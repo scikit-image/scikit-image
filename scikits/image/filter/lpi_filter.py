@@ -3,7 +3,7 @@
 :license: modified BSD
 """
 
-__all__ = ['LPIFilter2D']
+__all__ = ['inverse', 'wiener', 'LPIFilter2D']
 __docformat__ = 'restructuredtext en'
 
 import numpy as np
@@ -11,95 +11,99 @@ from scipy.fftpack import fftshift, ifftshift
 
 eps = np.finfo(float).eps
 
+def _min_limit(x, val=eps):
+    mask = np.abs(x) < eps
+    x[mask] = np.sign(x[mask]) * eps
+
+def _centre(x, oshape):
+    """Return an array of oshape from the centre of x.
+
+    """
+    start = (np.array(x.shape) - np.array(oshape)) / 2. + 1
+    out = x[[slice(s, s + n) for s, n in zip(start, oshape)]]
+    return out
+
+def _pad(data, shape):
+    """Pad the data to the given shape with zeros.
+
+    Parameters
+    ----------
+    data : 2-d ndarray
+        Input data
+    shape : (2,) tuple
+
+    """
+    out = np.zeros(shape)
+    out[[slice(0, n) for n in data.shape]] = data
+    return out
+
+
+
 class LPIFilter2D(object):
     """Linear Position-Invariant Filter (2-dimensional)
 
     """
-    def __init__(self,impulse_response,**filter_params):
+    def __init__(self, impulse_response, **filter_params):
         """
-        *Parameters*:
-            impulse_response : callable f(r,c,**filter_params)
-                Function that yields the impulse response.  `r` and
-                `c` are 1-dimensional vectors that represent row and
-                column positions, in other words coordinates are
-                (r[0],c[0]),(r[0],c[1]) etc.  `**filter_params` are
-                passed through.
+        Parameters
+        ----------
+        impulse_response : callable f(r, c, **filter_params)
+            Function that yields the impulse response.  `r` and
+            `c` are 1-dimensional vectors that represent row and
+            column positions, in other words coordinates are
+            (r[0],c[0]),(r[0],c[1]) etc.  `**filter_params` are
+            passed through.
 
-                In other words, example would be called like this:
+            In other words, example would be called like this:
 
-                r = [0,0,0,1,1,1,2,2,2]
-                c = [0,1,2,0,1,2,0,1,2]
-                impulse_response(r,c,**filter_params)
+            r = [0,0,0,1,1,1,2,2,2]
+            c = [0,1,2,0,1,2,0,1,2]
+            impulse_response(r, c, **filter_params)
 
-        *Example*:
+        Examples
+        --------
 
-           Gaussian filter:
+        Gaussian filter:
 
-           >>> def filt_func(r,c):
-                   return np.exp(-np.hypot(r,c)/1)
+        >>> def filt_func(r, c):
+                return np.exp(-np.hypot(r, c)/1)
 
-           >>> filter = LPIFilter2D(filt_func)
-
+        >>> filter = LPIFilter2D(filt_func)
 
         """
         self.impulse_response = impulse_response
         self.filter_params = filter_params
         self._cache = None
 
-    def _pad(self,data,shape):
-        """Pad the data to the given shape with zeros.
-
-        *Parameters*:
-            data : 2-d ndarray
-                Input data
-            shape : (2,) tuple
-
-        """
-        out = np.zeros(shape)
-        out[[slice(0,n) for n in data.shape]] = data
-        return out
-
-    def _prepare(self,data):
+    def _prepare(self, data):
         """Calculate filter and data FFT in preparation for filtering.
 
         """
         dshape = np.array(data.shape)
-        dshape += (dshape %2 == 0) # all filter dimensions must be uneven
-        oshape = np.array(data.shape)*2-1
+        dshape += (dshape % 2 == 0) # all filter dimensions must be uneven
+        oshape = np.array(data.shape) * 2 - 1
 
         if self._cache is None or np.any(self._cache.shape != oshape):
-            coords = np.mgrid[[slice(0,float(n)) for n in dshape]]
+            coords = np.mgrid[[slice(0, float(n)) for n in dshape]]
             # this steps over two sets of coordinates,
             # not over the coordinates individually
             for k,coord in enumerate(coords):
-                coord -= (dshape[k]-1)/2.
-            coords = coords.reshape(2,-1).T # coordinate pairs (r,c)
+                coord -= (dshape[k] - 1)/2.
+            coords = coords.reshape(2, -1).T # coordinate pairs (r,c)
 
             f = self.impulse_response(coords[:,0],coords[:,1],
                                       **self.filter_params).reshape(dshape)
 
-            f = self._pad(f,oshape)
+            f = _pad(f,oshape)
             F = np.dual.fftn(f)
             self._cache = F
         else:
             F = self._cache
 
-        data = self._pad(data,oshape)
+        data = _pad(data, oshape)
         G = np.dual.fftn(data)
 
-        return F,G
-
-    def _min_limit(self,x,val=eps):
-        mask = np.abs(x) < eps
-        x[mask] = np.sign(x[mask])*eps
-
-    def _centre(self,x,oshape):
-        """Return an array of oshape from the centre of x.
-
-        """
-        start = (np.array(x.shape) - np.array(oshape))/2.+1
-        out = x[[slice(s,s+n) for s,n in zip(start,oshape)]]
-        return out
+        return F, G
 
     def __call__(self,data):
         """Apply the filter to the given data.
@@ -108,51 +112,124 @@ class LPIFilter2D(object):
             data : (M,N) ndarray
 
         """
-        F,G = self._prepare(data)
-        out = np.dual.ifftn(F*G)
-        out = np.abs(self._centre(out,data.shape))
+        F, G = self._prepare(data)
+        out = np.dual.ifftn(F * G)
+        out = np.abs(_centre(out, data.shape))
         return out
 
-    def inverse(self,data,max_gain=2):
-        """Apply the filter in reverse to the given data.
+def forward(data, impulse_response=None, filter_params={},
+            predefined_filter=None):
+    """Apply the given filter to data.
 
-        *Parameters*:
-            data : (M,N) ndarray
-                Input data.
-            max_gain : float
-                Limit the filter gain.  Often, the filter contains
-                zeros, which would cause the inverse filter to have
-                infinite gain.  High gain causes amplification of
-                artefacts, so a conservative limit is recommended.
+    Parameters
+    ----------
+    data : (M,N) ndarray
+        Input data.
+    impulse_response : callable f(r, c, **filter_params)
+        Impulse response of the filter.  See LPIFilter2D.__init__.
+    filter_params : dict
+        Additional keyword parameters to the impulse_response function.
 
-        """
-        F,G = self._prepare(data)
-        self._min_limit(F)
+    Additional Parameters
+    ---------------------
+    predefined_filter : LPIFilter2D
+        If you need to apply the same filter multiple times over
+        different images, construct the LPIFilter2D and specify
+        it here.
 
-        F = 1/F
-        mask = np.abs(F) > max_gain
-        F[mask] = np.sign(F[mask])*max_gain
+    Examples
+    --------
 
-        return self._centre(np.abs(ifftshift(np.dual.ifftn(G*F))),data.shape)
+    Gaussian filter:
 
-    def wiener(self,data,K=0.25):
-        """Minimum Mean Square Error (Wiener) inverse filter.
+    >>> def filt_func(r, c):
+            return np.exp(-np.hypot(r, c)/1)
 
-        *Parameters*:
-            data : (M,N) ndarray
-                Input data.
-            K : float or (M,N) ndarray
-                Ratio between power spectrum of noise and undegraded
-                image.
+    >>> forward(data, filt_func)
 
-        """
-        F,G = self._prepare(data)
-        self._min_limit(F)
+    """
+    if predefined_filter is None:
+        predefined_filter = LPIFilter2D(impulse_response, **filter_params)
+    return predefined_filter(data)
 
-        H_mag_sqr = np.abs(F)**2
-        F = 1/F * H_mag_sqr / (H_mag_sqr + K)
+def inverse(data, max_gain=2, impulse_response=None, filter_params={},
+            predefined_filter=None):
+    """Apply the filter in reverse to the given data.
 
-        return self._centre(np.abs(ifftshift(np.dual.ifftn(G*F))),data.shape)
+    Parameters
+    ----------
+    data : (M,N) ndarray
+        Input data.
+    max_gain : float
+        Limit the filter gain.  Often, the filter contains
+        zeros, which would cause the inverse filter to have
+        infinite gain.  High gain causes amplification of
+        artefacts, so a conservative limit is recommended.
+    impulse_response : callable f(r, c, **filter_params)
+        Impulse response of the filter.  See LPIFilter2D.__init__.
+    filter_params : dict
+        Additional keyword parameters to the impulse_response function.
 
-    def constrained_least_squares(self,data,lam):
-        pass
+    Additional Parameters
+    ---------------------
+    predefined_filter : LPIFilter2D
+        If you need to apply the same filter multiple times over
+        different images, construct the LPIFilter2D and specify
+        it here.
+
+    """
+    if predefined_filter is None:
+        filt = LPIFilter2D(impulse_response, **filter_params)
+    else:
+        filt = predefined_filter
+
+    F, G = filt._prepare(data)
+    _min_limit(F)
+
+    F = 1/F
+    mask = np.abs(F) > max_gain
+    F[mask] = np.sign(F[mask]) * max_gain
+
+    return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+
+def wiener(data, K=0.25, impulse_response=None, filter_params={},
+           predefined_filter=None):
+    """Minimum Mean Square Error (Wiener) inverse filter.
+
+    Parameters
+    ----------
+    data : (M,N) ndarray
+        Input data.
+    K : float or (M,N) ndarray
+        Ratio between power spectrum of noise and undegraded
+        image.
+    impulse_response : callable f(r, c, **filter_params)
+        Impulse response of the filter.  See LPIFilter2D.__init__.
+    filter_params : dict
+        Additional keyword parameters to the impulse_response function.
+
+    Additional Parameters
+    ---------------------
+    predefined_filter : LPIFilter2D
+        If you need to apply the same filter multiple times over
+        different images, construct the LPIFilter2D and specify
+        it here.
+
+    """
+    if predefined_filter is None:
+        filt = LPIFilter2D(impulse_response, **filter_params)
+    else:
+        filt = predefined_filter
+
+    F, G = filt._prepare(data)
+    _min_limit(F)
+
+    H_mag_sqr = np.abs(F)**2
+    F = 1/F * H_mag_sqr / (H_mag_sqr + K)
+
+    return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+
+def constrained_least_squares(data, lam, impulse_response=None,
+                              filter_params={}):
+    raise NotImplementedError
+

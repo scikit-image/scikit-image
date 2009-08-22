@@ -25,30 +25,29 @@ class TestLPIFilter2D():
     def test_ip_shape(self):
         rows,columns = self.img.shape[:2]
 
-        for c_slice in [slice(0,columns),slice(0,columns-5),
-                        slice(0,columns-100)]:
-            yield (self.tst_shape,self.img[:,c_slice])
+        for c_slice in [slice(0, columns), slice(0, columns - 5),
+                        slice(0, columns - 100)]:
+            yield (self.tst_shape, self.img[:,c_slice])
 
     def test_inverse(self):
         F = self.f(self.img)
-        g = self.f.inverse(F)
-        assert_equal(g.shape,self.img.shape)
+        g = inverse(F, predefined_filter=self.f)
+        assert_equal(g.shape, self.img.shape)
 
-        g1 = self.f.inverse(F[::-1,::-1])
-        assert ((g-g1[::-1,::-1]).sum() < 55)
+        g1 = inverse(F[::-1,::-1], predefined_filter=self.f)
+        assert ((g - g1[::-1,::-1]).sum() < 55)
 
         # test cache
-        g1 = self.f.inverse(F[::-1,::-1])
-        assert ((g-g1[::-1,::-1]).sum() < 55)
-
+        g1 = inverse(F[::-1,::-1], predefined_filter=self.f)
+        assert ((g - g1[::-1,::-1]).sum() < 55)
 
     def test_wiener(self):
         F = self.f(self.img)
-        g = self.f.wiener(F)
-        assert_equal(g.shape,self.img.shape)
+        g = wiener(F, predefined_filter=self.f)
+        assert_equal(g.shape, self.img.shape)
 
-        g1 = self.f.wiener(F[::-1,::-1])
-        assert ((g-g1[::-1,::-1]).sum() < 1)
+        g1 = wiener(F[::-1,::-1], predefined_filter=self.f)
+        assert ((g - g1[::-1,::-1]).sum() < 1)
 
 
 if __name__ == "__main__":
