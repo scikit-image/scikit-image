@@ -1,0 +1,56 @@
+import os.path
+
+import numpy as np
+from numpy.testing import *
+
+from scikits.image.io import *
+from scikits.image.filter import *
+
+data_dir = os.path.join(os.path.dirname(__file__), './data/')
+
+class TestLPIFilter2D():
+    img = imread(os.path.join(data_dir + 'camera.png'),
+                 flatten=True)[:-101,:-100]
+
+    def filt_func(self,r,c):
+        return np.exp(-np.hypot(r,c)/1)
+
+    def setUp(self):
+        self.f = LPIFilter2D(self.filt_func)
+
+    def tst_shape(self, x):
+        X = self.f(x)
+        assert_equal(X.shape,x.shape)
+
+    def test_ip_shape(self):
+        rows,columns = self.img.shape[:2]
+
+        for c_slice in [slice(0,columns),slice(0,columns-5),
+                        slice(0,columns-100)]:
+            yield (self.tst_shape,self.img[:,c_slice])
+
+    def test_inverse(self):
+        F = self.f(self.img)
+        g = self.f.inverse(F)
+        assert_equal(g.shape,self.img.shape)
+
+        g1 = self.f.inverse(F[::-1,::-1])
+        assert ((g-g1[::-1,::-1]).sum() < 55)
+
+        # test cache
+        g1 = self.f.inverse(F[::-1,::-1])
+        assert ((g-g1[::-1,::-1]).sum() < 55)
+
+
+    def test_wiener(self):
+        F = self.f(self.img)
+        g = self.f.wiener(F)
+        assert_equal(g.shape,self.img.shape)
+
+        g1 = self.f.wiener(F[::-1,::-1])
+        assert ((g-g1[::-1,::-1]).sum() < 1)
+
+
+if __name__ == "__main__":
+    run_module_suite()
+
