@@ -9,7 +9,7 @@ from scikits.image.filter import *
 data_dir = os.path.join(os.path.dirname(__file__), './data/')
 
 class TestLPIFilter2D():
-    img = imread(os.path.join(data_dir + 'camera.png'),
+    img = imread(os.path.join(data_dir, 'camera.png'),
                  flatten=True)[:-101,:-100]
 
     def filt_func(self,r,c):
