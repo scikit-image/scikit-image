@@ -16,14 +16,14 @@ from scikits.image.color import (
     rgb2hsv,
     )
 
-from scikits.image import data
+from scikits.image import data_dir
 
 import colorsys
 
 class TestColorconv(TestCase):
 
-    img_rgb = imread(path.join(data.MY_PATH, 'color.png'))
-    img_grayscale = imread(path.join(data.MY_PATH, 'camera.png'))
+    img_rgb = imread(path.join(data_dir, 'color.png'))
+    img_grayscale = imread(path.join(data_dir, 'camera.png'))
 
     def test_rgb2hsv_conversion(self):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
