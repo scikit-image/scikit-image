@@ -3,10 +3,9 @@ import os.path
 import numpy as np
 from numpy.testing import *
 
+from scikits.image import data_dir
 from scikits.image.io import *
 from scikits.image.filter import *
-
-data_dir = os.path.join(os.path.dirname(__file__), './data/')
 
 class TestLPIFilter2D():
     img = imread(os.path.join(data_dir, 'camera.png'),
