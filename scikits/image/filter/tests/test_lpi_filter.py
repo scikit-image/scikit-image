@@ -41,6 +41,9 @@ class TestLPIFilter2D():
         g1 = inverse(F[::-1,::-1], predefined_filter=self.f)
         assert ((g - g1[::-1,::-1]).sum() < 55)
 
+        g1 = inverse(F[::-1, ::-1], self.filt_func)
+        assert ((g - g1[::-1,::-1]).sum() < 55)
+
     def test_wiener(self):
         F = self.f(self.img)
         g = wiener(F, predefined_filter=self.f)
@@ -49,6 +52,8 @@ class TestLPIFilter2D():
         g1 = wiener(F[::-1,::-1], predefined_filter=self.f)
         assert ((g - g1[::-1,::-1]).sum() < 1)
 
+        g1 = wiener(F[::-1,::-1], self.filt_func)
+        assert ((g - g1[::-1,::-1]).sum() < 1)
 
 if __name__ == "__main__":
     run_module_suite()

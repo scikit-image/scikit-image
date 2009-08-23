@@ -71,6 +71,9 @@ class LPIFilter2D(object):
         >>> filter = LPIFilter2D(filt_func)
 
         """
+        if impulse_response is None:
+            raise ValueError("Impulse response must be a callable.")
+
         self.impulse_response = impulse_response
         self.filter_params = filter_params
         self._cache = None
@@ -152,7 +155,7 @@ def forward(data, impulse_response=None, filter_params={},
         predefined_filter = LPIFilter2D(impulse_response, **filter_params)
     return predefined_filter(data)
 
-def inverse(data, max_gain=2, impulse_response=None, filter_params={},
+def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
             predefined_filter=None):
     """Apply the filter in reverse to the given data.
 
@@ -160,15 +163,15 @@ def inverse(data, max_gain=2, impulse_response=None, filter_params={},
     ----------
     data : (M,N) ndarray
         Input data.
+    impulse_response : callable f(r, c, **filter_params)
+        Impulse response of the filter.  See LPIFilter2D.__init__.
+    filter_params : dict
+        Additional keyword parameters to the impulse_response function.
     max_gain : float
         Limit the filter gain.  Often, the filter contains
         zeros, which would cause the inverse filter to have
         infinite gain.  High gain causes amplification of
         artefacts, so a conservative limit is recommended.
-    impulse_response : callable f(r, c, **filter_params)
-        Impulse response of the filter.  See LPIFilter2D.__init__.
-    filter_params : dict
-        Additional keyword parameters to the impulse_response function.
 
     Additional Parameters
     ---------------------
@@ -192,7 +195,7 @@ def inverse(data, max_gain=2, impulse_response=None, filter_params={},
 
     return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
 
-def wiener(data, K=0.25, impulse_response=None, filter_params={},
+def wiener(data, impulse_response=None, filter_params={}, K=0.25,
            predefined_filter=None):
     """Minimum Mean Square Error (Wiener) inverse filter.
 
