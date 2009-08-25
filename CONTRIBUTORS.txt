@@ -1,3 +1,12 @@
 - Stefan van der Walt
+  Project coordination
+
 - Nicolas Pinto
+  Colour spaces and filters
+
+- Damian Eads
+  Morphological operators
+
+- Mahipal Raythattha
+  Documentation
 
