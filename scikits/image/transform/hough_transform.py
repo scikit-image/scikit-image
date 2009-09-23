@@ -50,22 +50,28 @@ def hough(img, angles=None):
 
     Examples
     --------
-    # Generate a test image
-    img = np.zeros((100, 150), dtype=bool)
-    img[30, :] = 1
-    img[:, 65] = 1
-    img[35:45, 35:50] = 1
-    for i in range(90):
-        img[i, i] = 1
-    img += np.random.random(img.shape) > 0.95
+    Generate a test image:
 
-    out, angles, d = houghtf(img)
+    >>> img = np.zeros((100, 150), dtype=bool)
+    >>> img[30, :] = 1
+    >>> img[:, 65] = 1
+    >>> img[35:45, 35:50] = 1
+    >>> for i in range(90):
+    >>>     img[i, i] = 1
+    >>> img += np.random.random(img.shape) > 0.95
 
-    import matplotlib.pyplot as plt
-    plt.imshow(out, cmap=plt.cm.bone)
-    plt.xlabel('Angle (degree)')
-    plt.ylabel('Distance %d (pixel)' % d[0])
-    plt.show()
+    Apply the Hough transform:
+
+    >>> out, angles, d = houghtf(img)
+
+    Plot the results:
+
+    >>> import matplotlib.pyplot as plt
+    >>> plt.imshow(out, cmap=plt.cm.bone)
+    >>> plt.xlabel('Angle (degree)')
+    >>> plt.ylabel('Distance %d (pixel)' % d[0])
+    >>> plt.show()
+
     """
     if img.ndim != 2:
         raise ValueError("Input must be a two-dimensional array")
