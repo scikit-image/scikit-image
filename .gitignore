@@ -1,4 +1,7 @@
 *.pyc
 *~
 *#
-
+*egg-info
+doc/source/api
+doc/build
+source/api
