@@ -5,6 +5,10 @@ Source
 ------
 http://github.com/stefanv/scikits.gpu
 
+Mailing List
+------------
+http://groups.google.com/group/scikits-image
+
 Installation from source
 ------------------------
 
