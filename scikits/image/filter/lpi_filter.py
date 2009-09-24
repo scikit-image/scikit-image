@@ -47,7 +47,7 @@ class LPIFilter2D(object):
         """
         Parameters
         ----------
-        impulse_response : callable f(r, c, **filter_params)
+        impulse_response : callable `f(r, c, **filter_params)`
             Function that yields the impulse response.  `r` and
             `c` are 1-dimensional vectors that represent row and
             column positions, in other words coordinates are
@@ -56,9 +56,9 @@ class LPIFilter2D(object):
 
             In other words, example would be called like this:
 
-            r = [0,0,0,1,1,1,2,2,2]
-            c = [0,1,2,0,1,2,0,1,2]
-            impulse_response(r, c, **filter_params)
+            >>> r = [0,0,0,1,1,1,2,2,2]
+            >>> c = [0,1,2,0,1,2,0,1,2]
+            >>> impulse_response(r, c, **filter_params)
 
         Examples
         --------
@@ -128,13 +128,13 @@ def forward(data, impulse_response=None, filter_params={},
     ----------
     data : (M,N) ndarray
         Input data.
-    impulse_response : callable f(r, c, **filter_params)
+    impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
     filter_params : dict
         Additional keyword parameters to the impulse_response function.
 
-    Additional Parameters
-    ---------------------
+    Other Parameters
+    ----------------
     predefined_filter : LPIFilter2D
         If you need to apply the same filter multiple times over
         different images, construct the LPIFilter2D and specify
@@ -163,7 +163,7 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     ----------
     data : (M,N) ndarray
         Input data.
-    impulse_response : callable f(r, c, **filter_params)
+    impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
     filter_params : dict
         Additional keyword parameters to the impulse_response function.
@@ -206,7 +206,7 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     K : float or (M,N) ndarray
         Ratio between power spectrum of noise and undegraded
         image.
-    impulse_response : callable f(r, c, **filter_params)
+    impulse_response : callable `f(r, c, **filter_params)`
         Impulse response of the filter.  See LPIFilter2D.__init__.
     filter_params : dict
         Additional keyword parameters to the impulse_response function.
