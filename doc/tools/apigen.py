@@ -157,11 +157,9 @@ class ApiDocWriter(object):
     def _path2uri(self, dirpath):
         ''' Convert directory path to uri '''
         package_dir = self.package_name.replace('.', os.path.sep)
-        print dirpath, self.root_path
         relpath = dirpath.replace(self.root_path, package_dir)
         if relpath.startswith(os.path.sep):
             relpath = relpath[1:]
-        print "uri: ", relpath.replace(os.path.sep, '.')
         return relpath.replace(os.path.sep, '.')
 
     def _parse_module(self, uri):
@@ -213,18 +211,18 @@ class ApiDocWriter(object):
         # get the names of all classes and functions
         functions, classes = self._parse_module(uri)
         if not len(functions) and not len(classes):
-            print 'WARNING: Empty -',uri  # dbg
+            print 'WARNING: Empty -', uri  # dbg
             return ''
 
         # Make a shorter version of the uri that omits the package name for
-        # titles 
+        # titles
         uri_short = re.sub(r'^%s\.' % self.package_name,'',uri)
-        
+
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
         chap_title = uri_short
-        ad += (chap_title+'\n'+ self.rst_section_levels[1] * len(chap_title)
-               + '\n\n')
+        #ad += (chap_title+'\n'+ self.rst_section_levels[1] * len(chap_title)
+        #       + '\n\n')
 
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
@@ -232,7 +230,7 @@ class ApiDocWriter(object):
             title = 'Module: :mod:`' + uri_short + '`'
         else:
             title = ':mod:`' + uri_short + '`'
-        ad += title + '\n' + self.rst_section_levels[2] * len(title)
+        ad += title + '\n' + self.rst_section_levels[1] * len(title)
 
         if len(classes):
             ad += '\nInheritance diagram for ``%s``:\n\n' % uri
@@ -243,12 +241,12 @@ class ApiDocWriter(object):
         ad += '\n.. currentmodule:: ' + uri + '\n'
         multi_class = len(classes) > 1
         multi_fx = len(functions) > 1
-        if multi_class:
-            ad += '\n' + 'Classes' + '\n' + \
-                  self.rst_section_levels[2] * 7 + '\n'
-        elif len(classes) and multi_fx:
-            ad += '\n' + 'Class' + '\n' + \
-                  self.rst_section_levels[2] * 5 + '\n'
+#        if multi_class:
+#            ad += '\n' + 'Classes' + '\n' + \
+#                  self.rst_section_levels[2] * 7 + '\n'
+#        elif len(classes) and multi_fx:
+#            ad += '\n' + 'Class' + '\n' + \
+#                  self.rst_section_levels[2] * 5 + '\n'
         for c in classes:
             ad += '\n:class:`' + c + '`\n' \
                   + self.rst_section_levels[multi_class + 2 ] * \
@@ -261,15 +259,23 @@ class ApiDocWriter(object):
                   '  :inherited-members:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
-        if multi_fx:
-            ad += '\n' + 'Functions' + '\n' + \
-                  self.rst_section_levels[2] * 9 + '\n\n'
-        elif len(functions) and multi_class:
-            ad += '\n' + 'Function' + '\n' + \
-                  self.rst_section_levels[2] * 8 + '\n\n'
+#        if multi_fx:
+        ad += '\n' + 'Functions' + '\n' + \
+              self.rst_section_levels[2] * 9 + '\n\n'
+#        elif len(functions) and multi_class:
+#            ad += '\n' + 'Function' + '\n' + \
+#                  self.rst_section_levels[2] * 8 + '\n\n'
+        ad += '.. autosummary::\n\n'
+        for f in functions:
+            ad += '   ' + uri + '.' + f + '\n'
+        ad += '\n'
+
         for f in functions:
             # must NOT exclude from index to keep cross-refs working
-            ad += '\n.. autofunction:: ' + uri + '.' + f + '\n\n'
+            full_f = uri + '.' + f
+            ad += f + '\n'
+            ad += self.rst_section_levels[3] * len(f) + '\n'
+            ad += '\n.. autofunction:: ' + full_f + '\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):
@@ -429,6 +435,10 @@ class ApiDocWriter(object):
         idx = open(path,'wt')
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
+
+        title = self.package_name + " API Reference"
+        w(title + "\n")
+        w("=" * len(title) + "\n\n")
         w('.. toctree::\n\n')
         for f in self.written_modules:
             w('   %s\n' % os.path.join(relpath,f))
