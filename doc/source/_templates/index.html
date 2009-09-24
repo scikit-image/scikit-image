@@ -3,7 +3,8 @@
 {% block body %}
 
    <h1>{{ docstitle }}</h1>
-   <p>This is the official documentation for {{project}} {{release}}.</p>
+   <p>This <a href="http://scikits.appsport.com">SciKit</a> is an
+   image processing toolbox for <a href="http://www.scipy.org">SciPy</a>.</p>
 
    <h2>Sections</h2>
    <table class="contentstable" align="center">
@@ -12,37 +13,30 @@
          <a class="biglink" href="{{ pathto('overview') }}">
             Overview</a><br>
          <span class="linkdescr">
-            Get started with {{project}}.
+            Introduction to {{project}}.
          </span></p>
 
       <p class="biglink">
          <a class="biglink" href="{{ pathto('install') }}">
             Installation Steps</a><br>
          <span class="linkdescr">
-            Quickly install {{project}} to your system.
-         </span></p>
-
-      <p class="biglink">
-         <a class="biglink" href="{{ pathto('api/api') }}">
-            API (Developer's) Reference</a><br>
-         <span class="linkdescr">
-            Overview of what's in {{project}} and how to use it.
+            How to install {{project}}.
          </span></p>
 
    </td><td width="50%">
 
       <p class="biglink">
-         <a class="biglink" href="{{ pathto('changelog') }}">
-            What's new in {{project}}?</a><br>
+         <a class="biglink" href="{{ pathto('api/api') }}">
+            API Reference</a><br>
          <span class="linkdescr">
-            Changes made in each {{project}} release.
+             Documentation for the functions included in {{project}}.
          </span></p>
 
       <p class="biglink">
          <a class="biglink" href="{{ pathto('license') }}">
             License Info</a><br>
          <span class="linkdescr">
-            How you can use this software and the source code.
+             Conditions on the use and redistribution of this package.
          </span></p>
 
    </td></tr></table>
