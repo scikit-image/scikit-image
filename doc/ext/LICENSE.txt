@@ -1,0 +1,6 @@
+These files are
+
+Copyright (C) 2008 Stefan van der Walt <stefan@mentat.za.net>,
+                   Pauli Virtanen <pav@iki.fi>
+
+and are distributed under the modified BSD license.
