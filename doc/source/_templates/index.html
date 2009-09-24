@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% set title = 'Home' %}
+{% block body %}
+
+   <h1>{{ docstitle }}</h1>
+   <p>This is the official documentation for {{project}} {{release}}.</p>
+
+   <h2>Sections</h2>
+   <table class="contentstable" align="center">
+      <tr valign="top"><td width="50%">
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('overview') }}">
+            Overview</a><br>
+         <span class="linkdescr">
+            Get started with {{project}}.
+         </span></p>
+
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('install') }}">
+            Installation Steps</a><br>
+         <span class="linkdescr">
+            Quickly install {{project}} to your system.
+         </span></p>
+
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('api/api') }}">
+            API (Developer's) Reference</a><br>
+         <span class="linkdescr">
+            Overview of what's in {{project}} and how to use it.
+         </span></p>
+
+   </td><td width="50%">
+
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('changelog') }}">
+            What's new in {{project}}?</a><br>
+         <span class="linkdescr">
+            Changes made in each {{project}} release.
+         </span></p>
+
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('license') }}">
+            License Info</a><br>
+         <span class="linkdescr">
+            How you can use this software and the source code.
+         </span></p>
+
+   </td></tr></table>
+
+   <h2>Indices and Tables</h2>
+
+   <table class="contentstable" align="center">
+      <tr valign="top"><td width="50%">
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('contents') }}">
+            Table of Contents</a><br>
+         <span class="linkdescr">
+            Lists all sections and subsections.
+         </span></p>
+
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('search') }}">
+            Search Page</a><br>
+         <span class="linkdescr">
+            Search this documentation.
+         </span></p>
+
+      </td><td width="50%">
+
+      <p class="biglink">
+         <a class="biglink" href="{{ pathto('genindex') }}">
+            Index</a><br>
+         <span class="linkdescr">
+            All functions, classes, terms.
+         </span></p>
+
+    </td></tr></table>
+
+{% endblock %}
