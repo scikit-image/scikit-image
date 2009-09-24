@@ -1,0 +1,37 @@
+# Make sure we start in the correct directory
+if ! [[ -d ../.git ]]; then
+  echo "Call this script from the docs dir."
+  exit
+fi
+
+ref=$(git symbolic-ref HEAD 2> /dev/null)
+branch=${ref#refs/heads/}
+wd=`pwd`
+
+make clean
+make html
+rm -rf /tmp/scikits.image.docs
+cp -r build/html /tmp/scikits.image.docs
+cd ..
+git co gh-pages || exit
+rm -rf ./*
+cp -r /tmp/scikits.image.docs/* .
+sed -i "" 's/_static/static/g' `find . -name "*.html"`
+mv _static static
+for f in `find . | grep "./" | grep -v ".git"`; do
+   git add $f
+done
+
+echo "--------------------------------------"
+git status
+echo "--------------------------------------"
+
+echo "***"
+echo "*** These changes are about to be committed.  Press Ctrl-C to abort."
+echo "*** Press enter to continue."
+read
+
+git commit -m "Update docs."
+git push origin
+git co $branch
+
