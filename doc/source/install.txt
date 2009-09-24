@@ -1,0 +1,25 @@
+Installation from source
+------------------------
+
+Obtain the source from the git-repository at
+`http://github.com/stefanv/scikits.gpu
+<http://github.com/stefanv/scikits.gpu>`_.
+
+The SciKit can be installed globally using
+
+::
+
+  python setup.py install
+
+or locally using
+
+::
+
+  python setup.py install --prefix=${HOME}
+
+If you prefer, you can use it without installing, by simply adding
+this path to your PYTHONPATH variable and compiling extensions
+in-place::
+
+  python setup.py build_ext -i
+
