@@ -9,7 +9,7 @@ def test_frt():
         import sympy.ntheory as sn
         assert sn.isprime(SIZE) == True
     except ImportError:
-        sn = False
+        pass
 
     # Generate a test image
     L = np.tri(SIZE, dtype=np.int32) + np.tri(SIZE, dtype=np.int32)[::-1]

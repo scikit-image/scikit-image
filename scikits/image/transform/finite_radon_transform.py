@@ -6,7 +6,7 @@
 :license: modified BSD
 """
 
-__all__ = ["frt"]
+__all__ = ["frt2", "ifrt2"]
 __docformat__ = "restructuredtext en"
 
 import numpy as np
