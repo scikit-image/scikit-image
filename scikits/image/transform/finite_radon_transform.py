@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """
 :author: Gary Ruben, 2009
 :license: modified BSD
