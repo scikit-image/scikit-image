@@ -25,15 +25,19 @@ def homography(image, H, output_shape=None, order=1,
     with the given matrix, :math:`H`, to give :math:`H \mathbf{x}`.
     E.g., to rotate by theta degrees clockwise, the matrix should be
 
-    [[cos(theta) -sin(theta) 0]
-     [sin(theta)  cos(theta) 0]
-     [0            0         1]]
+    ::
+
+      [[cos(theta) -sin(theta) 0]
+       [sin(theta)  cos(theta) 0]
+       [0            0         1]]
 
     or, to translate x by 10 and y by 20,
 
-    [[1 0 10]
-     [0 1 20]
-     [0 0 1 ]].
+    ::
+
+      [[1 0 10]
+       [0 1 20]
+       [0 0 1 ]].
 
     Parameters
     ----------
