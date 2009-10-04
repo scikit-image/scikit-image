@@ -32,6 +32,6 @@ echo "*** Press enter to continue."
 read
 
 git commit -m "Update docs."
-git push origin
+git push origin gh-pages
 git co $branch
 
