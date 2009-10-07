@@ -2,19 +2,11 @@
 
 descr   = """Image Processing SciKit
 
-Provide image processing capabilities to SciPy, including:
+Image processing algorithms for SciPy, including IO, morphology, filtering,
+warping, color manipulation, object detection, etc.
 
-- Image IO without PIL dependencies
-- Image warping (wrappers based on ndimage)
-- Connected components
-- Color-space manipulations
-- Linear space-invariant filters
-- Hough transform
-- Shortest paths
-- Grey-level co-occurrence matrices
-- Edge detection
-- Image collections
-
+Please refer to the online documentation at
+http://stefanv.github.com/scikits.image
 """
 
 import os
@@ -25,9 +17,9 @@ DESCRIPTION         = 'Image processing routines for SciPy'
 LONG_DESCRIPTION    = descr
 MAINTAINER          = 'Stefan van der Walt',
 MAINTAINER_EMAIL    = 'stefan@sun.ac.za',
-URL                 = 'http://github.com/stefanv/scikits.image'
+URL                 = 'http://stefanv.github.com/scikits.image'
 LICENSE             = 'Modified BSD'
-DOWNLOAD_URL        = URL
+DOWNLOAD_URL        = 'http://github.com/stefanv/scikits.image'
 VERSION             = '0.1'
 
 import setuptools
