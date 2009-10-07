@@ -1,0 +1,145 @@
+How to contribute to ``scikits.image``
+======================================
+
+Developing Open Source is great fun!  Join us on the `scikits-image mailing
+list <http://groups.google.com/group/scikits-image>`_ and tell us which of the
+following challenges you'd like to solve.
+
+* Mentoring is available for those new to scientific programming in Python.
+* The technical detail of the `development process`_ is given below.
+
+.. contents::
+   :local:
+
+Tasks
+-----
+
+Adapt existing code for use
+```````````````````````````
+These snippets and packages have already been written.  Some need to be
+modified to work as part of the scikit, others may be lacking in documentation
+or tests.
+
+   * Connected components
+   * Color-space manipulations (partially done by Nicolas Pinto)
+   * `Hough transform <http://mentat.za.net>`_
+   * `Shortest paths <http://mentat.za.net>`_
+   * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
+   * Marching squares (investigate patent issues)
+   * Cached ImageCollection from `supreme <http://mentat.za.net/supreme>`_
+   * Nadav's bilateral filtering (first compare against CellProfile's code)
+   * 2D iso-contour finding (sub-pixel precision) [ask Zach Pincus]
+   * 2D image warping via thin-plate splines [ask Zach Pincus]
+
+Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
+`````````````````````````````````````````````````````````````````````````
+* Canny filter (Canny, J., *A Computational Approach To Edge Detection*,
+  IEEE Trans. Pattern Analysis and Machine Intelligence, 8:679-714, 1986)
+* Prewitt filter - convolution with ``[[1,1,1], [0,0,0], [-1,-1,-1]]`` to
+  detect edges
+* Sobel filter - convolution with ``[[1,2,1], [0,0,0], [-1,-2,-1]]`` to
+  detect edges
+* Roberts filter - convolution with diagonal and anti-diagonal
+  kernels to detect edges
+* Bilateral filter
+  (http://groups.csail.mit.edu/graphics/bilagrid/bilagrid_web.pdf)
+  - edge detection using both spatial and intensity information
+* Convex hulls of objects in a labels matrix
+* Minimum enclosing circles of objects in a labels matrix
+* Map-coloring of a labels matrix - assign each label a color so that
+  all adjacent labels have different colors
+* Skeletonize, spur removal, thinning, thickening, and other morphological
+  operations on binary images, framework for creating arbitrary morphological
+  operations using a 3x3 grid.
+* Skeletonize objects in a labels matrix
+
+Their SVN repository is read-accessible at
+
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/
+
+The files for the above algorithms are
+
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/cpmorphology.py
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/filter.py
+
+There are test suites for the files at
+
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/tests/test_cpmorphology.py
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/tests/test_filter.py
+
+Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
+5 August 2009::
+
+  We're part of the Broad Institute which is non-profit. We would be happy
+  to include our algorithm code in SciPy under the BSD license since that is
+  more appropriate for a library that might be integrated into a
+  commercial product whereas CellProfiler needs the more stringent
+  protection of GPL as an application.
+
+Thanks to Lee Kamentsky, Thouis Jones and Anne Carpenter and their colleagues
+who contributed.
+
+Add image output to documentation
+`````````````````````````````````
+Taken from a post by David Warde-Farley::
+
+  It would be really helpful to have the output of those plot
+  commands. `John Hunter's sampledoc tutorial
+  <http://matplotlib.sourceforge.net/sampledoc/>`_
+  contains instructions on how to do the requisite Sphinx twiddling
+  to get matplotlib plots plotted in the Sphinx output, it's just a
+  matter of someone actually *doing* it.
+
+  This is exactly the kind of low-hanging fruit a SciPy/scikits/open
+  source newcomer (or long-time user, first-time contributor) could do
+  to get their feet wet, by the way :)  It's basically a matter of
+
+        a) forking the project on GitHub,
+        b) following the instructions at the sampledoc tutorial to make
+           plots work,
+        c) committing and pushing to your own github branch and
+        d) pinging Stefan to go look/update the live docs.
+
+Write new functionality
+```````````````````````
+* Plugin structure for image IO
+* Handle multi-page images (possibly as ImageCollection?)
+
+Complete the build process
+``````````````````````````
+* Fix scripts for building Cython extensions (see `this thread
+  <http://www.mail-archive.com/numpy-discussion@scipy.org/msg19933.html>`_).
+
+Development process
+-------------------
+ * Go to `http://github.com/stefanv/scikits.image
+   <http://github.com/stefanv/scikits.image>`_  and follow the instructions on
+   making your own fork/branch.
+ * Make changes to your branch, committing locally as you progress.
+ * Push your changes back to github.
+ * Ping stefan to request a merge into the main development branch.
+
+.. note::
+   
+   Do *not* merge the main branch into yours.  You may rebase,
+   as long as you are `aware of its dangers <http://tinyurl.com/lll385>`_
+   (also see `LWN article <http://tinyurl.com/nqcbkj>`_).
+
+All of this may be intimidating if you've never used git before, so we'd
+happily accept plain old unified diffs (``git diff`` or ``diff -u a.txt
+b.txt``) as well.
+
+Guidelines:
+```````````
+ * All code should have tests.
+ * All code should be documented.
+ * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
+   where possible.
+ * All major changes should be `posted for review
+   <http://codereview.appspot.com>`_ to the `mailing list
+   <http://groups.google.com/group/scikits-image>`_.
+
+Bugs
+````
+Please `report bugs on Github <http://github.com/stefanv/scikits.image>`_.
+
