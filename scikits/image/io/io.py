@@ -2,7 +2,7 @@
 
 from __future__ import with_statement
 
-__all__ = ['Img', 'ImgCollection', 'imread']
+__all__ = ['Img', 'MultiImg', 'ImgCollection', 'imread']
 
 from glob import glob
 import os.path
@@ -116,7 +116,6 @@ class MultiImg(object):
         (576, 384)
         (576, 384)
     """
-
     def __init__(self, filename, conserve_memory=True):
         """Load a multi-img"""
         self.filename = filename
@@ -145,7 +144,6 @@ class MultiImg(object):
         img = Image.open(self.filename)
         img.seek(framenum)
         return np.asarray(img)
-
 
     def _getallframes(self, img):
         """Extract all frames from the multi-img."""
