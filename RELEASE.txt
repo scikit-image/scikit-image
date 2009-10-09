@@ -2,6 +2,7 @@ How to make a new release of ``scikits.image``
 ==============================================
 
 - Update the version number in setup.py and commit
+- Update the docs, using the "push_github" script
 - Add the version number as a tag in git::
 
   git tag v0.1
@@ -13,4 +14,6 @@ How to make a new release of ``scikits.image``
 - Publish on PyPi:
 
   python setup.py register
+
+- Increase the version number in the setup.py file to ``0.2dev``.
 
