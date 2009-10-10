@@ -26,6 +26,9 @@ cdef int assert_ndims(np.ndarray arr, dims) except -1
 cdef int assert_nchannels(np.ndarray arr, channels) except -1
 cdef int assert_same_dtype(np.ndarray arr1, np.ndarray arr2) except -1
 cdef int assert_same_shape(np.ndarray arr1, np.ndarray arr2) except -1
+cdef int assert_same_width_and_height(np.ndarray arr1, np.ndarray arr2) except -1
 cdef int assert_like(np.ndarray arr1, np.ndarray arr2) except -1
+cdef int assert_not_sharing_data(np.ndarray arr1, np.ndarray arr2) except -1
+cdef np.ndarray new_array(int ndim, np.npy_intp* shape, dtype)
 cdef np.ndarray new_array_like(np.ndarray arr)
 cdef np.ndarray new_array_like_diff_dtype(np.ndarray arr, dtype)

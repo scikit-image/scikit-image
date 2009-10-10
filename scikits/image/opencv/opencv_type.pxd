@@ -33,4 +33,10 @@ cdef struct _IplImage:
 
 ctypedef _IplImage IplImage
 
-
+ctypedef struct CvPoint2D32F:
+    float x
+    float y
+    
+ctypedef struct CvSize:
+    int width
+    int height

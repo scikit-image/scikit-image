@@ -120,12 +120,30 @@ cdef int assert_same_shape(np.ndarray arr1, np.ndarray arr2) except -1:
     if not np.PyArray_SAMESHAPE(arr1, arr2):
         raise ValueError('arrays not same shape')
     return 1
+    
+cdef int assert_same_width_and_height(np.ndarray arr1, np.ndarray arr2) except -1:
+    cdef np.npy_intp* shape1 = arr1.shape
+    cdef np.npy_intp* shape2 = arr2.shape
+    if (shape1[0] != shape2[0]) or (shape1[1] != shape2[1]):
+        raise ValueError('Arrays must have same width and height')
+    return 1
       
 cdef int assert_like(np.ndarray arr1, np.ndarray arr2) except -1:
     assert_same_dtype(arr1, arr2)
     assert_same_shape(arr1, arr2)
     return 1
+
+cdef int assert_not_sharing_data(np.ndarray arr1, np.ndarray arr2) except -1:
+    if arr1.data == arr2.data:
+        raise ValueError('In place operation not supported. Make sure \
+                          the out array is not just a view of src array')
+    return 1
               
+cdef np.ndarray new_array(int ndim, np.npy_intp* shape, dtype):
+    # need to incref because numpy will apprently steal a dtype reference
+    Py_INCREF(<object>dtype)
+    return PyArray_Empty(ndim, shape, dtype, 0)
+
 cdef np.ndarray new_array_like(np.ndarray arr):
     # need to incref because numpy will apprently steal a dtype reference
     Py_INCREF(<object>arr.dtype)
