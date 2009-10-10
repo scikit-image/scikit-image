@@ -2,7 +2,7 @@
 
 from __future__ import with_statement
 
-__all__ = ['Img', 'MultiImg', 'ImgCollection', 'imread']
+__all__ = ['MultiImage', 'ImgCollection', 'imread']
 
 from glob import glob
 import os.path
@@ -10,73 +10,11 @@ import os.path
 import numpy as np
 from pil_imread import imread
 
-try:
-    from PIL import Image
-except ImportError:
-    raise ImportError("Could not import the Python Imaging Library (PIL)"
-                      " required to load image files.  Please refer to"
-                      " http://pypi.python.org/pypi/PIL/ for installation"
-                      " instructions.")
-
-#import supreme
-#from supreme.lib import EXIF
+from PIL import Image
 
 
-class Img(np.ndarray):
-    """Image data with tags."""
-
-    tags = {'filename' : '',
-            'EXIF' : {},
-            'info' : {}}
-
-    def __new__(image_cls, arr,  **kwargs):
-        """Set the image data and tags according to given parameters.
-
-        Input:
-        ------
-        `image_cls` : Img class specification
-            This is not normally specified by the user.
-        `arr` : ndarray
-            Image data.
-        ``**kwargs`` : Image tags as keywords
-            Specified in the form ``tag0=value``, ``tag1=value``.
-
-        """
-        x = np.asarray(arr).view(image_cls)
-        for tag, value in Img.tags.items():
-            setattr(x, tag, kwargs.get(tag, getattr(arr, tag, value)))
-        return x
-
-    def __array_finalize__(self, obj):
-        """Copy object tags."""
-        for tag, value in Img.tags.items():
-            setattr(self, tag, getattr(obj, tag, value))
-        return
-
-    def __reduce__(self):
-        object_state = list(np.ndarray.__reduce__(self))
-        subclass_state = {}
-        for tag in self.tags:
-            subclass_state[tag] = getattr(self, tag)
-        object_state[2] = (object_state[2], subclass_state)
-        return tuple(object_state)
-
-    def __setstate__(self, state):
-        nd_state, subclass_state = state
-        np.ndarray.__setstate__(self, nd_state)
-
-        for tag in subclass_state:
-            setattr(self, tag, subclass_state[tag])
-
-    #@property
-    #def exposure(self):
-    #    """Return exposure time based on EXIF tag."""
-    #    exposure = self.EXIF['EXIF ExposureTime'].values[0]
-    #    return exposure.num / float(exposure.den)
-
-
-class MultiImg(object):
-    """A class containing a single multi-image.
+class MultiImage(object):
+    """A class containing a single multi-frame image.
 
     Parameters
     ----------
@@ -106,38 +44,42 @@ class MultiImg(object):
 
     Examples
     --------
-    ::
-        >>> img = MultiImg(fname)
-        >>> img.numframes
-        3
-        >>> for frame in img:
-        ...     frame.shape
-        (576, 384)
-        (576, 384)
-        (576, 384)
+    >>> img = MultiImage(fname)  #doctest: +SKIP
+    >>> len(img)
+    3
+    >>> for frame in img:
+    ...     print frame.shape
+    (576, 384)
+    (576, 384)
+    (576, 384)
     """
     def __init__(self, filename, conserve_memory=True):
         """Load a multi-img"""
-        self.filename = filename
+        self._filename = filename
         self.conserve_memory = conserve_memory
         self._cached = None
 
-        img = Image.open(self.filename)
+        img = Image.open(self._filename)
         if self.conserve_memory:
-            self.numframes = self._find_numframes(img)
+            self._numframes = self._find_numframes(img)
         else:
             self._frames = self._getallframes(img)
-            self.numframes = len(self._frames)
+            self._numframes = len(self._frames)
+
+    @property
+    def filename(self):
+        return self._filename
 
     def _find_numframes(self, img):
         """Find the number of frames in the multi-img."""
-        try:
-            i = 0
-            while True:
-                i += 1
+        i = 0
+        while True:
+            i += 1
+            try:
                 img.seek(i)
-        except EOFError:
-            return i
+            except EOFError:
+                break
+        return i
 
     def _getframe(self, framenum):
         """Open the image and extract the frame."""
@@ -170,7 +112,7 @@ class MultiImg(object):
         frame : ndarray
            The n-th frame.
         """
-        numframes = self.numframes
+        numframes = self._numframes
         if -numframes <= n < numframes:
             n = n% numframes
         else:
@@ -192,13 +134,13 @@ class MultiImg(object):
 
     def __len__(self):
         """Number of images in collection."""
-        return self.numframes
+        return self._numframes
 
     def __str__(self):
-        return str(self.filename)
+        return str(self.filename) + ' [%s frames]'%self._numframes
 
 
-class ImgCollection(object):
+class ImageCollection(object):
     """Load and manage a collection of images."""
 
     def __init__(self, file_pattern, conserve_memory=True, grey=False):
@@ -221,7 +163,7 @@ class ImgCollection(object):
         >>> from os.path import dirname, join
         >>> data_dir = join(dirname(__file__), 'tests')
 
-        >>> c = ImgCollection(data_dir + '/*.png')
+        >>> c = ImageCollection(data_dir + '/*.png')
         >>> len(c)
         3
         >>> c[2].shape
