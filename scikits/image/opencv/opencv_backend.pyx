@@ -154,5 +154,10 @@ cdef np.ndarray new_array_like_diff_dtype(np.ndarray arr, dtype):
     Py_INCREF(<object>dtype)
     return PyArray_Empty(arr.ndim, arr.shape, dtype, 0)
     
+cdef CvPoint2D32f* as_2Dpoint_array(np.ndarray arr):
+    cdef CvPoint2D32f* point2Darr   
+    point2Darr = <CvPoint2D32f*>arr.data
+    return point2Darr
+    
 
 

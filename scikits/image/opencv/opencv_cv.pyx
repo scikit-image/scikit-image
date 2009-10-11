@@ -55,6 +55,13 @@ ctypedef void (*cvCornerHarrisPtr)(IplImage*, IplImage*, int, int, double)
 cdef cvCornerHarrisPtr c_cvCornerHarris
 c_cvCornerHarris = (<cvCornerHarrisPtr*><size_t>ctypes.addressof(cv.cvCornerHarris))[0]
 
+'''
+# cvFindCornerSubPix
+ctypedef void (*cvFindCornerSubPixPtr)(IplImage*, CvPoint32f*, int, CvSize, CvSize, CvTermCriteria):
+cdef cvFindCornerSubPixPtr c_cvFindCornerSubPix
+c_cvFindCornerSubPix = (<cvFindCornerSubPixPtr*><size_t><ctypes.addressof(cv.cvFindCornerSubPix))[0]
+'''
+
 # cvSmooth
 ctypedef void (*cvSmoothPtr)(IplImage*, IplImage*, int, int, int, double, double)
 cdef cvSmoothPtr c_cvSmooth
@@ -66,6 +73,12 @@ c_cvSmooth =  (<cvSmoothPtr*><size_t>ctypes.addressof(cv.cvSmooth))[0]
 ####################################
 def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
             int aperture_size=3):
+    
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
     
     validate_array(src)
     assert_dtype(src, [UINT8, INT8, FLOAT32])
@@ -100,6 +113,13 @@ def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
     return out        
 
 def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
+    
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
+    
     validate_array(src)
     assert_dtype(src, [UINT8, INT8, FLOAT32])
     assert_nchannels(src, [1])
@@ -135,6 +155,13 @@ def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
 
 def cvCanny(np.ndarray src, np.ndarray out=None, double threshold1=10, 
             double threshold2=50, int aperture_size=3):
+    
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
+            
     validate_array(src)
     assert_nchannels(src, [1])
     
@@ -160,6 +187,13 @@ def cvCanny(np.ndarray src, np.ndarray out=None, double threshold1=10,
     return out
 
 def cvPreCornerDetect(np.ndarray src, np.ndarray out=None, int aperture_size=3):
+    
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
+    
     validate_array(src)
     assert_dtype(src, [UINT8, FLOAT32])
     assert_nchannels(src, [1])
@@ -186,7 +220,13 @@ def cvPreCornerDetect(np.ndarray src, np.ndarray out=None, int aperture_size=3):
     
 def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3, 
                                              int aperture_size=3):
-                             
+    
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
+    
     # no option for the out argument on this one. Its easier just 
     # to make it for them as there is only 1 valid out array for any 
     # given source array
@@ -215,7 +255,11 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
     
 def cvCornerMinEigenVal(np.ndarray src, int block_size=3, 
                                         int aperture_size=3):
-                                        
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """                                    
     # no option for the out argument on this one. Its easier just 
     # to make it for them as there is only 1 valid out array for any 
     # given source array
@@ -240,7 +284,11 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
 
 def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
                                                      double k=0.04):
-                                            
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """                                        
     # no option for the out argument on this one. Its easier just 
     # to make it for them as there is only 1 valid out array for any 
     # given source array
@@ -263,9 +311,38 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
     
     return out    
 
-
+""" not quite finished with this one
+def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
+                       zero_zone, criteria):
+    validate_array(src)
+    validate_array(corners)
+    
+    assert_nchannels(src, [1])
+    assert_dtype(src, UINT8)
+    
+    assert_nchannels(corners, [1])
+    assert_dtype(corners, FLOAT32)
+    
+    # make sure the number of points
+    # jives with the elements in the array
+    # the shape of the array is irrelevant
+    # because opencv will index it as if it were
+    # flat anyway
+    if a.nbytes != (count * 2 * 4):
+        raise ValueError('the number of declared points is different than exists in the array')
+    
+    cdef CvPoint32f* cvCorners = as_2Dpoint_array(corners)
+    
+    
+ """   
+                       
 def cvSmooth(np.ndarray src, np.ndarray out=None, int smoothtype=CV_GAUSSIAN, int param1=3,
             int param2=0, double param3=0, double param4=0, bool in_place=False):
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
     
     validate_array(src)
     if out is not None:

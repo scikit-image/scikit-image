@@ -1,4 +1,6 @@
-# a reimplementation of the opencv IplImage type.
+# a reimplementation of the opencv types.
+# so we dont have to worry about having the opencv headers
+# available at build time.
 
 cdef struct _IplImage:
     int nSize               # sizeof(_IplImage)
@@ -33,7 +35,7 @@ cdef struct _IplImage:
 
 ctypedef _IplImage IplImage
 
-ctypedef struct CvPoint2D32F:
+ctypedef struct CvPoint2D32f:
     float x
     float y
     

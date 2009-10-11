@@ -5,14 +5,18 @@ import ctypes
 
 # linux
 try:
-    ctypes.CDLL('libcv.so')
+    ctypes.CDLL('libcv.so')    
 except:
     # windows
     try:
         ctypes.CDLL('cv.dll')
-    except:
+    except:        
         raise RuntimeError('The opencv libraries were not found. Please make sure they are installed and available on the system path.')
 
 from opencv_constants import *
 from opencv_cv import *
+
+#def test(level=1, verbosity=1):
+#    from numpy.testing import Tester
+#    return Tester().test(level, verbosity)
 
