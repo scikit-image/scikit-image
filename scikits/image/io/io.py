@@ -171,14 +171,24 @@ class ImageCollection(object):
 
         Examples
         --------
-        >>> from os.path import dirname, join  #doctest: +SKIP
-        >>> data_dir = join(dirname(__file__), 'tests')
+        >>> from scikits.image.io import io
+        >>> from scikits.image import data_dir
 
-        >>> c = ImageCollection(data_dir + '/*.png')
-        >>> len(c)
-        3
-        >>> c[2].shape
-        (20, 20, 3)
+        >>> coll = io.ImageCollection(data_dir + '/*.png')
+        >>> len(coll)
+        2
+        >>> coll.files
+        ['.../scikits/image/data/camera.png', .../scikits/image/data/color.png']
+        >>> coll[0].shape
+        (256, 256)
+
+        When `as_grey` is changed, a color image is returned in grey-scale:
+
+        >>> coll[1].shape
+        (370, 371, 3)
+        >>> coll.as_grey = True
+        >>> coll[1].shape
+        (256, 256)
         """
         if isinstance(file_pattern, basestring):
             self._files = sorted(glob(file_pattern))
@@ -193,15 +203,32 @@ class ImageCollection(object):
         else:
             memory_slots = len(self._files)
 
-        self.conserve_memory = conserve_memory
+        self._conserve_memory = conserve_memory
         self._cached = None
-        #TODO: make as_grey a property, or provide a setter that reloads data
-        self.as_grey = as_grey
+        self._as_grey = as_grey
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
     def files(self):
         return self._files
+
+    @property
+    def as_grey(self):
+        """Whether images are converted to grey-scale.
+
+        If this property is changed, all images in memory get reloaded.
+        """
+        return self._as_grey
+
+    @as_grey.setter
+    def as_grey(self, newgrey):
+        if not newgrey == self._as_grey:
+            self._as_grey = newgrey
+            self.reload()
+
+    @property
+    def conserve_memory(self):
+        return self._conserve_memory
 
     def __getitem__(self, n):
         """Return image n in the collection.
@@ -218,18 +245,23 @@ class ImageCollection(object):
         img : ndarray
            The `n`-th image in the collection.
         """
+        n = self._check_imgnum(n)
+        idx = n % len(self.data)
+
+        if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
+            self.data[idx] = imread(self.files[n], self.as_grey)
+            self._cached = n
+
+        return self.data[idx]
+
+    def _check_imgnum(self, n):
+        """Check that the given image number is valid."""
         num = len(self.files)
         if -num <= n < num:
             n = n % num
         else:
             raise IndexError, "There are only %s images in the collection"%num
-        idx = n % len(self.data)
-
-        print num, idx, n
-        if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
-            self.data[idx] = imread(self.files[n], self.as_grey)
-
-        return self.data[idx]
+        return n
 
     def __iter__(self):
         """Iterate over the images."""
@@ -242,3 +274,31 @@ class ImageCollection(object):
 
     def __str__(self):
         return str(self.files)
+
+    def reload(self, n=None):
+        """Reload one or more images from file.
+
+        Parameters
+        ----------
+        n : None or int
+            The number of the image to reload. If None (default), all images in
+            memory are reloaded.  If `n` specifies an image not yet in memory,
+            it is loaded.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        `reload` is used to reload all images in memory when `as_grey` is
+        changed.
+        """
+        if n is not None:
+            n = self._check_numimg(n)
+            idx = n % len(self.data)
+            self.data[idx] = imread(self.files[n], self.as_grey)
+        else:
+            for idx, img in enumerate(self.data):
+                if img is not None:
+                    self.data[idx] = imread(self.files[idx], self.as_grey)

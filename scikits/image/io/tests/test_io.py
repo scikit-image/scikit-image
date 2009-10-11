@@ -37,6 +37,13 @@ class TestImageCollection():
             self.collection.files = f
         assert_raises(AttributeError, set_files, 'newfiles')
 
+    def test_as_grey_property(self):
+        self.collection.as_grey = False
+        assert self.collection[1].ndim == 3
+        self.collection.as_grey = True
+        assert self.collection[1].ndim == 2
+
+
 if __name__ == "__main__":
     run_module_suite()
 
