@@ -55,17 +55,21 @@ ctypedef void (*cvCornerHarrisPtr)(IplImage*, IplImage*, int, int, double)
 cdef cvCornerHarrisPtr c_cvCornerHarris
 c_cvCornerHarris = (<cvCornerHarrisPtr*><size_t>ctypes.addressof(cv.cvCornerHarris))[0]
 
-'''
+
 # cvFindCornerSubPix
-ctypedef void (*cvFindCornerSubPixPtr)(IplImage*, CvPoint32f*, int, CvSize, CvSize, CvTermCriteria):
+ctypedef void (*cvFindCornerSubPixPtr)(IplImage*, CvPoint2D32f*, int, CvSize, CvSize, CvTermCriteria)
 cdef cvFindCornerSubPixPtr c_cvFindCornerSubPix
-c_cvFindCornerSubPix = (<cvFindCornerSubPixPtr*><size_t><ctypes.addressof(cv.cvFindCornerSubPix))[0]
-'''
+c_cvFindCornerSubPix = (<cvFindCornerSubPixPtr*><size_t>ctypes.addressof(cv.cvFindCornerSubPix))[0]
 
 # cvSmooth
 ctypedef void (*cvSmoothPtr)(IplImage*, IplImage*, int, int, int, double, double)
 cdef cvSmoothPtr c_cvSmooth
 c_cvSmooth =  (<cvSmoothPtr*><size_t>ctypes.addressof(cv.cvSmooth))[0]
+
+# cvResize
+ctypedef void (*cvResizePtr)(IplImage*, IplImage*, int)
+cdef cvResizePtr c_cvResize
+c_cvResize = (<cvResizePtr*><size_t>ctypes.addressof(cv.cvResize))[0]
 
 
 ####################################
@@ -311,31 +315,55 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
     
     return out    
 
-""" not quite finished with this one
 def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
-                       zero_zone, criteria):
+                       zero_zone=(-1, -1), int iterations=0, 
+                       double epsilon=1e-5):
+                       
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """  
+    
     validate_array(src)
     validate_array(corners)
     
     assert_nchannels(src, [1])
-    assert_dtype(src, UINT8)
+    assert_dtype(src, [UINT8])
     
     assert_nchannels(corners, [1])
-    assert_dtype(corners, FLOAT32)
+    assert_dtype(corners, [FLOAT32])
     
     # make sure the number of points
     # jives with the elements in the array
     # the shape of the array is irrelevant
     # because opencv will index it as if it were
-    # flat anyway
-    if a.nbytes != (count * 2 * 4):
+    # flat anyway, but regardless, the validate_array function ensures
+    # that it is 2D
+    cdef int nbytes = <int> get_array_nbytes(corners)
+    if nbytes != (count * 2 * 4):
         raise ValueError('the number of declared points is different than exists in the array')
     
-    cdef CvPoint32f* cvCorners = as_2Dpoint_array(corners)
+    cdef CvPoint2D32f* cvcorners = array_as_cvPoint2D32f_ptr(corners)
     
+    cdef CvSize cvwin
+    cvwin.height = <int> win[0]
+    cvwin.width = <int> win[1]
     
- """   
-                       
+    cdef CvSize cvzerozone
+    cvzerozone.height = <int> zero_zone[0]
+    cvzerozone.width = <int> zero_zone[1]
+       
+    cdef IplImage srcimg
+    populate_iplimage(src, &srcimg)
+    
+    cdef CvTermCriteria crit
+    crit = get_cvTermCriteria(iterations, epsilon)
+    
+    c_cvFindCornerSubPix(&srcimg, cvcorners, count, cvwin, cvzerozone, crit)   
+    
+    return None
+                           
 def cvSmooth(np.ndarray src, np.ndarray out=None, int smoothtype=CV_GAUSSIAN, int param1=3,
             int param2=0, double param3=0, double param4=0, bool in_place=False):
     """
@@ -406,3 +434,47 @@ def cvSmooth(np.ndarray src, np.ndarray out=None, int smoothtype=CV_GAUSSIAN, in
     c_cvSmooth(&srcimg, &outimg, smoothtype, param1, param2, param3, param4)        
             
     return out
+
+def cvResize(np.ndarray src, height=None, width=None, 
+             int method=CV_INTER_LINEAR):
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
+    validate_array(src)
+    
+    if not height or not width:
+        raise ValueError('width and height must not be none')
+    
+    cdef int ndims = src.ndim    
+    
+    # we need a copy of the shape in case it has more than one channel
+    # what follows is a hack because i dont want to mess with malloc right
+    # now, and it doesnt waste a ton of memory
+    cdef np.npy_intp* shape2[2]
+    cdef np.npy_intp* shape3[3]
+    cdef np.npy_intp* shape
+    
+    if ndims == 2:
+        shape = <np.npy_intp*>shape2
+        shape[0] = <np.npy_intp>height
+        shape[1] = <np.npy_intp>width
+    else:
+        shape = <np.npy_intp*>shape3
+        shape[0] = <np.npy_intp>height
+        shape[1] = <np.npy_intp>width
+        shape[2] = src.shape[2]
+        
+    cdef np.ndarray out = new_array(ndims, shape, src.dtype)
+    validate_array(out)
+    
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    
+    c_cvResize(&srcimg, &outimg, method)
+    
+    return out
+    

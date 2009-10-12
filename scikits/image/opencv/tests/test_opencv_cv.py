@@ -69,6 +69,33 @@ class TestSmooth(OpenCVTest):
                    CV_BILATERAL):
             cvSmooth(self.lena_GRAY_U8, None, st, 3, 0, 0, 0, False)
                   
+class TestFindCornerSubPix:
+    @_opencv_skip
+    def test_cvFindCornersSubPix(self):
+        img = np.array([[1, 1, 1, 0, 0, 0, 1, 1, 1],
+                        [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                        [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                        [0, 0, 0, 1, 1, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 1, 1, 0, 0, 0],
+                        [0, 0, 0, 1, 1, 1, 0, 0, 0],
+                        [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                        [1, 1, 1, 0, 0, 0, 1, 1, 1],
+                        [1, 1, 1, 0, 0, 0, 1, 1, 1]], dtype='uint8')
+        
+        corners = np.array([[2, 2],
+                            [2, 5],
+                            [5, 2],
+                            [5, 5]], dtype='float32')
+        
+        cvFindCornerSubPix(img, corners, 4, (2, 2))
+        
     
+class TestResize(OpenCVTest):
+    @_opencv_skip
+    def test_cvResize(self):
+        cvResize(self.lena_RGB_U8, height=50, width=50, method=CV_INTER_LINEAR)
+        cvResize(self.lena_RGB_U8, height=200, width=200, method=CV_INTER_CUBIC)
+
+        
 if __name__ == '__main__':
     run_module_suite()

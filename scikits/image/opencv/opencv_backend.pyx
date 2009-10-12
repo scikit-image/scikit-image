@@ -1,7 +1,9 @@
 import numpy as np
 cimport numpy as np
+from opencv_constants import *
 from opencv_type cimport *
- 
+
+
 np.import_array()
 
 #-------------------------------------------------------------------------------
@@ -153,11 +155,35 @@ cdef np.ndarray new_array_like_diff_dtype(np.ndarray arr, dtype):
     # need to incref because numpy will apprently steal a dtype reference    
     Py_INCREF(<object>dtype)
     return PyArray_Empty(arr.ndim, arr.shape, dtype, 0)
-    
-cdef CvPoint2D32f* as_2Dpoint_array(np.ndarray arr):
+
+cdef CvPoint2D32f* array_as_cvPoint2D32f_ptr(np.ndarray arr):
     cdef CvPoint2D32f* point2Darr   
     point2Darr = <CvPoint2D32f*>arr.data
     return point2Darr
+    
+cdef np.npy_intp get_array_nbytes(np.ndarray arr):
+    cdef np.npy_intp nbytes = np.PyArray_NBYTES(arr)
+    return nbytes
+    
+cdef CvTermCriteria get_cvTermCriteria(int iterations, double epsilon):
+    cdef CvTermCriteria crit    
+    if iterations and epsilon:
+        crit.type = <int>(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS)
+        crit.max_iter = iterations
+        crit.epsilon = epsilon
+    elif iterations and not epsilon:
+        crit.type = <int>CV_TERMCRIT_ITER
+        crit.max_iter = iterations
+        crit.epsilon = 0.
+    else:
+        crit.type = <int>CV_TERMCRIT_EPS
+        crit.max_iter = 0
+        crit.epsilon = epsilon
+    return crit
+    
+
+       
+        
     
 
 
