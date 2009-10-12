@@ -44,6 +44,48 @@ class TestImageCollection():
         assert self.collection[1].ndim == 2
 
 
+class TestMultiImage():
+
+    def setUp(self):
+        # This multipage TIF file was created with imagemagick:
+        # convert im1.tif im2.tif -adjoin multipage.tif
+        self.img = io.MultiImage(os.path.join('data', 'multipage.tif'))
+
+    def test_len(self):
+        assert len(self.img) == 2
+
+    def test_getitem(self):
+        num = len(self.img)
+        for i in range(-num, num):
+            assert type(self.img[i]) is np.ndarray
+        assert_array_almost_equal(self.img[0],
+                                  self.img[-num])
+
+        #assert_raises expects a callable, hence this do-very-little func
+        def return_img(n):
+            return self.img[n]
+        assert_raises(IndexError, return_img, num)
+        assert_raises(IndexError, return_img, -num-1)
+
+    def test_files_property(self):
+        assert isinstance(self.img.filename, basestring)
+
+        def set_filename(f):
+            self.img.filename = f
+        assert_raises(AttributeError, set_filename, 'newfile')
+
+    def test_conserve_memory_property(self):
+        assert isinstance(self.img.conserve_memory, bool)
+
+        def set_mem(val):
+            self.img.conserve_memory = val
+        assert_raises(AttributeError, set_mem, True)
+
+
+
+
+
+
 if __name__ == "__main__":
     run_module_suite()
 

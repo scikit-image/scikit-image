@@ -44,23 +44,25 @@ class MultiImage(object):
 
     Examples
     --------
-    >>> img = MultiImage(fname)  #doctest: +SKIP
+    >>> import os.path
+    >>> fname = os.path.join('tests', 'data', 'multipage.tif')
+
+    >>> img = MultiImage(fname)
     >>> len(img)
-    3
+    2
     >>> for frame in img:
     ...     print frame.shape
-    (576, 384)
-    (576, 384)
-    (576, 384)
+    (15, 10)
+    (15, 10)
     """
     def __init__(self, filename, conserve_memory=True):
         """Load a multi-img"""
         self._filename = filename
-        self.conserve_memory = conserve_memory
+        self._conserve_memory = conserve_memory
         self._cached = None
 
         img = Image.open(self._filename)
-        if self.conserve_memory:
+        if self._conserve_memory:
             self._numframes = self._find_numframes(img)
         else:
             self._frames = self._getallframes(img)
@@ -69,6 +71,10 @@ class MultiImage(object):
     @property
     def filename(self):
         return self._filename
+
+    @property
+    def conserve_memory(self):
+        return self._conserve_memory
 
     def _find_numframes(self, img):
         """Find the number of frames in the multi-img."""
