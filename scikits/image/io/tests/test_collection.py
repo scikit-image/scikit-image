@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import *
 
 from scikits.image import data_dir
-from scikits.image.io import io
+from scikits.image.io import ImageCollection, MultiImage
 
 
 class TestImageCollection():
@@ -12,7 +12,7 @@ class TestImageCollection():
                                                        'color.png']]
 
     def setUp(self):
-        self.collection = io.ImageCollection(self.pattern)
+        self.collection = ImageCollection(self.pattern)
 
     def test_len(self):
         assert len(self.collection) == 2
@@ -49,7 +49,7 @@ class TestMultiImage():
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
-        self.img = io.MultiImage(os.path.join(data_dir, 'multipage.tif'))
+        self.img = MultiImage(os.path.join(data_dir, 'multipage.tif'))
 
     def test_len(self):
         assert len(self.img) == 2
