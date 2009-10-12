@@ -1,6 +1,8 @@
 import ctypes
 import numpy as np
 cimport numpy as np
+from python cimport *
+#from stdlib cimport *
 from opencv_type cimport *
 from opencv_backend import *
 from opencv_backend cimport *
@@ -65,6 +67,13 @@ c_cvFindCornerSubPix = (<cvFindCornerSubPixPtr*><size_t>ctypes.addressof(cv.cvFi
 ctypedef void (*cvSmoothPtr)(IplImage*, IplImage*, int, int, int, double, double)
 cdef cvSmoothPtr c_cvSmooth
 c_cvSmooth =  (<cvSmoothPtr*><size_t>ctypes.addressof(cv.cvSmooth))[0]
+
+# cvGoodFeaturesToTrack
+ctypedef void (*cvGoodFeaturesToTrackPtr)(IplImage*, IplImage*, IplImage*,
+                                          CvPoint2D32f*, int*, double, double, 
+                                          IplImage*, int, int, double)
+cdef cvGoodFeaturesToTrackPtr c_cvGoodFeaturesToTrack
+c_cvGoodFeaturesToTrack = (<cvGoodFeaturesToTrackPtr*><size_t>ctypes.addressof(cv.cvGoodFeaturesToTrack))[0]
 
 # cvResize
 ctypedef void (*cvResizePtr)(IplImage*, IplImage*, int)
@@ -435,6 +444,69 @@ def cvSmooth(np.ndarray src, np.ndarray out=None, int smoothtype=CV_GAUSSIAN, in
             
     return out
 
+def cvGoodFeaturesToTrack(np.ndarray src, int corner_count, double quality_level, 
+                          double min_distance, np.ndarray mask=None,
+                          int block_size=3, int use_harris=0, double k=0.04):
+    """
+    better doc string needed. 
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
+
+    validate_array(src)
+    assert_dtype(src, [UINT8, FLOAT32])
+    assert_nchannels(src, [1])
+    
+    cdef np.ndarray eig = new_array_like_diff_dtype(src, FLOAT32)
+    cdef np.ndarray temp = new_array_like(eig)
+    
+    cdef CvPoint2D32f* corners = (
+            <CvPoint2D32f*>PyMem_Malloc(corner_count * sizeof(CvPoint2D32f)))           
+    
+    cdef int out_corner_count    
+    out_corner_count = corner_count
+    
+    cdef IplImage srcimg
+    cdef IplImage eigimg
+    cdef IplImage tempimg
+    cdef IplImage *maskimg
+        
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(eig, &eigimg)
+    populate_iplimage(temp, &tempimg)
+    if mask is None:
+        maskimg = NULL        
+    else:
+        validate_array(mask)
+        assert_nchannels(mask, [1])
+        populate_iplimage(mask, maskimg)
+    
+    c_cvGoodFeaturesToTrack(&srcimg, &eigimg, &tempimg, corners, &out_corner_count,
+                            quality_level, min_distance, maskimg, block_size,
+                            use_harris, k)
+                               
+    # since the maximum allowed corners may not have been found
+    # the array might be too long, we create a new array and copy 
+    # the the data into it
+    # 
+    # It would be nice to use the numpy C-Api for this, but I couldn't quite
+    # get it to work
+    
+    cdef np.npy_intp cornershape[2]    
+    cornershape[0] = <np.npy_intp>out_corner_count
+    cornershape[1] = 2    
+    
+    cdef np.ndarray cornersarr = new_array(2, cornershape, FLOAT32)
+    cdef int i
+    for i in range(out_corner_count):
+        cornersarr[i,0] = corners[i].x
+        cornersarr[i,1] = corners[i].y        
+        
+    PyMem_Free(corners)
+        
+    return cornersarr
+    
+                          
 def cvResize(np.ndarray src, height=None, width=None, 
              int method=CV_INTER_LINEAR):
     """
@@ -447,27 +519,15 @@ def cvResize(np.ndarray src, height=None, width=None,
     if not height or not width:
         raise ValueError('width and height must not be none')
     
-    cdef int ndims = src.ndim    
-    
-    # we need a copy of the shape in case it has more than one channel
-    # what follows is a hack because i dont want to mess with malloc right
-    # now, and it doesnt waste a ton of memory
-    cdef np.npy_intp* shape2[2]
-    cdef np.npy_intp* shape3[3]
-    cdef np.npy_intp* shape
-    
-    if ndims == 2:
-        shape = <np.npy_intp*>shape2
-        shape[0] = <np.npy_intp>height
-        shape[1] = <np.npy_intp>width
-    else:
-        shape = <np.npy_intp*>shape3
-        shape[0] = <np.npy_intp>height
-        shape[1] = <np.npy_intp>width
-        shape[2] = src.shape[2]
-        
-    cdef np.ndarray out = new_array(ndims, shape, src.dtype)
+    cdef int ndim = src.ndim   
+    cdef np.npy_intp* shape = clone_array_shape(src)
+    shape[0] = height
+    shape[1] = width
+              
+    cdef np.ndarray out = new_array(ndim, shape, src.dtype)
     validate_array(out)
+    
+    PyMem_Free(shape)
     
     cdef IplImage srcimg
     cdef IplImage outimg

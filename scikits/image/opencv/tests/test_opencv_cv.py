@@ -89,13 +89,19 @@ class TestFindCornerSubPix:
         
         cvFindCornerSubPix(img, corners, 4, (2, 2))
         
+        
+class TestGoodFeaturesToTrack(OpenCVTest):
+    @_opencv_skip
+    def test_cvGoodFeaturesToTrack(self):
+        cvGoodFeaturesToTrack(self.lena_GRAY_U8, 100, 0.1, 3)                              
+        
     
 class TestResize(OpenCVTest):
     @_opencv_skip
-    def test_cvResize(self):
+    def test_cvResize(self):        
         cvResize(self.lena_RGB_U8, height=50, width=50, method=CV_INTER_LINEAR)
         cvResize(self.lena_RGB_U8, height=200, width=200, method=CV_INTER_CUBIC)
-
+        
         
 if __name__ == '__main__':
     run_module_suite()

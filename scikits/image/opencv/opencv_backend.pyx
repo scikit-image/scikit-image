@@ -1,5 +1,6 @@
 import numpy as np
 cimport numpy as np
+from python cimport *
 from opencv_constants import *
 from opencv_type cimport *
 
@@ -140,7 +141,10 @@ cdef int assert_not_sharing_data(np.ndarray arr1, np.ndarray arr2) except -1:
         raise ValueError('In place operation not supported. Make sure \
                           the out array is not just a view of src array')
     return 1
-              
+
+#-------------------------------------------------------------------------------
+# NumPy array convienences 
+#-------------------------------------------------------------------------------
 cdef np.ndarray new_array(int ndim, np.npy_intp* shape, dtype):
     # need to incref because numpy will apprently steal a dtype reference
     Py_INCREF(<object>dtype)
@@ -156,15 +160,27 @@ cdef np.ndarray new_array_like_diff_dtype(np.ndarray arr, dtype):
     Py_INCREF(<object>dtype)
     return PyArray_Empty(arr.ndim, arr.shape, dtype, 0)
 
-cdef CvPoint2D32f* array_as_cvPoint2D32f_ptr(np.ndarray arr):
-    cdef CvPoint2D32f* point2Darr   
-    point2Darr = <CvPoint2D32f*>arr.data
-    return point2Darr
-    
+cdef np.npy_intp* clone_array_shape(np.ndarray arr):
+    # make sure you call PyMem_Free after your done with the shape
+    cdef int ndim = arr.ndim
+    cdef np.npy_intp* shape = <np.npy_intp*>PyMem_Malloc(ndim * sizeof(np.npy_intp))
+    cdef int i
+    for i in range(ndim):
+        shape[i] = arr.shape[i]
+    return shape
+        
 cdef np.npy_intp get_array_nbytes(np.ndarray arr):
     cdef np.npy_intp nbytes = np.PyArray_NBYTES(arr)
     return nbytes
     
+#-------------------------------------------------------------------------------
+# OpenCV convienences
+#-------------------------------------------------------------------------------
+cdef CvPoint2D32f* array_as_cvPoint2D32f_ptr(np.ndarray arr):
+    cdef CvPoint2D32f* point2Darr   
+    point2Darr = <CvPoint2D32f*>arr.data
+    return point2Darr
+
 cdef CvTermCriteria get_cvTermCriteria(int iterations, double epsilon):
     cdef CvTermCriteria crit    
     if iterations and epsilon:
