@@ -23,6 +23,9 @@ class MultiImage(object):
     conserve_memory : bool, optional
         Whether to conserve memory by only caching a single frame. Default is
         True.
+    dtype : dtype, optional
+        NumPy data-type specifier. If given, the returned image has this type.
+        If None (default), the data-type is determined automatically.
 
     Attributes
     ----------
@@ -55,10 +58,11 @@ class MultiImage(object):
     (15, 10)
     (15, 10)
     """
-    def __init__(self, filename, conserve_memory=True):
+    def __init__(self, filename, conserve_memory=True, dtype=None):
         """Load a multi-img"""
         self._filename = filename
         self._conserve_memory = conserve_memory
+        self._dtype = dtype
         self._cached = None
 
         img = Image.open(self._filename)
@@ -91,7 +95,7 @@ class MultiImage(object):
         """Open the image and extract the frame."""
         img = Image.open(self.filename)
         img.seek(framenum)
-        return np.asarray(img)
+        return np.asarray(img, dtype=self._dtype)
 
     def _getallframes(self, img):
         """Extract all frames from the multi-img."""
@@ -99,7 +103,7 @@ class MultiImage(object):
         try:
             i = 0
             while True:
-                frames.append(np.asarray(img))
+                frames.append(np.asarray(img, dtype=self._dtype))
                 i += 1
                 img.seek(i)
         except EOFError:
@@ -149,7 +153,8 @@ class MultiImage(object):
 class ImageCollection(object):
     """Load and manage a collection of images."""
 
-    def __init__(self, file_pattern, conserve_memory=True, as_grey=False):
+    def __init__(self, file_pattern, conserve_memory=True, as_grey=False,
+                 dtype=None):
         """Load image files.
 
         Note that files are always stored in alphabetical order.
@@ -167,6 +172,9 @@ class ImageCollection(object):
         as_grey : bool, optional
             If True, convert the input images to grey-scale. This does not
             affect images that are already in a grey-scale format.
+        dtype : dtype, optional
+            NumPy data-type specifier. If given, the returned image has this type.
+            If None (default), the data-type is determined automatically.
 
         Attributes
         ----------
@@ -212,6 +220,7 @@ class ImageCollection(object):
         self._conserve_memory = conserve_memory
         self._cached = None
         self._as_grey = as_grey
+        self._dtype = dtype
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
@@ -255,7 +264,8 @@ class ImageCollection(object):
         idx = n % len(self.data)
 
         if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
-            self.data[idx] = imread(self.files[n], self.as_grey)
+            self.data[idx] = imread(self.files[n], self.as_grey,
+                                    dtype=self._dtype)
             self._cached = n
 
         return self.data[idx]
@@ -303,8 +313,10 @@ class ImageCollection(object):
         if n is not None:
             n = self._check_numimg(n)
             idx = n % len(self.data)
-            self.data[idx] = imread(self.files[n], self.as_grey)
+            self.data[idx] = imread(self.files[n], self.as_grey,
+                                    dtype=self._dtype)
         else:
             for idx, img in enumerate(self.data):
                 if img is not None:
-                    self.data[idx] = imread(self.files[idx], self.as_grey)
+                    self.data[idx] = imread(self.files[idx], self.as_grey,
+                                            dtype=self._dtype)
