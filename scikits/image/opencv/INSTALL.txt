@@ -1,0 +1,11 @@
+Until we come to a solution for a setup.py, execute the included shell script build.sh
+
+scikit/image/opencv$./build.sh
+scikit/image/opencv$cd tests
+scikit/image/opencv/tests$python test_opencv_cv.py
+
+!* make sure the scikits directory is on the python path *!
+
+
+
+
