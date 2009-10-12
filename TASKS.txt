@@ -125,7 +125,7 @@ Write new functionality
 Complete the build process
 ``````````````````````````
 * Fix scripts for building Cython extensions (see `this thread
-  <http://www.mail-archive.com/numpy-discussion@scipy.org/msg19933.html>`_).
+  <http://www.nabble.com/problem-with-numpy.distutils-and-Cython-td25100957.html#a25100957>`_).
 
 Development process
 -------------------
