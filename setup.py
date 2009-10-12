@@ -20,7 +20,7 @@ MAINTAINER_EMAIL    = 'stefan@sun.ac.za',
 URL                 = 'http://stefanv.github.com/scikits.image'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/stefanv/scikits.image'
-VERSION             = '0.1'
+VERSION             = '0.2dev'
 
 import setuptools
 from numpy.distutils.core import setup
