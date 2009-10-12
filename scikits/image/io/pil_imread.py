@@ -2,7 +2,7 @@ __all__ = ['imread']
 
 import numpy as np
 
-def imread(fname, flatten=False):
+def imread(fname, flatten=False, dtype=None):
     """Load an image from file.
 
     Parameters
@@ -11,6 +11,9 @@ def imread(fname, flatten=False):
         Image file name, e.g. ``test.jpg``.
     flatten : bool
         If true, convert the output to grey-scale.
+    dtype : dtype, optional
+        NumPy data-type specifier. If given, the returned image has this type.
+        If None (default), the data-type is determined automatically.
 
     Returns
     -------
@@ -31,4 +34,4 @@ def imread(fname, flatten=False):
     im = Image.open(fname)
     if flatten:
         im = im.convert('F')
-    return np.array(im)
+    return np.array(im, dtype=dtype)
