@@ -21,7 +21,8 @@ modified to work as part of the scikit, others may be lacking in documentation
 or tests.
 
    * Connected components
-   * Color-space manipulations (partially done by Nicolas Pinto)
+   * Color-space manipulations (so far rgb2hsv was done by Nicolas Pinto,
+                                needs documentation)
    * `Hough transform <http://mentat.za.net>`_
    * `Shortest paths <http://mentat.za.net>`_
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
@@ -79,8 +80,8 @@ Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
 Thanks to Lee Kamentsky, Thouis Jones and Anne Carpenter and their colleagues
 who contributed.
 
-Add image output to documentation
-`````````````````````````````````
+Documentation: Plots
+````````````````````
 Taken from a post by David Warde-Farley::
 
   It would be really helpful to have the output of those plot
@@ -99,6 +100,22 @@ Taken from a post by David Warde-Farley::
            plots work,
         c) committing and pushing to your own github branch and
         d) pinging Stefan to go look/update the live docs.
+
+Documentation: API generation
+`````````````````````````````
+The API documentation is auto-generated from source.  Currently, it's
+mostly functional but not very clean.  For example, we currently see things
+like:
+
+ - Module: ``io.collection``
+   ...
+ - Module: ``io.pil_imread``
+   ...
+ - Module: ``io.sift``
+
+These should be combined into one.  All around, there are small things that
+can be improved, such as the chaotic index table, the class attribute tables,
+etc.
 
 Write new functionality
 ```````````````````````
