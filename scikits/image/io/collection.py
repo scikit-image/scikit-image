@@ -151,59 +151,58 @@ class MultiImage(object):
 
 
 class ImageCollection(object):
-    """Load and manage a collection of images."""
+    """Load and manage a collection of image files.
 
+    Note that files are always stored in alphabetical order.
+
+    Parameters
+    ----------
+    file_pattern : str or list of str
+        Path(s) and pattern(s) of files to load. The path can be absolute
+        or relative. If given as a list of strings, each string in the list
+        is a separate pattern. Files are found by passing the pattern(s) to
+        the ``glob.glob`` function.
+    conserve_memory : bool, optional
+        If True, never keep more than one in memory at a specific
+        time.  Otherwise, images will be cached once they are loaded.
+    as_grey : bool, optional
+        If True, convert the input images to grey-scale. This does not
+        affect images that are already in a grey-scale format.
+    dtype : dtype, optional
+        NumPy data-type specifier. If given, the returned image has this type.
+        If None (default), the data-type is determined automatically.
+
+    Attributes
+    ----------
+    files : list of str
+        A list of files in the collection, ordered alphabetically.
+    as_grey : bool
+        Whether images are converted to grey-scale.
+
+    Examples
+    --------
+    >>> from scikits.image.io import io
+    >>> from scikits.image import data_dir
+
+    >>> coll = io.ImageCollection(data_dir + '/*.png')
+    >>> len(coll)
+    2
+    >>> coll.files
+    ['.../scikits/image/data/camera.png', .../scikits/image/data/color.png']
+    >>> coll[0].shape
+    (256, 256)
+
+    When `as_grey` is changed, a color image is returned in grey-scale:
+
+    >>> coll[1].shape
+    (370, 371, 3)
+    >>> coll.as_grey = True
+    >>> coll[1].shape
+    (256, 256)
+    """
     def __init__(self, file_pattern, conserve_memory=True, as_grey=False,
                  dtype=None):
-        """Load image files.
-
-        Note that files are always stored in alphabetical order.
-
-        Parameters
-        ----------
-        file_pattern : str or list of str
-            Path(s) and pattern(s) of files to load. The path can be absolute
-            or relative. If given as a list of strings, each string in the list
-            is a separate pattern. Files are found by passing the pattern(s) to
-            the ``glob.glob`` function.
-        conserve_memory : bool, optional
-            If True, never keep more than one in memory at a specific
-            time.  Otherwise, images will be cached once they are loaded.
-        as_grey : bool, optional
-            If True, convert the input images to grey-scale. This does not
-            affect images that are already in a grey-scale format.
-        dtype : dtype, optional
-            NumPy data-type specifier. If given, the returned image has this type.
-            If None (default), the data-type is determined automatically.
-
-        Attributes
-        ----------
-        files : list of str
-            A list of files in the collection, ordered alphabetically.
-        as_grey : bool
-            Whether images are converted to grey-scale.
-
-        Examples
-        --------
-        >>> from scikits.image.io import io
-        >>> from scikits.image import data_dir
-
-        >>> coll = io.ImageCollection(data_dir + '/*.png')
-        >>> len(coll)
-        2
-        >>> coll.files
-        ['.../scikits/image/data/camera.png', .../scikits/image/data/color.png']
-        >>> coll[0].shape
-        (256, 256)
-
-        When `as_grey` is changed, a color image is returned in grey-scale:
-
-        >>> coll[1].shape
-        (370, 371, 3)
-        >>> coll.as_grey = True
-        >>> coll[1].shape
-        (256, 256)
-        """
+        """Load and manage a collection of images."""
         if isinstance(file_pattern, basestring):
             self._files = sorted(glob(file_pattern))
         elif isinstance(file_pattern, list):
