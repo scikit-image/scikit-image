@@ -49,7 +49,7 @@ class TestMultiImage():
     def setUp(self):
         # This multipage TIF file was created with imagemagick:
         # convert im1.tif im2.tif -adjoin multipage.tif
-        self.img = io.MultiImage(os.path.join('data', 'multipage.tif'))
+        self.img = io.MultiImage(os.path.join(data_dir, 'multipage.tif'))
 
     def test_len(self):
         assert len(self.img) == 2
