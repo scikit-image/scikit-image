@@ -173,8 +173,8 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
         infinite gain.  High gain causes amplification of
         artefacts, so a conservative limit is recommended.
 
-    Additional Parameters
-    ---------------------
+    Other Parameters
+    ----------------
     predefined_filter : LPIFilter2D
         If you need to apply the same filter multiple times over
         different images, construct the LPIFilter2D and specify
@@ -211,8 +211,8 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     filter_params : dict
         Additional keyword parameters to the impulse_response function.
 
-    Additional Parameters
-    ---------------------
+    Other Parameters
+    ----------------
     predefined_filter : LPIFilter2D
         If you need to apply the same filter multiple times over
         different images, construct the LPIFilter2D and specify
