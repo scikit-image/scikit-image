@@ -1,4 +1,4 @@
-"""Read and write image files."""
+"""Data structures to hold collections of images, with optional caching."""
 
 from __future__ import with_statement
 
