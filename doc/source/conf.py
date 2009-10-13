@@ -19,14 +19,16 @@ import sys, os
 #sys.path.append(os.path.abspath('.'))
 
 curpath = os.path.dirname(__file__)
-sys.path.append(os.path.join(curpath, '../ext'))
+sys.path.append(os.path.join(curpath, '..', 'ext'))
 
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.pngmath', 'numpydoc',
-              'sphinx.ext.autosummary', 'sphinx.ext.inheritance_diagram']
+              'sphinx.ext.autosummary', 'sphinx.ext.inheritance_diagram',
+              'numpydoc.only_directives',
+              'numpydoc.plot_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -115,7 +117,7 @@ html_theme = 'default'
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-#html_title = None
+html_title = 'v%s documentation'%version
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -210,3 +212,40 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+# -----------------------------------------------------------------------------
+# Numpy extensions
+# -----------------------------------------------------------------------------
+# Make numpydoc to generate plots for example sections
+#numpydoc_use_plots = True
+
+# -----------------------------------------------------------------------------
+# Plots
+# -----------------------------------------------------------------------------
+plot_pre_code = """
+import numpy as np
+import matplotlib.pyplot as plt
+np.random.seed(0)
+"""
+plot_include_source = False
+plot_formats = [('png', 100), 'pdf']
+
+import math
+phi = (math.sqrt(5) + 1)/2
+
+import matplotlib
+matplotlib.rcParams.update({
+    'font.size': 8,
+    'axes.titlesize': 8,
+    'axes.labelsize': 8,
+    'xtick.labelsize': 8,
+    'ytick.labelsize': 8,
+    'legend.fontsize': 8,
+    'figure.figsize': (3*phi, 3),
+    'figure.subplot.bottom': 0.2,
+    'figure.subplot.left': 0.2,
+    'figure.subplot.right': 0.9,
+    'figure.subplot.top': 0.85,
+    'figure.subplot.wspace': 0.4,
+    'text.usetex': False,
+})

@@ -57,9 +57,13 @@ class MultiImage(object):
     ...     print frame.shape
     (15, 10)
     (15, 10)
+
+    The two frames in this image can be shown with matplotlib:
+
+    .. plot:: ../plots/show_collection.py
     """
     def __init__(self, filename, conserve_memory=True, dtype=None):
-        """Load a multi-img"""
+        """Load a multi-img."""
         self._filename = filename
         self._conserve_memory = conserve_memory
         self._dtype = dtype
