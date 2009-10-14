@@ -1,5 +1,5 @@
 # test for the opencv_cv extension module
-
+import os
 import numpy as np
 from numpy.testing import *
 
@@ -9,6 +9,8 @@ try:
 except:
     OPENCV_LIBS_NOTFOUND = True
 
+from scikits.image import data_dir 
+
 _opencv_skip = dec.skipif(OPENCV_LIBS_NOTFOUND, 
                            'Skipping OpenCV test because OpenCV'
                            'libs were not found')    
@@ -16,8 +18,8 @@ _opencv_skip = dec.skipif(OPENCV_LIBS_NOTFOUND,
 class OpenCVTest:
     # setup only works as a module level function
     def __init__(self):
-        self.lena_RGB_U8 = np.load('data/lena_RGB_U8.npy')
-        self.lena_GRAY_U8 = np.load('data/lena_GRAY_U8.npy')
+        self.lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npy'))
+        self.lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
 
         
 class TestSobel(OpenCVTest):

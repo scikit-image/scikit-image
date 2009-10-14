@@ -6,3 +6,4 @@ doc/source/api
 doc/build
 source/api
 scikits/image/opencv/*.so
+scikits/image/opencv/*.bak

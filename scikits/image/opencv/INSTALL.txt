@@ -1,4 +1,6 @@
-Until we come to a solution for a setup.py, execute the included shell script build.sh
+You can try to use the setup.py but it may still be broken
+
+Until we come to a solution for a setup.py, execute the included shell script build.sh and copy the .so's to wherever you want them
 
 scikit/image/opencv$./build.sh
 scikit/image/opencv$cd tests
