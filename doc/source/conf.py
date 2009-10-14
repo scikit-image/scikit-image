@@ -228,7 +228,7 @@ import matplotlib.pyplot as plt
 np.random.seed(0)
 """
 plot_include_source = False
-plot_formats = [('png', 100), 'pdf']
+plot_formats = [('png', 100)]
 
 import math
 phi = (math.sqrt(5) + 1)/2

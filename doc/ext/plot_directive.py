@@ -173,20 +173,28 @@ TEMPLATE = """
           {%- for option in options %}
           {{ option }}
           {% endfor %}
-    
+
+          (`Source code <{{source_link}}>`__)
+
+          {# We do not need to link to all the different image
+             formats.  The .png is included on the webpage, and a the
+             source snippet is given.
+
           (
           {%- if not source_code -%}
             `Source code <{{source_link}}>`__
-            {%- for fmt in img.formats -%} 
+            {%- for fmt in img.formats -%}
             , `{{ fmt }} <{{ dest_dir }}/{{ img.basename }}.{{ fmt }}>`__
             {%- endfor -%}
           {%- else -%}
-            {%- for fmt in img.formats -%} 
+            {%- for fmt in img.formats -%}
             {%- if not loop.first -%}, {% endif -%}
             `{{ fmt }} <{{ dest_dir }}/{{ img.basename }}.{{ fmt }}>`__
             {%- endfor -%}
           {%- endif -%}
           )
+
+          #}
        {% endfor %}
 
 {{ only_latex }}
@@ -332,9 +340,12 @@ def run(arguments, content, options, state_machine, state, lineno):
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir)
 
-    for img in images:
-        for fn in img.filenames():
-            shutil.copyfile(fn, os.path.join(dest_dir, os.path.basename(fn)))
+# Commented out so that images are not copied to the 'plots'
+# directory.  Sphinx copies to images to '_images' anyway, so no need.
+
+#    for img in images:
+#        for fn in img.filenames():
+#            shutil.copyfile(fn, os.path.join(dest_dir, os.path.basename(fn)))
 
     # copy script (if necessary)
     if source_file_name == rst_file:
