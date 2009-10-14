@@ -80,27 +80,6 @@ Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
 Thanks to Lee Kamentsky, Thouis Jones and Anne Carpenter and their colleagues
 who contributed.
 
-Documentation: Plots
-````````````````````
-Taken from a post by David Warde-Farley::
-
-  It would be really helpful to have the output of those plot
-  commands. `John Hunter's sampledoc tutorial
-  <http://matplotlib.sourceforge.net/sampledoc/>`_
-  contains instructions on how to do the requisite Sphinx twiddling
-  to get matplotlib plots plotted in the Sphinx output, it's just a
-  matter of someone actually *doing* it.
-
-  This is exactly the kind of low-hanging fruit a SciPy/scikits/open
-  source newcomer (or long-time user, first-time contributor) could do
-  to get their feet wet, by the way :)  It's basically a matter of
-
-        a) forking the project on GitHub,
-        b) following the instructions at the sampledoc tutorial to make
-           plots work,
-        c) committing and pushing to your own github branch and
-        d) pinging Stefan to go look/update the live docs.
-
 Documentation: API generation
 `````````````````````````````
 The API documentation is auto-generated from source.  Currently, it's
