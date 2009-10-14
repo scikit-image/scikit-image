@@ -11,12 +11,11 @@ Copyright (C) 2008 Stefan van der Walt <stefan@mentat.za.net>,
 
 and are distributed under the modified BSD license.
 
-The files
+The file
 
-- only_directives.py
 - plot_directive.py
 
-originate from Matplotlib (http://matplotlib.sf.net/) which has the
+originates from Matplotlib (http://matplotlib.sf.net/) which has the
 following license:
 
 Copyright (c) 2002-2008 John D. Hunter; All Rights Reserved.
