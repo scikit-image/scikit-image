@@ -1,0 +1,8 @@
+Using the setup.py in this directory will work. 
+But the setup.py in the main scikits.image does not (it uses setuptools)
+this will be changed in the future. 
+
+
+
+
+
