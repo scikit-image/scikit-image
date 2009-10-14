@@ -1,12 +1,7 @@
-You can try to use the setup.py but it may still be broken
+Using the setup.py in this directory will work. 
+But the setup.py in the main scikits.image does not (it uses setuptools)
+this will be changed in the future. 
 
-Until we come to a solution for a setup.py, execute the included shell script build.sh and copy the .so's to wherever you want them
-
-scikit/image/opencv$./build.sh
-scikit/image/opencv$cd tests
-scikit/image/opencv/tests$python test_opencv_cv.py
-
-!* make sure the scikits directory is on the python path *!
 
 
 
