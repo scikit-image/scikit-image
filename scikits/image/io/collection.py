@@ -60,7 +60,7 @@ class MultiImage(object):
 
     The two frames in this image can be shown with matplotlib:
 
-    .. plot:: ../plots/show_collection.py
+    .. plot:: show_collection.py
     """
     def __init__(self, filename, conserve_memory=True, dtype=None):
         """Load a multi-img."""
