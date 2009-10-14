@@ -4,6 +4,7 @@ if ! [[ -d ../.git ]]; then
   exit
 fi
 
+# Get current branch
 ref=$(git symbolic-ref HEAD 2> /dev/null)
 branch=${ref#refs/heads/}
 wd=`pwd`
@@ -16,8 +17,12 @@ cd ..
 git co gh-pages || exit
 rm -rf ./*
 cp -r /tmp/scikits.image.docs/* .
+
+# github doesn't like directories starting with "_"
 sed -i "" 's/_static/static/g' `find . -name "*.html"`
+sed -i "" 's/_images/images/g' `find . -name "*.html"`
 mv _static static
+mv _images images
 for f in `find . | grep "./" | grep -v ".git"`; do
    git add $f
 done
