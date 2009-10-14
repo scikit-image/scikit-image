@@ -342,6 +342,8 @@ def run(arguments, content, options, state_machine, state, lineno):
         f = open(target_name, 'w')
         f.write(unescape_doctest(code))
         f.close()
+    else:
+        shutil.copy(source_file_name, dest_dir)
 
     return []
 
