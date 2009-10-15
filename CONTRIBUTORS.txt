@@ -8,5 +8,11 @@
   Morphological operators
 
 - Mahipal Raythattha
-  Documentation
+  Documentation infrastructure
+
+- Chris Colbert
+  OpenCV wrappers
+
+- Ralf Gommers
+  Image IO and plots in documentation
 
