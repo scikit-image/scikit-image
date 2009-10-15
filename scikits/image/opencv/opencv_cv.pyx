@@ -64,6 +64,11 @@ ctypedef void (*cvFindChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*, in
 cdef cvFindChessboardCornersPtr c_cvFindChessboardCorners
 c_cvFindChessboardCorners = (<cvFindChessboardCornersPtr*><size_t>ctypes.addressof(cv.cvFindChessboardCorners))[0]
 
+# cvDrawChessboardCorners
+ctypedef void (*cvDrawChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*, int, int)
+cdef cvDrawChessboardCornersPtr c_cvDrawChessboardCorners
+c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>ctypes.addressof(cv.cvDrawChessboardCorners))[0]
+
 # cvSmooth
 ctypedef void (*cvSmoothPtr)(IplImage*, IplImage*, int, int, int, double, double)
 cdef cvSmoothPtr c_cvSmooth
@@ -103,7 +108,6 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size, int flags = CV_CALIB_C
     outshape[1] = <int> 2 # pattern_size[0]
 
     points = new_array(2, outshape, FLOAT32)
-    points[:] = 0
     cdef CvPoint2D32f* cvpoints = array_as_cvPoint2D32f_ptr(points)
 
     cdef CvSize cvpattern_size
@@ -117,6 +121,38 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size, int flags = CV_CALIB_C
     c_cvFindChessboardCorners(&srcimg, cvpattern_size, cvpoints, &ncorners_found, flags)
 
     return points[:ncorners_found]
+
+def cvDrawChessboardCorners(np.ndarray out, pattern_size, np.ndarray corners):
+    """
+    Wrapper around the OpenCV cvDrawChessboardCorners function.
+
+    Parameters
+    ----------
+    out : ndarray, dim 3, dtype: uint8
+        Image to draw into
+    pattern_size : array_like, shape (2,)
+        Number of inner corners (w,h)
+    corners : ndarray, shape (n,2), dtype: float32
+        Corners found in the image. See cvFindChessboardCorners and
+        cvFindCornerSubPix
+    """
+    validate_array(out)
+
+    assert_nchannels(out, [3])
+    assert_dtype(out, [UINT8])
+
+    cdef CvSize cvpattern_size
+    cvpattern_size.height = pattern_size[1]
+    cvpattern_size.width = pattern_size[0]
+
+    cdef IplImage img
+    populate_iplimage(out, &img)
+
+    cdef CvPoint2D32f* cvcorners = array_as_cvPoint2D32f_ptr(corners)
+
+    cdef int ncount = pattern_size[0]*pattern_size[1]
+    c_cvDrawChessboardCorners(&img, cvpattern_size, cvcorners,
+        ncount, <int> len(corners) == ncount)
 
 def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
             int aperture_size=3):

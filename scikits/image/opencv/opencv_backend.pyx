@@ -196,10 +196,3 @@ cdef CvTermCriteria get_cvTermCriteria(int iterations, double epsilon):
         crit.max_iter = 0
         crit.epsilon = epsilon
     return crit
-
-
-
-
-
-
-
