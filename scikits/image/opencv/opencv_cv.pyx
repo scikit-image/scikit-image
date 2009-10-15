@@ -11,14 +11,8 @@ from opencv_constants import *
 #one of these should work if the user imported the package properly
 try:
     cv = ctypes.CDLL('libcv.so')
-except:
-    try:
-        cv = ctypes.CDLL('cv.dll')
-    except:
-        raise RuntimeError('The opencv libraries were not found. '
-                           'Please make sure they are installed and '
-                           'available on the system path.')
-
+except OSError:
+    cv = ctypes.CDLL('cv.dll')
 
 ###################################
 # opencv function declarations

@@ -1,22 +1,15 @@
 import ctypes
-
-# try to open the opencv libs
-# raise an exception if the libs are not found
-
-# linux
-try:
-    ctypes.CDLL('libcv.so')    
-except:
-    # windows
-    try:
-        ctypes.CDLL('cv.dll')
-    except:        
-        raise RuntimeError('The opencv libraries were not found. Please make sure they are installed and available on the system path.')
+import warnings
 
 from opencv_constants import *
-from opencv_cv import *
 
-#def test(level=1, verbosity=1):
-#    from numpy.testing import Tester
-#    return Tester().test(level, verbosity)
+libs_found = True
 
+try:
+    from opencv_cv import *
+except:
+    warnings.warn(RuntimeWarning(
+        'The opencv libraries were not found.  Please ensure that they '
+        'are installed and available on the system path. '
+        '*** Skipping import of OpenCV functions.'))
+    libs_found = False
