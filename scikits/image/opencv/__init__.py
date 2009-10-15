@@ -1,17 +1,10 @@
 import ctypes
+import sys
 
 # try to open the opencv libs
 # raise an exception if the libs are not found
 
-# linux
-try:
-    ctypes.CDLL('libcv.so')    
-except:
-    # windows
-    try:
-        ctypes.CDLL('cv.dll')
-    except:        
-        raise RuntimeError('The opencv libraries were not found. Please make sure they are installed and available on the system path.')
+from _libimport import cv
 
 from opencv_constants import *
 from opencv_cv import *

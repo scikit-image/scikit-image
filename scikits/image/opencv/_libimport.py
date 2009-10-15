@@ -10,12 +10,12 @@ This module also removes the code duplication in __init__ and
 opencv_cv
 """
 
-__all__ = [ "import_opencv_lib" ]
+__all__ = [ "cv" ]
 
 import ctypes
 import sys
 
-def import_opencv_lib(which = "cv"):
+def _import_opencv_lib(which = "cv"):
     """
     Try to import a shared library of OpenCV.
 
@@ -32,18 +32,22 @@ def import_opencv_lib(which = "cv"):
         raise RuntimeError('The opencv libraries were not found. Please make ' \
                 'sure they are installed and available on the system path.')
 
+    return shared_lib
+
 def _tryload_macosx(which):
     common_paths = [
         '/lib/',
         '/usr/lib/',
-        '/usr/local/lib',
+        '/usr/local/lib/',
         '/opt/local/lib/', # MacPorts
         '/sw/lib/', # Fink
     ]
     shared_lib = None
     for path in common_paths:
         try:
+            libpath =path + "lib" + which + '.dylib' 
             shared_lib = ctypes.CDLL(path + "lib" + which + '.dylib')
+            break
         except OSError, e:
             if "image not found" in e.args[0]:
                 continue
@@ -51,4 +55,6 @@ def _tryload_macosx(which):
 
     return shared_lib
 
+
+cv = _import_opencv_lib("cv")
 
