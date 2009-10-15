@@ -274,7 +274,7 @@ class ApiDocWriter(object):
             # must NOT exclude from index to keep cross-refs working
             full_f = uri + '.' + f
             ad += f + '\n'
-            ad += self.rst_section_levels[3] * len(f) + '\n'
+            ad += self.rst_section_levels[2] * len(f) + '\n'
             ad += '\n.. autofunction:: ' + full_f + '\n\n'
         return ad
 
