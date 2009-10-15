@@ -64,7 +64,7 @@ def configuration(parent_package='', top_path=None):
             # if the generated .c file differs from the one provided,
             # use that one instead
             if not same_cython(c_file_new, c_file):
-                shutil.cp(c_file_new, c_file)
+                shutil.copy(c_file_new, c_file)
 
     except ImportError:
         # if cython is not found, we just build from the included .c files
