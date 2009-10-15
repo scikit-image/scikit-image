@@ -13,7 +13,7 @@ mailing list (address provided below).
 
 Source, bugs and patches
 ------------------------
-http://github.com/stefanv/scikits.gpu
+http://github.com/stefanv/scikits.image
 
 Mailing List
 ------------

@@ -3,7 +3,7 @@ Image Processing SciKit
 
 Source
 ------
-http://github.com/stefanv/scikits.gpu
+http://github.com/stefanv/scikits.image
 
 Mailing List
 ------------

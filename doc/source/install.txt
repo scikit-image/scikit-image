@@ -2,8 +2,8 @@ Installation from source
 ------------------------
 
 Obtain the source from the git-repository at
-`http://github.com/stefanv/scikits.gpu
-<http://github.com/stefanv/scikits.gpu>`_.
+`http://github.com/stefanv/scikits.image
+<http://github.com/stefanv/scikits.image>`_.
 
 The SciKit can be installed globally using
 
