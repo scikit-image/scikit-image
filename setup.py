@@ -39,6 +39,8 @@ def configuration(parent_package='', top_path=None, package_name=DISTNAME):
                            download_url = DOWNLOAD_URL,
                            long_description = LONG_DESCRIPTION)
 
+    config.add_subpackage('scikits.image.opencv')
+
     return config
 
 if __name__ == "__main__":
