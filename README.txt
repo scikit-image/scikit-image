@@ -21,7 +21,9 @@ or locally using
 python setup.py install --prefix=${HOME}
 
 If you prefer, you can use it without installing, by simply adding
-this path to your PYTHONPATH variable.
+this path to your PYTHONPATH variable and compiling the extensions::
+
+  python setup.py build_ext -i
 
 License
 -------
@@ -30,3 +32,4 @@ Please read LICENSE.txt in this directory.
 Contact
 -------
 Stefan van der Walt <stefan at sun.ac.za>
+
