@@ -45,12 +45,11 @@ def configuration(parent_package='', top_path=None, package_name=DISTNAME):
 
 if __name__ == "__main__":
     setup(configuration = configuration,
-        install_requires = 'numpy',
+        install_requires = [],
         namespace_packages = ['scikits'],
         packages = setuptools.find_packages(),
         include_package_data = True,
-        #test_suite="tester", # for python setup.py test
-        zip_safe = True, # the package can run out of an .egg file
+        zip_safe = False, # the package can run out of an .egg file
         classifiers =
             [ 'Development Status :: 1 - Planning',
               'Environment :: Console',
