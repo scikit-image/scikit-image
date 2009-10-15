@@ -9,9 +9,9 @@ from scikits.image import data_dir
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    from scikits.image import opencv
+    from scikits.image.opencv import *
 
-opencv_skip = dec.skipif(not opencv.libs_found,
+opencv_skip = dec.skipif(cv is None,
                          'OpenCV libraries not found')
 
 class OpenCVTest:
