@@ -27,7 +27,6 @@ or tests.
    * `Shortest paths <http://mentat.za.net>`_
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
    * Marching squares (investigate patent issues)
-   * Cached ImageCollection from `supreme <http://mentat.za.net/supreme>`_
    * Nadav's bilateral filtering (first compare against CellProfile's code)
    * 2D iso-contour finding (sub-pixel precision) [ask Zach Pincus]
    * 2D image warping via thin-plate splines [ask Zach Pincus]
@@ -99,7 +98,6 @@ etc.
 Write new functionality
 ```````````````````````
 * Plugin structure for image IO
-* Handle multi-page images (possibly as ImageCollection?)
 
 Complete the build process
 ``````````````````````````
@@ -128,7 +126,9 @@ b.txt``) as well.
 Guidelines:
 ```````````
  * All code should have tests.
- * All code should be documented.
+ * All code should be documented, to the same
+   `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
+   as NumPy and SciPy. 
  * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
    where possible.
  * All major changes should be `posted for review
