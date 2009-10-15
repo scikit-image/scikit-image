@@ -436,7 +436,7 @@ class ApiDocWriter(object):
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        title = self.package_name + " API Reference"
+        title = "API Reference"
         w(title + "\n")
         w("=" * len(title) + "\n\n")
         w('.. toctree::\n\n')
