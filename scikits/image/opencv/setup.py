@@ -2,8 +2,34 @@
 
 import os
 import shutil
+import hashlib
 
 base_path = os.path.dirname(__file__)
+
+def same_cython(f0, f1):
+    '''Compare two Cython generated C-files, based on their md5-sum.
+
+    Returns True if the files are identical, False if not.  The first
+    lines are skipped, due to the timestamp printed there.
+
+    '''
+    def md5sum(f):
+        m = hashlib.new('md5')
+        while True:
+            d = f.read(8096)
+            if not d:
+                break
+            m.update(d)
+        return m.hexdigest()
+
+    f0 = file(f0)
+    f0.readline()
+
+    f1 = file(f1)
+    f1.readline()
+
+    return md5sum(f0) == md5sum(f1)
+
 
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
@@ -23,22 +49,25 @@ def configuration(parent_package='', top_path=None):
         for pyxfile in [os.path.join(base_path, f) for f in cython_files]:
             # make a backup of the good c files
             c_file = pyxfile.rstrip('pyx') + 'c'
-            src = c_file
-            dst = c_file + '.bak'
-            shutil.copy(src, dst)
+            c_file_new = c_file + '.new'
 
             # run cython compiler
-            os.system('cython ' + pyxfile)
+            os.system('cython -o %s %s' % (c_file_new, pyxfile))
 
-            # if the file is small, cython compilation failed
-            size = os.path.getsize(c_file)
+            # if the resulting file is small, cython compilation failed
+            size = os.path.getsize(c_file_new)
             if size < 100:
-                print 'Cython compilation failed. Restoring from backup.'
-                # restore from backup
-                shutil.copy(dst, src)
+                print "Cython compilation of %s failed. Using " \
+                      "pre-generated file." % os.path.basename(pyxfile)
+                continue
+
+            # if the generated .c file differs from the one provided,
+            # use that one instead
+            if not same_cython(c_file_new, c_file):
+                shutil.cp(c_file_new, c_file)
 
     except ImportError:
-        # if cython is not found, we just build from the include .c files
+        # if cython is not found, we just build from the included .c files
         pass
 
     for pyxfile in cython_files:
