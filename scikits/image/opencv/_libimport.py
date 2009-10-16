@@ -10,7 +10,7 @@ This module also removes the code duplication in __init__ and
 opencv_cv
 """
 
-__all__ = [ "cv" ]
+__all__ = ["cv", "cxcore"]
 
 import ctypes
 import sys
