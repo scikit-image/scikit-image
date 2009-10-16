@@ -33,6 +33,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('scikits')
     config.add_subpackage(DISTNAME)
     config.add_data_files('scikits/__init__.py')
+    config.add_data_dir('scikits/image/data')
 
     return config
 

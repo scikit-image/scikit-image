@@ -1,6 +1,6 @@
 
 #############################################
-# Constants (need a better place for these)
+# Image Processing Constants 
 ############################################
 
 

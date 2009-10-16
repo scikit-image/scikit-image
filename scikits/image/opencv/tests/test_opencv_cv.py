@@ -17,6 +17,7 @@ opencv_skip = dec.skipif(cv is None,
 class OpenCVTest:
     lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npy'))
     lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
+    
 
 class TestSobel(OpenCVTest):
     @opencv_skip
@@ -66,6 +67,7 @@ class TestSmooth(OpenCVTest):
         for st in (CV_BLUR_NO_SCALE, CV_BLUR, CV_GAUSSIAN, CV_MEDIAN,
                    CV_BILATERAL):
             cvSmooth(self.lena_GRAY_U8, None, st, 3, 0, 0, 0, False)
+            
 
 class TestFindCornerSubPix:
     @opencv_skip
@@ -79,12 +81,10 @@ class TestFindCornerSubPix:
                         [1, 1, 1, 0, 0, 0, 1, 1, 1],
                         [1, 1, 1, 0, 0, 0, 1, 1, 1],
                         [1, 1, 1, 0, 0, 0, 1, 1, 1]], dtype='uint8')
-
         corners = np.array([[2, 2],
                             [2, 5],
                             [5, 2],
                             [5, 5]], dtype='float32')
-
         cvFindCornerSubPix(img, corners, 4, (2, 2))
 
 
@@ -92,14 +92,34 @@ class TestGoodFeaturesToTrack(OpenCVTest):
     @opencv_skip
     def test_cvGoodFeaturesToTrack(self):
         cvGoodFeaturesToTrack(self.lena_GRAY_U8, 100, 0.1, 3)
-
+        
 
 class TestResize(OpenCVTest):
     @opencv_skip
     def test_cvResize(self):
         cvResize(self.lena_RGB_U8, height=50, width=50, method=CV_INTER_LINEAR)
         cvResize(self.lena_RGB_U8, height=200, width=200, method=CV_INTER_CUBIC)
+        
 
-
+class TestFindChessboardCorners:
+    @opencv_skip
+    def test_cvFindChessboardCorners(self):
+        chessboard_GRAY_U8 = np.load(os.path.join(data_dir, 
+                                                  'chessboard_GRAY_U8.npy'))        
+        pts = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))      
+        
+    
+class TestDrawChessboardCorners:
+    @opencv_skip
+    def test_cvDrawChessboardCorners(self):
+        chessboard_GRAY_U8 = np.load(os.path.join(data_dir, 
+                                                  'chessboard_GRAY_U8.npy'))        
+        chessboard_RGB_U8 = np.load(os.path.join(data_dir, 
+                                                  'chessboard_RGB_U8.npy'))                        
+        corners = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))        
+        cvDrawChessboardCorners(chessboard_RGB_U8, (7, 7), corners)
+        
+        
+        
 if __name__ == '__main__':
     run_module_suite()

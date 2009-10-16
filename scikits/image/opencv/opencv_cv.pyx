@@ -56,23 +56,12 @@ cdef cvCornerHarrisPtr c_cvCornerHarris
 c_cvCornerHarris = (<cvCornerHarrisPtr*><size_t>
                     ctypes.addressof(cv.cvCornerHarris))[0]
 
-
 # cvFindCornerSubPix
 ctypedef void (*cvFindCornerSubPixPtr)(IplImage*, CvPoint2D32f*, int,
                                        CvSize, CvSize, CvTermCriteria)
 cdef cvFindCornerSubPixPtr c_cvFindCornerSubPix
 c_cvFindCornerSubPix = (<cvFindCornerSubPixPtr*>
                         <size_t>ctypes.addressof(cv.cvFindCornerSubPix))[0]
-
-# cvFindChessboardCorners
-ctypedef void (*cvFindChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*, int*, int)
-cdef cvFindChessboardCornersPtr c_cvFindChessboardCorners
-c_cvFindChessboardCorners = (<cvFindChessboardCornersPtr*><size_t>ctypes.addressof(cv.cvFindChessboardCorners))[0]
-
-# cvDrawChessboardCorners
-ctypedef void (*cvDrawChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*, int, int)
-cdef cvDrawChessboardCornersPtr c_cvDrawChessboardCorners
-c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>ctypes.addressof(cv.cvDrawChessboardCorners))[0]
 
 # cvSmooth
 ctypedef void (*cvSmoothPtr)(IplImage*, IplImage*, int, int,
@@ -87,79 +76,30 @@ ctypedef void (*cvGoodFeaturesToTrackPtr)(IplImage*, IplImage*, IplImage*,
 cdef cvGoodFeaturesToTrackPtr c_cvGoodFeaturesToTrack
 c_cvGoodFeaturesToTrack = (<cvGoodFeaturesToTrackPtr*><size_t>
                            ctypes.addressof(cv.cvGoodFeaturesToTrack))[0]
-
 # cvResize
 ctypedef void (*cvResizePtr)(IplImage*, IplImage*, int)
 cdef cvResizePtr c_cvResize
 c_cvResize = (<cvResizePtr*><size_t>ctypes.addressof(cv.cvResize))[0]
 
+# cvFindChessboardCorners
+ctypedef void (*cvFindChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*, 
+                                            int*, int)
+cdef cvFindChessboardCornersPtr c_cvFindChessboardCorners
+c_cvFindChessboardCorners = (<cvFindChessboardCornersPtr*><size_t>
+                             ctypes.addressof(cv.cvFindChessboardCorners))[0]
+
+# cvDrawChessboardCorners
+ctypedef void (*cvDrawChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*, 
+                                            int, int)
+cdef cvDrawChessboardCornersPtr c_cvDrawChessboardCorners
+c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
+                             ctypes.addressof(cv.cvDrawChessboardCorners))[0]
+
 
 ####################################
 # Function Implementations
 ####################################
-def cvFindChessboardCorners(np.ndarray src, pattern_size, int flags = CV_CALIB_CB_ADAPTIVE_THRESH):
-    """
-    Wrapper around the OpenCV cvFindChessboardCorners function.
 
-    src - Image to search for chessboard corners
-    pattern_size - Tuple of inner corners (w,h)
-    flags - directly passed through to OpenCV
-    """
-    validate_array(src)
-
-    assert_nchannels(src, [1, 3])
-    assert_dtype(src, [UINT8])
-
-    cdef np.npy_intp outshape[2]
-    outshape[0] = <int> pattern_size[1]*pattern_size[0]
-    outshape[1] = <int> 2 # pattern_size[0]
-
-    points = new_array(2, outshape, FLOAT32)
-    cdef CvPoint2D32f* cvpoints = array_as_cvPoint2D32f_ptr(points)
-
-    cdef CvSize cvpattern_size
-    cvpattern_size.height = pattern_size[1]
-    cvpattern_size.width = pattern_size[0]
-
-    cdef IplImage srcimg
-    populate_iplimage(src, &srcimg)
-
-    cdef int ncorners_found
-    c_cvFindChessboardCorners(&srcimg, cvpattern_size, cvpoints, &ncorners_found, flags)
-
-    return points[:ncorners_found]
-
-def cvDrawChessboardCorners(np.ndarray out, pattern_size, np.ndarray corners):
-    """
-    Wrapper around the OpenCV cvDrawChessboardCorners function.
-
-    Parameters
-    ----------
-    out : ndarray, dim 3, dtype: uint8
-        Image to draw into
-    pattern_size : array_like, shape (2,)
-        Number of inner corners (w,h)
-    corners : ndarray, shape (n,2), dtype: float32
-        Corners found in the image. See cvFindChessboardCorners and
-        cvFindCornerSubPix
-    """
-    validate_array(out)
-
-    assert_nchannels(out, [3])
-    assert_dtype(out, [UINT8])
-
-    cdef CvSize cvpattern_size
-    cvpattern_size.height = pattern_size[1]
-    cvpattern_size.width = pattern_size[0]
-
-    cdef IplImage img
-    populate_iplimage(out, &img)
-
-    cdef CvPoint2D32f* cvcorners = array_as_cvPoint2D32f_ptr(corners)
-
-    cdef int ncount = pattern_size[0]*pattern_size[1]
-    c_cvDrawChessboardCorners(&img, cvpattern_size, cvcorners,
-        ncount, <int> len(corners) == ncount)
 
 def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
             int aperture_size=3):
@@ -542,11 +482,15 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
     cdef np.ndarray eig = new_array_like_diff_dtype(src, FLOAT32)
     cdef np.ndarray temp = new_array_like(eig)
 
-    cdef CvPoint2D32f* corners = (
-            <CvPoint2D32f*>PyMem_Malloc(corner_count * sizeof(CvPoint2D32f)))
-
-    cdef int out_corner_count
-    out_corner_count = corner_count
+    cdef np.npy_intp cornershape[2]
+    cornershape[0] = <np.npy_intp>corner_count
+    cornershape[1] = 2
+    
+    cdef np.ndarray out = new_array(2, cornershape, FLOAT32)
+    cdef CvPoint2D32f* cvcorners = array_as_cvPoint2D32f_ptr(out)
+    
+    cdef int ncorners_found
+    ncorners_found = corner_count
 
     cdef IplImage srcimg
     cdef IplImage eigimg
@@ -563,32 +507,12 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
         assert_nchannels(mask, [1])
         populate_iplimage(mask, maskimg)
 
-    c_cvGoodFeaturesToTrack(&srcimg, &eigimg, &tempimg, corners,
-                            &out_corner_count, quality_level, min_distance,
+    c_cvGoodFeaturesToTrack(&srcimg, &eigimg, &tempimg, cvcorners,
+                            &ncorners_found, quality_level, min_distance,
                             maskimg, block_size,
                             use_harris, k)
-
-    # since the maximum allowed corners may not have been found
-    # the array might be too long, we create a new array and copy
-    # the the data into it
-    #
-    # It would be nice to use the numpy C-Api for this, but I couldn't quite
-    # get it to work
-
-    cdef np.npy_intp cornershape[2]
-    cornershape[0] = <np.npy_intp>out_corner_count
-    cornershape[1] = 2
-
-    cdef np.ndarray cornersarr = new_array(2, cornershape, FLOAT32)
-    cdef int i
-    for i in range(out_corner_count):
-        cornersarr[i,0] = corners[i].x
-        cornersarr[i,1] = corners[i].y
-
-    PyMem_Free(corners)
-
-    return cornersarr
-
+    
+    return out[:ncorners_found] 
 
 def cvResize(np.ndarray src, height=None, width=None,
              int method=CV_INTER_LINEAR):
@@ -619,5 +543,100 @@ def cvResize(np.ndarray src, height=None, width=None,
 
     c_cvResize(&srcimg, &outimg, method)
 
-    return out
+    return out    
+    
+def cvFindChessboardCorners(np.ndarray src, pattern_size, 
+                            int flags = CV_CALIB_CB_ADAPTIVE_THRESH):
+    """
+    Wrapper around the OpenCV cvFindChessboardCorners function.
 
+    src - Image to search for chessboard corners
+    pattern_size - Tuple of inner corners (h,w)
+    flags - see appropriate flags in opencv docs
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    
+    returns - an nx2 array of the corners found.
+    
+    """
+    
+    validate_array(src)
+
+    assert_nchannels(src, [1, 3])
+    assert_dtype(src, [UINT8])
+
+    cdef np.npy_intp outshape[2]
+    outshape[0] = <np.npy_intp> pattern_size[0] * pattern_size[1]
+    outshape[1] = <np.npy_intp> 2 
+
+    out = new_array(2, outshape, FLOAT32)
+    cdef CvPoint2D32f* cvpoints = array_as_cvPoint2D32f_ptr(out)
+
+    cdef CvSize cvpattern_size
+    cvpattern_size.height = pattern_size[0]
+    cvpattern_size.width = pattern_size[1]
+
+    cdef IplImage srcimg
+    populate_iplimage(src, &srcimg)
+
+    cdef int ncorners_found
+    c_cvFindChessboardCorners(&srcimg, cvpattern_size, cvpoints, 
+                              &ncorners_found, flags)
+    
+    return out[:ncorners_found]
+    
+def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
+                            in_place=True):
+    """
+    Wrapper around the OpenCV cvDrawChessboardCorners function.
+
+    Parameters
+    ----------
+    src : ndarray, dim 3, dtype: uint8
+        Image to draw into.
+    pattern_size : array_like, shape (2,)
+        Number of inner corners (w,h)
+    corners : ndarray, shape (n,2), dtype: float32
+        Corners found in the image. See cvFindChessboardCorners and
+        cvFindCornerSubPix
+    in_place: True/False (default=True) perform the drawing on the submitted
+              image. If false, a copy of the image will be made and drawn to. 
+    """
+    validate_array(src)
+
+    assert_nchannels(src, [3])
+    assert_dtype(src, [UINT8])
+    
+    assert_ndims(corners, [2])
+    assert_dtype(corners, [FLOAT32])
+    
+    cdef np.ndarray out
+    
+    if not in_place:
+        out = src.copy()
+    else:
+        out = src
+        
+    cdef CvSize cvpattern_size
+    cvpattern_size.height = pattern_size[0]
+    cvpattern_size.width = pattern_size[1]
+
+    cdef IplImage outimg
+    populate_iplimage(out, &outimg)
+
+    cdef CvPoint2D32f* cvcorners = array_as_cvPoint2D32f_ptr(corners)
+
+    cdef int ncount = pattern_size[0] * pattern_size[1]
+    
+    cdef int pattern_was_found
+    
+    if corners.shape[0] == ncount:
+        pattern_was_found = 1
+    else:
+        pattern_was_found = 0
+    
+    c_cvDrawChessboardCorners(&outimg, cvpattern_size, cvcorners,
+        ncount, pattern_was_found)
+        
+    return out
+        
+        
