@@ -19,6 +19,9 @@ CV_INTER_LINEAR = 1
 CV_INTER_CUBIC = 2
 CV_INTER_AREA = 3
 
+CV_WARP_FILL_OUTLIERS = 8
+CV_WARP_INVERSE_MAP = 16
+
 #########################
 # Calibration Constants #
 #########################

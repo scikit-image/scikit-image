@@ -94,13 +94,44 @@ class TestGoodFeaturesToTrack(OpenCVTest):
         cvGoodFeaturesToTrack(self.lena_GRAY_U8, 100, 0.1, 3)
         
 
+class TestGetRectSubPix(OpenCVTest):
+    @opencv_skip
+    def test_cvGetRectSubPix(self):
+        cvGetRectSubPix(self.lena_RGB_U8, (20, 20), (48.6, 48.6))
+        
+        
+class TestGetQuadrangleSubPix(OpenCVTest):
+    @opencv_skip
+    def test_cvGetQuadrangleSubPix(self):
+        warpmat = np.array([[0.5, 0.3, 0.4],
+                            [-.4, .23, 0.4]], dtype='float32')
+        cvGetQuadrangleSubPix(self.lena_RGB_U8, warpmat)
+
+        
 class TestResize(OpenCVTest):
     @opencv_skip
     def test_cvResize(self):
         cvResize(self.lena_RGB_U8, height=50, width=50, method=CV_INTER_LINEAR)
         cvResize(self.lena_RGB_U8, height=200, width=200, method=CV_INTER_CUBIC)
         
-
+        
+class TestWarpAffine(OpenCVTest):
+    @opencv_skip
+    def test_cvWarpAffine(self):
+        warpmat = np.array([[0.5, 0.3, 0.4],
+                            [-.4, .23, 0.4]], dtype='float32')
+        cvWarpAffine(self.lena_RGB_U8, warpmat)
+        
+        
+class TestWarpPerspective(OpenCVTest):
+    @opencv_skip
+    def test_cvWarpPerspective(self):
+        warpmat = np.array([[0.5, 0.3, 0.4],
+                            [-.4, .23, 0.4],
+                            [0.0, 1.0, 1.0]], dtype='float32')
+        cvWarpPerspective(self.lena_RGB_U8, warpmat)
+        
+        
 class TestFindChessboardCorners:
     @opencv_skip
     def test_cvFindChessboardCorners(self):

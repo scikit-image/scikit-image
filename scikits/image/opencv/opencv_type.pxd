@@ -35,6 +35,23 @@ cdef struct _IplImage:
 
 ctypedef _IplImage IplImage
 
+
+# you will never directly populate a CvMat.
+cdef union CvMat_uProxy:
+    unsigned char* ptr
+    short* s
+    int* i
+    float* fl
+    double* db
+    
+cdef struct CvMat:
+    int type
+    int step    
+    int* refcount
+    CvMat_uProxy data
+    int rows
+    int cols    
+
 cdef struct CvPoint2D32f:
     float x
     float y
@@ -47,4 +64,7 @@ cdef struct CvTermCriteria:
     int type
     int max_iter
     double epsilon
+    
+cdef struct CvScalar:
+    double val[4]
 

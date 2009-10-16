@@ -76,11 +76,37 @@ ctypedef void (*cvGoodFeaturesToTrackPtr)(IplImage*, IplImage*, IplImage*,
 cdef cvGoodFeaturesToTrackPtr c_cvGoodFeaturesToTrack
 c_cvGoodFeaturesToTrack = (<cvGoodFeaturesToTrackPtr*><size_t>
                            ctypes.addressof(cv.cvGoodFeaturesToTrack))[0]
+
+# cvGetRectSubPix
+ctypedef void (*cvGetRectSubPixPtr)(IplImage*, IplImage*, CvPoint2D32f)
+cdef cvGetRectSubPixPtr c_cvGetRectSubPix
+c_cvGetRectSubPix = (<cvGetRectSubPixPtr*><size_t>
+                     ctypes.addressof(cv.cvGetRectSubPix))[0]
+
+# cvGetQuadrangleSubPix
+ctypedef void (*cvGetQuadrangleSubPixPtr)(IplImage*, IplImage*, CvMat*)
+cdef cvGetQuadrangleSubPixPtr c_cvGetQuadrangleSubPix
+c_cvGetQuadrangleSubPix = (<cvGetQuadrangleSubPixPtr*><size_t>
+                           ctypes.addressof(cv.cvGetQuadrangleSubPix))[0]
+                           
 # cvResize
 ctypedef void (*cvResizePtr)(IplImage*, IplImage*, int)
 cdef cvResizePtr c_cvResize
 c_cvResize = (<cvResizePtr*><size_t>ctypes.addressof(cv.cvResize))[0]
 
+# cvWarpAffine
+ctypedef void (*cvWarpAffinePtr)(IplImage*, IplImage*, CvMat*, int, CvScalar)
+cdef cvWarpAffinePtr c_cvWarpAffine
+c_cvWarpAffine = (<cvWarpAffinePtr*><size_t>
+                  ctypes.addressof(cv.cvWarpAffine))[0]
+
+# cvWarpPerspective
+ctypedef void (*cvWarpPerspectivePtr)(IplImage*, IplImage*, CvMat*, int,
+                                      CvScalar)
+cdef cvWarpPerspectivePtr c_cvWarpPerspective
+c_cvWarpPerspective = (<cvWarpPerspectivePtr*><size_t>
+                       ctypes.addressof(cv.cvWarpPerspective))[0]
+                       
 # cvFindChessboardCorners
 ctypedef void (*cvFindChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*, 
                                             int*, int)
@@ -514,6 +540,94 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
     
     return out[:ncorners_found] 
 
+def cvGetRectSubPix(np.ndarray src, size, center):
+    ''' Retrieves the pixel rectangle from an image with 
+    sub-pixel accuracy.
+        
+    Paramters:
+        src - source image. 
+        size - two tuple (height, width) of rectangle (ints)
+        center - two tuple (x, y) of rectangle center (floats)
+        
+        the center must lie within the image, but the rectangle
+        may extend beyond the bounds of the image, at which point
+        the border is replicated.
+        
+    Returns:
+        A new image of the extracted rectangle. The same dtype as the src image.
+    '''
+    
+    validate_array(src)
+    
+    cdef np.npy_intp* shape = clone_array_shape(src)
+    shape[0] = <np.npy_intp>size[0]
+    shape[1] = <np.npy_intp>size[1]
+    
+    cdef CvPoint2D32f cvcenter
+    cvcenter.x = <float>center[0]
+    cvcenter.y = <float>center[1]
+    
+    cdef np.ndarray out = new_array(src.ndim, shape, src.dtype)
+    
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    
+    c_cvGetRectSubPix(&srcimg, &outimg, cvcenter)
+    
+    PyMem_Free(shape)
+    
+    return out
+
+def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
+    ''' Retrieves the pixel quandrangle from an image with 
+    sub-pixel accuracy. In english: apply and affine transform to an image. 
+    
+    Parameters:
+                src - input image
+                warpmat - a 2x3 array which is an affine transform
+                float_out - return a float32 array. If true, input must be 
+                            uint8. If false, output is same type as input.
+                            
+    Return:
+                warped image of same size and dtype as src. Except when 
+                float_out == True (see above)
+    '''
+    validate_array(src)
+    validate_array(warpmat)
+    
+    assert_nchannels(src, [1, 3])
+    
+    assert_nchannels(warpmat, [1])
+    
+    assert warpmat.shape[0] == 2, 'warpmat must be 2x3'
+    assert warpmat.shape[1] == 3, 'warpmat must be 2x3'
+    
+    cdef np.ndarray out
+    
+    if float_out:
+        assert_dtype(src, [UINT8])
+        out = new_array_like_diff_dtype(src, FLOAT32)
+    else:
+        out = new_array_like(src)
+        
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    cdef IplImage cvmat
+    cdef CvMat* cvmatptr
+    
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    populate_iplimage(warpmat, &cvmat)
+    cvmatptr = cvmat_ptr_from_iplimage(&cvmat)
+    
+    c_cvGetQuadrangleSubPix(&srcimg, &outimg, cvmatptr)
+    
+    PyMem_Free(cvmatptr)
+    
+    return out
+    
 def cvResize(np.ndarray src, height=None, width=None,
              int method=CV_INTER_LINEAR):
     """
@@ -543,7 +657,105 @@ def cvResize(np.ndarray src, height=None, width=None,
 
     c_cvResize(&srcimg, &outimg, method)
 
-    return out    
+    return out   
+    
+def cvWarpAffine(np.ndarray src, np.ndarray warpmat, 
+                 int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                 fillval=(0., 0., 0., 0.)):
+    
+    ''' Applies an affine transformation to an image.
+    
+    Parameters:
+                src - source image
+                warpmat - 2x3 affine transformation
+                flags - a combination of interpolation and method flags.
+                        see opencv documentation for more details
+                fillval - a 4 tuple of a color to fill the background
+                          defaults to black. 
+                          
+    Returns:
+                a warped image the same size and dtype as src
+    '''
+    validate_array(src)
+    validate_array(warpmat)    
+    assert len(fillval) == 4, 'fillval must be a 4-tuple'    
+    assert_nchannels(src, [1, 3])    
+    assert_nchannels(warpmat, [1])    
+    assert warpmat.shape[0] == 2, 'warpmat must be 2x3'
+    assert warpmat.shape[1] == 3, 'warpmat must be 2x3'
+    
+    cdef np.ndarray out
+    out = new_array_like(src)
+    
+    cdef CvScalar cvfill
+    cdef int i
+    for i in range(4):
+        cvfill.val[i] = <double>fillval[i]
+        
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    cdef IplImage cvmat
+    cdef CvMat* cvmatptr
+    
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    populate_iplimage(warpmat, &cvmat)
+    cvmatptr = cvmat_ptr_from_iplimage(&cvmat)
+    
+    c_cvWarpAffine(&srcimg, &outimg, cvmatptr, flags, cvfill)
+    
+    PyMem_Free(cvmatptr)
+    
+    return out
+    
+def cvWarpPerspective(np.ndarray src, np.ndarray warpmat, 
+                      int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                      fillval=(0., 0., 0., 0.)):
+    
+    ''' Applies a perspective transformation to an image.
+    
+    Parameters:
+                src - source image
+                warpmat - 3x3 perspective transformation
+                flags - a combination of interpolation and method flags.
+                        see opencv documentation for more details
+                fillval - a 4 tuple of a color to fill the background
+                          defaults to black. 
+                          
+    Returns:
+                a warped image the same size and dtype as src
+    '''
+    validate_array(src)
+    validate_array(warpmat)    
+    assert len(fillval) == 4, 'fillval must be a 4-tuple'    
+    assert_nchannels(src, [1, 3])    
+    assert_nchannels(warpmat, [1])    
+    assert warpmat.shape[0] == 3, 'warpmat must be 3x3'
+    assert warpmat.shape[1] == 3, 'warpmat must be 3x3'
+    
+    cdef np.ndarray out
+    out = new_array_like(src)
+    
+    cdef CvScalar cvfill
+    cdef int i
+    for i in range(4):
+        cvfill.val[i] = <double>fillval[i]
+        
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    cdef IplImage cvmat
+    cdef CvMat* cvmatptr
+    
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    populate_iplimage(warpmat, &cvmat)
+    cvmatptr = cvmat_ptr_from_iplimage(&cvmat)
+    
+    c_cvWarpPerspective(&srcimg, &outimg, cvmatptr, flags, cvfill)
+    
+    PyMem_Free(cvmatptr)
+    
+    return out                 
     
 def cvFindChessboardCorners(np.ndarray src, pattern_size, 
                             int flags = CV_CALIB_CB_ADAPTIVE_THRESH):

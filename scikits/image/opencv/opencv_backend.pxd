@@ -19,6 +19,7 @@ ctypedef np.float64_t FLOAT64_t
 # Utility functions for IplImage creation, array validation, etc...
 #-------------------------------------------------------------------------------
 cdef void populate_iplimage(np.ndarray arr, IplImage* img)
+cdef CvMat* cvmat_ptr_from_iplimage(IplImage* arr)
 cdef int validate_array(np.ndarray arr) except -1    
 cdef int assert_dtype(np.ndarray arr, dtypes) except -1
 cdef int assert_ndims(np.ndarray arr, dims) except -1

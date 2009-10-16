@@ -59,4 +59,4 @@ def _tryload_macosx(which):
 
 
 cv = _import_opencv_lib("cv")
-
+cxcore = _import_opencv_lib("cxcore")

@@ -1,8 +1,10 @@
+import ctypes
 import numpy as np
 cimport numpy as np
 from python cimport *
 from opencv_constants import *
 from opencv_type cimport *
+from _libimport import cxcore
 
 
 np.import_array()
@@ -42,6 +44,13 @@ _ipltypes = {UINT8: IPL_DEPTH_8U, INT8: IPL_DEPTH_8S, INT16: IPL_DEPTH_16S,
 
 
 cdef int IPLIMAGE_SIZE = sizeof(IplImage)
+
+# a function to convert from IplImage to cvMat 
+# this eliminates the need for a second populate function 
+# for CvMat
+ctypedef CvMat* (*cvGetMatPtr)(IplImage*, CvMat*, int*, int)
+cdef cvGetMatPtr c_cvGetMat
+c_cvGetMat = (<cvGetMatPtr*><size_t>ctypes.addressof(cxcore.cvGetMat))[0]
 
 cdef void populate_iplimage(np.ndarray arr, IplImage* img):
     # The numpy array should be validated with the validate_array
@@ -83,6 +92,17 @@ cdef void populate_iplimage(np.ndarray arr, IplImage* img):
     # create ourselves.
     img.imageDataOrigin = <char*>NULL
 
+cdef CvMat* cvmat_ptr_from_iplimage(IplImage* arr):
+    # this functions takes an IplImage* and returns a CvMat*
+    # it is designed so that we dont need a separate populate_cvmat
+    # function, or deal with OpenCV magic values. However, it needs to create a 
+    # CvMat header to pass to the opencv conversion routine.
+    # This means that you have to call PyMem_Free on the CvMat* when you're
+    # done with it.
+    cdef CvMat* mat_hdr = <CvMat*>PyMem_Malloc(sizeof(CvMat))
+    mat_hdr = c_cvGetMat(arr, mat_hdr, NULL, 0)
+    return mat_hdr
+    
 cdef int validate_array(np.ndarray arr) except -1:
     if arr.ndim != 2 and arr.ndim != 3:
         raise ValueError('Arrays must have either 2 or 3 dimensions')
