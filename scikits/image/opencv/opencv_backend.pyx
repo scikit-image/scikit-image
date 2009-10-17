@@ -4,7 +4,17 @@ cimport numpy as np
 from python cimport *
 from opencv_constants import *
 from opencv_type cimport *
+
+# Without the opencv libraries, this extension module cannot function,
+# so we raise an exception if loading fails.
+#
+# Note, however, that users should be able to import scikits.image.opencv
+# itself without having any of the libraries installed
+# (the opencv functionality is then simply not available)
+#
 from _libimport import cxcore
+if cxcore is None:
+    raise RuntimeError('Could not load OpenCV libraries.')
 
 
 np.import_array()

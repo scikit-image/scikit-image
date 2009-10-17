@@ -1,9 +1,24 @@
 import ctypes
 import sys
 
-# try to open the opencv libs
-# prints a warning if the libs are not found
-from _libimport import cv, cxcore
-
 from opencv_constants import *
-from opencv_cv import *
+
+# Note: users should be able to import this module even if
+# the extensions are uncompiled or the opencv libraries unavailable.
+# In that case, the opencv functionality is simply unavailable.
+
+cv = None
+cxcore = None
+try:
+    from opencv_cv import *
+except ImportError:
+    print """*** The opencv extension was not compiled.  Run
+
+python setup.py build_ext -i
+
+in the source directory to build in-place.  Please refer to INSTALL.txt
+for further detail."""
+
+except RuntimeError:
+    # Libraries could not be loaded
+    print "*** Skipping import of OpenCV functions."

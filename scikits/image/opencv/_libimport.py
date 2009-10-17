@@ -16,7 +16,7 @@ import ctypes
 import sys
 import warnings
 
-def _import_opencv_lib(which = "cv"):
+def _import_opencv_lib(which="cv"):
     """
     Try to import a shared library of OpenCV.
 
@@ -32,8 +32,7 @@ def _import_opencv_lib(which = "cv"):
     if shared_lib is None:
         warnings.warn(RuntimeWarning(
             'The opencv libraries were not found.  Please ensure that they '
-            'are installed and available on the system path. '
-            '*** Skipping import of OpenCV functions.'))
+            'are installed and available on the system path. '))
     return shared_lib
 
 def _tryload_macosx(which):

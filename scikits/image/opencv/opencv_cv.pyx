@@ -11,7 +11,16 @@ from opencv_constants import *
 from opencv_constants import *
 from opencv_cv import *
 
+# Without the opencv libraries, this extension module cannot function,
+# so we raise an exception if loading fails.
+#
+# Note, however, that users should be able to import scikits.image.opencv
+# itself without having any of the libraries installed
+# (the opencv functionality is then simply not available)
+#
 from _libimport import cv
+if cv is None:
+    raise RuntimeError('Could not load OpenCV libraries.')
 
 ###################################
 # opencv function declarations
