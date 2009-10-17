@@ -1,28 +1,31 @@
 """
 Attempt to generate templates for module reference with Sphinx
 
-XXX - we exclude extension modules
-
 To include extension modules, first identify them as valid in the
-``_uri2path`` method, then handle them in the ``_parse_module`` script.
+``_uri2path`` method, then handle them in the ``_parse_module_with_import``
+script.
 
-We get functions and classes by parsing the text of .py files.
-Alternatively we could import the modules for discovery, and we'd have
-to do that for extension modules.  This would involve changing the
-``_parse_module`` method to work via import and introspection, and
-might involve changing ``discover_modules`` (which determines which
-files are modules, and therefore which module URIs will be passed to
-``_parse_module``).
+Notes
+-----
+This parsing is based on import and introspection of modules.
+Previously functions and classes were found by parsing the text of .py files.
 
-NOTE: this is a modified version of a script originally shipped with the
-PyMVPA project, which we've adapted for NIPY use.  PyMVPA is an MIT-licensed
-project."""
+Extension modules should be discovered and included as well.
+
+This is a modified version of a script originally shipped with the PyMVPA
+project, then adapted for use first in NIPY and then in scikits.image. PyMVPA
+is an MIT-licensed project.
+"""
 
 # Stdlib imports
 import os
 import re
 
-# Functions and classes
+
+# suppress print statements (warnings for empty files)
+DEBUG = True
+
+
 class ApiDocWriter(object):
     ''' Class for automatic detection and parsing of API docs
     to Sphinx-parsable reST format'''
@@ -173,7 +176,44 @@ class ApiDocWriter(object):
         functions, classes = self._parse_lines(f)
         f.close()
         return functions, classes
-    
+
+    def _parse_module_with_import(self, uri):
+        """Look for functions and classes in an importable module.
+
+        Parameters
+        ----------
+        uri : str
+            The name of the module to be parsed. This module needs to be
+            importable.
+
+        Returns
+        -------
+        functions : list of str
+            A list of (public) function names in the module.
+        classes : list of str
+            A list of (public) class names in the module.
+        """
+        exec 'import ' + uri
+        exec 'mod = ' + uri
+        # find all public objects in the module.
+        obj_strs = [obj for obj in dir(mod) if not obj.startswith('_')]
+        functions = []
+        classes = []
+        for obj_str in obj_strs:
+            # find the actual object from its string representation
+            obj = mod.__dict__[obj_str]
+            # figure out if obj is a function or class
+            if hasattr(obj, 'func_name'):
+                functions.append(obj_str)
+            else:
+                try:
+                    issubclass(obj, object)
+                    classes.append(obj_str)
+                except TypeError:
+                    # not a function or class
+                    pass
+        return functions, classes
+
     def _parse_lines(self, linesource):
         ''' Parse lines of text for functions and classes '''
         functions = []
@@ -209,8 +249,8 @@ class ApiDocWriter(object):
             Contents of API doc
         '''
         # get the names of all classes and functions
-        functions, classes = self._parse_module(uri)
-        if not len(functions) and not len(classes):
+        functions, classes = self._parse_module_with_import(uri)
+        if not len(functions) and not len(classes) and DEBUG:
             print 'WARNING: Empty -', uri  # dbg
             return ''
 
@@ -239,8 +279,8 @@ class ApiDocWriter(object):
 
         ad += '\n.. automodule:: ' + uri + '\n'
         ad += '\n.. currentmodule:: ' + uri + '\n'
-        multi_class = len(classes) > 1
-        multi_fx = len(functions) > 1
+#        multi_class = len(classes) > 1
+#        multi_fx = len(functions) > 1
 #        if multi_class:
 #            ad += '\n' + 'Classes' + '\n' + \
 #                  self.rst_section_levels[2] * 7 + '\n'
@@ -249,7 +289,7 @@ class ApiDocWriter(object):
 #                  self.rst_section_levels[2] * 5 + '\n'
         for c in classes:
             ad += '\n:class:`' + c + '`\n' \
-                  + self.rst_section_levels[multi_class + 2 ] * \
+                  + self.rst_section_levels[2] * \
                   (len(c)+9) + '\n\n'
             ad += '\n.. autoclass:: ' + c + '\n'
             # must NOT exclude from index to keep cross-refs working
@@ -260,8 +300,8 @@ class ApiDocWriter(object):
                   '\n' \
                   '  .. automethod:: __init__\n'
 #        if multi_fx:
-        ad += '\n' + 'Functions' + '\n' + \
-              self.rst_section_levels[2] * 9 + '\n\n'
+#        ad += '\n' + 'Functions' + '\n' + \
+#              self.rst_section_levels[2] * 9 + '\n\n'
 #        elif len(functions) and multi_class:
 #            ad += '\n' + 'Function' + '\n' + \
 #                  self.rst_section_levels[2] * 8 + '\n\n'
@@ -274,7 +314,7 @@ class ApiDocWriter(object):
             # must NOT exclude from index to keep cross-refs working
             full_f = uri + '.' + f
             ad += f + '\n'
-            ad += self.rst_section_levels[3] * len(f) + '\n'
+            ad += self.rst_section_levels[2] * len(f) + '\n'
             ad += '\n.. autofunction:: ' + full_f + '\n\n'
         return ad
 
@@ -304,7 +344,7 @@ class ApiDocWriter(object):
         elif match_type == 'package':
             patterns = self.package_skip_patterns
         else:
-            raise ValueError('Cannot interpret match type "%s"' 
+            raise ValueError('Cannot interpret match type "%s"'
                              % match_type)
         # Match to URI without package name
         L = len(self.package_name)
@@ -320,7 +360,7 @@ class ApiDocWriter(object):
         return True
 
     def discover_modules(self):
-        ''' Return module sequence discovered from ``self.package_name`` 
+        ''' Return module sequence discovered from ``self.package_name``
 
 
         Parameters
@@ -341,7 +381,7 @@ class ApiDocWriter(object):
         >>> dw.package_skip_patterns.append('\.util$')
         >>> 'sphinx.util' in dw.discover_modules()
         False
-        >>> 
+        >>>
         '''
         modules = [self.package_name]
         # raw directory parsing
@@ -364,7 +404,7 @@ class ApiDocWriter(object):
                     self._survives_exclude(module_uri, 'module')):
                     modules.append(module_uri)
         return sorted(modules)
-    
+
     def write_modules_api(self, modules,outdir):
         # write the list
         written_modules = []
@@ -389,7 +429,7 @@ class ApiDocWriter(object):
         outdir : string
             Directory name in which to store files
             We create automatic filenames for each module
-            
+
         Returns
         -------
         None
@@ -402,8 +442,16 @@ class ApiDocWriter(object):
             os.mkdir(outdir)
         # compose list of modules
         modules = self.discover_modules()
+        # group modules so we have one less level
+        module_depth = max([len(item.split('.')) for item in modules])
+        # modifying modules in-place, so make a copy
+        for item in modules[:]:
+            # Do not treat the .py files all as separate modules.
+            # Like this, only the objects exported in __all__ get picked up.
+            if not (len(item.split('.')) < module_depth):
+                modules.remove(item)
         self.write_modules_api(modules,outdir)
-        
+
     def write_index(self, outdir, froot='gen', relative_to=None):
         """Make a reST API index file from written files
 
@@ -436,7 +484,7 @@ class ApiDocWriter(object):
         w = idx.write
         w('.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n')
 
-        title = self.package_name + " API Reference"
+        title = "API Reference"
         w(title + "\n")
         w("=" * len(title) + "\n\n")
         w('.. toctree::\n\n')
