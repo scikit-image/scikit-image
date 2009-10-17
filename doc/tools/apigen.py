@@ -21,6 +21,7 @@ is an MIT-licensed project.
 import os
 import re
 
+from types import BuiltinFunctionType
 
 # suppress print statements (warnings for empty files)
 DEBUG = True
@@ -203,7 +204,8 @@ class ApiDocWriter(object):
             # find the actual object from its string representation
             obj = mod.__dict__[obj_str]
             # figure out if obj is a function or class
-            if hasattr(obj, 'func_name'):
+            if hasattr(obj, 'func_name') or \
+               isinstance(obj, BuiltinFunctionType):
                 functions.append(obj_str)
             else:
                 try:
