@@ -13,6 +13,9 @@
 - Chris Colbert
   OpenCV wrappers
 
+- Holger Rapp
+  OpenCV functions and better OSX library loader
+
 - Ralf Gommers
   Image IO and plots in documentation
 
