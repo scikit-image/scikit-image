@@ -9,7 +9,6 @@ from opencv_backend cimport *
 from opencv_constants import *
 
 from opencv_constants import *
-from opencv_cv import *
 
 # Without the opencv libraries, this extension module cannot function,
 # so we raise an exception if loading fails.
