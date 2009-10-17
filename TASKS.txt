@@ -79,22 +79,6 @@ Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
 Thanks to Lee Kamentsky, Thouis Jones and Anne Carpenter and their colleagues
 who contributed.
 
-Documentation: API generation
-`````````````````````````````
-The API documentation is auto-generated from source.  Currently, it's
-mostly functional but not very clean.  For example, we currently see things
-like:
-
- - Module: ``io.collection``
-   ...
- - Module: ``io.pil_imread``
-   ...
- - Module: ``io.sift``
-
-These should be combined into one.  All around, there are small things that
-can be improved, such as the chaotic index table, the class attribute tables,
-etc.
-
 Write new functionality
 ```````````````````````
 * Plugin structure for image IO
