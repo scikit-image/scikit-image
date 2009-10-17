@@ -1,7 +1,7 @@
 """Image Processing SciKit (Toolbox for SciPy)"""
 
 
-import os.path
+import os.path as _osp
 
-data_dir = os.path.join(os.path.dirname(__file__), 'data')
+data_dir = _osp.join(_osp.dirname(__file__), 'data')
 
