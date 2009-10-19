@@ -54,7 +54,7 @@ class TestColorconv(TestCase):
         hsv = np.array([colorsys.rgb_to_hsv(pt[0], pt[1], pt[2])
                         for pt in rgb.reshape(-1, 3)]).reshape(rgb.shape)
         # convert back to RGB and compare with original.
-        # float32 -> relative precision about 1e-6
+        # relative precision for RGB -> HSV roundtrip is about 1e-6
         assert_almost_equal(rgb, hsv2rgb(hsv), decimal=4)
 
     def test_hsv2rgb_error_grayscale(self):

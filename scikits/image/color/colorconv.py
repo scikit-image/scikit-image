@@ -31,6 +31,15 @@ def rgb2hsv(rgb):
     ValueError
         If `rgb` is not a 3-D array of shape (.., .., 3).
 
+    Notes
+    -----
+    Conversion between RGB and HSV color spaces results in some loss of
+    precision, due to integer arithmetic and rounding [1]_.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/HSL_and_HSV
+
     Examples
     --------
     >>> import os
@@ -101,6 +110,15 @@ def hsv2rgb(hsv):
     ------
     ValueError
         If `hsv` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Conversion between RGB and HSV color spaces results in some loss of
+    precision, due to integer arithmetic and rounding [1]_.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/HSL_and_HSV
 
     Examples
     --------
