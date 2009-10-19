@@ -6,7 +6,7 @@
 :license: modified BSD
 """
 
-from os import path
+import os.path
 
 import numpy as np
 from numpy.testing import *
@@ -22,8 +22,8 @@ import colorsys
 
 class TestColorconv(TestCase):
 
-    img_rgb = imread(path.join(data_dir, 'color.png'))
-    img_grayscale = imread(path.join(data_dir, 'camera.png'))
+    img_rgb = imread(os.path.join(data_dir, 'color.png'))
+    img_grayscale = imread(os.path.join(data_dir, 'camera.png'))
 
     def test_rgb2hsv_conversion(self):
         rgb = self.img_rgb.astype("float32")[::16, ::16]
@@ -34,7 +34,7 @@ class TestColorconv(TestCase):
                       )
         assert_almost_equal(hsv, gt)
 
-    def test_rgb2hsv_error_grayscale(self):        
+    def test_rgb2hsv_error_grayscale(self):
         self.assertRaises(ValueError, rgb2hsv, self.img_grayscale)
 
     def test_rgb2hsv_error_one_element(self):
