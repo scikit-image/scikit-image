@@ -219,9 +219,80 @@ def _convert(matrix, arr):
 
 
 def xyz2rgb(xyz):
+    """XYZ to RGB color space conversion.
+
+    Parameters
+    ----------
+    xyz : ndarray
+        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `xyz` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    The CIE XYZ color space is derived from the CIE RGB color space. Note
+    however that this function converts to sRGB.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_xyz = rgb2xyz(lena)
+    >>> lena_rgb = xyz2rgb(lena_hsv)
+    """
     return _convert(rgb_from_xyz, xyz)
 
 def rgb2xyz(rgb):
+    """RGB to XYZ color space conversion.
+
+    Parameters
+    ----------
+    rgb : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    The CIE XYZ color space is derived from the CIE RGB color space. Note
+    however that this function converts from sRGB.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_xyz = rgb2xyz(lena)
+    """
     return _convert(xyz_from_rgb, rgb)
 
 
