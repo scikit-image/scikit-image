@@ -1,17 +1,31 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-:author: Nicolas Pinto, 2009
+"""Functions for converting between color spaces.
+
+Supported color spaces
+----------------------
+- RGB
+- HSV
+- XYZ
+
+Authors
+-------
+- rgb2hsv was written by Nicolas Pinto
+- hsv2rgb was written by Ralf Gommers
+- other functions were originally written by Travis Oliphant and adapted by
+  Ralf Gommers
+
 :license: modified BSD
 """
 
 from __future__ import division
 
-__all__ = ['rgb2hsv', 'hsv2rgb']
+__all__ = ['rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb']
 __docformat__ = "restructuredtext en"
 
 import numpy as np
+from scipy import linalg
 
 
 def _prepare_colorarray(arr, dtype="float32"):
@@ -155,3 +169,59 @@ def hsv2rgb(hsv):
     out[np.isnan(out)] = 0
 
     return out
+
+
+#---------------------------------------------------------------
+# Primaries for the coordinate systems
+#---------------------------------------------------------------
+cie_primaries = [700, 546.1, 435.8]
+sb_primaries = [1./155 * 1e5, 1./190 * 1e5, 1./225 * 1e5]
+
+#---------------------------------------------------------------
+# Matrices that define conversion between different color spaces
+#---------------------------------------------------------------
+
+# From sRGB specification
+xyz_from_rgb =  [[0.412453, 0.357580, 0.180423],
+                 [0.212671, 0.715160, 0.072169],
+                 [0.019334, 0.119193, 0.950227]]
+
+rgb_from_xyz = linalg.inv(xyz_from_rgb)
+
+#-------------------------------------------------------------
+# The conversion functions that make use of the matrices above
+#-------------------------------------------------------------
+
+def _convert(matrix, arr):
+    """Do the color space conversion.
+
+    Parameters
+    ----------
+    matrix : array_like
+        The 3x3 matrix to use.
+    arr : ndarray
+        The input array.
+
+    Returns
+    -------
+    out : ndarray
+        The converted array.
+    """
+    arr = _prepare_colorarray(arr)
+    arr = np.swapaxes(arr, 0, 2)
+    oldshape = arr.shape
+    arr = np.reshape(arr, (3, -1))
+    out = np.dot(matrix, arr)
+    out.shape = oldshape
+    out = np.swapaxes(out, 2, 0)
+
+    return out
+
+
+def xyz2rgb(xyz):
+    return _convert(rgb_from_xyz, xyz)
+
+def rgb2xyz(rgb):
+    return _convert(xyz_from_rgb, rgb)
+
+

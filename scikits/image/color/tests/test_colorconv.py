@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-:author: Nicolas Pinto, 2009
+"""Tests for color conversion functions.
+
+Authors
+-------
+- the rgb2hsv test was written by Nicolas Pinto, 2009
+- other tests written by Ralf Gommers, 2009
+
 :license: modified BSD
 """
 
@@ -15,6 +20,8 @@ from scikits.image.io import imread
 from scikits.image.color import (
     rgb2hsv,
     hsv2rgb,
+    rgb2xyz,
+    xyz2rgb
     )
 
 from scikits.image import data_dir
@@ -26,6 +33,13 @@ class TestColorconv(TestCase):
 
     img_rgb = imread(os.path.join(data_dir, 'color.png'))
     img_grayscale = imread(os.path.join(data_dir, 'camera.png'))
+
+    colbars = np.array([[1, 1, 0, 0, 1, 1, 0, 0],
+                        [1, 1, 1, 1, 0, 0, 0, 0],
+                        [1, 0, 1, 0, 1, 0, 1, 0]])
+    colbars_array = np.swapaxes(colbars.reshape(3, 4, 2), 0, 2)
+    colbars_point75 = colbars * 0.75
+    colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
@@ -65,6 +79,38 @@ class TestColorconv(TestCase):
 
     def test_hsv2rgb_error_list(self):
         self.assertRaises(TypeError, hsv2rgb, [self.img_rgb[0,0]])
+
+
+    # RGB to XYZ
+    def test_rgb2xyz_conversion(self):
+        gt = np.array([[[ 0.950456,  1.      ,  1.088754],
+                        [ 0.538003,  0.787329,  1.06942 ],
+                        [ 0.592876,  0.28484 ,  0.969561],
+                        [ 0.180423,  0.072169,  0.950227]],
+                       [[ 0.770033,  0.927831,  0.138527],
+                        [ 0.35758 ,  0.71516 ,  0.119193],
+                        [ 0.412453,  0.212671,  0.019334],
+                        [ 0.      ,  0.      ,  0.      ]]])
+
+        assert_almost_equal(rgb2xyz(self.colbars_array), gt)
+
+    # stop repeating the "raises" checks for all other functions that are
+    # implemented with color._convert()
+    def test_rgb2xyz_error_grayscale(self):
+        self.assertRaises(ValueError, rgb2xyz, self.img_grayscale)
+
+    def test_rgb2xyz_error_one_element(self):
+        self.assertRaises(ValueError, rgb2xyz, self.img_rgb[0,0])
+
+    def test_rgb2xyz_error_list(self):
+        self.assertRaises(TypeError, rgb2xyz, [self.img_rgb[0,0]])
+
+
+    # XYZ to RGB
+    def test_xyz2rgb_conversion(self):
+        # only roundtrip test, we checked rgb2xyz above already
+        assert_almost_equal(xyz2rgb(rgb2xyz(self.colbars_array)),
+                            self.colbars_array)
 
 
 if __name__ == "__main__":
