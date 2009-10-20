@@ -16,6 +16,7 @@ Supported color spaces
 ----------------------
 - RGB
 - HSV
+- RGB CIE
 - XYZ
 
 Authors
@@ -183,27 +184,31 @@ def hsv2rgb(hsv):
 #---------------------------------------------------------------
 # Primaries for the coordinate systems
 #---------------------------------------------------------------
-cie_primaries = [700, 546.1, 435.8]
-sb_primaries = [1./155 * 1e5, 1./190 * 1e5, 1./225 * 1e5]
+cie_primaries = np.array([700, 546.1, 435.8])
+sb_primaries = np.array([1./155, 1./190, 1./225]) * 1e5
 
 #---------------------------------------------------------------
 # Matrices that define conversion between different color spaces
 #---------------------------------------------------------------
 
 # From sRGB specification
-xyz_from_rgb =  [[0.412453, 0.357580, 0.180423],
-                 [0.212671, 0.715160, 0.072169],
-                 [0.019334, 0.119193, 0.950227]]
+xyz_from_rgb =  np.array([[0.412453, 0.357580, 0.180423],
+                          [0.212671, 0.715160, 0.072169],
+                          [0.019334, 0.119193, 0.950227]])
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
-# Matrices from Jain. TODO: find complete reference.
-xyz_from_rgbcie = [[0.490, 0.310, 0.200],
-                   [0.177, 0.813, 0.011],
-                   [0.000, 0.010, 0.990]]
+# From http://en.wikipedia.org/wiki/CIE_1931_color_space
+# Note: Travis' code did not have the divide by 0.17697
+xyz_from_rgbcie = np.array([[0.49, 0.31, 0.20],
+                            [0.17697, 0.81240, 0.01063],
+                            [0.00, 0.01, 0.99]]) / 0.17697
 
 rgbcie_from_xyz = linalg.inv(xyz_from_rgbcie)
 
+# construct matrices to and from rgb:
+rgbcie_from_rgb = np.dot(rgbcie_from_xyz, xyz_from_rgb)
+rgb_from_rgbcie = np.dot(rgb_from_xyz, xyz_from_rgb)
 
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
@@ -312,4 +317,70 @@ def rgb2xyz(rgb):
     """
     return _convert(xyz_from_rgb, rgb)
 
+def rgb2rgbcie(rgb):
+    """RGB to RGB CIE color space conversion.
+
+    Parameters
+    ----------
+    rgb : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB CIE format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_rgbcie = rgb2rgbcie(lena)
+    """
+    return _convert(rgbcie_from_rgb, rgb)
+
+def rgbcie2rgb(rgbcie):
+    """RGB CIE to RGB color space conversion.
+
+    Parameters
+    ----------
+    rgbcie : ndarray
+        The image in RGB CIE format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgbcie` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/CIE_1931_color_space
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_rgbcie = rgb2rgbcie(lena)
+    >>> lena_rgb = rgbcie2rgb(lena_hsv)
+    """
+    return _convert(rgb_from_rgbcie, rgbcie)
 
