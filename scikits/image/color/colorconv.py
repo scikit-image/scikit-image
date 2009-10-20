@@ -3,6 +3,15 @@
 
 """Functions for converting between color spaces.
 
+The "central" color space in this module is RGB, more specifically the linear
+sRGB color space using D65 as a white-point (IEC 61966-2-1).  This represents a
+standard monitor (w/o gamma correction).
+
+The API consists of functions to convert to and from RGB as defined above, as
+well as a generic function to convert to and from any supported color space
+(which is done through RGB in most cases).
+
+
 Supported color spaces
 ----------------------
 - RGB
@@ -187,6 +196,14 @@ xyz_from_rgb =  [[0.412453, 0.357580, 0.180423],
                  [0.019334, 0.119193, 0.950227]]
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
+
+# Matrices from Jain. TODO: find complete reference.
+xyz_from_rgbcie = [[0.490, 0.310, 0.200],
+                   [0.177, 0.813, 0.011],
+                   [0.000, 0.010, 0.990]]
+
+rgbcie_from_xyz = linalg.inv(xyz_from_rgbcie)
+
 
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
