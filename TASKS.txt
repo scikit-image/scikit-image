@@ -88,6 +88,12 @@ Complete the build process
 * Fix scripts for building Cython extensions (see `this thread
   <http://www.nabble.com/problem-with-numpy.distutils-and-Cython-td25100957.html#a25100957>`_).
 
+Rework linear filters
+`````````````````````
+* Should take kernel or function for parameter (currently only takes function)
+* Kernel shape should be specifiable (currently defaults to image shape)
+* Due to the above, the tests run unnecessarily slowly
+
 Development process
 -------------------
  * Go to `http://github.com/stefanv/scikits.image
@@ -98,7 +104,7 @@ Development process
  * Ping stefan to request a merge into the main development branch.
 
 .. note::
-   
+
    Do *not* merge the main branch into yours.  You may rebase,
    as long as you are `aware of its dangers <http://tinyurl.com/lll385>`_
    (also see `LWN article <http://tinyurl.com/nqcbkj>`_).
@@ -112,7 +118,7 @@ Guidelines:
  * All code should have tests.
  * All code should be documented, to the same
    `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
-   as NumPy and SciPy. 
+   as NumPy and SciPy.
  * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
    where possible.
  * All major changes should be `posted for review
