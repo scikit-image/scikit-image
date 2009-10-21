@@ -4,8 +4,9 @@
 """Functions for converting between color spaces.
 
 The "central" color space in this module is RGB, more specifically the linear
-sRGB color space using D65 as a white-point (IEC 61966-2-1).  This represents a
-standard monitor (w/o gamma correction).
+sRGB color space using D65 as a white-point [1]_.  This represents a
+standard monitor (w/o gamma correction). For a good FAQ on color spaces see
+[2]_.
 
 The API consists of functions to convert to and from RGB as defined above, as
 well as a generic function to convert to and from any supported color space
@@ -14,20 +15,31 @@ well as a generic function to convert to and from any supported color space
 
 Supported color spaces
 ----------------------
-- RGB
-- HSV
-- RGB CIE
-- XYZ
-- NTSC
+* RGB : Red Green Blue.
+        Here the sRGB standard [1]_.
+* HSV : Hue, Saturation, Value.
+        Uniquely defined when related to sRGB [3]_.
+* RGB CIE : Red Green Blue.
+        The original RGB CIE standard from 1931 [4]_. Primary colors are 700 nm
+        (red), 546.1 nm (blue) and 435.8 nm (green).
+* XYZ CIE : XYZ
+        Derived from the RGB CIE color space. Chosen such that
+        ``x == y == z == 1/3`` at the whitepoint, and all color matching
+        functions are greater than zero everywhere.
+* NTSC
 
-Authors
--------
-- rgb2hsv was written by Nicolas Pinto
-- hsv2rgb was written by Ralf Gommers
-- other functions were originally written by Travis Oliphant and adapted by
-  Ralf Gommers
+:author: Nicolas Pinto (rgb2hsv)
+:author: Ralf Gommers (hsv2rgb)
+:author: Travis Oliphant (XYZ and RGB CIE functions)
 
 :license: modified BSD
+
+References
+----------
+.. [1] Official specification of sRGB, IEC 61966-2-1:1999.
+.. [2] http://www.poynton.com/ColorFAQ.html
+.. [3] http://en.wikipedia.org/wiki/HSL_and_HSV
+.. [4] http://en.wikipedia.org/wiki/CIE_1931_color_space
 """
 
 from __future__ import division
