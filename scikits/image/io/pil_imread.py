@@ -10,7 +10,9 @@ def imread(fname, flatten=False, dtype=None):
     fname : string
         Image file name, e.g. ``test.jpg``.
     flatten : bool
-        If true, convert the output to grey-scale.
+        If True, convert color images to grey-scale. If `dtype` is not given,
+        converted color images are returned as 32-bit float images.
+        Images that are already in grey-scale format are not converted.
     dtype : dtype, optional
         NumPy data-type specifier. If given, the returned image has this type.
         If None (default), the data-type is determined automatically.
@@ -32,6 +34,6 @@ def imread(fname, flatten=False, dtype=None):
                           " instructions.")
 
     im = Image.open(fname)
-    if flatten:
+    if flatten and not im.mode in ('1', 'L', 'I', 'F', 'I;16', 'I;16L', 'I;16B'):
         im = im.convert('F')
     return np.array(im, dtype=dtype)
