@@ -18,10 +18,10 @@ from numpy.testing import *
 
 from scikits.image.io import imread
 from scikits.image.color import (
-    rgb2hsv,
-    hsv2rgb,
-    rgb2xyz,
-    xyz2rgb
+    rgb2hsv, hsv2rgb,
+    rgb2xyz, xyz2rgb,
+    rgb2rgbcie, rgbcie2rgb,
+    rgb2ntsc, ntsc2rgb
     )
 
 from scikits.image import data_dir
@@ -91,7 +91,6 @@ class TestColorconv(TestCase):
                         [ 0.35758 ,  0.71516 ,  0.119193],
                         [ 0.412453,  0.212671,  0.019334],
                         [ 0.      ,  0.      ,  0.      ]]])
-
         assert_almost_equal(rgb2xyz(self.colbars_array), gt)
 
     # stop repeating the "raises" checks for all other functions that are
@@ -111,6 +110,48 @@ class TestColorconv(TestCase):
         # only roundtrip test, we checked rgb2xyz above already
         assert_almost_equal(xyz2rgb(rgb2xyz(self.colbars_array)),
                             self.colbars_array)
+
+
+    # RGB to RGB CIE
+    def test_rgb2rgbcie_conversion(self):
+        gt = np.array([[[ 0.1488856 ,  0.18288098,  0.19277574],
+                        [ 0.01163224,  0.16649536,  0.18948516],
+                        [ 0.12259182,  0.03308008,  0.17298223],
+                        [-0.01466154,  0.01669446,  0.16969164]],
+                       [[ 0.16354714,  0.16618652,  0.0230841 ],
+                        [ 0.02629378,  0.1498009 ,  0.01979351],
+                        [ 0.13725336,  0.01638562,  0.00329059],
+                        [ 0.        ,  0.        ,  0.        ]]])
+        assert_almost_equal(rgb2rgbcie(self.colbars_array), gt)
+
+
+    # RGB CIE to RGB
+    def test_rgbcie2rgb_conversion(self):
+        # only roundtrip test, we checked rgb2rgbcie above already
+        assert_almost_equal(rgbcie2rgb(rgb2rgbcie(self.colbars_array)),
+                            self.colbars_array)
+
+
+    # RGB to NTSC
+    def test_rgb2ntsc_conversion(self):
+        gt = np.array([[[ 0.96880981,  1.03331573,  0.91265003],
+                        [ 0.29994641,  1.01478128,  0.89649967],
+                        [ 0.70133987, -0.04145057,  0.86950234],
+                        [ 0.03247648, -0.05998501,  0.85335198]],
+                       [[ 0.93633333,  1.09330074,  0.05929805],
+                        [ 0.26746994,  1.0747663 ,  0.04314769],
+                        [ 0.66886339,  0.01853444,  0.01615036],
+                        [ 0.        ,  0.        ,  0.        ]]])
+        assert_almost_equal(rgb2ntsc(self.colbars_array), gt)
+
+
+    # NTSC to RGB
+    def test_ntsc2rgb_conversion(self):
+        # only roundtrip test, we checked rgb2ntsc above already
+        assert_almost_equal(ntsc2rgb(rgb2ntsc(self.colbars_array)),
+                            self.colbars_array)
+
+
 
 
 if __name__ == "__main__":

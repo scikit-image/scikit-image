@@ -18,6 +18,7 @@ Supported color spaces
 - HSV
 - RGB CIE
 - XYZ
+- NTSC
 
 Authors
 -------
@@ -31,7 +32,8 @@ Authors
 
 from __future__ import division
 
-__all__ = ['rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb']
+__all__ = ['rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb', 'rgb2rgbcie', 'rgbcie2rgb',
+           'rgb2ntsc', 'ntsc2rgb']
 __docformat__ = "restructuredtext en"
 
 import numpy as np
@@ -208,7 +210,19 @@ rgbcie_from_xyz = linalg.inv(xyz_from_rgbcie)
 
 # construct matrices to and from rgb:
 rgbcie_from_rgb = np.dot(rgbcie_from_xyz, xyz_from_rgb)
-rgb_from_rgbcie = np.dot(rgb_from_xyz, xyz_from_rgb)
+rgb_from_rgbcie = np.dot(rgb_from_xyz, xyz_from_rgbcie)
+
+# from Travis' code. "Matrices from Jain". TODO: find reference.
+ntsc_from_xyz = np.array([[1.910, -0.533, -0.288],
+                          [-0.985, 2.000, -0.028],
+                          [0.058, -0.118, 0.896]])
+
+xyz_from_ntsc = linalg.inv(ntsc_from_xyz)
+
+# construct matrices to and from rgb:
+ntsc_from_rgb = np.dot(ntsc_from_xyz, xyz_from_rgb)
+rgb_from_ntsc = np.dot(rgb_from_xyz, xyz_from_ntsc)
+
 
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
@@ -383,4 +397,71 @@ def rgbcie2rgb(rgbcie):
     >>> lena_rgb = rgbcie2rgb(lena_hsv)
     """
     return _convert(rgb_from_rgbcie, rgbcie)
+
+def rgb2ntsc(rgb):
+    """RGB to NTSC color space conversion.
+
+    Parameters
+    ----------
+    rgb : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in NTSC format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/NTSC
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_ntsc = rgb2ntsc(lena)
+    """
+    return _convert(ntsc_from_rgb, rgb)
+
+def ntsc2rgb(ntsc):
+    """NTSC to RGB color space conversion.
+
+    Parameters
+    ----------
+    ntsc : ndarray
+        The image in NTSC format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `ntsc` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/NTSC
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_ntsc = rgb2ntsc(lena)
+    >>> lena_rgb = ntsc2rgb(lena_hsv)
+    """
+    return _convert(rgb_from_ntsc, ntsc)
 
