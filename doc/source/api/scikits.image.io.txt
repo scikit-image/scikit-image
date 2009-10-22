@@ -1,0 +1,57 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+Module: :mod:`io`
+=================
+Inheritance diagram for ``scikits.image.io``:
+
+.. inheritance-diagram:: scikits.image.io 
+   :parts: 3
+
+.. automodule:: scikits.image.io
+
+.. currentmodule:: scikits.image.io
+
+:class:`ImageCollection`
+------------------------
+
+
+.. autoclass:: ImageCollection
+  :members:
+  :undoc-members:
+  :show-inheritance:
+  :inherited-members:
+
+  .. automethod:: __init__
+
+:class:`MultiImage`
+-------------------
+
+
+.. autoclass:: MultiImage
+  :members:
+  :undoc-members:
+  :show-inheritance:
+  :inherited-members:
+
+  .. automethod:: __init__
+.. autosummary::
+
+   scikits.image.io.imread
+   scikits.image.io.load_sift
+   scikits.image.io.load_surf
+
+imread
+------
+
+.. autofunction:: scikits.image.io.imread
+
+load_sift
+---------
+
+.. autofunction:: scikits.image.io.load_sift
+
+load_surf
+---------
+
+.. autofunction:: scikits.image.io.load_surf
+

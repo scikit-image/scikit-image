@@ -1,0 +1,112 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+Module: :mod:`opencv`
+=====================
+.. automodule:: scikits.image.opencv
+
+.. currentmodule:: scikits.image.opencv
+.. autosummary::
+
+   scikits.image.opencv.cvCanny
+   scikits.image.opencv.cvCornerEigenValsAndVecs
+   scikits.image.opencv.cvCornerHarris
+   scikits.image.opencv.cvCornerMinEigenVal
+   scikits.image.opencv.cvDrawChessboardCorners
+   scikits.image.opencv.cvFindChessboardCorners
+   scikits.image.opencv.cvFindCornerSubPix
+   scikits.image.opencv.cvGetQuadrangleSubPix
+   scikits.image.opencv.cvGetRectSubPix
+   scikits.image.opencv.cvGoodFeaturesToTrack
+   scikits.image.opencv.cvLaplace
+   scikits.image.opencv.cvPreCornerDetect
+   scikits.image.opencv.cvResize
+   scikits.image.opencv.cvSmooth
+   scikits.image.opencv.cvSobel
+   scikits.image.opencv.cvWarpAffine
+   scikits.image.opencv.cvWarpPerspective
+
+cvCanny
+-------
+
+.. autofunction:: scikits.image.opencv.cvCanny
+
+cvCornerEigenValsAndVecs
+------------------------
+
+.. autofunction:: scikits.image.opencv.cvCornerEigenValsAndVecs
+
+cvCornerHarris
+--------------
+
+.. autofunction:: scikits.image.opencv.cvCornerHarris
+
+cvCornerMinEigenVal
+-------------------
+
+.. autofunction:: scikits.image.opencv.cvCornerMinEigenVal
+
+cvDrawChessboardCorners
+-----------------------
+
+.. autofunction:: scikits.image.opencv.cvDrawChessboardCorners
+
+cvFindChessboardCorners
+-----------------------
+
+.. autofunction:: scikits.image.opencv.cvFindChessboardCorners
+
+cvFindCornerSubPix
+------------------
+
+.. autofunction:: scikits.image.opencv.cvFindCornerSubPix
+
+cvGetQuadrangleSubPix
+---------------------
+
+.. autofunction:: scikits.image.opencv.cvGetQuadrangleSubPix
+
+cvGetRectSubPix
+---------------
+
+.. autofunction:: scikits.image.opencv.cvGetRectSubPix
+
+cvGoodFeaturesToTrack
+---------------------
+
+.. autofunction:: scikits.image.opencv.cvGoodFeaturesToTrack
+
+cvLaplace
+---------
+
+.. autofunction:: scikits.image.opencv.cvLaplace
+
+cvPreCornerDetect
+-----------------
+
+.. autofunction:: scikits.image.opencv.cvPreCornerDetect
+
+cvResize
+--------
+
+.. autofunction:: scikits.image.opencv.cvResize
+
+cvSmooth
+--------
+
+.. autofunction:: scikits.image.opencv.cvSmooth
+
+cvSobel
+-------
+
+.. autofunction:: scikits.image.opencv.cvSobel
+
+cvWarpAffine
+------------
+
+.. autofunction:: scikits.image.opencv.cvWarpAffine
+
+cvWarpPerspective
+-----------------
+
+.. autofunction:: scikits.image.opencv.cvWarpPerspective
+

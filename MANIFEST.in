@@ -12,6 +12,7 @@ include CONTRIBUTORS.txt
 # this at installation, only for sdist-generated tarballs
 include doc/Makefile
 recursive-include doc/source *
+recursive-include doc/source/api *
 recursive-include doc/tools *
 recursive-include doc/ext *
 

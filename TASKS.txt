@@ -94,6 +94,15 @@ Rework linear filters
 * Kernel shape should be specifiable (currently defaults to image shape)
 * Due to the above, the tests run unnecessarily slowly
 
+API generation for source distribution
+``````````````````````````````````````
+The source package is currently distributed without the auto-generated API doc
+sources.  This means that users who download the source tar-file need to
+install ``scikits.image`` before building docs.  We can skirt the issue by
+checking in the API files into the repository (done) -- but the doc build
+process needs to be updated to use these distributed files if they cannot be
+generated from source.
+
 Development process
 -------------------
  * Go to `http://github.com/stefanv/scikits.image

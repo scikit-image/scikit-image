@@ -1,0 +1,16 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+Module: :mod:`color`
+====================
+.. automodule:: scikits.image.color
+
+.. currentmodule:: scikits.image.color
+.. autosummary::
+
+   scikits.image.color.rgb2hsv
+
+rgb2hsv
+-------
+
+.. autofunction:: scikits.image.color.rgb2hsv
+
