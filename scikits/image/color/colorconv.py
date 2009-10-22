@@ -43,13 +43,63 @@ References
 
 from __future__ import division
 
-__all__ = ['rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb', 'rgb2rgbcie',
-           'rgbcie2rgb']
+__all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
+           'rgb2rgbcie', 'rgbcie2rgb']
 
 __docformat__ = "restructuredtext en"
 
 import numpy as np
 from scipy import linalg
+
+
+def convert_colorspace(arr, fromspace, tospace):
+    """Convert an image array to a new color space.
+
+    Parameters
+    ----------
+    arr : ndarray
+        The image to convert.
+    fromspace : str
+        The color space to convert from. Valid color space strings are
+        ['RGB', 'HSV', 'RGB CIE', 'XYZ']. Value may also be specified as lower
+        case.
+    tospace : str
+        The color space to convert to. Valid color space strings are
+        ['RGB', 'HSV', 'RGB CIE', 'XYZ']. Value may also be specified as lower
+        case.
+
+    Returns
+    -------
+    newarr : ndarray
+        The converted image.
+
+    Notes
+    -----
+    Conversion occurs through the "central" RGB color space, i.e. conversion
+    from XYZ to HSV is implemented as XYZ -> RGB -> HSV instead of directly.
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_hsv = convert_colorspace(lena, 'RGB', 'HSV')
+    """
+    fromdict = {'RGB':lambda im: im, 'HSV':hsv2rgb, 'RGB CIE':rgbcie2rgb,
+                'XYZ':xyz2rgb}
+    todict = {'RGB':lambda im:im, 'HSV':rgb2hsv, 'RGB CIE':rgb2rgbcie,
+              'XYZ':rgb2xyz}
+
+    fromspace = fromspace.upper()
+    tospace = tospace.upper()
+    if not fromspace in fromdict.keys():
+        raise ValueError, 'fromspace needs to be one of %s'%fromdict.keys()
+    if not tospace in todict.keys():
+        raise ValueError, 'tospace needs to be one of %s'%todict.keys()
+
+    return todict[tospace](fromdict[fromspace](arr))
 
 
 def _prepare_colorarray(arr, dtype="float32"):

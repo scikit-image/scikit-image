@@ -20,7 +20,8 @@ from scikits.image.io import imread
 from scikits.image.color import (
     rgb2hsv, hsv2rgb,
     rgb2xyz, xyz2rgb,
-    rgb2rgbcie, rgbcie2rgb
+    rgb2rgbcie, rgbcie2rgb,
+    convert_colorspace
     )
 
 from scikits.image import data_dir
@@ -130,6 +131,25 @@ class TestColorconv(TestCase):
         assert_almost_equal(rgbcie2rgb(rgb2rgbcie(self.colbars_array)),
                             self.colbars_array)
 
+    def test_convert_colorspace(self):
+        colspaces = ['HSV', 'RGB CIE', 'XYZ']
+        colfuncs_from = [hsv2rgb, rgbcie2rgb, xyz2rgb]
+        colfuncs_to = [rgb2hsv, rgb2rgbcie, rgb2xyz]
+
+        assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
+                                               'RGB'), self.colbars_array)
+        for i, space in enumerate(colspaces):
+            gt = colfuncs_from[i](self.colbars_array)
+            assert_almost_equal(convert_colorspace(self.colbars_array, space,
+                                                  'RGB'), gt)
+            gt = colfuncs_to[i](self.colbars_array)
+            assert_almost_equal(convert_colorspace(self.colbars_array, 'RGB',
+                                                   space), gt)
+
+        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
+                                                           'nokey', 'XYZ')
+        self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
+                                                           'RGB', 'nokey')
 
 if __name__ == "__main__":
     run_module_suite()
