@@ -22,6 +22,17 @@ CV_INTER_AREA = 3
 CV_WARP_FILL_OUTLIERS = 8
 CV_WARP_INVERSE_MAP = 16
 
+CV_SHAPE_RECT = 0
+CV_SHAPE_CROSS = 1
+CV_SHAPE_ELLIPSE = 2
+CV_SHAPE_CUSTOM = 100
+
+CV_MOP_OPEN = 2
+CV_MOP_CLOSE = 3
+CV_MOP_GRADIENT = 4
+CV_MOP_TOPHAT = 5
+CV_MOP_BLACKHAT = 6
+
 #########################
 # Calibration Constants #
 #########################

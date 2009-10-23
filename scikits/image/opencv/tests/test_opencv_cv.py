@@ -15,7 +15,7 @@ with warnings.catch_warnings():
 opencv_skip = dec.skipif(cv is None,
                          'OpenCV libraries not found')
 
-class OpenCVTest:
+class OpenCVTest(object):
     lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npy'))
     lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
 
@@ -70,7 +70,7 @@ class TestSmooth(OpenCVTest):
             cvSmooth(self.lena_GRAY_U8, None, st, 3, 0, 0, 0, False)
 
 
-class TestFindCornerSubPix:
+class TestFindCornerSubPix(object):
     @opencv_skip
     def test_cvFindCornersSubPix(self):
         img = np.array([[1, 1, 1, 0, 0, 0, 1, 1, 1],
@@ -133,7 +133,45 @@ class TestWarpPerspective(OpenCVTest):
         cvWarpPerspective(self.lena_RGB_U8, warpmat)
 
 
-class TestFindChessboardCorners:
+class TestLogPolar(OpenCVTest):
+    @opencv_skip
+    def test_cvLogPolar(self):
+        img = self.lena_RGB_U8
+        width = img.shape[1]
+        height = img.shape[0]
+        x = width / 2.
+        y = height / 2.
+        cvLogPolar(img, (x, y), 20)
+        
+
+class TestErode(OpenCVTest):
+    @opencv_skip
+    def test_cvErode(self):
+        kern = np.array([[0, 1, 0],
+                         [1, 1, 1],
+                         [0, 1, 0]], dtype='int32')
+        cvErode(self.lena_RGB_U8, kern, in_place=True)
+        
+        
+class TestDilate(OpenCVTest):
+    @opencv_skip
+    def test_cvDilate(self):
+        kern = np.array([[0, 1, 0],
+                         [1, 1, 1],
+                         [0, 1, 0]], dtype='int32')
+        cvDilate(self.lena_RGB_U8, kern, in_place=True)
+        
+        
+class TestMorphologyEx(OpenCVTest):
+    @opencv_skip
+    def test_cvMorphologyEx(self):
+        kern = np.array([[0, 1, 0],
+                         [1, 1, 1],
+                         [0, 1, 0]], dtype='int32')
+        cvMorphologyEx(self.lena_RGB_U8, kern, CV_MOP_TOPHAT, in_place=True)
+        
+        
+class TestFindChessboardCorners(object):
     @opencv_skip
     def test_cvFindChessboardCorners(self):
         chessboard_GRAY_U8 = np.load(os.path.join(data_dir,
@@ -141,7 +179,7 @@ class TestFindChessboardCorners:
         pts = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))
 
 
-class TestDrawChessboardCorners:
+class TestDrawChessboardCorners(object):
     @opencv_skip
     def test_cvDrawChessboardCorners(self):
         chessboard_GRAY_U8 = np.load(os.path.join(data_dir,
@@ -150,9 +188,11 @@ class TestDrawChessboardCorners:
                                                   'chessboard_RGB_U8.npy'))
         corners = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))
         cvDrawChessboardCorners(chessboard_RGB_U8, (7, 7), corners)
+        
 
-class TestCvCalibrateCamera2(object):
-    def test_cvCalibrateCamear2_Identity(self):
+class TestCalibrateCamera2(object):
+    @opencv_skip
+    def test_cvCalibrateCamera2_Identity(self):
         ys = xs = range(4)
 
         image_points = np.array( [(4 * x, 4 * y) for x in xs for y in ys ],
@@ -177,8 +217,9 @@ class TestCvCalibrateCamera2(object):
         assert_almost_equal( intrinsics[2,1], 0)
         assert_almost_equal( intrinsics[2,2], 1)
 
+    @opencv_skip
     @dec.slow
-    def test_cvCalibrateCamear2_KnownData(self):
+    def test_cvCalibrateCamera2_KnownData(self):
         (object_points,points_count,image_points,intrinsics,distortions) =\
              cPickle.load(open(os.path.join(
                  data_dir, "cvCalibrateCamera2TestData.pck"), "rb")

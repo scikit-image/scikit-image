@@ -7,6 +7,7 @@ cdef extern from "Python.h":
     
 cdef extern from "numpy/arrayobject.h":
     object PyArray_Empty(int, np.npy_intp*, dtype, int)
+    bint PyArray_ISCONTIGUOUS(np.ndarray)
     
 ctypedef np.uint8_t UINT8_t
 ctypedef np.int8_t INT8_t
@@ -44,3 +45,9 @@ cdef np.npy_intp* clone_array_shape(np.ndarray arr)
 #-------------------------------------------------------------------------------
 cdef CvPoint2D32f* array_as_cvPoint2D32f_ptr(np.ndarray arr)
 cdef CvTermCriteria get_cvTermCriteria(int, double)
+cdef IplConvKernel* get_IplConvKernel_ptr_from_array(np.ndarray arr, anchor) except NULL
+cdef void free_IplConvKernel(IplConvKernel* iplkernel)
+
+#-------------------------------------------------------------------------------
+# Other convienences
+#-------------------------------------------------------------------------------

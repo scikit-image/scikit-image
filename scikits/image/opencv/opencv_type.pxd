@@ -66,4 +66,13 @@ cdef struct CvTermCriteria:
 
 cdef struct CvScalar:
     double val[4]
+    
+cdef struct _IplConvKernel:
+    int  nCols
+    int  nRows
+    int  anchorX
+    int  anchorY
+    int *values
+    int  nShiftR
+ctypedef _IplConvKernel IplConvKernel
 

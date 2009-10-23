@@ -111,6 +111,28 @@ cdef cvWarpPerspectivePtr c_cvWarpPerspective
 c_cvWarpPerspective = (<cvWarpPerspectivePtr*><size_t>
                        ctypes.addressof(cv.cvWarpPerspective))[0]
 
+# cvLogPolar
+ctypedef void (*cvLogPolarPtr)(IplImage*, IplImage*, CvPoint2D32f, double, int)
+cdef cvLogPolarPtr c_cvLogPolar
+c_cvLogPolar = (<cvLogPolarPtr*><size_t>ctypes.addressof(cv.cvLogPolar))[0]
+
+# cvErode
+ctypedef void (*cvErodePtr)(IplImage*, IplImage*, IplConvKernel*, int)
+cdef cvErodePtr c_cvErode
+c_cvErode = (<cvErodePtr*><size_t>ctypes.addressof(cv.cvErode))[0]
+
+# cvDilate
+ctypedef void (*cvDilatePtr)(IplImage*, IplImage*, IplConvKernel*, int)
+cdef cvDilatePtr c_cvDilate
+c_cvDilate = (<cvDilatePtr*><size_t>ctypes.addressof(cv.cvDilate))[0]
+
+# cvMorphologyEx
+ctypedef void (*cvMorphologyExPtr)(IplImage*, IplImage*, IplImage*,
+                                   IplConvKernel*, int, int)
+cdef cvMorphologyExPtr c_cvMorphologyEx
+c_cvMorphologyEx = (<cvMorphologyExPtr*><size_t>
+                        ctypes.addressof(cv.cvMorphologyEx))[0]
+            
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
        CvSize, CvMat*, CvMat*, CvMat*, CvMat*, int)
@@ -764,6 +786,139 @@ def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
 
     return out
     
+def cvLogPolar(np.ndarray src, center, double M,
+               int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS):
+    
+    validate_array(src)
+    assert len(center) == 2
+    
+    cdef np.ndarray out = new_array_like(src)
+    
+    cdef CvPoint2D32f cv_center
+    cv_center.x = <float>center[0]
+    cv_center.y = <float>center[1]
+    
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    
+    c_cvLogPolar(&srcimg, &outimg, cv_center, M, flags)
+    return out
+    
+def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1, 
+            anchor=None, in_place=False):
+    
+    validate_array(src)
+    
+    cdef np.ndarray out
+    cdef IplConvKernel* iplkernel  
+    
+    if element == None:
+        iplkernel = NULL
+    else:
+        iplkernel = get_IplConvKernel_ptr_from_array(element, anchor)
+        
+    if in_place:
+        out = src
+    else:
+        out = new_array_like(src)
+        
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    
+    c_cvErode(&srcimg, &outimg, iplkernel, iterations)
+    
+    free_IplConvKernel(iplkernel)
+    
+    if in_place:
+        return None
+    else:
+        return out
+        
+def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1, 
+            anchor=None, in_place=False):
+    
+    validate_array(src)
+    
+    cdef np.ndarray out
+    cdef IplConvKernel* iplkernel  
+    
+    if element == None:
+        iplkernel = NULL
+    else:
+        iplkernel = get_IplConvKernel_ptr_from_array(element, anchor)
+        
+    if in_place:
+        out = src
+    else:
+        out = new_array_like(src)
+        
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    
+    c_cvDilate(&srcimg, &outimg, iplkernel, iterations)
+    
+    free_IplConvKernel(iplkernel)
+    
+    if in_place:
+        return None
+    else:
+        return out 
+        
+def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
+                   int iterations=1, anchor=None, in_place=False):
+    
+    validate_array(src)
+    
+    cdef np.ndarray out
+    cdef np.ndarray temp
+    cdef IplConvKernel* iplkernel  
+    
+    iplkernel = get_IplConvKernel_ptr_from_array(element, anchor)
+        
+    if in_place:
+        out = src
+    else:
+        out = new_array_like(src)
+        
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    cdef IplImage tempimg
+    cdef IplImage* tempimgptr = &tempimg
+    
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    
+    # determine if we need the tempimg    
+    if operation == CV_MOP_OPEN or operation == CV_MOP_CLOSE:
+        tempimgptr = NULL
+    elif operation == CV_MOP_GRADIENT:
+        temp = new_array_like(src)
+        populate_iplimage(temp, &tempimg)        
+    elif operation == CV_MOP_TOPHAT or operation == CV_MOP_BLACKHAT:
+        if in_place:
+            temp = new_array_like(src)
+            populate_iplimage(temp, &tempimg)
+        else:
+            tempimgptr = NULL
+    else:
+        raise RuntimeError('operation type not understood')
+        
+    c_cvMorphologyEx(&srcimg, &outimg, tempimgptr, iplkernel, operation, 
+                     iterations)
+    
+    free_IplConvKernel(iplkernel)
+    
+    if in_place:
+        return None
+    else:
+        return out 
+            
 def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
            np.ndarray point_counts, image_size):
     
