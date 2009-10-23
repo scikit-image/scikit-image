@@ -14,6 +14,7 @@ __all__ = ["cv", "cxcore"]
 
 import ctypes
 import sys
+import os.path
 import warnings
 
 def _import_opencv_lib(which="cv"):
@@ -22,45 +23,37 @@ def _import_opencv_lib(which="cv"):
 
     which - Which library ["cv", "cxcore", "highgui"]
     """
-    if sys.platform.startswith("darwin"):
-        shared_lib = _tryload_macosx(which)
-    elif sys.platform.startswith("linux"):
-        libname = 'lib%s.so' % which
+    library_paths = ['',
+                     '/lib/',
+                     '/usr/lib/',
+                     '/usr/local/lib/',
+                     '/opt/local/lib/', # MacPorts
+                     '/sw/lib/', # Fink
+                     ]
+
+    if sys.platform.startswith('linux'):
+        extensions = ['.so', '.so.1']
+    elif sys.platform.startswith("darwin"):
+        extension = ['.dylib']
     else:
-        libname = 'lib%s.dll' % which
+        extension = ['.dll']
+        library_paths = []
 
-    try:
-        shared_lib = ctypes.CDLL(libname)
-    except OSError:
-        shared_lib = None
-
-    if shared_lib is None:
-        warnings.warn(RuntimeWarning(
-            'The opencv libraries were not found.  Please ensure that they '
-            'are installed and available on the system path. '))
-    return shared_lib
-
-def _tryload_macosx(which):
-    common_paths = [
-        '/lib/',
-        '/usr/lib/',
-        '/usr/local/lib/',
-        '/opt/local/lib/', # MacPorts
-        '/sw/lib/', # Fink
-    ]
+    lib = 'lib' + which
     shared_lib = None
-    for path in common_paths:
-        try:
-            libpath =path + "lib" + which + '.dylib' 
-            shared_lib = ctypes.CDLL(path + "lib" + which + '.dylib')
-            break
-        except OSError, e:
-            if "image not found" in e.args[0]:
-                continue
-            raise
 
-    return shared_lib
+    for path in library_paths:
+        for ext in extensions:
+            try:
+                shared_lib = ctypes.CDLL(os.path.join(path, lib + ext))
+            except OSError:
+                pass
+            else:
+                return shared_lib
 
+    warnings.warn(RuntimeWarning(
+        'The opencv libraries were not found.  Please ensure that they '
+        'are installed and available on the system path. '))
 
 cv = _import_opencv_lib("cv")
 cxcore = _import_opencv_lib("cxcore")
