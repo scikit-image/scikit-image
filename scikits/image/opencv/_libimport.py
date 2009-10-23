@@ -25,9 +25,14 @@ def _import_opencv_lib(which="cv"):
     if sys.platform.startswith("darwin"):
         shared_lib = _tryload_macosx(which)
     elif sys.platform.startswith("linux"):
-        shared_lib = ctypes.CDLL('lib' + which + '.so')
+        libname = 'lib%s.so' % which
     else:
-        shared_lib = ctypes.CDLL(which + '.dll')
+        libname = 'lib%s.dll' % which
+
+    try:
+        shared_lib = ctypes.CDLL(libname)
+    except OSError:
+        shared_lib = None
 
     if shared_lib is None:
         warnings.warn(RuntimeWarning(
