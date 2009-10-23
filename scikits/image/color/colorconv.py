@@ -57,7 +57,7 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Parameters
     ----------
-    arr : ndarray
+    arr : array_like
         The image to convert.
     fromspace : str
         The color space to convert from. Valid color space strings are
@@ -102,10 +102,9 @@ def convert_colorspace(arr, fromspace, tospace):
     return todict[tospace](fromdict[fromspace](arr))
 
 
-def _prepare_colorarray(arr, dtype="float32"):
-    """Check the shape of the array, and give it the requested type"""
-    if type(arr) != np.ndarray:
-        raise TypeError, "the input array must be a numpy.ndarray"
+def _prepare_colorarray(arr, dtype=np.float32):
+    """Check the shape of the array, and give it the requested type."""
+    arr = np.asanyarray(arr)
 
     if arr.ndim != 3 or arr.shape[2] != 3:
         msg = "the input array must be have a shape == (.,.,3))"
@@ -113,12 +112,13 @@ def _prepare_colorarray(arr, dtype="float32"):
 
     return arr.astype(dtype)
 
+
 def rgb2hsv(rgb):
     """RGB to HSV color space conversion.
 
     Parameters
     ----------
-    rgb : ndarray
+    rgb : array_like
         The image in RGB format, in a 3-D array of shape (.., .., 3).
 
     Returns
@@ -190,7 +190,7 @@ def hsv2rgb(hsv):
 
     Parameters
     ----------
-    hsv : ndarray
+    hsv : array_like
         The image in HSV format, in a 3-D array of shape (.., .., 3).
 
     Returns
@@ -231,16 +231,13 @@ def hsv2rgb(hsv):
     t = arr[:,:,2] * (1 - (1 - f) * arr[:,:,1])
     v = arr[:,:,2]
 
-    hi = np.dstack([hi, hi, hi]).astype("uint8") % 6
+    hi = np.dstack([hi, hi, hi]).astype(np.uint8) % 6
     out = np.choose(hi, [np.dstack((v, t, p)),
                          np.dstack((q, v, p)),
                          np.dstack((p, v, t)),
                          np.dstack((p, q, v)),
                          np.dstack((t, p, v)),
                          np.dstack((v, p, q))])
-
-    # remove NaN
-    out[np.isnan(out)] = 0
 
     return out
 
@@ -286,7 +283,7 @@ def _convert(matrix, arr):
     ----------
     matrix : array_like
         The 3x3 matrix to use.
-    arr : ndarray
+    arr : array_like
         The input array.
 
     Returns
@@ -310,7 +307,7 @@ def xyz2rgb(xyz):
 
     Parameters
     ----------
-    xyz : ndarray
+    xyz : array_like
         The image in XYZ format, in a 3-D array of shape (.., .., 3).
 
     Returns
@@ -349,7 +346,7 @@ def rgb2xyz(rgb):
 
     Parameters
     ----------
-    rgb : ndarray
+    rgb : array_like
         The image in RGB format, in a 3-D array of shape (.., .., 3).
 
     Returns
@@ -387,7 +384,7 @@ def rgb2rgbcie(rgb):
 
     Parameters
     ----------
-    rgb : ndarray
+    rgb : array_like
         The image in RGB format, in a 3-D array of shape (.., .., 3).
 
     Returns
@@ -420,7 +417,7 @@ def rgbcie2rgb(rgbcie):
 
     Parameters
     ----------
-    rgbcie : ndarray
+    rgbcie : array_like
         The image in RGB CIE format, in a 3-D array of shape (.., .., 3).
 
     Returns

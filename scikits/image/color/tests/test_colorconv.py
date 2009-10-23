@@ -57,9 +57,6 @@ class TestColorconv(TestCase):
     def test_rgb2hsv_error_one_element(self):
         self.assertRaises(ValueError, rgb2hsv, self.img_rgb[0,0])
 
-    def test_rgb2hsv_error_list(self):
-        self.assertRaises(TypeError, rgb2hsv, [self.img_rgb[0,0]])
-
 
     # HSV to RGB
     def test_hsv2rgb_conversion(self):
@@ -76,9 +73,6 @@ class TestColorconv(TestCase):
 
     def test_hsv2rgb_error_one_element(self):
         self.assertRaises(ValueError, hsv2rgb, self.img_rgb[0,0])
-
-    def test_hsv2rgb_error_list(self):
-        self.assertRaises(TypeError, hsv2rgb, [self.img_rgb[0,0]])
 
 
     # RGB to XYZ
@@ -100,9 +94,6 @@ class TestColorconv(TestCase):
 
     def test_rgb2xyz_error_one_element(self):
         self.assertRaises(ValueError, rgb2xyz, self.img_rgb[0,0])
-
-    def test_rgb2xyz_error_list(self):
-        self.assertRaises(TypeError, rgb2xyz, [self.img_rgb[0,0]])
 
 
     # XYZ to RGB
