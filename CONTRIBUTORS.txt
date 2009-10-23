@@ -17,5 +17,5 @@
   OpenCV functions and better OSX library loader
 
 - Ralf Gommers
-  Image IO and plots in documentation
+  Image IO, color spaces and plots in documentation
 
