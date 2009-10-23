@@ -132,7 +132,12 @@ ctypedef void (*cvMorphologyExPtr)(IplImage*, IplImage*, IplImage*,
 cdef cvMorphologyExPtr c_cvMorphologyEx
 c_cvMorphologyEx = (<cvMorphologyExPtr*><size_t>
                         ctypes.addressof(cv.cvMorphologyEx))[0]
-            
+
+# cvFilter2D
+ctypedef void (*cvFilter2DPtr)(IplImage*, IplImage*, CvMat*, CvPoint)
+cdef cvFilter2DPtr c_cvFilter2D
+c_cvFilter2D = (<cvFilter2DPtr*><size_t>ctypes.addressof(cv.cvFilter2D))[0]
+
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
        CvSize, CvMat*, CvMat*, CvMat*, CvMat*, int)
@@ -918,6 +923,53 @@ def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
         return None
     else:
         return out 
+
+def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
+    
+    validate_array(src)
+    validate_array(kernel)
+    
+    assert_ndims(kernel, [2])
+    assert_dtype(kernel, [FLOAT32])
+    
+    cdef CvPoint cv_anchor
+    if anchor is not None:
+        assert len(anchor) == 2, 'anchor must be (x, y) tuple'
+        cv_anchor.x = <int>anchor[0]
+        cv_anchor.y = <int>anchor[1]
+        assert (cv_anchor.x < kernel.shape[1]) and (cv_anchor.x >= 0) \
+            and (cv_anchor.y < kernel.shape[0]) and (cv_anchor.y >= 0), \
+            'anchor point must be inside kernel'       
+    else:
+        cv_anchor.x = <int>(kernel.shape[1] / 2.)
+        cv_anchor.y = <int>(kernel.shape[0] / 2.)
+        
+    cdef np.ndarray out
+    
+    if in_place:
+        out = src
+    else:
+        out = new_array_like(src)
+        
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    cdef IplImage kernelimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    populate_iplimage(kernel, &kernelimg)
+    
+    cdef CvMat* cv_kernel
+    cv_kernel = cvmat_ptr_from_iplimage(&kernelimg)
+    
+    c_cvFilter2D(&srcimg, &outimg, cv_kernel, cv_anchor)
+    
+    PyMem_Free(cv_kernel)
+    
+    if in_place:
+        return None
+    else:
+        return out
+    
             
 def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
            np.ndarray point_counts, image_size):

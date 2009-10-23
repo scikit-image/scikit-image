@@ -51,6 +51,10 @@ cdef struct CvMat:
     int rows
     int cols
 
+cdef struct CvPoint:
+    int x
+    int y
+    	
 cdef struct CvPoint2D32f:
     float x
     float y

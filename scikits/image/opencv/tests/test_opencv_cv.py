@@ -170,6 +170,15 @@ class TestMorphologyEx(OpenCVTest):
                          [0, 1, 0]], dtype='int32')
         cvMorphologyEx(self.lena_RGB_U8, kern, CV_MOP_TOPHAT, in_place=True)
         
+
+class TestFilter2D(OpenCVTest):
+    @opencv_skip
+    def test_cvFilter2D(self):
+        kern = np.array([[0, 1.5, 0],
+                         [1, 1, 2.6],
+                         [0, .76, 0]], dtype='float32')
+        cvFilter2D(self.lena_RGB_U8, kern, in_place=True)
+        
         
 class TestFindChessboardCorners(object):
     @opencv_skip
