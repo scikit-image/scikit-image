@@ -31,8 +31,6 @@ cdef struct _IplImage:
     int BorderMode[4]       # ignored by opencv
     int BorderConst[4]      # ignored by opencv
     char* imageDataOrigin   # pointer to origin of data. Used for deallocation, but python will handle this so we'll set it to void*
-
-
 ctypedef _IplImage IplImage
 
 
@@ -43,14 +41,15 @@ cdef union CvMat_uProxy:
     int* i
     float* fl
     double* db
-    
+
 cdef struct CvMat:
     int type
-    int step    
+    int step
     int* refcount
+    int hdr_refcount
     CvMat_uProxy data
     int rows
-    int cols    
+    int cols
 
 cdef struct CvPoint2D32f:
     float x
@@ -64,7 +63,7 @@ cdef struct CvTermCriteria:
     int type
     int max_iter
     double epsilon
-    
+
 cdef struct CvScalar:
     double val[4]
 
