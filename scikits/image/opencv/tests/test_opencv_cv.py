@@ -217,6 +217,18 @@ class TestAdaptiveThreshold(OpenCVTest):
         cvAdaptiveThreshold(self.lena_GRAY_U8, 100)
 
 
+class TestPyrDown(OpenCVTest):
+    @opencv_skip
+    def test_cvPyrDown(self):
+        cvPyrDown(self.lena_RGB_U8)
+
+
+class TestPyrUp(OpenCVTest):
+    @opencv_skip
+    def test_cvPyrUp(self):
+        cvPyrUp(self.lena_RGB_U8)
+
+
 class TestFindChessboardCorners(object):
     @opencv_skip
     def test_cvFindChessboardCorners(self):

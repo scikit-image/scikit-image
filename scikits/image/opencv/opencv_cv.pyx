@@ -245,6 +245,16 @@ cdef cvAdaptiveThresholdPtr c_cvAdaptiveThreshold
 c_cvAdaptiveThreshold = (<cvAdaptiveThresholdPtr*><size_t>
                          ctypes.addressof(cv.cvAdaptiveThreshold))[0]
 
+# cvPyrDown
+ctypedef void (*cvPyrDownPtr)(IplImage*, IplImage*, int)
+cdef cvPyrDownPtr c_cvPyrDown
+c_cvPyrDown = (<cvPyrDownPtr*><size_t>ctypes.addressof(cv.cvPyrDown))[0]
+
+# cvPyrUp
+ctypedef void (*cvPyrUpPtr)(IplImage*, IplImage*, int)
+cdef cvPyrUpPtr c_cvPyrUp
+c_cvPyrUp = (<cvPyrUpPtr*><size_t>ctypes.addressof(cv.cvPyrUp))[0]
+
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
        CvSize, CvMat*, CvMat*, CvMat*, CvMat*, int)
@@ -1230,6 +1240,52 @@ def cvAdaptiveThreshold(np.ndarray src, double max_value,
 
     c_cvAdaptiveThreshold(&srcimg, &outimg, max_value, adaptive_method,
                           threshold_type, block_size, param1)
+
+    return out
+
+def cvPyrDown(np.ndarray src):
+
+    validate_array(src)
+    assert_dtype(src, [UINT8, UINT16, FLOAT32, FLOAT64])
+
+    cdef int outdim = src.ndim
+    cdef np.npy_intp* outshape = clone_array_shape(src)
+    outshape[0] = <np.npy_intp>(src.shape[0] + 1) / 2
+    outshape[1] = <np.npy_intp>(src.shape[1] + 1) / 2
+
+    cdef np.ndarray out = new_array(outdim, outshape, src.dtype)
+
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+
+    c_cvPyrDown(&srcimg, &outimg, 7)
+
+    PyMem_Free(outshape)
+
+    return out
+
+def cvPyrUp(np.ndarray src):
+
+    validate_array(src)
+    assert_dtype(src, [UINT8, UINT16, FLOAT32, FLOAT64])
+
+    cdef int outdim = src.ndim
+    cdef np.npy_intp* outshape = clone_array_shape(src)
+    outshape[0] = <np.npy_intp>(src.shape[0] * 2)
+    outshape[1] = <np.npy_intp>(src.shape[1] * 2)
+
+    cdef np.ndarray out = new_array(outdim, outshape, src.dtype)
+
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+
+    c_cvPyrUp(&srcimg, &outimg, 7)
+
+    PyMem_Free(outshape)
 
     return out
 
