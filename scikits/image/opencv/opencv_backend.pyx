@@ -12,11 +12,11 @@ from opencv_type cimport *
 # itself without having any of the libraries installed
 # (the opencv functionality is then simply not available)
 #
-from _libimport import cxcore
+from _libimport import cv, cxcore
 if cxcore is None:
     raise RuntimeError('Could not load OpenCV libraries.')
 
-
+# setup numpy tables for this module
 np.import_array()
 
 #-----------------------------------------------------------------------------
@@ -55,8 +55,8 @@ _ipltypes = {UINT8: IPL_DEPTH_8U, INT8: IPL_DEPTH_8S, INT16: IPL_DEPTH_16S,
 
 cdef int IPLIMAGE_SIZE = sizeof(IplImage)
 
-# a function to convert from IplImage to cvMat 
-# this eliminates the need for a second populate function 
+# a function to convert from IplImage to cvMat
+# this eliminates the need for a second populate function
 # for CvMat
 ctypedef CvMat* (*cvGetMatPtr)(IplImage*, CvMat*, int*, int)
 cdef cvGetMatPtr c_cvGetMat
@@ -78,24 +78,28 @@ cdef void populate_iplimage(np.ndarray arr, IplImage* img):
     img.imageId = NULL
     img.tileInfo = NULL
 
-    cdef int channels
     cdef int ndim = arr.ndim
     cdef np.npy_intp* shape = arr.shape
     cdef np.npy_intp* strides = arr.strides
 
     # nChannels is essentially the value of np.shape[2] of a 3D numpy array
     # for a 2D array, nChannels is 1
-    if ndim == 2:
+    if ndim == 1:
+        # Might happen for a 1D vector
         img.nChannels = 1
+        img.width = 1
     else:
-        img.nChannels = shape[2]
+        if ndim == 2:
+            img.nChannels = 1
+        else:
+            img.nChannels = shape[2]
+        img.width = shape[1]
 
-    img.depth = _ipltypes[arr.dtype]
-    img.width = shape[1]
     img.height = shape[0]
+    img.widthStep = strides[0]
+    img.depth = _ipltypes[arr.dtype]
     img.imageSize = arr.nbytes
     img.imageData = <char*>arr.data
-    img.widthStep = strides[0]
 
     # really doesn't matter what this is set to, because opencv only uses it to
     # deallocate images, but it will never attempt to deallocate images we
@@ -105,15 +109,16 @@ cdef void populate_iplimage(np.ndarray arr, IplImage* img):
 cdef CvMat* cvmat_ptr_from_iplimage(IplImage* arr):
     # this functions takes an IplImage* and returns a CvMat*
     # it is designed so that we dont need a separate populate_cvmat
-    # function, or deal with OpenCV magic values. However, it needs to create a 
+    # function, or deal with OpenCV magic values. However, it needs to create a
     # CvMat header to pass to the opencv conversion routine.
     # This means that you have to call PyMem_Free on the CvMat* when you're
     # done with it.
     cdef CvMat* mat_hdr = <CvMat*>PyMem_Malloc(sizeof(CvMat))
     mat_hdr = c_cvGetMat(arr, mat_hdr, NULL, 0)
     return mat_hdr
-    
+
 cdef int validate_array(np.ndarray arr) except -1:
+    assert PyArray_ISCONTIGUOUS(arr), 'Array must be contiguous'
     if arr.ndim != 2 and arr.ndim != 3:
         raise ValueError('Arrays must have either 2 or 3 dimensions')
     if arr.ndim == 3:
@@ -193,7 +198,7 @@ cdef np.ndarray new_array_like_diff_dtype(np.ndarray arr, dtype):
     return PyArray_Empty(arr.ndim, arr.shape, dtype, 0)
 
 cdef np.npy_intp* clone_array_shape(np.ndarray arr):
-    # make sure you call PyMem_Free after your done with the shape
+    # make sure you call PyMem_Free after you're done with the shape
     cdef int ndim = arr.ndim
     cdef np.npy_intp* shape = <np.npy_intp*>PyMem_Malloc(
         ndim * sizeof(np.npy_intp))
@@ -229,3 +234,57 @@ cdef CvTermCriteria get_cvTermCriteria(int iterations, double epsilon):
         crit.max_iter = 0
         crit.epsilon = epsilon
     return crit
+
+ctypedef IplConvKernel* (*cvCreateStructuringElementExPtr)(int, int, int, int,
+                                                           int, int*)
+cdef cvCreateStructuringElementExPtr c_cvCreateStructuringElementEx
+c_cvCreateStructuringElementEx = (<cvCreateStructuringElementExPtr*><size_t>
+                    ctypes.addressof(cv.cvCreateStructuringElementEx))[0]
+
+ctypedef void (*cvReleaseStructuringElementPtr)(IplConvKernel**)
+cdef cvReleaseStructuringElementPtr c_cvReleaseStructuringElement
+c_cvReleaseStructuringElement = (<cvReleaseStructuringElementPtr*><size_t>
+                    ctypes.addressof(cv.cvReleaseStructuringElement))[0]
+
+cdef IplConvKernel* get_IplConvKernel_ptr_from_array(np.ndarray arr, anchor) \
+    except NULL:
+    # make sure you call free_IplConvKernel you're done with the kernel
+    validate_array(arr)
+    assert_ndims(arr, [2])
+    assert_dtype(arr, [INT32])
+
+    cdef int rows
+    cdef int cols
+    cdef int anchorx
+    cdef int anchory
+    if anchor is not None:
+        assert len(anchor) == 2, 'anchor must be (x, y) tuple'
+        anchorx = <int>anchor[0]
+        anchory = <int>anchor[1]
+        assert (anchorx < arr.shape[1]) and (anchorx >= 0) \
+            and (anchory < arr.shape[0]) and (anchory >= 0), \
+            'anchor point must be inside kernel'
+    else:
+        anchorx = <int>(arr.shape[1] / 2.)
+        anchory = <int>(arr.shape[0] / 2.)
+
+    rows = arr.shape[0]
+    cols = arr.shape[1]
+
+    cdef int* values = <int*>arr.data
+
+    # this function copies the data from the array into (i'm guessing)
+    # aligned memory. Since this is using opencv memory management
+    # the free_IplConvKernel function makes the appropriate calls to free it
+    cdef IplConvKernel* iplkernel = \
+            c_cvCreateStructuringElementEx(cols, rows, anchorx, anchory,
+                                           CV_SHAPE_CUSTOM, values)
+
+    return iplkernel
+
+cdef void free_IplConvKernel(IplConvKernel* iplkernel):
+    c_cvReleaseStructuringElement(&iplkernel)
+
+#-------------------------------------------------------------------------------
+# Other convienences
+#-------------------------------------------------------------------------------

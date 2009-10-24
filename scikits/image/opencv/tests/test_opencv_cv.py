@@ -6,6 +6,7 @@ import numpy as np
 from numpy.testing import *
 
 from scikits.image import data_dir
+import cPickle
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -14,7 +15,7 @@ with warnings.catch_warnings():
 opencv_skip = dec.skipif(not loaded,
                          'OpenCV libraries not found')
 
-class OpenCVTest:
+class OpenCVTest(object):
     lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npy'))
     lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
 
@@ -67,9 +68,9 @@ class TestSmooth(OpenCVTest):
         for st in (CV_BLUR_NO_SCALE, CV_BLUR, CV_GAUSSIAN, CV_MEDIAN,
                    CV_BILATERAL):
             cvSmooth(self.lena_GRAY_U8, None, st, 3, 0, 0, 0, False)
-            
 
-class TestFindCornerSubPix:
+
+class TestFindCornerSubPix(object):
     @opencv_skip
     def test_cvFindCornersSubPix(self):
         img = np.array([[1, 1, 1, 0, 0, 0, 1, 1, 1],
@@ -92,14 +93,14 @@ class TestGoodFeaturesToTrack(OpenCVTest):
     @opencv_skip
     def test_cvGoodFeaturesToTrack(self):
         cvGoodFeaturesToTrack(self.lena_GRAY_U8, 100, 0.1, 3)
-        
+
 
 class TestGetRectSubPix(OpenCVTest):
     @opencv_skip
     def test_cvGetRectSubPix(self):
         cvGetRectSubPix(self.lena_RGB_U8, (20, 20), (48.6, 48.6))
-        
-        
+
+
 class TestGetQuadrangleSubPix(OpenCVTest):
     @opencv_skip
     def test_cvGetQuadrangleSubPix(self):
@@ -107,22 +108,22 @@ class TestGetQuadrangleSubPix(OpenCVTest):
                             [-.4, .23, 0.4]], dtype='float32')
         cvGetQuadrangleSubPix(self.lena_RGB_U8, warpmat)
 
-        
+
 class TestResize(OpenCVTest):
     @opencv_skip
     def test_cvResize(self):
         cvResize(self.lena_RGB_U8, height=50, width=50, method=CV_INTER_LINEAR)
         cvResize(self.lena_RGB_U8, height=200, width=200, method=CV_INTER_CUBIC)
-        
-        
+
+
 class TestWarpAffine(OpenCVTest):
     @opencv_skip
     def test_cvWarpAffine(self):
         warpmat = np.array([[0.5, 0.3, 0.4],
                             [-.4, .23, 0.4]], dtype='float32')
         cvWarpAffine(self.lena_RGB_U8, warpmat)
-        
-        
+
+
 class TestWarpPerspective(OpenCVTest):
     @opencv_skip
     def test_cvWarpPerspective(self):
@@ -130,27 +131,114 @@ class TestWarpPerspective(OpenCVTest):
                             [-.4, .23, 0.4],
                             [0.0, 1.0, 1.0]], dtype='float32')
         cvWarpPerspective(self.lena_RGB_U8, warpmat)
+
+
+class TestLogPolar(OpenCVTest):
+    @opencv_skip
+    def test_cvLogPolar(self):
+        img = self.lena_RGB_U8
+        width = img.shape[1]
+        height = img.shape[0]
+        x = width / 2.
+        y = height / 2.
+        cvLogPolar(img, (x, y), 20)
+        
+
+class TestErode(OpenCVTest):
+    @opencv_skip
+    def test_cvErode(self):
+        kern = np.array([[0, 1, 0],
+                         [1, 1, 1],
+                         [0, 1, 0]], dtype='int32')
+        cvErode(self.lena_RGB_U8, kern, in_place=True)
         
         
-class TestFindChessboardCorners:
+class TestDilate(OpenCVTest):
+    @opencv_skip
+    def test_cvDilate(self):
+        kern = np.array([[0, 1, 0],
+                         [1, 1, 1],
+                         [0, 1, 0]], dtype='int32')
+        cvDilate(self.lena_RGB_U8, kern, in_place=True)
+        
+        
+class TestMorphologyEx(OpenCVTest):
+    @opencv_skip
+    def test_cvMorphologyEx(self):
+        kern = np.array([[0, 1, 0],
+                         [1, 1, 1],
+                         [0, 1, 0]], dtype='int32')
+        cvMorphologyEx(self.lena_RGB_U8, kern, CV_MOP_TOPHAT, in_place=True)
+        
+
+class TestFilter2D(OpenCVTest):
+    @opencv_skip
+    def test_cvFilter2D(self):
+        kern = np.array([[0, 1.5, 0],
+                         [1, 1, 2.6],
+                         [0, .76, 0]], dtype='float32')
+        cvFilter2D(self.lena_RGB_U8, kern, in_place=True)
+        
+        
+class TestFindChessboardCorners(object):
     @opencv_skip
     def test_cvFindChessboardCorners(self):
-        chessboard_GRAY_U8 = np.load(os.path.join(data_dir, 
-                                                  'chessboard_GRAY_U8.npy'))        
-        pts = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))      
-        
-    
-class TestDrawChessboardCorners:
+        chessboard_GRAY_U8 = np.load(os.path.join(data_dir,
+                                                  'chessboard_GRAY_U8.npy'))
+        pts = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))
+
+
+class TestDrawChessboardCorners(object):
     @opencv_skip
     def test_cvDrawChessboardCorners(self):
-        chessboard_GRAY_U8 = np.load(os.path.join(data_dir, 
-                                                  'chessboard_GRAY_U8.npy'))        
-        chessboard_RGB_U8 = np.load(os.path.join(data_dir, 
-                                                  'chessboard_RGB_U8.npy'))                        
-        corners = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))        
+        chessboard_GRAY_U8 = np.load(os.path.join(data_dir,
+                                                  'chessboard_GRAY_U8.npy'))
+        chessboard_RGB_U8 = np.load(os.path.join(data_dir,
+                                                  'chessboard_RGB_U8.npy'))
+        corners = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))
         cvDrawChessboardCorners(chessboard_RGB_U8, (7, 7), corners)
         
-        
-        
+
+class TestCalibrateCamera2(object):
+    @opencv_skip
+    def test_cvCalibrateCamera2_Identity(self):
+        ys = xs = range(4)
+
+        image_points = np.array( [(4 * x, 4 * y) for x in xs for y in ys ],
+                dtype=np.float64)
+        object_points = np.array( [(x, y, 0) for x in xs for y in ys ],
+                dtype=np.float64)
+
+        image_points = np.ascontiguousarray(np.vstack((image_points,) * 3))
+        object_points = np.ascontiguousarray(np.vstack((object_points,) * 3))
+
+        intrinsics, distortions = cvCalibrateCamera2(
+            object_points, image_points,
+            np.array([16, 16, 16], dtype=np.int32), (4, 4)
+        )
+
+        assert_almost_equal(distortions, np.array([0., 0., 0., 0., 0.]))
+        # The intrinsics will be strange, but we can at least check
+        # for known zeros and ones
+        assert_almost_equal( intrinsics[0,1], 0)
+        assert_almost_equal( intrinsics[1,0], 0)
+        assert_almost_equal( intrinsics[2,0], 0)
+        assert_almost_equal( intrinsics[2,1], 0)
+        assert_almost_equal( intrinsics[2,2], 1)
+
+    @opencv_skip
+    @dec.slow
+    def test_cvCalibrateCamera2_KnownData(self):
+        (object_points,points_count,image_points,intrinsics,distortions) =\
+             cPickle.load(open(os.path.join(
+                 data_dir, "cvCalibrateCamera2TestData.pck"), "rb")
+             )
+
+        intrinsics_test, distortion_test = cvCalibrateCamera2(
+            object_points, image_points, points_count, (1024,1280)
+        )
+
+
+
 if __name__ == '__main__':
     run_module_suite()
