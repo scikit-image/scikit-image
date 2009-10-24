@@ -17,6 +17,91 @@ from _libimport import cv
 # setup numpy tables for this module
 np.import_array()
 
+#-------------------------------------------------------------------------------
+# Useful global stuff
+#-------------------------------------------------------------------------------
+
+# a dict for cvCvtColor to get the appropriate types and shapes without
+# if statements all over the place (this way is faster, cause the dict is
+# created at import time)
+# the order of list arguments is:
+# [in_channels, out_channels, [input_dtypes]]
+# out type is always the same as in type
+
+_cvtcolor_dict = {CV_BGR2BGRA: [3, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_RGB2RGBA: [3, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_BGRA2BGR: [4, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_RGBA2RGB: [4, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_BGR2RGBA: [3, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_RGB2BGRA: [3, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_RGBA2BGR: [4, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_BGRA2RGB: [4, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_BGR2RGB: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_RGB2BGR: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_BGRA2RGBA: [4, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_RGBA2BGRA: [4, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_BGR2GRAY: [3, 1, [UINT8, UINT16, FLOAT32]],
+                  CV_RGB2GRAY: [3, 1, [UINT8, UINT16, FLOAT32]],
+                  CV_GRAY2BGR: [1, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_GRAY2RGB: [1, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_GRAY2BGRA: [1, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_GRAY2RGBA: [1, 4, [UINT8, UINT16, FLOAT32]],
+                  CV_BGRA2GRAY: [4, 1, [UINT8, UINT16, FLOAT32]],
+                  CV_RGBA2GRAY: [4, 1, [UINT8, UINT16, FLOAT32]],
+                  CV_BGR2BGR565: [3, 2, [UINT8]],
+                  CV_RGB2BGR565: [3, 2, [UINT8]],
+                  CV_BGR5652BGR: [2, 3, [UINT8]],
+                  CV_BGR5652RGB: [2, 3, [UINT8]],
+                  CV_BGRA2BGR565: [4, 2, [UINT8]],
+                  CV_RGBA2BGR565: [4, 2, [UINT8]],
+                  CV_BGR5652BGRA: [2, 4, [UINT8]],
+                  CV_BGR5652RGBA: [2, 4, [UINT8]],
+                  CV_GRAY2BGR565: [1, 2, [UINT8]],
+                  CV_BGR5652GRAY: [2, 1, [UINT8]],
+                  CV_BGR2BGR555: [3, 2, [UINT8]],
+                  CV_RGB2BGR555: [3, 2, [UINT8]],
+                  CV_BGR5552BGR: [2, 3, [UINT8]],
+                  CV_BGR5552RGB: [2, 3, [UINT8]],
+                  CV_BGRA2BGR555: [4, 2, [UINT8]],
+                  CV_RGBA2BGR555: [4, 2, [UINT8]],
+                  CV_BGR5552BGRA: [2, 4, [UINT8]],
+                  CV_BGR5552RGBA: [2, 4, [UINT8]],
+                  CV_GRAY2BGR555: [1, 2, [UINT8]],
+                  CV_BGR5552GRAY: [2, 1, [UINT8]],
+                  CV_BGR2XYZ: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_RGB2XYZ: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_XYZ2BGR: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_XYZ2RGB: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_BGR2YCrCb: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_RGB2YCrCb: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_YCrCb2BGR: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_YCrCb2RGB: [3, 3, [UINT8, UINT16, FLOAT32]],
+                  CV_BGR2HSV: [3, 3, [UINT8, FLOAT32]],
+                  CV_RGB2HSV: [3, 3, [UINT8, FLOAT32]],
+                  CV_BGR2Lab: [3, 3, [UINT8, FLOAT32]],
+                  CV_RGB2Lab: [3, 3, [UINT8, FLOAT32]],
+                  CV_BayerBG2BGR: [1, 3, [UINT8]],
+                  CV_BayerGB2BGR: [1, 3, [UINT8]],
+                  CV_BayerRG2BGR: [1, 3, [UINT8]],
+                  CV_BayerGR2BGR: [1, 3, [UINT8]],
+                  CV_BayerBG2RGB: [1, 3, [UINT8]],
+                  CV_BayerGB2RGB: [1, 3, [UINT8]],
+                  CV_BayerRG2RGB: [1, 3, [UINT8]],
+                  CV_BayerGR2RGB: [1, 3, [UINT8]],
+                  CV_BGR2Luv: [3, 3, [UINT8, FLOAT32]],
+                  CV_RGB2Luv: [3, 3, [UINT8, FLOAT32]],
+                  CV_BGR2HLS: [3, 3, [UINT8, FLOAT32]],
+                  CV_RGB2HLS: [3, 3, [UINT8, FLOAT32]],
+                  CV_HSV2BGR: [3, 3, [UINT8, FLOAT32]],
+                  CV_HSV2RGB: [3, 3, [UINT8, FLOAT32]],
+                  CV_Lab2BGR: [3, 3, [UINT8, FLOAT32]],
+                  CV_Lab2RGB: [3, 3, [UINT8, FLOAT32]],
+                  CV_Luv2BGR: [3, 3, [UINT8, FLOAT32]],
+                  CV_Luv2RGB: [3, 3, [UINT8, FLOAT32]],
+                  CV_HLS2BGR: [3, 3, [UINT8, FLOAT32]],
+                  CV_HLS2RGB: [3, 3, [UINT8, FLOAT32]]}
+
+
 ###################################
 # opencv function declarations
 ###################################
@@ -142,6 +227,11 @@ c_cvFilter2D = (<cvFilter2DPtr*><size_t>ctypes.addressof(cv.cvFilter2D))[0]
 ctypedef void (*cvIntegralPtr)(IplImage*, IplImage*, IplImage*, IplImage*)
 cdef cvIntegralPtr c_cvIntegral
 c_cvIntegral = (<cvIntegralPtr*><size_t>ctypes.addressof(cv.cvIntegral))[0]
+
+# cvCvtColor
+ctypedef void (*cvCvtColorPtr)(IplImage*, IplImage*, int)
+cdef cvCvtColorPtr c_cvCvtColor
+c_cvCvtColor = (<cvCvtColorPtr*><size_t>ctypes.addressof(cv.cvCvtColor))[0]
 
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
@@ -1026,6 +1116,50 @@ def cvIntegral(np.ndarray src, square_sum=False, tilted_sum=False):
     c_cvIntegral(&srcimg, &outsumimg, outsqsumimgptr, outtiltsumimgptr)
 
     PyMem_Free(out_shape)
+
+    return out
+
+def cvCvtColor(np.ndarray src, int code):
+
+    validate_array(src)
+    assert_dtype(src, [UINT8, UINT16, FLOAT32])
+
+    try:
+        conversion_params = _cvtcolor_dict[code]
+    except KeyError:
+        print 'unknown conversion code'
+        raise
+
+    cdef int src_channels = <int>conversion_params[0]
+    cdef int out_channels = <int>conversion_params[1]
+    src_dtypes = conversion_params[2]
+
+    assert_nchannels(src, src_channels)
+    assert_dtype(src, src_dtypes)
+
+    cdef np.ndarray out
+
+    # the out array can be 2, 3, or 4 channels so we need shapes that
+    # can handle either
+    cdef np.npy_intp out_shape2[2]
+    cdef np.npy_intp out_shape3[3]
+    out_shape2[0] = src.shape[0]
+    out_shape2[1] = src.shape[1]
+    out_shape3[0] = src.shape[0]
+    out_shape3[1] = src.shape[1]
+
+    if out_channels == 1:
+        out = new_array(2, out_shape2, src.dtype)
+    else:
+        out_shape3[2] = <np.npy_intp>out_channels
+        out = new_array(3, out_shape3, src.dtype)
+
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+
+    c_cvCvtColor(&srcimg, &outimg, code)
 
     return out
 

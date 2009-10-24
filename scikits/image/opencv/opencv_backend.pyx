@@ -17,6 +17,7 @@ np.import_array()
 # dtype itself....
 UINT8 = np.dtype('uint8')
 INT8 = np.dtype('int8')
+UINT16 = np.dtype('uint16')
 INT16 = np.dtype('int16')
 INT32 = np.dtype('int32')
 FLOAT32 = np.dtype('float32')
@@ -25,6 +26,7 @@ FLOAT64 = np.dtype('float64')
 cdef int IPL_DEPTH_SIGN = 0x80000000
 cdef int IPL_DEPTH_8U = 8
 cdef int IPL_DEPTH_8S = (IPL_DEPTH_SIGN | 8)
+cdef int IPL_DEPTH_16U = 16
 cdef int IPL_DEPTH_16S = (IPL_DEPTH_SIGN | 16)
 cdef int IPL_DEPTH_32S = (IPL_DEPTH_SIGN | 32)
 cdef int IPL_DEPTH_32F = 32
@@ -33,8 +35,8 @@ cdef int IPL_DEPTH_64F = 64
 
 # I'd like a better to associate the IPL data type flag to the proper numpy
 # types without using a dictionary.
-_ipltypes = {UINT8: IPL_DEPTH_8U, INT8: IPL_DEPTH_8S, INT16: IPL_DEPTH_16S,
-             INT32: IPL_DEPTH_32S, FLOAT32: IPL_DEPTH_32F,
+_ipltypes = {UINT8: IPL_DEPTH_8U, INT8: IPL_DEPTH_8S, UINT16: IPL_DEPTH_16U,
+             INT16: IPL_DEPTH_16S, INT32: IPL_DEPTH_32S, FLOAT32: IPL_DEPTH_32F,
              FLOAT64: IPL_DEPTH_64F}
 
 

@@ -128,8 +128,6 @@ CV_Luv2RGB = 59
 CV_HLS2BGR = 60
 CV_HLS2RGB = 61
 
-CV_COLORCVT_MAX = 100
-
 #########################
 # Calibration Constants #
 #########################
