@@ -237,7 +237,7 @@ class TestCalibrateCamera2(object):
             np.array([16, 16, 16], dtype=np.int32), (4, 4)
         )
 
-        assert_almost_equal(distortions, np.array([0., 0., 0., 0.,]))
+        assert_almost_equal(distortions, np.array([0., 0., 0., 0., 0.]))
         # The intrinsics will be strange, but we can at least check
         # for known zeros and ones
         assert_almost_equal( intrinsics[0,1], 0)
