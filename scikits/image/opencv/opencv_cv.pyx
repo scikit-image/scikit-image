@@ -1054,7 +1054,7 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
     # Allocate a new distortion array
     cdef np.npy_intp distortion_shape[2]
     distortion_shape[0] = <np.npy_intp> 1
-    distortion_shape[1] = <np.npy_intp> 5
+    distortion_shape[1] = <np.npy_intp> 4
     cdef np.ndarray distortion = new_array(2, distortion_shape, FLOAT64)
     cdef IplImage ipl_distortion
     populate_iplimage(distortion, &ipl_distortion)
