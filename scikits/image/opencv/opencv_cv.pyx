@@ -233,6 +233,18 @@ ctypedef void (*cvCvtColorPtr)(IplImage*, IplImage*, int)
 cdef cvCvtColorPtr c_cvCvtColor
 c_cvCvtColor = (<cvCvtColorPtr*><size_t>ctypes.addressof(cv.cvCvtColor))[0]
 
+# cvThreshold
+ctypedef double (*cvThresholdPtr)(IplImage*, IplImage*, double, double, int)
+cdef cvThresholdPtr c_cvThreshold
+c_cvThreshold = (<cvThresholdPtr*><size_t>ctypes.addressof(cv.cvThreshold))[0]
+
+# cvAdaptiveThreshold
+ctypedef void (*cvAdaptiveThresholdPtr)(IplImage*, IplImage*, double, int, int,
+                                        int, double)
+cdef cvAdaptiveThresholdPtr c_cvAdaptiveThreshold
+c_cvAdaptiveThreshold = (<cvAdaptiveThresholdPtr*><size_t>
+                         ctypes.addressof(cv.cvAdaptiveThreshold))[0]
+
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
        CvSize, CvMat*, CvMat*, CvMat*, CvMat*, int)
@@ -1160,6 +1172,64 @@ def cvCvtColor(np.ndarray src, int code):
     populate_iplimage(out, &outimg)
 
     c_cvCvtColor(&srcimg, &outimg, code)
+
+    return out
+
+def cvThreshold(np.ndarray src, double threshold, double max_value=255,
+                int threshold_type=CV_THRESH_BINARY):
+
+    validate_array(src)
+    assert_nchannels(src, [1])
+    assert_dtype(src, [UINT8, FLOAT32])
+
+    use_otsu = (threshold_type & CV_THRESH_OTSU) != 0
+    if use_otsu:
+        assert_dtype(src, [UINT8])
+
+    cdef np.ndarray out = new_array_like(src)
+
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+
+    threshold = c_cvThreshold(&srcimg, &outimg, threshold, max_value,
+                              threshold_type)
+
+    if use_otsu:
+        return (out, threshold)
+    else:
+        return out
+
+def cvAdaptiveThreshold(np.ndarray src, double max_value,
+                        int adaptive_method=CV_ADAPTIVE_THRESH_MEAN_C,
+                        int threshold_type=CV_THRESH_BINARY,
+                        int block_size=3, double param1=5):
+
+    validate_array(src)
+    assert_nchannels(src, [1])
+    assert_dtype(src, [UINT8])
+
+    if (adaptive_method!=CV_ADAPTIVE_THRESH_MEAN_C and
+        adaptive_method!=CV_ADAPTIVE_THRESH_GAUSSIAN_C):
+        raise ValueError('Invalid adaptive method')
+
+    if (threshold_type!=CV_THRESH_BINARY and
+        threshold_type!=CV_THRESH_BINARY_INV):
+        raise ValueError('Invalid threshold type')
+
+    if (block_size % 2 != 1 or block_size <= 1):
+        raise ValueError('block size must be and odd number and greater than 1')
+
+    cdef np.ndarray out = new_array_like(src)
+
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+
+    c_cvAdaptiveThreshold(&srcimg, &outimg, max_value, adaptive_method,
+                          threshold_type, block_size, param1)
 
     return out
 
