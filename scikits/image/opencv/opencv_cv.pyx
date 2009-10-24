@@ -10,17 +10,9 @@ from opencv_backend cimport *
 from opencv_constants import *
 
 from opencv_constants import *
+from opencv_cv import *
 
-# Without the opencv libraries, this extension module cannot function,
-# so we raise an exception if loading fails.
-#
-# Note, however, that users should be able to import scikits.image.opencv
-# itself without having any of the libraries installed
-# (the opencv functionality is then simply not available)
-#
 from _libimport import cv
-if cv is None:
-    raise RuntimeError('Could not load OpenCV libraries.')
 
 # setup numpy tables for this module
 np.import_array()
@@ -74,12 +66,6 @@ ctypedef void (*cvFindCornerSubPixPtr)(IplImage*, CvPoint2D32f*, int,
 cdef cvFindCornerSubPixPtr c_cvFindCornerSubPix
 c_cvFindCornerSubPix = (<cvFindCornerSubPixPtr*>
                         <size_t>ctypes.addressof(cv.cvFindCornerSubPix))[0]
-
-# cvSmooth
-ctypedef void (*cvSmoothPtr)(IplImage*, IplImage*, int, int,
-                             int, double, double)
-cdef cvSmoothPtr c_cvSmooth
-c_cvSmooth =  (<cvSmoothPtr*><size_t>ctypes.addressof(cv.cvSmooth))[0]
 
 # cvGoodFeaturesToTrack
 ctypedef void (*cvGoodFeaturesToTrackPtr)(IplImage*, IplImage*, IplImage*,
@@ -141,10 +127,21 @@ cdef cvMorphologyExPtr c_cvMorphologyEx
 c_cvMorphologyEx = (<cvMorphologyExPtr*><size_t>
                         ctypes.addressof(cv.cvMorphologyEx))[0]
 
+# cvSmooth
+ctypedef void (*cvSmoothPtr)(IplImage*, IplImage*, int, int,
+                             int, double, double)
+cdef cvSmoothPtr c_cvSmooth
+c_cvSmooth =  (<cvSmoothPtr*><size_t>ctypes.addressof(cv.cvSmooth))[0]
+
 # cvFilter2D
 ctypedef void (*cvFilter2DPtr)(IplImage*, IplImage*, CvMat*, CvPoint)
 cdef cvFilter2DPtr c_cvFilter2D
 c_cvFilter2D = (<cvFilter2DPtr*><size_t>ctypes.addressof(cv.cvFilter2D))[0]
+
+# cvIntegral
+ctypedef void (*cvIntegralPtr)(IplImage*, IplImage*, IplImage*, IplImage*)
+cdef cvIntegralPtr c_cvIntegral
+c_cvIntegral = (<cvIntegralPtr*><size_t>ctypes.addressof(cv.cvIntegral))[0]
 
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
@@ -459,81 +456,6 @@ def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
 
     return None
 
-def cvSmooth(np.ndarray src, np.ndarray out=None,
-             int smoothtype=CV_GAUSSIAN, int param1=3,
-             int param2=0, double param3=0, double param4=0,
-             bool in_place=False):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
-
-    validate_array(src)
-    if out is not None:
-        validate_array(out)
-
-    # there are restrictions that must be placed on the data depending on
-    # the smoothing operation requested
-
-    # CV_BLUR_NO_SCALE
-    if smoothtype == CV_BLUR_NO_SCALE:
-
-        if in_place:
-            raise RuntimeError('In place operation not supported with this '
-                               'filter')
-
-        assert_dtype(src, [UINT8, INT8, FLOAT32])
-        assert_ndims(src, [2])
-
-        if out is not None:
-            if src.dtype == FLOAT32:
-                assert_dtype(out, [FLOAT32])
-            else:
-                assert_dtype(out, [INT16])
-            assert_same_shape(src, out)
-        else:
-            if src.dtype == FLOAT32:
-                out = new_array_like(src)
-            else:
-                out = new_array_like_diff_dtype(src, INT16)
-
-    # CV_BLUR and CV_GAUSSIAN
-    elif smoothtype == CV_BLUR or smoothtype == CV_GAUSSIAN:
-
-        assert_dtype(src, [UINT8, INT8, FLOAT32])
-        assert_nchannels(src, [1, 3])
-
-        if in_place:
-            out = src
-        elif out is not None:
-            assert_like(src, out)
-        else:
-            out = new_array_like(src)
-
-    # CV_MEDIAN and CV_BILATERAL
-    else:
-        assert_dtype(src, [UINT8, INT8])
-        assert_nchannels(src, [1, 3])
-
-        if in_place:
-            raise RuntimeError('In place operation not supported with this '
-                               'filter')
-
-        if out is not None:
-            assert_like(src, out)
-        else:
-            out = new_array_like(src)
-
-    cdef IplImage srcimg
-    cdef IplImage outimg
-    populate_iplimage(src, &srcimg)
-    populate_iplimage(out, &outimg)
-
-    c_cvSmooth(&srcimg, &outimg, smoothtype, param1, param2, param3, param4)
-
-    return out
-
 def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
                           double quality_level, double min_distance,
                           np.ndarray mask=None, int block_size=3,
@@ -798,121 +720,121 @@ def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
     PyMem_Free(cvmatptr)
 
     return out
-    
+
 def cvLogPolar(np.ndarray src, center, double M,
                int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS):
-    
+
     validate_array(src)
     assert len(center) == 2
-    
+
     cdef np.ndarray out = new_array_like(src)
-    
+
     cdef CvPoint2D32f cv_center
     cv_center.x = <float>center[0]
     cv_center.y = <float>center[1]
-    
+
     cdef IplImage srcimg
     cdef IplImage outimg
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
-    
+
     c_cvLogPolar(&srcimg, &outimg, cv_center, M, flags)
     return out
-    
-def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1, 
+
+def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,
             anchor=None, in_place=False):
-    
+
     validate_array(src)
-    
+
     cdef np.ndarray out
-    cdef IplConvKernel* iplkernel  
-    
+    cdef IplConvKernel* iplkernel
+
     if element == None:
         iplkernel = NULL
     else:
         iplkernel = get_IplConvKernel_ptr_from_array(element, anchor)
-        
+
     if in_place:
         out = src
     else:
         out = new_array_like(src)
-        
+
     cdef IplImage srcimg
     cdef IplImage outimg
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
-    
+
     c_cvErode(&srcimg, &outimg, iplkernel, iterations)
-    
+
     free_IplConvKernel(iplkernel)
-    
+
     if in_place:
         return None
     else:
         return out
-        
-def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1, 
+
+def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1,
             anchor=None, in_place=False):
-    
+
     validate_array(src)
-    
+
     cdef np.ndarray out
-    cdef IplConvKernel* iplkernel  
-    
+    cdef IplConvKernel* iplkernel
+
     if element == None:
         iplkernel = NULL
     else:
         iplkernel = get_IplConvKernel_ptr_from_array(element, anchor)
-        
+
     if in_place:
         out = src
     else:
         out = new_array_like(src)
-        
+
     cdef IplImage srcimg
     cdef IplImage outimg
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
-    
+
     c_cvDilate(&srcimg, &outimg, iplkernel, iterations)
-    
+
     free_IplConvKernel(iplkernel)
-    
+
     if in_place:
         return None
     else:
-        return out 
-        
+        return out
+
 def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
                    int iterations=1, anchor=None, in_place=False):
-    
+
     validate_array(src)
-    
+
     cdef np.ndarray out
     cdef np.ndarray temp
-    cdef IplConvKernel* iplkernel  
-    
+    cdef IplConvKernel* iplkernel
+
     iplkernel = get_IplConvKernel_ptr_from_array(element, anchor)
-        
+
     if in_place:
         out = src
     else:
         out = new_array_like(src)
-        
+
     cdef IplImage srcimg
     cdef IplImage outimg
     cdef IplImage tempimg
     cdef IplImage* tempimgptr = &tempimg
-    
+
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
-    
-    # determine if we need the tempimg    
+
+    # determine if we need the tempimg
     if operation == CV_MOP_OPEN or operation == CV_MOP_CLOSE:
         tempimgptr = NULL
     elif operation == CV_MOP_GRADIENT:
         temp = new_array_like(src)
-        populate_iplimage(temp, &tempimg)        
+        populate_iplimage(temp, &tempimg)
     elif operation == CV_MOP_TOPHAT or operation == CV_MOP_BLACKHAT:
         if in_place:
             temp = new_array_like(src)
@@ -921,25 +843,100 @@ def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
             tempimgptr = NULL
     else:
         raise RuntimeError('operation type not understood')
-        
-    c_cvMorphologyEx(&srcimg, &outimg, tempimgptr, iplkernel, operation, 
+
+    c_cvMorphologyEx(&srcimg, &outimg, tempimgptr, iplkernel, operation,
                      iterations)
-    
+
     free_IplConvKernel(iplkernel)
-    
+
     if in_place:
         return None
     else:
-        return out 
+        return out
+
+def cvSmooth(np.ndarray src, np.ndarray out=None,
+             int smoothtype=CV_GAUSSIAN, int param1=3,
+             int param2=0, double param3=0, double param4=0,
+             bool in_place=False):
+    """
+    better doc string needed.
+    for now:
+    http://opencv.willowgarage.com/documentation/cvreference.html
+    """
+
+    validate_array(src)
+    if out is not None:
+        validate_array(out)
+
+    # there are restrictions that must be placed on the data depending on
+    # the smoothing operation requested
+
+    # CV_BLUR_NO_SCALE
+    if smoothtype == CV_BLUR_NO_SCALE:
+
+        if in_place:
+            raise RuntimeError('In place operation not supported with this '
+                               'filter')
+
+        assert_dtype(src, [UINT8, INT8, FLOAT32])
+        assert_ndims(src, [2])
+
+        if out is not None:
+            if src.dtype == FLOAT32:
+                assert_dtype(out, [FLOAT32])
+            else:
+                assert_dtype(out, [INT16])
+            assert_same_shape(src, out)
+        else:
+            if src.dtype == FLOAT32:
+                out = new_array_like(src)
+            else:
+                out = new_array_like_diff_dtype(src, INT16)
+
+    # CV_BLUR and CV_GAUSSIAN
+    elif smoothtype == CV_BLUR or smoothtype == CV_GAUSSIAN:
+
+        assert_dtype(src, [UINT8, INT8, FLOAT32])
+        assert_nchannels(src, [1, 3])
+
+        if in_place:
+            out = src
+        elif out is not None:
+            assert_like(src, out)
+        else:
+            out = new_array_like(src)
+
+    # CV_MEDIAN and CV_BILATERAL
+    else:
+        assert_dtype(src, [UINT8, INT8])
+        assert_nchannels(src, [1, 3])
+
+        if in_place:
+            raise RuntimeError('In place operation not supported with this '
+                               'filter')
+
+        if out is not None:
+            assert_like(src, out)
+        else:
+            out = new_array_like(src)
+
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+
+    c_cvSmooth(&srcimg, &outimg, smoothtype, param1, param2, param3, param4)
+
+    return out
 
 def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
-    
+
     validate_array(src)
     validate_array(kernel)
-    
+
     assert_ndims(kernel, [2])
     assert_dtype(kernel, [FLOAT32])
-    
+
     cdef CvPoint cv_anchor
     if anchor is not None:
         assert len(anchor) == 2, 'anchor must be (x, y) tuple'
@@ -947,41 +944,94 @@ def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
         cv_anchor.y = <int>anchor[1]
         assert (cv_anchor.x < kernel.shape[1]) and (cv_anchor.x >= 0) \
             and (cv_anchor.y < kernel.shape[0]) and (cv_anchor.y >= 0), \
-            'anchor point must be inside kernel'       
+            'anchor point must be inside kernel'
     else:
         cv_anchor.x = <int>(kernel.shape[1] / 2.)
         cv_anchor.y = <int>(kernel.shape[0] / 2.)
-        
+
     cdef np.ndarray out
-    
+
     if in_place:
         out = src
     else:
         out = new_array_like(src)
-        
+
     cdef IplImage srcimg
     cdef IplImage outimg
     cdef IplImage kernelimg
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
     populate_iplimage(kernel, &kernelimg)
-    
+
     cdef CvMat* cv_kernel
     cv_kernel = cvmat_ptr_from_iplimage(&kernelimg)
-    
+
     c_cvFilter2D(&srcimg, &outimg, cv_kernel, cv_anchor)
-    
+
     PyMem_Free(cv_kernel)
-    
+
     if in_place:
         return None
     else:
         return out
-    
-            
+
+def cvIntegral(np.ndarray src, square_sum=False, tilted_sum=False):
+
+    validate_array(src)
+    assert_dtype(src, [UINT8, FLOAT32, FLOAT64])
+
+    out = []
+
+    cdef np.ndarray outsum
+    cdef np.ndarray outsqsum
+    cdef np.ndarray outtiltsum
+
+    cdef IplImage srcimg
+    cdef IplImage outsumimg
+    cdef IplImage outsqsumimg
+    cdef IplImage outtiltsumimg
+    cdef IplImage* outsqsumimgptr = &outsqsumimg
+    cdef IplImage* outtiltsumimgptr = &outtiltsumimg
+
+    populate_iplimage(src, &srcimg)
+
+    # out arrays need to be (H + 1) x (W + 1)
+    cdef np.npy_intp* out_shape = clone_array_shape(src)
+    out_shape[0] = src.shape[0] + 1
+    out_shape[1] = src.shape[1] + 1
+    cdef int out_dims = src.ndim
+
+    if src.dtype == UINT8:
+        outsum = new_array(out_dims, out_shape, INT32)
+    else:
+        outsum = new_array(out_dims, out_shape, FLOAT64)
+
+    populate_iplimage(outsum, &outsumimg)
+    out.append(outsum)
+
+    if square_sum:
+        outsqsum = new_array(out_dims, out_shape, FLOAT64)
+        populate_iplimage(outsqsum, &outsqsumimg)
+        out.append(outsqsum)
+    else:
+        outsqsumimgptr = NULL
+
+    if tilted_sum:
+        outtiltsum = new_array(out_dims, out_shape, outsum.dtype)
+        populate_iplimage(outtiltsum, &outtiltsumimg)
+        out.append(outtiltsum)
+    else:
+        outtiltsumimgptr = NULL
+
+    c_cvIntegral(&srcimg, &outsumimg, outsqsumimgptr, outtiltsumimgptr)
+
+    PyMem_Free(out_shape)
+
+    return out
+
 def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
            np.ndarray point_counts, image_size):
-    
+
     # Validate input
     validate_array(object_points)
     assert_ndims(object_points, [2])
@@ -1027,8 +1077,8 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
     cv_image_size.width = image_size[1]
 
     # Call the function
-    c_cvCalibrateCamera2(cvmat_object_points, cvmat_image_points, 
-                         cvmat_point_counts, cv_image_size, cvmat_intrinsics, 
+    c_cvCalibrateCamera2(cvmat_object_points, cvmat_image_points,
+                         cvmat_point_counts, cv_image_size, cvmat_intrinsics,
                          cvmat_distortion, NULL, NULL, 0)
 
     # Convert distortion back into a vector

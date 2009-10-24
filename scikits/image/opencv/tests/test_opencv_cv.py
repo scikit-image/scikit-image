@@ -12,7 +12,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from scikits.image.opencv import *
 
-opencv_skip = dec.skipif(not loaded,
+opencv_skip = dec.skipif(cv is None,
                          'OpenCV libraries not found')
 
 class OpenCVTest(object):
@@ -60,14 +60,6 @@ class TestCornerHarris(OpenCVTest):
     @opencv_skip
     def test_cvCornerHarris(self):
         cvCornerHarris(self.lena_GRAY_U8)
-
-
-class TestSmooth(OpenCVTest):
-    @opencv_skip
-    def test_cvSmooth(self):
-        for st in (CV_BLUR_NO_SCALE, CV_BLUR, CV_GAUSSIAN, CV_MEDIAN,
-                   CV_BILATERAL):
-            cvSmooth(self.lena_GRAY_U8, None, st, 3, 0, 0, 0, False)
 
 
 class TestFindCornerSubPix(object):
@@ -142,7 +134,7 @@ class TestLogPolar(OpenCVTest):
         x = width / 2.
         y = height / 2.
         cvLogPolar(img, (x, y), 20)
-        
+
 
 class TestErode(OpenCVTest):
     @opencv_skip
@@ -151,8 +143,8 @@ class TestErode(OpenCVTest):
                          [1, 1, 1],
                          [0, 1, 0]], dtype='int32')
         cvErode(self.lena_RGB_U8, kern, in_place=True)
-        
-        
+
+
 class TestDilate(OpenCVTest):
     @opencv_skip
     def test_cvDilate(self):
@@ -160,8 +152,8 @@ class TestDilate(OpenCVTest):
                          [1, 1, 1],
                          [0, 1, 0]], dtype='int32')
         cvDilate(self.lena_RGB_U8, kern, in_place=True)
-        
-        
+
+
 class TestMorphologyEx(OpenCVTest):
     @opencv_skip
     def test_cvMorphologyEx(self):
@@ -169,7 +161,15 @@ class TestMorphologyEx(OpenCVTest):
                          [1, 1, 1],
                          [0, 1, 0]], dtype='int32')
         cvMorphologyEx(self.lena_RGB_U8, kern, CV_MOP_TOPHAT, in_place=True)
-        
+
+
+class TestSmooth(OpenCVTest):
+    @opencv_skip
+    def test_cvSmooth(self):
+        for st in (CV_BLUR_NO_SCALE, CV_BLUR, CV_GAUSSIAN, CV_MEDIAN,
+                   CV_BILATERAL):
+            cvSmooth(self.lena_GRAY_U8, None, st, 3, 0, 0, 0, False)
+
 
 class TestFilter2D(OpenCVTest):
     @opencv_skip
@@ -178,8 +178,14 @@ class TestFilter2D(OpenCVTest):
                          [1, 1, 2.6],
                          [0, .76, 0]], dtype='float32')
         cvFilter2D(self.lena_RGB_U8, kern, in_place=True)
-        
-        
+
+
+class TestIntegral(OpenCVTest):
+    @opencv_skip
+    def test_cvIntegral(self):
+        cvIntegral(self.lena_RGB_U8, True, True)
+
+
 class TestFindChessboardCorners(object):
     @opencv_skip
     def test_cvFindChessboardCorners(self):
@@ -197,7 +203,7 @@ class TestDrawChessboardCorners(object):
                                                   'chessboard_RGB_U8.npy'))
         corners = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))
         cvDrawChessboardCorners(chessboard_RGB_U8, (7, 7), corners)
-        
+
 
 class TestCalibrateCamera2(object):
     @opencv_skip

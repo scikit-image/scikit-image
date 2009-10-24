@@ -4,17 +4,7 @@ cimport numpy as np
 from python cimport *
 from opencv_constants import *
 from opencv_type cimport *
-
-# Without the opencv libraries, this extension module cannot function,
-# so we raise an exception if loading fails.
-#
-# Note, however, that users should be able to import scikits.image.opencv
-# itself without having any of the libraries installed
-# (the opencv functionality is then simply not available)
-#
 from _libimport import cv, cxcore
-if cxcore is None:
-    raise RuntimeError('Could not load OpenCV libraries.')
 
 # setup numpy tables for this module
 np.import_array()
@@ -211,9 +201,9 @@ cdef np.npy_intp get_array_nbytes(np.ndarray arr):
     cdef np.npy_intp nbytes = np.PyArray_NBYTES(arr)
     return nbytes
 
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # OpenCV convienences
-#-----------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 cdef CvPoint2D32f* array_as_cvPoint2D32f_ptr(np.ndarray arr):
     cdef CvPoint2D32f* point2Darr
     point2Darr = <CvPoint2D32f*>arr.data
@@ -288,3 +278,6 @@ cdef void free_IplConvKernel(IplConvKernel* iplkernel):
 #-------------------------------------------------------------------------------
 # Other convienences
 #-------------------------------------------------------------------------------
+
+
+
