@@ -186,6 +186,20 @@ class TestIntegral(OpenCVTest):
         cvIntegral(self.lena_RGB_U8, True, True)
 
 
+class TestCvtColor(OpenCVTest):
+    @opencv_skip
+    def test_cvCvtColor(self):
+        cvCvtColor(self.lena_RGB_U8, CV_RGB2BGR)
+        cvCvtColor(self.lena_RGB_U8, CV_RGB2BGRA)
+        cvCvtColor(self.lena_RGB_U8, CV_RGB2HSV)
+        cvCvtColor(self.lena_RGB_U8, CV_RGB2BGR565)
+        cvCvtColor(self.lena_RGB_U8, CV_RGB2BGR555)
+        cvCvtColor(self.lena_RGB_U8, CV_RGB2GRAY)
+        cvCvtColor(self.lena_GRAY_U8, CV_GRAY2BGR)
+        cvCvtColor(self.lena_GRAY_U8, CV_GRAY2BGR565)
+        cvCvtColor(self.lena_GRAY_U8, CV_GRAY2BGR555)
+
+
 class TestFindChessboardCorners(object):
     @opencv_skip
     def test_cvFindChessboardCorners(self):
