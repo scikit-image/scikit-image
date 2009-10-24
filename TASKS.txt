@@ -21,8 +21,6 @@ modified to work as part of the scikit, others may be lacking in documentation
 or tests.
 
    * Connected components
-   * Color-space manipulations (so far rgb2hsv was done by Nicolas Pinto,
-                                needs documentation)
    * `Hough transform <http://mentat.za.net>`_
    * `Shortest paths <http://mentat.za.net>`_
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
@@ -82,11 +80,6 @@ who contributed.
 Write new functionality
 ```````````````````````
 * Plugin structure for image IO
-
-Complete the build process
-``````````````````````````
-* Fix scripts for building Cython extensions (see `this thread
-  <http://www.nabble.com/problem-with-numpy.distutils-and-Cython-td25100957.html#a25100957>`_).
 
 Rework linear filters
 `````````````````````

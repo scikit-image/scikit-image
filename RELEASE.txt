@@ -2,7 +2,7 @@ How to make a new release of ``scikits.image``
 ==============================================
 
 - Update the version number in setup.py and commit
-- Update the docs, using the "push_github" script
+- Update the docs and api, push upstream using the "push_github" script
 - Add the version number as a tag in git::
 
   git tag v0.1
