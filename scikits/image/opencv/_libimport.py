@@ -34,9 +34,9 @@ def _import_opencv_lib(which="cv"):
     if sys.platform.startswith('linux'):
         extensions = ['.so', '.so.1']
     elif sys.platform.startswith("darwin"):
-        extension = ['.dylib']
+        extensions = ['.dylib']
     else:
-        extension = ['.dll']
+        extensions = ['.dll']
         library_paths = []
 
     lib = 'lib' + which
