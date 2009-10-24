@@ -1176,15 +1176,15 @@ def cvCvtColor(np.ndarray src, int code):
     return out
 
 def cvThreshold(np.ndarray src, double threshold, double max_value=255,
-                int threshold_type=CV_THRESH_BINARY):
+                int threshold_type=CV_THRESH_BINARY, use_otsu=False):
 
     validate_array(src)
     assert_nchannels(src, [1])
     assert_dtype(src, [UINT8, FLOAT32])
 
-    use_otsu = (threshold_type & CV_THRESH_OTSU) != 0
     if use_otsu:
         assert_dtype(src, [UINT8])
+        threshold_type += 8
 
     cdef np.ndarray out = new_array_like(src)
 
