@@ -9,4 +9,4 @@ doc/build
 source/api
 scikits/image/opencv/*.new
 build
-
+scikits/image/version.py

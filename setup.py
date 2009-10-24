@@ -37,7 +37,22 @@ def configuration(parent_package='', top_path=None):
 
     return config
 
+def write_version_py(filename='scikits/image/version.py'):
+    template = """# THIS FILE IS GENERATED FROM THE SCIKITS.IMAGE SETUP.PY
+version='%s'
+"""
+
+    vfile = open(os.path.join(os.path.dirname(__file__),
+                              filename), 'w')
+
+    try:
+        vfile.write(template % VERSION)
+    finally:
+        vfile.close()
+
 if __name__ == "__main__":
+    write_version_py()
+
     setup(
         name=DISTNAME,
         description=DESCRIPTION,
