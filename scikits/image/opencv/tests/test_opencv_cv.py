@@ -200,6 +200,23 @@ class TestCvtColor(OpenCVTest):
         cvCvtColor(self.lena_GRAY_U8, CV_GRAY2BGR555)
 
 
+class TestThreshold(OpenCVTest):
+    @opencv_skip
+    def test_cvThreshold(self):
+        cvThreshold(self.lena_GRAY_U8, 100, 255, CV_THRESH_BINARY)
+        cvThreshold(self.lena_GRAY_U8, 100, 255, CV_THRESH_BINARY_INV)
+        cvThreshold(self.lena_GRAY_U8, 100, threshold_type=CV_THRESH_TRUNC)
+        cvThreshold(self.lena_GRAY_U8, 100, threshold_type=CV_THRESH_TOZERO)
+        cvThreshold(self.lena_GRAY_U8, 100, threshold_type=CV_THRESH_TOZERO_INV)
+        cvThreshold(self.lena_GRAY_U8, 100, 1, CV_THRESH_BINARY+CV_THRESH_OTSU)
+
+
+class TestAdaptiveThreshold(OpenCVTest):
+    @opencv_skip
+    def test_cvAdaptiveThreshold(self):
+        cvAdaptiveThreshold(self.lena_GRAY_U8, 100)
+
+
 class TestFindChessboardCorners(object):
     @opencv_skip
     def test_cvFindChessboardCorners(self):
