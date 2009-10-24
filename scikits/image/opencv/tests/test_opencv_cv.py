@@ -208,7 +208,7 @@ class TestThreshold(OpenCVTest):
         cvThreshold(self.lena_GRAY_U8, 100, threshold_type=CV_THRESH_TRUNC)
         cvThreshold(self.lena_GRAY_U8, 100, threshold_type=CV_THRESH_TOZERO)
         cvThreshold(self.lena_GRAY_U8, 100, threshold_type=CV_THRESH_TOZERO_INV)
-        cvThreshold(self.lena_GRAY_U8, 100, 1, CV_THRESH_BINARY+CV_THRESH_OTSU)
+        cvThreshold(self.lena_GRAY_U8, 100, 1, CV_THRESH_BINARY, use_otsu=True)
 
 
 class TestAdaptiveThreshold(OpenCVTest):
