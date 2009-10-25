@@ -17,5 +17,8 @@
   OpenCV functions and better OSX library loader
 
 - Ralf Gommers
-  Image IO, color spaces and plots in documentation
+  Image IO, color spaces, plots in documentation, cleaner API docs
+
+- Helge Reikeras
+  Logic around API docs generation
 
