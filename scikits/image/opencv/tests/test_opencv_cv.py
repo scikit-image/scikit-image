@@ -12,8 +12,7 @@ with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     from scikits.image.opencv import *
 
-opencv_skip = dec.skipif(cv is None,
-                         'OpenCV libraries not found')
+opencv_skip = dec.skipif(not loaded, 'OpenCV libraries not found')
 
 class OpenCVTest(object):
     lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npy'))
