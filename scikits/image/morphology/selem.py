@@ -19,7 +19,7 @@ def square(width, dtype=np.uint8):
     Additional Parameters
     ---------------------
     
-    dtype : string
+    dtype : data-type
        The data type of the structuring element.
 
     Returns
@@ -47,7 +47,7 @@ def rectangle(width, height, dtype=np.uint8):
     Additional Parameters
     ---------------------
     
-    dtype : string
+    dtype : data-type
        The data type of the structuring element.
 
     Returns
@@ -71,7 +71,7 @@ def diamond(radius, dtype=np.uint8):
     radius : string
        The radius of the disk-shaped structuring element.
 
-    dtype : string
+    dtype : data-type
        The data type of the structuring element.
 
     Returns
@@ -97,7 +97,7 @@ def disk(radius, N=0, dtype=np.uint8):
     radius : string
        The radius of the disk-shaped structuring element.
 
-    dtype : string
+    dtype : data-type
        The data type of the structuring element.
 
     Returns
@@ -135,7 +135,7 @@ def ellipse(size, angle, ratio=0.5, dtype=np.uint8):
     ratio : float
        The aspect ratio of the ellipse.
    
-    dtype : string
+    dtype : data-type
        The data type of the structuring element.
          
     Returns
