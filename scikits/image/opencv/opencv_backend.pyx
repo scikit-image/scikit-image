@@ -6,6 +6,13 @@ from opencv_constants import *
 from opencv_type cimport *
 from _libimport import cv, cxcore
 
+if cv is None:
+    raise RuntimeError("Could not load libcv")
+
+if cxcore is None:
+    raise RuntimeError("Could not load libcxcore")
+
+
 # setup numpy tables for this module
 np.import_array()
 

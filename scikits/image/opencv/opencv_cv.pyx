@@ -14,6 +14,9 @@ from opencv_cv import *
 
 from _libimport import cv
 
+if cv is None:
+    raise RuntimeError("Could not load libcv")
+
 # setup numpy tables for this module
 np.import_array()
 

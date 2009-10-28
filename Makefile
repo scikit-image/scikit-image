@@ -7,5 +7,8 @@ clean:
 	find . -name "*.so" | xargs rm
 
 test:
-	nosetests scikits.image
+	nosetests scikits/image
 
+coverage:
+	nosetests scikits/image --with-coverage
+	coverage -r -m scikits/image/*.py scikits/image/*/*.py 
