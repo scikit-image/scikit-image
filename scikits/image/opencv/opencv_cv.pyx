@@ -13,6 +13,7 @@ from opencv_constants import *
 from opencv_cv import *
 
 from _libimport import cv
+from _utilities import cvdoc
 
 # setup numpy tables for this module
 np.import_array()
@@ -276,17 +277,36 @@ cdef cvDrawChessboardCornersPtr c_cvDrawChessboardCorners
 c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
                              ctypes.addressof(cv.cvDrawChessboardCorners))[0]
 
-####################################
+#-------------------------------------------------------------------------------
 # Function Implementations
-####################################
+#-------------------------------------------------------------------------------
+
+#--------
+# cvSobel
+#--------
+
+@cvdoc(
+description = \
+'''Apply the Sobel operator to the input image.''',
+signature =  \
+'''cvSobel(src, xorder=1, yorder=0, aperture_size=3)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8, int8, float32]
+    The source image.
+xorder : integer
+    The x order of the Sobel operator.
+yorder : integer
+    The y order of the Sobel operator.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.''',
+returns = \
+'''out : ndarray
+    A new which is the result of applying the Sobel
+    operator to src.''',
+package = 'cv',
+group = 'image')
 def cvSobel(np.ndarray src, int xorder=1, int yorder=0,
             int aperture_size=3):
-
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
     assert_dtype(src, [UINT8, INT8, FLOAT32])
@@ -312,13 +332,28 @@ def cvSobel(np.ndarray src, int xorder=1, int yorder=0,
 
     return out
 
-def cvLaplace(np.ndarray src, int aperture_size=3):
 
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+#----------
+# cvLaplace
+#----------
+
+@cvdoc(
+description = \
+'''Apply the Laplace operator to the input image.''',
+signature =  \
+'''cvLaplace(src, aperture_size=3)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8, int8, float32]
+    The source image.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.''',
+returns = \
+'''out : ndarray
+    A new which is the result of applying the Laplace
+    operator to src.''',
+package = 'cv',
+group = 'image')
+def cvLaplace(np.ndarray src, int aperture_size=3):
 
     validate_array(src)
     assert_dtype(src, [UINT8, INT8, FLOAT32])
@@ -344,14 +379,33 @@ def cvLaplace(np.ndarray src, int aperture_size=3):
 
     return out
 
+
+#--------
+# cvCanny
+#--------
+
+@cvdoc(
+description = \
+'''Apply Canny edge detection to the input image.''',
+signature =  \
+'''cvCanny(src, threshold1=10, threshold2=50, aperture_size=3)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8]
+    The source image.
+threshold1 : float
+    The lower threshold used for edge linking.
+threshold2 : float
+    The upper threshold used to find strong edges.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.''',
+returns = \
+'''out : ndarray
+    A new which is the result of applying Canny
+    edge detection to src.''',
+package = 'cv',
+group = 'image')
 def cvCanny(np.ndarray src, double threshold1=10, double threshold2=50,
             int aperture_size=3):
-
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
     assert_dtype(src, [UINT8])
@@ -372,12 +426,27 @@ def cvCanny(np.ndarray src, double threshold1=10, double threshold2=50,
 
     return out
 
+
+#------------------
+# cvPreCornerDetect
+#------------------
+
+@cvdoc(
+description = \
+'''Calculate the feature map for corner detection.''',
+signature =  \
+'''cvPreCornerDetect(src, aperture_size=3)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.''',
+returns = \
+'''out : ndarray
+    A new array of the corner candidates.''',
+package = 'cv',
+group = 'image')
 def cvPreCornerDetect(np.ndarray src, int aperture_size=3):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
     assert_dtype(src, [UINT8, FLOAT32])
@@ -398,14 +467,35 @@ def cvPreCornerDetect(np.ndarray src, int aperture_size=3):
 
     return out
 
+
+#-------------------------
+# cvCornerEigenValsAndVecs
+#-------------------------
+
+@cvdoc(
+description = \
+'''Calculates the eigenvalues and eigenvectors of image
+blocks for corner detection.''',
+signature =  \
+'''cvCornerEigenValsAndVecs(src, block_size=3, aperture_size=3)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+block_size : integer
+    The size of the neighborhood in which to calculate
+    the eigenvalues and eigenvectors.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.''',
+returns = \
+'''out : ndarray
+    A new array of the eigenvalues and eigenvectors.
+    The shape of this array is (height, width, 6),
+    Where height and width are the same as that
+    of src.''',
+package = 'cv',
+group = 'image')
 def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
                                              int aperture_size=3):
-
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -430,13 +520,32 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
 
     return out.reshape(out.shape[0], -1, 6)
 
+
+#--------------------
+# cvCornerMinEigenVal
+#--------------------
+
+@cvdoc(
+description = \
+'''Calculates the minimum eigenvalues of gradient matrices
+for corner detection.''',
+signature =  \
+'''cvCornerMinEigenVal(src, block_size=3, aperture_size=3)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+block_size : integer
+    The size of the neighborhood in which to calculate
+    the eigenvalues.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.''',
+returns = \
+'''out : ndarray
+    A new array of the eigenvalues.''',
+package = 'cv',
+group = 'image')
 def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
                                         int aperture_size=3):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -457,13 +566,40 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
 
     return out
 
+
+#---------------
+# cvCornerHarris
+#---------------
+
+@cvdoc(
+description = \
+'''Applies the Harris edge detector to the input image.''',
+signature =  \
+'''cvCornerHarris(src, block_size=3, aperture_size=3, k=0.04)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+block_size : integer
+    The size of the neighborhood in which to apply the detector.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+k : float
+    Harris detector free parameter. See Notes.''',
+returns = \
+'''out : ndarray
+    A new array of the Harris corners.''',
+notes = \
+'''The function cvCornerHarris() runs the Harris edge
+detector on the image. Similarly to cvCornerMinEigenVal()
+and cvCornerEigenValsAndVecs(), for each pixel it calculates
+a gradient covariation matrix M over a block_size X block_size
+neighborhood. Then, it stores det(M) - k * trace(M)**2
+to the output image. Corners in the image can be found as the
+local maxima of the output image.''',
+package = 'cv',
+group = 'image')
 def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
                                                      double k=0.04):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -484,15 +620,45 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
 
     return out
 
+
+#-------------------
+# cvFindCornerSubPix
+#-------------------
+
+@cvdoc(
+description = \
+'''Refines corner locations to sub-pixel accuracy.''',
+signature =  \
+'''cvFindCornerSubPix(src, corners, win, zero_zone=(-1, -1),
+                      iterations=0, epsilon=1e-5)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8]
+    The source image.
+corners : ndarray, shape=(N x 2)
+    An initial approximation of the corners in the image.
+    The corners will be refined in-place in this array.
+win : tuple, (height, width)
+    The window within which the function iterates until it
+    converges on the real corner. The actual window is twice
+    the size of what is declared here. (an OpenCV peculiarity).
+zero_zone : Half of the size of the dead region in the middle
+    of the search zone over which the calculations are not
+    performed. It is used sometimes to avoid possible
+    singularities of the autocorrelation matrix.
+    The value of (-1,-1) indicates that there is no such size.
+iterations : integer
+    The maximum number of iterations to perform. If 0,
+    the function iterates until the error is less than epsilon.
+epsilon : float
+    The epsilon error, below which the function terminates.
+    Can be used in combination with iterations.''',
+returns = \
+'''None. The array corners is modified in place.''',
+package = 'cv',
+group = 'image')
 def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, win,
                        zero_zone=(-1, -1), int iterations=0,
                        double epsilon=1e-5):
-
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -528,17 +694,55 @@ def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, win,
 
     c_cvFindCornerSubPix(&srcimg, cvcorners, count, cvwin, cvzerozone, crit)
 
-    return corners
+    return None
 
+
+#----------------------
+# cvGoodFeaturesToTrack
+#----------------------
+
+@cvdoc(
+description = \
+'''Determines strong corners in an image.''',
+signature =  \
+'''cvGoodFeaturesToTrack(src, corner_count, quality_level,
+                         min_distance, block_size=3,
+                         use_harris=0, k=0.04)''',
+parameters = \
+'''src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+corner_count : int
+    The maximum number of corners to find.
+    Only found corners are returned.
+quality_level : float
+    Multiplier for the max/min eigenvalue;
+    specifies the minimal accepted quality of
+    image corners.
+min_distance : float
+    Limit, specifying the minimum possible
+    distance between the returned corners;
+    Euclidian distance is used.
+block_size : integer
+    The size of the neighborhood in which to apply the detector.
+use_harris : integer
+    If nonzero, Harris operator (cvCornerHarris())
+    is used instead of default cvCornerMinEigenVal()
+k : float
+    Harris detector free parameter.
+    Used only if use_harris != 0.''',
+returns = \
+'''out : ndarray
+    The locations of the found corners in the image.''',
+notes = \
+'''This function finds distinct and strong corners
+in an image which can be used as features in a tracking
+algorithm. It also insures that features are distanced
+from one another by at least min_distance.''',
+package = 'cv',
+group = 'image')
 def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
                           double quality_level, double min_distance,
-                          np.ndarray mask=None, int block_size=3,
-                          int use_harris=0, double k=0.04):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+                          int block_size=3, int use_harris=0, double k=0.04):
 
     validate_array(src)
     assert_dtype(src, [UINT8, FLOAT32])
@@ -565,12 +769,9 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
     populate_iplimage(src, &srcimg)
     populate_iplimage(eig, &eigimg)
     populate_iplimage(temp, &tempimg)
-    if mask is None:
-        maskimg = NULL
-    else:
-        validate_array(mask)
-        assert_nchannels(mask, [1])
-        populate_iplimage(mask, maskimg)
+
+    # don't need to support ROI. The user can just pass a slice.
+    maskimg = NULL
 
     c_cvGoodFeaturesToTrack(&srcimg, &eigimg, &tempimg, cvcorners,
                             &ncorners_found, quality_level, min_distance,
@@ -579,10 +780,8 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
 
     return out[:ncorners_found]
 
-def cvGetRectSubPix(np.ndarray src, size, center):
-    ''' Retrieves the pixel rectangle from an image with
-    sub-pixel accuracy.
 
+    '''
     Paramters:
         src - source image.
         size - two tuple (height, width) of rectangle (ints)
@@ -595,6 +794,37 @@ def cvGetRectSubPix(np.ndarray src, size, center):
     Returns:
         A new image of the extracted rectangle. The same dtype as the src image.
     '''
+
+#----------------
+# cvGetRectSubPix
+#----------------
+
+@cvdoc(
+description = \
+'''Retrieves the pixel rectangle from an image with
+sub-pixel accuracy.''',
+signature =  \
+'''cvGetRectSubPix(src, size, center)''',
+parameters = \
+'''src : ndarray
+    The source image.
+size : two tuple, integers, (height, width)
+    The size of the rectangle to extract.
+center : two tuple, floats, (x, y)
+    The center location of the rectangle.
+    The center must lie within the image, but the
+    rectangle may extend beyond the bounds of the image.''',
+returns = \
+'''out : ndarray
+    The extracted rectangle of the image.''',
+notes = \
+'''The center of the specified rectangle must
+lie within the image, but the bounds of the rectangle
+may extend beyond the image. Border replication is used
+to fill in missing pixels.''',
+package = 'cv',
+group = 'image')
+def cvGetRectSubPix(np.ndarray src, size, center):
 
     validate_array(src)
 
