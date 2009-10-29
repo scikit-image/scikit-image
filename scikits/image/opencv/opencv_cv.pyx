@@ -279,7 +279,7 @@ c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
 ####################################
 # Function Implementations
 ####################################
-def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
+def cvSobel(np.ndarray src, int xorder=1, int yorder=0,
             int aperture_size=3):
 
     """
@@ -295,20 +295,12 @@ def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
-    if out is not None:
-        validate_array(out)
-        assert_not_sharing_data(src, out)
-        assert_same_shape(src, out)
-        assert_nchannels(out, [1])
-        if src.dtype == UINT8 or src.dtype == INT8:
-            assert_dtype(out, [INT16])
-        else:
-            assert_dtype(out, [FLOAT32])
+    cdef np.ndarray out
+
+    if src.dtype == UINT8 or src.dtype == INT8:
+        out = new_array_like_diff_dtype(src, INT16)
     else:
-        if src.dtype == UINT8 or src.dtype == INT8:
-            out = new_array_like_diff_dtype(src, INT16)
-        else:
-            out = new_array_like(src)
+        out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -320,7 +312,7 @@ def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
 
     return out
 
-def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
+def cvLaplace(np.ndarray src, int aperture_size=3):
 
     """
     better doc string needed.
@@ -335,21 +327,12 @@ def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
 
-    if out is not None:
-        validate_array(out)
-        assert_not_sharing_data(src, out)
-        assert_same_shape(src, out)
-        assert_nchannels(out, [1])
-        if src.dtype == UINT8 or src.dtype == INT8:
-            assert_dtype(out, [INT16])
-        else:
-            assert_dtype(out, [FLOAT32])
+    if src.dtype == UINT8 or src.dtype == INT8:
+        out = new_array_like_diff_dtype(src, INT16)
     else:
-        if src.dtype == UINT8 or src.dtype == INT8:
-            out = new_array_like_diff_dtype(src, INT16)
-        else:
-            out = new_array_like(src)
+        out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -361,8 +344,8 @@ def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
 
     return out
 
-def cvCanny(np.ndarray src, np.ndarray out=None, double threshold1=10,
-            double threshold2=50, int aperture_size=3):
+def cvCanny(np.ndarray src, double threshold1=10, double threshold2=50,
+            int aperture_size=3):
 
     """
     better doc string needed.
@@ -371,19 +354,14 @@ def cvCanny(np.ndarray src, np.ndarray out=None, double threshold1=10,
     """
 
     validate_array(src)
+    assert_dtype(src, [UINT8])
     assert_nchannels(src, [1])
 
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
-
-    if out is not None:
-        validate_array(out)
-        assert_nchannels(out, [1])
-        assert_same_shape(src, out)
-        assert_not_sharing_data(src, out)
-    else:
-        out = new_array_like(src)
+    cdef np.ndarray out
+    out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -394,8 +372,7 @@ def cvCanny(np.ndarray src, np.ndarray out=None, double threshold1=10,
 
     return out
 
-def cvPreCornerDetect(np.ndarray src, np.ndarray out=None,
-                      int aperture_size=3):
+def cvPreCornerDetect(np.ndarray src, int aperture_size=3):
     """
     better doc string needed.
     for now:
@@ -409,13 +386,8 @@ def cvPreCornerDetect(np.ndarray src, np.ndarray out=None,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
-    if out is not None:
-        validate_array(out)
-        assert_same_shape(src, out)
-        assert_dtype(out, [FLOAT32])
-        assert_not_sharing_data(src, out)
-    else:
-        out = new_array_like_diff_dtype(src, FLOAT32)
+    cdef np.ndarray out
+    out = new_array_like_diff_dtype(src, FLOAT32)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -435,10 +407,6 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
     http://opencv.willowgarage.com/documentation/cvreference.html
     """
 
-    # no option for the out argument on this one. Its easier just
-    # to make it for them as there is only 1 valid out array for any
-    # given source array
-
     validate_array(src)
     assert_nchannels(src, [1])
     assert_dtype(src, [UINT8, FLOAT32])
@@ -446,9 +414,10 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
     cdef np.npy_intp outshape[2]
     outshape[0] = src.shape[0]
-    outshape[1] = src.shape[1] * <np.npy_intp>6
+    outshape[1] = src.shape[1] * 6
 
     out = new_array(2, outshape, FLOAT32)
 
@@ -468,9 +437,6 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
     for now:
     http://opencv.willowgarage.com/documentation/cvreference.html
     """
-    # no option for the out argument on this one. Its easier just
-    # to make it for them as there is only 1 valid out array for any
-    # given source array
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -479,6 +445,7 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
     out = new_array_like_diff_dtype(src, FLOAT32)
 
     cdef IplImage srcimg
@@ -497,9 +464,6 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
     for now:
     http://opencv.willowgarage.com/documentation/cvreference.html
     """
-    # no option for the out argument on this one. Its easier just
-    # to make it for them as there is only 1 valid out array for any
-    # given source array
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -508,6 +472,7 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
     out = new_array_like_diff_dtype(src, FLOAT32)
 
     cdef IplImage srcimg
@@ -519,7 +484,7 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
 
     return out
 
-def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
+def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, win,
                        zero_zone=(-1, -1), int iterations=0,
                        double epsilon=1e-5):
 
@@ -530,29 +495,26 @@ def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
     """
 
     validate_array(src)
-    validate_array(corners)
-
     assert_nchannels(src, [1])
     assert_dtype(src, [UINT8])
 
-    assert_nchannels(corners, [1])
+    validate_array(corners)
+    assert_ndims(corners, [2])
     assert_dtype(corners, [FLOAT32])
 
-    # make sure the number of points
-    # jives with the elements in the array
-    # the shape of the array is irrelevant
-    # because opencv will index it as if it were
-    # flat anyway, but regardless, the validate_array function ensures
-    # that it is 2D
-    cdef int nbytes = <int> get_array_nbytes(corners)
-    if nbytes != (count * 2 * 4):
-        raise ValueError('The number of declared points is different '
-                         'than exists in the array.')
+    cdef int count = <int>(corners.shape[0] * corners.shape[1] / 2.)
     cdef CvPoint2D32f* cvcorners = array_as_cvPoint2D32f_ptr(corners)
 
+    if len(win) != 2:
+        raise ValueError('win must be a 2-tuple')
     cdef CvSize cvwin
     cvwin.height = <int> win[0]
     cvwin.width = <int> win[1]
+
+    cdef int imgheight = src.shape[0]
+    cdef int imgwidth = src.shape[1]
+    if imgwidth < (cvwin.width * 2 + 5) or imgheight  < (cvwin.height * 2 + 5):
+        raise ValueError('The window is too large.')
 
     cdef CvSize cvzerozone
     cvzerozone.height = <int> zero_zone[0]
@@ -566,7 +528,7 @@ def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
 
     c_cvFindCornerSubPix(&srcimg, cvcorners, count, cvwin, cvzerozone, crit)
 
-    return None
+    return corners
 
 def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
                           double quality_level, double min_distance,
@@ -678,8 +640,8 @@ def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
 
     assert_nchannels(warpmat, [1])
 
-    assert warpmat.shape[0] == 2, 'warpmat must be 2x3'
-    assert warpmat.shape[1] == 3, 'warpmat must be 2x3'
+    if warpmat.shape[0] != 2 or warpmat.shape[1] != 3:
+        raise ValueError('warpmat must be 2x3')
 
     cdef np.ndarray out
 
@@ -719,8 +681,8 @@ def cvResize(np.ndarray src, height=None, width=None,
 
     cdef int ndim = src.ndim
     cdef np.npy_intp* shape = clone_array_shape(src)
-    shape[0] = height
-    shape[1] = width
+    shape[0] = <np.npy_intp>height
+    shape[1] = <np.npy_intp>width
 
     cdef np.ndarray out = new_array(ndim, shape, src.dtype)
     validate_array(out)
@@ -755,11 +717,13 @@ def cvWarpAffine(np.ndarray src, np.ndarray warpmat,
     '''
     validate_array(src)
     validate_array(warpmat)
-    assert len(fillval) == 4, 'fillval must be a 4-tuple'
+    if len(fillval) != 4:
+        raise ValueError('fillval must be a 4-tuple')
     assert_nchannels(src, [1, 3])
     assert_nchannels(warpmat, [1])
-    assert warpmat.shape[0] == 2, 'warpmat must be 2x3'
-    assert warpmat.shape[1] == 3, 'warpmat must be 2x3'
+
+    if warpmat.shape[0] != 2 or warpmat.shape[1] != 3:
+        raise ValueError('warpmat must be 2x3')
 
     cdef np.ndarray out
     out = new_array_like(src)
@@ -804,11 +768,12 @@ def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
     '''
     validate_array(src)
     validate_array(warpmat)
-    assert len(fillval) == 4, 'fillval must be a 4-tuple'
+    if len(fillval) != 4:
+        raise ValueError('fillval must be a 4-tuple')
     assert_nchannels(src, [1, 3])
     assert_nchannels(warpmat, [1])
-    assert warpmat.shape[0] == 3, 'warpmat must be 3x3'
-    assert warpmat.shape[1] == 3, 'warpmat must be 3x3'
+    if warpmat.shape[0] != 3 or warpmat.shape[1] != 3:
+        raise ValueError('warpmat must be 3x3')
 
     cdef np.ndarray out
     out = new_array_like(src)
@@ -837,7 +802,8 @@ def cvLogPolar(np.ndarray src, center, double M,
                int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS):
 
     validate_array(src)
-    assert len(center) == 2
+    if len(center) != 2:
+        raise ValueError('center must be a 2-tuple')
 
     cdef np.ndarray out = new_array_like(src)
 
@@ -966,8 +932,7 @@ def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
     else:
         return out
 
-def cvSmooth(np.ndarray src, np.ndarray out=None,
-             int smoothtype=CV_GAUSSIAN, int param1=3,
+def cvSmooth(np.ndarray src, int smoothtype=CV_GAUSSIAN, int param1=3,
              int param2=0, double param3=0, double param4=0,
              bool in_place=False):
     """
@@ -977,9 +942,8 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
     """
 
     validate_array(src)
-    if out is not None:
-        validate_array(out)
 
+    cdef np.ndarray out
     # there are restrictions that must be placed on the data depending on
     # the smoothing operation requested
 
@@ -993,17 +957,10 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
         assert_dtype(src, [UINT8, INT8, FLOAT32])
         assert_ndims(src, [2])
 
-        if out is not None:
-            if src.dtype == FLOAT32:
-                assert_dtype(out, [FLOAT32])
-            else:
-                assert_dtype(out, [INT16])
-            assert_same_shape(src, out)
+        if src.dtype == FLOAT32:
+            out = new_array_like(src)
         else:
-            if src.dtype == FLOAT32:
-                out = new_array_like(src)
-            else:
-                out = new_array_like_diff_dtype(src, INT16)
+            out = new_array_like_diff_dtype(src, INT16)
 
     # CV_BLUR and CV_GAUSSIAN
     elif smoothtype == CV_BLUR or smoothtype == CV_GAUSSIAN:
@@ -1013,8 +970,6 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
 
         if in_place:
             out = src
-        elif out is not None:
-            assert_like(src, out)
         else:
             out = new_array_like(src)
 
@@ -1027,10 +982,7 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
             raise RuntimeError('In place operation not supported with this '
                                'filter')
 
-        if out is not None:
-            assert_like(src, out)
-        else:
-            out = new_array_like(src)
+        out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -1039,7 +991,10 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
 
     c_cvSmooth(&srcimg, &outimg, smoothtype, param1, param2, param3, param4)
 
-    return out
+    if in_place:
+        return None
+    else:
+        return out
 
 def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
 
@@ -1375,6 +1330,7 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
     outshape[0] = <np.npy_intp> pattern_size[0] * pattern_size[1]
     outshape[1] = <np.npy_intp> 2
 
+    cdef np.ndarray out
     out = new_array(2, outshape, FLOAT32)
     cdef CvPoint2D32f* cvpoints = array_as_cvPoint2D32f_ptr(out)
 
@@ -1392,7 +1348,7 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
     return out[:ncorners_found]
 
 def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
-                            in_place=True):
+                            in_place=False):
     """
     Wrapper around the OpenCV cvDrawChessboardCorners function.
 
@@ -1444,6 +1400,9 @@ def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
     c_cvDrawChessboardCorners(&outimg, cvpattern_size, cvcorners,
         ncount, pattern_was_found)
 
-    return out
+    if in_place:
+        return None
+    else:
+        return out
 
 

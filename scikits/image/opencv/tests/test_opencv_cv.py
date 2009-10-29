@@ -78,7 +78,7 @@ class TestFindCornerSubPix(object):
                             [2, 5],
                             [5, 2],
                             [5, 5]], dtype='float32')
-        cvFindCornerSubPix(img, corners, 4, (2, 2))
+        cvFindCornerSubPix(img, corners, (2, 2))
 
 
 class TestGoodFeaturesToTrack(OpenCVTest):
@@ -168,7 +168,7 @@ class TestSmooth(OpenCVTest):
     def test_cvSmooth(self):
         for st in (CV_BLUR_NO_SCALE, CV_BLUR, CV_GAUSSIAN, CV_MEDIAN,
                    CV_BILATERAL):
-            cvSmooth(self.lena_GRAY_U8, None, st, 3, 0, 0, 0, False)
+            cvSmooth(self.lena_GRAY_U8, st, 3, 0, 0, 0, False)
 
 
 class TestFilter2D(OpenCVTest):
