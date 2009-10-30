@@ -285,26 +285,29 @@ c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
 # cvSobel
 #--------
 
-@cvdoc(
-description = \
-'''Apply the Sobel operator to the input image.''',
-signature =  \
-'''cvSobel(src, xorder=1, yorder=0, aperture_size=3)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8, int8, float32]
+@cvdoc(package='cv', group='image', doc=\
+'''Apply the Sobel operator to the input image.
+
+Signature
+---------
+cvSobel(src, xorder=1, yorder=0, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, int8, float32]
     The source image.
 xorder : integer
     The x order of the Sobel operator.
 yorder : integer
     The y order of the Sobel operator.
 aperture_size : integer=[3, 5, 7]
-    The size of the Sobel kernel.''',
-returns = \
-'''out : ndarray
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
     A new which is the result of applying the Sobel
-    operator to src.''',
-package = 'cv',
-group = 'image')
+    operator to src.''')
 def cvSobel(np.ndarray src, int xorder=1, int yorder=0,
             int aperture_size=3):
 
@@ -337,22 +340,25 @@ def cvSobel(np.ndarray src, int xorder=1, int yorder=0,
 # cvLaplace
 #----------
 
-@cvdoc(
-description = \
-'''Apply the Laplace operator to the input image.''',
-signature =  \
-'''cvLaplace(src, aperture_size=3)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8, int8, float32]
+@cvdoc(package='cv', group='image', doc=\
+'''Apply the Laplace operator to the input image.
+
+Signature
+---------
+cvLaplace(src, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, int8, float32]
     The source image.
 aperture_size : integer=[3, 5, 7]
-    The size of the Sobel kernel.''',
-returns = \
-'''out : ndarray
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
     A new which is the result of applying the Laplace
-    operator to src.''',
-package = 'cv',
-group = 'image')
+    operator to src.''')
 def cvLaplace(np.ndarray src, int aperture_size=3):
 
     validate_array(src)
@@ -384,26 +390,29 @@ def cvLaplace(np.ndarray src, int aperture_size=3):
 # cvCanny
 #--------
 
-@cvdoc(
-description = \
-'''Apply Canny edge detection to the input image.''',
-signature =  \
-'''cvCanny(src, threshold1=10, threshold2=50, aperture_size=3)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8]
+@cvdoc(package='cv', group='image', doc=\
+'''Apply Canny edge detection to the input image.
+
+Signature
+---------
+cvCanny(src, threshold1=10, threshold2=50, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8]
     The source image.
 threshold1 : float
     The lower threshold used for edge linking.
 threshold2 : float
     The upper threshold used to find strong edges.
 aperture_size : integer=[3, 5, 7]
-    The size of the Sobel kernel.''',
-returns = \
-'''out : ndarray
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
     A new which is the result of applying Canny
-    edge detection to src.''',
-package = 'cv',
-group = 'image')
+    edge detection to src.''')
 def cvCanny(np.ndarray src, double threshold1=10, double threshold2=50,
             int aperture_size=3):
 
@@ -431,21 +440,24 @@ def cvCanny(np.ndarray src, double threshold1=10, double threshold2=50,
 # cvPreCornerDetect
 #------------------
 
-@cvdoc(
-description = \
-'''Calculate the feature map for corner detection.''',
-signature =  \
-'''cvPreCornerDetect(src, aperture_size=3)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8, float32]
+@cvdoc(package='cv', group='image', doc=\
+'''Calculate the feature map for corner detection.
+
+Signature
+---------
+cvPreCornerDetect(src, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
     The source image.
 aperture_size : integer=[3, 5, 7]
-    The size of the Sobel kernel.''',
-returns = \
-'''out : ndarray
-    A new array of the corner candidates.''',
-package = 'cv',
-group = 'image')
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new array of the corner candidates.''')
 def cvPreCornerDetect(np.ndarray src, int aperture_size=3):
 
     validate_array(src)
@@ -472,28 +484,31 @@ def cvPreCornerDetect(np.ndarray src, int aperture_size=3):
 # cvCornerEigenValsAndVecs
 #-------------------------
 
-@cvdoc(
-description = \
+@cvdoc(package='cv', group='image', doc=\
 '''Calculates the eigenvalues and eigenvectors of image
-blocks for corner detection.''',
-signature =  \
-'''cvCornerEigenValsAndVecs(src, block_size=3, aperture_size=3)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8, float32]
+blocks for corner detection.
+
+Signature
+---------
+cvCornerEigenValsAndVecs(src, block_size=3, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
     The source image.
 block_size : integer
     The size of the neighborhood in which to calculate
     the eigenvalues and eigenvectors.
 aperture_size : integer=[3, 5, 7]
-    The size of the Sobel kernel.''',
-returns = \
-'''out : ndarray
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
     A new array of the eigenvalues and eigenvectors.
     The shape of this array is (height, width, 6),
     Where height and width are the same as that
-    of src.''',
-package = 'cv',
-group = 'image')
+    of src.''')
 def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
                                              int aperture_size=3):
 
@@ -525,25 +540,28 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
 # cvCornerMinEigenVal
 #--------------------
 
-@cvdoc(
-description = \
+@cvdoc(package='cv', group='image', doc=\
 '''Calculates the minimum eigenvalues of gradient matrices
-for corner detection.''',
-signature =  \
-'''cvCornerMinEigenVal(src, block_size=3, aperture_size=3)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8, float32]
+for corner detection.
+
+Signature
+---------
+cvCornerMinEigenVal(src, block_size=3, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
     The source image.
 block_size : integer
     The size of the neighborhood in which to calculate
     the eigenvalues.
 aperture_size : integer=[3, 5, 7]
-    The size of the Sobel kernel.''',
-returns = \
-'''out : ndarray
-    A new array of the eigenvalues.''',
-package = 'cv',
-group = 'image')
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new array of the eigenvalues.''')
 def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
                                         int aperture_size=3):
 
@@ -571,33 +589,38 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
 # cvCornerHarris
 #---------------
 
-@cvdoc(
-description = \
-'''Applies the Harris edge detector to the input image.''',
-signature =  \
-'''cvCornerHarris(src, block_size=3, aperture_size=3, k=0.04)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8, float32]
+@cvdoc(package='cv', group='image', doc=\
+'''Applies the Harris edge detector to the input image.
+
+Signature
+---------
+cvCornerHarris(src, block_size=3, aperture_size=3, k=0.04)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
     The source image.
 block_size : integer
     The size of the neighborhood in which to apply the detector.
 aperture_size : integer=[3, 5, 7]
     The size of the Sobel kernel.
 k : float
-    Harris detector free parameter. See Notes.''',
-returns = \
-'''out : ndarray
-    A new array of the Harris corners.''',
-notes = \
-'''The function cvCornerHarris() runs the Harris edge
+    Harris detector free parameter. See Notes.
+
+Returns
+-------
+out : ndarray
+    A new array of the Harris corners.
+
+Notes
+-----
+The function cvCornerHarris() runs the Harris edge
 detector on the image. Similarly to cvCornerMinEigenVal()
 and cvCornerEigenValsAndVecs(), for each pixel it calculates
 a gradient covariation matrix M over a block_size X block_size
 neighborhood. Then, it stores det(M) - k * trace(M)**2
 to the output image. Corners in the image can be found as the
-local maxima of the output image.''',
-package = 'cv',
-group = 'image')
+local maxima of the output image.''')
 def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
                                                      double k=0.04):
 
@@ -625,14 +648,17 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
 # cvFindCornerSubPix
 #-------------------
 
-@cvdoc(
-description = \
-'''Refines corner locations to sub-pixel accuracy.''',
-signature =  \
-'''cvFindCornerSubPix(src, corners, win, zero_zone=(-1, -1),
-                      iterations=0, epsilon=1e-5)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8]
+@cvdoc(package='cv', group='image', doc=\
+'''Refines corner locations to sub-pixel accuracy.
+
+Signature
+---------
+cvFindCornerSubPix(src, corners, win, zero_zone=(-1, -1),
+                   iterations=0, epsilon=1e-5)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8]
     The source image.
 corners : ndarray, shape=(N x 2)
     An initial approximation of the corners in the image.
@@ -651,11 +677,11 @@ iterations : integer
     the function iterates until the error is less than epsilon.
 epsilon : float
     The epsilon error, below which the function terminates.
-    Can be used in combination with iterations.''',
-returns = \
-'''None. The array corners is modified in place.''',
-package = 'cv',
-group = 'image')
+    Can be used in combination with iterations.
+
+Returns
+-------
+None. The array 'corners' is modified in place.''')
 def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, win,
                        zero_zone=(-1, -1), int iterations=0,
                        double epsilon=1e-5):
@@ -701,15 +727,18 @@ def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, win,
 # cvGoodFeaturesToTrack
 #----------------------
 
-@cvdoc(
-description = \
-'''Determines strong corners in an image.''',
-signature =  \
-'''cvGoodFeaturesToTrack(src, corner_count, quality_level,
-                         min_distance, block_size=3,
-                         use_harris=0, k=0.04)''',
-parameters = \
-'''src : ndarray, 2D, dtype=[uint8, float32]
+@cvdoc(package='cv', group='image', doc=\
+'''Determines strong corners in an image.
+
+Signature
+---------
+cvGoodFeaturesToTrack(src, corner_count, quality_level,
+                      min_distance, block_size=3,
+                      use_harris=0, k=0.04)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
     The source image.
 corner_count : int
     The maximum number of corners to find.
@@ -729,17 +758,19 @@ use_harris : integer
     is used instead of default cvCornerMinEigenVal()
 k : float
     Harris detector free parameter.
-    Used only if use_harris != 0.''',
-returns = \
-'''out : ndarray
-    The locations of the found corners in the image.''',
-notes = \
-'''This function finds distinct and strong corners
+    Used only if use_harris != 0.
+
+Returns
+-------
+out : ndarray
+    The locations of the found corners in the image.
+
+Notes
+-----
+This function finds distinct and strong corners
 in an image which can be used as features in a tracking
 algorithm. It also insures that features are distanced
-from one another by at least min_distance.''',
-package = 'cv',
-group = 'image')
+from one another by at least min_distance.''')
 def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
                           double quality_level, double min_distance,
                           int block_size=3, int use_harris=0, double k=0.04):
@@ -781,49 +812,40 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
     return out[:ncorners_found]
 
 
-    '''
-    Paramters:
-        src - source image.
-        size - two tuple (height, width) of rectangle (ints)
-        center - two tuple (x, y) of rectangle center (floats)
-
-        the center must lie within the image, but the rectangle
-        may extend beyond the bounds of the image, at which point
-        the border is replicated.
-
-    Returns:
-        A new image of the extracted rectangle. The same dtype as the src image.
-    '''
-
 #----------------
 # cvGetRectSubPix
 #----------------
 
-@cvdoc(
-description = \
+@cvdoc(package='cv', group='image', doc=\
 '''Retrieves the pixel rectangle from an image with
-sub-pixel accuracy.''',
-signature =  \
-'''cvGetRectSubPix(src, size, center)''',
-parameters = \
-'''src : ndarray
+sub-pixel accuracy.
+
+Signature
+---------
+cvGetRectSubPix(src, size, center)
+
+Parameters
+----------
+src : ndarray
     The source image.
 size : two tuple, integers, (height, width)
     The size of the rectangle to extract.
 center : two tuple, floats, (x, y)
     The center location of the rectangle.
     The center must lie within the image, but the
-    rectangle may extend beyond the bounds of the image.''',
-returns = \
-'''out : ndarray
-    The extracted rectangle of the image.''',
-notes = \
-'''The center of the specified rectangle must
+    rectangle may extend beyond the bounds of the image.
+
+Returns
+-------
+out : ndarray
+    The extracted rectangle of the image.
+
+Notes
+-----
+The center of the specified rectangle must
 lie within the image, but the bounds of the rectangle
 may extend beyond the image. Border replication is used
-to fill in missing pixels.''',
-package = 'cv',
-group = 'image')
+to fill in missing pixels.''')
 def cvGetRectSubPix(np.ndarray src, size, center):
 
     validate_array(src)
