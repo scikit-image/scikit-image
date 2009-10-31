@@ -871,20 +871,49 @@ def cvGetRectSubPix(np.ndarray src, size, center):
 
     return out
 
+
+#----------------------
+# cvGetQuadrangleSubPix
+#----------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Retrieves the pixel quandrangle from an image with
+sub-pixel accuracy. In english: apply an affine transform to an image.
+
+Signature
+---------
+cvGetQuadrangleSubPix(src, warpmat, float_out=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+warpmat : ndarray, 2x3
+    The affine transformation to apply to the src image.
+float_out : bool
+    If True, the return array will have dtype np.float32.
+    Otherwise, the return array will have the same dtype
+    as the src array.
+    If True, the src array MUST have dtype np.uint8
+
+Returns
+-------
+out : ndarray
+    Warped image of same size as src.
+
+Notes
+-----
+The values of pixels at non-integer coordinates are retrieved
+using bilinear interpolation. When the function needs pixels
+outside of the image, it uses replication border mode to
+reconstruct the values. Every channel of multiple-channel
+images is processed independently.
+
+This function has less overhead than cvWarpAffine
+and should be used unless specific feature of that
+function are required.''')
 def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
-    ''' Retrieves the pixel quandrangle from an image with
-    sub-pixel accuracy. In english: apply and affine transform to an image.
 
-    Parameters:
-                src - input image
-                warpmat - a 2x3 array which is an affine transform
-                float_out - return a float32 array. If true, input must be
-                            uint8. If false, output is same type as input.
-
-    Return:
-                warped image of same size and dtype as src. Except when
-                float_out == True (see above)
-    '''
     validate_array(src)
     validate_array(warpmat)
 
@@ -919,22 +948,51 @@ def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
 
     return out
 
-def cvResize(np.ndarray src, height=None, width=None,
-             int method=CV_INTER_LINEAR):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+
+#---------
+# cvResize
+#---------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Resize an to the given size.
+
+Signature
+---------
+cvResize(src, size, method=CV_INTER_LINEAR)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+size : tuple, (height, width)
+    The target resize size.
+method : integer
+    The interpolation method used for resizing.
+    Supported methods are:
+    CV_INTER_NN
+    CV_INTER_LINEAR
+    CV_INTER_AREA
+    CV_INTER_CUBIC
+
+Returns
+-------
+out : ndarray
+    The resized image.''')
+def cvResize(np.ndarray src, size, int method=CV_INTER_LINEAR):
+
     validate_array(src)
 
-    if not height or not width:
-        raise ValueError('width and height must not be none')
+    if len(size) != 2:
+        raise ValueError('size must be a 2-tuple (height, width)')
+
+    if method not in [CV_INTER_NN, CV_INTER_LINEAR, CV_INTER_AREA,
+                      CV_INTER_CUBIC]:
+        raise ValueError('unsupported interpolation type')
 
     cdef int ndim = src.ndim
     cdef np.npy_intp* shape = clone_array_shape(src)
-    shape[0] = <np.npy_intp>height
-    shape[1] = <np.npy_intp>width
+    shape[0] = <np.npy_intp>size[0]
+    shape[1] = <np.npy_intp>size[1]
 
     cdef np.ndarray out = new_array(ndim, shape, src.dtype)
     validate_array(out)
@@ -950,23 +1008,62 @@ def cvResize(np.ndarray src, height=None, width=None,
 
     return out
 
+
+#-------------
+# cvWarpAffine
+#-------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Applies an affine transformation to the image.
+
+Signature
+---------
+cvWarpAffine(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS
+             fillval=(0., 0., 0., 0.))
+
+Parameters
+----------
+src : ndarray
+    The source image.
+warpmat : ndarray, 2x3
+    The affine transformation to apply to the src image.
+flag : integer
+    A combination of interpolation and method flags.
+    Supported flags are: (see notes)
+    Interpolation:
+        CV_INTER_NN
+        CV_INTER_LINEAR
+        CV_INTER_AREA
+        CV_INTER_CUBIC
+    Method:
+        CV_WARP_FILL_OUTLIERS
+        CV_WARP_INVERSE_MAP
+fillval : 4-tuple, (R, G, B, A)
+    The color to fill in missing pixels. Defaults to black.
+    For < 4 channel images, use 0.'s for the value.
+
+Returns
+-------
+out : ndarray
+    The warped image of same size and dtype as src.
+
+Notes
+-----
+CV_WARP_FILL_OUTLIERS - fills all of the destination image pixels;
+    if some of them correspond to outliers in the source image,
+    they are set to fillval.
+CV_WARP_INVERSE_MAP - indicates that warpmat is inversely transformed
+    from the destination image to the source and, thus, can be used
+    directly for pixel interpolation. Otherwise, the function finds
+    the inverse transform from warpmat.
+
+This function has a larger overhead than cvGetQuadrangleSubPix,
+and that function should be used instead, unless specific
+features of this function are needed.''')
 def cvWarpAffine(np.ndarray src, np.ndarray warpmat,
-                 int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                 int flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
                  fillval=(0., 0., 0., 0.)):
 
-    ''' Applies an affine transformation to an image.
-
-    Parameters:
-                src - source image
-                warpmat - 2x3 affine transformation
-                flags - a combination of interpolation and method flags.
-                        see opencv documentation for more details
-                fillval - a 4 tuple of a color to fill the background
-                          defaults to black.
-
-    Returns:
-                a warped image the same size and dtype as src
-    '''
     validate_array(src)
     validate_array(warpmat)
     if len(fillval) != 4:
@@ -976,6 +1073,10 @@ def cvWarpAffine(np.ndarray src, np.ndarray warpmat,
 
     if warpmat.shape[0] != 2 or warpmat.shape[1] != 3:
         raise ValueError('warpmat must be 2x3')
+
+    valid_flags = [0, 1, 2, 3, 8, 16, 9, 17, 11, 19, 10, 18]
+    if flag not in valid_flags:
+        raise ValueError('unsupported flag combination')
 
     cdef np.ndarray out
     out = new_array_like(src)
@@ -995,29 +1096,64 @@ def cvWarpAffine(np.ndarray src, np.ndarray warpmat,
     populate_iplimage(warpmat, &cvmat)
     cvmatptr = cvmat_ptr_from_iplimage(&cvmat)
 
-    c_cvWarpAffine(&srcimg, &outimg, cvmatptr, flags, cvfill)
+    c_cvWarpAffine(&srcimg, &outimg, cvmatptr, flag, cvfill)
 
     PyMem_Free(cvmatptr)
 
     return out
 
+
+#------------------
+# cvWarpPerspective
+#------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Applies a perspective transformation to an image.
+
+Signature
+---------
+cvWarpPerspective(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS
+                  fillval=(0., 0., 0., 0.))
+
+Parameters
+----------
+src : ndarray
+    The source image.
+warpmat : ndarray, 3x3
+    The affine transformation to apply to the src image.
+flag : integer
+    A combination of interpolation and method flags.
+    Supported flags are: (see notes)
+    Interpolation:
+        CV_INTER_NN
+        CV_INTER_LINEAR
+        CV_INTER_AREA
+        CV_INTER_CUBIC
+    Method:
+        CV_WARP_FILL_OUTLIERS
+        CV_WARP_INVERSE_MAP
+fillval : 4-tuple, (R, G, B, A)
+    The color to fill in missing pixels. Defaults to black.
+    For < 4 channel images, use 0.'s for the value.
+
+Returns
+-------
+out : ndarray
+    The warped image of same size and dtype as src.
+
+Notes
+-----
+CV_WARP_FILL_OUTLIERS - fills all of the destination image pixels;
+    if some of them correspond to outliers in the source image,
+    they are set to fillval.
+CV_WARP_INVERSE_MAP - indicates that warpmat is inversely transformed
+    from the destination image to the source and, thus, can be used
+    directly for pixel interpolation. Otherwise, the function finds
+    the inverse transform from warpmat.''')
 def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
-                      int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                      int flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
                       fillval=(0., 0., 0., 0.)):
 
-    ''' Applies a perspective transformation to an image.
-
-    Parameters:
-                src - source image
-                warpmat - 3x3 perspective transformation
-                flags - a combination of interpolation and method flags.
-                        see opencv documentation for more details
-                fillval - a 4 tuple of a color to fill the background
-                          defaults to black.
-
-    Returns:
-                a warped image the same size and dtype as src
-    '''
     validate_array(src)
     validate_array(warpmat)
     if len(fillval) != 4:
@@ -1026,6 +1162,10 @@ def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
     assert_nchannels(warpmat, [1])
     if warpmat.shape[0] != 3 or warpmat.shape[1] != 3:
         raise ValueError('warpmat must be 3x3')
+
+    valid_flags = [0, 1, 2, 3, 8, 16, 9, 17, 11, 19, 10, 18]
+    if flag not in valid_flags:
+        raise ValueError('unsupported flag combination')
 
     cdef np.ndarray out
     out = new_array_like(src)
@@ -1044,18 +1184,71 @@ def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
     populate_iplimage(out, &outimg)
     populate_iplimage(warpmat, &cvmat)
     cvmatptr = cvmat_ptr_from_iplimage(&cvmat)
-    c_cvWarpPerspective(&srcimg, &outimg, cvmatptr, flags, cvfill)
+    c_cvWarpPerspective(&srcimg, &outimg, cvmatptr, flag, cvfill)
 
     PyMem_Free(cvmatptr)
 
     return out
 
+
+#-----------
+# cvLogPolar
+#-----------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Remaps and image to Log-Polar space.
+
+Signature
+---------
+cvLogPolar(src, center, M, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+center : tuple, (x, y)
+    The keypoint for the log polar transform.
+M : float
+    The scale factor for the transform.
+    (40 is a good starting point for a 256x256 image)
+flag : integer
+    A combination of interpolation and method flags.
+    Supported flags are: (see notes)
+    Interpolation:
+        CV_INTER_NN
+        CV_INTER_LINEAR
+        CV_INTER_AREA
+        CV_INTER_CUBIC
+    Method:
+        CV_WARP_FILL_OUTLIERS
+        CV_WARP_INVERSE_MAP
+
+Returns
+-------
+out : ndarray
+    A transformed image the same size and dtype as src.
+
+Notes
+-----
+CV_WARP_FILL_OUTLIERS - fills all of the destination image pixels;
+    if some of them correspond to outliers in the source image,
+    they are set to zero.
+CV_WARP_INVERSE_MAP - assume that the source image is already
+    in Log-Polar space, and transform back to cartesian space.
+
+The function emulates the human “foveal” vision and can be used
+for fast scale and rotation-invariant template matching,
+for object tracking and so forth.''')
 def cvLogPolar(np.ndarray src, center, double M,
-               int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS):
+               int flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS):
 
     validate_array(src)
     if len(center) != 2:
         raise ValueError('center must be a 2-tuple')
+
+    valid_flags = [0, 16, 8, 24, 1, 17, 9, 25, 2, 18, 10, 26, 3, 19, 11, 27]
+    if flag not in valid_flags:
+        raise ValueError('unsupported flag combination')
 
     cdef np.ndarray out = new_array_like(src)
 
@@ -1068,7 +1261,7 @@ def cvLogPolar(np.ndarray src, center, double M,
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
 
-    c_cvLogPolar(&srcimg, &outimg, cv_center, M, flags)
+    c_cvLogPolar(&srcimg, &outimg, cv_center, M, flag)
     return out
 
 def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,

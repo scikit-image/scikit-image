@@ -104,8 +104,8 @@ class TestGetQuadrangleSubPix(OpenCVTest):
 class TestResize(OpenCVTest):
     @opencv_skip
     def test_cvResize(self):
-        cvResize(self.lena_RGB_U8, height=50, width=50, method=CV_INTER_LINEAR)
-        cvResize(self.lena_RGB_U8, height=200, width=200, method=CV_INTER_CUBIC)
+        cvResize(self.lena_RGB_U8, (50, 50), method=CV_INTER_LINEAR)
+        cvResize(self.lena_RGB_U8, (200, 200), method=CV_INTER_CUBIC)
 
 
 class TestWarpAffine(OpenCVTest):
