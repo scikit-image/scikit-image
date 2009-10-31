@@ -1264,6 +1264,42 @@ def cvLogPolar(np.ndarray src, center, double M,
     c_cvLogPolar(&srcimg, &outimg, cv_center, M, flag)
     return out
 
+
+#--------
+# cvErode
+#--------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Erode the source image with the given element.
+
+Signature
+---------
+cvErode(src, element=None, iterations=1, anchor=None, in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+element : ndarray, 2D
+    The structuring element. Must be 2D. Non-zero elements
+    indicate which pixels of the underlying image to include
+    in the operation as the element is slid over the image.
+    If None, a 3x3 block element is used.
+iterations : integer
+    The number of times to perform the operation.
+anchor: 2-tuple, (x, y)
+    The anchor of the structuring element. Must be
+    FULLY inside the element. If None, the center of the
+    element is used.
+in_place: bool
+    If True, perform the operation in place.
+    Otherwise, store the results in a new image.
+
+Returns
+-------
+out/None : ndarray or None
+    An new array is returned only if in_place=False.
+    Otherwise, this function returns None.''')
 def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,
             anchor=None, in_place=False):
 
@@ -1296,6 +1332,42 @@ def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,
     else:
         return out
 
+
+#---------
+# cvDilate
+#---------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Dilate the source image with the given element.
+
+Signature
+---------
+cvDilate(src, element=None, iterations=1, anchor=None, in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+element : ndarray, 2D
+    The structuring element. Must be 2D. Non-zero elements
+    indicate which pixels of the underlying image to include
+    in the operation as the element is slid over the image.
+    If None, a 3x3 block element is used.
+iterations : integer
+    The number of times to perform the operation.
+anchor: 2-tuple, (x, y)
+    The anchor of the structuring element. Must be
+    FULLY inside the element. If None, the center of the
+    element is used.
+in_place: bool
+    If True, perform the operation in place.
+    Otherwise, store the results in a new image.
+
+Returns
+-------
+out/None : ndarray or None
+    An new array is returned only if in_place=False.
+    Otherwise, this function returns None.''')
 def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1,
             anchor=None, in_place=False):
 
@@ -1328,6 +1400,50 @@ def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1,
     else:
         return out
 
+
+#---------------
+# cvMorphologyEx
+#---------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Apply a morphological operation to the image.
+
+Signature
+---------
+cvMorphologyEx(src, element, operation, iterations=1, anchor=None,
+               in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+element : ndarray, 2D
+    The structuring element. Must be 2D. Non-zero elements
+    indicate which pixels of the underlying image to include
+    in the operation as the element is slid over the image.
+    Cannot be None.
+operation : flag
+    The morphology operation to perform. Must be one of:
+    CV_MOP_OPEN
+    CV_MOP_CLOSE
+    CV_MOP_GRADIENT
+    CV_MOP_TOPHAT
+    CV_MOP_BLACKHAT
+iterations : integer
+    The number of times to perform the operation.
+anchor: 2-tuple, (x, y)
+    The anchor of the structuring element. Must be
+    FULLY inside the element. If None, the center of the
+    element is used.
+in_place: bool
+    If True, perform the operation in place.
+    Otherwise, store the results in a new image.
+
+Returns
+-------
+out/None : ndarray or None
+    An new array is returned only if in_place=False.
+    Otherwise, this function returns None.''')
 def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
                    int iterations=1, anchor=None, in_place=False):
 
@@ -1377,14 +1493,93 @@ def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
     else:
         return out
 
+
+#---------
+# cvSmooth
+#---------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Smooth an image with the specified filter.
+
+Signature
+---------
+cvSmooth(src, smoothtype=CV_GAUSSIAN, param1=3, param2=0, param3=0.,
+         param4=0., in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+smoothtype : integer
+    The flag representing which smoothing operation to perfom.
+    See notes on restrictions.
+    Must be one of:
+    CV_BLUR_NO_SCALE
+    CV_BLUR
+    CV_GAUSSIAN
+    CV_MEDIAN
+    CV_BILATERAL
+param1 : integer
+    See notes.
+param2 : integer
+    See notes.
+param3 : float
+    See notes.
+param4 : float
+    See notes.
+in_place : bool
+    If True, perform the operation in place.
+    This is not supported for every combination of arguments.
+    See notes.
+
+Returns
+-------
+out/None : ndarray or None
+    If in_place == True the function operates in place and returns None.
+    Otherwise, the operation returns a new array that is
+    the result of the smoothing operation.
+
+Notes
+-----
+The following details the restrictions and argument interpretaions
+for each of the smoothing operations.
+
+CV_BLUR_NO_SCALE:
+    Source image must be 2D and have dtype uint8, int8, or float32.
+    param1 x param2 define the neighborhood over which the pixels
+    are summed. If param2 is zero it is set equal to param1.
+    param3 and param4 are ignored.
+    in_place operation is not supported.
+CV_BLUR:
+    Source image must have dtype uint8, int8, or float32.
+    param1 x param2 define the neighborhood over which the pixels
+    are summed. If param2 is zero it is set equal to param1.
+    param3 and param4 are ignored.
+CV_GAUSSIAN:
+    Source image must have dtype uint8, int8, or float32.
+    param1 x param2 defines the size of the gaussian kernel.
+    If param2 is zero it is set equal to param1.
+    param3 is the standard deviation of the kernel.
+    If param3 is zero, an optimum stddev is calculated based
+    on the kernel size. If both param1 and param2 or zero,
+    then an optimum kernel size is calculated based on
+    param3.
+    in_place operation is supported.
+CV_MEDIAN:
+    Source image must have dtype uint8, or int8.
+    param1 x param1 define the neigborhood over which
+    to find the median.
+    param2, param3, and param4 are ignored.
+    in_place operation is not supported.
+CV_BILATERAL:
+    Source image must have dtype uint8, or int8.
+    param1 x param2 define the neighborhood.
+    param3 defines the color stddev.
+    param4 defines the space stddev.
+    in_place operation is not supported.''')
 def cvSmooth(np.ndarray src, int smoothtype=CV_GAUSSIAN, int param1=3,
              int param2=0, double param3=0, double param4=0,
              bool in_place=False):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
 
