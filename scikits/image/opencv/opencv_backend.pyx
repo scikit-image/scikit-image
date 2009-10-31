@@ -117,7 +117,13 @@ cdef CvMat* cvmat_ptr_from_iplimage(IplImage* arr):
     return mat_hdr
 
 cdef int validate_array(np.ndarray arr) except -1:
-    assert PyArray_ISCONTIGUOUS(arr), 'Array must be contiguous'
+    
+    # this assertion prevents the use of slices, so
+    # we need to be more creative about how to deal 
+    # with non-contiguous arrays
+    #assert PyArray_ISCONTIGUOUS(arr), 'Array must be contiguous'
+    
+
     if arr.ndim != 2 and arr.ndim != 3:
         raise ValueError('Arrays must have either 2 or 3 dimensions')
     if arr.ndim == 3:

@@ -13,6 +13,7 @@ from opencv_constants import *
 from opencv_cv import *
 
 from _libimport import cv
+from _utilities import cvdoc
 
 if cv is None:
     raise RuntimeError("Could not load libcv")
@@ -279,17 +280,39 @@ cdef cvDrawChessboardCornersPtr c_cvDrawChessboardCorners
 c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
                              ctypes.addressof(cv.cvDrawChessboardCorners))[0]
 
-####################################
+#-------------------------------------------------------------------------------
 # Function Implementations
-####################################
-def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
-            int aperture_size=3):
+#-------------------------------------------------------------------------------
 
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+#--------
+# cvSobel
+#--------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Apply the Sobel operator to the input image.
+
+Signature
+---------
+cvSobel(src, xorder=1, yorder=0, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, int8, float32]
+    The source image.
+xorder : integer
+    The x order of the Sobel operator.
+yorder : integer
+    The y order of the Sobel operator.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new which is the result of applying the Sobel
+    operator to src.''')
+def cvSobel(np.ndarray src, int xorder=1, int yorder=0,
+            int aperture_size=3):
 
     validate_array(src)
     assert_dtype(src, [UINT8, INT8, FLOAT32])
@@ -298,20 +321,12 @@ def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
-    if out is not None:
-        validate_array(out)
-        assert_not_sharing_data(src, out)
-        assert_same_shape(src, out)
-        assert_nchannels(out, [1])
-        if src.dtype == UINT8 or src.dtype == INT8:
-            assert_dtype(out, [INT16])
-        else:
-            assert_dtype(out, [FLOAT32])
+    cdef np.ndarray out
+
+    if src.dtype == UINT8 or src.dtype == INT8:
+        out = new_array_like_diff_dtype(src, INT16)
     else:
-        if src.dtype == UINT8 or src.dtype == INT8:
-            out = new_array_like_diff_dtype(src, INT16)
-        else:
-            out = new_array_like(src)
+        out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -323,13 +338,31 @@ def cvSobel(np.ndarray src, np.ndarray out=None, int xorder=1, int yorder=0,
 
     return out
 
-def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
 
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+#----------
+# cvLaplace
+#----------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Apply the Laplace operator to the input image.
+
+Signature
+---------
+cvLaplace(src, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, int8, float32]
+    The source image.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new which is the result of applying the Laplace
+    operator to src.''')
+def cvLaplace(np.ndarray src, int aperture_size=3):
 
     validate_array(src)
     assert_dtype(src, [UINT8, INT8, FLOAT32])
@@ -338,21 +371,12 @@ def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
 
-    if out is not None:
-        validate_array(out)
-        assert_not_sharing_data(src, out)
-        assert_same_shape(src, out)
-        assert_nchannels(out, [1])
-        if src.dtype == UINT8 or src.dtype == INT8:
-            assert_dtype(out, [INT16])
-        else:
-            assert_dtype(out, [FLOAT32])
+    if src.dtype == UINT8 or src.dtype == INT8:
+        out = new_array_like_diff_dtype(src, INT16)
     else:
-        if src.dtype == UINT8 or src.dtype == INT8:
-            out = new_array_like_diff_dtype(src, INT16)
-        else:
-            out = new_array_like(src)
+        out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -364,29 +388,46 @@ def cvLaplace(np.ndarray src, np.ndarray out=None, int aperture_size=3):
 
     return out
 
-def cvCanny(np.ndarray src, np.ndarray out=None, double threshold1=10,
-            double threshold2=50, int aperture_size=3):
 
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+#--------
+# cvCanny
+#--------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Apply Canny edge detection to the input image.
+
+Signature
+---------
+cvCanny(src, threshold1=10, threshold2=50, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8]
+    The source image.
+threshold1 : float
+    The lower threshold used for edge linking.
+threshold2 : float
+    The upper threshold used to find strong edges.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new which is the result of applying Canny
+    edge detection to src.''')
+def cvCanny(np.ndarray src, double threshold1=10, double threshold2=50,
+            int aperture_size=3):
 
     validate_array(src)
+    assert_dtype(src, [UINT8])
     assert_nchannels(src, [1])
 
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
-
-    if out is not None:
-        validate_array(out)
-        assert_nchannels(out, [1])
-        assert_same_shape(src, out)
-        assert_not_sharing_data(src, out)
-    else:
-        out = new_array_like(src)
+    cdef np.ndarray out
+    out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -397,13 +438,30 @@ def cvCanny(np.ndarray src, np.ndarray out=None, double threshold1=10,
 
     return out
 
-def cvPreCornerDetect(np.ndarray src, np.ndarray out=None,
-                      int aperture_size=3):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+
+#------------------
+# cvPreCornerDetect
+#------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Calculate the feature map for corner detection.
+
+Signature
+---------
+cvPreCornerDetect(src, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new array of the corner candidates.''')
+def cvPreCornerDetect(np.ndarray src, int aperture_size=3):
 
     validate_array(src)
     assert_dtype(src, [UINT8, FLOAT32])
@@ -412,13 +470,8 @@ def cvPreCornerDetect(np.ndarray src, np.ndarray out=None,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
-    if out is not None:
-        validate_array(out)
-        assert_same_shape(src, out)
-        assert_dtype(out, [FLOAT32])
-        assert_not_sharing_data(src, out)
-    else:
-        out = new_array_like_diff_dtype(src, FLOAT32)
+    cdef np.ndarray out
+    out = new_array_like_diff_dtype(src, FLOAT32)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -429,18 +482,38 @@ def cvPreCornerDetect(np.ndarray src, np.ndarray out=None,
 
     return out
 
+
+#-------------------------
+# cvCornerEigenValsAndVecs
+#-------------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Calculates the eigenvalues and eigenvectors of image
+blocks for corner detection.
+
+Signature
+---------
+cvCornerEigenValsAndVecs(src, block_size=3, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+block_size : integer
+    The size of the neighborhood in which to calculate
+    the eigenvalues and eigenvectors.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new array of the eigenvalues and eigenvectors.
+    The shape of this array is (height, width, 6),
+    Where height and width are the same as that
+    of src.''')
 def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
                                              int aperture_size=3):
-
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
-
-    # no option for the out argument on this one. Its easier just
-    # to make it for them as there is only 1 valid out array for any
-    # given source array
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -449,9 +522,10 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
     cdef np.npy_intp outshape[2]
     outshape[0] = src.shape[0]
-    outshape[1] = src.shape[1] * <np.npy_intp>6
+    outshape[1] = src.shape[1] * 6
 
     out = new_array(2, outshape, FLOAT32)
 
@@ -464,16 +538,35 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
 
     return out.reshape(out.shape[0], -1, 6)
 
+
+#--------------------
+# cvCornerMinEigenVal
+#--------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Calculates the minimum eigenvalues of gradient matrices
+for corner detection.
+
+Signature
+---------
+cvCornerMinEigenVal(src, block_size=3, aperture_size=3)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+block_size : integer
+    The size of the neighborhood in which to calculate
+    the eigenvalues.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+
+Returns
+-------
+out : ndarray
+    A new array of the eigenvalues.''')
 def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
                                         int aperture_size=3):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
-    # no option for the out argument on this one. Its easier just
-    # to make it for them as there is only 1 valid out array for any
-    # given source array
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -482,6 +575,7 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
     out = new_array_like_diff_dtype(src, FLOAT32)
 
     cdef IplImage srcimg
@@ -493,16 +587,45 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
 
     return out
 
+
+#---------------
+# cvCornerHarris
+#---------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Applies the Harris edge detector to the input image.
+
+Signature
+---------
+cvCornerHarris(src, block_size=3, aperture_size=3, k=0.04)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+block_size : integer
+    The size of the neighborhood in which to apply the detector.
+aperture_size : integer=[3, 5, 7]
+    The size of the Sobel kernel.
+k : float
+    Harris detector free parameter. See Notes.
+
+Returns
+-------
+out : ndarray
+    A new array of the Harris corners.
+
+Notes
+-----
+The function cvCornerHarris() runs the Harris edge
+detector on the image. Similarly to cvCornerMinEigenVal()
+and cvCornerEigenValsAndVecs(), for each pixel it calculates
+a gradient covariation matrix M over a block_size X block_size
+neighborhood. Then, it stores det(M) - k * trace(M)**2
+to the output image. Corners in the image can be found as the
+local maxima of the output image.''')
 def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
                                                      double k=0.04):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
-    # no option for the out argument on this one. Its easier just
-    # to make it for them as there is only 1 valid out array for any
-    # given source array
 
     validate_array(src)
     assert_nchannels(src, [1])
@@ -511,6 +634,7 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
     if (aperture_size != 3 and aperture_size != 5 and aperture_size != 7):
         raise ValueError('aperture_size must be 3, 5, or 7')
 
+    cdef np.ndarray out
     out = new_array_like_diff_dtype(src, FLOAT32)
 
     cdef IplImage srcimg
@@ -522,40 +646,70 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
 
     return out
 
-def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
+
+#-------------------
+# cvFindCornerSubPix
+#-------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Refines corner locations to sub-pixel accuracy.
+
+Signature
+---------
+cvFindCornerSubPix(src, corners, win, zero_zone=(-1, -1),
+                   iterations=0, epsilon=1e-5)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8]
+    The source image.
+corners : ndarray, shape=(N x 2)
+    An initial approximation of the corners in the image.
+    The corners will be refined in-place in this array.
+win : tuple, (height, width)
+    The window within which the function iterates until it
+    converges on the real corner. The actual window is twice
+    the size of what is declared here. (an OpenCV peculiarity).
+zero_zone : Half of the size of the dead region in the middle
+    of the search zone over which the calculations are not
+    performed. It is used sometimes to avoid possible
+    singularities of the autocorrelation matrix.
+    The value of (-1,-1) indicates that there is no such size.
+iterations : integer
+    The maximum number of iterations to perform. If 0,
+    the function iterates until the error is less than epsilon.
+epsilon : float
+    The epsilon error, below which the function terminates.
+    Can be used in combination with iterations.
+
+Returns
+-------
+None. The array 'corners' is modified in place.''')
+def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, win,
                        zero_zone=(-1, -1), int iterations=0,
                        double epsilon=1e-5):
 
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
-
     validate_array(src)
-    validate_array(corners)
-
     assert_nchannels(src, [1])
     assert_dtype(src, [UINT8])
 
-    assert_nchannels(corners, [1])
+    validate_array(corners)
+    assert_ndims(corners, [2])
     assert_dtype(corners, [FLOAT32])
 
-    # make sure the number of points
-    # jives with the elements in the array
-    # the shape of the array is irrelevant
-    # because opencv will index it as if it were
-    # flat anyway, but regardless, the validate_array function ensures
-    # that it is 2D
-    cdef int nbytes = <int> get_array_nbytes(corners)
-    if nbytes != (count * 2 * 4):
-        raise ValueError('The number of declared points is different '
-                         'than exists in the array.')
+    cdef int count = <int>(corners.shape[0] * corners.shape[1] / 2.)
     cdef CvPoint2D32f* cvcorners = array_as_cvPoint2D32f_ptr(corners)
 
+    if len(win) != 2:
+        raise ValueError('win must be a 2-tuple')
     cdef CvSize cvwin
     cvwin.height = <int> win[0]
     cvwin.width = <int> win[1]
+
+    cdef int imgheight = src.shape[0]
+    cdef int imgwidth = src.shape[1]
+    if imgwidth < (cvwin.width * 2 + 5) or imgheight  < (cvwin.height * 2 + 5):
+        raise ValueError('The window is too large.')
 
     cdef CvSize cvzerozone
     cvzerozone.height = <int> zero_zone[0]
@@ -571,15 +725,58 @@ def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, int count, win,
 
     return None
 
+
+#----------------------
+# cvGoodFeaturesToTrack
+#----------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Determines strong corners in an image.
+
+Signature
+---------
+cvGoodFeaturesToTrack(src, corner_count, quality_level,
+                      min_distance, block_size=3,
+                      use_harris=0, k=0.04)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
+    The source image.
+corner_count : int
+    The maximum number of corners to find.
+    Only found corners are returned.
+quality_level : float
+    Multiplier for the max/min eigenvalue;
+    specifies the minimal accepted quality of
+    image corners.
+min_distance : float
+    Limit, specifying the minimum possible
+    distance between the returned corners;
+    Euclidian distance is used.
+block_size : integer
+    The size of the neighborhood in which to apply the detector.
+use_harris : integer
+    If nonzero, Harris operator (cvCornerHarris())
+    is used instead of default cvCornerMinEigenVal()
+k : float
+    Harris detector free parameter.
+    Used only if use_harris != 0.
+
+Returns
+-------
+out : ndarray
+    The locations of the found corners in the image.
+
+Notes
+-----
+This function finds distinct and strong corners
+in an image which can be used as features in a tracking
+algorithm. It also insures that features are distanced
+from one another by at least min_distance.''')
 def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
                           double quality_level, double min_distance,
-                          np.ndarray mask=None, int block_size=3,
-                          int use_harris=0, double k=0.04):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+                          int block_size=3, int use_harris=0, double k=0.04):
 
     validate_array(src)
     assert_dtype(src, [UINT8, FLOAT32])
@@ -606,12 +803,9 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
     populate_iplimage(src, &srcimg)
     populate_iplimage(eig, &eigimg)
     populate_iplimage(temp, &tempimg)
-    if mask is None:
-        maskimg = NULL
-    else:
-        validate_array(mask)
-        assert_nchannels(mask, [1])
-        populate_iplimage(mask, maskimg)
+
+    # don't need to support ROI. The user can just pass a slice.
+    maskimg = NULL
 
     c_cvGoodFeaturesToTrack(&srcimg, &eigimg, &tempimg, cvcorners,
                             &ncorners_found, quality_level, min_distance,
@@ -620,22 +814,42 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
 
     return out[:ncorners_found]
 
+
+#----------------
+# cvGetRectSubPix
+#----------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Retrieves the pixel rectangle from an image with
+sub-pixel accuracy.
+
+Signature
+---------
+cvGetRectSubPix(src, size, center)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+size : two tuple, integers, (height, width)
+    The size of the rectangle to extract.
+center : two tuple, floats, (x, y)
+    The center location of the rectangle.
+    The center must lie within the image, but the
+    rectangle may extend beyond the bounds of the image.
+
+Returns
+-------
+out : ndarray
+    The extracted rectangle of the image.
+
+Notes
+-----
+The center of the specified rectangle must
+lie within the image, but the bounds of the rectangle
+may extend beyond the image. Border replication is used
+to fill in missing pixels.''')
 def cvGetRectSubPix(np.ndarray src, size, center):
-    ''' Retrieves the pixel rectangle from an image with
-    sub-pixel accuracy.
-
-    Paramters:
-        src - source image.
-        size - two tuple (height, width) of rectangle (ints)
-        center - two tuple (x, y) of rectangle center (floats)
-
-        the center must lie within the image, but the rectangle
-        may extend beyond the bounds of the image, at which point
-        the border is replicated.
-
-    Returns:
-        A new image of the extracted rectangle. The same dtype as the src image.
-    '''
 
     validate_array(src)
 
@@ -660,20 +874,49 @@ def cvGetRectSubPix(np.ndarray src, size, center):
 
     return out
 
+
+#----------------------
+# cvGetQuadrangleSubPix
+#----------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Retrieves the pixel quandrangle from an image with
+sub-pixel accuracy. In english: apply an affine transform to an image.
+
+Signature
+---------
+cvGetQuadrangleSubPix(src, warpmat, float_out=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+warpmat : ndarray, 2x3
+    The affine transformation to apply to the src image.
+float_out : bool
+    If True, the return array will have dtype np.float32.
+    Otherwise, the return array will have the same dtype
+    as the src array.
+    If True, the src array MUST have dtype np.uint8
+
+Returns
+-------
+out : ndarray
+    Warped image of same size as src.
+
+Notes
+-----
+The values of pixels at non-integer coordinates are retrieved
+using bilinear interpolation. When the function needs pixels
+outside of the image, it uses replication border mode to
+reconstruct the values. Every channel of multiple-channel
+images is processed independently.
+
+This function has less overhead than cvWarpAffine
+and should be used unless specific feature of that
+function are required.''')
 def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
-    ''' Retrieves the pixel quandrangle from an image with
-    sub-pixel accuracy. In english: apply and affine transform to an image.
 
-    Parameters:
-                src - input image
-                warpmat - a 2x3 array which is an affine transform
-                float_out - return a float32 array. If true, input must be
-                            uint8. If false, output is same type as input.
-
-    Return:
-                warped image of same size and dtype as src. Except when
-                float_out == True (see above)
-    '''
     validate_array(src)
     validate_array(warpmat)
 
@@ -681,8 +924,8 @@ def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
 
     assert_nchannels(warpmat, [1])
 
-    assert warpmat.shape[0] == 2, 'warpmat must be 2x3'
-    assert warpmat.shape[1] == 3, 'warpmat must be 2x3'
+    if warpmat.shape[0] != 2 or warpmat.shape[1] != 3:
+        raise ValueError('warpmat must be 2x3')
 
     cdef np.ndarray out
 
@@ -708,22 +951,51 @@ def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
 
     return out
 
-def cvResize(np.ndarray src, height=None, width=None,
-             int method=CV_INTER_LINEAR):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
+
+#---------
+# cvResize
+#---------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Resize an to the given size.
+
+Signature
+---------
+cvResize(src, size, method=CV_INTER_LINEAR)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+size : tuple, (height, width)
+    The target resize size.
+method : integer
+    The interpolation method used for resizing.
+    Supported methods are:
+    CV_INTER_NN
+    CV_INTER_LINEAR
+    CV_INTER_AREA
+    CV_INTER_CUBIC
+
+Returns
+-------
+out : ndarray
+    The resized image.''')
+def cvResize(np.ndarray src, size, int method=CV_INTER_LINEAR):
+
     validate_array(src)
 
-    if not height or not width:
-        raise ValueError('width and height must not be none')
+    if len(size) != 2:
+        raise ValueError('size must be a 2-tuple (height, width)')
+
+    if method not in [CV_INTER_NN, CV_INTER_LINEAR, CV_INTER_AREA,
+                      CV_INTER_CUBIC]:
+        raise ValueError('unsupported interpolation type')
 
     cdef int ndim = src.ndim
     cdef np.npy_intp* shape = clone_array_shape(src)
-    shape[0] = height
-    shape[1] = width
+    shape[0] = <np.npy_intp>size[0]
+    shape[1] = <np.npy_intp>size[1]
 
     cdef np.ndarray out = new_array(ndim, shape, src.dtype)
     validate_array(out)
@@ -739,30 +1011,75 @@ def cvResize(np.ndarray src, height=None, width=None,
 
     return out
 
+
+#-------------
+# cvWarpAffine
+#-------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Applies an affine transformation to the image.
+
+Signature
+---------
+cvWarpAffine(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS
+             fillval=(0., 0., 0., 0.))
+
+Parameters
+----------
+src : ndarray
+    The source image.
+warpmat : ndarray, 2x3
+    The affine transformation to apply to the src image.
+flag : integer
+    A combination of interpolation and method flags.
+    Supported flags are: (see notes)
+    Interpolation:
+        CV_INTER_NN
+        CV_INTER_LINEAR
+        CV_INTER_AREA
+        CV_INTER_CUBIC
+    Method:
+        CV_WARP_FILL_OUTLIERS
+        CV_WARP_INVERSE_MAP
+fillval : 4-tuple, (R, G, B, A)
+    The color to fill in missing pixels. Defaults to black.
+    For < 4 channel images, use 0.'s for the value.
+
+Returns
+-------
+out : ndarray
+    The warped image of same size and dtype as src.
+
+Notes
+-----
+CV_WARP_FILL_OUTLIERS - fills all of the destination image pixels;
+    if some of them correspond to outliers in the source image,
+    they are set to fillval.
+CV_WARP_INVERSE_MAP - indicates that warpmat is inversely transformed
+    from the destination image to the source and, thus, can be used
+    directly for pixel interpolation. Otherwise, the function finds
+    the inverse transform from warpmat.
+
+This function has a larger overhead than cvGetQuadrangleSubPix,
+and that function should be used instead, unless specific
+features of this function are needed.''')
 def cvWarpAffine(np.ndarray src, np.ndarray warpmat,
-                 int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                 int flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
                  fillval=(0., 0., 0., 0.)):
 
-    ''' Applies an affine transformation to an image.
-
-    Parameters:
-                src - source image
-                warpmat - 2x3 affine transformation
-                flags - a combination of interpolation and method flags.
-                        see opencv documentation for more details
-                fillval - a 4 tuple of a color to fill the background
-                          defaults to black.
-
-    Returns:
-                a warped image the same size and dtype as src
-    '''
     validate_array(src)
     validate_array(warpmat)
-    assert len(fillval) == 4, 'fillval must be a 4-tuple'
+    if len(fillval) != 4:
+        raise ValueError('fillval must be a 4-tuple')
     assert_nchannels(src, [1, 3])
     assert_nchannels(warpmat, [1])
-    assert warpmat.shape[0] == 2, 'warpmat must be 2x3'
-    assert warpmat.shape[1] == 3, 'warpmat must be 2x3'
+
+    if warpmat.shape[0] != 2 or warpmat.shape[1] != 3:
+        raise ValueError('warpmat must be 2x3')
+
+    valid_flags = [0, 1, 2, 3, 8, 16, 9, 17, 11, 19, 10, 18]
+    if flag not in valid_flags:
+        raise ValueError('unsupported flag combination')
 
     cdef np.ndarray out
     out = new_array_like(src)
@@ -782,36 +1099,76 @@ def cvWarpAffine(np.ndarray src, np.ndarray warpmat,
     populate_iplimage(warpmat, &cvmat)
     cvmatptr = cvmat_ptr_from_iplimage(&cvmat)
 
-    c_cvWarpAffine(&srcimg, &outimg, cvmatptr, flags, cvfill)
+    c_cvWarpAffine(&srcimg, &outimg, cvmatptr, flag, cvfill)
 
     PyMem_Free(cvmatptr)
 
     return out
 
+
+#------------------
+# cvWarpPerspective
+#------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Applies a perspective transformation to an image.
+
+Signature
+---------
+cvWarpPerspective(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS
+                  fillval=(0., 0., 0., 0.))
+
+Parameters
+----------
+src : ndarray
+    The source image.
+warpmat : ndarray, 3x3
+    The affine transformation to apply to the src image.
+flag : integer
+    A combination of interpolation and method flags.
+    Supported flags are: (see notes)
+    Interpolation:
+        CV_INTER_NN
+        CV_INTER_LINEAR
+        CV_INTER_AREA
+        CV_INTER_CUBIC
+    Method:
+        CV_WARP_FILL_OUTLIERS
+        CV_WARP_INVERSE_MAP
+fillval : 4-tuple, (R, G, B, A)
+    The color to fill in missing pixels. Defaults to black.
+    For < 4 channel images, use 0.'s for the value.
+
+Returns
+-------
+out : ndarray
+    The warped image of same size and dtype as src.
+
+Notes
+-----
+CV_WARP_FILL_OUTLIERS - fills all of the destination image pixels;
+    if some of them correspond to outliers in the source image,
+    they are set to fillval.
+CV_WARP_INVERSE_MAP - indicates that warpmat is inversely transformed
+    from the destination image to the source and, thus, can be used
+    directly for pixel interpolation. Otherwise, the function finds
+    the inverse transform from warpmat.''')
 def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
-                      int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
+                      int flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS,
                       fillval=(0., 0., 0., 0.)):
 
-    ''' Applies a perspective transformation to an image.
-
-    Parameters:
-                src - source image
-                warpmat - 3x3 perspective transformation
-                flags - a combination of interpolation and method flags.
-                        see opencv documentation for more details
-                fillval - a 4 tuple of a color to fill the background
-                          defaults to black.
-
-    Returns:
-                a warped image the same size and dtype as src
-    '''
     validate_array(src)
     validate_array(warpmat)
-    assert len(fillval) == 4, 'fillval must be a 4-tuple'
+    if len(fillval) != 4:
+        raise ValueError('fillval must be a 4-tuple')
     assert_nchannels(src, [1, 3])
     assert_nchannels(warpmat, [1])
-    assert warpmat.shape[0] == 3, 'warpmat must be 3x3'
-    assert warpmat.shape[1] == 3, 'warpmat must be 3x3'
+    if warpmat.shape[0] != 3 or warpmat.shape[1] != 3:
+        raise ValueError('warpmat must be 3x3')
+
+    valid_flags = [0, 1, 2, 3, 8, 16, 9, 17, 11, 19, 10, 18]
+    if flag not in valid_flags:
+        raise ValueError('unsupported flag combination')
 
     cdef np.ndarray out
     out = new_array_like(src)
@@ -830,17 +1187,71 @@ def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
     populate_iplimage(out, &outimg)
     populate_iplimage(warpmat, &cvmat)
     cvmatptr = cvmat_ptr_from_iplimage(&cvmat)
-    c_cvWarpPerspective(&srcimg, &outimg, cvmatptr, flags, cvfill)
+    c_cvWarpPerspective(&srcimg, &outimg, cvmatptr, flag, cvfill)
 
     PyMem_Free(cvmatptr)
 
     return out
 
+
+#-----------
+# cvLogPolar
+#-----------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Remaps and image to Log-Polar space.
+
+Signature
+---------
+cvLogPolar(src, center, M, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+center : tuple, (x, y)
+    The keypoint for the log polar transform.
+M : float
+    The scale factor for the transform.
+    (40 is a good starting point for a 256x256 image)
+flag : integer
+    A combination of interpolation and method flags.
+    Supported flags are: (see notes)
+    Interpolation:
+        CV_INTER_NN
+        CV_INTER_LINEAR
+        CV_INTER_AREA
+        CV_INTER_CUBIC
+    Method:
+        CV_WARP_FILL_OUTLIERS
+        CV_WARP_INVERSE_MAP
+
+Returns
+-------
+out : ndarray
+    A transformed image the same size and dtype as src.
+
+Notes
+-----
+CV_WARP_FILL_OUTLIERS - fills all of the destination image pixels;
+    if some of them correspond to outliers in the source image,
+    they are set to zero.
+CV_WARP_INVERSE_MAP - assume that the source image is already
+    in Log-Polar space, and transform back to cartesian space.
+
+The function emulates the human “foveal” vision and can be used
+for fast scale and rotation-invariant template matching,
+for object tracking and so forth.''')
 def cvLogPolar(np.ndarray src, center, double M,
-               int flags=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS):
+               int flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS):
 
     validate_array(src)
-    assert len(center) == 2
+    if len(center) != 2:
+        raise ValueError('center must be a 2-tuple')
+
+    valid_flags = [0, 16, 8, 24, 1, 17, 9, 25, 2, 18, 10, 26, 3, 19, 11, 27]
+    if flag not in valid_flags:
+        raise ValueError('unsupported flag combination')
 
     cdef np.ndarray out = new_array_like(src)
 
@@ -853,7 +1264,7 @@ def cvLogPolar(np.ndarray src, center, double M,
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
 
-    c_cvLogPolar(&srcimg, &outimg, cv_center, M, flags)
+    c_cvLogPolar(&srcimg, &outimg, cv_center, M, flag)
     return out
 
 def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,
@@ -969,8 +1380,7 @@ def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
     else:
         return out
 
-def cvSmooth(np.ndarray src, np.ndarray out=None,
-             int smoothtype=CV_GAUSSIAN, int param1=3,
+def cvSmooth(np.ndarray src, int smoothtype=CV_GAUSSIAN, int param1=3,
              int param2=0, double param3=0, double param4=0,
              bool in_place=False):
     """
@@ -980,9 +1390,8 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
     """
 
     validate_array(src)
-    if out is not None:
-        validate_array(out)
 
+    cdef np.ndarray out
     # there are restrictions that must be placed on the data depending on
     # the smoothing operation requested
 
@@ -996,17 +1405,10 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
         assert_dtype(src, [UINT8, INT8, FLOAT32])
         assert_ndims(src, [2])
 
-        if out is not None:
-            if src.dtype == FLOAT32:
-                assert_dtype(out, [FLOAT32])
-            else:
-                assert_dtype(out, [INT16])
-            assert_same_shape(src, out)
+        if src.dtype == FLOAT32:
+            out = new_array_like(src)
         else:
-            if src.dtype == FLOAT32:
-                out = new_array_like(src)
-            else:
-                out = new_array_like_diff_dtype(src, INT16)
+            out = new_array_like_diff_dtype(src, INT16)
 
     # CV_BLUR and CV_GAUSSIAN
     elif smoothtype == CV_BLUR or smoothtype == CV_GAUSSIAN:
@@ -1016,8 +1418,6 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
 
         if in_place:
             out = src
-        elif out is not None:
-            assert_like(src, out)
         else:
             out = new_array_like(src)
 
@@ -1030,10 +1430,7 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
             raise RuntimeError('In place operation not supported with this '
                                'filter')
 
-        if out is not None:
-            assert_like(src, out)
-        else:
-            out = new_array_like(src)
+        out = new_array_like(src)
 
     cdef IplImage srcimg
     cdef IplImage outimg
@@ -1042,7 +1439,10 @@ def cvSmooth(np.ndarray src, np.ndarray out=None,
 
     c_cvSmooth(&srcimg, &outimg, smoothtype, param1, param2, param3, param4)
 
-    return out
+    if in_place:
+        return None
+    else:
+        return out
 
 def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
 
@@ -1378,6 +1778,7 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
     outshape[0] = <np.npy_intp> pattern_size[0] * pattern_size[1]
     outshape[1] = <np.npy_intp> 2
 
+    cdef np.ndarray out
     out = new_array(2, outshape, FLOAT32)
     cdef CvPoint2D32f* cvpoints = array_as_cvPoint2D32f_ptr(out)
 
@@ -1395,7 +1796,7 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
     return out[:ncorners_found]
 
 def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
-                            in_place=True):
+                            in_place=False):
     """
     Wrapper around the OpenCV cvDrawChessboardCorners function.
 
@@ -1447,6 +1848,9 @@ def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
     c_cvDrawChessboardCorners(&outimg, cvpattern_size, cvcorners,
         ncount, pattern_was_found)
 
-    return out
+    if in_place:
+        return None
+    else:
+        return out
 
 
