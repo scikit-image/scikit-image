@@ -5,16 +5,17 @@ import numpy as np
 
 # the doc decorator
 class cvdoc(object):
-    ''' a doc decorator which adds the docs for the opencv functions.
-    It primarily serves to append the appropriate opencv doc url
-    to each function.
+    '''A doc decorator which adds the docs for the opencv functions.
+    It primarily serves to append the appropriate opencv doc url to
+    each function.
     '''
 
     base_url = 'http://opencv.willowgarage.com/documentation/'
-    branch_urls = {'cv': {'image': 'image_processing',
-                          'structural': 'structural_analysis',
-                          'calibration': 'camera_calibration_and_3d_reconstruction'
-                          },
+    branch_urls = {'cv':
+                   {'image': 'image_processing',
+                    'structural': 'structural_analysis',
+                    'calibration': 'camera_calibration_and_3d_reconstruction'
+                    },
                    'cxcore': {},
                    'highgui': {}
                    }
@@ -40,8 +41,11 @@ class cvdoc(object):
                     self.branch_urls[self.package][self.group] +
                     '.html' + '#' + name)
         message = dedent('''
-            The OpenCV documentation for this fuction can
-            be found at the following url:''')
+References
+----------
+.. [1] OpenCV documentation for `%(name)s`, %(url)s.
+''' % {'name': name,
+       'url': full_url})
 
-        self.doc += '\n\n' + message + '\n\n' + full_url + '\n'
+        self.doc += '\n\n' + message
 
