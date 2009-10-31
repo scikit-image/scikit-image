@@ -289,11 +289,9 @@ c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
 #--------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Apply the Sobel operator to the input image.
+'''cvSobel(src, xorder=1, yorder=0, aperture_size=3)
 
-Signature
----------
-cvSobel(src, xorder=1, yorder=0, aperture_size=3)
+Apply the Sobel operator to the input image.
 
 Parameters
 ----------
@@ -344,11 +342,9 @@ def cvSobel(np.ndarray src, int xorder=1, int yorder=0,
 #----------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Apply the Laplace operator to the input image.
+'''cvLaplace(src, aperture_size=3)
 
-Signature
----------
-cvLaplace(src, aperture_size=3)
+Apply the Laplace operator to the input image.
 
 Parameters
 ----------
@@ -394,11 +390,9 @@ def cvLaplace(np.ndarray src, int aperture_size=3):
 #--------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Apply Canny edge detection to the input image.
+'''cvCanny(src, threshold1=10, threshold2=50, aperture_size=3)
 
-Signature
----------
-cvCanny(src, threshold1=10, threshold2=50, aperture_size=3)
+Apply Canny edge detection to the input image.
 
 Parameters
 ----------
@@ -444,11 +438,9 @@ def cvCanny(np.ndarray src, double threshold1=10, double threshold2=50,
 #------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Calculate the feature map for corner detection.
+'''cvPreCornerDetect(src, aperture_size=3)
 
-Signature
----------
-cvPreCornerDetect(src, aperture_size=3)
+Calculate the feature map for corner detection.
 
 Parameters
 ----------
@@ -488,12 +480,10 @@ def cvPreCornerDetect(np.ndarray src, int aperture_size=3):
 #-------------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Calculates the eigenvalues and eigenvectors of image
-blocks for corner detection.
+'''cvCornerEigenValsAndVecs(src, block_size=3, aperture_size=3)
 
-Signature
----------
-cvCornerEigenValsAndVecs(src, block_size=3, aperture_size=3)
+Calculates the eigenvalues and eigenvectors of image
+blocks for corner detection.
 
 Parameters
 ----------
@@ -544,12 +534,10 @@ def cvCornerEigenValsAndVecs(np.ndarray src, int block_size=3,
 #--------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Calculates the minimum eigenvalues of gradient matrices
-for corner detection.
+'''cvCornerMinEigenVal(src, block_size=3, aperture_size=3)
 
-Signature
----------
-cvCornerMinEigenVal(src, block_size=3, aperture_size=3)
+Calculates the minimum eigenvalues of gradient matrices
+for corner detection.
 
 Parameters
 ----------
@@ -593,11 +581,9 @@ def cvCornerMinEigenVal(np.ndarray src, int block_size=3,
 #---------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Applies the Harris edge detector to the input image.
+'''cvCornerHarris(src, block_size=3, aperture_size=3, k=0.04)
 
-Signature
----------
-cvCornerHarris(src, block_size=3, aperture_size=3, k=0.04)
+Applies the Harris edge detector to the input image.
 
 Parameters
 ----------
@@ -652,12 +638,9 @@ def cvCornerHarris(np.ndarray src, int block_size=3, int aperture_size=3,
 #-------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Refines corner locations to sub-pixel accuracy.
+'''cvFindCornerSubPix(src, corners, win, zero_zone=(-1, -1), iterations=0, epsilon=1e-5)
 
-Signature
----------
-cvFindCornerSubPix(src, corners, win, zero_zone=(-1, -1),
-                   iterations=0, epsilon=1e-5)
+Refines corner locations to sub-pixel accuracy.
 
 Parameters
 ----------
@@ -731,13 +714,9 @@ def cvFindCornerSubPix(np.ndarray src, np.ndarray corners, win,
 #----------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Determines strong corners in an image.
+'''cvGoodFeaturesToTrack(src, corner_count, quality_level, min_distance, block_size=3, use_harris=0, k=0.04)
 
-Signature
----------
-cvGoodFeaturesToTrack(src, corner_count, quality_level,
-                      min_distance, block_size=3,
-                      use_harris=0, k=0.04)
+Determines strong corners in an image.
 
 Parameters
 ----------
@@ -820,12 +799,10 @@ def cvGoodFeaturesToTrack(np.ndarray src, int corner_count,
 #----------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Retrieves the pixel rectangle from an image with
-sub-pixel accuracy.
+'''cvGetRectSubPix(src, size, center)
 
-Signature
----------
-cvGetRectSubPix(src, size, center)
+Retrieves the pixel rectangle from an image with
+sub-pixel accuracy.
 
 Parameters
 ----------
@@ -880,12 +857,10 @@ def cvGetRectSubPix(np.ndarray src, size, center):
 #----------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Retrieves the pixel quandrangle from an image with
-sub-pixel accuracy. In english: apply an affine transform to an image.
+'''cvGetQuadrangleSubPix(src, warpmat, float_out=False)
 
-Signature
----------
-cvGetQuadrangleSubPix(src, warpmat, float_out=False)
+Retrieves the pixel quandrangle from an image with
+sub-pixel accuracy. In english: apply an affine transform to an image.
 
 Parameters
 ----------
@@ -957,11 +932,9 @@ def cvGetQuadrangleSubPix(np.ndarray src, np.ndarray warpmat, float_out=False):
 #---------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Resize an to the given size.
+'''cvResize(src, size, method=CV_INTER_LINEAR)
 
-Signature
----------
-cvResize(src, size, method=CV_INTER_LINEAR)
+Resize an to the given size.
 
 Parameters
 ----------
@@ -1017,12 +990,9 @@ def cvResize(np.ndarray src, size, int method=CV_INTER_LINEAR):
 #-------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Applies an affine transformation to the image.
+'''cvWarpAffine(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS, fillval=(0., 0., 0., 0.))
 
-Signature
----------
-cvWarpAffine(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS
-             fillval=(0., 0., 0., 0.))
+Applies an affine transformation to the image.
 
 Parameters
 ----------
@@ -1111,12 +1081,9 @@ def cvWarpAffine(np.ndarray src, np.ndarray warpmat,
 #------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Applies a perspective transformation to an image.
+'''cvWarpPerspective(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS, fillval=(0., 0., 0., 0.))
 
-Signature
----------
-cvWarpPerspective(src, warpmat, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS
-                  fillval=(0., 0., 0., 0.))
+Applies a perspective transformation to an image.
 
 Parameters
 ----------
@@ -1199,11 +1166,9 @@ def cvWarpPerspective(np.ndarray src, np.ndarray warpmat,
 #-----------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Remaps and image to Log-Polar space.
+'''cvLogPolar(src, center, M, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS)
 
-Signature
----------
-cvLogPolar(src, center, M, flag=CV_INTER_LINEAR+CV_WARP_FILL_OUTLIERS)
+Remaps and image to Log-Polar space.
 
 Parameters
 ----------
@@ -1273,11 +1238,9 @@ def cvLogPolar(np.ndarray src, center, double M,
 #--------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Erode the source image with the given element.
+'''cvErode(src, element=None, iterations=1, anchor=None, in_place=False)
 
-Signature
----------
-cvErode(src, element=None, iterations=1, anchor=None, in_place=False)
+Erode the source image with the given element.
 
 Parameters
 ----------
@@ -1341,11 +1304,9 @@ def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,
 #---------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Dilate the source image with the given element.
+'''cvDilate(src, element=None, iterations=1, anchor=None, in_place=False)
 
-Signature
----------
-cvDilate(src, element=None, iterations=1, anchor=None, in_place=False)
+Dilate the source image with the given element.
 
 Parameters
 ----------
@@ -1409,12 +1370,9 @@ def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1,
 #---------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Apply a morphological operation to the image.
+'''cvMorphologyEx(src, element, operation, iterations=1, anchor=None, in_place=False)
 
-Signature
----------
-cvMorphologyEx(src, element, operation, iterations=1, anchor=None,
-               in_place=False)
+Apply a morphological operation to the image.
 
 Parameters
 ----------
@@ -1502,12 +1460,9 @@ def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
 #---------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Smooth an image with the specified filter.
+'''cvSmooth(src, smoothtype=CV_GAUSSIAN, param1=3, param2=0, param3=0., param4=0., in_place=False)
 
-Signature
----------
-cvSmooth(src, smoothtype=CV_GAUSSIAN, param1=3, param2=0, param3=0.,
-         param4=0., in_place=False)
+Smooth an image with the specified filter.
 
 Parameters
 ----------
@@ -1648,11 +1603,9 @@ def cvSmooth(np.ndarray src, int smoothtype=CV_GAUSSIAN, int param1=3,
 #-----------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Convolve an image with the given kernel.
+'''cvFilter2D(src, kernel, anchor=None, in_place=False)
 
-Signature
----------
-cvFilter2D(src, kernel, anchor=None, in_place=False)
+Convolve an image with the given kernel.
 
 Parameters
 ----------
@@ -1730,11 +1683,9 @@ def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
 #-----------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Calculate the integral of an image.
+'''cvIntegral(src, square_sum=False, titled_sum=False)
 
-Signature
----------
-cvIntegral(src, square_sum=False, titled_sum=False)
+Calculate the integral of an image.
 
 Parameters
 ----------
@@ -1813,11 +1764,9 @@ def cvIntegral(np.ndarray src, square_sum=False, tilted_sum=False):
 #-----------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Convert an image to another color space.
+'''cvCvtColor(src, code)
 
-Signature
----------
-cvCvtColor(src, code)
+Convert an image to another color space.
 
 Parameters
 ----------
@@ -1907,12 +1856,9 @@ def cvCvtColor(np.ndarray src, int code):
 #------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Threshold an image.
+'''cvThreshold(src, threshold, max_value=255, threshold_type=CV_THRESH_BINARY, use_otsu=False)
 
-Signature
----------
-cvThreshold(src, threshold, max_value=255, threshold_type=CV_THRESH_BINARY,
-            use_otsu=False)
+Threshold an image.
 
 Parameters
 ----------
@@ -1972,14 +1918,9 @@ def cvThreshold(np.ndarray src, double threshold, double max_value=255,
 #--------------------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Apply an adaptive threshold to an image.
+'''cvAdaptiveThreshold(src, max_value, adaptive_method=CV_ADAPTIVE_THRESH_MEAN_C, threshold_type=CV_THRESH_BINARY, block_size=3, param1=5)
 
-Signature
----------
-cvAdaptiveThreshold(src, max_value,
-                    adaptive_method=CV_ADAPTIVE_THRESH_MEAN_C,
-                    threshold_type=CV_THRESH_BINARY,
-                    block_size=3, param1=5)
+Apply an adaptive threshold to an image.
 
 Parameters
 ----------
@@ -2043,11 +1984,9 @@ def cvAdaptiveThreshold(np.ndarray src, double max_value,
 #----------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Downsample an image.
+'''cvPyrDown(src)
 
-Signature
----------
-cvPyrDown(src)
+Downsample an image.
 
 Parameters
 ----------
@@ -2087,11 +2026,9 @@ def cvPyrDown(np.ndarray src):
 #--------
 
 @cvdoc(package='cv', group='image', doc=\
-'''Upsample an image.
+'''cvPyrUp(src)
 
-Signature
----------
-cvPyrUp(src)
+Upsample an image.
 
 Parameters
 ----------
@@ -2131,12 +2068,10 @@ def cvPyrUp(np.ndarray src):
 #-------------------
 
 @cvdoc(package='cv', group='calibration', doc=\
-'''Finds the intrinsic and extrinsic camera parameters
-using a calibration pattern.
+'''cvCalibrateCamera2(object_points, image_points, point_counts, image_size)
 
-Signature
----------
-cvCalibrateCamera2(object_points, image_points, point_counts, image_size)
+Finds the intrinsic and extrinsic camera parameters
+using a calibration pattern.
 
 Parameters
 ----------
@@ -2225,11 +2160,9 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
 #------------------------
 
 @cvdoc(package='cv', group='calibration', doc=\
-'''Finds the position of the internal corners of a chessboard.
+'''cvFindChessboardCorners(src, pattern_size, flag=CV_CALIB_CB_ADAPTIVE_THRESH)
 
-Signature
----------
-cvFindChessboardCorners(src, pattern_size, flag=CV_CALIB_CB_ADAPTIVE_THRESH)
+Finds the position of the internal corners of a chessboard.
 
 Parameters
 ----------
@@ -2288,11 +2221,9 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
 #------------------------
 
 @cvdoc(package='cv', group='calibration', doc=\
-'''Renders found chessboard corners into an image.
+'''cvDrawChessboardCorners(src, pattern_size, corners, in_place=False)
 
-Signature
----------
-cvDrawChessboardCorners(src, pattern_size, corners, in_place=False)
+Renders found chessboard corners into an image.
 
 Parameters
 ----------
