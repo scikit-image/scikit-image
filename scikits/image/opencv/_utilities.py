@@ -13,7 +13,7 @@ class cvdoc(object):
     base_url = 'http://opencv.willowgarage.com/documentation/'
     branch_urls = {'cv': {'image': 'image_processing',
                           'structural': 'structural_analysis',
-                          'calibration': 'camera_calibration_and_3D_reconstruction'
+                          'calibration': 'camera_calibration_and_3d_reconstruction'
                           },
                    'cxcore': {},
                    'highgui': {}
