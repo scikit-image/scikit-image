@@ -1267,6 +1267,42 @@ def cvLogPolar(np.ndarray src, center, double M,
     c_cvLogPolar(&srcimg, &outimg, cv_center, M, flag)
     return out
 
+
+#--------
+# cvErode
+#--------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Erode the source image with the given element.
+
+Signature
+---------
+cvErode(src, element=None, iterations=1, anchor=None, in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+element : ndarray, 2D
+    The structuring element. Must be 2D. Non-zero elements
+    indicate which pixels of the underlying image to include
+    in the operation as the element is slid over the image.
+    If None, a 3x3 block element is used.
+iterations : integer
+    The number of times to perform the operation.
+anchor: 2-tuple, (x, y)
+    The anchor of the structuring element. Must be
+    FULLY inside the element. If None, the center of the
+    element is used.
+in_place: bool
+    If True, perform the operation in place.
+    Otherwise, store the results in a new image.
+
+Returns
+-------
+out/None : ndarray or None
+    An new array is returned only if in_place=False.
+    Otherwise, this function returns None.''')
 def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,
             anchor=None, in_place=False):
 
@@ -1299,6 +1335,42 @@ def cvErode(np.ndarray src, np.ndarray element=None, int iterations=1,
     else:
         return out
 
+
+#---------
+# cvDilate
+#---------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Dilate the source image with the given element.
+
+Signature
+---------
+cvDilate(src, element=None, iterations=1, anchor=None, in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+element : ndarray, 2D
+    The structuring element. Must be 2D. Non-zero elements
+    indicate which pixels of the underlying image to include
+    in the operation as the element is slid over the image.
+    If None, a 3x3 block element is used.
+iterations : integer
+    The number of times to perform the operation.
+anchor: 2-tuple, (x, y)
+    The anchor of the structuring element. Must be
+    FULLY inside the element. If None, the center of the
+    element is used.
+in_place: bool
+    If True, perform the operation in place.
+    Otherwise, store the results in a new image.
+
+Returns
+-------
+out/None : ndarray or None
+    An new array is returned only if in_place=False.
+    Otherwise, this function returns None.''')
 def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1,
             anchor=None, in_place=False):
 
@@ -1331,6 +1403,50 @@ def cvDilate(np.ndarray src, np.ndarray element=None, int iterations=1,
     else:
         return out
 
+
+#---------------
+# cvMorphologyEx
+#---------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Apply a morphological operation to the image.
+
+Signature
+---------
+cvMorphologyEx(src, element, operation, iterations=1, anchor=None,
+               in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+element : ndarray, 2D
+    The structuring element. Must be 2D. Non-zero elements
+    indicate which pixels of the underlying image to include
+    in the operation as the element is slid over the image.
+    Cannot be None.
+operation : flag
+    The morphology operation to perform. Must be one of:
+    CV_MOP_OPEN
+    CV_MOP_CLOSE
+    CV_MOP_GRADIENT
+    CV_MOP_TOPHAT
+    CV_MOP_BLACKHAT
+iterations : integer
+    The number of times to perform the operation.
+anchor: 2-tuple, (x, y)
+    The anchor of the structuring element. Must be
+    FULLY inside the element. If None, the center of the
+    element is used.
+in_place: bool
+    If True, perform the operation in place.
+    Otherwise, store the results in a new image.
+
+Returns
+-------
+out/None : ndarray or None
+    An new array is returned only if in_place=False.
+    Otherwise, this function returns None.''')
 def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
                    int iterations=1, anchor=None, in_place=False):
 
@@ -1380,14 +1496,96 @@ def cvMorphologyEx(np.ndarray src, np.ndarray element, int operation,
     else:
         return out
 
+
+#---------
+# cvSmooth
+#---------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Smooth an image with the specified filter.
+
+Signature
+---------
+cvSmooth(src, smoothtype=CV_GAUSSIAN, param1=3, param2=0, param3=0.,
+         param4=0., in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+smoothtype : integer
+    The flag representing which smoothing operation to perfom.
+    See notes on restrictions.
+    Must be one of:
+    CV_BLUR_NO_SCALE
+    CV_BLUR
+    CV_GAUSSIAN
+    CV_MEDIAN
+    CV_BILATERAL
+param1 : integer
+    See notes.
+param2 : integer
+    See notes.
+param3 : float
+    See notes.
+param4 : float
+    See notes.
+in_place : bool
+    If True, perform the operation in place.
+    This is not supported for every combination of arguments.
+    See notes.
+
+Returns
+-------
+out/None : ndarray or None
+    If in_place == True the function operates in place and returns None.
+    Otherwise, the operation returns a new array that is
+    the result of the smoothing operation.
+
+Notes
+-----
+The following details the restrictions and argument interpretaions
+for each of the smoothing operations.
+
+CV_BLUR_NO_SCALE:
+    Source image must be 2D and have dtype uint8, int8, or float32.
+    param1 x param2 define the neighborhood over which the pixels
+    are summed. If param2 is zero it is set equal to param1.
+    param3 and param4 are ignored.
+    in_place operation is not supported.
+CV_BLUR:
+    Source image must have dtype uint8, int8, or float32.
+    param1 x param2 define the neighborhood over which the pixels
+    are summed. If param2 is zero it is set equal to param1.
+    param3 and param4 are ignored.
+CV_GAUSSIAN:
+    Source image must have dtype uint8, int8, or float32.
+    param1 x param2 defines the size of the gaussian kernel.
+    If param2 is zero it is set equal to param1.
+    param3 is the standard deviation of the kernel.
+    If param3 is zero, an optimum stddev is calculated based
+    on the kernel size. If both param1 and param2 or zero,
+    then an optimum kernel size is calculated based on
+    param3.
+    in_place operation is supported.
+CV_MEDIAN:
+    Source image must have dtype uint8, or int8.
+    param1 x param1 define the neigborhood over which
+    to find the median.
+    param2, param3, and param4 are ignored.
+    in_place operation is not supported.
+CV_BILATERAL:
+    Source image must have dtype uint8, or int8.
+    param1 x param2 define the neighborhood.
+    param3 defines the color stddev.
+    param4 defines the space stddev.
+    in_place operation is not supported.
+
+Using standard sigma for small kernels (3x3 to 7x7)
+gives better speed.''')
 def cvSmooth(np.ndarray src, int smoothtype=CV_GAUSSIAN, int param1=3,
              int param2=0, double param3=0, double param4=0,
              bool in_place=False):
-    """
-    better doc string needed.
-    for now:
-    http://opencv.willowgarage.com/documentation/cvreference.html
-    """
 
     validate_array(src)
 
@@ -1444,6 +1642,42 @@ def cvSmooth(np.ndarray src, int smoothtype=CV_GAUSSIAN, int param1=3,
     else:
         return out
 
+
+#-----------
+# cvFilter2D
+#-----------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Convolve an image with the given kernel.
+
+Signature
+---------
+cvFilter2D(src, kernel, anchor=None, in_place=False)
+
+Parameters
+----------
+src : ndarray
+    The source image.
+kernel : ndarray, 2D, dtype=float32
+    The kernel with which to convolve the image.
+anchor : 2-tuple, (x, y)
+    The kernel anchor.
+in_place : bool
+    If True, perform the operation in_place.
+
+Returns
+-------
+out/None : ndarray or None
+    If in_place is True, returns None.
+    Otherwise a new array is returned which is the result
+    of the convolution.
+
+Notes
+-----
+This is a high performance function. OpenCV automatically
+determines, based on the size of the image and the kernel,
+whether it will faster to do the convolution in the spatial
+or the frequency domain, and behaves accordingly.''')
 def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
 
     validate_array(src)
@@ -1490,6 +1724,35 @@ def cvFilter2D(np.ndarray src, np.ndarray kernel, anchor=None, in_place=False):
     else:
         return out
 
+
+#-----------
+# cvIntegral
+#-----------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Calculate the integral of an image.
+
+Signature
+---------
+cvIntegral(src, square_sum=False, titled_sum=False)
+
+Parameters
+----------
+src : ndarray, dtyp=[uint8, float32, float64]
+    The source image.
+square_sum : bool
+    If True, also returns the square sum.
+tilted_sum : bool
+    If True, also returns the titled sum (45 degree tilt)
+
+Returns
+-------
+[out1, out2, out3] : list of ndarray's
+    Returns a list consisting at least of:
+    out1: the integral image, and optionally:
+    out2: the square sum image
+    out3: the titled sum image,
+    or any combination of these two.''')
 def cvIntegral(np.ndarray src, square_sum=False, tilted_sum=False):
 
     validate_array(src)
@@ -1544,6 +1807,56 @@ def cvIntegral(np.ndarray src, square_sum=False, tilted_sum=False):
 
     return out
 
+
+#-----------
+# cvCvtColor
+#-----------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Convert an image to another color space.
+
+Signature
+---------
+cvCvtColor(src, code)
+
+Parameters
+----------
+src : ndarray, dtype=[uint8, uint16, float32]
+    The source image.
+code : integer
+    A flag representing which color conversion to perform.
+    Valid flags are the following:
+    CV_BGR2BGRA,    CV_RGB2RGBA,    CV_BGRA2BGR,    CV_RGBA2RGB,
+    CV_BGR2RGBA,    CV_RGB2BGRA,    CV_RGBA2BGR,    CV_BGRA2RGB,
+    CV_BGR2RGB,     CV_RGB2BGR,     CV_BGRA2RGBA,   CV_RGBA2BGRA,
+    CV_BGR2GRAY,    CV_RGB2GRAY,    CV_GRAY2BGR,    CV_GRAY2RGB,
+    CV_GRAY2BGRA,   CV_GRAY2RGBA,   CV_BGRA2GRAY,   CV_RGBA2GRAY,
+    CV_BGR2BGR565,  CV_RGB2BGR565,  CV_BGR5652BGR,  CV_BGR5652RGB,
+    CV_BGRA2BGR565, CV_RGBA2BGR565, CV_BGR5652BGRA, CV_BGR5652RGBA,
+    CV_GRAY2BGR565, CV_BGR5652GRAY, CV_BGR2BGR555,  CV_RGB2BGR555,
+    CV_BGR5552BGR,  CV_BGR5552RGB,  CV_BGRA2BGR555, CV_RGBA2BGR555,
+    CV_BGR5552BGRA, CV_BGR5552RGBA, CV_GRAY2BGR555, CV_BGR5552GRAY,
+    CV_BGR2XYZ,     CV_RGB2XYZ,     CV_XYZ2BGR,     CV_XYZ2RGB,
+    CV_BGR2YCrCb,   CV_RGB2YCrCb,   CV_YCrCb2BGR,   CV_YCrCb2RGB,
+    CV_BGR2HSV,     CV_RGB2HSV,     CV_BGR2Lab,     CV_RGB2Lab,
+    CV_BayerBG2BGR, CV_BayerGB2BGR, CV_BayerRG2BGR, CV_BayerGR2BGR,
+    CV_BayerBG2RGB, CV_BayerGB2RGB, CV_BayerRG2RGB, CV_BayerGR2RGB,
+    CV_BGR2Luv,     CV_RGB2Luv,     CV_BGR2HLS,     CV_RGB2HLS,
+    CV_HSV2BGR,     CV_HSV2RGB,     CV_Lab2BGR,     CV_Lab2RGB,
+    CV_Luv2BGR,     CV_Luv2RGB,     CV_HLS2BGR,     CV_HLS2RGB
+
+Returns
+-------
+out : ndarray
+    A new image in the requested color-space, with
+    an appropriate dtype.
+
+Notes
+-----
+Not all conversion types support all dtypes.
+An exception will be raise if the dtype is not supported.
+See the OpenCV documentation for more details
+about the specific color conversions.''')
 def cvCvtColor(np.ndarray src, int code):
 
     validate_array(src)
@@ -1588,6 +1901,45 @@ def cvCvtColor(np.ndarray src, int code):
 
     return out
 
+
+#------------
+# cvThreshold
+#------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Threshold an image.
+
+Signature
+---------
+cvThreshold(src, threshold, max_value=255, threshold_type=CV_THRESH_BINARY,
+            use_otsu=False)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=[uint8, float32]
+threshold : float
+    The threshold value. (decision value)
+max_value : float
+    The maximum value.
+threshold_type : integer
+    The flag representing which type of thresholding to apply.
+    Valid flags are:
+    CV_THRESH_BINARY (max_value if src(x,y) > threshold else 0)
+    CV_THRESH_BINARY_INV (0 if src(x,y) > threshold else max_value)
+    CV_THRESH_TRUNC (threshold if src(x,y) > threshold else src(x,y))
+    CV_THRESH_TOZERO (src(x,y) if src(x,y) > threshold else 0)
+    CV_THRESH_TOZERO_INV (0 if src(x,y) > threshold else src(x,y))
+use_otsu : bool
+    If true, the optimum threshold is automatically computed
+    and the passed in threshold value is ignored.
+    Only implemented for uint8 source images.
+
+Returns
+-------
+out/(out, threshold) : ndarray or (ndarray, float)
+    If use_otsu is True, then the computed threshold value is
+    returned in addition to the thresholded image. Otherwise
+    just the thresholded image is returned.''')
 def cvThreshold(np.ndarray src, double threshold, double max_value=255,
                 int threshold_type=CV_THRESH_BINARY, use_otsu=False):
 
@@ -1614,6 +1966,45 @@ def cvThreshold(np.ndarray src, double threshold, double max_value=255,
     else:
         return out
 
+
+#--------------------
+# cvAdaptiveThreshold
+#--------------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Apply an adaptive threshold to an image.
+
+Signature
+---------
+cvAdaptiveThreshold(src, max_value,
+                    adaptive_method=CV_ADAPTIVE_THRESH_MEAN_C,
+                    threshold_type=CV_THRESH_BINARY,
+                    block_size=3, param1=5)
+
+Parameters
+----------
+src : ndarray, 2D, dtype=uint8
+max_value : float
+    The maximum value.
+adaptive_method : integer
+    The flag representing the adaptive method.
+    Valid flags are:
+    CV_ADAPTIVE_THRESH_MEAN_C (uses mean of the neighborhood)
+    CV_ADAPTIVE_THRESH_GAUSSIAN_C (uses gaussian of the neighborhood)
+threshold_type : integer
+    The flag representing which type of thresholding to apply.
+    Valid flags are:
+    CV_THRESH_BINARY (max_value if src(x,y) > threshold else 0)
+    CV_THRESH_BINARY_INV (0 if src(x,y) > threshold else max_value)
+block_size : integer
+    Defines a block_size x block_size neighborhood
+param1 : float
+    The weight to be subtracted from the neighborhood computation.
+
+Returns
+-------
+out : ndarray
+    The thresholded image.''')
 def cvAdaptiveThreshold(np.ndarray src, double max_value,
                         int adaptive_method=CV_ADAPTIVE_THRESH_MEAN_C,
                         int threshold_type=CV_THRESH_BINARY,
@@ -1646,6 +2037,27 @@ def cvAdaptiveThreshold(np.ndarray src, double max_value,
 
     return out
 
+
+#----------
+# cvPyrDown
+#----------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Downsample an image.
+
+Signature
+---------
+cvPyrDown(src)
+
+Parameters
+----------
+src : ndarray, dtype=[uint8, uint16, float32, float64]
+
+Returns
+-------
+out : ndarray
+    Downsampled image half the size of the original
+    in each dimension.''')
 def cvPyrDown(np.ndarray src):
 
     validate_array(src)
@@ -1669,6 +2081,27 @@ def cvPyrDown(np.ndarray src):
 
     return out
 
+
+#--------
+# cvPyrUp
+#--------
+
+@cvdoc(package='cv', group='image', doc=\
+'''Upsample an image.
+
+Signature
+---------
+cvPyrUp(src)
+
+Parameters
+----------
+src : ndarray, dtype=[uint8, uint16, float32, float64]
+
+Returns
+-------
+out : ndarray
+    Upsampled image twice the size of the original
+    in each dimension.''')
 def cvPyrUp(np.ndarray src):
 
     validate_array(src)
@@ -1692,6 +2125,37 @@ def cvPyrUp(np.ndarray src):
 
     return out
 
+
+#-------------------
+# cvCalibrateCamera2
+#-------------------
+
+@cvdoc(package='cv', group='calibration', doc=\
+'''Finds the intrinsic and extrinsic camera parameters
+using a calibration pattern.
+
+Signature
+---------
+cvCalibrateCamera2(object_points, image_points, point_counts, image_size)
+
+Parameters
+----------
+object_points : ndarray, Nx3
+    An array representing the (X, Y, Z) known coordinates of the
+    calibration object.
+image_points : ndarry, Nx2
+    An array representing the pixel image coordinate of the
+    points in object_points.
+point_counts : ndarry, 1D, dtype=int32
+    Vector containing the number of points in each particular view.
+image_size : 2-tuple, (height, width)
+    The height and width of the images used.
+
+Returns
+-------
+(intrinsics, distortion) : ndarray 3x3, ndarray 5-vector
+    Intrinsics is the 3x3 camera instrinsics matrix.
+    Distortion is the 5-vector of distortion coefficients.''')
 def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
            np.ndarray point_counts, image_size):
 
@@ -1755,19 +2219,42 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
 
     return intrinsics, distortion
 
+
+#------------------------
+# cvFindChessboardCorners
+#------------------------
+
+@cvdoc(package='cv', group='calibration', doc=\
+'''Finds the position of the internal corners of a chessboard.
+
+Signature
+---------
+cvFindChessboardCorners(src, pattern_size, flag=CV_CALIB_CB_ADAPTIVE_THRESH)
+
+Parameters
+----------
+src : ndarray, dtype=uint8
+    Image to search for chessboard corners.
+pattern_size : 2-tuple of inner corners (h,w)
+flag : integer
+    CV_CALIB_CB_ADAPTIVE_THRESH - use adaptive thresholding
+        to convert the image to black and white,
+        rather than a fixed threshold level
+        (computed from the average image brightness).
+    CV_CALIB_CB_NORMALIZE_IMAGE - normalize the image using
+        cvNormalizeHist() before applying fixed or adaptive
+        thresholding.
+    CV_CALIB_CB_FILTER_QUADS - use additional criteria
+        (like contour area, perimeter, square-like shape) to
+        filter out false quads that are extracted at the contour
+        retrieval stage.
+
+Returns
+-------
+out : ndarray Nx2
+    An nx2 array of the corners found.''')
 def cvFindChessboardCorners(np.ndarray src, pattern_size,
-                            int flags = CV_CALIB_CB_ADAPTIVE_THRESH):
-    """
-    Wrapper around the OpenCV cvFindChessboardCorners function.
-
-    src - Image to search for chessboard corners
-    pattern_size - Tuple of inner corners (h,w)
-    flags - see appropriate flags in opencv docs
-    http://opencv.willowgarage.com/documentation/cvreference.html
-
-    returns - an nx2 array of the corners found.
-
-    """
+                            int flag=CV_CALIB_CB_ADAPTIVE_THRESH):
 
     validate_array(src)
 
@@ -1791,27 +2278,44 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
 
     cdef int ncorners_found
     c_cvFindChessboardCorners(&srcimg, cvpattern_size, cvpoints,
-                              &ncorners_found, flags)
+                              &ncorners_found, flag)
 
     return out[:ncorners_found]
 
+
+#------------------------
+# cvFindChessboardCorners
+#------------------------
+
+@cvdoc(package='cv', group='calibration', doc=\
+'''Renders found chessboard corners into an image.
+
+Signature
+---------
+cvDrawChessboardCorners(src, pattern_size, corners, in_place=False)
+
+Parameters
+----------
+src : ndarray, dim 3, dtype: uint8
+    Image to draw into.
+pattern_size : 2-tuple, (h, w)
+    Number of inner corners (h,w)
+corners : ndarray, nx2, dtype=float32
+    Corners found in the image. See cvFindChessboardCorners and
+    cvFindCornerSubPix
+in_place: bool
+    If true, perform the drawing on the submitted
+    image. If false, a copy of the image will be made and drawn to.
+
+Returns
+-------
+out/None : ndarray or none
+    If in_place is True, the function returns None.
+    Otherwise, the function returns a new image with
+    the corners drawn into it.''')
 def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
                             in_place=False):
-    """
-    Wrapper around the OpenCV cvDrawChessboardCorners function.
 
-    Parameters
-    ----------
-    src : ndarray, dim 3, dtype: uint8
-        Image to draw into.
-    pattern_size : array_like, shape (2,)
-        Number of inner corners (h,w)
-    corners : ndarray, shape (n,2), dtype: float32
-        Corners found in the image. See cvFindChessboardCorners and
-        cvFindCornerSubPix
-    in_place: True/False (default=True) perform the drawing on the submitted
-              image. If false, a copy of the image will be made and drawn to.
-    """
     validate_array(src)
 
     assert_nchannels(src, [3])
