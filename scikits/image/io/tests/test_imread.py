@@ -15,3 +15,9 @@ def test_imread_flatten():
 def test_imread_dtype():
     img = imread(os.path.join(data_dir, 'camera.png'), dtype=np.float64)
     assert img.dtype == np.float64
+
+def test_imread_palette():
+    img = imread(os.path.join(data_dir, 'palette_gray.png'))
+    assert img.ndim == 2
+    img = imread(os.path.join(data_dir, 'palette_color.png'))
+    assert img.ndim == 3
