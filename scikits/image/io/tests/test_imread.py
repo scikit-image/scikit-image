@@ -2,7 +2,8 @@ import os.path
 import numpy as np
 
 from scikits.image import data_dir
-from scikits.image.io import imread, palette_is_grayscale
+from scikits.image.io import imread
+from scikits.image.io.pil_imread import palette_is_grayscale
 
 def test_imread_flatten():
     # a color image is flattened and returned as float32
@@ -23,10 +24,7 @@ def test_imread_palette():
     assert img.ndim == 3
 
 def test_palette_is_gray():
-    try:
-        from PIL import Image
-    except ImportError:
-        return
+    from PIL import Image
     gray = Image.open(os.path.join(data_dir, 'palette_gray.png'))
     assert palette_is_grayscale(gray)
     color = Image.open(os.path.join(data_dir, 'palette_color.png'))

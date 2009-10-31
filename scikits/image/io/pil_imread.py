@@ -1,4 +1,4 @@
-__all__ = ['imread', 'palette_is_grayscale']
+__all__ = ['imread']
 
 import numpy as np
 
@@ -45,13 +45,13 @@ def imread(fname, flatten=False, dtype=None):
 
 
 def palette_is_grayscale(pil_image):
-    """Return True if PIL image is grayscale.
-    
+    """Return True if PIL image in palette mode is grayscale.
+
     Parameters
     ----------
     pil_image : PIL image
         PIL Image that is in Palette mode.
-    
+
     Returns
     -------
     is_grayscale : bool
