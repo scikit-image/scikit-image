@@ -1,4 +1,4 @@
-__all__ = ['imread']
+__all__ = ['imread', 'palette_is_grayscale']
 
 import numpy as np
 
