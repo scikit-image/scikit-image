@@ -20,6 +20,18 @@ make html
 rm -rf /tmp/scikits.image.docs
 cp -r build/html /tmp/scikits.image.docs
 cd ..
+
+# This file changes upon build, so we have to back it up,
+# otherwise git won't switch branches
+ignore_files="scikits/image/version.py
+              scikits/image/opencv/opencv_cv.c
+              scikits/image/opencv/opencv_backend.c"
+mkdir -p /tmp/_scikits_image_backup
+for f in $ignore_files; do
+  cp $f /tmp/_scikits_image_backup
+  git co $f
+done
+
 git co gh-pages || exit
 rm -rf ./*
 cp -r /tmp/scikits.image.docs/* .
@@ -45,4 +57,8 @@ read
 git commit -m "Update docs."
 git push origin gh-pages
 git co $branch
+
+for f in $ignore_files; do
+  cp /tmp/_scikits_image_backup/`basename $f` $f
+done
 
