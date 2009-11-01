@@ -37,7 +37,7 @@ else:
     def show(arr, block=True):
         global app
 
-        if not '-qt4thread' in sys.argv and app is None:
+        if not '-q4thread' in sys.argv and app is None:
             app = QApplication([])
 
         arr = prepare_for_display(arr)
