@@ -1,40 +1,6 @@
 __all__ = ['imread', 'imsave', 'imshow']
 
-from scikits.image.io.plugin import plugin_store
-
-def _call_plugin(kind, *args, **kwargs):
-    """Find the appropriate plugin of 'kind' and execute it.
-
-    Parameters
-    ----------
-    kind : {'imshow', 'imsave', 'imread'}
-        Function to look up.
-    plugin : str, optional
-        Plugin to load.  Defaults to None, in which case the first
-        matching plugin is used.
-    *args, **kwargs : arguments and keyword arguments
-        Passed to the plugin function.
-
-    """
-    if not kind in plugin_store:
-        raise ValueError('Invalid function (%s) requested.' % kind)
-
-    plugin_funcs = plugin_store[kind]
-    if len(plugin_funcs) == 0:
-        raise RuntimeError('No suitable plugin registered for %s' % kind)
-
-    plugin = kwargs.pop('plugin', None)
-    if plugin is None:
-        _, func = plugin_funcs[0]
-    else:
-        try:
-            func = [f for (p,f) in plugin_funcs if p == plugin][0]
-        except IndexError:
-            raise RuntimeError('Could not find the plugin "%s" for %s.' % \
-                               (plugin, kind))
-
-    return func(*args, **kwargs)
-
+from scikits.image.io import plugin as _plugin
 
 def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
            **plugin_args):
@@ -78,7 +44,7 @@ def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    return _call_plugin('read', fname, as_grey=as_grey, dtype=dtype,
+    return _plugin.call('read', fname, as_grey=as_grey, dtype=dtype,
                         plugin=plugin, **plugin_args)
 
 def imsave(fname, arr, plugin=None, **plugin_args):
@@ -101,7 +67,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    return _call_plugin('save', fname, arr, plugin=plugin, **plugin_args)
+    return _plugin.call('save', fname, arr, plugin=plugin, **plugin_args)
 
 def imshow(arr, plugin=None, **plugin_args):
     """Display an image.
@@ -121,4 +87,4 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    return _call_plugin('show', arr, plugin=plugin, **plugin_args)
+    return _plugin.call('show', arr, plugin=plugin, **plugin_args)
