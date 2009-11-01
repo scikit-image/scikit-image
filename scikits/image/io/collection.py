@@ -8,7 +8,7 @@ from glob import glob
 import os.path
 
 import numpy as np
-from pil_imread import imread
+from io import imread
 
 from PIL import Image
 
@@ -266,7 +266,8 @@ class ImageCollection(object):
         n = self._check_imgnum(n)
         idx = n % len(self.data)
 
-        if (self.conserve_memory and n != self._cached) or (self.data[idx] is None):
+        if (self.conserve_memory and n != self._cached) or \
+               (self.data[idx] is None):
             self.data[idx] = imread(self.files[n], self.as_grey,
                                     dtype=self._dtype)
             self._cached = n

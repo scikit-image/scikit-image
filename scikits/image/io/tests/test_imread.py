@@ -3,7 +3,7 @@ import numpy as np
 
 from scikits.image import data_dir
 from scikits.image.io import imread
-from scikits.image.io.pil_imread import palette_is_grayscale
+from scikits.image.io.pil_plugin import palette_is_grayscale
 
 def test_imread_flatten():
     # a color image is flattened and returned as float32
