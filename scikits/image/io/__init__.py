@@ -2,6 +2,7 @@
 
 import pil_plugin
 import matplotlib_plugin
+import qt_plugin
 
 from plugin import register as register_plugin
 
