@@ -1,4 +1,6 @@
 import plugin
+from _plugin_util import prepare_for_display
+
 import numpy as np
 import sys
 
@@ -35,15 +37,10 @@ else:
     def show(arr, block=True):
         global app
 
-        arr = np.ascontiguousarray(arr.astype(np.uint8))
-        if arr.ndim != 3:
-            raise ValueError("Qt only displays colour images.")
-
-        if arr.shape[-1] == 4:
-            raise ValueError("Alpha channels not yet supported.")
-
         if not '-qt4thread' in sys.argv and app is None:
             app = QApplication([])
+
+        arr = prepare_for_display(arr)
 
         iw = ImageWindow(arr)
         iw.show()
@@ -55,3 +52,15 @@ else:
             app.exec_()
 
     plugin.register('qt', show=show)
+
+if __name__ == "__main__":
+    import scikits.image.io as io
+
+    io.plugin.use('qt', 'show')
+
+    img = np.empty((200, 200, 3), dtype=np.uint8)
+    img[:50, :50, 0] = 100
+    img[25:100, 25:100, 1] = 200
+    img[:, :, 2] = 155
+    io.imshow(img, block=False)
+    io.imshow(img)
