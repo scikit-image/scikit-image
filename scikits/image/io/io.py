@@ -1,6 +1,6 @@
 __all__ = ['imread', 'imsave', 'imshow']
 
-from scikits.image.io import plugin as _plugin
+from scikits.image.io._plugins import call as call_plugin
 
 def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
            **plugin_args):
@@ -44,8 +44,8 @@ def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    return _plugin.call('read', fname, as_grey=as_grey, dtype=dtype,
-                        plugin=plugin, **plugin_args)
+    return call_plugin('read', fname, as_grey=as_grey, dtype=dtype,
+                       plugin=plugin, **plugin_args)
 
 def imsave(fname, arr, plugin=None, **plugin_args):
     """Save an image to file.
@@ -67,7 +67,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    return _plugin.call('save', fname, arr, plugin=plugin, **plugin_args)
+    return call_plugin('save', fname, arr, plugin=plugin, **plugin_args)
 
 def imshow(arr, plugin=None, **plugin_args):
     """Display an image.
@@ -87,4 +87,4 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    return _plugin.call('show', arr, plugin=plugin, **plugin_args)
+    return call_plugin('show', arr, plugin=plugin, **plugin_args)

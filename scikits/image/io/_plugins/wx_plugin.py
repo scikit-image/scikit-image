@@ -1,6 +1,6 @@
 import numpy as np
 import plugin
-from _plugin_util import prepare_for_display
+from util import prepare_for_display
 
 try:
     import wx

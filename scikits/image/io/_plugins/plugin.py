@@ -2,7 +2,7 @@
 
 """
 
-__all__ = ['register', 'use']
+__all__ = ['register', 'use', 'load', 'available', 'call']
 
 import warnings
 
@@ -38,7 +38,7 @@ def register(name, **kwds):
         if not callable(func):
             raise ValueError('Can only register functions as plugins.')
 
-        plugin_store[kind].append((name, func))
+        plugin_store[kind].insert(0, (name, func))
 
 
 def call(kind, *args, **kwargs):
@@ -60,7 +60,11 @@ def call(kind, *args, **kwargs):
 
     plugin_funcs = plugin_store[kind]
     if len(plugin_funcs) == 0:
-        raise RuntimeError('No suitable plugin registered for %s' % kind)
+        raise RuntimeError('''No suitable plugin registered for %s.
+
+You may load I/O plugins with the `scikits.image.io.load_plugin`
+command.  A list of all available plugins can be found using
+`scikits.image.io.plugins()`.''' % kind)
 
     plugin = kwargs.pop('plugin', None)
     if plugin is None:
@@ -123,8 +127,9 @@ def available(kind=None):
     Parameters
     ----------
     kind : {'show', 'save', 'read'}, optional
-        Display the plugin list for the given function type.  If not specified,
-        return a dictionary with the plugins for all functions.
+        Display the plugin list for the given function type.  If not
+        specified, return a dictionary with the plugins for all
+        functions.
 
     """
     if kind is None:
@@ -141,3 +146,21 @@ def available(kind=None):
         d[k] = [name for (name, func) in plugin_store[k]]
 
     return d
+
+def load(plugin):
+    """Load the given plugin.
+
+    Parameters
+    ----------
+    plugin : str
+        Name of plugin to load.
+
+    See Also
+    --------
+    plugins : List of available plugins
+
+    """
+    try:
+        __import__('scikits.image.io._plugins.' + plugin + "_plugin")
+    except ImportError:
+        raise ValueError('Plugin %s not found.' % plugin)

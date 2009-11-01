@@ -1,5 +1,5 @@
 import plugin
-from _plugin_util import prepare_for_display
+from util import prepare_for_display
 
 import numpy as np
 import sys
@@ -37,7 +37,7 @@ else:
     def show(arr, block=True):
         global app
 
-        if not '-q4thread' in sys.argv and app is None:
+        if not '-qt4thread' in sys.argv and app is None:
             app = QApplication([])
 
         arr = prepare_for_display(arr)
