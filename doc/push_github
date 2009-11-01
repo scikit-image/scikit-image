@@ -4,6 +4,12 @@ if ! [[ -d ../.git ]]; then
   exit
 fi
 
+installed_ver=`python -c "import scikits.image; print scikits.image.__version__"`
+if [ $installed_ver = "unbuilt-dev" ]; then
+   echo "Please build the scikit before generating the docs."
+   exit 1
+fi
+
 # Get current branch
 ref=$(git symbolic-ref HEAD 2> /dev/null)
 branch=${ref#refs/heads/}
