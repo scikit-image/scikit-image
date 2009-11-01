@@ -3,6 +3,19 @@ __all__ = ['imread', 'imsave', 'imshow']
 from scikits.image.io.plugin import plugin_store
 
 def _call_plugin(kind, *args, **kwargs):
+    """Find the appropriate plugin of 'kind' and execute it.
+
+    Parameters
+    ----------
+    kind : {'imshow', 'imsave', 'imread'}
+        Function to look up.
+    plugin : str, optional
+        Plugin to load.  Defaults to None, in which case the first
+        matching plugin is used.
+    *args, **kwargs : arguments and keyword arguments
+        Passed to the plugin function.
+
+    """
     if not kind in plugin_store:
         raise ValueError('Invalid function (%s) requested.' % kind)
 
