@@ -2,7 +2,7 @@ import plugin
 import numpy as np
 import sys
 
-app = [None]
+app = None
 windows = []
 
 try:
@@ -33,6 +33,8 @@ else:
             windows.remove(self)
 
     def show(arr, block=True):
+        global app
+
         arr = np.ascontiguousarray(arr.astype(np.uint8))
         if arr.ndim != 3:
             raise ValueError("Qt only displays colour images.")
@@ -40,8 +42,8 @@ else:
         if arr.shape[-1] == 4:
             raise ValueError("Alpha channels not yet supported.")
 
-        if not '-qt4thread' in sys.argv and app[0] is None:
-            app[0] = QApplication([])
+        if not '-qt4thread' in sys.argv and app is None:
+            app = QApplication([])
 
         iw = ImageWindow(arr)
         iw.show()
@@ -49,7 +51,7 @@ else:
         # Keep track of window so that it doesn't get destroyed
         windows.append(iw)
 
-        if app[0] and block:
-            app[0].exec_()
+        if app and block:
+            app.exec_()
 
     plugin.register('qt', show=show)
