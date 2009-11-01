@@ -22,3 +22,6 @@
 - Helge Reikeras
   Logic around API docs generation
 
+- Tony Yu
+  Reading of paletted images
+
