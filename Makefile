@@ -10,5 +10,4 @@ test:
 	nosetests scikits/image
 
 coverage:
-	nosetests scikits/image --with-coverage
-	coverage -r -m scikits/image/*.py scikits/image/*/*.py 
+	nosetests scikits/image --with-coverage --cover-package=scikits.image
