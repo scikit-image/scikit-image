@@ -11,7 +11,6 @@ class WindowManager(object):
         self._callback = None
         self._callback_args = ()
         self._callback_kwargs = {}
-
         self._gui_lock = False
 
     def _check_locked(self):
@@ -19,8 +18,11 @@ class WindowManager(object):
             raise RuntimeError(\
             'Must first acquire the gui lock before using this image manager ')
 
+    def _exec_callback(self):
+        if self._callback:
+            self._callback(*self._callback_args, **self._callback_kwargs)
+
     def acquire(self):
-        print 'lock requested while: ', self._gui_lock
         if self._gui_lock:
             raise RuntimeError(\
             'The gui lock can only be acquired by one toolkit per session')
@@ -28,31 +30,34 @@ class WindowManager(object):
             self._gui_lock = True
 
     def add_window(self, win):
+        self._check_locked()
         self._windows.append(win)
 
     def remove_window(self, win):
+        self._check_locked()
         try:
             self._windows.remove(win)
         except ValueError:
             print 'Unable to find referenced window in tracked windows.'
             print 'Ignoring...'
         else:
-            print len(self._windows)
-            if len(self._windows)==0:
+            if len(self._windows) == 0:
                 self._exec_callback()
 
     def register_callback(self, cb, *cbargs, **cbkwargs):
+        self._check_locked()
         self._callback = cb
-        print self._callback
         self._callback_args = cbargs
         self._callback_kwargs = cbkwargs
 
-    def _exec_callback(self):
-        if self._callback:
-            print 'calling callback'
-            self._callback(*self._callback_args, **self._callback_kwargs)
+    def has_images(self):
+        if len(self._windows) > 0:
+            return True
+        else:
+            return False
 
 window_manager = WindowManager()
+
 
 def prepare_for_display(npy_img):
     '''Convert a 2D or 3D numpy array of any dtype into a

@@ -90,5 +90,14 @@ def imshow(arr, plugin=None, **plugin_args):
     return call_plugin('show', arr, plugin=plugin, **plugin_args)
 
 def show():
-    # need some checks here, now just for testing
+    '''Launches the event loop of the current gui plugin,
+    and displays all pending images. This is required,
+    when using imshow() from a non-interactive script.
+    Simply make all the calls to imshow() to queue up as many
+    images as you need, then call show(). After the
+    last window is closed, the gui event loop will exit,
+    and you script will continue execution.
+
+    If this is called from the interactive terminal,
+    it will block until all windows are closed.'''
     return call_plugin('appshow')

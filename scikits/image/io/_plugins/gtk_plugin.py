@@ -40,10 +40,14 @@ else:
         iw = ImageWindow(arr, window_manager)
         iw.show()
 
-    def show():
-        window_manager.register_callback(gtk.main_quit)
-        gtk.main()
+    def gtk_show():
+        if window_manager.has_images():
+            window_manager.register_callback(gtk.main_quit)
+            gtk.main()
+        else:
+            print 'no images to display'
 
-    plugin.register('gtk', show=gtk_imshow)
-    plugin.register('gtk', appshow=show)
+
+    plugin.register('gtk', show=gtk_imshow, appshow=gtk_show)
+
 
