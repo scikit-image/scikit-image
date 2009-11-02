@@ -6,9 +6,8 @@ import sys
 
 
 try:
-    # we try to aquire the gui lock first
-    # or else the gui import might trample another
-    # gui's pyos_inputhook.
+    # We try to aquire the gui lock first or else the gui import might
+    # trample another GUI's PyOS_InputHook.
     window_manager.acquire('qt')
 
 except GuiLockError, gle:
@@ -20,8 +19,7 @@ else:
                                  QLabel)
 
     except ImportError:
-        print 'pyqt4 libraries not installed.'
-        print 'plugin not loaded'
+        print 'PyQT4 libraries not installed.  Plugin not loaded.'
         window_manager._release('qt')
 
     else:
@@ -65,9 +63,6 @@ else:
             if app and window_manager.has_images():
                 app.exec_()
             else:
-                print 'no images to show'
+                print 'No images to show.  See `imshow`.'
 
         plugin.register('qt', show=qt_imshow, appshow=qt_show)
-
-
-
