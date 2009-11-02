@@ -1,5 +1,4 @@
 from util import prepare_for_display, window_manager, GuiLockError
-import plugin
 
 try:
     # we try to aquire the gui lock first
@@ -41,21 +40,15 @@ else:
             def destroy(self, widget, data=None):
                 self.mgr.remove_window(self)
 
-        def gtk_imshow(arr):
+        def imshow(arr):
             arr = prepare_for_display(arr)
 
             iw = ImageWindow(arr, window_manager)
             iw.show()
 
-        def gtk_show():
+        def _app_show():
             if window_manager.has_windows():
                 window_manager.register_callback(gtk.main_quit)
                 gtk.main()
             else:
                 print 'no images to display'
-
-
-        plugin.register('gtk', show=gtk_imshow, appshow=gtk_show)
-
-
-

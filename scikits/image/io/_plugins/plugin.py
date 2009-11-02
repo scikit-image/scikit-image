@@ -2,45 +2,45 @@
 
 """
 
-__all__ = ['register', 'use', 'load', 'available', 'call']
+__all__ = ['use', 'load', 'available', 'call']
 
 import warnings
+from ConfigParser import ConfigParser
+import os.path
+from glob import glob
 
-plugin_store = {'read': [],
-                'save': [],
-                'show': [],
-                'appshow': []}
+plugin_store = {'imread': [],
+                'imsave': [],
+                'imshow': [],
+                '_app_show': []}
 
-def register(name, **kwds):
-    """Register an image I/O plugin.
+plugin_provides = {}
+plugin_module_name = {}
 
-    Parameters
-    ----------
-    name : str
-        Name of this plugin.
-    read : callable, optional
-        Function with signature
-        ``read(filename, as_grey=False, dtype=None, **plugin_specific_args)``
-        that reads images.
-    save : callable, optional
-        Function with signature
-        ``write(filename, arr, **plugin_specific_args)``
-        that writes an image to disk.
-    show : callable, optional
-        Function with signature
-        ``show(X, **plugin_specific_args)`` that displays an image.
+def _scan_plugins():
+    """Scan the plugins directory for .ini files and parse them
+    to gather plugin meta-data.
 
     """
-    for kind in kwds:
-        if kind not in plugin_store.keys():
-            raise ValueError('Tried to register invalid plugin method.')
+    pd = os.path.dirname(__file__)
+    ini = glob(os.path.join(pd, '*.ini'))
 
-        func = kwds[kind]
-        if not callable(func):
-            raise ValueError('Can only register functions as plugins.')
+    for f in ini:
+        cp = ConfigParser()
+        cp.read(f)
+        name = cp.sections()[0]
+        provides = [s.strip() for s in cp.get(name, 'provides').split(',')]
+        valid_provides = [p for p in provides if p in plugin_store]
 
-        plugin_store[kind].insert(0, (name, func))
+        for p in provides:
+            if not p in plugin_store:
+                print "Plugin `%s` wants to provide non-existent `%s`." \
+                      " Ignoring." % (name, p)
 
+        plugin_provides[name] = valid_provides
+        plugin_module_name[name] = os.path.basename(f)[:-4]
+
+_scan_plugins()
 
 def call(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
@@ -103,10 +103,16 @@ def use(name, kind=None):
         kind = plugin_store.keys()
     else:
         kind = [kind]
+        if not kind in plugin_provides[name]:
+            raise RuntimeError("Plugin %s does not support `%s`." % \
+                               (name, kind))
+
+    if not name in available(loaded=True):
+        raise RuntimeError("No plugin '%s' has been loaded." % name)
 
     for k in kind:
         if not k in plugin_store:
-            raise RuntimeError("Could not find plugin for '%s'" % k)
+            raise RuntimeError("'%s' is not a known plugin function." % k)
 
         funcs = plugin_store[k]
 
@@ -115,36 +121,29 @@ def use(name, kind=None):
         funcs = [(n, f) for (n, f) in funcs if n == name] + \
                 [(n, f) for (n, f) in funcs if n != name]
 
-        n, f = funcs[0]
-        if not n == name:
-            warnings.warn(RuntimeWarning('Could not set plugin "%s" for'
-                                         ' function "%s".' % (name, k)))
-
         plugin_store[k] = funcs
 
-def available(kind=None):
+def available(loaded=False):
     """List available plugins.
 
     Parameters
     ----------
-    kind : {'show', 'save', 'read'}, optional
-        Display the plugin list for the given function type.  If not
-        specified, return a dictionary with the plugins for all
-        functions.
+    loaded : bool
+        If True, show only those plugins currently loaded.  By default,
+        all plugins are shown.
 
     """
-    if kind is None:
-        kind = plugin_store.keys()
-    else:
-        kind = [kind]
+    from copy import deepcopy
+    active_plugins = set()
+    for k in plugin_store:
+        for plugin, fname in plugin_store[k]:
+            active_plugins.add(plugin)
 
     d = {}
-    for k in kind:
-        if not k in plugin_store:
-            raise ValueError('No function "%s" exists in the plugin registry.'
-                             % kind)
-
-        d[k] = [name for (name, func) in plugin_store[k]]
+    for plugin in plugin_provides:
+        if not loaded or plugin in active_plugins:
+            d[plugin] = [f for f in plugin_provides[plugin] \
+                         if not f.startswith('_')]
 
     return d
 
@@ -161,7 +160,21 @@ def load(plugin):
     plugins : List of available plugins
 
     """
-    try:
-        __import__('scikits.image.io._plugins.' + plugin + "_plugin")
-    except ImportError:
-        raise ValueError('Plugin %s not found.' % plugin)
+    if not plugin in plugin_module_name:
+        raise ValueError("Plugin %s not found." % plugin)
+    else:
+        modname = plugin + "_plugin"
+        plugin_module = __import__('scikits.image.io._plugins.' + modname,
+                                   fromlist=[modname])
+
+    provides = plugin_provides[plugin]
+    for p in provides:
+        if not hasattr(plugin_module, p):
+            print "Plugin %s does not provide %s as advertised.  Ignoring." % \
+                  (plugin, p)
+        else:
+            store = plugin_store[p]
+            func = getattr(plugin_module, p)
+            if not func in store:
+                store.insert(0, (plugin, func))
+
