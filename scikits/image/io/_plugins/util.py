@@ -2,6 +2,14 @@ import numpy as np
 
 # utilities to make life easier for plugin writers.
 
+
+class GuiLockError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
 class WindowManager(object):
     ''' A class to keep track of spawned windows,
     and make any needed callback once all the windows,
@@ -12,22 +20,40 @@ class WindowManager(object):
         self._callback_args = ()
         self._callback_kwargs = {}
         self._gui_lock = False
+        self._guikit = ''
 
     def _check_locked(self):
         if not self._gui_lock:
-            raise RuntimeError(\
-            'Must first acquire the gui lock before using this image manager ')
+            raise GuiLockError(\
+            'Must first acquire the gui lock before using this image manager')
 
     def _exec_callback(self):
         if self._callback:
             self._callback(*self._callback_args, **self._callback_kwargs)
 
-    def acquire(self):
+    def acquire(self, kit):
         if self._gui_lock:
-            raise RuntimeError(\
-            'The gui lock can only be acquired by one toolkit per session')
+            raise GuiLockError(\
+            'The gui lock can only be acquired by one toolkit per session. \
+            The lock is already aquired by %s' % self._guikit)
         else:
             self._gui_lock = True
+            self._guikit = str(kit)
+
+    def _release(self, kit):
+        # releaseing the lock will lose all references to currently
+        # track images and callback.
+        # this function is private for reason!
+        self._check_locked()
+        if str(kit) == self._guikit:
+            self._windows = []
+            self._callback = None
+            self._callback_args = ()
+            self._callback_kwargs = {}
+            self._gui_lock = False
+            self._guikit = ''
+        else:
+            raise RuntimeError('Only the toolkit that owns the lock may release it')
 
     def add_window(self, win):
         self._check_locked()
