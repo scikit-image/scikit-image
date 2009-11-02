@@ -5,7 +5,7 @@ from _plugins import use as use_plugin
 from _plugins import available as plugins
 
 # Add this plugin so that we can read images by default
-import _plugins.pil_plugin as _pil_plugin
+load_plugin('pil')
 
 from sift import *
 from collection import *
