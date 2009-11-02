@@ -162,7 +162,7 @@ def load(plugin):
     if not plugin in plugin_module_name:
         raise ValueError("Plugin %s not found." % plugin)
     else:
-        modname = plugin + "_plugin"
+        modname = plugin_module_name[plugin]
         plugin_module = __import__('scikits.image.io._plugins.' + modname,
                                    fromlist=[modname])
 
