@@ -8,7 +8,8 @@ import warnings
 
 plugin_store = {'read': [],
                 'save': [],
-                'show': []}
+                'show': [],
+                'appshow': []}
 
 def register(name, **kwds):
     """Register an image I/O plugin.

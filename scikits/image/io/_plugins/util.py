@@ -2,6 +2,57 @@ import numpy as np
 
 # utilities to make life easier for plugin writers.
 
+class WindowManager(object):
+    ''' A class to keep track of spawned windows,
+    and make any needed callback once all the windows,
+    are closed.'''
+    def __init__(self):
+        self._windows = []
+        self._callback = None
+        self._callback_args = ()
+        self._callback_kwargs = {}
+
+        self._gui_lock = False
+
+    def _check_locked(self):
+        if not self._gui_lock:
+            raise RuntimeError(\
+            'Must first acquire the gui lock before using this image manager ')
+
+    def acquire(self):
+        print 'lock requested while: ', self._gui_lock
+        if self._gui_lock:
+            raise RuntimeError(\
+            'The gui lock can only be acquired by one toolkit per session')
+        else:
+            self._gui_lock = True
+
+    def add_window(self, win):
+        self._windows.append(win)
+
+    def remove_window(self, win):
+        try:
+            self._windows.remove(win)
+        except ValueError:
+            print 'Unable to find referenced window in tracked windows.'
+            print 'Ignoring...'
+        else:
+            print len(self._windows)
+            if len(self._windows)==0:
+                self._exec_callback()
+
+    def register_callback(self, cb, *cbargs, **cbkwargs):
+        self._callback = cb
+        print self._callback
+        self._callback_args = cbargs
+        self._callback_kwargs = cbkwargs
+
+    def _exec_callback(self):
+        if self._callback:
+            print 'calling callback'
+            self._callback(*self._callback_args, **self._callback_kwargs)
+
+window_manager = WindowManager()
 
 def prepare_for_display(npy_img):
     '''Convert a 2D or 3D numpy array of any dtype into a

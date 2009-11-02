@@ -1,4 +1,4 @@
-__all__ = ['imread', 'imsave', 'imshow']
+__all__ = ['imread', 'imsave', 'imshow', 'show']
 
 from scikits.image.io._plugins import call as call_plugin
 
@@ -88,3 +88,7 @@ def imshow(arr, plugin=None, **plugin_args):
 
     """
     return call_plugin('show', arr, plugin=plugin, **plugin_args)
+
+def show():
+    # need some checks here, now just for testing
+    return call_plugin('appshow')
