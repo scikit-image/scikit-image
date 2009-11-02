@@ -1,7 +1,7 @@
 from numpy.testing import *
 
 from scikits.image import io
-from scikits.image.io import plugin
+from scikits.image.io._plugins import plugin
 
 from copy import deepcopy
 
@@ -23,7 +23,7 @@ def show_other(arr):
 
 def setup_module(self):
     self.backup_plugin_store = deepcopy(plugin.plugin_store)
-    plugin.register('test', read=read, save=save, show=show)
+    plugin.register('testcase', read=read, save=save, show=show)
     plugin.register('other', show=show_other)
 
 def teardown_module(self):
@@ -31,13 +31,13 @@ def teardown_module(self):
 
 class TestPlugin:
     def test_read(self):
-        io.imread('test.png', as_grey=True, dtype='i4', plugin='test')
+        io.imread('test.png', as_grey=True, dtype='i4', plugin='testcase')
 
     def test_save(self):
-        io.imsave('test.png', [1, 2, 3], plugin='test')
+        io.imsave('test.png', [1, 2, 3], plugin='testcase')
 
     def test_show(self):
-        io.imshow([1, 2, 3], plugin_arg=(1, 2), plugin='test')
+        io.imshow([1, 2, 3], plugin_arg=(1, 2), plugin='testcase')
 
     def test_use(self):
         plugin.use('other', 'show')
@@ -47,6 +47,13 @@ class TestPlugin:
         plugin.use('other', 'show')
         d = plugin.available('show')
         assert d['show'][0] == 'other'
+
+    def test_load(self):
+        plugin.load('test')
+        fname, arr = io.imsave('outfile', [1, 2, 3])
+        assert_equal(fname, 'outfile')
+        assert_equal(arr, [1, 2, 3])
+        assert_equal(plugin.available('save')['save'][0], 'test')
 
 if __name__ == "__main__":
     run_module_suite()

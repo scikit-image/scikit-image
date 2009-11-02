@@ -1,7 +1,7 @@
 __all__ = ['imread']
 
-import numpy as np
 import plugin
+import numpy as np
 
 try:
     from PIL import Image
@@ -51,4 +51,4 @@ def palette_is_grayscale(pil_image):
 
 
 if has_pil:
-    plugin.register('PIL', read=imread)
+    plugin.register('pil', read=imread)

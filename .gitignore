@@ -4,6 +4,8 @@
 *egg-info
 *.so
 *.bak
+*.c
+.gitignore
 doc/source/api
 doc/build
 source/api
