@@ -31,5 +31,34 @@ class TestPrepareForDisplay:
     def test_wrong_depth(self):
         x = prepare_for_display(np.random.random((10, 10, 5)))
 
+class TestWindowManager:
+    callback_called = False
+
+    def setup(self):
+        self.wm = WindowManager()
+        self.wm.acquire('test')
+
+    def test_add_window(self):
+        self.wm.add_window('window1')
+        self.wm.remove_window('window1')
+
+    def callback(self):
+        self.callback_called = True
+
+    def test_callback(self):
+        cb = lambda x: x
+        self.wm.register_callback(self.callback)
+        self.wm.add_window('window')
+        self.wm.remove_window('window')
+        assert self.callback_called
+
+    def test_has_images(self):
+        assert not self.wm.has_windows()
+        self.wm.add_window('window')
+        assert self.wm.has_windows()
+
+    def teardown(self):
+        self.wm._release('test')
+
 if __name__ == "__main__":
     run_module_suite()

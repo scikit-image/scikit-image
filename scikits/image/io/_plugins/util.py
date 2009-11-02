@@ -42,7 +42,7 @@ class WindowManager(object):
 
     def _release(self, kit):
         # releaseing the lock will lose all references to currently
-        # track images and callback.
+        # tracked images and the callback.
         # this function is private for reason!
         self._check_locked()
         if str(kit) == self._guikit:
@@ -76,7 +76,7 @@ class WindowManager(object):
         self._callback_args = cbargs
         self._callback_kwargs = cbkwargs
 
-    def has_images(self):
+    def has_windows(self):
         if len(self._windows) > 0:
             return True
         else:
@@ -117,7 +117,7 @@ def prepare_for_display(npy_img):
     ignored.
 
     '''
-    if len(npy_img.shape) < 2:
+    if npy_img.ndim < 2:
         raise ValueError('Image must be 2D or 3D array')
 
     height = npy_img.shape[0]
@@ -125,9 +125,9 @@ def prepare_for_display(npy_img):
 
     out = np.empty((height, width, 3), dtype=np.uint8)
 
-    if len(npy_img.shape) == 2 or \
-       (len(npy_img.shape) == 3 and npy_img.shape[2] == 1):
-        if npy_img.dtype in [np.float32, np.float64]:
+    if npy_img.ndim == 2 or \
+       (npy_img.ndim == 3 and npy_img.shape[2] == 1):
+        if np.issubdtype(npy_img.dtype, float):
             out[:,:,0] = npy_img*255
             out[:,:,1] = out[:,:,0]
             out[:,:,2] = out[:,:,0]
@@ -136,9 +136,9 @@ def prepare_for_display(npy_img):
             out[:,:,1] = npy_img
             out[:,:,2] = npy_img
 
-    elif len(npy_img.shape) == 3:
+    elif npy_img.ndim == 3:
         if npy_img.shape[2] == 3 or npy_img.shape[2] == 4:
-            if npy_img.dtype in [np.float32, np.float64]:
+            if np.issubdtype(npy_img.dtype, float):
                 out[:,:,:3] = (npy_img[:,:,:3])*255
             else:
                 out[:,:,:3] = npy_img[:,:,:3]

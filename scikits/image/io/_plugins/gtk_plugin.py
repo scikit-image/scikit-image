@@ -48,7 +48,7 @@ else:
             iw.show()
 
         def gtk_show():
-            if window_manager.has_images():
+            if window_manager.has_windows():
                 window_manager.register_callback(gtk.main_quit)
                 gtk.main()
             else:

@@ -60,7 +60,7 @@ else:
 
         def qt_show():
             global app
-            if app and window_manager.has_images():
+            if app and window_manager.has_windows():
                 app.exec_()
             else:
                 print 'No images to show.  See `imshow`.'
