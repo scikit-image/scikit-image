@@ -48,5 +48,5 @@ detailing the test coverage::
 
 Bugs
 ````
-Please `report bugs on Github <http://github.com/stefanv/scikits.image>`_.
+Please `report bugs on Github <http://github.com/stefanv/scikits.image/issues>`_.
 
