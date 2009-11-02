@@ -133,10 +133,9 @@ def available(loaded=False):
         all plugins are shown.
 
     """
-    from copy import deepcopy
     active_plugins = set()
-    for k in plugin_store:
-        for plugin, fname in plugin_store[k]:
+    for plugin_func in plugin_store.itervalues():
+        for plugin, func in plugin_func:
             active_plugins.add(plugin)
 
     d = {}
