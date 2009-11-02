@@ -48,7 +48,7 @@ def configuration(parent_package='', top_path=None):
         import Cython
         for pyxfile in [os.path.join(base_path, f) for f in cython_files]:
             # make a backup of the good c files
-            c_file = pyxfile.rstrip('pyx') + 'c'
+            c_file = pyxfile[:-4] + 'c'
             c_file_new = c_file + '.new'
 
             # run cython compiler
@@ -71,8 +71,8 @@ def configuration(parent_package='', top_path=None):
         pass
 
     for pyxfile in cython_files:
-        c_file = pyxfile.rstrip('pyx') + 'c'
-        config.add_extension(pyxfile.rstrip('.pyx'),
+        c_file = pyxfile[:-4] + 'c'
+        config.add_extension(pyxfile[:-4],
                              sources=[c_file],
                              include_dirs=[get_numpy_include_dirs()])
 
