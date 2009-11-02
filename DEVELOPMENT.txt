@@ -1,0 +1,52 @@
+Development process
+-------------------
+ * Go to `http://github.com/stefanv/scikits.image
+   <http://github.com/stefanv/scikits.image>`_  and follow the instructions on
+   making your own fork/branch.
+ * Make changes to your branch, committing locally as you progress.
+ * Push your changes back to github.
+ * Ping stefan to request a merge into the main development branch.
+
+.. note::
+
+   Do *not* merge the main branch into yours.  You may rebase,
+   as long as you are `aware of its dangers <http://tinyurl.com/lll385>`_
+   (also see `LWN article <http://tinyurl.com/nqcbkj>`_).
+
+All of this may be intimidating if you've never used git before, so we'd
+happily accept plain old unified diffs (``git diff`` or ``diff -u a.txt
+b.txt``) as well.
+
+Guidelines:
+```````````
+ * All code should have tests (see "Test coverage" below for more details).
+ * All code should be documented, to the same
+   `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
+   as NumPy and SciPy.
+ * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
+   where possible.
+ * All major changes should be `posted for review
+   <http://codereview.appspot.com>`_ to the `mailing list
+   <http://groups.google.com/group/scikits-image>`_.
+
+Test coverage
+`````````````
+Tests for a module should ideally cover all code in that module, i.e. statement
+coverage should be at 100%. To measure the test coverage, install `<coverage.py
+http://nedbatchelder.com/code/coverage/>`_ and then run::
+
+  $ make coverage
+
+This will print a report with one line for each file in `scikits.image`,
+detailing the test coverage::
+
+  Name                                             Stmts   Exec  Cover   Missing
+  ------------------------------------------------------------------------------
+  scikits/image/color/colorconv                       77     77   100%
+  scikits/image/filter/__init__                        1      1   100%
+  ...
+
+Bugs
+````
+Please `report bugs on Github <http://github.com/stefanv/scikits.image/issues>`_.
+
