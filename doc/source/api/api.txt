@@ -8,5 +8,4 @@ API Reference
    scikits.image.color
    scikits.image.filter
    scikits.image.io
-   scikits.image.opencv
    scikits.image.transform

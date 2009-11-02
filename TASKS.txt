@@ -96,38 +96,3 @@ checking in the API files into the repository (done) -- but the doc build
 process needs to be updated to use these distributed files if they cannot be
 generated from source.
 
-Development process
--------------------
- * Go to `http://github.com/stefanv/scikits.image
-   <http://github.com/stefanv/scikits.image>`_  and follow the instructions on
-   making your own fork/branch.
- * Make changes to your branch, committing locally as you progress.
- * Push your changes back to github.
- * Ping stefan to request a merge into the main development branch.
-
-.. note::
-
-   Do *not* merge the main branch into yours.  You may rebase,
-   as long as you are `aware of its dangers <http://tinyurl.com/lll385>`_
-   (also see `LWN article <http://tinyurl.com/nqcbkj>`_).
-
-All of this may be intimidating if you've never used git before, so we'd
-happily accept plain old unified diffs (``git diff`` or ``diff -u a.txt
-b.txt``) as well.
-
-Guidelines:
-```````````
- * All code should have tests.
- * All code should be documented, to the same
-   `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
-   as NumPy and SciPy.
- * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
-   where possible.
- * All major changes should be `posted for review
-   <http://codereview.appspot.com>`_ to the `mailing list
-   <http://groups.google.com/group/scikits-image>`_.
-
-Bugs
-````
-Please `report bugs on Github <http://github.com/stefanv/scikits.image>`_.
-

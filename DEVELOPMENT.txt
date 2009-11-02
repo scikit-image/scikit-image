@@ -19,7 +19,7 @@ b.txt``) as well.
 
 Guidelines:
 ```````````
- * All code should have tests.
+ * All code should have tests (see "Test coverage" below for more details).
  * All code should be documented, to the same
    `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
    as NumPy and SciPy.
@@ -30,7 +30,7 @@ Guidelines:
    <http://groups.google.com/group/scikits-image>`_.
 
 Test coverage
--------------
+`````````````
 Tests for a module should ideally cover all code in that module, i.e. statement
 coverage should be at 100%. To measure the test coverage, install `<coverage.py
 http://nedbatchelder.com/code/coverage/>`_ and then run::
@@ -38,7 +38,13 @@ http://nedbatchelder.com/code/coverage/>`_ and then run::
   $ make coverage
 
 This will print a report with one line for each file in `scikits.image`,
-detailing the test coverage.
+detailing the test coverage::
+
+  Name                                             Stmts   Exec  Cover   Missing
+  ------------------------------------------------------------------------------
+  scikits/image/color/colorconv                       77     77   100%
+  scikits/image/filter/__init__                        1      1   100%
+  ...
 
 Bugs
 ````
