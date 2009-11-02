@@ -1,9 +1,7 @@
-import plugin
 from util import prepare_for_display, window_manager, GuiLockError
 
 import numpy as np
 import sys
-
 
 try:
     # We try to aquire the gui lock first or else the gui import might
@@ -47,7 +45,7 @@ else:
                 # references to it
                 self.mgr.remove_window(self)
 
-        def qt_imshow(arr):
+        def imshow(arr):
             global app
 
             if not app:
@@ -58,11 +56,9 @@ else:
             iw = ImageWindow(arr, window_manager)
             iw.show()
 
-        def qt_show():
+        def _app_show():
             global app
             if app and window_manager.has_windows():
                 app.exec_()
             else:
                 print 'No images to show.  See `imshow`.'
-
-        plugin.register('qt', show=qt_imshow, appshow=qt_show)

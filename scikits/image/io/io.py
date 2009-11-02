@@ -44,7 +44,7 @@ def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    return call_plugin('read', fname, as_grey=as_grey, dtype=dtype,
+    return call_plugin('imread', fname, as_grey=as_grey, dtype=dtype,
                        plugin=plugin, **plugin_args)
 
 def imsave(fname, arr, plugin=None, **plugin_args):
@@ -67,7 +67,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    return call_plugin('save', fname, arr, plugin=plugin, **plugin_args)
+    return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
 def imshow(arr, plugin=None, **plugin_args):
     """Display an image.
@@ -87,17 +87,23 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    return call_plugin('show', arr, plugin=plugin, **plugin_args)
+    return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 
 def show():
-    '''Launches the event loop of the current gui plugin,
-    and displays all pending images. This is required,
-    when using imshow() from a non-interactive script.
-    Simply make all the calls to imshow() to queue up as many
-    images as you need, then call show(). After the
-    last window is closed, the gui event loop will exit,
-    and you script will continue execution.
+    '''Display pending images.
 
-    If this is called from the interactive terminal,
-    it will block until all windows are closed.'''
-    return call_plugin('appshow')
+    Launch the event loop of the current gui plugin, and display all
+    pending images, queued via `imshow`. This is required when using
+    `imshow` from non-interactive scripts.
+
+    A call to `show` will block execution of code until all windows
+    have been closed.
+
+    Examples
+    --------
+    >>> for i in range(4):
+    ...     imshow(np.random.random((50, 50))
+    >>> show()
+
+    '''
+    return call_plugin('_app_show')
