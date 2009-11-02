@@ -49,7 +49,7 @@ else:
                 # references to it
                 self.mgr.remove_window(self)
 
-        def qt_imshow(arr, block=True):
+        def qt_imshow(arr):
             global app
 
             if not app:
