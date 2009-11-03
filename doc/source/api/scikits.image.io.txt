@@ -42,6 +42,7 @@ Inheritance diagram for ``scikits.image.io``:
    scikits.image.io.load_plugin
    scikits.image.io.load_sift
    scikits.image.io.load_surf
+   scikits.image.io.plugin_info
    scikits.image.io.plugins
    scikits.image.io.show
    scikits.image.io.use_plugin
@@ -75,6 +76,11 @@ load_surf
 ---------
 
 .. autofunction:: scikits.image.io.load_surf
+
+plugin_info
+-----------
+
+.. autofunction:: scikits.image.io.plugin_info
 
 plugins
 -------
