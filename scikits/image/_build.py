@@ -20,7 +20,7 @@ def cython(pyx_files, working_path=''):
     else:
         for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:
             # make a backup of the good c files
-            c_file = pyxfile[:-4] + 'c'
+            c_file = pyxfile[:-4] + '.c'
             c_file_new = c_file + '.new'
 
             # run cython compiler
