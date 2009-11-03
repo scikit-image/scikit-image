@@ -2,7 +2,7 @@
 
 """
 
-__all__ = ['use', 'load', 'available', 'call', 'info']
+__all__ = ['use', 'available', 'call', 'info']
 
 import warnings
 from ConfigParser import ConfigParser
@@ -87,7 +87,8 @@ command.  A list of all available plugins can be found using
     return func(*args, **kwargs)
 
 def use(name, kind=None):
-    """Set the default plugin for a specified operation.
+    """Set the default plugin for a specified operation.  The plugin
+    will be loaded if it hasn't been already.
 
     Parameters
     ----------
@@ -97,10 +98,14 @@ def use(name, kind=None):
         Set the plugin for this function.  By default,
         the plugin is set for all functions.
 
+    See Also
+    --------
+    plugins : List of available plugins
+
     Examples
     --------
 
-    Use Python Imaging Library to read images:
+    Use the Python Imaging Library to read images:
 
     >>> from scikits.image.io import plugin
     >>> plugin.use('PIL', 'read')
@@ -109,13 +114,13 @@ def use(name, kind=None):
     if kind is None:
         kind = plugin_store.keys()
     else:
-        kind = [kind]
         if not kind in plugin_provides[name]:
             raise RuntimeError("Plugin %s does not support `%s`." % \
                                (name, kind))
+        kind = [kind]
 
     if not name in available(loaded=True):
-        raise RuntimeError("No plugin '%s' has been loaded." % name)
+        _load(name)
 
     for k in kind:
         if not k in plugin_store:
@@ -153,7 +158,7 @@ def available(loaded=False):
 
     return d
 
-def load(plugin):
+def _load(plugin):
     """Load the given plugin.
 
     Parameters

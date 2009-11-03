@@ -8,7 +8,7 @@ from copy import deepcopy
 
 def setup_module(self):
     self.backup_plugin_store = deepcopy(plugin.plugin_store)
-    plugin.load('test')
+    plugin.use('test')
 
 def teardown_module(self):
     plugin.plugin_store = self.backup_plugin_store
@@ -25,8 +25,9 @@ class TestPlugin:
 
     def test_use(self):
         plugin.use('test')
+        plugin.use('test', 'imshow')
 
-    @raises(RuntimeError)
+    @raises(ValueError)
     def test_failed_use(self):
         plugin.use('asd')
 
