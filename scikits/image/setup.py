@@ -12,6 +12,8 @@ def configuration(parent_package='', top_path=None):
         if dirname.split(os.path.sep)[-1] == 'tests':
             config.add_data_dir(dirname)
 
+    config.add_data_files('io/_plugins/*.ini')
+
     # Add test directories
     from os.path import isdir, dirname, join, abspath
     rel_isdir = lambda d: isdir(join(curpath, d))
