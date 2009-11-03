@@ -27,10 +27,26 @@ else:
         class LabelImage(QLabel):
             def __init__(self, parent, arr):
                 QLabel.__init__(self)
+                self.parent = parent
+                # we need to hold a reference to
+                # arr because QImage doesn't copy the data
+                # and the buffer must be alive as long
+                # as the image is alive.
+                self.arr = arr
+
+                # we also need to pass in the row-stride to
+                # the constructor, because we can't guarantee
+                # that every row of the numpy data is
+                # 4-byte aligned. Which Qt would require
+                # if we didnt pass the stride.
                 self.img = QImage(arr.data, arr.shape[1], arr.shape[0],
                                   arr.strides[0], QImage.Format_RGB888)
+
                 self.pm = QPixmap.fromImage(self.img)
                 self.setPixmap(self.pm)
+
+            def mouseMoveEvent(self, evt):
+                self.parent.label_mouseMoveEvent(evt)
 
 
         class ImageWindow(QMainWindow):
@@ -46,20 +62,32 @@ else:
                 # references to it
                 self.mgr.remove_window(self)
 
+            def label_mouseMoveEvent(self, evt):
+                pass
+
 
         class FancyImageWindow(ImageWindow):
             def __init__(self, arr, mgr):
                 ImageWindow.__init__(self, arr, mgr)
-
-                # we need to hold a reference to arr,
-                # if we want to access the data later,
-                # because QImage does not copy the data.
                 self.arr = arr
+
+                # for image manipulation
+                self.arrfloat = np.asarray(arr, dtype=np.float64)
+                self.arruint8 = arr.copy()
 
                 self.statusBar().showMessage('X: Y: ')
                 self.label.setScaledContents(True)
                 self.label.setMouseTracking(True)
-                self.label.mouseMoveEvent = self.label_mouseMoveEvent
+
+
+            def keyPressEvent(self, evt):
+                self.arrfloat[:,:,0] *= 1.1
+                np.clip(self.arrfloat, 0, 255, self.arrfloat)
+                self.arr[:] = self.arrfloat[:]
+
+                pm = QPixmap.fromImage(self.label.img)
+                self.label.setPixmap(pm)
+                print 'heard'
 
             def scale_mouse_pos(self, x, y):
                 width = self.label.width()
