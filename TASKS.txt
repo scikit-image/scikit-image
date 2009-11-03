@@ -22,7 +22,6 @@ or tests.
 
    * Connected components
    * `Hough transform <http://mentat.za.net>`_
-   * `Shortest paths <http://mentat.za.net>`_
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
    * Marching squares 
    * Nadav's bilateral filtering (first compare against CellProfile's code)
