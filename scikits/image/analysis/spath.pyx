@@ -6,12 +6,26 @@ cimport numpy as np
 cdef extern from "math.h":
     double fabs(double f)
 
-cpdef shortest_path(np.ndarray arr):
+cpdef shortest_path(np.ndarray arr, int reach=1):
      """Find the shortest left-to-right path through an array.
 
      Parameters
      ----------
-     arr : (M,N) ndarray of float64
+     arr : (M, N) ndarray of float64
+     reach : int, optional
+         By default (``reach = 1``), the shortest path can only move
+         one row up or down for every column it moves forward (i.e.,
+         the path gradient is limited to 1).  `reach` defines the
+         number of rows that can be skipped at each step.
+
+     Returns
+     -------
+     p : ndarray of int
+         For each column, give the row-coordinate of the
+         shortest path.
+     cost : float
+         Cost of path.  This is the absolute sum of all the
+         differences along the path.
 
      """
      if arr.ndim != 2:
@@ -39,8 +53,8 @@ cpdef shortest_path(np.ndarray arr):
 
      for c in range(1, N):
           for r in range(M):
-               r_bracket_min = r - 1
-               r_bracket_max = r + 1
+               r_bracket_min = r - reach
+               r_bracket_max = r + reach
 
                if r_bracket_min < 0:
                     r_bracket_min = 0
@@ -48,9 +62,9 @@ cpdef shortest_path(np.ndarray arr):
                     r_bracket_max = M - 1
 
                node[r, c] = r_bracket_min
-               for rb in range(r_bracket_min + 1, r_bracket_max + 1):
-                    delta0 = fabs(data[rb, c] - data[rb, c - 1])
-                    delta1 = fabs(data[rb, c] - data[node[r, c], c - 1])
+               for rb in range(r_bracket_min, r_bracket_max + 1):
+                    delta0 = fabs(data[r, c] - data[rb, c - 1])
+                    delta1 = fabs(data[r, c] - data[node[r, c], c - 1])
                     if delta0 < delta1:
                          node[r, c] = rb
 
@@ -58,6 +72,9 @@ cpdef shortest_path(np.ndarray arr):
                             fabs(data[r, c] - data[node[r, c], c - 1])
 
      # Find minimum cost path
+     print arr
+     print cost
+     print node
      r_min_node = cost[:,-1].argmin()
 
      # Backtrack
