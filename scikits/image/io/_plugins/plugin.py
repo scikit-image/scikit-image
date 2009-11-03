@@ -2,7 +2,7 @@
 
 """
 
-__all__ = ['use', 'load', 'available', 'call']
+__all__ = ['use', 'load', 'available', 'call', 'info']
 
 import warnings
 from ConfigParser import ConfigParser
@@ -16,6 +16,7 @@ plugin_store = {'imread': [],
 
 plugin_provides = {}
 plugin_module_name = {}
+plugin_meta_data = {}
 
 def _scan_plugins():
     """Scan the plugins directory for .ini files and parse them
@@ -29,6 +30,12 @@ def _scan_plugins():
         cp = ConfigParser()
         cp.read(f)
         name = cp.sections()[0]
+
+        meta_data = {}
+        for opt in cp.options(name):
+            meta_data[opt] = cp.get(name, opt)
+        plugin_meta_data[name] = meta_data
+
         provides = [s.strip() for s in cp.get(name, 'provides').split(',')]
         valid_provides = [p for p in provides if p in plugin_store]
 
@@ -176,4 +183,23 @@ def load(plugin):
             func = getattr(plugin_module, p)
             if not func in store:
                 store.insert(0, (plugin, func))
+
+def info(plugin):
+    """Return plugin meta-data.
+
+    Parameters
+    ----------
+    plugin : str
+        Name of plugin.
+
+    Returns
+    -------
+    m : dict
+        Meta data as specified in plugin ``.ini``.
+
+    """
+    try:
+        return plugin_meta_data[plugin]
+    except KeyError:
+        raise ValueError('No information on plugin "%s"' % plugin)
 
