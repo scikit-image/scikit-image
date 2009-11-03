@@ -1,0 +1,16 @@
+.. AUTO-GENERATED FILE -- DO NOT EDIT!
+
+Module: :mod:`analysis`
+=======================
+.. automodule:: scikits.image.analysis
+
+.. currentmodule:: scikits.image.analysis
+.. autosummary::
+
+   scikits.image.analysis.shortest_path
+
+shortest_path
+-------------
+
+.. autofunction:: scikits.image.analysis.shortest_path
+

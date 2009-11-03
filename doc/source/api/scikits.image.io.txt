@@ -37,13 +37,34 @@ Inheritance diagram for ``scikits.image.io``:
 .. autosummary::
 
    scikits.image.io.imread
+   scikits.image.io.imsave
+   scikits.image.io.imshow
+   scikits.image.io.load_plugin
    scikits.image.io.load_sift
    scikits.image.io.load_surf
+   scikits.image.io.plugins
+   scikits.image.io.show
+   scikits.image.io.use_plugin
 
 imread
 ------
 
 .. autofunction:: scikits.image.io.imread
+
+imsave
+------
+
+.. autofunction:: scikits.image.io.imsave
+
+imshow
+------
+
+.. autofunction:: scikits.image.io.imshow
+
+load_plugin
+-----------
+
+.. autofunction:: scikits.image.io.load_plugin
 
 load_sift
 ---------
@@ -54,4 +75,19 @@ load_surf
 ---------
 
 .. autofunction:: scikits.image.io.load_surf
+
+plugins
+-------
+
+.. autofunction:: scikits.image.io.plugins
+
+show
+----
+
+.. autofunction:: scikits.image.io.show
+
+use_plugin
+----------
+
+.. autofunction:: scikits.image.io.use_plugin
 
