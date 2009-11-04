@@ -1,5 +1,5 @@
 import numpy as np
-
+import _colormixer
 # utilities to make life easier for plugin writers.
 
 
@@ -149,3 +149,88 @@ def prepare_for_display(npy_img):
         raise ValueError('Image must have 2 or 3 dimensions')
 
     return out
+
+
+
+class ColorMixer(object):
+    ''' a class to manage mixing colors in an image.
+    The input array must be an RGB uint8 image.
+
+    The mixer maintains an original copy of the image,
+    and uses this copy to query the pixel data for operations.
+    It also makes a copy for sharing state across operations.
+    That is, if you add to a channel, and multiply to same channel,
+    the two operations are carried separately and the results
+    averaged together.
+
+    it modifies your array in place. This ensures that if you
+    bust over a threshold, you can always come back down.
+
+    The passed values to a function are always considered
+    absolute. Thus to threshold a channel completely you
+    can do mixer.add(RED, 255). Or to double the intensity
+    of the blue channel: mixer.multiply(BLUE, 2.)
+
+    To reverse these operations, respectively:
+    mixer.add(RED, 0), mixer.multiply(BLUE, 1.)
+
+    The majority of the backend is implemented in Cython,
+    so it should be quite quick.
+    '''
+
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+
+    valid_channels = [RED, GREEN, BLUE]
+
+    def __init__(self, img):
+        if type(img) != np.ndarray:
+            raise ValueError('Image must be a numpy array')
+        if img.dtype != np.uint8:
+            raise ValueError('Image must have dtype uint8')
+        if img.ndim != 3 or img.shape[2] != 3:
+            raise ValueError('Image must be 3 channel MxNx3')
+
+        self.img = img
+        self.stateimg = img.copy()
+
+    def get_stateimage(self):
+        return self.stateimg
+
+    def commit_changes(self):
+        self.stateimg[:] = self.img[:]
+
+    def add(self, channel, ammount):
+        '''Add the specified ammount to the specified channel.
+
+        Parameters
+        ----------
+        channel : flag
+            the color channel to operate on
+            RED, GREED, or BLUE
+        ammount : integer
+            the ammount of color to add to the channel,
+            can be positive or negative.
+
+        '''
+        assert channel in self.valid_channels
+
+        _colormixer.add(self.img, self.stateimg, channel, ammount)
+
+    def multiply(self, channel, ammount):
+        '''Mutliply the indicated channel by the specified value.
+
+         Parameters
+        ----------
+        channel : flag
+            the color channel to operate on
+            RED, GREED, or BLUE
+        ammount : integer
+            the ammount of color to add to the channel,
+            can be positive or negative.
+
+        '''
+        assert channel in self.valid_channels
+
+        _colormixer.multiply(self.img, self.stateimg, channel, ammount)

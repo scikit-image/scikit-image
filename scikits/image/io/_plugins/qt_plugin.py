@@ -1,4 +1,4 @@
-from util import prepare_for_display, window_manager, GuiLockError
+from util import prepare_for_display, window_manager, GuiLockError, ColorMixer
 
 import numpy as np
 import sys
@@ -14,7 +14,8 @@ except GuiLockError, gle:
 else:
     try:
         from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
-                                 QLabel, QWidget, QVBoxLayout)
+                                 QLabel, QWidget, QVBoxLayout, QSlider)
+        from PyQt4 import QtCore, QtGui
 
     except ImportError:
         print 'PyQT4 libraries not installed.  Plugin not loaded.'
@@ -53,9 +54,14 @@ else:
             def __init__(self, arr, mgr):
                 QMainWindow.__init__(self)
                 self.mgr = mgr
+                self.main_widget = QWidget()
+                self.layout = QtGui.QHBoxLayout(self.main_widget)
+                self.setCentralWidget(self.main_widget)
+
                 self.label = LabelImage(self, arr)
-                self.setCentralWidget(self.label)
+                self.layout.addWidget(self.label)
                 self.mgr.add_window(self)
+                self.main_widget.show()
 
             def closeEvent(self, event):
                 # Allow window to be destroyed by removing any
@@ -66,28 +72,93 @@ else:
                 pass
 
 
+        class SliderBlock(QWidget):
+            def __init__(self, srange, callback):
+                QWidget.__init__(self)
+
+                self.callback = callback
+
+                low = srange[0]
+                high = srange[1]
+                init = srange[2]
+
+                self.rslider = QSlider()
+                self.rslider.setRange(low, high)
+                self.rslider.setValue(init)
+
+                self.gslider = QSlider()
+                self.gslider.setRange(low, high)
+                self.gslider.setValue(init)
+
+                self.bslider = QSlider()
+                self.bslider.setRange(low, high)
+                self.bslider.setValue(init)
+
+                self.rslider.valueChanged.connect(self.rslider_changed)
+                self.gslider.valueChanged.connect(self.gslider_changed)
+                self.bslider.valueChanged.connect(self.bslider_changed)
+
+                self.layout = QtGui.QHBoxLayout(self)
+                self.layout.addWidget(self.rslider)
+                self.layout.addWidget(self.gslider)
+                self.layout.addWidget(self.bslider)
+
+            def rslider_changed(self, val):
+                self.callback('RED', val)
+
+            def gslider_changed(self, val):
+                self.callback('GREEN', val)
+
+            def bslider_changed(self, val):
+                self.callback('BLUE', val)
+
+
         class FancyImageWindow(ImageWindow):
             def __init__(self, arr, mgr):
                 ImageWindow.__init__(self, arr, mgr)
                 self.arr = arr
 
-                # for image manipulation
-                self.arrfloat = np.asarray(arr, dtype=np.float64)
-                self.arruint8 = arr.copy()
-
                 self.statusBar().showMessage('X: Y: ')
                 self.label.setScaledContents(True)
                 self.label.setMouseTracking(True)
 
+                self.mixer = ColorMixer(self.arr)
 
-            def keyPressEvent(self, evt):
-                self.arrfloat[:,:,0] *= 1.1
-                np.clip(self.arrfloat, 0, 255, self.arrfloat)
-                self.arr[:] = self.arrfloat[:]
+                self.sliders = SliderBlock((-255, 255, 0), self.svalueChanged)
+                self.msliders = SliderBlock((0, 1000, 500), self.mvalueChanged)
+
+                self.layout.addWidget(self.sliders)
+                self.layout.addWidget(self.msliders)
+
+                self.sliders.show()
+                self.msliders.show()
+
+            def svalueChanged(self, who, val):
+                if who == 'RED':
+                    self.mixer.add(self.mixer.RED, val)
+                elif who == 'GREEN':
+                    self.mixer.add(self.mixer.GREEN, val)
+                elif who == 'BLUE':
+                    self.mixer.add(self.mixer.BLUE, val)
+                else:
+                    return
 
                 pm = QPixmap.fromImage(self.label.img)
                 self.label.setPixmap(pm)
-                print 'heard'
+
+            def mvalueChanged(self, who, val):
+                val = val / 500.
+                if who == 'RED':
+                    self.mixer.multiply(self.mixer.RED, val)
+                elif who == 'GREEN':
+                    self.mixer.multiply(self.mixer.GREEN, val)
+                elif who == 'BLUE':
+                    self.mixer.multiply(self.mixer.BLUE, val)
+                else:
+                    return
+
+                pm = QPixmap.fromImage(self.label.img)
+                self.label.setPixmap(pm)
 
             def scale_mouse_pos(self, x, y):
                 width = self.label.width()
