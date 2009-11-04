@@ -79,14 +79,28 @@ else:
             This allows you to create large groups of sliders in a loop,
             but still keep track of the individual events'''
 
-            def __init__(self, name, callback):
+            def __init__(self, name, callback, conv_fac):
                 QSlider.__init__(self)
                 self.name = name
                 self.callback = callback
+                self.conv_fac = conv_fac
+
+                self.name_label = QLabel()
+                self.name_label.setText(self.name)
+                self.name_label.setAlignment(QtCore.Qt.AlignCenter)
+
+                self.value_label = QLabel()
+                self.value_label.setText('')
+                self.value_label.setAlignment(QtCore.Qt.AlignCenter)
 
             # bind this to the valueChanged signal of the slider
             def i_changed(self, val):
+                val = self.conv_val()
+                self.value_label.setText(str(val)[:4])
                 self.callback(self.name, val)
+
+            def conv_val(self):
+                return self.value() * self.conv_fac
 
 
         class NSliderBlock(QWidget):
@@ -112,33 +126,33 @@ else:
                     raise ValueError('not enough or too many ranges supplied')
 
                 self.callback = callback
+
+                # each key will give you
                 self.sliders = {}
-                self.slider_names = []
                 self.layout = QtGui.QGridLayout(self)
 
                 for i in range(n):
                     params = ranges_labels[i]
-                    if len(params) != 4:
+                    if len(params) != 5:
                         raise ValueError('Tuples must be length 4')
 
                     name = params[3]
-                    slider_name = QLabel()
-                    slider_name.setText(name)
-                    slider_name.setAlignment(QtCore.Qt.AlignCenter)
-                    self.slider_names.append(slider_name)
+                    conv_fac = params[4]
 
-                    self.layout.addWidget(slider_name, 0, i)
-
-
-                    slider = IntelligentSlider(name, self.callback)
+                    slider = IntelligentSlider(name, self.callback, conv_fac)
                     slider.setMinimum(params[0])
                     slider.setMaximum(params[1])
                     slider.setValue(params[2])
                     slider.valueChanged.connect(slider.i_changed)
 
+
                     self.sliders[name] = slider
 
-                    self.layout.addWidget(slider, 1, i)
+                    self.layout.addWidget(slider.name_label, 0, i)
+                    self.layout.addWidget(slider, 1, i, QtCore.Qt.AlignCenter)
+                    self.layout.addWidget(slider.value_label, 2, i)
+
+                    self.layout.setColumnMinimumWidth(i, 50)
 
             def set_sliders(self, vals):
                 # vals should a dict to of slider names and set vals
@@ -184,15 +198,15 @@ else:
                 self.rgb_add.toggled.connect(self.rgb_radio_changed)
 
                 # additive sliders
-                self.rgb_add_sliders = NSliderBlock(3, [(-255, 255, 0, 'R'),
-                                                        (-255, 255, 0, 'G'),
-                                                        (-255, 255, 0, 'B')],
+                self.rgb_add_sliders = NSliderBlock(3, [(-255, 255, 0, 'R', 1),
+                                                        (-255, 255, 0, 'G', 1),
+                                                        (-255, 255, 0, 'B', 1)],
                                                     self.rgb_add_changed)
 
                 # multiplicative sliders
-                self.rgb_mul_sliders = NSliderBlock(3, [(0, 1000, 500, 'R'),
-                                                        (0, 1000, 500, 'G'),
-                                                        (0, 1000, 500, 'B')],
+                self.rgb_mul_sliders = NSliderBlock(3, [(0, 1000, 500, 'R', .002),
+                                                        (0, 1000, 500, 'G', .002),
+                                                        (0, 1000, 500, 'B', .002)],
                                                     self.rgb_mul_changed)
 
                 # layout
@@ -208,8 +222,8 @@ else:
                 #---------------------------------------------------------------
 
                 # sliders
-                self.bright_sliders = NSliderBlock(2, [(-255, 255, 0, 'OFF'),
-                                                    (0, 1000, 500, 'FAC')],
+                self.bright_sliders = NSliderBlock(2, [(-255, 255, 0, '+', 1),
+                                                    (0, 1000, 500, 'x', 0.002)],
                                                    self.bright_changed)
 
                 # layout
@@ -260,7 +274,6 @@ else:
             def rgb_mul_changed(self, name, val):
                 if not self.rgb_mul.isChecked():
                     return
-                val = val/500.
                 if name == 'R':
                     self.mixer.multiply(self.mixer.RED, val)
                 elif name == 'G':
@@ -274,8 +287,8 @@ else:
             def bright_changed(self, name, val):
                 # doesnt matter which slider changed we need both
                 # values
-                factor = self.bright_sliders.sliders['FAC'].value() / 500.
-                offset = self.bright_sliders.sliders['OFF'].value()
+                factor = self.bright_sliders.sliders['x'].conv_val()
+                offset = self.bright_sliders.sliders['+'].conv_val()
                 self.mixer.brightness(offset, factor)
                 self.update()
 
@@ -283,7 +296,7 @@ else:
             def reset_sliders(self):
                 self.rgb_add_sliders.set_sliders({'R': 0, 'G': 0, 'B': 0})
                 self.rgb_mul_sliders.set_sliders({'R': 500, 'G': 500, 'B': 500})
-                self.bright_sliders.set_sliders({'OFF': 0, 'FAC': 500})
+                self.bright_sliders.set_sliders({'+': 0, 'x': 500})
 
             def combo_box_changed(self, index):
                 self.reset_sliders()
