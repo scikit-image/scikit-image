@@ -24,13 +24,14 @@ cd ..
 # This file changes upon build, so we have to back it up,
 # otherwise git won't switch branches
 ignore_files="scikits/image/version.py
-              scikits/image/opencv/opencv_cv.c
-              scikits/image/opencv/opencv_backend.c"
+              scikits/image/opencv/opencv_cv.so
+              scikits/image/opencv/opencv_backend.so
+              scikits/image/graph/spath.so"
 mkdir -p /tmp/_scikits_image_backup
 for f in $ignore_files; do
   cp $f /tmp/_scikits_image_backup
-  git co $f
 done
+git co scikits/image/version.py
 
 git co gh-pages || exit
 rm -rf ./*
