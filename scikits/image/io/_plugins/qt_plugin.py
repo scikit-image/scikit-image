@@ -145,11 +145,10 @@ else:
                     slider.setValue(params[2])
                     slider.valueChanged.connect(slider.i_changed)
 
-
                     self.sliders[name] = slider
 
                     self.layout.addWidget(slider.name_label, 0, i)
-                    self.layout.addWidget(slider, 1, i, QtCore.Qt.AlignCenter)
+                    self.layout.addWidget(slider, 1, i, QtCore.Qt.AlignHCenter)
                     self.layout.addWidget(slider.value_label, 2, i)
 
                     self.layout.setColumnMinimumWidth(i, 50)
