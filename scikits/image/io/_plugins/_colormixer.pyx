@@ -87,3 +87,41 @@ def multiply(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i, j, k] = 0
             else:
                 img[i, j, k] = <np.uint8_t>op_result
+
+@cython.boundscheck(False)
+def brightness(np.ndarray[np.uint8_t, ndim=3] img,
+             np.ndarray[np.uint8_t, ndim=3] stateimg,
+             int offset, float factor):
+    """Modify the brightness of an image.
+    'offset' is added to all channels, which are
+    then multiplied by 'factor'. Overflow is clipped.
+
+    Parameters
+    ----------
+    img : (M, N, 3) ndarray of uint8
+        Output image.
+    stateimg : (M, N, 3) ndarray of uint8
+        Input image.
+    offset : int
+        Ammount to add to each channel.
+    factor : float
+        Multiplication factor.
+
+    """
+
+    cdef int height = img.shape[0]
+    cdef int width = img.shape[1]
+
+    cdef float op_result
+
+    cdef int i, j, k
+    for i in range(height):
+        for j in range(width):
+            for k in range(3):
+                op_result = <float>((stateimg[i,j,k] + offset)*factor)
+                if op_result > 255:
+                    img[i, j, k] = 255
+                elif op_result < 0:
+                    img[i, j, k] = 0
+                else:
+                    img[i, j, k] = <np.uint8_t>op_result

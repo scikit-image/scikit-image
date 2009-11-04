@@ -72,45 +72,275 @@ else:
                 pass
 
 
-        class SliderBlock(QWidget):
-            def __init__(self, srange, callback):
+        class IntelligentSlider(QSlider):
+            ''' A slider that adds a 'name' attribute and calls a callback
+            with 'name' as an argument to the registerd callback.
+
+            This allows you to create large groups of sliders in a loop,
+            but still keep track of the individual events'''
+
+            def __init__(self, name, callback):
+                QSlider.__init__(self)
+                self.name = name
+                self.callback = callback
+                self.valueChanged.connect(self.i_changed)
+
+            def i_changed(self, val):
+                self.callback(self.name, val)
+
+
+        class NSliderBlock(QWidget):
+            '''Creates a block of n sliders with ranges
+            specified as a list of tuples. The fourth entry
+            in the tuple will be used as a dictionary key
+            so you can access the slider later.
+            So the tuple should be (min, max, initial, name)
+
+            The callback is the function to be called
+            when a slider value changes. The callback will be
+            called with the following arguments (name, value).
+
+            You can get a hook to a specific slider using
+            NSliderBlock.sliders[name]
+
+            '''
+
+            def __init__(self, n, ranges_labels, callback):
                 QWidget.__init__(self)
 
+                if len(ranges_labels) != n:
+                    raise ValueError('not enough or too many ranges supplied')
+
                 self.callback = callback
+                self.sliders = {}
+                self.slider_names = []
+                self.layout = QtGui.QGridLayout(self)
 
-                low = srange[0]
-                high = srange[1]
-                init = srange[2]
+                for i in range(n):
+                    params = ranges_labels[i]
+                    if len(params) != 4:
+                        raise ValueError('Tuples must be length 4')
 
-                self.rslider = QSlider()
-                self.rslider.setRange(low, high)
-                self.rslider.setValue(init)
+                    name = params[3]
+                    slider_name = QLabel()
+                    slider_name.setText(name)
+                    slider_name.setAlignment(QtCore.Qt.AlignCenter)
+                    self.slider_names.append(slider_name)
 
-                self.gslider = QSlider()
-                self.gslider.setRange(low, high)
-                self.gslider.setValue(init)
+                    self.layout.addWidget(slider_name, 0, i)
 
-                self.bslider = QSlider()
-                self.bslider.setRange(low, high)
-                self.bslider.setValue(init)
 
-                self.rslider.valueChanged.connect(self.rslider_changed)
-                self.gslider.valueChanged.connect(self.gslider_changed)
-                self.bslider.valueChanged.connect(self.bslider_changed)
+                    slider = IntelligentSlider(name, self.callback)
+                    slider.setMinimum(params[0])
+                    slider.setMaximum(params[1])
+                    slider.setValue(params[2])
 
-                self.layout = QtGui.QHBoxLayout(self)
-                self.layout.addWidget(self.rslider)
-                self.layout.addWidget(self.gslider)
-                self.layout.addWidget(self.bslider)
+                    self.sliders[name] = slider
 
-            def rslider_changed(self, val):
-                self.callback('RED', val)
+                    self.layout.addWidget(slider, 1, i)
 
-            def gslider_changed(self, val):
-                self.callback('GREEN', val)
+            def set_sliders(self, vals):
+                # vals should a dict to of slider names and set vals
+                if len(vals) != len(self.sliders):
+                    raise ValueError('Wrong number of values')
 
-            def bslider_changed(self, val):
-                self.callback('BLUE', val)
+                for key, value in vals.iteritems():
+                    self.sliders[key].setValue(value)
+
+        class MixerPanel(QWidget):
+            '''A color mixer to hook up to an image.
+            You pass the image you the panel to operate on
+            and it operates on that image in place. You also
+            pass a callback to be called to trigger a refresh.
+            This callback is called every time the mixer modifies
+            your image.'''
+            def __init__(self, img, callback):
+                QWidget.__init__(self)
+
+                self.img = img
+                self.update = callback
+                self.mixer = ColorMixer(self.img)
+
+                #---------------------------------------------------------------
+                # ComboBox
+                #---------------------------------------------------------------
+
+                self.combo_box_entries = ['RGB Color', 'HSV Color',
+                                          'Brightness', 'Contrast']
+                self.combo_box = QtGui.QComboBox()
+                for entry in self.combo_box_entries:
+                    self.combo_box.addItem(entry)
+                self.combo_box.currentIndexChanged.connect(self.combo_box_changed)
+
+                #---------------------------------------------------------------
+                # RGB color sliders
+                #---------------------------------------------------------------
+
+                # radio buttons
+                self.rgb_add = QtGui.QRadioButton('Additive')
+                self.rgb_mul = QtGui.QRadioButton('Multiplicative')
+                self.rgb_mul.toggled.connect(self.rgb_radio_changed)
+                self.rgb_add.toggled.connect(self.rgb_radio_changed)
+
+                # additive sliders
+                self.rgb_add_sliders = NSliderBlock(3, [(-255, 255, 0, 'R'),
+                                                        (-255, 255, 0, 'G'),
+                                                        (-255, 255, 0, 'B')],
+                                                    self.rgb_add_changed)
+
+                # multiplicative sliders
+                self.rgb_mul_sliders = NSliderBlock(3, [(0, 1000, 500, 'R'),
+                                                        (0, 1000, 500, 'G'),
+                                                        (0, 1000, 500, 'B')],
+                                                    self.rgb_mul_changed)
+
+                # layout
+                self.rgb_widget = QWidget()
+                self.rgb_widget.layout = QtGui.QGridLayout(self.rgb_widget)
+                self.rgb_widget.layout.addWidget(self.rgb_add, 0, 0)
+                self.rgb_widget.layout.addWidget(self.rgb_mul, 1, 0)
+                self.rgb_widget.layout.addWidget(self.rgb_add_sliders, 2, 0)
+                self.rgb_widget.layout.addWidget(self.rgb_mul_sliders, 2, 0)
+
+                #---------------------------------------------------------------
+                # Brightness sliders
+                #---------------------------------------------------------------
+
+                # sliders
+                self.bright_sliders = NSliderBlock(2, [(-255, 255, 0, 'OFF'),
+                                                    (0, 1000, 500, 'FAC')],
+                                                   self.bright_changed)
+
+                # layout
+                self.bright_widget = QWidget()
+                self.bright_widget.layout = QtGui.QGridLayout(self.bright_widget)
+                self.bright_widget.layout.addWidget(self.bright_sliders, 0, 0)
+
+                #---------------------------------------------------------------
+                # Buttons
+                #---------------------------------------------------------------
+                self.commit_button = QtGui.QPushButton('Commit')
+                self.commit_button.clicked.connect(self.commit_changes)
+                self.revert_button = QtGui.QPushButton('Revert')
+                self.revert_button.clicked.connect(self.revert_changes)
+
+                #---------------------------------------------------------------
+                # Mixer Layout
+                #---------------------------------------------------------------
+                self.layout = QtGui.QGridLayout(self)
+                self.layout.addWidget(self.combo_box, 0, 0)
+                self.layout.addWidget(self.rgb_widget, 1, 0)
+                self.layout.addWidget(self.bright_widget, 1, 0)
+                self.layout.addWidget(self.commit_button, 2, 0)
+                self.layout.addWidget(self.revert_button, 3, 0)
+
+                #---------------------------------------------------------------
+                # Initialization
+                #---------------------------------------------------------------
+
+                self.combo_box.setCurrentIndex(0)
+                self.hide_sliders()
+                self.rgb_widget.show()
+                self.rgb_add.setChecked(True)
+
+            def rgb_add_changed(self, name, val):
+                if not self.rgb_add.isChecked():
+                    return
+                if name == 'R':
+                    self.mixer.add(self.mixer.RED, val)
+                elif name == 'G':
+                    self.mixer.add(self.mixer.GREEN, val)
+                elif name == 'B':
+                    self.mixer.add(self.mixer.BLUE, val)
+                else:
+                    return
+                self.update()
+
+            def rgb_mul_changed(self, name, val):
+                if not self.rgb_mul.isChecked():
+                    return
+                val = val/500.
+                if name == 'R':
+                    self.mixer.multiply(self.mixer.RED, val)
+                elif name == 'G':
+                    self.mixer.multiply(self.mixer.GREEN, val)
+                elif name == 'B':
+                    self.mixer.multiply(self.mixer.BLUE, val)
+                else:
+                    return
+                self.update()
+
+            def bright_changed(self, name, val):
+                # doesnt matter which slider changed we need both
+                # values
+
+                # i dont know why this is required, but if you take it out
+                # an exception is thrown for missing attribute when the
+                # class is initialized
+                # though everything will still work.
+                # python 2.6.4 BUG?
+                if not hasattr(self, 'bright_sliders'):
+                    return
+
+                factor = self.bright_sliders.sliders['FAC'].value() / 500.
+                offset = self.bright_sliders.sliders['OFF'].value()
+                self.mixer.brightness(offset, factor)
+                self.update()
+
+
+            def reset_sliders(self):
+                self.rgb_add_sliders.set_sliders({'R': 0, 'G': 0, 'B': 0})
+                self.rgb_mul_sliders.set_sliders({'R': 500, 'G': 500, 'B': 500})
+                self.bright_sliders.set_sliders({'OFF': 0, 'FAC': 500})
+
+            def combo_box_changed(self, index):
+                self.reset_sliders()
+                self.mixer.set_to_stateimg()
+                self.update()
+                combo_box_map={0: self.show_rgb, 1: self.show_hsv,
+                               2: self.show_bright, 3: self.show_contrast}
+                combo_box_map[index]()
+
+            def hide_sliders(self):
+                self.rgb_widget.hide()
+                self.bright_widget.hide()
+
+            def rgb_radio_changed(self):
+                if self.rgb_add.isChecked():
+                    self.rgb_add_sliders.show()
+                    self.rgb_mul_sliders.hide()
+                elif self.rgb_mul.isChecked():
+                    self.rgb_mul_sliders.show()
+                    self.rgb_add_sliders.hide()
+                else:
+                    pass
+
+                self.reset_sliders()
+                self.mixer.set_to_stateimg()
+                self.update()
+
+            def show_rgb(self):
+                self.hide_sliders()
+                self.rgb_widget.show()
+
+            def show_hsv(self):
+                self.hide_sliders()
+
+            def show_bright(self):
+                self.hide_sliders()
+                self.bright_widget.show()
+
+            def show_contrast(self):
+                self.hide_sliders()
+
+            def commit_changes(self):
+                self.mixer.commit_changes()
+                self.update()
+
+            def revert_changes(self):
+                self.mixer.revert()
+                self.update()
+
 
 
         class FancyImageWindow(ImageWindow):
@@ -122,41 +352,11 @@ else:
                 self.label.setScaledContents(True)
                 self.label.setMouseTracking(True)
 
-                self.mixer = ColorMixer(self.arr)
+                self.mixer_panel = MixerPanel(self.arr, self.refresh_image)
+                self.layout.addWidget(self.mixer_panel)
+                self.mixer_panel.show()
 
-                self.sliders = SliderBlock((-255, 255, 0), self.svalueChanged)
-                self.msliders = SliderBlock((0, 1000, 500), self.mvalueChanged)
-
-                self.layout.addWidget(self.sliders)
-                self.layout.addWidget(self.msliders)
-
-                self.sliders.show()
-                self.msliders.show()
-
-            def svalueChanged(self, who, val):
-                if who == 'RED':
-                    self.mixer.add(self.mixer.RED, val)
-                elif who == 'GREEN':
-                    self.mixer.add(self.mixer.GREEN, val)
-                elif who == 'BLUE':
-                    self.mixer.add(self.mixer.BLUE, val)
-                else:
-                    return
-
-                pm = QPixmap.fromImage(self.label.img)
-                self.label.setPixmap(pm)
-
-            def mvalueChanged(self, who, val):
-                val = val / 500.
-                if who == 'RED':
-                    self.mixer.multiply(self.mixer.RED, val)
-                elif who == 'GREEN':
-                    self.mixer.multiply(self.mixer.GREEN, val)
-                elif who == 'BLUE':
-                    self.mixer.multiply(self.mixer.BLUE, val)
-                else:
-                    return
-
+            def refresh_image(self):
                 pm = QPixmap.fromImage(self.label.img)
                 self.label.setPixmap(pm)
 

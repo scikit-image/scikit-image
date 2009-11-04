@@ -193,6 +193,7 @@ class ColorMixer(object):
             raise ValueError('Image must be 3 channel MxNx3')
 
         self.img = img
+        self.origimg = img.copy()
         self.stateimg = img.copy()
 
     def get_stateimage(self):
@@ -200,6 +201,13 @@ class ColorMixer(object):
 
     def commit_changes(self):
         self.stateimg[:] = self.img[:]
+
+    def revert(self):
+        self.stateimg[:] = self.origimg[:]
+        self.img[:] = self.stateimg[:]
+
+    def set_to_stateimg(self):
+        self.img[:] = self.stateimg[:]
 
     def add(self, channel, ammount):
         '''Add the specified ammount to the specified channel.
@@ -234,3 +242,6 @@ class ColorMixer(object):
         assert channel in self.valid_channels
 
         _colormixer.multiply(self.img, self.stateimg, channel, ammount)
+
+    def brightness(self, offset, factor):
+        _colormixer.brightness(self.img, self.stateimg, offset, factor)
