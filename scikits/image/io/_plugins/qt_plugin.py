@@ -83,8 +83,8 @@ else:
                 QSlider.__init__(self)
                 self.name = name
                 self.callback = callback
-                self.valueChanged.connect(self.i_changed)
 
+            # bind this to the valueChanged signal of the slider
             def i_changed(self, val):
                 self.callback(self.name, val)
 
@@ -134,6 +134,7 @@ else:
                     slider.setMinimum(params[0])
                     slider.setMaximum(params[1])
                     slider.setValue(params[2])
+                    slider.valueChanged.connect(slider.i_changed)
 
                     self.sliders[name] = slider
 
@@ -273,15 +274,6 @@ else:
             def bright_changed(self, name, val):
                 # doesnt matter which slider changed we need both
                 # values
-
-                # i dont know why this is required, but if you take it out
-                # an exception is thrown for missing attribute when the
-                # class is initialized
-                # though everything will still work.
-                # python 2.6.4 BUG?
-                if not hasattr(self, 'bright_sliders'):
-                    return
-
                 factor = self.bright_sliders.sliders['FAC'].value() / 500.
                 offset = self.bright_sliders.sliders['OFF'].value()
                 self.mixer.brightness(offset, factor)
@@ -339,6 +331,7 @@ else:
 
             def revert_changes(self):
                 self.mixer.revert()
+                self.reset_sliders()
                 self.update()
 
 
