@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import *
 
-from scikits.image.analysis import shortest_path
+from scikits.image.graph import shortest_path
 
 class TestShortestPath:
     def test_basic(self):
