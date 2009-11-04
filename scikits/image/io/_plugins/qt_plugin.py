@@ -217,6 +217,36 @@ else:
                 self.rgb_widget.layout.addWidget(self.rgb_mul_sliders, 2, 0)
 
                 #---------------------------------------------------------------
+                # HSV sliders
+                #---------------------------------------------------------------
+
+                # radio buttons
+                self.hsv_add = QtGui.QRadioButton('Additive')
+                self.hsv_mul = QtGui.QRadioButton('Multiplicative')
+                self.hsv_mul.toggled.connect(self.hsv_radio_changed)
+                self.hsv_add.toggled.connect(self.hsv_radio_changed)
+
+                # additive sliders
+                self.hsv_add_sliders = NSliderBlock(3, [(-360, 360, 0, 'H', 1),
+                                                        (-100, 100, 0, 'S', .01),
+                                                        (-100, 100, 0, 'V', .01)],
+                                                    self.hsv_add_changed)
+
+                # multiplicative sliders
+                self.hsv_mul_sliders = NSliderBlock(3, [(0, 1000, 500, 'H', .002),
+                                                        (0, 1000, 500, 'S', .002),
+                                                        (0, 1000, 500, 'V', .002)],
+                                                    self.hsv_mul_changed)
+
+                # layout
+                self.hsv_widget = QWidget()
+                self.hsv_widget.layout = QtGui.QGridLayout(self.hsv_widget)
+                self.hsv_widget.layout.addWidget(self.hsv_add, 0, 0)
+                self.hsv_widget.layout.addWidget(self.hsv_mul, 1, 0)
+                self.hsv_widget.layout.addWidget(self.hsv_add_sliders, 2, 0)
+                self.hsv_widget.layout.addWidget(self.hsv_mul_sliders, 2, 0)
+
+                #---------------------------------------------------------------
                 # Brightness sliders
                 #---------------------------------------------------------------
 
@@ -244,6 +274,7 @@ else:
                 self.layout = QtGui.QGridLayout(self)
                 self.layout.addWidget(self.combo_box, 0, 0)
                 self.layout.addWidget(self.rgb_widget, 1, 0)
+                self.layout.addWidget(self.hsv_widget, 1, 0)
                 self.layout.addWidget(self.bright_widget, 1, 0)
                 self.layout.addWidget(self.commit_button, 2, 0)
                 self.layout.addWidget(self.revert_button, 3, 0)
@@ -256,6 +287,7 @@ else:
                 self.hide_sliders()
                 self.rgb_widget.show()
                 self.rgb_add.setChecked(True)
+                self.hsv_add.setChecked(True)
 
             def rgb_add_changed(self, name, val):
                 if not self.rgb_add.isChecked():
@@ -283,6 +315,24 @@ else:
                     return
                 self.update()
 
+            def hsv_add_changed(self, name, val):
+                if not self.hsv_add.isChecked():
+                    return
+                h = self.hsv_add_sliders.sliders['H'].conv_val()
+                s = self.hsv_add_sliders.sliders['S'].conv_val()
+                v = self.hsv_add_sliders.sliders['V'].conv_val()
+                self.mixer.hsv_add(h, s, v)
+                self.update()
+
+            def hsv_mul_changed(self, name, val):
+                if not self.hsv_mul.isChecked():
+                    return
+                h = self.hsv_mul_sliders.sliders['H'].conv_val()
+                s = self.hsv_mul_sliders.sliders['S'].conv_val()
+                v = self.hsv_mul_sliders.sliders['V'].conv_val()
+                self.mixer.hsv_multiply(h, s, v)
+                self.update()
+
             def bright_changed(self, name, val):
                 # doesnt matter which slider changed we need both
                 # values
@@ -295,6 +345,7 @@ else:
             def reset_sliders(self):
                 self.rgb_add_sliders.set_sliders({'R': 0, 'G': 0, 'B': 0})
                 self.rgb_mul_sliders.set_sliders({'R': 500, 'G': 500, 'B': 500})
+                self.hsv_add_sliders.set_sliders({'H': 0, 'S': 0, 'V': 0})
                 self.bright_sliders.set_sliders({'+': 0, 'x': 500})
 
             def combo_box_changed(self, index):
@@ -307,6 +358,7 @@ else:
 
             def hide_sliders(self):
                 self.rgb_widget.hide()
+                self.hsv_widget.hide()
                 self.bright_widget.hide()
 
             def rgb_radio_changed(self):
@@ -323,12 +375,27 @@ else:
                 self.mixer.set_to_stateimg()
                 self.update()
 
+            def hsv_radio_changed(self):
+                if self.hsv_add.isChecked():
+                    self.hsv_add_sliders.show()
+                    self.hsv_mul_sliders.hide()
+                elif self.hsv_mul.isChecked():
+                    self.hsv_mul_sliders.show()
+                    self.hsv_add_sliders.hide()
+                else:
+                    pass
+
+                self.reset_sliders()
+                self.mixer.set_to_stateimg()
+                self.update()
+
             def show_rgb(self):
                 self.hide_sliders()
                 self.rgb_widget.show()
 
             def show_hsv(self):
                 self.hide_sliders()
+                self.hsv_widget.show()
 
             def show_bright(self):
                 self.hide_sliders()

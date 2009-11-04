@@ -244,4 +244,53 @@ class ColorMixer(object):
         _colormixer.multiply(self.img, self.stateimg, channel, ammount)
 
     def brightness(self, offset, factor):
+        '''Adjust the brightness off an image with an offset and factor.
+
+        Parameters
+        ----------
+        offset : integer
+            The ammount to add to each channel.
+        factor : float
+            The factor to multiply each channel by.
+
+        result = clip((pixel + offset)*factor)
+
+        '''
         _colormixer.brightness(self.img, self.stateimg, offset, factor)
+
+    def hsv_add(self, h_amt, s_amt, v_amt):
+        '''Adjust the H, S, V channels of an image by a constant ammount.
+        This is similar to the add() mixer function, but operates over the
+        entire image at once. Thus all three additive values, H, S, V, must
+        be supplied simultaneously.
+
+        Parameters
+        ----------
+        h_amt : float
+            The ammount to add to the hue (-360..360)
+        s_amt : float
+            The ammount to add to the saturation (-1..1)
+        v_amt : float
+            The ammount to add to the value (-1..1)
+
+        '''
+        _colormixer.hsv_add(self.img, self.stateimg, h_amt, s_amt, v_amt)
+
+    def hsv_multiply(self, h_amt, s_amt, v_amt):
+        '''Adjust the H, S, V channels of an image by a constant ammount.
+        This is similar to the add() mixer function, but operates over the
+        entire image at once. Thus all three additive values, H, S, V, must
+        be supplied simultaneously.
+
+        Parameters
+        ----------
+        h_amt : float
+            The ammount to multiply to the hue (0..1)
+        s_amt : float
+            The ammount to multiply to the saturation (0..1)
+        v_amt : float
+            The ammount to multiply to the value (0..1)
+
+        '''
+        _colormixer.hsv_multiply(self.img, self.stateimg, h_amt, s_amt, v_amt)
+
