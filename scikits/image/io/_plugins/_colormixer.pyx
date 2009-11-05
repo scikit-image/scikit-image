@@ -126,30 +126,8 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
                 else:
                     img[i, j, k] = <np.uint8_t>op_result
 
+
 cdef void rgb_2_hsv(float* RGB, float* HSV):
-    '''Convert an HSV value to RGB.
-
-    Automatic clipping.
-
-    Parameters
-    ----------
-    R : float
-        From 0. - 255.
-    G : float
-        From 0. - 255.
-    B : float
-        From 0. - 255.
-
-    Returns
-    -------
-    out : (H, S, V) Floats
-        Ranges (0...360), (0...1), (0...1)
-
-    conversion convention from here:
-    http://en.wikipedia.org/wiki/HSL_and_HSV
-
-    '''
-
     cdef float R, G, B, H, S, V, MAX, MIN
     R = RGB[0]
     G = RGB[1]
@@ -195,7 +173,7 @@ cdef void rgb_2_hsv(float* RGB, float* HSV):
     if MAX == MIN:
         H = 0.
     elif MAX == R:
-        H = (60 * (G - B) / (MAX - MIN)) % 360
+        H = (60 * (G - B) / (MAX - MIN) + 360) % 360
     elif MAX == G:
         H = 60 * (B - R) / (MAX - MIN) + 120
     else:
@@ -210,30 +188,8 @@ cdef void rgb_2_hsv(float* RGB, float* HSV):
     HSV[1] = S
     HSV[2] = V
 
+
 cdef void hsv_2_rgb(float* HSV, float* RGB):
-    '''Convert an HSV value to RGB.
-
-    Automatic clipping.
-
-    Parameters
-    ----------
-    H : float
-        From 0. - 360.
-    S : float
-        From 0. - 1.
-    V : float
-        From 0. - 1.
-
-    Returns
-    -------
-    out : (R, G, B) Floats
-        Each from 0. - 1.
-
-    conversion convention from here:
-    http://en.wikipedia.org/wiki/HSL_and_HSV
-
-    '''
-
     cdef float H, S, V
     cdef float f, p, q, t, r, g, b
     cdef int hi
@@ -243,9 +199,9 @@ cdef void hsv_2_rgb(float* HSV, float* RGB):
     V = HSV[2]
 
     if H > 360:
-        H = 360
+        H = H % 360
     elif H < 0:
-        H = 0
+        H = 360 - ((-1 * H) % 360)
     else:
         pass
 
@@ -297,6 +253,84 @@ cdef void hsv_2_rgb(float* HSV, float* RGB):
     RGB[0] = r
     RGB[1] = g
     RGB[2] = b
+
+
+def py_hsv_2_rgb(H, S, V):
+    '''Convert an HSV value to RGB.
+
+    Automatic clipping.
+
+    Parameters
+    ----------
+    H : float
+        From 0. - 360.
+    S : float
+        From 0. - 1.
+    V : float
+        From 0. - 1.
+
+    Returns
+    -------
+    out : (R, G, B) ints
+        Each from 0 - 255
+
+    conversion convention from here:
+    http://en.wikipedia.org/wiki/HSL_and_HSV
+
+    '''
+    cdef float HSV[3]
+    cdef float RGB[3]
+
+    HSV[0] = H
+    HSV[1] = S
+    HSV[2] = V
+
+    hsv_2_rgb(HSV, RGB)
+
+    R = int(RGB[0] * 255)
+    G = int(RGB[1] * 255)
+    B = int(RGB[2] * 255)
+
+    return (R, G, B)
+
+def py_rgb_2_hsv(R, G, B):
+    '''Convert an HSV value to RGB.
+
+    Automatic clipping.
+
+    Parameters
+    ----------
+    R : int
+        From 0. - 255.
+    G : int
+        From 0. - 255.
+    B : int
+        From 0. - 255.
+
+    Returns
+    -------
+    out : (H, S, V) floats
+        Ranges (0...360), (0...1), (0...1)
+
+    conversion convention from here:
+    http://en.wikipedia.org/wiki/HSL_and_HSV
+
+    '''
+    cdef float HSV[3]
+    cdef float RGB[3]
+
+    RGB[0] = R
+    RGB[1] = G
+    RGB[2] = B
+
+    rgb_2_hsv(RGB, HSV)
+
+    H = HSV[0]
+    S = HSV[1]
+    V = HSV[2]
+
+    return (H, S, V)
+
 
 @cython.boundscheck(False)
 def hsv_add(np.ndarray[np.uint8_t, ndim=3] img,
@@ -379,6 +413,10 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
     reverse transform is performed. Those are the ranges to keep in mind,
     when passing in values.
 
+    Note that since hue is in degrees, it makes no sense to multiply
+    that channel, thus an add operation is performed on the hue. And the
+    values given for h_amt, should be the same as for hsv_add
+
     Parameters
     ----------
     img : (M, N, 3) ndarray of uint8
@@ -388,9 +426,9 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
     h_amt : float
         Ammount to add to H channel.
     s_amt : float
-        Ammount to add to S channel.
+        Ammount by which to multiply S channel.
     v_amt : float
-        Ammount to add to V channel.
+        Ammount by which to multiply V channel.
 
 
     """
@@ -412,7 +450,7 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
             rgb_2_hsv(RGB, HSV)
 
             # Multiply operation
-            HSV[0] *= h_amt
+            HSV[0] += h_amt
             HSV[1] *= s_amt
             HSV[2] *= v_amt
 

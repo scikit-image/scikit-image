@@ -267,7 +267,7 @@ class ColorMixer(object):
         Parameters
         ----------
         h_amt : float
-            The ammount to add to the hue (-360..360)
+            The ammount to add to the hue (-180..180)
         s_amt : float
             The ammount to add to the saturation (-1..1)
         v_amt : float
@@ -282,10 +282,14 @@ class ColorMixer(object):
         entire image at once. Thus all three additive values, H, S, V, must
         be supplied simultaneously.
 
+        Note that since hue is in degrees, it makes no sense to multiply
+        that channel, thus an add operation is performed on the hue. And the
+        values given for h_amt, should be the same as for hsv_add
+
         Parameters
         ----------
         h_amt : float
-            The ammount to multiply to the hue (0..1)
+            The ammount to to add to the hue (-180..180)
         s_amt : float
             The ammount to multiply to the saturation (0..1)
         v_amt : float
@@ -294,3 +298,45 @@ class ColorMixer(object):
         '''
         _colormixer.hsv_multiply(self.img, self.stateimg, h_amt, s_amt, v_amt)
 
+
+    def rgb_2_hsv_pixel(self, R, G, B):
+        '''Convert an RGB value to HSV
+
+        Parameters
+        ----------
+        R : int
+            Red value
+        G : int
+            Green value
+        B : int
+            Blue value
+
+        Returns
+        -------
+        out : (H, S, V) Floats
+            The HSV values
+
+        '''
+        H, S, V = _colormixer.py_rgb_2_hsv(R, G, B)
+        return (H, S, V)
+
+    def hsv_2_rgb_pixel(self, H, S, V):
+        '''Convert an HSV value to RGB
+
+        Parameters
+        ----------
+        H : float
+            Hue value
+        S : float
+            Saturation value
+        V : float
+            Intensity value
+
+        Returns
+        -------
+        out : (R, G, B) ints
+            The RGB values
+
+        '''
+        R, G, B = _colormixer.py_hsv_2_rgb(H, S, V)
+        return (R, G, B)
