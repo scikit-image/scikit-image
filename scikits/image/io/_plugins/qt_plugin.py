@@ -251,6 +251,7 @@ else:
                 self.mixer_panel = MixerPanel(self.arr)
                 self.layout.addWidget(self.mixer_panel, 0, 2)
                 self.mixer_panel.show()
+                self.mixer_panel.set_callback(self.refresh_image)
 
                 self.rgb_hist = MultiHist(self.calc_hist())
                 self.layout.addWidget(self.rgb_hist, 0, 1)
@@ -271,38 +272,6 @@ else:
                 self.layout.addWidget(self.save_variable, 1, 1)
                 self.layout.addWidget(self.save_file, 1, 2)
 
-                ''''
-                # hook up the mixer sliders move events to trigger a
-                # histogram redraw.
-                self.mixer_panel.rgb_add_sliders.sliders['R'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.rgb_add_sliders.sliders['G'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.rgb_add_sliders.sliders['B'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.rgb_mul_sliders.sliders['R'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.rgb_mul_sliders.sliders['G'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.rgb_mul_sliders.sliders['B'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.hsv_add_sliders.sliders['H'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.hsv_add_sliders.sliders['S'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.hsv_add_sliders.sliders['V'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.hsv_mul_sliders.sliders['H'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.hsv_mul_sliders.sliders['S'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.hsv_mul_sliders.sliders['V'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.bright_sliders.sliders['+'].\
-                    sliderMoved.connect(self.update_histogram)
-                self.mixer_panel.bright_sliders.sliders['x'].\
-                    sliderMoved.connect(self.update_histogram)
-                '''
 
             def update_histogram(self):
                 self.rgb_hist.update_hists(self.calc_hist())

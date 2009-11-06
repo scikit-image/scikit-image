@@ -40,10 +40,10 @@ class IntelligentSlider(QWidget):
         self.value_label.setText(str(self.slider.value() * self.a + self.b))
         self.value_label.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.layout = QVBoxLayout(self)
-        self.layout.addWidget(self.name_label)
-        self.layout.addWidget(self.slider)
-        self.layout.addWidget(self.value_label)
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.name_label, 0, 0)
+        self.layout.addWidget(self.slider, 1, 0, QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.value_label, 2, 0)
 
     # bind this to the valueChanged signal of the slider
     def slider_changed(self, val):
@@ -56,10 +56,11 @@ class IntelligentSlider(QWidget):
         self.b = b
 
     def set_value(self, val):
-        self.slider.setValue(int((val - self.a) / self.b))
+        self.slider.setValue(int((val - self.b) / self.a))
+        self.value_label.setText(str(val)[:4])
 
     def val(self):
-        return self.value() * self.a + self.b
+        return self.slider.value() * self.a + self.b
 
 
 class MixerPanel(QWidget):
@@ -74,6 +75,7 @@ class MixerPanel(QWidget):
 
         self.img = img
         self.mixer = ColorMixer(self.img)
+        self.callback = None
 
         #---------------------------------------------------------------
         # ComboBox
@@ -147,7 +149,7 @@ class MixerPanel(QWidget):
 
         # sliders
         cont = IntelligentSlider('x', 0.002, 0, self.bright_changed)
-        bright = IntelligentSlider('+', 0.51, -155, self.bright_changed)
+        bright = IntelligentSlider('+', 0.51, -255, self.bright_changed)
         self.cont = cont
         self.bright = bright
 
@@ -158,21 +160,21 @@ class MixerPanel(QWidget):
         self.bright_widget.layout.addWidget(self.bright, 0, 1)
 
 
-        '''
         #---------------------------------------------------------------
         # Gamma sliders
         #---------------------------------------------------------------
+
         # sliders
-        self.gamma_sliders = NSliderBlock(2,
-                                           [(100, 1200, 100, 'alpha', 0.01),
-                                            (0, 1200, 0, 'beta', 0.01)],
-                                           self.gamma_changed)
+        alpha = IntelligentSlider('alpha', 0.011, 1, self.gamma_changed)
+        beta = IntelligentSlider('beta', 0.012, 0, self.gamma_changed)
+        self.a_gamma = alpha
+        self.b_gamma = beta
 
         # layout
         self.gamma_widget = QWidget()
         self.gamma_widget.layout = QtGui.QGridLayout(self.gamma_widget)
-        self.gamma_widget.layout.addWidget(self.gamma_sliders, 0, 0)
-        '''
+        self.gamma_widget.layout.addWidget(self.a_gamma, 0, 0)
+        self.gamma_widget.layout.addWidget(self.b_gamma, 0, 1)
 
         #---------------------------------------------------------------
         # Buttons
@@ -189,6 +191,7 @@ class MixerPanel(QWidget):
         self.sliders.addWidget(self.rgb_widget)
         self.sliders.addWidget(self.hsv_widget)
         self.sliders.addWidget(self.bright_widget)
+        self.sliders.addWidget(self.gamma_widget)
 
         self.layout = QtGui.QGridLayout(self)
         self.layout.addWidget(self.combo_box, 0, 0)
@@ -197,91 +200,123 @@ class MixerPanel(QWidget):
         self.layout.addWidget(self.revert_button, 3, 0)
 
         #---------------------------------------------------------------
-        # Initialization
+        # State Initialization
         #---------------------------------------------------------------
 
         self.combo_box.setCurrentIndex(0)
-        self.sliders.setCurrentIndex(2)
-        #self.hide_sliders()
-        #self.rgb_widget.show()
-        #self.rgb_mul.setChecked(True)
-        #self.hsv_mul.setChecked(True)
+        self.rgb_mul.setChecked(True)
+        self.hsv_mul.setChecked(True)
+
+
+    def set_callback(self, callback):
+        self.callback = callback
+
+    def combo_box_changed(self, index):
+        self.sliders.setCurrentIndex(index)
+        self.reset_sliders()
+
+    def rgb_radio_changed(self):
+        self.reset_sliders()
+
+    def hsv_radio_changed(self):
+        self.reset_sliders()
+
+    def reset_sliders(self):
+        # handle changing the conversion factors necessary
+        if self.rgb_add.isChecked():
+            self.rs.set_conv_fac(0.51, -255)
+            self.rs.set_value(0)
+            self.gs.set_conv_fac(0.51, -255)
+            self.gs.set_value(0)
+            self.bs.set_conv_fac(0.51, -255)
+            self.bs.set_value(0)
+        else:
+            self.rs.set_conv_fac(0.002, 0)
+            self.rs.set_value(1.)
+            self.gs.set_conv_fac(0.002, 0)
+            self.gs.set_value(1.)
+            self.bs.set_conv_fac(0.002, 0)
+            self.bs.set_value(1.)
+
+        self.hs.set_value(0)
+        if self.hsv_add.isChecked():
+            self.ss.set_conv_fac(0.002, -1)
+            self.ss.set_value(0)
+            self.vs.set_conv_fac(0.002, -1)
+            self.vs.set_value(0)
+        else:
+            self.ss.set_conv_fac(0.002, 0)
+            self.ss.set_value(1.)
+            self.vs.set_conv_fac(0.002, 0)
+            self.vs.set_value(1.)
+
+        self.bright.set_value(0)
+        self.cont.set_value(1.)
+
+        self.a_gamma.set_value(1)
+        self.b_gamma.set_value(0)
+
 
     def rgb_changed(self, name, val):
-        pass
+        if name == 'R':
+            channel = self.mixer.RED
+        elif name == 'G':
+            channel = self.mixer.GREEN
+        else:
+            channel = self.mixer.BLUE
 
+        if self.rgb_mul.isChecked():
+            self.mixer.multiply(channel, val)
+        elif self.rgb_add.isChecked():
+            self.mixer.add(channel, val)
+        else:
+            pass
+
+        if self.callback:
+            self.callback()
 
     def hsv_changed(self, name, val):
-        pass
+        h = self.hs.val()
+        s = self.ss.val()
+        v = self.vs.val()
+
+        if self.hsv_mul.isChecked():
+            self.mixer.hsv_multiply(h, s, v)
+        elif self.hsv_add.isChecked():
+            self.mixer.hsv_add(h, s, v)
+        else:
+            pass
+
+        if self.callback:
+            self.callback()
 
     def bright_changed(self, name, val):
-        # doesnt matter which slider changed we need both
-        # values
-        factor = self.bright_sliders.sliders['x'].conv_val()
-        offset = self.bright_sliders.sliders['+'].conv_val()
-        self.mixer.brightness(offset, factor)
-        self.update()
+        b = self.bright.val()
+        c = self.cont.val()
+        self.mixer.brightness(c, b)
+
+        if self.callback:
+            self.callback()
 
     def gamma_changed(self, name, val):
-        # doesnt matter which slider changed we need both
-        # values
-        alpha = self.gamma_sliders.sliders['alpha'].conv_val()
-        beta = self.gamma_sliders.sliders['beta'].conv_val()
-        self.mixer.sigmoid_gamma(alpha, beta)
-        self.update()
+        ag = self.a_gamma.val()
+        bg = self.b_gamma.val()
+        self.mixer.sigmoid_gamma(ag, bg)
+
+        if self.callback:
+            self.callback()
 
     def iter_all_sliders(self):
         pass
 
-    def reset_sliders(self):
-        self.rgb_add_sliders.set_sliders({'R': 0, 'G': 0, 'B': 0})
-        self.rgb_mul_sliders.set_sliders({'R': 500, 'G': 500, 'B': 500})
-        self.hsv_add_sliders.set_sliders({'H': 0, 'S': 0, 'V': 0})
-        self.hsv_mul_sliders.set_sliders({'H': 0, 'S': 500, 'V': 500})
-        self.bright_sliders.set_sliders({'+': 0, 'x': 500})
-        self.gamma_sliders.set_sliders({'alpha': 100, 'beta': 0})
 
-    def combo_box_changed(self, index):
-        self.reset_sliders()
-        self.mixer.set_to_stateimg()
-        self.update()
-        combo_box_map={0: self.show_rgb, 1: self.show_hsv,
-                       2: self.show_bright, 3: self.show_gamma}
-        combo_box_map[index]()
+
+
 
     def hide_sliders(self):
-        self.rgb_widget.hide()
-        self.hsv_widget.hide()
-        self.bright_widget.hide()
-        self.gamma_sliders.hide()
+        pass
 
-    def rgb_radio_changed(self):
-        if self.rgb_add.isChecked():
-            self.rgb_add_sliders.show()
-            self.rgb_mul_sliders.hide()
-        elif self.rgb_mul.isChecked():
-            self.rgb_mul_sliders.show()
-            self.rgb_add_sliders.hide()
-        else:
-            pass
 
-        self.reset_sliders()
-        self.mixer.set_to_stateimg()
-        self.update()
-
-    def hsv_radio_changed(self):
-        if self.hsv_add.isChecked():
-            self.hsv_add_sliders.show()
-            self.hsv_mul_sliders.hide()
-        elif self.hsv_mul.isChecked():
-            self.hsv_mul_sliders.show()
-            self.hsv_add_sliders.hide()
-        else:
-            pass
-
-        self.reset_sliders()
-        self.mixer.set_to_stateimg()
-        self.update()
 
     def show_rgb(self):
         self.hide_sliders()

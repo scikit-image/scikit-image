@@ -243,7 +243,7 @@ class ColorMixer(object):
 
         _colormixer.multiply(self.img, self.stateimg, channel, ammount)
 
-    def brightness(self, offset, factor):
+    def brightness(self, factor, offset):
         '''Adjust the brightness off an image with an offset and factor.
 
         Parameters
@@ -256,7 +256,7 @@ class ColorMixer(object):
         result = clip((pixel + offset)*factor)
 
         '''
-        _colormixer.brightness(self.img, self.stateimg, offset, factor)
+        _colormixer.brightness(self.img, self.stateimg, factor, offset)
 
     def sigmoid_gamma(self, alpha, beta):
         _colormixer.sigmoid_gamma(self.img, self.stateimg, alpha, beta)

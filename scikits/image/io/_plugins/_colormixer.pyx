@@ -97,7 +97,7 @@ def multiply(np.ndarray[np.uint8_t, ndim=3] img,
 @cython.boundscheck(False)
 def brightness(np.ndarray[np.uint8_t, ndim=3] img,
              np.ndarray[np.uint8_t, ndim=3] stateimg,
-             int offset, float factor):
+             float factor, int offset):
     """Modify the brightness of an image.
     'factor' is multiplied to all channels, which are
     then added by 'amount'. Overflow is clipped.
@@ -108,10 +108,10 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
         Output image.
     stateimg : (M, N, 3) ndarray of uint8
         Input image.
-    offset : int
-        Ammount to add to each channel.
     factor : float
         Multiplication factor.
+    offset : int
+        Ammount to add to each channel.
 
     """
 
