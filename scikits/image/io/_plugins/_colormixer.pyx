@@ -529,68 +529,7 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
             img[i, j, 1] = <np.uint8_t>RGB[1]
             img[i, j, 2] = <np.uint8_t>RGB[2]
 
-@cython.boundscheck(False)
-def histograms(np.ndarray[np.uint8_t, ndim=3] img, int nbins):
-    '''Calculate the channel histograms of the current image.
 
-    Parameters
-    ----------
-    img : ndarray, uint8, ndim=3
-        The image to calculate the histogram.
-    nbins : int
-        The number of bins.
-
-    Returns
-    -------
-    out : (rcounts, gcounts, bcounts, vcounts)
-        The binned histograms of the RGB channels and grayscale intensity.
-
-    This is a NAIVE histogram routine, meant primarily for fast display.
-
-    '''
-    cdef int width = img.shape[1]
-    cdef int height = img.shape[0]
-    cdef np.ndarray[np.int32_t, ndim=1] r
-    cdef np.ndarray[np.int32_t, ndim=1] g
-    cdef np.ndarray[np.int32_t, ndim=1] b
-    cdef np.ndarray[np.int32_t, ndim=1] v
-
-    r = np.zeros((nbins,), dtype=np.int32)
-    g = np.zeros((nbins,), dtype=np.int32)
-    b = np.zeros((nbins,), dtype=np.int32)
-    v = np.zeros((nbins,), dtype=np.int32)
-
-    cdef int i, j, k, rbin, gbin, bbin, vbin
-    cdef float bin_width = 255./ nbins
-    cdef np.uint8_t R, G, B, V
-
-    for i in range(height):
-        for j in range(width):
-            R = img[i, j, 0]
-            G = img[i, j, 1]
-            B = img[i, j, 2]
-            V = <np.uint8_t> (0.3 * R + 0.59 * G + 0.11 * B)
-
-            rbin = <int>(R / bin_width)
-            gbin = <int>(G / bin_width)
-            bbin = <int>(B / bin_width)
-            vbin = <int>(V / bin_width)
-
-            if rbin == nbins:
-                rbin -= 1
-            if gbin == nbins:
-                gbin -= 1
-            if bbin == nbins:
-                gbin -= 1
-            if vbin == nbins:
-                vbin -= 1
-
-            r[rbin] += 1
-            g[gbin] += 1
-            b[bbin] += 1
-            v[vbin] += 1
-
-    return (r, g, b, v)
 
 
 

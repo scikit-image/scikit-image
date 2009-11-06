@@ -6,8 +6,6 @@ from PyQt4.QtGui import (QWidget, QStackedWidget, QSlider, QVBoxLayout,
 from util import ColorMixer
 
 
-
-
 class IntelligentSlider(QWidget):
     ''' A slider that adds a 'name' attribute and calls a callback
     with 'name' as an argument to the registerd callback.
@@ -26,6 +24,7 @@ class IntelligentSlider(QWidget):
         self.callback = callback
         self.a = a
         self.b = b
+        self.manually_triggered = False
 
         self.slider = QSlider()
         self.slider.setRange(0, 1000)
@@ -49,15 +48,19 @@ class IntelligentSlider(QWidget):
     def slider_changed(self, val):
         val = self.val()
         self.value_label.setText(str(val)[:4])
-        self.callback(self.name, val)
+
+        if not self.manually_triggered:
+            self.callback(self.name, val)
 
     def set_conv_fac(self, a, b):
         self.a = a
         self.b = b
 
     def set_value(self, val):
+        self.manually_triggered = True
         self.slider.setValue(int((val - self.b) / self.a))
         self.value_label.setText(str(val)[:4])
+        self.manually_triggered = False
 
     def val(self):
         return self.slider.value() * self.a + self.b
@@ -227,13 +230,19 @@ class MixerPanel(QWidget):
 
     def combo_box_changed(self, index):
         self.sliders.setCurrentIndex(index)
-        self.reset_sliders()
+        self.reset()
 
     def rgb_radio_changed(self):
-        self.reset_sliders()
+        self.reset()
 
     def hsv_radio_changed(self):
+        self.reset()
+
+    def reset(self):
         self.reset_sliders()
+        self.mixer.set_to_stateimg()
+        if self.callback:
+            self.callback()
 
     def reset_sliders(self):
         # handle changing the conversion factors necessary

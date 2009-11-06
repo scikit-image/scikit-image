@@ -15,10 +15,15 @@ def configuration(parent_package='', top_path=None):
 
     # This function tries to create C files from the given .pyx files.  If
     # it fails, we build the checked-in .c files.
-    cython(['_plugins/_colormixer.pyx'], working_path=base_path)
+    cython(['_plugins/_colormixer.pyx', '_plugins/_histograms.pyx'],
+           working_path=base_path)
 
     config.add_extension('_plugins._colormixer',
                          sources=['_plugins/_colormixer.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+
+    config.add_extension('_plugins._histograms',
+                         sources=['_plugins/_histograms.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

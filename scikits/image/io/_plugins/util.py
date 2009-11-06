@@ -1,5 +1,6 @@
 import numpy as np
 import _colormixer
+import _histograms
 # utilities to make life easier for plugin writers.
 
 
@@ -150,6 +151,26 @@ def prepare_for_display(npy_img):
 
     return out
 
+
+def histograms(img, nbins):
+    '''Calculate the channel histograms of the current image.
+
+    Parameters
+    ----------
+    img : ndarray, ndim=3, dtype=np.uint8
+    nbins : int
+        The number of bins.
+
+    Returns
+    -------
+    out : (rcounts, gcounts, bcounts, vcounts)
+        The binned histograms of the RGB channels and intensity values.
+
+    This is a NAIVE histogram routine, meant primarily for fast display.
+
+    '''
+
+    return _histograms.histograms(img, nbins)
 
 
 class ColorMixer(object):
@@ -347,21 +368,3 @@ class ColorMixer(object):
         R, G, B = _colormixer.py_hsv_2_rgb(H, S, V)
         return (R, G, B)
 
-    def histograms(self, nbins):
-        '''Calculate the channel histograms of the current image.
-
-        Parameters
-        ----------
-        nbins : int
-            The number of bins.
-
-        Returns
-        -------
-        out : (rcounts, gcounts, bcounts, vcounts)
-            The binned histograms of the RGB channels and grayscale intensity.
-
-        This is a NAIVE histogram routine, meant primarily for fast display.
-
-        '''
-
-        return _colormixer.histograms(self.img, nbins)
