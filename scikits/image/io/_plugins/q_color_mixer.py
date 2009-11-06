@@ -83,6 +83,7 @@ class MixerPanel(QWidget):
 
         self.combo_box_entries = ['RGB Color', 'HSV Color',
                                   'Brightness/Contrast',
+                                  'Gamma',
                                   'Gamma (Sigmoidal)']
         self.combo_box = QtGui.QComboBox()
         for entry in self.combo_box_entries:
@@ -160,21 +161,33 @@ class MixerPanel(QWidget):
         self.bright_widget.layout.addWidget(self.bright, 0, 1)
 
 
-        #---------------------------------------------------------------
-        # Gamma sliders
-        #---------------------------------------------------------------
-
-        # sliders
-        alpha = IntelligentSlider('alpha', 0.011, 1, self.gamma_changed)
-        beta = IntelligentSlider('beta', 0.012, 0, self.gamma_changed)
-        self.a_gamma = alpha
-        self.b_gamma = beta
+        #-----------------------------------------------------------------------
+        # Gamma Slider
+        #-----------------------------------------------------------------------
+        gamma = IntelligentSlider('gamma', 0.005, 0, self.gamma_changed)
+        self.gamma = gamma
 
         # layout
         self.gamma_widget = QWidget()
         self.gamma_widget.layout = QtGui.QGridLayout(self.gamma_widget)
-        self.gamma_widget.layout.addWidget(self.a_gamma, 0, 0)
-        self.gamma_widget.layout.addWidget(self.b_gamma, 0, 1)
+        self.gamma_widget.layout.addWidget(self.gamma, 0, 0)
+
+
+        #---------------------------------------------------------------
+        # Sigmoid Gamma sliders
+        #---------------------------------------------------------------
+
+        # sliders
+        alpha = IntelligentSlider('alpha', 0.011, 1, self.sig_gamma_changed)
+        beta = IntelligentSlider('beta', 0.012, 0, self.sig_gamma_changed)
+        self.a_gamma = alpha
+        self.b_gamma = beta
+
+        # layout
+        self.sig_gamma_widget = QWidget()
+        self.sig_gamma_widget.layout = QtGui.QGridLayout(self.sig_gamma_widget)
+        self.sig_gamma_widget.layout.addWidget(self.a_gamma, 0, 0)
+        self.sig_gamma_widget.layout.addWidget(self.b_gamma, 0, 1)
 
         #---------------------------------------------------------------
         # Buttons
@@ -192,6 +205,7 @@ class MixerPanel(QWidget):
         self.sliders.addWidget(self.hsv_widget)
         self.sliders.addWidget(self.bright_widget)
         self.sliders.addWidget(self.gamma_widget)
+        self.sliders.addWidget(self.sig_gamma_widget)
 
         self.layout = QtGui.QGridLayout(self)
         self.layout.addWidget(self.combo_box, 0, 0)
@@ -253,8 +267,9 @@ class MixerPanel(QWidget):
         self.bright.set_value(0)
         self.cont.set_value(1.)
 
+        self.gamma.set_value(1)
         self.a_gamma.set_value(1)
-        self.b_gamma.set_value(0)
+        self.b_gamma.set_value(0.5)
 
 
     def rgb_changed(self, name, val):
@@ -299,6 +314,12 @@ class MixerPanel(QWidget):
             self.callback()
 
     def gamma_changed(self, name, val):
+        self.mixer.gamma(val)
+
+        if self.callback:
+            self.callback()
+
+    def sig_gamma_changed(self, name, val):
         ag = self.a_gamma.val()
         bg = self.b_gamma.val()
         self.mixer.sigmoid_gamma(ag, bg)
@@ -306,39 +327,13 @@ class MixerPanel(QWidget):
         if self.callback:
             self.callback()
 
-    def iter_all_sliders(self):
-        pass
-
-
-
-
-
-    def hide_sliders(self):
-        pass
-
-
-
-    def show_rgb(self):
-        self.hide_sliders()
-        self.rgb_widget.show()
-
-    def show_hsv(self):
-        self.hide_sliders()
-        self.hsv_widget.show()
-
-    def show_bright(self):
-        self.hide_sliders()
-        self.bright_widget.show()
-
-    def show_gamma(self):
-        self.hide_sliders()
-        self.gamma_sliders.show()
-
     def commit_changes(self):
         self.mixer.commit_changes()
-        self.update()
+        self.reset_sliders()
 
     def revert_changes(self):
         self.mixer.revert()
         self.reset_sliders()
-        self.update()
+
+        if self.callback:
+            self.callback()

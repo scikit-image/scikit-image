@@ -16,6 +16,7 @@ import cython
 
 cdef extern from "math.h":
     float exp(float)
+    float pow(float, float)
 
 
 @cython.boundscheck(False)
@@ -167,6 +168,27 @@ def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
             img[i,j,1] = <np.uint8_t>(g * 255)
             img[i,j,2] = <np.uint8_t>(b * 255)
 
+
+@cython.boundscheck(False)
+def gamma(np.ndarray[np.uint8_t, ndim=3] img,
+          np.ndarray[np.uint8_t, ndim=3] stateimg,
+          float gamma):
+
+    cdef int height = img.shape[0]
+    cdef int width = img.shape[1]
+
+    cdef float r, g, b
+
+    cdef int i, j
+    for i in range(height):
+        for j in range(width):
+            r = <float>stateimg[i,j,0] / 255.
+            g = <float>stateimg[i,j,1] / 255.
+            b = <float>stateimg[i,j,2] / 255.
+
+            img[i,j,0] = <np.uint8_t>(pow(r, gamma) * 255)
+            img[i,j,1] = <np.uint8_t>(pow(g, gamma) * 255)
+            img[i,j,2] = <np.uint8_t>(pow(b, gamma) * 255)
 
 
 
