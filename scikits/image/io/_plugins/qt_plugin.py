@@ -15,7 +15,7 @@ else:
     try:
         from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
                                  QLabel, QWidget, QVBoxLayout, QSlider,
-                                 QPainter, QColor, QFrame)
+                                 QPainter, QColor, QFrame, QLayoutItem)
         from PyQt4 import QtCore, QtGui
         from q_color_mixer import MixerPanel
         from q_histogram import QuadHistogram
@@ -27,6 +27,7 @@ else:
     else:
 
         app = None
+
 
         class LabelImage(QLabel):
             def __init__(self, parent, arr):
@@ -45,12 +46,24 @@ else:
                 # if we didnt pass the stride.
                 self.img = QImage(arr.data, arr.shape[1], arr.shape[0],
                                   arr.strides[0], QImage.Format_RGB888)
-
                 self.pm = QPixmap.fromImage(self.img)
                 self.setPixmap(self.pm)
+                self.setMinimumSize(100, 100)
 
             def mouseMoveEvent(self, evt):
                 self.parent.label_mouseMoveEvent(evt)
+
+            def resizeEvent(self, evt):
+                width = self.width()
+                pm = QPixmap.fromImage(self.img)
+                pm = pm.scaledToWidth(width)
+                self.setPixmap(pm)
+
+            def update_image(self):
+                width = self.width()
+                pm = QPixmap.fromImage(self.img)
+                pm = pm.scaledToWidth(width)
+                self.setPixmap(pm)
 
 
         class ImageWindow(QMainWindow):
@@ -63,6 +76,7 @@ else:
 
                 self.label = LabelImage(self, arr)
                 self.layout.addWidget(self.label, 0, 0)
+                self.layout.addLayout
                 self.mgr.add_window(self)
                 self.main_widget.show()
 
@@ -130,9 +144,7 @@ else:
                 ImageWindow.__init__(self, arr, mgr)
                 self.arr = arr
 
-                self.label.setScaledContents(True)
                 self.label.setMouseTracking(True)
-                self.label.setMinimumSize(QtCore.QSize(100, 100))
 
                 self.mixer_panel = MixerPanel(self.arr)
                 self.layout.addWidget(self.mixer_panel, 0, 2)
@@ -163,8 +175,7 @@ else:
                 self.rgbv_hist.update_hists(self.arr)
 
             def refresh_image(self):
-                pm = QPixmap.fromImage(self.label.img)
-                self.label.setPixmap(pm)
+                self.label.update_image()
                 self.update_histograms()
 
             def scale_mouse_pos(self, x, y):
