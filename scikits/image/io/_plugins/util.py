@@ -258,6 +258,9 @@ class ColorMixer(object):
         '''
         _colormixer.brightness(self.img, self.stateimg, offset, factor)
 
+    def sigmoid_gamma(self, alpha, beta):
+        _colormixer.sigmoid_gamma(self.img, self.stateimg, alpha, beta)
+
     def hsv_add(self, h_amt, s_amt, v_amt):
         '''Adjust the H, S, V channels of an image by a constant ammount.
         This is similar to the add() mixer function, but operates over the

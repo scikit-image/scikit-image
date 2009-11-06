@@ -14,6 +14,10 @@ cimport numpy as np
 
 import cython
 
+cdef extern from "math.h":
+    float exp(float)
+
+
 @cython.boundscheck(False)
 def add(np.ndarray[np.uint8_t, ndim=3] img,
         np.ndarray[np.uint8_t, ndim=3] stateimg,
@@ -50,6 +54,7 @@ def add(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i, j, k] = 0
             else:
                 img[i, j, k] = <np.uint8_t>op_result
+
 
 @cython.boundscheck(False)
 def multiply(np.ndarray[np.uint8_t, ndim=3] img,
@@ -88,13 +93,14 @@ def multiply(np.ndarray[np.uint8_t, ndim=3] img,
             else:
                 img[i, j, k] = <np.uint8_t>op_result
 
+
 @cython.boundscheck(False)
 def brightness(np.ndarray[np.uint8_t, ndim=3] img,
              np.ndarray[np.uint8_t, ndim=3] stateimg,
              int offset, float factor):
     """Modify the brightness of an image.
-    'offset' is added to all channels, which are
-    then multiplied by 'factor'. Overflow is clipped.
+    'factor' is multiplied to all channels, which are
+    then added by 'amount'. Overflow is clipped.
 
     Parameters
     ----------
@@ -118,13 +124,50 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
     for i in range(height):
         for j in range(width):
             for k in range(3):
-                op_result = <float>((stateimg[i,j,k] + offset)*factor)
+                op_result = <float>((stateimg[i,j,k] * factor + offset))
+
                 if op_result > 255:
                     img[i, j, k] = 255
                 elif op_result < 0:
                     img[i, j, k] = 0
                 else:
                     img[i, j, k] = <np.uint8_t>op_result
+
+
+@cython.boundscheck(False)
+def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
+                  np.ndarray[np.uint8_t, ndim=3] stateimg,
+                  float alpha, float beta):
+
+    cdef int height = img.shape[0]
+    cdef int width = img.shape[1]
+
+    cdef float c1, c2, r, g, b
+
+    cdef int i, j, k
+    for i in range(height):
+        for j in range(width):
+            r = <float>stateimg[i,j,0] / 255.
+            g = <float>stateimg[i,j,1] / 255.
+            b = <float>stateimg[i,j,2] / 255.
+
+            c1 = 1 / (1 + exp(beta))
+            c2 = 1 / (1 + exp(beta - alpha)) - c1
+
+            r = 1 / (1 + exp(beta - r * alpha))
+            r = (r - c1) / c2
+
+            g = 1 / (1 + exp(beta - g * alpha))
+            g = (g - c1) / c2
+
+            b = 1 / (1 + exp(beta - b * alpha))
+            b = (b - c1) / c2
+
+            img[i,j,0] = <np.uint8_t>(r * 255)
+            img[i,j,1] = <np.uint8_t>(g * 255)
+            img[i,j,2] = <np.uint8_t>(b * 255)
+
+
 
 
 cdef void rgb_2_hsv(float* RGB, float* HSV):

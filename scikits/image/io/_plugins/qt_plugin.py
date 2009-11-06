@@ -181,7 +181,8 @@ else:
                 #---------------------------------------------------------------
 
                 self.combo_box_entries = ['RGB Color', 'HSV Color',
-                                          'Brightness', 'Contrast']
+                                          'Brightness/Contrast',
+                                          'Gamma (Sigmoidal)']
                 self.combo_box = QtGui.QComboBox()
                 for entry in self.combo_box_entries:
                     self.combo_box.addItem(entry)
@@ -252,14 +253,29 @@ else:
                 #---------------------------------------------------------------
 
                 # sliders
-                self.bright_sliders = NSliderBlock(2, [(-255, 255, 0, '+', 1),
-                                                    (0, 1000, 500, 'x', 0.002)],
+                self.bright_sliders = NSliderBlock(2,
+                                                   [(0, 1000, 500, 'x', 0.002),
+                                                    (-255, 255, 0, '+', 1)],
                                                    self.bright_changed)
 
                 # layout
                 self.bright_widget = QWidget()
                 self.bright_widget.layout = QtGui.QGridLayout(self.bright_widget)
                 self.bright_widget.layout.addWidget(self.bright_sliders, 0, 0)
+
+                #---------------------------------------------------------------
+                # Gamma sliders
+                #---------------------------------------------------------------
+                # sliders
+                self.gamma_sliders = NSliderBlock(2,
+                                                   [(100, 1200, 100, 'alpha', 0.01),
+                                                    (0, 1200, 0, 'beta', 0.01)],
+                                                   self.gamma_changed)
+
+                # layout
+                self.gamma_widget = QWidget()
+                self.gamma_widget.layout = QtGui.QGridLayout(self.gamma_widget)
+                self.gamma_widget.layout.addWidget(self.gamma_sliders, 0, 0)
 
                 #---------------------------------------------------------------
                 # Buttons
@@ -276,7 +292,9 @@ else:
                 self.layout.addWidget(self.combo_box, 0, 0)
                 self.layout.addWidget(self.rgb_widget, 1, 0)
                 self.layout.addWidget(self.hsv_widget, 1, 0)
+                self.layout.addWidget(self.gamma_widget, 1, 0)
                 self.layout.addWidget(self.bright_widget, 1, 0)
+
                 self.layout.addWidget(self.commit_button, 2, 0)
                 self.layout.addWidget(self.revert_button, 3, 0)
 
@@ -342,6 +360,16 @@ else:
                 self.mixer.brightness(offset, factor)
                 self.update()
 
+            def gamma_changed(self, name, val):
+                # doesnt matter which slider changed we need both
+                # values
+                alpha = self.gamma_sliders.sliders['alpha'].conv_val()
+                beta = self.gamma_sliders.sliders['beta'].conv_val()
+                self.mixer.sigmoid_gamma(alpha, beta)
+                self.update()
+
+            def iter_all_sliders(self):
+                pass
 
             def reset_sliders(self):
                 self.rgb_add_sliders.set_sliders({'R': 0, 'G': 0, 'B': 0})
@@ -349,19 +377,21 @@ else:
                 self.hsv_add_sliders.set_sliders({'H': 0, 'S': 0, 'V': 0})
                 self.hsv_mul_sliders.set_sliders({'H': 0, 'S': 500, 'V': 500})
                 self.bright_sliders.set_sliders({'+': 0, 'x': 500})
+                self.gamma_sliders.set_sliders({'alpha': 100, 'beta': 0})
 
             def combo_box_changed(self, index):
                 self.reset_sliders()
                 self.mixer.set_to_stateimg()
                 self.update()
                 combo_box_map={0: self.show_rgb, 1: self.show_hsv,
-                               2: self.show_bright, 3: self.show_contrast}
+                               2: self.show_bright, 3: self.show_gamma}
                 combo_box_map[index]()
 
             def hide_sliders(self):
                 self.rgb_widget.hide()
                 self.hsv_widget.hide()
                 self.bright_widget.hide()
+                self.gamma_sliders.hide()
 
             def rgb_radio_changed(self):
                 if self.rgb_add.isChecked():
@@ -403,8 +433,9 @@ else:
                 self.hide_sliders()
                 self.bright_widget.show()
 
-            def show_contrast(self):
+            def show_gamma(self):
                 self.hide_sliders()
+                self.gamma_sliders.show()
 
             def commit_changes(self):
                 self.mixer.commit_changes()
@@ -604,6 +635,14 @@ else:
 
                 self.layout.setColumnStretch(0, 1)
                 self.layout.setRowStretch(0, 1)
+
+                self.save_file = QtGui.QPushButton('Save to File')
+                self.save_variable = QtGui.QPushButton('Save to Variable')
+                self.save_file.show()
+                self.save_variable.show()
+
+                self.layout.addWidget(self.save_variable, 1, 1)
+                self.layout.addWidget(self.save_file, 1, 2)
 
                 # hook up the mixer sliders move events to trigger a
                 # histogram redraw.
