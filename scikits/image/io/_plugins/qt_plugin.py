@@ -14,7 +14,8 @@ except GuiLockError, gle:
 else:
     try:
         from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
-                                 QLabel, QWidget, QVBoxLayout, QSlider)
+                                 QLabel, QWidget, QVBoxLayout, QSlider,
+                                 QPainter, QColor, QFrame)
         from PyQt4 import QtCore, QtGui
 
     except ImportError:
@@ -465,6 +466,121 @@ else:
                 self.v_value.setText(str(v)[:5])
 
 
+        class Histogram(QWidget):
+            '''A Class which draws a scaling histogram in
+            a widget.
+
+            The argument to the constructor 'vals' is a list of tuples
+            of the following form:
+
+            vals = [(counts, colormap)]
+
+            where counts are the bin values in the histogram
+            and colormap is a tuple of (R, G, B) tuples the same length
+            as counts. These are the colors to apply to the histogram bars.
+            Colormap can also contain a single tuple, in which case this is
+            the color applied to all bars of that histogram.
+
+            Each histogram is drawn in order from left to right in its own
+            box and the values are scaled so that max(count) = height.
+            This is a linear scaling.
+
+            The histogram assumes the bins were evenly spaced.
+            '''
+
+            def __init__(self, counts, colormap):
+                QWidget.__init__(self)
+                self._validate_input(counts, colormap)
+                self.counts = counts
+                self.n = np.sum(self.counts)
+                self.colormap = colormap
+                self.setMinimumSize(100, 50)
+
+            def _validate_input(self, counts, colormap):
+                if len(counts) != len(colormap):
+                    if len(colormap) != 1:
+                        msg = 'Colormap must be same length as count or 1'
+                        raise ValueError(msg)
+
+            def paintEvent(self, evt):
+                # get the widget dimensions
+                orig_width = self.width()
+                orig_height = self.height()
+
+                # fill perc % of the widget
+                perc =  1.0
+                width = int(orig_width * perc)
+                height = int(orig_height * perc)
+
+                # get the starting origin
+                x_orig = int((orig_width - width) / 2)
+                # we want to start at the bottom and draw up.
+                y_orig = orig_height - int((orig_height - height) / 2)
+
+                # a running x-position
+                running_pos = x_orig
+
+                # calculate to number of bars
+                nbars = len(self.counts)
+
+
+                # calculate the bar widths, this compilcation is
+                # necessary because integer trunction severly cripples
+                # the layout.
+                remainder = width % nbars
+                bar_width = [int(width / nbars)] * nbars
+                for i in range(remainder):
+                    bar_width[i]+=1
+
+                paint = QPainter()
+                paint.begin(self)
+
+                if len(self.colormap) == 1:
+                    self.colormap = self.colormap * len(self.counts)
+
+                # determine the scaling factor
+                max_val = np.max(self.counts)
+                scale =  1. * height / max_val
+
+                # draw the bars for this graph
+                for i in range(len(self.counts)):
+                    bar_height = self.counts[i] * scale
+                    r, g, b = self.colormap[i]
+                    paint.setPen(QColor(r, g, b))
+                    paint.setBrush(QColor(r, g, b))
+                    paint.drawRect(running_pos, y_orig, bar_width[i], -bar_height)
+                    running_pos += bar_width[i]
+
+                paint.end()
+
+
+            def update_hist(self, counts, cmap):
+                self._validate_input(counts, cmap)
+                self.counts = counts
+                self.colormap = cmap
+                self.repaint()
+
+
+
+        class MultiHist(QFrame):
+            def __init__(self, vals):
+                QFrame.__init__(self)
+
+                self.hists = []
+                for counts, cmap in vals:
+                    self.hists.append(Histogram(counts, cmap))
+
+                self.layout = QtGui.QGridLayout(self)
+                for i in range(len(self.hists))[::-1]:
+                    self.layout.addWidget(self.hists[i], i, 0)
+
+
+            def update_hists(self, vals):
+                for i in range(len(vals)):
+                    counts, cmap = vals[i]
+                    self.hists[i].update_hist(counts, cmap)
+
+
         class FancyImageWindow(ImageWindow):
             def __init__(self, arr, mgr):
                 ImageWindow.__init__(self, arr, mgr)
@@ -475,8 +591,12 @@ else:
                 self.label.setMinimumSize(QtCore.QSize(100, 100))
 
                 self.mixer_panel = MixerPanel(self.arr, self.refresh_image)
-                self.layout.addWidget(self.mixer_panel, 0, 1, 2, 1)
+                self.layout.addWidget(self.mixer_panel, 0, 2)
                 self.mixer_panel.show()
+
+                self.rgb_hist = MultiHist(self.calc_hist())
+                self.layout.addWidget(self.rgb_hist, 0, 1)
+                self.rgb_hist.show()
 
                 self.rgb_hsv_disp = RGBHSVDisplay()
                 self.layout.addWidget(self.rgb_hsv_disp, 1, 0)
@@ -485,9 +605,52 @@ else:
                 self.layout.setColumnStretch(0, 1)
                 self.layout.setRowStretch(0, 1)
 
+                # hook up the mixer sliders move events to trigger a
+                # histogram redraw.
+                self.mixer_panel.rgb_add_sliders.sliders['R'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.rgb_add_sliders.sliders['G'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.rgb_add_sliders.sliders['B'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.rgb_mul_sliders.sliders['R'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.rgb_mul_sliders.sliders['G'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.rgb_mul_sliders.sliders['B'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.hsv_add_sliders.sliders['H'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.hsv_add_sliders.sliders['S'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.hsv_add_sliders.sliders['V'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.hsv_mul_sliders.sliders['H'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.hsv_mul_sliders.sliders['S'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.hsv_mul_sliders.sliders['V'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.bright_sliders.sliders['+'].\
+                    sliderMoved.connect(self.update_histogram)
+                self.mixer_panel.bright_sliders.sliders['x'].\
+                    sliderMoved.connect(self.update_histogram)
+
+            def update_histogram(self):
+                self.rgb_hist.update_hists(self.calc_hist())
+
+            def calc_hist(self):
+                rvals, gvals, bvals, grays = \
+                     self.mixer_panel.mixer.histograms(100)
+
+                vals = ((rvals, ((255,0,0),)),(gvals, ((0,255,0),)),
+                        (bvals, ((0,0,255),)), (grays, ((0, 0, 0),)))
+                return vals
+
             def refresh_image(self):
                 pm = QPixmap.fromImage(self.label.img)
                 self.label.setPixmap(pm)
+                self.update_histogram()
 
             def scale_mouse_pos(self, x, y):
                 width = self.label.width()

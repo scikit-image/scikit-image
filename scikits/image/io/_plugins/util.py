@@ -340,3 +340,22 @@ class ColorMixer(object):
         '''
         R, G, B = _colormixer.py_hsv_2_rgb(H, S, V)
         return (R, G, B)
+
+    def histograms(self, nbins):
+        '''Calculate the channel histograms of the current image.
+
+        Parameters
+        ----------
+        nbins : int
+            The number of bins.
+
+        Returns
+        -------
+        out : (rcounts, gcounts, bcounts, vcounts)
+            The binned histograms of the RGB channels and grayscale intensity.
+
+        This is a NAIVE histogram routine, meant primarily for fast display.
+
+        '''
+
+        return _colormixer.histograms(self.img, nbins)
