@@ -180,6 +180,8 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
     cdef float r, g, b
 
     cdef int i, j
+
+    gamma = 1./gamma
     for i in range(height):
         for j in range(width):
             r = <float>stateimg[i,j,0] / 255.
