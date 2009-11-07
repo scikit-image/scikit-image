@@ -1,6 +1,35 @@
-__all__ = ['imread', 'imsave', 'imshow', 'show']
+__all__ = ['imread', 'imsave', 'imshow', 'show', 'push', 'pop']
 
 from scikits.image.io._plugins import call as call_plugin
+import numpy as np
+
+# Shared image queue
+_image_stack = []
+
+def push(img):
+    """Push an image onto the shared image stack.
+
+    Parameters
+    ----------
+    img : ndarray
+        Image to push.
+
+    """
+    if not isinstance(img, np.ndarray):
+        raise ValueError("Can only push ndarrays to the image stack.")
+
+    _image_stack.append(img)
+
+def pop():
+    """Pop and image from the shared image stack.
+
+    Returns
+    -------
+    img : ndarray
+        Image popped from the stack.
+
+    """
+    return _image_stack.pop()
 
 def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
            **plugin_args):
