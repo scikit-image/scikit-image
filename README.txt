@@ -11,8 +11,9 @@ http://groups.google.com/group/scikits-image
 
 Installation from source
 ------------------------
+Refer to DEPENDS.txt for a list of dependencies.
 
-This SciKit can be installed globally using
+The SciKit may be installed globally using
 
 python setup.py install
 

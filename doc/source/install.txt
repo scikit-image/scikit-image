@@ -23,4 +23,4 @@ in-place::
 
   python setup.py build_ext -i
 
-.. include:: ../../REQUIREMENTS.txt
+.. include:: ../../DEPENDS.txt

@@ -1,0 +1,25 @@
+Build Requirements
+------------------
+* Python 2.5
+* `Numpy <http://numpy.scipy.org/>`_
+* `Cython <http://www.cython.org/>`_
+
+Usage Requirements
+------------------
+* `Scipy <http://www.scipy.org/>`_
+* `Python Imaging Library (PIL) <http://www.pythonware.com/products/pil/>`_
+  
+Optional Requirements
+---------------------
+You can use this scikit with the basic requirements listed above, but some
+functionality is only available with the following installed:
+
+`Open CV <http://opencv.willowgarage.com/wiki/>`_ (>= 2.0). 
+   Required for functions in ``scikits.image.opencv``.
+
+`PyQt4 <http://wiki.python.org/moin/PyQt>`_
+   The `qt` plugin that provides `imshow` and `scivy`.
+
+`PyGTK <http://www.pygtk.org/>`_
+   The `gtk` plugin that provides `imshow`.
+
