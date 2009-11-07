@@ -48,6 +48,7 @@ else:
                                   arr.strides[0], QImage.Format_RGB888)
                 self.pm = QPixmap.fromImage(self.img)
                 self.setPixmap(self.pm)
+                self.setAlignment(QtCore.Qt.AlignTop)
                 self.setMinimumSize(100, 100)
 
             def mouseMoveEvent(self, evt):
@@ -56,8 +57,9 @@ else:
             def resizeEvent(self, evt):
                 width = self.width()
                 pm = QPixmap.fromImage(self.img)
-                pm = pm.scaledToWidth(width)
-                self.setPixmap(pm)
+                self.pm = pm.scaledToWidth(width)
+                self.setPixmap(self.pm)
+                self.setSizePolicy
 
             def update_image(self):
                 width = self.width()
@@ -163,24 +165,32 @@ else:
                 self.layout.setRowStretch(0, 1)
 
                 self.save_file = QtGui.QPushButton('Save to File')
-                self.save_variable = QtGui.QPushButton('Save to Variable')
+                self.save_file.clicked.connect(self.save_to_file)
+                #self.save_variable = QtGui.QPushButton('Save to Variable')
                 self.save_file.show()
-                self.save_variable.show()
+                #self.save_variable.show()
 
-                self.layout.addWidget(self.save_variable, 1, 1)
+                #self.layout.addWidget(self.save_variable, 1, 1)
                 self.layout.addWidget(self.save_file, 1, 2)
 
 
             def update_histograms(self):
                 self.rgbv_hist.update_hists(self.arr)
 
+            def save_to_file(self):
+                from scikits.image import io
+                filename = str(QtGui.QFileDialog.getSaveFileName())
+                if len(filename) == 0:
+                    return
+                io.imsave(filename, self.arr)
+
             def refresh_image(self):
                 self.label.update_image()
                 self.update_histograms()
 
             def scale_mouse_pos(self, x, y):
-                width = self.label.width()
-                height = self.label.height()
+                width = self.label.pm.width()
+                height = self.label.pm.height()
                 x_frac = 1. * x / width
                 y_frac = 1. * y / height
                 width = self.arr.shape[1]
@@ -193,10 +203,18 @@ else:
                 x = evt.x()
                 y = evt.y()
                 x, y = self.scale_mouse_pos(x, y)
-                r = self.arr[y,x,0]
-                g = self.arr[y,x,1]
-                b = self.arr[y,x,2]
-                h, s, v = self.mixer_panel.mixer.rgb_2_hsv_pixel(r, g, b)
+
+                # handle tracking out of array bounds
+                maxw = self.arr.shape[1]
+                maxh = self.arr.shape[0]
+                if x >= maxw or y >= maxh or x < 0 or y < 0:
+                    r = g = b = h = s = v = ''
+                else:
+                    r = self.arr[y,x,0]
+                    g = self.arr[y,x,1]
+                    b = self.arr[y,x,2]
+                    h, s, v = self.mixer_panel.mixer.rgb_2_hsv_pixel(r, g, b)
+
                 self.rgb_hsv_disp.update_vals((x, y, r, g, b, h, s, v))
 
 
