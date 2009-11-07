@@ -1,5 +1,6 @@
 import numpy as np
-
+import _colormixer
+import _histograms
 # utilities to make life easier for plugin writers.
 
 
@@ -149,3 +150,221 @@ def prepare_for_display(npy_img):
         raise ValueError('Image must have 2 or 3 dimensions')
 
     return out
+
+
+def histograms(img, nbins):
+    '''Calculate the channel histograms of the current image.
+
+    Parameters
+    ----------
+    img : ndarray, ndim=3, dtype=np.uint8
+    nbins : int
+        The number of bins.
+
+    Returns
+    -------
+    out : (rcounts, gcounts, bcounts, vcounts)
+        The binned histograms of the RGB channels and intensity values.
+
+    This is a NAIVE histogram routine, meant primarily for fast display.
+
+    '''
+
+    return _histograms.histograms(img, nbins)
+
+
+class ColorMixer(object):
+    ''' a class to manage mixing colors in an image.
+    The input array must be an RGB uint8 image.
+
+    The mixer maintains an original copy of the image,
+    and uses this copy to query the pixel data for operations.
+    It also makes a copy for sharing state across operations.
+    That is, if you add to a channel, and multiply to same channel,
+    the two operations are carried separately and the results
+    averaged together.
+
+    it modifies your array in place. This ensures that if you
+    bust over a threshold, you can always come back down.
+
+    The passed values to a function are always considered
+    absolute. Thus to threshold a channel completely you
+    can do mixer.add(RED, 255). Or to double the intensity
+    of the blue channel: mixer.multiply(BLUE, 2.)
+
+    To reverse these operations, respectively:
+    mixer.add(RED, 0), mixer.multiply(BLUE, 1.)
+
+    The majority of the backend is implemented in Cython,
+    so it should be quite quick.
+    '''
+
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+
+    valid_channels = [RED, GREEN, BLUE]
+
+    def __init__(self, img):
+        if type(img) != np.ndarray:
+            raise ValueError('Image must be a numpy array')
+        if img.dtype != np.uint8:
+            raise ValueError('Image must have dtype uint8')
+        if img.ndim != 3 or img.shape[2] != 3:
+            raise ValueError('Image must be 3 channel MxNx3')
+
+        self.img = img
+        self.origimg = img.copy()
+        self.stateimg = img.copy()
+
+    def get_stateimage(self):
+        return self.stateimg
+
+    def commit_changes(self):
+        self.stateimg[:] = self.img[:]
+
+    def revert(self):
+        self.stateimg[:] = self.origimg[:]
+        self.img[:] = self.stateimg[:]
+
+    def set_to_stateimg(self):
+        self.img[:] = self.stateimg[:]
+
+    def add(self, channel, ammount):
+        '''Add the specified ammount to the specified channel.
+
+        Parameters
+        ----------
+        channel : flag
+            the color channel to operate on
+            RED, GREED, or BLUE
+        ammount : integer
+            the ammount of color to add to the channel,
+            can be positive or negative.
+
+        '''
+        assert channel in self.valid_channels
+
+        _colormixer.add(self.img, self.stateimg, channel, ammount)
+
+    def multiply(self, channel, ammount):
+        '''Mutliply the indicated channel by the specified value.
+
+         Parameters
+        ----------
+        channel : flag
+            the color channel to operate on
+            RED, GREED, or BLUE
+        ammount : integer
+            the ammount of color to add to the channel,
+            can be positive or negative.
+
+        '''
+        assert channel in self.valid_channels
+
+        _colormixer.multiply(self.img, self.stateimg, channel, ammount)
+
+    def brightness(self, factor, offset):
+        '''Adjust the brightness off an image with an offset and factor.
+
+        Parameters
+        ----------
+        offset : integer
+            The ammount to add to each channel.
+        factor : float
+            The factor to multiply each channel by.
+
+        result = clip((pixel + offset)*factor)
+
+        '''
+        _colormixer.brightness(self.img, self.stateimg, factor, offset)
+
+    def sigmoid_gamma(self, alpha, beta):
+        _colormixer.sigmoid_gamma(self.img, self.stateimg, alpha, beta)
+
+    def gamma(self, gamma):
+        _colormixer.gamma(self.img, self.stateimg, gamma)
+
+    def hsv_add(self, h_amt, s_amt, v_amt):
+        '''Adjust the H, S, V channels of an image by a constant ammount.
+        This is similar to the add() mixer function, but operates over the
+        entire image at once. Thus all three additive values, H, S, V, must
+        be supplied simultaneously.
+
+        Parameters
+        ----------
+        h_amt : float
+            The ammount to add to the hue (-180..180)
+        s_amt : float
+            The ammount to add to the saturation (-1..1)
+        v_amt : float
+            The ammount to add to the value (-1..1)
+
+        '''
+        _colormixer.hsv_add(self.img, self.stateimg, h_amt, s_amt, v_amt)
+
+    def hsv_multiply(self, h_amt, s_amt, v_amt):
+        '''Adjust the H, S, V channels of an image by a constant ammount.
+        This is similar to the add() mixer function, but operates over the
+        entire image at once. Thus all three additive values, H, S, V, must
+        be supplied simultaneously.
+
+        Note that since hue is in degrees, it makes no sense to multiply
+        that channel, thus an add operation is performed on the hue. And the
+        values given for h_amt, should be the same as for hsv_add
+
+        Parameters
+        ----------
+        h_amt : float
+            The ammount to to add to the hue (-180..180)
+        s_amt : float
+            The ammount to multiply to the saturation (0..1)
+        v_amt : float
+            The ammount to multiply to the value (0..1)
+
+        '''
+        _colormixer.hsv_multiply(self.img, self.stateimg, h_amt, s_amt, v_amt)
+
+
+    def rgb_2_hsv_pixel(self, R, G, B):
+        '''Convert an RGB value to HSV
+
+        Parameters
+        ----------
+        R : int
+            Red value
+        G : int
+            Green value
+        B : int
+            Blue value
+
+        Returns
+        -------
+        out : (H, S, V) Floats
+            The HSV values
+
+        '''
+        H, S, V = _colormixer.py_rgb_2_hsv(R, G, B)
+        return (H, S, V)
+
+    def hsv_2_rgb_pixel(self, H, S, V):
+        '''Convert an HSV value to RGB
+
+        Parameters
+        ----------
+        H : float
+            Hue value
+        S : float
+            Saturation value
+        V : float
+            Intensity value
+
+        Returns
+        -------
+        out : (R, G, B) ints
+            The RGB values
+
+        '''
+        R, G, B = _colormixer.py_hsv_2_rgb(H, S, V)
+        return (R, G, B)
+

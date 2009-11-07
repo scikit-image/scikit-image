@@ -7,6 +7,7 @@ def configuration(parent_package='', top_path=None):
 
     config.add_subpackage('opencv')
     config.add_subpackage('analysis')
+    config.add_subpackage('io')
 
     def add_test_directories(arg, dirname, fnames):
         if dirname.split(os.path.sep)[-1] == 'tests':
