@@ -15,6 +15,7 @@ else:
     try:
         from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
                                  QLabel, QWidget, QVBoxLayout)
+        from PyQt4.QtCore import Qt
 
     except ImportError:
         print 'PyQT4 libraries not installed.  Plugin not loaded.'
@@ -30,6 +31,7 @@ else:
                 self.img = QImage(arr.data, arr.shape[1], arr.shape[0],
                                   arr.strides[0], QImage.Format_RGB888)
                 self.pm = QPixmap.fromImage(self.img)
+                self.setAlignment(Qt.AlignTop)
                 self.setPixmap(self.pm)
 
 
