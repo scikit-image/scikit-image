@@ -28,8 +28,6 @@ else:
 
         app = None
 
-        variable_saved_image = None
-
         class LabelImage(QLabel):
             def __init__(self, parent, arr):
                 QLabel.__init__(self)
@@ -180,17 +178,23 @@ else:
                 self.rgbv_hist.update_hists(self.arr)
 
             def save_to_variable(self):
-                global variable_saved_image
-                variable_saved_image = self.arr.copy()
-                msg = QLabel('The image has been saved. Call *** to retrieve.')
+                from scikits.image import io
+                from textwrap import dedent
+                img = self.arr.copy()
+                io.push(img)
+                msg = dedent('''
+                    The image has been pushed to the io stack.
+                    Use io.pop() to retrieve the most recently pushed image.''')
+                msglabel = QLabel(msg)
                 dialog = QtGui.QDialog()
-                ok = QtGui.QPushButton('OK', msg)
+                ok = QtGui.QPushButton('OK', dialog)
                 ok.clicked.connect(dialog.accept)
                 ok.setDefault(True)
                 dialog.layout = QtGui.QGridLayout(dialog)
-                dialog.layout.addWidget(msg, 0, 0, 1, 3)
+                dialog.layout.addWidget(msglabel, 0, 0, 1, 3)
                 dialog.layout.addWidget(ok, 1, 1)
                 dialog.exec_()
+
 
             def save_to_file(self):
                 from scikits.image import io
@@ -247,9 +251,6 @@ else:
 
             iw.show()
 
-        def retrieve_saved_image():
-            global variable_saved_image
-            return variable_saved_image
 
         def _app_show():
             global app
