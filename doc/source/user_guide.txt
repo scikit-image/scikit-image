@@ -1,0 +1,8 @@
+User Guide
+==========
+
+.. contents::
+   :local:
+
+.. include:: user_guide/plugins.txt
+
