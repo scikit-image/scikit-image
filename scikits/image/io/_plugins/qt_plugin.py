@@ -28,6 +28,7 @@ else:
 
         app = None
 
+        variable_saved_image = None
 
         class LabelImage(QLabel):
             def __init__(self, parent, arr):
@@ -166,16 +167,30 @@ else:
 
                 self.save_file = QtGui.QPushButton('Save to File')
                 self.save_file.clicked.connect(self.save_to_file)
-                #self.save_variable = QtGui.QPushButton('Save to Variable')
+                self.save_variable = QtGui.QPushButton('Save to Variable')
+                self.save_variable.clicked.connect(self.save_to_variable)
                 self.save_file.show()
-                #self.save_variable.show()
+                self.save_variable.show()
 
-                #self.layout.addWidget(self.save_variable, 1, 1)
+                self.layout.addWidget(self.save_variable, 1, 1)
                 self.layout.addWidget(self.save_file, 1, 2)
 
 
             def update_histograms(self):
                 self.rgbv_hist.update_hists(self.arr)
+
+            def save_to_variable(self):
+                global variable_saved_image
+                variable_saved_image = self.arr.copy()
+                msg = QLabel('The image has been saved. Call *** to retrieve.')
+                dialog = QtGui.QDialog()
+                ok = QtGui.QPushButton('OK', msg)
+                ok.clicked.connect(dialog.accept)
+                ok.setDefault(True)
+                dialog.layout = QtGui.QGridLayout(dialog)
+                dialog.layout.addWidget(msg, 0, 0, 1, 3)
+                dialog.layout.addWidget(ok, 1, 1)
+                dialog.exec_()
 
             def save_to_file(self):
                 from scikits.image import io
@@ -231,6 +246,10 @@ else:
                 iw = FancyImageWindow(arr, window_manager)
 
             iw.show()
+
+        def retrieve_saved_image():
+            global variable_saved_image
+            return variable_saved_image
 
         def _app_show():
             global app
