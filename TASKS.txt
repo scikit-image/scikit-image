@@ -76,22 +76,15 @@ Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
 Thanks to Lee Kamentsky, Thouis Jones and Anne Carpenter and their colleagues
 who contributed.
 
-Write new functionality
-```````````````````````
-* Plugin structure for image IO
-
 Rework linear filters
 `````````````````````
 * Should take kernel or function for parameter (currently only takes function)
 * Kernel shape should be specifiable (currently defaults to image shape)
 * Due to the above, the tests run unnecessarily slowly
 
-API generation for source distribution
-``````````````````````````````````````
-The source package is currently distributed without the auto-generated API doc
-sources.  This means that users who download the source tar-file need to
-install ``scikits.image`` before building docs.  We can skirt the issue by
-checking in the API files into the repository (done) -- but the doc build
-process needs to be updated to use these distributed files if they cannot be
-generated from source.
+io
+``
+* Update ``ImageCollection`` to initialise either from list of files or from
+  list of images.  For example, ``ic = ImageCollection([img1, img2])``.
+* Update ``qt_plugin.py`` to view collections.
 
