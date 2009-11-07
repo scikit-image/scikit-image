@@ -17,7 +17,6 @@ else:
                                  QLabel, QWidget, QVBoxLayout, QSlider,
                                  QPainter, QColor, QFrame, QLayoutItem)
         from PyQt4 import QtCore, QtGui
-        from PyQt4.QtCore import Qt
         from q_color_mixer import MixerPanel
         from q_histogram import QuadHistogram
 
@@ -47,7 +46,7 @@ else:
                 self.img = QImage(arr.data, arr.shape[1], arr.shape[0],
                                   arr.strides[0], QImage.Format_RGB888)
                 self.pm = QPixmap.fromImage(self.img)
-                self.setAlignment(Qt.AlignTop)
+                self.setAlignment(QtCore.Qt.AlignTop)
                 self.setPixmap(self.pm)
                 self.setAlignment(QtCore.Qt.AlignTop)
                 self.setMinimumSize(100, 100)
