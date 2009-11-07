@@ -17,6 +17,7 @@ else:
                                  QLabel, QWidget, QVBoxLayout, QSlider,
                                  QPainter, QColor, QFrame, QLayoutItem)
         from PyQt4 import QtCore, QtGui
+        from PyQt4.QtCore import Qt
         from q_color_mixer import MixerPanel
         from q_histogram import QuadHistogram
 
