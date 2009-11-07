@@ -58,7 +58,7 @@ else:
                 pm = QPixmap.fromImage(self.img)
                 self.pm = pm.scaledToWidth(width)
                 self.setPixmap(self.pm)
-                self.setSizePolicy
+
 
             def update_image(self):
                 width = self.width()
