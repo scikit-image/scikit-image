@@ -1,8 +1,15 @@
 import numpy as np
 import _colormixer
 import _histograms
+import threading
+
 # utilities to make life easier for plugin writers.
 
+try:
+    import multiprocessing
+    CPU_COUNT = multiprocessing.cpu_count()
+except ImportError:
+    CPU_COUNT = 2
 
 class GuiLockError(Exception):
     def __init__(self, msg):
@@ -173,6 +180,56 @@ def histograms(img, nbins):
     return _histograms.histograms(img, nbins)
 
 
+class ImgThread(threading.Thread):
+    def __init__(self, func, *args):
+        super(ImgThread, self).__init__()
+        self.func = func
+        self.args = args
+
+    def run(self):
+        self.func(*self.args)
+
+class ThreadDispatch(object):
+    def __init__(self, img, stateimg, func, *args):
+
+        width = img.shape[1]
+        height = img.shape[0]
+        self.cores = CPU_COUNT
+        self.threads = []
+        self.chunks = []
+
+        if self.cores == 1:
+            self.chunks.append((img, stateimg))
+
+        elif self.cores >= 4:
+            self.chunks.append((img[:(height/2), :(width/2), :],
+                                stateimg[:(height/2), :(width/2), :]))
+            self.chunks.append((img[:(height/2), (width/2):, :],
+                                stateimg[:(height/2), (width/2):, :]))
+            self.chunks.append((img[(height/2):, :(width/2), :],
+                                stateimg[(height/2):, :(width/2), :]))
+            self.chunks.append((img[(height/2):, (width/2):, :],
+                                stateimg[(height/2):, (width/2):, :]))
+
+        # if they dont have 1, or 4 or more, 2 is good.
+        else:
+            self.chunks.append((img[:, :(width/2), :],
+                                stateimg[:, :(width/2), :]))
+            self.chunks.append((img[:, (width/2):, :],
+                               stateimg[:, (width/2):, :]))
+
+        for i in range(self.cores):
+            self.threads.append(ImgThread(func, self.chunks[i][0],
+                                          self.chunks[i][1], *args))
+
+    def run(self):
+        for t in self.threads:
+            t.start()
+        for t in self.threads:
+            t.join()
+
+
+
 class ColorMixer(object):
     ''' a class to manage mixing colors in an image.
     The input array must be an RGB uint8 image.
@@ -244,8 +301,11 @@ class ColorMixer(object):
 
         '''
         assert channel in self.valid_channels
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.add, channel, ammount)
+        pool.run()
 
-        _colormixer.add(self.img, self.stateimg, channel, ammount)
+
 
     def multiply(self, channel, ammount):
         '''Mutliply the indicated channel by the specified value.
@@ -261,8 +321,10 @@ class ColorMixer(object):
 
         '''
         assert channel in self.valid_channels
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.multiply, channel, ammount)
+        pool.run()
 
-        _colormixer.multiply(self.img, self.stateimg, channel, ammount)
 
     def brightness(self, factor, offset):
         '''Adjust the brightness off an image with an offset and factor.
@@ -277,13 +339,21 @@ class ColorMixer(object):
         result = clip((pixel + offset)*factor)
 
         '''
-        _colormixer.brightness(self.img, self.stateimg, factor, offset)
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.brightness, factor, offset)
+        pool.run()
+
 
     def sigmoid_gamma(self, alpha, beta):
-        _colormixer.sigmoid_gamma(self.img, self.stateimg, alpha, beta)
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.sigmoid_gamma, alpha, beta)
+        pool.run()
+
 
     def gamma(self, gamma):
-        _colormixer.gamma(self.img, self.stateimg, gamma)
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.gamma, gamma)
+        pool.run()
 
     def hsv_add(self, h_amt, s_amt, v_amt):
         '''Adjust the H, S, V channels of an image by a constant ammount.
@@ -301,7 +371,9 @@ class ColorMixer(object):
             The ammount to add to the value (-1..1)
 
         '''
-        _colormixer.hsv_add(self.img, self.stateimg, h_amt, s_amt, v_amt)
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.hsv_add, h_amt, s_amt, v_amt)
+        pool.run()
 
     def hsv_multiply(self, h_amt, s_amt, v_amt):
         '''Adjust the H, S, V channels of an image by a constant ammount.
@@ -323,8 +395,9 @@ class ColorMixer(object):
             The ammount to multiply to the value (0..1)
 
         '''
-        _colormixer.hsv_multiply(self.img, self.stateimg, h_amt, s_amt, v_amt)
-
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.hsv_multiply, h_amt, s_amt, v_amt)
+        pool.run()
 
     def rgb_2_hsv_pixel(self, R, G, B):
         '''Convert an RGB value to HSV
