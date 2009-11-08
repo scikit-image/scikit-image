@@ -139,6 +139,7 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
 
 
 @cython.boundscheck(False)
+@cython.cdivision(True)
 def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
                   np.ndarray[np.uint8_t, ndim=3] stateimg,
                   float alpha, float beta):
