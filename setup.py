@@ -78,4 +78,9 @@ if __name__ == "__main__":
         packages=setuptools.find_packages(),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
+
+        entry_points={
+            'console_scripts': [
+                'scivi = scikits.image.scripts.scivi:main']
+            },
         )

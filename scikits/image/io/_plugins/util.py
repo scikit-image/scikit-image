@@ -1,7 +1,15 @@
 import numpy as np
+import _colormixer
+import _histograms
+import threading
 
 # utilities to make life easier for plugin writers.
 
+try:
+    import multiprocessing
+    CPU_COUNT = multiprocessing.cpu_count()
+except ImportError:
+    CPU_COUNT = 2
 
 class GuiLockError(Exception):
     def __init__(self, msg):
@@ -149,3 +157,287 @@ def prepare_for_display(npy_img):
         raise ValueError('Image must have 2 or 3 dimensions')
 
     return out
+
+
+def histograms(img, nbins):
+    '''Calculate the channel histograms of the current image.
+
+    Parameters
+    ----------
+    img : ndarray, ndim=3, dtype=np.uint8
+    nbins : int
+        The number of bins.
+
+    Returns
+    -------
+    out : (rcounts, gcounts, bcounts, vcounts)
+        The binned histograms of the RGB channels and intensity values.
+
+    This is a NAIVE histogram routine, meant primarily for fast display.
+
+    '''
+
+    return _histograms.histograms(img, nbins)
+
+
+class ImgThread(threading.Thread):
+    def __init__(self, func, *args):
+        super(ImgThread, self).__init__()
+        self.func = func
+        self.args = args
+
+    def run(self):
+        self.func(*self.args)
+
+class ThreadDispatch(object):
+    def __init__(self, img, stateimg, func, *args):
+
+        width = img.shape[1]
+        height = img.shape[0]
+        self.cores = CPU_COUNT
+        self.threads = []
+        self.chunks = []
+
+        if self.cores == 1:
+            self.chunks.append((img, stateimg))
+
+        elif self.cores >= 4:
+            self.chunks.append((img[:(height/4), :, :],
+                                stateimg[:(height/4), :, :]))
+            self.chunks.append((img[(height/4):(height/2), :, :],
+                                stateimg[(height/4):(height/2), :, :]))
+            self.chunks.append((img[(height/2):(3*height/4), :, :],
+                                stateimg[(height/2):(3*height/4), :, :]))
+            self.chunks.append((img[(3*height/4):, :, :],
+                                stateimg[(3*height/4):, :, :]))
+
+        # if they dont have 1, or 4 or more, 2 is good.
+        else:
+            self.chunks.append((img[:(height/2), :, :],
+                                stateimg[:(height/2), :, :]))
+            self.chunks.append((img[(height/2):, :, :],
+                               stateimg[(height/2):, :, :]))
+
+        for i in range(self.cores):
+            self.threads.append(ImgThread(func, self.chunks[i][0],
+                                          self.chunks[i][1], *args))
+
+    def run(self):
+        for t in self.threads:
+            t.start()
+        for t in self.threads:
+            t.join()
+
+
+
+class ColorMixer(object):
+    ''' a class to manage mixing colors in an image.
+    The input array must be an RGB uint8 image.
+
+    The mixer maintains an original copy of the image,
+    and uses this copy to query the pixel data for operations.
+    It also makes a copy for sharing state across operations.
+    That is, if you add to a channel, and multiply to same channel,
+    the two operations are carried separately and the results
+    averaged together.
+
+    it modifies your array in place. This ensures that if you
+    bust over a threshold, you can always come back down.
+
+    The passed values to a function are always considered
+    absolute. Thus to threshold a channel completely you
+    can do mixer.add(RED, 255). Or to double the intensity
+    of the blue channel: mixer.multiply(BLUE, 2.)
+
+    To reverse these operations, respectively:
+    mixer.add(RED, 0), mixer.multiply(BLUE, 1.)
+
+    The majority of the backend is implemented in Cython,
+    so it should be quite quick.
+    '''
+
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+
+    valid_channels = [RED, GREEN, BLUE]
+
+    def __init__(self, img):
+        if type(img) != np.ndarray:
+            raise ValueError('Image must be a numpy array')
+        if img.dtype != np.uint8:
+            raise ValueError('Image must have dtype uint8')
+        if img.ndim != 3 or img.shape[2] != 3:
+            raise ValueError('Image must be 3 channel MxNx3')
+
+        self.img = img
+        self.origimg = img.copy()
+        self.stateimg = img.copy()
+
+    def get_stateimage(self):
+        return self.stateimg
+
+    def commit_changes(self):
+        self.stateimg[:] = self.img[:]
+
+    def revert(self):
+        self.stateimg[:] = self.origimg[:]
+        self.img[:] = self.stateimg[:]
+
+    def set_to_stateimg(self):
+        self.img[:] = self.stateimg[:]
+
+    def add(self, channel, ammount):
+        '''Add the specified ammount to the specified channel.
+
+        Parameters
+        ----------
+        channel : flag
+            the color channel to operate on
+            RED, GREED, or BLUE
+        ammount : integer
+            the ammount of color to add to the channel,
+            can be positive or negative.
+
+        '''
+        assert channel in self.valid_channels
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.add, channel, ammount)
+        pool.run()
+
+
+
+    def multiply(self, channel, ammount):
+        '''Mutliply the indicated channel by the specified value.
+
+         Parameters
+        ----------
+        channel : flag
+            the color channel to operate on
+            RED, GREED, or BLUE
+        ammount : integer
+            the ammount of color to add to the channel,
+            can be positive or negative.
+
+        '''
+        assert channel in self.valid_channels
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.multiply, channel, ammount)
+        pool.run()
+
+
+    def brightness(self, factor, offset):
+        '''Adjust the brightness off an image with an offset and factor.
+
+        Parameters
+        ----------
+        offset : integer
+            The ammount to add to each channel.
+        factor : float
+            The factor to multiply each channel by.
+
+        result = clip((pixel + offset)*factor)
+
+        '''
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.brightness, factor, offset)
+        pool.run()
+
+
+    def sigmoid_gamma(self, alpha, beta):
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.sigmoid_gamma, alpha, beta)
+        pool.run()
+
+
+    def gamma(self, gamma):
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.gamma, gamma)
+        pool.run()
+
+    def hsv_add(self, h_amt, s_amt, v_amt):
+        '''Adjust the H, S, V channels of an image by a constant ammount.
+        This is similar to the add() mixer function, but operates over the
+        entire image at once. Thus all three additive values, H, S, V, must
+        be supplied simultaneously.
+
+        Parameters
+        ----------
+        h_amt : float
+            The ammount to add to the hue (-180..180)
+        s_amt : float
+            The ammount to add to the saturation (-1..1)
+        v_amt : float
+            The ammount to add to the value (-1..1)
+
+        '''
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.hsv_add, h_amt, s_amt, v_amt)
+        pool.run()
+
+    def hsv_multiply(self, h_amt, s_amt, v_amt):
+        '''Adjust the H, S, V channels of an image by a constant ammount.
+        This is similar to the add() mixer function, but operates over the
+        entire image at once. Thus all three additive values, H, S, V, must
+        be supplied simultaneously.
+
+        Note that since hue is in degrees, it makes no sense to multiply
+        that channel, thus an add operation is performed on the hue. And the
+        values given for h_amt, should be the same as for hsv_add
+
+        Parameters
+        ----------
+        h_amt : float
+            The ammount to to add to the hue (-180..180)
+        s_amt : float
+            The ammount to multiply to the saturation (0..1)
+        v_amt : float
+            The ammount to multiply to the value (0..1)
+
+        '''
+        pool = ThreadDispatch(self.img, self.stateimg,
+                              _colormixer.hsv_multiply, h_amt, s_amt, v_amt)
+        pool.run()
+
+    def rgb_2_hsv_pixel(self, R, G, B):
+        '''Convert an RGB value to HSV
+
+        Parameters
+        ----------
+        R : int
+            Red value
+        G : int
+            Green value
+        B : int
+            Blue value
+
+        Returns
+        -------
+        out : (H, S, V) Floats
+            The HSV values
+
+        '''
+        H, S, V = _colormixer.py_rgb_2_hsv(R, G, B)
+        return (H, S, V)
+
+    def hsv_2_rgb_pixel(self, H, S, V):
+        '''Convert an HSV value to RGB
+
+        Parameters
+        ----------
+        H : float
+            Hue value
+        S : float
+            Saturation value
+        V : float
+            Intensity value
+
+        Returns
+        -------
+        out : (R, G, B) ints
+            The RGB values
+
+        '''
+        R, G, B = _colormixer.py_hsv_2_rgb(H, S, V)
+        return (R, G, B)
+

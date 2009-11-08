@@ -7,12 +7,11 @@ def configuration(parent_package='', top_path=None):
 
     config.add_subpackage('opencv')
     config.add_subpackage('graph')
+    config.add_subpackage('io')
 
     def add_test_directories(arg, dirname, fnames):
         if dirname.split(os.path.sep)[-1] == 'tests':
             config.add_data_dir(dirname)
-
-    config.add_data_files('io/_plugins/*.ini')
 
     # Add test directories
     from os.path import isdir, dirname, join, abspath
