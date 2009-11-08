@@ -185,6 +185,8 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
 
     cdef int i, j
 
+    if gamma == 0:
+        gamma = 0.00000000000000000001
     gamma = 1./gamma
 
     with nogil:
@@ -199,7 +201,7 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i,j,2] = <np.uint8_t>(pow(b, gamma) * 255)
 
 
-
+@cython.cdivision(True)
 cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     cdef float R, G, B, H, S, V, MAX, MIN
     R = RGB[0]
@@ -261,7 +263,7 @@ cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     HSV[1] = S
     HSV[2] = V
 
-
+@cython.cdivision(True)
 cdef void hsv_2_rgb(float* HSV, float* RGB) nogil:
     cdef float H, S, V
     cdef float f, p, q, t, r, g, b

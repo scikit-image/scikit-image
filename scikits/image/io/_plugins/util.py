@@ -202,21 +202,21 @@ class ThreadDispatch(object):
             self.chunks.append((img, stateimg))
 
         elif self.cores >= 4:
-            self.chunks.append((img[:(height/2), :(width/2), :],
-                                stateimg[:(height/2), :(width/2), :]))
-            self.chunks.append((img[:(height/2), (width/2):, :],
-                                stateimg[:(height/2), (width/2):, :]))
-            self.chunks.append((img[(height/2):, :(width/2), :],
-                                stateimg[(height/2):, :(width/2), :]))
-            self.chunks.append((img[(height/2):, (width/2):, :],
-                                stateimg[(height/2):, (width/2):, :]))
+            self.chunks.append((img[:(height/4), :, :],
+                                stateimg[:(height/4), :, :]))
+            self.chunks.append((img[(height/4):(height/2), :, :],
+                                stateimg[(height/4):(height/2), :, :]))
+            self.chunks.append((img[(height/2):(3*height/4), :, :],
+                                stateimg[(height/2):(3*height/4), :, :]))
+            self.chunks.append((img[(3*height/4):, :, :],
+                                stateimg[(3*height/4):, :, :]))
 
         # if they dont have 1, or 4 or more, 2 is good.
         else:
-            self.chunks.append((img[:, :(width/2), :],
-                                stateimg[:, :(width/2), :]))
-            self.chunks.append((img[:, (width/2):, :],
-                               stateimg[:, (width/2):, :]))
+            self.chunks.append((img[:(height/2), :, :],
+                                stateimg[:(height/2), :, :]))
+            self.chunks.append((img[(height/2):, :, :],
+                               stateimg[(height/2):, :, :]))
 
         for i in range(self.cores):
             self.threads.append(ImgThread(func, self.chunks[i][0],
