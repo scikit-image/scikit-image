@@ -193,12 +193,11 @@ class ThreadDispatch(object):
         self.cores = CPU_COUNT
         self.threads = []
         self.chunks = []
-        if self.cores == 2:
-            self.chunks.append((img[:, :(width/2), :],
-                                stateimg[:, :(width/2), :]))
-            self.chunks.append((img[:, (width/2):, :],
-                               stateimg[:, (width/2):, :]))
-        elif self.cores == 4:
+
+        if self.cores == 1:
+            self.chunks.append((img, stateimg))
+
+        elif self.cores >= 4:
             self.chunks.append((img[:(height/2), :(width/2), :],
                                 stateimg[:(height/2), :(width/2), :]))
             self.chunks.append((img[:(height/2), (width/2):, :],
@@ -207,8 +206,13 @@ class ThreadDispatch(object):
                                 stateimg[(height/2):, :(width/2), :]))
             self.chunks.append((img[(height/2):, (width/2):, :],
                                 stateimg[(height/2):, (width/2):, :]))
+
+        # if they dont have 1, or 4 or more, 2 is good.
         else:
-            raise ValueError('Cant handle your weird machine')
+            self.chunks.append((img[:, :(width/2), :],
+                                stateimg[:, :(width/2), :]))
+            self.chunks.append((img[:, (width/2):, :],
+                               stateimg[:, (width/2):, :]))
 
         for i in range(self.cores):
             self.threads.append(ImgThread(func, self.chunks[i][0],
