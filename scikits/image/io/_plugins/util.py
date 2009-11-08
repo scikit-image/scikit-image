@@ -2,10 +2,14 @@ import numpy as np
 import _colormixer
 import _histograms
 import threading
-import multiprocessing
+
 # utilities to make life easier for plugin writers.
 
-CPU_COUNT = multiprocessing.cpu_count()
+try:
+    import multiprocessing
+    CPU_COUNT = multiprocessing.cpu_count()
+except ImportError:
+    CPU_COUNT = 2
 
 class GuiLockError(Exception):
     def __init__(self, msg):
