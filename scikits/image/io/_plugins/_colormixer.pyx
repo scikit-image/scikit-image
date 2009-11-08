@@ -15,8 +15,8 @@ cimport numpy as np
 import cython
 
 cdef extern from "math.h":
-    float exp(float)
-    float pow(float, float)
+    float exp(float) nogil
+    float pow(float, float) nogil
 
 
 @cython.boundscheck(False)
@@ -46,15 +46,16 @@ def add(np.ndarray[np.uint8_t, ndim=3] img,
     cdef np.int16_t op_result
 
     cdef int i, j
-    for i in range(height):
-        for j in range(width):
-            op_result = <np.int16_t>(stateimg[i,j,k] + n)
-            if op_result > 255:
-                img[i, j, k] = 255
-            elif op_result < 0:
-                img[i, j, k] = 0
-            else:
-                img[i, j, k] = <np.uint8_t>op_result
+    with nogil:
+        for i from 0 <= i < height:
+            for j from 0 <= j < width:
+                op_result = <np.int16_t>(stateimg[i,j,k] + n)
+                if op_result > 255:
+                    img[i, j, k] = 255
+                elif op_result < 0:
+                    img[i, j, k] = 0
+                else:
+                    img[i, j, k] = <np.uint8_t>op_result
 
 
 @cython.boundscheck(False)
@@ -84,15 +85,16 @@ def multiply(np.ndarray[np.uint8_t, ndim=3] img,
     cdef float op_result
 
     cdef int i, j
-    for i in range(height):
-        for j in range(width):
-            op_result = <float>(stateimg[i,j,k] * n)
-            if op_result > 255:
-                img[i, j, k] = 255
-            elif op_result < 0:
-                img[i, j, k] = 0
-            else:
-                img[i, j, k] = <np.uint8_t>op_result
+    with nogil:
+        for i from 0 <= i < height:
+            for j from 0 <= j < width:
+                op_result = <float>(stateimg[i,j,k] * n)
+                if op_result > 255:
+                    img[i, j, k] = 255
+                elif op_result < 0:
+                    img[i, j, k] = 0
+                else:
+                    img[i, j, k] = <np.uint8_t>op_result
 
 
 @cython.boundscheck(False)
@@ -122,17 +124,18 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
     cdef float op_result
 
     cdef int i, j, k
-    for i in range(height):
-        for j in range(width):
-            for k in range(3):
-                op_result = <float>((stateimg[i,j,k] * factor + offset))
+    with nogil:
+        for i from 0 <= i < height:
+            for j from 0 <= j < width:
+                for k from 0 <= k < 3:
+                    op_result = <float>((stateimg[i,j,k] * factor + offset))
 
-                if op_result > 255:
-                    img[i, j, k] = 255
-                elif op_result < 0:
-                    img[i, j, k] = 0
-                else:
-                    img[i, j, k] = <np.uint8_t>op_result
+                    if op_result > 255:
+                        img[i, j, k] = 255
+                    elif op_result < 0:
+                        img[i, j, k] = 0
+                    else:
+                        img[i, j, k] = <np.uint8_t>op_result
 
 
 @cython.boundscheck(False)
@@ -144,29 +147,30 @@ def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
     cdef int width = img.shape[1]
 
     cdef float c1, c2, r, g, b
-
     cdef int i, j, k
-    for i in range(height):
-        for j in range(width):
-            r = <float>stateimg[i,j,0] / 255.
-            g = <float>stateimg[i,j,1] / 255.
-            b = <float>stateimg[i,j,2] / 255.
 
-            c1 = 1 / (1 + exp(beta))
-            c2 = 1 / (1 + exp(beta - alpha)) - c1
+    with nogil:
+        for i from 0 <= i < height:
+            for j from 0 <= j < width:
+                r = <float>stateimg[i,j,0] / 255.
+                g = <float>stateimg[i,j,1] / 255.
+                b = <float>stateimg[i,j,2] / 255.
 
-            r = 1 / (1 + exp(beta - r * alpha))
-            r = (r - c1) / c2
+                c1 = 1 / (1 + exp(beta))
+                c2 = 1 / (1 + exp(beta - alpha)) - c1
 
-            g = 1 / (1 + exp(beta - g * alpha))
-            g = (g - c1) / c2
+                r = 1 / (1 + exp(beta - r * alpha))
+                r = (r - c1) / c2
 
-            b = 1 / (1 + exp(beta - b * alpha))
-            b = (b - c1) / c2
+                g = 1 / (1 + exp(beta - g * alpha))
+                g = (g - c1) / c2
 
-            img[i,j,0] = <np.uint8_t>(r * 255)
-            img[i,j,1] = <np.uint8_t>(g * 255)
-            img[i,j,2] = <np.uint8_t>(b * 255)
+                b = 1 / (1 + exp(beta - b * alpha))
+                b = (b - c1) / c2
+
+                img[i,j,0] = <np.uint8_t>(r * 255)
+                img[i,j,1] = <np.uint8_t>(g * 255)
+                img[i,j,2] = <np.uint8_t>(b * 255)
 
 
 @cython.boundscheck(False)
@@ -182,19 +186,21 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
     cdef int i, j
 
     gamma = 1./gamma
-    for i in range(height):
-        for j in range(width):
-            r = <float>stateimg[i,j,0] / 255.
-            g = <float>stateimg[i,j,1] / 255.
-            b = <float>stateimg[i,j,2] / 255.
 
-            img[i,j,0] = <np.uint8_t>(pow(r, gamma) * 255)
-            img[i,j,1] = <np.uint8_t>(pow(g, gamma) * 255)
-            img[i,j,2] = <np.uint8_t>(pow(b, gamma) * 255)
+    with nogil:
+        for i from 0 <= i < height:
+            for j from 0 <= j < width:
+                r = <float>stateimg[i,j,0] / 255.
+                g = <float>stateimg[i,j,1] / 255.
+                b = <float>stateimg[i,j,2] / 255.
+
+                img[i,j,0] = <np.uint8_t>(pow(r, gamma) * 255)
+                img[i,j,1] = <np.uint8_t>(pow(g, gamma) * 255)
+                img[i,j,2] = <np.uint8_t>(pow(b, gamma) * 255)
 
 
 
-cdef void rgb_2_hsv(float* RGB, float* HSV):
+cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     cdef float R, G, B, H, S, V, MAX, MIN
     R = RGB[0]
     G = RGB[1]
@@ -256,7 +262,7 @@ cdef void rgb_2_hsv(float* RGB, float* HSV):
     HSV[2] = V
 
 
-cdef void hsv_2_rgb(float* HSV, float* RGB):
+cdef void hsv_2_rgb(float* HSV, float* RGB) nogil:
     cdef float H, S, V
     cdef float f, p, q, t, r, g, b
     cdef int hi
@@ -440,28 +446,30 @@ def hsv_add(np.ndarray[np.uint8_t, ndim=3] img,
 
     cdef int i, j
 
-    for i in range(height):
-        for j in range(width):
-            RGB[0] = stateimg[i, j, 0]
-            RGB[1] = stateimg[i, j, 1]
-            RGB[2] = stateimg[i, j, 2]
+    with nogil:
+        for i from 0 <= i < height:
+            for j from 0 <= j < width:
+                RGB[0] = stateimg[i, j, 0]
+                RGB[1] = stateimg[i, j, 1]
+                RGB[2] = stateimg[i, j, 2]
 
-            rgb_2_hsv(RGB, HSV)
+                rgb_2_hsv(RGB, HSV)
 
-            # Add operation
-            HSV[0] += h_amt
-            HSV[1] += s_amt
-            HSV[2] += v_amt
+                # Add operation
+                HSV[0] += h_amt
+                HSV[1] += s_amt
+                HSV[2] += v_amt
 
-            hsv_2_rgb(HSV, RGB)
+                hsv_2_rgb(HSV, RGB)
 
-            RGB[0] *= 255
-            RGB[1] *= 255
-            RGB[2] *= 255
+                RGB[0] *= 255
+                RGB[1] *= 255
+                RGB[2] *= 255
 
-            img[i, j, 0] = <np.uint8_t>RGB[0]
-            img[i, j, 1] = <np.uint8_t>RGB[1]
-            img[i, j, 2] = <np.uint8_t>RGB[2]
+                img[i, j, 0] = <np.uint8_t>RGB[0]
+                img[i, j, 1] = <np.uint8_t>RGB[1]
+                img[i, j, 2] = <np.uint8_t>RGB[2]
+
 
 @cython.boundscheck(False)
 def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
@@ -508,28 +516,29 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
 
     cdef int i, j
 
-    for i in range(height):
-        for j in range(width):
-            RGB[0] = stateimg[i, j, 0]
-            RGB[1] = stateimg[i, j, 1]
-            RGB[2] = stateimg[i, j, 2]
+    with nogil:
+        for i from 0 <= i < height:
+            for j from 0 <= j < width:
+                RGB[0] = stateimg[i, j, 0]
+                RGB[1] = stateimg[i, j, 1]
+                RGB[2] = stateimg[i, j, 2]
 
-            rgb_2_hsv(RGB, HSV)
+                rgb_2_hsv(RGB, HSV)
 
-            # Multiply operation
-            HSV[0] += h_amt
-            HSV[1] *= s_amt
-            HSV[2] *= v_amt
+                # Multiply operation
+                HSV[0] += h_amt
+                HSV[1] *= s_amt
+                HSV[2] *= v_amt
 
-            hsv_2_rgb(HSV, RGB)
+                hsv_2_rgb(HSV, RGB)
 
-            RGB[0] *= 255
-            RGB[1] *= 255
-            RGB[2] *= 255
+                RGB[0] *= 255
+                RGB[1] *= 255
+                RGB[2] *= 255
 
-            img[i, j, 0] = <np.uint8_t>RGB[0]
-            img[i, j, 1] = <np.uint8_t>RGB[1]
-            img[i, j, 2] = <np.uint8_t>RGB[2]
+                img[i, j, 0] = <np.uint8_t>RGB[0]
+                img[i, j, 1] = <np.uint8_t>RGB[1]
+                img[i, j, 2] = <np.uint8_t>RGB[2]
 
 
 
