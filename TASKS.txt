@@ -88,3 +88,10 @@ io
   list of images.  For example, ``ic = ImageCollection([img1, img2])``.
 * Update ``qt_plugin.py`` to view collections.
 
+docs
+````
+* Write topics for the `user guide
+  <http://stefanv.github.com/scikits.image/user_guide.html>`_:
+
+  - Introduction to I/O and image processing with examples
+
