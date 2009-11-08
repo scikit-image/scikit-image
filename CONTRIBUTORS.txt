@@ -10,8 +10,8 @@
 - Mahipal Raythattha
   Documentation infrastructure
 
-- Chris Colbert
-  OpenCV wrappers
+- S. Chris Colbert
+  OpenCV wrappers, Scivi, Qt and Gtk gui bits.
 
 - Holger Rapp
   OpenCV functions and better OSX library loader

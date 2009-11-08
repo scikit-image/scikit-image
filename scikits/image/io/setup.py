@@ -11,6 +11,7 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('io', parent_package, top_path)
     config.add_data_dir('tests')
+    config.add_data_dir('_plugins/tests')
     config.add_data_files('_plugins/*.ini')
 
     # This function tries to create C files from the given .pyx files.  If
