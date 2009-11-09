@@ -1821,7 +1821,7 @@ def cvCvtColor(np.ndarray src, int code):
     cdef int out_channels = <int>conversion_params[1]
     src_dtypes = conversion_params[2]
 
-    assert_nchannels(src, src_channels)
+    assert_nchannels(src, [src_channels])
     assert_dtype(src, src_dtypes)
 
     cdef np.ndarray out
