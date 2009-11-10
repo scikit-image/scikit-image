@@ -45,17 +45,25 @@ def add(np.ndarray[np.uint8_t, ndim=3] img,
 
     cdef np.int16_t op_result
 
-    cdef int i, j
+    cdef np.uint8_t lut[256]
+
+    cdef int i, j, l
+
     with nogil:
+
+        for l from 0 <= l < 256:
+            op_result = <np.int16_t>(l + n)
+            if op_result > 255:
+                op_result = 255
+            elif op_result < 0:
+                op_result = 0
+            else:
+                pass
+            lut[l] = <np.uint8_t>op_result
+
         for i from 0 <= i < height:
             for j from 0 <= j < width:
-                op_result = <np.int16_t>(stateimg[i,j,k] + n)
-                if op_result > 255:
-                    img[i, j, k] = 255
-                elif op_result < 0:
-                    img[i, j, k] = 0
-                else:
-                    img[i, j, k] = <np.uint8_t>op_result
+                img[i, j, k] = lut[stateimg[i,j,k]]
 
 
 @cython.boundscheck(False)
@@ -84,17 +92,25 @@ def multiply(np.ndarray[np.uint8_t, ndim=3] img,
 
     cdef float op_result
 
-    cdef int i, j
+    cdef np.uint8_t lut[256]
+
+    cdef int i, j, l
+
     with nogil:
+
+        for l from 0 <= l < 256:
+            op_result = l * n
+            if op_result > 255:
+                op_result = 255
+            elif op_result < 0:
+                op_result = 0
+            else:
+                pass
+            lut[l] = <np.uint8_t>op_result
+
         for i from 0 <= i < height:
             for j from 0 <= j < width:
-                op_result = <float>(stateimg[i,j,k] * n)
-                if op_result > 255:
-                    img[i, j, k] = 255
-                elif op_result < 0:
-                    img[i, j, k] = 0
-                else:
-                    img[i, j, k] = <np.uint8_t>op_result
+                img[i,j,k] = lut[stateimg[i,j,k]]
 
 
 @cython.boundscheck(False)
@@ -122,20 +138,26 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
     cdef int width = img.shape[1]
 
     cdef float op_result
+    cdef np.uint8_t lut[256]
 
     cdef int i, j, k
     with nogil:
+
+        for k from 0 <= k < 256:
+            op_result = k * factor + offset
+            if op_result > 255:
+                op_result = 255
+            elif op_result < 0:
+                op_result = 0
+            else:
+                pass
+            lut[k] = <np.uint8_t>op_result
+
         for i from 0 <= i < height:
             for j from 0 <= j < width:
-                for k from 0 <= k < 3:
-                    op_result = <float>((stateimg[i,j,k] * factor + offset))
-
-                    if op_result > 255:
-                        img[i, j, k] = 255
-                    elif op_result < 0:
-                        img[i, j, k] = 0
-                    else:
-                        img[i, j, k] = <np.uint8_t>op_result
+                img[i,j,0] = lut[stateimg[i,j,0]]
+                img[i,j,1] = lut[stateimg[i,j,1]]
+                img[i,j,2] = lut[stateimg[i,j,2]]
 
 
 @cython.boundscheck(False)
@@ -147,31 +169,25 @@ def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
     cdef int height = img.shape[0]
     cdef int width = img.shape[1]
 
-    cdef float c1, c2, r, g, b
     cdef int i, j, k
 
+    cdef float c1 = 1 / (1 + exp(beta))
+    cdef float c2 = 1 / (1 + exp(beta - alpha)) - c1
+
+    cdef np.uint8_t lut[256]
+
     with nogil:
+
+        # compute the lut
+        for k from 0 <= k < 256:
+            lut[k] = <np.uint8_t>(((1 / (1 + exp(beta - (k / 255.) * alpha)))
+                                    - c1) * 255 / c2)
         for i from 0 <= i < height:
             for j from 0 <= j < width:
-                r = <float>stateimg[i,j,0] / 255.
-                g = <float>stateimg[i,j,1] / 255.
-                b = <float>stateimg[i,j,2] / 255.
+                img[i,j,0] = lut[stateimg[i,j,0]]
+                img[i,j,1] = lut[stateimg[i,j,1]]
+                img[i,j,2] = lut[stateimg[i,j,2]]
 
-                c1 = 1 / (1 + exp(beta))
-                c2 = 1 / (1 + exp(beta - alpha)) - c1
-
-                r = 1 / (1 + exp(beta - r * alpha))
-                r = (r - c1) / c2
-
-                g = 1 / (1 + exp(beta - g * alpha))
-                g = (g - c1) / c2
-
-                b = 1 / (1 + exp(beta - b * alpha))
-                b = (b - c1) / c2
-
-                img[i,j,0] = <np.uint8_t>(r * 255)
-                img[i,j,1] = <np.uint8_t>(g * 255)
-                img[i,j,2] = <np.uint8_t>(b * 255)
 
 
 @cython.boundscheck(False)
@@ -182,24 +198,26 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
     cdef int height = img.shape[0]
     cdef int width = img.shape[1]
 
-    cdef float r, g, b
+    cdef np.uint8_t lut[256]
 
-    cdef int i, j
+    cdef int i, j, k
 
     if gamma == 0:
         gamma = 0.00000000000000000001
     gamma = 1./gamma
 
     with nogil:
+
+        # compute the lut
+        for k from 0 <= k < 256:
+            lut[k] = <np.uint8_t>((pow((k / 255.), gamma) * 255))
+
         for i from 0 <= i < height:
             for j from 0 <= j < width:
-                r = <float>stateimg[i,j,0] / 255.
-                g = <float>stateimg[i,j,1] / 255.
-                b = <float>stateimg[i,j,2] / 255.
+                img[i,j,0] = lut[stateimg[i,j,0]]
+                img[i,j,1] = lut[stateimg[i,j,1]]
+                img[i,j,2] = lut[stateimg[i,j,2]]
 
-                img[i,j,0] = <np.uint8_t>(pow(r, gamma) * 255)
-                img[i,j,1] = <np.uint8_t>(pow(g, gamma) * 255)
-                img[i,j,2] = <np.uint8_t>(pow(b, gamma) * 255)
 
 
 @cython.cdivision(True)
