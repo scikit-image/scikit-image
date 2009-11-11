@@ -287,6 +287,22 @@ class TestCalibrateCamera2(object):
         )
 
 
+class TestUndistort2(OpenCVTest):
+    @opencv_skip
+    def test_cvUndistort2(self):
+        intrinsics = np.array([[1, 0, 0],
+                               [0, 1, 0],
+                               [0, 0, 1]], dtype='float64')
+        distortions = np.array([0., 0., 0., 0., 0.], dtype='float64')
+
+        undist = cvUndistort2(self.lena_RGB_U8, intrinsics, distortions)
+        undistg = cvUndistort2(self.lena_GRAY_U8, intrinsics, distortions)
+
+        assert_array_almost_equal(undist, self.lena_RGB_U8)
+        assert_array_almost_equal(undistg, self.lena_GRAY_U8)
+
+
+
 
 if __name__ == '__main__':
     run_module_suite()

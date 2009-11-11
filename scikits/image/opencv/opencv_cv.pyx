@@ -266,6 +266,11 @@ cdef cvCalibrateCamera2Ptr c_cvCalibrateCamera2
 c_cvCalibrateCamera2 = (<cvCalibrateCamera2Ptr*>
                         <size_t>ctypes.addressof(cv.cvCalibrateCamera2))[0]
 
+# cvUndistort2
+ctypedef void (*cvUndistort2Ptr)(IplImage*, IplImage*, CvMat*, CvMat*)
+cdef cvUndistort2Ptr c_cvUndistort2
+c_cvUndistort2 = (<cvUndistort2Ptr*><size_t>ctypes.addressof(cv.cvUndistort2))[0]
+
 # cvFindChessboardCorners
 ctypedef void (*cvFindChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*,
                                             int*, int)
@@ -2154,6 +2159,64 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
 
     return intrinsics, distortion
 
+
+#-------------
+# cvUndistort2
+#-------------
+
+@cvdoc(package='cv', group='calibration', doc=\
+'''cvUndistort2(src, intrinsics, distortions)
+
+Undistorts an image given the camera intrinsics matrix and distortions vector.
+These values can be calculated using cvCalibrateCamera2.
+
+Parameters
+----------
+src : ndarray
+    The image to undistort
+intrinsics : ndarray, 3x3, dtype=float64
+    The camera intrinsics matrix.
+distortions : ndarray, 5-vector, dtype=float64
+    The camera distortion coefficients.
+
+Returns
+-------
+out : ndarray
+    The undistorted image the same size and dtype
+    as the source image.''')
+def cvUndistort2(src, intrinsics, distortions):
+    validate_array(src)
+    assert_dtype(intrinsics, [FLOAT64])
+    assert_dtype(distortions, [FLOAT64])
+    assert_ndims(intrinsics, [2])
+    assert_ndims(distortions, [1])
+
+    if intrinsics.shape[0] != 3 or intrinsics.shape[1] != 3:
+        raise ValueError('intrinsics must be 3x3')
+    if distortions.shape[0] != 5:
+        raise ValueError('distortions must be a 5-vector')
+
+    cdef np.ndarray out = new_array_like(src)
+
+    cdef IplImage srcimg
+    cdef IplImage outimg
+    cdef IplImage intrimg
+    cdef IplImage distimg
+
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(out, &outimg)
+    populate_iplimage(intrinsics, &intrimg)
+    populate_iplimage(distortions, &distimg)
+
+    cdef CvMat* cvintr = cvmat_ptr_from_iplimage(&intrimg)
+    cdef CvMat* cvdist = cvmat_ptr_from_iplimage(&distimg)
+
+    c_cvUndistort2(&srcimg, &outimg, cvintr, cvdist)
+
+    PyMem_Free(cvintr)
+    PyMem_Free(cvdist)
+
+    return out
 
 #------------------------
 # cvFindChessboardCorners
