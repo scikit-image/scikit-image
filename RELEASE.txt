@@ -15,5 +15,11 @@ How to make a new release of ``scikits.image``
 
   python setup.py register
 
+- Ideally, the step above would be replaced by
+
+  python setup.py sdist upload
+
+  but this doesn't work at the moment.
+
 - Increase the version number in the setup.py file to ``0.2dev``.
 
