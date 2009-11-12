@@ -230,20 +230,19 @@ class ImageCollection(object):
     def files(self):
         return self._files
 
-    @property
-    def as_grey(self):
+    def _get_as_grey(self):
         """Whether images are converted to grey-scale.
 
         If this property is changed, all images in memory get reloaded.
         """
         return self._as_grey
 
-    @as_grey.setter
-    def as_grey(self, newgrey):
+    def _set_as_grey(self, newgrey):
         if not newgrey == self._as_grey:
             self._as_grey = newgrey
             self.reload()
-
+    as_grey = property(_get_as_grey, _set_as_grey)
+    
     @property
     def conserve_memory(self):
         return self._conserve_memory
