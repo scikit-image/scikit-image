@@ -1,4 +1,7 @@
 # test for the opencv_cv extension module
+
+from __future__ import with_statement
+
 import os
 import warnings
 
