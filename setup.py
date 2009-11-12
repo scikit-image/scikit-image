@@ -12,8 +12,8 @@ http://stefanv.github.com/scikits.image
 DISTNAME            = 'scikits.image'
 DESCRIPTION         = 'Image processing routines for SciPy'
 LONG_DESCRIPTION    = descr
-MAINTAINER          = 'Stefan van der Walt',
-MAINTAINER_EMAIL    = 'stefan@sun.ac.za',
+MAINTAINER          = 'Stefan van der Walt'
+MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
 URL                 = 'http://stefanv.github.com/scikits.image'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/stefanv/scikits.image'
@@ -79,8 +79,8 @@ if __name__ == "__main__":
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
 
-        entry_points={
-            'console_scripts': [
-                'scivi = scikits.image.scripts.scivi:main']
-            },
+        #entry_points={
+        #    'console_scripts': [
+        #        'scivi = scikits.image.scripts.scivi:main']
+        #    },
         )
