@@ -130,9 +130,11 @@ def show():
 
     Examples
     --------
+    >>> import scikits.image.io as io
+
     >>> for i in range(4):
-    ...     imshow(np.random.random((50, 50))
-    >>> show()
+    ...     io.imshow(np.random.random((50, 50)))
+    >>> io.show()
 
     '''
     return call_plugin('_app_show')

@@ -47,10 +47,9 @@ class MultiImage(object):
 
     Examples
     --------
-    >>> import os.path
-    >>> fname = os.path.join('tests', 'data', 'multipage.tif')
+    >>> from scikits.image import data_dir
 
-    >>> img = MultiImage(fname)
+    >>> img = MultiImage(data_dir + '/multipage.tif')
     >>> len(img)
     2
     >>> for frame in img:
@@ -185,24 +184,21 @@ class ImageCollection(object):
 
     Examples
     --------
-    >>> from scikits.image.io import io
+    >>> import scikits.image.io as io
     >>> from scikits.image import data_dir
 
-    >>> coll = io.ImageCollection(data_dir + '/*.png')
+    >>> coll = io.ImageCollection(data_dir + '/lena*.png')
     >>> len(coll)
     2
-    >>> coll.files
-    ['.../scikits/image/data/camera.png', .../scikits/image/data/color.png']
     >>> coll[0].shape
-    (256, 256)
+    (128, 128, 3)
 
-    When `as_grey` is changed, a color image is returned in grey-scale:
+    When `as_grey` is set to True, a color image is returned in grey-scale:
 
-    >>> coll[1].shape
-    (370, 371, 3)
-    >>> coll.as_grey = True
-    >>> coll[1].shape
-    (256, 256)
+    >>> coll = io.ImageCollection(data_dir + '/lena*.png', as_grey=True)
+    >>> coll[0].shape
+    (128, 128)
+
     """
     def __init__(self, file_pattern, conserve_memory=True, as_grey=False,
                  dtype=None):
