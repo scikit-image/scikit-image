@@ -1,18 +1,13 @@
-#
-# Use .add_data_files and .add_data_dir methods in a appropriate
-# setup.py files to include non-python files such as documentation,
-# data, etc files to distribution. Avoid using MANIFEST.in for that.
-#
+include setup.cfg
+include setup*.py
 include MANIFEST.in
-include LICENSE.txt
-include README.txt
-include TASKS.txt
-include CONTRIBUTORS.txt
-# Add documentation: we don't use add_data_dir since we do not want to include
-# this at installation, only for sdist-generated tarballs
-include doc/Makefile
-recursive-include doc/source *
-recursive-include doc/source/api *
-recursive-include doc/tools *
-recursive-include doc/ext *
+include *.txt
+include Makefile
+recursive-include scikits *.pyx *.pxd *.py *.c *.h *.ini
+recursive-include scikits/image/data *
 
+include doc/Makefile
+recursive-include doc/source *.txt
+recursive-include doc/tools *.txt
+recursive-include doc/*.py
+prune doc/build
