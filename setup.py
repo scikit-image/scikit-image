@@ -65,7 +65,7 @@ if __name__ == "__main__":
         version=VERSION,
 
         classifiers =
-            [ 'Development Status :: 1 - Planning',
+            [ 'Development Status :: 4 - Beta',
               'Environment :: Console',
               'Intended Audience :: Developers',
               'Intended Audience :: Science/Research',
