@@ -1,6 +1,5 @@
 __all__ = ['imread']
 
-import plugin
 import numpy as np
 
 try:
