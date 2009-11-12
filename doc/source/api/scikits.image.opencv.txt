@@ -51,6 +51,7 @@ Inheritance diagram for ``scikits.image.opencv``:
    scikits.image.opencv.cvSmooth
    scikits.image.opencv.cvSobel
    scikits.image.opencv.cvThreshold
+   scikits.image.opencv.cvUndistort2
    scikits.image.opencv.cvWarpAffine
    scikits.image.opencv.cvWarpPerspective
 
@@ -188,6 +189,11 @@ cvThreshold
 -----------
 
 .. autofunction:: scikits.image.opencv.cvThreshold
+
+cvUndistort2
+------------
+
+.. autofunction:: scikits.image.opencv.cvUndistort2
 
 cvWarpAffine
 ------------
