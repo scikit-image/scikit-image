@@ -29,8 +29,7 @@ def cython(pyx_files, working_path=''):
             status = os.system(cmd)
 
             # if the resulting file is small, cython compilation failed
-            size = os.path.getsize(c_file_new)
-            if status != 0 or (size < 100):
+            if status != 0 or os.path.getsize(c_file_new):
                 print "Cython compilation of %s failed. Falling back " \
                       "on pre-generated file." % os.path.basename(pyxfile)
                 continue
