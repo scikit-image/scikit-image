@@ -9,5 +9,6 @@ recursive-include scikits/image/data *
 include doc/Makefile
 recursive-include doc/source *.txt
 recursive-include doc/tools *.txt
+recursive-include doc/source/_templates/ *.html
 recursive-include doc *.py
 prune doc/build
