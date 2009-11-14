@@ -96,4 +96,5 @@ docs
   - Introduction to I/O and image processing with examples
 
 * In API list, use columns to better utilise page width.
+* Fix doctests
 
