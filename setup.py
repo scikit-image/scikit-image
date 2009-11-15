@@ -30,6 +30,12 @@ def configuration(parent_package='', top_path=None):
     config = Configuration(None, parent_package, top_path,
                            namespace_packages=['scikits'])
 
+    config.set_options(
+            ignore_setup_xxx_py=True,
+            assume_default_configuration=True,
+            delegate_options_to_subpackages=True,
+            quiet=True)
+
     config.add_subpackage('scikits')
     config.add_subpackage(DISTNAME)
     config.add_data_files('scikits/__init__.py')
@@ -79,8 +85,8 @@ if __name__ == "__main__":
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
 
-        #entry_points={
-        #    'console_scripts': [
-        #        'scivi = scikits.image.scripts.scivi:main']
-        #    },
+        entry_points={
+            'console_scripts': [
+                'scivi = scikits.image.scripts.scivi:main']
+            },
         )
