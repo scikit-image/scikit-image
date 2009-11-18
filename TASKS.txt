@@ -98,3 +98,6 @@ docs
 * In API list, use columns to better utilise page width.
 * Fix doctests
 
+Implement Algorithms
+````````````````````
+- Histograms of oriented gradients
