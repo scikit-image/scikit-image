@@ -18,7 +18,7 @@ ctypedef np.uint8_t IMAGE_DTYPE_t
 cdef inline int int_max(int a, int b): return a if a >= b else b
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
-@cython.boundsgcheck(False)
+@cython.boundscheck(False)
 def dilate(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
            np.ndarray[IMAGE_DTYPE_t, ndim=2] selem not None,
            np.ndarray[IMAGE_DTYPE_t, ndim=2] out):

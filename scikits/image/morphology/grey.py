@@ -35,7 +35,7 @@ def greyscale_erode(image, selem, out=None):
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
     try:
-        import cmorph
+        import scikits.image.morphology.cmorph as cmorph
         out = cmorph.erode(image, selem, out=out)
         return out;
     except ImportError:
