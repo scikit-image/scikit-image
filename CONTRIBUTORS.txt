@@ -25,3 +25,6 @@
 - Tony Yu
   Reading of paletted images
 
+- Zachary Pincus
+  Tracing of low cost paths
+
