@@ -1,5 +1,6 @@
 try:
     from spath import shortest_path
+    from trace_path import trace_path
 except ImportError:
     print """*** The shortest path extension has not been compiled.  Run
 
