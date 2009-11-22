@@ -9,38 +9,51 @@ def trace_path(numpy.ndarray[numpy.float32_t, ndim=2] costs not None,
                start, ends, diagonal_steps=True):
   """Find the lowest-cost path from the start point to each given end point.
 
-  Inputs: 'costs' array; 'start' (x, y) pair; list of 'ends' (x, y) pairs,
-    and optional 'diagonal_steps' boolean flag.
-
   Costs are given by the input array: a move onto any given position in the
   costs array adds that cost to the path. Paths may be constrained to
   vertical and horizontal moves only by passing False for the diagonal_steps
-  parameter. The costs must be non-negative!
+  parameter. Costs must be non-negative!
 
   The array of cumulative costs from the starting point, and a list of paths
   from the start to each end point are returned.
 
+  Parameters
+  ----------
+  costs : ndarray
+  start : tuple of ints
+      ``(x, y)`` position (i.e., ``(column, row)``) of starting position.
+  ends : list of tuple of ints
+      ``[(x1, y1), (x2, y2), ...]`` List of end points.
+  diagonal_steps : bool
+      Whether to allow diagonal steps (True, by default).
+
+  Notes
+  -----
   Paths are found by (more or less) breadth-first search outward from the
   starting point: each time a lower-cost route to a given pixel is found, that
   pixel is marked "active"; the neighbors of all active pixels are then
   examined to see if their costs can be lowered as well. This continues until
   no pixels are marked active.
+
   """
   if costs.min() < 0:
-    raise ValueError("All costs must be non-negative.")
+      raise ValueError("All costs must be non-negative.")
+
   try:
-    a, b = start
+      a, b = start
   except:
-    raise ValueError("The start point must be an (x, y) pair")
+      raise ValueError("The start point must be an (x, y) pair")
+
   if not (0 <= a < costs.shape[0]  and 0 <= b < costs.shape[1]):
-    raise ValueError("The start point must fall within the array")
+      raise ValueError("The start point must fall within the array")
+
   for end in ends:
-    try:
-      a, b = end
-    except:
-      raise ValueError("All end points must be (x, y) pairs")
-    if not (0 <= a < costs.shape[0]  and 0 <= b < costs.shape[1]):
-      raise ValueError("The end points must fall within the array")
+      try:
+          a, b = end
+      except:
+          raise ValueError("All end points must be (x, y) pairs")
+      if not (0 <= a < costs.shape[0]  and 0 <= b < costs.shape[1]):
+          raise ValueError("The end points must fall within the array")
 
   cdef numpy.ndarray[numpy.float32_t, ndim=2] cumulative_costs = \
        numpy.empty_like(costs)
