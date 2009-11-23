@@ -72,9 +72,6 @@ cpdef shortest_path(np.ndarray arr, int reach=1):
                             fabs(data[r, c] - data[node[r, c], c - 1])
 
      # Find minimum cost path
-     print arr
-     print cost
-     print node
      r_min_node = cost[:,-1].argmin()
 
      # Backtrack
