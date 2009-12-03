@@ -25,3 +25,7 @@ test = _setup_test()
 if test is None:
     del test
 
+def get_log(name):
+    import logging, sys
+    logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+    return logging.getLogger(name)
