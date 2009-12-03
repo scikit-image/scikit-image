@@ -2,6 +2,7 @@
 
 all:
 	python setup.py build_ext --inplace
+	git update-index --assume-unchanged scikits/image/version.py
 
 clean:
 	find . -name "*.so" | xargs rm

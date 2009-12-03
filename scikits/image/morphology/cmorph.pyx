@@ -22,8 +22,8 @@ cdef inline int int_min(int a, int b): return a if a <= b else b
 def dilate(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
            np.ndarray[IMAGE_DTYPE_t, ndim=2] selem not None,
            np.ndarray[IMAGE_DTYPE_t, ndim=2] out):
-    cdef int hw = selem.shape[0] / 2
-    cdef int hh = selem.shape[1] / 2
+    cdef int hw = selem.shape[0] // 2
+    cdef int hh = selem.shape[1] // 2
     cdef int width = image.shape[0], height = image.shape[1]
     if out is None:
         out = np.zeros([width, height], dtype=IMAGE_DTYPE)
@@ -65,8 +65,8 @@ def dilate(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
 def erode(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
           np.ndarray[IMAGE_DTYPE_t, ndim=2] selem not None,
           np.ndarray[IMAGE_DTYPE_t, ndim=2] out):
-    cdef int hw = selem.shape[0] / 2
-    cdef int hh = selem.shape[1] / 2
+    cdef int hw = selem.shape[0] // 2
+    cdef int hh = selem.shape[1] // 2
     cdef int width = image.shape[0], height = image.shape[1]
     if out is None:
         out = np.zeros([width, height], dtype=IMAGE_DTYPE)
