@@ -5,6 +5,7 @@ API Reference
 
 .. toctree::
 
+   scikits.image
    scikits.image.color
    scikits.image.filter
    scikits.image.graph
