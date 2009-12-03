@@ -21,7 +21,7 @@ def push(img):
     _image_stack.append(img)
 
 def pop():
-    """Pop and image from the shared image stack.
+    """Pop an image from the shared image stack.
 
     Returns
     -------
