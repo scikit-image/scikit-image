@@ -26,6 +26,22 @@ if test is None:
     del test
 
 def get_log(name):
+    """Return a console logger.
+
+    Output may be sent to the logger using the `debug`, `info`, `warning`,
+    `error` and `critical` methods.
+
+    Parameters
+    ----------
+    name : str
+        Name of the log.
+
+    References
+    ----------
+    .. [1] Logging facility for Python,
+           http://docs.python.org/library/logging.html
+
+    """
     import logging, sys
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     return logging.getLogger(name)
