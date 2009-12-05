@@ -259,6 +259,11 @@ ctypedef void (*cvPyrUpPtr)(IplImage*, IplImage*, int)
 cdef cvPyrUpPtr c_cvPyrUp
 c_cvPyrUp = (<cvPyrUpPtr*><size_t>ctypes.addressof(cv.cvPyrUp))[0]
 
+# cvWatershed
+ctypedef void (*cvWatershedPtr)(IplImage*, IplImage*)
+cdef cvWatershedPtr c_cvWatershed
+c_cvWatershed = (<cvWatershedPtr*><size_t>ctypes.addressof(cv.cvWatershed))[0]
+
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
        CvSize, CvMat*, CvMat*, CvMat*, CvMat*, int)
@@ -277,6 +282,14 @@ ctypedef void (*cvFindChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*,
 cdef cvFindChessboardCornersPtr c_cvFindChessboardCorners
 c_cvFindChessboardCorners = (<cvFindChessboardCornersPtr*><size_t>
                              ctypes.addressof(cv.cvFindChessboardCorners))[0]
+
+# cvFindExtrinsicCameraParams2
+ctypedef void (*cvFindExtrinsicCameraParams2Ptr)(CvMat*, CvMat*, CvMat*, CvMat*,
+                                                 CvMat*, CvMat*, int)
+cdef cvFindExtrinsicCameraParams2Ptr c_cvFindExtrinsicCameraParams2
+c_cvFindExtrinsicCameraParams2 = \
+                        (<cvFindExtrinsicCameraParams2Ptr*><size_t>
+                         ctypes.addressof(cv.cvFindExtrinsicCameraParams2))[0]
 
 # cvDrawChessboardCorners
 ctypedef void (*cvDrawChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*,
@@ -2068,6 +2081,54 @@ def cvPyrUp(np.ndarray src):
     return out
 
 
+#------------
+# cvWatershed
+#------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''cvWatershed(src, markers)
+
+Performs watershed segmentation.
+
+Parameters
+----------
+src : ndarray, 3D, dtype=uint8
+    The source image.
+markers : ndarray, 2D, dtype=int32
+    The markers identifying the regions of interest.
+    Marker values should be non-zero.
+    This array should have the same width and height as src.
+
+Returns
+-------
+None : None
+    The markers array is modified in place. The results of which
+    identify the segmented regions of the image.''')
+def cvWatershed(src, markers):
+
+    validate_array(src)
+    validate_array(markers)
+
+    assert_ndims(src, [3])
+    assert_dtype(src, [UINT8])
+
+    assert_ndims(markers, [2])
+    assert_dtype(markers, [INT32])
+
+    #assert src.shape[:2] == markers.shape[:2], \
+    #                'The src and markers array must have same width and height'
+
+    cdef IplImage srcimg
+    cdef IplImage markersimg
+
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(markers, &markersimg)
+
+    c_cvWatershed(&srcimg, &markersimg)
+
+    return None
+
+
 #-------------------
 # cvCalibrateCamera2
 #-------------------
@@ -2278,6 +2339,102 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
 
     return out[:ncorners_found]
 
+
+#-----------------------------
+# cvFindExtrinsicCameraParams2
+#-----------------------------
+
+@cvdoc(package='cv', group='calibration', doc=\
+'''cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic_matrix,
+                                distortion_coeffs)
+
+Calculates the extrinsic camera parameters given a set of 3D points, their
+2D locations in the image, and the camera instrinsics matrix and distortion
+coefficients.
+
+i.e. given this information, it calculates the offset and rotation of the
+camera from the chessboard origin.
+
+Parameters
+----------
+object_points: ndarray, nx3
+    The 3D coordinates of the chessboard corners.
+image_points: ndarray, nx2
+    The 2D image coordinates of the object_points
+intrinsic_matrix: ndarray, 3x3, dtype=float64
+    The 2D camera intrinsics matrix that is the result of camera calibration
+distortion_coeffs: ndarray, 5-vector, dtype=float64
+    The 5 distortion coefficients that are the result of camera calibration
+
+Returns
+-------
+(rvec, tvec): ndarray 3-vector dtype=float64, ndarray 3-vector dtype=float64
+    rvec - the rotation vector representing the rotation of the camera
+    relative to the chessboard. The direction of the vector represents the
+    axis of rotation and its magnitude the amount of rotation.
+    tvec - the translation vector representing the offset of the camera
+    relative to the chessboard origin.''')
+def cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic_matrix,
+                                 distortion_coeffs):
+
+    validate_array(object_points)
+    validate_array(image_points)
+    validate_array(intrinsic_matrix)
+
+    assert_ndims(object_points, [2])
+    assert_dtype(object_points, [FLOAT32, FLOAT64])
+    assert object_points.shape[1] == 3, 'object_points should be nx3'
+
+    assert_ndims(image_points, [2])
+    assert_dtype(image_points, [FLOAT32, FLOAT64])
+    assert image_points.shape[1] == 2, 'image_points should be nx2'
+
+    assert_dtype(intrinsic_matrix, [FLOAT64])
+    assert intrinsic_matrix.shape == (3, 3), 'instrinsics should be 3x3'
+
+    assert_dtype(distortion_coeffs, [FLOAT64])
+    assert distortion_coeffs.shape == (5,), 'distortions should be 5-vector'
+
+    # allocate the numpy return arrays
+    cdef np.npy_intp shape[1]
+    shape[0] = 3
+    cdef np.ndarray rvec = new_array(1, shape, FLOAT64)
+    cdef np.ndarray tvec = new_array(1, shape, FLOAT64)
+
+    # allocate the cv images
+    cdef IplImage obj_img
+    cdef IplImage img_img
+    cdef IplImage intr_img
+    cdef IplImage dist_img
+    cdef IplImage rot_img
+    cdef IplImage tran_img
+    populate_iplimage(object_points, &obj_img)
+    populate_iplimage(image_points, &img_img)
+    populate_iplimage(intrinsic_matrix, &intr_img)
+    populate_iplimage(distortion_coeffs, &dist_img)
+    populate_iplimage(rvec, &rot_img)
+    populate_iplimage(tvec, &tran_img)
+
+    # allocate the cv mats
+    cdef CvMat* cvobj = cvmat_ptr_from_iplimage(&obj_img)
+    cdef CvMat* cvimg = cvmat_ptr_from_iplimage(&img_img)
+    cdef CvMat* cvint = cvmat_ptr_from_iplimage(&intr_img)
+    cdef CvMat* cvdis = cvmat_ptr_from_iplimage(&dist_img)
+    cdef CvMat* cvrot = cvmat_ptr_from_iplimage(&rot_img)
+    cdef CvMat* cvtrn = cvmat_ptr_from_iplimage(&tran_img)
+
+    # the last argument is new to OpenCV 2.0 and tells it NOT to use
+    # an extrinsics guess
+    c_cvFindExtrinsicCameraParams2(cvobj, cvimg, cvint, cvdis, cvrot, cvtrn, 0)
+
+    PyMem_Free(cvobj)
+    PyMem_Free(cvimg)
+    PyMem_Free(cvint)
+    PyMem_Free(cvdis)
+    PyMem_Free(cvrot)
+    PyMem_Free(cvtrn)
+
+    return (rvec, tvec)
 
 #------------------------
 # cvFindChessboardCorners
