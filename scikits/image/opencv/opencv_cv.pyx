@@ -298,6 +298,18 @@ cdef cvDrawChessboardCornersPtr c_cvDrawChessboardCorners
 c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
                              ctypes.addressof(cv.cvDrawChessboardCorners))[0]
 
+# cvFloodFill
+ctypedef void (*cvFloodFillPtr)(IplImage*, CvPoint, CvScalar, CvScalar,
+                                CvScalar, void*, int, IplImage*)
+cdef cvFloodFillPtr c_cvFloodFill
+c_cvFloodFill = (<cvFloodFillPtr*><size_t>ctypes.addressof(cv.cvFloodFill))[0]
+
+# cvMatchTemplate
+ctypedef void (*cvMatchTemplatePtr)(IplImage*, IplImage*, IplImage*, int)
+cdef cvMatchTemplatePtr c_cvMatchTemplate
+c_cvMatchTemplate = (<cvMatchTemplatePtr*><size_t>
+                     ctypes.addressof(cv.cvMatchTemplate))[0]
+
 #-------------------------------------------------------------------------------
 # Function Implementations
 #-------------------------------------------------------------------------------
@@ -2509,3 +2521,242 @@ def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
         return out
 
 
+#------------
+# cvFloodFill
+#------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''cvFloodFill(np.ndarray src, seed_point, new_val, low_diff, high_diff,
+                         mask=None, connect_diag=False, mask_only=False,
+                         mask_fillval=None, fixed_range=False)
+
+Fills a connected component with the given color.
+
+Parameters
+----------
+src : ndarray, ndims=[2, 3], dtypes[uint8, float32]
+    The source image
+seed_point : (x, y) int tuple
+    The starting point of the fill in image pixel coordinates.
+new_val : scalar double or 3-tuple (R, G, B) doubles
+    The color value of the repainted area. If a scalar, the RGB values
+    are all set equal to the scalar.
+low_diff : scalar double or 3-tuple (R, G, B) doubles
+    Maximal lower brightness/color difference between the currently
+    observed pixel and one of its neighbors belonging to the component,
+    or a seed pixel being added to the component. Must be positive.
+high_diff : scalar double or 3-tuple (R, G, B) doubles
+    Maximal upper brightness/color difference between the currently
+    observed pixel and one of its neighbors belonging to the component,
+    or a seed pixel being added to the component. Must be positive.
+mask : ndarray 2d, dtype=uint8 or None
+    The mask in which to draw the results and/or use as a mask.
+    See the opencv documentation for more details.
+    If not None, the mask shape must be 2 pixels wider and taller than src.
+connect_diag : bool
+    If True, implies connectivity across the diagonals in addition to
+    the standard horizontal and vertical directions.
+mask_only : bool
+    If True, fill the mask instead of the image.
+    Mask must not be None
+mask_fillval : int 0 - 255 or None
+    The value to fill the mask if mask is not None.
+    If None, defaults to 1
+fixed_range : bool
+    If True, fills relative to seed value, else, fills relative to
+    neighbors value.
+
+Returns
+-------
+None : None
+    This is an in-place operation which draws into src and/or image depending
+    on the flags set in the input arguments''')
+def cvFloodFill(np.ndarray src, seed_point, new_val, low_diff, high_diff,
+                mask=None, connect_diag=False, mask_only=False,
+                mask_fillval=None, fixed_range=False):
+
+    validate_array(src)
+    assert_ndims(src, [2, 3])
+    assert_dtype(src, [UINT8, FLOAT32])
+
+    # src
+    cdef IplImage srcimg
+    populate_iplimage(src, &srcimg)
+
+    # seed_point
+    if len(seed_point) != 2:
+        raise ValueError('seed_point should be an (x, y) tuple of ints')
+    cdef CvPoint cv_seed_point
+    cdef int x = <int>seed_point[0]
+    cdef int y = <int>seed_point[1]
+    cdef int xmax = <int>src.shape[1]
+    cdef int ymax = <int>src.shape[0]
+    if x < 0 or x > xmax or y < 0 or y > ymax:
+        raise ValueError('seed_point must be image pixel coordinates')
+    cv_seed_point.x = x
+    cv_seed_point.y = y
+
+    # loop counter
+    cdef int i
+    cdef double temp
+
+    # new_val
+    cdef CvScalar cv_new_val
+    if hasattr(new_val, '__len__'):
+        if len(new_val) != 3:
+            raise ValueError('If not a scalar, new_val must be 3 tuple')
+        for i in range(3):
+            cv_new_val.val[i] = <double>new_val[i]
+    else:
+        temp = <double>new_val
+        for i in range(3):
+            cv_new_val.val[i] = temp
+
+    # low_diff
+    cdef CvScalar cv_low_diff
+    if hasattr(low_diff, '__len__'):
+        if len(low_diff) != 3:
+            raise ValueError('If not a scalar, low_diff must be 3 tuple')
+        for i in range(3):
+            cv_low_diff.val[i] = <double>low_diff[i]
+    else:
+        temp = <double>low_diff
+        for i in range(3):
+            cv_low_diff.val[i] = temp
+
+    # high_diff
+    cdef CvScalar cv_high_diff
+    if hasattr(high_diff, '__len__'):
+        if len(high_diff) != 3:
+            raise ValueError('If not a scalar, high_diff must be 3 tuple')
+        for i in range(3):
+            cv_high_diff.val[i] = <double>high_diff[i]
+    else:
+        temp = <double>high_diff
+        for i in range(3):
+            cv_high_diff.val[i] = temp
+
+    # mask
+    cdef IplImage maskimg
+    cdef IplImage* maskimgptr = NULL
+    if mask is not None:
+        validate_array(mask)
+        assert_ndims(mask, [2])
+        assert_dtype(mask, [UINT8])
+        if mask.shape[0] != (src.shape[0] +  2) or \
+        mask.shape[1] != (src.shape[1] + 2):
+            raise ValueError('mask must be 2 pixels wider and taller than src.')
+        populate_iplimage(mask, &maskimg)
+        maskimgptr = &maskimg
+
+    # flags
+    cdef int flags
+
+    # connect_diag
+    cdef int cv_connect_diag = 4
+    if connect_diag:
+        cv_connect_diag = 8
+
+    # mask_only
+    cdef int cv_mask_only = 0
+    if mask_only:
+        if mask is None:
+            raise ValueError('If mask_only==True, mask must not be None')
+        cv_mask_only = (1 << 17)
+
+    # mask_fillval
+    cdef int cv_mask_fillval = (1 << 8)
+    if mask_fillval:
+        if mask_fillval < 0 or mask_fillval > 255:
+            raise ValueError('mask_fillval must be in range 0-255')
+        cv_mask_fillval = ((<int>mask_fillval) << 8)
+
+    # fixed_range
+    cdef int cv_fixed_range = 0
+    if fixed_range:
+        cv_fixed_range = (1 << 16)
+
+    flags = cv_connect_diag | cv_mask_only | cv_mask_fillval | cv_fixed_range
+
+    c_cvFloodFill(&srcimg, cv_seed_point, cv_new_val, cv_low_diff, cv_high_diff,
+                  NULL, flags, maskimgptr)
+
+    return None
+
+
+#----------------
+# cvMatchTemplate
+#----------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''cvMatchTemplate(src, template, method)
+
+Compares a template against overlapped image regions and returns a match array
+dependent on the match method requested.
+
+Parameters
+----------
+src : ndarray, ndims=[2, 3], dtype=[uint8, float32]
+    The source image.
+template : ndarray, ndim=src.ndim, dtype=src.dtype
+    The template to match in the source.
+method : int
+    The method to use for matching.
+    One of:
+        CV_TM_SQDIFF
+        CV_TM_SQDIFF_NORMED
+        CV_TM_CCORR
+        CV_TM_CCORR_NORMED
+        CV_TM_CCOEFF
+        CV_TM_CCOEFF_NORMED
+
+Returns
+-------
+out : ndarray, 2d, dtype=float3d
+    The results of the template matching.
+    The size of this array (H - h + 1) x (W - w + 1)
+    where (H, W) is (Height, Width) of src and (h, w) is
+    (height, width) of template.
+
+Notes
+-----
+After the function finishes the comparison, the best matches can be found
+as global minimums (CV_TM_SQDIFF) or maximums (CV_TM_CCORR and CV_TM_CCOEFF)
+using the appropriate numpy functions. In the case of a color image,
+template summation in the numerator and each sum in the denominator
+is done over all of the channels (and separate mean values are used for each
+channel).''')
+def cvMatchTemplate(np.ndarray src, np.ndarray template, int method):
+
+    validate_array(src)
+    validate_array(template)
+
+    assert_ndims(src, [2, 3])
+    assert_dtype(src, [UINT8, FLOAT32])
+
+    assert_ndims(template, [src.ndim])
+    assert_dtype(template, [src.dtype])
+
+    if method not in [CV_TM_SQDIFF_NORMED, CV_TM_CCORR, CV_TM_CCORR_NORMED,
+                      CV_TM_CCOEFF, CV_TM_CCOEFF_NORMED]:
+        raise ValueError('Unknown method type')
+
+    if src.shape[0] <= template.shape[0] or src.shape[1] <= template.shape[1]:
+        raise ValueError('template must be smaller than source image')
+
+    cdef np.npy_intp outshape[2]
+    outshape[0] = <np.npy_intp>(src.shape[0] - template.shape[0] + 1)
+    outshape[1] = <np.npy_intp>(src.shape[1] - template.shape[1] + 1)
+    cdef np.ndarray out = new_array(2, outshape, FLOAT32)
+
+    cdef IplImage srcimg
+    cdef IplImage templateimg
+    cdef IplImage outimg
+
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(template, &templateimg)
+    populate_iplimage(out, &outimg)
+
+    c_cvMatchTemplate(&srcimg, &templateimg, &outimg, method)
+
+    return out
