@@ -1,8 +1,8 @@
 try:
     from spath import shortest_path
-    from trace_path import trace_path
+    from mcp import MCP, MCP_Geometric, route_through_array
 except ImportError:
-    print """*** The shortest path extension has not been compiled.  Run
+    print """*** The cython extensions have not been compiled.  Run
 
 python setup.py build_ext -i
 
