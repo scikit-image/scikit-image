@@ -1,6 +1,7 @@
 import os
 import shutil
 import hashlib
+import subprocess
 
 def cython(pyx_files, working_path=''):
     """Use Cython to convert the given files to C.
@@ -26,18 +27,17 @@ def cython(pyx_files, working_path=''):
             # run cython compiler
             cmd = 'cython -o %s %s' % (c_file_new, pyxfile)
             print cmd
-            status = os.system(cmd)
-
+            status = subprocess.call(['cython', '-o', c_file_new, pyxfile])
             # if the resulting file is small, cython compilation failed
             if status != 0 or os.path.getsize(c_file_new) < 100:
                 print "Cython compilation of %s failed. Falling back " \
                       "on pre-generated file." % os.path.basename(pyxfile)
-                continue
-
-            # if the generated .c file differs from the one provided,
-            # use that one instead
-            if not same_cython(c_file_new, c_file):
+            elif not same_cython(c_file_new, c_file):
+                # if the generated .c file differs from the one provided,
+                # use that one instead
                 shutil.copy(c_file_new, c_file)
+            os.remove(c_file_new)
+            
 
 def same_cython(f0, f1):
     '''Compare two Cython generated C-files, based on their md5-sum.
@@ -65,3 +65,4 @@ def same_cython(f0, f1):
     f1.readline()
 
     return md5sum(f0) == md5sum(f1)
+
