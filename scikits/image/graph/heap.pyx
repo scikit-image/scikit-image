@@ -350,13 +350,13 @@ cdef class BinaryHeap:
         cdef int levels = self.levels
         # search tree (using absolute indices)
         for level in range(1, levels):        
-            if values[i] < values[i+1]:
+            if values[i] <= values[i+1]:
                 i = i*2+1 # CalcNextAbs
             else:
                 i = (i+1)*2+1 # CalcNextAbs
         
         # select best one in last level
-        if values[i] < values[i+1]:
+        if values[i] <= values[i+1]:
             i = i
         else:
             i = i+1
@@ -367,7 +367,7 @@ cdef class BinaryHeap:
         self._popped_ref = self._references[ir]
         
         # remove it
-        if value != inf:
+        if self.count:
             self._remove(i)
         
         # return 
