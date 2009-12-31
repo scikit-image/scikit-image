@@ -1,3 +1,5 @@
+# -*- python -*-
+
 """Cython implementation of a binary min heap.
 
 Original author: Almar Klein
@@ -244,7 +246,7 @@ cdef class BinaryHeap:
             i0 = (1 << level) - 1 #2**level-1 = LevelStart
             n = i0 + 1 #2**level
             for i in range(i0,i0+n,2):            
-                ii = (i-1)/2 # CalcPrevAbs
+                ii = (int)(i-1)/2 # CalcPrevAbs
                 if values[i] < values[i+1]:
                     values[ii] = values[i]
                 else:
@@ -264,7 +266,7 @@ cdef class BinaryHeap:
         # track tree        
         cdef int ii, level      
         for level in range(self.levels,1,-1):        
-            ii = (i-1)/2 # CalcPrevAbs
+            ii = (int)(i-1)/2 # CalcPrevAbs
             # test
             if values[i] < values[i+1]:
                 values[ii] = values[i]
