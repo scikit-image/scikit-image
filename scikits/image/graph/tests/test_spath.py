@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.testing import *
- 
+
 import scikits.image.graph.spath as spath
- 
+
 def test_basic():
     x = np.array([[1, 1, 3],
                   [0, 2, 0],
@@ -27,7 +27,7 @@ def test_non_square():
     path, cost = spath.shortest_path(x, reach=2)
     assert_array_equal(path, [2, 1, 1, 2, 3, 3, 2])
     assert_equal(cost, 0)
- 
- 
+
+
 if __name__ == "__main__":
     run_module_suite()

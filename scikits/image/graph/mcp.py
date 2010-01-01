@@ -1,13 +1,11 @@
 from _mcp import MCP, MCP_Geometric, make_offsets
 
 def route_through_array(array, start, end, fully_connected=True, geometric=True):
-    """route_through_array(array, start, end, fully_connected=True, geometric=True)
-    
-    Simple example of how to use the MCP and MCP_Geometric classes.
-    
+    """Simple example of how to use the MCP and MCP_Geometric classes.
+
     See the MCP and MCP_Geometric class documentation for explanation of the
     path-finding algorithm.
-    
+
     Parameters
     ----------
     array : ndarray
@@ -20,9 +18,9 @@ def route_through_array(array, start, end, fully_connected=True, geometric=True)
         If True, diagonal moves are permitted, if False, only axial moves.
     geometric : bool (optional)
         If True, the MCP_Geometric class is used to calculate costs, if False,
-        the MCP base class is used. See the class documentation for 
+        the MCP base class is used. See the class documentation for
         an explanation of the differences between MCP and MCP_Geometric.
-    
+
     Returns
     -------
     path : list
@@ -38,4 +36,3 @@ def route_through_array(array, start, end, fully_connected=True, geometric=True)
     m = mcp_class(array, fully_connected=fully_connected)
     costs, traceback_array = m.find_costs([start], [end])
     return m.traceback(end), costs[end]
-

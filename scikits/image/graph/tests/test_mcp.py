@@ -1,12 +1,12 @@
 import numpy as np
 from numpy.testing import *
- 
+
 import scikits.image.graph.mcp as mcp
 
 a = np.ones((8,8), dtype=np.float32)
 a[1:-1, 1] = 0
 a[1, 1:-1] = 0
- 
+
 ## array([[ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
 ##        [ 1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.],
 ##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
@@ -15,7 +15,7 @@ a[1, 1:-1] = 0
 ##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
 ##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
 ##        [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]], dtype=float32)
- 
+
 def test_basic():
     m = mcp.MCP(a, fully_connected=True)
     costs, traceback = m.find_costs([(1,6)])
@@ -29,7 +29,7 @@ def test_basic():
                         [ 1.,  0.,  1.,  2.,  3.,  4.,  4.,  4.],
                         [ 1.,  0.,  1.,  2.,  3.,  4.,  5.,  5.],
                         [ 1.,  1.,  1.,  2.,  3.,  4.,  5.,  6.]])
- 
+
     assert_array_equal(return_path,
                        [(1, 6),
                         (1, 5),
@@ -58,7 +58,7 @@ def test_route():
                         (5, 1),
                         (6, 1),
                         (7, 2)])
- 
+
 def test_no_diagonal():
     m = mcp.MCP(a, fully_connected=False)
     costs, traceback = m.find_costs([(1,6)])
@@ -86,23 +86,25 @@ def test_no_diagonal():
                         (6, 1),
                         (7, 1),
                         (7, 2)])
- 
+
 
 def test_crashing():
-    _test_random((1000,1000))
-    _test_random((10,20,30,40))
+    for shape in [(100, 100), (5, 8, 13, 17)]:
+        yield _test_random, shape
 
 def _test_random(shape):
     # Just tests for crashing -- not for correctness.
     np.random.seed(0)
     a = np.random.random(shape).astype(np.float32)
-    starts = [[0]*len(shape), [-1]*len(shape), (np.random.random(len(shape))*shape).astype(int)]
+    starts = [[0]*len(shape), [-1]*len(shape),
+              (np.random.random(len(shape))*shape).astype(int)]
     ends = [(np.random.random(len(shape))*shape).astype(int) for i in range(4)]
     m = mcp.MCP(a, fully_connected=True)
     costs, offsets = m.find_costs(starts)
-    for point in [(np.random.random(len(shape))*shape).astype(int) for i in range(4)]:
+    for point in [(np.random.random(len(shape))*shape).astype(int)
+                  for i in range(4)]:
         m.traceback(point)
-    m.reset()
+    m._reset()
     m.find_costs(starts, ends)
     for end in ends:
         m.traceback(end)
