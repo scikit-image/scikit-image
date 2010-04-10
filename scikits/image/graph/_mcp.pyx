@@ -184,6 +184,7 @@ def _normalize_indices(indices, shape):
             return None
         new_index = []
         for i, s in zip(index, shape):
+            i = int(i)
             if i < 0:
                 i = s+i
             if not (0 <= i < s):
