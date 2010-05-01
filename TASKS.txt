@@ -23,7 +23,7 @@ or tests.
    * Connected components
    * `Hough transform <http://mentat.za.net>`_
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
-   * Marching squares 
+   * Marching squares
    * Nadav's bilateral filtering (first compare against CellProfile's code)
    * 2D iso-contour finding (sub-pixel precision) [ask Zach Pincus]
    * 2D image warping via thin-plate splines [ask Zach Pincus]
@@ -52,17 +52,17 @@ Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
 
 Their SVN repository is read-accessible at
 
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler
 
 The files for the above algorithms are
 
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/cpmorphology.py
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/filter.py
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/cpmorphology.py
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/filter.py
 
 There are test suites for the files at
 
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/tests/test_cpmorphology.py
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/pyCellProfiler/cellprofiler/cpmath/tests/test_filter.py
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/tests/test_cpmorphology.py
+- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/tests/test_filter.py
 
 Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
 5 August 2009::
