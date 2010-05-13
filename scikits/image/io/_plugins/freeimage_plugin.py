@@ -23,7 +23,7 @@ API = {
                          [ctypes.c_void_p]),
     'FreeImage_GetPitch': (ctypes.c_uint,
                            [ctypes.c_void_p]),
-    'FreeImage_GetBits': (ctypes.c_uint,
+    'FreeImage_GetBits': (ctypes.c_int,
                           [ctypes.c_void_p]),
     }
 
@@ -283,16 +283,23 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
     byte_size = height * pitch
     itemsize = dtype.itemsize
 
-    print byte_size
     if len(shape) == 3:
         strides = (itemsize, shape[0]*itemsize, pitch)
     else:
         strides = (itemsize, pitch)
     bits = _FI.FreeImage_GetBits(bitmap)
-    array = numpy.ndarray(shape, dtype=dtype,
-                          buffer=(ctypes.c_char*byte_size).from_address(bits),
-                          strides=strides)
-    return array
+
+    class DummyArray:
+        __array_interface__ = {
+            'data': (bits, True),
+            'strides': strides,
+            'typestr': '|u1',
+            'shape': shape,
+            }
+
+    # Still segfaulting on 64-bit machine because of illegal memory access
+
+    return array(DummyArray())
 
 def _array_from_bitmap(bitmap):
   """Convert a FreeImage bitmap pointer to a numpy array
