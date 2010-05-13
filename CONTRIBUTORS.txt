@@ -26,7 +26,7 @@
   Reading of paletted images
 
 - Zachary Pincus
-  Tracing of low cost paths
+  Tracing of low cost paths, FreeImage I/O plugin
 
 - Almar Klein
   Binary heap class for graph algorithms
