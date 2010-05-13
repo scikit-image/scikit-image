@@ -110,7 +110,7 @@ class FI_TYPES(object):
             elif bpp == 32:
                 extra_dims = [4]
             else:
-                raise ValueError('Cannot convert %d BPP bitmap'%bpp)
+                raise ValueError('Cannot convert %d BPP bitmap' % bpp)
         else:
             extra_dims = cls.extra_dims[fi_type]
         return numpy.dtype(dtype), extra_dims + [w, h]
@@ -292,7 +292,8 @@ def string_tag(bitmap, key, model=METADATA_MODELS.FIMD_EXIF_MAIN):
     """Retrieve the value of a metadata tag with the given string key as a
     string."""
     tag = ctypes.c_int()
-    if not _FI.FreeImage_GetMetadata(model, bitmap, str(key), ctypes.byref(tag)):
+    if not _FI.FreeImage_GetMetadata(model, bitmap, str(key),
+                                     ctypes.byref(tag)):
         return
     char_ptr = ctypes.c_char * _FI.FreeImage_GetTagLength(tag)
     return char_ptr.from_address(_FI.FreeImage_GetTagValue(tag)).raw()
@@ -315,7 +316,8 @@ def write(array, filename, flags=0):
         else:
             can_write = _FI.FreeImage_FIFSupportsExportType(ftype, fi_type)
         if not can_write:
-            raise TypeError('Cannot save image of this format to this file type')
+            raise TypeError('Cannot save image of this format '
+                            'to this file type')
         res = _FI.FreeImage_Save(ftype, bitmap, filename, flags)
         if not res:
             raise RuntimeError('Could not save image properly.')
