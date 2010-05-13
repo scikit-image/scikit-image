@@ -10,6 +10,30 @@ lib_dirs = ('.',
             '/opt/local/lib',
             )
 
+API = {
+    'FreeImage_Load': (ctypes.c_voidp,
+                       [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]),
+    'FreeImage_GetWidth': (ctypes.c_uint,
+                           [ctypes.c_void_p]),
+    'FreeImage_GetHeight': (ctypes.c_uint,
+                           [ctypes.c_void_p]),
+    'FreeImage_GetImageType': (ctypes.c_uint,
+                               [ctypes.c_void_p]),
+    'FreeImage_GetBPP': (ctypes.c_uint,
+                         [ctypes.c_void_p]),
+    'FreeImage_GetPitch': (ctypes.c_uint,
+                           [ctypes.c_void_p]),
+    'FreeImage_GetBits': (ctypes.c_uint,
+                          [ctypes.c_void_p]),
+    }
+
+# Albert's ctypes pattern
+def register_api(lib,api):
+    for f, (restype, argtypes) in api.iteritems():
+        func = getattr(lib, f)
+        func.restype = restype
+        func.argtypes = argtypes
+
 _FI = None
 for d in lib_dirs:
     try:
@@ -21,6 +45,8 @@ if not _FI:
     raise OSError('Could not find libFreeImage in any of the following '
                   'directories: \'%s\'' % '\', \''.join(lib_dirs))
 
+register_api(_FI, API)
+
 if sys.platform == 'win32':
     _functype = ctypes.WINFUNCTYPE
 else:
@@ -28,7 +54,7 @@ else:
 
 @_functype(None, ctypes.c_int, ctypes.c_char_p)
 def _error_handler(fif, message):
-    raise RuntimeError('FreeImage error: %s'%message)
+    raise RuntimeError('FreeImage error: %s' % message)
 
 _FI.FreeImage_SetOutputMessage(_error_handler)
 
@@ -255,8 +281,9 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
     pitch = _FI.FreeImage_GetPitch(bitmap)
     height = shape[-1]
     byte_size = height * pitch
-
     itemsize = dtype.itemsize
+
+    print byte_size
     if len(shape) == 3:
         strides = (itemsize, shape[0]*itemsize, pitch)
     else:
