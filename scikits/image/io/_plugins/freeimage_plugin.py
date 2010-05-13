@@ -195,8 +195,11 @@ class METADATA_MODELS(object):
     FIMD_CUSTOM = 10
 
 def read(filename, flags=0):
-    """Read an image to a numpy array of shape (width, height) for greyscale
-    images, or shape (nchannels, width, height) for RGB or RGBA images."""
+    """Read an image to a numpy array of shape (width, height) for
+    greyscale images, or shape (width, height, nchannels) for RGB or
+    RGBA images.
+
+    """
     bitmap = _read_bitmap(filename, flags)
     try:
         return _array_from_bitmap(bitmap)
@@ -278,7 +281,12 @@ def _array_from_bitmap(bitmap):
       b = array[0].copy()
       array[0] = array[2]
       array[2] = b
-  return array[...,::-1].copy()
+
+  array = array[..., ::-1]
+  if len(shape) == 3:
+      array = numpy.rollaxis(array, 0, 3)
+
+  return array.copy()
 
 def string_tag(bitmap, key, model=METADATA_MODELS.FIMD_EXIF_MAIN):
     """Retrieve the value of a metadata tag with the given string key as a
@@ -378,3 +386,13 @@ def _array_to_bitmap(array):
     except:
       _FI.FreeImage_Unload(bitmap)
       raise
+
+
+def imread(filename, as_grey=False, dtype=None):
+    """Warning: currenly as_grey and dtype is simply ignored.
+
+    """
+    return read(filename)
+
+def imsave(filename, arr):
+    write(filename, arr)
