@@ -397,4 +397,6 @@ def imread(filename, as_grey=False, dtype=None):
     return read(filename)
 
 def imsave(filename, arr):
-    write(filename, arr)
+    if arr.ndim == 3:
+        arr = numpy.rollaxis(arr, 2, 0)
+    write(arr, filename)
