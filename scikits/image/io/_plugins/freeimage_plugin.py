@@ -3,7 +3,7 @@ import numpy
 import sys
 import os
 
-lib_dirs = ('.',
+lib_dirs = (os.path.dirname(__file__),
             '/lib',
             '/usr/lib',
             '/usr/local/lib',
@@ -36,10 +36,16 @@ def register_api(lib,api):
 
 _FI = None
 for d in lib_dirs:
-    try:
-        _FI = numpy.ctypeslib.load_library('libFreeImage', d)
-    except OSError:
-        pass
+    for libname in ('libfreeimage', 'libFreeImage'):
+        try:
+            _FI = numpy.ctypeslib.load_library(libname, d)
+        except OSError:
+            pass
+        else:
+            break
+
+    if _FI is not None:
+        break
 
 if not _FI:
     raise OSError('Could not find libFreeImage in any of the following '
