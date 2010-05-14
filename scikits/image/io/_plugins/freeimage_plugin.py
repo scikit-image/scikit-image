@@ -23,7 +23,7 @@ API = {
                          [ctypes.c_void_p]),
     'FreeImage_GetPitch': (ctypes.c_uint,
                            [ctypes.c_void_p]),
-    'FreeImage_GetBits': (ctypes.c_int,
+    'FreeImage_GetBits': (ctypes.c_void_p,
                           [ctypes.c_void_p]),
     }
 
