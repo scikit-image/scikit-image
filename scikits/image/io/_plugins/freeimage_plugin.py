@@ -300,12 +300,12 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
             'data': (bits, True),
             'strides': strides,
             'typestr': '|u1',
-            'shape': shape,
+            'shape': tuple(shape),
             }
 
     # Still segfaulting on 64-bit machine because of illegal memory access
 
-    return array(DummyArray())
+    return numpy.array(DummyArray())
 
 def _array_from_bitmap(bitmap):
   """Convert a FreeImage bitmap pointer to a numpy array
@@ -323,8 +323,7 @@ def _array_from_bitmap(bitmap):
       array[2] = b
 
   array = array[..., ::-1]
-  if len(shape) == 3:
-      array = numpy.rollaxis(array, 0, 3)
+  array = array.T
 
   return array.copy()
 
