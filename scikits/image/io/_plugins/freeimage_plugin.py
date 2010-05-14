@@ -299,7 +299,7 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
         __array_interface__ = {
             'data': (bits, False),
             'strides': strides,
-            'typestr': dtype.byteorder + dtype.kind + str(dtype.itemsize),
+            'typestr': dtype.str,
             'shape': tuple(shape),
             }
 
