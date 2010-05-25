@@ -12,7 +12,10 @@ class cvdoc(object):
 
     base_url = 'http://opencv.willowgarage.com/documentation/'
     branch_urls = {'cv':
-                   {'image': 'image_processing',
+                   {'filter': 'image_filtering',
+                    'feature': 'feature_detection',
+                    'geometry': 'geometric_image_transformations',
+                    'transforms': 'miscellaneous_image_transformations',
                     'structural': 'structural_analysis',
                     'calibration': 'camera_calibration_and_3d_reconstruction'
                     },
@@ -36,7 +39,9 @@ class cvdoc(object):
             return func
 
     def _add_url(self, func):
-        name = func.__name__
+        # Remove cv prefix from name
+        name = func.__name__.lower()[2:]
+
         full_url = (self.base_url +
                     self.branch_urls[self.package][self.group] +
                     '.html' + '#' + name)
