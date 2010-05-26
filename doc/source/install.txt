@@ -5,6 +5,14 @@ Obtain the source from the git-repository at
 `http://github.com/stefanv/scikits.image
 <http://github.com/stefanv/scikits.image>`_.
 
+by running
+
+:: 
+
+  git clone http://github.com/stefanv/scikits.image.git
+
+in a terminal (You will need to have git installed on your machine).
+
 The SciKit can be installed globally using
 
 ::
