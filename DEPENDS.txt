@@ -1,8 +1,8 @@
 Build Requirements
 ------------------
-* Python 2.5
-* `Numpy <http://numpy.scipy.org/>`_
-* `Cython <http://www.cython.org/>`_
+* `Python >= 2.5 <http://python.org>`_
+* `Numpy >= 1.4 <http://numpy.scipy.org/>`_
+* `Cython >= 0.12 <http://www.cython.org/>`_
 
 Usage Requirements
 ------------------
