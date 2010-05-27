@@ -1,5 +1,9 @@
 Development process
 -------------------
+
+:doc:`Read this overview <gitwash/index>` of how to use Git with
+``scikits.image``.  Here's the long and short of it:
+
  * Go to `http://github.com/stefanv/scikits.image
    <http://github.com/stefanv/scikits.image>`_  and follow the instructions on
    making your own fork/branch.
@@ -17,8 +21,8 @@ All of this may be intimidating if you've never used git before, so we'd
 happily accept plain old unified diffs (``git diff`` or ``diff -u a.txt
 b.txt``) as well.
 
-Guidelines:
-```````````
+Guidelines
+``````````
  * All code should have tests (see "Test coverage" below for more details).
  * All code should be documented, to the same
    `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
