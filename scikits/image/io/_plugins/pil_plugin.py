@@ -92,3 +92,18 @@ def imsave(fname, arr):
 
     img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
     img.save(fname)
+
+def imshow(arr):
+    """Display an image, using PIL's default display command.
+
+    Parameters
+    ----------
+    arr : ndarray
+       Image to display.  Images of dtype float are assumed to be in
+       [0, 1].  Images of dtype uint8 are in [0, 255].
+
+    """
+    if np.issubdtype(arr.dtype, float):
+        arr = (arr * 255).astype(np.uint8)
+
+    Image.fromarray(arr).show()
