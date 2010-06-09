@@ -47,9 +47,7 @@ def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
         NumPy data-type specifier. If given, the returned image has this type.
         If None (default), the data-type is determined automatically.
     plugin : str
-        Name of plugin to use.  By default, the different plugins are
-        tried (starting with the Python Imaging Library) until a suitable
-        candidate is found.
+        Name of plugin to use (Python Imaging Library by default).
 
     Other Parameters
     ----------------
