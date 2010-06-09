@@ -21,8 +21,11 @@ def imread(fname, as_grey=False, dtype=None):
             im = im.convert('RGB')
 
     if as_grey and not \
-           im.mode in ('1', 'L', 'I', 'F', 'I;16', 'I;16L', 'I;16B'):
+           im.mode in ('1', 'L', 'I', 'F', 'I;16', 'I;16L', 'I;16B', 'LA'):
         im = im.convert('F')
+
+    if 'A' in im.mode:
+        im = im.convert('RGBA')
 
     return np.array(im, dtype=dtype)
 
