@@ -261,6 +261,11 @@ ctypedef void (*cvPyrUpPtr)(IplImage*, IplImage*, int)
 cdef cvPyrUpPtr c_cvPyrUp
 c_cvPyrUp = (<cvPyrUpPtr*><size_t>ctypes.addressof(cv.cvPyrUp))[0]
 
+# cvWatershed
+ctypedef void (*cvWatershedPtr)(IplImage*, IplImage*)
+cdef cvWatershedPtr c_cvWatershed
+c_cvWatershed = (<cvWatershedPtr*><size_t>ctypes.addressof(cv.cvWatershed))[0]
+
 # cvCalibrateCamera2
 ctypedef void (*cvCalibrateCamera2Ptr)(CvMat*, CvMat*, CvMat*,
        CvSize, CvMat*, CvMat*, CvMat*, CvMat*, int)
@@ -280,12 +285,32 @@ cdef cvFindChessboardCornersPtr c_cvFindChessboardCorners
 c_cvFindChessboardCorners = (<cvFindChessboardCornersPtr*><size_t>
                              ctypes.addressof(cv.cvFindChessboardCorners))[0]
 
+# cvFindExtrinsicCameraParams2
+ctypedef void (*cvFindExtrinsicCameraParams2Ptr)(CvMat*, CvMat*, CvMat*, CvMat*,
+                                                 CvMat*, CvMat*, int)
+cdef cvFindExtrinsicCameraParams2Ptr c_cvFindExtrinsicCameraParams2
+c_cvFindExtrinsicCameraParams2 = \
+                        (<cvFindExtrinsicCameraParams2Ptr*><size_t>
+                         ctypes.addressof(cv.cvFindExtrinsicCameraParams2))[0]
+
 # cvDrawChessboardCorners
 ctypedef void (*cvDrawChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*,
                                             int, int)
 cdef cvDrawChessboardCornersPtr c_cvDrawChessboardCorners
 c_cvDrawChessboardCorners = (<cvDrawChessboardCornersPtr*><size_t>
                              ctypes.addressof(cv.cvDrawChessboardCorners))[0]
+
+# cvFloodFill
+ctypedef void (*cvFloodFillPtr)(IplImage*, CvPoint, CvScalar, CvScalar,
+                                CvScalar, void*, int, IplImage*)
+cdef cvFloodFillPtr c_cvFloodFill
+c_cvFloodFill = (<cvFloodFillPtr*><size_t>ctypes.addressof(cv.cvFloodFill))[0]
+
+# cvMatchTemplate
+ctypedef void (*cvMatchTemplatePtr)(IplImage*, IplImage*, IplImage*, int)
+cdef cvMatchTemplatePtr c_cvMatchTemplate
+c_cvMatchTemplate = (<cvMatchTemplatePtr*><size_t>
+                     ctypes.addressof(cv.cvMatchTemplate))[0]
 
 #-------------------------------------------------------------------------------
 # Function Implementations
@@ -2070,6 +2095,54 @@ def cvPyrUp(np.ndarray src):
     return out
 
 
+#------------
+# cvWatershed
+#------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''cvWatershed(src, markers)
+
+Performs watershed segmentation.
+
+Parameters
+----------
+src : ndarray, 3D, dtype=uint8
+    The source image.
+markers : ndarray, 2D, dtype=int32
+    The markers identifying the regions of interest.
+    Marker values should be non-zero.
+    This array should have the same width and height as src.
+
+Returns
+-------
+None : None
+    The markers array is modified in place. The results of which
+    identify the segmented regions of the image.''')
+def cvWatershed(src, markers):
+
+    validate_array(src)
+    validate_array(markers)
+
+    assert_ndims(src, [3])
+    assert_dtype(src, [UINT8])
+
+    assert_ndims(markers, [2])
+    assert_dtype(markers, [INT32])
+
+    #assert src.shape[:2] == markers.shape[:2], \
+    #                'The src and markers array must have same width and height'
+
+    cdef IplImage srcimg
+    cdef IplImage markersimg
+
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(markers, &markersimg)
+
+    c_cvWatershed(&srcimg, &markersimg)
+
+    return None
+
+
 #-------------------
 # cvCalibrateCamera2
 #-------------------
@@ -2281,6 +2354,102 @@ def cvFindChessboardCorners(np.ndarray src, pattern_size,
     return out[:ncorners_found]
 
 
+#-----------------------------
+# cvFindExtrinsicCameraParams2
+#-----------------------------
+
+@cvdoc(package='cv', group='calibration', doc=\
+'''cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic_matrix,
+                                distortion_coeffs)
+
+Calculates the extrinsic camera parameters given a set of 3D points, their
+2D locations in the image, and the camera instrinsics matrix and distortion
+coefficients.
+
+i.e. given this information, it calculates the offset and rotation of the
+camera from the chessboard origin.
+
+Parameters
+----------
+object_points: ndarray, nx3
+    The 3D coordinates of the chessboard corners.
+image_points: ndarray, nx2
+    The 2D image coordinates of the object_points
+intrinsic_matrix: ndarray, 3x3, dtype=float64
+    The 2D camera intrinsics matrix that is the result of camera calibration
+distortion_coeffs: ndarray, 5-vector, dtype=float64
+    The 5 distortion coefficients that are the result of camera calibration
+
+Returns
+-------
+(rvec, tvec): ndarray 3-vector dtype=float64, ndarray 3-vector dtype=float64
+    rvec - the rotation vector representing the rotation of the camera
+    relative to the chessboard. The direction of the vector represents the
+    axis of rotation and its magnitude the amount of rotation.
+    tvec - the translation vector representing the offset of the camera
+    relative to the chessboard origin.''')
+def cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic_matrix,
+                                 distortion_coeffs):
+
+    validate_array(object_points)
+    validate_array(image_points)
+    validate_array(intrinsic_matrix)
+
+    assert_ndims(object_points, [2])
+    assert_dtype(object_points, [FLOAT32, FLOAT64])
+    assert object_points.shape[1] == 3, 'object_points should be nx3'
+
+    assert_ndims(image_points, [2])
+    assert_dtype(image_points, [FLOAT32, FLOAT64])
+    assert image_points.shape[1] == 2, 'image_points should be nx2'
+
+    assert_dtype(intrinsic_matrix, [FLOAT64])
+    assert intrinsic_matrix.shape == (3, 3), 'instrinsics should be 3x3'
+
+    assert_dtype(distortion_coeffs, [FLOAT64])
+    assert distortion_coeffs.shape == (5,), 'distortions should be 5-vector'
+
+    # allocate the numpy return arrays
+    cdef np.npy_intp shape[1]
+    shape[0] = 3
+    cdef np.ndarray rvec = new_array(1, shape, FLOAT64)
+    cdef np.ndarray tvec = new_array(1, shape, FLOAT64)
+
+    # allocate the cv images
+    cdef IplImage obj_img
+    cdef IplImage img_img
+    cdef IplImage intr_img
+    cdef IplImage dist_img
+    cdef IplImage rot_img
+    cdef IplImage tran_img
+    populate_iplimage(object_points, &obj_img)
+    populate_iplimage(image_points, &img_img)
+    populate_iplimage(intrinsic_matrix, &intr_img)
+    populate_iplimage(distortion_coeffs, &dist_img)
+    populate_iplimage(rvec, &rot_img)
+    populate_iplimage(tvec, &tran_img)
+
+    # allocate the cv mats
+    cdef CvMat* cvobj = cvmat_ptr_from_iplimage(&obj_img)
+    cdef CvMat* cvimg = cvmat_ptr_from_iplimage(&img_img)
+    cdef CvMat* cvint = cvmat_ptr_from_iplimage(&intr_img)
+    cdef CvMat* cvdis = cvmat_ptr_from_iplimage(&dist_img)
+    cdef CvMat* cvrot = cvmat_ptr_from_iplimage(&rot_img)
+    cdef CvMat* cvtrn = cvmat_ptr_from_iplimage(&tran_img)
+
+    # the last argument is new to OpenCV 2.0 and tells it NOT to use
+    # an extrinsics guess
+    c_cvFindExtrinsicCameraParams2(cvobj, cvimg, cvint, cvdis, cvrot, cvtrn, 0)
+
+    PyMem_Free(cvobj)
+    PyMem_Free(cvimg)
+    PyMem_Free(cvint)
+    PyMem_Free(cvdis)
+    PyMem_Free(cvrot)
+    PyMem_Free(cvtrn)
+
+    return (rvec, tvec)
+
 #------------------------
 # cvFindChessboardCorners
 #------------------------
@@ -2354,3 +2523,242 @@ def cvDrawChessboardCorners(np.ndarray src, pattern_size, np.ndarray corners,
         return out
 
 
+#------------
+# cvFloodFill
+#------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''cvFloodFill(np.ndarray src, seed_point, new_val, low_diff, high_diff,
+                         mask=None, connect_diag=False, mask_only=False,
+                         mask_fillval=None, fixed_range=False)
+
+Fills a connected component with the given color.
+
+Parameters
+----------
+src : ndarray, ndims=[2, 3], dtypes[uint8, float32]
+    The source image
+seed_point : (x, y) int tuple
+    The starting point of the fill in image pixel coordinates.
+new_val : scalar double or 3-tuple (R, G, B) doubles
+    The color value of the repainted area. If a scalar, the RGB values
+    are all set equal to the scalar.
+low_diff : scalar double or 3-tuple (R, G, B) doubles
+    Maximal lower brightness/color difference between the currently
+    observed pixel and one of its neighbors belonging to the component,
+    or a seed pixel being added to the component. Must be positive.
+high_diff : scalar double or 3-tuple (R, G, B) doubles
+    Maximal upper brightness/color difference between the currently
+    observed pixel and one of its neighbors belonging to the component,
+    or a seed pixel being added to the component. Must be positive.
+mask : ndarray 2d, dtype=uint8 or None
+    The mask in which to draw the results and/or use as a mask.
+    See the opencv documentation for more details.
+    If not None, the mask shape must be 2 pixels wider and taller than src.
+connect_diag : bool
+    If True, implies connectivity across the diagonals in addition to
+    the standard horizontal and vertical directions.
+mask_only : bool
+    If True, fill the mask instead of the image.
+    Mask must not be None
+mask_fillval : int 0 - 255 or None
+    The value to fill the mask if mask is not None.
+    If None, defaults to 1
+fixed_range : bool
+    If True, fills relative to seed value, else, fills relative to
+    neighbors value.
+
+Returns
+-------
+None : None
+    This is an in-place operation which draws into src and/or image depending
+    on the flags set in the input arguments''')
+def cvFloodFill(np.ndarray src, seed_point, new_val, low_diff, high_diff,
+                mask=None, connect_diag=False, mask_only=False,
+                mask_fillval=None, fixed_range=False):
+
+    validate_array(src)
+    assert_ndims(src, [2, 3])
+    assert_dtype(src, [UINT8, FLOAT32])
+
+    # src
+    cdef IplImage srcimg
+    populate_iplimage(src, &srcimg)
+
+    # seed_point
+    if len(seed_point) != 2:
+        raise ValueError('seed_point should be an (x, y) tuple of ints')
+    cdef CvPoint cv_seed_point
+    cdef int x = <int>seed_point[0]
+    cdef int y = <int>seed_point[1]
+    cdef int xmax = <int>src.shape[1]
+    cdef int ymax = <int>src.shape[0]
+    if x < 0 or x > xmax or y < 0 or y > ymax:
+        raise ValueError('seed_point must be image pixel coordinates')
+    cv_seed_point.x = x
+    cv_seed_point.y = y
+
+    # loop counter
+    cdef int i
+    cdef double temp
+
+    # new_val
+    cdef CvScalar cv_new_val
+    if hasattr(new_val, '__len__'):
+        if len(new_val) != 3:
+            raise ValueError('If not a scalar, new_val must be 3 tuple')
+        for i in range(3):
+            cv_new_val.val[i] = <double>new_val[i]
+    else:
+        temp = <double>new_val
+        for i in range(3):
+            cv_new_val.val[i] = temp
+
+    # low_diff
+    cdef CvScalar cv_low_diff
+    if hasattr(low_diff, '__len__'):
+        if len(low_diff) != 3:
+            raise ValueError('If not a scalar, low_diff must be 3 tuple')
+        for i in range(3):
+            cv_low_diff.val[i] = <double>low_diff[i]
+    else:
+        temp = <double>low_diff
+        for i in range(3):
+            cv_low_diff.val[i] = temp
+
+    # high_diff
+    cdef CvScalar cv_high_diff
+    if hasattr(high_diff, '__len__'):
+        if len(high_diff) != 3:
+            raise ValueError('If not a scalar, high_diff must be 3 tuple')
+        for i in range(3):
+            cv_high_diff.val[i] = <double>high_diff[i]
+    else:
+        temp = <double>high_diff
+        for i in range(3):
+            cv_high_diff.val[i] = temp
+
+    # mask
+    cdef IplImage maskimg
+    cdef IplImage* maskimgptr = NULL
+    if mask is not None:
+        validate_array(mask)
+        assert_ndims(mask, [2])
+        assert_dtype(mask, [UINT8])
+        if mask.shape[0] != (src.shape[0] +  2) or \
+        mask.shape[1] != (src.shape[1] + 2):
+            raise ValueError('mask must be 2 pixels wider and taller than src.')
+        populate_iplimage(mask, &maskimg)
+        maskimgptr = &maskimg
+
+    # flags
+    cdef int flags
+
+    # connect_diag
+    cdef int cv_connect_diag = 4
+    if connect_diag:
+        cv_connect_diag = 8
+
+    # mask_only
+    cdef int cv_mask_only = 0
+    if mask_only:
+        if mask is None:
+            raise ValueError('If mask_only==True, mask must not be None')
+        cv_mask_only = (1 << 17)
+
+    # mask_fillval
+    cdef int cv_mask_fillval = (1 << 8)
+    if mask_fillval:
+        if mask_fillval < 0 or mask_fillval > 255:
+            raise ValueError('mask_fillval must be in range 0-255')
+        cv_mask_fillval = ((<int>mask_fillval) << 8)
+
+    # fixed_range
+    cdef int cv_fixed_range = 0
+    if fixed_range:
+        cv_fixed_range = (1 << 16)
+
+    flags = cv_connect_diag | cv_mask_only | cv_mask_fillval | cv_fixed_range
+
+    c_cvFloodFill(&srcimg, cv_seed_point, cv_new_val, cv_low_diff, cv_high_diff,
+                  NULL, flags, maskimgptr)
+
+    return None
+
+
+#----------------
+# cvMatchTemplate
+#----------------
+
+@cvdoc(package='cv', group='image', doc=\
+'''cvMatchTemplate(src, template, method)
+
+Compares a template against overlapped image regions and returns a match array
+dependent on the match method requested.
+
+Parameters
+----------
+src : ndarray, ndims=[2, 3], dtype=[uint8, float32]
+    The source image.
+template : ndarray, ndim=src.ndim, dtype=src.dtype
+    The template to match in the source.
+method : int
+    The method to use for matching.
+    One of:
+        CV_TM_SQDIFF
+        CV_TM_SQDIFF_NORMED
+        CV_TM_CCORR
+        CV_TM_CCORR_NORMED
+        CV_TM_CCOEFF
+        CV_TM_CCOEFF_NORMED
+
+Returns
+-------
+out : ndarray, 2d, dtype=float3d
+    The results of the template matching.
+    The size of this array (H - h + 1) x (W - w + 1)
+    where (H, W) is (Height, Width) of src and (h, w) is
+    (height, width) of template.
+
+Notes
+-----
+After the function finishes the comparison, the best matches can be found
+as global minimums (CV_TM_SQDIFF) or maximums (CV_TM_CCORR and CV_TM_CCOEFF)
+using the appropriate numpy functions. In the case of a color image,
+template summation in the numerator and each sum in the denominator
+is done over all of the channels (and separate mean values are used for each
+channel).''')
+def cvMatchTemplate(np.ndarray src, np.ndarray template, int method):
+
+    validate_array(src)
+    validate_array(template)
+
+    assert_ndims(src, [2, 3])
+    assert_dtype(src, [UINT8, FLOAT32])
+
+    assert_ndims(template, [src.ndim])
+    assert_dtype(template, [src.dtype])
+
+    if method not in [CV_TM_SQDIFF_NORMED, CV_TM_CCORR, CV_TM_CCORR_NORMED,
+                      CV_TM_CCOEFF, CV_TM_CCOEFF_NORMED]:
+        raise ValueError('Unknown method type')
+
+    if src.shape[0] <= template.shape[0] or src.shape[1] <= template.shape[1]:
+        raise ValueError('template must be smaller than source image')
+
+    cdef np.npy_intp outshape[2]
+    outshape[0] = <np.npy_intp>(src.shape[0] - template.shape[0] + 1)
+    outshape[1] = <np.npy_intp>(src.shape[1] - template.shape[1] + 1)
+    cdef np.ndarray out = new_array(2, outshape, FLOAT32)
+
+    cdef IplImage srcimg
+    cdef IplImage templateimg
+    cdef IplImage outimg
+
+    populate_iplimage(src, &srcimg)
+    populate_iplimage(template, &templateimg)
+    populate_iplimage(out, &outimg)
+
+    c_cvMatchTemplate(&srcimg, &templateimg, &outimg, method)
+
+    return out

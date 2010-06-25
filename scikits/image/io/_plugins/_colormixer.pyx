@@ -248,6 +248,7 @@ cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     else:
         pass
 
+
     if R < G:
         MIN = R
         MAX = G

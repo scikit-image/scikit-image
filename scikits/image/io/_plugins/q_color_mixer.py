@@ -66,7 +66,7 @@ class IntelligentSlider(QWidget):
         return self.slider.value() * self.a + self.b
 
 
-class MixerPanel(QWidget):
+class MixerPanel(QtGui.QFrame):
     '''A color mixer to hook up to an image.
     You pass the image you the panel to operate on
     and it operates on that image in place. You also
@@ -74,7 +74,8 @@ class MixerPanel(QWidget):
     This callback is called every time the mixer modifies
     your image.'''
     def __init__(self, img):
-        QWidget.__init__(self)
+        QtGui.QFrame.__init__(self)
+        #self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Sunken)
 
         self.img = img
         self.mixer = ColorMixer(self.img)

@@ -1,6 +1,6 @@
 import numpy as np
 
-from PyQt4.QtGui import QWidget, QPainter, QGridLayout, QColor
+from PyQt4.QtGui import QWidget, QPainter, QGridLayout, QColor, QFrame
 
 from util import histograms
 
@@ -103,7 +103,7 @@ class ColorHistogram(QWidget):
         self.repaint()
 
 
-class QuadHistogram(QWidget):
+class QuadHistogram(QFrame):
     '''A class which uses ColorHistogram to draw
     the 4 histograms of an image. R, G, B, and Value.
 
@@ -113,14 +113,17 @@ class QuadHistogram(QWidget):
     '''
 
     def __init__(self, img, layout='vertical', order=['R', 'G', 'B', 'V']):
-        QWidget.__init__(self)
+        QFrame.__init__(self)
+
         r, g, b, v = histograms(img, 100)
         self.r_hist = ColorHistogram(r, (255, 0, 0))
         self.g_hist = ColorHistogram(g, (0, 255, 0))
         self.b_hist = ColorHistogram(b, (0, 0, 255))
         self.v_hist = ColorHistogram(v, (0, 0, 0))
 
+        self.setFrameStyle(QFrame.StyledPanel|QFrame.Sunken)
         self.layout = QGridLayout(self)
+        self.layout.setMargin(0)
 
         order_map = {'R': self.r_hist, 'G': self.g_hist, 'B': self.b_hist,
                      'V': self.v_hist}

@@ -201,5 +201,15 @@ CV_64FC2 = _CV_MAKETYPE(CV_64F,2)
 CV_64FC3 = _CV_MAKETYPE(CV_64F,3)
 CV_64FC4 = _CV_MAKETYPE(CV_64F,4)
 
+#-------------------------------------------------------------------------------
+# Template Matching
+#-------------------------------------------------------------------------------
+CV_TM_SQDIFF = 0
+CV_TM_SQDIFF_NORMED = 1
+CV_TM_CCORR = 2
+CV_TM_CCORR_NORMED = 3
+CV_TM_CCOEFF = 4
+CV_TM_CCOEFF_NORMED = 5
+
 
 

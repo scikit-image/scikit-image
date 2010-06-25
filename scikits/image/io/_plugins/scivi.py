@@ -66,9 +66,11 @@ class ImageLabel(QLabel):
         self.setPixmap(pm)
 
 
-class RGBHSVDisplay(QWidget):
+class RGBHSVDisplay(QFrame):
     def __init__(self):
-        QWidget.__init__(self)
+        QFrame.__init__(self)
+        self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Sunken)
+
         self.posx_label = QLabel('X-pos:')
         self.posx_value = QLabel()
         self.posy_label = QLabel('Y-pos:')
@@ -129,8 +131,15 @@ class SciviImageWindow(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
         self.label = ImageLabel(self, arr)
-        self.layout.addWidget(self.label, 0, 0)
-        self.layout.addLayout
+        self.label_container = QFrame()
+        self.label_container.setFrameShape(QtGui.QFrame.StyledPanel|QtGui.QFrame.Sunken)
+        self.label_container.setLineWidth(1)
+
+        self.label_container.layout = QtGui.QGridLayout(self.label_container)
+        self.label_container.layout.setMargin(0)
+        self.label_container.layout.addWidget(self.label, 0, 0)
+        self.layout.addWidget(self.label_container, 0, 0)
+
         self.mgr.add_window(self)
         self.main_widget.show()
 
