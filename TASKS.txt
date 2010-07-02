@@ -73,6 +73,10 @@ Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
   commercial product whereas CellProfiler needs the more stringent
   protection of GPL as an application.
 
+In 2010, Vebjorn Ljosa officially released parts of the code under a
+BSD license (:doc:`cell_profiler` | `original message
+<http://groups.google.com/group/scikits-image/browse_thread/thread/c4f8fc584bfd839d>`_).
+
 Thanks to Lee Kamentsky, Thouis Jones and Anne Carpenter and their colleagues
 who contributed.
 
