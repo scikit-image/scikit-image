@@ -37,11 +37,13 @@ class TestImageCollection():
             self.collection.files = f
         assert_raises(AttributeError, set_files, 'newfiles')
 
-    def test_as_grey_property(self):
-        self.collection.as_grey = False
-        assert self.collection[1].ndim == 3
-        self.collection.as_grey = True
-        assert self.collection[1].ndim == 2
+    def test_custom_load(self):
+        load_pattern = [(1, 'one'), (2, 'two')]
+        def load_fn(x):
+            return x
+
+        ic = ImageCollection(load_pattern, load_func=load_fn)
+        assert_equal(ic[1], (2, 'two'))
 
 
 class TestMultiImage():

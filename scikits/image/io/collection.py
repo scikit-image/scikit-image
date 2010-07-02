@@ -150,7 +150,7 @@ class MultiImage(object):
         return self._numframes
 
     def __str__(self):
-        return str(self.filename) + ' [%s frames]'%self._numframes
+        return str(self.filename) + ' [%s frames]' % self._numframes
 
 
 class ImageCollection(object):
@@ -160,27 +160,56 @@ class ImageCollection(object):
 
     Parameters
     ----------
-    file_pattern : str or list of str
-        Path(s) and pattern(s) of files to load. The path can be absolute
-        or relative. If given as a list of strings, each string in the list
-        is a separate pattern. Files are found by passing the pattern(s) to
-        the ``glob.glob`` function.
+    load_pattern : str or list
+        Pattern glob or filenames to load. The path can be absolute or
+        relative.  Multiple patterns should be separated by a colon,
+        e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
+        implementation notes below.
     conserve_memory : bool, optional
         If True, never keep more than one in memory at a specific
         time.  Otherwise, images will be cached once they are loaded.
-    as_grey : bool, optional
-        If True, convert the input images to grey-scale. This does not
-        affect images that are already in a grey-scale format.
-    dtype : dtype, optional
-        NumPy data-type specifier. If given, the returned image has this type.
-        If None (default), the data-type is determined automatically.
+
+    Other parameters
+    ----------------
+    load_func : callable
+        ``imread`` by default.  See notes below.
 
     Attributes
     ----------
     files : list of str
-        A list of files in the collection, ordered alphabetically.
-    as_grey : bool
-        Whether images are converted to grey-scale.
+        If a glob string is given for `load_pattern`, this attribute
+        stores the expanded file list.  Otherwise, this is simply
+        equal to `load_pattern`.
+
+    Notes
+    -----
+    ImageCollection can be modified to load images from an arbitrary
+    source by specifying a combination of `load_pattern` and
+    `load_func`.  For an ImageCollection ``ic``, ``ic[5]`` uses
+    ``load_func(file_pattern[5])`` to load the image.
+
+    Imagine, for example, an ImageCollection that loads every tenth
+    frame from a video file::
+
+      class AVILoader:
+          video_file = 'myvideo.avi'
+
+          def __call__(self, frame):
+              return video_read(self.video_file, frame)
+
+      avi_load = AVILoader()
+
+      frames = range(0, 1000, 10) # 0, 10, 20, ...
+      ic = ImageCollection(frames, load_func=avi_load)
+
+      x = ic[5] # calls avi_load(frames[5]) or equivalently avi_load(50)
+
+    Another use of ``load_func`` would be to convert all images to ``uint8``::
+
+      def imread_convert(f):
+          return imread(f).astype(np.uint8)
+
+      ic = ImageCollection('/tmp/*.png', load_func=imread_convert)
 
     Examples
     --------
@@ -193,23 +222,19 @@ class ImageCollection(object):
     >>> coll[0].shape
     (128, 128, 3)
 
-    When `as_grey` is set to True, a color image is returned in grey-scale:
-
-    >>> coll = io.ImageCollection(data_dir + '/lena*.png', as_grey=True)
-    >>> coll[0].shape
-    (128, 128)
+    >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
 
     """
-    def __init__(self, file_pattern, conserve_memory=True, as_grey=False,
-                 dtype=None):
+    def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
-        if isinstance(file_pattern, basestring):
-            self._files = sorted(glob(file_pattern))
-        elif isinstance(file_pattern, list):
+        if isinstance(load_pattern, basestring):
+            load_pattern = load_pattern.split(':')
             self._files = []
-            for pattern in file_pattern:
+            for pattern in load_pattern:
                 self._files.extend(glob(pattern))
             self._files.sort()
+        else:
+            self._files = load_pattern
 
         if conserve_memory:
             memory_slots = 1
@@ -218,27 +243,18 @@ class ImageCollection(object):
 
         self._conserve_memory = conserve_memory
         self._cached = None
-        self._as_grey = as_grey
-        self._dtype = dtype
+
+        if load_func is None:
+            self.load_func = imread
+        else:
+            self.load_func = load_func
+
         self.data = np.empty(memory_slots, dtype=object)
 
     @property
     def files(self):
         return self._files
 
-    def _get_as_grey(self):
-        """Whether images are converted to grey-scale.
-
-        If this property is changed, all images in memory get reloaded.
-        """
-        return self._as_grey
-
-    def _set_as_grey(self, newgrey):
-        if not newgrey == self._as_grey:
-            self._as_grey = newgrey
-            self.reload()
-    as_grey = property(_get_as_grey, _set_as_grey)
-    
     @property
     def conserve_memory(self):
         return self._conserve_memory
@@ -263,8 +279,7 @@ class ImageCollection(object):
 
         if (self.conserve_memory and n != self._cached) or \
                (self.data[idx] is None):
-            self.data[idx] = imread(self.files[n], self.as_grey,
-                                    dtype=self._dtype)
+            self.data[idx] = self.load_func(self.files[n])
             self._cached = n
 
         return self.data[idx]
@@ -291,31 +306,13 @@ class ImageCollection(object):
         return str(self.files)
 
     def reload(self, n=None):
-        """Reload one or more images from file.
+        """Clear the image cache.
 
         Parameters
         ----------
         n : None or int
-            The number of the image to reload. If None (default), all images in
-            memory are reloaded.  If `n` specifies an image not yet in memory,
-            it is loaded.
+            Clear the cache for this image only. By default, the
+            entire cache is erased.
 
-        Returns
-        -------
-        None
-
-        Notes
-        -----
-        `reload` is used to reload all images in memory when `as_grey` is
-        changed.
         """
-        if n is not None:
-            n = self._check_numimg(n)
-            idx = n % len(self.data)
-            self.data[idx] = imread(self.files[n], self.as_grey,
-                                    dtype=self._dtype)
-        else:
-            for idx, img in enumerate(self.data):
-                if img is not None:
-                    self.data[idx] = imread(self.files[idx], self.as_grey,
-                                            dtype=self._dtype)
+        self.data = np.empty_like(self.data)
