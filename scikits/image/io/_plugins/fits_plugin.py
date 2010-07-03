@@ -111,12 +111,12 @@ def FITSFactory(image_ext):
     Parameters
     ----------
 
-       image_ext : tuple
-           FITS extension to load, in the format ``(filename, ext_num)``.
-           The ``(extname, extver)`` format is unsupported, since this
-           function is not called directly by the user and
-           ``imread_collection()`` does the work of figuring out which
-           extensions need loading.
+    image_ext : tuple
+        FITS extension to load, in the format ``(filename, ext_num)``.
+        The FITS ``(extname, extver)`` format is unsupported, since this
+        function is not called directly by the user and
+        ``imread_collection()`` does the work of figuring out which
+        extensions need loading.
 
     """
 
