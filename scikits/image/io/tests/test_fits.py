@@ -4,7 +4,7 @@ from numpy.testing import run_module_suite
 from numpy.testing.decorators import skipif
 import scikits.image.io as io
 from scikits.image import data_dir
-import scikits.image.io._plugins.fits_plugin as fplug
+
 
 pyfits_available = True
 
@@ -12,7 +12,8 @@ try:
     import pyfits
 except ImportError:
     pyfits_available = False
-
+else:
+    import scikits.image.io._plugins.fits_plugin as fplug
 
 def test_fits_plugin_import():
     # Make sure we get an import exception if PyFITS isn't there
