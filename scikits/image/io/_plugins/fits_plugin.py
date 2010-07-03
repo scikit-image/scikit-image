@@ -27,17 +27,18 @@ def imread(fname, as_grey=True, dtype=None):
     Returns
     -------
     img_array : ndarray
-        Unlike other plugins where the different colour bands/channels are
-        stored in the third dimension, here the native dimensionality defined
-        in the FITS file is used.
+        Unlike plugins such as PIL, where different colour bands/channels are
+        stored in the third dimension, FITS images are greyscale-only and can
+        be N-dimensional, so an array of the native FITS dimensionality is
+        returned, without colour channels.
 
         Currently if no image is found in the file, None will be returned
 
     Notes
     -----
 
-    Currently FITS imread() always returns the first image extension when
-    given a Multi-Extension FITS file; use imread_collection() (which does
+    Currently FITS ``imread()`` always returns the first image extension when
+    given a Multi-Extension FITS file; use ``imread_collection()`` (which does
     lazy loading) to get all the extensions at once.
 
     """
@@ -80,7 +81,7 @@ def imread_collection(load_pattern, conserve_memory=True):
 
     intype = type(load_pattern)
     if intype is not list and intype is not str:
-        raise TypeError("Input must be a file or list of files")
+        raise TypeError("Input must be a filename or list of filenames")
 
     # Ensure we have a list, otherwise we'll end up iterating over the string:
     if intype is not list:
@@ -104,10 +105,6 @@ def imread_collection(load_pattern, conserve_memory=True):
                               conserve_memory=conserve_memory)
 
 
-    imread(fname, as_grey=as_grey, dtype=dtype,
-                       plugin=plugin, **plugin_args)
-
-
 def FITSFactory(image_ext):
     """Load an image extension from a FITS file and return a NumPy array
     
@@ -115,10 +112,11 @@ def FITSFactory(image_ext):
     ----------
 
        image_ext : tuple
-           FITS extension to load, in the format (filename, ext_num).
-           The (extname, extver) format is unsupported, since this function
-           is not called directly by the user and imread_collection() does
-           the work of figuring out which extensions need loading.
+           FITS extension to load, in the format ``(filename, ext_num)``.
+           The ``(extname, extver)`` format is unsupported, since this
+           function is not called directly by the user and
+           ``imread_collection()`` does the work of figuring out which
+           extensions need loading.
 
     """
 
