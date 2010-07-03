@@ -12,6 +12,7 @@ from glob import glob
 plugin_store = {'imread': [],
                 'imsave': [],
                 'imshow': [],
+                'imread_collection': [],
                 '_app_show': []}
 
 plugin_provides = {}
@@ -54,7 +55,7 @@ def call(kind, *args, **kwargs):
 
     Parameters
     ----------
-    kind : {'show', 'save', 'read'}
+    kind : {'imshow', 'imsave', 'imread', 'imread_collection'}
         Function to look up.
     plugin : str, optional
         Plugin to load.  Defaults to None, in which case the first
@@ -94,7 +95,7 @@ def use(name, kind=None):
     ----------
     name : str
         Name of plugin.
-    kind : {'save', 'read', 'show'}, optional
+    kind : {'imsave', 'imread', 'imshow', 'imread_collection'}, optional
         Set the plugin for this function.  By default,
         the plugin is set for all functions.
 
