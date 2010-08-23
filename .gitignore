@@ -13,3 +13,5 @@ source/api
 build
 dist
 scikits/image/version.py
+*.swp
+
