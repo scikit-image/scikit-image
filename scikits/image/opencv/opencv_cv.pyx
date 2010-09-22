@@ -1,9 +1,10 @@
 # -*- python -*-
 
 import ctypes
-import numpy as np
 
 cimport numpy as np
+import numpy as np
+
 from python cimport *
 from stdlib cimport *
 from opencv_type cimport *
@@ -1572,7 +1573,7 @@ Using standard sigma for small kernels (3x3 to 7x7)
 gives better speed.''')
 def cvSmooth(np.ndarray src, int smoothtype=CV_GAUSSIAN, int param1=3,
              int param2=0, double param3=0, double param4=0,
-             bool in_place=False):
+             bint in_place=False):
 
     validate_array(src)
 
