@@ -16,3 +16,15 @@ def test_hough():
 
     assert_equal(out.max(), 100)
     assert_equal(len(angles), 180)
+
+def test_hough_angles():
+    img = np.zeros((10, 10))
+    img[0, 0] = 1
+
+    out, angles, d = hough(img, np.linspace(0, 360, 10))
+
+    assert_equal(len(angles), 10)
+
+if __name__ == "__main__":
+    run_module_suite()
+

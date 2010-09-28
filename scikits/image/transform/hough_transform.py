@@ -1,4 +1,4 @@
-## Copyright (C) 2006 Stefan van der Walt <stefan@sun.ac.za>
+## Copyright (C) 2005 Stefan van der Walt <stefan@sun.ac.za>
 ##
 ## Redistribution and use in source and binary forms, with or without
 ## modification, are permitted provided that the following conditions are
@@ -78,7 +78,7 @@ def hough(img, angles=None):
 
     img = img.astype(bool)
 
-    if not angles:
+    if angles is None:
         angles = np.linspace(-90,90,180)
 
     theta = angles / 180. * np.pi
