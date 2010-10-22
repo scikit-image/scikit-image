@@ -389,6 +389,9 @@ def write_multipage(arrays, filename, flags=0):
     finally:
         _FI.FreeImage_CloseMultiBitmap(multibitmap, flags)
 
+# 4-byte quads of 0,v,v,v from 0,0,0,0 to 0,255,255,255
+_GREY_PALETTE = numpy.arange(0, 0x01000000, 0x00010101, dtype=numpy.uint32)
+
 def _array_to_bitmap(array):
     """Allocate a FreeImage bitmap and copy a numpy array into it.
 
@@ -429,7 +432,11 @@ def _array_to_bitmap(array):
                 wrapped_array[3] = n(array[:,:,3])
         else:
             wrapped_array[:] = n(array)
-
+        if len(shape) == 2 and dtype.type == numpy.uint8:
+            palette = _FI.FreeImage_GetPalette(bitmap)
+            if not palette:
+                raise RuntimeError('Could not get image palette')
+            ctypes.memmove(palette, _GREY_PALETTE.ctypes.data, 1024)
         return bitmap, fi_type
     except:
       _FI.FreeImage_Unload(bitmap)
