@@ -44,7 +44,7 @@ References
 from __future__ import division
 
 __all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
-           'rgb2rgbcie', 'rgbcie2rgb']
+           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray']
 
 __docformat__ = "restructuredtext en"
 
@@ -264,7 +264,7 @@ xyz_from_rgb =  np.array([[0.412453, 0.357580, 0.180423],
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
 # From http://en.wikipedia.org/wiki/CIE_1931_color_space
-# Note: Travis' code did not have the divide by 0.17697
+# Note: Travis's code did not have the divide by 0.17697
 xyz_from_rgbcie = np.array([[0.49, 0.31, 0.20],
                             [0.17697, 0.81240, 0.01063],
                             [0.00, 0.01, 0.99]]) / 0.17697
@@ -275,6 +275,10 @@ rgbcie_from_xyz = linalg.inv(xyz_from_rgbcie)
 rgbcie_from_rgb = np.dot(rgbcie_from_xyz, xyz_from_rgb)
 rgb_from_rgbcie = np.dot(rgb_from_xyz, xyz_from_rgbcie)
 
+
+grey_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
+                          [0, 0, 0],
+                          [0, 0, 0]])
 
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
@@ -338,6 +342,7 @@ def xyz2rgb(xyz):
     >>> import os
     >>> from scikits.image import data_dir
     >>> from scikits.image.io import imread
+    >>> from scikits.image.color import rgb2xyz, xyz2rgb
 
     >>> lena = imread(os.path.join(data_dir, 'lena.png'))
     >>> lena_xyz = rgb2xyz(lena)
@@ -410,6 +415,7 @@ def rgb2rgbcie(rgb):
     >>> import os
     >>> from scikits.image import data_dir
     >>> from scikits.image.io import imread
+    >>> from scikits.image.color import rgb2rgbcie
 
     >>> lena = imread(os.path.join(data_dir, 'lena.png'))
     >>> lena_rgbcie = rgb2rgbcie(lena)
@@ -443,9 +449,54 @@ def rgbcie2rgb(rgbcie):
     >>> import os
     >>> from scikits.image import data_dir
     >>> from scikits.image.io import imread
+    >>> from scikits.image.color import rgb2rgbcie, rgbcie2rgb
 
     >>> lena = imread(os.path.join(data_dir, 'lena.png'))
     >>> lena_rgbcie = rgb2rgbcie(lena)
     >>> lena_rgb = rgbcie2rgb(lena_hsv)
     """
     return _convert(rgb_from_rgbcie, rgbcie)
+
+def rgb2grey(rgb):
+    """Compute luminance of an RGB image.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The luminance image, a 2-D array.
+
+    Raises
+    ------
+    ValueError
+        If `rgb2grey` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] http://www.poynton.com/PDFs/ColorFAQ.pdf
+
+    Notes
+    -----
+    The weights used in this conversion are calibrated for contemporary
+    CRT phosphors::
+
+        Y = 0.2125 R + 0.7154 G + 0.0721 B
+
+    Examples
+    --------
+    >>> import os
+    >>> from scikits.image import data_dir
+    >>> from scikits.image.io import imread
+    >>> from scikits.image.color import rgb2grey
+
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_grey = rgb2grey(lena)
+    """
+    return _convert(grey_from_rgb, rgb)[..., 0]
+
+rgb2gray = rgb2grey
+

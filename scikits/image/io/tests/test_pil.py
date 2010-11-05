@@ -9,16 +9,13 @@ from scikits.image.io import imread, imsave
 from scikits.image.io._plugins.pil_plugin import _palette_is_grayscale
 
 def test_imread_flatten():
-    # a color image is flattened and returned as float32
+    # a color image is flattened
     img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
-    assert img.dtype == np.float32
+    assert img.ndim == 2
+    assert img.dtype == np.float64
     img = imread(os.path.join(data_dir, 'camera.png'), flatten=True)
     # check that flattening does not occur for an image that is grey already.
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
-
-def test_imread_dtype():
-    img = imread(os.path.join(data_dir, 'camera.png'), dtype=np.float64)
-    assert img.dtype == np.float64
 
 def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_gray.png'))
