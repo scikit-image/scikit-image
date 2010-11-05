@@ -1,4 +1,5 @@
 Version 0.3
 -----------
-- Remove ``as_grey``, ``dtype`` keywords from imread and ImageCollection
+- Remove ``as_grey``, ``dtype`` keyword from ImageCollection
+- Remove ``dtype`` from imread
 - Generalise ImageCollection to accept a load_func

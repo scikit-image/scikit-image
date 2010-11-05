@@ -23,9 +23,6 @@ class MultiImage(object):
     conserve_memory : bool, optional
         Whether to conserve memory by only caching a single frame. Default is
         True.
-    dtype : dtype, optional
-        NumPy data-type specifier. If given, the returned image has this type.
-        If None (default), the data-type is determined automatically.
 
     Attributes
     ----------
