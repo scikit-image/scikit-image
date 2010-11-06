@@ -1,4 +1,5 @@
-__all__ = ['imread', 'imsave', 'imshow', 'show', 'push', 'pop']
+__all__ = ['imread', 'imread_collection', 'imsave', 'imshow', 'show',
+           'push', 'pop']
 
 from scikits.image.io._plugins import call as call_plugin
 from scikits.image.color import rgb2grey
@@ -74,6 +75,36 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         img = rgb2grey(img)
 
     return img
+
+def imread_collection(load_pattern, conserve_memory=True,
+                      plugin=None, **plugin_args):
+    """
+    Load a collection of images.
+
+    Parameters
+    ----------
+    load_pattern : str or list
+        List of objects to load. These are usually filenames, but may
+        vary depending on the currently active plugin.  See the docstring
+        for ``ImageCollection`` for the default behaviour of this parameter.
+    conserve_memory : bool, optional
+        If True, never keep more than one in memory at a specific
+        time.  Otherwise, images will be cached once they are loaded.
+
+    Returns
+    -------
+    ic : ImageCollection
+        Collection of images.
+
+    Other parameters
+    ----------------
+    plugin_args : keywords
+        Passed to the given plugin.
+
+    """
+    return call_plugin('imread_collection', load_pattern, conserve_memory,
+                       plugin=plugin, **plugin_args)
+
 
 def imsave(fname, arr, plugin=None, **plugin_args):
     """Save an image to file.

@@ -23,6 +23,9 @@ class TestPlugin:
     def test_show(self):
         io.imshow([1, 2, 3], plugin_arg=(1, 2), plugin='test')
 
+    def test_collection(self):
+        io.imread_collection('*.png', conserve_memory=False, plugin='test')
+
     def test_use(self):
         plugin.use('test')
         plugin.use('test', 'imshow')

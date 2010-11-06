@@ -9,3 +9,7 @@ def imsave(fname, arr):
 def imshow(arr, plugin_arg=None):
     assert arr == [1, 2, 3]
     assert plugin_arg == (1, 2)
+
+def imread_collection(x, conserve_memory=True):
+    assert conserve_memory == False
+    assert x == '*.png'
