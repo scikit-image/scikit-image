@@ -5,8 +5,10 @@ from numpy.testing import *
 from tempfile import NamedTemporaryFile
 
 from scikits.image import data_dir
-from scikits.image.io import imread, imsave
+from scikits.image.io import imread, imsave, use_plugin
 from scikits.image.io._plugins.pil_plugin import _palette_is_grayscale
+
+use_plugin('pil')
 
 def test_imread_flatten():
     # a color image is flattened
