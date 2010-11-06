@@ -1,7 +1,7 @@
 import ctypes
 import numpy as np
 cimport numpy as np
-from python cimport *
+from cpython cimport *
 from opencv_constants import *
 from opencv_type cimport *
 from _libimport import cv, cxcore

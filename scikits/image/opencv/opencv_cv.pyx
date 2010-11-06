@@ -5,8 +5,8 @@ import ctypes
 cimport numpy as np
 import numpy as np
 
-from python cimport *
-from stdlib cimport *
+from cpython cimport *
+from libc.stdlib cimport *
 from opencv_type cimport *
 from opencv_backend import *
 from opencv_backend cimport *

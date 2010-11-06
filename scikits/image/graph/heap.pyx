@@ -35,7 +35,7 @@ from __future__ import division
 
 # cython specific imports
 import cython
-from stdlib cimport malloc, free
+from libc.stdlib cimport malloc, free
 
 cdef extern from "pyport.h":
   double Py_HUGE_VAL
