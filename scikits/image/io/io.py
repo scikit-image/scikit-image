@@ -1,6 +1,7 @@
 __all__ = ['imread', 'imsave', 'imshow', 'show', 'push', 'pop']
 
 from scikits.image.io._plugins import call as call_plugin
+from scikits.image.color import rgb2grey
 import numpy as np
 
 # Shared image queue
@@ -31,7 +32,7 @@ def pop():
     """
     return _image_stack.pop()
 
-def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
+def imread(fname, as_grey=False, plugin=None, flatten=None,
            **plugin_args):
     """Load an image from file.
 
@@ -40,12 +41,8 @@ def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
     fname : string
         Image file name, e.g. ``test.jpg``.
     as_grey : bool
-        If True, convert color images to grey-scale. If `dtype` is not given,
-        converted color images are returned as 32-bit float images.
+        If True, convert color images to grey-scale (32-bit floats).
         Images that are already in grey-scale format are not converted.
-    dtype : dtype, optional
-        NumPy data-type specifier. If given, the returned image has this type.
-        If None (default), the data-type is determined automatically.
     plugin : str
         Name of plugin to use (Python Imaging Library by default).
 
@@ -71,8 +68,12 @@ def imread(fname, as_grey=False, dtype=None, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    return call_plugin('imread', fname, as_grey=as_grey, dtype=dtype,
-                       plugin=plugin, **plugin_args)
+    img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+
+    if as_grey and getattr(img, 'ndim', 0) >= 3:
+        img = rgb2grey(img)
+
+    return img
 
 def imsave(fname, arr, plugin=None, **plugin_args):
     """Save an image to file.

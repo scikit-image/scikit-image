@@ -21,7 +21,8 @@ from scikits.image.color import (
     rgb2hsv, hsv2rgb,
     rgb2xyz, xyz2rgb,
     rgb2rgbcie, rgbcie2rgb,
-    convert_colorspace
+    convert_colorspace,
+    rgb2grey
     )
 
 from scikits.image import data_dir
@@ -141,6 +142,13 @@ class TestColorconv(TestCase):
                                                            'nokey', 'XYZ')
         self.assertRaises(ValueError, convert_colorspace, self.colbars_array,
                                                            'RGB', 'nokey')
+
+    def test_rgb2grey(self):
+        x = np.array([1, 1, 1]).reshape((1, 1, 3))
+        g = rgb2grey(x)
+        assert_array_almost_equal(g, 1)
+
+        assert_equal(g.shape, (1, 1))
 
 if __name__ == "__main__":
     run_module_suite()

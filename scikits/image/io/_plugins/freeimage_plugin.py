@@ -319,11 +319,11 @@ def _array_from_bitmap(bitmap):
     def n(arr):
         return arr[..., ::-1].T
     if len(shape) == 3 and _FI.FreeImage_IsLittleEndian() and \
-       dtype.type == np.uint8:
+       dtype.type == numpy.uint8:
         b = array[0]
         g = array[1]
         r = array[2]
-        return np.dstack( (n(r), n(g), n(b)) )
+        return numpy.dstack( (n(r), n(g), n(b)) )
     # We need to copy because array does *not* own its memory
     # after bitmap is freed.
     return n(array).copy()
@@ -460,8 +460,8 @@ def imread(filename, as_grey=False):
     img = read(filename)
     if as_grey and len(img) == 3:
         # these are the values that wikipedia says are typical
-        transform = np.array([ 0.30,  0.59,  0.11])
-        return np.dot(img, transform)
+        transform = numpy.array([ 0.30,  0.59,  0.11])
+        return numpy.dot(img, transform)
     return img
 
 def imsave(filename, img):

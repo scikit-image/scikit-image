@@ -1,6 +1,5 @@
 def imread(fname, as_grey=False, dtype=None):
     assert fname == 'test.png'
-    assert as_grey == True
     assert dtype == 'i4'
 
 def imsave(fname, arr):
