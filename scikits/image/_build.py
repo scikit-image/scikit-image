@@ -27,7 +27,8 @@ def cython(pyx_files, working_path=''):
             # run cython compiler
             cmd = 'cython -o %s %s' % (c_file_new, pyxfile)
             print cmd
-            status = subprocess.call(['cython', '-o', c_file_new, pyxfile])
+            status = subprocess.call(['cython', '-o', c_file_new, pyxfile],
+                                     shell=True)
             # if the resulting file is small, cython compilation failed
             if status != 0 or os.path.getsize(c_file_new) < 100:
                 print "Cython compilation of %s failed. Falling back " \
