@@ -11,10 +11,10 @@ eps = np.finfo(float).eps
 
 def greyscale_erode(image, selem, out=None):
     """
-    Performs a greyscale morphological erosion on an image given a
-    structuring element. The eroded pixel at (i,j) is the minimum
-    over all pixels in the neighborhood centered at (i,j).
-    
+    Performs a greyscale morphological erosion on an image given a flat
+    structuring element. The eroded pixel at (i,j) is the minimum over all
+    pixels in the neighborhood centered at (i,j).
+
     Parameters
     ----------
     image : ndarray
@@ -43,13 +43,13 @@ def greyscale_erode(image, selem, out=None):
 
 def greyscale_dilate(image, selem, out=None):
     """
-    Performs a greyscale morphological dilation on an image given a
-    structuring element. The dilated pixel at (i,j) is the maximum
-    over all pixels in the neighborhood centered at (i,j).
+    Performs a greyscale morphological dilation on an image given a flat
+    structuring element. The dilated pixel at (i,j) is the maximum over all
+    pixels in the neighborhood centered at (i,j).
 
     Parameters
     ----------
-    
+
     image : ndarray
        The image as an ndarray.
 
@@ -73,10 +73,10 @@ def greyscale_dilate(image, selem, out=None):
         return out;
     except ImportError:
         raise ImportError("cmorph extension not available.")
-    
+
 def greyscale_open(image, selem, out=None):
     """
-    Performs a greyscale morphological opening on an image given a
+    Performs a greyscale morphological opening on an image given a flat
     structuring element defined as a erosion followed by a dilation.
 
     Parameters
@@ -102,7 +102,7 @@ def greyscale_open(image, selem, out=None):
 
 def greyscale_close(image, selem, out=None):
     """
-    Performs a greyscale morphological closing on an image given a
+    Performs a greyscale morphological closing on an image given a flat
     structuring element defined as a dilation followed by an erosion.
 
     Parameters
@@ -128,7 +128,7 @@ def greyscale_close(image, selem, out=None):
 
 def greyscale_white_top_hat(image, selem, out=None):
     """
-    Applies a white top hat on an image given a structuring element.
+    Applies a white top hat on an image given a flat structuring element.
 
     Parameters
     ----------
@@ -149,7 +149,7 @@ def greyscale_white_top_hat(image, selem, out=None):
     """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
-    
+
     eroded = greyscale_erode(image, selem)
     out = greyscale_dilate(eroded, selem, out=out)
     out = image - out
@@ -157,7 +157,7 @@ def greyscale_white_top_hat(image, selem, out=None):
 
 def greyscale_black_top_hat(image, selem, out=None):
     """
-    Applies a black top hat on an image given a structuring element.
+    Applies a black top hat on an image given a flat structuring element.
 
     Parameters
     ----------
