@@ -2,6 +2,7 @@ import os
 import shutil
 import hashlib
 import subprocess
+import platform
 
 def cython(pyx_files, working_path=''):
     """Use Cython to convert the given files to C.
@@ -28,7 +29,7 @@ def cython(pyx_files, working_path=''):
             cmd = 'cython -o %s %s' % (c_file_new, pyxfile)
             print cmd
             status = subprocess.call(['cython', '-o', c_file_new, pyxfile],
-                                     shell=True)
+                                     shell=(platform.system() == 'Windows'))
             # if the resulting file is small, cython compilation failed
             if status != 0 or os.path.getsize(c_file_new) < 100:
                 print "Cython compilation of %s failed. Falling back " \
