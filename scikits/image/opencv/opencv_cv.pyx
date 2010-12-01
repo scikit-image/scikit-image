@@ -2543,7 +2543,10 @@ def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
     cdef np.npy_intp fundamental_shape[2]
     cdef np.npy_intp status_shape[1]
 
-    fundamental_shape[0] = <np.npy_intp> 9
+    if (status == CV_FM_7POINT):
+        fundamental_shape[0] = <np.npy_intp> 9
+    else:
+        fundamental_shape[0] = <np.npy_intp> 3
     fundamental_shape[1] = <np.npy_intp> 3
     status_shape[0] = <np.npy_intp> points1.shape[0]
 
@@ -2578,7 +2581,7 @@ def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
     if m == 0:
         return (None, status)
     else:
-        return (F[:m, :].reshape((m, 3, 3)), shape)
+        return (F.reshape((m, 3, 3)), status)
 
 
 #------------------------
