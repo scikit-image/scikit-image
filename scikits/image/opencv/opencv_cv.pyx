@@ -2541,7 +2541,7 @@ def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
 
     # allocate the numpy return arrays
     cdef np.npy_intp fundamental_shape[2]
-    cdef np.npy_intp status_shape[1]
+    cdef np.npy_intp status_shape[2]
 
     if (method == CV_FM_7POINT):
         fundamental_shape[0] = <np.npy_intp> 9
@@ -2549,9 +2549,10 @@ def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
         fundamental_shape[0] = <np.npy_intp> 3
     fundamental_shape[1] = <np.npy_intp> 3
     status_shape[0] = <np.npy_intp> points1.shape[0]
+    status_shape[1] = <np.npy_intp> 1
 
     cdef np.ndarray F = new_array(2, fundamental_shape, FLOAT64)
-    cdef np.ndarray status = new_array(1, status_shape, FLOAT64)
+    cdef np.ndarray status = new_array(2, status_shape, FLOAT64)
 
     # Allocate cv images
     cdef IplImage points1_img
