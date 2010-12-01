@@ -294,6 +294,14 @@ c_cvFindExtrinsicCameraParams2 = \
                         (<cvFindExtrinsicCameraParams2Ptr*><size_t>
                          ctypes.addressof(cv.cvFindExtrinsicCameraParams2))[0]
 
+# cvFindFundamentalMat
+ctypedef int (*cvFindFundamentalMatPtr)(CvMat*, CvMat*, CvMat*, int, double,
+                                        double, CvMat*)
+cdef cvFindFundamentalMatPtr c_cvFindFundamentalMat
+c_cvFindFundamentalMat = \
+                       (<cvFindFundamentalMatPtr*><size_t>
+                        ctypes.addressof(cv.cvFindFundamentalMat))[0]
+
 # cvDrawChessboardCorners
 ctypedef void (*cvDrawChessboardCornersPtr)(IplImage*, CvSize, CvPoint2D32f*,
                                             int, int)
@@ -2473,6 +2481,104 @@ def cvFindExtrinsicCameraParams2(object_points, image_points, intrinsic_matrix,
     PyMem_Free(cvtrn)
 
     return (rvec, tvec)
+
+#---------------------
+# cvFindFundamentalMat
+#---------------------
+
+@cvdoc(package='cv', group='calibration', doc=\
+'''cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
+                        double param1=1, double param2=0.99)
+
+Calculates the fundamental matrix from the corresponding points in two images.
+
+Parameters
+----------
+points1 : ndarray, Nx2 or Nx3, dtype=float
+    Points from the first image.
+points2 : ndarray, Nx3 or Nx3, dtype=float
+    Points from the second image (same length as ``points1``).
+method : integer
+    CV_FM_7POINT - use 7-point algorithm (N = 7)
+    CV_FM_8POINT - use 8-point algorithm (N = 8)
+    CV_FM_RANSAC - use RANSAC algorithm (N >= 8)
+    CV_FM_LMEDS - use LMedS algorithm (N >= 8)
+param1 : float
+    In RANSAC, the maximum distance from point to epipolar lines
+    (in pixels) beyond which the point is considered an outlier.
+param2 : float
+    In RANSAC and LMedS, the level of confidence (probability)
+    that the estimated matrix is correct.
+
+Returns
+-------
+fundamental_matrix : ndarray, 3x3 or 3x3x3
+    Fundamental matrix. The 7-point method may return up to three
+    matrices, stored as a 3x3x3 array. If no matrix could be found,
+    None is returned.
+status : ndarray, length N, dtype=bool
+    Indicates whether a data-point is an inlier (True) or outlier
+    (False). Only used by RANSAC and MLedS; other methods set all
+    True.''')
+def cvFindFundamentalMat(points1, points2, method, param1, param2):
+    validate_array(points1)
+    validate_array(points2)
+
+    assert_ndims(points1, [2])
+    assert_ndims(points2, [2])
+    assert_dtype(points1, [FLOAT32, FLOAT64])
+    assert_dtype(points2, [FLOAT32, FLOAT64])
+
+    if not points1.shape[1] in (2, 3):
+        raise ValueError("Points should be Nx2 or Nx3 arrays")
+
+    if not method in (CV_FM_7POINT, CV_FM_8POINT, CV_FM_RANSAC, CV_FM_LMEDS):
+        raise ValueError("Invalid method specified")
+
+    if not points1.shape[0] == points2.shape[0]:
+        raise ValueError("Points1 and points2 should be of equal length.")
+
+    # allocate the numpy return arrays
+    cdef np.npy_intp fundamental_shape[2]
+    cdef np.npy_intp status_shape[1]
+
+    fundamental_shape[0] = <np.npy_intp> 9
+    fundamental_shape[1] = <np.npy_intp> 3
+    status_shape[0] = <np.npy_intp> points1.shape[0]
+
+    cdef np.ndarray F = new_array(2, fundamental_shape, FLOAT64)
+    cdef np.ndarray status = new_array(2, status_shape, FLOAT64)
+
+    # Allocate cv images
+    cdef IplImage points1_img
+    cdef IplImage points2_img
+    cdef IplImage F_img
+    cdef IplImage status_img
+
+    populate_iplimage(points1, &points1_img)
+    populate_iplimage(points2, &points2_img)
+    populate_iplimage(F, &F_img)
+    populate_iplimage(status, &status_img)
+
+    # Allocate cv matrices
+    cdef CvMat* cvpoints1 = cvmat_ptr_from_iplimage(&points1_img)
+    cdef CvMat* cvpoints2 = cvmat_ptr_from_iplimage(&points2_img)
+    cdef CvMat* cvF = cvmat_ptr_from_iplimage(&F_img)
+    cdef CvMat* cvstatus = cvmat_ptr_from_iplimage(&status_img)
+
+    cdef int m = c_cvFindFundamentalMat(cvpoints1, cvpoints2, cvF, method,
+                                        param1, param2, cvstatus)
+
+    PyMem_Free(cvpoints1)
+    PyMem_Free(cvpoints2)
+    PyMem_Free(cvF)
+    PyMem_Free(cvstatus)
+
+    if m == 0:
+        return (None, status)
+    else:
+        return (F[:m, :].reshape((m, 3, 3)), shape)
+
 
 #------------------------
 # cvFindChessboardCorners

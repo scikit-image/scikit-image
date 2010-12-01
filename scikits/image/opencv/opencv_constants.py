@@ -147,6 +147,14 @@ CV_CALIB_CB_ADAPTIVE_THRESH = 1
 CV_CALIB_CB_NORMALIZE_IMAGE = 2
 CV_CALIB_CB_FILTER_QUADS = 4
 
+################################
+# Fundamental Matrix Constants #
+################################
+CV_FM_7POINT = 1
+CV_FM_8POINT = 2
+CV_FM_LMEDS = 4
+CV_FM_RANSAC = 8
+
 ####################
 # cvMat TypeValues #
 ####################
