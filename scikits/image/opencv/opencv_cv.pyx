@@ -2520,7 +2520,8 @@ status : ndarray, length N, dtype=bool
     Indicates whether a data-point is an inlier (True) or outlier
     (False). Only used by RANSAC and MLedS; other methods set all
     True.''')
-def cvFindFundamentalMat(points1, points2, method, param1, param2):
+def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
+                         double param1=1, double param2=0.99):
     validate_array(points1)
     validate_array(points2)
 
