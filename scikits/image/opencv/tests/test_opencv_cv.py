@@ -320,7 +320,92 @@ class TestUndistort2(OpenCVTest):
         assert_array_almost_equal(undistg, self.lena_GRAY_U8)
 
 
+@opencv_skip
+def test_cvFindFundamentalMat():
+    #
+    #  *<---c2
+    #  ^
+    #  |
+    #  c1
+    #
+    # Experimental setup: camera 1 at the origin, random cube data set in front,
+    # camera two watching from the side
 
+    # Set up projection matrices
+
+    def build_proj_mat(K, R, C):
+        """
+        Construct a projection matrix.
+
+        Parameters
+        ----------
+        K : ndarray, 3x3
+            Camera matrix, intrinsic parameters.
+        R : ndarray, 3x3
+            Rotation, world to camera.
+        C : ndarray, (3,)
+            Location of camera center in world coordinates.
+
+        """
+        C = np.reshape(C, (3, 1))
+
+        KR = np.dot(K, R)
+        P = np.zeros((3, 4))
+        P[:3, :3] = KR
+        P[:, 3].flat = np.dot(KR, -C)
+
+        return P
+
+    def cross_matrix(v):
+        a = v[0]
+        b = v[1]
+        c = v[2]
+
+        return np.array([[ 0, -c,  b],
+                         [ c,  0, -a],
+                         [-b,  a,  0]])
+
+    # Camera one, at origin of world coordinates, looking down the z-axis
+    K = np.diag([5, 5, 1])
+    R = np.eye(3)
+    C = np.zeros((3,))
+    P = build_proj_mat(K, R, C)
+
+    # Camera two
+    K_ = K
+    R_ = np.array([[0, 0, 1],
+                   [0, 1, 0],
+                   [-1, 0, 0]]) # Rotation of 90 degrees around y-axis
+    C_ = np.array([[-10, 0, 10]])
+    P_ = build_proj_mat(K_, R_, C_)
+
+    data = np.random.random((20, 4)) * 5 - 2.5
+    data[:, 3] = 1 # Homogeneous coordinates in 3D
+
+    points1 = np.dot(data, P.T)
+    points2 = np.dot(data, P_.T)
+
+    # See Hartley & Zisserman, Multiple View Geometry (2nd ed), p. 244
+    t = -np.dot(R, C)
+    K_t = np.dot(K_, t)
+
+    # Under numpy >= 1.5, this would be:
+    # F = cross_matrix(K_t).dot(K_).dot(R).dot(np.linalg.inv(K))
+
+    F = np.dot(np.dot(np.dot(cross_matrix(K_t), K_), R), np.linalg.inv(K))
+
+    F_est = cvFindFundamentalMat(points1, points2)
+
+    print F
+    print F_est
+
+    # Normalise F
+    #F_est *= (F[2, 2] / F_est[3, 3])
+
+    # Compare
+    #assert_array_almost_equal(F, F_est)
+
+    # Alternative: compute points1.T F points2
 
 if __name__ == '__main__':
     run_module_suite()
