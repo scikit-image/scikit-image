@@ -2517,9 +2517,11 @@ fundamental_matrix : ndarray, 3x3 or 3x3x3
     matrices, stored as a 3x3x3 array. If no matrix could be found,
     None is returned.
 status : ndarray, length N, dtype=bool
-    Indicates whether a data-point is an inlier (True) or outlier
-    (False). Only used by RANSAC and MLedS; other methods set all
-    True.''')
+    Currently, this is only a placeholder for future use.
+
+    In future, should indicate whether a data-point is an inlier
+    (True) or outlier (False). Only used by RANSAC and MLedS; other
+    methods set all True.''')
 def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
                          double param1=1, double param2=0.99):
     validate_array(points1)
@@ -2541,43 +2543,49 @@ def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
 
     # allocate the numpy return arrays
     cdef np.npy_intp fundamental_shape[2]
-    cdef np.npy_intp status_shape[2]
 
     if (method == CV_FM_7POINT):
         fundamental_shape[0] = <np.npy_intp> 9
     else:
         fundamental_shape[0] = <np.npy_intp> 3
     fundamental_shape[1] = <np.npy_intp> 3
-    status_shape[0] = <np.npy_intp> points1.shape[0]
-    status_shape[1] = <np.npy_intp> 1
 
     cdef np.ndarray F = new_array(2, fundamental_shape, FLOAT64)
-    cdef np.ndarray status = new_array(2, status_shape, FLOAT64)
+
+    ## The code snippet below creates the ``status`` matrix
+    ## that may optionally be provided.  I could not get this
+    ## to work with OpenCV 2.1.
+
+    cdef np.npy_intp status_shape[2]
+    status_shape[0] = <np.npy_intp> points1.shape[0]
+    status_shape[1] = <np.npy_intp> 1
+    cdef np.ndarray status = new_array(2, status_shape, UINT8)
+
+    ## cdef IplImage status_img
+    ## populate_iplimage(status, &status_img)
+    ## cdef CvMat* cvstatus = cvmat_ptr_from_iplimage(&status_img)
 
     # Allocate cv images
     cdef IplImage points1_img
     cdef IplImage points2_img
     cdef IplImage F_img
-    cdef IplImage status_img
 
     populate_iplimage(points1, &points1_img)
     populate_iplimage(points2, &points2_img)
     populate_iplimage(F, &F_img)
-    populate_iplimage(status, &status_img)
 
     # Allocate cv matrices
     cdef CvMat* cvpoints1 = cvmat_ptr_from_iplimage(&points1_img)
     cdef CvMat* cvpoints2 = cvmat_ptr_from_iplimage(&points2_img)
     cdef CvMat* cvF = cvmat_ptr_from_iplimage(&F_img)
-    cdef CvMat* cvstatus = cvmat_ptr_from_iplimage(&status_img)
 
     cdef int m = c_cvFindFundamentalMat(cvpoints1, cvpoints2, cvF, method,
-                                        param1, param2, cvstatus)
+                                        param1, param2, NULL)
 
     PyMem_Free(cvpoints1)
     PyMem_Free(cvpoints2)
     PyMem_Free(cvF)
-    PyMem_Free(cvstatus)
+    # PyMem_Free(cvstatus)
 
     if m == 0:
         return (None, status)
