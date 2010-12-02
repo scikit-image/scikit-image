@@ -323,13 +323,14 @@ class TestUndistort2(OpenCVTest):
 @opencv_skip
 def test_cvFindFundamentalMat():
     #
-    #  *<---c2
-    #  ^
-    #  |
-    #  c1
+    #  c2--->*        * = Data Cloud
+    #        ^
+    #        |           ^ z-direction
+    #        c1       <--|
+    #                 x
     #
     # Experimental setup: camera 1 at the origin, random cube data set in front,
-    # camera two watching from the side
+    # camera two watching from the side (position [10, 0, 10])
 
     # Set up projection matrices
 
@@ -387,9 +388,6 @@ def test_cvFindFundamentalMat():
 
     points1 = np.dot(data, P.T)
     points2 = np.dot(data, P_.T)
-
-    #points1 /= points1[:, 2][:, None]
-    #points2 /= points2[:, 2][:, None]
 
     # See Hartley & Zisserman, Multiple View Geometry (2nd ed), p. 244
     t = -np.dot(R_, C_)
