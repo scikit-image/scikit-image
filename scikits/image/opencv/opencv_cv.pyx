@@ -2185,6 +2185,19 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
     assert_dtype(point_counts, [INT32])
     assert_ndims(point_counts, [1])
 
+    if not object_points.shape[1] == 3:
+        raise ValueError("Object points must be Nx3")
+
+    if not image_points.shape[1] == 2:
+        raise ValueError("Image points must be Nx2")
+
+    if not len(image_points) == len(object_points):
+        raise ValueError("Must provide same number of image and object points.")
+
+    if np.sum(point_counts) != len(image_points):
+        raise ValueError("Point counts must sum to length of image_points "
+                         "(is %d must be %d)." % (np.sum(point_counts), len(image_points)))
+
     # Allocate a new intrinsics array
     cdef np.npy_intp intrinsics_shape[2]
     intrinsics_shape[0] = <np.npy_intp> 3
