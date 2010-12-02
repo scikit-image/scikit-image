@@ -304,6 +304,21 @@ class TestUndistort2(OpenCVTest):
         assert_array_almost_equal(undist, self.lena_RGB_U8)
         assert_array_almost_equal(undistg, self.lena_GRAY_U8)
 
+    @opencv_skip
+    def test_cvUndistort2_new_intrinsics(self):
+        intrinsics = np.array([[1, 0, 0],
+                               [0, 1, 0],
+                               [0, 0, 1]], dtype='float64')
+        distortions = np.array([0., 0., 0., 0., 0.], dtype='float64')
+
+        undist = cvUndistort2(self.lena_RGB_U8, intrinsics, distortions,
+                              intrinsics)
+        undistg = cvUndistort2(self.lena_GRAY_U8, intrinsics, distortions,
+                               intrinsics)
+
+        assert_array_almost_equal(undist, self.lena_RGB_U8)
+        assert_array_almost_equal(undistg, self.lena_GRAY_U8)
+
 
 
 
