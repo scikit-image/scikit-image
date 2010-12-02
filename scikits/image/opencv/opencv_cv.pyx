@@ -2560,6 +2560,7 @@ def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
     status_shape[0] = <np.npy_intp> points1.shape[0]
     status_shape[1] = <np.npy_intp> 1
     cdef np.ndarray status = new_array(2, status_shape, UINT8)
+    status.fill(0)
 
     ## cdef IplImage status_img
     ## populate_iplimage(status, &status_img)
@@ -2590,7 +2591,7 @@ def cvFindFundamentalMat(points1, points2, int method=CV_FM_RANSAC,
     if m == 0:
         return (None, status)
     else:
-        return (F.reshape((m, 3, 3)), status)
+        return (F.reshape((m, 3, 3)).squeeze(), status)
 
 
 #------------------------
