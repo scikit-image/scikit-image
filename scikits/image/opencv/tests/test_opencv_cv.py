@@ -366,46 +366,45 @@ def test_cvFindFundamentalMat():
                          [-b,  a,  0]])
 
     # Camera one, at origin of world coordinates, looking down the z-axis
-    K = np.diag([5, 5, 1])
+    K = np.array([[100., 0,   100],
+                  [0,    100, 100],
+                  [0,    0,   1]])
     R = np.eye(3)
     C = np.zeros((3,))
     P = build_proj_mat(K, R, C)
 
     # Camera two
     K_ = K
-    R_ = np.array([[0, 0, 1],
-                   [0, 1, 0],
-                   [-1, 0, 0]]) # Rotation of 90 degrees around y-axis
-    C_ = np.array([[-10, 0, 10]])
+    R_ = np.array([[0., 0, -1],
+                   [0,  1,  0],
+                   [1,  0,  0]]) # Rotation of 90 degrees around y-axis
+    C_ = np.array([[10., 0, 10]]).T
     P_ = build_proj_mat(K_, R_, C_)
 
-    data = np.random.random((20, 4)) * 5 - 2.5
-    data[:, 3] = 1 # Homogeneous coordinates in 3D
+    data = np.random.random((100, 4)) * 5 - 2.5
+    data[:, 2] += 10 # Offset data in the z direction
+    data[:, 3] = 1 # 4D homogeneous version of 3D coords
 
     points1 = np.dot(data, P.T)
     points2 = np.dot(data, P_.T)
 
+    #points1 /= points1[:, 2][:, None]
+    #points2 /= points2[:, 2][:, None]
+
     # See Hartley & Zisserman, Multiple View Geometry (2nd ed), p. 244
-    t = -np.dot(R, C)
+    t = -np.dot(R_, C_)
     K_t = np.dot(K_, t)
 
     # Under numpy >= 1.5, this would be:
-    # F = cross_matrix(K_t).dot(K_).dot(R).dot(np.linalg.inv(K))
+    #F = cross_matrix(K_t).dot(K_).dot(R).dot(np.linalg.inv(K))
 
-    F = np.dot(np.dot(np.dot(cross_matrix(K_t), K_), R), np.linalg.inv(K))
+    F = np.dot(np.dot(np.dot(cross_matrix(K_t), K_), R_), np.linalg.inv(K))
+    F /= F[2, 2]
 
-    F_est = cvFindFundamentalMat(points1, points2)
-
-    print F
-    print F_est
-
-    # Normalise F
-    #F_est *= (F[2, 2] / F_est[3, 3])
+    F_est, status = cvFindFundamentalMat(points1, points2)
 
     # Compare
-    #assert_array_almost_equal(F, F_est)
-
-    # Alternative: compute points1.T F points2
+    assert_array_almost_equal(F, F_est)
 
 if __name__ == '__main__':
     run_module_suite()
