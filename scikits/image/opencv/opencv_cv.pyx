@@ -275,7 +275,7 @@ c_cvCalibrateCamera2 = (<cvCalibrateCamera2Ptr*>
                         <size_t>ctypes.addressof(cv.cvCalibrateCamera2))[0]
 
 # cvUndistort2
-ctypedef void (*cvUndistort2Ptr)(IplImage*, IplImage*, CvMat*, CvMat*)
+ctypedef void (*cvUndistort2Ptr)(IplImage*, IplImage*, CvMat*, CvMat*, CvMat*)
 cdef cvUndistort2Ptr c_cvUndistort2
 c_cvUndistort2 = (<cvUndistort2Ptr*><size_t>ctypes.addressof(cv.cvUndistort2))[0]
 
@@ -2185,6 +2185,19 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
     assert_dtype(point_counts, [INT32])
     assert_ndims(point_counts, [1])
 
+    if not object_points.shape[1] == 3:
+        raise ValueError("Object points must be Nx3")
+
+    if not image_points.shape[1] == 2:
+        raise ValueError("Image points must be Nx2")
+
+    if not len(image_points) == len(object_points):
+        raise ValueError("Must provide same number of image and object points.")
+
+    if np.sum(point_counts) != len(image_points):
+        raise ValueError("Point counts must sum to length of image_points "
+                         "(is %d must be %d)." % (np.sum(point_counts), len(image_points)))
+
     # Allocate a new intrinsics array
     cdef np.npy_intp intrinsics_shape[2]
     intrinsics_shape[0] = <np.npy_intp> 3
@@ -2241,7 +2254,7 @@ def cvCalibrateCamera2(np.ndarray object_points, np.ndarray image_points,
 #-------------
 
 @cvdoc(package='cv', group='calibration', doc=\
-'''cvUndistort2(src, intrinsics, distortions)
+'''cvUndistort2(src, intrinsics, distortions, new_intrinsics=None)
 
 Undistorts an image given the camera intrinsics matrix and distortions vector.
 These values can be calculated using cvCalibrateCamera2.
@@ -2254,13 +2267,16 @@ intrinsics : ndarray, 3x3, dtype=float64
     The camera intrinsics matrix.
 distortions : ndarray, 5-vector, dtype=float64
     The camera distortion coefficients.
+new_intrinsics : ndarray, 3x3, dtype=float64, optional
+    Determine the subset of the source image that is visible after
+    correction.
 
 Returns
 -------
 out : ndarray
     The undistorted image the same size and dtype
     as the source image.''')
-def cvUndistort2(src, intrinsics, distortions):
+def cvUndistort2(src, intrinsics, distortions, new_intrinsics=None):
     validate_array(src)
     assert_dtype(intrinsics, [FLOAT64])
     assert_dtype(distortions, [FLOAT64])
@@ -2278,19 +2294,26 @@ def cvUndistort2(src, intrinsics, distortions):
     cdef IplImage outimg
     cdef IplImage intrimg
     cdef IplImage distimg
+    cdef IplImage new_intrinsics_img
 
     populate_iplimage(src, &srcimg)
     populate_iplimage(out, &outimg)
     populate_iplimage(intrinsics, &intrimg)
     populate_iplimage(distortions, &distimg)
 
+    cdef CvMat* cvnew_intrinsics = NULL
     cdef CvMat* cvintr = cvmat_ptr_from_iplimage(&intrimg)
     cdef CvMat* cvdist = cvmat_ptr_from_iplimage(&distimg)
 
-    c_cvUndistort2(&srcimg, &outimg, cvintr, cvdist)
+    if new_intrinsics is not None:
+        populate_iplimage(new_intrinsics, &new_intrinsics_img)
+        cvnew_intrinsics = cvmat_ptr_from_iplimage(&new_intrinsics_img)
+
+    c_cvUndistort2(&srcimg, &outimg, cvintr, cvdist, cvnew_intrinsics)
 
     PyMem_Free(cvintr)
     PyMem_Free(cvdist)
+    PyMem_Free(cvnew_intrinsics)
 
     return out
 

@@ -14,7 +14,7 @@ Optional Requirements
 You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-`Open CV <http://opencv.willowgarage.com/wiki/>`_ (>= 2.0). 
+`Open CV <http://opencv.willowgarage.com/wiki/>`_ (version 2.1). 
    Required for functions in ``scikits.image.opencv``.
 
 `PyQt4 <http://wiki.python.org/moin/PyQt>`_
