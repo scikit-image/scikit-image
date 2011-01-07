@@ -210,6 +210,9 @@ cdef class MCP:
     `costs` array at each point on the path. The class MCP_Geometric, on the
     other hand, accounts for the fact that diagonal vs. axial moves are of
     different lengths, and weights the path cost accordingly.
+    
+    Array elements with infinite or negative costs will simply be ignored, as
+    will paths whose cumulative cost overflows to infinite.
 
     Parameters
     ----------
@@ -241,8 +244,6 @@ cdef class MCP:
         See class documentation.
         """
         costs = np.asarray(costs)
-        if costs.min() < 0:
-            raise ValueError('minimum cost must be positive')
         if not np.can_cast(costs.dtype, FLOAT):
             raise TypeError('cannot cast costs array to ' + str(FLOAT))
 
