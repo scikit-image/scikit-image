@@ -43,6 +43,32 @@ def test_basic():
                         (6, 1),
                         (7, 2)])
 
+def test_neg_inf():
+    expected_costs = numpy.where(a==1, np.inf, 0)
+    expected_path = [(1, 6),
+                     (1, 5),
+                     (1, 4),
+                     (1, 3),
+                     (1, 2),
+                     (2, 1),
+                     (3, 1),
+                     (4, 1),
+                     (5, 1),
+                     (6, 1)]
+    test_neg = numpy.where(a==1, -1, 0)
+    test_inf = numpy.where(a==1, np.inf, 0)
+    m = mcp.MCP(test_neg, fully_connected=True)
+    costs, traceback = m.find_costs([(1, 6)])
+    return_path = m.traceback((6, 1))
+    assert_array_equal(costs, expected_costs)
+    assert_array_equal(return_path, expected_path)
+    m = mcp.MCP(test_inf, fully_connected=True)
+    costs, traceback = m.find_costs([(1, 6)])
+    return_path = m.traceback((6, 1))
+    assert_array_equal(costs, expected_costs)
+    assert_array_equal(return_path, expected_path)
+  
+
 def test_route():
     return_path, cost = mcp.route_through_array(a, (1,6), (7,2), geometric=True)
     assert_almost_equal(cost, np.sqrt(2)/2)
