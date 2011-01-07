@@ -476,19 +476,26 @@ cdef class MCP:
                 # ignore this point
                 if flat_cumulative_costs[new_index] != inf:
                     continue
-
+                # If the cost at this point is negative or infinite, ignore it
+                new_cost = flat_costs[new_index]
+                if new_cost < 0 or new_cost == inf:
+                    continue
+                
                 # Now we ask the heap to append or update the cost to
                 # this new point, but only if that point isn't already
                 # in the heap, or it is but the new cost is lower.
                 travel_cost = self._travel_cost(flat_costs[index],
-                                                flat_costs[new_index],
+                                                new_cost,
                                                 offset_lengths[i])
-                costs_heap.push_if_lower_fast(cost + travel_cost, new_index)
-                # If we did perform an append or update, we should
-                # record the offset from the predecessor to this new
-                # point
-                if costs_heap._pushed:
-                    traceback_offsets[new_index] = i
+                # don't push infs into the heap though!
+                new_cost = cost + travel_cost
+                if new_cost != inf:
+                    costs_heap.push_if_lower_fast(new_cost, new_index)
+                    # If we did perform an append or update, we should
+                    # record the offset from the predecessor to this new
+                    # point
+                    if costs_heap._pushed:
+                        traceback_offsets[new_index] = i
 
         # Un-flatten the costs and traceback arrays for human consumption.
         cumulative_costs = flat_cumulative_costs.reshape(self.costs_shape,
