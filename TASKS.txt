@@ -21,7 +21,6 @@ modified to work as part of the scikit, others may be lacking in documentation
 or tests.
 
    * Connected components
-   * `Hough transform <http://mentat.za.net>`_
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
    * Marching squares
    * Nadav's bilateral filtering (first compare against CellProfile's code)
@@ -88,9 +87,8 @@ Rework linear filters
 
 io
 ``
-* Update ``ImageCollection`` to initialise either from list of files or from
-  list of images.  For example, ``ic = ImageCollection([img1, img2])``.
-* Update ``qt_plugin.py`` to view collections.
+* Update ``qt_plugin.py`` and other plugins to view collections.
+* Add medical / biological or GIS image format plugins.
 
 docs
 ````
@@ -99,8 +97,13 @@ docs
 
   - Introduction to I/O and image processing with examples
 
-* Fix doctests
+* Build docs outside source directory
+* Integrate BiBTeX plugin into Sphinx build
+* Create a kick-ass website
 
 Implement Algorithms
 ````````````````````
 - Histograms of oriented gradients
+- Fast radon transform
+- Graph cut segmentation
+
