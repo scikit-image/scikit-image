@@ -28,8 +28,17 @@ def cython(pyx_files, working_path=''):
             # run cython compiler
             cmd = 'cython -o %s %s' % (c_file_new, pyxfile)
             print cmd
-            status = subprocess.call(['cython', '-o', c_file_new, pyxfile],
-                                     shell=(platform.system() == 'Windows'))
+
+            if platform.system() == 'Windows':
+                status = subprocess.call(
+                    [sys.executable,
+                     os.path.join(os.path.dirname(sys.executable),
+                                  'Scripts', 'cython.py'),
+                     '-o', c_file_new, pyxfile],
+                    shell=True)
+            else:
+                status = subprocess.call(['cython', '-o', c_file_new, pyxfile])
+
             # if the resulting file is small, cython compilation failed
             if status != 0 or os.path.getsize(c_file_new) < 100:
                 print "Cython compilation of %s failed. Falling back " \
@@ -39,7 +48,7 @@ def cython(pyx_files, working_path=''):
                 # use that one instead
                 shutil.copy(c_file_new, c_file)
             os.remove(c_file_new)
-            
+
 
 def same_cython(f0, f1):
     '''Compare two Cython generated C-files, based on their md5-sum.
