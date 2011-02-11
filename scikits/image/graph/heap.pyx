@@ -339,7 +339,7 @@ cdef class BinaryHeap:
         return count
 
 
-    cdef float pop_fast(self):
+    cdef VALUE_T pop_fast(self):
         """The c-method for fast popping.
 
         Returns the minimum value. The reference is put in self._popped_ref"""
@@ -366,7 +366,7 @@ cdef class BinaryHeap:
 
         # get values
         cdef int ir = i - ((1 << levels) - 1) #(2**self.levels-1) # LevelStart
-        cdef float value =  values[i]
+        cdef VALUE_T value =  values[i]
         self._popped_ref = self._references[ir]
 
         # remove it
@@ -645,7 +645,7 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
         return ir
 
 
-    cdef float value_of_fast(self, int reference):
+    cdef VALUE_T value_of_fast(self, int reference):
         """Return the value corresponding to the given reference. If inf
         is returned, the reference may be invalid: check the _invaild_ref
         field in this case."""
