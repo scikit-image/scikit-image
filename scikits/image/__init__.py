@@ -16,7 +16,7 @@ def _setup_test():
     try:
         import nose as _nose
     except ImportError:
-        print "Could not load nose.  Unit tests not available."
+        print("Could not load nose.  Unit tests not available.")
         return None
     else:
         return functools.partial(_nose.run, 'scikits.image', argv=args)

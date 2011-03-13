@@ -22,6 +22,10 @@ VERSION             = '0.3dev'
 import os
 import setuptools
 from numpy.distutils.core import setup
+try:
+    from distutils.command.build_py import build_py_2to3 as build_py
+except ImportError:
+    from distutils.command.build_py import build_py
 
 def configuration(parent_package='', top_path=None):
     if os.path.exists('MANIFEST'): os.remove('MANIFEST')
@@ -89,4 +93,6 @@ if __name__ == "__main__":
             'console_scripts': [
                 'scivi = scikits.image.scripts.scivi:main']
             },
+
+        cmdclass={'build_py': build_py},
         )

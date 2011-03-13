@@ -37,12 +37,12 @@ class TestPlugin:
     def test_use_priority(self):
         plugin.use('pil')
         plug, func = plugin.plugin_store['imread'][0]
-        print plugin.plugin_store
+        print(plugin.plugin_store)
         assert_equal(plug, 'pil')
 
         plugin.use('test')
         plug, func = plugin.plugin_store['imread'][0]
-        print plugin.plugin_store
+        print(plugin.plugin_store)
         assert_equal(plug, 'test')
 
     def test_available(self):

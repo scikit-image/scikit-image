@@ -27,7 +27,7 @@ def cython(pyx_files, working_path=''):
 
             # run cython compiler
             cmd = 'cython -o %s %s' % (c_file_new, pyxfile)
-            print cmd
+            print(cmd)
 
             if platform.system() == 'Windows':
                 status = subprocess.call(
@@ -41,8 +41,8 @@ def cython(pyx_files, working_path=''):
 
             # if the resulting file is small, cython compilation failed
             if status != 0 or os.path.getsize(c_file_new) < 100:
-                print "Cython compilation of %s failed. Falling back " \
-                      "on pre-generated file." % os.path.basename(pyxfile)
+                print("Cython compilation of %s failed. Falling back " \
+                      "on pre-generated file." % os.path.basename(pyxfile))
             elif not same_cython(c_file_new, c_file):
                 # if the generated .c file differs from the one provided,
                 # use that one instead
