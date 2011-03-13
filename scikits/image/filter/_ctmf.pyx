@@ -14,25 +14,10 @@ import numpy as np
 cimport numpy as np
 cimport cython
 
-cdef extern from "Python.h":
-    ctypedef int Py_intptr_t
+from libc.stdlib cimport malloc, free
+from libc.string cimport memset
 
-cdef extern from "numpy/arrayobject.h":
-    ctypedef class numpy.ndarray [object PyArrayObject]:
-        cdef char *data
-        cdef Py_intptr_t *strides
-    cdef void import_array()
-    cdef int  PyArray_ITEMSIZE(np.ndarray)
-
-cdef extern from "stdlib.h":
-    ctypedef unsigned long size_t
-    void free(void *ptr)
-    void *malloc(size_t size)
-
-cdef extern from "string.h":
-    void *memset(void *, int, int)
-
-import_array()
+np.import_array()
 
 ##############################################################################
 # 
