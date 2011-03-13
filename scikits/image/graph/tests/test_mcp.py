@@ -44,7 +44,7 @@ def test_basic():
                         (7, 2)])
 
 def test_neg_inf():
-    expected_costs = numpy.where(a==1, np.inf, 0)
+    expected_costs = np.where(a==1, np.inf, 0)
     expected_path = [(1, 6),
                      (1, 5),
                      (1, 4),
@@ -55,8 +55,8 @@ def test_neg_inf():
                      (4, 1),
                      (5, 1),
                      (6, 1)]
-    test_neg = numpy.where(a==1, -1, 0)
-    test_inf = numpy.where(a==1, np.inf, 0)
+    test_neg = np.where(a==1, -1, 0)
+    test_inf = np.where(a==1, np.inf, 0)
     m = mcp.MCP(test_neg, fully_connected=True)
     costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((6, 1))
