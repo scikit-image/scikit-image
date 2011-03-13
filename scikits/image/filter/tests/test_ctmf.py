@@ -1,6 +1,5 @@
 import os.path
 
-
 import numpy as np
 from numpy.testing import *
 
@@ -95,3 +94,6 @@ class TestMedianFilter():
         assert (np.all(result[:14, :] == 1))
         # in zero coverage areas, the result should be the lowest valud in the valid area
         assert (np.all(result[15:, :] == np.min(img[mask])))
+
+if __name__ == "__main__":
+    run_module_suite()
