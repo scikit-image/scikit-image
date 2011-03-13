@@ -94,5 +94,12 @@ def test_04_01_half_masked():
     # in zero coverage areas, the result should be the lowest valud in the valid area
     assert (np.all(result[15:, :] == np.min(img[mask])))
 
+def test_default_values():
+    img = (np.random.random((20, 20)) * 255).astype(np.uint8)
+    mask = np.ones((20, 20), dtype=np.uint8)
+    result1 = median_filter(img, mask, radius=1, percent=50)
+    result2 = median_filter(img)
+    assert_array_equal(result1, result2)
+
 if __name__ == "__main__":
     run_module_suite()

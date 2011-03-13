@@ -761,21 +761,15 @@ def median_filter(
     mask : (M,N) array, dtype uint8
         A value of 1 indicates a significant pixel, 0
         that a pixel is masked.
-    output : (M,N) array, dtype uint8, optional
+    output : (M,N) array, dtype uint8
         Array of same size as the input in which to store
         the filtered image.
     radius : int
         Radius of the inscribed circle to the octagon.
-    percent : int
-        Sort the unmasked pixels within the octagon into and array
-        (conceptually) and take the value indexed by the size of that
-        array times `percent` divided by 100.  50 gives the median.
-
-    Returns
-    -------
-    output : (M,N) ndarray, dtype uint8
-        A reference to `output`, if specified, otherwise
-        the new output array.
+    percent : int, optional
+        The unmasked pixels within the octagon are sorted, and the
+        value at the `percent`-th index chosen.  For example, the
+        default value of 50 chooses the median pixel.
 
     """
     if percent < 0:
