@@ -752,18 +752,31 @@ def median_filter(
     np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] output,
     int radius,
     np.int32_t percent):
-    """Median filter with octagon shape and masking
+    """Median filter with octagon shape and masking.
 
-    data - a 2d array containing the image data
-    mask - a 2d array of 1=significant pixel, 0=masked
-           similarly shaped to "data"
-    output - a 2d array that will hold the output of this operation
-             similarly shaped to "data"
-    radius - the radius of the inscribed circle to the octagon
-    percent - sort the unmasked pixels within the octagon into
-              an array (conceptually) and take the value indexed
-              by the size of that array times the percent divided by 100.
-              50 gives the median
+    Parameters
+    ----------
+    data : (M,N) ndarray, dtype uint8
+        Input image.
+    mask : (M,N) array, dtype uint8
+        A value of 1 indicates a significant pixel, 0
+        that a pixel is masked.
+    output : (M,N) array, dtype uint8, optional
+        Array of same size as the input in which to store
+        the filtered image.
+    radius : int
+        Radius of the inscribed circle to the octagon.
+    percent : int
+        Sort the unmasked pixels within the octagon into and array
+        (conceptually) and take the value indexed by the size of that
+        array times `percent` divided by 100.  50 gives the median.
+
+    Returns
+    -------
+    output : (M,N) ndarray, dtype uint8
+        A reference to `output`, if specified, otherwise
+        the new output array.
+
     """
     if percent < 0:
         raise ValueError('Median filter percent = %d is less than zero' % \
