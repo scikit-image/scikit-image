@@ -35,9 +35,10 @@ def test_palette_is_gray():
 class TestSave:
     def roundtrip(self, dtype, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
-        imsave(f.name, x)
-        f.seek(0)
-        y = imread(f.name)
+        fname = f.name
+        f.close()
+        imsave(fname, x)
+        y = imread(fname)
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 

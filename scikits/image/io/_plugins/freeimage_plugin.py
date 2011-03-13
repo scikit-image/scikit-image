@@ -36,7 +36,7 @@ def register_api(lib,api):
 
 _FI = None
 for d in lib_dirs:
-    for libname in ('libfreeimage', 'libFreeImage'):
+    for libname in ('FreeImage.dll', 'libfreeimage', 'libFreeImage'):
         try:
             _FI = numpy.ctypeslib.load_library(libname, d)
         except OSError:

@@ -13,14 +13,14 @@ from scikits.image.morphology import *
 class TestSElem():
 
     def test_square_selem(self):
-        for k in xrange(0, 5):
+        for k in range(0, 5):
             actual_mask = selem.square(k)
             expected_mask = np.ones((k, k), dtype='uint8')
             assert_equal(expected_mask, actual_mask)
 
     def test_rectangle_selem(self):
-        for i in xrange(0, 5):
-            for j in xrange(0, 5):
+        for i in range(0, 5):
+            for j in range(0, 5):
                 actual_mask = selem.rectangle(i, j)
                 expected_mask = np.ones((i, j), dtype='uint8')
                 assert_equal(expected_mask, actual_mask)
