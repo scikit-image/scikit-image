@@ -69,10 +69,10 @@ def same_cython(f0, f1):
     if not (os.path.isfile(f0) and os.path.isfile(f1)):
         return False
 
-    f0 = file(f0)
+    f0 = open(f0, 'br')
     f0.readline()
 
-    f1 = file(f1)
+    f1 = open(f1, 'br')
     f1.readline()
 
     return md5sum(f0) == md5sum(f1)
