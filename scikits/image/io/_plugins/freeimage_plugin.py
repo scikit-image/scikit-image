@@ -3,6 +3,8 @@ import numpy
 import sys
 import os
 
+from numpy.compat import asbytes
+
 lib_dirs = (os.path.dirname(__file__),
             '/lib',
             '/usr/lib',
@@ -29,7 +31,7 @@ API = {
 
 # Albert's ctypes pattern
 def register_api(lib,api):
-    for f, (restype, argtypes) in api.iteritems():
+    for f, (restype, argtypes) in api.items():
         func = getattr(lib, f)
         func.restype = restype
         func.argtypes = argtypes
@@ -244,9 +246,10 @@ def read_multipage(filename, flags=0):
     (nchannels, width, height) for RGB or RGBA images.
 
     """
+    filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFileType(filename, 0)
     if ftype == -1:
-        raise ValueError('Cannot determine type of file %s'%filename)
+        raise ValueError('Cannot determine type of file %s' % filename)
     create_new = False
     read_only = True
     keep_cache_in_memory = True
@@ -254,7 +257,7 @@ def read_multipage(filename, flags=0):
                                                 read_only, keep_cache_in_memory,
                                                 flags)
     if not multibitmap:
-        raise ValueError('Could not open %s as multi-page image.'%filename)
+        raise ValueError('Could not open %s as multi-page image.' % filename)
     try:
         pages = _FI.FreeImage_GetPageCount(multibitmap)
         arrays = []
@@ -270,12 +273,13 @@ def read_multipage(filename, flags=0):
 
 def _read_bitmap(filename, flags):
     """Load a file to a FreeImage bitmap pointer"""
-    ftype = _FI.FreeImage_GetFileType(str(filename), 0)
+    filename = asbytes(filename)
+    ftype = _FI.FreeImage_GetFileType(filename, 0)
     if ftype == -1:
-        raise ValueError('Cannot determine type of file %s'%filename)
+        raise ValueError('Cannot determine type of file %s' % filename)
     bitmap = _FI.FreeImage_Load(ftype, filename, flags)
     if not bitmap:
-        raise ValueError('Could not load file %s'%filename)
+        raise ValueError('Could not load file %s' % filename)
     return bitmap
 
 def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
@@ -351,10 +355,10 @@ def write(array, filename, flags=0):
     filename.
 
     """
-    filename = str(filename)
+    filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFIFFromFilename(filename)
     if ftype == -1:
-        raise ValueError('Cannot determine type for %s'%filename)
+        raise ValueError('Cannot determine type for %s' % filename)
     bitmap, fi_type = _array_to_bitmap(array)
     try:
         if fi_type == FI_TYPES.FIT_BITMAP:
@@ -377,15 +381,16 @@ def write_multipage(arrays, filename, flags=0):
     deduced from the filename.
 
     """
+    filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFIFFromFilename(filename)
     if ftype == -1:
-        raise ValueError('Cannot determine type of file %s'%filename)
+        raise ValueError('Cannot determine type of file %s' % filename)
     create_new = True
     read_only = False
     keep_cache_in_memory = True
-    multibitmap = _FI.FreeImage_OpenMultiBitmap(ftype, filename, create_new,
-                                                read_only, keep_cache_in_memory,
-                                                0)
+    multibitmap = _FI.FreeImage_OpenMultiBitmap(ftype, filename,
+                                                create_new, read_only,
+                                                keep_cache_in_memory, 0)
     if not multibitmap:
         raise ValueError('Could not open %s for writing multi-page image.' %
                          filename)
