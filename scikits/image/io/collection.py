@@ -10,8 +10,6 @@ import os.path
 import numpy as np
 from io import imread
 
-from PIL import Image
-
 
 class MultiImage(object):
     """A class containing a single multi-frame image.
@@ -65,6 +63,7 @@ class MultiImage(object):
         self._dtype = dtype
         self._cached = None
 
+        from PIL import Image
         img = Image.open(self._filename)
         if self._conserve_memory:
             self._numframes = self._find_numframes(img)
