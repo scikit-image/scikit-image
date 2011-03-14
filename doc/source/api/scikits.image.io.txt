@@ -37,6 +37,7 @@ Inheritance diagram for ``scikits.image.io``:
 .. autosummary::
 
    scikits.image.io.imread
+   scikits.image.io.imread_collection
    scikits.image.io.imsave
    scikits.image.io.imshow
    scikits.image.io.load_sift
@@ -52,6 +53,11 @@ imread
 ------
 
 .. autofunction:: scikits.image.io.imread
+
+imread_collection
+-----------------
+
+.. autofunction:: scikits.image.io.imread_collection
 
 imsave
 ------

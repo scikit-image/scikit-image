@@ -9,6 +9,8 @@ Module: :mod:`color`
 
    scikits.image.color.convert_colorspace
    scikits.image.color.hsv2rgb
+   scikits.image.color.rgb2gray
+   scikits.image.color.rgb2grey
    scikits.image.color.rgb2hsv
    scikits.image.color.rgb2rgbcie
    scikits.image.color.rgb2xyz
@@ -24,6 +26,16 @@ hsv2rgb
 -------
 
 .. autofunction:: scikits.image.color.hsv2rgb
+
+rgb2gray
+--------
+
+.. autofunction:: scikits.image.color.rgb2gray
+
+rgb2grey
+--------
+
+.. autofunction:: scikits.image.color.rgb2grey
 
 rgb2hsv
 -------

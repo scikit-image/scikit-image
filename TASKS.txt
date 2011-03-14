@@ -14,6 +14,8 @@ following challenges you'd like to solve.
 Tasks
 -----
 
+:doc:`gsoc2011`
+
 Adapt existing code for use
 ```````````````````````````
 These snippets and packages have already been written.  Some need to be

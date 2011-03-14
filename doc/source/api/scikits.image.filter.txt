@@ -25,12 +25,18 @@ Inheritance diagram for ``scikits.image.filter``:
 .. autosummary::
 
    scikits.image.filter.inverse
+   scikits.image.filter.median_filter
    scikits.image.filter.wiener
 
 inverse
 -------
 
 .. autofunction:: scikits.image.filter.inverse
+
+median_filter
+-------------
+
+.. autofunction:: scikits.image.filter.median_filter
 
 wiener
 ------

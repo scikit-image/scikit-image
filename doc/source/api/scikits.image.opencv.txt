@@ -37,12 +37,16 @@ Inheritance diagram for ``scikits.image.opencv``:
    scikits.image.opencv.cvFilter2D
    scikits.image.opencv.cvFindChessboardCorners
    scikits.image.opencv.cvFindCornerSubPix
+   scikits.image.opencv.cvFindExtrinsicCameraParams2
+   scikits.image.opencv.cvFindFundamentalMat
+   scikits.image.opencv.cvFloodFill
    scikits.image.opencv.cvGetQuadrangleSubPix
    scikits.image.opencv.cvGetRectSubPix
    scikits.image.opencv.cvGoodFeaturesToTrack
    scikits.image.opencv.cvIntegral
    scikits.image.opencv.cvLaplace
    scikits.image.opencv.cvLogPolar
+   scikits.image.opencv.cvMatchTemplate
    scikits.image.opencv.cvMorphologyEx
    scikits.image.opencv.cvPreCornerDetect
    scikits.image.opencv.cvPyrDown
@@ -54,6 +58,7 @@ Inheritance diagram for ``scikits.image.opencv``:
    scikits.image.opencv.cvUndistort2
    scikits.image.opencv.cvWarpAffine
    scikits.image.opencv.cvWarpPerspective
+   scikits.image.opencv.cvWatershed
 
 cvAdaptiveThreshold
 -------------------
@@ -120,6 +125,21 @@ cvFindCornerSubPix
 
 .. autofunction:: scikits.image.opencv.cvFindCornerSubPix
 
+cvFindExtrinsicCameraParams2
+----------------------------
+
+.. autofunction:: scikits.image.opencv.cvFindExtrinsicCameraParams2
+
+cvFindFundamentalMat
+--------------------
+
+.. autofunction:: scikits.image.opencv.cvFindFundamentalMat
+
+cvFloodFill
+-----------
+
+.. autofunction:: scikits.image.opencv.cvFloodFill
+
 cvGetQuadrangleSubPix
 ---------------------
 
@@ -149,6 +169,11 @@ cvLogPolar
 ----------
 
 .. autofunction:: scikits.image.opencv.cvLogPolar
+
+cvMatchTemplate
+---------------
+
+.. autofunction:: scikits.image.opencv.cvMatchTemplate
 
 cvMorphologyEx
 --------------
@@ -204,4 +229,9 @@ cvWarpPerspective
 -----------------
 
 .. autofunction:: scikits.image.opencv.cvWarpPerspective
+
+cvWatershed
+-----------
+
+.. autofunction:: scikits.image.opencv.cvWatershed
 
