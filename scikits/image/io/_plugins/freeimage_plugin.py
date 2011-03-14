@@ -5,12 +5,15 @@ import os
 
 from numpy.compat import asbytes
 
-lib_dirs = (os.path.dirname(__file__),
+lib_dirs = [os.path.dirname(__file__),
             '/lib',
             '/usr/lib',
             '/usr/local/lib',
             '/opt/local/lib',
-            )
+            ]
+
+if 'HOME' in os.environ:
+    lib_dirs.append(os.path.join(os.environ['HOME'], 'lib'))
 
 API = {
     'FreeImage_Load': (ctypes.c_voidp,
@@ -38,7 +41,8 @@ def register_api(lib,api):
 
 _FI = None
 for d in lib_dirs:
-    for libname in ('FreeImage.dll', 'libfreeimage', 'libFreeImage'):
+    for libname in ('freeimage', 'FreeImage',
+                    'libfreeimage', 'libFreeImage'):
         try:
             _FI = numpy.ctypeslib.load_library(libname, d)
         except OSError:
