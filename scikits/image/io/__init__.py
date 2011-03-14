@@ -10,7 +10,11 @@ from _plugins import info as plugin_info
 
 # Add this plugin so that we can read images by default
 use_plugin('null')
-use_plugin('pil')
+
+try:
+    use_plugin('pil')
+except ImportError:
+    pass
 
 from sift import *
 from collection import *
