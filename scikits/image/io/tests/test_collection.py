@@ -1,3 +1,4 @@
+import sys
 import os.path
 
 import numpy as np
@@ -5,6 +6,10 @@ from numpy.testing import *
 
 from scikits.image import data_dir
 from scikits.image.io import ImageCollection, MultiImage
+
+
+if sys.version_info[0] > 2:
+    basestring = str
 
 
 class TestImageCollection():

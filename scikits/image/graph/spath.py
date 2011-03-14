@@ -1,5 +1,5 @@
 import numpy as np
-import _spath
+from . import _spath
 
 def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
     """Find the shortest path through an n-d array from one side to another.

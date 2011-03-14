@@ -3,13 +3,18 @@
 from __future__ import with_statement
 
 import os
+import sys
 import warnings
 
 import numpy as np
 from numpy.testing import *
 
 from scikits.image import data_dir
-import cPickle
+
+if sys.version_info[0] < 3:
+    import cPickle
+else:
+    import pickle as cPickle
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")

@@ -1,6 +1,6 @@
 import numpy as np
-import _colormixer
-import _histograms
+from . import _colormixer
+from . import _histograms
 import threading
 
 # utilities to make life easier for plugin writers.

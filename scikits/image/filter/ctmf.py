@@ -12,7 +12,7 @@ Original author: Lee Kamentsky
 '''
 
 import numpy as np
-import _ctmf
+from . import _ctmf
 from rank_order import rank_order
 
 def median_filter(data, mask=None, radius=1, percent=50):
@@ -59,7 +59,7 @@ def median_filter(data, mask=None, radius=1, percent=50):
         if max_ranked_data == 0:
             return data
         if max_ranked_data > 255:
-            ranked_data = ranked_data * 255 / max_ranked_data
+            ranked_data = ranked_data * 255 // max_ranked_data
         was_ranked = True
     else:
         ranked_data = data[mask]
@@ -78,7 +78,7 @@ def median_filter(data, mask=None, radius=1, percent=50):
         # use the translation to look up the original value in the data.
         #
         if max_ranked_data > 255:
-            result = translation[output.astype(np.uint32) * max_ranked_data / 255]
+            result = translation[output.astype(np.uint32) * max_ranked_data // 255]
         else:
             result = translation[output]
     else:
