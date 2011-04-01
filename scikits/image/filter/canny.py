@@ -1,6 +1,6 @@
 '''canny.py - Canny Edge detector
 
-Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans. 
+Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
 
 Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
@@ -14,26 +14,39 @@ Original author: Lee Kamentsky
 
 import numpy as np
 from smooth import smooth_with_function_and_mask
-import scipy.ndimage as scind
-from scipy.ndimage import gaussian_filter, convolve, generate_binary_structure, \
-     binary_erosion, label
-
-def fix(whatever_it_returned):
-    if getattr(whatever_it_returned,"__getitem__",False):
-        return np.array(whatever_it_returned)
-    else:
-        return np.array([whatever_it_returned])
+import scipy.ndimage as ndi
+from scipy.ndimage import (gaussian_filter, convolve,
+                           generate_binary_structure, binary_erosion, label)
 
 
-def canny(image, mask, sigma, low_threshold, high_threshold):
+def canny(image, sigma, low_threshold, high_threshold, mask=None):
     '''Edge filter an image using the Canny algorithm.
+
+    Parameters
+    -----------
+    image : array_like
+    The input image to detect edges on.
     
-    sigma - the standard deviation of the Gaussian used
-    low_threshold - threshold for edges that connect to high-threshold
-                    edges
-    high_threshold - threshold of a high-threshold edge
+    sigma : float
+    The standard deviation of the Gaussian filter
     
-    Canny, J., A Computational Approach To Edge Detection, IEEE Trans. 
+    low_threshold : float
+    The lower bound for hysterisis thresholding (linking edges)
+
+    high_threshold : float
+    The upper bound for hysterisis thresholding (linking edges)
+
+    mask : array of booleans, optional
+    An optional mask to limit the application of Canny to a certain area.
+
+    Returns
+    -------
+    output : array (image)
+    The binary edge map.
+
+    References
+    -----------
+    Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
     
     William Green's Canny tutorial
@@ -68,21 +81,23 @@ def canny(image, mask, sigma, low_threshold, high_threshold):
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
     #
+    if mask is None:
+        mask = np.ones(image.shape, dtype=bool)
     fsmooth = lambda x: gaussian_filter(x, sigma, mode='constant')
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
-    jsobel = convolve(smoothed, [[-1,0,1],[-2,0,2],[-1,0,1]])
+    jsobel = convolve(smoothed, [[-1,0,1], [-2,0,2], [-1,0,1]])
     isobel = convolve(smoothed, [[-1,-2,-1],[0,0,0],[1,2,1]])
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
-    magnitude = np.sqrt(isobel*isobel + jsobel*jsobel)
+    magnitude = np.sqrt(isobel * isobel + jsobel * jsobel)
 
     #
     # Make the eroded mask. Setting the border value to zero will wipe
     # out the image edges for us.
     #
     s = generate_binary_structure(2,2)
-    emask = binary_erosion(mask, s, border_value = 0)
-    emask = np.logical_and(emask, magnitude > 0)
+    eroded_mask = binary_erosion(mask, s, border_value=0)
+    eroded_mask = np.logical_and(eroded_mask, magnitude > 0)
     #
     #--------- Find local maxima --------------
     #
@@ -91,102 +106,104 @@ def canny(image, mask, sigma, low_threshold, high_threshold):
     #
     local_maxima = np.zeros(image.shape,bool)
     #----- 0 to 45 degrees ------
-    pts_plus = np.logical_and(isobel >= 0, 
-                              np.logical_and(jsobel >= 0, 
+    pts_plus = np.logical_and(isobel >= 0,
+                              np.logical_and(jsobel >= 0,
                                              abs_isobel >= abs_jsobel))
     pts_minus = np.logical_and(isobel <= 0,
                                np.logical_and(jsobel <= 0,
                                               abs_isobel >= abs_jsobel))
     pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(emask, pts)
+    pts = np.logical_and(eroded_mask, pts)
     # Get the magnitudes shifted left to make a matrix of the points to the
     # right of pts. Similarly, shift left and down to get the points to the
     # top right of pts.
     c1 = magnitude[1:,:][pts[:-1,:]]
     c2 = magnitude[1:,1:][pts[:-1,:-1]]
-    m  = magnitude[pts]
-    w  = abs_jsobel[pts] / abs_isobel[pts]
-    c_plus  = c2 * w + c1 * (1-w) <= m
+    m = magnitude[pts]
+    w = abs_jsobel[pts] / abs_isobel[pts]
+    c_plus = c2 * w + c1 * (1 - w) <= m
     c1 = magnitude[:-1,:][pts[1:,:]]
     c2 = magnitude[:-1,:-1][pts[1:,1:]]
-    c_minus =  c2 * w + c1 * (1-w) <= m
+    c_minus = c2 * w + c1 * (1 - w) <= m
     local_maxima[pts] = np.logical_and(c_plus, c_minus)
     #----- 45 to 90 degrees ------
     # Mix diagonal and vertical
     #
-    pts_plus = np.logical_and(isobel >= 0, 
-                              np.logical_and(jsobel >= 0, 
+    pts_plus = np.logical_and(isobel >= 0,
+                              np.logical_and(jsobel >= 0,
                                              abs_isobel <= abs_jsobel))
     pts_minus = np.logical_and(isobel <= 0,
-                               np.logical_and(jsobel <= 0, 
+                               np.logical_and(jsobel <= 0,
                                               abs_isobel <= abs_jsobel))
     pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(emask, pts)
+    pts = np.logical_and(eroded_mask, pts)
     c1 = magnitude[:,1:][pts[:,:-1]]
     c2 = magnitude[1:,1:][pts[:-1,:-1]]
-    m  = magnitude[pts]
-    w  = abs_isobel[pts] / abs_jsobel[pts]
-    c_plus  = c2 * w + c1 * (1-w) <= m
+    m = magnitude[pts]
+    w = abs_isobel[pts] / abs_jsobel[pts]
+    c_plus = c2 * w + c1 * (1 - w) <= m
     c1 = magnitude[:,:-1][pts[:,1:]]
     c2 = magnitude[:-1,:-1][pts[1:,1:]]
-    c_minus =  c2 * w + c1 * (1-w) <= m
+    c_minus = c2 * w + c1 * (1 - w) <= m
     local_maxima[pts] = np.logical_and(c_plus, c_minus)
     #----- 90 to 135 degrees ------
     # Mix anti-diagonal and vertical
     #
-    pts_plus = np.logical_and(isobel <= 0, 
-                              np.logical_and(jsobel >= 0, 
+    pts_plus = np.logical_and(isobel <= 0,
+                              np.logical_and(jsobel >= 0,
                                              abs_isobel <= abs_jsobel))
     pts_minus = np.logical_and(isobel >= 0,
-                               np.logical_and(jsobel <= 0, 
+                               np.logical_and(jsobel <= 0,
                                               abs_isobel <= abs_jsobel))
     pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(emask, pts)
+    pts = np.logical_and(eroded_mask, pts)
     c1a = magnitude[:,1:][pts[:,:-1]]
     c2a = magnitude[:-1,1:][pts[1:,:-1]]
-    m  = magnitude[pts]
-    w  = abs_isobel[pts] / abs_jsobel[pts]
-    c_plus  = c2a * w + c1a * (1.0-w) <= m
+    m = magnitude[pts]
+    w = abs_isobel[pts] / abs_jsobel[pts]
+    c_plus = c2a * w + c1a * (1.0 - w) <= m
     c1 = magnitude[:,:-1][pts[:,1:]]
     c2 = magnitude[1:,:-1][pts[:-1,1:]]
-    c_minus =  c2 * w + c1 * (1.0-w) <= m
+    c_minus = c2 * w + c1 * (1.0 - w) <= m
     cc = np.logical_and(c_plus,c_minus)
     local_maxima[pts] = np.logical_and(c_plus, c_minus)
     #----- 135 to 180 degrees ------
     # Mix anti-diagonal and anti-horizontal
     #
-    pts_plus = np.logical_and(isobel <= 0, 
-                              np.logical_and(jsobel >= 0, 
+    pts_plus = np.logical_and(isobel <= 0,
+                              np.logical_and(jsobel >= 0,
                                              abs_isobel >= abs_jsobel))
     pts_minus = np.logical_and(isobel >= 0,
-                               np.logical_and(jsobel <= 0, 
+                               np.logical_and(jsobel <= 0,
                                               abs_isobel >= abs_jsobel))
     pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(emask, pts)
+    pts = np.logical_and(eroded_mask, pts)
     c1 = magnitude[:-1,:][pts[1:,:]]
     c2 = magnitude[:-1,1:][pts[1:,:-1]]
-    m  = magnitude[pts]
-    w  = abs_jsobel[pts] / abs_isobel[pts]
-    c_plus  = c2 * w + c1 * (1-w) <= m
+    m = magnitude[pts]
+    w = abs_jsobel[pts] / abs_isobel[pts]
+    c_plus = c2 * w + c1 * (1 - w) <= m
     c1 = magnitude[1:,:][pts[:-1,:]]
     c2 = magnitude[1:,:-1][pts[:-1,1:]]
-    c_minus =  c2 * w + c1 * (1-w) <= m
+    c_minus = c2 * w + c1 * (1 - w) <= m
     local_maxima[pts] = np.logical_and(c_plus, c_minus)
     #
     #---- Create two masks at the two thresholds.
     #
     high_mask = np.logical_and(local_maxima, magnitude >= high_threshold)
-    low_mask  = np.logical_and(local_maxima, magnitude >= low_threshold)
+    low_mask = np.logical_and(local_maxima, magnitude >= low_threshold)
     #
     # Segment the low-mask, then only keep low-segments that have
-    # some high_mask component in them 
+    # some high_mask component in them
     #
     labels,count = label(low_mask, np.ndarray((3,3),bool))
     if count == 0:
         return low_mask
     
-    sums = fix(scind.sum(high_mask, labels, np.arange(count,dtype=np.int32)+1))
-    good_label = np.zeros((count+1,),bool)
+    sums = (np.array(ndi.sum(high_mask,labels,
+                             np.arange(count,dtype=np.int32) + 1),
+                     copy=False, ndmin=1))
+    good_label = np.zeros((count + 1,),bool)
     good_label[1:] = sums > 0
     output_mask = good_label[labels]
-    return output_mask  
+    return output_mask
