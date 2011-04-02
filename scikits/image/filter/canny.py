@@ -13,10 +13,41 @@ Original author: Lee Kamentsky
 '''
 
 import numpy as np
-from smooth import smooth_with_function_and_mask
 import scipy.ndimage as ndi
 from scipy.ndimage import (gaussian_filter, convolve,
                            generate_binary_structure, binary_erosion, label)
+
+
+def smooth_with_function_and_mask(image, function, mask):
+    """Smooth an image with a linear function, ignoring masked pixels
+
+    Parameters
+    ----------
+    image : array
+    The image to smooth
+    
+    function : callable
+    A function that takes an image and returns a smoothed image
+    
+    mask : array
+    Mask with 1's for significant pixels, 0 for masked pixels
+
+    Notes
+    ------
+    This function calculates the fractional contribution of masked pixels
+    by applying the function to the mask (which gets you the fraction of
+    the pixel data that's due to significant points). We then mask the image
+    and apply the function. The resulting values will be lower by the bleed-over
+    fraction, so you can recalibrate by dividing by the function on the mask
+    to recover the effect of smoothing from just the significant pixels.
+    """
+    not_mask               = np.logical_not(mask)
+    bleed_over             = function(mask.astype(float))
+    masked_image           = np.zeros(image.shape, image.dtype)
+    masked_image[mask]     = image[mask]
+    smoothed_image         = function(masked_image)
+    output_image           = smoothed_image / (bleed_over + np.finfo(float).eps)
+    return output_image
 
 
 def canny(image, sigma, low_threshold, high_threshold, mask=None):
