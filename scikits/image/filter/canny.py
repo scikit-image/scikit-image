@@ -55,8 +55,9 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
 
     Parameters
     -----------
-    image : array_like
-    The input image to detect edges on.
+    image : array_like, dtype=float
+    The greyscale input image to detect edges on; should be normalized to 0.0
+    to 1.0.
     
     sigma : float
     The standard deviation of the Gaussian filter
@@ -67,7 +68,7 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
     high_threshold : float
     The upper bound for hysterisis thresholding (linking edges)
 
-    mask : array of booleans, optional
+    mask : array, dtype=bool, optional
     An optional mask to limit the application of Canny to a certain area.
 
     Returns
@@ -116,8 +117,8 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
         mask = np.ones(image.shape, dtype=bool)
     fsmooth = lambda x: gaussian_filter(x, sigma, mode='constant')
     smoothed = smooth_with_function_and_mask(image, fsmooth, mask)
-    jsobel = convolve(smoothed, [[-1,0,1], [-2,0,2], [-1,0,1]])
-    isobel = convolve(smoothed, [[-1,-2,-1],[0,0,0],[1,2,1]])
+    jsobel = ndi.sobel(smoothed, axis=1)
+    isobel = ndi.sobel(smoothed, axis=0)
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
     magnitude = np.sqrt(isobel * isobel + jsobel * jsobel)
