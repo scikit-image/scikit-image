@@ -16,6 +16,11 @@ Tasks
 
 :doc:`gsoc2011`
 
+Infrastructure
+--------------
+- Implement a new backend system so that we may start including
+  PyOpenCL-based algorithms
+
 Adapt existing code for use
 ```````````````````````````
 These snippets and packages have already been written.  Some need to be
@@ -90,7 +95,9 @@ Rework linear filters
 io
 ``
 * Update ``qt_plugin.py`` and other plugins to view collections.
-* Add medical / biological or GIS image format plugins.
+* Rewrite GTK backend using GObject Introspection for Py3K compatibility.
+* Add medical / biological and GIS image format plugins.
+* Add DICOM plugin for `GDCM <http://sourceforge.net/apps/mediawiki/gdcm>`__.
 
 docs
 ````
@@ -108,4 +115,5 @@ Implement Algorithms
 - Histograms of oriented gradients
 - Fast radon transform
 - Graph cut segmentation
+- Probabilistic Hough transform
 
