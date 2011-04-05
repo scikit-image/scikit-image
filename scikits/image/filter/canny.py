@@ -121,15 +121,15 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
     isobel = ndi.sobel(smoothed, axis=0)
     abs_isobel = np.abs(isobel)
     abs_jsobel = np.abs(jsobel)
-    magnitude = np.sqrt(isobel * isobel + jsobel * jsobel)
+    magnitude = np.hypot(isobel, jsobel)
 
     #
     # Make the eroded mask. Setting the border value to zero will wipe
     # out the image edges for us.
     #
-    s = generate_binary_structure(2,2)
+    s = generate_binary_structure(2, 2)
     eroded_mask = binary_erosion(mask, s, border_value=0)
-    eroded_mask = np.logical_and(eroded_mask, magnitude > 0)
+    eroded_mask = eroded_mask & (magnitude > 0)
     #
     #--------- Find local maxima --------------
     #
@@ -138,97 +138,81 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
     #
     local_maxima = np.zeros(image.shape,bool)
     #----- 0 to 45 degrees ------
-    pts_plus = np.logical_and(isobel >= 0,
-                              np.logical_and(jsobel >= 0,
-                                             abs_isobel >= abs_jsobel))
-    pts_minus = np.logical_and(isobel <= 0,
-                               np.logical_and(jsobel <= 0,
-                                              abs_isobel >= abs_jsobel))
-    pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(eroded_mask, pts)
+    pts_plus = (isobel >= 0) & (jsobel >= 0) & (abs_isobel >= abs_jsobel)
+    pts_minus = (isobel <= 0) & (jsobel <= 0) & (abs_isobel >= abs_jsobel)
+    pts = pts_plus | pts_minus
+    pts = eroded_mask & pts
     # Get the magnitudes shifted left to make a matrix of the points to the
     # right of pts. Similarly, shift left and down to get the points to the
     # top right of pts.
-    c1 = magnitude[1:,:][pts[:-1,:]]
-    c2 = magnitude[1:,1:][pts[:-1,:-1]]
+    c1 = magnitude[1:, :][pts[:-1, :]]
+    c2 = magnitude[1:, 1:][pts[:-1, :-1]]
     m = magnitude[pts]
     w = abs_jsobel[pts] / abs_isobel[pts]
     c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[:-1,:][pts[1:,:]]
-    c2 = magnitude[:-1,:-1][pts[1:,1:]]
+    c1 = magnitude[:-1, :][pts[1:, :]]
+    c2 = magnitude[:-1, :-1][pts[1:, 1:]]
     c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = np.logical_and(c_plus, c_minus)
+    local_maxima[pts] = c_plus & c_minus
     #----- 45 to 90 degrees ------
     # Mix diagonal and vertical
     #
-    pts_plus = np.logical_and(isobel >= 0,
-                              np.logical_and(jsobel >= 0,
-                                             abs_isobel <= abs_jsobel))
-    pts_minus = np.logical_and(isobel <= 0,
-                               np.logical_and(jsobel <= 0,
-                                              abs_isobel <= abs_jsobel))
-    pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(eroded_mask, pts)
-    c1 = magnitude[:,1:][pts[:,:-1]]
-    c2 = magnitude[1:,1:][pts[:-1,:-1]]
+    pts_plus = (isobel >= 0) & (jsobel >= 0) & (abs_isobel <= abs_jsobel)
+    pts_minus = (isobel <= 0) & (jsobel <= 0) & (abs_isobel <= abs_jsobel)
+    pts = pts_plus | pts_minus
+    pts = eroded_mask & pts
+    c1 = magnitude[:, 1:][pts[:, :-1]]
+    c2 = magnitude[1:, 1:][pts[:-1, :-1]]
     m = magnitude[pts]
     w = abs_isobel[pts] / abs_jsobel[pts]
     c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[:,:-1][pts[:,1:]]
-    c2 = magnitude[:-1,:-1][pts[1:,1:]]
+    c1 = magnitude[:, :-1][pts[:, 1:]]
+    c2 = magnitude[:-1, :-1][pts[1:, 1:]]
     c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = np.logical_and(c_plus, c_minus)
+    local_maxima[pts] = c_plus & c_minus
     #----- 90 to 135 degrees ------
     # Mix anti-diagonal and vertical
     #
-    pts_plus = np.logical_and(isobel <= 0,
-                              np.logical_and(jsobel >= 0,
-                                             abs_isobel <= abs_jsobel))
-    pts_minus = np.logical_and(isobel >= 0,
-                               np.logical_and(jsobel <= 0,
-                                              abs_isobel <= abs_jsobel))
-    pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(eroded_mask, pts)
-    c1a = magnitude[:,1:][pts[:,:-1]]
-    c2a = magnitude[:-1,1:][pts[1:,:-1]]
+    pts_plus = (isobel <= 0) & (jsobel >= 0) & (abs_isobel <= abs_jsobel)
+    pts_minus = (isobel >= 0) & (jsobel <= 0) & (abs_isobel <= abs_jsobel)
+    pts = pts_plus | pts_minus
+    pts = eroded_mask & pts
+    c1a = magnitude[:, 1:][pts[:, :-1]]
+    c2a = magnitude[:-1, 1:][pts[1:, :-1]]
     m = magnitude[pts]
     w = abs_isobel[pts] / abs_jsobel[pts]
     c_plus = c2a * w + c1a * (1.0 - w) <= m
-    c1 = magnitude[:,:-1][pts[:,1:]]
-    c2 = magnitude[1:,:-1][pts[:-1,1:]]
+    c1 = magnitude[:, :-1][pts[:, 1:]]
+    c2 = magnitude[1:, :-1][pts[:-1, 1:]]
     c_minus = c2 * w + c1 * (1.0 - w) <= m
     cc = np.logical_and(c_plus,c_minus)
-    local_maxima[pts] = np.logical_and(c_plus, c_minus)
+    local_maxima[pts] = c_plus & c_minus
     #----- 135 to 180 degrees ------
     # Mix anti-diagonal and anti-horizontal
     #
-    pts_plus = np.logical_and(isobel <= 0,
-                              np.logical_and(jsobel >= 0,
-                                             abs_isobel >= abs_jsobel))
-    pts_minus = np.logical_and(isobel >= 0,
-                               np.logical_and(jsobel <= 0,
-                                              abs_isobel >= abs_jsobel))
-    pts = np.logical_or(pts_plus, pts_minus)
-    pts = np.logical_and(eroded_mask, pts)
-    c1 = magnitude[:-1,:][pts[1:,:]]
-    c2 = magnitude[:-1,1:][pts[1:,:-1]]
+    pts_plus = (isobel <= 0) & (jsobel >= 0) & (abs_isobel >= abs_jsobel)
+    pts_minus = (isobel >= 0) & (jsobel <= 0) & (abs_isobel >= abs_jsobel)
+    pts = pts_plus | pts_minus
+    pts = eroded_mask & pts
+    c1 = magnitude[:-1, :][pts[1:, :]]
+    c2 = magnitude[:-1, 1:][pts[1:, :-1]]
     m = magnitude[pts]
     w = abs_jsobel[pts] / abs_isobel[pts]
     c_plus = c2 * w + c1 * (1 - w) <= m
-    c1 = magnitude[1:,:][pts[:-1,:]]
+    c1 = magnitude[1:, :][pts[:-1, :]]
     c2 = magnitude[1:,:-1][pts[:-1,1:]]
     c_minus = c2 * w + c1 * (1 - w) <= m
-    local_maxima[pts] = np.logical_and(c_plus, c_minus)
+    local_maxima[pts] = c_plus & c_minus
     #
     #---- Create two masks at the two thresholds.
     #
-    high_mask = np.logical_and(local_maxima, magnitude >= high_threshold)
-    low_mask = np.logical_and(local_maxima, magnitude >= low_threshold)
+    high_mask = local_maxima & (magnitude >= high_threshold)
+    low_mask = local_maxima & (magnitude >= low_threshold)
     #
     # Segment the low-mask, then only keep low-segments that have
     # some high_mask component in them
     #
-    labels,count = label(low_mask, np.ndarray((3,3),bool))
+    labels,count = label(low_mask, np.ndarray((3, 3),bool))
     if count == 0:
         return low_mask
     
