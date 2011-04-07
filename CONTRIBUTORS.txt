@@ -33,3 +33,7 @@
 
 - Lee Kamentsky and Thouis Jones of the CellProfiler team, Broad Institute, MIT
   Constant time per pixel median filter
+
+- Dan Farmer
+  Incorporating CellProfiler's Canny edge detector
+
