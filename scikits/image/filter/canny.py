@@ -24,13 +24,13 @@ def smooth_with_function_and_mask(image, function, mask):
     Parameters
     ----------
     image : array
-    The image to smooth
+      The image to smooth
     
     function : callable
-    A function that takes an image and returns a smoothed image
+      A function that takes an image and returns a smoothed image
     
     mask : array
-    Mask with 1's for significant pixels, 0 for masked pixels
+      Mask with 1's for significant pixels, 0 for masked pixels
 
     Notes
     ------
@@ -41,12 +41,12 @@ def smooth_with_function_and_mask(image, function, mask):
     fraction, so you can recalibrate by dividing by the function on the mask
     to recover the effect of smoothing from just the significant pixels.
     """
-    not_mask               = np.logical_not(mask)
-    bleed_over             = function(mask.astype(float))
-    masked_image           = np.zeros(image.shape, image.dtype)
-    masked_image[mask]     = image[mask]
-    smoothed_image         = function(masked_image)
-    output_image           = smoothed_image / (bleed_over + np.finfo(float).eps)
+    not_mask = np.logical_not(mask)
+    bleed_over = function(mask.astype(float))
+    masked_image = np.zeros(image.shape, image.dtype)
+    masked_image[mask] = image[mask]
+    smoothed_image = function(masked_image)
+    output_image = smoothed_image / (bleed_over + np.finfo(float).eps)
     return output_image
 
 
@@ -56,25 +56,25 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
     Parameters
     -----------
     image : array_like, dtype=float
-    The greyscale input image to detect edges on; should be normalized to 0.0
-    to 1.0.
+      The greyscale input image to detect edges on; should be normalized to 0.0
+      to 1.0.
     
     sigma : float
-    The standard deviation of the Gaussian filter
+      The standard deviation of the Gaussian filter
     
     low_threshold : float
-    The lower bound for hysterisis thresholding (linking edges)
+      The lower bound for hysterisis thresholding (linking edges)
 
     high_threshold : float
-    The upper bound for hysterisis thresholding (linking edges)
+      The upper bound for hysterisis thresholding (linking edges)
 
     mask : array, dtype=bool, optional
-    An optional mask to limit the application of Canny to a certain area.
+      An optional mask to limit the application of Canny to a certain area.
 
     Returns
     -------
     output : array (image)
-    The binary edge map.
+      The binary edge map.
 
     References
     -----------
