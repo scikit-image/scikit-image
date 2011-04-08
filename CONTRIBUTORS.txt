@@ -11,7 +11,8 @@
   Documentation infrastructure
 
 - S. Chris Colbert
-  OpenCV wrappers, Scivi, Qt and Gtk gui bits.
+  OpenCV wrappers, Scivi, Qt and Gtk gui bits, fast Hough transform,
+  and much more.
 
 - Holger Rapp
   OpenCV functions and better OSX library loader
