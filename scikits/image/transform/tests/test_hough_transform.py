@@ -5,17 +5,18 @@ from scikits.image.transform import *
 
 def test_hough():
     # Generate a test image
-    img = np.zeros((100, 150), dtype=bool)
-    img[30, :] = 1
-    img[:, 65] = 1
-    img[35:45, 35:50] = 1
-    for i in range(90):
-        img[i, i] = 1
+    img = np.zeros((100, 100), dtype=int)
+    for i in range(25, 75):
+        img[100 - i, i] = 1
 
     out, angles, d = hough(img)
 
-    assert_equal(out.max(), 100)
-    assert_equal(len(angles), 180)
+    y, x = np.where(out == out.max())
+    dist = d[y[0]]
+    theta = angles[x[0]]
+
+    assert_equal(dist > 70, dist < 72)
+    assert_equal(theta > 0.78, theta < 0.79)
 
 def test_hough_angles():
     img = np.zeros((10, 10))
