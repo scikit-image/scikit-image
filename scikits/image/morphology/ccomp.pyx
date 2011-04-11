@@ -69,7 +69,7 @@ cdef join_trees(np.int_t *work, np.int_t n, np.int_t m):
 def label(np.ndarray[DTYPE_t, ndim=2] input):
     """Label connected regions of an integer array.
 
-    Connectivity is defined as two neighboring values
+    Connectivity is defined as two (8-connected) neighboring entries
     having equal value.
 
     Parameters
