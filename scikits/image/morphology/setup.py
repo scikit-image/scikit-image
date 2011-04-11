@@ -14,8 +14,11 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('morphology', parent_package, top_path)
     config.add_data_dir('tests')
 
+    cython(['ccomp.pyx'], working_path=base_path)
     cython(['cmorph.pyx'], working_path=base_path)
 
+    config.add_extension('ccomp', sources=['ccomp.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('cmorph', sources=['cmorph.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
