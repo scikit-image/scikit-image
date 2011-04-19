@@ -67,9 +67,10 @@ def hsobel(image, mask=None):
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value = 0)
-    result = np.abs(convolve(image, np.array([[ 1, 2, 1],
-                                              [ 0, 0, 0],
-                                              [-1,-2,-1]]).astype(float) / 4.0))
+    result = np.abs(convolve(image.astype(float),
+                             np.array([[ 1, 2, 1],
+                                       [ 0, 0, 0],
+                                       [-1,-2,-1]]).astype(float) / 4.0))
     result[big_mask == False] = 0
     return result
 
@@ -103,9 +104,10 @@ def vsobel(image, mask=None):
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value=0)
-    result = np.abs(convolve(image, np.array([[1, 0, -1],
-                                              [2, 0, -2],
-                                              [1, 0, -1]]).astype(float) / 4.0))
+    result = np.abs(convolve(image.astype(float),
+                             np.array([[1, 0, -1],
+                                       [2, 0, -2],
+                                       [1, 0, -1]]).astype(float) / 4.0))
     result[big_mask == False] = 0
     return result
 
@@ -161,9 +163,10 @@ def hprewitt(image, mask=None):
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value=0)
-    result = np.abs(convolve(image, np.array([[ 1, 1, 1],
-                                              [ 0, 0, 0],
-                                              [-1,-1,-1]]).astype(float) / 3.0))
+    result = np.abs(convolve(image.astype(float),
+                             np.array([[ 1, 1, 1],
+                                       [ 0, 0, 0],
+                                       [-1,-1,-1]]).astype(float) / 3.0))
     result[big_mask == False] = 0
     return result
 
@@ -197,8 +200,9 @@ def vprewitt(image, mask=None):
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value=0)
-    result = np.abs(convolve(image, np.array([[1, 0, -1],
-                                              [1, 0, -1],
-                                              [1, 0, -1]]).astype(float) / 3.0))
+    result = np.abs(convolve(image.astype(float),
+                             np.array([[1, 0, -1],
+                                       [1, 0, -1],
+                                       [1, 0, -1]]).astype(float) / 3.0))
     result[big_mask == False] = 0
     return result

@@ -1,7 +1,11 @@
+import os
+
 from numpy.testing import *
 import numpy as np
 from scipy.ndimage import binary_dilation, binary_erosion
+
 import scikits.image.filter as F
+from scikits.image import data_dir
 
 class TestSobel():
     def test_00_00_zeros(self):
@@ -34,6 +38,16 @@ class TestSobel():
         j[np.abs(i) == 5] = 10000
         assert (np.all(result[j == 0] == 1))
         assert (np.all(result[np.abs(j) > 1] == 0))
+
+    def test_convolution_upcast(self):
+        i, j = np.mgrid[-5:6, -5:6]
+        image = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
+
+        result1 = F.sobel(image)
+        image = image.astype(float)
+        result2 = F.sobel(image)
+
+        assert_array_equal(result1, result2)
 
 class TestHSobel():
     def test_00_00_zeros(self):
