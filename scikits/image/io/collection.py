@@ -40,6 +40,8 @@ class MultiImage(object):
     The last accessed frame is cached, all other frames will have to be read
     from file.
 
+    The current implementation makes use of PIL.
+
     Examples
     --------
     >>> from scikits.image import data_dir
@@ -92,6 +94,7 @@ class MultiImage(object):
 
     def _getframe(self, framenum):
         """Open the image and extract the frame."""
+        from PIL import Image
         img = Image.open(self.filename)
         img.seek(framenum)
         return np.asarray(img, dtype=self._dtype)

@@ -3,10 +3,18 @@ import os.path
 
 import numpy as np
 from numpy.testing import *
+from numpy.testing.decorators import skipif
 
 from scikits.image import data_dir
 from scikits.image.io import ImageCollection, MultiImage
 
+
+try:
+    from PIL import Image
+except ImportError:
+    PIL_available = False
+else:
+    PIL_available = True
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -58,9 +66,11 @@ class TestMultiImage():
         # convert im1.tif im2.tif -adjoin multipage.tif
         self.img = MultiImage(os.path.join(data_dir, 'multipage.tif'))
 
+    @skipif(not PIL_available)
     def test_len(self):
         assert len(self.img) == 2
 
+    @skipif(not PIL_available)
     def test_getitem(self):
         num = len(self.img)
         for i in range(-num, num):
@@ -74,6 +84,7 @@ class TestMultiImage():
         assert_raises(IndexError, return_img, num)
         assert_raises(IndexError, return_img, -num-1)
 
+    @skipif(not PIL_available)
     def test_files_property(self):
         assert isinstance(self.img.filename, basestring)
 
@@ -81,6 +92,7 @@ class TestMultiImage():
             self.img.filename = f
         assert_raises(AttributeError, set_filename, 'newfile')
 
+    @skipif(not PIL_available)
     def test_conserve_memory_property(self):
         assert isinstance(self.img.conserve_memory, bool)
 

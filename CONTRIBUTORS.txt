@@ -38,3 +38,5 @@
 - Dan Farmer
   Incorporating CellProfiler's Canny edge detector
 
+- Pieter Holtzhausen
+  Incorporating CellProfiler's Sobel edge detector
