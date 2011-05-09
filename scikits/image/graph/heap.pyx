@@ -127,17 +127,7 @@ cdef class BinaryHeap:
     #
     # To calculate the capacity at a certain level:
     # 2**l
-
-
-    def __init__(self, int initial_capcity=128):
-        """__init__(initial_capacity=128)
-
-        Class constructor.
-
-        Takes an optional parameter 'initial_capacity' so that
-        if the required heap capacity is known or can be estimated in advance,
-        there will need to be fewer resize operations on the heap."""
-
+    def __cinit__(self, int initial_capcity=128, *args, **kws):
         # calc levels from the default capacity
         cdef int levels = 0
         while 2**levels < initial_capcity:
@@ -150,10 +140,19 @@ cdef class BinaryHeap:
 
         # allocate arrays
         cdef int number = 2**self.levels
-        cdef VALUE_T *values
-        values = self._values = <VALUE_T *>malloc( 2*number * sizeof(VALUE_T))
+        self._values = <VALUE_T *>malloc( 2*number * sizeof(VALUE_T))
         self._references = <REFERENCE_T *>malloc(number * sizeof(REFERENCE_T))
 
+    def __init__(self, int initial_capcity=128):
+        """__init__(initial_capacity=128)
+
+        Class constructor.
+
+        Takes an optional parameter 'initial_capacity' so that
+        if the required heap capacity is known or can be estimated in advance,
+        there will need to be fewer resize operations on the heap."""
+        if self._values is NULL or self._references is NULL:
+          raise MemoryError()
         self.reset()
 
     def reset(self):
@@ -512,18 +511,21 @@ cdef class FastUpdateBinaryHeap(BinaryHeap):
     is lower than the current value in the heap. This is again useful for
     pathfinding algorithms.
     """
+    def __cinit__(self, int initial_capacity=128, max_reference=None):
+      if max_reference is None:
+        max_reference = initial_capacity - 1
+      self.max_reference = max_reference
+      self._crossref = <REFERENCE_T *>malloc((max_reference+1) * \
+                                      sizeof(REFERENCE_T))
+
     def __init__(self, int initial_capacity=128, max_reference=None):
         """__init__(initial_capacity=128, max_reference=None)
 
         Class constructor.
         """
-        if max_reference is None:
-          max_reference = initial_capacity - 1
-        self.max_reference = max_reference
-        self._crossref = <REFERENCE_T *>malloc((max_reference+1) * \
-                                        sizeof(REFERENCE_T))
         # below will call self.reset
         BinaryHeap.__init__(self, initial_capacity)
+
 
     def __dealloc__(self):
         if self._crossref is not NULL:
