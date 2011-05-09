@@ -16,7 +16,7 @@ if 'HOME' in os.environ:
     lib_dirs.append(os.path.join(os.environ['HOME'], 'lib'))
 
 API = {
-    'FreeImage_Load': (ctypes.c_voidp,
+    'FreeImage_Load': (ctypes.c_void_p,
                        [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]),
     'FreeImage_GetWidth': (ctypes.c_uint,
                            [ctypes.c_void_p]),
@@ -263,10 +263,12 @@ def read_multipage(filename, flags=0):
     if not multibitmap:
         raise ValueError('Could not open %s as multi-page image.' % filename)
     try:
+        multibitmap = ctypes.c_void_p(multibitmap)
         pages = _FI.FreeImage_GetPageCount(multibitmap)
         arrays = []
         for i in range(pages):
             bitmap = _FI.FreeImage_LockPage(multibitmap, i)
+            bitmap = ctypes.c_void_p(bitmap)
             try:
                 arrays.append(_array_from_bitmap(bitmap))
             finally:
@@ -284,36 +286,28 @@ def _read_bitmap(filename, flags):
     bitmap = _FI.FreeImage_Load(ftype, filename, flags)
     if not bitmap:
         raise ValueError('Could not load file %s' % filename)
-    return bitmap
-
+    return ctypes.c_void_p(bitmap)
+    
 def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
-    """Return an ndarray view on the data in a FreeImage bitmap. Only
-    valid for as long as the bitmap is loaded (if single page) / locked
-    in memory (if multipage).
+  """Return an ndarray view on the data in a FreeImage bitmap. Only
+  valid for as long as the bitmap is loaded (if single page) / locked
+  in memory (if multipage).
 
-    """
-    pitch = _FI.FreeImage_GetPitch(bitmap)
-    height = shape[-1]
-    itemsize = dtype.itemsize
+  """
+  pitch = _FI.FreeImage_GetPitch(bitmap)
+  height = shape[-1]
+  byte_size = height * pitch
+  itemsize = dtype.itemsize
 
-    if len(shape) == 3:
-        strides = (itemsize, shape[0]*itemsize, pitch)
-    else:
-        strides = (itemsize, pitch)
-    bits = _FI.FreeImage_GetBits(bitmap)
-
-    class DummyArray:
-        __array_interface__ = {
-            'data': (bits, False),
-            'strides': strides,
-            'typestr': dtype.str,
-            'shape': tuple(shape),
-            'version' : 3,
-            }
-
-    # Still segfaulting on 64-bit machine because of illegal memory access
-
-    return numpy.array(DummyArray(), copy=False)
+  if len(shape) == 3:
+    strides = (itemsize, shape[0]*itemsize, pitch)
+  else:
+    strides = (itemsize, pitch)
+  bits = _FI.FreeImage_GetBits(bitmap)
+  array = numpy.ndarray(shape, dtype=dtype, 
+                        buffer=(ctypes.c_char*byte_size).from_address(bits),
+                        strides=strides)
+  return array
 
 def _array_from_bitmap(bitmap):
     """Convert a FreeImage bitmap pointer to a numpy array
@@ -399,8 +393,9 @@ def write_multipage(arrays, filename, flags=0):
         raise ValueError('Could not open %s for writing multi-page image.' %
                          filename)
     try:
+        multibitmap = ctypes.c_void_p(multibitmap)
         for array in arrays:
-            bitmap = _array_to_bitmap(array)
+            bitmap, fi_type = _array_to_bitmap(array)
             _FI.FreeImage_AppendPage(multibitmap, bitmap)
     finally:
         _FI.FreeImage_CloseMultiBitmap(multibitmap, flags)
@@ -436,6 +431,7 @@ def _array_to_bitmap(array):
     try:
         def n(arr): # normalise to freeimage's in-memory format
             return arr.T[:,::-1]
+        bitmap = ctypes.c_void_p(bitmap)
         wrapped_array = _wrap_bitmap_bits_in_array(bitmap, w_shape, dtype)
         # swizzle the color components and flip the scanlines to go to
         # FreeImage's BGR[A] and upside-down internal memory format
