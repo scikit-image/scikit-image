@@ -9,8 +9,10 @@ np.import_array()
 cdef extern from "math.h":
     double sqrt(double)
     double ceil(double)
-    double round(double)
+    double floor(double)
 
+cdef double round(double val):
+    return floor(val + 0.5);
 
 cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
