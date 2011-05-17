@@ -127,10 +127,10 @@ cdef class BinaryHeap:
     #
     # To calculate the capacity at a certain level:
     # 2**l
-    def __cinit__(self, int initial_capcity=128, *args, **kws):
+    def __cinit__(self, int initial_capacity=128, *args, **kws):
         # calc levels from the default capacity
         cdef int levels = 0
-        while 2**levels < initial_capcity:
+        while 2**levels < initial_capacity:
             levels += 1
         # set levels
         self.min_levels = self.levels = levels
@@ -143,7 +143,7 @@ cdef class BinaryHeap:
         self._values = <VALUE_T *>malloc( 2*number * sizeof(VALUE_T))
         self._references = <REFERENCE_T *>malloc(number * sizeof(REFERENCE_T))
 
-    def __init__(self, int initial_capcity=128):
+    def __init__(self, int initial_capacity=128):
         """__init__(initial_capacity=128)
 
         Class constructor.
