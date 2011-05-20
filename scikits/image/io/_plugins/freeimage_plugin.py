@@ -24,8 +24,8 @@ def _load_library(libname, loader_path):
             libname_ext.insert(0, '%s.dll' % libname)
         elif sys.platform == 'darwin':
             libname_ext.insert(0, '%s.dylib' % libname)
-        else:
-            libname_ext = [libname]
+    else:
+        libname_ext = [libname]
 
         loader_path = os.path.abspath(loader_path)
         if not os.path.isdir(loader_path):
