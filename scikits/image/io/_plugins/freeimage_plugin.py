@@ -2,8 +2,48 @@ import ctypes
 import numpy
 import sys
 import os
-
+import os.path
 from numpy.compat import asbytes
+
+def _load_library(libname, loader_path):
+    """ A small fork of numpy.ctypeslib.load_library
+    to support windll.
+    """
+    if ctypes.__version__ < '1.0.1':
+        import warnings
+        warnings.warn("All features of ctypes interface may not work " \
+                          "with ctypes < 1.0.1")
+
+    ext = os.path.splitext(libname)[1]
+    if not ext:
+        # Try to load library with platform-specific name, otherwise
+        # default to libname.[so|pyd].  Sometimes, these files are built
+        # erroneously on non-linux platforms.
+        libname_ext = ['%s.so' % libname, '%s.pyd' % libname]
+        if sys.platform == 'win32':
+            libname_ext.insert(0, '%s.dll' % libname)
+        elif sys.platform == 'darwin':
+            libname_ext.insert(0, '%s.dylib' % libname)
+        else:
+            libname_ext = [libname]
+
+        loader_path = os.path.abspath(loader_path)
+        if not os.path.isdir(loader_path):
+            libdir = os.path.dirname(loader_path)
+        else:
+            libdir = loader_path
+
+        for ln in libname_ext:
+            try:
+                libpath = os.path.join(libdir, ln)
+                if sys.platform == 'win32':
+                    return ctypes.windll[libpath]
+                else:
+                    return ctypes.cdll[libpath]
+            except OSError, e:
+                pass
+
+        raise e
 
 lib_dirs = [os.path.dirname(__file__),
             '/lib',
@@ -44,7 +84,7 @@ for d in lib_dirs:
     for libname in ('freeimage', 'FreeImage',
                     'libfreeimage', 'libFreeImage'):
         try:
-            _FI = numpy.ctypeslib.load_library(libname, d)
+            _FI = _load_library(libname, d)
         except OSError:
             pass
         else:
