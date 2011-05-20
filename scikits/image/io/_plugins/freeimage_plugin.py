@@ -35,7 +35,6 @@ def _load_library(libname, loader_path):
         for ln in libname_ext:
             try:
                 libpath = os.path.join(libdir, ln)
-                print("Trying to load ", libpath)
                 if sys.platform == 'win32':
                     return ctypes.windll[libpath]
                 else:
