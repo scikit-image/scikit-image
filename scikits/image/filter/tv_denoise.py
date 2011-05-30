@@ -198,12 +198,14 @@ def tv_denoise(im, eps=2.e-4, weight=50, keep_type=False, n_iter_max=200):
 
     Parameters
     ----------
-    im: ndarray (2d or 3d)
-        input data to be denoised
+    im: ndarray (2d or 3d) of ints, uints or floats
+        input data to be denoised. `im` can be of any numeric type,
+        but it is cast into an ndarray of floats for the computation 
+        of the denoised image.
 
     eps: float, optional
-        relative difference of the value of the cost function that determines
-        the stop criterion. The algorithm stops when 
+        relative difference of the value of the cost function that 
+        determines the stop criterion. The algorithm stops when 
                 (E_(n-1) - E_n) < eps * E_0 
 
     weight: float, optional
