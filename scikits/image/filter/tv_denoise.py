@@ -92,7 +92,7 @@ def _tv_denoise_3d(im, eps=2.e-4, weight=100, keep_type=False, n_iter_max=200):
     else:
         return out
  
-def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
+def _tv_denoise_2d(im, eps=2.e-4, weight=50, keep_type=False, n_iter_max=200):
     """
     Perform total-variation denoising
 
