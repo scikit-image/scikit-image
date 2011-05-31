@@ -78,13 +78,11 @@ def _tv_denoise_3d(im, eps=2.e-4, weight=100, keep_type=False, n_iter_max=200):
         pz -= 1/6.*gz
         pz /= norm
         E /= float(im.size)
-        print E
         if i == 0:
             E_init = E
             E_previous = E
         else:
             if np.abs(E_previous - E) < eps * E_init:
-                print E_previous, E
                 break
             else:
                 E_previous = E
@@ -176,7 +174,6 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
         py -= 0.25*gy
         py /= norm
         E /= float(im.size)
-        print E
         if i == 0:
             E_init = E
             E_previous = E
@@ -186,7 +183,6 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
             else:
                 E_previous = E
         i += 1
-    print i
     if keep_type:
         return out.astype(im_type)
     else:
