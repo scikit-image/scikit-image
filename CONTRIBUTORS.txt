@@ -33,10 +33,17 @@
   Binary heap class for graph algorithms
 
 - Lee Kamentsky and Thouis Jones of the CellProfiler team, Broad Institute, MIT
-  Constant time per pixel median filter
+  Constant time per pixel median filter, edge detectors, and more.
 
 - Dan Farmer
   Incorporating CellProfiler's Canny edge detector
 
 - Pieter Holtzhausen
   Incorporating CellProfiler's Sobel edge detector
+
+- Emmanuelle Guillart
+  Total variation noise filtering
+
+- Maël Primet
+  Total variation noise filtering
+
