@@ -36,7 +36,8 @@
   Constant time per pixel median filter, edge detectors, and more.
 
 - Dan Farmer
-  Incorporating CellProfiler's Canny edge detector
+  Incorporating CellProfiler's Canny edge detector, ctypes loader with Windows
+  support.
 
 - Pieter Holtzhausen
   Incorporating CellProfiler's Sobel edge detector
