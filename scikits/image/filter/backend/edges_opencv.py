@@ -3,7 +3,7 @@ import cv
 import time
 
 def sobel(image, axis=None, output=None):
-    t = time.time()
+    print "running opencv sobel"
     if not image.flags["C_CONTIGUOUS"]:
         image = np.ascontiguousarray(image)
     if image.dtype == np.uint8:
@@ -22,6 +22,7 @@ def sobel(image, axis=None, output=None):
         cv.Pow(dy, dy, 2)
         cv.Add(dx, dy, dx)
         cv.Pow(dx, dx, 0.5)        
+
         if output:
             output[:] = dx
             return output
@@ -44,8 +45,8 @@ if __name__ == "__main__":
     from scikits.image import io
     from scikits.image.color import rgb2gray
     image = rgb2gray(io.imread(os.path.join(data_dir,"lena512.png"))).astype(np.uint8)
-    #image = rgb2gray(io.imread(os.path.join(data_dir,"lena512.png"))).astype(np.float32)
-    image = np.zeros((2000, 2000), dtype=np.float32)
+    image = rgb2gray(io.imread(os.path.join(data_dir,"lena512.png"))).astype(np.float32)
+    #image = np.zeros((2000, 2000), dtype=np.float32)
     t = time.time()
     output = sobel(image, axis=None)
     print time.time() - t
