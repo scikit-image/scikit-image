@@ -74,21 +74,22 @@ class add_backends(object):
             del kwargs["backend"]
         else:
             backend = current_backend
-            if current_backend not in backend_listing[self.module_name]:
-                backend_module = import_backend(current_backend, self.module_name)
-                if backend_module:
-                    backend_listing[self.module_name][current_backend] = {}
-                    try:
-                        # register backend function
-                        backend_listing[self.module_name][current_backend][self.function_name] = \
-                            getattr(backend_module, self.function_name)
-                    except AttributeError:
-                        backend = None
-                else:
+            
+        if backend not in backend_listing[self.module_name]:
+            backend_module = import_backend(current_backend, self.module_name)
+            if backend_module:
+                backend_listing[self.module_name][current_backend] = {}
+                try:
+                    # register backend function
+                    backend_listing[self.module_name][current_backend][self.function_name] = \
+                        getattr(backend_module, self.function_name)
+                except AttributeError:
                     backend = None
+            else:
+                backend = None
+                
         # fall back to numpy if function not provided
         if not backend or self.function_name not in backend_listing[self.module_name][backend]:
             backend = "numpy"
         return backend_listing[self.module_name][backend][self.function_name](*args, **kwargs)
-    
     
