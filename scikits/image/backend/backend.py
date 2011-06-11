@@ -33,6 +33,20 @@ backend_listing = {}
 def use_backend(backend):
     global current_backend
     current_backend = backend
+    for module_name, backends in backend_listing.items():
+        if backend not in backends:
+            # import backend module and register its functions
+            backend_module = import_backend(backend, module_name)
+            if backend_module:
+                backend_listing[module_name][backend] = {}
+                # iterate through module functions, register, and replace with their backend counterparts
+                for function_name, function in backends["numpy"].items():                
+                    try:
+                        print "registering backend", backend, function_name
+                        backend_listing[module_name][current_backend][function_name] = \
+                            getattr(backend_module, function_name)                 
+                    except AttributeError:
+                        pass  
 
 def import_backend(backend, module_name):
     mods = module_name.split(".")
@@ -74,22 +88,9 @@ class add_backends(object):
             del kwargs["backend"]
         else:
             backend = current_backend
-            
-        if backend not in backend_listing[self.module_name]:
-            backend_module = import_backend(current_backend, self.module_name)
-            if backend_module:
-                backend_listing[self.module_name][current_backend] = {}
-                try:
-                    # register backend function
-                    backend_listing[self.module_name][current_backend][self.function_name] = \
-                        getattr(backend_module, self.function_name)
-                except AttributeError:
-                    backend = None
-            else:
-                backend = None
-                
         # fall back to numpy if function not provided
-        if not backend or self.function_name not in backend_listing[self.module_name][backend]:
+        if backend not in backend_listing[self.module_name] or \
+        self.function_name not in backend_listing[self.module_name][backend]:
             backend = "numpy"
         return backend_listing[self.module_name][backend][self.function_name](*args, **kwargs)
     
