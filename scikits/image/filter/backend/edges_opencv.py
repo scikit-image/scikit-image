@@ -3,6 +3,9 @@ import cv
 import time
 
 def sobel(image, axis=None, output=None):
+    """
+    Opencv documentation.
+    """
     print "running opencv sobel"
     if not image.flags["C_CONTIGUOUS"]:
         image = np.ascontiguousarray(image)

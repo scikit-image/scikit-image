@@ -87,6 +87,9 @@ except:
     raise
 
 def sobel(image, axis=None, output=None):
+    """
+    Opencl documentation.
+    """    
     print "running opencl sobel"
     if not image.flags["C_CONTIGUOUS"]:
         image = np.ascontiguousarray(image)    
