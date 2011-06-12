@@ -1,1 +1,2 @@
-from backend import add_backends, use_backend
+from backend import add_backends, use_backend, manager
+
