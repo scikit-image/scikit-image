@@ -46,7 +46,7 @@ def use_backend(backend):
                         backend_listing[module_name][current_backend][function_name] = \
                             getattr(backend_module, function_name)                 
                     except AttributeError:
-                        pass  
+                        pass
 
 def import_backend(backend, module_name):
     mods = module_name.split(".")
@@ -56,6 +56,38 @@ def import_backend(backend, module_name):
         return __import__(name, fromlist=[name])
     except ImportError:
         return None
+
+class BackendManager(object):
+    def __init__(self):
+        self.backends = []
+    
+    def add_backend(self, backend_name):
+        b = Backend(name=backend_name)
+        self.backends.append(b)
+        return b
+    
+    def get_module_backends(self, module_name):
+        """
+        Iterate through a module's backend directory and find all files that matches the signature.
+        """
+        module_elements = module_name.split(".")
+        module_name = ".".join(module_elements[:-1] + ["backend"])
+        backend_group_module = __import__(module_name, fromlist=[module_name])
+        backend_names = []
+        target_module = module_elements[-1]
+        for mod in dir(backend_group_module):
+            b = mod.split("_")
+            module_name = "_".join(b[:-1])
+            if module_name == target_module:
+                backend_names.append(b[-1])
+                
+    def support_function(self, module_name):
+        pass
+
+class Backend(object):
+    def __init__(self, name=None):
+        self.name = name
+        self.functions = {}
 
 class add_backends(object):
     def __init__(self, function):
@@ -68,6 +100,15 @@ class add_backends(object):
             backend_listing[self.module_name]["numpy"] = {}
         # register numpy implementation
         backend_listing[self.module_name]["numpy"][self.function_name] = function
+        
+        # iterate through backend directory and find backends that match
+#        backends = backend_manager.get_module_backends(self.module_name)
+#        if backend not in backend_manager.backends:
+#            backend = backend_manager.add_backend(backend_name)
+#        backend_manager.support_function(self.module_name, function_name, backends=backends)
+        # inject documentation here
+        # scan through backend directory registering functions
+        
         # if other backend is selected, import needed modules
         if current_backend != "numpy":
             if current_backend not in backend_listing[self.module_name]:

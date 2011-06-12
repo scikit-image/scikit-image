@@ -77,20 +77,23 @@ __kernel void sobel_filter_float32(__global float* input_image, __global float* 
     }
 }
 """)
-    
-try:
-    print "building"
-    program.build()
-except:
-    print("Error:")
-    print(program.get_build_info(context.devices[0], cl.program_build_info.LOG))
-    raise
 
+built = False
 def sobel(image, axis=None, output=None):
     """
     Opencl documentation.
-    """    
+    """ 
+    global built
     print "running opencl sobel"
+    if not built:
+        try:
+            print "building"
+            program.build()
+            built = True
+        except:
+            print("Error:")
+            print(program.get_build_info(context.devices[0], cl.program_build_info.LOG))
+            raise
     if not image.flags["C_CONTIGUOUS"]:
         image = np.ascontiguousarray(image)    
     if image.dtype == np.uint8:
