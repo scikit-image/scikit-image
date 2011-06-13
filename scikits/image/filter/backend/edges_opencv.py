@@ -4,7 +4,7 @@ import time
 
 def sobel(image, axis=None, output=None):
     """
-    Opencv documentation.
+    OpenCV implementation of the sobel operator.
     """
     print "running opencv sobel"
     if not image.flags["C_CONTIGUOUS"]:

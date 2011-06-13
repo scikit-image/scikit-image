@@ -12,9 +12,8 @@ import numpy as np
 from scipy.ndimage import convolve
 from scikits.image.backend import add_backends
 import sys
-    
 
-@add_backends
+@add_backends("opencv", "opencl")
 def sobel(image, axis=None, output=None):
     """Calculate the absolute magnitude Sobel to find the edges.
 
