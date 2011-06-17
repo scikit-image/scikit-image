@@ -2,7 +2,31 @@ import os, sys
 import scikits.image.backends
 import ast
 
+
+class ModuleParser(ast.NodeVisitor):
+    """
+    Parser that extracts all defined methods from source without importing.
+    """
+    def parse(self, code):
+        """
+        Parses source code and visit definitions.
+        """
+        tree = ast.parse(code)
+        self.functions = []
+        self.visit(tree)
+        return self.functions
+    
+    def visit_FunctionDef(self, statement):
+        """
+        Function visitation of parser.
+        """
+        self.functions.append(statement.name)
+
+
 def import_backend(backend, module_name):
+    """
+    Imports the backend counterpart of a module.
+    """
     mods = module_name.split(".")
     module_name = ".".join(mods[:-1] + ["backend"] + [mods[-1]])
     name = module_name + "_%s" % backend
@@ -12,19 +36,10 @@ def import_backend(backend, module_name):
         return None
 
 
-class ModuleParser(ast.NodeVisitor):
-    def parse(self, code):
-        """Parse text into a tree and walk the result"""
-        tree = ast.parse(code)
-        self.functions = []
-        self.visit(tree)
-        return self.functions
-    
-    def visit_FunctionDef(self, statement):
-        self.functions.append(statement.name)
-
-
 class BackendManager(object):
+    """
+    Backend manager handles backend registry and switching.
+    """
     def __init__(self):
         # add default numpy to backends namespace
         mod = sys.modules["scikits.image.backends"]
@@ -33,15 +48,17 @@ class BackendManager(object):
         self.current_backends = {}
         self.backend_listing = {}
         self.backend_imported = {}
-        self.backend_parsed = []
-        
         self.scan_backends()
         self.parser = ModuleParser()
     
     def scan_backends(self):
+        """
+        Scans through the source tree to extract all available backends.
+        """        
         root = "scikits.image"
         location = os.path.split(sys.modules[root].__file__)[0]
         backends = []
+        # visit each backend directory in every scikits.image submodule
         for f in os.listdir(location):
             submodule = os.path.join(location, f)
             if os.path.isdir(submodule):
@@ -53,6 +70,7 @@ class BackendManager(object):
                         if os.path.isfile(os.path.join(submodule_dir, f)) and f.endswith(".py")]
                     backend_files = [f for f in os.listdir(backend_dir) \
                         if os.path.isfile(os.path.join(backend_dir, f)) and f.endswith(".py")]
+                    # math file in backend directory with file in parent directory
                     for f in backend_files:
                         split = f.split("_")
                         backend = split[-1][:-3]
@@ -62,20 +80,23 @@ class BackendManager(object):
                                 backends.append(backend)
                             mod_name = module_name + "." + target
                             if mod_name not in self.backend_listing:
+                                # initialize default numpy backend
                                 self.backend_listing[mod_name] = {}
                                 self.backend_listing[mod_name]["numpy"] = {}
                                 self.backend_imported[mod_name] = {}
                                 self.backend_imported[mod_name]["numpy"] = True
                             self.backend_listing[mod_name][backend] = {}
-                            self.backend_imported[mod_name][backend] = None
+                            self.backend_imported[mod_name][backend] = False
+        # create references for each backend in backends namespace
         backends_mod = sys.modules["scikits.image.backends"]
         for backend_name in backends:
             setattr(backends_mod, backend_name, backend_name)
 
     def use_backend(self, backend):
+        """
+        Selects a new backend and update modules as needed.
+        """
         self.current_backend = backend
-        print self.backend_listing
-        print self.backend_imported
         for module_name in self.backend_imported.keys():
             # check if backend has been imported and if not do so
             print module_name, backend
@@ -86,9 +107,11 @@ class BackendManager(object):
                 for function_name in self.backend_listing[module_name][backend].keys():
                     self.backend_listing[module_name][backend][function_name] = \
                         getattr(backend_module, function_name)
-        print self.backend_listing
 
-    def module_backend_functions(self, module_name):
+    def scan_backend_functions(self, module_name):
+        """
+        Scans through the registered backends of a module and extract the defined functions
+        """
         module_path = os.path.split(sys.modules[module_name].__file__)[0]
         main_name = module_name.split('.')[-1]
         functions = {}
@@ -114,7 +137,7 @@ class BackendManager(object):
             self.backend_listing[module_name]["numpy"] = {}
         # parse backend files and initialize implemented functions
         if len(self.backend_listing[module_name]["numpy"]) == 0:
-            functions = self.module_backend_functions(module_name)
+            functions = self.scan_backend_functions(module_name)
             for backend, backend_functions in functions.items():
                 for backend_function in backend_functions:
                     self.backend_listing[module_name][backend][backend_function] = None
@@ -134,8 +157,11 @@ use_backend = manager.use_backend
 
 
 class add_backends(object):
+    """
+    Decorator that adds backend support to a function.
+    """
     def __init__(self, *backends):
-        self.document_backends = backends
+        pass
                 
     def __call__(self, function):
         self.function = function
