@@ -45,7 +45,7 @@ class BackendManager(object):
         mod = sys.modules["scikits.image.backends"]
         setattr(mod, "numpy", "numpy")        
         self.current_backend = "numpy"
-        self.current_backends = {}
+        self.fallback_backends = []
         self.backend_listing = {}
         self.backend_imported = {}
         self.scan_backends()
@@ -53,7 +53,7 @@ class BackendManager(object):
     
     def scan_backends(self):
         """
-        Scans through the source tree to extract all available backends.
+        Scans through the source tree to extract all available backends from file names.
         """        
         root = "scikits.image"
         location = os.path.split(sys.modules[root].__file__)[0]
@@ -92,11 +92,7 @@ class BackendManager(object):
         for backend_name in backends:
             setattr(backends_mod, backend_name, backend_name)
 
-    def use_backend(self, backend):
-        """
-        Selects a new backend and update modules as needed.
-        """
-        self.current_backend = backend
+    def register_backend(self, backend):
         for module_name in self.backend_imported.keys():
             # check if backend has been imported and if not do so
             if backend in self.backend_imported[module_name] \
@@ -106,8 +102,23 @@ class BackendManager(object):
                 for function_name in self.backend_listing[module_name][backend].keys():
                     self.backend_listing[module_name][backend][function_name] = \
                         getattr(backend_module, function_name)
+                        
+    def use_backend(self, backend):
+        """
+        Selects a new backend and update modules as needed.
+        """
+        if isinstance(backend, list):
+            if backend:            
+                self.current_backend = backend[0]
+                self.fallback_backends = backend[1:]
+            else:
+                self.current_backend = "numpy"                
+        else:
+            self.current_backend = backend
+            self.fallback_backends = []
+        self.register_backend(self.current_backend)
 
-    def backends_available(self, function):
+    def backing(self, function):
         module_name = function.__module__
         backends = []
         if module_name in self.backend_listing:
@@ -131,7 +142,8 @@ class BackendManager(object):
 
     def backend_function_name(self, function, backend):
         module_elements = function.__module__.split(".")
-        return ".".join(module_elements[:-1] + ["backend"] + [module_elements[-1] + "_" + backend] + [function.__name__])
+        return ".".join(module_elements[:-1] + ["backend"] + \
+            [module_elements[-1] + "_" + backend] + [function.__name__])
     
     def register_function(self, module_name, function):
         """
@@ -192,17 +204,26 @@ class backend_function(object):
             del kwargs["backend"]
         else:
             backend = manager.current_backend
-        # fall back to numpy if function not provided
+        # fall back to numpy if backend not supported
         if backend not in manager.backend_listing[self.module_name] or \
         self.function_name not in manager.backend_listing[self.module_name][backend]:
-            backend = "numpy"
-#            self.logger.warn("Warning: Falling back to default numpy implementation")
+            for fallback in manager.fallback_backends:
+                if fallback in manager.backend_listing[self.module_name] and \
+                self.function_name in manager.backend_listing[self.module_name][fallback]:
+                    backend = fallback
+                    print("Warning: Falling back to %s implementation" % fallback)
+                    # make sure backend imported
+                    manager.register_backend(backend)
+                    break
+            else:
+                backend = "numpy"
+                print("Warning: Falling back to default numpy implementation")
         return manager.backend_listing[self.module_name][backend][self.function_name](*args, **kwargs)
      
      
 manager = BackendManager()
 use_backend = manager.use_backend        
-backing = manager.backends_available
+backing = manager.backing
 add_backends = backend_function   
 
 
