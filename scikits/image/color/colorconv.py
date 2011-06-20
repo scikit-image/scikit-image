@@ -50,7 +50,7 @@ __docformat__ = "restructuredtext en"
 
 import numpy as np
 from scipy import linalg
-
+from scikits.image.backend import add_backends
 
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
@@ -112,7 +112,7 @@ def _prepare_colorarray(arr, dtype=np.float32):
 
     return arr.astype(dtype)
 
-
+@add_backends
 def rgb2hsv(rgb):
     """RGB to HSV color space conversion.
 
@@ -186,7 +186,7 @@ def rgb2hsv(rgb):
 
     return out
 
-
+@add_backends
 def hsv2rgb(hsv):
     """HSV to RGB color space conversion.
 
@@ -309,7 +309,7 @@ def _convert(matrix, arr):
 
     return out
 
-
+@add_backends
 def xyz2rgb(xyz):
     """XYZ to RGB color space conversion.
 
@@ -350,6 +350,7 @@ def xyz2rgb(xyz):
     """
     return _convert(rgb_from_xyz, xyz)
 
+@add_backends
 def rgb2xyz(rgb):
     """RGB to XYZ color space conversion.
 
