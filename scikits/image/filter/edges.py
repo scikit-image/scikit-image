@@ -13,7 +13,8 @@ from scipy.ndimage import convolve
 from scikits.image.backend import add_backends
 import sys
 
-@add_backends("opencv", "opencl")
+
+@add_backends
 def sobel(image, axis=None, output=None):
     """Calculate the absolute magnitude Sobel to find the edges.
 
@@ -69,6 +70,8 @@ def sobel(image, axis=None, output=None):
                                   [ 2, 0,-2],
                                   [ 1, 0,-1]]), output=dy)
         return dy
+
+
     
 #    hprewitt = np.abs(convolve(image, np.array([[ 1, 1, 1],
 #                                              [ 0, 0, 0],

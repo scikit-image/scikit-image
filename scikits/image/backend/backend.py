@@ -2,7 +2,6 @@ import os, sys
 import scikits.image.backends
 import ast
 
-
 class ModuleParser(ast.NodeVisitor):
     """
     Parser that extracts all defined methods from source without importing.
@@ -27,6 +26,7 @@ def import_backend(backend, module_name):
     """
     Imports the backend counterpart of a module.
     """
+    print "importing", backend
     mods = module_name.split(".")
     module_name = ".".join(mods[:-1] + ["backend"] + [mods[-1]])
     name = module_name + "_%s" % backend
@@ -99,7 +99,6 @@ class BackendManager(object):
         self.current_backend = backend
         for module_name in self.backend_imported.keys():
             # check if backend has been imported and if not do so
-            print module_name, backend
             if backend in self.backend_imported[module_name] \
             and not self.backend_imported[module_name][backend]:
                 backend_module = import_backend(backend, module_name)
@@ -108,6 +107,15 @@ class BackendManager(object):
                     self.backend_listing[module_name][backend][function_name] = \
                         getattr(backend_module, function_name)
 
+    def backends_available(self, function):
+        module_name = function.__module__
+        backends = []
+        if module_name in self.backend_listing:
+            for backend in self.backend_listing[module_name].keys():
+                if function.__name__ in self.backend_listing[module_name][backend].keys():
+                    backends.append(backend)
+        return backends
+
     def scan_backend_functions(self, module_name):
         """
         Scans through the registered backends of a module and extract the defined functions
@@ -115,7 +123,6 @@ class BackendManager(object):
         module_path = os.path.split(sys.modules[module_name].__file__)[0]
         main_name = module_name.split('.')[-1]
         functions = {}
-        print self.backend_listing[module_name].keys(), module_name, module_path, main_name
         for backend in self.backend_listing[module_name].keys():
             if backend != "numpy":
                 backend_path = os.path.join(module_path, "backend", main_name + "_" + backend + ".py")
@@ -144,26 +151,19 @@ class BackendManager(object):
         # register numpy implementation
         self.backend_listing[module_name]["numpy"][function_name] = function
         # if current backend is other than default, do the required backend imports
-        if not self.backend_imported[module_name][backend]:
+        if not self.backend_imported[module_name][self.current_backend]:
             # register backend function
-            backend_module = import_backend(backend, module_name)
-            self.backend_imported[module_name][backend] = True
-            self.backend_listing[module_name][backend][function_name] = \
+            backend_module = import_backend(self.current_backend, module_name)
+            self.backend_imported[module_name][self.current_backend] = True
+            self.backend_listing[module_name][self.current_backend][function_name] = \
                     getattr(backend_module, function_name)
-        
-
-manager = BackendManager()
-use_backend = manager.use_backend        
 
 
-class add_backends(object):
+class backend_function(object):
     """
     Decorator that adds backend support to a function.
     """
-    def __init__(self, *backends):
-        pass
-                
-    def __call__(self, function):
+    def __init__(self, function):
         self.function = function
         self.function_name = function.__name__
         self.module_name = function.__module__
@@ -178,23 +178,31 @@ class add_backends(object):
             function.__doc__ += "    Backends supported:\n"
             function.__doc__ += "    -------------------\n"
             for backend in manager.backend_listing[self.module_name].keys():
+                if backend == "numpy":
+                    continue
                 function.__doc__ += "    %s\n" % backend
                 function.__doc__ += "       See also: %s\n" % manager.backend_function_name(function, backend)
-        
-        def wrapped_f(*args, **kwargs):
-            if "backend" in kwargs:
-                backend = kwargs.get("backend")
-                del kwargs["backend"]
-            else:
-                backend = manager.current_backend
-            # fall back to numpy if function not provided
-            if backend not in manager.backend_listing[self.module_name] or \
-            self.function_name not in manager.backend_listing[self.module_name][backend]:
-                backend = "numpy"
-#                if manager.required:
-#                    raise RuntimeError("No backend support for function call")
-            return manager.backend_listing[self.module_name][backend][self.function_name](*args, **kwargs)
-        
-        wrapped_f.__doc__ = function.__doc__
-        wrapped_f.__module__ = function.__module__
-        return wrapped_f
+        self.__doc__ = function.__doc__
+        self.__module__ = function.__module__        
+        self.__name__ = function.__name__ 
+                                
+    def __call__(self, *args, **kwargs):
+        if "backend" in kwargs:
+            backend = kwargs.get("backend")
+            del kwargs["backend"]
+        else:
+            backend = manager.current_backend
+        # fall back to numpy if function not provided
+        if backend not in manager.backend_listing[self.module_name] or \
+        self.function_name not in manager.backend_listing[self.module_name][backend]:
+            backend = "numpy"
+#            self.logger.warn("Warning: Falling back to default numpy implementation")
+        return manager.backend_listing[self.module_name][backend][self.function_name](*args, **kwargs)
+     
+     
+manager = BackendManager()
+use_backend = manager.use_backend        
+backing = manager.backends_available
+add_backends = backend_function   
+
+
