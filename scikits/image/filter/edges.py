@@ -15,6 +15,11 @@ import sys
 
 
 @add_backends
+def test():
+    print "test from numpy"
+
+    
+@add_backends
 def sobel(image, axis=None, output=None):
     """Calculate the absolute magnitude Sobel to find the edges.
 
@@ -44,6 +49,8 @@ def sobel(image, axis=None, output=None):
         output_type = np.int16
     elif image.dtype == np.float32:
         output_type = np.float32
+    else:
+        output_type = image.dtype
     if axis is None:
         dx = np.empty(image.shape, dtype=np.float32)
         dy = np.empty(image.shape, dtype=np.float32)
