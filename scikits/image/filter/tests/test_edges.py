@@ -1,45 +1,50 @@
 from numpy.testing import *
 import numpy as np
-from scipy.ndimage import binary_dilation, binary_erosion
 import scikits.image.filter as F
 from scikits.image.backend import use_backend
-
+import scikits
 
 class TestSobel():
-    def test_00_00_zeros(self):
+    def test_all_backends(self):
+        for backend in scikits.image.backends.list:
+            yield (self._test_00_00_zeros, backend)
+            yield (self._test_01_01_horizontal, backend)
+            yield (self._test_01_02_vertical, backend)
+            
+    def _test_00_00_zeros(self, backend):
         """Sobel on an array of all zeros"""
-        result = F.sobel(np.zeros((10, 10)))
+        result = F.sobel(np.zeros((10, 10), dtype=np.float32), backend=backend)
         assert (np.all(result == 0))
     
-    def test_01_01_horizontal(self):
+    def _test_01_01_horizontal(self, backend):
         """Sobel on an edge should be a horizontal line"""
         i, j = np.mgrid[-5:6, -5:6]
-        image = (i >= 0).astype(float)
-        result = F.sobel(image)
+        image = (i >= 0).astype(np.float32)
+        result = F.sobel(image, backend=backend)
         assert (np.all(result[np.abs(i) > 1] == 0))        
     
-    def test_01_02_vertical(self):
+    def _test_01_02_vertical(self, backend):
         """Sobel on a vertical edge should be a vertical line"""
         i,j = np.mgrid[-5:6, -5:6]
-        image = (j >= 0).astype(float)
-        result = F.sobel(image)
+        image = (j >= 0).astype(np.float32)
+        result = F.sobel(image, backend=backend)
         assert (np.all(result[np.abs(j) > 1] == 0))
 
 
 class TestHSobel():        
-    def test_00_00_zeros(self):
+    def _test_00_00_zeros(self):
         """Horizontal sobel on an array of all zeros"""
         result = F.sobel(np.zeros((10, 10)), axis=0)
         assert (np.all(result == 0))
 
-    def test_01_01_horizontal(self):
+    def _test_01_01_horizontal(self):
         """Horizontal Sobel on an edge should be a horizontal line"""
         i,j = np.mgrid[-5:6, -5:6]
         image = (i >= 0).astype(float)
         result = F.sobel(image, axis=0)
         assert (np.all(result[np.abs(i) > 1] == 0))
     
-    def test_01_02_vertical(self):
+    def _test_01_02_vertical(self):
         """Horizontal Sobel on a vertical edge should be zero"""
         i,j = np.mgrid[-5:6, -5:6]
         image = (j >= 0).astype(float)
@@ -48,7 +53,7 @@ class TestHSobel():
 
 
 class TestVSobel():
-    def test_00_00_zeros(self):
+    def _test_00_00_zeros(self):
         """Vertical sobel on an array of all zeros"""
         result = F.sobel(np.zeros((10, 10)), axis=1)
         assert (np.all(result == 0))
