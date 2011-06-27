@@ -7,23 +7,24 @@ import scikits
 class TestSobel():
     def test_all_backends(self):
         for backend in scikits.image.backends.list:
-            yield (self._test_00_00_zeros, backend)
-            yield (self._test_01_01_horizontal, backend)
-            yield (self._test_01_02_vertical, backend)
+            if backend == "default": continue
+            yield (self.test_00_00_zeros, backend)
+            yield (self.test_01_01_horizontal, backend)
+            yield (self.test_01_02_vertical, backend)
             
-    def _test_00_00_zeros(self, backend):
+    def test_00_00_zeros(self, backend=None):
         """Sobel on an array of all zeros"""
         result = F.sobel(np.zeros((10, 10), dtype=np.float32), backend=backend)
         assert (np.all(result == 0))
     
-    def _test_01_01_horizontal(self, backend):
+    def test_01_01_horizontal(self, backend=None):
         """Sobel on an edge should be a horizontal line"""
         i, j = np.mgrid[-5:6, -5:6]
         image = (i >= 0).astype(np.float32)
         result = F.sobel(image, backend=backend)
         assert (np.all(result[np.abs(i) > 1] == 0))        
     
-    def _test_01_02_vertical(self, backend):
+    def test_01_02_vertical(self, backend=None):
         """Sobel on a vertical edge should be a vertical line"""
         i,j = np.mgrid[-5:6, -5:6]
         image = (j >= 0).astype(np.float32)
