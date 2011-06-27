@@ -45,3 +45,6 @@ def get_log(name):
     import logging, sys
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     return logging.getLogger(name)
+
+log = get_log("scikits.image")
+

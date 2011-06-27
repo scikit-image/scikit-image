@@ -25,6 +25,9 @@ class ModuleParser(ast.NodeVisitor):
 
 
 class BackendTester():
+    """
+    Base class for nose backend testing.
+    """
     def test_all_backends(self):
         for backend in scikits.image.backends.list:
             if backend == "default": 
@@ -141,6 +144,9 @@ class BackendManager(object):
         self.ensure_backend_loaded(self.current_backend)
 
     def backing(self, function):
+        """
+        Returns the backends that implements a function.
+        """
         module_name = function.__module__
         backends = []
         if module_name in self.backend_listing:
@@ -164,28 +170,21 @@ class BackendManager(object):
         return functions
 
     def backend_function_name(self, function, backend):
+        """
+        Module location of backend supported function.
+        """
         module_elements = function.__module__.split(".")
         return ".".join(module_elements[:-1] + ["backend"] + \
             [module_elements[-1] + "_" + backend] + [function.__name__])
     
     def register_function(self, module_name, function):
         """
-        Register functions for a specific module
+        Register functions for a specific module.
         """
         function_name = function.__name__
         if module_name not in self.backend_listing:
             self.backend_listing[module_name] = {}
             self.backend_listing[module_name]["default"] = {}
-        # parse backend files and initialize implemented functions
-#        if len(self.backend_listing[module_name]["default"]) == 0:
-#            functions = self.scan_backend_functions(module_name)
-#            for backend, backend_functions in functions.items():
-#                for backend_function in backend_functions:
-#                    if backend_function in funcs:
-#                        print ">", backend_function
-#                        self.backend_listing[module_name][backend][backend_function] = None
-#                print self.backend_listing[module_name][backend]
-
         if module_name not in self.module_members:
             self.module_members[module_name] = self.scan_backend_functions(module_name)
         # register default implementation
@@ -193,67 +192,8 @@ class BackendManager(object):
         for backend, members in self.module_members[module_name].items():
             if function_name in members:
                 self.backend_listing[module_name][backend][function_name] = None
-        
         self.ensure_backend_loaded(self.current_backend)
-        # if current backend is other than default, do the required backend imports
-#        if not self.backend_imported[module_name][self.current_backend]:
-#            # register backend function
-#            backend_module = import_backend(self.current_backend, module_name)
-#            self.backend_imported[module_name][self.current_backend] = True
-#            self.backend_listing[module_name][self.current_backend][function_name] = \
-#                    getattr(backend_module, function_name)
-          
-        
-class backend_function(object):
-    """
-    A decorator that adds backend support to a function.
-    """
-    def __init__(self, function):
-        self.function = function
-        self.function_name = function.__name__
-        self.module_name = function.__module__
-        # iterate through backend directory and find backends that match
-        manager.register_function(self.module_name, function)
-        # add documentation to function doc strings
-        if len(manager.backend_listing[self.module_name]) > 1:
-            if not function.__doc__:
-                function.__doc__ = ""
-            else:
-                function.__doc__ += "\n"
-            function.__doc__ += "    Backends supported:\n"
-            function.__doc__ += "    -------------------\n"
-            for backend in manager.backend_listing[self.module_name]:
-                if backend == "default":
-                    continue
-                function.__doc__ += "    %s\n" % backend
-                function.__doc__ += "       See also: %s\n" % manager.backend_function_name(function, backend)
-        self.__doc__ = function.__doc__
-        self.__module__ = function.__module__        
-        self.__name__ = function.__name__ 
-        self.func_name = function.func_name
-                                
-    def __call__(self, *args, **kwargs):
-        if "backend" in kwargs:
-            backend = kwargs.get("backend")
-            manager.ensure_backend_loaded(backend, module=self.module_name)
-            del kwargs["backend"]
-        else:
-            backend = manager.current_backend
-        # fall back to default if backend not supported
-        if backend not in manager.backend_listing[self.module_name] or \
-        self.function_name not in manager.backend_listing[self.module_name][backend]:
-            for fallback in manager.fallback_backends:
-                if fallback in manager.backend_listing[self.module_name] and \
-                self.function_name in manager.backend_listing[self.module_name][fallback]:
-                    backend = fallback
-                    log.warn("Falling back to %s implementation" % fallback)
-                    # make sure backend imported
-                    manager.register_backend(backend)
-                    break
-            else:
-                log.warn("Falling back to default implementation from backend %s" % backend)
-                backend = "default"
-        return manager.backend_listing[self.module_name][backend][self.function_name](*args, **kwargs)
+       
 
 def add_backends(function):
     """
@@ -280,7 +220,7 @@ def add_backends(function):
     def wrapper(*args, **kwargs):
         if "backend" in kwargs:
             backend = kwargs.get("backend")
-            if not backend:
+            if backend == None:
                 backend = "default"
             manager.ensure_backend_loaded(backend, module=module_name)
             del kwargs["backend"]
@@ -300,6 +240,7 @@ def add_backends(function):
             else:
                 log.warn("Falling back to default implementation from backend %s" % backend)
                 backend = "default"
+        # execute the backend function and return result
         return manager.backend_listing[module_name][backend][function_name](*args, **kwargs)
     
     wrapper.__doc__ = function.__doc__
