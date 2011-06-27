@@ -4,14 +4,16 @@ import scikits.image.filter as F
 from scikits.image.backend import use_backend
 import scikits
 
-class TestSobel():
+class BackendTester():
     def test_all_backends(self):
         for backend in scikits.image.backends.list:
-            if backend == "default": continue
-            yield (self.test_00_00_zeros, backend)
-            yield (self.test_01_01_horizontal, backend)
-            yield (self.test_01_02_vertical, backend)
-            
+            if backend == "default": 
+                continue
+            for function_name in dir(self):
+                if function_name.startswith("test") and function_name != "test_all_backends":
+                    yield (getattr(self, function_name), backend)
+                    
+class TestSobel(BackendTester):
     def test_00_00_zeros(self, backend=None):
         """Sobel on an array of all zeros"""
         result = F.sobel(np.zeros((10, 10), dtype=np.float32), backend=backend)
@@ -22,7 +24,7 @@ class TestSobel():
         i, j = np.mgrid[-5:6, -5:6]
         image = (i >= 0).astype(np.float32)
         result = F.sobel(image, backend=backend)
-        assert (np.all(result[np.abs(i) > 1] == 0))        
+        assert (np.all(result[np.abs(i) > 1] == 0))
     
     def test_01_02_vertical(self, backend=None):
         """Sobel on a vertical edge should be a vertical line"""
