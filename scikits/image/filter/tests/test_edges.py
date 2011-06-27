@@ -1,18 +1,10 @@
 from numpy.testing import *
 import numpy as np
 import scikits.image.filter as F
-from scikits.image.backend import use_backend
+from scikits.image.backend import use_backend, BackendTester
 import scikits
 
-class BackendTester():
-    def test_all_backends(self):
-        for backend in scikits.image.backends.list:
-            if backend == "default": 
-                continue
-            for function_name in dir(self):
-                if function_name.startswith("test") and function_name != "test_all_backends":
-                    yield (getattr(self, function_name), backend)
-                    
+
 class TestSobel(BackendTester):
     def test_00_00_zeros(self, backend=None):
         """Sobel on an array of all zeros"""
@@ -34,46 +26,46 @@ class TestSobel(BackendTester):
         assert (np.all(result[np.abs(j) > 1] == 0))
 
 
-class TestHSobel():        
-    def _test_00_00_zeros(self):
+class TestHSobel(BackendTester):
+    def test_00_00_zeros(self, backend=None):
         """Horizontal sobel on an array of all zeros"""
-        result = F.sobel(np.zeros((10, 10)), axis=0)
+        result = F.sobel(np.zeros((10, 10), dtype=np.float32), axis=0, backend=backend)
         assert (np.all(result == 0))
 
-    def _test_01_01_horizontal(self):
+    def test_01_01_horizontal(self, backend=None):
         """Horizontal Sobel on an edge should be a horizontal line"""
         i,j = np.mgrid[-5:6, -5:6]
-        image = (i >= 0).astype(float)
-        result = F.sobel(image, axis=0)
+        image = (i >= 0).astype(np.float32)
+        result = F.sobel(image, axis=0, backend=backend)
         assert (np.all(result[np.abs(i) > 1] == 0))
     
-    def _test_01_02_vertical(self):
+    def test_01_02_vertical(self, backend=None):
         """Horizontal Sobel on a vertical edge should be zero"""
         i,j = np.mgrid[-5:6, -5:6]
-        image = (j >= 0).astype(float)
-        result = F.sobel(image, axis=0)
-        assert (np.all(result == 0))   
+        image = (j >= 0).astype(np.float32)
+        result = F.sobel(image, axis=0, backend=backend)
+        assert (np.all(result == 0))
 
 
-class TestVSobel():
-    def _test_00_00_zeros(self):
+class TestVSobel(BackendTester):
+    def _test_00_00_zeros(self, backend=None):
         """Vertical sobel on an array of all zeros"""
-        result = F.sobel(np.zeros((10, 10)), axis=1)
+        result = F.sobel(np.zeros((10, 10), dtype=np.float32), axis=1, backend=backend)
         assert (np.all(result == 0))
     
-    def test_01_01_vertical(self):
+    def test_01_01_vertical(self, backend=None):
         """Vertical Sobel on an edge should be a vertical line"""
         i,j = np.mgrid[-5:6, -5:6]
-        image = (j >= 0).astype(float)
-        result = F.sobel(image, axis=1)
+        image = (j >= 0).astype(np.float32)
+        result = F.sobel(image, axis=1, backend=backend)
         # Fudge the eroded points
         assert (np.all(result[np.abs(j) > 1] == 0))
     
-    def test_01_02_horizontal(self):
+    def test_01_02_horizontal(self, backend=None):
         """Vertical Sobel on a horizontal edge should be zero"""
         i,j = np.mgrid[-5:6, -5:6]
-        image = (i >= 0).astype(float)
-        result = F.sobel(image, axis=1)
+        image = (i >= 0).astype(np.float32)
+        result = F.sobel(image, axis=1, backend=backend)
         eps = .000001
         assert (np.all(np.abs(result) < eps))       
 
@@ -95,7 +87,7 @@ class TestVSobel():
 #    def test_01_01_horizontal(self):
 #        """Prewitt on an edge should be a horizontal line"""
 #        i,j = np.mgrid[-5:6, -5:6]
-#        image = (i >= 0).astype(float)
+#        image = (i >= 0).astype(np.float32)
 #        result = F.prewitt(image)
 #        # Fudge the eroded points
 #        i[np.abs(j) == 5] = 10000
@@ -106,7 +98,7 @@ class TestVSobel():
 #    def test_01_02_vertical(self):
 #        """Prewitt on a vertical edge should be a vertical line"""
 #        i,j = np.mgrid[-5:6, -5:6]
-#        image = (j >= 0).astype(float)
+#        image = (j >= 0).astype(np.float32)
 #        result = F.prewitt(image)
 #        eps = .000001
 #        j[np.abs(i)==5] = 10000
@@ -130,7 +122,7 @@ class TestVSobel():
 #    def test_01_01_horizontal(self):
 #        """Horizontal prewitt on an edge should be a horizontal line"""
 #        i,j = np.mgrid[-5:6, -5:6]
-#        image = (i >= 0).astype(float)
+#        image = (i >= 0).astype(np.float32)
 #        result = F.hprewitt(image)
 #        # Fudge the eroded points
 #        i[np.abs(j) == 5] = 10000
@@ -141,7 +133,7 @@ class TestVSobel():
 #    def test_01_02_vertical(self):
 #        """Horizontal prewitt on a vertical edge should be zero"""
 #        i,j = np.mgrid[-5:6, -5:6]
-#        image = (j >= 0).astype(float)
+#        image = (j >= 0).astype(np.float32)
 #        result = F.hprewitt(image)
 #        eps = .000001
 #        assert (np.all(np.abs(result) < eps))
@@ -162,7 +154,7 @@ class TestVSobel():
 #    def test_01_01_vertical(self):
 #        """Vertical prewitt on an edge should be a vertical line"""
 #        i,j = np.mgrid[-5:6, -5:6]
-#        image = (j >= 0).astype(float)
+#        image = (j >= 0).astype(np.float32)
 #        result = F.vprewitt(image)
 #        # Fudge the eroded points
 #        j[np.abs(i) == 5] = 10000
@@ -173,7 +165,7 @@ class TestVSobel():
 #    def test_01_02_horizontal(self):
 #        """Vertical prewitt on a horizontal edge should be zero"""
 #        i,j = np.mgrid[-5:6, -5:6]
-#        image = (i >= 0).astype(float)
+#        image = (i >= 0).astype(np.float32)
 #        result = F.vprewitt(image)
 #        eps = .000001
 #        assert (np.all(np.abs(result) < eps))

@@ -24,6 +24,16 @@ class ModuleParser(ast.NodeVisitor):
         self.functions.append(statement.name)
 
 
+class BackendTester():
+    def test_all_backends(self):
+        for backend in scikits.image.backends.list:
+            if backend == "default": 
+                continue
+            for function_name in dir(self):
+                if function_name.startswith("test") and function_name != "test_all_backends":
+                    yield (getattr(self, function_name), backend)
+
+
 def import_backend(backend, module_name):
     """
     Imports the backend counterpart of a module.
@@ -98,6 +108,9 @@ class BackendManager(object):
             scikits.image.backends.list.append(backend_name)
 
     def ensure_backend_loaded(self, backend, module=None):
+        """
+        Ensures a backend is imported.
+        """
         if module:
             modules = [module]
         else:
@@ -193,7 +206,7 @@ class BackendManager(object):
         
 class backend_function(object):
     """
-    Decorator that adds backend support to a function.
+    A decorator that adds backend support to a function.
     """
     def __init__(self, function):
         self.function = function
@@ -243,6 +256,9 @@ class backend_function(object):
         return manager.backend_listing[self.module_name][backend][self.function_name](*args, **kwargs)
 
 def add_backends(function):
+    """
+    A decorator that adds backend support to a function.
+    """
     function_name = function.__name__
     module_name = function.__module__
     # iterate through backend directory and find backends that match
@@ -264,6 +280,8 @@ def add_backends(function):
     def wrapper(*args, **kwargs):
         if "backend" in kwargs:
             backend = kwargs.get("backend")
+            if not backend:
+                backend = "default"
             manager.ensure_backend_loaded(backend, module=module_name)
             del kwargs["backend"]
         else:
