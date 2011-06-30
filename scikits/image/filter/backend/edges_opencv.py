@@ -2,6 +2,9 @@ import numpy as np
 import cv
 import time
 
+def test():
+    print "test from opencv"
+
 def sobel(image, axis=None, output=None):
     """
     OpenCV implementation of the sobel operator.

@@ -79,7 +79,6 @@ def sobel(image, axis=None, output=None):
         return dy
 
 
-    
 #    hprewitt = np.abs(convolve(image, np.array([[ 1, 1, 1],
 #                                              [ 0, 0, 0],
 #                                              [-1,-1,-1]]).astype(float) / 3.0))                              
