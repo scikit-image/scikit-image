@@ -124,8 +124,15 @@ def get_directive(name):
     from docutils.parsers.rst import directives
     try:
         return directives.directive(name, None, None)[0]
-    except AttributeError:
-        pass
+    except AttributeError:        
+        if "method" in name:
+            name = "automethod"
+        else:
+            name = "auto"+name
+        try:
+            return directives.directive(name, None, None)[0]
+        except AttributeError:        
+            pass
     try:
         # docutils 0.4
         return directives._directives[name]

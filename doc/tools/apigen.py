@@ -194,14 +194,15 @@ class ApiDocWriter(object):
         classes : list of str
             A list of (public) class names in the module.
         """
-        exec 'import ' + uri
-        exec 'mod = ' + uri
+        mod = __import__(uri, fromlist=[uri])
         # find all public objects in the module.
         obj_strs = [obj for obj in dir(mod) if not obj.startswith('_')]
         functions = []
         classes = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
+            if obj_str not in mod.__dict__:
+                continue
             obj = mod.__dict__[obj_str]
             # figure out if obj is a function or class
             if hasattr(obj, 'func_name') or \
