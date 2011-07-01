@@ -31,9 +31,9 @@ mkdir -p /tmp/_scikits_image_backup
 for f in $ignore_files; do
   cp $f /tmp/_scikits_image_backup
 done
-git co scikits/image/version.py
+git checkout scikits/image/version.py
 
-git co gh-pages || exit
+git checkout gh-pages || exit
 rm -rf ./*
 cp -r /tmp/scikits.image.docs/* .
 
