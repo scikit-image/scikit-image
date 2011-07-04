@@ -57,7 +57,7 @@ read
 
 git commit -m "Update docs."
 git push origin gh-pages
-git co $branch
+git checkout $branch
 
 for f in $ignore_files; do
   cp /tmp/_scikits_image_backup/`basename $f` $f
