@@ -3,6 +3,7 @@ from scikits.image import log
 import scikits.image.backends
 import warnings
 import ast
+from nose.plugins.skip import SkipTest
 
 class ModuleParser(ast.NodeVisitor):
     """
@@ -28,13 +29,20 @@ class BackendTester():
     """
     Base class for nose backend testing.
     """
+    def wrapped(self, function, backend):
+        try:
+            use_backend(backend)
+            function()
+        except ImportError:
+            raise SkipTest
+    
     def test_all_backends(self):
         for backend in scikits.image.backends.list:
             if backend == "default": 
                 continue
             for function_name in dir(self):
                 if function_name.startswith("test") and function_name != "test_all_backends":
-                    yield (getattr(self, function_name), backend)
+                    yield (self.wrapped, getattr(self, function_name), backend)
 
 
 def import_backend(backend, module_name):
@@ -45,10 +53,7 @@ def import_backend(backend, module_name):
     mods = module_name.split(".")
     module_name = ".".join(mods[:-1] + ["backend"] + [mods[-1]])
     name = module_name + "_%s" % backend
-    try:
-        return __import__(name, fromlist=[name])
-    except ImportError:
-        return None
+    return __import__(name, fromlist=[name])
 
 
 class BackendManager(object):
@@ -134,14 +139,16 @@ class BackendManager(object):
         """
         if isinstance(backend, list):
             if backend:            
-                self.current_backend = backend[0]
-                self.fallback_backends = backend[1:]
+                current_backend = backend[0]
+                fallback_backends = backend[1:]
             else:
-                self.current_backend = "default"                
+                current_backend = "default"                
         else:
-            self.current_backend = backend
-            self.fallback_backends = []
-        self.ensure_backend_loaded(self.current_backend)
+            current_backend = backend
+            fallback_backends = []
+        self.ensure_backend_loaded(current_backend)
+        self.current_backend = current_backend
+        self.fallback_backends = fallback_backends
 
     def backing(self, function):
         """
@@ -241,6 +248,7 @@ def add_backends(function):
                 log.warn("Falling back to default implementation from backend %s" % backend)
                 backend = "default"
         # execute the backend function and return result
+        print (module_name + " " + backend +  " " + function_name)
         return manager.backend_listing[module_name][backend][function_name](*args, **kwargs)
     
     wrapper.__doc__ = function.__doc__
