@@ -42,7 +42,7 @@ sed -i 's/_static/static/g' `find . -name "*.html"`
 sed -i 's/_images/images/g' `find . -name "*.html"`
 mv _static static
 mv _images images
-for f in `find . | grep "./" | grep -v ".git"`; do
+for f in `find . | grep "./" | grep -v "\.git"`; do
    git add $f
 done
 
