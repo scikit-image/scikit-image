@@ -24,9 +24,17 @@ Inheritance diagram for ``scikits.image.filter``:
   .. automethod:: __init__
 .. autosummary::
 
+   scikits.image.filter.canny
    scikits.image.filter.inverse
    scikits.image.filter.median_filter
+   scikits.image.filter.sobel
+   scikits.image.filter.test
    scikits.image.filter.wiener
+
+canny
+-----
+
+.. autofunction:: scikits.image.filter.canny
 
 inverse
 -------
@@ -37,6 +45,16 @@ median_filter
 -------------
 
 .. autofunction:: scikits.image.filter.median_filter
+
+sobel
+-----
+
+.. autofunction:: scikits.image.filter.sobel
+
+test
+----
+
+.. autofunction:: scikits.image.filter.test
 
 wiener
 ------

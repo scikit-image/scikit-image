@@ -6,10 +6,36 @@ API Reference
 .. toctree::
 
    scikits.image
+   scikits.image.backend
+   scikits.image.backend.backend
+   scikits.image.backend.backend_old
    scikits.image.color
+   scikits.image.color.colorconv
    scikits.image.filter
+   scikits.image.filter.canny
+   scikits.image.filter.ctmf
+   scikits.image.filter.edges
+   scikits.image.filter.lpi_filter
+   scikits.image.filter.rank_order
    scikits.image.graph
+   scikits.image.graph.heap
+   scikits.image.graph.heap
+   scikits.image.graph.mcp
+   scikits.image.graph.spath
    scikits.image.io
+   scikits.image.io._plugins
+   scikits.image.io.collection
+   scikits.image.io.io
+   scikits.image.io.sift
    scikits.image.morphology
-   scikits.image.opencv
+   scikits.image.morphology.ccomp
+   scikits.image.morphology.ccomp
+   scikits.image.morphology.cmorph
+   scikits.image.morphology.cmorph
+   scikits.image.morphology.grey
+   scikits.image.morphology.selem
+   scikits.image.scripts.scivi
    scikits.image.transform
+   scikits.image.transform.finite_radon_transform
+   scikits.image.transform.hough_transform
+   scikits.image.transform.project
