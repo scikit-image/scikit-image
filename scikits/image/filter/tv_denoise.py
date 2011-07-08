@@ -1,6 +1,6 @@
 import numpy as np
 
-def _tv_denoise_3d(im, eps=2.e-4, weight=100, keep_type=False, n_iter_max=200):
+def _tv_denoise_3d(im, weight=100, eps=2.e-4, keep_type=False, n_iter_max=200):
     """
     Perform total-variation denoising on 3-D arrays
 
@@ -9,14 +9,14 @@ def _tv_denoise_3d(im, eps=2.e-4, weight=100, keep_type=False, n_iter_max=200):
     im: ndarray
         3-D input data to be denoised
 
+    weight: float, optional
+        denoising weight. The greater ``weight``, the more denoising (at 
+        the expense of fidelity to ``input``) 
+
     eps: float, optional
         relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when 
                 (E_(n-1) - E_n) < eps * E_0 
-
-    weight: float, optional
-        denoising weight. The greater ``weight``, the more denoising (at 
-        the expense of fidelity to ``input``) 
 
     keep_type: bool, optional (False)
         whether the output has the same dtype as the input array. 
@@ -78,13 +78,11 @@ def _tv_denoise_3d(im, eps=2.e-4, weight=100, keep_type=False, n_iter_max=200):
         pz -= 1/6.*gz
         pz /= norm
         E /= float(im.size)
-        print E
         if i == 0:
             E_init = E
             E_previous = E
         else:
             if np.abs(E_previous - E) < eps * E_init:
-                print E_previous, E
                 break
             else:
                 E_previous = E
@@ -103,14 +101,14 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     im: ndarray
         input data to be denoised
 
+    weight: float, optional
+        denoising weight. The greater ``weight``, the more denoising (at 
+        the expense of fidelity to ``input``) 
+
     eps: float, optional
         relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when 
                 (E_(n-1) - E_n) < eps * E_0 
-
-    weight: float, optional
-        denoising weight. The greater ``weight``, the more denoising (at 
-        the expense of fidelity to ``input``) 
 
     keep_type: bool, optional (False)
         whether the output has the same dtype as the input array. 
@@ -176,7 +174,6 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
         py -= 0.25*gy
         py /= norm
         E /= float(im.size)
-        print E
         if i == 0:
             E_init = E
             E_previous = E
@@ -186,13 +183,12 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
             else:
                 E_previous = E
         i += 1
-    print i
     if keep_type:
         return out.astype(im_type)
     else:
         return out
 
-def tv_denoise(im, eps=2.e-4, weight=50, keep_type=False, n_iter_max=200):
+def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     """
     Perform total-variation denoising on 2-d and 3-d images
 
@@ -203,14 +199,14 @@ def tv_denoise(im, eps=2.e-4, weight=50, keep_type=False, n_iter_max=200):
         but it is cast into an ndarray of floats for the computation 
         of the denoised image.
 
+    weight: float, optional
+        denoising weight. The greater ``weight``, the more denoising (at 
+        the expense of fidelity to ``input``) 
+
     eps: float, optional
         relative difference of the value of the cost function that 
         determines the stop criterion. The algorithm stops when 
                 (E_(n-1) - E_n) < eps * E_0 
-
-    weight: float, optional
-        denoising weight. The greater ``weight``, the more denoising (at 
-        the expense of fidelity to ``input``) 
 
     keep_type: bool, optional (False)
         whether the output has the same dtype as the input array. 
@@ -265,9 +261,9 @@ def tv_denoise(im, eps=2.e-4, weight=50, keep_type=False, n_iter_max=200):
     """
 
     if im.ndim == 2:
-        return _tv_denoise_2d(im, eps, weight, keep_type, n_iter_max)
+        return _tv_denoise_2d(im, weight, eps, keep_type, n_iter_max)
     elif im.ndim == 3:
-        return _tv_denoise_3d(im, eps, weight, keep_type, n_iter_max)
+        return _tv_denoise_3d(im, weight, eps, keep_type, n_iter_max)
     else:
         raise ValueError('only 2-d and 3-d images may be denoised with this function')
 
