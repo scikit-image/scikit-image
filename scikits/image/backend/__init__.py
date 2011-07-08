@@ -1,1 +1,1 @@
-from backend import add_backends, use_backend, backing, BackendTester
+from backend import add_backends, use_backend, backing, BackendTester, register_backend

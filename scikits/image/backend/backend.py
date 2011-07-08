@@ -60,7 +60,7 @@ class BackendManager(object):
     """
     Backend manager handles backend registry and switching.
     """
-    def __init__(self):
+    def __init__(self, auto_scan=1):
         # add default backend to the namespace
         mod = sys.modules["scikits.image.backends"]
         scikits.image.backends.list = ["default"]
@@ -69,9 +69,24 @@ class BackendManager(object):
         self.fallback_backends = []
         self.backend_listing = {}
         self.backend_imported = {}
-        self.module_members = {}        
-        self.scan_backends()
+        self.module_members = {}
+        self.auto_scan = auto_scan
         self.parser = ModuleParser()
+
+    
+    def register_backend(self, module_name, backend_name):
+#        if backend not in backends:
+#            backends.append(backend)
+        print "registering", module_name, backend_name
+        mod_name = module_name + "." + target
+        if mod_name not in self.backend_listing:
+            # initialize default backend
+            self.backend_listing[mod_name] = {}
+            self.backend_listing[mod_name]["default"] = {}
+            self.backend_imported[mod_name] = {}
+            self.backend_imported[mod_name]["default"] = True
+        self.backend_listing[mod_name][backend] = {}
+        self.backend_imported[mod_name][backend] = False
     
     def scan_backends(self):
         """
@@ -88,27 +103,32 @@ class BackendManager(object):
                 module_name = root + "." + f
                 backend_dir = os.path.join(location, f, "backend")
                 if os.path.exists(backend_dir):
-                    submodule_files = [f for f in os.listdir(submodule_dir) \
-                        if os.path.isfile(os.path.join(submodule_dir, f)) and f.endswith(".py")]
-                    backend_files = [f for f in os.listdir(backend_dir) \
-                        if os.path.isfile(os.path.join(backend_dir, f)) and f.endswith(".py")]
-                    # math file in backend directory with file in parent directory
-                    for f in backend_files:
-                        split = f.split("_")
-                        backend = split[-1][:-3]
-                        target = "_".join(split[:-1])
-                        if target + ".py" in submodule_files:
-                            if backend not in backends:
-                                backends.append(backend)
-                            mod_name = module_name + "." + target
-                            if mod_name not in self.backend_listing:
-                                # initialize default default backend
-                                self.backend_listing[mod_name] = {}
-                                self.backend_listing[mod_name]["default"] = {}
-                                self.backend_imported[mod_name] = {}
-                                self.backend_imported[mod_name]["default"] = True
-                            self.backend_listing[mod_name][backend] = {}
-                            self.backend_imported[mod_name][backend] = False
+                    if not self.auto_scan:
+                        mod_name = module_name + ".backend"
+                        __import__(mod_name, fromlist=[mod_name])
+                    else:
+                        submodule_files = [f for f in os.listdir(submodule_dir) \
+                            if os.path.isfile(os.path.join(submodule_dir, f)) and f.endswith(".py")]
+                        backend_files = [f for f in os.listdir(backend_dir) \
+                            if os.path.isfile(os.path.join(backend_dir, f)) and f.endswith(".py")]                    
+                        # math file in backend directory with file in parent directory
+                        for f in backend_files:
+                            split = f.split("_")
+                            backend = split[-1][:-3]
+                            target = "_".join(split[:-1])
+                            if target + ".py" in submodule_files:
+                                if backend not in backends:
+                                    backends.append(backend)
+                                mod_name = module_name + "." + target
+                                if mod_name not in self.backend_listing:
+                                    # initialize default backend
+                                    self.backend_listing[mod_name] = {}
+                                    self.backend_listing[mod_name]["default"] = {}
+                                    self.backend_imported[mod_name] = {}
+                                    self.backend_imported[mod_name]["default"] = True
+                                self.backend_listing[mod_name][backend] = {}
+                                self.backend_imported[mod_name][backend] = False
+
         # create references for each backend in backends namespace
         backends_mod = sys.modules["scikits.image.backends"]
         for backend_name in backends:
@@ -242,7 +262,7 @@ def add_backends(function):
                     backend = fallback
                     log.warn("Falling back to %s implementation" % fallback)
                     # make sure backend imported
-                    manager.register_backend(backend)
+                    manager.ensure_backend_loaded(backend, module=module_name)
                     break
             else:
                 log.warn("Falling back to default implementation from backend %s" % backend)
@@ -255,7 +275,11 @@ def add_backends(function):
     wrapper.__module__ = function.__module__        
     return wrapper
 
+
 manager = BackendManager()
+register_backend = manager.register_backend
 use_backend = manager.use_backend        
 backing = manager.backing
+print "HERE1"
+manager.scan_backends()
 
