@@ -5,26 +5,6 @@ import warnings
 import ast
 from nose.plugins.skip import SkipTest
 
-class ModuleParser(ast.NodeVisitor):
-    """
-    Parser that extracts all defined methods from source without importing.
-    """
-    def parse(self, code):
-        """
-        Parses source code and visit definitions.
-        """
-        tree = ast.parse(code)
-        self.functions = []
-        self.visit(tree)
-        return self.functions
-    
-    def visit_FunctionDef(self, statement):
-        """
-        Function visitation of parser.
-        """
-        self.functions.append(statement.name)
-
-
 class BackendTester():
     """
     Base class for nose backend testing.
@@ -45,17 +25,6 @@ class BackendTester():
                     yield (self.wrapped, getattr(self, function_name), backend)
 
 
-def import_backend(backend, module_name):
-    """
-    Imports the backend counterpart of a module.
-    """
-    print "importing", backend
-    mods = module_name.split(".")
-    module_name = ".".join(mods[:-1] + ["backend"] + [mods[-1]])
-    name = module_name + "_%s" % backend
-    return __import__(name, fromlist=[name])
-
-
 class BackendManager(object):
     """
     Backend manager handles backend registry and switching.
@@ -68,26 +37,30 @@ class BackendManager(object):
         self.current_backend = "default"
         self.fallback_backends = []
         self.backend_listing = {}
+        self.backend_modules = {}
         self.backend_imported = {}
         self.module_members = {}
         self.auto_scan = auto_scan
-        self.parser = ModuleParser()
 
-    
-    def register_backend(self, module_name, backend_name):
-#        if backend not in backends:
-#            backends.append(backend)
-        print "registering", module_name, backend_name
-        mod_name = module_name + "." + target
-        if mod_name not in self.backend_listing:
+    def register_backend(self, backend_name, module_name, function_location):
+        backend_module_str = ".".join(function_location.split(".")[:-1])
+        function_name = function_location.split(".")[-1]
+        print "registering", backend_name, module_name, function_name, backend_module_str      
+        if module_name not in self.backend_listing:
             # initialize default backend
-            self.backend_listing[mod_name] = {}
-            self.backend_listing[mod_name]["default"] = {}
-            self.backend_imported[mod_name] = {}
-            self.backend_imported[mod_name]["default"] = True
-        self.backend_listing[mod_name][backend] = {}
-        self.backend_imported[mod_name][backend] = False
-    
+            self.backend_listing[module_name] = {"default" : {}}
+            self.backend_modules[module_name] = {"default" : {}}
+        if backend_name not in self.backend_listing[module_name]:
+            self.backend_listing[module_name][backend_name] = {}
+            self.backend_modules[module_name][backend_name] = {}
+        self.backend_listing[module_name][backend_name][function_name] = None
+        self.backend_modules[module_name][backend_name][function_name] = backend_module_str
+        self.backend_imported[backend_module_str] = False
+        
+        if backend_name not in scikits.image.backends.list:
+            setattr(sys.modules["scikits.image.backends"], backend_name, backend_name)
+            scikits.image.backends.list.append(backend_name)
+            
     def scan_backends(self):
         """
         Scans through the source tree to extract all available backends from file names.
@@ -103,55 +76,32 @@ class BackendManager(object):
                 module_name = root + "." + f
                 backend_dir = os.path.join(location, f, "backend")
                 if os.path.exists(backend_dir):
-                    if not self.auto_scan:
-                        mod_name = module_name + ".backend"
-                        __import__(mod_name, fromlist=[mod_name])
-                    else:
-                        submodule_files = [f for f in os.listdir(submodule_dir) \
-                            if os.path.isfile(os.path.join(submodule_dir, f)) and f.endswith(".py")]
-                        backend_files = [f for f in os.listdir(backend_dir) \
-                            if os.path.isfile(os.path.join(backend_dir, f)) and f.endswith(".py")]                    
-                        # math file in backend directory with file in parent directory
-                        for f in backend_files:
-                            split = f.split("_")
-                            backend = split[-1][:-3]
-                            target = "_".join(split[:-1])
-                            if target + ".py" in submodule_files:
-                                if backend not in backends:
-                                    backends.append(backend)
-                                mod_name = module_name + "." + target
-                                if mod_name not in self.backend_listing:
-                                    # initialize default backend
-                                    self.backend_listing[mod_name] = {}
-                                    self.backend_listing[mod_name]["default"] = {}
-                                    self.backend_imported[mod_name] = {}
-                                    self.backend_imported[mod_name]["default"] = True
-                                self.backend_listing[mod_name][backend] = {}
-                                self.backend_imported[mod_name][backend] = False
-
+                    __import__(module_name + ".backend", fromlist=[module_name])
+                        
         # create references for each backend in backends namespace
         backends_mod = sys.modules["scikits.image.backends"]
         for backend_name in backends:
             setattr(backends_mod, backend_name, backend_name)
             scikits.image.backends.list.append(backend_name)
 
-    def ensure_backend_loaded(self, backend, module=None):
+    def ensure_backend_loaded(self, backend_name, module_name, function_name):
         """
         Ensures a backend is imported.
         """
-        if module:
-            modules = [module]
-        else:
-            modules = self.backend_imported.keys()
-        for module_name in modules:
-            # check if backend has been imported and if not do so
-            if backend in self.backend_imported[module_name] \
-            and not self.backend_imported[module_name][backend]:
-                backend_module = import_backend(backend, module_name)
-                self.backend_imported[module_name][backend] = True
-                for function_name in self.backend_listing[module_name][backend]:
-                    self.backend_listing[module_name][backend][function_name] = \
-                        getattr(backend_module, function_name)
+        # check if backend has been imported and if not do so
+        if not (backend_name in self.backend_listing[module_name] and\
+            function_name in self.backend_listing[module_name][backend_name]):
+            return False
+        
+        if not self.backend_listing[module_name][backend_name][function_name]:
+            module_location = self.backend_modules[module_name][backend_name][function_name]
+            if not self.backend_imported[module_location]:
+                module = __import__(module_location, fromlist=[module_location])
+                self.backend_imported[module_location] = True
+                for f_name in self.backend_listing[module_name][backend_name]:
+                    self.backend_listing[module_name][backend_name][f_name] = \
+                        getattr(module, f_name)
+        return True
                         
     def use_backend(self, backend):
         """
@@ -166,7 +116,6 @@ class BackendManager(object):
         else:
             current_backend = backend
             fallback_backends = []
-        self.ensure_backend_loaded(current_backend)
         self.current_backend = current_backend
         self.fallback_backends = fallback_backends
 
@@ -182,94 +131,54 @@ class BackendManager(object):
                     backends.append(backend)
         return backends
 
-    def scan_backend_functions(self, module_name):
-        """
-        Scans through the registered backends of a module and extract the defined functions
-        """
-        module_path = os.path.split(sys.modules[module_name].__file__)[0]
-        main_name = module_name.split('.')[-1]
-        functions = {}
-        for backend in self.backend_listing[module_name]:
-            if backend != "default":
-                backend_path = os.path.join(module_path, "backend", main_name + "_" + backend + ".py")
-                #functions[backend] = self.parser.parse(open(backend_path).read())
-                functions[backend] = compile(open(backend_path).read(), '', mode='exec').co_names
-        return functions
-
-    def backend_function_name(self, function, backend):
-        """
-        Module location of backend supported function.
-        """
-        module_elements = function.__module__.split(".")
-        return ".".join(module_elements[:-1] + ["backend"] + \
-            [module_elements[-1] + "_" + backend] + [function.__name__])
-    
-    def register_function(self, module_name, function):
-        """
-        Register functions for a specific module.
-        """
-        function_name = function.__name__
-        if module_name not in self.backend_listing:
-            self.backend_listing[module_name] = {}
-            self.backend_listing[module_name]["default"] = {}
-        if module_name not in self.module_members:
-            self.module_members[module_name] = self.scan_backend_functions(module_name)
-        # register default implementation
-        self.backend_listing[module_name]["default"][function_name] = function
-        for backend, members in self.module_members[module_name].items():
-            if function_name in members:
-                self.backend_listing[module_name][backend][function_name] = None
-        self.ensure_backend_loaded(self.current_backend)
-       
 
 def add_backends(function):
     """
     A decorator that adds backend support to a function.
     """
     function_name = function.__name__
-    module_name = function.__module__
+    module_name = ".".join(function.__module__.split(".")[:3])
     # iterate through backend directory and find backends that match
-    manager.register_function(module_name, function)
+    # register default implementation   
+    listing = manager.backend_listing[module_name]
+    listing["default"][function_name] = function
     # add documentation to function doc strings
-    if len(manager.backend_listing[module_name]) > 1:
+    if len(listing) > 1:
         if not function.__doc__:
             function.__doc__ = ""
         else:
             function.__doc__ += "\n"
         function.__doc__ += "    Backends supported:\n"
         function.__doc__ += "    -------------------\n"
-        for backend in manager.backend_listing[module_name]:
-            if backend == "default":
+        for backend in listing:
+            if backend == "default" or function_name not in listing[backend]:
                 continue
             function.__doc__ += "    %s\n" % backend
-            function.__doc__ += "       See also: %s\n" % manager.backend_function_name(function, backend)
+            function.__doc__ += "       See also: %s\n" % manager.backend_modules[module_name][backend][function_name]
                                 
     def wrapper(*args, **kwargs):
         if "backend" in kwargs:
             backend = kwargs.get("backend")
             if backend == None:
                 backend = "default"
-            manager.ensure_backend_loaded(backend, module=module_name)
             del kwargs["backend"]
         else:
             backend = manager.current_backend
         # fall back to default if backend not supported
-        if backend not in manager.backend_listing[module_name] or \
-        function_name not in manager.backend_listing[module_name][backend]:
+        if not manager.ensure_backend_loaded(backend, module_name, function_name):
             for fallback in manager.fallback_backends:
-                if fallback in manager.backend_listing[module_name] and \
-                function_name in manager.backend_listing[module_name][fallback]:
+                if fallback in listing and \
+                function_name in listing[fallback]:
                     backend = fallback
                     log.warn("Falling back to %s implementation" % fallback)
                     # make sure backend imported
-                    manager.ensure_backend_loaded(backend, module=module_name)
-                    break
+                    if manager.ensure_backend_loaded(backend, module_name, function_name):
+                        break                
             else:
                 log.warn("Falling back to default implementation from backend %s" % backend)
                 backend = "default"
         # execute the backend function and return result
-        print (module_name + " " + backend +  " " + function_name)
-        return manager.backend_listing[module_name][backend][function_name](*args, **kwargs)
+        return listing[backend][function_name](*args, **kwargs)
     
     wrapper.__doc__ = function.__doc__
     wrapper.__module__ = function.__module__        
@@ -280,6 +189,5 @@ manager = BackendManager()
 register_backend = manager.register_backend
 use_backend = manager.use_backend        
 backing = manager.backing
-print "HERE1"
 manager.scan_backends()
 
