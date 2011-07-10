@@ -44,7 +44,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     offset = max_distance / 2
     
     # compute the nonzero indexes
-    cdef np.ndarray[ndim=1, dtype=np.int32_t] x_idxs, y_idxs
+    cdef np.ndarray[ndim=1, dtype=np.int_t] x_idxs, y_idxs
     y_idxs, x_idxs = np.PyArray_Nonzero(img)
 
     # finally, run the transform
