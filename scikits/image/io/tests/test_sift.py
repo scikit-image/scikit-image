@@ -1,7 +1,7 @@
 import numpy as np
 from nose.tools import *
 from numpy.testing import assert_array_equal, assert_array_almost_equal, \
-                          assert_equal
+                          assert_equal, run_module_suite
 from tempfile import TemporaryFile
 
 from scikits.image.io import load_sift, load_surf
@@ -56,3 +56,6 @@ def test_load_surf():
     assert_equal(len(features['data'][0]), 64)
     assert_equal(features['column'][1], 68.5773)
     assert_equal(features['row'][0], 62.0491)
+
+if __name__ == '__main__':
+    run_module_suite()
