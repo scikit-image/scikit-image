@@ -30,6 +30,7 @@ help:
 
 clean:
 	-rm -rf build/*
+	-rm -rf source/api
 
 api:
 	mkdir -p source/api
