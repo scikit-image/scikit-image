@@ -27,7 +27,7 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.pngmath', 'numpydoc',
               'sphinx.ext.autosummary', 'sphinx.ext.inheritance_diagram',
-              'plot_directive']
+              'matplotlib.sphinxext.plot_directive']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
