@@ -30,6 +30,7 @@ help:
 
 clean:
 	-rm -rf $(DEST)/*
+	-rm -rf source/api
 
 api:
 	mkdir -p source/api
