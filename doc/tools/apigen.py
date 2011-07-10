@@ -92,14 +92,20 @@ class ApiDocWriter(object):
         '''
         # It's also possible to imagine caching the module parsing here
         self._package_name = package_name
-        self.root_module = __import__(package_name)
-        self.root_path = self.root_module.__path__[-1]
-        self.root_path = os.path.join(self.root_path,
-                os.path.sep.join(package_name.split('.')[1:]))
+        root_module = self._import(package_name)
+        self.root_path = root_module.__path__[-1]
         self.written_modules = None
 
     package_name = property(get_package_name, set_package_name, None,
                             'get/set package_name')
+
+    def _import(self, name):
+        ''' Import namespace package '''
+        mod = __import__(name)
+        components = name.split('.')
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+        return mod
 
     def _get_object_name(self, line):
         ''' Get second token in line
