@@ -76,7 +76,10 @@ class BackendManager(object):
                 module_name = root + "." + f
                 backend_dir = os.path.join(location, f, "backend")
                 if os.path.exists(backend_dir):
-                    __import__(module_name + ".backend", fromlist=[module_name])
+                    try:
+                        __import__(module_name + ".backend", fromlist=[module_name])
+                    except ImportError:
+                        pass
                         
         # create references for each backend in backends namespace
         backends_mod = sys.modules["scikits.image.backends"]
@@ -138,8 +141,11 @@ def add_backends(function):
     """
     function_name = function.__name__
     module_name = ".".join(function.__module__.split(".")[:3])
-    # iterate through backend directory and find backends that match
-    # register default implementation   
+    if module_name not in manager.backend_listing:
+        # initialize default backend
+        manager.backend_listing[module_name] = {"default" : {}}
+        manager.backend_modules[module_name] = {"default" : {}}    
+    # register default implementation               
     listing = manager.backend_listing[module_name]
     listing["default"][function_name] = function
     # add documentation to function doc strings
