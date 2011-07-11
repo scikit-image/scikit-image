@@ -1,8 +1,8 @@
 .. _forking:
 
-==========================================
+============================================
 Making your own copy (fork) of scikits.image
-==========================================
+============================================
 
 You need to do this only once.  The instructions here are very similar
 to the instructions at http://help.github.com/forking/ - please see that
@@ -18,7 +18,7 @@ You then need to configure your account to allow write access - see the
 ``Generating SSH keys`` help on `github help`_.
 
 Create your own forked copy of scikits.image_
-=========================================
+=============================================
 
 #. Log into your github_ account.
 #. Go to the scikits.image_ github home at `scikits.image github`_.
