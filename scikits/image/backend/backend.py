@@ -1,6 +1,6 @@
 import os, sys
+import scikits.image
 from scikits.image import log
-import scikits.image.backends
 import warnings
 import ast
 from nose.plugins.skip import SkipTest
@@ -31,9 +31,7 @@ class BackendManager(object):
     """
     def __init__(self, auto_scan=1):
         # add default backend to the namespace
-        mod = sys.modules["scikits.image.backends"]
-        scikits.image.backends.list = ["default"]
-        setattr(mod, "default", "default")        
+        scikits.image.backends = ["default"]
         self.current_backend = "default"
         self.fallback_backends = []
         self.backend_listing = {}
@@ -57,9 +55,8 @@ class BackendManager(object):
         self.backend_modules[module_name][backend_name][function_name] = backend_module_str
         self.backend_imported[backend_module_str] = False
         
-        if backend_name not in scikits.image.backends.list:
-            setattr(sys.modules["scikits.image.backends"], backend_name, backend_name)
-            scikits.image.backends.list.append(backend_name)
+        if backend_name not in scikits.image.backends:
+            scikits.image.backends.append(backend_name)
             
     def scan_backends(self):
         """
@@ -81,12 +78,6 @@ class BackendManager(object):
                     except ImportError:
                         pass
                         
-        # create references for each backend in backends namespace
-        backends_mod = sys.modules["scikits.image.backends"]
-        for backend_name in backends:
-            setattr(backends_mod, backend_name, backend_name)
-            scikits.image.backends.list.append(backend_name)
-
     def ensure_backend_loaded(self, backend_name, module_name, function_name):
         """
         Ensures a backend is imported.
@@ -101,6 +92,7 @@ class BackendManager(object):
             if not self.backend_imported[module_location]:
                 module = __import__(module_location, fromlist=[module_location])
                 self.backend_imported[module_location] = True
+                print module_location, backend_name, function_name
                 for f_name in self.backend_listing[module_name][backend_name]:
                     self.backend_listing[module_name][backend_name][f_name] = \
                         getattr(module, f_name)

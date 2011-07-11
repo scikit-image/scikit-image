@@ -47,4 +47,4 @@ def get_log(name):
     return logging.getLogger(name)
 
 log = get_log("scikits.image")
-
+backends = []
