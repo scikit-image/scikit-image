@@ -48,3 +48,6 @@
 - Maël Primet
   Total variation noise filtering
 
+- Martin Bergholdt
+  Fix missing math.h functions in Windows 7 + MSVCC.
+
