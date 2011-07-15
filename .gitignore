@@ -14,4 +14,4 @@ build
 dist
 scikits/image/version.py
 *.swp
-
+.coverage
