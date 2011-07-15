@@ -1,0 +1,28 @@
+"Make movie from multiframe image                    ", immovie 
+"Play movies, videos, or image sequences             ", implay	 
+"Display image                                       ", imshow	 
+"Image Tool                                          ", imtool	 
+"Display multiple image frames as rectangular montage", montage  
+"Display multiple images in single figure            ", subimage 
+"Display image as texture-mapped surface             ", warp	 
+
+"Read metadata from header file of Analyze 7.5 data set             ",analyze75info
+"Read image data from image file of Analyze 7.5 data set            ",analyze75read
+"Anonymize DICOM file                                               ",dicomanon	 
+"Get or set active DICOM data dictionary                            ",dicomdict	 
+"Read metadata from DICOM message                                   ",dicominfo	 
+"Find attribute in DICOM data dictionary                            ",dicomlookup	 
+"Read DICOM image                                                   ",dicomread	 
+"Generate DICOM unique identifier                                   ",dicomuid	 
+"Write images as DICOM files                                        ",dicomwrite	 
+"Read high dynamic range (HDR) image                                ",hdrread	     
+"Write Radiance high dynamic range (HDR) image file                 ",hdrwrite	 
+"Read metadata from Interfile file                                  ",interfileinfo
+"Read images in Interfile format                                    ",interfileread
+"Check if file is R-Set                                             ",isrset	     
+"Create high dynamic range image                                    ",makehdr	     
+"Read metadata from National Imagery Transmission Format (NITF) file",nitfinfo	 
+"Read image from NITF file                                          ",nitfread	 
+"Open R-Set file                                                    ",openrset	 
+"Create reduced resolution data set from image file                 ",rsetwrite	 
+"Render high dynamic range image for viewing                        ",tonemap
