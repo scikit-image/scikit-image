@@ -11,7 +11,7 @@ PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 DEST = build
-.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest
+.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash
 
 all: html
 
@@ -114,3 +114,9 @@ doctest:
 
 gh-pages:
 	python gh-pages.py
+
+gitwash:
+	python tools/gitwash/gitwash_dumper.py source scikits.image \
+	--project-url=http://scikits-image.org \
+	--project-ml-url=http://groups.google.com/group/scikits-image \
+	--source-suffix=.txt
