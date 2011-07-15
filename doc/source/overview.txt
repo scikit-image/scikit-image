@@ -1,19 +1,22 @@
 Image Processing SciKit
 =======================
 
-This SciKit (toolkit for `SciPy <http://www.scipy.org>`_) includes
-useful image processing algorithms for use with `Python
-<http://www.python.org>`_ and `NumPy <http://numpy.scipy.org>`_.
-While SciPy's ``ndimage`` provides low-level manipulation,
-``scikits.image`` centres around algorithms and applications.
+The `scikits.image <http://scikits-image.org>`__ SciKit (toolkit for
+`SciPy <http://www.scipy.org>`__) extends ``scipy.ndimage`` to provide
+a versatile set of image processing routines.  It is written in the
+`Python <http://www.python.org>`_ language.
 
 This `SciKit <http://scikits.appspot.com>`_ is developed by the SciPy
 community.  All contributions are most welcome!  Please join us on the
 mailing list (address provided below).
 
+Homepage
+--------
+http://scikits-image.org
+
 Source, bugs and patches
 ------------------------
-http://github.com/stefanv/scikits.image
+http://github.com/scikits-image/scikits.image
 
 Mailing List
 ------------
