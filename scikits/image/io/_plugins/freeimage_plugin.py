@@ -32,19 +32,18 @@ def _load_library(libname, loader_path):
         libdir = os.path.dirname(loader_path)
     else:
         libdir = loader_path
-        if sys.platform == 'win32':
-            loader = ctypes.windll
-        else:
-            loader = ctypes.cdll
-        for ln in libname_ext:
-            try:
-                return loader[os.path.join(libdir, ln)]
-            except OSError:
-                pass
-        # TODO: Setup errno and other bits to something correctly
-        raise OSError(
-                'Unable to find library in any of the foloowing paths: %s' %
-                [os.path.join(libdir, ln) for ln in libname_ext])
+    if sys.platform == 'win32':
+        loader = ctypes.windll
+    else:
+        loader = ctypes.cdll
+    for ln in libname_ext:
+        try:
+            return loader[os.path.join(libdir, ln)]
+        except OSError:
+            pass
+    # TODO: Setup errno and other bits to something correctly
+    raise OSError('Unable to find library in any of the foloowing paths: %s' %
+            [os.path.join(libdir, ln) for ln in libname_ext])
 
 
 lib_dirs = [os.path.dirname(__file__),
