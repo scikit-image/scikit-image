@@ -9,81 +9,150 @@
 Overview
 ========
 
-::
+Your personal git configurations are saved in the ``.gitconfig`` file in
+your home directory.
 
-  git config --global user.email you@yourdomain.example.com
-  git config --global user.name "Your Name Comes Here"
+Here is an example ``.gitconfig`` file::
 
-
-In detail
-=========
-
-This is to tell git_ who you are, for labeling any changes you make to
-the code.  The simplest way to do this is from the command line::
-
-  git config --global user.email you@yourdomain.example.com
-  git config --global user.name "Your Name Comes Here"
-
-This will write the settings into your git configuration file - a file
-called ``.gitconfig`` in your home directory. 
-
-Advanced git configuration
-==========================
-
-You might well benefit from some aliases to common commands.
-
-For example, you might well want to be able to shorten ``git checkout`` to ``git co``. 
-
-The easiest way to do this, is to create a ``.gitconfig`` file in your
-home directory, with contents like this::
-
-  [core]
-          editor = emacs
   [user]
+          name = Your Name
           email = you@yourdomain.example.com
-          name = Your Name Comes Here
+
   [alias]
+          ci = commit -a
+          co = checkout
           st = status
           stat = status
-          co = checkout
-  [color]
-          diff = auto
-          status = true
+          br = branch
+          wdiff = diff --color-words
 
-(of course you'll need to set your email and name, and may want to set
-your editor).  If you prefer, you can do the same thing from the command
-line::
+  [core]
+          editor = vim
 
-  git config --global core.editor emacs
+  [merge]
+          summary = true
+
+You can edit this file directly or you can use the ``git config --global``
+command::
+
+  git config --global user.name "Your Name"
   git config --global user.email you@yourdomain.example.com
-  git config --global user.name "Your Name Comes Here"
-  git config --global alias.st status
-  git config --global alias.stat status
+  git config --global alias.ci "commit -a"
   git config --global alias.co checkout
-  git config --global color.diff auto
-  git config --global color.status true
-
-These commands will write to your user's git configuration file
-``~/.gitconfig``.
+  git config --global alias.st "status -a"
+  git config --global alias.stat "status -a"
+  git config --global alias.br branch
+  git config --global alias.wdiff "diff --color-words"
+  git config --global core.editor vim
+  git config --global merge.summary true
 
 To set up on another computer, you can copy your ``~/.gitconfig`` file,
 or run the commands above.
 
-Other configuration recommended by Yarik
-========================================
+In detail
+=========
 
-In your ``~/.gitconfig`` file alias section::
+user.name and user.email
+------------------------
 
-   wdiff = diff --color-words
+It is good practice to tell git_ who you are, for labeling any changes
+you make to the code.  The simplest way to do this is from the command
+line::
 
-so that ``git wdiff`` gives a nicely formatted output of the diff. 
+  git config --global user.name "Your Name"
+  git config --global user.email you@yourdomain.example.com
 
-To enforce summaries when doing merges(``~/.gitconfig`` file again)::
+This will write the settings into your git configuration file,  which
+should now contain a user section with your name and email::
+
+  [user]
+        name = Your Name
+        email = you@yourdomain.example.com
+
+Of course you'll need to replace ``Your Name`` and ``you@yourdomain.example.com``
+with your actual name and email address.
+
+Aliases
+-------
+
+You might well benefit from some aliases to common commands.
+
+For example, you might well want to be able to shorten ``git checkout``
+to ``git co``.  Or you may want to alias ``git diff --color-words``
+(which gives a nicely formatted output of the diff) to ``git wdiff``
+
+The following ``git config --global`` commands::
+
+  git config --global alias.ci "commit -a"
+  git config --global alias.co checkout
+  git config --global alias.st "status -a"
+  git config --global alias.stat "status -a"
+  git config --global alias.br branch
+  git config --global alias.wdiff "diff --color-words"
+
+will create an ``alias`` section in your ``.gitconfig`` file with contents
+like this::
+
+  [alias]
+          ci = commit -a
+          co = checkout
+          st = status -a
+          stat = status -a
+          br = branch
+          wdiff = diff --color-words
+
+Editor
+------
+
+You may also want to make sure that your editor of choice is used ::
+
+  git config --global core.editor vim
+
+Merging
+-------
+
+To enforce summaries when doing merges (``~/.gitconfig`` file again)::
 
    [merge]
-      summary = true
+      log = true
 
+Or from the command line::
 
-.. include:: git_links.txt
+  git config --global merge.log true
 
+.. _fancy-log:
 
+Fancy log output
+----------------
+
+This is a very nice alias to get a fancy log output; it should go in the
+``alias`` section of your ``.gitconfig`` file::
+
+    lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)[%an]%Creset' --abbrev-commit --date=relative
+
+You use the alias with::
+
+    git lg
+
+and it gives graph / text output something like this (but with color!)::
+
+    * 6d8e1ee - (HEAD, origin/my-fancy-feature, my-fancy-feature) NF - a fancy file (45 minutes ago) [Matthew Brett]
+    *   d304a73 - (origin/placeholder, placeholder) Merge pull request #48 from hhuuggoo/master (2 weeks ago) [Jonathan Terhorst]
+    |\  
+    | * 4aff2a8 - fixed bug 35, and added a test in test_bugfixes (2 weeks ago) [Hugo]
+    |/  
+    * a7ff2e5 - Added notes on discussion/proposal made during Data Array Summit. (2 weeks ago) [Corran Webster]
+    * 68f6752 - Initial implimentation of AxisIndexer - uses 'index_by' which needs to be changed to a call on an Axes object - this is all very sketchy right now. (2 weeks ago) [Corr
+    *   376adbd - Merge pull request #46 from terhorst/master (2 weeks ago) [Jonathan Terhorst]
+    |\  
+    | * b605216 - updated joshu example to current api (3 weeks ago) [Jonathan Terhorst]
+    | * 2e991e8 - add testing for outer ufunc (3 weeks ago) [Jonathan Terhorst]
+    | * 7beda5a - prevent axis from throwing an exception if testing equality with non-axis object (3 weeks ago) [Jonathan Terhorst]
+    | * 65af65e - convert unit testing code to assertions (3 weeks ago) [Jonathan Terhorst]
+    | *   956fbab - Merge remote-tracking branch 'upstream/master' (3 weeks ago) [Jonathan Terhorst]
+    | |\  
+    | |/
+
+Thanks to Yury V. Zaytsev for posting it.
+
+.. include:: links.inc

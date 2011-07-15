@@ -1,8 +1,8 @@
 .. _git-resources:
 
-================
- git_ resources
-================
+=============
+git resources
+=============
 
 Tutorials and summaries
 =======================
@@ -14,18 +14,20 @@ Tutorials and summaries
 * The `git user manual`_ 
 * The `git tutorial`_
 * The `git community book`_
-* `git ready`_ - a nice series of tutorials
-* `git casts`_ - video snippets giving git how-tos.
-* `git magic`_ - extended introduction with intermediate detail
-* Fernando Perez' git page - `Fernando's git page`_ - many links and tips
+* `git ready`_ |emdash| a nice series of tutorials
+* `git casts`_ |emdash| video snippets giving git how-tos.
+* `git magic`_ |emdash| extended introduction with intermediate detail
+* The `git parable`_ is an easy read explaining the concepts behind git.
+* `git foundation`_ expands on the `git parable`_.
+* Fernando Perez' git page |emdash| `Fernando's git page`_ |emdash| many
+  links and tips
 * A good but technical page on `git concepts`_
-* Th `git parable`_ is an easy read explaining the concepts behind git.
-* `git svn crash course`_: git_ for those of us used to subversion_
+* `git svn crash course`_: git for those of us used to subversion_
 
 Advanced git workflow
 =====================
 
-There are many ways of working with git_; here are some posts on the
+There are many ways of working with git; here are some posts on the
 rules of thumb that other projects have come up with:
 
 * Linus Torvalds on `git management`_
@@ -54,4 +56,4 @@ online manual pages for some common commands:
 * `git remote`_
 * `git status`_
 
-.. include:: git_links.txt
+.. include:: links.inc

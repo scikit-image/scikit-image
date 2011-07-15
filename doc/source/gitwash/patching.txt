@@ -2,16 +2,18 @@
  Making a patch
 ================
 
-You've discovered a bug or something else you want to change in scikits.image_ - excellent!
+You've discovered a bug or something else you want to change
+in scikits.image_ .. |emdash| excellent!
 
-You've worked out a way to fix it - even better!
+You've worked out a way to fix it |emdash| even better!
 
-You want to tell us about it - best of all!
+You want to tell us about it |emdash| best of all!
 
-The easiest way is to make a *patch* or set of patches.  Here we explain
-how.  Making a patch is the simplest and quickest, but if you're going
-to be doing anything more than simple quick things, please consider
-following the :ref:`git-development` model instead.
+The easiest way is to make a *patch* or set of patches.  Here
+we explain how.  Making a patch is the simplest and quickest,
+but if you're going to be doing anything more than simple
+quick things, please consider following the
+:ref:`git-development` model instead.
 
 .. _making-patches:
 
@@ -42,24 +44,28 @@ Overview
    # make the patch files
    git format-patch -M -C master
 
-Then, send the generated patch files to the `scikits.image mailing list`_ - where we will thank you warmly.
+Then, send the generated patch files to the `scikits.image
+mailing list`_ |emdash| where we will thank you warmly.
 
 In detail
 ---------
 
-#. Tell git_ who you are so it can label the commits you've made::
+#. Tell git who you are so it can label the commits you've
+   made::
 
       git config --global user.email you@yourdomain.example.com
       git config --global user.name "Your Name Comes Here"
 
-#. If you don't already have one, clone a copy of the scikits.image_ repository::
+#. If you don't already have one, clone a copy of the
+   scikits.image_ repository::
 
       git clone git://github.com/scikits.image/scikits.image.git
       cd scikits.image
 
-#. Make a 'feature branch'.  This will be where you work on your bug
-   fix.  It's nice and safe and leaves you with access to an unmodified
-   copy of the code in the main branch::
+#. Make a 'feature branch'.  This will be where you work on
+   your bug fix.  It's nice and safe and leaves you with
+   access to an unmodified copy of the code in the main
+   branch::
 
       git branch the-fix-im-thinking-of
       git checkout the-fix-im-thinking-of
@@ -74,16 +80,18 @@ In detail
       # hack hack, hack
       git commit -am 'BF - added fix for Funny bug'
 
-   Note the ``-am`` options to ``commit``. The ``m`` flag just signals
-   that you're going to type a message on the command line.  The ``a``
-   flag - you can just take on faith - or see `why the -a flag?`_.
+   Note the ``-am`` options to ``commit``. The ``m`` flag just
+   signals that you're going to type a message on the command
+   line.  The ``a`` flag |emdash| you can just take on faith |emdash|
+   or see `why the -a flag?`_.
 
-#. When you have finished, check you have committed all your changes::
+#. When you have finished, check you have committed all your
+   changes::
 
       git status
 
-#. Finally, make your commits into patches.  You want all the commits
-   since you branched from the ``master`` branch::
+#. Finally, make your commits into patches.  You want all the
+   commits since you branched from the ``master`` branch::
 
       git format-patch -M -C master
 
@@ -94,19 +102,21 @@ In detail
 
    Send these files to the `scikits.image mailing list`_.
 
-When you are done, to switch back to the main copy of the code, just
-return to the ``master`` branch::
+When you are done, to switch back to the main copy of the
+code, just return to the ``master`` branch::
 
    git checkout master
 
 Moving from patching to development
 ===================================
 
-If you find you have done some patches, and you have one or more feature
-branches, you will probably want to switch to development mode.  You can
-do this with the repository you have.
+If you find you have done some patches, and you have one or
+more feature branches, you will probably want to switch to
+development mode.  You can do this with the repository you
+have.
 
-Fork the scikits.image_ repository on github_ - :ref:`forking`.  Then::
+Fork the scikits.image_ repository on github |emdash| :ref:`forking`.
+Then::
 
    # checkout and refresh master branch from main repo
    git checkout master
@@ -118,6 +128,7 @@ Fork the scikits.image_ repository on github_ - :ref:`forking`.  Then::
    # push up any branches you've made and want to keep
    git push origin the-fix-im-thinking-of
 
-Then you can, if you want, follow the :ref:`development-workflow`.
+Then you can, if you want, follow the
+:ref:`development-workflow`.
 
-.. include:: git_links.txt
+.. include:: links.inc

@@ -4,14 +4,14 @@
  Set up your fork
 ==================
 
-First you follow the instructions for :ref:`forking`. 
+First you follow the instructions for :ref:`forking`.
 
 Overview
 ========
 
 ::
 
-   git clone git@github.com/your-user-name/scikits.image.git
+   git clone git@github.com:your-user-name/scikits.image.git
    cd scikits.image
    git remote add upstream git://github.com/scikits.image/scikits.image.git
 
@@ -33,7 +33,7 @@ Clone your fork
    This tells you that you are currently on the ``master`` branch, and
    that you also have a ``remote`` connection to ``origin/master``.
    What remote repository is ``remote/origin``? Try ``git remote -v`` to
-   see the URLs for the remote.  They will point to your github_ fork.
+   see the URLs for the remote.  They will point to your github fork.
 
    Now you want to connect to the upstream `scikits.image github`_ repository, so
    you can merge in changes from trunk.
@@ -64,5 +64,5 @@ Just for your own satisfaction, show yourself that you now have a new
    origin	git@github.com:your-user-name/scikits.image.git (fetch)
    origin	git@github.com:your-user-name/scikits.image.git (push)
 
-.. include:: git_links.txt
+.. include:: links.inc
 
