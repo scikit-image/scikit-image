@@ -326,7 +326,7 @@ def _read_bitmap(filename, flags):
     if not bitmap:
         raise ValueError('Could not load file %s' % filename)
     return ctypes.c_void_p(bitmap)
-    
+
 def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   """Return an ndarray view on the data in a FreeImage bitmap. Only
   valid for as long as the bitmap is loaded (if single page) / locked
@@ -343,7 +343,7 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   else:
     strides = (itemsize, pitch)
   bits = _FI.FreeImage_GetBits(bitmap)
-  array = numpy.ndarray(shape, dtype=dtype, 
+  array = numpy.ndarray(shape, dtype=dtype,
                         buffer=(ctypes.c_char*byte_size).from_address(bits),
                         strides=strides)
   return array
