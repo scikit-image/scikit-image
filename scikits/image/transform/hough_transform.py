@@ -3,7 +3,6 @@ __all__ = ['hough']
 from itertools import izip
 import numpy as np
 
-
 def _hough(img, theta=None):
     if img.ndim != 2:
         raise ValueError('The input image must be 2-D')
@@ -50,6 +49,7 @@ def _hough(img, theta=None):
 
     return out, theta, bins
 
+_py_hough = _hough
 
 # try to import and use the faster Cython version if it exists
 try:
