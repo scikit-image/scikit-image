@@ -24,7 +24,7 @@
   Logic around API docs generation
 
 - Tony Yu
-  Reading of paletted images
+  Reading of paletted images, build and bug fixes. 
 
 - Zachary Pincus
   Tracing of low cost paths, FreeImage I/O plugin
@@ -40,7 +40,7 @@
   support.
 
 - Pieter Holtzhausen
-  Incorporating CellProfiler's Sobel edge detector
+  Incorporating CellProfiler's Sobel edge detector, build and bug fixes.
 
 - Emmanuelle Guillart
   Total variation noise filtering

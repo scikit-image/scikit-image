@@ -31,9 +31,9 @@ mkdir -p /tmp/_scikits_image_backup
 for f in $ignore_files; do
   cp $f /tmp/_scikits_image_backup
 done
-git co scikits/image/version.py
+git checkout scikits/image/version.py
 
-git co gh-pages || exit
+git checkout gh-pages || exit
 rm -rf ./*
 cp -r /tmp/scikits.image.docs/* .
 
@@ -42,7 +42,7 @@ sed -i 's/_static/static/g' `find . -name "*.html"`
 sed -i 's/_images/images/g' `find . -name "*.html"`
 mv _static static
 mv _images images
-for f in `find . | grep "./" | grep -v ".git"`; do
+for f in `find . | grep "./" | grep -v "\.git"`; do
    git add $f
 done
 
@@ -57,7 +57,7 @@ read
 
 git commit -m "Update docs."
 git push origin gh-pages
-git co $branch
+git checkout $branch
 
 for f in $ignore_files; do
   cp /tmp/_scikits_image_backup/`basename $f` $f
