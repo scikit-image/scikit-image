@@ -7,6 +7,7 @@ following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
 * The technical detail of the `development process`_ is given below.
+* :doc:`How to use GitHub <gitwash/index>` when developing scikits.image
 
 .. contents::
    :local:
