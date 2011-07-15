@@ -79,15 +79,13 @@ def init_repo(path):
 # Script starts
 #-----------------------------------------------------------------------------
 if __name__ == '__main__':
-    # The tag can be given as a positional argument
-    try:
-        tag = sys.argv[1]
-    except IndexError:
-        try:
-            #tag = sh2('git describe ')
-            tag = sh2('git describe --tags')
-        except CalledProcessError:
-            tag = "dev"   # Fallback
+    # find the version number from setup.py
+    setup_lines = open('../setup.py').readlines()
+    tag = 'vUndefined'
+    for l in setup_lines:
+        if l.startswith('VERSION'):
+            tag = l.split("'")[1]
+            break
     
     startdir = os.getcwd()
     if not os.path.exists(pages_dir):
@@ -100,15 +98,21 @@ if __name__ == '__main__':
         sh('git pull')
         cd(startdir)
 
-    dest = pjoin(pages_dir, tag)
-    # don't `make html` here, because gh-pages already depends on html in Makefile
-    # sh('make html')
+    dest = os.path.join(pages_dir, tag)
     # This is pretty unforgiving: we unconditionally nuke the destination
     # directory, and then copy the html tree in there
     shutil.rmtree(dest, ignore_errors=True)
     shutil.copytree(html_dir, dest)
+    # copy pdf file into tree
     #shutil.copy(pjoin(pdf_dir, 'scikits.image.pdf'), pjoin(dest, 'scikits.image.pdf'))
-
+    index_html = """
+    <html><body>
+    <a href="%s/index.html">%s documentation</a>
+    </body></html>    
+    """ % (tag, tag)
+    with open(os.path.join(pages_dir, "index.html"), 'w') as f:
+        f.write(index_html)
+    
     try:
         cd(pages_dir)
         status = sh2('git status | head -1')
@@ -117,7 +121,9 @@ if __name__ == '__main__':
             e = 'On %r, git branch is %r, MUST be "gh-pages"' % (pages_dir,
                                                                  branch)
             raise RuntimeError(e)
-
+        sh("touch .nojekyll")        
+        sh('git add .nojekyll')
+        sh('git add index.html')
         sh('git add %s' % tag)
         sh2('git commit -m"Updated doc release: %s"' % tag)
 
