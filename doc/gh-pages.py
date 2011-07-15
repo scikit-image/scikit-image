@@ -9,7 +9,7 @@ If no tag is given, the current output of 'git describe' is used.  If given,
 that is how the resulting directory will be named.
 
 In practice, you should use either actual clean tags from a current build or
-something like 'current' as a stable URL for the most current version of the """
+something like 'current' as a stable URL for the mest current version of the """
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -30,7 +30,7 @@ from subprocess import Popen, PIPE, CalledProcessError, check_call
 pages_dir = 'gh-pages'
 html_dir = 'build/html'
 pdf_dir = 'build/latex'
-pages_repo = 'git@github.com:holtzhau/scikits.image-doc.git'
+pages_repo = 'git@github.com:scikits-image/docs.git'
 
 #-----------------------------------------------------------------------------
 # Functions
@@ -121,7 +121,7 @@ if __name__ == '__main__':
         sh('git add %s' % tag)
         sh2('git commit -m"Updated doc release: %s"' % tag)
 
-        print 'Most recent 3 commits:'
+        print 'Most recent commit:'
         sys.stdout.flush()
         sh('git --no-pager log --oneline HEAD~1..')
     finally:
