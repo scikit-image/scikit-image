@@ -96,7 +96,8 @@ def ifrt2(a):
 
     Notes
     -----
-    The FRT has a unique inverse iff n is prime. [FRT]
+    The FRT has a unique inverse iff n is prime.
+    See [FRT] for an overview.
     The idea for this algorithm is due to Vlad Negnevitski.
 
     Examples
@@ -110,6 +111,7 @@ def ifrt2(a):
     >>> f = frt2(img)
 
     Apply the Inverse Finite Radon Transform to recover the input
+
     >>> fi = ifrt2(f)
 
     Check that it's identical to the original
