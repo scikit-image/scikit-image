@@ -92,14 +92,20 @@ class ApiDocWriter(object):
         '''
         # It's also possible to imagine caching the module parsing here
         self._package_name = package_name
-        self.root_module = __import__(package_name)
-        self.root_path = self.root_module.__path__[-1]
-        self.root_path = os.path.join(self.root_path,
-                os.path.sep.join(package_name.split('.')[1:]))
+        root_module = self._import(package_name)
+        self.root_path = root_module.__path__[-1]
         self.written_modules = None
 
     package_name = property(get_package_name, set_package_name, None,
                             'get/set package_name')
+
+    def _import(self, name):
+        ''' Import namespace package '''
+        mod = __import__(name)
+        components = name.split('.')
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+        return mod
 
     def _get_object_name(self, line):
         ''' Get second token in line
@@ -194,14 +200,15 @@ class ApiDocWriter(object):
         classes : list of str
             A list of (public) class names in the module.
         """
-        exec 'import ' + uri
-        exec 'mod = ' + uri
+        mod = __import__(uri, fromlist=[uri])
         # find all public objects in the module.
         obj_strs = [obj for obj in dir(mod) if not obj.startswith('_')]
         functions = []
         classes = []
         for obj_str in obj_strs:
             # find the actual object from its string representation
+            if obj_str not in mod.__dict__:
+                continue
             obj = mod.__dict__[obj_str]
             # figure out if obj is a function or class
             if hasattr(obj, 'func_name') or \
