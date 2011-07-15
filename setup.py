@@ -14,9 +14,9 @@ DESCRIPTION         = 'Image processing routines for SciPy'
 LONG_DESCRIPTION    = descr
 MAINTAINER          = 'Stefan van der Walt'
 MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
-URL                 = 'http://stefanv.github.com/scikits.image'
+URL                 = 'http://scikits-image.org'
 LICENSE             = 'Modified BSD'
-DOWNLOAD_URL        = 'http://github.com/stefanv/scikits.image'
+DOWNLOAD_URL        = 'http://github.com/scikits-image/scikits.image'
 VERSION             = '0.3dev'
 
 import os
