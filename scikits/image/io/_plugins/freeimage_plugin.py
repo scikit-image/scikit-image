@@ -496,25 +496,20 @@ def _array_to_bitmap(array):
       raise
 
 
-def imread(filename, as_grey=False):
+def imread(filename):
     """
-    img = imread(filename, as_grey=False)
+    img = imread(filename)
 
     Reads an image from file `filename`
 
     Parameters
     ----------
       filename : file name
-      as_grey : Whether to convert to grey scale image (default: no)
     Returns
     -------
       img : ndarray
     """
     img = read(filename)
-    if as_grey and len(img) == 3:
-        # these are the values that wikipedia says are typical
-        transform = numpy.array([ 0.30,  0.59,  0.11])
-        return numpy.dot(img, transform).astype('uint8')
     return img
 
 def imsave(filename, img):
