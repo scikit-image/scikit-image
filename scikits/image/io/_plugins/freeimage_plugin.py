@@ -514,7 +514,7 @@ def imread(filename, as_grey=False):
     if as_grey and len(img) == 3:
         # these are the values that wikipedia says are typical
         transform = numpy.array([ 0.30,  0.59,  0.11])
-        return numpy.dot(img, transform)
+        return numpy.dot(img, transform).astype('uint8')
     return img
 
 def imsave(filename, img):
