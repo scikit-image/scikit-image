@@ -108,8 +108,11 @@ def imread_qt(filename):
         img = img.reshape((qtimg.height(), pixelsPerLine))
         img = img[:, :qtimg.width()]
     # Strip qt's false alpha channel if needed
+    # and reorder color axes as required
     if bytesPerPixel == 4 and not qtimg.hasAlphaChannel():
-        img = img[:, :, 0:3]
+        img = img[:, :, 2::-1]
+    elif bytesPerPixel == 4:
+        img[:, :, 0:3] = img[:, :, 2::-1]
     return img
 
 if sip.SIP_VERSION >= 0x040c00:
