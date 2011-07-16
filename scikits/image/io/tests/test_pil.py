@@ -1,15 +1,24 @@
 import os.path
 import numpy as np
 from numpy.testing import *
+from numpy.testing.decorators import skipif
 
 from tempfile import NamedTemporaryFile
 
 from scikits.image import data_dir
 from scikits.image.io import imread, imsave, use_plugin
-from scikits.image.io._plugins.pil_plugin import _palette_is_grayscale
 
-use_plugin('pil')
+try:
+    from PIL import Image
+    from scikits.image.io._plugins.pil_plugin import _palette_is_grayscale
+    use_plugin('pil')
+except ImportError:
+    PIL_available = False
+else:
+    PIL_available = True
 
+
+@skipif(not PIL_available)
 def test_imread_flatten():
     # a color image is flattened
     img = imread(os.path.join(data_dir, 'color.png'), flatten=True)
@@ -19,12 +28,14 @@ def test_imread_flatten():
     # check that flattening does not occur for an image that is grey already.
     assert np.sctype2char(img.dtype) in np.typecodes['AllInteger']
 
+@skipif(not PIL_available)
 def test_imread_palette():
     img = imread(os.path.join(data_dir, 'palette_gray.png'))
     assert img.ndim == 2
     img = imread(os.path.join(data_dir, 'palette_color.png'))
     assert img.ndim == 3
 
+@skipif(not PIL_available)
 def test_palette_is_gray():
     from PIL import Image
     gray = Image.open(os.path.join(data_dir, 'palette_gray.png'))
@@ -42,6 +53,7 @@ class TestSave:
 
         assert_array_almost_equal((x * scaling).astype(np.int32), y)
 
+    @skipif(not PIL_available)
     def test_imsave_roundtrip(self):
         for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
             for dtype in (np.uint8, np.uint16, np.float32, np.float64):
