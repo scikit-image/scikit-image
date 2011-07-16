@@ -128,7 +128,7 @@ class MultiImage(object):
         if -numframes <= n < numframes:
             n = n % numframes
         else:
-            raise IndexError, "There are only %s frames in the image"%numframes
+            raise IndexError("There are only %s frames in the image"%numframes)
 
         if self.conserve_memory:
             if not self._cached == n:
@@ -289,7 +289,7 @@ class ImageCollection(object):
         if -num <= n < num:
             n = n % num
         else:
-            raise IndexError, "There are only %s images in the collection"%num
+            raise IndexError("There are only %s images in the collection"%num)
         return n
 
     def __iter__(self):
