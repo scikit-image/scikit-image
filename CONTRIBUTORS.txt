@@ -51,3 +51,6 @@
 - Martin Bergholdt
   Fix missing math.h functions in Windows 7 + MSVCC.
 
+- Neil Muller
+  Numerous fixes, including those for Python 3 compatibility.
+
