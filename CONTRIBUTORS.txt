@@ -54,3 +54,6 @@
 - Neil Muller
   Numerous fixes, including those for Python 3 compatibility.
 
+- The IPython team
+  From whom we borrowed the github+web tools / style.
+
