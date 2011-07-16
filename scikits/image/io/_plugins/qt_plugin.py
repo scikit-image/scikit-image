@@ -80,7 +80,7 @@ class ImageWindow(QMainWindow):
         self.mgr.remove_window(self)
 
 
-def imread_qt(filename, as_grey=False):
+def imread_qt(filename):
     """
     Read an image using QT's QImage.load
     """
@@ -107,17 +107,9 @@ def imread_qt(filename, as_grey=False):
     else:
         img = img.reshape((qtimg.height(), pixelsPerLine))
         img = img[:, :qtimg.width()]
-    # Strip alpha channel if needed
+    # Strip qt's false alpha channel if needed
     if bytesPerPixel == 4 and not qtimg.hasAlphaChannel():
         img = img[:, :, 0:3]
-    if as_grey and bytesPerPixel > 1:
-        # Stolen from fits_plugin
-        if img.shape[2] == 4:
-            # these are the values that wikipedia says are typical
-            transform = np.array([ 0.30,  0.59,  0.11, 0])
-        else:
-            transform = np.array([ 0.30,  0.59,  0.11])
-        return np.dot(img, transform).astype('uint8')
     return img
 
 if sip.SIP_VERSION >= 0x040c00:
