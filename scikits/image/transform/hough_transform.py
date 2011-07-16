@@ -65,13 +65,13 @@ def hough(img, theta=None):
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    theta :1D ndarray, dtype=double
+    theta : 1D ndarray of double
         Angles at which to compute the transform, in radians.
         Defaults to -pi/2 - pi/2
 
     Returns
     -------
-    H : 2-D ndarray, uint64
+    H : 2-D ndarray of uint64
         Hough transform accumulator.
     distances : ndarray
         Distance values.
@@ -101,6 +101,8 @@ def hough(img, theta=None):
     >>> plt.xlabel('Angle (degree)')
     >>> plt.ylabel('Distance %d (pixel)' % d[0])
     >>> plt.show()
+
+    .. plot:: hough_tf.py
 
     """
     return _hough(img, theta)
