@@ -10,6 +10,8 @@ try:
     from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
                              QLabel, QWidget)
     from PyQt4 import QtCore, QtGui
+    import sip
+    import warnings
 
 except ImportError:
     window_manager._release('qt')
@@ -26,6 +28,7 @@ except ImportError:
     """)
 
 app = None
+
 
 class ImageLabel(QLabel):
     def __init__(self, parent, arr):
@@ -77,7 +80,7 @@ class ImageWindow(QMainWindow):
         self.mgr.remove_window(self)
 
 
-def imread(filename, as_grey=False):
+def imread_qt(filename, as_grey=False):
     """
     Read an image using QT's QImage.load
     """
@@ -110,6 +113,14 @@ def imread(filename, as_grey=False):
         transform = numpy.array([ 0.30,  0.59,  0.11])
         return numpy.dot(img, transform)
     return img
+
+if sip.SIP_VERSION >= 0x040c00:
+    # sip.voidptr only acquired a buffer view in 4.12.0, so our imread
+    # doesn't work with earlier versions
+    imread = imread_qt
+else:
+    warnings.warn(RuntimeWarning(
+        "sip version too old. QT imread disabled"))
 
 
 def imshow(arr, fancy=False):
