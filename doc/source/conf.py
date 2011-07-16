@@ -226,22 +226,15 @@ plot_pre_code = """
 import numpy as np
 import matplotlib.pyplot as plt
 np.random.seed(0)
-"""
-plot_include_source = False
-plot_formats = [('png', 100)]
-
-import math
-phi = (math.sqrt(5) + 1)/2
 
 import matplotlib
 matplotlib.rcParams.update({
-    'font.size': 8,
-    'axes.titlesize': 8,
-    'axes.labelsize': 8,
+    'font.size': 14,
+    'axes.titlesize': 12,
+    'axes.labelsize': 10,
     'xtick.labelsize': 8,
     'ytick.labelsize': 8,
-    'legend.fontsize': 8,
-    'figure.figsize': (3*phi, 3),
+    'legend.fontsize': 10,
     'figure.subplot.bottom': 0.2,
     'figure.subplot.left': 0.2,
     'figure.subplot.right': 0.9,
@@ -249,3 +242,7 @@ matplotlib.rcParams.update({
     'figure.subplot.wspace': 0.4,
     'text.usetex': False,
 })
+
+"""
+plot_include_source = True
+plot_formats = [('png', 100)]
