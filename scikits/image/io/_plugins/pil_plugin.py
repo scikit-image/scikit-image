@@ -9,7 +9,7 @@ except ImportError:
                       "Please refer to http://pypi.python.org/pypi/PIL/ "
                       "for further instructions.")
 
-def imread(fname, as_grey=False, dtype=None):
+def imread(fname, dtype=None):
     """Load an image from file.
 
     """
@@ -19,10 +19,6 @@ def imread(fname, as_grey=False, dtype=None):
             im = im.convert('L')
         else:
             im = im.convert('RGB')
-
-    if as_grey and not \
-           im.mode in ('1', 'L', 'I', 'F', 'I;16', 'I;16L', 'I;16B', 'LA'):
-        im = im.convert('F')
 
     if 'A' in im.mode:
         im = im.convert('RGBA')

@@ -2,12 +2,13 @@ import numpy as np
 from nose.tools import *
 from numpy.testing import assert_array_equal, assert_array_almost_equal, \
                           assert_equal, run_module_suite
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
+import os
 
 from scikits.image.io import load_sift, load_surf
 
 def test_load_sift():
-    f = TemporaryFile()
+    f = NamedTemporaryFile(delete=False)
     fname = f.name
     f.close()
     f = open(fname, 'wb')
@@ -32,6 +33,7 @@ def test_load_sift():
     f = open(fname, 'rb')
     features = load_sift(f)
     f.close()
+    os.remove(fname)
 
     assert_equal(len(features), 2)
     assert_equal(len(features['data'][0]), 128)
@@ -39,7 +41,7 @@ def test_load_sift():
     assert_equal(features['column'][1], 99.75)
 
 def test_load_surf():
-    f = TemporaryFile()
+    f = NamedTemporaryFile(delete=False)
     fname = f.name
     f.close()
     f = open(fname, 'wb')
@@ -51,6 +53,7 @@ def test_load_surf():
     f = open(fname, 'rb')
     features = load_surf(f)
     f.close()
+    os.remove(fname)
 
     assert_equal(len(features), 2)
     assert_equal(len(features['data'][0]), 64)
