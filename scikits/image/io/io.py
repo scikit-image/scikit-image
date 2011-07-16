@@ -69,7 +69,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+    img = call_plugin('imread', fname, as_grey, plugin=plugin, **plugin_args)
 
     if as_grey and getattr(img, 'ndim', 0) >= 3:
         img = rgb2grey(img)
