@@ -77,6 +77,41 @@ class ImageWindow(QMainWindow):
         self.mgr.remove_window(self)
 
 
+def imread(filename, as_grey=False):
+    """
+    Read an image using QT's QImage.load
+    """
+    qtimg = QImage()
+    if not qtimg.load(filename):
+        # QImage.load() returns false on failure, so raise an exception
+        raise IOError('Unable to load file %s' % filename)
+    if qtimg.depth() == 1:
+        raise IOError('1-bit images currently not supported')
+    # TODO: Warn about other odd formats we don't currently handle properly,
+    # such as the odd 16-bit packed formats QT supports
+    arrayptr = qtimg.bits()
+    # QT may pad the image, so we need to use bytesPerLine, not width for
+    # the conversion to a numpy array
+    bytesPerPixel = qtimg.depth() // 8
+    pixelsPerLine = qtimg.bytesPerLine() // bytesPerPixel
+    img_size = pixelsPerLine * qtimg.height() * bytesPerPixel
+    arrayptr.setsize(img_size)
+    img = np.array(arrayptr)
+    # Reshape and trim down to correct dimensions
+    if bytesPerPixel > 1:
+        img = img.reshape((qtimg.height(), pixelsPerLine, bytesPerPixel))
+        img = img[:, :qtimg.width(), :]
+    else:
+        img = img.reshape((qtimg.height(), pixelsPerLine))
+        img = img[:, :qtimg.width()]
+    if as_grey and bytesPerPixel > 1:
+        # Stolen from fits_plugin
+        # these are the values that wikipedia says are typical
+        transform = numpy.array([ 0.30,  0.59,  0.11])
+        return numpy.dot(img, transform)
+    return img
+
+
 def imshow(arr, fancy=False):
     global app
     if not app:
