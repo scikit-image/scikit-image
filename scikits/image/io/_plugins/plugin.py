@@ -71,7 +71,7 @@ def call(kind, *args, **kwargs):
     if len(plugin_funcs) == 0:
         raise RuntimeError('''No suitable plugin registered for %s.
 
-You may load I/O plugins with the `scikits.image.io.load_plugin`
+You may load I/O plugins with the `scikits.image.io.use_plugin`
 command.  A list of all available plugins can be found using
 `scikits.image.io.plugins()`.''' % kind)
 

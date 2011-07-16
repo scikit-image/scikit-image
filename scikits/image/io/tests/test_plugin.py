@@ -2,8 +2,23 @@ from numpy.testing import *
 
 from scikits.image import io
 from scikits.image.io._plugins import plugin
+from numpy.testing.decorators import skipif
 
 from copy import deepcopy
+
+try:
+    io.use_plugin('pil')
+    PIL_available = True
+    priority_plugin = 'pil'
+except ImportError:
+    PIL_available = False
+
+try:
+    io.use_plugin('freeimage')
+    FI_available = True
+    priority_plugin = 'freeimage'
+except ImportError:
+    FI_available = False
 
 
 def setup_module(self):
@@ -34,11 +49,12 @@ class TestPlugin:
     def test_failed_use(self):
         plugin.use('asd')
 
+    @skipif(not PIL_available and not FI_available)
     def test_use_priority(self):
-        plugin.use('pil')
+        plugin.use(priority_plugin)
         plug, func = plugin.plugin_store['imread'][0]
         print(plugin.plugin_store)
-        assert_equal(plug, 'pil')
+        assert_equal(plug, priority_plugin)
 
         plugin.use('test')
         plug, func = plugin.plugin_store['imread'][0]

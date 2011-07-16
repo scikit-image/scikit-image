@@ -1,7 +1,7 @@
 # This mock-up is called by ../tests/test_plugin.py
 # to verify the behaviour of the plugin infrastructure
 
-def imread(fname, as_grey=False, dtype=None):
+def imread(fname, dtype=None):
     assert fname == 'test.png'
     assert dtype == 'i4'
 

@@ -32,17 +32,19 @@ def _load_library(libname, loader_path):
         libdir = os.path.dirname(loader_path)
     else:
         libdir = loader_path
-        for ln in libname_ext:
-            try:
-                libpath = os.path.join(libdir, ln)
-                if sys.platform == 'win32':
-                    return ctypes.windll[libpath]
-                else:
-                    return ctypes.cdll[libpath]
-            except OSError, e:
-                pass
+    if sys.platform == 'win32':
+        loader = ctypes.windll
+    else:
+        loader = ctypes.cdll
+    for ln in libname_ext:
+        try:
+            return loader[os.path.join(libdir, ln)]
+        except OSError:
+            pass
+    # TODO: Setup errno and other bits to something correctly
+    raise OSError('Unable to find library in any of the foloowing paths: %s' %
+            [os.path.join(libdir, ln) for ln in libname_ext])
 
-        raise e
 
 lib_dirs = [os.path.dirname(__file__),
             '/lib',
@@ -326,7 +328,7 @@ def _read_bitmap(filename, flags):
     if not bitmap:
         raise ValueError('Could not load file %s' % filename)
     return ctypes.c_void_p(bitmap)
-    
+
 def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   """Return an ndarray view on the data in a FreeImage bitmap. Only
   valid for as long as the bitmap is loaded (if single page) / locked
@@ -343,7 +345,7 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   else:
     strides = (itemsize, pitch)
   bits = _FI.FreeImage_GetBits(bitmap)
-  array = numpy.ndarray(shape, dtype=dtype, 
+  array = numpy.ndarray(shape, dtype=dtype,
                         buffer=(ctypes.c_char*byte_size).from_address(bits),
                         strides=strides)
   return array
@@ -494,25 +496,20 @@ def _array_to_bitmap(array):
       raise
 
 
-def imread(filename, as_grey=False):
+def imread(filename):
     """
-    img = imread(filename, as_grey=False)
+    img = imread(filename)
 
     Reads an image from file `filename`
 
     Parameters
     ----------
       filename : file name
-      as_grey : Whether to convert to grey scale image (default: no)
     Returns
     -------
       img : ndarray
     """
     img = read(filename)
-    if as_grey and len(img) == 3:
-        # these are the values that wikipedia says are typical
-        transform = numpy.array([ 0.30,  0.59,  0.11])
-        return numpy.dot(img, transform)
     return img
 
 def imsave(filename, img):
