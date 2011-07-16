@@ -5,7 +5,6 @@
 *.so
 *.bak
 *.c
-.gitignore
 *.new
 doc/source/api
 doc/build
