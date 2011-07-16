@@ -11,10 +11,14 @@ from _plugins import info as plugin_info
 # Add this plugin so that we can read images by default
 use_plugin('null')
 
-try:
-    use_plugin('pil')
-except ImportError:
-    pass
+# Try to load a plugin to provide imread
+for plugin in ['pil', 'freeimage', 'qt']:
+    try:
+        use_plugin(plugin)
+        # Plugin loaded, so break out
+        break
+    except ImportError:
+        pass
 
 from sift import *
 from collection import *
