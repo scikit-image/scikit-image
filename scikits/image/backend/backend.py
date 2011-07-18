@@ -40,21 +40,23 @@ class BackendManager(object):
         self.module_members = {}
         self.auto_scan = auto_scan
 
-    def register_function(self, backend_name, module_name, function_location):
-        backend_module_str = ".".join(function_location.split(".")[:-1])
-        function_name = function_location.split(".")[-1]
-        module_name = ".".join(module_name.split(".")[:-1])
-        print "registering", backend_name, module_name, function_name, backend_module_str      
-        if module_name not in self.backend_listing:
-            # initialize default backend
-            self.backend_listing[module_name] = {"default" : {}}
-            self.backend_modules[module_name] = {"default" : {}}
-        if backend_name not in self.backend_listing[module_name]:
-            self.backend_listing[module_name][backend_name] = {}
-            self.backend_modules[module_name][backend_name] = {}
-        self.backend_listing[module_name][backend_name][function_name] = None
-        self.backend_modules[module_name][backend_name][function_name] = backend_module_str
-        self.backend_imported[backend_module_str] = False
+    def register(self, backend=None, module=None, functions=[]):
+        backend_name = backend
+        module_elements = module.split(".")
+        backend_module_str = module      
+        module_name = ".".join(module_elements[:3])
+        for function_name in functions:
+            print "registering", backend_name, module_name, function_name, backend_module_str      
+            if module_name not in self.backend_listing:
+                # initialize default backend
+                self.backend_listing[module_name] = {"default" : {}}
+                self.backend_modules[module_name] = {"default" : {}}
+            if backend_name not in self.backend_listing[module_name]:
+                self.backend_listing[module_name][backend_name] = {}
+                self.backend_modules[module_name][backend_name] = {}
+            self.backend_listing[module_name][backend_name][function_name] = None
+            self.backend_modules[module_name][backend_name][function_name] = backend_module_str
+            self.backend_imported[backend_module_str] = False
         
         if backend_name not in scikits.image.backends:
             scikits.image.backends.append(backend_name)
@@ -185,7 +187,7 @@ def add_backends(function):
 
 
 manager = BackendManager()
-register_function = manager.register_function
+register = manager.register
 use_backend = manager.use_backend        
 backing = manager.backing
 manager.scan_backends()
