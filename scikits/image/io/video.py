@@ -37,6 +37,28 @@ class CvVideo(object):
             cv.Resize(img, img_mat)
         return img_mat
     
+    def seek_frame(self, frame_number):
+        """
+        Seek to specified frame in video.
+        
+        Parameters
+        ----------
+        frame_number : int
+            Frame position
+        """
+        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_FRAMES, frame_number)
+        
+    def seek_time(self, milliseconds):
+        """
+        Seek to specified time in video.
+        
+        Parameters
+        ----------
+        milliseconds : int
+            Time position
+        """
+        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_MSEC, milliseconds)
+    
         
 class GstVideo(object):
     """
@@ -111,15 +133,37 @@ class GstVideo(object):
         img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3), dtype='uint8', buffer=buff.data)
         return img_mat
 
-   
+    def seek_frame(self, frame_number):
+        """
+        Seek to specified frame in video.
+        
+        Parameters
+        ----------
+        frame_number : int
+            Frame position
+        """
+        self.pipeline.seek_simple(gst.FORMAT_DEFAULT, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, frame_number)
+        
+    def seek_time(self, milliseconds):
+        """
+        Seek to specified time in video.
+        
+        Parameters
+        ----------
+        milliseconds : int
+            Time position
+        """
+        self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, milliseconds/1000.0 * gst.SECOND)
+
 
 if __name__ == '__main__':
     cv.NamedWindow ('display', cv.CV_WINDOW_AUTOSIZE)
     cv.MoveWindow("display", 100, 100);
     #camera = GstVideo(source="http://146.232.169.185/video.mjpg")
-    camera = GstVideo(source="/home/tzhau/hacking/video/ing1.avi", sync=1)
+    #camera = GstVideo(source="/home/tzhau/hacking/video/ing1.avi", sync=1)
     #camera = CvVideo(source="/home/tzhau/hacking/video/ing1.avi")
-    camera.seek_frame(200)
+    time.sleep(1)
+    camera.seek_frame(300)
     i = 0
     while 1:
         i += 1
