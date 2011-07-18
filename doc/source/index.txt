@@ -11,18 +11,32 @@ This SciKit_ is an image processing toolbox for SciPy_.
 Sections
 ========
 
-`Overview <overview.html>`_
-   Introduction to scikits.image.
-`Installation Steps <install.html>`_
-   How to install scikits.image.
-`Contribute <contribute.html>`_
-   Take part in development.
-`API Reference <api/api.html>`_ (`changes <api_changes.html>`_)
-   Documentation for the functions included in scikits.image.
-`User Guide <user_guide.html>`_
-   Usage guidelines.
-`License Info <license.html>`_
-   Conditions on the use and redistribution of this package.
+.. list-table::
+   :class: contentstable
+
+   * - `Overview <overview.html>`_
+
+       Introduction to scikits.image.
+
+     - `API Reference <api/api.html>`_ (`changes <api_changes.html>`_)
+
+       Documentation for the functions included in scikits.image.
+
+   * - `Installation Steps <install.html>`_
+
+       How to install scikits.image.
+
+     - `User Guide <user_guide.html>`_
+
+       Usage guidelines.
+
+   * - `Contribute <contribute.html>`_
+
+       Take part in development.
+
+     - `License Info <license.html>`_
+
+       Conditions on the use and redistribution of this package.
 
 
 Indices and Tables
