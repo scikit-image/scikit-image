@@ -7,6 +7,13 @@ import gst, gobject
 gobject.threads_init()
 from gst.extend.discoverer import Discoverer
 
+"""
+@add_backends
+class Video(object):
+    def __init__(self):
+        raise NotImplementedError("Please select a video backend.")
+"""
+
 class CvVideo(object):
     """
     Opencv-based video player.
@@ -18,7 +25,7 @@ class CvVideo(object):
     size: tuple, optional
         Size of returned array.
     """
-    def __init__(self, source, size=None):
+    def __init__(self, source=None, size=None):
         self.source = source
         self.capture = cv.CreateFileCapture(self.source)
         self.size = size
@@ -26,6 +33,11 @@ class CvVideo(object):
     def get(self):
         """
         Retrieve a video frame as a numpy array.
+        
+        Returns
+        -------
+        output : array (image)
+            Retrieved image.
         """
         img = cv.QueryFrame(self.capture)
         if not self.size:
@@ -59,6 +71,30 @@ class CvVideo(object):
         """
         cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_MSEC, milliseconds)
     
+    def frame_count(self):
+        """
+        Returns frame count of video.
+
+        Returns
+        -------
+        output : int
+            Frame count.
+        """
+        return cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_COUNT)
+    
+    def duration(self):
+        """
+        Returns time length of video in milliseconds.
+
+        Returns
+        -------
+        output : int
+            Time length [ms].
+        """
+        return cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FPS) * \
+            cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_COUNT)
+    
+    
         
 class GstVideo(object):
     """
@@ -73,11 +109,11 @@ class GstVideo(object):
     sync: bool, optional
         Frames are extracted per frame or per time basis.
     """
-    def __init__(self, source, size=None, sync=False):
+    def __init__(self, source=None, size=None, sync=False):
         self.source = source
         self.size = size
-        self.time_format = gst.Format(gst.FORMAT_TIME)
-
+        self.video_length = 0
+        self.video_rate = 0
         # extract video size
         if not size: 
             gobject.idle_add(self._discover_one)
@@ -91,7 +127,7 @@ class GstVideo(object):
 
     def _discover_one(self):
         """
-        Callback to start media discovery process.
+        Callback to start media discovery process, used to retrieve video parameters.
         """
         discoverer = Discoverer(self.source)
         discoverer.connect('discovered', self._discovered)
@@ -103,7 +139,9 @@ class GstVideo(object):
         Callback to on media discovery result.
         """
         if is_media:
-            self.size = (d.videowidth, d.videoheight)            
+            self.size = (d.videowidth, d.videoheight)
+            self.video_length = d.videolength / gst.MSECOND            
+            self.video_rate = d.videorate.num
         self.mainloop.quit()
         return False
     
@@ -128,6 +166,11 @@ class GstVideo(object):
     def get(self):
         """
         Retrieve a video frame as a numpy array.
+        
+        Returns
+        -------
+        output : array (image)
+            Retrieved image.
         """
         buff = self.appsink.emit('pull-buffer')
         img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3), dtype='uint8', buffer=buff.data)
@@ -155,21 +198,41 @@ class GstVideo(object):
         """
         self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, milliseconds/1000.0 * gst.SECOND)
 
+    def frame_count(self):
+        """
+        Returns frame count of video.
+
+        Returns
+        -------
+        output : int
+            Frame count.
+        """
+        return self.video_length/1000*self.video_rate
+    
+    def duration(self):
+        """
+        Returns time length of video in milliseconds.
+
+        Returns
+        -------
+        output : int
+            Time length [ms].
+        """
+        return self.video_length
+
 
 if __name__ == '__main__':
     cv.NamedWindow ('display', cv.CV_WINDOW_AUTOSIZE)
     cv.MoveWindow("display", 100, 100);
-    #camera = GstVideo(source="http://146.232.169.185/video.mjpg")
-    #camera = GstVideo(source="/home/tzhau/hacking/video/ing1.avi", sync=1)
-    #camera = CvVideo(source="/home/tzhau/hacking/video/ing1.avi")
-    time.sleep(1)
-    camera.seek_frame(300)
+    camera = GstVideo(source="http://146.232.169.185/video.mjpg")
+    #$camera = GstVideo(source="/home/tzhau/hacking/video/ing1.avi", sync=1)
+#    camera = CvVideo(source="/home/tzhau/hacking/video/ing1.avi")
+    #camera = CvVideo(source="/home/tzhau/Desktop/lego.flv")
+    print camera.frame_count()
+    print camera.duration()
     i = 0
     while 1:
         i += 1
-        #print 'hey'
-        #time.sleep(0.5)
-        #print 'hallo'
         a = time.time()
         img = camera.get()
 
