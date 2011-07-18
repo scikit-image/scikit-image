@@ -15,8 +15,9 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, keep_type=False, n_iter_max=200):
 
     eps: float, optional
         relative difference of the value of the cost function that determines
-        the stop criterion. The algorithm stops when 
-                (E_(n-1) - E_n) < eps * E_0 
+        the stop criterion. The algorithm stops when:
+
+            (E_(n-1) - E_n) < eps * E_0
 
     keep_type: bool, optional (False)
         whether the output has the same dtype as the input array. 
@@ -107,8 +108,9 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
 
     eps: float, optional
         relative difference of the value of the cost function that determines
-        the stop criterion. The algorithm stops when 
-                (E_(n-1) - E_n) < eps * E_0 
+        the stop criterion. The algorithm stops when:
+
+            (E_(n-1) - E_n) < eps * E_0
 
     keep_type: bool, optional (False)
         whether the output has the same dtype as the input array. 
@@ -205,8 +207,9 @@ def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
 
     eps: float, optional
         relative difference of the value of the cost function that 
-        determines the stop criterion. The algorithm stops when 
-                (E_(n-1) - E_n) < eps * E_0 
+        determines the stop criterion. The algorithm stops when:
+
+            (E_(n-1) - E_n) < eps * E_0
 
     keep_type: bool, optional (False)
         whether the output has the same dtype as the input array. 

@@ -426,6 +426,14 @@ table.contentstable p.biglink {
     line-height: 150%;
 }
 
+table.contentstable {
+    border-style: none;
+}
+
+table.contentstable td, table.contentstable th {
+    border-style: none;
+}
+
 a.biglink {
     font-size: 1.3em;
 }
