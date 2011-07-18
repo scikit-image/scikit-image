@@ -40,9 +40,10 @@ class BackendManager(object):
         self.module_members = {}
         self.auto_scan = auto_scan
 
-    def register_backend(self, backend_name, module_name, function_location):
+    def register_function(self, backend_name, module_name, function_location):
         backend_module_str = ".".join(function_location.split(".")[:-1])
         function_name = function_location.split(".")[-1]
+        module_name = ".".join(module_name.split(".")[:-1])
         print "registering", backend_name, module_name, function_name, backend_module_str      
         if module_name not in self.backend_listing:
             # initialize default backend
@@ -184,7 +185,7 @@ def add_backends(function):
 
 
 manager = BackendManager()
-register_backend = manager.register_backend
+register_function = manager.register_function
 use_backend = manager.use_backend        
 backing = manager.backing
 manager.scan_backends()
