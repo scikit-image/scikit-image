@@ -1,6 +1,6 @@
-*************
-scikits.image
-*************
+****************************
+scikits.image |version| docs
+****************************
 
 This SciKit_ is an image processing toolbox for SciPy_.
 
