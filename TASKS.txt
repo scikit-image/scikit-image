@@ -1,3 +1,5 @@
+ ..  role:: strike
+
 How to contribute to ``scikits.image``
 ======================================
 
@@ -19,8 +21,8 @@ Tasks
 
 Infrastructure
 --------------
-- Implement a new backend system so that we may start including
-  PyOpenCL-based algorithms
+- :strike:`Implement a new backend system so that we may start including
+  PyOpenCL-based algorithms`
 
 Adapt existing code for use
 ```````````````````````````
@@ -28,7 +30,7 @@ These snippets and packages have already been written.  Some need to be
 modified to work as part of the scikit, others may be lacking in documentation
 or tests.
 
-   * Connected components
+   * :strike:`Connected components`
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
    * Marching squares
    * Nadav's bilateral filtering (first compare against CellProfile's code)
@@ -41,8 +43,7 @@ Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
   IEEE Trans. Pattern Analysis and Machine Intelligence, 8:679-714, 1986)
 * Prewitt filter - convolution with ``[[1,1,1], [0,0,0], [-1,-1,-1]]`` to
   detect edges
-* Sobel filter - convolution with ``[[1,2,1], [0,0,0], [-1,-2,-1]]`` to
-  detect edges
+* :strike:`Sobel filter - convolution with` ``[[1,2,1], [0,0,0], [-1,-2,-1]]`` :strike:`to detect edges`
 * Roberts filter - convolution with diagonal and anti-diagonal
   kernels to detect edges
 * Bilateral filter
@@ -89,6 +90,7 @@ who contributed.
 
 Rework linear filters
 `````````````````````
+* Fast, SSE2 convolution (high priority)
 * Should take kernel or function for parameter (currently only takes function)
 * Kernel shape should be specifiable (currently defaults to image shape)
 * Due to the above, the tests run unnecessarily slowly
@@ -103,13 +105,13 @@ io
 docs
 ````
 * Write topics for the `user guide
-  <http://stefanv.github.com/scikits.image/user_guide.html>`_:
+  <http://scikits-image.org/docs/0.3dev/user_guide.html>`_:
 
   - Introduction to I/O and image processing with examples
 
-* Build docs outside source directory
+* :strike:`Build docs outside source directory`
 * Integrate BiBTeX plugin into Sphinx build
-* Create a kick-ass website
+* :strike:`Create a kick-ass website`
 
 Implement Algorithms
 ````````````````````

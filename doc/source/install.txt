@@ -7,7 +7,7 @@ Obtain the source from the git-repository at
 
 by running
 
-:: 
+::
 
   git clone http://github.com/scikits-image/scikits.image.git
 
