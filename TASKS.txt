@@ -105,7 +105,7 @@ io
 docs
 ````
 * Write topics for the `user guide
-  <http://scikits-image.org/docs/0.3dev/user_guide.html>`_:
+  <http://scikits-image.org/docs/dev/user_guide.html>`_:
 
   - Introduction to I/O and image processing with examples
 

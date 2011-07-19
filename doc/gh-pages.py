@@ -86,7 +86,10 @@ if __name__ == '__main__':
         if l.startswith('VERSION'):
             tag = l.split("'")[1]
             break
-    
+
+    if "dev" in tag:
+        tag = "dev"
+
     startdir = os.getcwd()
     if not os.path.exists(pages_dir):
         # init the repo
