@@ -24,7 +24,7 @@
   Logic around API docs generation
 
 - Tony Yu
-  Reading of paletted images, build and bug fixes. 
+  Reading of paletted images; build, bug and doc fixes. 
 
 - Zachary Pincus
   Tracing of low cost paths, FreeImage I/O plugin
