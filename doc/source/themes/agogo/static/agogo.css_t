@@ -418,10 +418,6 @@ ul.keywordmatches li.goodmatch a {
 
 /* -- index page ------------------------------------------------------------ */
 
-table.contentstable {
-    width: 90%;
-}
-
 table.contentstable p.biglink {
     line-height: 150%;
 }
