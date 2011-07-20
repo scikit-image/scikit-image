@@ -19,6 +19,8 @@ Tasks
 
 :doc:`gsoc2011`
 
+:doc:`coverage_table`
+
 Infrastructure
 --------------
 - :strike:`Implement a new backend system so that we may start including

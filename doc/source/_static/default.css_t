@@ -273,3 +273,51 @@ th {
   font-size: 80%;
 }
 
+/* Coverage States */
+span.missing{
+	color: #000;
+	background-color: #ff5840;
+	border-color: #A77272;
+	font-weight: bold;
+}
+span.partial{
+	color: #806600;
+	background-color: #ffc343;
+	font-weight: bold;
+}
+span.done{
+	color: #106600;
+	background-color: #60f030;
+	border-color: #4F8530;
+	font-weight: bold;
+}
+span.na{
+	color: #A8A8A8;
+	border-color: #4F8530;
+}
+span.missing-bar{
+	color: #000;
+	background-color: #ff5840;
+	border-color: #A77272;
+	font-weight: normal;
+	font-style: normal;
+}
+span.partial-bar{
+	color: #806600;
+	background-color: #ffc343;
+	font-weight: normal;
+	font-style: normal;
+}
+span.done-bar{
+	color: #106600;
+	background-color: #60f030;
+	border-color: #4F8530;
+	font-weight: normal;
+	font-style: normal;
+}
+span.na-bar{
+	color: #A8A8A8;
+	border-color: #4F8530;
+	font-weight: normal;
+	font-style: normal;
+}
