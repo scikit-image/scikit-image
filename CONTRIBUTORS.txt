@@ -57,3 +57,5 @@
 - The IPython team
   From whom we borrowed the github+web tools / style.
 
+- Kyle Mandli
+  CSV to ReST code for MATLAB comparison table.
