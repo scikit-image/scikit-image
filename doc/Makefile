@@ -11,7 +11,7 @@ PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d build/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) source
 DEST = build
-.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages
+.PHONY: all help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest gitwash gh-pages coveragetable
 
 all: html
 
@@ -35,11 +35,14 @@ clean:
 	-rm -rf source/api
 
 api:
-	mkdir -p source/api
+	@mkdir -p source/api
 	python tools/build_modref_templates.py
-	@echo "Build API docs finished."
+	@echo "Build API docs...done."
 
-html: api
+coveragetable:
+	@cd source && python coverage_generator.py
+
+html: api coveragetable
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
 	cp source/plots $(DEST)/html -r
 	@echo
