@@ -487,3 +487,190 @@ div.viewcode-block:target {
 }
 
 span.strike { text-decoration: line-through; }
+
+/* -- body styles ----------------------------------------------------------- */
+
+a {
+    color: {{ theme_linkcolor }};
+    text-decoration: none;
+}
+
+a:visited {
+    color: {{ theme_visitedlinkcolor }};
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+div.body p, div.body dd, div.body li {
+    text-align: justify;
+    line-height: 130%;
+}
+
+div.body h1,
+div.body h2,
+div.body h3,
+div.body h4,
+div.body h5,
+div.body h6 {
+    font-family: {{ theme_headfont }};
+    background-color: {{ theme_headbgcolor }};
+    font-weight: normal;
+    color: {{ theme_headtextcolor }};
+    border-bottom: 1px solid #ccc;
+    margin: 20px -20px 10px -20px;
+    padding: 3px 0 3px 10px;
+}
+
+div.body h1 { margin-top: 0; font-size: 200%; }
+div.body h2 { font-size: 160%; }
+div.body h3 { font-size: 140%; }
+div.body h4 { font-size: 120%; }
+div.body h5 { font-size: 110%; }
+div.body h6 { font-size: 100%; }
+
+a.headerlink {
+    color: {{ theme_headlinkcolor }};
+    font-size: 0.8em;
+    padding: 0 4px 0 4px;
+    text-decoration: none;
+}
+
+a.headerlink:hover {
+    background-color: {{ theme_headlinkcolor }};
+    color: white;
+}
+
+div.body p, div.body dd, div.body li {
+    text-align: justify;
+    line-height: 130%;
+}
+
+div.admonition p.admonition-title + p {
+    display: inline;
+}
+
+div.note {
+    background-color: #eee;
+    border: 1px solid #ccc;
+}
+
+div.seealso {
+    background-color: #ffc;
+    border: 1px solid #ff6;
+}
+
+div.topic {
+    background-color: #eee;
+}
+
+div.warning {
+    background-color: #ffe4e4;
+    border: 1px solid #f66;
+}
+
+p.admonition-title {
+    display: inline;
+}
+
+p.admonition-title:after {
+    content: ":";
+}
+
+pre {
+    padding: 5px;
+    background-color: {{ theme_codebgcolor }};
+    color: {{ theme_codetextcolor }};
+    line-height: 120%;
+    border: 1px solid #ac9;
+    border-left: none;
+    border-right: none;
+}
+
+tt {
+    background-color: #ecf0f3;
+    padding: 0 1px 0 1px;
+    font-size: 0.95em;
+}
+
+th {
+    background-color: #ede;
+}
+
+#api-reference ul:first-child {
+  float: left;
+  width: 35em;
+  margin-top: 0;
+  padding-top: 0;
+  list-style: none;
+  overflow: auto;
+}
+
+#api-reference li {
+  float: left;
+  position: relative;
+  margin-right: 1em;
+  width: 17em;
+  padding: 0;
+}
+
+.field-list {
+  font-size: 80%;
+}
+
+/* ----------------- Coverage States ----------------- */
+span.missing{
+	color: #000;
+	background-color: #ff5840;
+	border-color: #A77272;
+	font-weight: bold;
+}
+span.partial{
+	color: #806600;
+	background-color: #ffc343;
+	font-weight: bold;
+}
+span.done{
+	color: #106600;
+	background-color: #60f030;
+	border-color: #4F8530;
+	font-weight: bold;
+}
+span.na{
+	color: #A8A8A8;
+	border-color: #4F8530;
+}
+
+table.coverage {
+        border: solid 1px;
+}
+
+td.missing-bar{
+	color: #ff5840;
+	background-color: #ff5840;
+	border-color: #A77272;
+	font-weight: normal;
+	font-style: normal;
+}
+td.partial-bar{
+	color: #ffc343;
+	background-color: #ffc343;
+	font-weight: normal;
+	font-style: normal;
+}
+td.done-bar{
+	color: #60f030;
+	background-color: #60f030;
+	border-color: #4F8530;
+	font-weight: normal;
+	font-style: normal;
+}
+td.na-bar{
+	color: #FFF;
+        background-color: #FFF;
+	border-color: #4F8530;
+	font-weight: normal;
+	font-style: normal;
+}

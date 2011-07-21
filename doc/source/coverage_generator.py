@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import division
+
 import sys
 import os
 import csv
@@ -13,12 +15,13 @@ except ImportError:
 # Missing item value
 MISSING_STRING=":missing:`Not Implemented`"
 
-def calculate_coverage(reader,blocks=100):
-    r"""Calculate portions of code that are in one of the coverage categories
-    
-    Returns a tuple representing the weighted items as integers.  The order is
-        
-        (done,partial,missing,not applicable)
+def calculate_coverage(reader):
+    """Calculate portions of code that are in one of the coverage categories
+
+    Returns a tuple representing the weighted items.  The order is
+
+        (done, partial, missing, not applicable)
+
     """
     # Coverage counters
     total_items = 0
@@ -41,14 +44,13 @@ def calculate_coverage(reader,blocks=100):
                 partial_items += 1
             elif ":na:" in row[2] or ":na:" in row[3]:
                 na_items += 1
-    
-    weight = float(blocks) / total_items
-    
-    return (int(weight*done_items),
-            int(weight*partial_items),
-            int(weight*(total_items - (partial_items + done_items + na_items))),
-            int(weight*na_items))
-                
+
+    counts = (done_items,
+              partial_items,
+              total_items - (partial_items + done_items + na_items),
+              na_items)
+
+    return list(i / total_items for i in counts)
 
 def read_table_titles(reader):
     r"""Create a dictionary with keys as section names and values as a list of
@@ -196,45 +198,55 @@ def generate_page(csv_path,stream,page_title="Coverage Tables"):
     # reader = csv.reader(csv_file, dialect)
     
     reader = csv.reader(csv_file)
-    item_counts = calculate_coverage(reader,blocks=90)
+    item_counts = calculate_coverage(reader)
     csv_file.seek(0)
-    
+
     # Write out header
     stream.write("%s\n" % page_title)
     stream.write("="*len(page_title) + "\n\n")
-    stream.write(".. role:: missing\n")
-    stream.write(".. role:: partial\n")
-    stream.write(".. role:: done\n")
-    stream.write(".. role:: na\n\n")
-    stream.write(".. role:: missing-bar\n")
-    stream.write(".. role:: partial-bar\n")
-    stream.write(".. role:: done-bar\n")
-    stream.write(".. role:: na-bar\n\n")
-    stream.write("Color Key\n")
-    stream.write("---------\n")
-    stream.write(":done:`Complete` ")
-    stream.write(":partial:`Partial` ")
-    stream.write(":missing:`Missing` ")
-    stream.write(":na:`Not applicable`\n\n")
-    stream.write("Coverage Bar\n")
-    stream.write("------------\n\n")
-    if item_counts[0] > 0:
-        stream.write(":done-bar:`%s` " % ("="*item_counts[0]))
-    if item_counts[1] > 0:
-        stream.write(":partial-bar:`%s` " % ("="*item_counts[1]))
-    if item_counts[2] > 0:
-        stream.write(":missing-bar:`%s` " % ("="*item_counts[2]))
-    if item_counts[3] > 0:
-        stream.write(":na-bar:`%s`" % ("="*item_counts[3]))
-    stream.write("\n\n")
-    
+    stream.write("""
+
+.. role:: missing
+.. role:: partial
+.. role:: done
+.. role:: na
+.. role:: missing-bar
+.. role:: partial-bar
+.. role:: done-bar
+.. role:: na-bar
+
+.. warning::
+
+   This table has not yet been updated.  We've just finished
+   setting up its structure.
+
+Color Key
+---------
+:done:`Complete` :partial:`Partial` :missing:`Missing` :na:`Not Applicable`
+
+Coverage Bar
+------------
+
+.. raw:: html
+
+   <table width="100%" class="coverage"><tr>
+
+    """)
+
+    for item, style in enumerate(('done-bar', 'partial-bar',
+                                  'missing-bar', 'na-bar')):
+        stream.write('<td width="%s" class="%s">XX</td>' % \
+                     (item_counts[item] * 100, style))
+
+    stream.write("</tr></table>\n\n")
+
     sections,table_names = read_table_titles(reader)
     for section_name in sections:
         stream.write(section_name + "\n")
         stream.write("-"*len(section_name) + "\n\n")
         for table_name in table_names[section_name]:
             generate_table(reader,stream,table_name)
-    
+
     csv_file.close()
 
 if __name__ == "__main__":
