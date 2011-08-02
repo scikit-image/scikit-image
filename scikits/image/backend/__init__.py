@@ -40,13 +40,22 @@ class BackendManager(object):
         self.module_members = {}
         self.auto_scan = auto_scan
 
-    def register(self, backend=None, module=None, functions=[]):
+    def register(self, backend=None, module=None, source=None, functions=[]):
         backend_name = backend
         module_elements = module.split(".")
-        backend_module_str = module      
-        module_name = ".".join(module_elements[:3])
+        backend_module_str = ".".join([module, "backend"])
+        if source:
+            backend_module_str += "." + source
+        #module_name = ".".join(module_elements[:3])
+        module_name = module
         for function_name in functions:
             print "registering", backend_name, module_name, function_name, backend_module_str      
+            function_name = function_name.split(".")
+            ending_module = function_name[:-1]
+            if ending_module:
+                backend_module_string = ".".join([backend_module_str] + ending_module)
+            else:
+                backend_module_string = backend_module_str
             if module_name not in self.backend_listing:
                 # initialize default backend
                 self.backend_listing[module_name] = {"default" : {}}
@@ -54,9 +63,9 @@ class BackendManager(object):
             if backend_name not in self.backend_listing[module_name]:
                 self.backend_listing[module_name][backend_name] = {}
                 self.backend_modules[module_name][backend_name] = {}
-            self.backend_listing[module_name][backend_name][function_name] = None
-            self.backend_modules[module_name][backend_name][function_name] = backend_module_str
-            self.backend_imported[backend_module_str] = False
+            self.backend_listing[module_name][backend_name][function_name[-1]] = None
+            self.backend_modules[module_name][backend_name][function_name[-1]] = backend_module_string
+            self.backend_imported[backend_module_string] = False
         
         if backend_name not in scikits.image.backends:
             scikits.image.backends.append(backend_name)
