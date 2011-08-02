@@ -4,8 +4,9 @@ from scikits.image import log
 import warnings
 import ast
 from nose.plugins.skip import SkipTest
+import unittest
 
-class BackendTester():
+class BackendTester(object):
     """
     Base class for nose backend testing.
     """
@@ -17,7 +18,7 @@ class BackendTester():
             raise SkipTest
     
     def test_all_backends(self):
-        for backend in scikits.image.backends.list:
+        for backend in scikits.image.backends:
             if backend == "default": 
                 continue
             for function_name in dir(self):
@@ -40,7 +41,7 @@ class BackendManager(object):
         self.module_members = {}
         self.auto_scan = auto_scan
 
-    def register(self, backend=None, module=None, source=None, functions=[]):
+    def register(self, backend=None, module=None, source=None, functions=[], unlisted=False):
         backend_name = backend
         module_elements = module.split(".")
         backend_module_str = ".".join([module, "backend"])
@@ -66,9 +67,10 @@ class BackendManager(object):
             self.backend_listing[module_name][backend_name][function_name[-1]] = None
             self.backend_modules[module_name][backend_name][function_name[-1]] = backend_module_string
             self.backend_imported[backend_module_string] = False
-        
-        if backend_name not in scikits.image.backends:
-            scikits.image.backends.append(backend_name)
+    
+        if not unlisted:
+            if backend_name not in scikits.image.backends:
+                scikits.image.backends.append(backend_name)
             
     def scan_backends(self):
         """
@@ -110,7 +112,7 @@ class BackendManager(object):
                         getattr(module, f_name)
         return True
                         
-    def use_backend(self, backend):
+    def use_backend(self, backend=None):
         """
         Selects a new backend and update modules as needed.
         """
@@ -121,7 +123,10 @@ class BackendManager(object):
             else:
                 current_backend = "default"                
         else:
-            current_backend = backend
+            if backend == None:
+                current_backend = "default"
+            else:
+                current_backend = backend
             fallback_backends = []
         self.current_backend = current_backend
         self.fallback_backends = fallback_backends
@@ -134,6 +139,7 @@ class BackendManager(object):
         backends = []
         if module_name in self.backend_listing:
             for backend in self.backend_listing[module_name]:
+                print "X", backend, self.backend_listing[module_name][backend][function.__name__]
                 if function.__name__ in self.backend_listing[module_name][backend]:
                     backends.append(backend)
         return backends
@@ -192,8 +198,8 @@ def add_backends(function):
     
     wrapper.__doc__ = function.__doc__
     wrapper.__module__ = function.__module__        
+    wrapper.__name__ = function_name
     return wrapper
-
 
 manager = BackendManager()
 register = manager.register
@@ -201,5 +207,26 @@ use_backend = manager.use_backend
 backing = manager.backing
 manager.scan_backends()
 
-__all__ = ["add_backends", "use_backend", "backing", "BackendTester", "register"]
+@add_backends
+def test1():
+    """
+    Test function test1 documentation
+    """
+    return "default test1"
+
+@add_backends
+def test2():
+    """
+    Test function test2 documentation
+    """    
+    return "default test2"
+
+@add_backends
+def test3():
+    """
+    Test function test3 documentation
+    """    
+    return "default test3"
+
+__all__ = ["add_backends", "use_backend", "backing", "BackendTester", "register", "test"]
 
