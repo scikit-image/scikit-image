@@ -11,13 +11,12 @@ kernel = np.array([
     [50, 100, 140, 100, 50, 1], 
     [20, 50, 80, 50, 20, 1]], dtype=np.float32)
     
-kernel = random.randn(2, 2).astype(np.float32)
 
 size = (4, 4)
 #a = np.ones(size, dtype=np.float32)
 #a = np.ones(size, dtype=np.float32)
 #a = np.arange(2, size[0]*size[1]+2).reshape(*size).astype(np.float32)
-a = random.randn(3, 416).astype(np.float32)
+a = random.randn(1000, 1000).astype(np.float32)
 
 b = np.zeros_like(a)
 e = np.zeros_like(a)
@@ -27,22 +26,16 @@ anchor = (0, 0)
 t = time.time()
 ext.pyconvolve(a, b, kernel, anchor=anchor)
 print "sc", (time.time() - t)*1E3
-print a
-
 
 t = time.time()
 cv.Filter2D(a, e, kernel, anchor=anchor)
 print "cv", (time.time() - t)*1E3
-
-
 
 from scipy.ndimage import convolve
 t = time.time()
 c = convolve(a, kernel)
 print "nd", (time.time() - t)*1E3
 k = 1
-print b
-#print e
 #print b[0, :]#[5:10,5:10]
 #print e[0, :]#[5:10,5:10]
 #print b[-1, :]#[5:10,5:10]

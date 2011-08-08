@@ -93,9 +93,10 @@ void convolve(float* src, float* dst, float* kernel, int width, int height,
                 }
                 if (copy_width < 0) {
                     copy_width = 0;
-                    // offset more than buffer size
+                    // offset more to the left than the buffer size
                     delta = w_aligned;
                 }
+                // first row value
                 value = *(current_row);
                 for (iter = buffer[k]; iter < buffer[k] + delta ; iter++) {
                     *iter = value;
@@ -109,6 +110,7 @@ void convolve(float* src, float* dst, float* kernel, int width, int height,
                 // handle x > width border                
                 if (copy_width < 0)
                     copy_width = 0;
+                // last row value
                 value = *(current_row + width - 1);
                 for (iter = buffer[k] + copy_width; iter < buffer[k] + w_aligned; iter++) { 
                     *iter = value;
@@ -116,14 +118,6 @@ void convolve(float* src, float* dst, float* kernel, int width, int height,
             }
             if (copy_width > 0) {
                 memcpy(copy_dest, copy_source, copy_width*sizeof(float));
-                if (copy_dest < buffer[k])
-                    printf("XXXX 3\n");                
-                if(copy_dest + copy_width > buffer[k] + w_aligned)
-                    printf("XXXX 4\n");                
-                if(copy_source < src)
-                    printf("XXXX 5\n");                
-                if(copy_source >= src + length) 
-                    printf("XXXX 6 %d %d %d %d %d\n", width, delta, length, current_row-src,current_row + width-1-src);
             }
         }
         dst_row = dst + y * width;
@@ -146,3 +140,12 @@ void convolve(float* src, float* dst, float* kernel, int width, int height,
 //                    printf("%.2f ", buffer[k][j]);
 //                printf("\n");
 //            }
+
+//     if (copy_dest < buffer[k])
+//                    printf("XXXX 3\n");                
+//                if(copy_dest + copy_width > buffer[k] + w_aligned)
+//                    printf("XXXX 4\n");                
+//                if(copy_source < src)
+//                    printf("XXXX 5\n");                
+//                if(copy_source >= src + length) 
+//                    printf("XXXX 6 %d %d %d %d %d\n", width, delta, length, current_row-src,current_row + width-1-src);
