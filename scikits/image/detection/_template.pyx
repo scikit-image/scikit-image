@@ -60,6 +60,8 @@ cdef void integral_image2(float *image, double *ii2, int width, int height):
 def match_template(np.ndarray [float, ndim=2, mode="c"] image, np.ndarray[float, ndim=2, mode="c"] template):
     # convolve the image with template by frequency domain multiplication
     cdef np.ndarray result = np.ascontiguousarray(fftconvolve(image, template, mode="valid"))
+#    out = np.empty((image.shape[0] - template.shape[0] + 1,image.shape[1] - template.shape[1] + 1), dtype=image.dtype)
+#    cv.MatchTemplate(image, template, result, cv.CV_TM_CCORR)
     # calculate squared integral images used for normalization
     cdef np.ndarray integral_sqr = np.empty((image.shape[0], image.shape[1]))
     cdef np.ndarray integral_sqr2 = np.empty((image.shape[0], image.shape[1]))
@@ -72,9 +74,9 @@ def match_template(np.ndarray [float, ndim=2, mode="c"] image, np.ndarray[float,
     cdef int sqstep = integral_sqr.strides[0] / sizeof(double)
     # define window of template size in squared integral image
     cdef double* q0 = <double*> integral_sqr.data
-    cdef double* q1 = q0 + template.shape[0] 
-    cdef double* q2 = <double*>integral_sqr.data + template.shape[1] * sqstep
-    cdef double* q3 = q2 + template.shape[0]
+    cdef double* q1 = q0 + template.shape[1] 
+    cdef double* q2 = <double*>integral_sqr.data + template.shape[0] * sqstep
+    cdef double* q3 = q2 + template.shape[1]
     cdef int i, j, index
     cdef double num, window_sum2, normed
     # move window through convolution results, normalizing in the process
