@@ -1,7 +1,8 @@
-__all__ = ['hough']
+__all__ = ['hough', 'probabilistic_hough']
 
 from itertools import izip
 import numpy as np
+from _hough_transform import _probabilistic_hough  
 
 def _hough(img, theta=None):
     if img.ndim != 2:
@@ -53,9 +54,37 @@ _py_hough = _hough
 
 # try to import and use the faster Cython version if it exists
 try:
-    from ._hough_transform import _hough
+    from ._hough_transform import _hough  
 except ImportError:
     pass
+
+
+def probabilistic_hough(img, value_threshold=50, line_length=50, line_gap=10, theta=None):
+    """Performs a progressive probabilistic line Hough transform and returns the detected lines.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    value_threshold: int
+        Threshold
+    theta :1D ndarray, dtype=double
+        Angles at which to compute the transform, in radians.
+        Defaults to -pi/2 .. pi/2
+
+    Returns
+    -------
+    lines : list
+      List of lines identified, lines in format ((x0, y0), (x1, y0)), indicating 
+      line start and end.
+
+    References
+    ----------
+    .. [1]  C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic Hough 
+            transform for line detection", in  IEEE Computer Society Conference on 
+            Computer Vision and Pattern Recognition, 1999. 
+    """    
+    return _probabilistic_hough(img, value_threshold, line_length, line_gap, theta)
 
 
 def hough(img, theta=None):
@@ -67,7 +96,7 @@ def hough(img, theta=None):
         Input image with nonzero values representing edges.
     theta : 1D ndarray of double
         Angles at which to compute the transform, in radians.
-        Defaults to -pi/2 - pi/2
+        Defaults to -pi/2 .. pi/2
 
     Returns
     -------
@@ -106,3 +135,5 @@ def hough(img, theta=None):
 
     """
     return _hough(img, theta)
+
+
