@@ -7,6 +7,7 @@ np.import_array()
 
 
 cdef extern from "math.h":
+    int abs(int)
     double fabs(double)
     double sqrt(double)
     double ceil(double)
@@ -35,14 +36,14 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
 
-    # compute the bins and allocate the output array
-    cdef np.ndarray[ndim=2, dtype=np.uint64_t] out
+    # compute the bins and allocate the accumulator array
+    cdef np.ndarray[ndim=2, dtype=np.uint64_t] accum
     cdef np.ndarray[ndim=1, dtype=np.double_t] bins
     cdef int max_distance, offset 
 
     max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] + 
                                        img.shape[1] * img.shape[1])))
-    out = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
+    accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
     bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
     offset = max_distance / 2
     
@@ -52,16 +53,16 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
 
 
     # finally, run the transform
-    cdef int nidxs, nthetas, i, j, x, y, out_idx
+    cdef int nidxs, nthetas, i, j, x, y, accum_idx
     nidxs = y_idxs.shape[0] # x and y are the same shape
     nthetas = theta.shape[0]
     for i in range(nidxs):
         x = x_idxs[i]
         y = y_idxs[i]   
         for j in range(nthetas):
-            out_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
-            out[out_idx, j] += 1
-    return out, theta, bins
+            accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
+            accum[accum_idx, j] += 1
+    return accum, theta, bins
 
 
 @cython.boundscheck(False)
@@ -79,38 +80,45 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, i
     stheta = np.sin(theta)
     cdef int height = img.shape[0]
     cdef int width = img.shape[1]
-    # compute the bins and allocate the output array
-    cdef np.ndarray[ndim=2, dtype=np.uint64_t] out
+    # compute the bins and allocate the accumulator array
+    cdef np.ndarray[ndim=2, dtype=np.int64_t] accum
     cdef np.ndarray[ndim=2, dtype=np.uint8_t] mask = np.zeros((height, width), dtype=np.uint8)
-    cdef np.ndarray[ndim=2, dtype=np.uint32_t] line_end = np.zeros((2, 2), dtype=np.uint32)
-    cdef np.ndarray[ndim=1, dtype=np.double_t] bins
+    cdef np.ndarray[ndim=2, dtype=np.int32_t] line_end = np.zeros((2, 2), dtype=np.int32)
     cdef int max_distance, offset, num_indexes, index    
     cdef double a, b
-    cdef int nidxs, nthetas, i, j, x, y, px, py, out_idx, value, max_value, max_theta
+    cdef int nidxs, nthetas, i, j, x, y, px, py, accum_idx, value, max_value, max_theta
     cdef int shift = 16
     # maximum line number cutoff
     cdef int lines_max = 2 ** 15
-    cdef int xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, good_line    
+    cdef int xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, good_line, count
     max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] + 
                                        img.shape[1] * img.shape[1])))
-    out = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
-    bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
+    accum = np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
     offset = max_distance / 2
     # find the nonzero indexes
     cdef np.ndarray[ndim=1, dtype=np.int_t] x_idxs, y_idxs
-    y_idxs, x_idxs =  np.PyArray_Nonzero(img)
+    y_idxs, x_idxs =  np.nonzero(img)
     num_indexes = y_idxs.shape[0] # x and y are the same shape
     nthetas = theta.shape[0]
+    
+    points = []
+    for i in range(num_indexes):
+        points.append((x_idxs[i], y_idxs[i]))
     lines = []
     # create mask of all non-zero indexes
     for i in range(num_indexes):
         mask[y_idxs[i], x_idxs[i]] = 1
 
-    for i in range(num_indexes):
+    while 1:
+    #for i in range(num_indexes):
         # select random non-zero point
-        index = randint(0, num_indexes-1)
-        x = x_idxs[i]
-        y = y_idxs[i]
+        count = len(points)
+        if count == 0:
+            break        
+        index = randint(0, count-1)
+        x = points[index][0]
+        y = points[index][1]
+        del points[index]
         # if previously eliminated, skip
         if not mask[y, x]:
             continue
@@ -119,9 +127,9 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, i
         max_theta = 0
         # apply hough transform on point
         for j in range(nthetas):
-            out_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
-            out[out_idx, j] += 1
-            value = out[out_idx, j]
+            accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
+            accum[accum_idx, j] += 1
+            value = accum[accum_idx, j]
             if value > max_value:
                 max_value = value
                 max_theta = j
@@ -181,8 +189,8 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, i
                 px += dx
                 py += dy            
         # confirm line length is sufficient
-        good_line = fabs(line_end[1, 1] - line_end[0, 1]) >= line_length or \
-                    fabs(line_end[1, 0] - line_end[0, 0]) >= line_length
+        good_line = abs(line_end[1, 1] - line_end[0, 1]) >= line_length or \
+                    abs(line_end[1, 0] - line_end[0, 0]) >= line_length
         # pass 2: walk the line again and reset accumulator and mask
         for k in range(2):
             px = x0
@@ -200,15 +208,22 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, i
                     x1 = px >> shift
                     y1 = py
                 # if non-zero point found, continue the line
-                if mask[y1, x1]:
-                    if good_line:
-                        for j in range(nthetas):
-                            out_idx = <int>round((ctheta[j] * x1 + stheta[j] * y1)) + offset
-                            out[out_idx, j] -= 1
-                    mask[y1, x1] = 0
+                if 1:
+                    if mask[y1, x1]:  
+                        if good_line:                  
+                            accum_idx = <int>round((ctheta[j] * x1 + stheta[j] * y1)) + offset                    
+                            accum[accum_idx, max_theta] -= 1
+                        mask[y1, x1] = 0
+                else:
+                    if mask[y1, x1]:
+                        if good_line:
+                            for j in range(nthetas):
+                                accum_idx = <int>round((ctheta[j] * x1 + stheta[j] * y1)) + offset
+                                accum[accum_idx, j] -= 1
+                        mask[y1, x1] = 0
                 # exit when the point is the line end
                 if x1 == line_end[k, 0] and y1 == line_end[k, 1]:
-                    break;
+                    break
                 px += dx
                 py += dy
 
