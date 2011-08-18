@@ -54,7 +54,7 @@ Let us illustrate the transform by looking at projections taken at specific angl
     @savefig radon_projection_plot1.png width=4in
     In [15]: plt.show()
 
-We are going to reconstruct an image from 180 (the default) of these projections.
+We are going to reconstruct an image from 180 of these projections (the default).
 
 .. ipython::
 
