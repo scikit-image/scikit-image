@@ -77,9 +77,9 @@ def radon(image, theta=None):
         radon_filtered = radon_filtered[:radon_image.shape[0], :]
 """
 
-def iradon(radon_image, theta=None, output_size=None, filter="ramp", interpolate="nearest"):
+def iradon(radon_image, theta=None, output_size=None, filter="ramp", interpolate="linear"):
     if theta == None:
-        theta = np.mgrid[0:180]
+        theta = np.arange(180)
     th = (math.pi/180.0)*theta        
     # if output size not specified, estimate from input radon image
     if not output_size:
@@ -94,45 +94,59 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp", interpolate
     #construct the fourier filter
     freqs = np.zeros((order, 1))
     
-    #w = np.sqrt(np.sum((np.mgrid[-pi:pi:(2*pi)/Length1, -pi:pi:(2*pi)/Length2])**2, 0))
-
-    w = fftshift(abs(np.mgrid[-1:1:2/order])).reshape(-1, 1)
-#    if filter == "ramp":
-#    elif filter == "shepp-logan":
-#        rn1 = abs(2/a*s.sin(a*w/2))
-#        rn2 = s.sin(a*w/2)
-#        rd = (a*w)/2
-#        r = rn1*(rn2/rd)**2
-#        r = where(w!=0, r, w!=0)
-#        f = fftshift(r)
-#    elif filter == 'cosine':
-#    elif filter == 'hamming':
-#    elif filter == 'hann':
-#    elif filter == None:
+    f = fftshift(abs(np.mgrid[-1:1:2/order])).reshape(-1, 1)
+    w = 2 * math.pi * f
+    # start from first element to avoid divide by zero
+    if filter == "ramp":
+        pass
+    elif filter == "shepp-logan":
+        f[1:] = f[1:] * np.sin(w[1:] / 2) / (w[1:]/2)
+    elif filter == "cosine":
+       f[1:] = f[1:] * np.cos(w[1:] / 2)
+    elif filter == "hamming":
+       f[1:] = f[1:] * (0.54 + 0.46 * np.cos(w[1:]))
+    elif filter == "hann":
+       f[1:] = f[1:] * (1 + np.cos(w[1:])) / 2
+    elif filter == None:
+        f[1:] = 1
+    else:
+        raise ValueError("Unknown filter: %s" % filter)
         
-        
-    filter_ft = np.tile(w, (1, len(theta)))        
+    filter_ft = np.tile(f, (1, len(theta)))        
     # apply filter in fourier domain
     projection = fft(img, axis=0) * filter_ft
     radon_filtered = np.real(ifft(projection, axis=0))
     # resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
-    midindex = (n + 1.0) / 2.0
+    mid_index = np.ceil(n/2);
     x = output_size
     y = output_size
     [X, Y] = np.mgrid[0.0:x, 0.0:y]
-    xpr = X - (output_size+1.0)/2.0
-    ypr = Y - (output_size+1.0)/2.0
-    if interpolate == "nearest":        
+    xpr = X - (output_size + 1.0) / 2.0
+    ypr = Y - (output_size + 1.0) / 2.0
+    if interpolate == "nearest":   
         for i in range(len(theta)):
-            filtIndex = np.round(midindex + xpr*np.sin(th[i]) - ypr*np.cos(th[i]))
-            reconstructed += radon_filtered[((((filtIndex > 0) & \
-                (filtIndex <= n))*filtIndex) - 1).astype('i'), i]
+            k = np.round(mid_index + xpr*np.sin(th[i]) - ypr*np.cos(th[i]))
+            reconstructed += radon_filtered[((((k > 0) & (k < n))*k) - 1).astype(np.int), i]             
     elif interpolate == "linear":
-        pass
-    elif interpolate == "spline":
-        pass
+        for i in range(len(theta)):
+          t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
+          a = np.floor(t)
+          b = mid_index + a 
+          reconstructed += (t - a) * radon_filtered[((((b+1 > 0) & (b+1 < n))*(b+1)) - 1).astype(np.int), i] \
+           + (a - t + 1) * radon_filtered[((((b > 0) & (b < n))*b) - 1).astype(np.int), i]
+# XXX slow and inaccurate           
+#    elif interpolate == "spline":
+#        axis = np.arange(0, radon_filtered.shape[0]) - mid_index
+#        for i in range(len(theta)):
+#            print i
+#            t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
+#            #f = interp1d(axis, radon_filtered[:, i], kind="cubic", bounds_error=False, fill_value=0) 
+#            f = interp1d(axis, radon_filtered[:, i], kind="linear", bounds_error=False, fill_value=0) # cubic
+#            reconstructed += f(t).reshape(output_size, output_size)
+    else:
+        raise ValueError("Unknown interpolation: %s" % interpolate)
         
     return reconstructed * math.pi / (2*len(th))
 
