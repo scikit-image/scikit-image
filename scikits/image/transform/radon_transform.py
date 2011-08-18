@@ -1,16 +1,45 @@
+"""
+radon.py - Radon and inverse radon transforms
+
+Based on code of Justin K. Romberg 
+(http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
+J. Gillam and Chris Griffin.
+
+References: 
+    -B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
+    the Discrete Radon Transform With Some Applications", Proceedings of
+    the Fourth IEEE Region 10 International Conference, TENCON '89, 1989.
+    -A. C. Kak, Malcolm Slaney, "Principles of Computerized Tomographic
+    Imaging", IEEE Press 1988.
+"""
+
 import numpy as np
 from scipy.misc import imrotate
 from scipy.interpolate import interp1d
-from scipy.fftpack import fftshift, ifftshift, fft, ifft
+from scipy.fftpack import fftshift, fft, ifft
 import math
+
 
 def radon(image, theta=None):
     """
-    Calculates the projections given the current object and projection angle
-    Justin K. Romberg
+    Calculates the radon transform of an image given specified projection angles.
+
+    Parameters
+    ----------
+    image : array_like, dtype=float
+        Input image.
+    theta : array_like, dtype=float, optional (default np.arange(180))
+        Projection angles (in degrees).
+    
+    Returns
+    -------
+    output : ndarray
+        Radon transform.
     """
+    if image.ndim != 2:
+        raise ValueError('The input image must be 2-D')
     if theta == None:
-        theta = np.arange(180)
+        theta = np.arange(180)    
     height, width = image.shape
     diagonal = np.sqrt(height**2 + width**2)
     heightpad = np.ceil(diagonal - height) + 2
@@ -25,82 +54,63 @@ def radon(image, theta=None):
         out[:,i] = rotated.sum(0)[::-1]
     return out
 
-"""
-  if 0:
-        # filter the projections
-        freqs = np.zeros((n, 1))
-        freqs[:, 0] = np.linspace(-1, 1, n).T;
-        filter_ft = np.tile(np.abs(freqs), (1, len(theta)))
-        # fourier domain filtering
-        radon_ft = fft(radon_image, axis=0)
-        projection = radon_ft * fftshift(filter_ft)
-        radon_filtered = np.real(ifft(projection, axis=0))        
-    #    print np.max(projection)
-    #    print projection
-        #projection = ifftshift(projection, axes=1);
-    if 0:
-        height, width = radon_image.shape
-        w = np.mgrid[-math.pi:math.pi:(2*math.pi)/height]
-        f = fftshift(abs(w))
-        g = np.array([np.real(ifft(fft(i)*f)) for i in radon_image.T])
-        radon_filtered = np.transpose(g)
-    if 0:
-        img = radon_image.copy()
-        order = 1024
-        filt = np.zeros((order/2, 1))
-        filt[:, 0] = 2.0*np.arange(0, order/2)/order;
-        filt = np.vstack((filt, filt[ ::-1])).T
-        #filt = fftshift(abs(filt))
-    #    order = radon_image.shape[0]
-        w = np.mgrid[-math.pi:math.pi:(2*math.pi)/order]
-        filt = fftshift(abs(w))
-        img.resize((order, img.shape[1]))
-        radon_filtered = np.array([np.real(ifft(fft(column)*filt)) for column in img.T]).T
-        radon_filtered = radon_filtered[:radon_image.shape[0], :]
-    if 0:
-        ### bestest
-        img = radon_image.copy()
-        order = max(64, 2 ** np.ceil(np.log(2*n)/np.log(2)))
-#        filt = np.zeros((order/2, 1))
-#        filt[:, 0] = 2.0*np.arange(0, order/2)/order;
-#        filt = np.vstack((filt, filt[ ::-1])).T
-        #filt = fftshift(abs(filt))
-    #    order = radon_image.shape[0]
-        w = np.mgrid[-math.pi:math.pi:(2*math.pi)/order]
-        filt = fftshift(abs(w))
-        img.resize((order, img.shape[1]))
-        img = fft(img, axis=0)
-        #radon_filtered = np.array([np.real(ifft(column*filt)) for column in img.T]).T
-        radon_filtered = np.array([column*filt for column in img.T]).T
-        
-        radon_filtered = np.real(ifft(radon_filtered, axis=0))
-        radon_filtered = radon_filtered[:radon_image.shape[0], :]
-"""
 
-def iradon(radon_image, theta=None, output_size=None, filter="ramp", interpolate="linear"):
+def iradon(radon_image, theta=None, output_size=None, filter="ramp", interpolation="linear"):
+    """
+    Reconstructs an image from radon transformed data.
+        
+    Parameters
+    ----------
+    radon_image : array_like, dtype=float
+        Image containing radon transform.
+    theta : array_like, dtype=float, optional (default np.arange(180))
+        Reconstruction angles (in degrees).
+    output_size : int
+        Number of rows and columns in the reconstruction.
+    filter : str, optional (default ramp)
+        Filter used in frequency domain filtering. Ramp filter used by default.
+        Filters available: ramp, shepp-logan, cosine, hamming, hann
+        Assign None to use no filter.
+    interpolation : str, optional (default linear)
+        Interpolation method used in reconstruction.
+        Methods available: nearest, linear.
+    
+    Returns
+    -------
+    output : ndarray
+      Reconstructed image.
+
+    Notes
+    -----
+    It applies the fourier slice theorem to reconstruct an image by multiplying the 
+    frequency domain of the filter with the FFT of the projection data. 
+    """
+    if radon_image.ndim != 2:
+        raise ValueError('The input image must be 2-D')
     if theta == None:
         theta = np.arange(180)
     th = (math.pi/180.0)*theta        
     # if output size not specified, estimate from input radon image
     if not output_size:
-        output_size = 2*np.floor(radon_image.shape[0] / (2*np.sqrt(2)))
+        output_size = 2*np.floor(radon_image.shape[0] / (2 * np.sqrt(2)))
     n = radon_image.shape[0]
   
     img = radon_image.copy()
     # resize image to next power of two for fourier analysis
-    order = max(64, 2 ** np.ceil(np.log(2*n)/np.log(2)))
+    # speeds up fourier and lessens artifacts
+    order = max(64, 2 ** np.ceil(np.log(2 * n) / np.log(2)))
     # zero pad input image
     img.resize((order, img.shape[1]))
     #construct the fourier filter
     freqs = np.zeros((order, 1))
     
-    f = fftshift(abs(np.mgrid[-1:1:2/order])).reshape(-1, 1)
+    f = fftshift(abs(np.mgrid[-1:1:2 / order])).reshape(-1, 1)
     w = 2 * math.pi * f
     # start from first element to avoid divide by zero
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
-        f[1:] = f[1:] * np.sin(w[1:] / 2) / (w[1:]/2)
+        f[1:] = f[1:] * np.sin(w[1:] / 2) / (w[1:] / 2)
     elif filter == "cosine":
        f[1:] = f[1:] * np.cos(w[1:] / 2)
     elif filter == "hamming":
@@ -125,30 +135,32 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp", interpolate
     [X, Y] = np.mgrid[0.0:x, 0.0:y]
     xpr = X - (output_size + 1.0) / 2.0
     ypr = Y - (output_size + 1.0) / 2.0
-    if interpolate == "nearest":   
+    
+    # reconstruct image by interpolation
+    if interpolation == "nearest":   
         for i in range(len(theta)):
             k = np.round(mid_index + xpr*np.sin(th[i]) - ypr*np.cos(th[i]))
             reconstructed += radon_filtered[((((k > 0) & (k < n))*k) - 1).astype(np.int), i]             
-    elif interpolate == "linear":
+    elif interpolation == "linear":
         for i in range(len(theta)):
           t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
           a = np.floor(t)
           b = mid_index + a 
-          reconstructed += (t - a) * radon_filtered[((((b+1 > 0) & (b+1 < n))*(b+1)) - 1).astype(np.int), i] \
-           + (a - t + 1) * radon_filtered[((((b > 0) & (b < n))*b) - 1).astype(np.int), i]
-# XXX slow and inaccurate           
-#    elif interpolate == "spline":
+          b0 = ((((b + 1 > 0) & (b + 1 < n))*(b + 1)) - 1).astype(np.int)
+          b1 = ((((b > 0) & (b < n))*b) - 1).astype(np.int)
+          reconstructed += (t - a) * radon_filtered[b0, i] + (a - t + 1) * radon_filtered[b1, i]
+# XXX slow with some artifacts
+#    elif interpolation == "spline":
 #        axis = np.arange(0, radon_filtered.shape[0]) - mid_index
 #        for i in range(len(theta)):
 #            print i
 #            t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
 #            #f = interp1d(axis, radon_filtered[:, i], kind="cubic", bounds_error=False, fill_value=0) 
-#            f = interp1d(axis, radon_filtered[:, i], kind="linear", bounds_error=False, fill_value=0) # cubic
+#            f = interp1d(axis, radon_filtered[:, i], kind="linear", bounds_error=False, fill_value=0)
 #            reconstructed += f(t).reshape(output_size, output_size)
     else:
-        raise ValueError("Unknown interpolation: %s" % interpolate)
+        raise ValueError("Unknown interpolation: %s" % interpolation)
         
     return reconstructed * math.pi / (2*len(th))
-
 
 
