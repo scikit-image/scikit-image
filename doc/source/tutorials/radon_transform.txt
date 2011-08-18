@@ -1,0 +1,109 @@
+***************
+Radon transform
+***************
+
+The radon transform is a technique widely used in tomography, where you reconstruct an object from its different projections. A projection for example the scattering data obtained as the output of a tomographic scan.
+
+For more information:
+    http://en.wikipedia.org/wiki/Radon_transform
+    http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html
+    
+Forward transform
+=================
+
+First we load the Schepp-Logan phantom, a classic test image representing a tomographic scan.
+
+.. ipython::
+
+    In [1]: from scikits.image.io import imread
+
+    In [1]: from scikits.image import data_dir
+
+    In [2]: from scikits.image.transform import radon, iradon
+
+    In [3]: from scikits.image.color import rgb2gray
+
+    In [4]: import matplotlib.pyplot as plt
+
+    In [5]: import matplotlib.cm as cm
+
+    In [6]: image = rgb2gray(imread(data_dir + "/phantom.png"))
+
+    In [7]: plt.title("original image");
+
+    In [8]: plt.imshow(image, cmap=cm.Greys_r)
+
+    @savefig radon_original_image.png width=4in
+    In [9]: plt.show()
+
+
+Let us illustrate the transform by looking at projections taken at specific angles.
+
+.. ipython::
+
+    In [10]: projections = radon(image, theta=[0, 45, 90])
+
+    In [11]: plt.plot(projections);
+
+    In [12]: plt.title("radon projections");
+
+    In [13]: plt.xlabel("projection axis");
+
+    In [14]: plt.ylabel("intensity");
+
+    @savefig radon_projection_plot1.png width=4in
+    In [15]: plt.show()
+
+We are going to reconstruct an image from 180 (the default) of these projections.
+
+.. ipython::
+
+    In [16]: projections = radon(image)
+
+    In [17]: plt.figure()
+
+    In [18]: plt.title("radon projections");
+
+    In [19]: plt.xlabel("projection axis");
+
+    In [20]: plt.ylabel("intensity");
+
+    In [21]: plt.plot(projections)
+
+    @savefig radon_projection_plot2.png width=4in
+    In [22]: plt.show()
+    
+
+We have now constructed various projections, line integrals of an image, at specific angles. This image is called a sinogram.
+
+.. ipython::
+
+    In [23]: plt.figure()
+    
+    In [24]: plt.title("sinogram");
+
+    In [25]: plt.xlabel("projection axis");
+
+    In [26]: plt.ylabel("intensity");
+
+    In [27]: plt.imshow(projections)
+
+    @savefig radon_sinogram.png width=4in
+    In [28]: plt.show()
+
+Inverse transform
+=================
+To reconstruct the image from this sinogram, we apply the inverse transform.
+
+.. ipython::
+
+    In [29]: reconstruction = iradon(projections)
+
+    In [30]: plt.title("reconstructed image");
+
+    In [31]: plt.imshow(reconstruction, cmap=cm.Greys_r)
+
+    @savefig radon_reconstructed_image.png width=4in
+    In [32]: plt.show()
+
+
