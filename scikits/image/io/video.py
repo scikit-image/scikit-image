@@ -1,18 +1,22 @@
-import cv
 import numpy as np
-import pygst
 import os, time
-pygst.require("0.10")
-import gst, gobject
-gobject.threads_init()
-from gst.extend.discoverer import Discoverer
 
-"""
-@add_backends
-class Video(object):
-    def __init__(self):
-        raise NotImplementedError("Please select a video backend.")
-"""
+try:
+    import pygst
+    pygst.require("0.10")
+    import gst, gobject
+    gobject.threads_init()
+    from gst.extend.discoverer import Discoverer
+    gstreamer_available = True
+except ImportError:
+    gstreamer_available = False
+
+try:
+    import cv
+    opencv_available = True
+except ImportError:
+    opencv_available = False
+
 
 class CvVideo(object):
     """
@@ -25,7 +29,9 @@ class CvVideo(object):
     size: tuple, optional
         Size of returned array.
     """
-    def __init__(self, source=None, size=None):
+    def __init__(self, source=None, size=None, backend=None):
+        if not opencv_available:
+            raise ImportError("Opencv 2.0+ required")
         self.source = source
         self.capture = cv.CreateFileCapture(self.source)
         self.size = size
@@ -44,9 +50,11 @@ class CvVideo(object):
             self.size = cv.GetSize(img)
         img_mat = np.empty((self.size[1], self.size[0], 3), dtype=np.uint8)
         if cv.GetSize(img) == self.size:
-            cv.Copy(img, img_mat)
+            cv.Copy(img, img_mat)            
         else:
             cv.Resize(img, img_mat)
+        # opencv stores images in BGR format
+        cv.CvtColor(img_mat, img_mat, cv.CV_BGR2RGB)
         return img_mat
     
     def seek_frame(self, frame_number):
@@ -94,7 +102,6 @@ class CvVideo(object):
         return cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FPS) * \
             cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_COUNT)
     
-    
         
 class GstVideo(object):
     """
@@ -108,8 +115,12 @@ class GstVideo(object):
         Size of returned array.
     sync: bool, optional
         Frames are extracted per frame or per time basis.
+        If enabled the video time step continues onward according to the play rate.
+        Useful for ip cameras and other real time video feeds.
     """
     def __init__(self, source=None, size=None, sync=False):
+        if not gstreamer_available:
+            raise ImportError("GStreamer Python bindings 0.10+ required")
         self.source = source
         self.size = size
         self.video_length = 0
@@ -221,22 +232,95 @@ class GstVideo(object):
         return self.video_length
 
 
-if __name__ == '__main__':
-    cv.NamedWindow ('display', cv.CV_WINDOW_AUTOSIZE)
-    cv.MoveWindow("display", 100, 100);
-    camera = GstVideo(source="http://146.232.169.185/video.mjpg")
-    #$camera = GstVideo(source="/home/tzhau/hacking/video/ing1.avi", sync=1)
-#    camera = CvVideo(source="/home/tzhau/hacking/video/ing1.avi")
-    #camera = CvVideo(source="/home/tzhau/Desktop/lego.flv")
-    print camera.frame_count()
-    print camera.duration()
-    i = 0
-    while 1:
-        i += 1
-        a = time.time()
-        img = camera.get()
+class Video(object):
+    """
+    Video player. Supports Opencv and Gstreamer backends.
+    
+    Parameters
+    ----------
+    source : str
+        Media location.
+    size: tuple, optional
+        Size of returned array.
+    sync: bool, optional 
+        Frames are extracted per frame or per time basis. Gstreamer only.
+        If enabled the video time step continues onward according to the play rate.
+        Useful for IP cameras and other real time video feeds.
+    backend: str, 'gstreamer' or 'opencv'
+        Backend to use. 
+    """
+    def __init__(self, source=None, size=None, sync=False, backend=None):
+        if backend == None:
+            # select backend that is available
+            if gstreamer_available:
+                self.video = GstVideo(source, size, sync)
+            elif opencv_available:
+                self.video = CvVideo(source, size)
+            else:
+                # if no backend available, raise exception
+                self.video = GstVideo(source, size, sync)
+        elif backend == "gstreamer":
+            self.video = GstVideo(source, size, sync)
+        elif backend == "opencv":
+            self.video = CvVideo(source, size)
+        else:
+            raise ValueError("Unknown backend: %s", backend)
 
-        b = time.time()
-        print b-a
-        cv.ShowImage('display', img)
-        cv.WaitKey(100)    
+    def get(self):
+        """
+        Retrieve a video frame as a numpy array.
+        
+        Returns
+        -------
+        output : array (image)
+            Retrieved image.
+        """
+        return self.video.get()
+    
+    def seek_frame(self, frame_number):
+        """
+        Seek to specified frame in video.
+        
+        Parameters
+        ----------
+        frame_number : int
+            Frame position
+        """
+        self.video.seek_frame(frame_number)
+        
+    def seek_time(self, milliseconds):
+        """
+        Seek to specified time in video.
+        
+        Parameters
+        ----------
+        milliseconds : int
+            Time position
+        """
+        self.video.seek_time(milliseconds)
+
+    def frame_count(self):
+        """
+        Returns frame count of video.
+
+        Returns
+        -------
+        output : int
+            Frame count.
+        """
+        return self.video.frame_count()
+    
+    def duration(self):
+        """
+        Returns time length of video in milliseconds.
+
+        Returns
+        -------
+        output : int
+            Time length [ms].
+        """
+        return self.video.duration()
+     
+    
+__all__ = ["Video"]
+
