@@ -19,7 +19,7 @@ cdef double round(double val):
 cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
 
-
+@cython.cdivision(True)
 @cython.boundscheck(False)
 def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     
@@ -66,8 +66,8 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
 
 
 @cython.boundscheck(False)
-def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, int line_gap, \
-   np.ndarray[ndim=1, dtype=np.double_t] theta=None):
+def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
+        int line_gap, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
     # compute the array of angles and their sine and cosine
@@ -110,7 +110,6 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, i
         mask[y_idxs[i], x_idxs[i]] = 1
 
     while 1:
-    #for i in range(num_indexes):
         # select random non-zero point
         count = len(points)
         if count == 0:
@@ -141,7 +140,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, i
         b = ctheta[max_theta]
         x0 = x
         y0 = y
-       # calculate gradient of walks using fixed point math
+        # calculate gradient of walks using fixed point math
         xflag = fabs(a) > fabs(b)
         if xflag:
             if a > 0:
