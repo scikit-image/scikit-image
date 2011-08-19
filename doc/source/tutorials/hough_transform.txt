@@ -108,7 +108,7 @@ gap less than 3 pixels.
 
     In [25]: plt.imshow(np.zeros(edges.shape))
 
-    In [26]: lines = probabilistic_hough(edges, threshold=1, line_length=10, line_gap=3)
+    In [26]: lines = probabilistic_hough(edges, threshold=10, line_length=5, line_gap=3)
 
     In [27]: for line in lines:
        ....:         p0, p1 = line
