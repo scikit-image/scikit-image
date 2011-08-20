@@ -25,7 +25,8 @@ As a first example we construct a line intersection.
        ...: 
 
     In [7]: plt.imshow(image)
-
+    
+    @savefig hough_original.png width=4in
     In [8]: plt.show()
 
 
@@ -50,6 +51,7 @@ local maxima represents the parameters of probable lines.
 
     In [11]: plt.imshow(h)
 
+    @savefig hough_transform.png width=4in
     In [12]: plt.show()
 
 
@@ -77,6 +79,7 @@ line merging.
        ....:     plt.plot((p0[0], p1[0]), (p0[1], p1[1]))
        ....: 
 
+    @savefig hough_probabilistic1.png width=4in
     In [16]: plt.show()
 
 
@@ -96,6 +99,7 @@ The Hough transform are often used on edge detected images.
 
     In [22]: plt.imshow(edges)
 
+    @savefig hough_edge_detected.png width=4in
     In [23]: plt.show()
 
 
@@ -115,6 +119,7 @@ gap less than 3 pixels.
        ....:     plt.plot((p0[0], p1[0]), (p0[1], p1[1]))
        ....: 
 
+    @savefig hough_lines.png width=4in
     In [28]: plt.show()
 
 
