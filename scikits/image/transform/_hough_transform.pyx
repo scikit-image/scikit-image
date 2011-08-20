@@ -77,8 +77,8 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     # calculate thetas if none specified
     if theta is None:
         theta = np.linspace(math.pi/2, -math.pi/2, 180)
-        #p_2 = math.pi/2
-        #theta = p_2-np.arange(180)/180.0*p_2*2
+        p_2 = math.pi/2
+        theta = p_2-np.arange(180)/180.0*p_2*2
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
     cdef int height = img.shape[0]
@@ -87,7 +87,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     cdef np.ndarray[ndim=2, dtype=np.int64_t] accum
     cdef np.ndarray[ndim=2, dtype=np.uint8_t] mask = np.zeros((height, width), dtype=np.uint8)
     cdef np.ndarray[ndim=2, dtype=np.int32_t] line_end = np.zeros((2, 2), dtype=np.int32)
-    cdef int max_distance, offset, num_indexes, index    
+    cdef int max_distance, offset, num_indexes, index, other_max, settle
     cdef double a, b
     cdef int nidxs, nthetas, i, j, x, y, px, py, accum_idx, value, max_value, max_theta
     cdef int shift = 16
@@ -112,6 +112,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     # create mask of all non-zero indexes
     for i in range(num_indexes):
         mask[y_idxs[i], x_idxs[i]] = 1
+    settle = 0
     while 1:
         # select random non-zero point
         count = len(points)
@@ -127,17 +128,25 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
         value = 0
         max_value = value_threshold-1
         max_theta = -1
-        
+        other_max = 0
         # apply hough transform on point
         for j in range(nthetas):
             accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
             accum[accum_idx, j] += 1
-            value = accum[accum_idx, j]            
+            value = accum[accum_idx, j]
             if value > max_value:
                 max_value = value
                 max_theta = j
-        if max_value < value_threshold:
+            # if two max angles are very similar, extend the threshold for a while
+            if j != max_theta and value == max_value and abs(j - max_theta) == 1:
+                settle += 1
+                if settle > 100:
+                    other_max = 0
+                else:
+                    other_max = 1
+        if max_value < value_threshold or other_max:
             continue
+        settle = 0
         # from the random point walk in opposite directions and find line beginning and end
         a = -stheta[max_theta]
         b = ctheta[max_theta]
@@ -151,14 +160,14 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
             else:
                 dx0 = -1
             dy0 = <int>round(b * (1 << shift) / fabs(a)) 
-            y0 = (y0 << shift) + (1 << (shift - 1))
+            y0 = (y0 << shift) #+ (1 << (shift - 1))
         else:
             if b > 0:
                 dy0 = 1
             else:
                 dy0 = -1
             dx0 = <int>round(a * (1 << shift) / fabs(b))
-            x0 = (x0 << shift) + (1 << (shift - 1))
+            x0 = (x0 << shift) #+ (1 << (shift - 1))
   
         # pass 1: walk the line, merging lines less than specified gap length
         for k in range(2):

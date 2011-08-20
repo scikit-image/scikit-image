@@ -50,15 +50,17 @@ def test_probabilistic_hough():
     for i in range(25, 75):
         img[100 - i, i] = 100
         img[i, i] = 100
-    lines = probabilistic_hough(img, 10, line_length=10, line_gap=1)
-    # sort the lines according to the x-axis
-    sorted_lines = []
-    for line in lines:
-        line = list(line)
-        line.sort(lambda x,y: cmp(x[0], y[0]))
-        sorted_lines.append(line)
-    assert([(25, 75), (74, 26)] in sorted_lines)
-    assert([(25, 25), (74, 74)] in sorted_lines)
+    # test the line extraction a few times
+    for i in range(100):
+        lines = probabilistic_hough(img, threshold=10, line_length=10, line_gap=1)
+        # sort the lines according to the x-axis
+        sorted_lines = []
+        for line in lines:
+            line = list(line)
+            line.sort(lambda x,y: cmp(x[0], y[0]))
+            sorted_lines.append(line)
+        assert([(25, 75), (74, 26)] in sorted_lines)
+        assert([(25, 25), (74, 74)] in sorted_lines)
 
 
 if __name__ == "__main__":
