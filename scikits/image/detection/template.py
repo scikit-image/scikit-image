@@ -4,7 +4,7 @@ import numpy as np
 import cv
 import _template
 
-def match_template_cv(image, template, out=None):
+def match_template_cv(image, template, out=None,  method="norm-coeff"):
     """Finds a template in an image using normalized correlation.
 
     Parameters
@@ -22,8 +22,12 @@ def match_template_cv(image, template, out=None):
     """
     if out == None:
         out = np.empty((image.shape[0] - template.shape[0] + 1,image.shape[1] - template.shape[1] + 1), dtype=image.dtype)
-    #cv.MatchTemplate(image, template, out, cv.CV_TM_CCORR_NORMED)
-    cv.MatchTemplate(image, template, out, cv.CV_TM_CCOEFF_NORMED)
+    if method == "norm-corr":
+        cv.MatchTemplate(image, template, out, cv.CV_TM_CCORR)#_NORMED)
+    elif method == "norm-corr":
+        cv.MatchTemplate(image, template, out, cv.CV_TM_CCOEFF_NORMED)
+    else:
+        raise ValueError("Unknown template method: %s" % method)
     return out
 
 
@@ -70,11 +74,12 @@ if __name__ == "__main__":
     import scikits.image.io as io
     import time
     template = io.imread("../../../target.bmp").astype(np.float32)
-    temp2 = np.empty((template.shape[0] + 200, template.shape[1]), dtype=template.dtype)
+    temp2 = np.empty((template.shape[0], template.shape[1]), dtype=template.dtype)
     cv.Resize(np.ascontiguousarray(template), temp2)
     template = temp2
     image = io.imread("../../../source.bmp").astype(np.float32)
-    
+    print template.strides, image.strides
+    qwer
     t = time.time()
     r = match_template_cv(image, template)
     print "cv", time.time() - t

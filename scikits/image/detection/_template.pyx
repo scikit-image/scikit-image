@@ -101,7 +101,7 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
         np.ndarray[float, ndim=2, mode="c"] template, int num_type):
     # convolve the image with template by frequency domain multiplication
     cdef np.ndarray[np.double_t, ndim=2] result
-    result = np.ascontiguousarray(fftconvolve(image, template, mode="valid"), dtype=np.double)
+    result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template), mode="valid"), dtype=np.double)
     # calculate squared integral images used for normalization
     cdef np.ndarray integral_sum = np.zeros((image.shape[0], image.shape[1]))
     cdef np.ndarray integral_sqr = np.zeros((image.shape[0], image.shape[1]))
