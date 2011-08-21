@@ -1,0 +1,99 @@
+*****************
+Template Matching
+*****************
+
+We are going to use template matching, using normalised correlation techniques 
+to identify the occurence of an object in an image.
+
+We first construct a simple image target:
+
+.. ipython::
+
+    In [1]: import numpy as np
+
+    In [2]: from scikits.image.color import rgb2gray
+
+    In [3]: from scikits.image.detection import *
+
+    In [4]: from numpy.random import randn
+
+    In [5]: import matplotlib.pyplot as plt
+
+    In [6]: import math
+
+    In [7]: size = 100
+
+    In [8]: image = np.zeros((400, 400), dtype=np.float32)
+
+    In [9]: target = np.tri(size) + np.tri(size)[::-1]
+
+    In [10]: target = target.astype(np.float32)
+    
+    In [11]: plt.gray()
+
+    @savefig template_target.png width=4in
+    In [12]: plt.imshow(target)
+
+    In [13]: plt.show()
+
+
+Now we place this target in an image at two positions, and add some gaussian
+random noise.
+
+.. ipython::
+
+    In [14]: target_positions = [(50, 50), (200, 200)]
+
+    In [15]: for x, y in target_positions:
+       ....:     image[x:x+size, y:y+size] = target
+       ....: 
+
+    In [16]: image += randn(400, 400)*2
+
+    @savefig template_image.png width=4in
+    In [17]: plt.imshow(image)
+
+    In [18]: plt.show()
+
+
+Match the template using the normalised correlation method and plot the output:
+
+.. ipython::
+
+    In [19]: result = match_template(image, target, method='norm-corr')
+    
+    In [20]: plt.colors()
+
+    @savefig template_ncc.png width=4in
+    In [21]: plt.imshow(result)
+
+    In [22]: plt.show()
+
+
+The peaks can be easily identified visually, extracting them we use a simple
+peak extraction algorithm.
+
+.. ipython::
+
+    In [23]: delta = 5
+
+    In [24]: found_positions = []
+
+    In [25]: for i in range(50):
+       ....:     index = np.argmax(result)
+       ....:     y, x = np.unravel_index(index, result.shape)
+       ....:     if not found_positions:
+       ....:         found_positions.append((x, y))
+       ....:     for position in found_positions:
+       ....:         distance = math.sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
+       ....:         if distance > delta:
+       ....:             found_positions.append((x, y))
+       ....:     result[y, x] = 0
+       ....:     if len(found_positions) == len(target_positions):
+       ....:         break
+       ....:     
+
+    In [26]: print found_positions
+    [(50, 50), (200, 200)]
+
+
