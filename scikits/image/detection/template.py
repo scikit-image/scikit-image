@@ -71,49 +71,5 @@ def match_template(image, template, method="norm-coeff"):
     return _template.match_template(image, template, method_num)
 
 
-if __name__ == "__main__":
-    import scikits.image.io as io
-    import time
-    template = io.imread("../../../target.bmp").astype(np.float32)
-    temp2 = np.empty((template.shape[0], template.shape[1]), dtype=template.dtype)
-    cv.Resize(np.ascontiguousarray(template), temp2)
-    template = temp2
-    image = io.imread("../../../source.bmp").astype(np.float32)
-    print template.strides, image.strides
-    qwer
-    t = time.time()
-    r = match_template_cv(image, template)
-    print "cv", time.time() - t
-    index = np.argmax(r)
-    print "max cv", np.max(r), index 
-    y, x = np.unravel_index(index, r.shape)
-    print x, y
-    
-    print r
-    print np.max(r), np.min(r)
-    cv.ShowImage("main2", r/np.max(r))
-    
-    print template.strides
-    print template.shape
-    t = time.time()
-    result = match_template(image, template)
-    print "_", result.shape
-    cv.ShowImage("main", result/np.max(result))
-    cv.WaitKey(10)
-    print "sc", time.time() - t
-    
-    index = np.argmax(result)
-    print "max sc", np.max(result), index 
-    y2, x2 = np.unravel_index(index, result.shape)
-    print x2, y2
-    
-    io.use_plugin("gtk")
-    
-    output = image.astype(np.uint8)
-    cv.Rectangle(output, (x, y), (x + template.shape[1],y + template.shape[0]), (0,0,255))
-    cv.Rectangle(output, (x2, y2), (x2 + template.shape[1],y2 + template.shape[0]), (0,0,255))
-    io.imshow(output)
-    io.show()
-    
     
 
