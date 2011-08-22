@@ -114,7 +114,7 @@ class GstVideo(object):
         Media location URI. Video file path or http address of IP camera.
     size: tuple, optional
         Size of returned array.
-    sync: bool, optional
+    sync: bool, optional (default False)
         Frames are extracted per frame or per time basis.
         If enabled the video time step continues onward according to the play rate.
         Useful for ip cameras and other real time video feeds.
@@ -243,7 +243,7 @@ class Video(object):
         Media location URI. Video file path or http address of IP camera.
     size: tuple, optional
         Size of returned array.
-    sync: bool, optional 
+    sync: bool, optional (default False)
         Frames are extracted per frame or per time basis. Gstreamer only.
         If enabled the video time step continues onward according to the play rate.
         Useful for IP cameras and other real time video feeds.
@@ -341,7 +341,7 @@ class Video(object):
     
     def get_collection(self, time_range=None):
         """
-        Returns an ImageCollection object 
+        Returns an ImageCollection object.
         
         Parameters
         ----------
@@ -354,7 +354,7 @@ class Video(object):
             Collection of images iterator.
         """
         if not time_range:
-            time_range = range(0, self.frame_count())
+            time_range = range(self.frame_count())
         return ImageCollection(time_range, load_func=self.get_index_frame)
     
     
