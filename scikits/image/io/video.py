@@ -1,5 +1,6 @@
 import numpy as np
 import os, time
+from scikits.image.io import ImageCollection
 
 try:
     import pygst
@@ -20,12 +21,12 @@ except ImportError:
 
 class CvVideo(object):
     """
-    Opencv-based video player.
+    Opencv-based video loader.
 
     Parameters
     ----------
     source : str
-        Media location.
+        Media location URI. Video file path or http address of IP camera.
     size: tuple, optional
         Size of returned array.
     """
@@ -105,12 +106,12 @@ class CvVideo(object):
         
 class GstVideo(object):
     """
-    GStreamer-based video player.
+    GStreamer-based video loader.
 
     Parameters
     ----------
     source : str
-        Media location.
+        Media location URI. Video file path or http address of IP camera.
     size: tuple, optional
         Size of returned array.
     sync: bool, optional
@@ -234,12 +235,12 @@ class GstVideo(object):
 
 class Video(object):
     """
-    Video player. Supports Opencv and Gstreamer backends.
+    Video loader. Supports Opencv and Gstreamer backends.
     
     Parameters
     ----------
     source : str
-        Media location.
+        Media location URI. Video file path or http address of IP camera.
     size: tuple, optional
         Size of returned array.
     sync: bool, optional 
@@ -268,7 +269,7 @@ class Video(object):
 
     def get(self):
         """
-        Retrieve a video frame as a numpy array.
+        Retrieve the next video frame as a numpy array.
         
         Returns
         -------
@@ -321,6 +322,41 @@ class Video(object):
         """
         return self.video.duration()
      
+    def get_index_frame(self, frame_number):
+        """
+        Retrieve a specified video frame as a numpy array.
+        
+        Parameters
+        ----------
+        frame_number : int
+            Frame position
+
+        Returns
+        -------
+        output : array (image)
+            Retrieved image.
+        """        
+        self.video.seek_frame(frame_number)
+        return self.video.get()
+    
+    def get_collection(self, time_range=None):
+        """
+        Returns an ImageCollection object 
+        
+        Parameters
+        ----------
+        time_range: range (int)
+            Time steps to extract.
+                
+        Returns
+        -------
+        output: ImageCollection            
+            Collection of images iterator.
+        """
+        if not time_range:
+            time_range = range(0, self.frame_count())
+        return ImageCollection(time_range, load_func=self.get_index_frame)
+    
     
 __all__ = ["Video"]
 
