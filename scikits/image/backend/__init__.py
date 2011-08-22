@@ -4,7 +4,6 @@ from scikits.image import log
 import warnings
 import ast
 from nose.plugins.skip import SkipTest
-import unittest
 
 class BackendTester(object):
     """
@@ -67,7 +66,6 @@ class BackendManager(object):
             backend_module_str += "." + source
         module_name = module
         for function_name in functions:
-            #print "registering", backend_name, module_name, function_name, backend_module_str      
             function_name = function_name.split(".")
             ending_module = function_name[:-1]
             if ending_module:
@@ -136,7 +134,6 @@ class BackendManager(object):
             if not self.backend_imported[module_location]:
                 module = __import__(module_location, fromlist=[module_location])
                 self.backend_imported[module_location] = True
-                print module_location, backend_name, function_name
                 for f_name in self.backend_listing[module_name][backend_name]:
                     self.backend_listing[module_name][backend_name][f_name] = \
                         getattr(module, f_name)
