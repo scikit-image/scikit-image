@@ -41,12 +41,12 @@ def radon(image, theta=None):
     if theta == None:
         theta = np.arange(180)    
     height, width = image.shape
-    diagonal = np.sqrt(height**2 + width**2)
+    diagonal = np.sqrt(height ** 2 + width ** 2)
     heightpad = np.ceil(diagonal - height) + 2
     widthpad = np.ceil(diagonal - width) + 2
-    padded_image = np.zeros((int(height+heightpad), int(width+widthpad)))
-    y0, y1 = int(np.ceil(heightpad/2)), int((np.ceil(heightpad/2)+height))
-    x0, x1 = int((np.ceil(widthpad/2))), int((np.ceil(widthpad/2)+width))
+    padded_image = np.zeros((int(height + heightpad), int(width + widthpad)))
+    y0, y1 = int(np.ceil(heightpad / 2)), int((np.ceil(heightpad / 2) + height))
+    x0, x1 = int((np.ceil(widthpad / 2))), int((np.ceil(widthpad / 2) + width))
     padded_image[y0:y1, x0:x1] = image
     out = np.zeros((max(padded_image.shape), len(theta)))
     for i in range(len(theta)):
@@ -140,24 +140,15 @@ def iradon(radon_image, theta=None, output_size=None, filter="ramp", interpolati
     if interpolation == "nearest":   
         for i in range(len(theta)):
             k = np.round(mid_index + xpr*np.sin(th[i]) - ypr*np.cos(th[i]))
-            reconstructed += radon_filtered[((((k > 0) & (k < n))*k) - 1).astype(np.int), i]             
+            reconstructed += radon_filtered[((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]             
     elif interpolation == "linear":
         for i in range(len(theta)):
           t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
           a = np.floor(t)
           b = mid_index + a 
-          b0 = ((((b + 1 > 0) & (b + 1 < n))*(b + 1)) - 1).astype(np.int)
-          b1 = ((((b > 0) & (b < n))*b) - 1).astype(np.int)
+          b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
+          b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
           reconstructed += (t - a) * radon_filtered[b0, i] + (a - t + 1) * radon_filtered[b1, i]
-# XXX slow with some artifacts
-#    elif interpolation == "spline":
-#        axis = np.arange(0, radon_filtered.shape[0]) - mid_index
-#        for i in range(len(theta)):
-#            print i
-#            t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
-#            #f = interp1d(axis, radon_filtered[:, i], kind="cubic", bounds_error=False, fill_value=0) 
-#            f = interp1d(axis, radon_filtered[:, i], kind="linear", bounds_error=False, fill_value=0)
-#            reconstructed += f(t).reshape(output_size, output_size)
     else:
         raise ValueError("Unknown interpolation: %s" % interpolation)
         
