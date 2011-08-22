@@ -1,0 +1,69 @@
+**************
+Backend System
+**************
+
+Let us consider adding a new backend for the Sobel filter.
+We create a new directory scikits/image/filter/backend with a file __init__.py:
+
+    from scikits.image.backend import register
+    register(backend="new_backend", module="scikits.image.filter", 
+        functions=["sobel"],
+        source="backend_sobel")
+    
+This registers the backend "new_backend" supporting the function in the 
+specified scikits module, with the implementation located in 
+scikits/image/filter/backend/backend_sobel.py
+
+Importing of the module is done only during backend selection.
+More than one function can be specified in the functions parameter.
+
+Sobel is implemented in scikits/image/filter/edges.py, so for the final step
+we simply prefix that function definition with the following decorator:
+
+    from scikits.image.backend import add_backends
+
+    @add_backends
+    def sobel(...):
+        ...
+    
+Sobel is now backend enabled. 
+Select the backend in your code:
+
+    from scikits.image.filter import sobel
+    output = sobel(image, backend="new_backend")
+
+
+or to select a global backend:
+
+    from scikits.image.backend import use_backend
+    use_backend("new_backend")
+    output = sobel(image)
+
+    
+View the backends available for sobel:
+    
+    from scikits.image.backend import backing
+    backing(sobel)
+
+
+Backends can be selected with fallback preference, in case backends are not 
+available for a method. We always fall back to default if none matches.
+
+    use_backend(["backend1", "new_backend"])
+    output = sobel(image) # uses the new_backend implementation
+    
+
+A Nose test system is also available to test all of the backend implementations,
+by inheriting from the BackendTester class.
+
+    from scikits.image.backend import BackendTester
+
+    class Test(BackendTester):
+        def test_sobel(self):
+            assert sobel(image) != None
+        
+All the backends will be selected in turn, and tests executed.
+
+
+
+
