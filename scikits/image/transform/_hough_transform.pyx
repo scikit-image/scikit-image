@@ -86,7 +86,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     cdef np.ndarray[ndim=2, dtype=np.int64_t] accum
     cdef np.ndarray[ndim=2, dtype=np.uint8_t] mask = np.zeros((height, width), dtype=np.uint8)
     cdef np.ndarray[ndim=2, dtype=np.int32_t] line_end = np.zeros((2, 2), dtype=np.int32)
-    cdef int max_distance, offset, num_indexes, index, other_max, settle
+    cdef int max_distance, offset, num_indexes, index
     cdef double a, b
     cdef int nidxs, nthetas, i, j, x, y, px, py, accum_idx, value, max_value, max_theta
     cdef int shift = 16
@@ -111,8 +111,6 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     # create mask of all non-zero indexes
     for i in range(num_indexes):
         mask[y_idxs[i], x_idxs[i]] = 1
-    settle = 0
-    print
     while 1:
         # select random non-zero point
         count = len(points)
@@ -125,33 +123,19 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
         # if previously eliminated, skip
         if not mask[y, x]:
             continue
-        print "select", y, x
         value = 0
         max_value = value_threshold-1
         max_theta = -1
-        other_max = 0
         # apply hough transform on point
         for j in range(nthetas):
             accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
             accum[accum_idx, j] += 1
             value = accum[accum_idx, j]
             if value > max_value:
-                print "max", j, value
                 max_value = value
                 max_theta = j
-            # if two bordering angles have max values, extend the threshold for a while
-            if j != max_theta and value == max_value:
-                if abs(j - max_theta) <= 2:
-                    if settle > 100:
-                        other_max = 0
-                    else:
-                        other_max = 1
-            if j == 134 or j == 135:
-                print j, value, accum_idx, ctheta[j], stheta[j]
-        if max_value < value_threshold or other_max:
+        if max_value < value_threshold:
             continue
-        settle = 0
-        print "THETA", max_theta, max_value
         # from the random point walk in opposite directions and find line beginning and end
         a = -stheta[max_theta]
         b = ctheta[max_theta]

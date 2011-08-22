@@ -13,6 +13,9 @@ def append_desc(func, description):
 
     return func
 
+from scikits.image.transform import *
+import math
+
 def test_hough():
     # Generate a test image
     img = np.zeros((100, 100), dtype=int)
@@ -27,6 +30,7 @@ def test_hough():
 
     assert_equal(dist > 70, dist < 72)
     assert_equal(theta > 0.78, theta < 0.79)
+
 
 def test_hough_angles():
     img = np.zeros((10, 10))
@@ -50,17 +54,18 @@ def test_probabilistic_hough():
     for i in range(25, 75):
         img[100 - i, i] = 100
         img[i, i] = 100
-    # test the line extraction a few times
-    for i in range(100):
-        lines = probabilistic_hough(img, threshold=10, line_length=10, line_gap=1)
-        # sort the lines according to the x-axis
-        sorted_lines = []
-        for line in lines:
-            line = list(line)
-            line.sort(lambda x,y: cmp(x[0], y[0]))
-            sorted_lines.append(line)
-        assert([(25, 75), (74, 26)] in sorted_lines)
-        assert([(25, 25), (74, 74)] in sorted_lines)
+    # decrease default theta sampling because similar orientations may confuse
+    # as mentioned in article of Galambos et al
+    theta=np.linspace(0, math.pi, 45)
+    lines = probabilistic_hough(img, theta=theta, threshold=10, line_length=10, line_gap=1)
+    # sort the lines according to the x-axis
+    sorted_lines = []
+    for line in lines:
+        line = list(line)
+        line.sort(lambda x,y: cmp(x[0], y[0]))
+        sorted_lines.append(line)
+    assert([(25, 75), (74, 26)] in sorted_lines)
+    assert([(25, 25), (74, 74)] in sorted_lines)
 
 
 if __name__ == "__main__":
