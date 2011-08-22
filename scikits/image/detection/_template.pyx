@@ -12,133 +12,146 @@ cdef extern from "math.h":
 
 
 @cython.boundscheck(False)
-cdef void integral_image(float *image, double *ii, int width, int height):
+cdef integral_image(np.ndarray[float, ndim=2, mode="c"] image):
     """
     Calculate the summed integral image.
     
     Parameters
     ----------
-    image : *float
-        Pointer to source image, single channel.
-    ii : *double
-        Pointer to destination summed integral image.
-    width : int
-        Image width.
-    height : int
-        Image height.
+    image : array_like, dtype=float
+        Source image.
+        
+    Returns
+    -------
+    output : ndarray, dtype=np.double_t
+        Summed integral image.
     """
-    cdef double *prev_line = ii
+    cdef np.ndarray[np.double_t, ndim=2, mode="c"] ii = np.zeros((image.shape[0], image.shape[1]))
     cdef double s
     cdef int x, y
-    ii[0] = image[0]
-    ii += 1
-    image += 1
-    for x in range(1, height):
-        ii[0] = (image[0])
-        ii[0] += (ii - 1)[0]
-        ii += 1
-        image += 1
-    for y in range(1, width):
+    cdef int width, height
+    height = image.shape[0]
+    width = image.shape[1]
+    ii[0, 0] = image[0, 0]
+
+    for y in range(1, height):
+        ii[y, 0] = image[y, 0] + ii[y - 1, 0]
+
+    for x in range(1, width):
         s = 0
-        for x in range(0, height):
-            s += image[0]
-            ii[0] = s
-            ii[0] += prev_line[0]
-            ii += 1
-            image += 1
-            prev_line += 1
+        for y in range(0, height):
+            s += image[y, x]
+            ii[y, x] = s + ii[y, x - 1]
+    
+    return ii
 
 
 @cython.boundscheck(False)
-cdef void integral_image2(float *image, double *ii2, int width, int height):
+cdef integral_image_sqr(np.ndarray[float, ndim=2, mode="c"] image):
     """
     Calculate the squared integral image.
     
     Parameters
     ----------
-    image : *float
-        Pointer to source image, single channel.
-    ii2 : *double
-        Pointer to destination squared integral image.
-    width : int
-        Image width.
-    height : int
-        Image height.
+    image : array_like, dtype=float
+        Source image.
+        
+    Returns
+    -------
+    output : ndarray, dtype=np.double_t
+        Squared integral image.
     """
-    cdef double *prev_line = ii2
+    cdef np.ndarray[np.double_t, ndim=2, mode="c"] ii2 = np.zeros((image.shape[0], image.shape[1]))
     cdef double s
     cdef int x, y
-    ii2[0] = (image[0])*(image[0])
-    ii2 += 1
-    image += 1
-    for x in range(1, height):
-        ii2[0] = (image[0]) * (image[0])
-        ii2[0] += (ii2 - 1)[0]
-        ii2 += 1
-        image += 1
-    for y in range(1, width):
+    cdef int width, height
+    height = image.shape[0]
+    width = image.shape[1]
+    ii2[0, 0] = image[0, 0] * image[0, 0]
+
+    for y in range(1, height):
+        ii2[y, 0] = image[y, 0] * image[y, 0] + ii2[y - 1, 0]
+
+    for x in range(1, width):
         s = 0
-        for x in range(0, height):
-            s += image[0]
-            s += (image[0]) * (image[0])
-            ii2[0] = s
-            ii2[0] += prev_line[0]
-            ii2 += 1
-            image += 1
-            prev_line += 1
+        for y in range(0, height):
+            s += image[y, x] * image[y, x]
+            ii2[y, x] = s + ii2[y, x - 1]
+    
+    return ii2
 
 
 @cython.boundscheck(False)
-cdef void integral_images(float *image, double *ii, double *ii2, int width, int height):
+cdef integral_images(np.ndarray[float, ndim=2, mode="c"] image):
     """
-    Calculate the summed and squared integral image.
+    Calculate the summed and sqared integral image.
     
     Parameters
     ----------
-    image : *float
-        Pointer to source image, single channel.
-    ii : *double
-        Pointer to destination summed integral image.
-    ii2 : *double
-        Pointer to destination squared integral image.
-    width : int
-        Image width.
-    height : int
-        Image height.
+    image : array_like, dtype=float
+        Source image.
+        
+    Returns
+    -------
+    output : tuple (ndarray, ndarray) of type np.double_t
+        Summed and squared integral image.
     """
-
-    cdef double *prev_line = ii
-    cdef double *prev_line2 = ii2
+    cdef np.ndarray[np.double_t, ndim=2, mode="c"] ii = np.zeros((image.shape[0], image.shape[1]))
+    cdef np.ndarray[np.double_t, ndim=2,  mode="c"] ii2 = np.zeros((image.shape[0], image.shape[1]))
     cdef double s, s2
     cdef int x, y
-    ii[0] = image[0]
-    ii2[0] = (image[0] * image[0])
-    ii += 1
-    ii2 += 1
-    image += 1
-    for x in range(1, height):
-        ii[0] = (image[0])
-        ii[0] += (ii - 1)[0]
-        ii += 1        
-        ii2[0] = (image[0]) * (image[0])
-        ii2[0] += (ii2 - 1)[0]
-        ii2 += 1
-        image += 1
-    for y in range(1, width):
+    cdef int width, height
+    height = image.shape[0]
+    width = image.shape[1]
+    ii[0, 0] = image[0, 0]
+    ii2[0, 0] = image[0, 0] * image[0, 0]
+
+    for y in range(1, height):
+        ii[y, 0] = image[y, 0] + ii[y - 1, 0]
+        ii2[y, 0] = image[y, 0] * image[y, 0] + ii2[y - 1, 0]
+
+    for x in range(1, width):
         s = 0
         s2 = 0
-        for x in range(0, height):
-            s += image[0]
-            ii[0] = s
-            ii[0] += prev_line[0]
-            ii += 1
-            s2 += (image[0]) * (image[0])
-            ii2[0] = s2
-            ii2[0] += prev_line2[0]
-            ii2 += 1
-            image += 1
-            prev_line += 1
-            prev_line2 += 1
+        for y in range(0, height):
+            s += image[y, x]
+            s2 += image[y, x] * image[y, x]
+            ii[y, x] = s + ii[y, x - 1]
+            ii2[y, x] = s2 + ii2[y, x - 1]
+    
+    return ii, ii2
+
+cpdef np.double_t sat_sum(np.ndarray sat, int r0, int c0, int r1, int c1):
+    """Using a summed area table / integral image, calculate the sum
+    over a given window.
+
+    Parameters
+    ----------
+    sat : ndarray of uint64
+        Summed area table / integral image.
+    r0, c0 : int
+        Top-left corner of block to be summed.
+    r1, c1 : int
+        Bottom-right corner of block to be summed.
+
+    Returns
+    -------
+    S : int
+        Sum over the given window.
+
+    """
+    cdef np.double_t S = 0
+
+    S += sat[r1, c1]
+
+    if (r0 - 1 >= 0) and (c0 - 1 >= 0):
+        S += sat[r0 - 1, c0 - 1]
+
+    if (r0 - 1 >= 0):
+        S -= sat[r0 - 1, c1]
+
+    if (c0 - 1 >= 0):
+        S -= sat[r1, c0 - 1]
 
 
 @cython.boundscheck(False)
@@ -148,13 +161,13 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     cdef np.ndarray[np.double_t, ndim=2] result
     result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template), mode="valid"), dtype=np.double)
     # calculate squared integral images used for normalization
-    cdef np.ndarray integral_sum = np.zeros((image.shape[0], image.shape[1]))
-    cdef np.ndarray integral_sqr = np.zeros((image.shape[0], image.shape[1]))
+    cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sum
+    cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sqr
+    
     if num_type == 1:
-        integral_images(<float*>image.data, <double*>integral_sum.data, 
-            <double*>integral_sqr.data, image.shape[0], image.shape[1])
+        integral_sum, integral_sqr = integral_images(image)
     else:
-        integral_image2(<float*>image.data, <double*>integral_sqr.data, image.shape[0], image.shape[1])
+        integral_sqr = integral_image_sqr(image)
     # use inversed area for accuracy
     cdef double inv_area = 1.0 / (template.shape[0] * template.shape[1])
     # calculate template norm according to the following:
@@ -197,6 +210,7 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
         
             # calculate squared template window sum in the image
             window_sum2 = q0[index] - q1[index] - q2[index] + q3[index]
+            sat_sum(integral_sqr, i, j, i + template.shape[0], j + template.shape[1])
             normed = sqrt(window_sum2 - window_mean2) * template_norm
             # enforce some limits
             if fabs(num) < normed:
