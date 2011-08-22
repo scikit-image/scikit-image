@@ -121,13 +121,17 @@ cdef integral_images(np.ndarray[float, ndim=2, mode="c"] image):
     
     return ii, ii2
 
-cpdef np.double_t sat_sum(np.ndarray sat, int r0, int c0, int r1, int c1):
-    """Using a summed area table / integral image, calculate the sum
+
+@cython.boundscheck(False)
+cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat, 
+        int r0, int c0, int r1, int c1):
+    """
+    Using a summed area table / integral image, calculate the sum
     over a given window.
 
     Parameters
     ----------
-    sat : ndarray of uint64
+    sat : ndarray of double_t
         Summed area table / integral image.
     r0, c0 : int
         Top-left corner of block to be summed.
@@ -138,9 +142,8 @@ cpdef np.double_t sat_sum(np.ndarray sat, int r0, int c0, int r1, int c1):
     -------
     S : int
         Sum over the given window.
-
     """
-    cdef np.double_t S = 0
+    cdef double S = 0
 
     S += sat[r1, c1]
 
@@ -152,6 +155,7 @@ cpdef np.double_t sat_sum(np.ndarray sat, int r0, int c0, int r1, int c1):
 
     if (c0 - 1 >= 0):
         S -= sat[r1, c0 - 1]
+    return S
 
 
 @cython.boundscheck(False)
@@ -163,11 +167,11 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     # calculate squared integral images used for normalization
     cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sum
     cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sqr
-    
     if num_type == 1:
         integral_sum, integral_sqr = integral_images(image)
     else:
         integral_sqr = integral_image_sqr(image)
+
     # use inversed area for accuracy
     cdef double inv_area = 1.0 / (template.shape[0] * template.shape[1])
     # calculate template norm according to the following:
@@ -180,37 +184,21 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     else:
         template_norm = sqrt((template_mean ** 2)) / sqrt(inv_area)
         
-    cdef int sqstep = integral_sqr.strides[0] / sizeof(double)
     # define window of template size in squared integral image
-    cdef double *p0, *p1, *p2, *p3
-    cdef double *q0, *q1, *q2, *q3
-    q0 = <double*> integral_sqr.data
-    q1 = q0 + template.shape[1] 
-    q2 = <double*>integral_sqr.data + template.shape[0] * sqstep
-    q3 = q2 + template.shape[1]
-    if num_type == 1:
-        # define window of template size in summed integral image
-        p0 = <double*> integral_sum.data
-        p1 = p0 + template.shape[1] 
-        p2 = <double*>integral_sum.data + template.shape[0] * sqstep
-        p3 = p2 + template.shape[1]
-    
-    cdef int i, j, index
+    cdef int i, j
     cdef double num, window_sum2, window_mean2, normed, t, 
     # move window through convolution results, normalizing in the process
     for i in range(result.shape[0] - 1):
-        index = i * sqstep;
         for j in range(result.shape[1] - 1):
             num = result[i, j]
             window_mean2 = 0
             if num_type == 1:
-                t = p0[index] - p1[index] - p2[index] + p3[index]
+                t = sum_integral(integral_sum, i, j, i + template.shape[0], j + template.shape[1])
                 window_mean2 = t * t * inv_area
                 num -= t*template_mean
         
             # calculate squared template window sum in the image
-            window_sum2 = q0[index] - q1[index] - q2[index] + q3[index]
-            sat_sum(integral_sqr, i, j, i + template.shape[0], j + template.shape[1])
+            window_sum2 = sum_integral(integral_sqr, i, j, i + template.shape[0], j + template.shape[1])
             normed = sqrt(window_sum2 - window_mean2) * template_norm
             # enforce some limits
             if fabs(num) < normed:
@@ -223,7 +211,6 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             else:
                 num = 0
             result[i, j] = num
-            index += 1
     # zero boundaries
     for i in range(result.shape[0]):
         result[i, -1] = 0
