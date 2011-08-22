@@ -14,7 +14,6 @@ def append_desc(func, description):
     return func
 
 from scikits.image.transform import *
-import math
 
 def test_hough():
     # Generate a test image
@@ -56,7 +55,7 @@ def test_probabilistic_hough():
         img[i, i] = 100
     # decrease default theta sampling because similar orientations may confuse
     # as mentioned in article of Galambos et al
-    theta=np.linspace(0, math.pi, 45)
+    theta=np.linspace(0, np.pi, 45)
     lines = probabilistic_hough(img, theta=theta, threshold=10, line_length=10, line_gap=1)
     # sort the lines according to the x-axis
     sorted_lines = []

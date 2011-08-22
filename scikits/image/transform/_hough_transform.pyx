@@ -1,11 +1,13 @@
 cimport cython
-
 import numpy as np
 cimport numpy as np
 from random import randint
 np.import_array()
 
-
+cdef extern from "stdlib.h":
+    int rand()
+    void randomize()
+        
 cdef extern from "math.h":
     int abs(int)
     double fabs(double)
@@ -95,7 +97,6 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     cdef int xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, good_line, count
     max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] + 
                                        img.shape[1] * img.shape[1])))
-    #max_distance = (img.shape[0] + img.shape[1]) * 2 
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
     offset = max_distance / 2
     # find the nonzero indexes
@@ -103,7 +104,6 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     y_idxs, x_idxs =  np.nonzero(img)
     num_indexes = y_idxs.shape[0] # x and y are the same shape
     nthetas = theta.shape[0]
-    
     points = []
     for i in range(num_indexes):
         points.append((x_idxs[i], y_idxs[i]))
@@ -116,7 +116,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
         count = len(points)
         if count == 0:
             break        
-        index = randint(0, count-1)
+        index = rand() % (count)
         x = points[index][0]
         y = points[index][1]
         del points[index]        
