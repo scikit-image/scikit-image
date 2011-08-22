@@ -2,7 +2,9 @@
 Radon transform
 ***************
 
-The radon transform is a technique widely used in tomography, where you reconstruct an object from its different projections. A projection for example the scattering data obtained as the output of a tomographic scan.
+The radon transform is a technique widely used in tomography, where you 
+reconstruct an object from its different projections. A projection for example 
+the scattering data obtained as the output of a tomographic scan.
 
 For more information:
     http://en.wikipedia.org/wiki/Radon_transform
@@ -11,7 +13,8 @@ For more information:
 Forward transform
 =================
 
-First we load the Schepp-Logan phantom, a classic test image representing a tomographic scan.
+First we load the Schepp-Logan phantom, a classic test image representing a 
+tomographic scan.
 
 .. ipython::
 
@@ -37,7 +40,8 @@ First we load the Schepp-Logan phantom, a classic test image representing a tomo
     In [9]: plt.show()
 
 
-Let us illustrate the transform by looking at projections taken at specific angles.
+Let us illustrate the transform by looking at projections taken at specific 
+angles.
 
 .. ipython::
 
@@ -54,7 +58,8 @@ Let us illustrate the transform by looking at projections taken at specific angl
     @savefig radon_projection_plot1.png width=4in
     In [15]: plt.show()
 
-We are going to reconstruct an image from 180 of these projections (the default).
+We are going to reconstruct an image from 180 of these projections (the 
+default).
 
 .. ipython::
 
@@ -74,7 +79,8 @@ We are going to reconstruct an image from 180 of these projections (the default)
     In [22]: plt.show()
     
 
-We have now constructed various projections, line integrals of an image, at specific angles. This image is called a sinogram.
+We have now constructed various projections, line integrals of an image, at 
+specific angles. This image is called a sinogram.
 
 .. ipython::
 
@@ -90,6 +96,7 @@ We have now constructed various projections, line integrals of an image, at spec
 
     @savefig radon_sinogram.png width=4in
     In [28]: plt.show()
+
 
 Inverse transform
 =================
