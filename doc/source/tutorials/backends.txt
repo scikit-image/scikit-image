@@ -10,6 +10,7 @@ We create a new directory scikits/image/filter/backend with a file __init__.py:
         functions=["sobel"],
         source="backend_sobel")
     
+    
 This registers the backend "new_backend" supporting the function in the 
 specified scikits module, with the implementation located in 
 scikits/image/filter/backend/backend_sobel.py
@@ -25,6 +26,7 @@ we simply prefix that function definition with the following decorator:
     @add_backends
     def sobel(...):
         ...
+    
     
 Sobel is now backend enabled. 
 Select the backend in your code:
@@ -61,6 +63,7 @@ by inheriting from the BackendTester class.
     class Test(BackendTester):
         def test_sobel(self):
             assert sobel(image) != None
+        
         
 All the backends will be selected in turn, and tests executed.
 
