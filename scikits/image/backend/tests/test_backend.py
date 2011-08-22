@@ -65,7 +65,7 @@ def test_documentation_update():
 
 def test_backing():
     backends = backing(_test1)
-    print backends
+    print backends, 123
     for b in ["backend1", "backend2", "default"]:
         assert b in backends
 

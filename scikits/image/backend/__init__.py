@@ -33,7 +33,7 @@ class BackendManager(object):
         # add default backend to the namespace
         scikits.image.backends = ["default"]
         self.current_backend = "default"
-        self.fallback_backends = []
+        self.fallback_backends = ["default"]
         self.backend_listing = {}
         self.backend_modules = {}
         self.backend_imported = {}
@@ -44,16 +44,16 @@ class BackendManager(object):
         
         Parameters
         ----------
-            backend: str
-                Name of backend.
-            module: str
-                Name of module that is supported.
-            source: str
-                Backend implementation module located in the backends subdirectory.
-            functions: list of str
-                Functions to be registered.
-            unlisted: boolean, optional
-                Omit backend from listing (used in testing).
+        backend : str
+            Name of backend.
+        module : str
+            Name of module that is supported.
+        source : str
+            Backend implementation module located in the backends subdirectory.
+        functions : list of str
+            Functions to be registered.
+        unlisted : boolean, optional
+            Omit backend from listing (used in testing).
         """
         if not backend:
             raise ValueError("Specify backend name.")
@@ -113,16 +113,16 @@ class BackendManager(object):
         
         Parameters
         ----------
-            backend_name: str
-                Name of backend.
-            module_name: str
-                Name of function module.
-            function_name: str
-                Function name.
+        backend_name : str
+            Name of backend.
+        module_name : str
+            Name of function module.
+        function_name : str
+            Function name.
         Returns
         -------
-            output: boolean
-                Backend supports for a function.
+        output: boolean
+            Backend supports for a function.
         """
         # check if backend has been imported and if not do so
         if not (backend_name in self.backend_listing[module_name] and\
@@ -145,14 +145,14 @@ class BackendManager(object):
         
         Parameters
         ----------
-        backend: str, optional
+        backend : str, optional
             Selects a new backend globally.
-            Default backend is selected if None or if the parameter is omitted.
+            Unless specified, the default backend is used.
         """
         if isinstance(backend, list):
             if backend:            
                 current_backend = backend[0]
-                fallback_backends = backend[1:]
+                fallback_backends = backend[1:] + ["default"]
             else:
                 current_backend = "default"                
         else:
@@ -160,7 +160,7 @@ class BackendManager(object):
                 current_backend = "default"
             else:
                 current_backend = backend
-            fallback_backends = []
+            fallback_backends = ["default"]
         self.current_backend = current_backend
         self.fallback_backends = fallback_backends
 
@@ -170,14 +170,15 @@ class BackendManager(object):
         
         Parameters
         ----------
-            function: function type 
-                Queried function.
+        function : function type 
+            Queried function.
         """
         module_name = ".".join(function.__module__.split('.')[:3])
         backends = []
         if module_name in self.backend_listing:
-            for backend in self.backend_listing[module_name]:
-                if function.__name__ in self.backend_listing[module_name][backend]:
+            backend_funcs = self.backend_listing[module_name]
+            for backend in backend_funcs:
+                if function.__name__ in backend_funcs[backend]:
                     backends.append(backend)
         return backends
 
@@ -211,9 +212,7 @@ def add_backends(function):
                                 
     def wrapper(*args, **kwargs):
         if "backend" in kwargs:
-            backend = kwargs.get("backend")
-            if backend == None:
-                backend = "default"
+            backend = kwargs.get("backend", "default")
             del kwargs["backend"]
         else:
             backend = _manager.current_backend
@@ -227,9 +226,6 @@ def add_backends(function):
                     # make sure backend imported
                     if _manager._ensure_backend_loaded(backend, module_name, function_name):
                         break                
-            else:
-                log.warn("Falling back to default implementation from backend %s" % backend)
-                backend = "default"
         # execute the backend function and return result
         return listing[backend][function_name](*args, **kwargs)
     
