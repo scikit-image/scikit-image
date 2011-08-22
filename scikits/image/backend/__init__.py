@@ -173,7 +173,7 @@ class BackendManager(object):
             function: function type 
                 Queried function.
         """
-        module_name = function.__module__
+        module_name = ".".join(function.__module__.split('.')[:3])
         backends = []
         if module_name in self.backend_listing:
             for backend in self.backend_listing[module_name]:
