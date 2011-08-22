@@ -3,6 +3,7 @@ from numpy.testing import *
 
 import scikits.image.transform as tf
 import scikits.image.transform.hough_transform as ht
+from scikits.image.transform import probabilistic_hough
 
 def append_desc(func, description):
     """Append the test function ``func`` and append
@@ -42,6 +43,23 @@ def test_py_hough():
     yield append_desc(test_hough_angles, '_python')
 
     tf._hough = fast_hough
+
+def test_probabilistic_hough():
+    # Generate a test image
+    img = np.zeros((100, 100), dtype=int)
+    for i in range(25, 75):
+        img[100 - i, i] = 100
+        img[i, i] = 100
+    lines = probabilistic_hough(img, 10, line_length=10, line_gap=1)
+    # sort the lines according to the x-axis
+    sorted_lines = []
+    for line in lines:
+        line = list(line)
+        line.sort(lambda x,y: cmp(x[0], y[0]))
+        sorted_lines.append(line)
+    assert([(25, 75), (74, 26)] in sorted_lines)
+    assert([(25, 25), (74, 74)] in sorted_lines)
+
 
 if __name__ == "__main__":
     run_module_suite()
