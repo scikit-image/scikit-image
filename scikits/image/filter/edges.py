@@ -13,11 +13,6 @@ from scipy.ndimage import convolve
 from scikits.image.backend import add_backends
 import sys
 
-
-@add_backends
-def test():
-    print "test from numpy"
-
     
 @add_backends
 def sobel(image, axis=None, output=None):
@@ -44,7 +39,6 @@ def sobel(image, axis=None, output=None):
     Note that scipy's Sobel returns a directional Sobel which isn't
     useful for edge detection in its raw form.
     """
-    print "running numpy sobel"
     if image.dtype == np.uint8:
         output_type = np.int16
     elif image.dtype == np.float32:
@@ -77,12 +71,3 @@ def sobel(image, axis=None, output=None):
                                   [ 2, 0,-2],
                                   [ 1, 0,-1]]), output=dy)
         return dy
-
-
-#    hprewitt = np.abs(convolve(image, np.array([[ 1, 1, 1],
-#                                              [ 0, 0, 0],
-#                                              [-1,-1,-1]]).astype(float) / 3.0))                              
-#    vprewitt = np.abs(convolve(image, np.array([[ 1, 0,-1],
-#                                              [ 1, 0,-1],
-#                                              [ 1, 0,-1]]).astype(float) / 3.0))
-

@@ -2,14 +2,11 @@ import numpy as np
 import cv
 import time
 
-def test():
-    print "test from opencv"
 
 def sobel(image, axis=None, output=None):
     """
     OpenCV implementation of the sobel operator.
     """
-    print "running opencv sobel"
     if not image.flags["C_CONTIGUOUS"]:
         image = np.ascontiguousarray(image)
     if image.dtype == np.uint8:
@@ -44,18 +41,3 @@ def sobel(image, axis=None, output=None):
         elif axis == 1:
             cv.Sobel(image, output, 1, 0, 3)
         return output
-    
-if __name__ == "__main__":
-    import os
-    from scikits.image import data_dir
-    from scikits.image import io
-    from scikits.image.color import rgb2gray
-    image = rgb2gray(io.imread(os.path.join(data_dir,"lena512.png"))).astype(np.uint8)
-    image = rgb2gray(io.imread(os.path.join(data_dir,"lena512.png"))).astype(np.float32)
-    #image = np.zeros((2000, 2000), dtype=np.float32)
-    t = time.time()
-    output = sobel(image, axis=None)
-    print time.time() - t
-    io.use_plugin("gtk")    
-    io.imshow(output.astype(np.uint8))
-    #io.show()
