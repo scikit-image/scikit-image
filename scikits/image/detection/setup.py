@@ -1,11 +1,33 @@
+#!/usr/bin/env python
 
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
-import numpy
+import os
+import shutil
+import hashlib
 
-setup(
-    cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("_template", ["_template.pyx"])],
-    include_dirs = [numpy.get_include(),],
-)
+from scikits.image._build import cython
+
+base_path = os.path.abspath(os.path.dirname(__file__))
+
+def configuration(parent_package='', top_path=None):
+    from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
+
+    config = Configuration('transform', parent_package, top_path)
+    config.add_data_dir('tests')
+
+    cython(['_template.pyx'], working_path=base_path)
+
+    config.add_extension('_template', sources=['_template.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+
+    return config
+
+if __name__ == '__main__':
+    from numpy.distutils.core import setup
+    setup(maintainer = 'Scikits.Image Developers',
+          author = 'Scikits.Image Developers',
+          maintainer_email = 'scikits-image@googlegroups.com',
+          description = 'Transforms',
+          url = 'http://stefanv.github.com/scikits.image/',
+          license = 'SciPy License (BSD Style)',
+          **(configuration(top_path='').todict())
+          )

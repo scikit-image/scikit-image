@@ -13,6 +13,20 @@ cdef extern from "math.h":
 
 @cython.boundscheck(False)
 cdef void integral_image(float *image, double *ii, int width, int height):
+    """
+    Calculate the summed integral image.
+    
+    Parameters
+    ----------
+    image : *float
+        Pointer to source image, single channel.
+    ii : *double
+        Pointer to destination summed integral image.
+    width : int
+        Image width.
+    height : int
+        Image height.
+    """
     cdef double *prev_line = ii
     cdef double s
     cdef int x, y
@@ -37,6 +51,20 @@ cdef void integral_image(float *image, double *ii, int width, int height):
 
 @cython.boundscheck(False)
 cdef void integral_image2(float *image, double *ii2, int width, int height):
+    """
+    Calculate the squared integral image.
+    
+    Parameters
+    ----------
+    image : *float
+        Pointer to source image, single channel.
+    ii2 : *double
+        Pointer to destination squared integral image.
+    width : int
+        Image width.
+    height : int
+        Image height.
+    """
     cdef double *prev_line = ii2
     cdef double s
     cdef int x, y
@@ -62,6 +90,23 @@ cdef void integral_image2(float *image, double *ii2, int width, int height):
 
 @cython.boundscheck(False)
 cdef void integral_images(float *image, double *ii, double *ii2, int width, int height):
+    """
+    Calculate the summed and squared integral image.
+    
+    Parameters
+    ----------
+    image : *float
+        Pointer to source image, single channel.
+    ii : *double
+        Pointer to destination summed integral image.
+    ii2 : *double
+        Pointer to destination squared integral image.
+    width : int
+        Image width.
+    height : int
+        Image height.
+    """
+
     cdef double *prev_line = ii
     cdef double *prev_line2 = ii2
     cdef double s, s2

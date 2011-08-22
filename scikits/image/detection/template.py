@@ -24,7 +24,7 @@ def match_template_cv(image, template, out=None,  method="norm-coeff"):
     if out == None:
         out = np.empty((image.shape[0] - template.shape[0] + 1,image.shape[1] - template.shape[1] + 1), dtype=image.dtype)
     if method == "norm-corr":
-        cv.MatchTemplate(image, template, out, cv.CV_TM_CCORR)#_NORMED)
+        cv.MatchTemplate(image, template, out, cv.CV_TM_CCORR_NORMED)
     elif method == "norm-corr":
         cv.MatchTemplate(image, template, out, cv.CV_TM_CCOEFF_NORMED)
     else:

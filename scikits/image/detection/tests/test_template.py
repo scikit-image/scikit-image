@@ -2,10 +2,8 @@ import os.path
 import numpy as np
 from numpy.testing import *
 from scikits.image import data_dir
-from scikits.image.io import *
 from scikits.image.detection import *
 from numpy.random import randn
-from math import sqrt
 
 def test_template():
     size = 100
@@ -28,7 +26,7 @@ def test_template():
             if not found_positions:
                 found_positions.append((x, y))
             for position in found_positions:
-                distance = sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
+                distance = np.sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
                 if distance > delta:
                     found_positions.append((x, y))
             result[y, x] = 0
@@ -39,7 +37,7 @@ def test_template():
             print x, y
             found = False
             for position in found_positions:
-                distance = sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
+                distance = np.sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
                 if distance < delta:
                     found = True
             assert found
