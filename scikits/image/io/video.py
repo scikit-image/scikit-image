@@ -345,8 +345,8 @@ class Video(object):
         
         Parameters
         ----------
-        time_range: range (int)
-            Time steps to extract.
+        time_range: range (int), optional
+            Time steps to extract, defaults to the entire length of video.
                 
         Returns
         -------
