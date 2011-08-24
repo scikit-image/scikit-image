@@ -13,6 +13,10 @@ by running
 
 in a terminal (You will need to have git installed on your machine).
 
+If you do not have git installed, you can also download a zipball from
+`https://github.com/scikits-image/scikits.image/zipball/master
+<https://github.com/scikits-image/scikits.image/zipball/master>`_.
+
 The SciKit can be installed globally using
 
 ::
