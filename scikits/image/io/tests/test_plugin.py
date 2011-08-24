@@ -17,7 +17,7 @@ try:
     io.use_plugin('freeimage')
     FI_available = True
     priority_plugin = 'freeimage'
-except ImportError:
+except OSError:
     FI_available = False
 
 
