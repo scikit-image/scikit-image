@@ -4,6 +4,22 @@ Build Requirements
 * `Numpy >= 1.4 <http://numpy.scipy.org/>`_
 * `Cython >= 0.13 <http://www.cython.org/>`_
 
+Known build errors
+------------------
+
+If Cython compilation fails with the error ``cpython.pycapsule.pxd not
+found`` (for Cython 0.14), try to `install Cython 0.15
+<http://www.cython.org/#download>`_ instead. 
+
+On Windows, the error ``Error:unable to find vcvarsall.bat`` means that
+distutils is not correctly configured to use the C compiler. Edit (create
+if not existing) the configuration file ``distutils.cfg`` (located for
+example at ``C:\Python26\Lib\distutils\distutils.cfg``) to be::
+
+    [build]
+    compiler=mingw32
+
+
 Usage Requirements
 ------------------
 * `Scipy <http://www.scipy.org/>`_
