@@ -6,7 +6,6 @@ np.import_array()
 
 cdef extern from "stdlib.h":
     int rand()
-    void randomize()
         
 cdef extern from "math.h":
     int abs(int)
