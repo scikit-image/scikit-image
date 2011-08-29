@@ -1,7 +1,7 @@
 Unless otherwise specified by LICENSE.txt files in individual
 directories, all code is
 
-Copyright (C) 2008 Stéfan van der Walt <stefan@mentat.za.net>
+Copyright (C) 2011, the scikits-image team
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
