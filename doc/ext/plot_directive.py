@@ -481,7 +481,7 @@ def run_code(code, code_path, ns=None, function_name=None):
 
 def clear_state(plot_rcparams):
     plt.close('all')
-    matplotlib.rc_file_defaults()
+    matplotlib.rcdefaults()
     matplotlib.rcParams.update(plot_rcparams)
 
 def render_figures(code, code_path, output_dir, output_base, context,
