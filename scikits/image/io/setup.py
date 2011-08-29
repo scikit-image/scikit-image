@@ -33,7 +33,7 @@ if __name__ == '__main__':
     setup(maintainer = 'scikits.image Developers',
           maintainer_email = 'scikits-image@googlegroups.com',
           description = 'Image I/O Routines',
-          url = 'http://stefanv.github.com/scikits.image/',
+          url = 'https://github.com/scikits-image/scikits.image',
           license = 'Modified BSD',
           **(configuration(top_path='').todict())
           )
