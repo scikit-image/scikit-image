@@ -1,0 +1,57 @@
+Image data types and what they mean
+===================================
+
+In ``scikits.image``, we assume the following dtype ranges:
+
+=========== ================
+Data type   Range 
+=========== ================
+uint8       0 to 255
+uint16      0 to 65535
+float       0 to 1
+int8        -128 to 127
+int16       -32767 to 32768
+=========== ================
+
+Input types
+-----------
+
+Functions may choose to support only a subset of these data-types.  In
+such a case, the input will be converted to the required type (if
+possible) and a warning message printed to the log if a memory copy is
+needed.  Type requirements should be noted in the docstrings.
+
+The following utility functions are available to developers and
+users:
+
+(*Tentative list only -- not implemented yet*)
+
+=============== =======================================
+Function name   Description   
+=============== =======================================
+img_as_float    Convert to 64-bit floating pt repre.
+                Scaled to 0/1.
+img_as_uint     Convert to 16-bit uint repr.
+                Scaled to 0-65535.
+img_as_int      Convert to 16-bit int repr.
+                Scaled to -32767 to 32768.
+=============== =======================================
+
+Wherever possible, functions should try to handle input
+without explicit conversion (e.g., there is no need to
+force values to a specific type for doing a convolution;
+a plotting function, on the other hand, needs to know the
+range of the input).
+
+Output types
+------------
+The output type of a function is determined by the function author,
+and documented for the benefit of the user.  While this requires the
+user to explicitly convert the output to whichever format is needed,
+it ensures that no unnecessary data copies take place.
+
+A user that requires a specific type of output (e.g., for display
+purposes), may do::
+
+  out = img_as_uint(sobel(img))
+  plt.imshow(out)
