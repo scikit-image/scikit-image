@@ -1,6 +1,6 @@
 import numpy as np
 
-def _tv_denoise_3d(im, weight=100, eps=2.e-4, keep_type=False, n_iter_max=200):
+def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     """
     Perform total-variation denoising on 3-D arrays
 
@@ -18,11 +18,6 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, keep_type=False, n_iter_max=200):
         the stop criterion. The algorithm stops when:
 
             (E_(n-1) - E_n) < eps * E_0
-
-    keep_type: bool, optional (False)
-        whether the output has the same dtype as the input array. 
-        keep_type is False by default, and the dtype of the output
-        is np.float
 
     n_iter_max: int, optional
         maximal number of iterations used for the optimization.
@@ -45,9 +40,6 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, keep_type=False, n_iter_max=200):
     >>> mask += 0.2*np.random.randn(*mask.shape)
     >>> res = tv_denoise_3d(mask, weight=100)
     """
-    im_type = im.dtype
-    if im_type is not np.float:
-        im = im.astype(np.float)
     px = np.zeros_like(im)
     py = np.zeros_like(im)
     pz = np.zeros_like(im)
@@ -88,12 +80,9 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, keep_type=False, n_iter_max=200):
             else:
                 E_previous = E
         i += 1
-    if keep_type:
-        return out.astype(im_type)
-    else:
-        return out
+    return out
  
-def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
+def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
     """
     Perform total-variation denoising
 
@@ -111,11 +100,6 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
         the stop criterion. The algorithm stops when:
 
             (E_(n-1) - E_n) < eps * E_0
-
-    keep_type: bool, optional (False)
-        whether the output has the same dtype as the input array. 
-        keep_type is False by default, and the dtype of the output
-        is np.float
 
     n_iter_max: int, optional
         maximal number of iterations used for the optimization.
@@ -149,9 +133,6 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     >>> lena += 0.5 * lena.std()*np.random.randn(*lena.shape)
     >>> denoised_lena = tv_denoise(lena, weight=60.0)
     """
-    im_type = im.dtype
-    if im_type is not np.float:
-        im = im.astype(np.float)
     px = np.zeros_like(im)
     py = np.zeros_like(im)
     gx = np.zeros_like(im)
@@ -185,10 +166,7 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
             else:
                 E_previous = E
         i += 1
-    if keep_type:
-        return out.astype(im_type)
-    else:
-        return out
+    return out
 
 def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     """
@@ -262,11 +240,18 @@ def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     >>> mask += 0.2*np.random.randn(*mask.shape)
     >>> res = tv_denoise_3d(mask, weight=100)
     """
+    im_type = im.dtype
+    if not im_type.kind == 'f':
+        im = im.astype(np.float)
 
     if im.ndim == 2:
-        return _tv_denoise_2d(im, weight, eps, keep_type, n_iter_max)
+        out = _tv_denoise_2d(im, weight, eps, n_iter_max)
     elif im.ndim == 3:
-        return _tv_denoise_3d(im, weight, eps, keep_type, n_iter_max)
+        out = _tv_denoise_3d(im, weight, eps, n_iter_max)
     else:
         raise ValueError('only 2-d and 3-d images may be denoised with this function')
+    if keep_type:
+        return out.astype(im_type)
+    else:
+        return out
 
