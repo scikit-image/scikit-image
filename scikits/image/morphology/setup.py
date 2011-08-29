@@ -30,7 +30,7 @@ if __name__ == '__main__':
           author = 'Damian Eads',
           maintainer_email = 'scikits-image@googlegroups.com',
           description = 'Morphology Wrapper',
-          url = 'http://stefanv.github.com/scikits.image/',
+          url = 'https://github.com/scikits-image/scikits.image',
           license = 'SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )

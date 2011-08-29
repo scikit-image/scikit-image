@@ -27,7 +27,7 @@ if __name__ == '__main__':
           author = 'Scikits.Image Developers',
           maintainer_email = 'scikits-image@googlegroups.com',
           description = 'Transforms',
-          url = 'http://stefanv.github.com/scikits.image/',
+          url = 'https://github.com/scikits-image/scikits.image',
           license = 'SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )

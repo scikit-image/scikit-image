@@ -33,7 +33,7 @@ if __name__ == '__main__':
           author = 'Steven C. Colbert',
           maintainer_email = 'scikits-image@googlegroups.com',
           description = 'OpenCV wrapper for NumPy arrays',
-          url = 'http://stefanv.github.com/scikits.image/',
+          url = 'https://github.com/scikits-image/scikits.image',
           license = 'SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )
