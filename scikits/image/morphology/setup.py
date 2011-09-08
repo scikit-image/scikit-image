@@ -17,6 +17,7 @@ def configuration(parent_package='', top_path=None):
     cython(['ccomp.pyx'], working_path=base_path)
     cython(['cmorph.pyx'], working_path=base_path)
     cython(['_cpmorphology2.pyx'], working_path=base_path)
+    cython(['_watershed.pyx'], working_path=base_path)
 
     config.add_extension('ccomp', sources=['ccomp.c'],
                          include_dirs=[get_numpy_include_dirs()])
