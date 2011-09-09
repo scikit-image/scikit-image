@@ -46,73 +46,6 @@ def __get_strides_for_shape(shape):
     stride.reverse()
     return np.array(stride)
 
-def __heapify_markers(markers,image):
-    """Create a priority queue heap with the markers on it"""
-    stride = __get_strides_for_shape(image.shape)
-    coords = np.argwhere(markers != 0)
-    ncoords= coords.shape[0]
-    if ncoords > 0:
-        pixels = image[markers != 0]
-        age    = np.array(range(ncoords))
-        offset = np.zeros(coords.shape[0], int)
-        for i in range(image.ndim):
-            offset = offset + stride[i] * coords[:,i]
-        pq = np.column_stack((pixels, age, offset, coords))
-        ordering = np.lexsort((age, pixels)) # pixels = top priority, age=second
-        pq = pq[ordering,:]
-    else:
-        pq = np.zeros((0, markers.ndim+3), int)
-    return (pq, ncoords)
-    
-def watershed(image, markers, connectivity=8, mask=None):
-    """Return a matrix labeled using the watershed algorithm
-    
-    image - a two-dimensional matrix where the lowest value points are
-            labeled first.
-    markers - a two-dimensional matrix marking the basins with the values
-              to be assigned in the label matrix. Zero means not a marker.
-    connectivity - either 4 for four-connected or 8 (default) for eight-
-                   connected
-    mask    - don't label points in the mask
-    """
-    if connectivity not in (4, 8):
-        raise ValueError("Connectivity was %d: it should be either four or eight"%(connectivity))
-    
-    image = np.array(image)
-    markers = np.array(markers)
-    labels = markers.copy()
-    max_x  = markers.shape[0]
-    max_y  = markers.shape[1]
-    if connectivity == 4:
-        connect_increments = ((1, 0), (0, 1), (-1, 0), (0, -1))
-    else:
-        connect_increments = ((1, 0), (1, 1), (0, 1), (-1, 1),
-                              (-1, 0), (-1, -1), (0, -1), (1, -1))
-    pq,age = __heapify_markers(markers, image)
-    pq = pq.tolist()
-    #
-    # The second step pops a value off of the queue, then labels and pushes
-    # the neighbors
-    #
-    while len(pq):
-        pix_value, pix_age, ignore,pix_x,pix_y = heappop(pq)
-        pix_label = labels[pix_x,pix_y]
-        for xi,yi in connect_increments:
-            x = pix_x + xi
-            y = pix_y + yi
-            if x < 0 or y < 0 or x >= max_x or y >= max_y:
-                continue
-            if labels[x,y]:
-                continue
-            if mask != None and not mask[x,y]:
-                continue
-            # label the pixel
-            labels[x,y] = pix_label
-            # put the pixel onto the queue
-            heappush(pq, (image[x,y], age, 0, x, y))
-            age += 1
-    return labels
-
         
 def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
     """Return a matrix labeled using the watershed algorithm
@@ -236,3 +169,79 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
         return c_output.astype(markers.dtype)
     except:
         return c_output
+
+watershed = fast_watershed
+
+# ---------------------- deprecated ------------------------------
+# Deprecate slower pure-Python code, that we keep only for 
+# pedagogical purposes
+
+
+def __heapify_markers(markers,image):
+    """Create a priority queue heap with the markers on it"""
+    stride = __get_strides_for_shape(image.shape)
+    coords = np.argwhere(markers != 0)
+    ncoords= coords.shape[0]
+    if ncoords > 0:
+        pixels = image[markers != 0]
+        age    = np.array(range(ncoords))
+        offset = np.zeros(coords.shape[0], int)
+        for i in range(image.ndim):
+            offset = offset + stride[i] * coords[:,i]
+        pq = np.column_stack((pixels, age, offset, coords))
+        ordering = np.lexsort((age, pixels)) # pixels = top priority, age=second
+        pq = pq[ordering,:]
+    else:
+        pq = np.zeros((0, markers.ndim+3), int)
+    return (pq, ncoords)
+    
+def _slow_watershed(image, markers, connectivity=8, mask=None):
+    """Return a matrix labeled using the watershed algorithm
+    
+    image - a two-dimensional matrix where the lowest value points are
+            labeled first.
+    markers - a two-dimensional matrix marking the basins with the values
+              to be assigned in the label matrix. Zero means not a marker.
+    connectivity - either 4 for four-connected or 8 (default) for eight-
+                   connected
+    mask    - don't label points in the mask
+    """
+    if connectivity not in (4, 8):
+        raise ValueError("Connectivity was %d: it should be either four or eight"%(connectivity))
+    
+    image = np.array(image)
+    markers = np.array(markers)
+    labels = markers.copy()
+    max_x  = markers.shape[0]
+    max_y  = markers.shape[1]
+    if connectivity == 4:
+        connect_increments = ((1, 0), (0, 1), (-1, 0), (0, -1))
+    else:
+        connect_increments = ((1, 0), (1, 1), (0, 1), (-1, 1),
+                              (-1, 0), (-1, -1), (0, -1), (1, -1))
+    pq,age = __heapify_markers(markers, image)
+    pq = pq.tolist()
+    #
+    # The second step pops a value off of the queue, then labels and pushes
+    # the neighbors
+    #
+    while len(pq):
+        pix_value, pix_age, ignore,pix_x,pix_y = heappop(pq)
+        pix_label = labels[pix_x,pix_y]
+        for xi,yi in connect_increments:
+            x = pix_x + xi
+            y = pix_y + yi
+            if x < 0 or y < 0 or x >= max_x or y >= max_y:
+                continue
+            if labels[x,y]:
+                continue
+            if mask != None and not mask[x,y]:
+                continue
+            # label the pixel
+            labels[x,y] = pix_label
+            # put the pixel onto the queue
+            heappush(pq, (image[x,y], age, 0, x, y))
+            age += 1
+    return labels
+
+
