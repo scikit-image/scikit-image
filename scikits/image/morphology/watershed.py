@@ -30,7 +30,7 @@ Website: http://www.cellprofiler.org
 __version__ = "$Revision$"
 
 from _heapq import heapify, heappush, heappop
-import numpy
+import numpy as np
 import scipy.ndimage
 from rankorder import rank_order
 
@@ -41,45 +41,28 @@ def __get_strides_for_shape(shape):
     lshape = list(shape)
     lshape.reverse()
     stride = [1]
-    for i in range(len(lshape)-1):
-        stride.append(lshape[i]*stride[i])
+    for i in range(len(lshape) - 1):
+        stride.append(lshape[i] * stride[i])
     stride.reverse()
-    return numpy.array(stride)
-
-def __old_heapify_markers(markers,image):
-    """Create a priority queue heap with the markers on it"""
-    age = 0
-    pq = []
-    stride = __get_strides_for_shape(image.shape)
-    for coords in numpy.argwhere(markers != 0):
-        offset = numpy.dot(coords,stride)
-        tcoords = tuple(coords)
-        entry = [image.__getitem__(tcoords),
-                 age,
-                 offset]
-        entry.extend(tcoords)
-        pq.append(tuple(entry))
-        age += 1
-    heapify(pq)
-    return (pq,age)
+    return np.array(stride)
 
 def __heapify_markers(markers,image):
     """Create a priority queue heap with the markers on it"""
     stride = __get_strides_for_shape(image.shape)
-    coords = numpy.argwhere(markers != 0)
+    coords = np.argwhere(markers != 0)
     ncoords= coords.shape[0]
     if ncoords > 0:
         pixels = image[markers != 0]
-        age    = numpy.array(range(ncoords))
-        offset = numpy.zeros(coords.shape[0],int)
+        age    = np.array(range(ncoords))
+        offset = np.zeros(coords.shape[0], int)
         for i in range(image.ndim):
-            offset = offset + stride[i]*coords[:,i]
-        pq = numpy.column_stack((pixels, age, offset, coords))
-        ordering = numpy.lexsort((age,pixels)) # pixels = top priority, age=second
+            offset = offset + stride[i] * coords[:,i]
+        pq = np.column_stack((pixels, age, offset, coords))
+        ordering = np.lexsort((age, pixels)) # pixels = top priority, age=second
         pq = pq[ordering,:]
     else:
-        pq = numpy.zeros((0,markers.ndim+3),int)
-    return (pq,ncoords)
+        pq = np.zeros((0, markers.ndim+3), int)
+    return (pq, ncoords)
     
 def watershed(image, markers, connectivity=8, mask=None):
     """Return a matrix labeled using the watershed algorithm
@@ -92,20 +75,21 @@ def watershed(image, markers, connectivity=8, mask=None):
                    connected
     mask    - don't label points in the mask
     """
-    if connectivity not in (4,8):
+    if connectivity not in (4, 8):
         raise ValueError("Connectivity was %d: it should be either four or eight"%(connectivity))
     
-    image = numpy.array(image)
-    markers = numpy.array(markers)
+    image = np.array(image)
+    markers = np.array(markers)
     labels = markers.copy()
     max_x  = markers.shape[0]
     max_y  = markers.shape[1]
     if connectivity == 4:
-        connect_increments = ((1,0),(0,1),(-1,0),(0,-1))
+        connect_increments = ((1, 0), (0, 1), (-1, 0), (0, -1))
     else:
-        connect_increments = ((1,0),(1,1),(0,1),(-1,1),
-                              (-1,0),(-1,-1),(0,-1),(1,-1))
-    pq,age = __heapify_markers(markers,image)
+        connect_increments = ((1, 0), (1, 1), (0, 1), (-1, 1),
+                              (-1, 0), (-1, -1), (0, -1), (1, -1))
+    pq,age = __heapify_markers(markers, image)
+    pq = pq.tolist()
     #
     # The second step pops a value off of the queue, then labels and pushes
     # the neighbors
@@ -114,8 +98,8 @@ def watershed(image, markers, connectivity=8, mask=None):
         pix_value, pix_age, ignore,pix_x,pix_y = heappop(pq)
         pix_label = labels[pix_x,pix_y]
         for xi,yi in connect_increments:
-            x = pix_x+xi
-            y = pix_y+yi
+            x = pix_x + xi
+            y = pix_y + yi
             if x < 0 or y < 0 or x >= max_x or y >= max_y:
                 continue
             if labels[x,y]:
@@ -125,7 +109,7 @@ def watershed(image, markers, connectivity=8, mask=None):
             # label the pixel
             labels[x,y] = pix_label
             # put the pixel onto the queue
-            heappush(pq, (image[x,y],age,0,x,y))
+            heappush(pq, (image[x,y], age, 0, x, y))
             age += 1
     return labels
 
@@ -155,7 +139,7 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
     if connectivity == None:
         c_connectivity = scipy.ndimage.generate_binary_structure(image.ndim, 1)
     else:
-        c_connectivity = numpy.array(connectivity,bool)
+        c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image.ndim:
             raise ValueError,"Connectivity dimension must be same as image"
     if offset == None:
@@ -164,38 +148,38 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
         #
         # offset to center of connectivity array
         #
-        offset = numpy.array(c_connectivity.shape)/2
+        offset = np.array(c_connectivity.shape) / 2
 
     # pad the image, markers, and mask so that we can use the mask to keep from running off the edges
     pads = offset
 
     def pad(im):
-        new_im = numpy.zeros([i + 2*p for i,p in zip(im.shape, pads)], im.dtype)
-        new_im[[slice(p, -p,None) for p in pads]] = im
+        new_im = np.zeros([i + 2*p for i, p in zip(im.shape, pads)], im.dtype)
+        new_im[[slice(p, -p, None) for p in pads]] = im
         return new_im
 
     if mask is not None:
         mask = pad(mask)
     else:
-        mask = pad(numpy.ones(image.shape, bool))
+        mask = pad(np.ones(image.shape, bool))
     image = pad(image)
     markers = pad(markers)
 
-    c_image = rank_order(image)[0].astype(numpy.int32)
-    c_markers = numpy.ascontiguousarray(markers,dtype=numpy.int32)
+    c_image = rank_order(image)[0].astype(np.int32)
+    c_markers = np.ascontiguousarray(markers, dtype=np.int32)
     if c_markers.ndim!=c_image.ndim:
         raise ValueError,\
             "markers (ndim=%d) must have same # of dimensions "\
             "as image (ndim=%d)"%(c_markers.ndim, cimage.ndim)
-    if not all([x==y for x,y in zip(c_markers.shape, c_image.shape)]):
+    if not all([x==y for x, y in zip(c_markers.shape, c_image.shape)]):
         raise ValueError("image and markers must have the same shape")
-    if mask!=None:
-        c_mask = numpy.ascontiguousarray(mask,dtype=bool)
-        if c_mask.ndim!=c_markers.ndim:
+    if mask != None:
+        c_mask = np.ascontiguousarray(mask,dtype=bool)
+        if c_mask.ndim != c_markers.ndim:
             raise ValueError, "mask must have same # of dimensions as image"
-        if not all([x==y for x,y in zip(c_markers.shape, c_mask.shape)]):
+        if not all([x == y for x, y in zip(c_markers.shape, c_mask.shape)]):
             raise ValueError, "mask must have same shape as image"
-        c_markers[numpy.logical_not(mask)]=0
+        c_markers[np.logical_not(mask)]=0
     else:
         c_mask = None
     c_output = c_markers.copy()
@@ -210,7 +194,7 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
     # (to do bounds checking).
     c = []
     image_stride = __get_strides_for_shape(image.shape)
-    for i in range(numpy.product(c_connectivity.shape)):
+    for i in range(np.product(c_connectivity.shape)):
         multiplier = 1
         offs = []
         indexes = []
@@ -225,28 +209,29 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
             indexes.append(idx)
             multiplier *= c_connectivity.shape[j]
         if (not ignore) and c_connectivity.__getitem__(tuple(indexes)):
-            stride = numpy.dot(image_stride, numpy.array(offs))
-            offs.insert(0,stride)
+            stride = np.dot(image_stride, np.array(offs))
+            offs.insert(0, stride)
             c.append(offs)
-    c = numpy.array(c,numpy.int32)
+    c = np.array(c, np.int32)
 
     pq,age = __heapify_markers(c_markers, c_image)
-    pq = numpy.ascontiguousarray(pq,dtype=numpy.int32)
-    if numpy.product(pq.shape) > 0:
+    pq = np.ascontiguousarray(pq, dtype=np.int32)
+    if np.product(pq.shape) > 0:
         # If nothing is labeled, the output is empty and we don't have to
         # do anything
         c_output = c_output.flatten()
         if c_mask == None:
-            c_mask = numpy.ones(c_image.shape,numpy.int8).flatten()
+            c_mask = np.ones(c_image.shape,np.int8).flatten()
         else:
-            c_mask = c_mask.astype(numpy.int8).flatten()
+            c_mask = c_mask.astype(np.int8).flatten()
         _watershed.watershed(c_image.flatten(),
                              pq, age, c, 
                              c_image.ndim, 
                              c_mask,
-                             numpy.array(c_image.shape,numpy.int32),
+                             np.array(c_image.shape,np.int32),
                              c_output)
-    c_output = c_output.reshape(c_image.shape)[[slice(1,-1,None)] * image.ndim]
+    c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
+                                                image.ndim]
     try:
         return c_output.astype(markers.dtype)
     except:
