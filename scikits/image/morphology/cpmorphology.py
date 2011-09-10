@@ -1,18 +1,14 @@
 """ cpmorphology.py - morphological operations not in scipy
 
-CellProfiler is distributed under the GNU General Public License,
-but this file is licensed under the more permissive BSD license.
-See the accompanying file LICENSE for details.
+Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
+Website: http://www.cellprofiler.org
 
 Copyright (c) 2003-2009 Massachusetts Institute of Technology
 Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 
-Please see the AUTHORS file for credits.
-
-Website: http://www.cellprofiler.org
+Original author: Lee Kamentsky
 """
-__version__ = "$Revision$"
 
 import logging
 import numpy as np
