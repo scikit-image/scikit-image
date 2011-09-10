@@ -1,16 +1,13 @@
 """test_watershed.py - tests the watershed function
 
-CellProfiler is distributed under the GNU General Public License,
-but this file is licensed under the more permissive BSD license.
-See the accompanying file LICENSE for details.
+Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
+Website: http://www.cellprofiler.org
 
 Copyright (c) 2003-2009 Massachusetts Institute of Technology
 Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 
-Please see the AUTHORS file for credits.
-
-Website: http://www.cellprofiler.org
+Original author: Lee Kamentsky
 """
 #Portions of this test were taken from scipy's watershed test in test_ndimage.py
 #
@@ -44,7 +41,6 @@ Website: http://www.cellprofiler.org
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-__version__ = "$Revision$"
 
 import math
 import time
@@ -53,7 +49,8 @@ import unittest
 import numpy as np
 import scipy.ndimage
 
-from scikits.image.morphology.watershed import watershed,fast_watershed, _slow_watershed
+from scikits.image.morphology.watershed import watershed,fast_watershed, \
+        _slow_watershed
 
 eps = 1e-12
 
@@ -64,7 +61,7 @@ def diff(a, b):
         b = np.asarray(b)
     if (0 in a.shape) and (0 in b.shape):
         return 0.0
-    b[a==0]=0
+    b[a==0] = 0
     if (a.dtype in [np.complex64, np.complex128] or
         b.dtype in [np.complex64, np.complex128]):
         a = np.asarray(a, np.complex128)
@@ -79,7 +76,7 @@ def diff(a, b):
     return math.sqrt(t)
 
 class TestFastWatershed(unittest.TestCase):
-    eight = np.ones((3,3),bool)
+    eight = np.ones((3, 3),bool)
     def test_watershed01(self):
         "watershed 1"
         data = np.array([[0, 0, 0, 0, 0, 0, 0],
@@ -103,7 +100,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [  0, 0, 0, 0, 0, 0, 0],
                                   [  0, 0, 0, 0, 0, 0, 0]],
                                  np.int8)
-        out = fast_watershed(data, markers,self.eight)
+        out = watershed(data, markers,self.eight)
         expected = np.array([[-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
@@ -218,7 +215,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [ 0, 0, 0, 0, 0, 0, 0],
                                   [ 0, 0, 0, 0, 0, 0, -1]],
                                  np.int8)
-        out = fast_watershed(data, markers,self.eight)
+        out = fast_watershed(data, markers, self.eight)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
@@ -254,7 +251,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [ 0, 0, 0, 0, 0, 0, 0],
                                   [ 0, 0, 0, 0, 0, 0, -1]],
                                  np.int8)
-        out = fast_watershed(data, markers,self.eight)
+        out = fast_watershed(data, markers, self.eight)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  3,  3,  0,  2,  2, -1],
                       [-1,  3,  3,  0,  2,  2, -1],
@@ -288,7 +285,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [  0, 0, 0, 0, 0, 0, 0],
                                   [  -1, 0, 0, 0, 0, 0, 0]],
                                  np.int8)
-        out = fast_watershed(data, markers,self.eight)
+        out = fast_watershed(data, markers, self.eight)
         error = diff([[-1,  1,  1,  1,  1,  1, -1],
                       [-1,  1,  1,  1,  1,  1, -1],
                       [-1,  1,  1,  1,  1,  1, -1],
@@ -325,16 +322,16 @@ class TestFastWatershed(unittest.TestCase):
                             [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]])
         mask = (data!=255)
         markers = np.zeros(data.shape,int)
-        markers[6,7] = 1
-        markers[14,7] = 2
-        out = fast_watershed(data, markers,self.eight,mask=mask)
+        markers[6, 7] = 1
+        markers[14, 7] = 2
+        out = fast_watershed(data, markers, self.eight, mask=mask)
         #
         # The two objects should be the same size, except possibly for the
         # border region
         #
-        size1 = np.sum(out==1)
-        size2 = np.sum(out==2)
-        self.assertTrue(abs(size1-size2) <=6)
+        size1 = np.sum(out == 1)
+        size2 = np.sum(out == 2)
+        self.assertTrue(abs(size1-size2) <= 6)
     
     def test_watershed08(self):
         "The border pixels + an edge are all the same value"
@@ -359,18 +356,18 @@ class TestFastWatershed(unittest.TestCase):
                             [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
                             [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
                             [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]])
-        mask = (data!=255)
+        mask = (data != 255)
         markers = np.zeros(data.shape,int)
         markers[6,7] = 1
         markers[14,7] = 2
-        out = fast_watershed(data, markers,self.eight,mask=mask)
+        out = fast_watershed(data, markers, self.eight, mask=mask)
         #
         # The two objects should be the same size, except possibly for the
         # border region
         #
-        size1 = np.sum(out==1)
-        size2 = np.sum(out==2)
-        self.assertTrue(abs(size1-size2) <=6)
+        size1 = np.sum(out == 1)
+        size2 = np.sum(out == 2)
+        self.assertTrue(abs(size1-size2) <= 6)
     
     def test_watershed09(self):
         """Test on an image of reasonable size
@@ -378,22 +375,22 @@ class TestFastWatershed(unittest.TestCase):
         This is here both for timing (does it take forever?) and to
         ensure that the memory constraints are reasonable
         """
-        image = np.zeros((1000,1000))
-        coords = np.random.uniform(0,1000,(100,2)).astype(int)
-        markers = np.zeros((1000,1000),int)
+        image = np.zeros((1000, 1000))
+        coords = np.random.uniform(0, 1000, (100, 2)).astype(int)
+        markers = np.zeros((1000, 1000),int)
         idx = 1
         for x,y in coords:
             image[x,y] = 1
-            markers[x,y] = idx
+            markers[x, y] = idx
             idx += 1
         
         image = scipy.ndimage.gaussian_filter(image, 4)
         before = time.clock() 
-        out = fast_watershed(image,markers,self.eight)
-        elapsed = time.clock()-before
+        out = fast_watershed(image, markers, self.eight)
+        elapsed = time.clock() - before
         print "Fast watershed ran a megapixel image in %f seconds"%(elapsed)
         before = time.clock()
         out = scipy.ndimage.watershed_ift(image.astype(np.uint16), markers, self.eight)
-        elapsed = time.clock()-before
+        elapsed = time.clock() - before
         print "Scipy watershed ran a megapixel image in %f seconds"%(elapsed)
 
