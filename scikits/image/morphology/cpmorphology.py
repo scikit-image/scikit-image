@@ -12,7 +12,7 @@ Original author: Lee Kamentsky
 
 import logging
 import numpy as np
-import scipy.ndimage as scind
+from scipy import ndimage
 import scipy.sparse
 import _cpmorphology
 from outline import outline
@@ -30,9 +30,9 @@ except:
 
 logger = logging.getLogger(__name__)
 '''A structuring element for eight-connecting a neigborhood'''
-eight_connect = scind.generate_binary_structure(2, 2)
+eight_connect = ndimage.generate_binary_structure(2, 2)
 '''A structuring element for four-connecting a neigborhood'''
-four_connect = scind.generate_binary_structure(2, 1)
+four_connect = ndimage.generate_binary_structure(2, 1)
 
 def fill_labeled_holes(labels, mask=None, size_fn = None):
     '''Fill all background pixels that are holes inside the foreground
@@ -69,7 +69,7 @@ def fill_labeled_holes(labels, mask=None, size_fn = None):
     if mask is not None:
         background &= mask
     
-    blabels, count = scind.label(background, four_connect)
+    blabels, count = ndimage.label(background, four_connect)
     lcount = np.max(labels)
     labels = labels.copy().astype(int)
     labels[blabels != 0] = blabels[blabels != 0] + lcount + 1
@@ -104,7 +104,8 @@ def fill_labeled_holes(labels, mask=None, size_fn = None):
         #
         i_count = np.bincount(i)
         if len(i_count) < lmax + 1:
-            i_count = np.hstack((i_count, np.zeros(lmax + 1 - len(i_count), int)))
+            i_count = np.hstack((i_count, np.zeros(lmax + 1 - len(i_count), 
+                                 int)))
         indexer = Indexes([i_count])
         #
         # Filter using the size function passed, if any
@@ -154,11 +155,11 @@ def adjacent(labels):
         labels = labels.astype(np.int)
     image_with_high_background = labels.copy()
     image_with_high_background[labels == 0] = high
-    min_label = scind.minimum_filter(image_with_high_background,
+    min_label = ndimage.minimum_filter(image_with_high_background,
                                      footprint=np.ones((3,3),bool),
                                      mode = 'constant',
                                      cval = high)
-    max_label = scind.maximum_filter(labels,
+    max_label = ndimage.maximum_filter(labels,
                                      footprint=np.ones((3,3),bool),
                                      mode = 'constant',
                                      cval = 0)
@@ -169,7 +170,7 @@ def binary_thin(image, strel1, strel2):
     strel1 - the required values of the pixels in order to survive
     strel2 - at each pixel, the complement of strel1 if we care about the value
     """
-    hit_or_miss = scind.binary_hit_or_miss(image, strel1, strel2)
+    hit_or_miss = ndimage.binary_hit_or_miss(image, strel1, strel2)
     return np.logical_and(image,np.logical_not(hit_or_miss))
 
 binary_shrink_top_right = None
@@ -344,7 +345,7 @@ def binary_shrink(image, iterations=-1):
         # The erode table hits all patterns that can be eroded without
         # changing the euler_number
         erode_table = np.array([pattern_of(index)[1,1] and
-                                (scind.label(pattern_of(index-16))[1] != 1)
+                                (ndimage.label(pattern_of(index-16))[1] != 1)
                                 for index in range(512)])
         erode_table[index_of(np.ones((3,3), bool))] = True
         #
@@ -438,7 +439,8 @@ def strel_disk(radius):
     return strel
 
 def cpmaximum(image, structure=np.ones((3,3),dtype=bool),offset=None):
-    """Find the local maximum at each point in the image, using the given structuring element
+    """Find the local maximum at each point in the image, 
+    using the given structuring element
     
     image - a 2-d array of doubles
     structure - a boolean structuring element indicating which
@@ -555,9 +557,9 @@ def convex_hull_ijv(pixel_labels, indexes):
     # Calculate the centers for each label
     #
     center_i = fixup_scipy_ndimage_result(
-        scind.mean(i.astype(float), labels_per_point, indexes))
+        ndimage.mean(i.astype(float), labels_per_point, indexes))
     center_j = fixup_scipy_ndimage_result(
-        scind.mean(j.astype(float), labels_per_point, indexes))
+        ndimage.mean(j.astype(float), labels_per_point, indexes))
     centers = np.column_stack((center_i, center_j))
     #
     # Now make an array with one outline point per row and the following
@@ -581,7 +583,8 @@ def convex_hull_ijv(pixel_labels, indexes):
     #
     # Make unique
     #
-    same_as_next = np.hstack([np.all(a[order[:-1],:] == a[order[1:],:], 1), [False]])
+    same_as_next = np.hstack([np.all(a[order[:-1],:] == a[order[1:],:], 1), 
+                                [False]])
     order = order[~same_as_next]
     a=a[order]
     anti_indexes_per_point = anti_indexes_per_point[order]
@@ -646,7 +649,8 @@ def convex_hull_ijv(pixel_labels, indexes):
             # Map label #s to the index into indexes_to_finish of that label #
             #
             anti_indexes_to_finish = np.zeros((len(indexes),), np.int32)
-            anti_indexes_to_finish[indexes_to_finish] = range(len(indexes_to_finish))
+            anti_indexes_to_finish[indexes_to_finish] = \
+                                            range(len(indexes_to_finish))
             #
             # Figure out the indices of each point in a label to be finished.
             # We figure out how much to subtract for each label, then
@@ -657,7 +661,8 @@ def convex_hull_ijv(pixel_labels, indexes):
             #
             finish_idx_base = np.zeros((len(indexes_to_finish),), np.int32)
             finish_idx_base[1:]=np.cumsum(new_counts[indexes_to_finish])[:-1]
-            finish_idx_bases = finish_idx_base[anti_indexes_to_finish[atf_indexes]]
+            finish_idx_bases = finish_idx_base[anti_indexes_to_finish
+                                                [atf_indexes]]
             finish_idx = (np.array(range(a_to_finish.shape[0]))-
                           finish_idx_bases)
             finish_idx = finish_idx + result_index[atf_indexes]
@@ -958,9 +963,9 @@ def fixup_scipy_ndimage_result(whatever_it_returned):
     scipy.ndimage has the annoying habit of returning a single, bare
     value instead of an array if the indexes passed in are of length 1.
     For instance:
-    scind.maximum(image, labels, [1]) returns a float
+    ndimage.maximum(image, labels, [1]) returns a float
     but
-    scind.maximum(image, labels, [1,2]) returns a list
+    ndimage.maximum(image, labels, [1,2]) returns a list
     """
     if getattr(whatever_it_returned,"__getitem__",False):
         return np.array(whatever_it_returned)
@@ -979,7 +984,7 @@ def centers_of_labels(labels):
     if max_labels == 0:
         return np.zeros((2,0),int)
     
-    result = scind.center_of_mass(np.ones(labels.shape),
+    result = ndimage.center_of_mass(np.ones(labels.shape),
                                   labels,
                                   np.arange(max_labels)+1)
     result = np.array(result)
@@ -1003,7 +1008,7 @@ def maximum_position_of_labels(image, labels, indices):
     if len(indices) == 0:
         return np.zeros((2,0),int)
     
-    result = scind.maximum_position(image, labels, indices)
+    result = ndimage.maximum_position(image, labels, indices)
     result = np.array(result,int)
     if result.ndim == 1:
         result.shape = (2,1)
@@ -1236,7 +1241,7 @@ def minimum_enclosing_circle(labels, indexes = None,
         #
         # Now we find the minimum angle per label
         #
-        min_angle = scind.minimum(angle_s0vs1,v_labels,
+        min_angle = ndimage.minimum(angle_s0vs1,v_labels,
                                   labels_to_consider)
         min_angle = fixup_scipy_ndimage_result(min_angle)
         min_angle_per_vertex = min_angle[anti_indexes_to_consider_per_vertex]
@@ -1245,7 +1250,7 @@ def minimum_enclosing_circle(labels, indexes = None,
         # Use "indexes" instead of labels_to_consider so we get something
         # with the same shape as keep_me
         #
-        min_position = scind.minimum_position(angle_s0vs1,v_labels,
+        min_position = ndimage.minimum_position(angle_s0vs1,v_labels,
                                               indexes)
         min_position = fixup_scipy_ndimage_result(min_position).astype(int)
         min_position = min_position.flatten()
@@ -1253,7 +1258,7 @@ def minimum_enclosing_circle(labels, indexes = None,
         # Case 1: minimum angle is obtuse or right. Accept S as the diameter.
         # Case 1a: there are no vertices. Accept S as the diameter.
         #
-        vertex_counts = scind.sum(keep_me_vertices,
+        vertex_counts = ndimage.sum(keep_me_vertices,
                                   hull[:,0],
                                   labels_to_consider)
         vertex_counts = fixup_scipy_ndimage_result(vertex_counts)
@@ -1906,12 +1911,12 @@ def ellipse_from_second_moments_ijv(i,j, image, labels, indexes, wants_compactne
 def calculate_extents(labels, indexes):
     """Return the area of each object divided by the area of its bounding box"""
     fix = fixup_scipy_ndimage_result
-    areas = fix(scind.sum(np.ones(labels.shape),labels,np.array(indexes, dtype=np.int32)))
+    areas = fix(ndimage.sum(np.ones(labels.shape),labels,np.array(indexes, dtype=np.int32)))
     y,x = np.mgrid[0:labels.shape[0],0:labels.shape[1]]
-    xmin = fix(scind.minimum(x, labels, indexes))
-    xmax = fix(scind.maximum(x, labels, indexes))
-    ymin = fix(scind.minimum(y, labels, indexes))
-    ymax = fix(scind.maximum(y, labels, indexes))
+    xmin = fix(ndimage.minimum(x, labels, indexes))
+    xmax = fix(ndimage.maximum(x, labels, indexes))
+    ymin = fix(ndimage.minimum(y, labels, indexes))
+    ymax = fix(ndimage.maximum(y, labels, indexes))
     bbareas = (xmax-xmin+1)*(ymax-ymin+1)
     return areas / bbareas
 
@@ -2005,7 +2010,7 @@ def calculate_perimeters(labels, indexes):
             m[mask] += 2**exponent
             exponent += 1
     pixel_score = __perimeter_scoring[m]
-    return fixup_scipy_ndimage_result(scind.sum(pixel_score, labels, np.array(indexes,dtype=np.int32)))
+    return fixup_scipy_ndimage_result(ndimage.sum(pixel_score, labels, np.array(indexes,dtype=np.int32)))
 
 def calculate_convex_hull_areas(labels,indexes=None):
     """Calulculate the area of the convex hull of each labeled object
@@ -2078,10 +2083,10 @@ def calculate_convex_hull_areas(labels,indexes=None):
     # Find some point within each convex hull.
     #
     within_hull = np.zeros((counts_nd.shape[0],2))
-    within_hull[:,0] = scind.sum(hull_nd[:,1],
+    within_hull[:,0] = ndimage.sum(hull_nd[:,1],
                                  hull_nd[:,0],
                                  indexes_nd) / counts_nd
-    within_hull[:,1] = scind.sum(hull_nd[:,2],
+    within_hull[:,1] = ndimage.sum(hull_nd[:,2],
                                  hull_nd[:,0],
                                  indexes_nd) / counts_nd
     within_hull_per_pixel = within_hull[index_of_label_per_pixel_nd]
@@ -2111,7 +2116,7 @@ def calculate_convex_hull_areas(labels,indexes=None):
     #
     # The convex area is the sum of these triangles
     #
-    result[counts>=3] = scind.sum(area_per_pt_nd, hull_nd[:,0], indexes_nd)
+    result[counts>=3] = ndimage.sum(area_per_pt_nd, hull_nd[:,0], indexes_nd)
     return result
 
 def calculate_solidity(labels,indexes=None):
@@ -2123,7 +2128,7 @@ def calculate_solidity(labels,indexes=None):
     if indexes is not None:
         """ Convert to compat 32bit integer """
         indexes = np.array(indexes,dtype=np.int32)
-    areas = scind.sum(np.ones(labels.shape),labels,indexes)
+    areas = ndimage.sum(np.ones(labels.shape),labels,indexes)
     convex_hull_areas = calculate_convex_hull_areas(labels, indexes)
     return areas / convex_hull_areas
 
@@ -2215,7 +2220,7 @@ def euler_number(labels, indexes=None):
     #     0 0
     #     0 1
     Q1_condition[slice_00] += (NE11_00 & NE11_01 & NE11_10)[slice_11]
-    Q1 = fix(scind.sum(Q1_condition, I00, indexes))
+    Q1 = fix(ndimage.sum(Q1_condition, I00, indexes))
     #
     # Q3: 1 1
     #     1 0
@@ -2229,14 +2234,14 @@ def euler_number(labels, indexes=None):
     #     1 1
     #     0 1
     Q3_condition += (NE00_10 & EQ00_01 & EQ00_11)
-    Q3 = fix(scind.sum(Q3_condition, I00, indexes))
+    Q3 = fix(ndimage.sum(Q3_condition, I00, indexes))
     # QD: 1 0
     #     0 1
     QD_condition = (NE00_01 & NE00_10 & EQ00_11).astype(int)
     #     0 1
     #     1 0
     QD_condition[slice_00] += (NE01_00 & NE01_11 & EQ01_10)[slice_01]
-    QD  = fix(scind.sum(QD_condition, I00, indexes))
+    QD  = fix(ndimage.sum(QD_condition, I00, indexes))
     W = (Q1 - Q3 - 2*QD).astype(float)/4.0
     if indexes is None:
         return W[0]
@@ -2257,7 +2262,7 @@ def block(shape, block_shape):
     to the image via indexing. For instance:
     
     labels, indexes = block(image.shape, (60,60))
-    minima = scind.minimum(image, labels, indexes)
+    minima = ndimage.minimum(image, labels, indexes)
     img2 = image - minima[labels]
     """
     shape = np.array(shape)
@@ -2333,7 +2338,7 @@ def grey_erosion(image, radius=None, mask=None, footprint=None):
     if not mask is None:
         not_mask = np.logical_not(mask)
         big_image[iradius:-iradius,iradius:-iradius][not_mask] = 1
-    processed_image = scind.grey_erosion(big_image, footprint=footprint)
+    processed_image = ndimage.grey_erosion(big_image, footprint=footprint)
     final_image = processed_image[iradius:-iradius,iradius:-iradius]
     if not mask is None:
         final_image[not_mask] = image[not_mask]
@@ -2361,7 +2366,7 @@ def grey_dilation(image, radius=None, mask=None, footprint=None):
     if not mask is None:
         not_mask = np.logical_not(mask)
         big_image[iradius:-iradius,iradius:-iradius][not_mask] = 0
-    processed_image = scind.grey_dilation(big_image, footprint=footprint)
+    processed_image = ndimage.grey_dilation(big_image, footprint=footprint)
     final_image = processed_image[iradius:-iradius,iradius:-iradius]
     if not mask is None:
         final_image[not_mask] = image[not_mask]
@@ -2628,7 +2633,7 @@ def make_table(value, pattern, care=np.ones((3,3),bool)):
 # using 4-connectivity.
 #
 branchpoints_table = np.array([pattern_of(index)[1,1] and
-                               scind.label(pattern_of(index-16))[1] > 2
+                               ndimage.label(pattern_of(index-16))[1] > 2
                                for index in range(512)])
 
 def branchpoints(image, mask=None):
@@ -2665,7 +2670,7 @@ def branchpoints(image, mask=None):
 #####################################
 
 branchings_table = np.array([ 0 if (index & 16) == 0
-                             else scind.label(pattern_of(index-16))[1]
+                             else ndimage.label(pattern_of(index-16))[1]
                              for index in range(512)])
 
 def branchings(image, mask=None):
@@ -2696,7 +2701,7 @@ def branchings(image, mask=None):
     kernel = np.array([[1,2,4],
                        [8,16,32],
                        [64,128,256]])
-    indexer = scind.convolve(masked_image.astype(int), kernel,
+    indexer = ndimage.convolve(masked_image.astype(int), kernel,
                              mode='constant').astype(int)
     result = branchings_table[indexer]
     return result
@@ -2707,7 +2712,7 @@ def branchings(image, mask=None):
 # there are two unconnected objects in the pattern
 #
 bridge_table = np.array([pattern_of(index)[1,1] or
-                         scind.label(pattern_of(index),
+                         ndimage.label(pattern_of(index),
                                      np.ones((3,3),bool))[1] > 1
                          for index in range(512)])
 
@@ -3033,8 +3038,8 @@ def spur(image, mask=None, iterations=1):
 # The thicken table turns pixels on if they have a neighbor that's on and
 # if adding the pixel does not connect any neighbors
 #
-thicken_table = np.array([scind.label(pattern_of(i), eight_connect)[1] ==
-                          scind.label(pattern_of(i | 16), eight_connect)[1] or
+thicken_table = np.array([ndimage.label(pattern_of(i), eight_connect)[1] ==
+                          ndimage.label(pattern_of(i | 16), eight_connect)[1] or
                           ((i & 16) != 0) for i in range(512)])
                                       
 def thicken(image, mask=None, iterations=1):
@@ -3097,7 +3102,7 @@ def thin(image, mask=None, iterations=1):
                 continue
             pat = pattern_of(i & ~ 16)
             ipat = pat.astype(int)
-            if scind.label(pat, eight_connect)[1] != 1:
+            if ndimage.label(pat, eight_connect)[1] != 1:
                 thin_table[:,i] = True
                 continue
             n1 = ((ipat[0,0] or ipat[0,1]) + (ipat[0,2] or ipat[1,2])+
@@ -3196,7 +3201,7 @@ def find_neighbors(labels):
     #
     # The count of # of neighbors
     #
-    v_count = fixup_scipy_ndimage_result(scind.sum(np.ones(v_label.shape),
+    v_count = fixup_scipy_ndimage_result(ndimage.sum(np.ones(v_label.shape),
                                                    v_label,
                                                    np.arange(max_label,dtype=np.int32)+1))
     v_count = v_count.astype(int)
@@ -3249,7 +3254,7 @@ def color_labels(labels, distance_transform = False):
     returns the color matrix
     '''
     if distance_transform:
-        i,j = scind.distance_transform_edt(labels == 0, return_distances=False,
+        i,j = ndimage.distance_transform_edt(labels == 0, return_distances=False,
                                            return_indices = True)
         dt_labels = labels[i,j]
     else:
@@ -3323,13 +3328,13 @@ def skeletonize(image, mask=None):
     #
     table = (make_table(True,np.array([[0,0,0],[0,1,0],[0,0,0]],bool),
                         np.array([[0,0,0],[0,1,0],[0,0,0]],bool)) &
-             (np.array([scind.label(pattern_of(index), eight_connect)[1] !=
-                        scind.label(pattern_of(index & ~ 2**4),
+             (np.array([ndimage.label(pattern_of(index), eight_connect)[1] !=
+                        ndimage.label(pattern_of(index & ~ 2**4),
                                     eight_connect)[1]
                         for index in range(512) ]) |
               np.array([np.sum(pattern_of(index))<3 for index in range(512)])))
     
-    distance = scind.distance_transform_edt(masked_image)
+    distance = ndimage.distance_transform_edt(masked_image)
     #
     # The processing order along the edge is critical to the shape of the
     # resulting skeleton: if you process a corner first, that corner will
@@ -3402,7 +3407,7 @@ def label_skeleton(skeleton):
     #
     # Count the # of neighbors per point
     #
-    neighbors = scind.convolve(skeleton.astype(int), np.ones((3,3),int),
+    neighbors = ndimage.convolve(skeleton.astype(int), np.ones((3,3),int),
                                mode='constant').astype(int)
     neighbors[~skeleton] = 0
     neighbors[skeleton] -= 1
@@ -3476,7 +3481,7 @@ def distance_to_edge(labels):
     
     for i in range(1, max_color+1):
         mask = (colors==i)
-        result[mask] = scind.distance_transform_edt(mask)[mask]
+        result[mask] = ndimage.distance_transform_edt(mask)[mask]
     return result
  
 def regional_maximum(image, mask = None, structure=None, ties_are_ok=False):
@@ -3505,19 +3510,19 @@ def regional_maximum(image, mask = None, structure=None, ties_are_ok=False):
         result = regional_maximum(image, mask, structure, True)
         if not np.any(result):
             return result
-        distance = scind.distance_transform_edt(result)
+        distance = ndimage.distance_transform_edt(result)
         #
         # Rank-order the distances and then add a randomizing factor
         # to break ties for pixels equidistant from the background.
         # Pick the best value within a contiguous region
         #
-        labels, label_count = scind.label(result, eight_connect)
+        labels, label_count = ndimage.label(result, eight_connect)
         np.random.seed(0)
         ro_distance = rank_order(distance)[0].astype(float)
         count = np.product(ro_distance.shape)
         ro_distance.flat += (np.random.permutation(count).astype(float) / 
                              float(count))
-        positions = scind.maximum_position(ro_distance, labels,
+        positions = ndimage.maximum_position(ro_distance, labels,
                                            np.arange(label_count)+1)
         positions = np.array(positions, np.uint32)
         result = np.zeros(image.shape, bool)
@@ -3528,7 +3533,7 @@ def regional_maximum(image, mask = None, structure=None, ties_are_ok=False):
         return result
     result = np.ones(image.shape,bool)
     if structure == None:
-        structure = scind.generate_binary_structure(image.ndim, image.ndim)
+        structure = ndimage.generate_binary_structure(image.ndim, image.ndim)
     #
     # The edges of the image are losers because they are touching undefined
     # points. Construct a big mask that represents the edges.
@@ -3985,14 +3990,14 @@ def feret_diameter(chulls, counts, indexes):
     pt2 = chulls[antipodes[:,1],1:]
     distances = np.sum((pt1 - pt2) **2, 1)
     if logger.getEffectiveLevel() <= logging.DEBUG:
-        best = np.array(scind.maximum_position(distances, l, indexes)).ravel().astype(int)
+        best = np.array(ndimage.maximum_position(distances, l, indexes)).ravel().astype(int)
         dt = np.dtype([("label",int,1),("distance",float,1),("pt1",int,2),("pt2",int,2)])
         choices = np.array(
             zip(indexes, np.sqrt(distances[best]), pt1[best,:], pt2[best,:]),
             dtype = dt)
         logger.debug("Feret diameter results:\n" + repr(choices))
                            
-    max_distance = np.sqrt(fixup_scipy_ndimage_result(scind.maximum(distances, l, indexes)))
+    max_distance = np.sqrt(fixup_scipy_ndimage_result(ndimage.maximum(distances, l, indexes)))
     #
     # For the minimum distance, we have to take the distance from each
     # antipode to any line between alternate successive antipodes.
@@ -4055,7 +4060,7 @@ def feret_diameter(chulls, counts, indexes):
     # Compute the distances
     #
     distances = distance2_to_line(v, l0, l1)
-    min_distance = np.sqrt(fixup_scipy_ndimage_result(scind.minimum(distances, l, indexes)))
+    min_distance = np.sqrt(fixup_scipy_ndimage_result(ndimage.minimum(distances, l, indexes)))
     min_distance[np.isnan(min_distance)] = 0
     return min_distance, max_distance
 
