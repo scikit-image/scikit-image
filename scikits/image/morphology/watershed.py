@@ -14,20 +14,15 @@ solves two problems: a pixel should be assigned to the neighbor with the
 largest gradient or, if there is no gradient, pixels on a plateau should
 be split between markers on opposite sides.
 
-CellProfiler is distributed under the GNU General Public License,
-but this file is licensed under the more permissive BSD license.
-See the accompanying file LICENSE for details.
+Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
+Website: http://www.cellprofiler.org
 
 Copyright (c) 2003-2009 Massachusetts Institute of Technology
 Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 
-Please see the AUTHORS file for credits.
-
-Website: http://www.cellprofiler.org
+Original author: Lee Kamentsky
 """
-
-__version__ = "$Revision$"
 
 from _heapq import heapify, heappush, heappop
 import numpy as np
@@ -48,25 +43,91 @@ def __get_strides_for_shape(shape):
 
         
 def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
-    """Return a matrix labeled using the watershed algorithm
+    """
+    Return a matrix labeled using the watershed segmentation algorithm
+
+    Parameters
+    ----------
+
+    image: ndarray (2-D, 3-D, ...)
+        Data array where the lowest value points are labeled first.
+    markers: ndarray of the same shape as `image`
+        An array marking the basins with the values to be assigned in the 
+        label matrix. Zero means not a marker. This array should be of an 
+        integer type.
+    connectivity: ndarray, optional
+        An array with the same number of dimensions as `image` whose
+        non-zero elements indicate neighbors for connection.
+        Following the scipy convention, default is a one-connected array of 
+        the dimension of the image.
+    offset: array_like of shape image.ndim, optional
+        offset of the connectivity (one offset per dimension)
+    mask: ndarray of bools or 0s and 1s, optional
+        Array of same shape as `image`. Only points at which mask == True 
+        will be labeled.
     
-    image - an array where the lowest value points are
-            labeled first.
-    markers - an array marking the basins with the values
-              to be assigned in the label matrix. Zero means not a marker.
-              This array should be of an integer type.
-    connectivity - an array whose non-zero elements indicate neighbors
-                   for connection.
-                   Following the scipy convention, default is a one-connected
-                   array of the dimension of the image.
-    offset  - offset of the connectivity (one offset per dimension)
-    mask    - don't label points in the mask
+    Returns 
+    -------
+    out: ndarray
+        A labeled matrix of the same type and shape as markers
     
-    Returns a labeled matrix of the same type and shape as markers
-    
+
+    Notes
+    -----
+    This function implements a watershed algorithm [1]_that apportions pixels
+    into marked basins. The algorithm uses a priority queue to hold the pixels
+    with the metric for the priority queue being pixel value, then the time of
+    entry into the queue - this settles ties in favor of the closest marker.
+
+    Some ideas taken from
+    Soille, "Automated Basin Delineation from Digital Elevation Models Using
+    Mathematical Morphology", Signal Processing 20 (1990) 171-182
+
+    The most important insight in the paper is that entry time onto the queue
+    solves two problems: a pixel should be assigned to the neighbor with the
+    largest gradient or, if there is no gradient, pixels on a plateau should
+    be split between markers on opposite sides.
+
     This implementation converts all arguments to specific, lowest common
-    denominator types, then passes these to a C algorithm that operates
-    as above.
+    denominator types, then passes these to a C algorithm.
+    
+    Markers can be determined manually, or automatically using for example 
+    the local minima of the gradient of the image, or the local maxima of the
+    distance function to the background for separating overlapping objects
+    (see example).
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Watershed_%28image_processing%29
+
+    .. [2] http://cmm.ensmp.fr/~beucher/wtshed.html
+
+    See also
+    --------
+    `regional_maximum`, `is_local_maximum`, `scipy.ndimage.label`
+
+    Examples
+    --------
+    The watershed algorithm is very useful to separate overlapping objects
+
+    >>> # Generate an initial image with two overlapping circles
+    >>> x, y = np.indices((80, 80))
+    >>> x1, y1, x2, y2 = 28, 28, 44, 52
+    >>> r1, r2 = 16, 20
+    >>> mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
+    >>> mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
+    >>> image = np.logical_or(mask_circle1, mask_circle2)
+    >>> # Now we want to separate the two objects in image
+    >>> # Generate the markers as local maxima of the distance
+    >>> # to the background
+    >>> from scipy import ndimage
+    >>> distance = ndimage.distance_transform_edt(image)
+    >>> local_maxi = regional_maximum(distance)
+    >>> markers = ndimage.label(local_maxi)[0]
+    >>> labels = watershed(-distance, markers, mask=image)
+
+    The algorithm works also for 3-D images, and can be used for example to
+    separate overlapping spheres.
     """
     
     if connectivity == None:
