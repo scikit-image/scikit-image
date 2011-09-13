@@ -1,0 +1,2 @@
+
+from hog import histogram_of_oriented_gradients
