@@ -10,7 +10,7 @@ uint8       0 to 255
 uint16      0 to 65535
 float       0 to 1
 int8        -128 to 127
-int16       -32767 to 32768
+int16       -32768 to 32767
 =========== ================
 
 Input types
