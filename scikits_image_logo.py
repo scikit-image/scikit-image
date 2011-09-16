@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.misc
 
-import scikits.image.io as imgio
+import scikits.image.io as sio
 import scikits.image.filter as imfilt
 
 import scipy_logo
@@ -107,7 +107,7 @@ class SnakeLogo(LogoBase):
     def __init__(self):
         self.radius = 250
         self.origin = (420, 0)
-        img = imgio.imread('data/snake_pixabay.jpg')
+        img = sio.imread('data/snake_pixabay.jpg')
         self.img = self._crop_image(img)
         LogoBase.__init__(self)
 
@@ -117,17 +117,6 @@ snake = SnakeLogo()
 # turn RGB image into gray image
 snake.img = np.mean(snake.img, axis=2)
 snake.edges = np.mean(snake.edges, axis=2)
-
-
-class LenaLogo(LogoBase):
-
-    def __init__(self):
-        self.radius = 180
-        self.origin = (120, 120)
-        self.img = self._crop_image(scipy.misc.lena())
-        LogoBase.__init__(self)
-
-lena = LenaLogo()
 
 
 # Demo plotting functions
@@ -198,28 +187,18 @@ if __name__ == '__main__':
     plotters = (red_light_edges, red_dark_edges,
                 blue_light_edges, blue_dark_edges,
                 green_orange_light_edges, green_orange_dark_edges)
-    f, axes_array = plt.subplots(nrows=4, ncols=len(plotters))
+    f, axes_array = plt.subplots(nrows=2, ncols=len(plotters))
     for plot, ax_col in zip(plotters, axes_array.T):
             prepare_axes(ax_col[0])
             plot(snake)
             prepare_axes(ax_col[1])
             plot(snake, whiten=True)
-
-            prepare_axes(ax_col[2])
-            plot(lena)
-            prepare_axes(ax_col[3])
-            plot(lena, whiten=True)
     plt.tight_layout()
 
     f, ax = plt.subplots()
     prepare_axes(ax)
     green_orange_dark_edges(snake, whiten=(False, True))
     #plt.savefig('green_orange_snake.pdf', bbox_inches='tight')
-
-    f, ax = plt.subplots()
-    prepare_axes(ax)
-    green_orange_dark_edges(lena, whiten=(False, True))
-    #plt.savefig('green_orange_lena.pdf', bbox_inches='tight')
 
     plt.show()
 
