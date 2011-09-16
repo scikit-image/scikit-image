@@ -1,7 +1,7 @@
 .PHONY: logo
 
 logo: green_orange_snake.png snake_logo.svg
-	inkscape --export-png=snake_logo.png --export-dpi=100 \
+	inkscape --export-png=scikits_image_logo.png --export-dpi=100 \
 		     --export-area-drawing --export-background-opacity=1 \
 			 snake_logo.svg
 
