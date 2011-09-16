@@ -107,8 +107,13 @@ class SnakeLogo(LogoBase):
     def __init__(self):
         self.radius = 250
         self.origin = (420, 0)
-        img = sio.imread('data/snake_pixabay.jpg')
-        self.img = self._crop_image(img)
+        img = sio.imread('data/snake_pixabay.jpg')        
+        img = self._crop_image(img)
+
+        img = img.astype(float) * 1.1
+        img[img > 255] = 255
+        self.img = img.astype(np.uint8)
+
         LogoBase.__init__(self)
 
 
@@ -184,21 +189,38 @@ def green_orange_dark_edges(logo, **kwargs):
 
 if __name__ == '__main__':
 
-    plotters = (red_light_edges, red_dark_edges,
-                blue_light_edges, blue_dark_edges,
-                green_orange_light_edges, green_orange_dark_edges)
-    f, axes_array = plt.subplots(nrows=2, ncols=len(plotters))
-    for plot, ax_col in zip(plotters, axes_array.T):
-            prepare_axes(ax_col[0])
-            plot(snake)
-            prepare_axes(ax_col[1])
-            plot(snake, whiten=True)
-    plt.tight_layout()
+    import sys
+    plot = False
+    if len(sys.argv) < 2 or sys.argv[1] != '--no-plot':
+        plot = True
 
-    f, ax = plt.subplots()
-    prepare_axes(ax)
-    green_orange_dark_edges(snake, whiten=(False, True))
-    #plt.savefig('green_orange_snake.pdf', bbox_inches='tight')
+        print "Run with '--no-plot' flag to generate logo silently."
 
-    plt.show()
+    def plot_all():
+        plotters = (red_light_edges, red_dark_edges,
+                    blue_light_edges, blue_dark_edges,
+                    green_orange_light_edges, green_orange_dark_edges)
+
+        f, axes_array = plt.subplots(nrows=2, ncols=len(plotters))
+        for plot, ax_col in zip(plotters, axes_array.T):
+                prepare_axes(ax_col[0])
+                plot(snake)
+                prepare_axes(ax_col[1])
+                plot(snake, whiten=True)
+        plt.tight_layout()
+
+    def plot_snake():
+
+        f, ax = plt.subplots()
+        prepare_axes(ax)
+        green_orange_dark_edges(snake, whiten=(False, True))
+        plt.savefig('green_orange_snake.png', bbox_inches='tight')
+
+    if plot:
+        plot_all()
+
+    plot_snake()
+
+    if plot:
+        plt.show()
 
