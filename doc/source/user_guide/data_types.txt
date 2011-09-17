@@ -1,6 +1,10 @@
 Image data types and what they mean
 ===================================
 
+.. note::
+
+   This is a preliminary design document.
+
 In ``scikits.image``, we assume the following dtype ranges:
 
 =========== ================
@@ -29,7 +33,7 @@ users:
 =============== =======================================
 Function name   Description   
 =============== =======================================
-img_as_float    Convert to 64-bit floating pt repre.
+img_as_float    Convert to 64-bit floating point repr.
                 Scaled to 0/1.
 img_as_uint     Convert to 16-bit uint repr.
                 Scaled to 0-65535.
