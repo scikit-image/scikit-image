@@ -86,14 +86,8 @@ def hog(image, n_orientations=9, pixels_per_cell=(8, 8),
 
     gx = np.zeros(image.shape)
     gy = np.zeros(image.shape)
-    gx[:-1, :-1] = image[:-1,:-1]-image[:-1,1:]
-    gy[:-1, :-1] = image[:-1,:-1]-image[1:,:-1]
-    #gx[:-1, :-1] = np.diff(image, n=1, axis=0)
-    #gy[:-1, :-1] = np.diff(image, n=1, axis=1)
-
-    #import Image
-    #Image.fromarray(gx).show()
-    #Image.fromarray(gy).show()
+    gx[:, :-1] = np.diff(image, n=1, axis=1)
+    gy[:-1, :] = np.diff(image, n=1, axis=0)
 
     """
     The third stage aims to produce an encoding that is sensitive to
