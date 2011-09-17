@@ -1,25 +1,15 @@
-# Authors: Brian Holt
-#
-# License: BSD
-
 import numpy as np
-import scipy as sp
-from scipy import ndimage
+import scipy
 
-from numpy.testing import assert_raises
-
-from scikits.image.feature import histogram_of_oriented_gradients  
+from scikits.image.feature import hog 
 
 def test_histogram_of_oriented_gradients():
-    img = sp.lena().astype(np.int8) 
+    img = scipy.lena().astype(np.int8) 
     
-    fd, hog_image = histogram_of_oriented_gradients(img, 
-                                                    n_orientations=9, 
-                                                    ppc=(8,8), 
-                                                    cpb=(1,1), 
-                                                    visualise=False)
+    fd = hog(img, n_orientations=9, pixels_per_cell=(8, 8), 
+             cells_per_block=(1, 1))
     assert len(fd) == 9 * (512//8) ** 2
     
 if __name__ == '__main__':
-    import nose
-    nose.runmodule()
+    from numpy.testing import run_module_suite
+    run_module_suite()
