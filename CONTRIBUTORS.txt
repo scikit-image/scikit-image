@@ -68,3 +68,5 @@
 - Andreas Mueller
   Example data set loader.
 
+- Brian Holt
+  Histograms of Oriented Gradients
