@@ -4,7 +4,7 @@
 """
 
 import numpy as np
-from scipy import sqrt, pi, arctan, cos, sin
+from scipy import sqrt, pi, arctan2, cos, sin
 
 
 def hog(image, n_orientations=9, pixels_per_cell=(8, 8),
@@ -104,7 +104,7 @@ def hog(image, n_orientations=9, pixels_per_cell=(8, 8),
     """
 
     magnitude = sqrt(gx ** 2 + gy ** 2)
-    orientation = arctan(gy / (gx + 1e-15)) * (180 / pi) + 90
+    orientation = arctan2(gy, (gx + 1e-15)) * (180 / pi) + 90
 
     # compute n_orientations integral images
     integral_images = []
