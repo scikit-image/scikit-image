@@ -59,3 +59,6 @@
 
 - Kyle Mandli
   CSV to ReST code for MATLAB comparison table.
+
+- Brian Holt
+  Histograms of Oriented Gradients
