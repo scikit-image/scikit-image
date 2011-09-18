@@ -10,7 +10,7 @@ def sat(x):
 
     Parameters
     ----------
-    X : ndarray of uint
+    X : ndarray
         Input image.
 
     Returns
@@ -27,12 +27,11 @@ def sat(x):
     return x.cumsum(1).cumsum(0)
 
 def sat_sum(sat, r0, c0, r1, c1):
-    """Using a summed area table / integral image, calculate the sum
-    over a given window.
+    """Use a summed area table / integral image to sum over a given window.
 
     Parameters
     ----------
-    sat : ndarray of uint64
+    sat : ndarray
         Summed area table / integral image.
     r0, c0 : int
         Top-left corner of block to be summed.
