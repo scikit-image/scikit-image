@@ -25,6 +25,7 @@
 
 - Tony Yu
   Reading of paletted images; build, bug and doc fixes.
+  Code to generate scikits-image logo.
 
 - Zachary Pincus
   Tracing of low cost paths, FreeImage I/O plugin
@@ -58,7 +59,7 @@
   From whom we borrowed the github+web tools / style.
 
 - Kyle Mandli
-  CSV to ReST code for MATLAB comparison table.
+  CSV to ReST code for feature comparison table.
 
 - Brian Holt
   Histograms of Oriented Gradients
