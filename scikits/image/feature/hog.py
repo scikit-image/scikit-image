@@ -5,7 +5,7 @@
 
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
-
+from ..transform import sat_sum
 
 def hog(image, n_orientations=9, pixels_per_cell=(8, 8),
         cells_per_block=(3, 3), visualise=False, normalise=False):
@@ -147,12 +147,11 @@ def hog(image, n_orientations=9, pixels_per_cell=(8, 8),
         for y in range(0, n_cellsy):
             for o in range(0, n_orientations):
                 # compute the histogram from integral image
-                #print x, y, o
-                A = integral_images[o][x * cx, y * cy]
-                B = integral_images[o][(x + 1) * cx - 1, y * cy]
-                C = integral_images[o][(x + 1) * cx - 1, (y + 1) * cy - 1]
-                D = integral_images[o][x * cx, (y + 1) * cy - 1]
-                orientation_histogram[x, y, o] = A + C - D - B
+                orientation_histogram[x, y, o] = sat_sum(integral_images[o],
+                                                         y * cy,
+                                                         x * cx,
+                                                         (y + 1) * cy - 1,
+                                                         (x + 1) * cx - 1)
 
                 if visualise:
                     centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
