@@ -1,8 +1,8 @@
 User Guide
 ==========
 
-.. contents::
-   :local:
+.. toctree::
+   :maxdepth: 1
 
-.. include:: user_guide/plugins.txt
-
+   user_guide/data_types
+   user_guide/plugins
