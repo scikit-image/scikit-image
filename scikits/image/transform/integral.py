@@ -1,5 +1,5 @@
-def sat(x):
-    """Summed area table / integral image.
+def integral_image(x):
+    """Integral image / summed area table.
 
     The integral image contains the sum of all elements above and to the
     left of it, i.e.:
@@ -10,13 +10,13 @@ def sat(x):
 
     Parameters
     ----------
-    X : ndarray
+    x : ndarray
         Input image.
 
     Returns
     -------
     S : ndarray
-        Summed area table.
+        Integral image / summed area table.
 
     References
     ----------
@@ -26,13 +26,13 @@ def sat(x):
     """
     return x.cumsum(1).cumsum(0)
 
-def sat_sum(sat, r0, c0, r1, c1):
-    """Use a summed area table / integral image to sum over a given window.
+def integrate(ii, r0, c0, r1, c1):
+    """Use an integral image to integrate over a given window.
 
     Parameters
     ----------
-    sat : ndarray
-        Summed area table / integral image.
+    ii : ndarray
+        Integral image.
     r0, c0 : int
         Top-left corner of block to be summed.
     r1, c1 : int
@@ -41,20 +41,20 @@ def sat_sum(sat, r0, c0, r1, c1):
     Returns
     -------
     S : int
-        Sum over the given window.
+        Integral (sum) over the given window.
 
     """
     S = 0
 
-    S += sat[r1, c1]
+    S += ii[r1, c1]
 
     if (r0 - 1 >= 0) and (c0 - 1 >= 0):
-        S += sat[r0 - 1, c0 - 1]
+        S += ii[r0 - 1, c0 - 1]
 
     if (r0 - 1 >= 0):
-        S -= sat[r0 - 1, c1]
+        S -= ii[r0 - 1, c1]
 
     if (c0 - 1 >= 0):
-        S -= sat[r1, c0 - 1]
+        S -= ii[r1, c0 - 1]
 
     return S
