@@ -40,16 +40,16 @@ def calculate_coverage(reader):
             total_items += 1
             if ":done:" in row[2] or ":done:" in row[3]:
                 done_items += 1
-            elif ":partial:" in row[2] or ":partial:" in row[3]:
+            if ":partial:" in row[2] or ":partial:" in row[3]:
                 partial_items += 1
-            elif ":na:" in row[2] or ":na:" in row[3]:
+            if ":na:" in row[2] or ":na:" in row[3]:
                 na_items += 1
 
     counts = (done_items,
               partial_items,
               total_items - (partial_items + done_items + na_items),
               na_items)
-
+    
     return list(i / total_items for i in counts)
 
 def read_table_titles(reader):
@@ -235,7 +235,7 @@ Coverage Bar
 
     for item, style in enumerate(('done-bar', 'partial-bar',
                                   'missing-bar', 'na-bar')):
-        stream.write('<td width="%s" class="%s">XX</td>' % \
+        stream.write('<td width="%s%%" class="%s">&nbsp</td>' % \
                      (item_counts[item] * 100, style))
 
     stream.write("</tr></table>\n\n")
@@ -269,6 +269,6 @@ if __name__ == "__main__":
     generate_page(csv_path,output)
     output.close()
     
-    print "Generated %s from %s." % (output_path,csv_path)
+    print("Generated %s from %s." % (output_path,csv_path))
 
 
