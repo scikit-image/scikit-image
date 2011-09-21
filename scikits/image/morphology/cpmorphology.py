@@ -16,7 +16,7 @@ from scipy import ndimage
 import scipy.sparse
 import _cpmorphology
 from outline import outline
-from rankorder import rank_order
+from ..filter import rank_order
 from index import Indexes
 from _cpmorphology2 import skeletonize_loop, table_lookup_index
 from _cpmorphology2 import grey_reconstruction_loop
