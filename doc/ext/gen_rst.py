@@ -1,10 +1,12 @@
 """
-Example generation for the scikit learn
+Example generation for the scikit image.
 
 Generate the rst files for the examples by iterating over the python
 example files.
 
-Files that generate images should start with 'plot'
+Files that generate images should start with 'plot'.
+
+This code was taken from the scikit-learn.
 
 """
 import os
