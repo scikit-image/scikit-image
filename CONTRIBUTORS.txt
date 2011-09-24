@@ -44,7 +44,8 @@
   Incorporating CellProfiler's Sobel edge detector, build and bug fixes.
 
 - Emmanuelle Guillart
-  Total variation noise filtering
+  Total variation noise filtering, integration of CellProfiler's
+  mathematical morphology tools.
 
 - Maël Primet
   Total variation noise filtering
@@ -60,3 +61,6 @@
 
 - Kyle Mandli
   CSV to ReST code for feature comparison table.
+
+- The Scikit Learn team
+  From whom we borrowed the example generation tools.

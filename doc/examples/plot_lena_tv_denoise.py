@@ -21,7 +21,7 @@ from scipy import ndimage
 import matplotlib.pyplot as plt
 from scikits.image.filter import tv_denoise
 
-l = scipy.lena()
+l = scipy.misc.lena()
 l = l[230:290, 220:320]
 
 noisy = l + 0.4*l.std()*np.random.random(l.shape)
@@ -48,4 +48,4 @@ plt.title('(more) TV denoising', fontsize=20)
 
 plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9, bottom=0, left=0, 
                                             right=1)
-
+plt.show()
