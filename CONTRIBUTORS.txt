@@ -64,3 +64,7 @@
 
 - The Scikit Learn team
   From whom we borrowed the example generation tools.
+
+- Andreas Mueller
+  Example data set loader.
+
