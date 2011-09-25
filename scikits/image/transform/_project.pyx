@@ -17,7 +17,7 @@ cdef extern from "math.h":
 cdef double get_pixel(double *image, int rows, int cols,
                       int r, int c, char mode, double cval=0):
     if mode == 'C':
-        if (r < 0) or (r >= cols) or (c < 0) or (c >= cols):
+        if (r < 0) or (r > cols - 1) or (c < 0) or (c > cols - 1):
             return cval
         else:
             return image[r * cols + c]
@@ -31,7 +31,10 @@ cdef int coord_map(int dim, int coord, char mode):
         if (coord < 0):
             return <int>(-coord % dim)
         elif (coord > dim):
-            return <int>(dim  - (coord % dim))
+            if (<int>(coord / dim) % 2 != 0):
+                return <int>(dim - (coord % dim))
+            else:
+                return <int>(coord % dim)
     elif mode == 'W': # wrap
         if (coord < 0):
             return <int>(dim - (-coord % dim))
