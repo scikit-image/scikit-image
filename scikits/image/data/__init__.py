@@ -1,24 +1,42 @@
-"""Convinience functions to get sample data"""
+"""Convenience functions to load sample data.
 
-import os
+"""
+
+import os as _os
 
 from ..io import imread
 from ...image import data_dir
 
-def camera():
-    """Example gray "camera" image, often used for segmentation
-    and denoising examples."""
+def load(f):
+    """Load an image file located in the data directory.
 
-    return imread(os.path.join(data_dir, "camera.png"))
+    Parameters
+    ----------
+    f : string
+        File name.
+
+    Returns
+    -------
+    img : ndarray
+        Image loaded from scikits.image.data_dir.
+    """
+    return imread(_os.path.join(data_dir, f))
+
+def camera():
+    """Gray "camera" image, often used for segmentation
+    and denoising examples.
+
+    """
+    return load("camera.png")
 
 def lena():
-    """Example "Lena" image. """
-    return imread(os.path.join(data_dir, "lena.png"))
+    """Colour "Lena" image.
+
+    """
+    return load("lena.png")
 
 def checkerboard():
-    """Checkerboard image"""
-    return imread(os.path.join(data_dir, "chessboard_RGB.png"))
+    """Checkerboard image.
 
-def checkerboard_gray():
-    """Checkerboard image, only gray channel"""
-    return imread(os.path.join(data_dir, "chessboard_GRAY.png"))
+    """
+    return load("chessboard_RGB.png")
