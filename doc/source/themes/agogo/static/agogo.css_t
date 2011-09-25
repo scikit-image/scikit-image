@@ -595,8 +595,23 @@ tt {
     font-size: 0.95em;
 }
 
+table {
+  border-collapse: collapse;
+  margin-bottom: 1em;
+  margin-top: 1em;
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+}
+
+th, td {
+  padding: 5px;
+}
+
 th {
-    background-color: #ede;
+    color: #333;
+    background-color: #eee;
 }
 
 #api-reference ul:first-child {
