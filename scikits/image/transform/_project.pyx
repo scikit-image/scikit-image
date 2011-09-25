@@ -6,26 +6,24 @@ cimport numpy as np
 import numpy as np
 import cython
 
+from cython.operator import dereference
+
 np.import_array()
 
 cdef extern from "math.h":
     double floor(double)
     double fmod(double, double)
 
-cdef double get_pixel(np.ndarray image, int r, int c, char mode,
-                      double cval=0):
-    cdef np.ndarray[dtype=np.double_t, ndim=2] img = image
-    cdef int rows = img.shape[0]
-    cdef int cols = img.shape[1]
-
+cdef double get_pixel(double *image, int rows, int cols,
+                      int r, int c, char mode, double cval=0):
     if mode == 'C':
         if (r < 0) or (r >= cols) or (c < 0) or (c >= cols):
             return cval
         else:
-            return img[r, c]
+            return image[r * cols + c]
     else:
-        return img[coord_map(rows, r, mode),
-                   coord_map(cols, c, mode)]
+        return image[coord_map(rows, r, mode) * cols +
+                     coord_map(cols, c, mode)]
 
 cdef int coord_map(int dim, int coord, char mode):
     dim = dim - 1
@@ -42,22 +40,28 @@ cdef int coord_map(int dim, int coord, char mode):
 
     return coord
 
-cdef tf(double x, double y, H):
-    cdef np.ndarray[np.double_t, ndim=2] M = H
+cdef tf(double x, double y, double* H, double *x_, double *y_):
     cdef double xx, yy, zz
 
-    xx = M[0, 0] * x + M[0, 1] * y + M[0, 2]
-    yy = M[1, 0] * x + M[1, 1] * y + M[1, 2]
-    zz = M[2, 0] * x + M[2, 1] * y + M[2, 2]
+    ## print
+    ## print H[0], H[1], H[2]
+    ## print H[3], H[4], H[5]
+    ## print H[6], H[7], H[8]
+    ## print
 
-    xx /= zz
-    yy /= zz
+    xx = H[0] * x + H[1] * y + H[2]
+    yy = H[3] * x + H[4] * y + H[5]
+    zz =  H[6] * x + H[7] * y + H[8]
 
-    return xx, yy
+    xx = xx / zz
+    yy = yy / zz
+
+    x_[0] = xx
+    y_[0] = yy
 
 @cython.boundscheck(False)
 def homography(np.ndarray image, np.ndarray H, output_shape=None,
-               mode='C', double cval=0):
+               mode='constant', double cval=0):
     """
     Projective transformation (homography).
     
@@ -93,9 +97,8 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
         Shape of the output image generated.
     order : int
         Order of splines used in interpolation.
-    mode : {'C', 'M', 'W'}
+    mode : {'constant', 'mirror', 'wrap'}
         How to handle values outside the image borders.
-        Constant, Mirror or Wrap.
     cval : string
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
@@ -103,12 +106,18 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
     """
 
     cdef np.ndarray[dtype=np.double_t, ndim=2] img = image
-    cdef np.ndarray[dtype=np.double_t, ndim=2] M = np.linalg.inv(H)
+    cdef np.ndarray[dtype=np.double_t, ndim=2] M = \
+         np.ascontiguousarray(np.linalg.inv(H))
 
-    if mode not in ('C', 'W', 'M'):
+    if mode not in ('constant', 'wrap', 'mirror'):
         raise ValueError("Invalid mode specified.  Please use "
-                         "C [constant], W [wrap] or M [mirror].")
-    cdef char mode_c = ord(mode[0])
+                         "`constant`, `wrap` or `mirror`.")
+    if mode == 'constant':
+        mode_c = ord('C')
+    elif mode == 'wrap':
+        mode_c = ord('W')
+    elif mode == 'mirror':
+        mode_c = ord('M')
 
     cdef int out_r, out_c, columns, rows
     if output_shape is None:
@@ -130,17 +139,21 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
 
     for tfr in range(out_r):
         for tfc in range(out_c):
-            c, r = tf(tfc, tfr, M)
+            tf(tfc, tfr, <double*>M.data, &c, &r)
             r_int = <int>floor(r)
             c_int = <int>floor(c)
 
             t = r - r_int
             u = c - c_int
 
-            y0 = get_pixel(img, r_int, c_int, mode_c)
-            y1 = get_pixel(img, r_int + 1, c_int, mode_c)
-            y2 = get_pixel(img, r_int + 1, c_int + 1, mode_c)
-            y3 = get_pixel(img, r_int, c_int + 1, mode_c)
+            y0 = get_pixel(<double*>img.data, rows, columns,
+                           r_int, c_int, mode_c)
+            y1 = get_pixel(<double*>img.data, rows, columns,
+                           r_int + 1, c_int, mode_c)
+            y2 = get_pixel(<double*>img.data, rows, columns,
+                           r_int + 1, c_int + 1, mode_c)
+            y3 = get_pixel(<double*>img.data, rows, columns,
+                           r_int, c_int + 1, mode_c)
 
             out[tfr, tfc] = \
                 (1 - t) * (1 - u) * y0 + \
