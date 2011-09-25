@@ -20,9 +20,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from scikits.image import data
+from scikits.image import color
 from scikits.image.filter import tv_denoise
 
-l = data.lena()
+l = color.rgb2gray(data.lena())
 l = l[230:290, 220:320]
 
 noisy = l + 0.4*l.std()*np.random.random(l.shape)
