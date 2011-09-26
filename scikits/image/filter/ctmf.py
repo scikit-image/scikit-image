@@ -15,7 +15,7 @@ import numpy as np
 from . import _ctmf
 from rank_order import rank_order
 
-def median_filter(data, mask=None, radius=1, percent=50):
+def median_filter(data, mask=None, radius=2, percent=50):
     '''Masked median filter with octagon shape.
 
     Parameters
