@@ -43,6 +43,9 @@ def median_filter(data, mask=None, radius=1, percent=50):
 
     '''
 
+    if data.ndim!=2:
+        raise TypeError("The input 'data' must be a two dimensional array.")
+
     if mask is None:
         mask = np.ones(data.shape, dtype=np.bool)
     mask = np.ascontiguousarray(mask, dtype=np.bool)
