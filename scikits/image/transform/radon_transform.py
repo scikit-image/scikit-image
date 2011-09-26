@@ -32,7 +32,7 @@ def radon(image, theta=None):
     Returns
     -------
     output : ndarray
-        Radon transform.
+        Radon transform (sinogram).
 
     """
     if image.ndim != 2:
@@ -85,14 +85,17 @@ def iradon(radon_image, theta=None, output_size=None,
     """
     Inverse radon transform.
 
-    Reconstruct an image from the radon transform.
+    Reconstruct an image from the radon transform, using the filtered
+    back projection algorithm.
         
     Parameters
     ----------
     radon_image : array_like, dtype=float
-        Image containing radon transform (sinogram).
-    theta : array_like, dtype=float, optional (default np.arange(180))
-        Reconstruction angles (in degrees).
+        Image containing radon transform (sinogram). Each column of
+        the image corresponds to a projection along a different angle.
+    theta : array_like, dtype=float, optional
+        Reconstruction angles (in degrees). Default: m angles evenly spaced
+        between 0 and 180 (if the shape of `radon_image` is nxm)
     output_size : int
         Number of rows and columns in the reconstruction.
     filter : str, optional (default ramp)
@@ -112,13 +115,14 @@ def iradon(radon_image, theta=None, output_size=None,
     -----
     It applies the fourier slice theorem to reconstruct an image by
     multiplying the frequency domain of the filter with the FFT of the
-    projection data.
+    projection data. This algorithm is called filtered back projection.
     
     """
     if radon_image.ndim != 2:
         raise ValueError('The input image must be 2-D')
     if theta == None:
-        theta = np.arange(180)
+        m, n = radon_image.shape
+        theta = np.linspace(0, 180, n, endpoint=False)
     th = (np.pi / 180.0) * theta        
     # if output size not specified, estimate from input radon image
     if not output_size:
