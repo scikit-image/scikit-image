@@ -35,7 +35,7 @@ cdef double get_pixel(double *image, int rows, int cols,
     
     """
     if mode == 'C':
-        if (r < 0) or (r > cols - 1) or (c < 0) or (c > cols - 1):
+        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
             return cval
         else:
             return image[r * cols + c]

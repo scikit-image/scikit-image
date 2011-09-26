@@ -40,16 +40,20 @@ def test_fast_homography():
     for mode in ('constant', 'mirror', 'wrap'):
         print 'Transform mode:', mode
 
-        p0 = homography(img, H, mode=mode)
+        p0 = homography(img, H, mode=mode, order=1)
         p1 = fast_homography(img, H, mode=mode)
         p1 = np.round(p1)
 
         ## import matplotlib.pyplot as plt
-        ## plt.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
+        ## f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
+        ## ax0.imshow(img)
+        ## ax1.imshow(p0, cmap=plt.cm.gray)
+        ## ax2.imshow(p1, cmap=plt.cm.gray)
+        ## ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
         ## plt.show()
 
         d = np.mean(np.abs(p0 - p1))
-        assert d < 0.1
+        assert d < 0.2
     
 
 if __name__ == "__main__":
