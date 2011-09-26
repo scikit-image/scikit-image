@@ -1,7 +1,4 @@
-import os.path
-
 import numpy as np
-from numpy.testing import *
 
 from scikits.image.filter import median_filter
 
@@ -20,7 +17,7 @@ def test_00_01_all_masked():
 def test_00_02_all_but_one_masked():
     mask = np.zeros((10,10), bool)
     mask[5,5] = True
-    result = median_filter(np.zeros((10,10)), mask, 3)
+    median_filter(np.zeros((10,10)), mask, 3)
 
 def test_01_01_mask():
     '''The median filter, masking a single value'''
@@ -30,14 +27,14 @@ def test_01_01_mask():
     mask[5,5] = False
     result = median_filter(img, mask, 3)
     assert (np.all(result[mask] == 0))
-    assert_equal(result[5,5], 1)
+    np.testing.assert_equal(result[5,5], 1)
 
 def test_02_01_median():
     '''A median filter larger than the image = median of image'''
     np.random.seed(0)
     img = np.random.uniform(size=(9,9))
     result = median_filter(img, np.ones((9,9),bool), 20)
-    assert_equal(result[0,0], np.median(img))
+    np.testing.assert_equal(result[0,0], np.median(img))
     assert (np.all(result == np.median(img)))
 
 def test_02_02_median_bigger():
@@ -99,14 +96,7 @@ def test_default_values():
     mask = np.ones((20, 20), dtype=np.uint8)
     result1 = median_filter(img, mask, radius=1, percent=50)
     result2 = median_filter(img)
-    assert_array_equal(result1, result2)
-
-def test_default_values():
-    img = (np.random.random((20, 20)) * 255).astype(np.uint8)
-    mask = np.ones((20, 20), dtype=np.uint8)
-    result1 = median_filter(img, mask, radius=1, percent=50)
-    result2 = median_filter(img)
-    assert_array_equal(result1, result2)
+    np.testing.assert_array_equal(result1, result2)
 
 if __name__ == "__main__":
-    run_module_suite()
+    np.testing.run_module_suite()
