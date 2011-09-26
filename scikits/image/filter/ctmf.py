@@ -15,12 +15,13 @@ import numpy as np
 from . import _ctmf
 from rank_order import rank_order
 
-def median_filter(data, mask=None, radius=1, percent=50):
+
+def median_filter(image, mask=None, radius=2, percent=50):
     '''Masked median filter with octagon shape.
 
     Parameters
     ----------
-    data : (M,N) ndarray, dtype uint8
+    image : (M,N) ndarray, dtype uint8
         Input image.
     mask : (M,N) ndarray, dtype uint8, optional
         A value of 1 indicates a significant pixel, 0
@@ -43,42 +44,46 @@ def median_filter(data, mask=None, radius=1, percent=50):
 
     '''
 
+    if image.ndim != 2:
+        raise TypeError("The input 'image' must be a two dimensional array.")
+
     if mask is None:
-        mask = np.ones(data.shape, dtype=np.bool)
+        mask = np.ones(image.shape, dtype=np.bool)
     mask = np.ascontiguousarray(mask, dtype=np.bool)
 
     if np.all(~ mask):
-        return data.copy()
+        return image.copy()
     #
-    # Normalize the ranked data to 0-255
+    # Normalize the ranked image to 0-255
     #
-    if (not np.issubdtype(data.dtype, np.int) or
-        np.min(data) < 0 or np.max(data) > 255):
-        ranked_data,translation = rank_order(data[mask])
-        max_ranked_data = np.max(ranked_data)
-        if max_ranked_data == 0:
-            return data
-        if max_ranked_data > 255:
-            ranked_data = ranked_data * 255 // max_ranked_data
+    if (not np.issubdtype(image.dtype, np.int) or
+        np.min(image) < 0 or np.max(image) > 255):
+        ranked_image, translation = rank_order(image[mask])
+        max_ranked_image = np.max(ranked_image)
+        if max_ranked_image == 0:
+            return image
+        if max_ranked_image > 255:
+            ranked_image = ranked_image * 255 // max_ranked_image
         was_ranked = True
     else:
-        ranked_data = data[mask]
+        ranked_image = image[mask]
         was_ranked = False
-    input = np.zeros(data.shape, np.uint8 )
-    input[mask] = ranked_data
+    input = np.zeros(image.shape, np.uint8)
+    input[mask] = ranked_image
 
     mask.dtype = np.uint8
-    output = np.zeros(data.shape, np.uint8)
+    output = np.zeros(image.shape, np.uint8)
 
     _ctmf.median_filter(input, mask, output, radius, percent)
     if was_ranked:
         #
         # The translation gives the original value at each ranking.
         # We rescale the output to the original ranking and then
-        # use the translation to look up the original value in the data.
+        # use the translation to look up the original value in the image.
         #
-        if max_ranked_data > 255:
-            result = translation[output.astype(np.uint32) * max_ranked_data // 255]
+        if max_ranked_image > 255:
+            result = translation[output.astype(np.uint32) *
+                                 max_ranked_image // 255]
         else:
             result = translation[output]
     else:
