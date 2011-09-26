@@ -122,3 +122,7 @@ Implement Algorithms
 - Graph cut segmentation
 - Probabilistic Hough transform
 
+Drawing
+```````
+- Wu's algorithm for lines and circles
+
