@@ -14,7 +14,7 @@ Original author: Lee Kamentsky
 
 import numpy as np
 import scipy.ndimage as ndi
-from scipy.ndimage import (gaussian_filter, convolve,
+from scipy.ndimage import (gaussian_filter,
                            generate_binary_structure, binary_erosion, label)
 
 
@@ -25,10 +25,10 @@ def smooth_with_function_and_mask(image, function, mask):
     ----------
     image : array
       The image to smooth
-    
+
     function : callable
       A function that takes an image and returns a smoothed image
-    
+
     mask : array
       Mask with 1's for significant pixels, 0 for masked pixels
 
@@ -37,11 +37,11 @@ def smooth_with_function_and_mask(image, function, mask):
     This function calculates the fractional contribution of masked pixels
     by applying the function to the mask (which gets you the fraction of
     the pixel data that's due to significant points). We then mask the image
-    and apply the function. The resulting values will be lower by the bleed-over
-    fraction, so you can recalibrate by dividing by the function on the mask
-    to recover the effect of smoothing from just the significant pixels.
+    and apply the function. The resulting values will be lower by the
+    bleed-over fraction, so you can recalibrate by dividing by the function
+    on the mask to recover the effect of smoothing from just the significant
+    pixels.
     """
-    not_mask = np.logical_not(mask)
     bleed_over = function(mask.astype(float))
     masked_image = np.zeros(image.shape, image.dtype)
     masked_image[mask] = image[mask]
@@ -58,10 +58,10 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     image : array_like, dtype=float
       The greyscale input image to detect edges on; should be normalized to 0.0
       to 1.0.
-    
+
     sigma : float
       The standard deviation of the Gaussian filter
-    
+
     low_threshold : float
       The lower bound for hysterisis thresholding (linking edges)
 
@@ -112,7 +112,7 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     # because who knows what lies beyond the edge of the image?
     #
 
-    if image.ndim!=2:
+    if image.ndim != 2:
         raise TypeError("The input 'image' must be a two dimensional array.")
 
     if mask is None:
@@ -138,7 +138,7 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     # Assign each point to have a normal of 0-45 degrees, 45-90 degrees,
     # 90-135 degrees and 135-180 degrees.
     #
-    local_maxima = np.zeros(image.shape,bool)
+    local_maxima = np.zeros(image.shape, bool)
     #----- 0 to 45 degrees ------
     pts_plus = (isobel >= 0) & (jsobel >= 0) & (abs_isobel >= abs_jsobel)
     pts_minus = (isobel <= 0) & (jsobel <= 0) & (abs_isobel >= abs_jsobel)
@@ -187,7 +187,6 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     c1 = magnitude[:, :-1][pts[:, 1:]]
     c2 = magnitude[1:, :-1][pts[:-1, 1:]]
     c_minus = c2 * w + c1 * (1.0 - w) <= m
-    cc = np.logical_and(c_plus,c_minus)
     local_maxima[pts] = c_plus & c_minus
     #----- 135 to 180 degrees ------
     # Mix anti-diagonal and anti-horizontal
@@ -202,7 +201,7 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     w = abs_jsobel[pts] / abs_isobel[pts]
     c_plus = c2 * w + c1 * (1 - w) <= m
     c1 = magnitude[1:, :][pts[:-1, :]]
-    c2 = magnitude[1:,:-1][pts[:-1,1:]]
+    c2 = magnitude[1:, :-1][pts[:-1, 1:]]
     c_minus = c2 * w + c1 * (1 - w) <= m
     local_maxima[pts] = c_plus & c_minus
     #
@@ -214,14 +213,14 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     # Segment the low-mask, then only keep low-segments that have
     # some high_mask component in them
     #
-    labels,count = label(low_mask, np.ndarray((3, 3),bool))
+    labels, count = label(low_mask, np.ndarray((3, 3), bool))
     if count == 0:
         return low_mask
-    
-    sums = (np.array(ndi.sum(high_mask,labels,
-                             np.arange(count,dtype=np.int32) + 1),
+
+    sums = (np.array(ndi.sum(high_mask, labels,
+                             np.arange(count, dtype=np.int32) + 1),
                      copy=False, ndmin=1))
-    good_label = np.zeros((count + 1,),bool)
+    good_label = np.zeros((count + 1,), bool)
     good_label[1:] = sums > 0
     output_mask = good_label[labels]
     return output_mask
