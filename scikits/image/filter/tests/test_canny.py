@@ -11,21 +11,21 @@ class TestCanny(unittest.TestCase):
     
     def test_00_01_zeros_mask(self):
         '''Test that the Canny filter finds no points in a masked image'''
-        result = (F.canny(np.random.uniform(size=(20,20)), 4,0,0,
-                          np.zeros((20,20),bool)))
+        result = (F.canny(np.random.uniform(size=(20,20)), 4, 0, 0,
+                          np.zeros((20, 20), bool)))
         self.assertFalse(np.any(result))
     
     def test_01_01_circle(self):
         '''Test that the Canny filter finds the outlines of a circle'''
-        i,j = np.mgrid[-200:200,-200:200].astype(float) / 200
-        c = np.abs(np.sqrt(i*i+j*j) - .5) < .02
-        result = F.canny(c.astype(float), 4, 0, 0,np.ones(c.shape,bool))
+        i, j = np.mgrid[-200:200, -200:200].astype(float) / 200
+        c = np.abs(np.sqrt( i * i + j * j) - .5) < .02
+        result = F.canny(c.astype(float), 4, 0, 0, np.ones(c.shape, bool))
         #
         # erode and dilate the circle to get rings that should contain the
         # outlines
         #
         cd = binary_dilation(c, iterations=3)
-        ce = binary_erosion(c,iterations=3)
+        ce = binary_erosion(c, iterations=3)
         cde = np.logical_and(cd, np.logical_not(ce))
         self.assertTrue(np.all(cde[result]))
         #
@@ -41,16 +41,16 @@ class TestCanny(unittest.TestCase):
     def test_01_02_circle_with_noise(self):
         '''Test that the Canny filter finds the circle outlines in a noisy image'''
         np.random.seed(0)
-        i,j = np.mgrid[-200:200,-200:200].astype(float) / 200
-        c = np.abs(np.sqrt(i*i+j*j) - .5) < .02
-        cf = c.astype(float) * .5 + np.random.uniform(size=c.shape)*.5
-        result = F.canny(cf, 4, .1, .2,np.ones(c.shape,bool))
+        i,j = np.mgrid[-200:200, -200:200].astype(float) / 200
+        c = np.abs(np.sqrt( i * i + j * j) - .5) < .02
+        cf = c.astype(float) * .5 + np.random.uniform(size=c.shape) * .5
+        result = F.canny(cf, 4, .1, .2, np.ones(c.shape, bool))
         #
         # erode and dilate the circle to get rings that should contain the
         # outlines
         #
         cd = binary_dilation(c, iterations=4)
-        ce = binary_erosion(c,iterations=4)
+        ce = binary_erosion(c, iterations=4)
         cde = np.logical_and(cd, np.logical_not(ce))
         self.assertTrue(np.all(cde[result]))
         point_count = np.sum(result)
