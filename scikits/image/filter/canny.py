@@ -50,7 +50,7 @@ def smooth_with_function_and_mask(image, function, mask):
     return output_image
 
 
-def canny(image, sigma, low_threshold, high_threshold, mask=None):
+def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     '''Edge filter an image using the Canny algorithm.
 
     Parameters
