@@ -1,5 +1,7 @@
 #cython: cdivison=True boundscheck=False
 
+__all__ = ['homography']
+
 cimport cython
 cimport numpy as np
 
@@ -16,6 +18,22 @@ cdef extern from "math.h":
 
 cdef double get_pixel(double *image, int rows, int cols,
                       int r, int c, char mode, double cval=0):
+    """Get a pixel from the image, taking wrapping mode into consideration.
+
+    Parameters
+    ----------
+    image : *double
+        Input image.
+    rows, cols : int
+        Dimensions of image.
+    r, c : int
+        Position at which to get the pixel.
+    mode : {'C', 'W', 'M'}
+        Wrapping mode.  Constant, Wrap or Mirror.
+    cval : double
+        Constant value to use for mode constant.
+    
+    """
     if mode == 'C':
         if (r < 0) or (r > cols - 1) or (c < 0) or (c > cols - 1):
             return cval
@@ -26,10 +44,28 @@ cdef double get_pixel(double *image, int rows, int cols,
                      coord_map(cols, c, mode)]
 
 cdef int coord_map(int dim, int coord, char mode):
+    """
+    Wrap a coordinate, according to a given dimension and mode.
+    
+    Parameters
+    ----------
+    dim : int
+        Maximum coordinate.
+    coord : int
+        Coord provided by user.  May be < 0 or > dim.
+    mode : {'W', 'M'}
+        Whether to wrap or mirror the coordinate if it
+        falls outside [0, dim).
+    
+    """
     dim = dim - 1
     if mode == 'M': # mirror
         if (coord < 0):
-            return <int>(-coord % dim)
+            # How many times times does the coordinate wrap?
+            if (<int>(-coord / dim) % 2 != 0):
+                return dim - <int>(-coord % dim)
+            else:
+                return <int>(-coord % dim)
         elif (coord > dim):
             if (<int>(coord / dim) % 2 != 0):
                 return <int>(dim - (coord % dim))
@@ -44,13 +80,19 @@ cdef int coord_map(int dim, int coord, char mode):
     return coord
 
 cdef tf(double x, double y, double* H, double *x_, double *y_):
-    cdef double xx, yy, zz
+    """Apply a homography to a coordinate.
 
-    ## print
-    ## print H[0], H[1], H[2]
-    ## print H[3], H[4], H[5]
-    ## print H[6], H[7], H[8]
-    ## print
+    Parameters
+    ----------
+    x, y : double
+        Input coordinate.
+    H : (3,3) *double
+        Transformation matrix.
+    x_, y_ : *double
+        Output coordinate.
+
+    """
+    cdef double xx, yy, zz
 
     xx = H[0] * x + H[1] * y + H[2]
     yy = H[3] * x + H[4] * y + H[5]
@@ -108,7 +150,8 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
 
     """
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2] img = image
+    cdef np.ndarray[dtype=np.double_t, ndim=2] img = \
+         np.asarray(image, dtype=np.double)
     cdef np.ndarray[dtype=np.double_t, ndim=2] M = \
          np.ascontiguousarray(np.linalg.inv(H))
 
@@ -134,7 +177,7 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
     columns = img.shape[1]
 
     cdef np.ndarray[dtype=np.double_t, ndim=2] out = \
-         np.zeros((out_r, out_c), dtype=np.float64)
+         np.zeros((out_r, out_c), dtype=np.double)
     
     cdef int tfr, tfc, r_int, c_int
     cdef double y0, y1, y2, y3
