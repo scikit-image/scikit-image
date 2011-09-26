@@ -70,3 +70,6 @@
 
 - Brian Holt
   Histograms of Oriented Gradients
+
+- David-Warde Farley, Sturla Molden
+  Bresenheim line drawing, from snippets on numpy-discussion.
