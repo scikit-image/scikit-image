@@ -80,10 +80,8 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
     -----------
     Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
-    
-    William Green's Canny tutorial
-    http://www.pages.drexel.edu/~weg22/can_tut.html
     '''
+
     #
     # The steps involved:
     #
