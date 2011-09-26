@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-from scikits.image.transform.project import _stackcopy, homography
-from scikits.image.transform._project import homography as fast_homography
+from scikits.image.transform.project import _stackcopy
+from scikits.image.transform import homography, fast_homography
 from scikits.image import data
 
 def test_stackcopy():
