@@ -111,6 +111,10 @@ def canny(image, sigma, low_threshold, high_threshold, mask=None):
     # mask by one and then mask the output. We also mask out the border points
     # because who knows what lies beyond the edge of the image?
     #
+
+    if image.ndim!=2:
+        raise TypeError("The input 'image' must be a two dimensional array.")
+
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
     fsmooth = lambda x: gaussian_filter(x, sigma, mode='constant')

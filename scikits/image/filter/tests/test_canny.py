@@ -56,3 +56,6 @@ class TestCanny(unittest.TestCase):
         point_count = np.sum(result)
         self.assertTrue(point_count > 1200)
         self.assertTrue(point_count < 1600)
+
+    def test_image_shape(self):
+        self.assertRaises(TypeError,F.canny,np.zeros((20, 20, 20)), 4, 0, 0)
