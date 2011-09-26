@@ -3,7 +3,7 @@ from numpy.testing import *
 from scikits.image.transform import *
 
 def rescale(x):
-    x = x.astype(float, copy=True)
+    x = x.astype(float)
     x -= x.min()
     x /= x.max()
     return x
