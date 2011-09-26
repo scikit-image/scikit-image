@@ -105,7 +105,7 @@ def test_04_01_half_masked():
 def test_default_values():
     img = (np.random.random((20, 20)) * 255).astype(np.uint8)
     mask = np.ones((20, 20), dtype=np.uint8)
-    result1 = median_filter(img, mask, radius=1, percent=50)
+    result1 = median_filter(img, mask, radius=2, percent=50)
     result2 = median_filter(img)
     np.testing.assert_array_equal(result1, result2)
 
