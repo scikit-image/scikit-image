@@ -104,7 +104,7 @@ def img_as_float(image):
     return _convert(image, np.float64, prec_loss)
 
 def img_as_uint(image):
-    """Convert an image to 64-bit unsigned integer format.
+    """Convert an image to 16-bit unsigned integer format.
 
     Parameters
     ----------
@@ -113,7 +113,7 @@ def img_as_uint(image):
 
     Returns
     -------
-    out : ndarray of uint64
+    out : ndarray of uint16
         Output image.
 
     Notes
@@ -126,7 +126,7 @@ def img_as_uint(image):
     return _convert(image, np.uint16, prec_loss)
 
 def img_as_int(image):
-    """Convert an image to 64-bit signed integer format.
+    """Convert an image to 16-bit signed integer format.
 
     Parameters
     ----------
@@ -135,7 +135,7 @@ def img_as_int(image):
 
     Returns
     -------
-    out : ndarray of uint64
+    out : ndarray of uint16
         Output image.
 
     Notes
