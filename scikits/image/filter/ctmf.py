@@ -15,6 +15,7 @@ import numpy as np
 from . import _ctmf
 from rank_order import rank_order
 
+
 def median_filter(data, mask=None, radius=2, percent=50):
     '''Masked median filter with octagon shape.
 
@@ -43,7 +44,7 @@ def median_filter(data, mask=None, radius=2, percent=50):
 
     '''
 
-    if data.ndim!=2:
+    if data.ndim != 2:
         raise TypeError("The input 'data' must be a two dimensional array.")
 
     if mask is None:
@@ -57,7 +58,7 @@ def median_filter(data, mask=None, radius=2, percent=50):
     #
     if (not np.issubdtype(data.dtype, np.int) or
         np.min(data) < 0 or np.max(data) > 255):
-        ranked_data,translation = rank_order(data[mask])
+        ranked_data, translation = rank_order(data[mask])
         max_ranked_data = np.max(ranked_data)
         if max_ranked_data == 0:
             return data
@@ -67,7 +68,7 @@ def median_filter(data, mask=None, radius=2, percent=50):
     else:
         ranked_data = data[mask]
         was_ranked = False
-    input = np.zeros(data.shape, np.uint8 )
+    input = np.zeros(data.shape, np.uint8)
     input[mask] = ranked_data
 
     mask.dtype = np.uint8
@@ -81,7 +82,8 @@ def median_filter(data, mask=None, radius=2, percent=50):
         # use the translation to look up the original value in the data.
         #
         if max_ranked_data > 255:
-            result = translation[output.astype(np.uint32) * max_ranked_data // 255]
+            result = translation[output.astype(np.uint32) *
+                                 max_ranked_data // 255]
         else:
             result = translation[output]
     else:
