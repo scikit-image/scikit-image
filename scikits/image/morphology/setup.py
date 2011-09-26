@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
 import os
-import shutil
-import hashlib
-
 from scikits.image._build import cython
 
 base_path = os.path.abspath(os.path.dirname(__file__))
