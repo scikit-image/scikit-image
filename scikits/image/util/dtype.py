@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
 
-__all__ = ['img_as_float', 'img_as_int', 'img_as_uint']
+__all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte']
 
 from .. import get_log
 log = get_log('dtype_converter')
@@ -146,3 +146,25 @@ def img_as_int(image):
     """
     prec_loss = (np.float32, np.float64, np.uint16)
     return _convert(image, np.int16, prec_loss)
+
+def img_as_ubyte(image):
+    """Convert an image to 8-bit unsigned integer format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    Returns
+    -------
+    out : ndarray of ubyte (uint8)
+        Output image.
+
+    Notes
+    -----
+    If the input data-type is positive-only (e.g., uint16), then
+    the output image will still only have positive values.
+
+    """
+    prec_loss = (np.float32, np.float64, np.uint16, np.int16, np.int8)
+    return _convert(image, np.ubyte, prec_loss)
