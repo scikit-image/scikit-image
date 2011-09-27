@@ -1,0 +1,2 @@
+version=3
+http://github.com/scikits-image/scikits.image/downloads .*tarball/v([\d\.a-z]+)
