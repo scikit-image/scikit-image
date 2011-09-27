@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal
-from scikits.image import img_as_int, img_as_float, img_as_uint
+from scikits.image import img_as_int, img_as_float, \
+                          img_as_uint, img_as_ubyte
 
 dtype_range = {np.uint8: (0, 255),
                np.uint16: (0, 65535),
@@ -20,7 +21,8 @@ def test_range():
 
         for (f, dt) in [(img_as_int, np.int16),
                         (img_as_float, np.float64),
-                        (img_as_uint, np.uint16)]:
+                        (img_as_uint, np.uint16),
+                        (img_as_ubyte, np.ubyte)]:
             y = f(x)
 
             omin, omax = dtype_range[dt]
