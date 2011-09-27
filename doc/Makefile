@@ -33,7 +33,7 @@ help:
 clean:
 	-rm -rf $(DEST)/*
 	-rm -rf source/api
-
+	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
 api:
 	@mkdir -p source/api
 	python tools/build_modref_templates.py
