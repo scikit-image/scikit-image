@@ -45,3 +45,5 @@ def get_log(name):
     import logging, sys
     logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
     return logging.getLogger(name)
+
+from util.dtype import *
