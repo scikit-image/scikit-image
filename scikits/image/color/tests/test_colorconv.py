@@ -37,7 +37,7 @@ class TestColorconv(TestCase):
 
     colbars = np.array([[1, 1, 0, 0, 1, 1, 0, 0],
                         [1, 1, 1, 1, 0, 0, 0, 0],
-                        [1, 0, 1, 0, 1, 0, 1, 0]])
+                        [1, 0, 1, 0, 1, 0, 1, 0]]).astype(np.float)
     colbars_array = np.swapaxes(colbars.reshape(3, 4, 2), 0, 2)
     colbars_point75 = colbars * 0.75
     colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
@@ -144,7 +144,7 @@ class TestColorconv(TestCase):
                                                            'RGB', 'nokey')
 
     def test_rgb2grey(self):
-        x = np.array([1, 1, 1]).reshape((1, 1, 3))
+        x = np.array([1, 1, 1]).reshape((1, 1, 3)).astype(np.float)
         g = rgb2grey(x)
         assert_array_almost_equal(g, 1)
 
