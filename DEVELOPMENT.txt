@@ -4,19 +4,19 @@ Development process
 :doc:`Read this overview <gitwash/index>` of how to use Git with
 ``scikits.image``.  Here's the long and short of it:
 
- * Go to `http://github.com/stefanv/scikits.image
-   <http://github.com/stefanv/scikits.image>`_  and follow the instructions on
-   making your own fork.
- * Create a new branch for the feature you want to work on.  Since the branch
-   name will appear in the merge message, use a sensible name such as
-   'stefan-transform-speedups'.
+ * Go to `https://github.com/scikits-image/scikits.image
+   <http://github.com/scikits-image/scikits.image>`_ and follow the
+   instructions on making your own fork.
+ * Create a new branch for the feature you want to work on.  Since the
+   branch name will appear in the merge message, use a sensible name
+   such as 'your_name-transform-speedups'.
  * Commit locally as you progress.
- * Push your changes back to github.
- * Ping Stefan to request a merge into the main development branch (or simply
-   click on "Request Pull" in GitHub).
+ * Push your changes back to github and create a pull request by
+   clicking "request pull" in GitHub.
+ * Optionally, mail the mailing list, explaining your changes.
 
-You may also read this summary by Fernando Perez of the IPython project on how
-they manage to keep review overhead to a minimum:
+You may also read this summary by Fernando Perez of the IPython
+project on how they manage to keep review overhead to a minimum:
 
 http://mail.scipy.org/pipermail/ipython-dev/2010-October/006746.html
 
@@ -34,19 +34,21 @@ Guidelines
  * All code should have tests (see "Test coverage" below for more details).
  * All code should be documented, to the same
    `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
-   as NumPy and SciPy.
+   as NumPy and SciPy.  If possible, also add a section to the user guide.
  * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
    where possible.
  * No major changes should be committed without review.  Ask on the
-   `mailing list <http://groups.google.com/group/scikits-image>`_ if you get
-   no response to your pull request.
+   `mailing list <http://groups.google.com/group/scikits-image>`_ if
+   you get no response to your pull request.
 
 Test coverage
 `````````````
-Tests for a module should ideally cover all code in that module, i.e. statement
-coverage should be at 100%. To measure the test coverage, install `coverage.py
-<http://nedbatchelder.com/code/coverage/>`__ (using ``easy_install coverage``)
-and then run::
+Tests for a module should ideally cover all code in that module,
+i.e. statement coverage should be at 100%.
+
+ To measure the test coverage, install
+`coverage.py <http://nedbatchelder.com/code/coverage/>`__
+(using ``easy_install coverage``) and then run::
 
   $ make coverage
 
@@ -61,5 +63,4 @@ detailing the test coverage::
 
 Bugs
 ````
-Please `report bugs on Github <http://github.com/stefanv/scikits.image/issues>`_.
-
+Please `report bugs on Github <https://github.com/scikits-image/scikits.image/issues>`_.
