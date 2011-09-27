@@ -4,6 +4,7 @@ from numpy.testing import assert_array_almost_equal
 from scikits.image.transform.project import _stackcopy
 from scikits.image.transform import homography, fast_homography
 from scikits.image import data
+from scikits.image.color import rgb2gray
 
 def test_stackcopy():
     layers = 4
@@ -23,7 +24,7 @@ def test_homography():
     assert_array_almost_equal(x90, np.rot90(x))
 
 def test_fast_homography():
-    img = data.lena()
+    img = rgb2gray(data.lena()).astype(np.uint8)
     img = img[:, :100]
     
     theta = np.deg2rad(30)
@@ -53,6 +54,7 @@ def test_fast_homography():
         ## plt.show()
 
         d = np.mean(np.abs(p0 - p1))
+        print "delta=", d
         assert d < 0.2
     
 
