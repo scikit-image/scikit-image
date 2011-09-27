@@ -307,7 +307,7 @@ def _convert(matrix, arr):
     out.shape = oldshape
     out = np.swapaxes(out, 2, 0)
 
-    return out
+    return np.ascontiguousarray(out)
 
 
 def xyz2rgb(xyz):
