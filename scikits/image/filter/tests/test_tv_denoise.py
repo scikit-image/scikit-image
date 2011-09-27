@@ -1,6 +1,9 @@
 import numpy as np
 from numpy.testing import run_module_suite
-import scikits.image.filter as F
+
+from scikits.image import filter
+from scikits.image import data
+from scikits.image import color
 
 class TestTvDenoise():
 
@@ -9,13 +12,12 @@ class TestTvDenoise():
         Apply the TV denoising algorithm on the lena image provided
         by scipy
         """
-        import scipy
         # lena image
-        lena = scipy.lena().astype(np.float)
+        lena = color.rgb2gray(data.lena())
         # add noise to lena
         lena += 0.5 * lena.std()*np.random.randn(*lena.shape)
         # denoise
-        denoised_lena = F.tv_denoise(lena, weight=60.0)
+        denoised_lena = filter.tv_denoise(lena, weight=60.0)
         # which dtype?
         assert denoised_lena.dtype in [np.float, np.float32, np.float64]
         from scipy import ndimage
@@ -23,7 +25,7 @@ class TestTvDenoise():
         grad_denoised = ndimage.morphological_gradient(denoised_lena, size=((3,3)))
         # test if the total variation has decreased
         assert np.sqrt((grad_denoised**2).sum()) < np.sqrt((grad**2).sum()) / 2
-        denoised_lena_int = F.tv_denoise(lena.astype(np.int32), \
+        denoised_lena_int = filter.tv_denoise(lena.astype(np.int32), \
                 weight=60.0, keep_type=True)
         assert denoised_lena_int.dtype is np.dtype('int32')
 
@@ -40,16 +42,17 @@ class TestTvDenoise():
         mask += 20*np.random.randn(*mask.shape)
         mask[mask < 0] = 0
         mask[mask > 255] = 255
-        res = F.tv_denoise(mask.astype(np.uint8), weight=100, keep_type=True)
+        res = filter.tv_denoise(mask.astype(np.uint8),
+                                weight=100, keep_type=True)
         assert res.std() < mask.std()
         assert res.dtype is np.dtype('uint8')
-        res = F.tv_denoise(mask.astype(np.uint8), weight=100)
+        res = filter.tv_denoise(mask.astype(np.uint8), weight=100)
         assert res.std() < mask.std()
         assert res.dtype is not np.dtype('uint8')
         # test wrong number of dimensions
         a = np.random.random((8, 8, 8, 8))
         try:
-            res = F.tv_denoise(a)
+            res = filter.tv_denoise(a)
         except ValueError:
             pass
 
