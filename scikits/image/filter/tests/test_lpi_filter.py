@@ -9,7 +9,7 @@ from scikits.image.filter import *
 
 class TestLPIFilter2D():
     img = imread(os.path.join(data_dir, 'camera.png'),
-                 flatten=True)[:-101,:-100]
+                 flatten=True)[:50,:50]
 
     def filt_func(self,r,c):
         return np.exp(-np.hypot(r,c)/1)
@@ -19,14 +19,14 @@ class TestLPIFilter2D():
 
     def tst_shape(self, x):
         X = self.f(x)
-        assert_equal(X.shape,x.shape)
+        assert_equal(X.shape, x.shape)
 
     def test_ip_shape(self):
-        rows,columns = self.img.shape[:2]
+        rows, columns = self.img.shape[:2]
 
         for c_slice in [slice(0, columns), slice(0, columns - 5),
-                        slice(0, columns - 100)]:
-            yield (self.tst_shape, self.img[:,c_slice])
+                        slice(0, columns - 20)]:
+            yield (self.tst_shape, self.img[:, c_slice])
 
     def test_inverse(self):
         F = self.f(self.img)
