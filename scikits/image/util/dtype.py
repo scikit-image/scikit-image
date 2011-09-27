@@ -13,7 +13,7 @@ dtype_range = {np.uint8: (0, 255),
                np.float32: (0, 1),
                np.float64: (0, 1)}
 
-integer_types = (np.uint8, np.int16, np.int8, np.int16)
+integer_types = (np.uint8, np.uint16, np.int8, np.int16)
 
 def _convert(image, dtype, prec_loss):
     """
