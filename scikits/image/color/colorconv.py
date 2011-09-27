@@ -50,6 +50,7 @@ __docformat__ = "restructuredtext en"
 
 import numpy as np
 from scipy import linalg
+from ..util import dtype
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -299,9 +300,10 @@ def _convert(matrix, arr):
 
     Returns
     -------
-    out : ndarray
+    out : ndarray, dtype=float
         The converted array.
     """
+    arr = dtype.img_as_float(arr)
     arr = _prepare_colorarray(arr)
     arr = np.swapaxes(arr, 0, 2)
     oldshape = arr.shape
