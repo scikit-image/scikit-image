@@ -150,9 +150,9 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
 
     """
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2] img = \
-         np.asarray(image, dtype=np.double)
-    cdef np.ndarray[dtype=np.double_t, ndim=2] M = \
+    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] img = \
+         np.ascontiguousarray(image, dtype=np.double)
+    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] M = \
          np.ascontiguousarray(np.linalg.inv(H))
 
     if mode not in ('constant', 'wrap', 'mirror'):
