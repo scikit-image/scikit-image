@@ -5,7 +5,7 @@ all:
 	git update-index --assume-unchanged scikits/image/version.py
 
 clean:
-	find . -name "*.so" | xargs rm -f
+	find . -name "*.so" -o -name "*.pyc" | xargs rm -f
 
 test:
 	nosetests scikits/image
