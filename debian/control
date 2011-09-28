@@ -2,7 +2,7 @@ Source: scikits-image
 Section: python
 Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
-Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.5), python-support (>= 0.6), python-numpy, python-sphinx, python-nose, python-setuptools, cython (>= 0.13), python-matplotlib
+Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.6.6-3~), python-numpy, python-sphinx, python-nose, python-setuptools, cython (>= 0.13), python-matplotlib
 Standards-Version: 3.9.1
 XS-Python-Version: >= 2.5
 Homepage: http://scikits-image.org
@@ -14,7 +14,6 @@ Package: python-scikits-image
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-numpy, python-scipy, python-scikits-image-lib(>= ${source:Version})
 Provides: ${python:Provides}
-XB-Python-Version: ${python:Versions}
 Recommends: python-nose, python-matplotlib
 Suggests: python-scikits-image-doc, python-opencv
 Description: Python modules for image processing
