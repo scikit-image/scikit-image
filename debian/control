@@ -2,7 +2,7 @@ Source: scikits-image
 Section: python
 Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
-Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.5), python-support (>= 0.6), python-numpy, python-sphinx, python-nose, python-setuptools, cython, python-matplotlib
+Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.5), python-support (>= 0.6), python-numpy, python-sphinx, python-nose, python-setuptools, cython (>= 0.13), python-matplotlib
 Standards-Version: 3.9.1
 XS-Python-Version: >= 2.5
 Homepage: http://scikits-image.org
