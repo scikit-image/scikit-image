@@ -9,7 +9,7 @@ PYVER = $(shell pyversions  -vd)
 
 # Mega rule
 %:
-	dh $@
+	dh $@ --buildsystem python_distutils
 
 # Build docs during build
 override_dh_auto_build:
@@ -22,11 +22,13 @@ endif
 
 
 override_dh_clean:
+ifeq (,$(filter noclean,$(DEB_BUILD_OPTIONS)))
 	rm -rf build doc/build doc/auto_examples *-stamp scikits.image.egg-info
 	dh_clean
+endif
 
 # Prune toplevel scikits/__init__.py to avoid conflicts across future
-# scikits- packages, and rely on pysupport to create such one if
+# scikits- packages, and rely on dh_python to create such one if
 # necessary
 override_dh_auto_install: ${PYVERS:%=python-install%}
 	find debian -wholename \*scikits/__init__.py -delete
