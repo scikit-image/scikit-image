@@ -11,16 +11,6 @@ PYVER = $(shell pyversions  -vd)
 %:
 	dh $@ --buildsystem python_distutils
 
-# Build docs during build
-override_dh_auto_build:
-	dh_auto_build
-	: # Build Documentation
-ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
-	export PYTHONPATH=`/bin/ls -d $$PWD/build/lib.*$(PYVER)` MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
-	 cd doc; $(MAKE) html
-endif
-
-
 override_dh_clean:
 ifeq (,$(filter noclean,$(DEB_BUILD_OPTIONS)))
 	rm -rf build doc/build doc/auto_examples *-stamp scikits.image.egg-info
@@ -30,6 +20,8 @@ endif
 # Prune toplevel scikits/__init__.py to avoid conflicts across future
 # scikits- packages, and rely on dh_python to create such one if
 # necessary
+
+# Build docs during install
 override_dh_auto_install: ${PYVERS:%=python-install%}
 	find debian -wholename \*scikits/__init__.py -delete
 
@@ -37,9 +29,16 @@ override_dh_auto_install: ${PYVERS:%=python-install%}
 python-install%:
 	python$* setup.py install --install-layout=deb --root=$(PACKAGE_ROOT_DIR)
 
+	: # Build Documentation
+ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+	export PYTHONPATH=$(PACKAGE_ROOT_DIR)/usr/lib/python$*/dist-packages MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
+	 cd doc; $(MAKE) html
+	python$* setup.py install --install-layout=deb --root=$(PACKAGE_ROOT_DIR)
+endif
+
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	: # Run unittests
-	export MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
+	export PYTHONPATH=$(PACKAGE_ROOT_DIR)/usr/lib/python$*/dist-packages; \
 	 python$* /usr/bin/nosetests -s \
 	  $(PACKAGE_ROOT_DIR)/usr/lib/python$*/*/scikits/image
 else
@@ -54,6 +53,16 @@ endif
 	   echo "Moving '$$lib' into '$$tdir'." ; \
 	   mv $$lib $$tdir ; \
 	done
+
+	: # Move documentation to -doc
+	for lib in $$(find $(PACKAGE_ROOT_DIR)/usr -name '*.so'); do \
+	   sdir=$(CURDIR)/build/html ; \
+	   tdir=$(PACKAGE_ROOT_DIR)-doc/} ; \
+	   mkdir -p $$tdir ; \
+	   echo "Moving '$$sdir' into '$$tdir'." ; \
+	   mv $$lib $$tdir ; \
+	done
+
 	if [ -x /usr/bin/dh_numpy ]; then dh_numpy; fi
 
 ## immediately useable documentation and exemplar scripts/data
@@ -62,5 +71,5 @@ override_dh_compress:
 
 override_dh_installdocs:
 	: # Use jquery from Debian package, so prune shipped one
-	-rm doc/build/html/_static/jquery.js
+	-rm -f doc/build/html/_static/jquery.js
 	dh_installdocs -A CONTRIBUTORS.txt DEVELOPMENT.txt README.txt TASKS.txt
