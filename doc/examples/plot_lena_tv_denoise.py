@@ -19,17 +19,15 @@ the tradeoff between denoising and faithfulness to the original image.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scikits.image import data
-from scikits.image import color
+from scikits.image import data, color, img_as_ubyte
 from scikits.image.filter import tv_denoise
 
-l = color.rgb2gray(data.lena())
+l = img_as_ubyte(color.rgb2gray(data.lena()))
 l = l[230:290, 220:320]
 
-noisy = l + 0.4*l.std()*np.random.random(l.shape)
+noisy = l + 0.4 * l.std() * np.random.random(l.shape)
 
 tv_denoised = tv_denoise(noisy, weight=10)
-
 
 plt.figure(figsize=(12,2.8))
 
