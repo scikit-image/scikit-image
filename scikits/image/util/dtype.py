@@ -75,7 +75,10 @@ def _convert(image, dtype, prec_loss):
 
     # Do scaling/shifting calculations in floating point
     image = image.astype(np.float64)
-    out = round_fn((image - imin) * scale + shift).astype(dtype)
+    out = image - imin
+    out *= scale
+    out += shift
+    out = round_fn(out).astype(dtype)
 
     return out
 
