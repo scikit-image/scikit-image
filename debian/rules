@@ -2,7 +2,7 @@
 # -*- mode: makefile; coding: utf-8 -*-
 
 PACKAGE_NAME = python-scikits-image
-PACKAGE_ROOT_DIR = debian/${PACKAGE_NAME}
+PACKAGE_ROOT_DIR = $(CURDIR)/debian/${PACKAGE_NAME}
 
 PYVERS = $(shell pyversions -vs)
 PYVER = $(shell pyversions  -vd)
@@ -32,7 +32,7 @@ python-install%:
 	: # Build Documentation
 ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
 	export PYTHONPATH=$(PACKAGE_ROOT_DIR)/usr/lib/python$*/dist-packages MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
-	 cd doc; $(MAKE) html
+	 cd doc; test -d build/html || $(MAKE) html
 	python$* setup.py install --install-layout=deb --root=$(PACKAGE_ROOT_DIR)
 endif
 
@@ -54,14 +54,17 @@ endif
 	   mv $$lib $$tdir ; \
 	done
 
+	: # Use jquery from Debian package, so prune shipped one
+	-rm -f doc/build/html/_static/jquery.js
+	-rf -f doc/build/html/_sources
+	-rf -f doc/build/html/.buildinfo
+
 	: # Move documentation to -doc
-	for lib in $$(find $(PACKAGE_ROOT_DIR)/usr -name '*.so'); do \
-	   sdir=$(CURDIR)/build/html ; \
-	   tdir=$(PACKAGE_ROOT_DIR)-doc/} ; \
-	   mkdir -p $$tdir ; \
-	   echo "Moving '$$sdir' into '$$tdir'." ; \
-	   mv $$lib $$tdir ; \
-	done
+	sdir=$(CURDIR)/doc/build/html ; \
+	tdir=$(PACKAGE_ROOT_DIR)-doc/usr/share/doc/$(PACKAGE_NAME)-doc ; \
+	mkdir -p $$tdir ; \
+	echo "DOCS: Moving '$$sdir' into '$$tdir'." ; \
+	test -d $$tdir/html || mv $$sdir $$tdir
 
 	if [ -x /usr/bin/dh_numpy ]; then dh_numpy; fi
 
@@ -70,6 +73,7 @@ override_dh_compress:
 	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
 
 override_dh_installdocs:
-	: # Use jquery from Debian package, so prune shipped one
-	-rm -f doc/build/html/_static/jquery.js
-	dh_installdocs -A CONTRIBUTORS.txt DEVELOPMENT.txt README.txt TASKS.txt
+	dh_installdocs -A CONTRIBUTORS.txt README.txt
+	dh_link /usr/share/javascript/jquery/jquery.js \
+		/usr/share/doc/$(PACKAGE_NAME)-doc/html/_static/jquery.js
+	cp DEVELOPMENT.txt TASKS.txt $(PACKAGE_ROOT_DIR)/usr/share/doc/
