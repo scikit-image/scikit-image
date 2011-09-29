@@ -15,6 +15,7 @@ dtype_range = {np.uint8: (0, 255),
 
 integer_types = (np.uint8, np.uint16, np.int8, np.int16)
 
+
 def _convert(image, dtype, prec_loss):
     """
     Convert an image to the requested data-type.
@@ -38,7 +39,7 @@ def _convert(image, dtype, prec_loss):
 
     if dtype_in == dtype:
         return image
-    
+
     if dtype_in in prec_loss:
         log.warn('Possible precision loss, converting from '
                  '%s to %s' % (np.dtype(dtype_in), np.dtype(dtype)))
@@ -75,9 +76,13 @@ def _convert(image, dtype, prec_loss):
 
     # Do scaling/shifting calculations in floating point
     image = image.astype(np.float64)
-    out = round_fn((image - imin) * scale + shift).astype(dtype)
+    out = image - imin
+    out *= scale
+    out += shift
+    out = round_fn(out).astype(dtype)
 
     return out
+
 
 def img_as_float(image):
     """Convert an image to double-precision floating point format.
@@ -101,6 +106,7 @@ def img_as_float(image):
     prec_loss = ()
     return _convert(image, np.float64, prec_loss)
 
+
 def img_as_uint(image):
     """Convert an image to 16-bit unsigned integer format.
 
@@ -123,6 +129,7 @@ def img_as_uint(image):
     prec_loss = (np.float32, np.float64)
     return _convert(image, np.uint16, prec_loss)
 
+
 def img_as_int(image):
     """Convert an image to 16-bit signed integer format.
 
@@ -144,6 +151,7 @@ def img_as_int(image):
     """
     prec_loss = (np.float32, np.float64, np.uint16)
     return _convert(image, np.int16, prec_loss)
+
 
 def img_as_ubyte(image):
     """Convert an image to 8-bit unsigned integer format.
