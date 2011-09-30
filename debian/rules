@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 # -*- mode: makefile; coding: utf-8 -*-
 
-PACKAGE_NAME = python-scikits-image
+PACKAGE_NAME = python-scikits.image
 PACKAGE_ROOT_DIR = $(CURDIR)/debian/${PACKAGE_NAME}
 
 PYVERS = $(shell pyversions -vs)
