@@ -14,6 +14,10 @@ def cython(pyx_files, working_path=''):
         The input .pyx files.
 
     """
+    # Do not build cython files if target is clean
+    if sys.argv[1] == 'clean':
+        return
+
     try:
         import Cython
     except ImportError:
