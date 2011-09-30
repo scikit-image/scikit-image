@@ -68,3 +68,6 @@
 - Andreas Mueller
   Example data set loader.
 
+- Yaroslav Halchenko
+  For sharing his expert advice on Debian packaging.
+
