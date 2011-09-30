@@ -1,2 +1,3 @@
 version=3
-http://github.com/scikits-image/scikits.image/downloads .*tarball/v([\d\.a-z]+)
+options="uversionmangle=s/v//,filenamemangle=s/.*\/(.*)/scikits-image-$1\.tar\.gz/" \
+ http://github.com/scikits-image/scikits.image/downloads .*tarball/v([\d\.a-z]+)
