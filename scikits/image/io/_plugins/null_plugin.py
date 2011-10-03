@@ -1,4 +1,4 @@
-__all__ = ['imshow', '_app_show']
+__all__ = ['imshow', 'imread', '_app_show']
 
 import warnings
 
@@ -10,6 +10,9 @@ scikits.image.io.plugins()
 for a list of available plugins.'''
 
 def imshow(*args, **kwargs):
+    warnings.warn(RuntimeWarning(message))
+
+def imread(*args, **kwargs):
     warnings.warn(RuntimeWarning(message))
 
 _app_show = imshow
