@@ -10,7 +10,8 @@ from _plugins import info as plugin_info
 
 available_plugins = plugins()
 
-for preferred_plugin in ['pil', 'matplotlib', 'gtk', 'freeimage', 'qt', 'null']:
+for preferred_plugin in ['pil',
+        'matplotlib', 'gtk', 'freeimage', 'qt', 'null']:
     if preferred_plugin in available_plugins:
         use_plugin(preferred_plugin)
         break
@@ -19,6 +20,7 @@ from sift import *
 from collection import *
 
 from io import *
+
 
 def _update_doc(doc):
     """Add a list of plugins to the module docstring, formatted as
@@ -37,7 +39,7 @@ def _update_doc(doc):
     info.insert(0, ('=' * col_1_len, {'description': '=' * col_2_len}))
     info.insert(1, ('Plugin', {'description': 'Description'}))
     info.insert(2, ('-' * col_1_len, {'description': '-' * col_2_len}))
-    info.append(   ('=' * col_1_len, {'description': '=' * col_2_len}))
+    info.append(('=' * col_1_len, {'description': '=' * col_2_len}))
 
     for (name, meta_data) in info:
         wrapped_descr = wrap(meta_data.get('description', ''),
