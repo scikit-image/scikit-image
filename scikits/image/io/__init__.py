@@ -8,13 +8,12 @@ from _plugins import use as use_plugin
 from _plugins import available as plugins
 from _plugins import info as plugin_info
 
-# Add this plugin so that we can read images by default
-use_plugin('null')
+available_plugins = plugins()
 
-try:
-    use_plugin('pil')
-except ImportError:
-    pass
+for preferred_plugin in ['pil', 'matplotlib', 'gtk', 'freeimage', 'qt', 'null']:
+    if preferred_plugin in available_plugins:
+        use_plugin(preferred_plugin)
+        break
 
 from sift import *
 from collection import *
