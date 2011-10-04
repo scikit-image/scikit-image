@@ -24,7 +24,7 @@ Description: Python modules for image processing
 Package: python-scikits.image-doc
 Architecture: all
 Section: doc
-Depends: ${misc:Depends}, libjs-jquery
+Depends: ${misc:Depends}, libjs-jquery, libjs-underscore
 Suggests: python-scikits.image
 Description: Documentation and examples for scikits-image
  This package contains documentation and example scripts for
