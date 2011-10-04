@@ -1,0 +1,4 @@
+# Explicit license file is desired for the completeness of the documentation
+#
+
+python-scikits.image-doc binary: extra-license-file usr/share/doc/python-scikits.image-doc/html/_sources/license.txt
