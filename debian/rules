@@ -56,7 +56,8 @@ endif
 
 	: # Use jquery and underscore from Debian package, so prune shipped one
 	-rm -f doc/build/html/_static/jquery.js
-	-rm -f doc/build/html/_static/underscore.js
+	# Actually due to the problems with underscore pkg across releases just ship one for now
+	#-rm -f doc/build/html/_static/underscore.js
 	-rf -f doc/build/html/_sources
 	-rf -f doc/build/html/.buildinfo
 
