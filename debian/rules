@@ -73,7 +73,6 @@ override_dh_compress:
 	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
 
 override_dh_installdocs:
-	dh_installdocs -A CONTRIBUTORS.txt README.txt
+	dh_installdocs -A CONTRIBUTORS.txt README.txt DEVELOPMENT.txt TASKS.txt
 	dh_link /usr/share/javascript/jquery/jquery.js \
 		/usr/share/doc/$(PACKAGE_NAME)-doc/html/_static/jquery.js
-	cp DEVELOPMENT.txt TASKS.txt $(PACKAGE_ROOT_DIR)/usr/share/doc/
