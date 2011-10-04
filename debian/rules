@@ -54,8 +54,9 @@ endif
 	   mv $$lib $$tdir ; \
 	done
 
-	: # Use jquery from Debian package, so prune shipped one
+	: # Use jquery and underscore from Debian package, so prune shipped one
 	-rm -f doc/build/html/_static/jquery.js
+	-rm -f doc/build/html/_static/underscore.js
 	-rf -f doc/build/html/_sources
 	-rf -f doc/build/html/.buildinfo
 
@@ -74,5 +75,3 @@ override_dh_compress:
 
 override_dh_installdocs:
 	dh_installdocs -A CONTRIBUTORS.txt README.txt DEVELOPMENT.txt TASKS.txt
-	dh_link /usr/share/javascript/jquery/jquery.js \
-		/usr/share/doc/$(PACKAGE_NAME)-doc/html/_static/jquery.js
