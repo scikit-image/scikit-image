@@ -2,3 +2,8 @@
 #
 
 python-scikits.image-doc binary: extra-license-file usr/share/doc/python-scikits.image-doc/html/_sources/license.txt
+
+# For easy backportability just rely on the shipped copy of underscore.js for now until problems with nodejs get resolved
+#
+
+python-scikits.image-doc binary: embedded-javascript-library usr/share/doc/python-scikits.image-doc/html/_static/underscore.js
