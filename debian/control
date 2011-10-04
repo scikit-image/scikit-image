@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>
 Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.6.6-3~), python-numpy, python-sphinx, python-nose, python-setuptools, cython (>= 0.13), python-matplotlib, python-scipy
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 XS-Python-Version: >= 2.5
 Homepage: http://scikits-image.org
 Vcs-Browser: https://github.com/scikits-image/scikits.image
