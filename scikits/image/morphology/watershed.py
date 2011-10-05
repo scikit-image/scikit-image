@@ -31,17 +31,6 @@ from ..filter import rank_order
 
 import _watershed
 
-def __get_strides_for_shape(shape):
-    """Get the amount to multiply at each coord when converting to flat"""
-    lshape = list(shape)
-    lshape.reverse()
-    stride = [1]
-    for i in range(len(lshape) - 1):
-        stride.append(lshape[i] * stride[i])
-    stride.reverse()
-    return np.array(stride)
-
-        
 def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
     """
     Return a matrix labeled using the watershed segmentation algorithm
@@ -189,7 +178,7 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
     # and the second through last are the x,y...whatever offsets
     # (to do bounds checking).
     c = []
-    image_stride = __get_strides_for_shape(image.shape)
+    image_stride = np.array(image.strides) / image.itemsize
     for i in range(np.product(c_connectivity.shape)):
         multiplier = 1
         offs = []
@@ -240,22 +229,23 @@ watershed = fast_watershed
 # pedagogical purposes
 
 
-def __heapify_markers(markers,image):
+def __heapify_markers(markers, image):
     """Create a priority queue heap with the markers on it"""
-    stride = __get_strides_for_shape(image.shape)
+    stride = np.array(image.strides) / image.itemsize
     coords = np.argwhere(markers != 0)
-    ncoords= coords.shape[0]
+    ncoords = coords.shape[0]
     if ncoords > 0:
         pixels = image[markers != 0]
-        age    = np.array(range(ncoords))
+        age    = np.arange(ncoords)
         offset = np.zeros(coords.shape[0], int)
         for i in range(image.ndim):
-            offset = offset + stride[i] * coords[:,i]
+            offset = offset + stride[i] * coords[:, i]
         pq = np.column_stack((pixels, age, offset, coords))
-        ordering = np.lexsort((age, pixels)) # pixels = top priority, age=second
-        pq = pq[ordering,:]
+        # pixels = top priority, age=second
+        ordering = np.lexsort((age, pixels)) 
+        pq = pq[ordering, :]
     else:
-        pq = np.zeros((0, markers.ndim+3), int)
+        pq = np.zeros((0, markers.ndim + 3), int)
     return (pq, ncoords)
     
 def _slow_watershed(image, markers, connectivity=8, mask=None):
