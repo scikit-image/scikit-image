@@ -30,6 +30,7 @@ import scipy.ndimage
 from ..filter import rank_order
 
 import _watershed
+import warnings
 
 def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
     """
@@ -361,6 +362,9 @@ def __heapify_markers(markers, image):
     
 def _slow_watershed(image, markers, connectivity=8, mask=None):
     """Return a matrix labeled using the watershed algorithm
+    
+    Use the `watershed` function for a faster execution.
+    This pure Python function is solely for pedagogical purposes.
     
     Parameters
     ----------
