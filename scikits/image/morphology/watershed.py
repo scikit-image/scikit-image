@@ -91,10 +91,6 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
 
     .. [2] http://cmm.ensmp.fr/~beucher/wtshed.html
 
-    See also
-    --------
-    `is_local_maximum`, `scipy.ndimage.label`
-
     Examples
     --------
     The watershed algorithm is very useful to separate overlapping objects
