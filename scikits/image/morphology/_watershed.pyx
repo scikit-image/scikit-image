@@ -26,16 +26,25 @@ ctypedef np.int8_t DTYPE_BOOL_t
 include "heap_watershed.pxi"
 
 @cython.boundscheck(False)
-def watershed(np.ndarray[DTYPE_INT32_t,ndim=1,negative_indices=False, mode='c'] image,
-              np.ndarray[DTYPE_INT32_t,ndim=2,negative_indices=False, mode='c'] pq,
+def watershed(np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False, 
+              mode='c'] image,
+              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False, 
+              mode='c'] pq,
               DTYPE_INT32_t age,
-              np.ndarray[DTYPE_INT32_t,ndim=2,negative_indices=False, mode='c'] structure,
+              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False, 
+              mode='c'] structure,
               DTYPE_INT32_t ndim,
-              np.ndarray[DTYPE_BOOL_t,ndim=1,negative_indices=False, mode='c'] mask,
-              np.ndarray[DTYPE_INT32_t,ndim=1,negative_indices=False, mode='c'] image_shape,
-              np.ndarray[DTYPE_INT32_t,ndim=1,negative_indices=False, mode='c'] output):
+              np.ndarray[DTYPE_BOOL_t, ndim=1, negative_indices=False, 
+              mode='c'] mask,
+              np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False, 
+              mode='c'] image_shape,
+              np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False, 
+              mode='c'] output):
     """Do heavy lifting of watershed algorithm
-    
+   
+    Parameters
+    ----------
+
     image - the flattened image pixels, converted to rank-order
     pq    - the priority queue, starts with the marked pixels
             the first element in each row is the image intensity
@@ -49,7 +58,7 @@ def watershed(np.ndarray[DTYPE_INT32_t,ndim=1,negative_indices=False, mode='c'] 
                 in a flattened array. The remaining elements are the
                 offsets from the point to its neighbor in the various
                 dimensions
-    ndim  - # of dimensions in the image
+    ndim - # of dimensions in the image
     mask  - numpy boolean (char) array indicating which pixels to consider
             and which to ignore. Also flattened.
     image_shape - the dimensions of the image, for boundary checking,
@@ -83,14 +92,15 @@ def watershed(np.ndarray[DTYPE_INT32_t,ndim=1,negative_indices=False, mode='c'] 
         old_index = elem.index
         for i in range(nneighbors):
             # get the flattened address of the neighbor
-            index = structure[i,0]+old_index
-            if index < 0 or index >= max_index or output[index] or not mask[index]:
+            index = structure[i, 0] + old_index
+            if index < 0 or index >= max_index or output[index] or \
+                    not mask[index]:
                 continue
 
-            new_elem.value   = image[index]
-            new_elem.age   = elem.age + 1
-            new_elem.index   = index
-            age          += 1
+            new_elem.value = image[index]
+            new_elem.age = elem.age + 1
+            new_elem.index = index
+            age += 1
             output[index] = output[old_index]
             #
             # Push the neighbor onto the heap to work on it later

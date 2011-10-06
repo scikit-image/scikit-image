@@ -50,7 +50,7 @@ import numpy as np
 import scipy.ndimage
 
 from scikits.image.morphology.watershed import watershed,fast_watershed, \
-        _slow_watershed
+        _slow_watershed, is_local_maximum
 
 eps = 1e-12
 
@@ -393,4 +393,103 @@ class TestFastWatershed(unittest.TestCase):
         out = scipy.ndimage.watershed_ift(image.astype(np.uint16), markers, self.eight)
         elapsed = time.clock() - before
         print "Scipy watershed ran a megapixel image in %f seconds"%(elapsed)
+
+
+class TestIsLocalMaximum(unittest.TestCase):
+    def test_00_00_empty(self):
+        image = np.zeros((10, 20))
+        labels = np.zeros((10, 20), int)
+        result = is_local_maximum(image, labels, np.ones((3, 3), bool))
+        self.assertTrue(np.all(~ result))
+        
+    def test_01_01_one_point(self):
+        image = np.zeros((10, 20))
+        labels = np.zeros((10, 20), int)
+        image[5, 5] = 1
+        labels[5, 5] = 1
+        result = is_local_maximum(image, labels, np.ones((3, 3), bool))
+        self.assertTrue(np.all(result == (labels == 1)))
+        
+    def test_01_02_adjacent_and_same(self):
+        image = np.zeros((10, 20))
+        labels = np.zeros((10, 20), int)
+        image[5, 5:6] = 1
+        labels[5, 5:6] = 1
+        result = is_local_maximum(image, labels, np.ones((3, 3), bool))
+        self.assertTrue(np.all(result == (labels == 1)))
+        
+    def test_01_03_adjacent_and_different(self):
+        image = np.zeros((10, 20))
+        labels = np.zeros((10, 20), int)
+        image[5, 5] = 1
+        image[5, 6] = .5
+        labels[5, 5:6] = 1
+        expected = (image == 1)
+        result = is_local_maximum(image, labels, np.ones((3, 3), bool))
+        self.assertTrue(np.all(result == expected))
+        result = is_local_maximum(image, labels)
+        self.assertTrue(np.all(result == expected))
+        
+    def test_01_04_not_adjacent_and_different(self):
+        image = np.zeros((10,20))
+        labels = np.zeros((10,20), int)
+        image[5,5] = 1
+        image[5,8] = .5
+        labels[image > 0] = 1
+        expected = (labels == 1)
+        result = is_local_maximum(image, labels, np.ones((3,3), bool))
+        self.assertTrue(np.all(result == expected))
+        
+    def test_01_05_two_objects(self):
+        image = np.zeros((10,20))
+        labels = np.zeros((10,20), int)
+        image[5,5] = 1
+        image[5,15] = .5
+        labels[5,5] = 1
+        labels[5,15] = 2
+        expected = (labels > 0)
+        result = is_local_maximum(image, labels, np.ones((3,3), bool))
+        self.assertTrue(np.all(result == expected))
+
+    def test_01_06_adjacent_different_objects(self):
+        image = np.zeros((10,20))
+        labels = np.zeros((10,20), int)
+        image[5,5] = 1
+        image[5,6] = .5
+        labels[5,5] = 1
+        labels[5,6] = 2
+        expected = (labels > 0)
+        result = is_local_maximum(image, labels, np.ones((3,3), bool))
+        self.assertTrue(np.all(result == expected))
+        
+    def test_02_01_four_quadrants(self):
+        np.random.seed(21)
+        image = np.random.uniform(size=(40,60))
+        i,j = np.mgrid[0:40,0:60]
+        labels = 1 + (i >= 20) + (j >= 30) * 2
+        i,j = np.mgrid[-3:4,-3:4]
+        footprint = (i*i + j*j <=9)
+        expected = np.zeros(image.shape, float)
+        for imin, imax in ((0, 20), (20, 40)):
+            for jmin, jmax in ((0, 30), (30, 60)):
+                expected[imin:imax,jmin:jmax] = scipy.ndimage.maximum_filter(
+                    image[imin:imax, jmin:jmax], footprint = footprint)
+        expected = (expected == image)
+        result = is_local_maximum(image, labels, footprint)
+        self.assertTrue(np.all(result == expected))
+        
+    def test_03_01_disk_1(self):
+        '''regression test of img-1194, footprint = [1]
+        
+        Test is_local_maximum when every point is a local maximum
+        '''
+        np.random.seed(31)
+        image = np.random.uniform(size=(10,20))
+        footprint = np.array([[1]])
+        result = is_local_maximum(image, np.ones((10,20)), footprint)
+        self.assertTrue(np.all(result))
+        result = is_local_maximum(image, footprint=footprint)
+        self.assertTrue(np.all(result))
+        
+
 
