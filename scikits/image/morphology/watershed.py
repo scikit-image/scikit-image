@@ -32,7 +32,7 @@ from ..filter import rank_order
 import _watershed
 import warnings
 
-def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
+def watershed(image, markers, connectivity=None, offset=None, mask=None):
     """
     Return a matrix labeled using the watershed segmentation algorithm
 
@@ -219,7 +219,6 @@ def fast_watershed(image, markers, connectivity=None, offset=None, mask=None):
     except:
         return c_output
 
-watershed = fast_watershed
 
 def is_local_maximum(image, labels=None, footprint=None):
     """
