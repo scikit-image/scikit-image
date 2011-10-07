@@ -1,4 +1,4 @@
 from grey import *
 from selem import *
 from ccomp import label
-from watershed import watershed, fast_watershed, is_local_maximum
+from watershed import watershed, is_local_maximum

@@ -49,7 +49,7 @@ import unittest
 import numpy as np
 import scipy.ndimage
 
-from scikits.image.morphology.watershed import watershed,fast_watershed, \
+from scikits.image.morphology.watershed import watershed \
         _slow_watershed, is_local_maximum
 
 eps = 1e-12
@@ -75,7 +75,7 @@ def diff(a, b):
         t = ((a - b)**2).sum()
     return math.sqrt(t)
 
-class TestFastWatershed(unittest.TestCase):
+class TestWatershed(unittest.TestCase):
     eight = np.ones((3, 3),bool)
     def test_watershed01(self):
         "watershed 1"
@@ -142,7 +142,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [  0, 0, 0, 0, 0, 0, 0],
                                   [  0, 0, 0, 0, 0, 0, 0]],
                                  np.int8)
-        out = fast_watershed(data, markers)
+        out = watershed(data, markers)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
@@ -179,7 +179,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [ 0, 0, 0, 0, 0, 0, 0],
                                   [ 0, 0, 0, 0, 0, 0, -1]],
                                  np.int8)
-        out = fast_watershed(data, markers)
+        out = watershed(data, markers)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  0,  2,  0,  3,  0, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
@@ -215,7 +215,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [ 0, 0, 0, 0, 0, 0, 0],
                                   [ 0, 0, 0, 0, 0, 0, -1]],
                                  np.int8)
-        out = fast_watershed(data, markers, self.eight)
+        out = watershed(data, markers, self.eight)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
@@ -251,7 +251,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [ 0, 0, 0, 0, 0, 0, 0],
                                   [ 0, 0, 0, 0, 0, 0, -1]],
                                  np.int8)
-        out = fast_watershed(data, markers, self.eight)
+        out = watershed(data, markers, self.eight)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  3,  3,  0,  2,  2, -1],
                       [-1,  3,  3,  0,  2,  2, -1],
@@ -285,7 +285,7 @@ class TestFastWatershed(unittest.TestCase):
                                   [  0, 0, 0, 0, 0, 0, 0],
                                   [  -1, 0, 0, 0, 0, 0, 0]],
                                  np.int8)
-        out = fast_watershed(data, markers, self.eight)
+        out = watershed(data, markers, self.eight)
         error = diff([[-1,  1,  1,  1,  1,  1, -1],
                       [-1,  1,  1,  1,  1,  1, -1],
                       [-1,  1,  1,  1,  1,  1, -1],
@@ -324,7 +324,7 @@ class TestFastWatershed(unittest.TestCase):
         markers = np.zeros(data.shape,int)
         markers[6, 7] = 1
         markers[14, 7] = 2
-        out = fast_watershed(data, markers, self.eight, mask=mask)
+        out = watershed(data, markers, self.eight, mask=mask)
         #
         # The two objects should be the same size, except possibly for the
         # border region
@@ -360,7 +360,7 @@ class TestFastWatershed(unittest.TestCase):
         markers = np.zeros(data.shape,int)
         markers[6,7] = 1
         markers[14,7] = 2
-        out = fast_watershed(data, markers, self.eight, mask=mask)
+        out = watershed(data, markers, self.eight, mask=mask)
         #
         # The two objects should be the same size, except possibly for the
         # border region
@@ -386,7 +386,7 @@ class TestFastWatershed(unittest.TestCase):
         
         image = scipy.ndimage.gaussian_filter(image, 4)
         before = time.clock() 
-        out = fast_watershed(image, markers, self.eight)
+        out = watershed(image, markers, self.eight)
         elapsed = time.clock() - before
         print "Fast watershed ran a megapixel image in %f seconds"%(elapsed)
         before = time.clock()
