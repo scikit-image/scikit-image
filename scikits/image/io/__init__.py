@@ -9,8 +9,7 @@ from _plugins import available as plugins
 from _plugins import info as plugin_info
 available_plugins = plugins()
 
-for preferred_plugin in \
-        ['pil', 'matplotlib', 'gtk', 'freeimage', 'qt', 'null']:
+for preferred_plugin in ['pil', 'matplotlib', 'null']:
     if preferred_plugin in available_plugins:
         try:
             use_plugin(preferred_plugin)
