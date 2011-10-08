@@ -11,8 +11,9 @@ Original author: Lee Kamentstky
 import numpy
 
 def rank_order(image):
-    """Return an image of the same shape where each pixel has the
-    rank-order value of the corresponding pixel in the image.
+    """Return an image of the same shape where each pixel is the
+    index of the pixel value in the ascending order of the unique 
+    values of `image`, aka the rank-order value.
 
     Parameters
     ----------
