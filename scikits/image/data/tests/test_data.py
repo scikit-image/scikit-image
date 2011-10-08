@@ -15,7 +15,6 @@ def test_camera():
 def test_checkerboard():
     """ Test that checkerboard image can be loaded. """
     checkerboard = data.checkerboard()
-    assert_equal(checkerboard.dtype, np.uint8)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
