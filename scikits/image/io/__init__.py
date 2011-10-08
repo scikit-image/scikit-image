@@ -7,8 +7,6 @@ The following plug-ins are available:
 from _plugins import use as use_plugin
 from _plugins import available as plugins
 from _plugins import info as plugin_info
-import ipdb
-ipdb.set_trace()
 available_plugins = plugins()
 
 for preferred_plugin in \
