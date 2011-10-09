@@ -135,14 +135,15 @@ def prepare_for_display(npy_img):
 
     if npy_img.ndim == 2 or \
        (npy_img.ndim == 3 and npy_img.shape[2] == 1):
+        npy_plane = npy_img.reshape((height, width))
         if np.issubdtype(npy_img.dtype, float):
-            out[:,:,0] = npy_img*255
+            out[:,:,0] = npy_plane*255
             out[:,:,1] = out[:,:,0]
             out[:,:,2] = out[:,:,0]
         else:
-            out[:,:,0] = npy_img
-            out[:,:,1] = npy_img
-            out[:,:,2] = npy_img
+            out[:,:,0] = npy_plane
+            out[:,:,1] = npy_plane
+            out[:,:,2] = npy_plane
 
     elif npy_img.ndim == 3:
         if npy_img.shape[2] == 3 or npy_img.shape[2] == 4:
