@@ -3,6 +3,7 @@ from numpy.testing import *
 
 import scikits.image.transform as tf
 import scikits.image.transform.hough_transform as ht
+from scikits.image.transform import probabilistic_hough
 
 def append_desc(func, description):
     """Append the test function ``func`` and append
@@ -11,6 +12,8 @@ def append_desc(func, description):
     func.description = func.__module__ + '.' + func.func_name + description
 
     return func
+
+from scikits.image.transform import *
 
 def test_hough():
     # Generate a test image
@@ -27,6 +30,7 @@ def test_hough():
     assert_equal(dist > 70, dist < 72)
     assert_equal(theta > 0.78, theta < 0.79)
 
+
 def test_hough_angles():
     img = np.zeros((10, 10))
     img[0, 0] = 1
@@ -42,6 +46,26 @@ def test_py_hough():
     yield append_desc(test_hough_angles, '_python')
 
     tf._hough = fast_hough
+
+def test_probabilistic_hough():
+    # Generate a test image
+    img = np.zeros((100, 100), dtype=int)
+    for i in range(25, 75):
+        img[100 - i, i] = 100
+        img[i, i] = 100
+    # decrease default theta sampling because similar orientations may confuse
+    # as mentioned in article of Galambos et al
+    theta=np.linspace(0, np.pi, 45)
+    lines = probabilistic_hough(img, theta=theta, threshold=10, line_length=10, line_gap=1)
+    # sort the lines according to the x-axis
+    sorted_lines = []
+    for line in lines:
+        line = list(line)
+        line.sort(lambda x,y: cmp(x[0], y[0]))
+        sorted_lines.append(line)
+    assert([(25, 75), (74, 26)] in sorted_lines)
+    assert([(25, 25), (74, 74)] in sorted_lines)
+
 
 if __name__ == "__main__":
     run_module_suite()

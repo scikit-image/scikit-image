@@ -1,0 +1,133 @@
+***************
+Hough transform
+***************
+The Hough transform in its simplest form is a method to detect straight lines.
+
+http://en.wikipedia.org/wiki/Hough_transform
+
+As a first example we construct a line intersection.
+
+.. ipython::
+
+    In [1]: import numpy as np
+
+    In [2]: from scikits.image.transform import hough, probabilistic_hough
+
+    In [3]: import matplotlib.pyplot as plt
+
+    In [4]: from matplotlib.lines import Line2D                        
+
+    In [5]: image = np.zeros((100, 100))
+
+    In [6]: for i in range(25, 75):
+       ...:         image[100 - i, i] = 255
+       ...:     image[i, i] = 255
+       ...: 
+
+    In [7]: plt.imshow(image)
+    
+    @savefig hough_original.png width=4in
+    In [8]: plt.show()
+
+
+The Hough transform converts the image into a parameter space that represents 
+lines. A line can be represented by the distance r of its closest point to the 
+origin and by the angle theta of this vector.
+ 
+Every non-zero pixel of the image votes for potential line candidates, and the 
+local maxima represents the parameters of probable lines.
+
+.. ipython::
+
+    In [9]: h, theta, d = hough(image)
+
+    In [10]: plt.figure()
+
+    In [10]: plt.title("hough transform")
+
+    In [10]: plt.xlabel("degrees")
+
+    In [10]: plt.ylabel("distance")
+
+    In [11]: plt.imshow(h)
+
+    @savefig hough_transform.png width=4in
+    In [12]: plt.show()
+
+
+As can be seen, the maxima occur at 45 and 135 degrees, corresponding to the 
+normal vector angles of each line.
+
+Another method is to use the function probabilistic_hough, an implementation
+based on the Progressive Probabilistic Hough Transform [1]. It states that a 
+random subset of voting points give good enough results, and that lines can
+be extracted during the voting process by walking along connected components.
+This returns the beginning and end of line segments, which are useful.
+
+The function has three parameters: a general threshold that is applied to 
+the Hough accumulator, a minimum line length and the line gap that influences
+line merging.
+
+.. ipython::
+
+    In [13]: lines = probabilistic_hough(image, threshold=10, line_length=10, line_gap=1)
+
+    In [14]: plt.figure()
+
+    In [15]: for line in lines:
+       ....:         p0, p1 = line
+       ....:     plt.plot((p0[0], p1[0]), (p0[1], p1[1]))
+       ....: 
+
+    @savefig hough_probabilistic1.png width=4in
+    In [16]: plt.show()
+
+
+The Hough transform are often used on edge detected images.
+
+.. ipython::
+
+    In [17]: from scikits.image.io import imread
+
+    In [18]: from scikits.image import data_dir
+
+    In [19]: from scikits.image.filter import canny
+
+    In [20]: image = imread(data_dir + "/camera.png")
+
+    In [21]: edges = canny(image, 2, 1, 25)
+
+    In [22]: plt.imshow(edges)
+
+    @savefig hough_edge_detected.png width=4in
+    In [23]: plt.show()
+
+
+Apply the Probabilistic Hough Transform and find lines longer than 10 with a
+gap less than 3 pixels.
+
+.. ipython::
+
+    In [24]: plt.figure()
+
+    In [25]: plt.imshow(np.zeros(edges.shape))
+
+    In [26]: lines = probabilistic_hough(edges, threshold=10, line_length=5, line_gap=3)
+
+    In [27]: for line in lines:
+       ....:         p0, p1 = line
+       ....:     plt.plot((p0[0], p1[0]), (p0[1], p1[1]))
+       ....: 
+
+    @savefig hough_lines.png width=4in
+    In [28]: plt.show()
+
+
+References
+----------
+..  [1]  C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic Hough 
+        transform for line detection", in  IEEE Computer Society Conference on 
+        Computer Vision and Pattern Recognition, 1999. 
+    [2]  Duda, R. O. and P. E. Hart, "Use of the Hough Transformation to Detect 
+        Lines and Curves in Pictures," Comm. ACM, Vol. 15, pp. 11–15 (January, 
+        1972)
