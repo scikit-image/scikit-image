@@ -20,6 +20,7 @@ from sift import *
 from collection import *
 
 from io import *
+from video import *
 
 
 def _update_doc(doc):
