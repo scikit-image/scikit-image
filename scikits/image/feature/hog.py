@@ -1,8 +1,6 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
-
-# XXX Replace with integral after merge
-from ..transform import sat_sum
+from scipy.ndimage import uniform_filter
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cells_per_block=(3, 3), visualise=False, normalise=False):
@@ -98,8 +96,15 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     magnitude = sqrt(gx ** 2 + gy ** 2)
     orientation = arctan2(gy, (gx + 1e-15)) * (180 / pi) + 90
 
+    sx, sy = image.shape
+    cx, cy = pixels_per_cell
+    bx, by = cells_per_block
+
+    n_cellsx = int(np.floor(sx // cx))  # number of cells in x
+    n_cellsy = int(np.floor(sy // cy))  # number of cells in y
+
     # compute orientations integral images
-    integral_images = []
+    orientation_histogram = np.zeros((n_cellsx, n_cellsy, orientations))
     for i in range(orientations):
         #create new integral image for this orientation
         # isolate orientations in this range
@@ -112,35 +117,16 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cond2 = temp_ori > 0
         temp_mag = np.where(cond2, magnitude, 0)
 
-        #compute integral image
-        integral = np.cumsum(np.cumsum(temp_mag, axis=0, dtype=float),
-                             axis=1, dtype=float)
-        integral_images.append(integral)
+        orientation_histogram[:,:,i] = uniform_filter(temp_mag, size=(cx, cy))[cx/2::cx, cy/2::cy].T
 
-    sx, sy = image.shape
-    cx, cy = pixels_per_cell
-    bx, by = cells_per_block
-
-    n_cellsx = int(np.floor(sx // cx))  # number of cells in x
-    n_cellsy = int(np.floor(sy // cy))  # number of cells in y
 
     # now for each cell, compute the histogram
-    orientation_histogram = np.zeros((n_cellsx, n_cellsy, orientations))
+    #orientation_histogram = np.zeros((n_cellsx, n_cellsy, orientations))
 
     radius = min(cx, cy) // 2 - 1
     hog_image = None
     if visualise:
         hog_image = np.zeros((sy, sx), dtype=float)
-
-    for x in range(n_cellsx):
-        for y in range(n_cellsy):
-            for o in range(orientations):
-                # compute the histogram from integral image
-                orientation_histogram[x, y, o] = sat_sum(integral_images[o],
-                                                         y * cy,
-                                                         x * cx,
-                                                         (y + 1) * cy - 1,
-                                                         (x + 1) * cx - 1)
 
     if visualise:
         from scikits.image import draw
