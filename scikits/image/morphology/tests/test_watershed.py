@@ -49,8 +49,8 @@ import unittest
 import numpy as np
 import scipy.ndimage
 
-from scikits.image.morphology.watershed import watershed \
-        _slow_watershed, is_local_maximum
+from scikits.image.morphology.watershed import watershed, \
+     _slow_watershed, is_local_maximum
 
 eps = 1e-12
 
@@ -491,5 +491,5 @@ class TestIsLocalMaximum(unittest.TestCase):
         result = is_local_maximum(image, footprint=footprint)
         self.assertTrue(np.all(result))
         
-
-
+if __name__ == "__main__":
+    np.testing.run_module_suite()
