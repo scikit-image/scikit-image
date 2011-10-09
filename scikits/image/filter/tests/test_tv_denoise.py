@@ -1,9 +1,8 @@
 import numpy as np
 from numpy.testing import run_module_suite
 
-from scikits.image import filter
-from scikits.image import data
-from scikits.image import color
+from scikits.image import filter, data, color
+from scikits.image import img_as_uint
 
 class TestTvDenoise():
 
@@ -13,7 +12,7 @@ class TestTvDenoise():
         by scipy
         """
         # lena image
-        lena = color.rgb2gray(data.lena())
+        lena = color.rgb2gray(data.lena())[:256, :256]
         # add noise to lena
         lena += 0.5 * lena.std()*np.random.randn(*lena.shape)
         # denoise
@@ -25,9 +24,9 @@ class TestTvDenoise():
         grad_denoised = ndimage.morphological_gradient(denoised_lena, size=((3,3)))
         # test if the total variation has decreased
         assert np.sqrt((grad_denoised**2).sum()) < np.sqrt((grad**2).sum()) / 2
-        denoised_lena_int = filter.tv_denoise(lena.astype(np.int32), \
-                weight=60.0, keep_type=True)
-        assert denoised_lena_int.dtype is np.dtype('int32')
+        denoised_lena_int = filter.tv_denoise(img_as_uint(lena),
+                                              weight=60.0, keep_type=True)
+        assert denoised_lena_int.dtype is np.dtype('uint16')
 
 
     def test_tv_denoise_3d(self):
