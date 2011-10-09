@@ -54,7 +54,8 @@
   Fix missing math.h functions in Windows 7 + MSVCC.
 
 - Neil Muller
-  Numerous fixes, including those for Python 3 compatibility.
+  Numerous fixes, including those for Python 3 compatibility,
+  QT image reading.
 
 - The IPython team
   From whom we borrowed the github+web tools / style.
