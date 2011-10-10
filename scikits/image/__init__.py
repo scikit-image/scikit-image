@@ -8,6 +8,7 @@ data_dir = _osp.abspath(_osp.join(_osp.dirname(__file__), 'data'))
 from version import version as __version__
 
 def _setup_test():
+    import gzip
     import functools
 
     basedir = _osp.dirname(_osp.join(__file__, '../'))
