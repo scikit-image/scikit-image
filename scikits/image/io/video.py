@@ -173,7 +173,7 @@ class GstVideo(object):
         self.appsink.set_property('caps', gst.caps_from_string(caps))
         if self.pipeline.set_state(gst.STATE_PLAYING) == gst.STATE_CHANGE_FAILURE:
             raise NameError("Failed to load video source %s" % self.source)
-	    buff = self.appsink.emit('pull-preroll')
+        buff = self.appsink.emit('pull-preroll')
       
     def get(self):
         """
