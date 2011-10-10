@@ -129,7 +129,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         #
         # offset to center of connectivity array
         #
-        offset = np.array(c_connectivity.shape) / 2
+        offset = np.array(c_connectivity.shape) // 2
 
     # pad the image, markers, and mask so that we can use the mask to 
     # keep from running off the edges
@@ -175,7 +175,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     # and the second through last are the x,y...whatever offsets
     # (to do bounds checking).
     c = []
-    image_stride = np.array(image.strides) / image.itemsize
+    image_stride = np.array(image.strides) // image.itemsize
     for i in range(np.product(c_connectivity.shape)):
         multiplier = 1
         offs = []
@@ -183,7 +183,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         ignore = True
         for j in range(len(c_connectivity.shape)):
             elems = c_image.shape[j]
-            idx   = (i / multiplier) % c_connectivity.shape[j]
+            idx   = (i // multiplier) % c_connectivity.shape[j]
             off   = idx - offset[j]
             if off:
                 ignore = False
@@ -282,7 +282,7 @@ def is_local_maximum(image, labels=None, footprint=None):
         footprint = np.ones([3] * image.ndim, dtype=np.uint8)
     assert((np.all(footprint.shape) & 1) == 1)
     footprint = (footprint != 0)
-    footprint_extent = (np.array(footprint.shape)-1) / 2
+    footprint_extent = (np.array(footprint.shape)-1) // 2
     if np.all(footprint_extent == 0):
         return labels > 0
     result = (labels > 0).copy()
@@ -296,9 +296,9 @@ def is_local_maximum(image, labels=None, footprint=None):
     #
     # Find the relative indexes of each footprint element
     #
-    image_strides = np.array(image.strides) / image.dtype.itemsize
-    big_strides = np.array(big_labels.strides) / big_labels.dtype.itemsize
-    result_strides = np.array(result.strides) / result.dtype.itemsize
+    image_strides = np.array(image.strides) // image.dtype.itemsize
+    big_strides = np.array(big_labels.strides) // big_labels.dtype.itemsize
+    result_strides = np.array(result.strides) // result.dtype.itemsize
     footprint_offsets = np.mgrid[[slice(-fe,fe+1) for fe in footprint_extent]]
     
     fp_image_offsets = np.sum(image_strides[:, np.newaxis] *
@@ -342,7 +342,7 @@ def is_local_maximum(image, labels=None, footprint=None):
 
 def __heapify_markers(markers, image):
     """Create a priority queue heap with the markers on it"""
-    stride = np.array(image.strides) / image.itemsize
+    stride = np.array(image.strides) // image.itemsize
     coords = np.argwhere(markers != 0)
     ncoords = coords.shape[0]
     if ncoords > 0:
@@ -442,8 +442,6 @@ def _slow_watershed(image, markers, connectivity=8, mask=None):
             # label the pixel
             labels[x, y] = pix_label
             # put the pixel onto the queue
-            heappush(pq, (image[x, y], age, 0, x, y))
+            heappush(pq, [image[x, y], age, 0, x, y])
             age += 1
     return labels
-
-
