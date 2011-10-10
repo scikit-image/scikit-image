@@ -13,7 +13,7 @@ For more information, visit out website
 
 or the examples gallery at
 
-   http://scikits-image.org/docs/dev/auto_examples/
+   http://scikits-image.org/docs/0.3/auto_examples/
 
 New Features
 ------------
