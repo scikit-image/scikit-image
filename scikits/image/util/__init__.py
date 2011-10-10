@@ -1,2 +1,2 @@
-from dtype import *
+from .dtype import *
 
