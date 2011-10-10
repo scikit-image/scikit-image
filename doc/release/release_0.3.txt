@@ -7,7 +7,13 @@ scikits.image, the image processing toolbox for SciPy.
 This release runs under all major operating systems where
 Python (>=2.6 or 3.x), NumPy and SciPy can be installed.
 
-Please visit http://scikits-image.org for more information.
+For more information, visit out website
+
+  http://scikits-image.org
+
+or the examples gallery at
+
+   http://scikits-image.org/docs/dev/auto_examples/
 
 New Features
 ------------
