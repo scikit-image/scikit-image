@@ -48,7 +48,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     offset = max_distance / 2
     
     # compute the nonzero indexes
-    cdef np.ndarray[ndim=1, dtype=np.int_t] x_idxs, y_idxs
+    cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
     y_idxs, x_idxs = np.PyArray_Nonzero(img)
 
 
@@ -99,7 +99,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
     offset = max_distance / 2
     # find the nonzero indexes
-    cdef np.ndarray[ndim=1, dtype=np.int_t] x_idxs, y_idxs
+    cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
     y_idxs, x_idxs =  np.nonzero(img)
     num_indexes = y_idxs.shape[0] # x and y are the same shape
     nthetas = theta.shape[0]
