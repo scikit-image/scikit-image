@@ -23,7 +23,6 @@ example at ``C:\Python26\Lib\distutils\distutils.cfg``) to be::
 Usage Requirements
 ------------------
 * `Scipy <http://www.scipy.org/>`_
-* `Python Imaging Library (PIL) <http://www.pythonware.com/products/pil/>`_
 
 Optional Requirements
 ---------------------
