@@ -108,13 +108,6 @@ if __name__ == '__main__':
     shutil.copytree(html_dir, dest)
     # copy pdf file into tree
     #shutil.copy(pjoin(pdf_dir, 'scikits.image.pdf'), pjoin(dest, 'scikits.image.pdf'))
-    index_html = """
-    <html><body>
-    <a href="%s/index.html">%s documentation</a>
-    </body></html>    
-    """ % (tag, tag)
-    with open(os.path.join(pages_dir, "index.html"), 'w') as f:
-        f.write(index_html)
     
     try:
         cd(pages_dir)
