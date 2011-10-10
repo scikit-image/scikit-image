@@ -47,4 +47,4 @@ def get_log(name):
     logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
     return logging.getLogger(name)
 
-from util.dtype import *
+from .util.dtype import *
