@@ -13,9 +13,8 @@ How to make a new release of ``scikits.image``
 
 - Publish on PyPi:
 
+  python setup.py register
   python setup.py sdist upload
-  
-  (not sure if "python setup.py register" is needed before that)
 
 - Increase the version number in the setup.py file to ``0.Xdev``.
 
