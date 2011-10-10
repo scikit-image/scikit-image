@@ -29,7 +29,7 @@ import numpy as np
 import scipy.ndimage
 from ..filter import rank_order
 
-import _watershed
+from . import _watershed
 import warnings
 
 def watershed(image, markers, connectivity=None, offset=None, mask=None):
