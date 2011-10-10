@@ -9,7 +9,7 @@ def append_desc(func, description):
     """Append the test function ``func`` and append
     ``description`` to its name.
     """
-    func.description = func.__module__ + '.' + func.func_name + description
+    func.description = func.__module__ + '.' + func.__name__ + description
 
     return func
 
