@@ -2,7 +2,7 @@ __all__ = ['hough', 'probabilistic_hough']
 
 from itertools import izip
 import numpy as np
-from _hough_transform import _probabilistic_hough  
+from ._hough_transform import _probabilistic_hough  
 
 def _hough(img, theta=None):
     if img.ndim != 2:
