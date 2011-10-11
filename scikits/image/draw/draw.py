@@ -3,4 +3,4 @@ Methods to draw on arrays.
 
 """
 
-from _draw import bresenham
+from ._draw import bresenham
