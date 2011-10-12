@@ -28,7 +28,8 @@ class TestSElem():
     def strel_worker(self, fn, func):
         matlab_masks = np.load(os.path.join(data_dir, fn))
         k = 0
-        for expected_mask in matlab_masks:
+        for arrname in sorted(matlab_masks):
+            expected_mask = matlab_masks[arrname]
             actual_mask = func(k)
             if (expected_mask.shape == (1,)):
                 expected_mask = expected_mask[:,np.newaxis]
@@ -36,8 +37,8 @@ class TestSElem():
             k = k + 1
     
     def test_selem_disk(self):
-        self.strel_worker("disk-matlab-output.npy", selem.disk)
+        self.strel_worker("disk-matlab-output.npz", selem.disk)
 
     def test_selem_diamond(self):
-        self.strel_worker("diamond-matlab-output.npy", selem.diamond)
+        self.strel_worker("diamond-matlab-output.npz", selem.diamond)
 
