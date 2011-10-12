@@ -6,7 +6,7 @@ Image processing algorithms for SciPy, including IO, morphology, filtering,
 warping, color manipulation, object detection, etc.
 
 Please refer to the online documentation at
-http://stefanv.github.com/scikits.image
+http://scikits-image.org/
 """
 
 DISTNAME            = 'scikits.image'
