@@ -18,7 +18,7 @@ Get the local copy of the code
 
 From the command line::
 
-   git clone git://github.com/scikits.image/scikits.image.git
+   git clone git://github.com/scikits-image/scikits.image.git
 
 You now have a copy of the code tree in the new ``scikits.image`` directory.
 
