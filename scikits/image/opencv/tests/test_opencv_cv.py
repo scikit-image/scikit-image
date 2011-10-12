@@ -23,8 +23,8 @@ with warnings.catch_warnings():
 opencv_skip = dec.skipif(not loaded, 'OpenCV libraries not found')
 
 class OpenCVTest(object):
-    lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npy'))
-    lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
+    lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npz'))['arr_0']
+    lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npz'))['arr_0']
 
 
 class TestSobel(OpenCVTest):
@@ -239,18 +239,18 @@ class TestPyrUp(OpenCVTest):
 class TestFindChessboardCorners(object):
     @opencv_skip
     def test_cvFindChessboardCorners(self):
-        chessboard_GRAY_U8 = np.load(os.path.join(data_dir,
-                                                  'chessboard_GRAY_U8.npy'))
+        chessboard_GRAY_U8 = np.load(
+            os.path.join(data_dir, 'chessboard_GRAY_U8.npz')['arr_0'])
         pts = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))
 
 
 class TestDrawChessboardCorners(object):
     @opencv_skip
     def test_cvDrawChessboardCorners(self):
-        chessboard_GRAY_U8 = np.load(os.path.join(data_dir,
-                                                  'chessboard_GRAY_U8.npy'))
-        chessboard_RGB_U8 = np.load(os.path.join(data_dir,
-                                                  'chessboard_RGB_U8.npy'))
+        chessboard_GRAY_U8 = np.load(
+            os.path.join(data_dir, 'chessboard_GRAY_U8.npz')['arr_0'])
+        chessboard_RGB_U8 = np.load(
+            os.path.join(data_dir, 'chessboard_RGB_U8.npz')['arr_0'])
         corners = cvFindChessboardCorners(chessboard_GRAY_U8, (7, 7))
         cvDrawChessboardCorners(chessboard_RGB_U8, (7, 7), corners)
 
@@ -285,10 +285,8 @@ class TestCalibrateCamera2(object):
     @opencv_skip
     @dec.slow
     def test_cvCalibrateCamera2_KnownData(self):
-        (object_points,points_count,image_points,intrinsics,distortions) =\
-             cPickle.load(open(os.path.join(
-                 data_dir, "cvCalibrateCamera2TestData.pck"), "rb")
-             )
+        _, (object_points,points_count,image_points,intrinsics,distortions) = \
+           np.load(os.path.join(data_dir, "cvCalibrateCamera2TestData.npz"))
 
         intrinsics_test, distortion_test = cvCalibrateCamera2(
             object_points, image_points, points_count, (1024,1280)
