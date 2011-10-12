@@ -9,7 +9,7 @@ Please refer to the online documentation at
 http://scikits-image.org/
 """
 
-DISTNAME            = 'scikits.image'
+DISTNAME            = 'skimage'
 DESCRIPTION         = 'Image processing routines for SciPy'
 LONG_DESCRIPTION    = descr
 MAINTAINER          = 'Stefan van der Walt'
@@ -31,8 +31,7 @@ def configuration(parent_package='', top_path=None):
     if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
     from numpy.distutils.misc_util import Configuration
-    config = Configuration(None, parent_package, top_path,
-                           namespace_packages=['scikits'])
+    config = Configuration(None, parent_package, top_path)
 
     config.set_options(
             ignore_setup_xxx_py=True,
@@ -40,15 +39,13 @@ def configuration(parent_package='', top_path=None):
             delegate_options_to_subpackages=True,
             quiet=True)
 
-    config.add_subpackage('scikits')
     config.add_subpackage(DISTNAME)
-    config.add_data_files('scikits/__init__.py')
-    config.add_data_dir('scikits/image/data')
+    config.add_data_dir('skimage/data')
 
     return config
 
-def write_version_py(filename='scikits/image/version.py'):
-    template = """# THIS FILE IS GENERATED FROM THE SCIKITS.IMAGE SETUP.PY
+def write_version_py(filename='skimage/version.py'):
+    template = """# THIS FILE IS GENERATED FROM THE SKIMAGE SETUP.PY
 version='%s'
 """
 
@@ -92,14 +89,13 @@ if __name__ == "__main__":
 
         configuration=configuration,
         install_requires=[],
-        namespace_packages=['scikits'],
         packages=setuptools.find_packages(),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
 
         entry_points={
             'console_scripts': [
-                'scivi = scikits.image.scripts.scivi:main']
+                'scivi = skimage.scripts.scivi:main']
             },
 
         cmdclass={'build_py': build_py},
