@@ -39,7 +39,7 @@ def test_fast_homography():
     H[:2, 2] = [tx, ty]
 
     for mode in ('constant', 'mirror', 'wrap'):
-        print 'Transform mode:', mode
+        print ('Transform mode: %s' % mode)
 
         p0 = homography(img, H, mode=mode, order=1)
         p1 = fast_homography(img, H, mode=mode)
@@ -54,7 +54,7 @@ def test_fast_homography():
         ## plt.show()
 
         d = np.mean(np.abs(p0 - p1))
-        print "delta=", d
+        print ("delta=%f" % d)
         assert d < 0.2
     
 
