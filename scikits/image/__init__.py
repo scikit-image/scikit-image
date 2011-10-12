@@ -12,8 +12,7 @@ def _setup_test():
     import gzip
     import functools
 
-    basedir = _osp.join(pkg_dir, '../')
-    args = ['', '--exe', '-w', '%s' % basedir]
+    args = ['', '--exe', '-w', '%s' % pkg_dir]
 
     try:
         import nose as _nose
