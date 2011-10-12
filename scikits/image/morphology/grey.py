@@ -68,7 +68,7 @@ def greyscale_dilate(image, selem, out=None):
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
     try:
-        import cmorph
+        from . import cmorph
         out = cmorph.dilate(image, selem, out=out)
         return out;
     except ImportError:
