@@ -3,7 +3,8 @@
 
 import os.path as _osp
 
-data_dir = _osp.abspath(_osp.join(_osp.dirname(__file__), 'data'))
+pkg_dir = _osp.abspath(_osp.dirname(__file__))
+data_dir = _osp.join(pkg_dir, 'data')
 
 from version import version as __version__
 
@@ -11,7 +12,7 @@ def _setup_test():
     import gzip
     import functools
 
-    basedir = _osp.dirname(_osp.join(__file__, '../'))
+    basedir = _osp.join(pkg_dir, '../')
     args = ['', '--exe', '-w', '%s' % basedir]
 
     try:
