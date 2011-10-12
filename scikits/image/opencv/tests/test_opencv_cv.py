@@ -24,7 +24,7 @@ opencv_skip = dec.skipif(not loaded, 'OpenCV libraries not found')
 
 class OpenCVTest(object):
     lena_RGB_U8 = np.load(os.path.join(data_dir, 'lena_RGB_U8.npz'))['arr_0']
-    lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))['arr_0']
+    lena_GRAY_U8 = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npz'))['arr_0']
 
 
 class TestSobel(OpenCVTest):
