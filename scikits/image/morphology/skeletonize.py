@@ -52,7 +52,7 @@ def skeletonize(image):
     while pixelRemoved:
         pixelRemoved = False;
 
-        # pass 1
+        # pass 1 - remove the 1's and 3's
         neighbours = correlate(skeleton, mask, mode='constant')
         neighbours[skeleton == 0] = 0
         codes = np.take(lut, neighbours)
@@ -63,7 +63,7 @@ def skeletonize(image):
             pixelRemoved = True
             skeleton[codes == 3] = 0
 
-        # pass 2
+        # pass 2 - remove the 2's and 3's
         neighbours = correlate(skeleton, mask, mode='constant')
         neighbours[skeleton == 0] = 0
         codes = np.take(lut, neighbours)
@@ -74,9 +74,4 @@ def skeletonize(image):
             pixelRemoved = True
             skeleton[codes == 3] = 0
 
-
-
     return skeleton
-
-    
-             
