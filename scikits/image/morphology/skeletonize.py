@@ -6,6 +6,7 @@ Original author: Neil Yager
 
 import numpy as np
 from scipy.ndimage import correlate
+from .. import util
 
 def skeletonize(image):
     """
@@ -26,7 +27,8 @@ def skeletonize(image):
     
     image: ndarray (2D)
         A binary image containing the objects to be skeletonized. '1' 
-         represents foreground, and '0' represents background.
+         represents foreground, and '0' represents background. It 
+         also accepts arrays of boolean values where True is foreground.
     
     Notes
     -----
@@ -62,15 +64,24 @@ def skeletonize(image):
             3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             2,3,1,3,0,0,1,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             2,3,0,1,0,0,0,1,0,0,0,0,0,0,0,0,3,3,0,1,0,0,0,0,2,2,0,0,2,0,0,0]
+
+    # convert to unsigned int (this should work for boolean values)
+    skeleton = np.array(image).astype(np.uint8)
+
+    # check some properties of the input image:
+    #  - 2D
+    #  - binary image with only 0's and 1's 
+    if skeleton.ndim != 2:
+        raise ValueError('Skeletonize requires a 2D array')    
+    for val in np.unique(skeleton):
+        if val not in [0, 1]:
+            raise ValueError('Invalid value in the image: %d'%(val))
     
-    # initialize the skeleton to the original image
-    # TODO: how to handle data types
-    skeleton = image.copy().astype(np.int8)
-    
-    # create the mask that will assign a value based on neighbouring pixels
+    # create the mask that will assign a unique value based on the
+    #  arrangement of neighbouring pixels
     mask = np.array([[  1,  2,  4],
                      [128,  0,  8],
-                     [ 64, 32, 16]], np.int8)
+                     [ 64, 32, 16]], np.uint8)
 
     pixelRemoved = True
     while pixelRemoved:
