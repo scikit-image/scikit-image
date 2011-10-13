@@ -123,4 +123,6 @@ gitwash:
 	python tools/gitwash/gitwash_dumper.py source scikits.image \
 	--project-url=http://scikits-image.org \
 	--project-ml-url=http://groups.google.com/group/scikits-image \
+	--repo-name=scikits.image \
+	--github-user=scikits-image \
 	--source-suffix=.txt
