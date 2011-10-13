@@ -1,4 +1,5 @@
-"""skeletonize.py - ???
+"""skeletonize.py - Use an iterative thinning algorithm to find the
+                    skeletons of binary objects in an image.
 
 Original author: Neil Yager
 """
@@ -8,13 +9,32 @@ from scipy.ndimage import correlate
 
 def skeletonize(image):
     """
-    Return a single pixel wide skeleton of all connected
-     components in a binary image
+    Return a single pixel wide skeleton of all connected components 
+     in a binary image. 
+     
+    The algorithm works by making successive passes of the image, 
+     removing pixels on object borders. This continues until no
+     more pixels can be removed.  The image is correlated with a
+     mask that assigns each pixel a number in the range [0...255]
+     corresponding to each possible pattern of its 8 neighbouring
+     pixels. A look up table is then used to assign the pixels a
+     value of 0, 1, 2 or 3, which are selectively removed during
+     the iterations. 
 
     Parameters
     ----------
     
-    image:
+    image: ndarray (2D)
+        A binary image containing the objects to be skeletonized. '1' 
+         represents foreground, and '0' represents background.
+    
+    Notes
+    -----
+    
+    This implementation gives different results than a medial 
+     axis transforrmation, which can be can be implemented using  
+     morphological operations. This implementation is generally much
+     faster.
     
     Returns 
     -------
@@ -43,7 +63,11 @@ def skeletonize(image):
             2,3,1,3,0,0,1,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
             2,3,0,1,0,0,0,1,0,0,0,0,0,0,0,0,3,3,0,1,0,0,0,0,2,2,0,0,2,0,0,0]
     
+    # initialize the skeleton to the original image
+    # TODO: how to handle data types
     skeleton = image.copy().astype(np.int8)
+    
+    # create the mask that will assign a value based on neighbouring pixels
     mask = np.array([[  1,  2,  4],
                      [128,  0,  8],
                      [ 64, 32, 16]], np.int8)
