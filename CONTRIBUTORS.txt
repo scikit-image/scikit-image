@@ -74,3 +74,7 @@
 
 - David-Warde Farley, Sturla Molden
   Bresenheim line drawing, from snippets on numpy-discussion.
+
+- Christoph Gohlke
+  Windows packaging and Python 3 compatibility.
+
