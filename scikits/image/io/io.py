@@ -72,6 +72,8 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
 
     if as_grey and getattr(img, 'ndim', 0) >= 3:
+        # ignore alpha channel
+        if getattr(img, 'shape', 2) > 3: img = img[:,:,:3]
         img = rgb2grey(img)
 
     return img
