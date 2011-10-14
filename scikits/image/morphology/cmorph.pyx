@@ -8,6 +8,7 @@ import numpy as np
 
 cimport numpy as np
 cimport cython
+from cpython cimport bool
 
 STREL_DTYPE = np.uint8
 ctypedef np.uint8_t STREL_DTYPE_t
@@ -21,9 +22,14 @@ cdef inline int int_min(int a, int b): return a if a <= b else b
 @cython.boundscheck(False)
 def dilate(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
            np.ndarray[IMAGE_DTYPE_t, ndim=2] selem not None,
-           np.ndarray[IMAGE_DTYPE_t, ndim=2] out):
+           np.ndarray[IMAGE_DTYPE_t, ndim=2] out,
+           bool flip):
     cdef int hw = selem.shape[0] // 2
     cdef int hh = selem.shape[1] // 2
+    if flip:
+        hw -= 1
+        hh -= 1
+
     cdef int width = image.shape[0], height = image.shape[1]
     if out is None:
         out = np.zeros([width, height], dtype=IMAGE_DTYPE)
@@ -64,9 +70,14 @@ def dilate(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
 @cython.boundscheck(False)
 def erode(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
           np.ndarray[IMAGE_DTYPE_t, ndim=2] selem not None,
-          np.ndarray[IMAGE_DTYPE_t, ndim=2] out):
+          np.ndarray[IMAGE_DTYPE_t, ndim=2] out,
+          bool flip):
     cdef int hw = selem.shape[0] // 2
     cdef int hh = selem.shape[1] // 2
+    if flip:
+        hw -= 1
+        hh -= 1
+
     cdef int width = image.shape[0], height = image.shape[1]
     if out is None:
         out = np.zeros([width, height], dtype=IMAGE_DTYPE)
