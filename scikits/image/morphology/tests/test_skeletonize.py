@@ -4,6 +4,9 @@ from scikits.image.morphology import skeletonize
 import numpy.testing
 from scikits.image.draw import draw
 from scipy.ndimage import correlate
+from scikits.image.io import imread
+from scikits.image import data_dir
+import os.path
 
 class TestSkeletonize(unittest.TestCase):
     def test_skeletonize_no_foreground(self):
@@ -47,6 +50,17 @@ class TestSkeletonize(unittest.TestCase):
         im[4, 0] = 1
         result = skeletonize.skeletonize(im)
         numpy.testing.assert_array_equal(result, im)
+    
+    def test_skeletonize_output(self):
+        im = imread(os.path.join(data_dir, "bw_text.png"), as_grey=True)
+        
+        # make black the foreground
+        im = (im==0)
+        result = skeletonize.skeletonize(im)
+        
+        expected = np.load(os.path.join(data_dir, "bw_text_skeleton.npy"))
+        numpy.testing.assert_array_equal(result, expected)
+        
     
     def test_skeletonize_num_neighbours(self):
         # an empty image
