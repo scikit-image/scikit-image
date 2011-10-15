@@ -105,8 +105,13 @@ def greyscale_open(image, selem, out=None):
     opening : ndarray
        The result of the morphological opening.
     """
+    h, w = selem.shape
+    if (h % 2) == 0 and (w % 2) == 0:
+        flip = True
+    else:
+        flip = False
     eroded = greyscale_erode(image, selem)
-    out = greyscale_dilate(eroded, selem, out=out)
+    out = greyscale_dilate(eroded, selem, out=out, flip=flip)
     return out
 
 def greyscale_close(image, selem, out=None):
@@ -131,8 +136,13 @@ def greyscale_close(image, selem, out=None):
     opening : ndarray
        The result of the morphological opening.
     """
+    h, w = selem.shape
+    if (h % 2) == 0 and (w % 2) == 0:
+        flip = True
+    else:
+        flip = False
     dilated = greyscale_dilate(image, selem)
-    out = greyscale_erode(dilated, selem, out=out)
+    out = greyscale_erode(dilated, selem, out=out, flip=flip)
     return out
 
 def greyscale_white_top_hat(image, selem, out=None):
