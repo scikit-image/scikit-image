@@ -9,7 +9,7 @@ import numpy as np
 
 eps = np.finfo(float).eps
 
-def greyscale_erode(image, selem, out=None, flip=False):
+def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
     """
     Performs a greyscale morphological erosion on an image given a flat
     structuring element. The eroded pixel at (i,j) is the minimum over all
@@ -27,8 +27,8 @@ def greyscale_erode(image, selem, out=None, flip=False):
        The array to store the result of the morphology. If None is
        passed, a new array will be allocated.
 
-    flip : bool
-        Flip structuring element about center point. This only affects
+    shift_x, shift_y : bool
+        shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
 
     Returns
@@ -40,12 +40,13 @@ def greyscale_erode(image, selem, out=None, flip=False):
         raise NotImplementedError("In-place erosion not supported!")
     try:
         import scikits.image.morphology.cmorph as cmorph
-        out = cmorph.erode(image, selem, out=out, flip=flip)
+        out = cmorph.erode(image, selem, out=out,
+                           shift_x=shift_x, shift_y=shift_y)
         return out;
     except ImportError:
         raise ImportError("cmorph extension not available.")
 
-def greyscale_dilate(image, selem, out=None, flip=False):
+def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
     """
     Performs a greyscale morphological dilation on an image given a flat
     structuring element. The dilated pixel at (i,j) is the maximum over all
@@ -64,8 +65,8 @@ def greyscale_dilate(image, selem, out=None, flip=False):
        The array to store the result of the morphology. If None, is
        passed, a new array will be allocated.
 
-    flip : bool
-        Flip structuring element about center point. This only affects
+    shift_x, shift_y : bool
+        shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
 
     Returns
@@ -77,7 +78,8 @@ def greyscale_dilate(image, selem, out=None, flip=False):
         raise NotImplementedError("In-place dilation not supported!")
     try:
         from . import cmorph
-        out = cmorph.dilate(image, selem, out=out, flip=flip)
+        out = cmorph.dilate(image, selem, out=out,
+                            shift_x=shift_x, shift_y=shift_y)
         return out;
     except ImportError:
         raise ImportError("cmorph extension not available.")
@@ -106,12 +108,12 @@ def greyscale_open(image, selem, out=None):
        The result of the morphological opening.
     """
     h, w = selem.shape
-    if (h % 2) == 0 and (w % 2) == 0:
-        flip = True
-    else:
-        flip = False
+    shift_x = True if (w % 2) == 0 else False
+    shift_y = True if (h % 2) == 0 else False
+
     eroded = greyscale_erode(image, selem)
-    out = greyscale_dilate(eroded, selem, out=out, flip=flip)
+    out = greyscale_dilate(eroded, selem, out=out,
+                           shift_x=shift_x, shift_y=shift_y)
     return out
 
 def greyscale_close(image, selem, out=None):
@@ -137,12 +139,12 @@ def greyscale_close(image, selem, out=None):
        The result of the morphological opening.
     """
     h, w = selem.shape
-    if (h % 2) == 0 and (w % 2) == 0:
-        flip = True
-    else:
-        flip = False
+    shift_x = True if (w % 2) == 0 else False
+    shift_y = True if (h % 2) == 0 else False
+
     dilated = greyscale_dilate(image, selem)
-    out = greyscale_erode(dilated, selem, out=out, flip=flip)
+    out = greyscale_erode(dilated, selem, out=out,
+                          shift_x=shift_x, shift_y=shift_y)
     return out
 
 def greyscale_white_top_hat(image, selem, out=None):
