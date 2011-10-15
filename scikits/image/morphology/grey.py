@@ -36,6 +36,23 @@ def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
     -------
     eroded : ndarray
        The result of the morphological erosion.
+
+    Examples
+    --------
+    >>> # Erosion shrinks bright regions
+    >>> from scikits.image.morphology import square
+    >>> bright_square = np.array([[0, 0, 0, 0, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> greyscale_erode(bright_square, square(3))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype='uint8')
+
     """
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
@@ -75,6 +92,23 @@ def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
     -------
     dilated : ndarray
        The result of the morphological dilation.
+
+    Examples
+    --------
+    >>> # Dilation enlarges bright regions
+    >>> from scikits.image.morphology import square
+    >>> bright_pixel = np.array([[0, 0, 0, 0, 0],
+    ...                          [0, 0, 0, 0, 0],
+    ...                          [0, 0, 1, 0, 0],
+    ...                          [0, 0, 0, 0, 0],
+    ...                          [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> greyscale_dilate(bright_pixel, square(3))
+    array([[0, 0, 0, 0, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0]], dtype='uint8')
+
     """
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
@@ -110,6 +144,23 @@ def greyscale_open(image, selem, out=None):
     -------
     opening : ndarray
        The result of the morphological opening.
+
+    Examples
+    --------
+    >>> # Open up gap between two bright regions (but also shrink regions)
+    >>> from scikits.image.morphology import square
+    >>> bad_connection = np.array([[1, 0, 0, 0, 1],
+    ...                            [1, 1, 0, 1, 1],
+    ...                            [1, 1, 1, 1, 1],
+    ...                            [1, 1, 0, 1, 1],
+    ...                            [1, 0, 0, 0, 1]], dtype=np.uint8)
+    >>> greyscale_open(bad_connection, square(3))
+    array([[0, 0, 0, 0, 0],
+           [1, 1, 0, 1, 1],
+           [1, 1, 0, 1, 1],
+           [1, 1, 0, 1, 1],
+           [0, 0, 0, 0, 0]], dtype='uint8')
+
     """
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
@@ -144,6 +195,23 @@ def greyscale_close(image, selem, out=None):
     -------
     opening : ndarray
        The result of the morphological opening.
+
+    Examples
+    --------
+    >>> # Close a gap between two bright lines
+    >>> from scikits.image.morphology import square
+    >>> broken_line = np.array([[0, 0, 0, 0, 0],
+    ...                         [0, 0, 0, 0, 0],
+    ...                         [1, 1, 0, 1, 1],
+    ...                         [0, 0, 0, 0, 0],
+    ...                         [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> greyscale_close(broken_line, square(3))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype='uint8')
+
     """
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
@@ -177,7 +245,24 @@ def greyscale_white_top_hat(image, selem, out=None):
     -------
     opening : ndarray
        The result of the morphological white top hat.
-    """
+
+    Examples
+    --------
+    >>> # Subtract grey background from bright peak
+    >>> from scikits.image.morphology import square
+    >>> bright_on_grey = np.array([[2, 3, 3, 3, 2],
+    ...                            [3, 4, 5, 4, 3],
+    ...                            [3, 5, 9, 5, 3],
+    ...                            [3, 4, 5, 4, 3],
+    ...                            [2, 3, 3, 3, 2]], dtype=np.uint8)
+    >>> greyscale_white_top_hat(bright_on_grey, square(3))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 1, 5, 1, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0]], dtype='uint8')
+
+   """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
@@ -209,9 +294,27 @@ def greyscale_black_top_hat(image, selem, out=None):
     -------
     opening : ndarray
        The result of the black top filter.
+
+    Examples
+    --------
+    >>> # Change dark peak to bright peak and subtract background
+    >>> from scikits.image.morphology import square
+    >>> dark_on_grey = np.array([[7, 6, 6, 6, 7],
+    ...                          [6, 5, 4, 5, 6],
+    ...                          [6, 4, 0, 4, 6],
+    ...                          [6, 5, 4, 5, 6],
+    ...                          [7, 6, 6, 6, 7]], dtype=np.uint8)
+    >>> greyscale_black_top_hat(dark_on_grey, square(3))
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0],
+           [0, 1, 5, 1, 0],
+           [0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0]], dtype='uint8')
+
     """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
     out = greyscale_close(image, selem, out=out)
     out = out - image
     return out
+
