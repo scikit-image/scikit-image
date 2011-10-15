@@ -159,8 +159,7 @@ def greyscale_white_top_hat(image, selem, out=None):
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
-    eroded = greyscale_erode(image, selem)
-    out = greyscale_dilate(eroded, selem, out=out)
+    out = greyscale_open(image, selem, out=out)
     out = image - out
     return out
 
@@ -187,7 +186,6 @@ def greyscale_black_top_hat(image, selem, out=None):
     """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
-    dilated = greyscale_dilate(image, selem)
-    out = greyscale_erode(dilated, selem, out=out)
+    out = greyscale_close(image, selem, out=out)
     out = out - image
     return out
