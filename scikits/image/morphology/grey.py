@@ -10,10 +10,11 @@ import numpy as np
 eps = np.finfo(float).eps
 
 def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
-    """
-    Performs a greyscale morphological erosion on an image given a flat
-    structuring element. The eroded pixel at (i,j) is the minimum over all
-    pixels in the neighborhood centered at (i,j).
+    """Return greyscale morphological erosion of an image.
+
+    Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
+    in the neighborhood centered at (i,j). Erosion shrinks bright regions and
+    enlarges dark regions.
 
     Parameters
     ----------
@@ -47,10 +48,11 @@ def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
         raise ImportError("cmorph extension not available.")
 
 def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
-    """
-    Performs a greyscale morphological dilation on an image given a flat
-    structuring element. The dilated pixel at (i,j) is the maximum over all
-    pixels in the neighborhood centered at (i,j).
+    """Return greyscale morphological dilation of an image.
+
+    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
+    in the neighborhood centered at (i,j). Dilation enlarges bright regions
+    and shrinks dark regions.
 
     Parameters
     ----------
@@ -85,10 +87,12 @@ def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
         raise ImportError("cmorph extension not available.")
 
 def greyscale_open(image, selem, out=None):
-    """
-    Performs a greyscale morphological opening on an image given a flat
-    structuring element defined as a erosion followed by a dilation.
+    """Return greyscale morphological opening of an image.
 
+    The morphological opening on an image is defined as an erosion followed by
+    a dilation. Opening can remove small bright spots (i.e. "salt") and connect
+    small dark cracks. This tends to "open" up (dark) gaps between (bright)
+    features.
 
     Parameters
     ----------
@@ -117,9 +121,12 @@ def greyscale_open(image, selem, out=None):
     return out
 
 def greyscale_close(image, selem, out=None):
-    """
-    Performs a greyscale morphological closing on an image given a flat
-    structuring element defined as a dilation followed by an erosion.
+    """Return greyscale morphological closing of an image.
+
+    The morphological closing on an image is defined as a dilation followed by
+    an erosion. Closing can remove small dark spots (i.e. "pepper") and connect
+    small bright cracks. This tends to "close" up (dark) gaps between (bright)
+    features.
 
     Parameters
     ----------
@@ -148,8 +155,11 @@ def greyscale_close(image, selem, out=None):
     return out
 
 def greyscale_white_top_hat(image, selem, out=None):
-    """
-    Applies a white top hat on an image given a flat structuring element.
+    """Return white top hat of an image.
+
+    The white top hat of an image is defined as the image minus its
+    morphological opening. This operation returns the bright spots of the image
+    that are smaller than the structuring element.
 
     Parameters
     ----------
@@ -176,8 +186,12 @@ def greyscale_white_top_hat(image, selem, out=None):
     return out
 
 def greyscale_black_top_hat(image, selem, out=None):
-    """
-    Applies a black top hat on an image given a flat structuring element.
+    """Return black top hat of an image.
+
+    The black top hat of an image is defined as its morphological closing minus
+    the original image. This operation returns the dark spots of the image that
+    are smaller than the structuring element. Note that dark spots in the
+    original image are bright spots after the black top hat.
 
     Parameters
     ----------
