@@ -61,3 +61,48 @@ class TestMorphology():
     def test_close_disk(self):
         self.morph_worker(lena, "disk-close-matlab-output.npz",
                           greyscale_close, disk)
+
+
+BLACK_PIXEL = 255 * np.ones((4, 4), dtype=np.uint8)
+BLACK_PIXEL[1, 1] = 0
+WHITE_PIXEL = 255 - BLACK_PIXEL
+SELEM = square(2)
+
+def test_dilate_erode_symmetry():
+    c = greyscale_erode(BLACK_PIXEL, SELEM)
+    d = greyscale_dilate(WHITE_PIXEL, SELEM)
+    assert np.all(c == (255 - d))
+
+
+def test_open_dark_pixel():
+    assert np.all(greyscale_open(BLACK_PIXEL, SELEM) == BLACK_PIXEL)
+
+def test_close_white_pixel():
+    assert np.all(greyscale_close(WHITE_PIXEL, SELEM) == WHITE_PIXEL)
+
+
+def test_open_white_pixel():
+    assert np.all(greyscale_open(WHITE_PIXEL, SELEM) == 0)
+
+def test_close_dark_pixel():
+    assert np.all(greyscale_close(BLACK_PIXEL, SELEM) == 255)
+
+
+def test_white_tophat_white_pixel():
+    tophat = greyscale_white_top_hat(WHITE_PIXEL, SELEM)
+    assert np.all(tophat == WHITE_PIXEL)
+
+def test_black_tophat_black_pixel():
+    tophat = greyscale_black_top_hat(BLACK_PIXEL, SELEM)
+    assert np.all(tophat == (255 - BLACK_PIXEL))
+
+
+def test_white_tophat_black_pixel():
+    tophat = greyscale_white_top_hat(BLACK_PIXEL, SELEM)
+    assert np.all(tophat == 0)
+
+def test_black_tophat_white_pixel():
+    tophat = greyscale_black_top_hat(WHITE_PIXEL, SELEM)
+    assert np.all(tophat == 0)
+
+
