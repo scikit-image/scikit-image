@@ -19,7 +19,7 @@ def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-       The image as an ndarray.
+       The image as a uint8 ndarray.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -75,7 +75,7 @@ def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
     ----------
 
     image : ndarray
-       The image as an ndarray.
+       The image as a uint8 ndarray.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -131,7 +131,7 @@ def greyscale_open(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as an ndarray.
+       The image as a uint8 ndarray.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -182,7 +182,7 @@ def greyscale_close(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as an ndarray.
+       The image as a uint8 ndarray.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -232,7 +232,7 @@ def greyscale_white_top_hat(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as an ndarray.
+       The image as a uint8 ndarray.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -281,7 +281,7 @@ def greyscale_black_top_hat(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as an ndarray.
+       The image as a uint8 ndarray.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
