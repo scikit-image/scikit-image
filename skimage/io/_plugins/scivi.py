@@ -11,7 +11,7 @@ Please report any bugs to the author.
 
 The scivi module is not meant to be used directly.
 
-Use scikits.image.io.imshow(img, fancy=True)'''
+Use skimage.io.imshow(img, fancy=True)'''
 
 from textwrap import dedent
 import numpy as np
@@ -143,7 +143,7 @@ class SciviImageWindow(QMainWindow):
         self.mgr.add_window(self)
         self.main_widget.show()
 
-        self.setWindowTitle('Scivi - The scikits.image viewer.')
+        self.setWindowTitle('Scivi - The skimage viewer.')
 
         self.mixer_panel = MixerPanel(self.arr)
         self.layout.addWidget(self.mixer_panel, 0, 2)
@@ -215,7 +215,7 @@ class SciviImageWindow(QMainWindow):
 
 
     def save_to_stack(self):
-        from scikits.image import io
+        from skimage import io
         img = self.arr.copy()
         io.push(img)
         msg = dedent('''
@@ -233,7 +233,7 @@ class SciviImageWindow(QMainWindow):
         dialog.exec_()
 
     def save_to_file(self):
-        from scikits.image import io
+        from skimage import io
         filename = str(QtGui.QFileDialog.getSaveFileName())
         if len(filename) == 0:
             return
