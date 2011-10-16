@@ -69,7 +69,7 @@ def diamond(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : string
-       The radius of the disk-shaped structuring element.
+       The radius of the diamond-shaped structuring element.
 
     dtype : data-type
        The data type of the structuring element.

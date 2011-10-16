@@ -61,3 +61,58 @@ class TestMorphology():
     def test_close_disk(self):
         self.morph_worker(lena, "disk-close-matlab-output.npz",
                           greyscale_close, disk)
+
+
+class TestEccentricStructuringElements():
+
+    def setUp(self):
+        self.black_pixel = 255 * np.ones((4, 4), dtype=np.uint8)
+        self.black_pixel[1, 1] = 0
+        self.white_pixel = 255 - self.black_pixel
+        self.selems = [square(2), rectangle(2, 2),
+                       rectangle(2, 1), rectangle(1, 2)]
+
+    def test_dilate_erode_symmetry(self):
+        for s in self.selems:
+            c = greyscale_erode(self.black_pixel, s)
+            d = greyscale_dilate(self.white_pixel, s)
+            assert np.all(c == (255 - d))
+
+    def test_open_black_pixel(self):
+        for s in self.selems:
+            grey_open = greyscale_open(self.black_pixel, s)
+            assert np.all(grey_open == self.black_pixel)
+
+    def test_close_white_pixel(self):
+        for s in self.selems:
+            grey_close = greyscale_close(self.white_pixel, s)
+            assert np.all(grey_close == self.white_pixel)
+
+    def test_open_white_pixel(self):
+        for s in self.selems:
+            assert np.all(greyscale_open(self.white_pixel, s) == 0)
+
+    def test_close_black_pixel(self):
+        for s in self.selems:
+            assert np.all(greyscale_close(self.black_pixel, s) == 255)
+
+    def test_white_tophat_white_pixel(self):
+        for s in self.selems:
+            tophat = greyscale_white_top_hat(self.white_pixel, s)
+            assert np.all(tophat == self.white_pixel)
+
+    def test_black_tophat_black_pixel(self):
+        for s in self.selems:
+            tophat = greyscale_black_top_hat(self.black_pixel, s)
+            assert np.all(tophat == (255 - self.black_pixel))
+
+    def test_white_tophat_black_pixel(self):
+        for s in self.selems:
+            tophat = greyscale_white_top_hat(self.black_pixel, s)
+            assert np.all(tophat == 0)
+
+    def test_black_tophat_white_pixel(self):
+        for s in self.selems:
+            tophat = greyscale_black_top_hat(self.white_pixel, s)
+            assert np.all(tophat == 0)
+
