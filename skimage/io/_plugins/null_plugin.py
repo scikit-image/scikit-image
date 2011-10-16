@@ -5,7 +5,7 @@ import warnings
 message = '''\
 No plugin has been loaded.  Please refer to
 
-scikits.image.io.plugins()
+skimage.io.plugins()
 
 for a list of available plugins.'''
 

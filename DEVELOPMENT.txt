@@ -2,7 +2,7 @@ Development process
 -------------------
 
 :doc:`Read this overview <gitwash/index>` of how to use Git with
-``scikits.image``.  Here's the long and short of it:
+``skimage``.  Here's the long and short of it:
 
  * Go to `https://github.com/scikits-image/scikits.image
    <http://github.com/scikits-image/scikits.image>`_ and follow the
@@ -52,13 +52,13 @@ i.e. statement coverage should be at 100%.
 
   $ make coverage
 
-This will print a report with one line for each file in `scikits.image`,
+This will print a report with one line for each file in `skimage`,
 detailing the test coverage::
 
   Name                                             Stmts   Exec  Cover   Missing
   ------------------------------------------------------------------------------
-  scikits/image/color/colorconv                       77     77   100%
-  scikits/image/filter/__init__                        1      1   100%
+  skimage/color/colorconv                             77     77   100%
+  skimage/filter/__init__                              1      1   100%
   ...
 
 Bugs

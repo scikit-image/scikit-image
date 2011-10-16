@@ -1,5 +1,5 @@
-How to make a new release of ``scikits.image``
-==============================================
+How to make a new release of ``skimage``
+========================================
 
 - Update the version number in setup.py and commit
 - Update the docs and api, push upstream using "make gh-pages"

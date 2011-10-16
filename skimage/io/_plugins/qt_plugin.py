@@ -62,7 +62,7 @@ class ImageLabel(QLabel):
 class ImageWindow(QMainWindow):
     def __init__(self, arr, mgr):
         QMainWindow.__init__(self)
-        self.setWindowTitle('scikits.image')
+        self.setWindowTitle('skimage')
         self.mgr = mgr
         self.main_widget = QWidget()
         self.layout = QtGui.QGridLayout(self.main_widget)

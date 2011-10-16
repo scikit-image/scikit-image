@@ -1,5 +1,5 @@
 ****************************
-scikits.image |version| docs
+skimage |version| docs
 ****************************
 
 This SciKit_ is an image processing toolbox for SciPy_.
@@ -16,15 +16,15 @@ Sections
 
    * - `Overview <overview.html>`_
 
-       Introduction to scikits.image.
+       Introduction to skimage.
 
      - `API Reference <api/api.html>`_ (`changes <api_changes.html>`_)
 
-       Documentation for the functions included in scikits.image.
+       Documentation for the functions included in skimage.
 
    * - `Installation Steps <install.html>`_
 
-       How to install scikits.image.
+       How to install skimage.
 
      - `User Guide <user_guide.html>`_
 

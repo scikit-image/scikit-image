@@ -48,7 +48,7 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'scikits.image'
+project = u'skimage'
 copyright = u'2011, scikits-image team'
 
 # The version info for the project you're documenting, acts as replacement for

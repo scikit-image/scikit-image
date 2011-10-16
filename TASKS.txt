@@ -1,6 +1,6 @@
  ..  role:: strike
 
-How to contribute to ``scikits.image``
+How to contribute to ``skimage``
 ======================================
 
 Developing Open Source is great fun!  Join us on the `scikits-image mailing
