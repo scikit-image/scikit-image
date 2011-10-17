@@ -3,7 +3,17 @@
 Skeletonize
 ===========
 
-An example of thinning a binary image using skeletonize.
+Skeletonization reduces binary objects to 1 pixel wide representations. This
+can be useful for feature extraction, and/or representing an object's topology.
+
+The algorithm works by making successive passes of the image. On each pass, 
+border pixels are identified and removed on the condition that they do not
+break the connectivity of the corresponding object. 
+
+This module provides an example of calling the routine and displaying the
+results. The input is a 2D ndarray, with either boolean or integer elements.
+In the case of boolean, 'True' indicates foreground, and for integer arrays,
+the foreground is 1's.  
 """
 from scikits.image.morphology import skeletonize
 from scikits.image.draw import draw
@@ -32,7 +42,7 @@ image[circle1] = 1
 image[circle2] = 0
 
 # perform skeletonization
-skeleton = skeletonize.skeletonize(image)
+skeleton = skeletonize(image)
 
 # display results
 plt.figure(figsize=(10,6))
