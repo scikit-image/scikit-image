@@ -1,4 +1,3 @@
-import unittest
 import numpy as np
 from scikits.image.morphology import skeletonize
 import numpy.testing
@@ -8,39 +7,39 @@ from scikits.image.io import imread
 from scikits.image import data_dir
 import os.path
 
-class TestSkeletonize(unittest.TestCase):
+class TestSkeletonize():
     def test_skeletonize_no_foreground(self):
         im = np.zeros((5,5))
-        result = skeletonize.skeletonize(im)
+        result = skeletonize(im)
         numpy.testing.assert_array_equal(result, np.zeros((5,5)))
     
     def test_skeletonize_wrong_dim1(self):
         im = np.zeros((5))
-        self.assertRaises(ValueError, skeletonize.skeletonize, im)    
+        numpy.testing.assert_raises(ValueError, skeletonize, im)    
 
     def test_skeletonize_wrong_dim2(self):
         im = np.zeros((5, 5, 5))
-        self.assertRaises(ValueError, skeletonize.skeletonize, im)    
+        numpy.testing.assert_raises(ValueError, skeletonize, im)    
 
     def test_skeletonize_not_binary(self):
         im = np.zeros((5, 5))
         im[0, 0] = 1
         im[0, 1] = 2
-        self.assertRaises(ValueError, skeletonize.skeletonize, im)  
+        numpy.testing.assert_raises(ValueError, skeletonize, im)  
         
     def test_skeletonize_unexpected_value(self):
         im = np.zeros((5, 5))
         im[0, 0] = 2
-        self.assertRaises(ValueError, skeletonize.skeletonize, im)          
+        numpy.testing.assert_raises(ValueError, skeletonize, im)          
         
     def test_skeletonize_all_foreground(self):
         im = np.ones((3,4))
-        result = skeletonize.skeletonize(im)
+        result = skeletonize(im)
     
     def test_skeletonize_single_point(self):
         im = np.zeros((5, 5), np.uint8)
         im[3, 3] = 1
-        result = skeletonize.skeletonize(im)
+        result = skeletonize(im)
         numpy.testing.assert_array_equal(result, im)
     
     def test_skeletonize_already_thinned(self):
@@ -48,7 +47,7 @@ class TestSkeletonize(unittest.TestCase):
         im[3,1:-1] = 1
         im[2, -1] = 1
         im[4, 0] = 1
-        result = skeletonize.skeletonize(im)
+        result = skeletonize(im)
         numpy.testing.assert_array_equal(result, im)
     
     def test_skeletonize_output(self):
@@ -56,7 +55,7 @@ class TestSkeletonize(unittest.TestCase):
         
         # make black the foreground
         im = (im==0)
-        result = skeletonize.skeletonize(im)
+        result = skeletonize(im)
         
         expected = np.load(os.path.join(data_dir, "bw_text_skeleton.npy"))
         numpy.testing.assert_array_equal(result, expected)
@@ -83,15 +82,14 @@ class TestSkeletonize(unittest.TestCase):
         circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
         image[circle1] = 1
         image[circle2] = 0
-        result = skeletonize.skeletonize(image)
+        result = skeletonize(image)
         
-        # there should never be a 2x2 block of foreground pixels
-        #  in a skeleton
+        # there should never be a 2x2 block of foreground pixels in a skeleton
         mask = np.array([[1,  1],
                          [1,  1]], np.uint8)        
         blocks = correlate(result, mask, mode='constant')
-        self.assertFalse(numpy.any(blocks == 4))
+        assert not numpy.any(blocks == 4)
         
 
 if __name__ == '__main__':
-    unittest.main()
+    np.testing.run_module_suite()
