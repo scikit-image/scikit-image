@@ -7,14 +7,15 @@ The following plug-ins are available:
 from _plugins import use as use_plugin
 from _plugins import available as plugins
 from _plugins import info as plugin_info
-
 available_plugins = plugins()
 
-for preferred_plugin in \
-        ['pil', 'matplotlib', 'gtk', 'freeimage', 'qt', 'null']:
+for preferred_plugin in ['pil', 'matplotlib', 'qt', 'null']:
     if preferred_plugin in available_plugins:
-        use_plugin(preferred_plugin)
-        break
+        try:
+            use_plugin(preferred_plugin)
+            break
+        except ImportError:
+            pass
 
 from sift import *
 from collection import *
