@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# scikits.image documentation build configuration file, created by
+# skimage documentation build configuration file, created by
 # sphinx-quickstart on Sat Aug 22 13:00:30 2009.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'skimage'
-copyright = u'2011, scikits-image team'
+copyright = u'2011, the Image Scikit team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -122,7 +122,7 @@ html_theme_path = ['themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = 'scikits.image v%s docs' % version
+html_title = 'skimage v%s docs' % version
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
@@ -197,7 +197,7 @@ htmlhelp_basename = 'scikitsimagedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikitsimage.tex', u'scikits.image Documentation',
+  ('contents', 'scikitsimage.tex', u'The Image Scikit Documentation',
    u'SciPy Developers', 'manual'),
 ]
 

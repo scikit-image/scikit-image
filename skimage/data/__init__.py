@@ -18,7 +18,7 @@ def load(f):
     Returns
     -------
     img : ndarray
-        Image loaded from scikits.image.data_dir.
+        Image loaded from skimage.data_dir.
     """
     return imread(_os.path.join(data_dir, f))
 
