@@ -1,15 +1,15 @@
  ..  role:: strike
 
-How to contribute to ``scikits.image``
+How to contribute to ``skimage``
 ======================================
 
-Developing Open Source is great fun!  Join us on the `scikits-image mailing
+Developing Open Source is great fun!  Join us on the `skimage mailing
 list <http://groups.google.com/group/scikits-image>`_ and tell us which of the
 following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
 * The technical detail of the `development process`_ is given below.
-* :doc:`How to use GitHub <gitwash/index>` when developing scikits.image
+* :doc:`How to use GitHub <gitwash/index>` when developing skimage
 
 .. contents::
    :local:

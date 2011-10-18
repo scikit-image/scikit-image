@@ -3,7 +3,7 @@ Code used to trace Scipy logo.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import scikits.image.io as imgio
+import skimage.io as imgio
 from scipy.misc import lena
 import matplotlib.nxutils as nx
 

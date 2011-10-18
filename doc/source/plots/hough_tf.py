@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scikits.image.transform import hough
+from skimage.transform import hough
 
 img = np.zeros((100, 150), dtype=bool)
 img[30, :] = 1

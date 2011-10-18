@@ -13,7 +13,7 @@ Previously functions and classes were found by parsing the text of .py files.
 Extension modules should be discovered and included as well.
 
 This is a modified version of a script originally shipped with the PyMVPA
-project, then adapted for use first in NIPY and then in scikits.image. PyMVPA
+project, then adapted for use first in NIPY and then in skimage. PyMVPA
 is an MIT-licensed project.
 """
 
