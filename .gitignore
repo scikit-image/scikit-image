@@ -11,6 +11,6 @@ doc/build
 source/api
 build
 dist
-scikits/image/version.py
+skimage/version.py
 *.swp
 .coverage
