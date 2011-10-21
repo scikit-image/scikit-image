@@ -1,58 +1,78 @@
-"""skeletonize.py - Use an iterative thinning algorithm to find the
-                    skeletons of binary objects in an image.
+"""Use an iterative thinning algorithm to find the skeletons of binary 
+objects in an image.
+
 """
 
 import numpy as np
 from scipy.ndimage import correlate
-from .. import util
 
 def skeletonize(image):
-    """
-    Return a single pixel wide skeleton of all connected components 
-    in a binary image. 
+    """Return the skeleton of a binary image.
+    
+    Thinning is used to reduce each connected component in a binary image
+    to a single-pixel wide skeleton. 
      
-    The algorithm works by making successive passes of the image, 
+    Parameters
+    ----------
+    image : numpy.ndarray 
+        A binary image containing the objects to be skeletonized. '1' 
+        represents foreground, and '0' represents background. It 
+        also accepts arrays of boolean values where True is foreground.
+    
+    Returns
+    -------
+    skeleton : ndarray
+        A matrix containing the thinned image.
+    
+    Notes
+    -----
+    The algorithm [1] works by making successive passes of the image, 
     removing pixels on object borders. This continues until no
     more pixels can be removed.  The image is correlated with a
     mask that assigns each pixel a number in the range [0...255]
     corresponding to each possible pattern of its 8 neighbouring
     pixels. A look up table is then used to assign the pixels a
     value of 0, 1, 2 or 3, which are selectively removed during
-    the iterations. 
-
-    Parameters
-    ----------
+    the iterations.
     
-    image: ndarray (2D)
-        A binary image containing the objects to be skeletonized. '1' 
-         represents foreground, and '0' represents background. It 
-         also accepts arrays of boolean values where True is foreground.
-    
-    Notes
-    -----
-    
-    This implementation gives different results than a medial 
-    axis transformation, which can be can be implemented using  
-    morphological operations. This implementation is generally much
-    faster.
-    
-    Returns 
-    -------
-    
-    out: ndarray
-        A matrix containing the thinned image
+    Note that this algorithm will give different results than a 
+    medial axis transform, which is also often referred to as
+    "skeletonization".   
    
     References
     ----------
-    A fast parallel algorithm for thinning digital patterns, 
-    T. Y. ZHANG and C. Y. SUEN, Communications of the ACM,
-    March 1984, Volume 27, Number 3
+    .. [1] A fast parallel algorithm for thinning digital patterns, 
+       T. Y. ZHANG and C. Y. SUEN, Communications of the ACM,
+       March 1984, Volume 27, Number 3
 
     
     Examples
     --------
+    >>> X, Y = np.ogrid[0:9, 0:9]
+    >>> ellipse = (1./3 * (X - 4)**2 + (Y - 4)**2 < 3**2).astype(np.uint8)
+    >>> ellipse
+    array([[0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
+    >>> skel = skeletonize(ellipse)
+    >>> skel
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+           
     """
-    
     # look up table - there is one entry for each of the 2^8=256 possible
     # combinations of 8 binary neighbours. 1's, 2's and 3's are candidates
     # for removal at each iteration of the algorithm.
@@ -90,7 +110,7 @@ def skeletonize(image):
         neighbours = correlate(skeleton, mask, mode='constant')
         
         # ignore background
-        neighbours[skeleton == 0] = 0
+        neighbours *= skeleton
         
         # use LUT to categorize each foreground pixel as a 0, 1, 2 or 3
         codes = np.take(lut, neighbours)
