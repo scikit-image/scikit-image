@@ -78,3 +78,6 @@
 - Christoph Gohlke
   Windows packaging and Python 3 compatibility.
 
+- Neil Yager
+  Skeletonization.
+  
