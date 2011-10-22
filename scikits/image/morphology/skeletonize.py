@@ -127,7 +127,7 @@ def skeletonize(image):
 
         # pass 2 - remove the 2's and 3's
         neighbours = correlate(skeleton, mask, mode='constant')
-        neighbours[skeleton == 0] = 0
+        neighbours *= skeleton
         codes = np.take(lut, neighbours)
         code_mask = (codes == 2)
         if np.any(code_mask): 
