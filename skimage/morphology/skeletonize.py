@@ -1,14 +1,11 @@
-"""Use an iterative thinning algorithm to find the skeletons of binary 
-objects in an image.
-
+"""
+Algorithms for computing the skeleton of a binary image
 """
 
 import numpy as np
 from scipy import ndimage
 
 from _cpmorphology2 import skeletonize_loop, table_lookup_index
-from _cpmorphology2 import extract_from_image_lookup, \
-            prepare_for_index_lookup, index_lookup
 
 # --------- Skeletonization by morphological thinning ---------
 
@@ -168,7 +165,7 @@ def medial_axis(image, mask=None, return_distance=False):
         If a mask is given, only those elements with a true value in `mask`
         are used for computing the medial axis.
 
-    return_distance; bool, optional
+    return_distance: bool, optional
         If true, the distance transform is returned as well as the skeleton.
 
     Returns
@@ -188,11 +185,24 @@ def medial_axis(image, mask=None, return_distance=False):
     Notes
     -----
     This algorithm computes the medial axis transform of an image
-    as the ridges of its distance transform. First, the distance transform
-    is computed, then the foreground (value of 1) points are ordered by
-    the distance transform. In order to reduce the image to its skeleton, 
-    a point is removed if it has more than one neighbor and if removing it
-    does not change the Euler number (the connectivity).
+    as the ridges of its distance transform. 
+    
+    The different steps of the algorithm are as follows
+     * A lookup table is used, that assigns 0 or 1 to each configuration of 
+       the 3x3 binary square, whether the central pixel should be removed
+       or kept. We want a point to be removed if it has more than one neighbor
+       and if removing it does not change the number of connected components.
+
+     * The distance transform to the background is computed, as well as
+       the cornerness of the pixel.
+
+     * The foreground (value of 1) points are ordered by
+       the distance transform, then the cornerness. 
+       
+     * A cython function is called to reduce the image to its skeleton. It 
+       processes pixels in the order determined at the previous step, and 
+       removes or not a pixel according to the lookup table. Because of the
+       ordering, it is possible to process all pixels in only one pass.
 
     Examples
     --------
@@ -223,48 +233,60 @@ def medial_axis(image, mask=None, return_distance=False):
         masked_image = image.astype(bool).copy()
         masked_image[~mask] = False
     #
-    # Lookup table - start with only positive pixels.
-    # Keep if # pixels in neighborhood is 2 or less
-    # Keep if removing the pixel results in a different connectivity
-    # table is independent of image
-    table = (_make_table(True, 
-                        np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], bool),
-                        np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], bool)) &
+    # Build lookup table - three conditions 
+    # 1. Keep only positive pixels (center_is_foreground array).
+    # AND
+    # 2. Keep if removing the pixel results in a different connectivity
+    # (if the number of connected components is different with and
+    # without the central pixel)
+    # OR
+    # 3. Keep if # pixels in neighbourhood is 2 or less
+    # Note that table is independent of image
+    center_is_foreground = (np.arange(512) & 2**4).astype(bool)
+    table = (center_is_foreground & 
             (np.array([ndimage.label(_pattern_of(index), eight_connect)[1] !=
                         ndimage.label(_pattern_of(index & ~ 2**4),
                                     eight_connect)[1]
                         for index in range(512)]) |
         np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)])))
+    
+    # Build distance transform
     distance = ndimage.distance_transform_edt(masked_image)
     if return_distance:
         store_distance = distance.copy()
-    #
-        # The processing order along the edge is critical to the shape of the
+    
+    # Corners
+    # The processing order along the edge is critical to the shape of the
     # resulting skeleton: if you process a corner first, that corner will
     # be eroded and the skeleton will miss the arm from that corner. Pixels
     # with fewer neighbors are more "cornery" and should be processed last.
-    #
+    # We use a cornerness_table lookup table where the score of a 
+    # configuration is the number of background (0-value) pixels in the
+    # 3x3 neighbourhood
     cornerness_table = np.array([9 - np.sum(_pattern_of(index))
                                  for index in range(512)])
-    corner_score = _table_lookup(masked_image, cornerness_table, False, 1)
+    corner_score = _table_lookup(masked_image, cornerness_table)
+    
+    # Define arrays for inner loop
     i, j = np.mgrid[0:image.shape[0], 0:image.shape[1]]
     result = masked_image.copy()
     distance = distance[result]
     i = np.ascontiguousarray(i[result], np.int32)
     j = np.ascontiguousarray(j[result], np.int32)
     result = np.ascontiguousarray(result, np.uint8)
-    #
+    
+    # Determine the order in which pixels are processed.
     # We use a random # for tiebreaking. Assign each pixel in the image a
     # predictable, random # so that masking doesn't affect arbitrary choices
     # of skeletons
     #
-    # Why fix the seed? Should we pass a random number generator instead?
-    np.random.seed(0)
-    tiebreaker = np.random.permutation(np.arange(masked_image.sum()))
+    generator = np.random.RandomState(0)
+    tiebreaker = generator.permutation(np.arange(masked_image.sum()))
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],
                         distance))
     order = np.ascontiguousarray(order, np.int32)
+
     table = np.ascontiguousarray(table, np.uint8)
     # Remove pixels not belonging to the medial axis
     skeletonize_loop(result, i, j, order, table)
@@ -282,12 +304,12 @@ def _pattern_of(index):
     Return the pattern represented by an index value
     Byte decomposition of index
     """
-    return np.array([[index & 2**0,index & 2**1,index & 2**2],
-                     [index & 2**3,index & 2**4,index & 2**5],
-                     [index & 2**6,index & 2**7,index & 2**8]], bool)
+    return np.array([[index & 2**0, index & 2**1, index & 2**2],
+                     [index & 2**3, index & 2**4, index & 2**5],
+                     [index & 2**6, index & 2**7, index & 2**8]], bool)
 
 
-def _table_lookup(image, table, border_value, iterations = None):
+def _table_lookup(image, table):
     """
     Perform a morphological transform on an image, directed by its 
     neighbors
@@ -316,85 +338,27 @@ def _table_lookup(image, table, border_value, iterations = None):
     that evaluate to true. 
     """
     #
-    # Test for a table that never transforms a zero into a one:
+    # We accumulate into the indexer to get the index into the table
+    # at each point in the image
     #
-    center_is_zero = np.array([(x & 2**4) == 0 for x in range(2**9)])
-    use_index_trick = False
-    if (not np.any(table[center_is_zero]) and
-        (np.issubdtype(image.dtype, bool) or np.issubdtype(image.dtype, int))):
-        # Use the index trick
-        use_index_trick = True
-        invert = False
-    elif (np.all(table[~center_is_zero]) and np.issubdtype(image.dtype, bool)):
-        # All ones stay ones, invert the table and the image and do the trick
-        use_index_trick = True
-        invert = True
-        image = ~ image
-        # table index 0 -> 511 and the output is reversed
-        table = ~ table[511-np.arange(512)]
-        border_value = not border_value
-    if use_index_trick:
-        orig_image = image
-        index_i, index_j, image = prepare_for_index_lookup(image, border_value)
-        index_i, index_j = index_lookup(index_i, index_j,
-                                        image, table, iterations)
-        image = extract_from_image_lookup(orig_image, index_i, index_j)
-        if invert:
-            image = ~ image
-        return image
-    print(use_index_trick)
-    counter = 0
-    while counter != iterations:
-        counter += 1
-        #
-        # We accumulate into the indexer to get the index into the table
-        # at each point in the image
-        #
-        if image.shape[0] < 3 or image.shape[1] < 3:
-            image = image.astype(bool)
-            indexer = np.zeros(image.shape,int)
-            indexer[1:, 1:]   += image[:-1, :-1] * 2**0
-            indexer[1:, :]    += image[:-1, :] * 2**1
-            indexer[1:, :-1]  += image[:-1, 1:] * 2**2
-            
-            indexer[:, 1:]    += image[:, :-1] * 2**3
-            indexer[:, :]     += image[:, :] * 2**4
-            indexer[:, :-1]   += image[:, 1:] * 2**5
+    if image.shape[0] < 3 or image.shape[1] < 3:
+        image = image.astype(bool)
+        indexer = np.zeros(image.shape,int)
+        indexer[1:, 1:]   += image[:-1, :-1] * 2**0
+        indexer[1:, :]    += image[:-1, :] * 2**1
+        indexer[1:, :-1]  += image[:-1, 1:] * 2**2
         
-            indexer[:-1, 1:]  += image[1:, :-1] * 2**6
-            indexer[:-1, :]   += image[1:, :] * 2**7
-            indexer[:-1, :-1] += image[1:, 1:] * 2**8
-        else:
-            indexer = table_lookup_index(np.ascontiguousarray(image, np.uint8))
-        if border_value:
-            indexer[0,:]   |= 2**0 + 2**1 + 2**2
-            indexer[-1,:]  |= 2**6 + 2**7 + 2**8
-            indexer[:,0]   |= 2**0 + 2**3 + 2**6
-            indexer[:,-1]  |= 2**2 + 2**5 + 2**8
-        new_image = table[indexer]
-        if np.all(new_image == image):
-            break
-        image = new_image
+        indexer[:, 1:]    += image[:, :-1] * 2**3
+        indexer[:, :]     += image[:, :] * 2**4
+        indexer[:, :-1]   += image[:, 1:] * 2**5
+    
+        indexer[:-1, 1:]  += image[1:, :-1] * 2**6
+        indexer[:-1, :]   += image[1:, :] * 2**7
+        indexer[:-1, :-1] += image[1:, 1:] * 2**8
+    else:
+        indexer = table_lookup_index(np.ascontiguousarray(image, np.uint8))
+    image = table[indexer]
     return image
 
-def _make_table(value, pattern, care=np.ones((3,3),bool)):
-    '''Return a table suitable for table_lookup
-    
-    value - set all table entries matching "pattern" to "value", all others
-            to not "value"
-    pattern - a 3x3 boolean array with the pattern to match
-    care    - a 3x3 boolean array where each value is true if the pattern
-              must match at that position and false if we don't care if
-              the pattern matches at that position.
-    '''
-    def fn(index, p, i, j):
-        '''Return true if bit position "p" in index matches pattern'''
-        return ((((index & 2**p) > 0) == pattern[i, j]) or not care[i, j])
-    return np.array([value     
-                     if (fn(i, 0, 0, 0) and fn(i, 1, 0, 1) and fn(i, 2, 0, 2) 
-                     and fn(i, 3, 1, 0) and fn(i, 4, 1, 1) and fn(i, 5, 1, 2) 
-                     and fn(i, 6, 2, 0) and fn(i, 7, 2, 1) and fn(i, 8, 2, 2))
-                     else not value
-                     for i in range(512)], bool)
 
 
