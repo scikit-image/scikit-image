@@ -121,6 +121,8 @@ class TestMedialAxis():
                              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]], bool)
         result = medial_axis(image)
         assert np.all(result == expected)
+        result, distance = medial_axis(image, return_distance=True)
+        assert distance.max() == 4
 
     def test_01_02_hole(self):
         '''Test skeletonize on a rectangle with a hole in the middle'''
@@ -138,6 +140,13 @@ class TestMedialAxis():
                              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],bool)
         result = medial_axis(image)
         assert np.all(result == expected)
+
+    def test_narrow_image(self):
+        """Test skeletonize on a 1-pixel thin strip"""
+        image = np.zeros((1, 5), bool)
+        image[:, 1:-1] = True
+        result = medial_axis(image)
+        assert np.all(result == image)
 
 
 if __name__ == '__main__':
