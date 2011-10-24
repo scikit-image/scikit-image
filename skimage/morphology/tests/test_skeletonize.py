@@ -1,10 +1,10 @@
 import numpy as np
-from scikits.image.morphology import skeletonize
+from skimage.morphology import skeletonize
 import numpy.testing
-from scikits.image.draw import draw
+from skimage.draw import draw
 from scipy.ndimage import correlate
-from scikits.image.io import imread
-from scikits.image import data_dir
+from skimage.io import imread
+from skimage import data_dir
 import os.path
 
 class TestSkeletonize():
