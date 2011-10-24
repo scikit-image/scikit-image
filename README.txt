@@ -3,7 +3,7 @@ Image Processing SciKit
 
 Source
 ------
-https://github.com/scikits-image/scikits.image
+https://github.com/scikits-image/scikits-image
 
 Mailing List
 ------------
