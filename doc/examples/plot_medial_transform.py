@@ -15,7 +15,7 @@ argument ``return_distance=True``), it is possible to compute the distance to
 the background for all points of the medial axis with this function. This gives
 an estimate of the local width of the objects.
 
-For a skeleton with less branches, there exists another skeletonization 
+For a skeleton with fewer branches, there exists another skeletonization 
 algorithm in ``skimage``: ``skimage.morphology.skeletonize``, that computes
 a skeleton by iterative morphological thinnings.
 """

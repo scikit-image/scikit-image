@@ -14,21 +14,9 @@ import numpy as np
 cimport numpy as np
 cimport cython
 
-cdef extern from "Python.h":
-    ctypedef int Py_intptr_t
-
-cdef extern from "numpy/arrayobject.h":
-    ctypedef class numpy.ndarray [object PyArrayObject]:
-        cdef char *data
-        cdef Py_intptr_t *dimensions
-        cdef Py_intptr_t *strides
-    cdef void import_array()
-    cdef int  PyArray_ITEMSIZE(np.ndarray)
-
-import_array()
 
 @cython.boundscheck(False)
-def skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2, 
+def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2, 
                                 negative_indices=False, mode='c'] result,
                      np.ndarray[dtype=np.int32_t, ndim=1,
                                 negative_indices=False, mode='c'] i,
@@ -44,15 +32,18 @@ def skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
     Parameters
     ----------
 
-    result: ndarray of uint8
+    result : ndarray of uint8
         On input, the image to be skeletonized, on output the skeletonized
         image.
-    i, j: ndarrays
+
+    i, j : ndarrays
         The coordinates of each foreground pixel in the image
-    order: ndarray
+   
+   order : ndarray
         The index of each pixel, in the order of processing (order[0] is
         the first pixel to process, etc.)
-    table: ndarray
+   
+   table : ndarray
         The 512-element lookup table of values after transformation 
         (whether to keep or not each configuration in a binary 3x3 array)
 
@@ -103,21 +94,24 @@ def skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
             result[ii, jj] = table[accumulator]
 
 @cython.boundscheck(False)
-def table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
+def _table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
                                   negative_indices=False, mode='c'] image):
     """
     Return an index into a table per pixel of a binary image
 
     Take the sum of true neighborhood pixel values where the neighborhood
-    looks like this:
+    looks like this::
+
      1   2   4
      8  16  32
     64 128 256
 
-    This code could be replaced by a convolution with the kernel:
+    This code could be replaced by a convolution with the kernel::
+
     256 128 64
      32  16  8
       4   2  1
+    
     but this runs about twice as fast because of inlining and the
     hardwired kernel.
     """
