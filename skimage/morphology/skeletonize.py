@@ -5,7 +5,7 @@ Algorithms for computing the skeleton of a binary image
 import numpy as np
 from scipy import ndimage
 
-from _cpmorphology2 import skeletonize_loop, table_lookup_index
+from _skeletonize import _skeletonize_loop, _table_lookup_index
 
 # --------- Skeletonization by morphological thinning ---------
 
@@ -149,7 +149,7 @@ def skeletonize(image):
 
 # --------- Skeletonization by medial axis transform --------
 
-eight_connect = ndimage.generate_binary_structure(2, 2)
+_eight_connect = ndimage.generate_binary_structure(2, 2)
 
 
 def medial_axis(image, mask=None, return_distance=False):
@@ -159,22 +159,22 @@ def medial_axis(image, mask=None, return_distance=False):
     Parameters
     ----------
 
-    image: binary ndarray 
+    image : binary ndarray 
     
-    mask: binary ndarray, optional
+    mask : binary ndarray, optional
         If a mask is given, only those elements with a true value in `mask`
         are used for computing the medial axis.
 
-    return_distance: bool, optional
+    return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
 
     Returns
     -------
 
-    out: ndarray of bools
+    out : ndarray of bools
         Medial axis transform of the image
 
-    dist: ndarray of ints
+    dist : ndarray of ints
         Distance transform of the image (only returned if `return_distance`
         is True)
    
@@ -201,8 +201,9 @@ def medial_axis(image, mask=None, return_distance=False):
        
      * A cython function is called to reduce the image to its skeleton. It 
        processes pixels in the order determined at the previous step, and 
-       removes or not a pixel according to the lookup table. Because of the
-       ordering, it is possible to process all pixels in only one pass.
+       removes or maintains a pixel according to the lookup table. Because 
+       of the ordering, it is possible to process all pixels in only one 
+       pass.
 
     Examples
     --------
@@ -226,7 +227,7 @@ def medial_axis(image, mask=None, return_distance=False):
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
-    global eight_connect
+    global _eight_connect
     if mask is None:
         masked_image = image.astype(np.bool)
     else:
@@ -243,12 +244,17 @@ def medial_axis(image, mask=None, return_distance=False):
     # 3. Keep if # pixels in neighbourhood is 2 or less
     # Note that table is independent of image
     center_is_foreground = (np.arange(512) & 2**4).astype(bool)
-    table = (center_is_foreground & 
-            (np.array([ndimage.label(_pattern_of(index), eight_connect)[1] !=
+    table = (center_is_foreground  # condition 1.
+                &
+            (np.array([ndimage.label(_pattern_of(index), _eight_connect)[1] !=
                         ndimage.label(_pattern_of(index & ~ 2**4),
-                                    eight_connect)[1]
-                        for index in range(512)]) |
-        np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)])))
+                                    _eight_connect)[1]
+                        for index in range(512)]) # condition 2 
+                | 
+        np.array([np.sum(_pattern_of(index)) < 3 for index in range(512)]))
+        # condition 3
+            )
+        
     
     # Build distance transform
     distance = ndimage.distance_transform_edt(masked_image)
@@ -289,7 +295,7 @@ def medial_axis(image, mask=None, return_distance=False):
 
     table = np.ascontiguousarray(table, np.uint8)
     # Remove pixels not belonging to the medial axis
-    skeletonize_loop(result, i, j, order, table)
+    _skeletonize_loop(result, i, j, order, table)
 
     result = result.astype(bool)
     if not mask is None:
@@ -316,20 +322,22 @@ def _table_lookup(image, table):
     
     Parameters
     ----------
-    image - a binary image
-    table - a 512-element table giving the transform of each pixel given
-            the values of that pixel and its 8-connected neighbors.
-    border_value - the value of pixels beyond the border of the image.
-                   This should test as True or False.
+    image : ndarray
+        A binary image
+    table : ndarray
+        A 512-element table giving the transform of each pixel given
+        the values of that pixel and its 8-connected neighbors.
+    border_value : bool
+        The value of pixels beyond the border of the image.
     
     Returns
     -------
-    result: ndarray of same shape as `image`
+    result : ndarray of same shape as `image`
         Transformed image
 
     Notes
     -----
-    The pixels are numbered like this:
+    The pixels are numbered like this::
     
     0 1 2
     3 4 5
@@ -343,7 +351,7 @@ def _table_lookup(image, table):
     #
     if image.shape[0] < 3 or image.shape[1] < 3:
         image = image.astype(bool)
-        indexer = np.zeros(image.shape,int)
+        indexer = np.zeros(image.shape, int)
         indexer[1:, 1:]   += image[:-1, :-1] * 2**0
         indexer[1:, :]    += image[:-1, :] * 2**1
         indexer[1:, :-1]  += image[:-1, 1:] * 2**2
@@ -356,7 +364,7 @@ def _table_lookup(image, table):
         indexer[:-1, :]   += image[1:, :] * 2**7
         indexer[:-1, :-1] += image[1:, 1:] * 2**8
     else:
-        indexer = table_lookup_index(np.ascontiguousarray(image, np.uint8))
+        indexer = _table_lookup_index(np.ascontiguousarray(image, np.uint8))
     image = table[indexer]
     return image
 
