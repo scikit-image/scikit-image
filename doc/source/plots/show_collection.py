@@ -3,8 +3,8 @@ import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid import AxesGrid
 
-from scikits.image.io import MultiImage
-from scikits.image import data_dir
+from skimage.io import MultiImage
+from skimage import data_dir
 
 # Load the multi-layer image
 fname = os.path.join(data_dir, 'multipage.tif')

@@ -20,9 +20,9 @@ input image based on the resulting sinogram.
 
 import matplotlib.pyplot as plt
 
-from scikits.image.io import imread
-from scikits.image import data_dir
-from scikits.image.transform import radon, iradon
+from skimage.io import imread
+from skimage import data_dir
+from skimage.transform import radon, iradon
 from scipy.ndimage import zoom
 
 image = imread(data_dir + "/phantom.png", as_grey=True)

@@ -25,7 +25,7 @@
 
 - Tony Yu
   Reading of paletted images; build, bug and doc fixes.
-  Code to generate scikits-image logo.
+  Code to generate skimage logo.
 
 - Zachary Pincus
   Tracing of low cost paths, FreeImage I/O plugin
@@ -80,4 +80,7 @@
 
 - Neil Yager
   Skeletonization.
-  
+
+- Nelle Varoquaux
+  Renaming of the package to ``skimage``.
+
