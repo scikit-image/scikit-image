@@ -19,8 +19,8 @@ the tradeoff between denoising and faithfulness to the original image.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from scikits.image import data, color, img_as_ubyte
-from scikits.image.filter import tv_denoise
+from skimage import data, color, img_as_ubyte
+from skimage.filter import tv_denoise
 
 l = img_as_ubyte(color.rgb2gray(data.lena()))
 l = l[230:290, 220:320]

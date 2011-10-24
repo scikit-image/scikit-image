@@ -27,7 +27,7 @@ more details on the algorithm.
 import numpy as np
 from scipy import ndimage
 import matplotlib.pyplot as plt
-from scikits.image.morphology import watershed, is_local_maximum
+from skimage.morphology import watershed, is_local_maximum
 
 # Generate an initial image with two overlapping circles
 x, y = np.indices((80, 80))

@@ -5,7 +5,7 @@ Image data types and what they mean
 
    This is a preliminary design document.
 
-In ``scikits.image``, we assume the following dtype ranges:
+In ``skimage``, we assume the following dtype ranges:
 
 =========== ================
 Data type   Range 

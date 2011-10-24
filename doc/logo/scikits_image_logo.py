@@ -1,5 +1,5 @@
 """
-Script to draw scikits.image logo using Scipy logo as stencil. The easiest
+Script to draw skimage logo using Scipy logo as stencil. The easiest
 starting point is the `plot_colorized_logo`; the "if-main" demonstrates its use.
 
 Original snake image from pixabay [1]_
@@ -10,8 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.misc
 
-import scikits.image.io as sio
-import scikits.image.filter as imfilt
+import skimage.io as sio
+import skimage.filter as imfilt
 
 import scipy_logo
 
