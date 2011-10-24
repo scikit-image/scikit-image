@@ -22,7 +22,7 @@ a skeleton by iterative morphological thinnings.
 
 import numpy as np
 from scipy import ndimage
-from scikits.image.morphology import medial_axis
+from skimage.morphology import medial_axis
 import matplotlib.pyplot as plt
 
 
