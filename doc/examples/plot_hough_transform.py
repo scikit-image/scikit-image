@@ -59,9 +59,9 @@ References
 
 '''
 
-from scikits.image.transform import hough, probabilistic_hough
-from scikits.image.filter import canny
-from scikits.image import data
+from skimage.transform import hough, probabilistic_hough
+from skimage.filter import canny
+from skimage import data
 
 import numpy as np
 import matplotlib.pyplot as plt

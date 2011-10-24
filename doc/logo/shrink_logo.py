@@ -1,4 +1,4 @@
-from scikits.image import io, transform
+from skimage import io, transform
 
 s = 0.7
 

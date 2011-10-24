@@ -3,8 +3,8 @@ include setup*.py
 include MANIFEST.in
 include *.txt
 include Makefile
-recursive-include scikits *.pyx *.pxd *.pxi *.py *.c *.h *.ini
-recursive-include scikits/image/data *
+recursive-include skimage *.pyx *.pxd *.pxi *.py *.c *.h *.ini
+recursive-include skimage/data *
 
 include doc/Makefile
 recursive-include doc/source *.txt
