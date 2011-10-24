@@ -4,8 +4,8 @@ A plugin consists of two files, the source and the descriptor ``.ini``.  Let's
 say we'd like to provide a plugin for ``imshow`` using ``matplotlib``.  We'll
 call our plugin ``mpl``::
 
-  scikits/image/io/_plugins/mpl.py
-  scikits/image/io/_plugins/mpl.ini
+  skimage/io/_plugins/mpl.py
+  skimage/io/_plugins/mpl.ini
 
 The name of the ``.py`` and ``.ini`` files must correspond.  Inside the
 ``.ini`` file, we give the plugin meta-data::
@@ -45,10 +45,10 @@ provide it as follows::
       plt.show()
 
 Any plugin in the ``_plugins`` directory is automatically examined by
-``scikits.image.io`` upon import.  You may list all the plugins on your
+``skimage.io`` upon import.  You may list all the plugins on your
 system::
 
-  >>> import scikits.image.io as io
+  >>> import skimage.io as io
   >>> io.plugins()
   {'gtk': ['imshow'],
    'matplotlib': ['imshow', 'imsave'],
@@ -63,7 +63,7 @@ or only those already loaded::
 
 A plugin is loaded using the ``use_plugin`` command::
 
-  >>> import scikits.image.io as io
+  >>> import skimage.io as io
   >>> io.use_plugin('pil') # Use all capabilities provided by PIL
 
 or

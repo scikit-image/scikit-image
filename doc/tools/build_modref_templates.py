@@ -17,7 +17,7 @@ def abort(error):
     exit()
 
 if __name__ == '__main__':
-    package = 'scikits.image'
+    package = 'skimage'
 
     # Check that the 'image' package is available. If not, the API
     # documentation is not (re)generated and existing API documentation
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     try:
         __import__(package)
     except ImportError, e:
-        abort("Can not import scikits.image")
+        abort("Can not import skimage")
 
     module = sys.modules[package]
 
