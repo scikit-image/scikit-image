@@ -1,5 +1,4 @@
-'''_cpmorphology2.pyx - support routines for cpmorphology in Cython
-
+'''
 Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
 Website: http://www.cellprofiler.org
 
@@ -39,11 +38,11 @@ def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
     i, j : ndarrays
         The coordinates of each foreground pixel in the image
    
-   order : ndarray
+    order : ndarray
         The index of each pixel, in the order of processing (order[0] is
         the first pixel to process, etc.)
    
-   table : ndarray
+    table : ndarray
         The 512-element lookup table of values after transformation 
         (whether to keep or not each configuration in a binary 3x3 array)
 
@@ -102,15 +101,15 @@ def _table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
     Take the sum of true neighborhood pixel values where the neighborhood
     looks like this::
 
-     1   2   4
-     8  16  32
-    64 128 256
+       1   2   4
+       8  16  32
+      64 128 256
 
     This code could be replaced by a convolution with the kernel::
 
-    256 128 64
-     32  16  8
-      4   2  1
+      256 128 64
+       32  16  8
+        4   2  1
     
     but this runs about twice as fast because of inlining and the
     hardwired kernel.
@@ -182,37 +181,32 @@ def _table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
     for j in range(1, j_shape - 1):
         if image[0, j]:
             indexer[0, j - 1] += 32
-            indexer[0, j]   += 16
+            indexer[0, j] += 16
             indexer[0, j + 1] += 8
             indexer[1, j - 1] += 4
-            indexer[1, j]   += 2
+            indexer[1, j] += 2
             indexer[1, j + 1] += 1
         if image[i_shape - 1, j]:
             indexer[i_shape - 2, j - 1] += 256
-            indexer[i_shape - 2, j]   += 128
+            indexer[i_shape - 2, j] += 128
             indexer[i_shape - 2, j + 1] += 64
             indexer[i_shape - 1, j - 1] += 32
-            indexer[i_shape - 1, j]   += 16
+            indexer[i_shape - 1, j] += 16
             indexer[i_shape - 1, j + 1] += 8
 
     for i in range(1, i_shape - 1):
         if image[i, 0]:
             indexer[i - 1, 0] += 128
-            indexer[i, 0]   += 16
+            indexer[i, 0] += 16
             indexer[i + 1, 0] += 2
             indexer[i - 1, 1] += 64
-            indexer[i, 1]   += 8
+            indexer[i, 1] += 8
             indexer[i + 1, 1] += 1
         if image[i, j_shape - 1]:
             indexer[i - 1, j_shape - 2] += 256
-            indexer[i, j_shape - 2]   += 32
+            indexer[i, j_shape - 2] += 32
             indexer[i + 1, j_shape - 2] += 4
             indexer[i - 1, j_shape - 1] += 128
-            indexer[i, j_shape - 1]   += 16
+            indexer[i, j_shape - 1] += 16
             indexer[i + 1, j_shape - 1] += 2
     return indexer
-
-
-
-
-
