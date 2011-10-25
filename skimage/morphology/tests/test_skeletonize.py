@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.morphology import skeletonize
+from skimage.morphology import skeletonize, medial_axis
 import numpy.testing
 from skimage.draw import draw
 from scipy.ndimage import correlate
@@ -90,6 +90,64 @@ class TestSkeletonize():
         blocks = correlate(result, mask, mode='constant')
         assert not numpy.any(blocks == 4)
         
+class TestMedialAxis():
+    def test_00_00_zeros(self):
+        '''Test skeletonize on an array of all zeros'''
+        result = medial_axis(np.zeros((10, 10), bool))
+        assert np.all(result == False)
+
+    def test_00_01_zeros_masked(self):
+        '''Test skeletonize on an array that is completely masked'''
+        result = medial_axis(np.zeros((10, 10), bool),
+                                   np.zeros((10, 10), bool))
+        assert np.all(result == False)
+    
+    def test_01_01_rectangle(self):
+        '''Test skeletonize on a rectangle'''
+        image = np.zeros((9, 15), bool)
+        image[1:-1, 1:-1] = True
+        #
+        # The result should be four diagonals from the
+        # corners, meeting in a horizontal line
+        #
+        expected = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
+                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
+                             [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                             [0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],
+                             [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
+                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
+                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]], bool)
+        result = medial_axis(image)
+        assert np.all(result == expected)
+        result, distance = medial_axis(image, return_distance=True)
+        assert distance.max() == 4
+
+    def test_01_02_hole(self):
+        '''Test skeletonize on a rectangle with a hole in the middle'''
+        image = np.zeros((9, 15), bool)
+        image[1:-1, 1:-1] = True
+        image[4, 4:-4] = False
+        expected = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
+                             [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
+                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
+                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
+                             [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
+                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
+                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],bool)
+        result = medial_axis(image)
+        assert np.all(result == expected)
+
+    def test_narrow_image(self):
+        """Test skeletonize on a 1-pixel thin strip"""
+        image = np.zeros((1, 5), bool)
+        image[:, 1:-1] = True
+        result = medial_axis(image)
+        assert np.all(result == image)
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
