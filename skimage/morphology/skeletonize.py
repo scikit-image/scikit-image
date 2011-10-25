@@ -339,9 +339,10 @@ def _table_lookup(image, table):
     -----
     The pixels are numbered like this::
     
-    0 1 2
-    3 4 5
-    6 7 8
+      0 1 2
+      3 4 5
+      6 7 8
+
     The index at a pixel is the sum of 2**<pixel-number> for pixels
     that evaluate to true. 
     """
@@ -367,6 +368,4 @@ def _table_lookup(image, table):
         indexer = _table_lookup_index(np.ascontiguousarray(image, np.uint8))
     image = table[indexer]
     return image
-
-
 
