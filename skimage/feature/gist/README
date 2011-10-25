@@ -1,0 +1,78 @@
+
+
+What is this
+============
+
+This is a library and an exectuable that reimplement A. Torralba's
+GIST image descriptor in C. The original Matlab implementation is
+here:
+
+http://people.csail.mit.edu/torralba/code/spatialenvelope/
+
+How to compile
+==============
+
+The library depends on fftw3. It is available at: 
+
+http://www.fftw.org/
+
+or along with your Linux distribution. Versions 3.1.2 and 3.2.1 work.
+
+If it is installed in a non-standard location, set the WFFTINC and
+WFFTLIB accordingly in the Makefile.
+
+The code compiles on linux 32 and 64 bit with gcc 4.2.1. It has not
+been tested on other platforms.
+
+How to test
+===========
+
+The library comes with a mini-executable that computes the GIST
+descriptor of a PPM image. To test: 
+
+./compute_gist ar.ppm 
+
+Should display 960 float values that start with: 
+
+0.0579 0.1926 0.0933 0.0662 .... 
+
+and end with 
+
+.... 0.0563 0.0575 0.0640
+
+The code works on non-square images, but it is of little interest:
+descriptors computed on images of different sizes are not comparable.
+
+The library should compute the exact same descriptor as the Matlab
+version. Be careful that encoding a small image in JPEG (even with the
+maximum quality factor) changes the descriptor.
+
+Quizz: where does the ar.ppm test image come from? 
+
+Who made it
+===========
+
+The library was developed in 2009 in the Lear group at INRIA. It was
+used in
+
+@INPROCEEDINGS{JDSAS09,
+  author = {Matthijs Douze and Herve Jegou and Harsimrat Singh and Laurent Amsaleg
+	and Cordelia Schmid},
+  title = {Evaluation of GIST descriptors for web-scale image search},
+  booktitle = {civr},
+  year = {2009},
+}
+
+Licence: GPL
+
+Comments, complaints to: matthijs.douze@inria.fr
+
+History
+=======
+
+jan 2009: Reimplementation of GIST added to Lear's internal image
+processing library by Christophe Smekens.
+
+jul 2009: Standalone version packaged by Matthijs Douze
+
+

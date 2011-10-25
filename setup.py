@@ -21,7 +21,8 @@ VERSION             = '0.4dev'
 
 import os
 import setuptools
-from numpy.distutils.core import setup
+
+from distutils.core import setup, Extension
 try:
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:
@@ -99,4 +100,14 @@ if __name__ == "__main__":
             },
 
         cmdclass={'build_py': build_py},
+        ext_modules=[
+            Extension(
+                'skimage.feature._gist', [
+                    'skimage/feature/gist/standalone_image.c',
+                    'skimage/feature/gist/gist.c',
+                    ],
+                libraries=['m', 'fftw3f'],
+                extra_compile_args=['-DUSE_GIST', '-DSTANDALONE_GIST'],
+                ),
+            ],
         )
