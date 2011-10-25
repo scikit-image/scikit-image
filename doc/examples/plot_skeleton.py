@@ -15,8 +15,8 @@ results. The input is a 2D ndarray, with either boolean or integer elements.
 In the case of boolean, 'True' indicates foreground, and for integer arrays,
 the foreground is 1's.  
 """
-from scikits.image.morphology import skeletonize
-from scikits.image.draw import draw
+from skimage.morphology import skeletonize
+from skimage.draw import draw
 import numpy as np
 import matplotlib.pyplot as plt
 
