@@ -472,7 +472,8 @@ def rgb2grey(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3-D array of shape (.., .., 3),
+        or in RGBA format with shape (.., .., 4).
 
     Returns
     -------
@@ -482,7 +483,8 @@ def rgb2grey(rgb):
     Raises
     ------
     ValueError
-        If `rgb2grey` is not a 3-D array of shape (.., .., 3).
+        If `rgb2grey` is not a 3-D array of shape (.., .., 3) or 
+        (.., .., 4).
 
     References
     ----------
@@ -494,6 +496,8 @@ def rgb2grey(rgb):
     CRT phosphors::
 
         Y = 0.2125 R + 0.7154 G + 0.0721 B
+        
+    If there is an alpha channel present, it is ignored.
 
     Examples
     --------
@@ -505,6 +509,6 @@ def rgb2grey(rgb):
     >>> lena = imread(os.path.join(data_dir, 'lena.png'))
     >>> lena_grey = rgb2grey(lena)
     """
-    return _convert(grey_from_rgb, rgb)[..., 0]
+    return _convert(grey_from_rgb, rgb[:, :, :3])[..., 0]
 
 rgb2gray = rgb2grey
