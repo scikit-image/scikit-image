@@ -1,4 +1,5 @@
 import numpy as np
+from nose.tools import raises
 
 from skimage.filter import median_filter
 
@@ -108,6 +109,12 @@ def test_default_values():
     result1 = median_filter(img, mask, radius=2, percent=50)
     result2 = median_filter(img)
     np.testing.assert_array_equal(result1, result2)
+
+
+@raises(ValueError)
+def test_insufficient_size():
+    img = (np.random.random((20, 20)) * 255).astype(np.uint8)
+    median_filter(img, radius=1)
 
 
 if __name__ == "__main__":
