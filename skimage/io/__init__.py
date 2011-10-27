@@ -17,11 +17,11 @@ for preferred_plugin in ['pil', 'matplotlib', 'qt', 'null']:
         except ImportError:
             pass
 
-from sift import *
-from collection import *
+from sift import load_sift, load_surf
+from collection import MultiImage, ImageCollection
 
-from io import *
-from video import *
+from io import push, pop, imread, imread_collection, imsave, imshow, show
+from video import CvVideo, GstVideo, Video
 
 
 def _update_doc(doc):
