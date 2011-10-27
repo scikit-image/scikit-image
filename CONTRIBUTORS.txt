@@ -84,3 +84,5 @@
 - Nelle Varoquaux
   Renaming of the package to ``skimage``.
 
+- W. Randolph Franklin
+  Point in polygon test.

@@ -1,0 +1,56 @@
+__all__ = ['convex_hull']
+
+import numpy as np
+from scipy.spatial import Delaunay
+from ._pnpoly import points_inside_poly
+
+def convex_hull(image):
+    """Compute the convex hull of a binary image.
+
+    The convex hull is the set of pixels included in the smallest convex
+    polygon that surround all white pixels in the input image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Binary input image.  This array is cast to bool before processing.
+
+    Returns
+    -------
+    hull : ndarray of uint8
+        Binary image with pixels in convex hull set to 255.
+
+    References
+    ----------
+    .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
+
+    """
+    image = image.astype(bool)
+    r, c = np.nonzero(image)
+    coords = np.vstack((r, c)).T
+
+    # Add a vertex for the middle of each pixel edge
+    coords_corners = np.empty((0, 2))
+    for x_offset, y_offset in zip((0, 0, -0.5, 0.5),
+                                  (-0.5, 0.5, 0, 0)):
+            coords_corners = np.vstack((coords_corners,
+                                        coords + [x_offset, y_offset]))
+
+    coords = coords_corners
+
+    # Find the convex hull
+    chull = Delaunay(coords).convex_hull
+    v = coords[np.unique(chull)]
+
+    # Sort vertices clock-wise
+    v_centred = v - v.mean(axis=0)
+    angles = np.arctan2(v_centred[:, 0], v_centred[:, 1])
+    v = v[np.argsort(angles)]
+
+    # For each pixel coordinate, check whether that pixel
+    # lies inside the convex hull
+    xy = np.dstack(np.mgrid[:image.shape[0], :image.shape[1]]).reshape(-1, 2)
+    mask = points_inside_poly(xy, v)
+    mask = mask.reshape(image.shape[:2])
+    
+    return mask
