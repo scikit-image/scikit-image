@@ -15,7 +15,7 @@ def test_stackcopy():
         assert_array_almost_equal(x[...,i], y)
 
 def test_homography():
-    x = np.arange(9).reshape((3, 3)) + 1
+    x = np.arange(9, dtype=np.uint8).reshape((3, 3)) + 1
     theta = -np.pi/2
     M = np.array([[np.cos(theta),-np.sin(theta),0],
                   [np.sin(theta), np.cos(theta),2],
