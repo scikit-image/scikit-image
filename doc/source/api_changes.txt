@@ -3,3 +3,7 @@ Version 0.3
 - Remove ``as_grey``, ``dtype`` keyword from ImageCollection
 - Remove ``dtype`` from imread
 - Generalise ImageCollection to accept a load_func
+
+Version 0.4
+-----------
+- Switch mask and radius arguments for median_filter
