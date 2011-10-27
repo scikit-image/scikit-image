@@ -60,7 +60,7 @@ def homography(image, H, output_shape=None, order=1,
     if image.ndim < 2:
         raise ValueError("Input must have more than 1 dimension.")
 
-    image = np.atleast_3d(image).astype(np.float64)
+    image = np.atleast_3d(image)
     ishape = np.array(image.shape)
     bands = ishape[2]
 
