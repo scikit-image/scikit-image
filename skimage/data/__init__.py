@@ -40,3 +40,9 @@ def checkerboard():
 
     """
     return load("chessboard_RGB.png")
+
+def coins():
+    """Coins image.
+
+    """
+    return load("coins.jpg")
