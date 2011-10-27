@@ -34,9 +34,10 @@
 extern "C" {
 #endif
 
-int pnpoly(int nr_verts, double *xp, double *yp, double x, double y)
+unsigned char pnpoly(int nr_verts, double *xp, double *yp, double x, double y)
 {
-    int i,j, c=0;
+    int i, j;
+    unsigned char c = 0;
     for (i = 0, j = nr_verts-1; i < nr_verts; j = i++) {
         if ((((yp[i]<=y) && (y<yp[j])) ||
              ((yp[j]<=y) && (y<yp[i]))) &&
