@@ -28,13 +28,13 @@ def convex_hull(image):
     image = image.astype(bool)
     r, c = np.nonzero(image)
     coords = np.vstack((r, c)).T
+    N = len(coords)
 
     # Add a vertex for the middle of each pixel edge
-    coords_corners = np.empty((0, 2))
-    for x_offset, y_offset in zip((0, 0, -0.5, 0.5),
-                                  (-0.5, 0.5, 0, 0)):
-            coords_corners = np.vstack((coords_corners,
-                                        coords + [x_offset, y_offset]))
+    coords_corners = np.empty((N * 4, 2))
+    for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5),
+                                                 (-0.5, 0.5, 0, 0))):
+        coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
 
     coords = coords_corners
 
