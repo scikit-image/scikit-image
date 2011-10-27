@@ -3,6 +3,7 @@ __all__ = ['convex_hull']
 import numpy as np
 from scipy.spatial import Delaunay
 from ._pnpoly import points_inside_poly, grid_points_inside_poly
+from ._convex_hull import possible_hull
 
 def convex_hull(image):
     """Compute the convex hull of a binary image.
@@ -25,11 +26,16 @@ def convex_hull(image):
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
 
     """
-    image = image.astype(bool)
-    r, c = np.nonzero(image)
-    coords = np.vstack((r, c)).T
-    N = len(coords)
 
+    image = image.astype(bool)
+
+    # Here we do an optimisation by choosing only pixels that are
+    # the starting or ending pixel of a row or column.  This vastly
+    # limits the number of coordinates to examine for the virtual
+    # hull.
+    coords = possible_hull(image.astype(np.uint8))
+    N = len(coords)
+    
     # Add a vertex for the middle of each pixel edge
     coords_corners = np.empty((N * 4, 2))
     for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5),
