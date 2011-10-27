@@ -16,20 +16,20 @@ from . import _ctmf
 from rank_order import rank_order
 
 
-def median_filter(image, mask=None, radius=2, percent=50):
+def median_filter(image, radius=2, mask=None, percent=50):
     '''Masked median filter with octagon shape.
 
     Parameters
     ----------
     image : (M,N) ndarray, dtype uint8
         Input image.
+    radius : {int, 1}, optional
+        The radius of a circle inscribed into the filtering
+        octagon. Default radius is 1.
     mask : (M,N) ndarray, dtype uint8, optional
         A value of 1 indicates a significant pixel, 0
         that a pixel is masked.  By default, all pixels
         are considered.
-    radius : {int, 1}, optional
-        The radius of a circle inscribed into the filtering
-        octagon. Default radius is 1.
     percent : {int, 50}, optional
         The unmasked pixels within the octagon are sorted, and the
         value at the `percent`-th index chosen.  For example, the
@@ -46,6 +46,9 @@ def median_filter(image, mask=None, radius=2, percent=50):
 
     if image.ndim != 2:
         raise TypeError("The input 'image' must be a two dimensional array.")
+
+    if radius < 2:
+        raise ValueError("The input 'radius' must be >= 2.")
 
     if mask is None:
         mask = np.ones(image.shape, dtype=np.bool)
