@@ -56,6 +56,43 @@ def homography(image, H, output_shape=None, order=1,
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
+    Examples
+    --------
+    >>> # rotate by 90 degrees around origin and shift down by 2
+    >>> x = np.arange(9, dtype=np.uint8).reshape((3, 3)) + 1
+    >>> x
+    array([[1, 2, 3],
+           [4, 5, 6],
+           [7, 8, 9]], dtype=uint8)
+    >>> theta = -np.pi/2
+    >>> M = np.array([[np.cos(theta),-np.sin(theta),0],
+    ...               [np.sin(theta), np.cos(theta),2],
+    ...               [0,             0,            1]])
+    >>> x90 = homography(x, M, order=1)
+    >>> x90
+    array([[3, 6, 9],
+           [2, 5, 8],
+           [1, 4, 7]], dtype=uint8)
+    >>> # translate right by 2 and down by 1
+    >>> y = np.zeros((5,5), dtype=np.uint8)
+    >>> y[1, 1] = 255
+    >>> y
+    array([[  0,   0,   0,   0,   0],
+           [  0, 255,   0,   0,   0],
+           [  0,   0,   0,   0,   0],
+           [  0,   0,   0,   0,   0],
+           [  0,   0,   0,   0,   0]], dtype=uint8)
+    >>> M = np.array([[ 1.,  0.,  2.],
+    ...               [ 0.,  1.,  1.],
+    ...               [ 0.,  0.,  1.]])
+    >>> y21 = homography(y, M, order=1)
+    >>> y21
+    array([[  0,   0,   0,   0,   0],
+           [  0,   0,   0,   0,   0],
+           [  0,   0,   0, 255,   0],
+           [  0,   0,   0,   0,   0],
+           [  0,   0,   0,   0,   0]], dtype=uint8)
+           
     """
     if image.ndim < 2:
         raise ValueError("Input must have more than 1 dimension.")
