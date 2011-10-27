@@ -42,7 +42,15 @@ def checkerboard():
     return load("chessboard_RGB.png")
 
 def coins():
-    """Coins image.
+    """Greek coins from Pompeii.
+
+    Notes
+    -----
+    This image was downloaded from the
+    `Brooklyn Museum Collection
+    <http://www.brooklynmuseum.org/opencollection/archives/image/617/image>`__.
+
+    No known copyright restrictions.
 
     """
     return load("coins.jpg")
