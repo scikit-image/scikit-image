@@ -2,7 +2,7 @@ __all__ = ['convex_hull']
 
 import numpy as np
 from scipy.spatial import Delaunay
-from ._pnpoly import points_inside_poly
+from ._pnpoly import points_inside_poly, grid_points_inside_poly
 
 def convex_hull(image):
     """Compute the convex hull of a binary image.
@@ -49,8 +49,6 @@ def convex_hull(image):
 
     # For each pixel coordinate, check whether that pixel
     # lies inside the convex hull
-    xy = np.dstack(np.mgrid[:image.shape[0], :image.shape[1]]).reshape(-1, 2)
-    mask = points_inside_poly(xy, v)
-    mask = mask.reshape(image.shape[:2])
+    mask = grid_points_inside_poly(image.shape[:2], v)
     
     return mask
