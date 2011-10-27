@@ -15,7 +15,7 @@ def cython(pyx_files, working_path=''):
 
     """
     # Do not build cython files if target is clean
-    if sys.argv[1] == 'clean':
+    if len(sys.argv) >= 2 and sys.argv[1] == 'clean':
         return
 
     try:
@@ -27,12 +27,15 @@ def cython(pyx_files, working_path=''):
               % " ".join([f.replace('.pyx', '.c') for f in pyx_files]))
     else:
         for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:
-            # make a backup of the good c files
+
+            # if the .pyx file stayed the same, we don't need to recompile
+            if not _changed(pyxfile):
+                continue
+
             c_file = pyxfile[:-4] + '.c'
-            c_file_new = c_file + '.new'
 
             # run cython compiler
-            cmd = 'cython -o %s %s' % (c_file_new, pyxfile)
+            cmd = 'cython -o %s %s' % (c_file, pyxfile)
             print(cmd)
 
             if platform.system() == 'Windows':
@@ -40,49 +43,36 @@ def cython(pyx_files, working_path=''):
                     [sys.executable,
                      os.path.join(os.path.dirname(sys.executable),
                                   'Scripts', 'cython.py'),
-                     '-o', c_file_new, pyxfile],
+                     '-o', c_file, pyxfile],
                     shell=True)
             else:
-                status = subprocess.call(['cython', '-o', c_file_new, pyxfile])
+                status = subprocess.call(['cython', '-o', c_file, pyxfile])
 
-            # if the resulting file is small, cython compilation failed
-            if status != 0 or os.path.getsize(c_file_new) < 100:
-                print("Cython compilation of %s failed. Falling back " \
-                      "on pre-generated file." % os.path.basename(pyxfile))
-            elif not same_cython(c_file_new, c_file):
-                # if the generated .c file differs from the one provided,
-                # use that one instead
-                shutil.copy(c_file_new, c_file)
-            try:
-                os.remove(c_file_new)
-            except OSError:
-                pass
+def _md5sum(f):
+    m = hashlib.new('md5')
+    while True:
+        # Hash one 8096 byte block at a time
+        d = f.read(8096)
+        if not d:
+            break
+        m.update(d)
+    return m.hexdigest()
 
+def _changed(filename):
+    """Compare the hash of a Cython file to the cached hash value on disk.
 
-def same_cython(f0, f1):
-    '''Compare two Cython generated C-files, based on their md5-sum.
+    """
+    filename_cache = filename + '.md5'
+    
+    try:
+        md5_cached = open(filename_cache, 'rb').read()
+    except IOError:
+        md5_cached = '0'
 
-    Returns True if the files are identical, False if not.  The first
-    lines are skipped, due to the timestamp printed there.
+    with open(filename, 'rb') as f:
+        md5_new = _md5sum(f)
 
-    '''
-    def md5sum(f):
-        m = hashlib.new('md5')
-        while True:
-            d = f.read(8096)
-            if not d:
-                break
-            m.update(d)
-        return m.hexdigest()
+        with open(filename_cache, 'wb') as cf:
+            cf.write(md5_new)
 
-    if not (os.path.isfile(f0) and os.path.isfile(f1)):
-        return False
-
-    f0 = open(f0, 'rb')
-    f0.readline()
-
-    f1 = open(f1, 'rb')
-    f1.readline()
-
-    return md5sum(f0) == md5sum(f1)
-
+    return md5_cached != md5_new
