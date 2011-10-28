@@ -24,6 +24,7 @@ Implement Algorithms
 ````````````````````
 - Graph cut segmentation
 - Fast 2D convex hull (consider using CellProfiler version)
+  `Algorithm overview <http://www.tcs.fudan.edu.cn/rudolf/Courses/Algorithms/Alg_cs_07w/Webprojects/Zhaobo_hull/index.html#section26>`__.
 - :strike:`Histograms of oriented gradients`
 - :strike:`Fast radon transform`
 - :strike:`Probabilistic Hough transform`
