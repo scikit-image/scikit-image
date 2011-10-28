@@ -53,7 +53,7 @@ def test_possible_hull():
                          [4, 6]])
 
     ph = possible_hull(image)
-    assert_array_equal(possible_hull(image), expected)
+    assert_array_equal(ph, expected)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
