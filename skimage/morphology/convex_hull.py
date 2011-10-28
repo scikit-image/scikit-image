@@ -1,7 +1,6 @@
 __all__ = ['convex_hull']
 
 import numpy as np
-from scipy.spatial import Delaunay
 from ._pnpoly import points_inside_poly, grid_points_inside_poly
 from ._convex_hull import possible_hull
 
@@ -43,6 +42,12 @@ def convex_hull(image):
         coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
 
     coords = coords_corners
+
+    try:
+        from scipy.spatial import Delaunay
+    except ImportError:
+        raise ImportError('Could not import scipy.spatial, only available in '
+                          'scipy >= 0.9.')
 
     # Find the convex hull
     chull = Delaunay(coords).convex_hull
