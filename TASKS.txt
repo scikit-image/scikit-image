@@ -17,9 +17,21 @@ following challenges you'd like to solve.
 Tasks
 -----
 
-:doc:`gsoc2011`
+.. :doc:`gsoc2011`
+.. :doc:`coverage_table`
 
-:doc:`coverage_table`
+Implement Algorithms
+````````````````````
+- Graph cut segmentation
+- Fast 2D convex hull (consider using CellProfiler version)
+- :strike:`Histograms of oriented gradients`
+- :strike:`Fast radon transform`
+- :strike:`Probabilistic Hough transform`
+
+Drawing
+```````
+- Wu's algorithm for lines and circles
+- Text rendering
 
 Infrastructure
 --------------
@@ -35,27 +47,25 @@ or tests.
    * :strike:`Connected components`
    * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
    * Marching squares
-   * Nadav's bilateral filtering (first compare against CellProfile's code)
+   * Nadav's bilateral filtering (first compare against CellProfiler's
+     code, based on http://groups.csail.mit.edu/graphics/bilagrid/bilagrid_web.pdf)
    * 2D iso-contour finding (sub-pixel precision) [ask Zach Pincus]
    * 2D image warping via thin-plate splines [ask Zach Pincus]
 
 Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
 `````````````````````````````````````````````````````````````````````````
-* Canny filter (Canny, J., *A Computational Approach To Edge Detection*,
+* :strike:`Canny filter` (Canny, J., *A Computational Approach To Edge Detection*,
   IEEE Trans. Pattern Analysis and Machine Intelligence, 8:679-714, 1986)
-* Prewitt filter - convolution with ``[[1,1,1], [0,0,0], [-1,-1,-1]]`` to
+* :strike:`Prewitt filter` - convolution with ``[[1,1,1], [0,0,0], [-1,-1,-1]]`` to
   detect edges
 * :strike:`Sobel filter - convolution with` ``[[1,2,1], [0,0,0], [-1,-2,-1]]`` :strike:`to detect edges`
 * Roberts filter - convolution with diagonal and anti-diagonal
   kernels to detect edges
-* Bilateral filter
-  (http://groups.csail.mit.edu/graphics/bilagrid/bilagrid_web.pdf)
-  - edge detection using both spatial and intensity information
 * Convex hulls of objects in a labels matrix
 * Minimum enclosing circles of objects in a labels matrix
 * Map-coloring of a labels matrix - assign each label a color so that
   all adjacent labels have different colors
-* Skeletonize, spur removal, thinning, thickening, and other morphological
+* :strike:`Skeletonize`, spur removal, thinning, thickening, and other morphological
   operations on binary images, framework for creating arbitrary morphological
   operations using a 3x3 grid.
 * Skeletonize objects in a labels matrix
@@ -92,7 +102,7 @@ who contributed.
 
 Rework linear filters
 `````````````````````
-* Fast, SSE2 convolution (high priority)
+* Fast, SSE2 convolution (high priority) (see prototype in pull requests)
 * Should take kernel or function for parameter (currently only takes function)
 * Kernel shape should be specifiable (currently defaults to image shape)
 * Due to the above, the tests run unnecessarily slowly
@@ -101,7 +111,6 @@ io
 ``
 * Update ``qt_plugin.py`` and other plugins to view collections.
 * Rewrite GTK backend using GObject Introspection for Py3K compatibility.
-* Add medical / biological and GIS image format plugins.
 * Add DICOM plugin for `GDCM <http://sourceforge.net/apps/mediawiki/gdcm>`__.
 
 docs
@@ -114,15 +123,3 @@ docs
 * :strike:`Build docs outside source directory`
 * Integrate BiBTeX plugin into Sphinx build
 * :strike:`Create a kick-ass website`
-
-Implement Algorithms
-````````````````````
-- Histograms of oriented gradients
-- Fast radon transform
-- Graph cut segmentation
-- Probabilistic Hough transform
-
-Drawing
-```````
-- Wu's algorithm for lines and circles
-
