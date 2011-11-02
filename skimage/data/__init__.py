@@ -1,4 +1,8 @@
-"""Convenience functions to load sample data.
+"""Standard test images.
+
+For more images, see
+
+ - http://sipi.usc.edu/database/database.php
 
 """
 
@@ -23,7 +27,7 @@ def load(f):
     return imread(_os.path.join(data_dir, f))
 
 def camera():
-    """Gray "camera" image, often used for segmentation
+    """Gray-level "camera" image, often used for segmentation
     and denoising examples.
 
     """
@@ -32,11 +36,40 @@ def camera():
 def lena():
     """Colour "Lena" image.
 
+    The standard, yet sometimes controversial Lena test image was
+    scanned from the November 1972 edition of Playboy magazine.  From
+    an image processing perspective, this image is useful because it
+    contains smooth, textured, shaded as well as detail areas.
+
     """
     return load("lena.png")
 
 def checkerboard():
     """Checkerboard image.
 
+    Checkerboards are often used in image calibration, since the
+    corner-points are easy to locate.  Because of the many parallel
+    edges, they also visualise distortions particularly well.
+
     """
-    return load("chessboard_RGB.png")
+    return load("chessboard_GRAY_U8.png")
+
+def coins():
+    """Greek coins from Pompeii.
+
+    This image shows several coins outlined against a gray background.
+    It is especially useful in, e.g. segmentation tests, where
+    individual objects need to be identified against a background.
+    The background shares enough grey levels with the coins that a
+    simple segmentation is not sufficient.
+
+    Notes
+    -----
+    This image was downloaded from the
+    `Brooklyn Museum Collection
+    <http://www.brooklynmuseum.org/opencollection/archives/image/617/image>`__.
+
+    No known copyright restrictions.
+
+    """
+    return load("coins.png")
