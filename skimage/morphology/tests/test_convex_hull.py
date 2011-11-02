@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 from numpy.testing.decorators import skipif
-from skimage.morphology import convex_hull
+from skimage.morphology import convex_hull_image
 from skimage.morphology._convex_hull import possible_hull
 
 try:
@@ -28,7 +28,7 @@ def test_basic():
          [0, 1, 1, 1, 1, 1, 1, 1, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
-    assert_array_equal(convex_hull(image), expected)
+    assert_array_equal(convex_hull_image(image), expected)
 
 @skipif(not scipy_spatial)
 def test_possible_hull():
