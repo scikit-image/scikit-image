@@ -23,9 +23,9 @@ def median_filter(image, radius=2, mask=None, percent=50):
     ----------
     image : (M,N) ndarray, dtype uint8
         Input image.
-    radius : {int, 1}, optional
+    radius : {int, 2}, optional
         The radius of a circle inscribed into the filtering
-        octagon. Default radius is 1.
+        octagon. Must be at least 2.  Default radius is 2.
     mask : (M,N) ndarray, dtype uint8, optional
         A value of 1 indicates a significant pixel, 0
         that a pixel is masked.  By default, all pixels
