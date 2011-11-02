@@ -8,7 +8,7 @@ import skimage.util
 
 
 def glcm(image, distances, angles, levels=256, symmetric=False,
-         normal=False):
+         normed=False):
     """Calculate the grey-level co-occurrence matrix of a grey-level
     image.
 
@@ -33,9 +33,10 @@ def glcm(image, distances, angles, levels=256, symmetric=False,
         If True, the output matrix P is symmetric. This is accomplished 
         by ignoring the order of value pairs, so both (i, j) and (j, i) 
         are accumulated when (i, j) is encountered. 
-    normal : bool
+    normed : bool
         If True, normalize the result by dividing by the number of 
-        possible outcomes
+        possible outcomes. The elements of the resulting matrix sum
+        to 1.
 
     Returns
     -------
@@ -43,7 +44,15 @@ def glcm(image, distances, angles, levels=256, symmetric=False,
        The grey-level co-occurrence histogram. The value
        P[i,j,d,theta] is the number of times that grey-level j
        occurs at a distance d and at an angle theta from
-       grey-level i.
+       grey-level i. I
+
+    References
+    ----------
+    .. [1] The GLCM Tutorial Home Page,
+           http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
+    .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P. 
+           Smith
+    
 
     Examples
     --------
@@ -98,15 +107,95 @@ def glcm(image, distances, angles, levels=256, symmetric=False,
                         if i >= 0 and i < levels and \
                            j >= 0 and j < levels:
                             out[i, j, d_idx, a_idx] += 1
-                            if symmetric:
-                                out[j, i, d_idx, a_idx] += 1
 
-    # normalize
-    if normal:
-        out = out.astype(np.float64) / out.sum()
+    # make each GLMC symmetric
+    if symmetric:
+        for d in range(len(distances)):
+            for a in range(len(angles)):
+                out[:, :, d, a] += out[:, :, d, a].transpose()
+                
+    # normalize each GLMC individually
+    if normed:
+        out = out.astype(np.float64)
+        for d in range(len(distances)):
+            for a in range(len(angles)):
+                if np.any(out[:, :, d, a]):
+                    out[:, :, d, a] /= out[:, :, d, a].sum()
 
     return out
+
+def compute_glcm_prop(glcm, prop='contrast'):
+    """Calculate texture properties of a GLCM.
+    
+    TODO: rest of docstring, including math
+    
+    Examples
+    --------
+    Compute the contrast for GLCMs with distances [1, 2] and angles
+    [0 degrees, 90 degrees] 
+    
+    >>> image = np.array([[0, 0, 1, 1],
+    ...                   [0, 0, 1, 1],
+    ...                   [0, 2, 2, 2],
+    ...                   [2, 2, 3, 3]], dtype=np.uint8)
+    >>> g = glcm(image, [1, 2], [0, np.pi/2], 4, normed=True, symmetric=True)
+    >>> contrast = compute_glcm_prop(g, 'contrast')
+    >>> contrast
+    array([[ 0.58333333,  1.        ],
+           [ 1.25      ,  2.75      ]])
+    
+    """
+    
+    assert glcm.ndim == 4
+    (num_level, num_level2, num_dist, num_angle) = glcm.shape
+    assert num_level == num_level2
+    assert num_dist > 0
+    assert num_angle > 0
+    
+    # create weights for specified property
+    r = range(num_level)
+    I, J = np.meshgrid(r, r)
+    if prop == 'contrast':
+        weights = (I-J)**2
+    elif prop == 'dissimilarity':
+        weights = np.abs(I-J)
+    elif prop == 'homogeneity':
+        weights = 1./(1.+(I-J)**2)
+    elif prop in ['ASM', 'energy', 'correlation']:
+        pass
+    else:
+        raise ValueError('%s is an invalid property'%(prop))
+    
+    # compute property for each GLCM 
+    results = np.zeros((num_dist, num_angle), dtype=np.float64)
+    for d in range(num_dist):
+        for a in range(num_angle):
+            if prop == 'energy':
+                asm = (glcm[:, :, d, a]**2).sum()
+                results[d, a] = np.sqrt(asm)
+            elif prop == 'ASM':
+                results[d, a] = (glcm[:, :, d, a]**2).sum()
+            elif prop == 'correlation':
+                g = glcm[:, :, d, a]
+                mean_i = (I * g).sum()
+                mean_j = (J * g).sum()
+                diff_i = I - mean_i
+                diff_j = J - mean_j
+                std_i = np.sqrt((g * (diff_i)**2).sum())
+                std_j = np.sqrt((g * (diff_j)**2).sum())
+                cov = (g * (diff_i * diff_j)).sum()
+                if std_i < 1e-15 or std_j < 1e-15:
+                    corr = 1.
+                else:
+                    corr = cov / (std_i * std_j)
+                
+                results[d, a] = corr
+            else:
+                results[d, a] = (glcm[:, :, d, a] * weights).sum()
+
+    return results
 
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
+    
