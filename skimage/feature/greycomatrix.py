@@ -1,50 +1,47 @@
 """
-Compute grey level co-occurrence matrices (GLCM) to characterize
-image textures.
+Compute grey level co-occurrence matrices (GLCM) and associated 
+properties to characterize image textures.
 """
 
 import numpy as np
 import skimage.util
 
 
-def glcm(image, distances, angles, levels=256, symmetric=False,
+def compute_glcm(image, distances, angles, levels=256, symmetric=False,
          normed=False):
-    """Calculate the grey-level co-occurrence matrix of a grey-level
-    image.
+    """Calculate the grey-level co-occurrence matrix.
 
     A grey level co-occurence matrix is a histogram of co-occuring
-    greyscale values at a given offset over an image. It can be used to
-    extract features from textured areas of an image.
+    greyscale values at a given offset over an image.
 
     Parameters
     ----------
-    image : (M,N) ndarray
-        Input image. The input image is converted to the uint8 data
-        type.
-    distances : (K,) ndarray
-        Histogram distance offsets
-    angles : (L,) ndarray
-        Histogram angles in radians
-    levels : int
+    image : ndarray
+        Input image, which is converted to the uint8 data type.
+    distances : array_like
+        List of histogram distance offsets.
+    angles : array_like
+        List of histogram angles in radians.
+    levels : int, optional
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image).
-    symmetric : bool
+        (typically 256 for an 8-bit image). The default is 256.
+    symmetric : bool, optional
         If True, the output matrix P is symmetric. This is accomplished 
         by ignoring the order of value pairs, so both (i, j) and (j, i) 
-        are accumulated when (i, j) is encountered. 
-    normed : bool
+        are accumulated when (i, j) is encountered. The default is False. 
+    normed : bool, optional
         If True, normalize the result by dividing by the number of 
         possible outcomes. The elements of the resulting matrix sum
-        to 1.
+        to 1. The default is False.
 
     Returns
     -------
-    P : 4-dimensional ndarray
-       The grey-level co-occurrence histogram. The value
-       P[i,j,d,theta] is the number of times that grey-level j
-       occurs at a distance d and at an angle theta from
-       grey-level i. I
+    out : ndarray
+        The grey-level co-occurrence histogram. The value
+        `P[i,j,d,theta]` is the number of times that grey-level `j`
+        occurs at a distance `d` and at an angle `theta` from
+        grey-level `i`.
 
     References
     ----------
@@ -63,7 +60,7 @@ def glcm(image, distances, angles, levels=256, symmetric=False,
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> result = glcm(image, [1], [0, np.pi/2], 4)
+    >>> result = compute_glcm(image, [1], [0, np.pi/2], 4)
     >>> result[:, :, 0, 0]
     array([[2, 2, 1, 0],
            [0, 2, 0, 0],
@@ -124,10 +121,42 @@ def glcm(image, distances, angles, levels=256, symmetric=False,
 
     return out
 
+
 def compute_glcm_prop(glcm, prop='contrast'):
     """Calculate texture properties of a GLCM.
     
-    TODO: rest of docstring, including math
+    Compute a feature of a grey level co-occurance matrix to serve as 
+    a compact summary of the matrix. The properties are computed as
+    follows:
+    
+    - 'contrast': :math:`X`
+    - 'dissimilarity': :math:`X`
+    - 'homogeneity': :math:`X`
+    - 'energy': :math:`X`
+    - 'correlation': :math:`X`
+    - 'ASM': :math:`X`
+    
+    Parameters
+    ----------    
+    glcm : ndarray
+        Input array. `glcm` is the grey-level co-occurrence histogram 
+        for which to compute the specified property. The value
+        `P[i,j,d,theta]` is the number of times that grey-level j
+        occurs at a distance d and at an angle theta from
+        grey-level i.
+    prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', 'correlation', 'ASM'}, optional
+        The property of the GLCM to compute. The default is 'contrast'.
+    
+    Returns
+    -------
+    results : ndarray
+        2-dimensional array. `results[d, a]` is the property 'prop' for 
+        the d'th distance and the a'th angle.
+    
+    References
+    ----------
+    .. [1] The GLCM Tutorial Home Page,
+           http://www.fp.ucalgary.ca/mhallbey/tutorial.htm    
     
     Examples
     --------
@@ -138,7 +167,8 @@ def compute_glcm_prop(glcm, prop='contrast'):
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> g = glcm(image, [1, 2], [0, np.pi/2], 4, normed=True, symmetric=True)
+    >>> g = compute_glcm(image, [1, 2], [0, np.pi/2], 4, normed=True, 
+    ...                  symmetric=True)
     >>> contrast = compute_glcm_prop(g, 'contrast')
     >>> contrast
     array([[ 0.58333333,  1.        ],
@@ -156,33 +186,33 @@ def compute_glcm_prop(glcm, prop='contrast'):
     r = range(num_level)
     I, J = np.meshgrid(r, r)
     if prop == 'contrast':
-        weights = (I-J)**2
+        weights = (I - J) ** 2
     elif prop == 'dissimilarity':
-        weights = np.abs(I-J)
+        weights = np.abs(I - J)
     elif prop == 'homogeneity':
-        weights = 1./(1.+(I-J)**2)
+        weights = 1. / (1. + (I - J) ** 2)
     elif prop in ['ASM', 'energy', 'correlation']:
         pass
     else:
-        raise ValueError('%s is an invalid property'%(prop))
+        raise ValueError('%s is an invalid property' % (prop))
     
     # compute property for each GLCM 
     results = np.zeros((num_dist, num_angle), dtype=np.float64)
     for d in range(num_dist):
         for a in range(num_angle):
             if prop == 'energy':
-                asm = (glcm[:, :, d, a]**2).sum()
+                asm = (glcm[:, :, d, a] ** 2).sum()
                 results[d, a] = np.sqrt(asm)
             elif prop == 'ASM':
-                results[d, a] = (glcm[:, :, d, a]**2).sum()
+                results[d, a] = (glcm[:, :, d, a] ** 2).sum()
             elif prop == 'correlation':
                 g = glcm[:, :, d, a]
                 mean_i = (I * g).sum()
                 mean_j = (J * g).sum()
                 diff_i = I - mean_i
                 diff_j = J - mean_j
-                std_i = np.sqrt((g * (diff_i)**2).sum())
-                std_j = np.sqrt((g * (diff_j)**2).sum())
+                std_i = np.sqrt((g * (diff_i) ** 2).sum())
+                std_j = np.sqrt((g * (diff_j) ** 2).sum())
                 cov = (g * (diff_i * diff_j)).sum()
                 if std_i < 1e-15 or std_j < 1e-15:
                     corr = 1.
@@ -194,8 +224,3 @@ def compute_glcm_prop(glcm, prop='contrast'):
                 results[d, a] = (glcm[:, :, d, a] * weights).sum()
 
     return results
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
-    
