@@ -1,11 +1,11 @@
-__all__ = ['convex_hull']
+__all__ = ['convex_hull_image']
 
 import numpy as np
 from ._pnpoly import points_inside_poly, grid_points_inside_poly
 from ._convex_hull import possible_hull
 
-def convex_hull(image):
-    """Compute the convex hull of a binary image.
+def convex_hull_image(image):
+    """Compute the convex hull image of a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
     polygon that surround all white pixels in the input image.
