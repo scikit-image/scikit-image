@@ -6,6 +6,8 @@
 *.bak
 *.c
 *.new
+*.md5
+*.old
 doc/source/api
 doc/build
 source/api
