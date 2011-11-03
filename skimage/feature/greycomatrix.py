@@ -6,6 +6,8 @@ properties to characterize image textures.
 import numpy as np
 import skimage.util
 
+from _greycomatrix import _glcm_loop
+
 
 def compute_glcm(image, distances, angles, levels=256, symmetric=False,
          normed=False):
@@ -19,9 +21,9 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
     image : ndarray
         Input image, which is converted to the uint8 data type.
     distances : array_like
-        List of histogram distance offsets.
+        List of pixel pair distance offsets.
     angles : array_like
-        List of histogram angles in radians.
+        List of pixel pair angles in radians.
     levels : int, optional
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
@@ -77,8 +79,8 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
     assert image.ndim == 2
     assert image.min() >= 0
     assert image.max() < levels
-    distances = np.asarray(distances)
-    angles = np.asarray(angles)
+    distances = np.ascontiguousarray(distances, dtype=np.float64)
+    angles = np.ascontiguousarray(angles, dtype=np.float64)
     assert distances.ndim == 1
     assert angles.ndim == 1
 
@@ -86,24 +88,8 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
     out = np.zeros((levels, levels, len(distances), len(angles)),
                    dtype=np.uint32)
     
-    for a_idx, angle in enumerate(angles):
-        for d_idx, distance in enumerate(distances):
-            for r in range(rows):
-                for c in range(cols):
-                    i = image[r, c]
-
-                    # compute the location of the offset pixel
-                    row = r + int(np.round(np.sin(angle) * distance))
-                    col = c + int(np.round(np.cos(angle) * distance))
-                    
-                    # make sure the offset is within bounds
-                    if row >= 0 and row < rows and \
-                       col >= 0 and col < cols:
-                        j = image[row, col]
-                        
-                        if i >= 0 and i < levels and \
-                           j >= 0 and j < levels:
-                            out[i, j, d_idx, a_idx] += 1
+    # count co-occurances
+    _glcm_loop(image, distances, angles, levels, out)
 
     # make each GLMC symmetric
     if symmetric:
@@ -111,7 +97,7 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
             for a in range(len(angles)):
                 out[:, :, d, a] += out[:, :, d, a].transpose()
                 
-    # normalize each GLMC individually
+    # normalize each GLMC
     if normed:
         out = out.astype(np.float64)
         for d in range(len(distances)):
