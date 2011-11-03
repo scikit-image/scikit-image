@@ -122,24 +122,25 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
     return out
 
 
-def compute_glcm_prop(glcm, prop='contrast'):
+def compute_glcm_prop(P, prop='contrast'):
     """Calculate texture properties of a GLCM.
     
     Compute a feature of a grey level co-occurance matrix to serve as 
     a compact summary of the matrix. The properties are computed as
     follows:
-    
-    - 'contrast': :math:`X`
-    - 'dissimilarity': :math:`X`
-    - 'homogeneity': :math:`X`
-    - 'energy': :math:`X`
-    - 'correlation': :math:`X`
-    - 'ASM': :math:`X`
+
+    - 'contrast': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-j)^2`
+    - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}\\left|i-j\\right|`
+    - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
+    - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`    
+    - 'energy': :math:`\\sqrt{ASM}`
+    - 'correlation': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i)(j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]`
+
     
     Parameters
     ----------    
-    glcm : ndarray
-        Input array. `glcm` is the grey-level co-occurrence histogram 
+    P : ndarray
+        Input array. `P` is the grey-level co-occurrence histogram 
         for which to compute the specified property. The value
         `P[i,j,d,theta]` is the number of times that grey-level j
         occurs at a distance d and at an angle theta from
@@ -176,8 +177,8 @@ def compute_glcm_prop(glcm, prop='contrast'):
     
     """
     
-    assert glcm.ndim == 4
-    (num_level, num_level2, num_dist, num_angle) = glcm.shape
+    assert P.ndim == 4
+    (num_level, num_level2, num_dist, num_angle) = P.shape
     assert num_level == num_level2
     assert num_dist > 0
     assert num_angle > 0
@@ -201,12 +202,12 @@ def compute_glcm_prop(glcm, prop='contrast'):
     for d in range(num_dist):
         for a in range(num_angle):
             if prop == 'energy':
-                asm = (glcm[:, :, d, a] ** 2).sum()
+                asm = (P[:, :, d, a] ** 2).sum()
                 results[d, a] = np.sqrt(asm)
             elif prop == 'ASM':
-                results[d, a] = (glcm[:, :, d, a] ** 2).sum()
+                results[d, a] = (P[:, :, d, a] ** 2).sum()
             elif prop == 'correlation':
-                g = glcm[:, :, d, a]
+                g = P[:, :, d, a]
                 mean_i = (I * g).sum()
                 mean_j = (J * g).sum()
                 diff_i = I - mean_i
@@ -221,6 +222,6 @@ def compute_glcm_prop(glcm, prop='contrast'):
                 
                 results[d, a] = corr
             else:
-                results[d, a] = (glcm[:, :, d, a] * weights).sum()
+                results[d, a] = (P[:, :, d, a] * weights).sum()
 
     return results
