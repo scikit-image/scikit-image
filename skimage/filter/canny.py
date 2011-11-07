@@ -78,7 +78,7 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
 
     See also
     --------
-    scipy.ndimage.sobel
+    skimage.sobel
 
     Notes
     -----
