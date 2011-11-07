@@ -40,8 +40,6 @@ import heap
 
 ctypedef np.int8_t OFFSET_T
 OFFSET_D = np.int8
-ctypedef np.int32_t FLAT_OFFSET_T
-FLAT_OFFSET_D = np.int32
 ctypedef np.int16_t OFFSETS_INDEX_T
 OFFSETS_INDEX_D = np.int16
 ctypedef np.int8_t EDGE_T
@@ -288,7 +286,7 @@ cdef class MCP:
         self.offsets = np.array(offsets, dtype=OFFSET_D)
         self.flat_offsets = np.array(
             _ravel_index_fortran(self.offsets, self.costs_shape),
-            dtype=FLAT_OFFSET_D)
+            dtype=INDEX_D)
 
         # Instead of unraveling each index during the pathfinding algorithm, we
         # will use a pre-computed "edge map" that specifies for each dimension
@@ -397,7 +395,7 @@ cdef class MCP:
              self.traceback_offsets
         cdef np.ndarray[EDGE_T, ndim=2] flat_edge_map = self.flat_edge_map
         cdef np.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
-        cdef np.ndarray[FLAT_OFFSET_T, ndim=1] flat_offsets = self.flat_offsets
+        cdef np.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
         cdef np.ndarray[FLOAT_T, ndim=1] offset_lengths = self.offset_lengths
 
         cdef DIM_T dim = self.dim
@@ -564,7 +562,7 @@ cdef class MCP:
         cdef np.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
              self.traceback_offsets
         cdef np.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
-        cdef np.ndarray[FLAT_OFFSET_T, ndim=1] flat_offsets = self.flat_offsets
+        cdef np.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
 
         cdef OFFSETS_INDEX_T offset
         cdef DIM_T d
