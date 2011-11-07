@@ -38,7 +38,19 @@ import numpy as np
 cimport heap
 import heap
 
-FLOAT = np.float64
+ctypedef np.int8_t OFFSET_T
+OFFSET_D = np.int8
+ctypedef np.int32_t FLAT_OFFSET_T
+FLAT_OFFSET_D = np.int32
+ctypedef np.int16_t OFFSETS_INDEX_T
+OFFSETS_INDEX_D = np.int16
+ctypedef np.int8_t EDGE_T
+EDGE_D = np.int8
+ctypedef np.intp_t INDEX_T
+INDEX_D = np.intp
+FLOAT_D = np.float64
+
+
 
 def _get_edge_map(shape):
     """Return an array with edge points/lines/planes/hyperplanes marked.
@@ -53,7 +65,7 @@ def _get_edge_map(shape):
 
     """
     d = len(shape)
-    edges = np.zeros(shape+(d,), order='F', dtype=np.int8)
+    edges = np.zeros(shape+(d,), order='F', dtype=EDGE_D)
     for i in range(d):
         slices = [slice(None)] * (d+1)
         slices[d] = i
@@ -90,7 +102,7 @@ def _offset_edge_map(shape, offsets):
 
     """
     d = len(shape)
-    edges = np.zeros(shape+(d,), order='F', dtype=np.int8)
+    edges = np.zeros(shape+(d,), order='F', dtype=EDGE_D)
     offsets = np.asarray(offsets)
     for i in range(d):
         slices = [slice(None)] * (d+1)
@@ -244,16 +256,16 @@ cdef class MCP:
         See class documentation.
         """
         costs = np.asarray(costs)
-        if not np.can_cast(costs.dtype, FLOAT):
-            raise TypeError('cannot cast costs array to ' + str(FLOAT))
+        if not np.can_cast(costs.dtype, FLOAT_D):
+            raise TypeError('cannot cast costs array to ' + str(FLOAT_D))
 
         # We use flat, fortran-style indexing here (could use C-style,
         # but this is my code and I like fortran-style! Also, it's
         # faster when working with image arrays, which are often
         # already fortran-strided.)
-        self.flat_costs = costs.astype(FLOAT).flatten('F')
+        self.flat_costs = costs.astype(FLOAT_D).flatten('F')
         size = self.flat_costs.shape[0]
-        self.flat_cumulative_costs = np.empty(size, dtype=FLOAT)
+        self.flat_cumulative_costs = np.empty(size, dtype=FLOAT_D)
         self.flat_cumulative_costs.fill(np.inf)
         self.dim = len(costs.shape)
         self.costs_shape = costs.shape
@@ -263,7 +275,7 @@ cdef class MCP:
         # This array stores, for each point, the index into the offset
         # array (see below) that leads to that point from the
         # predecessor point.
-        self.traceback_offsets = np.empty(size, dtype=np.int16)
+        self.traceback_offsets = np.empty(size, dtype=OFFSETS_INDEX_D)
         self.traceback_offsets.fill(-1)
 
         # The offsets are a list of relative offsets from a central
@@ -273,10 +285,10 @@ cdef class MCP:
         # in the same way for flat indices to move to neighboring points.
         if offsets is None:
             offsets = make_offsets(self.dim, fully_connected)
-        self.offsets = np.array(offsets, dtype=np.int8)
+        self.offsets = np.array(offsets, dtype=OFFSET_D)
         self.flat_offsets = np.array(
             _ravel_index_fortran(self.offsets, self.costs_shape),
-            dtype=np.int32)
+            dtype=FLAT_OFFSET_D)
 
         # Instead of unraveling each index during the pathfinding algorithm, we
         # will use a pre-computed "edge map" that specifies for each dimension
@@ -292,7 +304,7 @@ cdef class MCP:
 
         # The offset lengths are the distances traveled along each offset
         self.offset_lengths = np.sqrt(
-            np.sum(self.offsets**2, axis=1)).astype(FLOAT)
+            np.sum(self.offsets**2, axis=1)).astype(FLOAT_D)
         self.dirty = 0
         self.use_start_cost = 1
 
@@ -306,8 +318,8 @@ cdef class MCP:
         self.flat_cumulative_costs.fill(np.inf)
         self.dirty = 0
 
-    cdef FLOAT_C _travel_cost(self, FLOAT_C old_cost,
-                              FLOAT_C new_cost, FLOAT_C offset_length):
+    cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost,
+                              FLOAT_T new_cost, FLOAT_T offset_length):
         return new_cost
 
     @cython.boundscheck(False)
@@ -356,10 +368,10 @@ cdef class MCP:
         """
         # basic variables to use for end-finding; also fix up the start and end
         # lists
-        cdef int use_ends = 0
-        cdef int num_ends
-        cdef int all_ends = find_all_ends
-        cdef np.ndarray[np.uint32_t, ndim=1] flat_ends
+        cdef BOOL_T use_ends = 0
+        cdef INDEX_T num_ends
+        cdef BOOL_T all_ends = find_all_ends
+        cdef np.ndarray[INDEX_T, ndim=1] flat_ends
         starts = _normalize_indices(starts, self.costs_shape)
         if starts is None:
             raise ValueError('start points must all be within the costs array')
@@ -371,7 +383,7 @@ cdef class MCP:
             use_ends = 1
             num_ends = len(ends)
             flat_ends = np.array(_ravel_index_fortran(
-                ends, self.costs_shape), dtype=np.uint32)
+                ends, self.costs_shape), dtype=INDEX_D)
 
         if self.dirty:
             self._reset()
@@ -381,14 +393,14 @@ cdef class MCP:
         cdef np.ndarray[FLOAT_T, ndim=1] flat_costs = self.flat_costs
         cdef np.ndarray[FLOAT_T, ndim=1] flat_cumulative_costs = \
              self.flat_cumulative_costs
-        cdef np.ndarray[np.int16_t, ndim=1] traceback_offsets = \
+        cdef np.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
              self.traceback_offsets
-        cdef np.ndarray[np.int8_t, ndim=2] flat_edge_map = self.flat_edge_map
-        cdef np.ndarray[np.int8_t, ndim=2] offsets = self.offsets
-        cdef np.ndarray[np.int32_t, ndim=1] flat_offsets = self.flat_offsets
+        cdef np.ndarray[EDGE_T, ndim=2] flat_edge_map = self.flat_edge_map
+        cdef np.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
+        cdef np.ndarray[FLAT_OFFSET_T, ndim=1] flat_offsets = self.flat_offsets
         cdef np.ndarray[FLOAT_T, ndim=1] offset_lengths = self.offset_lengths
 
-        cdef int dim = self.dim
+        cdef DIM_T dim = self.dim
         cdef int num_offsets = len(flat_offsets)
 
         # push each start point into the heap. Note that we use flat indexing!
@@ -398,14 +410,15 @@ cdef class MCP:
             else:
                 costs_heap.push_fast(0, start)
 
-        cdef double cost, new_cost
-        cdef unsigned int index, new_index
-        cdef int is_at_edge, use_offset
-        cdef unsigned int d, i
-        cdef int offset, edge_val
+        cdef FLOAT_T cost, new_cost
+        cdef INDEX_T index, new_index
+        cdef BOOL_T is_at_edge, use_offset
+        cdef INDEX_T d, i
+        cdef OFFSET_T offset
+        cdef EDGE_T edge_val
         cdef int num_ends_found = 0
-        cdef double inf = np.inf
-        cdef double travel_cost
+        cdef FLOAT_T inf = np.inf
+        cdef FLOAT_T travel_cost
         while 1:
             # Find the point with the minimum cost in the heap. Once
             # popped, this point's minimum cost path has been found.
@@ -540,21 +553,22 @@ cdef class MCP:
                              'within the costs array')
         traceback = [tuple(ends[0])]
 
-        cdef unsigned int flat_position =\
+        cdef INDEX_T flat_position =\
              _ravel_index_fortran(ends, self.costs_shape)[0]
         if self.flat_cumulative_costs[flat_position] == np.inf:
             raise ValueError('no minimum-cost path was found '
                              'to the specified end point')
 
-        cdef np.ndarray[np.int32_t, ndim=1] position = \
-             np.array(ends[0], dtype=np.int32)
-        cdef np.ndarray[np.int16_t, ndim=1] traceback_offsets = \
+        cdef np.ndarray[INDEX_T, ndim=1] position = \
+             np.array(ends[0], dtype=INDEX_D)
+        cdef np.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
              self.traceback_offsets
-        cdef np.ndarray[np.int8_t, ndim=2] offsets = self.offsets
-        cdef np.ndarray[np.int32_t, ndim=1] flat_offsets = self.flat_offsets
+        cdef np.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
+        cdef np.ndarray[FLAT_OFFSET_T, ndim=1] flat_offsets = self.flat_offsets
 
-        cdef unsigned int offset, d
-        cdef int dim = self.dim
+        cdef OFFSETS_INDEX_T offset
+        cdef DIM_T d
+        cdef DIM_T dim = self.dim
         while 1:
             offset = traceback_offsets[flat_position]
             if offset == -1:
@@ -601,6 +615,6 @@ cdef class MCP_Geometric(MCP):
             raise ValueError('all offset components must be 0, 1, or -1')
         self.use_start_cost = 0
 
-    cdef FLOAT_C _travel_cost(self, FLOAT_C old_cost, FLOAT_C new_cost,
-                              FLOAT_C offset_length):
+    cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost,
+                              FLOAT_T offset_length):
         return offset_length * 0.5 * (old_cost + new_cost)
