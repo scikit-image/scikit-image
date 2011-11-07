@@ -56,8 +56,8 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     Parameters
     -----------
     image : array_like, dtype=float
-      The greyscale input image to detect edges on; should be normalized to 0.0
-      to 1.0.
+      The greyscale input image to detect edges on; should be normalized to 
+      0.0 to 1.0.
 
     sigma : float
       The standard deviation of the Gaussian filter
@@ -76,6 +76,32 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     output : array (image)
       The binary edge map.
 
+    See also
+    --------
+    scipy.ndimage.sobel
+
+    Notes
+    -----
+    The steps of the algorithm are as follows:
+
+    * Smooth the image using a Gaussian with ``sigma`` width.
+    
+    * Apply the horizontal and vertical Sobel operators to get the gradients
+      within the image. The edge strength is the norm of the gradient.
+    
+    * Thin potential edges to 1-pixel wide curves. First, find the normal 
+      to the edge at each point. This is done by looking at the 
+      signs and the relative magnitude of the X-Sobel and Y-Sobel
+      to sort the points into 4 categories: horizontal, vertical,
+      diagonal and antidiagonal. Then look in the normal and reverse 
+      directions to see if the values in either of those directions are 
+      greater than the point in question. Use interpolation to get a mix of 
+      points instead of picking the one that's the closest to the normal. 
+    
+    * Perform a hysteresis thresholding: first label all points above the 
+      high threshold as edges. Then recursively label any point above the 
+      low threshold that is 8-connected to a labeled point as an edge.
+
     References
     -----------
     Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
@@ -83,6 +109,18 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
 
     William Green' Canny tutorial
     http://dasl.mem.drexel.edu/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
+
+    Examples
+    --------
+    >>> from skimage import filter
+    >>> # Generate noisy image of a square
+    >>> im = np.zeros((256, 256))
+    >>> im[64:-64, 64:-64] = 1
+    >>> im += 0.2*np.random.random(im.shape)
+    >>> # First trial with the Canny filter, with the default smoothing
+    >>> edges1 = filter.canny(im)
+    >>> # Increase the smoothing for better results
+    >>> edges2 = filter.canny(im, sigma=3)    
     '''
 
     #
