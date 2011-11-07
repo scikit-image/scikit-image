@@ -52,7 +52,7 @@ def checkerboard():
     edges, they also visualise distortions particularly well.
 
     """
-    return load("chessboard_GRAY_U8.png")
+    return load("chessboard_GRAY.png")
 
 def coins():
     """Greek coins from Pompeii.
