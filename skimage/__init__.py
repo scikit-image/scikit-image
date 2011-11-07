@@ -8,11 +8,13 @@ data_dir = _osp.join(pkg_dir, 'data')
 
 from version import version as __version__
 
-def _setup_test():
+def _setup_test(verbose=False):
     import gzip
     import functools
 
-    args = ['', '--exe', '-w', '%s' % pkg_dir]
+    args = ['', '--exe', '-w', pkg_dir]
+    if verbose:
+        args.extend(['-v', '-s'])
 
     try:
         import nose as _nose
@@ -20,10 +22,16 @@ def _setup_test():
         print("Could not load nose.  Unit tests not available.")
         return None
     else:
-        return functools.partial(_nose.run, 'skimage', argv=args)
+        f = functools.partial(_nose.run, 'skimage', argv=args)
+        f.__doc__ = 'Invoke the skimage test suite.'
+        return f
 
 test = _setup_test()
 if test is None:
+    del test
+
+test_verbose = _setup_test(verbose=True)
+if test_verbose is None:
     del test
 
 def get_log(name):
