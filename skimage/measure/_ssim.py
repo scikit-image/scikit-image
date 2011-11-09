@@ -5,7 +5,7 @@ __all__ = ['ssim']
 import numpy as np
 from numpy.lib import stride_tricks
 
-def _as_windows(X, win_size=7):
+def _as_windows(X, win_size=7, flatten_first_axis=True):
     """Re-stride an array to simulate a sliding window.
 
     Parameters
@@ -15,7 +15,7 @@ def _as_windows(X, win_size=7):
 
     Returns
     -------
-    window : (N, win_size, win_size) ndarray
+    window : (N, M, win_size, win_size) ndarray
         Sliding windows.
 
     """
@@ -35,12 +35,11 @@ def _as_windows(X, win_size=7):
     new_shape = (new_rows, new_cols, win_size, win_size)
 
     windows = stride_tricks.as_strided(X, shape=new_shape, strides=new_strides)
-    windows = windows.reshape((-1, win_size, win_size))
 
     return windows
 
 
-def ssim(X, Y, win_size=7, dynamic_range=255):
+def ssim(X, Y, win_size=7, gradient=False, dynamic_range=255):
     """Compute the structural similarity index between two images.
 
     Parameters
@@ -54,11 +53,16 @@ def ssim(X, Y, win_size=7, dynamic_range=255):
         Dynamic range of the input image (distance between minimum and
         maximum possible values).  This should eventually be
         auto-computed, but just specifying it manually for now.
+    gradient : bool
+        If True, also return the gradient.
 
     Returns
     -------
     s : float
         Strucutural similarity.
+    grad : (N * N,) ndarray
+        Gradient of the structural similarity index between X and Y.
+        This is only returned if `gradient` is set to True.
 
     References
     ----------
@@ -72,33 +76,27 @@ def ssim(X, Y, win_size=7, dynamic_range=255):
         raise ValueError('Input images must have the same dtype.')
 
     if not X.shape == Y.shape:
-        raise ValueError('Inout images must have the same dimensions.')
+        raise ValueError('Input images must have the same dimensions.')
 
-    import time
-
-    tic = time.time()
+    if not (win_size % 2 == 1):
+        raise ValueError('Window size must be odd.')
 
     XW = _as_windows(X, win_size=win_size)
     YW = _as_windows(Y, win_size=win_size)
 
-    tic = time.time()
-    
-    # Flatten windows
-    XW = XW.reshape(XW.shape[0], -1)
-    YW = YW.reshape(YW.shape[0], -1)
+    NS = len(XW)
+    NP = win_size * win_size
 
-    ux = np.mean(XW, axis=1)
-    uy = np.mean(YW, axis=1)
-
-    tic = time.time()
+    ux = np.mean(np.mean(XW, axis=2), axis=2)
+    uy = np.mean(np.mean(YW, axis=2), axis=2)
 
     # Compute variances var(X), var(Y) and var(X, Y)
     cov_norm = 1 / (win_size**2 - 1)
-    XWM = XW - ux[:, None]
-    YWM = YW - uy[:, None]
-    vx = cov_norm * np.sum(XWM**2, axis=1)
-    vy = cov_norm * np.sum(YWM**2, axis=1)
-    vxy = cov_norm * np.sum(XWM * YWM, axis=1)    
+    XWM = XW - ux[..., None, None]
+    YWM = YW - uy[..., None, None]
+    vx = cov_norm * np.sum(np.sum(XWM**2, axis=2), axis=2)
+    vy = cov_norm * np.sum(np.sum(YWM**2, axis=2), axis=2)
+    vxy = cov_norm * np.sum(np.sum(XWM * YWM, axis=2), axis=2)
 
     R = dynamic_range
     K1 = 0.01
@@ -106,5 +104,29 @@ def ssim(X, Y, win_size=7, dynamic_range=255):
     C1 = (K1 * R)**2
     C2 = (K2 * R)**2
 
-    return np.mean(((2 * ux * uy + C1) * (2 * vxy + C2)) / \
-                   ((ux**2 + uy**2 + C1) * (vx + vy + C2)))
+    A1, A2, B1, B2 = (v[..., None, None] for v in
+                      (2 * ux * uy + C1,
+                       2 * vxy + C2,
+                       ux**2 + uy**2 + C1,
+                       vx + vy + C2))
+
+    S = np.mean((A1 * A2) / (B1 * B2))
+
+    if gradient:
+        local_grad = 2 / (NP * B1**2 * B2**2) * \
+            (
+            A1 * B1 * (B2 * XW - A2 * YW) - \
+            B1 * B2 * (A2 - A1) * ux[..., None, None] + \
+            A1 * A2 * (B1 - B2) * uy[..., None, None]
+            )
+
+        grad = np.zeros_like(X, dtype=float)
+        OW = _as_windows(grad, win_size=win_size)
+
+        OW += local_grad
+        grad /= NS
+
+        return S, grad
+
+    else:
+        return S
