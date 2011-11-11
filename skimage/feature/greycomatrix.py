@@ -1,5 +1,5 @@
 """
-Compute grey level co-occurrence matrices (GLCM) and associated 
+Compute grey level co-occurrence matrices (GLCMs) and associated 
 properties to characterize image textures.
 """
 
@@ -39,11 +39,12 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
 
     Returns
     -------
-    out : ndarray
+    hist : ndarray
         The grey-level co-occurrence histogram. The value
         `P[i,j,d,theta]` is the number of times that grey-level `j`
         occurs at a distance `d` and at an angle `theta` from
-        grey-level `i`.
+        grey-level `i`. If `normed` is `False`, the output is of
+        type uint32, otherwise it is float64.
 
     References
     ----------
@@ -75,7 +76,7 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
-    image = skimage.util.img_as_ubyte(image)    
+    image = np.ascontiguousarray(skimage.util.img_as_ubyte(image)) 
     assert image.ndim == 2
     assert image.min() >= 0
     assert image.max() < levels
@@ -84,28 +85,27 @@ def compute_glcm(image, distances, angles, levels=256, symmetric=False,
     assert distances.ndim == 1
     assert angles.ndim == 1
 
-    rows, cols = image.shape
-    out = np.zeros((levels, levels, len(distances), len(angles)),
-                   dtype=np.uint32)
+    hist = np.zeros((levels, levels, len(distances), len(angles)),
+                    dtype=np.uint32, order='C')
     
     # count co-occurances
-    _glcm_loop(image, distances, angles, levels, out)
+    _glcm_loop(image, distances, angles, levels, hist)
 
     # make each GLMC symmetric
     if symmetric:
         for d in range(len(distances)):
             for a in range(len(angles)):
-                out[:, :, d, a] += out[:, :, d, a].transpose()
+                hist[:, :, d, a] += hist[:, :, d, a].transpose()
                 
     # normalize each GLMC
     if normed:
-        out = out.astype(np.float64)
+        hist = hist.astype(np.float64)
         for d in range(len(distances)):
             for a in range(len(angles)):
-                if np.any(out[:, :, d, a]):
-                    out[:, :, d, a] /= out[:, :, d, a].sum()
+                if np.any(hist[:, :, d, a]):
+                    hist[:, :, d, a] /= hist[:, :, d, a].sum()
 
-    return out
+    return hist
 
 
 def compute_glcm_prop(P, prop='contrast'):
