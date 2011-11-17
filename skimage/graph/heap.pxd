@@ -7,29 +7,33 @@ value_of_fast()
 
 # determine datatypes for heap
 ctypedef double VALUE_T
-ctypedef int REFERENCE_T
-
+ctypedef Py_ssize_t REFERENCE_T
+ctypedef REFERENCE_T INDEX_T
+ctypedef unsigned char BOOL_T
+ctypedef unsigned char LEVELS_T
 
 cdef class BinaryHeap:
-    cdef readonly int count, levels, min_levels    
+    cdef readonly INDEX_T count
+    cdef readonly LEVELS_T levels, min_levels    
     cdef VALUE_T *_values
     cdef REFERENCE_T *_references
-    cdef int _popped_ref
+    cdef REFERENCE_T _popped_ref
     
-    cdef void _add_or_remove_level(self, int add_or_remove)
+    cdef void _add_or_remove_level(self, LEVELS_T add_or_remove)
     cdef void _update(self)
-    cdef void _update_one(self, int i)
-    cdef void _remove(self, int i)
+    cdef void _update_one(self, INDEX_T i)
+    cdef void _remove(self, INDEX_T i)
     
-    cdef int push_fast(self, double value, int reference)
+    cdef INDEX_T push_fast(self, VALUE_T value, REFERENCE_T reference)
     cdef VALUE_T pop_fast(self)
 
 cdef class FastUpdateBinaryHeap(BinaryHeap):
-    cdef readonly int max_reference
-    cdef REFERENCE_T *_crossref
-    cdef int _invalid_ref
-    cdef int _pushed
+    cdef readonly REFERENCE_T max_reference
+    cdef INDEX_T *_crossref
+    cdef BOOL_T _invalid_ref
+    cdef BOOL_T _pushed
     
-    cdef VALUE_T value_of_fast(self, int reference)
-    cdef int push_if_lower_fast(self, double value, int reference)
+    cdef VALUE_T value_of_fast(self, REFERENCE_T reference)
+    cdef INDEX_T push_if_lower_fast(self, VALUE_T value, 
+                                    REFERENCE_T reference)
     

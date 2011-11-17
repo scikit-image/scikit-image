@@ -28,7 +28,7 @@ cdef class MCP_Diff(_mcp.MCP):
         _mcp.MCP.__init__(self, costs, offsets, fully_connected)
         self.use_start_cost = 0
 
-    cdef _mcp.FLOAT_C _travel_cost(self, _mcp.FLOAT_C old_cost,
-                                   _mcp.FLOAT_C new_cost,
-                                   _mcp.FLOAT_C offset_length):
+    cdef _mcp.FLOAT_T _travel_cost(self, _mcp.FLOAT_T old_cost,
+                                   _mcp.FLOAT_T new_cost,
+                                   _mcp.FLOAT_T offset_length):
         return  fabs(old_cost - new_cost)
