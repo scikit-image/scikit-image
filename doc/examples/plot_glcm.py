@@ -90,5 +90,5 @@ plt.ylabel('GLVM Correlation')
 plt.legend()
 
 # display the patches and plot
-plt.suptitle('Grey level co-occurance matrix features', fontsize=14)
+plt.suptitle('Grey level co-occurrence matrix features', fontsize=14)
 plt.show()

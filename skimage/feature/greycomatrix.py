@@ -156,7 +156,7 @@ def greycoprops(P, prop='contrast'):
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
     >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4, 
     ...                  normed=True, symmetric=True)
-    >>> contrast = compute_glcm_prop(g, 'contrast')
+    >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
     array([[ 0.58333333,  1.        ],
            [ 1.25      ,  2.75      ]])
