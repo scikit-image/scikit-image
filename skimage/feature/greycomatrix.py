@@ -107,7 +107,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
             # GLCMs are sometimes all zero, so temporarily suppress warning
             old_settings = np.seterr(invalid='ignore')  
             P /= glcm_sums
-            np.seterr(invalid=old_settings['divide'])
+            np.seterr(invalid=old_settings['invalid'])
             P = np.nan_to_num(P)
         else:
             P /= glcm_sums
