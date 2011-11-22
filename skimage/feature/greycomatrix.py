@@ -1,5 +1,5 @@
 """
-Compute grey level co-occurrence matrices (GLCMs) and associated 
+Compute grey level co-occurrence matrices (GLCMs) and associated
 properties to characterize image textures.
 """
 
@@ -9,7 +9,7 @@ import skimage.util
 from _greycomatrix import _glcm_loop
 
 
-def greycomatrix(image, distances, angles, levels=256, symmetric=False, 
+def greycomatrix(image, distances, angles, levels=256, symmetric=False,
                  normed=False):
     """Calculate the grey-level co-occurrence matrix.
 
@@ -102,8 +102,15 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     # normalize each GLMC
     if normed:
         P = P.astype(np.float64)
-        P /= np.apply_over_axes(np.sum, P, axes=(0, 1))
-        P = np.nan_to_num(P)
+        glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
+        if np.any(glcm_sums == 0):
+            # GLCMs are sometimes all zero, so temporarily suppress warning
+            old_settings = np.seterr(invalid='ignore')  
+            P /= glcm_sums
+            np.seterr(invalid=old_settings['divide'])
+            P = np.nan_to_num(P)
+        else:
+            P /= glcm_sums
 
     return P
 
@@ -190,24 +197,26 @@ def greycoprops(P, prop='contrast'):
         results = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
     elif prop == 'correlation':
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
-        for d in range(num_dist):
-            for a in range(num_angle):        
-                g = P[:, :, d, a]
-                mean_i = (I * g).sum()
-                mean_j = (J * g).sum()
-                diff_i = I - mean_i
-                diff_j = J - mean_j
-                std_i = np.sqrt((g * (diff_i) ** 2).sum())
-                std_j = np.sqrt((g * (diff_j) ** 2).sum())
-                cov = (g * (diff_i * diff_j)).sum()
-                if std_i < 1e-15 or std_j < 1e-15:
-                    corr = 1.
-                else:
-                    corr = cov / (std_i * std_j)
-                
-                results[d, a] = corr
-                
-                results[d, a] = corr
+        I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
+        J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
+        diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
+        diff_j = J - np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
+        
+        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2), 
+                                           axes=(0, 1))[0, 0])
+        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2), 
+                                           axes=(0, 1))[0, 0])
+        cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)), 
+                                 axes=(0, 1))[0, 0]
+        
+        # handle the special case of standard deviations near zero
+        mask_0 = std_i < 1e-15
+        mask_0[std_j < 1e-15] = True
+        results[mask_0] = 1
+        
+        # handle the standard case
+        mask_1 = mask_0 == False
+        results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])
     elif prop in ['contrast', 'dissimilarity', 'homogeneity']:
         weights = weights.reshape((num_level, num_level, 1, 1))
         results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
