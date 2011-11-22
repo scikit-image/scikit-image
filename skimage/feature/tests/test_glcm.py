@@ -134,7 +134,7 @@ class TestGLCM():
 
     def test_uniform_properties(self):
         im = np.ones((4, 4), dtype=np.uint8)
-        result = greycomatrix(im, [1, 2], [0, np.pi / 2], 4, normed=True, 
+        result = greycomatrix(im, [1, 2, 8], [0, np.pi / 2], 4, normed=True, 
                               symmetric=True)
         for prop in ['contrast', 'dissimilarity', 'homogeneity', 
                      'energy', 'correlation', 'ASM']:
