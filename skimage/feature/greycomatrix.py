@@ -18,9 +18,9 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
 
     Parameters
     ----------
-    image : ndarray
-        Input image. The image is converted to the uint8 data type, so  
-        its range of the image is [0, 255].
+    image : array_like
+        Integer typed input image. The image will be cast to uint8, so
+        the maximum value must be less than 256.
     distances : array_like
         List of pixel pair distance offsets.
     angles : array_like
@@ -28,7 +28,8 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     levels : int, optional
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image). The default is 256.        
+        (typically 256 for an 8-bit image). The maximum value is 
+        256, and the default is 256.        
     symmetric : bool, optional
         If True, the output matrix `P[:, :, d, theta]` is symmetric. This 
         is accomplished by ignoring the order of value pairs, so both 
@@ -80,10 +81,13 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 0, 0, 0]], dtype=uint32)
 
     """
-    image = np.ascontiguousarray(skimage.util.img_as_ubyte(image)) 
+
+    assert levels <= 256    
+    image = np.ascontiguousarray(image)
     assert image.ndim == 2
     assert image.min() >= 0
     assert image.max() < levels
+    image = image.astype(np.uint8)
     distances = np.ascontiguousarray(distances, dtype=np.float64)
     angles = np.ascontiguousarray(angles, dtype=np.float64)
     assert distances.ndim == 1
@@ -103,14 +107,8 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     if normed:
         P = P.astype(np.float64)
         glcm_sums = np.apply_over_axes(np.sum, P, axes=(0, 1))
-        if np.any(glcm_sums == 0):
-            # GLCMs are sometimes all zero, so temporarily suppress warning
-            old_settings = np.seterr(invalid='ignore')  
-            P /= glcm_sums
-            np.seterr(invalid=old_settings['invalid'])
-            P = np.nan_to_num(P)
-        else:
-            P /= glcm_sums
+        glcm_sums[glcm_sums == 0] = 1
+        P /= glcm_sums
 
     return P
 
@@ -123,11 +121,13 @@ def greycoprops(P, prop='contrast'):
     follows:
 
     - 'contrast': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-j)^2`
-    - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}\\left|i-j\\right|`
+    - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}|i-j|`
     - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
     - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`    
     - 'energy': :math:`\\sqrt{ASM}`
-    - 'correlation': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i)(j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]`
+    - 'correlation': 
+.. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\ 
+          (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
     
     Parameters
@@ -138,7 +138,8 @@ def greycoprops(P, prop='contrast'):
         `P[i,j,d,theta]` is the number of times that grey-level j
         occurs at a distance d and at an angle theta from
         grey-level i.
-    prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', 'correlation', 'ASM'}, optional
+    prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
+            'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
     
     Returns
@@ -222,7 +223,3 @@ def greycoprops(P, prop='contrast'):
         results = np.apply_over_axes(np.sum, (P * weights), axes=(0, 1))[0, 0]
 
     return results
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
