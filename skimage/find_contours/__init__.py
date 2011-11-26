@@ -75,8 +75,8 @@ def find_contours(array, level, fully_connected='low', positive_orientation='low
     if array.ndim != 2:
         raise RuntimeError('Only 2D arrays are supported.')
     level = float(level)
-    if fully_connected not in _param_options or 
-       positive_orientation not in _param_options:
+    if (fully_connected not in _param_options or 
+       positive_orientation not in _param_options):
        raise ValueError('Parameters "fully_connected" and'
        ' "positive_orientation" must be either "high" or "low".')
     point_list = _find_contours.iterate_and_store(array, level,
