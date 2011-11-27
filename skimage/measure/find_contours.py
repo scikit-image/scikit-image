@@ -41,7 +41,7 @@ def find_contours(array, level, fully_connected='low', positive_orientation='low
     87 Proceedings) 21(4) July 1987, p. 163-170). A simple explanation is
     available here: http://www.essi.fr/~lingrand/MarchingCubes/algo.html
     
-     There is a single ambiguous case in the marching squares algorithm: when
+    There is a single ambiguous case in the marching squares algorithm: when
     a given 2x2-element square has two high-valued and two low-valued
     elements, each pair diagonally adjacent. (Where high- and low-valued is
     with respect to the contour value sought.) In this case, either the
@@ -54,7 +54,7 @@ def find_contours(array, level, fully_connected='low', positive_orientation='low
     low-valued elements are considered fully-connected; this can be altered 
     with the 'fully_connected' parameter.
     
-     Output contours are not guaranteed to be closed: contours which intersect
+    Output contours are not guaranteed to be closed: contours which intersect
     the array edge will be left open. All other contours will be closed. (The
     closed-ness of a contours can be tested by checking whether the beginning
     point is the same as the end point.)
@@ -69,7 +69,20 @@ def find_contours(array, level, fully_connected='low', positive_orientation='low
     The order of the contours in the output list is determined by the position
     of the smallest x,y (in lexicographical order) coordinate in the contour.
     This is a side-effect of how the input array is traversed, but can be
-    relied upon.'''
+    relied upon.
+    
+    IMPORTANT NOTE ON COORDINATES AND VALUES:
+    Array coordinates/values are assumed to refer to the _center_ of the
+    array element. Take a simple example: [0, 1]. The interpolated position of
+    0.5 in this array is midway between the 0-element (at x=0) and the
+    1-element (at x=1), and thus would fall at x=0.5.
+    
+    This means that to find reasonable contours, it is best to find contours
+    midway between the expected "light" and "dark" values. In particular,
+    given a binarized array, DO NOT choose to find contours at the low or high
+    value of the array. This will often yield degenerate contours, especially
+    around structures that are a single array element wide. Instead choose
+    a middle value, as above.'''
     
     array = np.asarray(array)
     if array.ndim != 2:

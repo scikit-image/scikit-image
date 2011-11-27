@@ -16,8 +16,10 @@ a[1, 1:-1] = 0
 ##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
 ##        [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]], dtype=float32)
 
+x,y = np.mgrid[-1:1:5j,-1:1:5j]
+r = np.sqrt(x**2 + y**2)
 
-def test_find_contours():
+def test_binary():
   contours = find_contours(a, 0.5)
   assert len(contours) == 1
   assert_array_equal(contours[0],
@@ -46,6 +48,16 @@ def test_find_contours():
                       [ 6. ,  0.5],
                       [ 6.5,  1. ],
                       [ 6. ,  1.5]])
+
+def test_float():
+  contours = find_contours(r, 0.5)
+  assert len(contours) == 1
+  assert_array_equal(contours[0],
+                    [[ 2.,  3.],
+                     [ 1.,  2.],
+                     [ 2.,  1.],
+                     [ 3.,  2.],
+                     [ 2.,  3.]])
 
 
     
