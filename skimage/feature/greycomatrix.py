@@ -18,7 +18,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
 
     Parameters
     ----------
-    image : array_like
+    image : array_like of uint8
         Integer typed input image. The image will be cast to uint8, so
         the maximum value must be less than 256.
     distances : array_like
@@ -29,7 +29,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
         (typically 256 for an 8-bit image). The maximum value is 
-        256, and the default is 256.        
+        256.        
     symmetric : bool, optional
         If True, the output matrix `P[:, :, d, theta]` is symmetric. This 
         is accomplished by ignoring the order of value pairs, so both 
