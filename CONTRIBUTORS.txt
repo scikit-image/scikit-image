@@ -28,7 +28,7 @@
   Code to generate skimage logo.
 
 - Zachary Pincus
-  Tracing of low cost paths, FreeImage I/O plugin
+  Tracing of low cost paths, FreeImage I/O plugin, iso-contours
 
 - Almar Klein
   Binary heap class for graph algorithms
