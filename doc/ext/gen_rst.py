@@ -117,18 +117,18 @@ def generate_example_rst(app):
     <style type="text/css">
     .figure {
         float: left;
-        margin: 10px;
-        width: auto;
-        height: 200px;
-        width: 180px;
+        margin: 1em;
     }
 
     .figure img {
-        display: inline;
-        }
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 200px;
+    }
 
     .figure .caption {
-        width: 170px;
+        width: 200px;
         text-align: center !important;
     }
     </style>
