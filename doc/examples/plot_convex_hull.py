@@ -17,7 +17,7 @@ A good overview of the algorithm is given on `Steve Eddin's blog
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.morphology import convex_hull
+from skimage.morphology import convex_hull_image
 
 image = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -27,7 +27,7 @@ image = np.array(
      [0, 1, 0, 0, 0, 0, 0, 1, 0],
      [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=float)
 
-chull = convex_hull(image)
+chull = convex_hull_image(image)
 image[chull] += 1.7
 image -= -1.7
 
