@@ -47,7 +47,7 @@ modified to work as part of the scikit, others may be lacking in documentation
 or tests.
 
    * :strike:`Connected components`
-   * `Grey-level co-occurrence matrices <http://mentat.za.net/hg>`_
+   * :strike:`Grey-level co-occurrence matrices`
    * Marching squares
    * Nadav's bilateral filtering (first compare against CellProfiler's
      code, based on http://groups.csail.mit.edu/graphics/bilagrid/bilagrid_web.pdf)
