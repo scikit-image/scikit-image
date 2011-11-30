@@ -84,7 +84,7 @@ def find_contours(array, level, fully_connected='low', positive_orientation='low
     around structures that are a single array element wide. Instead choose
     a middle value, as above.'''
 
-    array = np.asarray(array)
+    array = np.asarray(array, dtype=np.double)
     if array.ndim != 2:
         raise RuntimeError('Only 2D arrays are supported.')
     level = float(level)
