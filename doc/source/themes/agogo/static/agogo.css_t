@@ -689,3 +689,9 @@ td.na-bar{
 	font-weight: normal;
 	font-style: normal;
 }
+
+/* Adjust doc headers such as Notes, References, etc. */
+p.rubric {
+    font-weight: bold;
+    font-size: 120%;
+}
