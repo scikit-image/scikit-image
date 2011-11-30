@@ -1,11 +1,11 @@
 #include <Python.h>
 #include "numpy/arrayobject.h"
 
-static char _find_contours_doc[] = 
+static char _find_contours_doc[] =
 "This module defines C helper functions for find_contours";
 
 
-static char iterate_and_store_doc[] = 
+static char iterate_and_store_doc[] =
 "iterate_and_store(array, level, vertex_connect_high)\n\
 \n\
 Iterate across the given array in a marching-squares fashion, looking for\n\
@@ -51,32 +51,32 @@ face+vertex connected into objects; otherwise low-valued pixels are.";
     return NULL; \
   } \
   char res = PyList_Append(arc_list, tuple); \
-	Py_DECREF(tuple); \
-	if (res < 0) { \
+        Py_DECREF(tuple); \
+        if (res < 0) { \
     Py_DECREF(double_array); \
     Py_DECREF(arc_list); \
-		return NULL; \
-	} \
+                return NULL; \
+        } \
 }
 
 #define ADD_SEGMENT(START, END) { \
   double output0, output1; \
   START \
   ADD_TUPLE \
-	END \
-	ADD_TUPLE \
+        END \
+        ADD_TUPLE \
 }
 
 static PyObject*
 iterate_and_store(PyObject *self, PyObject *args)
 {
-	PyObject* array;
-	double level;
-	int vertex_connect_high;
-	if (!PyArg_ParseTuple(args, "Odi:iterate_and_store", &array, &level,
-	  &vertex_connect_high)) {
-		return NULL;
-	}
+        PyObject* array;
+        double level;
+        int vertex_connect_high;
+        if (!PyArg_ParseTuple(args, "Odi:iterate_and_store", &array, &level,
+          &vertex_connect_high)) {
+                return NULL;
+        }
 
   PyObject* double_array = PyArray_FromAny(array,
     PyArray_DescrFromType(NPY_DOUBLE), 2, 2, NPY_CONTIGUOUS | NPY_ALIGNED,
@@ -84,14 +84,14 @@ iterate_and_store(PyObject *self, PyObject *args)
   if (!double_array) {
     return NULL;
   }
-  
+
   npy_intp *dims = PyArray_DIMS(double_array);
   if (dims[0] < 2 || dims[1] < 2) {
     Py_DECREF(double_array);
     PyErr_SetString(PyExc_ValueError, "Input array must be at least 2x2.");
     return NULL;
-  }  
-  
+  }
+
   // The plan is to iterate a 2x2 square across the input array. This means
   // that the upper-left corner of the square needs to iterate across a
   // sub-array that's one-less-large in each direction (so that the square
@@ -100,7 +100,7 @@ iterate_and_store(PyObject *self, PyObject *args)
   // 2D coordinates for the position of the upper-left pointer. Note that we
   // ensured that the array is of type 'double' and is C-contiguous (last
   // index varies the fastest).
-  
+
   // Current coords start at 0,0.
   npy_intp coords[2] = {0,0};
   // Precompute the size of the array minus 2 in each direction, so we'll know
@@ -116,7 +116,7 @@ iterate_and_store(PyObject *self, PyObject *args)
   double* ur_ptr = ul_ptr + 1;
   double* ll_ptr = ul_ptr + dims[1];
   double* lr_ptr = ll_ptr + 1;
-  
+
   // make a list to hold the returned coordinates
   PyObject* arc_list = PyList_New(0);
   if (!arc_list) {
@@ -139,22 +139,22 @@ iterate_and_store(PyObject *self, PyObject *args)
     //   -+    -+    -+    -+    ++    ++    ++    ++
     //
     // The position of the line segment that cuts through (or doesn't, in case
-    // 0 and 15) each square is clear, except in cases  6 and 9. In this case, 
+    // 0 and 15) each square is clear, except in cases  6 and 9. In this case,
     // where the segments are placed is determined by vertex_connect_high.
-    // If vertex_connect_high is false, then lines like \\ are drawn 
+    // If vertex_connect_high is false, then lines like \\ are drawn
     // through square 6, and lines like // are drawn through square 9.
     // Otherwise, the situation is reversed.
     // Finally, recall that we draw the lines so that (moving from tail to
     // head) the lower-valued pixels are on the left of the line. So, for
     // example, case 1 entails a line slanting from the middle of the top of
     // the square to the middle of the left side of the square.
-    
+
     unsigned char square_case = 0;
     if ((*ul_ptr) > level) square_case += 1;
     if ((*ur_ptr) > level) square_case += 2;
     if ((*ll_ptr) > level) square_case += 4;
     if ((*lr_ptr) > level) square_case += 8;
-    
+
     switch(square_case)
       {
       case 0: // no line
@@ -210,7 +210,7 @@ iterate_and_store(PyObject *self, PyObject *args)
           ADD_SEGMENT(TOP, LEFT);
           // bottom to right
           ADD_SEGMENT(BOTTOM, RIGHT);
-          }        
+          }
         break;
       case 10: // bottom to top
         ADD_SEGMENT(BOTTOM, TOP);
@@ -230,7 +230,7 @@ iterate_and_store(PyObject *self, PyObject *args)
       case 15: // no line
         break;
       } // switch square_case
-    
+
     if (coords[1] < dims_m2[1]) {
       coords[1]++;
     } else {
@@ -242,21 +242,21 @@ iterate_and_store(PyObject *self, PyObject *args)
     }
     ul_ptr++; ur_ptr++; ll_ptr++; lr_ptr++;
   } // iteration
-  
+
   // get rid of the double array reference that we own
   Py_DECREF(double_array);
-  return arc_list;  
+  return arc_list;
 }
 
 
 static PyMethodDef _find_contours_methods[] = {
-	{"iterate_and_store", iterate_and_store, METH_VARARGS, iterate_and_store_doc},
-	{NULL, NULL, 0, NULL}
+        {"iterate_and_store", iterate_and_store, METH_VARARGS, iterate_and_store_doc},
+        {NULL, NULL, 0, NULL}
 };
 
 PyMODINIT_FUNC
 init_find_contours(void)
 {
-	Py_InitModule3("_find_contours", _find_contours_methods, _find_contours_doc);
-	import_array();
+        Py_InitModule3("_find_contours", _find_contours_methods, _find_contours_doc);
+        import_array();
 }
