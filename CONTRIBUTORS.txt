@@ -79,7 +79,7 @@
   Windows packaging and Python 3 compatibility.
 
 - Neil Yager
-  Skeletonization.
+  Skeletonization and grey level co-occurrence matrices.
 
 - Nelle Varoquaux
   Renaming of the package to ``skimage``.
