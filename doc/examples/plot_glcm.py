@@ -78,6 +78,7 @@ for (y, x) in sky_locations:
 plt.xlabel('Original Image')
 plt.xticks([])
 plt.yticks([])
+plt.axis('image')
 
 # for each patch, plot (dissimilarity, correlation)
 plt.subplot(3, 2, 2)
