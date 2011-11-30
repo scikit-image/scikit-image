@@ -8,7 +8,7 @@ from glob import glob
 import os.path
 
 import numpy as np
-from io import imread
+from ._io import imread
 
 
 class MultiImage(object):
