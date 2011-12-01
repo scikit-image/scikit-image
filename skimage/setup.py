@@ -15,6 +15,7 @@ def configuration(parent_package='', top_path=None):
     config.add_subpackage('color')
     config.add_subpackage('draw')
     config.add_subpackage('feature')
+    config.add_subpackage('measure')
 
     def add_test_directories(arg, dirname, fnames):
         if dirname.split(os.path.sep)[-1] == 'tests':
