@@ -6,7 +6,8 @@ cimport numpy as np
 
 np.import_array()
 
-cdef double _get_fraction(double from_value, double to_value, double level):
+cdef inline double _get_fraction(double from_value, double to_value, 
+                                 double level):
     if (to_value == from_value):
         return 0
     return ((level - from_value) / (to_value - from_value))
@@ -70,7 +71,7 @@ def iterate_and_store(np.ndarray[double, ndim=2, mode='c'] array,
         # cases 6 and 9. In this case, where the segments are placed
         # is determined by vertex_connect_high.  If
         # vertex_connect_high is false, then lines like \\ are drawn
-        # through square 6, and lines like # are drawn through square
+        # through square 6, and lines like // are drawn through square
         # 9.  Otherwise, the situation is reversed.
         # Finally, recall that we draw the lines so that (moving from tail to
         # head) the lower-valued pixels are on the left of the line. So, for
@@ -81,9 +82,17 @@ def iterate_and_store(np.ndarray[double, ndim=2, mode='c'] array,
         r1, c1 = r0 + 1, c0 + 1
 
         ul = array[r0, c0]
-        ur = array[r0, c0 + 1]
-        ll = array[r0 + 1, c0]
-        lr = array[r0 + 1, c0 + 1]
+        ur = array[r0, c1]
+        ll = array[r1, c0]
+        lr = array[r1, c1]
+
+        # now in advance the coords indices
+        if coords[1] < array.shape[1] - 2:
+            coords[1] += 1
+        else:
+            coords[0] += 1
+            coords[1] = 0
+        
 
         square_case = 0
         if (ul > level): square_case += 1
@@ -91,95 +100,87 @@ def iterate_and_store(np.ndarray[double, ndim=2, mode='c'] array,
         if (ll > level): square_case += 4
         if (lr > level): square_case += 8
 
-        top = coords[0], coords[1] + _get_fraction(ul, ur, level)
-        bottom = coords[0] + 1, coords[1] + _get_fraction(ll, lr, level)
-        left = coords[0] + _get_fraction(ul, ll, level), coords[1]
-        right = coords[0] + _get_fraction(ur, lr, level), coords[1] + 1
+        if (square_case != 0 and square_case != 15):
+            # only do anything if there's a line passing through the
+            # square. Cases 0 and 15 are entirely below/above the contour.
+            
+            top = r0, c0 + _get_fraction(ul, ur, level)
+            bottom = r1, c0 + _get_fraction(ll, lr, level)
+            left = r0 + _get_fraction(ul, ll, level), c0
+            right = r0 + _get_fraction(ur, lr, level), c1
 
-        if (square_case == 0):
-            # no line
-            pass
-        elif (square_case == 1):
-            # top to left
-            arc_list.append(top)
-            arc_list.append(left)
-        elif (square_case == 2):
-            # right to top
-            arc_list.append(right)
-            arc_list.append(top)
-        elif (square_case == 3):
-            # right to left
-            arc_list.append(right)
-            arc_list.append(left)
-        elif (square_case == 4):
-            # left to bottom
-            arc_list.append(left)
-            arc_list.append(bottom)
-        elif (square_case == 5):
-            # top to bottom
-            arc_list.append(top)
-            arc_list.append(bottom)
-        elif (square_case == 6):
-            if vertex_connect_high:
-                arc_list.append(left)
-                arc_list.append(top)
-
-                arc_list.append(right)
-                arc_list.append(bottom)
-            else:
-                arc_list.append(right)
+            if (square_case == 1):
+                # top to left
                 arc_list.append(top)
                 arc_list.append(left)
-                arc_list.append(bottom)
-        elif (square_case == 7):
-            # right to bottom
-            arc_list.append(right)
-            arc_list.append(bottom)
-        elif (square_case == 8):
-            # bottom to right
-            arc_list.append(bottom)
-            arc_list.append(right)
-        elif (square_case == 9):
-            if vertex_connect_high:
-                arc_list.append(top)
+            elif (square_case == 2):
+                # right to top
                 arc_list.append(right)
+                arc_list.append(top)
+            elif (square_case == 3):
+                # right to left
+                arc_list.append(right)
+                arc_list.append(left)
+            elif (square_case == 4):
+                # left to bottom
+                arc_list.append(left)
+                arc_list.append(bottom)
+            elif (square_case == 5):
+                # top to bottom
+                arc_list.append(top)
+                arc_list.append(bottom)
+            elif (square_case == 6):
+                if vertex_connect_high:
+                    arc_list.append(left)
+                    arc_list.append(top)
 
+                    arc_list.append(right)
+                    arc_list.append(bottom)
+                else:
+                    arc_list.append(right)
+                    arc_list.append(top)
+                    arc_list.append(left)
+                    arc_list.append(bottom)
+            elif (square_case == 7):
+                # right to bottom
+                arc_list.append(right)
+                arc_list.append(bottom)
+            elif (square_case == 8):
+                # bottom to right
+                arc_list.append(bottom)
+                arc_list.append(right)
+            elif (square_case == 9):
+                if vertex_connect_high:
+                    arc_list.append(top)
+                    arc_list.append(right)
+
+                    arc_list.append(bottom)
+                    arc_list.append(left)
+                else:
+                    arc_list.append(top)
+                    arc_list.append(left)
+
+                    arc_list.append(bottom)
+                    arc_list.append(right)
+            elif (square_case == 10):
+                # bottom to top
+                arc_list.append(bottom)
+                arc_list.append(top)
+            elif (square_case == 11):
+                # bottom to left
                 arc_list.append(bottom)
                 arc_list.append(left)
-            else:
-                arc_list.append(top)
+            elif (square_case == 12):
+                # lef to right
                 arc_list.append(left)
-
-                arc_list.append(bottom)
                 arc_list.append(right)
-        elif (square_case == 10):
-            # bottom to top
-            arc_list.append(bottom)
-            arc_list.append(top)
-        elif (square_case == 11):
-            # bottom to left
-            arc_list.append(bottom)
-            arc_list.append(left)
-        elif (square_case == 12):
-            # lef to right
-            arc_list.append(left)
-            arc_list.append(right)
-        elif (square_case == 13):
-            # top to right
-            arc_list.append(top)
-            arc_list.append(right)
-        elif (square_case == 14):
-            # left to top
-            arc_list.append(left)
-            arc_list.append(top)
-        elif (square_case == 15):
-            # no line
-            pass
-
-        if coords[1] < array.shape[1] - 2:
-            coords[1] += 1
-        else:
-            coords[0] += 1
-            coords[1] = 0
+            elif (square_case == 13):
+                # top to right
+                arc_list.append(top)
+                arc_list.append(right)
+            elif (square_case == 14):
+                # left to top
+                arc_list.append(left)
+                arc_list.append(top)
 
     return arc_list
