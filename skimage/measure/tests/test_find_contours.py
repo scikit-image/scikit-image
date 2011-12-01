@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import *
 
-from skimage.find_contours import find_contours 
+from skimage.measure import find_contours 
 
 a = np.ones((8,8), dtype=np.float32)
 a[1:-1, 1] = 0
