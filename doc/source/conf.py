@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'skimage'
-copyright = u'2011, the Image Scikit team'
+copyright = u'2011, the scikits-image team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
