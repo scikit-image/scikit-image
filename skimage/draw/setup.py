@@ -20,11 +20,11 @@ def configuration(parent_package='', top_path=None):
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
-    setup(maintainer = 'Scikits-image developers',
-          author = 'Scikits-image developers',
+    setup(maintainer = 'scikits-image developers',
+          author = 'scikits-image developers',
           maintainer_email = 'scikits-image@googlegroups.com',
           description = 'Drawing',
-          url = 'https://github.com/scikits-image/scikits.image',
+          url = 'https://github.com/scikits-image/scikits-image',
           license = 'SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )

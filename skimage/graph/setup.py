@@ -28,10 +28,10 @@ def configuration(parent_package='', top_path=None):
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
-    setup(maintainer = 'scikits.image Developers',
+    setup(maintainer = 'scikits-image Developers',
           maintainer_email = 'scikits-image@googlegroups.com',
           description = 'Graph-based Image-processing Algorithms',
-          url = 'https://github.com/scikits-image/scikits.image',
+          url = 'https://github.com/scikits-image/scikits-image',
           license = 'Modified BSD',
           **(configuration(top_path='').todict())
           )
