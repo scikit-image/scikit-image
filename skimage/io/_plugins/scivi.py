@@ -3,9 +3,9 @@ Scivi is written/maintained/developed by:
 
 S. Chris Colbert - sccolbert@gmail.com
 
-Scivi is free software and is part of the scikits.image project.
+Scivi is free software and is part of the scikits-image project.
 
-Scivi is governed by the licenses of the scikits.image project.
+Scivi is governed by the licenses of the scikits-image project.
 
 Please report any bugs to the author.
 

@@ -35,11 +35,11 @@ def configuration(parent_package='', top_path=None):
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
-    setup(maintainer = 'Scikits.Image Developers',
+    setup(maintainer = 'scikits-image Developers',
           author = 'Damian Eads',
           maintainer_email = 'scikits-image@googlegroups.com',
           description = 'Morphology Wrapper',
-          url = 'https://github.com/scikits-image/scikits.image',
+          url = 'https://github.com/scikits-image/scikits-image',
           license = 'SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )
