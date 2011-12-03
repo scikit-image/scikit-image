@@ -5,7 +5,7 @@ Algorithms for computing the skeleton of a binary image
 import numpy as np
 from scipy import ndimage
 
-from _skeletonize import _skeletonize_loop, _table_lookup_index
+from ._skeletonize import _skeletonize_loop, _table_lookup_index
 
 # --------- Skeletonization by morphological thinning ---------
 
