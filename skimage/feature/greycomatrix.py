@@ -6,7 +6,7 @@ properties to characterize image textures.
 import numpy as np
 import skimage.util
 
-from _greycomatrix import _glcm_loop
+from ._greycomatrix import _glcm_loop
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
