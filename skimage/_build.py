@@ -63,7 +63,7 @@ def _changed(filename):
 
     """
     filename_cache = filename + '.md5'
-    
+
     try:
         md5_cached = open(filename_cache, 'rb').read()
     except IOError:
@@ -73,6 +73,6 @@ def _changed(filename):
         md5_new = _md5sum(f)
 
         with open(filename_cache, 'wb') as cf:
-            cf.write(md5_new)
+            cf.write(md5_new.encode('utf-8'))
 
     return md5_cached != md5_new

@@ -28,11 +28,17 @@ def _setup_test(verbose=False):
 
 test = _setup_test()
 if test is None:
-    del test
+    try:
+        del test
+    except NameError:
+        pass
 
 test_verbose = _setup_test(verbose=True)
 if test_verbose is None:
-    del test
+    try:
+        del test
+    except NameError:
+        pass
 
 def get_log(name):
     """Return a console logger.
