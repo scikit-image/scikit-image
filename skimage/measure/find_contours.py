@@ -1,5 +1,5 @@
 import numpy as np
-import _find_contours
+from . import _find_contours
 
 from collections import deque
 
