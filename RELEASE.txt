@@ -1,6 +1,7 @@
 How to make a new release of ``skimage``
 ========================================
 
+- Update release notes.
 - Update the version number in setup.py and commit
 - Update the docs and api, push upstream using "make gh-pages"
 - Add the version number as a tag in git::
@@ -20,4 +21,5 @@ How to make a new release of ``skimage``
 
 - Update the web frontpage.
   The webpage is kept in a separate repo: scikits-image-web
+- Post release notes on mailing lists.
 
