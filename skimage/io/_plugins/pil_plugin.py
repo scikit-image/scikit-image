@@ -20,7 +20,11 @@ def imread(fname, dtype=None):
         else:
             im = im.convert('RGB')
 
-    if 'A' in im.mode:
+    if im.mode == 'I;16':  
+        shape = im.size
+        im = np.fromstring(im.tostring(), dtype=np.uint16)
+        im.shape = shape[::-1]
+    elif 'A' in im.mode:
         im = im.convert('RGBA')
 
     return np.array(im, dtype=dtype)
