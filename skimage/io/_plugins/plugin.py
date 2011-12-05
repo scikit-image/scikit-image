@@ -108,8 +108,8 @@ def use(name, kind=None):
 
     Use the Python Imaging Library to read images:
 
-    >>> from skimage.io import plugin
-    >>> plugin.use('PIL', 'read')
+    >>> from skimage.io import use_plugin
+    >>> use_plugin('pil', 'imread')
 
     """
     if kind is None:
