@@ -1,3 +1,13 @@
+Pre-built installation
+----------------------
+
+Scikits-image is distributed with the `Enthought Python Distribution (EPD)
+<www.enthought.com/products/epd.php>`__ as well as with `Python(x,y)
+<http://www.pythonxy.com>`__.  On systems that support setuptools, the package
+can be installed with ``easy_install``::
+
+  easy_install scikits-image
+
 Installation from source
 ------------------------
 
