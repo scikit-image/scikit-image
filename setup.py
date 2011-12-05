@@ -9,7 +9,7 @@ Please refer to the online documentation at
 http://scikits-image.org/
 """
 
-DISTNAME            = 'skimage'
+DISTNAME            = 'scikits-image'
 DESCRIPTION         = 'Image processing routines for SciPy'
 LONG_DESCRIPTION    = descr
 MAINTAINER          = 'Stefan van der Walt'
@@ -39,7 +39,7 @@ def configuration(parent_package='', top_path=None):
             delegate_options_to_subpackages=True,
             quiet=True)
 
-    config.add_subpackage(DISTNAME)
+    config.add_subpackage('skimage')
     config.add_data_dir('skimage/data')
 
     return config
