@@ -118,10 +118,13 @@ def use(name, kind=None):
         if not kind in plugin_provides[name]:
             raise RuntimeError("Plugin %s does not support `%s`." % \
                                (name, kind))
-        kind = [kind]
+        if kind == 'imshow':
+            kind = [kind, '_app_show']
+        else:
+            kind = [kind]
 
     if not name in available(loaded=True):
-        _load(name)
+        _load(name, kind)
 
     for k in kind:
         if not k in plugin_store:
@@ -159,13 +162,16 @@ def available(loaded=False):
 
     return d
 
-def _load(plugin):
+def _load(plugin, kind=None):
     """Load the given plugin.
 
     Parameters
     ----------
     plugin : str
         Name of plugin to load.
+    kind : list of plugin_store.keys(), optional
+        Set the plugin as default for these functions.
+        By default, the plugin is set as default for all functions.
 
     See Also
     --------
@@ -188,7 +194,10 @@ def _load(plugin):
             store = plugin_store[p]
             func = getattr(plugin_module, p)
             if not func in store:
-                store.insert(0, (plugin, func))
+                if kind is None or p in kind:
+                    store.insert(0, (plugin, func))
+                else:
+                    store.append((plugin, func))
 
 def info(plugin):
     """Return plugin meta-data.
