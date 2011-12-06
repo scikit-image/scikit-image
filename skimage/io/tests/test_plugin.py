@@ -53,13 +53,33 @@ class TestPlugin:
     def test_use_priority(self):
         plugin.use(priority_plugin)
         plug, func = plugin.plugin_store['imread'][0]
-        print(plugin.plugin_store)
         assert_equal(plug, priority_plugin)
 
         plugin.use('test')
         plug, func = plugin.plugin_store['imread'][0]
-        print(plugin.plugin_store)
         assert_equal(plug, 'test')
+
+    @skipif(not PIL_available)
+    def test_use_priority_with_func(self):
+        plugin.use('pil')
+        plug, func = plugin.plugin_store['imread'][0]
+        assert_equal(plug, 'pil')
+
+        plugin.use('test', 'imread')
+        plug, func = plugin.plugin_store['imread'][0]
+        assert_equal(plug, 'test')
+
+        plug, func = plugin.plugin_store['imsave'][0]
+        assert_equal(plug, 'pil')
+
+        plugin.use('test')
+        plug, func = plugin.plugin_store['imsave'][0]
+        assert_equal(plug, 'test')
+
+    def test_plugin_order(self):
+        p = io.plugin_order()
+        assert 'imread' in p
+        assert 'test' in p['imread']
 
     def test_available(self):
         assert 'qt' in io.plugins()

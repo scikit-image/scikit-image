@@ -7,6 +7,7 @@ The following plug-ins are available:
 from ._plugins import use as use_plugin
 from ._plugins import available as plugins
 from ._plugins import info as plugin_info
+from ._plugins import configuration as plugin_order
 available_plugins = plugins()
 
 for preferred_plugin in ['pil', 'matplotlib', 'qt', 'null']:
