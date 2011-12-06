@@ -2,7 +2,7 @@
 
 """
 
-__all__ = ['use', 'available', 'call', 'info']
+__all__ = ['use', 'available', 'call', 'info', 'configuration']
 
 import warnings
 from ConfigParser import ConfigParser
@@ -145,6 +145,12 @@ def available(loaded=False):
         If True, show only those plugins currently loaded.  By default,
         all plugins are shown.
 
+    Returns
+    -------
+    p : dict
+        Dictionary with plugin names as keys and exposed functions as
+        values.
+
     """
     active_plugins = set()
     for plugin_func in plugin_store.itervalues():
@@ -187,8 +193,8 @@ def _load(plugin):
         else:
             store = plugin_store[p]
             func = getattr(plugin_module, p)
-            if not func in store:
-                store.insert(0, (plugin, func))
+            if not (plugin, func) in store:
+                store.append((plugin, func))
 
 def info(plugin):
     """Return plugin meta-data.
@@ -209,3 +215,17 @@ def info(plugin):
     except KeyError:
         raise ValueError('No information on plugin "%s"' % plugin)
 
+def configuration():
+    """Return the currently preferred plugin order.
+
+    Returns
+    -------
+    p : dict
+        Dictionary of preferred plugin order, with function name as key and
+        plugins (in order of preference) as value.
+
+    """
+    p = {}
+    for func in plugin_store:
+        p[func] = [plugin_name for (plugin_name, f) in plugin_store[func]]
+    return p
