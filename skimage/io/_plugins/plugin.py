@@ -118,7 +118,11 @@ def use(name, kind=None):
         if not kind in plugin_provides[name]:
             raise RuntimeError("Plugin %s does not support `%s`." % \
                                (name, kind))
-        kind = [kind]
+
+        if kind == 'imshow':
+            kind = [kind, '_app_show']
+        else:
+            kind = [kind]
 
     if not name in available(loaded=True):
         _load(name)
