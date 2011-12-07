@@ -2,15 +2,10 @@ Build Requirements
 ------------------
 * `Python >= 2.5 <http://python.org>`_
 * `Numpy >= 1.4 <http://numpy.scipy.org/>`_
-* `Cython >= 0.13 <http://www.cython.org/>`_
+* `Cython >= 0.15 <http://www.cython.org/>`_
 
 Known build errors
 ------------------
-
-If Cython compilation fails with the error ``cpython.pycapsule.pxd not
-found`` (for Cython 0.14), try to `install Cython 0.15
-<http://www.cython.org/#download>`_ instead. 
-
 On Windows, the error ``Error:unable to find vcvarsall.bat`` means that
 distutils is not correctly configured to use the C compiler. Edit (create
 if not existing) the configuration file ``distutils.cfg`` (located for
@@ -30,8 +25,5 @@ You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
 `PyQt4 <http://wiki.python.org/moin/PyQt>`_
-   The `qt` plugin that provides `imshow` and `scivi`.
-
-`PyGTK <http://www.pygtk.org/>`_
-   The `gtk` plugin that provides `imshow`.
+   The `qt` plugin that provides ``imshow(x, fancy=True)`` and `scivi`.
 
