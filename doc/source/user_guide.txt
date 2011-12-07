@@ -5,4 +5,5 @@ User Guide
    :maxdepth: 1
 
    user_guide/data_types
+   user_guide/segmentation
    user_guide/plugins
