@@ -10,7 +10,7 @@ Homepage: http://scikits-image.org
 Vcs-Browser: https://github.com/scikits-image/scikits.image
 Vcs-Git: git://github.com/scikits-image/scikits.image.git
 
-Package: python-scikits.image
+Package: python-skimage
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-numpy, python-scipy, python-scikits.image-lib (>= ${source:Version})
 Provides: ${python:Provides}
@@ -21,7 +21,17 @@ Description: Python modules for image processing
  Python.  It performs tasks such as image loading, filtering,
  morphology, segmentation, color conversions, and transformations.
 
-Package: python-scikits.image-doc
+Package: python-scikits.image
+Architecture: all
+Depends: python-skimage
+Suggests: python-scikits.image-doc, python-opencv
+Description: Dummy transition package for python-skimage
+ This is a dummy package to ease the transition to python-skimage.
+ It depends on python-skimage package and pulls in the correct package.
+ It is provided for compatibility purposes. Please use python-skimage
+ instead of python-scikits.image.
+
+Package: python-skimage-doc
 Architecture: all
 Section: doc
 Depends: ${misc:Depends}, libjs-jquery
@@ -30,7 +40,17 @@ Description: Documentation and examples for scikits-image
  This package contains documentation and example scripts for
  python-scikits.image.
 
-Package: python-scikits.image-lib
+Package: python-scikits.image-doc
+Architecture: all
+Section: doc
+Depends: python-skimage-doc
+Description: Dummy transition package for python-skimage-doc
+ This is a dummy package to ease the transition to python-skimage-doc.
+ It depends on python-skimage-doc package and pulls in the correct
+ package. It is provided for compatibility purposes. Please use 
+ python-skimage-doc instead of python-scikits.image-doc.
+
+Package: python-skimage-lib
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, ${python:Depends}, python-numpy
 Recommends: python-scikits.image
@@ -39,3 +59,13 @@ XB-Python-Version: ${python:Versions}
 Description: Optimized low-level algorithms for scikits-image
  This is an add-on package for python-scikits.image. It provides
  optimized, low-level implementations of algorithms.
+
+Package: python-scikits.image-lib
+Architecture: any
+Depends: python-skimage-lib
+Recommends: python-skimage
+Description: Dummy transition package for python-skimage-lib
+ This is a dummy package to ease the transition to python-skimage-lib.
+ It depends on python-skimage-lib package and pulls in the correct
+ package. It is provided for compatibility purposes. Please use 
+ python-skimage-lib instead of python-scikits.image-lib.
