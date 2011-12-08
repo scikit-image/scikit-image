@@ -131,9 +131,13 @@ markers for the background were not well distributed, the barriers in the
 elevation map were high enough for these markers to flood the entire 
 background.
 
+We remove a few small holes with mathematical morphology::
+
+    >>> segmentation = ndimage.binary_fill_holes(segmentation - 1)
+
 We can now label all the coins one by one using ``ndimage.label``::
 
-    >>> labeled_coins, _ = ndimage.label(segmentation - 1)
+    >>> labeled_coins, _ = ndimage.label(segmentation)
 
 .. image:: ../../_images/plot_coins_segmentation_5.png
    :target: ../auto_examples/applications/plot_coins_segmentation.html
