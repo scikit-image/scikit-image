@@ -107,6 +107,7 @@ elevation_map = sobel(coins)
 
 segmentation = watershed(elevation_map, markers)
 
+
 plt.figure(figsize=(7, 3))
 plt.subplot(131)
 plt.imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
@@ -124,12 +125,24 @@ plt.title('segmentation')
 plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0,
                     right=1)
 
+# ------------------- Removing a few small holes ---------------------
+
+segmentation = ndimage.binary_fill_holes(segmentation - 1)
 
 #------------------ Labeling the coins --------------------------------
-labeled_coins, _ = ndimage.label(segmentation - 1)
+labeled_coins, _ = ndimage.label(segmentation)
 
-plt.figure(figsize=(6, 4))
+plt.figure(figsize=(6, 3))
+plt.subplot(121)
+plt.imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
+plt.contour(segmentation, [0.5], linewidths=1.2, colors='y')
+plt.axis('off')
+plt.subplot(122)
 plt.imshow(labeled_coins, cmap=plt.cm.spectral, interpolation='nearest')
 plt.axis('off')
+
+plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0,
+                    right=1)
+
 
 plt.show()
