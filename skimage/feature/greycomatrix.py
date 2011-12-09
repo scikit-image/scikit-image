@@ -101,7 +101,9 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
 
     # make each GLMC symmetric
     if symmetric:
-        P += np.transpose(P, (1, 0, 2, 3))
+        Pt = np.transpose(P, (1, 0, 2, 3))
+        P = P + Pt
+ 
                 
     # normalize each GLMC
     if normed:
