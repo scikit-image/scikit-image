@@ -1,10 +1,10 @@
 import numpy as np
 
 
-__all__ = ['otsu_threshold', 'binarize']
+__all__ = ['threshold_otsu', 'binarize']
 
 
-def otsu_threshold(image, bins=256):
+def threshold_otsu(image, bins=256):
     """Return threshold value based on Otsu's method.
 
     Parameters
@@ -45,7 +45,7 @@ def otsu_threshold(image, bins=256):
     return threshold
 
 
-_threshold_funcs = {'otsu': otsu_threshold}
+_threshold_funcs = {'otsu': threshold_otsu}
 def binarize(image, method='otsu'):
     """Return binary image using an automatic thresholding method.
 
