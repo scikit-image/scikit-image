@@ -1,7 +1,7 @@
 import numpy as np
 
 
-__all__ = ['threshold_otsu', 'binarize']
+__all__ = ['threshold_otsu']
 
 
 def threshold_otsu(image, bins=256):
@@ -43,28 +43,6 @@ def threshold_otsu(image, bins=256):
     idx = np.argmax(variance12)
     threshold = bin_centers[:-1][idx]
     return threshold
-
-
-_threshold_funcs = {'otsu': threshold_otsu}
-def binarize(image, method='otsu'):
-    """Return binary image using an automatic thresholding method.
-
-    Parameters
-    ----------
-    image : array
-        Input array.
-    method : {'otsu'}
-        Method used to calculate threshold value. Currently, only Otsu's method
-        is implemented.
-
-    Returns
-    -------
-    out : array
-        Thresholded image.
-    """
-    get_threshold = _threshold_funcs[method]
-    threshold = get_threshold(image)
-    return image > threshold
 
 
 def histogram(image, bins):

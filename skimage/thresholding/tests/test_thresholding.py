@@ -2,7 +2,7 @@ import numpy as np
 
 import skimage
 from skimage import data
-from skimage.thresholding import threshold_otsu, binarize
+from skimage.thresholding import threshold_otsu
 
 
 class TestSimpleImage():
@@ -23,14 +23,6 @@ class TestSimpleImage():
     def test_otsu_float_image(self):
         image = np.float64(self.image)
         assert 2 <= threshold_otsu(image) < 3
-
-    def test_binarize(self):
-        expected = np.array([[0, 0, 0, 1, 1],
-                             [0, 0, 1, 1, 1],
-                             [0, 0, 1, 1, 0],
-                             [0, 1, 1, 0, 0],
-                             [1, 1, 0, 0, 0]])
-        assert np.all(binarize(self.image) == expected)
 
 
 def test_otsu_camera_image():
