@@ -20,9 +20,10 @@ def imread(fname, dtype=None):
         else:
             im = im.convert('RGB')
 
-    if im.mode == 'I;16':  
+    if im.mode.startswith('I;16'):
         shape = im.size
-        im = np.fromstring(im.tostring(), dtype=np.uint16)
+        dtype = '>u2' if im.mode.endswith('B') else '<u2'
+        im = np.fromstring(im.tostring(), dtype)
         im.shape = shape[::-1]
     elif 'A' in im.mode:
         im = im.convert('RGBA')
