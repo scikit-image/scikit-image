@@ -17,8 +17,8 @@ def threshold_otsu(image, bins=256):
 
     Returns
     -------
-    threshold : numeric
-        Threshold value. int or float depending on input image.
+    threshold : float
+        Threshold value.
 
     References
     ----------
