@@ -2,6 +2,7 @@ import numpy as np
 from . import _colormixer
 from . import _histograms
 import threading
+from skimage.util import img_as_ubyte
 
 # utilities to make life easier for plugin writers.
 
@@ -132,25 +133,18 @@ def prepare_for_display(npy_img):
     width = npy_img.shape[1]
 
     out = np.empty((height, width, 3), dtype=np.uint8)
+    npy_img = img_as_ubyte(npy_img)
 
     if npy_img.ndim == 2 or \
        (npy_img.ndim == 3 and npy_img.shape[2] == 1):
         npy_plane = npy_img.reshape((height, width))
-        if np.issubdtype(npy_img.dtype, float):
-            out[:,:,0] = npy_plane*255
-            out[:,:,1] = out[:,:,0]
-            out[:,:,2] = out[:,:,0]
-        else:
-            out[:,:,0] = npy_plane
-            out[:,:,1] = npy_plane
-            out[:,:,2] = npy_plane
+        out[:,:,0] = npy_plane
+        out[:,:,1] = npy_plane
+        out[:,:,2] = npy_plane
 
     elif npy_img.ndim == 3:
         if npy_img.shape[2] == 3 or npy_img.shape[2] == 4:
-            if np.issubdtype(npy_img.dtype, float):
-                out[:,:,:3] = (npy_img[:,:,:3])*255
-            else:
-                out[:,:,:3] = npy_img[:,:,:3]
+            out[:,:,:3] = npy_img[:,:,:3]
         else:
             raise ValueError('Image must have 1, 3, or 4 channels')
 
