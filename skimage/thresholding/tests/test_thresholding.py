@@ -16,10 +16,9 @@ class TestSimpleImage():
     def test_otsu(self):
         assert threshold_otsu(self.image) == 2
 
-    @np.testing.raises(NotImplementedError)
-    def test_otsu_raises_error(self):
+    def test_otsu_negative_int(self):
         image = self.image - 2
-        threshold_otsu(image)
+        assert threshold_otsu(image) == 0
 
     def test_otsu_float_image(self):
         image = np.float64(self.image)

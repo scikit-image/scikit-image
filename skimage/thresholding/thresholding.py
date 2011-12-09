@@ -89,11 +89,11 @@ def histogram(image, bins):
         The values at the center of the bins.
     """
     if np.issubdtype(image.dtype, np.integer):
+        offset = 0
         if np.min(image) < 0:
-            msg = "Images with negative values not allowed"
-            raise NotImplementedError(msg)
-        hist = np.bincount(image.flat)
-        bin_centers = np.arange(len(hist))
+            offset = np.min(image)
+        hist = np.bincount(image.ravel() - offset)
+        bin_centers = np.arange(len(hist)) + offset
 
         # clip histogram to return only non-zero bins
         idx = np.nonzero(hist)[0][0]
