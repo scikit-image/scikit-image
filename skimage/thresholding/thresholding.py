@@ -24,6 +24,12 @@ def threshold_otsu(image, bins=256):
     ----------
     .. [1] Wikipedia, http://en.wikipedia.org/wiki/Otsu's_Method
 
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_otsu(camera())
+    >>> binary = image > thresh
     """
     hist, bin_centers = histogram(image, bins)
     hist = hist.astype(float)
