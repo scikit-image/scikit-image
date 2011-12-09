@@ -1,1 +1,1 @@
-from .thresholding import otsu_threshold, binarize
+from .thresholding import threshold_otsu, binarize

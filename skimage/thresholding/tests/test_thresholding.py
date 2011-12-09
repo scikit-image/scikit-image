@@ -2,7 +2,7 @@ import numpy as np
 
 import skimage
 from skimage import data
-from skimage.thresholding import otsu_threshold, binarize
+from skimage.thresholding import threshold_otsu, binarize
 
 
 class TestSimpleImage():
@@ -14,16 +14,16 @@ class TestSimpleImage():
                                [4, 5, 1, 0, 0]], dtype=int)
 
     def test_otsu(self):
-        assert otsu_threshold(self.image) == 2
+        assert threshold_otsu(self.image) == 2
 
     @np.testing.raises(NotImplementedError)
     def test_otsu_raises_error(self):
         image = self.image - 2
-        otsu_threshold(image)
+        threshold_otsu(image)
 
     def test_otsu_float_image(self):
         image = np.float64(self.image)
-        assert 2 <= otsu_threshold(image) < 3
+        assert 2 <= threshold_otsu(image) < 3
 
     def test_binarize(self):
         expected = np.array([[0, 0, 0, 1, 1],
@@ -35,17 +35,17 @@ class TestSimpleImage():
 
 
 def test_otsu_camera_image():
-    assert otsu_threshold(data.camera()) == 87
+    assert threshold_otsu(data.camera()) == 87
 
 def test_otsu_coins_image():
-    assert otsu_threshold(data.coins()) == 107
+    assert threshold_otsu(data.coins()) == 107
 
 def test_otsu_coins_image_as_float():
     coins = skimage.img_as_float(data.coins())
-    assert 0.41 < otsu_threshold(coins) < 0.42
+    assert 0.41 < threshold_otsu(coins) < 0.42
 
 def test_otsu_lena_image():
-    assert otsu_threshold(data.lena()) == 141
+    assert threshold_otsu(data.lena()) == 141
 
 
 if __name__ == '__main__':
