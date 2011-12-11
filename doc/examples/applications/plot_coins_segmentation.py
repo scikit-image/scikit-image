@@ -9,8 +9,8 @@ several coins outlined against a darker background. The segmentation of
 the coins cannot be done directly from the histogram of grey values,
 because the background shares enough grey levels with the coins that a
 thresholding segmentation is not sufficient. Simply thresholding the image 
-leads either to missing significant parts of the coins, or to getting parts 
-of the background together with the coins.
+leads either to missing significant parts of the coins, or to merging parts
+of the background with the coins.
 
 We first try an edge-based segmentation. We use the Canny detector to 
 delineate the contours of the coins. These contours are filled using 
