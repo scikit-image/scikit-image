@@ -2,7 +2,7 @@ import numpy as np
 
 import skimage
 from skimage import data
-from skimage.thresholding import threshold_otsu
+from skimage.filter.thresholding import threshold_otsu
 
 
 class TestSimpleImage():
