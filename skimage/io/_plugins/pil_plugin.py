@@ -9,6 +9,8 @@ except ImportError:
                       "Please refer to http://pypi.python.org/pypi/PIL/ "
                       "for further instructions.")
 
+from skimage.util import img_as_ubyte
+
 def imread(fname, dtype=None):
     """Load an image from file.
 
@@ -107,7 +109,4 @@ def imshow(arr):
        [0, 1].  Images of dtype uint8 are in [0, 255].
 
     """
-    if np.issubdtype(arr.dtype, float):
-        arr = (arr * 255).astype(np.uint8)
-
-    Image.fromarray(arr).show()
+    Image.fromarray(img_as_ubyte(arr)).show()
