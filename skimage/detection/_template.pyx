@@ -15,12 +15,12 @@ cdef extern from "math.h":
 cdef integral_image(np.ndarray[float, ndim=2, mode="c"] image):
     """
     Calculate the summed integral image.
-    
+
     Parameters
     ----------
     image : array_like, dtype=float
         Source image.
-        
+
     Returns
     -------
     output : ndarray, dtype=np.double_t
@@ -42,7 +42,7 @@ cdef integral_image(np.ndarray[float, ndim=2, mode="c"] image):
         for y in range(0, height):
             s += image[y, x]
             ii[y, x] = s + ii[y, x - 1]
-    
+
     return ii
 
 
@@ -50,12 +50,12 @@ cdef integral_image(np.ndarray[float, ndim=2, mode="c"] image):
 cdef integral_image_sqr(np.ndarray[float, ndim=2, mode="c"] image):
     """
     Calculate the squared integral image.
-    
+
     Parameters
     ----------
     image : array_like, dtype=float
         Source image.
-        
+
     Returns
     -------
     output : ndarray, dtype=np.double_t
@@ -77,7 +77,7 @@ cdef integral_image_sqr(np.ndarray[float, ndim=2, mode="c"] image):
         for y in range(0, height):
             s += image[y, x] * image[y, x]
             ii2[y, x] = s + ii2[y, x - 1]
-    
+
     return ii2
 
 
@@ -85,12 +85,12 @@ cdef integral_image_sqr(np.ndarray[float, ndim=2, mode="c"] image):
 cdef integral_images(np.ndarray[float, ndim=2, mode="c"] image):
     """
     Calculate the summed and sqared integral image.
-    
+
     Parameters
     ----------
     image : array_like, dtype=float
         Source image.
-        
+
     Returns
     -------
     output : tuple (ndarray, ndarray) of type np.double_t
@@ -118,12 +118,12 @@ cdef integral_images(np.ndarray[float, ndim=2, mode="c"] image):
             s2 += image[y, x] * image[y, x]
             ii[y, x] = s + ii[y, x - 1]
             ii2[y, x] = s2 + ii2[y, x - 1]
-    
+
     return ii, ii2
 
 
 @cython.boundscheck(False)
-cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat, 
+cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat,
         int r0, int c0, int r1, int c1):
     """
     Using a summed area table / integral image, calculate the sum
@@ -178,15 +178,15 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     # variance ** 2 = 1/K Sigma[(x_k - mean) ** 2] = 1/K Sigma[x_k ** 2] - mean ** 2
     cdef double template_norm
     cdef double template_mean = np.mean(template)
-    
+
     if num_type == 0:
         template_norm = sqrt((np.std(template) ** 2 + template_mean ** 2)) / sqrt(inv_area)
     else:
         template_norm = sqrt((template_mean ** 2)) / sqrt(inv_area)
-        
+
     # define window of template size in squared integral image
     cdef int i, j
-    cdef double num, window_sum2, window_mean2, normed, t, 
+    cdef double num, window_sum2, window_mean2, normed, t,
     # move window through convolution results, normalizing in the process
     for i in range(result.shape[0] - 1):
         for j in range(result.shape[1] - 1):
@@ -196,7 +196,7 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
                 t = sum_integral(integral_sum, i, j, i + template.shape[0], j + template.shape[1])
                 window_mean2 = t * t * inv_area
                 num -= t*template_mean
-        
+
             # calculate squared template window sum in the image
             window_sum2 = sum_integral(integral_sqr, i, j, i + template.shape[0], j + template.shape[1])
             normed = sqrt(window_sum2 - window_mean2) * template_norm
@@ -207,7 +207,7 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
                 if num > 0:
                     num = 1
                 else:
-                    num = -1                    
+                    num = -1
             else:
                 num = 0
             result[i, j] = num
@@ -215,5 +215,6 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     for i in range(result.shape[0]):
         result[i, -1] = 0
     for j in range(result.shape[1]):
-        result[-1, j] = 0 
+        result[-1, j] = 0
     return result
+

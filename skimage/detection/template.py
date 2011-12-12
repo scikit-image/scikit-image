@@ -4,6 +4,7 @@ import numpy as np
 import cv
 import _template
 
+
 #XXX add to opencv backend once backend system in place
 def match_template_cv(image, template, out=None,  method="norm-coeff"):
     """Finds a template in an image using normalized correlation.
@@ -43,17 +44,17 @@ def match_template(image, template, method="norm-coeff"):
         Template to locate.
     method: str (default 'norm-coeff')
         The correlation method used in scanning.
-        T represents the template, I the image and R the result.        
+        T represents the template, I the image and R the result.
         The summation is done over x' = 0..w-1 and y' = 0..h-1 of the template.
-        'norm-coeff': 
+        'norm-coeff':
             R(x, y) = Sigma(x',y')[T(x', y').I(x + x', y + y')] / N
             N = sqrt(Sigma(x',y')[T(x', y')**2].Sigma(x',y')[I(x + x', y + y')**2])
-        'norm-corr': 
-            R(x,y) = Sigma(x',y)[T'(x', y').I'(x + x', y + y')] / N 
+        'norm-corr':
+            R(x,y) = Sigma(x',y)[T'(x', y').I'(x + x', y + y')] / N
             N = sqrt(Sigma(x',y)[T'(x', y')**2].Sigma(x',y')[I'(x + x', y + y')**2])
             where:
             T'(x, y) = T(x', y') - 1/(w.h).Sigma(x'',y'')[T(x'', y'')]
-            I'(x + x', y + y') =  I(x + x', y + y') - 
+            I'(x + x', y + y') =  I(x + x', y + y') -
                 1/(w.h).Sigma(x'',y'')[I(x + x'', y + y'')]
 
     Returns
@@ -69,7 +70,4 @@ def match_template(image, template, method="norm-coeff"):
     else:
         raise ValueError("Unknown template method: %s" % method)
     return _template.match_template(image, template, method_num)
-
-
-    
 

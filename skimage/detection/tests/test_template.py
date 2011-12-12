@@ -11,14 +11,14 @@ def test_template():
     for x, y in target_positions:
         image[x:x+size, y:y+size] = target
     image += randn(400, 400)*2
-    
+
     for method in ["norm-corr", "norm-coeff"]:
         result = match_template(image, target, method=method)
         delta = 5
         found_positions = []
         # find the targets
         for i in range(50):
-            index = np.argmax(result)        
+            index = np.argmax(result)
             y, x = np.unravel_index(index, result.shape)
             if not found_positions:
                 found_positions.append((x, y))
@@ -38,7 +38,7 @@ def test_template():
                 if distance < delta:
                     found = True
             assert found
-    
+
 if __name__ == "__main__":
     from numpy import testing
     testing.run_module_suite()

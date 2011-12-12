@@ -29,3 +29,4 @@ if __name__ == '__main__':
           license = 'SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )
+
