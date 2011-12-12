@@ -1,8 +1,5 @@
-import os.path
 import numpy as np
-from numpy.testing import *
-from skimage import data_dir
-from skimage.detection import *
+from skimage.detection import match_template
 from numpy.random import randn
 
 def test_template():
@@ -43,4 +40,6 @@ def test_template():
             assert found
     
 if __name__ == "__main__":
-    run_module_suite()
+    from numpy import testing
+    testing.run_module_suite()
+
