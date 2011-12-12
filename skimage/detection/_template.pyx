@@ -163,7 +163,8 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
         np.ndarray[float, ndim=2, mode="c"] template, int num_type):
     # convolve the image with template by frequency domain multiplication
     cdef np.ndarray[np.double_t, ndim=2] result
-    result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template), mode="valid"), dtype=np.double)
+    result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
+                                              mode="valid"), dtype=np.double)
     # calculate squared integral images used for normalization
     cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sum
     cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sqr
@@ -193,12 +194,16 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             num = result[i, j]
             window_mean2 = 0
             if num_type == 1:
-                t = sum_integral(integral_sum, i, j, i + template.shape[0], j + template.shape[1])
+                t = sum_integral(integral_sum, i, j,
+                                 i + template.shape[0],
+                                 j + template.shape[1])
                 window_mean2 = t * t * inv_area
                 num -= t*template_mean
 
             # calculate squared template window sum in the image
-            window_sum2 = sum_integral(integral_sqr, i, j, i + template.shape[0], j + template.shape[1])
+            window_sum2 = sum_integral(integral_sqr, i, j,
+                                       i + template.shape[0],
+                                       j + template.shape[1])
             normed = sqrt(window_sum2 - window_mean2) * template_norm
             # enforce some limits
             if fabs(num) < normed:

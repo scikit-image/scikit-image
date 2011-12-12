@@ -23,7 +23,8 @@ def test_template():
             if not found_positions:
                 found_positions.append((x, y))
             for position in found_positions:
-                distance = np.sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
+                distance = np.sqrt((x - position[0]) ** 2 +
+                                   (y - position[1]) ** 2)
                 if distance > delta:
                     found_positions.append((x, y))
             result[y, x] = 0
@@ -34,7 +35,8 @@ def test_template():
             print x, y
             found = False
             for position in found_positions:
-                distance = np.sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
+                distance = np.sqrt((x - position[0]) ** 2 +
+                                   (y - position[1]) ** 2)
                 if distance < delta:
                     found = True
             assert found

@@ -20,10 +20,13 @@ def match_template_cv(image, template, out=None,  method="norm-coeff"):
     Returns
     -------
     output : ndarray, dtype=float
-        Correlation results between 0.0 and 1.0, maximum indicating the most probable match.
+        Correlation results between 0.0 and 1.0, maximum indicating the most
+        probable match.
     """
     if out == None:
-        out = np.empty((image.shape[0] - template.shape[0] + 1,image.shape[1] - template.shape[1] + 1), dtype=image.dtype)
+        out = np.empty((image.shape[0] - template.shape[0] + 1,
+                        image.shape[1] - template.shape[1] + 1),
+                       dtype=image.dtype)
     if method == "norm-corr":
         cv.MatchTemplate(image, template, out, cv.CV_TM_CCORR_NORMED)
     elif method == "norm-corr":
