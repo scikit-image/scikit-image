@@ -16,7 +16,6 @@ import numpy as np
 from skimage.detection import match_template
 from numpy.random import randn
 import matplotlib.pyplot as plt
-import math
 
 # We first construct a simple image target:
 size = 100
@@ -59,7 +58,7 @@ for i in range(50):
     if not found_positions:
         found_positions.append((x, y))
     for position in found_positions:
-        distance = math.sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
+        distance = np.sqrt((x - position[0]) ** 2 + (y - position[1]) ** 2)
         if distance > delta:
             found_positions.append((x, y))
     result[y, x] = 0
