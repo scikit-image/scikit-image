@@ -48,17 +48,17 @@ def match_template(image, template, method="norm-coeff"):
     method: str (default 'norm-coeff')
         The correlation method used in scanning.
         T represents the template, I the image and R the result.
-        The summation is done over x' = 0..w-1 and y' = 0..h-1 of the template.
+        The summation is done over X = 0..w-1 and Y = 0..h-1 of the template.
         'norm-coeff':
-            R(x, y) = Sigma(x',y')[T(x', y').I(x + x', y + y')] / N
-            N = sqrt(Sigma(x',y')[T(x', y')**2].Sigma(x',y')[I(x + x', y + y')**2])
+            R(x, y) = Sigma(X,Y)[T(X, Y).I(x + X, y + Y)] / N
+            N = sqrt(Sigma(X,Y)[T(X, Y)**2].Sigma(X,Y)[I(x + X, y + Y)**2])
         'norm-corr':
-            R(x,y) = Sigma(x',y)[T'(x', y').I'(x + x', y + y')] / N
-            N = sqrt(Sigma(x',y)[T'(x', y')**2].Sigma(x',y')[I'(x + x', y + y')**2])
+            R(x,y) = Sigma(X,y)[T'(X, Y).I'(x + X, y + Y)] / N
+            N = sqrt(Sigma(X,y)[T'(X, Y)**2].Sigma(X,Y)[I'(x + X, y + Y)**2])
             where:
-            T'(x, y) = T(x', y') - 1/(w.h).Sigma(x'',y'')[T(x'', y'')]
-            I'(x + x', y + y') =  I(x + x', y + y') -
-                1/(w.h).Sigma(x'',y'')[I(x + x'', y + y'')]
+            T'(x, y) = T(X, Y) - 1/(w.h).Sigma(X',Y')[T(X', Y')]
+            I'(x + X, y + Y) = I(x + X, y + Y)
+                               - 1/(w.h).Sigma(X',Y')[I(x + X', y + Y')]
 
     Returns
     -------

@@ -84,7 +84,7 @@ cdef integral_image_sqr(np.ndarray[float, ndim=2, mode="c"] image):
 @cython.boundscheck(False)
 cdef integral_images(np.ndarray[float, ndim=2, mode="c"] image):
     """
-    Calculate the summed and sqared integral image.
+    Calculate the summed and squared integral image.
 
     Parameters
     ----------
