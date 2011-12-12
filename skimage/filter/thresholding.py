@@ -4,14 +4,14 @@ import numpy as np
 __all__ = ['threshold_otsu']
 
 
-def threshold_otsu(image, bins=256):
+def threshold_otsu(image, nbins=256):
     """Return threshold value based on Otsu's method.
 
     Parameters
     ----------
     image : array
         Input image.
-    bins : int
+    nbins : int
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
 
@@ -31,7 +31,7 @@ def threshold_otsu(image, bins=256):
     >>> thresh = threshold_otsu(image)
     >>> binary = image > thresh
     """
-    hist, bin_centers = histogram(image, bins)
+    hist, bin_centers = histogram(image, nbins)
     hist = hist.astype(float)
 
     # class probabilities for all possible thresholds
@@ -51,7 +51,7 @@ def threshold_otsu(image, bins=256):
     return threshold
 
 
-def histogram(image, bins):
+def histogram(image, nbins):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
@@ -61,7 +61,7 @@ def histogram(image, bins):
     ----------
     image : array
         Input image.
-    bins : int
+    nbins : int
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
 
@@ -83,7 +83,7 @@ def histogram(image, bins):
         idx = np.nonzero(hist)[0][0]
         return hist[idx:], bin_centers[idx:]
     else:
-        hist, bin_edges = np.histogram(image, bins=bins)
+        hist, bin_edges = np.histogram(image, bins=nbins)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
         return hist, bin_centers
 
