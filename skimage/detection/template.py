@@ -29,7 +29,7 @@ def match_template_cv(image, template, out=None,  method="norm-coeff"):
                        dtype=image.dtype)
     if method == "norm-corr":
         cv.MatchTemplate(image, template, out, cv.CV_TM_CCORR_NORMED)
-    elif method == "norm-corr":
+    elif method == "norm-coeff":
         cv.MatchTemplate(image, template, out, cv.CV_TM_CCOEFF_NORMED)
     else:
         raise ValueError("Unknown template method: %s" % method)
