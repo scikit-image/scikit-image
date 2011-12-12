@@ -176,12 +176,14 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     # use inversed area for accuracy
     cdef double inv_area = 1.0 / (template.shape[0] * template.shape[1])
     # calculate template norm according to the following:
-    # variance ** 2 = 1/K Sigma[(x_k - mean) ** 2] = 1/K Sigma[x_k ** 2] - mean ** 2
+    # variance ** 2 = 1/K Sigma[(x_k - mean) ** 2]
+    #               = 1/K Sigma[x_k ** 2] - mean ** 2
     cdef double template_norm
     cdef double template_mean = np.mean(template)
 
     if num_type == 0:
-        template_norm = sqrt((np.std(template) ** 2 + template_mean ** 2)) / sqrt(inv_area)
+        template_norm = sqrt((np.std(template) ** 2 +
+                              template_mean ** 2)) / sqrt(inv_area)
     else:
         template_norm = sqrt((template_mean ** 2)) / sqrt(inv_area)
 
