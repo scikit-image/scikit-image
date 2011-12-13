@@ -21,8 +21,9 @@ def imread(fname, dtype=None):
             im = im.convert('L')
         else:
             im = im.convert('RGB')
-
-    if im.mode.startswith('I;16'):
+    elif im.mode == '1':
+        im = im.convert('L')
+    elif im.mode == 'I;16':
         shape = im.size
         dtype = '>u2' if im.mode.endswith('B') else '<u2'
         im = np.fromstring(im.tostring(), dtype)

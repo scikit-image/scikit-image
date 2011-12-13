@@ -43,6 +43,14 @@ def test_palette_is_gray():
     color = Image.open(os.path.join(data_dir, 'palette_color.png'))
     assert not _palette_is_grayscale(color)
 
+@skipif(not PIL_available)
+def test_bilevel():
+    expected = np.zeros((10, 10))
+    expected[::2] = 255
+
+    img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
+    assert_array_equal(img, expected)
+
 class TestSave:
     def roundtrip(self, dtype, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
