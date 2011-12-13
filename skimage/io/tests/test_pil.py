@@ -51,6 +51,14 @@ def test_bilevel():
     img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
     assert_array_equal(img, expected)
 
+@skipif(not PIL_available)
+def test_imread_uint16():
+    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
+    assert img.dtype == np.uint16
+    assert_array_almost_equal(img, expected)
+
+
 class TestSave:
     def roundtrip(self, dtype, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
