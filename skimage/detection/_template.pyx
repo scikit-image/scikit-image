@@ -19,6 +19,10 @@ cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat,
     Using a summed area table / integral image, calculate the sum
     over a given window.
 
+    This function is the same as the `integrate` function in
+    `skimage.transform.integrate`, but this Cython version significantly
+    speeds up the code.
+
     Parameters
     ----------
     sat : ndarray of double_t
