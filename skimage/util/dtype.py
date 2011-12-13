@@ -68,121 +68,82 @@ def _convert(image, dtype):
             if itemsize_in > itemsize:
                 prec_loss()
             return dtype(image)
-        if kind == 'u':
-            # floating point -> unsigned integer
+        # floating point -> integer
+        prec_loss()
+        image = np.array(image, dtype=np.promote_types(dtype_in, dtype))
+        image *= np.iinfo(dtype).max + 1
+        np.clip(image, 0, np.iinfo(dtype).max, out=image)
+        return dtype(image)
+    if kind == 'f':
+        # integer -> floating point
+        if itemsize_in >= itemsize:
             prec_loss()
-            tdt = next(dt for dt in (dtype_in, np.float32, np.float64)
-                       if itemsize * 8 < np.finfo(dt).nmant)
-            image = tdt(image)
-            umax = np.iinfo(dtype).max
-            image = image * (umax + 1)
-            np.clip(image, 0, umax, out=image)
-            return dtype(image)
-        if kind == 'i':
-            # floating point -> signed integer
-            prec_loss()
-            tdt = next(dt for dt in (dtype_in, np.float32, np.float64)
-                       if itemsize * 8 < np.finfo(dt).nmant)
-            image = tdt(image)
-            image = image * (np.iinfo(dtype).max + 1)
-            np.clip(image, 0, np.iinfo(dtype).max, out=image)
-            return dtype(image)
+        image = np.array(image, dtype=np.promote_types(dtype_in, dtype))
+        if np.iinfo(dtype_in).min:
+            sign_loss()
+            image -= np.iinfo(dtype_in).min
+        image /= np.iinfo(dtype_in).max - np.iinfo(dtype_in).min
+        return dtype(image)
     if kind_in == 'u':
-        if kind == 'f':
-            # unsigned integer -> floating point
-            if itemsize_in * 8 > np.finfo(dtype).nmant:
-                prec_loss()
-            tdt = next(dt for dt in (dtype, np.float32, np.float64)
-                       if itemsize_in * 8 < np.finfo(dt).nmant)
-            image = tdt(image)
-            image /= np.iinfo(dtype_in).max
+        # unsigned integer -> integer
+        shift = 1 if kind == 'i' else 0
+        if itemsize_in > itemsize:
+            prec_loss()
+            image = image >> 8 * (itemsize_in - itemsize) + shift
             return dtype(image)
-        if kind == 'u':
-            # unsigned integer -> unsigned integer
-            if itemsize_in > itemsize:
-                prec_loss()
-                image = image >> 8 * (itemsize_in - itemsize)
-                return dtype(image)
-            else:
-                result = dtype(image)
-                result <<= 8 * (itemsize - itemsize_in)
-                if itemsize - itemsize_in == 3:
-                    # uint8 -> uint32
-                    image = dtype(image)
-                    image *= 2**16 + 2**8 + 1
-                result += image
-                return result
-        if kind == 'i':
-            # unsigned integer -> signed integer
-            if itemsize_in >= itemsize:
-                prec_loss()
-                image = image >> (8 * (itemsize_in - itemsize) + 1)
-                return dtype(image)
-            else:
-                result = dtype(image)
-                result <<= 8 * (itemsize - itemsize_in) - 1
-                if itemsize - itemsize_in == 3:
-                    # uint8 -> int32
-                    image = dtype(image)
-                    image *= 2**16 + 2**8 + 1
-                result += image >> 1
-                return dtype(result)
-    if kind_in == 'i':
-        if kind == 'f':
-            # signed integer -> floating point
-            if itemsize_in * 8 > np.finfo(dtype).nmant:
-                prec_loss()
-            sign_loss()
-            tdt = next(dt for dt in (dtype, np.float32, np.float64)
-                       if itemsize_in * 8 < np.finfo(dt).nmant)
-            image = tdt(image)
-            image -= np.iinfo(dtype_in).min
-            image /= np.iinfo(dtype_in).max - np.iinfo(dtype_in).min
+        result = dtype(image)
+        result <<= 8 * (itemsize - itemsize_in) - shift
+        if itemsize - itemsize_in == 3:
+            # uint8 -> (u)int32
+            # hint: 4294967295 == (255 << 24) + (255 << 16) + (255 << 8) + 255
+            image = dtype(image)
+            image *= 2**16 + 2**8 + 1
+        if shift:
+            result += image >> shift
+        else:
+            result += image
+        return dtype(result)
+    if kind == 'u':
+        # signed integer -> unsigned integer
+        sign_loss()
+        image = np.array(image, dtype=np.promote_types(dtype_in, dtype))
+        image -= np.iinfo(dtype_in).min
+        if itemsize_in == itemsize:
             return dtype(image)
-        if kind == 'u':
-            # signed integer -> unsigned integer
-            sign_loss()
-            tdt = next(dt for dt in (np.int16, np.int32, np.int64)
-                       if itemsize_in < np.dtype(dt).itemsize)
-            image = tdt(image)
-            image -= np.iinfo(dtype_in).min
-            if itemsize_in == itemsize:
-                return dtype(image)
-            if itemsize_in > itemsize:
-                prec_loss()
-                image >>= 8 * (itemsize_in - itemsize)
-                return dtype(image)
-            else:
-                result = dtype(image)
-                result <<= 8 * (itemsize - itemsize_in)
-                if itemsize - itemsize_in == 3:
-                    # int8 -> uint32
-                    image = dtype(image)
-                    image *= 2**16 + 2**8 + 1
-                result += image
-                return result
-        if kind == 'i':
-            # signed integer -> signed integer
-            if itemsize_in > itemsize:
-                prec_loss()
-                image = image // 2**(8 * (itemsize_in - itemsize))
-                return dtype(image)
-            else:
-                tdt = next(dt for dt in (dtype, np.int16, np.int32, np.int64)
-                           if itemsize_in < np.dtype(dt).itemsize)
-                image = tdt(image)
-                image -= np.iinfo(dtype_in).min
-                tdt = next(dt for dt in (np.int32, np.int64)
-                           if image.dtype.itemsize < np.dtype(dt).itemsize)
-                result = tdt(image)
-                result *= 2**(8 * (itemsize - itemsize_in))
-                if itemsize - itemsize_in == 3:
-                    # int8 -> int32
-                    image = dtype(image)
-                    image *= 2**16 + 2**8 + 1
-                result += image
-                result += np.iinfo(dtype).min
-                return dtype(result)
+        if itemsize_in > itemsize:
+            prec_loss()
+            image >>= 8 * (itemsize_in - itemsize)
+            return dtype(image)
+        result = dtype(image)
+        result <<= 8 * (itemsize - itemsize_in)
+        if itemsize - itemsize_in == 3:
+            # int8 -> uint32
+            image = dtype(image)
+            image *= 2**16 + 2**8 + 1
+        result += image
+        return result
+    if kind == 'i':
+        # signed integer -> signed integer
+        if itemsize_in > itemsize:
+            prec_loss()
+            return dtype(image // 2**(8 * (itemsize_in - itemsize)))
+        # upcast to next higher precision signed integer type
+        dt = next(dt for dt in (np.int16, np.int32, np.int64)
+                  if image.itemsize < np.dtype(dt).itemsize)
+        image = np.array(image, dtype=dt)
+        image -= np.iinfo(dtype_in).min
+        # upcast to next higher precision signed integer type
+        dt = next(dt for dt in (np.int32, np.int64)
+                  if image.itemsize < np.dtype(dt).itemsize)
+        result = np.array(image, dtype=dt)
+        result *= 2**(8 * (itemsize - itemsize_in))
+        if itemsize - itemsize_in == 3:
+            # int8 -> int32
+            image = dtype(image)
+            image *= 2**16 + 2**8 + 1
+        result += image
+        result += np.iinfo(dtype).min
+        return dtype(result)
 
 
 def img_as_float(image):
