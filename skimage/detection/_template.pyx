@@ -3,8 +3,8 @@
 import cython
 cimport numpy as np
 import numpy as np
-import cv
 from scipy.signal import fftconvolve
+
 
 cdef extern from "math.h":
     double sqrt(double x)

@@ -1,8 +1,14 @@
 """template.py - Template matching
 """
 import numpy as np
-import cv
 import _template
+
+try:
+    import cv
+    opencv_available = True
+except ImportError:
+    opencv_available = False
+
 
 
 #XXX add to opencv backend once backend system in place
@@ -23,6 +29,8 @@ def match_template_cv(image, template, out=None,  method="norm-coeff"):
         Correlation results between 0.0 and 1.0, maximum indicating the most
         probable match.
     """
+    if not opencv_available:
+        raise ImportError("Opencv 2.0+ required")
     if out == None:
         out = np.empty((image.shape[0] - template.shape[0] + 1,
                         image.shape[1] - template.shape[1] + 1),
