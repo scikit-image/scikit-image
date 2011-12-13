@@ -9,8 +9,8 @@ def test_template():
     target = target.astype(np.float32)
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
-        image[x:x+size, y:y+size] = target
-    image += randn(400, 400)*2
+        image[x:x + size, y:y + size] = target
+    image += randn(400, 400) * 2
 
     for method in ["norm-corr", "norm-coeff"]:
         result = match_template(image, target, method=method)
