@@ -12,41 +12,6 @@ cdef extern from "math.h":
 
 
 @cython.boundscheck(False)
-cdef integral_image(np.ndarray[float, ndim=2, mode="c"] image):
-    """
-    Calculate the summed integral image.
-
-    Parameters
-    ----------
-    image : array_like, dtype=float
-        Source image.
-
-    Returns
-    -------
-    output : ndarray, dtype=np.double_t
-        Summed integral image.
-    """
-    cdef np.ndarray[np.double_t, ndim=2, mode="c"] ii = np.zeros((image.shape[0], image.shape[1]))
-    cdef double s
-    cdef int x, y
-    cdef int width, height
-    height = image.shape[0]
-    width = image.shape[1]
-    ii[0, 0] = image[0, 0]
-
-    for y in range(1, height):
-        ii[y, 0] = image[y, 0] + ii[y - 1, 0]
-
-    for x in range(1, width):
-        s = 0
-        for y in range(0, height):
-            s += image[y, x]
-            ii[y, x] = s + ii[y, x - 1]
-
-    return ii
-
-
-@cython.boundscheck(False)
 cdef integral_image_sqr(np.ndarray[float, ndim=2, mode="c"] image):
     """
     Calculate the squared integral image.
