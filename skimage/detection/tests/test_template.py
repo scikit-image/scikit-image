@@ -2,11 +2,11 @@ import numpy as np
 from skimage.detection import match_template
 from numpy.random import randn
 
+
 def test_template():
     size = 100
-    image = np.zeros((400, 400), dtype=np.float32)
+    image = np.zeros((400, 400))
     target = np.tri(size) + np.tri(size)[::-1]
-    target = target.astype(np.float32)
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
         image[x:x + size, y:y + size] = target

@@ -4,87 +4,12 @@ import cython
 cimport numpy as np
 import numpy as np
 from scipy.signal import fftconvolve
+from skimage.transform import integral
 
 
 cdef extern from "math.h":
     double sqrt(double x)
     double fabs(double x)
-
-
-@cython.boundscheck(False)
-cdef integral_image_sqr(np.ndarray[float, ndim=2, mode="c"] image):
-    """
-    Calculate the squared integral image.
-
-    Parameters
-    ----------
-    image : array_like, dtype=float
-        Source image.
-
-    Returns
-    -------
-    output : ndarray, dtype=np.double_t
-        Squared integral image.
-    """
-    cdef np.ndarray[np.double_t, ndim=2, mode="c"] ii2 = np.zeros((image.shape[0], image.shape[1]))
-    cdef double s
-    cdef int x, y
-    cdef int width, height
-    height = image.shape[0]
-    width = image.shape[1]
-    ii2[0, 0] = image[0, 0] * image[0, 0]
-
-    for y in range(1, height):
-        ii2[y, 0] = image[y, 0] * image[y, 0] + ii2[y - 1, 0]
-
-    for x in range(1, width):
-        s = 0
-        for y in range(0, height):
-            s += image[y, x] * image[y, x]
-            ii2[y, x] = s + ii2[y, x - 1]
-
-    return ii2
-
-
-@cython.boundscheck(False)
-cdef integral_images(np.ndarray[float, ndim=2, mode="c"] image):
-    """
-    Calculate the summed and squared integral image.
-
-    Parameters
-    ----------
-    image : array_like, dtype=float
-        Source image.
-
-    Returns
-    -------
-    output : tuple (ndarray, ndarray) of type np.double_t
-        Summed and squared integral image.
-    """
-    cdef np.ndarray[np.double_t, ndim=2, mode="c"] ii = np.zeros((image.shape[0], image.shape[1]))
-    cdef np.ndarray[np.double_t, ndim=2,  mode="c"] ii2 = np.zeros((image.shape[0], image.shape[1]))
-    cdef double s, s2
-    cdef int x, y
-    cdef int width, height
-    height = image.shape[0]
-    width = image.shape[1]
-    ii[0, 0] = image[0, 0]
-    ii2[0, 0] = image[0, 0] * image[0, 0]
-
-    for y in range(1, height):
-        ii[y, 0] = image[y, 0] + ii[y - 1, 0]
-        ii2[y, 0] = image[y, 0] * image[y, 0] + ii2[y - 1, 0]
-
-    for x in range(1, width):
-        s = 0
-        s2 = 0
-        for y in range(0, height):
-            s += image[y, x]
-            s2 += image[y, x] * image[y, x]
-            ii[y, x] = s + ii[y, x - 1]
-            ii2[y, x] = s2 + ii2[y, x - 1]
-
-    return ii, ii2
 
 
 @cython.boundscheck(False)
@@ -124,8 +49,9 @@ cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat,
 
 
 @cython.boundscheck(False)
-def match_template(np.ndarray[float, ndim=2, mode="c"] image,
-        np.ndarray[float, ndim=2, mode="c"] template, int num_type):
+def match_template(np.ndarray[np.double_t, ndim=2, mode="c"] image,
+                   np.ndarray[np.double_t, ndim=2, mode="c"] template,
+                   int num_type):
     # convolve the image with template by frequency domain multiplication
     cdef np.ndarray[np.double_t, ndim=2] result
     result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
@@ -134,9 +60,8 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sum
     cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sqr
     if num_type == 1:
-        integral_sum, integral_sqr = integral_images(image)
-    else:
-        integral_sqr = integral_image_sqr(image)
+        integral_sum = integral.integral_image(image)
+    integral_sqr = integral.integral_image(image**2)
 
     # use inversed area for accuracy
     cdef double inv_area = 1.0 / (template.shape[0] * template.shape[1])

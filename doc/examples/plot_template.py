@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 # We first construct a simple image target:
 size = 100
 target = np.tri(size) + np.tri(size)[::-1]
-target = target.astype(np.float32)
 
 plt.gray()
 plt.imshow(target)
@@ -28,7 +27,7 @@ plt.title("Target image")
 plt.axis('off')
 
 # place target in an image at two positions, and add noise.
-image = np.zeros((400, 400), dtype=np.float32)
+image = np.zeros((400, 400))
 target_positions = [(50, 50), (200, 200)]
 for x, y in target_positions:
     image[x:x+size, y:y+size] = target
