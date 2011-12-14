@@ -1,5 +1,7 @@
 import numpy as np
 
+from skimage.exposure import histogram
+
 
 __all__ = ['threshold_otsu']
 
@@ -49,41 +51,4 @@ def threshold_otsu(image, nbins=256):
     idx = np.argmax(variance12)
     threshold = bin_centers[:-1][idx]
     return threshold
-
-
-def histogram(image, nbins):
-    """Return histogram of image.
-
-    Unlike `numpy.histogram`, this function returns the centers of bins and
-    does not rebin integer arrays.
-
-    Parameters
-    ----------
-    image : array
-        Input image.
-    nbins : int
-        Number of bins used to calculate histogram. This value is ignored for
-        integer arrays.
-
-    Returns
-    -------
-    hist : array
-        The values of the histogram.
-    bin_centers : array
-        The values at the center of the bins.
-    """
-    if np.issubdtype(image.dtype, np.integer):
-        offset = 0
-        if np.min(image) < 0:
-            offset = np.min(image)
-        hist = np.bincount(image.ravel() - offset)
-        bin_centers = np.arange(len(hist)) + offset
-
-        # clip histogram to return only non-zero bins
-        idx = np.nonzero(hist)[0][0]
-        return hist[idx:], bin_centers[idx:]
-    else:
-        hist, bin_edges = np.histogram(image, bins=nbins)
-        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
-        return hist, bin_centers
 
