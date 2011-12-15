@@ -58,6 +58,13 @@ def test_imread_uint16():
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
+@skipif(not PIL_available)
+def test_imread_uint16_big_endian():
+    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
+    img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
+    assert img.dtype == np.dtype('>u2')
+    assert_array_almost_equal(img, expected)
+
 
 class TestSave:
     def roundtrip(self, dtype, x, scaling=1):
