@@ -3,7 +3,7 @@
 What is this
 ============
 
-This is a library and an exectuable that reimplement A. Torralba's
+This is a library and an exectuable that reimplements A. Torralba's
 GIST image descriptor in C. The original Matlab implementation is
 here:
 
@@ -16,13 +16,14 @@ The library depends on fftw3. It is available at:
 
 http://www.fftw.org/
 
-or along with your Linux distribution. Versions 3.1.2 and 3.2.1 work.
+or along with your Linux distribution. Versions 3.1.2 and 3.2.1
+work. Make sure to compile the float version (--enable-single).
 
 If it is installed in a non-standard location, set the WFFTINC and
 WFFTLIB accordingly in the Makefile.
 
-The code compiles on linux 32 and 64 bit with gcc 4.2.1. It has not
-been tested on other platforms.
+The code compiles on linux 32 and 64 bit with gcc 4.2.1, and on Mac OS
+X 10.5 32 and 64 bit. It has not been tested on other platforms.
 
 How to test
 ===========
@@ -63,16 +64,20 @@ used in
   year = {2009},
 }
 
-Licence: GPL
+Licence: Python Software Foundation License, http://docs.python.org/license.html
 
 Comments, complaints to: matthijs.douze@inria.fr
 
 History
 =======
 
+dec 2011: Python integration with scikit image by Sebastien Campion
+
 jan 2009: Reimplementation of GIST added to Lear's internal image
-processing library by Christophe Smekens.
+processing library by Christophe Smekens and Matthijs Douze.
 
 jul 2009: Standalone version packaged by Matthijs Douze
 
+oct 2009: Added PGM input support
 
+dec 2011: License changed to PSFL

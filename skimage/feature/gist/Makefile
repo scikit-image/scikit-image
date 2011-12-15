@@ -5,8 +5,6 @@ all: compute_gist
 
 WFFTINC=
 WFFTLIB=
-# WFFTINC=-I/scratch/adonis/mordelet/install/include
-# WFFTLIB=-L/scratch/adonis/mordelet/install/lib
 
 
 # gist.c: ../../descriptors/gist.c 

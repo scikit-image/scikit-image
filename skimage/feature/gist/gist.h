@@ -1,4 +1,4 @@
-/* Lear's GIST implementation, version 1.0, (c) INRIA 2009, Licence: GPL */
+/* Lear's GIST implementation, version 1.1, (c) INRIA 2009, Licence: PSFL */
 
 
 #ifndef GIST_H_INCLUDED

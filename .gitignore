@@ -4,7 +4,6 @@
 *egg-info
 *.so
 *.bak
-*.c
 *.new
 doc/source/api
 doc/build
