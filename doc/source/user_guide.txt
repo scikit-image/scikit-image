@@ -2,8 +2,8 @@ User Guide
 ==========
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    user_guide/data_types
-   user_guide/segmentation
    user_guide/plugins
+   user_guide/tutorials
