@@ -114,9 +114,9 @@ use the Sobel operator for computing the amplitude of the gradient::
 From the 3-D surface plot shown below, we see that high barriers effectively
 separate the coins from the background.
 
-.. image:: elevation_map.jpg
+.. image:: data/elevation_map.jpg
     :align: center
- 
+
 Let us now compute the watershed transform::
 
     >>> from skimage.morphology import watershed
