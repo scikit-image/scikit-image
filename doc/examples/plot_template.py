@@ -13,7 +13,7 @@ a simple peak extraction algorithm.
 """
 
 import numpy as np
-from skimage.detection import match_template
+from skimage.feature import match_template
 from numpy.random import randn
 import matplotlib.pyplot as plt
 
