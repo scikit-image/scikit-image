@@ -64,5 +64,6 @@ for i in range(50):
     if len(found_positions) == len(target_positions):
         break
 
+found_positions = np.sort(found_positions)
 assert np.all(found_positions == target_positions)
 
