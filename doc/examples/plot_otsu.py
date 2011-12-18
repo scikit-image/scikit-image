@@ -3,7 +3,14 @@
 Thresholding
 ============
 
-Thresholding is used to create a binary image. This example uses Otsu's method to calculate the threshold value.
+Thresholding is used to create a binary image. This example uses Otsu's method
+to calculate the threshold value.
+
+Otsu's method calculates an "optimal" threshold by maximizing the variance
+between the two classes of pixels, which are separated by the threshold.
+Equivalently, the optimal threshold minimizes the intra-class variance.
+
+.. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
 """
 
@@ -17,7 +24,21 @@ image = camera()
 thresh = threshold_otsu(image)
 binary = image > thresh
 
-plt.imshow(binary)
+plt.figure(figsize=(10, 3.5))
+plt.subplot(1, 3, 1)
+plt.imshow(image)
+plt.title('original')
 plt.axis('off')
+
+plt.subplot(1, 3, 2)
+plt.hist(image)
+plt.title('histogram')
+plt.axvline(thresh, color='r')
+
+plt.subplot(1, 3, 3)
+plt.imshow(binary)
+plt.title('thresholded')
+plt.axis('off')
+
 plt.show()
 
