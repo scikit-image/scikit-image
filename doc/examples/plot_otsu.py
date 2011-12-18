@@ -6,9 +6,10 @@ Thresholding
 Thresholding is used to create a binary image. This example uses Otsu's method
 to calculate the threshold value.
 
-Otsu's method calculates an "optimal" threshold by maximizing the variance
-between the two classes of pixels, which are separated by the threshold.
-Equivalently, the optimal threshold minimizes the intra-class variance.
+Otsu's method calculates an "optimal" threshold (marked by a red line in the
+histogram below) by maximizing the variance between two classes of pixels,
+which are separated by the threshold. Equivalently, this threshold minimizes
+the intra-class variance.
 
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
