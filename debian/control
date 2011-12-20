@@ -3,7 +3,7 @@ Section: python
 Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.6.6-3~), python-numpy, python-sphinx, python-nose, python-setuptools, cython (>= 0.13), python-matplotlib, python-scipy
+Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.6.6-3~), python-numpy, python-sphinx, python-nose, python-setuptools, cython (>= 0.13), python-matplotlib, python-scipy, python-central, python-support
 Standards-Version: 3.9.2
 XS-Python-Version: >= 2.5
 Homepage: http://scikits-image.org
@@ -14,6 +14,7 @@ Package: python-skimage
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-numpy, python-scipy, python-skimage-lib (>= ${source:Version})
 Provides: ${python:Provides}
+XB-Python-Version: ${python:Versions}
 Recommends: python-nose, python-matplotlib
 Suggests: python-skimage-doc
 Description: Python modules for image processing
@@ -21,41 +22,23 @@ Description: Python modules for image processing
  Python.  It performs tasks such as image loading, filtering,
  morphology, segmentation, color conversions, and transformations.
 
-Package: python-scikits.image
-Architecture: all
-Depends: python-skimage
-Suggests: python-skimage-doc 
-Description: Dummy transition package for python-skimage
- This is a dummy package to ease the transition to python-skimage.
- It depends on python-skimage package and pulls in the correct package.
- It is provided for compatibility purposes. Please use python-skimage
- instead of python-scikits.image.
-
 Package: python-skimage-doc
 Architecture: all
 Section: doc
-Depends: ${misc:Depends}, libjs-jquery
-Suggests: python-skimage 
+Depends: ${misc:Depends}, ${python:Depends}, libjs-jquery
+XB-Python-Version: ${python:Versions}
+Suggests: python-skimage
 Description: Documentation and examples for scikits-image
  This package contains documentation and example scripts for
  python-scikits.image.
 
 Package: python-skimage-lib
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, ${python:Depends}, python-numpy
+Section: python
+Depends: ${misc:Depends}, ${python:Depends}, python-numpy
 Recommends: python-skimage
 Provides: ${python:Provides}
 XB-Python-Version: ${python:Versions}
 Description: Optimized low-level algorithms for scikits-image
  This is an add-on package for python-scikits.image. It provides
  optimized, low-level implementations of algorithms.
-
-Package: python-scikits.image-lib
-Architecture: any
-Depends: python-skimage-lib
-Recommends: python-skimage
-Description: Dummy transition package for python-skimage-lib
- This is a dummy package to ease the transition to python-skimage-lib.
- It depends on python-skimage-lib package and pulls in the correct
- package. It is provided for compatibility purposes. Please use 
- python-skimage-lib instead of python-scikits.image-lib.
