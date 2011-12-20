@@ -1,10 +1,8 @@
 import os.path
 
 import numpy as np
-from numpy.testing import *
+from numpy.testing import assert_equal
 
-from skimage import data_dir
-from skimage.io import imread
 from skimage import data_dir
 from skimage.morphology import *
 
