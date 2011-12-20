@@ -213,7 +213,7 @@ class ThreadDispatch(object):
             self.chunks.append((img[(height/2):, :, :],
                                stateimg[(height/2):, :, :]))
 
-        for i in range(self.cores):
+        for i in range(len(self.chunks)):
             self.threads.append(ImgThread(func, self.chunks[i][0],
                                           self.chunks[i][1], *args))
 
