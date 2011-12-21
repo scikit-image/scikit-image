@@ -1,7 +1,7 @@
 import os.path
 
 import numpy as np
-from numpy.testing import assert_equal
+from numpy import testing
 
 from skimage import data_dir
 from skimage.morphology.grey import *
@@ -19,7 +19,7 @@ class TestMorphology():
             expected_result = matlab_results[arrname]
             mask = strel_func(k)
             actual_result = morph_func(lena, mask)
-            assert_equal(expected_result, actual_result)
+            testing.assert_equal(expected_result, actual_result)
             k = k + 1
 
     def test_erode_diamond(self):
@@ -115,4 +115,8 @@ class TestEccentricStructuringElements():
         for s in self.selems:
             tophat = black_tophat(self.white_pixel, s)
             assert np.all(tophat == 0)
+
+
+if __name__ == '__main__':
+    testing.run_module_suite()
 
