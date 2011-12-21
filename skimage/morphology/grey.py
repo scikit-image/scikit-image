@@ -5,11 +5,15 @@
 
 __docformat__ = 'restructuredtext en'
 
+import warnings
+
 import numpy as np
+
 
 eps = np.finfo(float).eps
 
-def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
+
+def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -46,7 +50,7 @@ def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> greyscale_erode(bright_square, square(3))
+    >>> erosion(bright_square, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
@@ -64,7 +68,7 @@ def greyscale_erode(image, selem, out=None, shift_x=False, shift_y=False):
     except ImportError:
         raise ImportError("cmorph extension not available.")
 
-def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
+def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
@@ -102,7 +106,7 @@ def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
     ...                          [0, 0, 1, 0, 0],
     ...                          [0, 0, 0, 0, 0],
     ...                          [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> greyscale_dilate(bright_pixel, square(3))
+    >>> dilation(bright_pixel, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 1, 0],
            [0, 1, 1, 1, 0],
@@ -120,7 +124,7 @@ def greyscale_dilate(image, selem, out=None, shift_x=False, shift_y=False):
     except ImportError:
         raise ImportError("cmorph extension not available.")
 
-def greyscale_open(image, selem, out=None):
+def opening(image, selem, out=None):
     """Return greyscale morphological opening of an image.
 
     The morphological opening on an image is defined as an erosion followed by
@@ -154,7 +158,7 @@ def greyscale_open(image, selem, out=None):
     ...                            [1, 1, 1, 1, 1],
     ...                            [1, 1, 0, 1, 1],
     ...                            [1, 0, 0, 0, 1]], dtype=np.uint8)
-    >>> greyscale_open(bad_connection, square(3))
+    >>> opening(bad_connection, square(3))
     array([[0, 0, 0, 0, 0],
            [1, 1, 0, 1, 1],
            [1, 1, 0, 1, 1],
@@ -166,12 +170,11 @@ def greyscale_open(image, selem, out=None):
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
 
-    eroded = greyscale_erode(image, selem)
-    out = greyscale_dilate(eroded, selem, out=out,
-                           shift_x=shift_x, shift_y=shift_y)
+    eroded = erosion(image, selem)
+    out = dilation(eroded, selem, out=out, shift_x=shift_x, shift_y=shift_y)
     return out
 
-def greyscale_close(image, selem, out=None):
+def closing(image, selem, out=None):
     """Return greyscale morphological closing of an image.
 
     The morphological closing on an image is defined as a dilation followed by
@@ -205,7 +208,7 @@ def greyscale_close(image, selem, out=None):
     ...                         [1, 1, 0, 1, 1],
     ...                         [0, 0, 0, 0, 0],
     ...                         [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> greyscale_close(broken_line, square(3))
+    >>> closing(broken_line, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1],
@@ -217,12 +220,11 @@ def greyscale_close(image, selem, out=None):
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
 
-    dilated = greyscale_dilate(image, selem)
-    out = greyscale_erode(dilated, selem, out=out,
-                          shift_x=shift_x, shift_y=shift_y)
+    dilated = dilation(image, selem)
+    out = erosion(dilated, selem, out=out, shift_x=shift_x, shift_y=shift_y)
     return out
 
-def greyscale_white_top_hat(image, selem, out=None):
+def white_tophat(image, selem, out=None):
     """Return white top hat of an image.
 
     The white top hat of an image is defined as the image minus its
@@ -255,7 +257,7 @@ def greyscale_white_top_hat(image, selem, out=None):
     ...                            [3, 5, 9, 5, 3],
     ...                            [3, 4, 5, 4, 3],
     ...                            [2, 3, 3, 3, 2]], dtype=np.uint8)
-    >>> greyscale_white_top_hat(bright_on_grey, square(3))
+    >>> white_tophat(bright_on_grey, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
@@ -266,11 +268,11 @@ def greyscale_white_top_hat(image, selem, out=None):
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
 
-    out = greyscale_open(image, selem, out=out)
+    out = opening(image, selem, out=out)
     out = image - out
     return out
 
-def greyscale_black_top_hat(image, selem, out=None):
+def black_tophat(image, selem, out=None):
     """Return black top hat of an image.
 
     The black top hat of an image is defined as its morphological closing minus
@@ -304,7 +306,7 @@ def greyscale_black_top_hat(image, selem, out=None):
     ...                          [6, 4, 0, 4, 6],
     ...                          [6, 5, 4, 5, 6],
     ...                          [7, 6, 6, 6, 7]], dtype=np.uint8)
-    >>> greyscale_black_top_hat(dark_on_grey, square(3))
+    >>> black_tophat(dark_on_grey, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
@@ -314,7 +316,32 @@ def greyscale_black_top_hat(image, selem, out=None):
     """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
-    out = greyscale_close(image, selem, out=out)
+    out = closing(image, selem, out=out)
     out = out - image
     return out
+
+
+def greyscale_erode(*args, **kwargs):
+    warnings.warn("`greyscale_erode` renamed `erosion`.")
+    return erosion(*args, **kwargs)
+
+def greyscale_dilate(*args, **kwargs):
+    warnings.warn("`greyscale_dilate` renamed `dilation`.")
+    return dilation(*args, **kwargs)
+
+def greyscale_open(*args, **kwargs):
+    warnings.warn("`greyscale_open` renamed `opening`.")
+    return opening(*args, **kwargs)
+
+def greyscale_close(*args, **kwargs):
+    warnings.warn("`greyscale_close` renamed `closing`.")
+    return closing(*args, **kwargs)
+
+def greyscale_white_top_hat(*args, **kwargs):
+    warnings.warn("`greyscale_white_top_hat` renamed `white_tophat`.")
+    return white_tophat(*args, **kwargs)
+
+def greyscale_black_top_hat(*args, **kwargs):
+    warnings.warn("`greyscale_black_top_hat` renamed `black_tophat`.")
+    return black_tophat(*args, **kwargs)
 
