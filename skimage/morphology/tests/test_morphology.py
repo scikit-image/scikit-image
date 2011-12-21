@@ -117,6 +117,41 @@ class TestEccentricStructuringElements():
             assert np.all(tophat == 0)
 
 
+class TestDTypes():
+
+    def setUp(self):
+        k = 5
+        arrname = '%03i' % k
+
+        self.disk = selem.disk(k)
+
+        fname_opening = os.path.join(data_dir, "disk-open-matlab-output.npz")
+        self.expected_opening = np.load(fname_opening)[arrname]
+
+        fname_closing = os.path.join(data_dir, "disk-close-matlab-output.npz")
+        self.expected_closing = np.load(fname_closing)[arrname]
+
+    def _test_image(self, image):
+        result_opening = opening(image, self.disk)
+        testing.assert_equal(result_opening, self.expected_opening)
+
+        result_closing = closing(image, self.disk)
+        testing.assert_equal(result_closing, self.expected_closing)
+
+    def test_float(self):
+        image = skimage.img_as_float(lena)
+        self._test_image(image)
+
+    @testing.decorators.skipif(True)
+    def test_int(self):
+        image = skimage.img_as_int(lena)
+        self._test_image(image)
+
+    def test_uint(self):
+        image = skimage.img_as_uint(lena)
+        self._test_image(image)
+
+
 if __name__ == '__main__':
     testing.run_module_suite()
 

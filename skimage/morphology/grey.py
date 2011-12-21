@@ -9,6 +9,8 @@ import warnings
 
 import numpy as np
 
+import skimage
+
 
 eps = np.finfo(float).eps
 
@@ -23,7 +25,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-       The image as a uint8 ndarray.
+       Image array.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -38,7 +40,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    eroded : ndarray
+    eroded : uint8 array
        The result of the morphological erosion.
 
     Examples
@@ -60,6 +62,8 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     """
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
+    image = skimage.img_as_ubyte(image)
+
     try:
         import skimage.morphology.cmorph as cmorph
         out = cmorph.erode(image, selem, out=out,
@@ -67,6 +71,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
         return out;
     except ImportError:
         raise ImportError("cmorph extension not available.")
+
 
 def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological dilation of an image.
@@ -79,7 +84,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     ----------
 
     image : ndarray
-       The image as a uint8 ndarray.
+       Image array.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -94,7 +99,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    dilated : ndarray
+    dilated : uint8 array
        The result of the morphological dilation.
 
     Examples
@@ -116,6 +121,8 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     """
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
+    image = skimage.img_as_ubyte(image)
+
     try:
         from . import cmorph
         out = cmorph.dilate(image, selem, out=out,
@@ -123,6 +130,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
         return out;
     except ImportError:
         raise ImportError("cmorph extension not available.")
+
 
 def opening(image, selem, out=None):
     """Return greyscale morphological opening of an image.
@@ -135,7 +143,7 @@ def opening(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as a uint8 ndarray.
+       Image array.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -146,7 +154,7 @@ def opening(image, selem, out=None):
 
     Returns
     -------
-    opening : ndarray
+    opening : uint8 array
        The result of the morphological opening.
 
     Examples
@@ -174,6 +182,7 @@ def opening(image, selem, out=None):
     out = dilation(eroded, selem, out=out, shift_x=shift_x, shift_y=shift_y)
     return out
 
+
 def closing(image, selem, out=None):
     """Return greyscale morphological closing of an image.
 
@@ -185,7 +194,7 @@ def closing(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as a uint8 ndarray.
+       Image array.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -196,8 +205,8 @@ def closing(image, selem, out=None):
 
     Returns
     -------
-    opening : ndarray
-       The result of the morphological opening.
+    closing : uint8 array
+       The result of the morphological closing.
 
     Examples
     --------
@@ -224,6 +233,7 @@ def closing(image, selem, out=None):
     out = erosion(dilated, selem, out=out, shift_x=shift_x, shift_y=shift_y)
     return out
 
+
 def white_tophat(image, selem, out=None):
     """Return white top hat of an image.
 
@@ -234,7 +244,7 @@ def white_tophat(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as a uint8 ndarray.
+       Image array.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -245,7 +255,7 @@ def white_tophat(image, selem, out=None):
 
     Returns
     -------
-    opening : ndarray
+    opening : uint8 array
        The result of the morphological white top hat.
 
     Examples
@@ -267,10 +277,12 @@ def white_tophat(image, selem, out=None):
    """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
+    image = skimage.img_as_ubyte(image)
 
     out = opening(image, selem, out=out)
     out = image - out
     return out
+
 
 def black_tophat(image, selem, out=None):
     """Return black top hat of an image.
@@ -283,7 +295,7 @@ def black_tophat(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       The image as a uint8 ndarray.
+       Image array.
 
     selem : ndarray
        The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -294,7 +306,7 @@ def black_tophat(image, selem, out=None):
 
     Returns
     -------
-    opening : ndarray
+    opening : uint8 array
        The result of the black top filter.
 
     Examples
@@ -316,6 +328,8 @@ def black_tophat(image, selem, out=None):
     """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
+    image = skimage.img_as_ubyte(image)
+
     out = closing(image, selem, out=out)
     out = out - image
     return out
