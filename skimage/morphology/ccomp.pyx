@@ -64,10 +64,20 @@ cdef join_trees(np.int_t *work, np.int_t n, np.int_t m):
         set_root(work, n, root)
         set_root(work, m, root)
 
+cdef link_bg(np.int_t *work, np.int_t n, np.int_t *background_node):
+    """
+    Link a node to the background node.
+
+    """
+    if background_node[0] == -1:
+        background_node[0] = n
+
+    join_trees(work, n, background_node[0])
+
 # Connected components search as described in Fiorio et al.
 
 def label(np.ndarray[DTYPE_t, ndim=2] input,
-          int neighbors=8):
+          np.int_t neighbors=8, np.int_t background=-1):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -87,6 +97,9 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
         Image to label.
     neighbors : {4, 8}, int
         Whether to use 4- or 8-connectivity.
+    background : int
+        Consider all pixels with this value as background pixels, and label
+        them as -1.
 
     Returns
     -------
@@ -112,6 +125,15 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
      [1 0 1]
      [1 1 0]]
 
+    >>> x = np.array([[1, 0, 0],
+    ...               [1, 1, 5],
+    ...               [0, 0, 0]])
+
+    >>> print m.label(x, background=0)
+    [[ 0 -1 -1]
+     [ 0  0  1]
+     [-1 -1 -1]]
+
     """
     cdef np.int_t rows = input.shape[0]
     cdef np.int_t cols = input.shape[1]
@@ -126,16 +148,24 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
 
     cdef np.int_t i, j
 
+    cdef np.int_t background_node = -1
+
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
 
     # Initialize the first row
     for j in range(1, cols):
+        if data[0, j] == background:
+            link_bg(work_p, j, &background_node)
+
         if data[0, j] == data[0, j-1]:
             join_trees(work_p, j, j-1)
 
     for i in range(1, rows):
         # Handle the first column
+        if data[i, 0] == background:
+            link_bg(work_p, i * cols, &background_node)
+
         if data[i, 0] == data[i-1, 0]:
             join_trees(work_p, i*cols, (i-1)*cols)
 
@@ -144,6 +174,9 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
                 join_trees(work_p, i*cols, (i-1)*cols + 1)
 
         for j in range(1, cols):
+            if data[i, j] == background:
+                link_bg(work_p, i * cols + j, &background_node)
+
             if neighbors == 8:
                 if data[i, j] == data[i-1, j-1]:
                     join_trees(work_p, i*cols + j, (i-1)*cols + j - 1)
@@ -164,7 +197,9 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
     cdef np.int_t ctr = 0
     for i in range(rows):
         for j in range(cols):
-            if (i*cols + j) == work[i, j]:
+            if (i*cols + j) == background_node:
+                data[i, j] = -1
+            elif (i*cols + j) == work[i, j]:
                 data[i, j] = ctr
                 ctr = ctr + 1
             else:
