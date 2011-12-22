@@ -1,6 +1,7 @@
 #
 # Harris detector
 #
+# Inspired from Solem's implementation
 # http://www.janeriksolem.net/2009/01/harris-corner-detector-in-python.html
 
 import numpy as np
@@ -56,7 +57,7 @@ def harris_corner_detector(image, min_distance=10, threshold=0.1, eps=1e-6):
 
     params
     -------
-    harrisim: ndarray
+    harrisim: ndarray of floats
 
     min_distance: int, optional, default: 10
         minimum number of pixels separating corners and image boundary
