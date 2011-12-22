@@ -3,14 +3,15 @@ import numpy as np
 import skimage
 
 
-__all__ = ['histogram', 'cumulative_distribution', 'equalize_hist']
+__all__ = ['histogram', 'cumulative_distribution', 'equalize']
 
 
 def histogram(image, nbins, density=True):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
-    does not rebin integer arrays.
+    does not rebin integer arrays. For integer arrays, each integer value has
+    its own bin, which improves speed and intensity-resolution.
 
     Parameters
     ----------
@@ -80,7 +81,7 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
-def equalize_hist(image, nbins=256):
+def equalize(image, nbins=256):
     """Return image after histogram equalization.
 
     Parameters
@@ -97,7 +98,7 @@ def equalize_hist(image, nbins=256):
 
     Notes
     -----
-    This function is adapted from [1] with the author's permission.
+    This function is adapted from [1]_ with the author's permission.
 
     References
     ----------
