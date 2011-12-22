@@ -10,18 +10,20 @@ from scipy import ndimage
 
 def _compute_harris_response(image, eps=1e-6):
     """Compute the Harris corner detector response function
-        for each pixel in the image
+    for each pixel in the image
 
-    Params
-    -------
-    image: ndarray
+    Parameters
+    ----------
+    image: ndarray of floats
+        input image
 
-    eps: float, optional, default: 1e-6
-    normalisation factor
+    eps: float, optional
+        normalisation factor
 
     Returns
     --------
-    ndarray
+    features: (M, 2) ndarray
+        Harris image response
     """
     if len(image.shape) == 3:
         image = image.mean(axis=2)
@@ -42,8 +44,10 @@ def _compute_harris_response(image, eps=1e-6):
 
     # Non maximum filter of size 3
     harris_max = ndimage.maximum_filter(harris, 3, mode='constant')
-    harris *= harris == harris_max
-    # Remove the image corners
+    mask = (harris == harris_max)
+    harris *= mask
+
+    # Remove the image borders
     harris[:3] = 0
     harris[-3:] = 0
     harris[:, :3] = 0
@@ -52,23 +56,26 @@ def _compute_harris_response(image, eps=1e-6):
     return harris
 
 
-def harris_corner_detector(image, min_distance=10, threshold=0.1, eps=1e-6):
+def harris(image, min_distance=10, threshold=0.1, eps=1e-6):
     """Return corners from a Harris response image
 
-    params
-    -------
-    harrisim: ndarray of floats
+    Parameters
+    ----------
+    image: ndarray of floats
+        Input image
 
-    min_distance: int, optional, default: 10
-        minimum number of pixels separating corners and image boundary
+    min_distance: int, optional
+        minimum number of pixels separating interest points and image boundary
 
-    threshold: float, optional, default: 0.1
+    threshold: float, optional
+        relative threshold impacting the number of interest points.
 
-    eps: float, optional, default: 1e-6
+    eps: float, optional
+        Normalisation factor
 
     returns:
     --------
-    array: coordinates
+    array: coordinates of interest points
     """
     harrisim = _compute_harris_response(image, eps=eps)
     corner_threshold = np.max(harrisim.ravel()) * threshold
@@ -78,8 +85,9 @@ def harris_corner_detector(image, min_distance=10, threshold=0.1, eps=1e-6):
 
     # get coordinates of candidates
     candidates = harrisim_t.nonzero()
-    coords = [(candidates[0][c], candidates[1][c]) for c
-               in range(len(candidates[0]))]
+    coords = np.concatenate((candidates[0].reshape((len(candidates[0]), 1)),
+                             candidates[1].reshape((len(candidates[0]), 1))),
+                            axis=1)
 
     # ...and their values
     candidate_values = [harrisim[c[0]][c[1]] for c in coords]
