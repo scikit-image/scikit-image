@@ -47,5 +47,19 @@ class TestConnectedComponents:
                            [[0, 1],
                             [1, 0]])
 
+    def test_background(self):
+        x = np.array([[1, 0, 0],
+                      [1, 1, 5],
+                      [0, 0, 0]])
+
+        assert_array_equal(label(x), [[0, 1, 1],
+                                      [0, 0, 2],
+                                      [3, 3, 3]])
+
+        assert_array_equal(label(x, background=0),
+                           [[0, -1, -1],
+                            [0,  0,  1],
+                            [-1, -1, -1]])
+
 if __name__ == "__main__":
     run_module_suite()
