@@ -6,7 +6,7 @@ import skimage
 __all__ = ['histogram', 'cumulative_distribution', 'equalize']
 
 
-def histogram(image, nbins, density=True):
+def histogram(image, nbins=256):
     """Return histogram of image.
 
     Unlike `numpy.histogram`, this function returns the centers of bins and
@@ -20,10 +20,6 @@ def histogram(image, nbins, density=True):
     nbins : int
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
-    density : {True | False}
-        If True, values represent the probability density function.
-        If False, values represent the number of pixels in bins.
-        See numpy.histogram for details.
 
     Returns
     -------
@@ -43,12 +39,7 @@ def histogram(image, nbins, density=True):
         idx = np.nonzero(hist)[0][0]
         return hist[idx:], bin_centers[idx:]
     else:
-
-        if np.version.version >= '1.6':
-            hist, bin_edges = np.histogram(image.flat, nbins, density=density)
-        else:
-            hist, bin_edges = np.histogram(image.flat, nbins, normed=density)
-
+        hist, bin_edges = np.histogram(image.flat, nbins)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
         return hist, bin_centers
 
