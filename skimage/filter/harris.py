@@ -22,7 +22,7 @@ def _compute_harris_response(image, eps=1e-6):
 
     Returns
     --------
-    features: (M, 2) ndarray
+    image: (M, N) ndarray
         Harris image response
     """
     if len(image.shape) == 3:
@@ -85,12 +85,10 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6):
 
     # get coordinates of candidates
     candidates = harrisim_t.nonzero()
-    coords = np.concatenate((candidates[0].reshape((len(candidates[0]), 1)),
-                             candidates[1].reshape((len(candidates[0]), 1))),
-                            axis=1)
+    coords = np.transpose(candidates)
 
     # ...and their values
-    candidate_values = [harrisim[c[0]][c[1]] for c in coords]
+    candidate_values = harrisim[candidates]
 
     # sort candidates
     index = np.argsort(candidate_values)
@@ -103,7 +101,7 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6):
     # select the best points taking min_distance into account
     filtered_coords = []
     for i in index:
-        if allowed_locations[coords[i][0]][coords[i][1]] == 1:
+        if allowed_locations[tuple(coords[i])] == 1:
             filtered_coords.append(coords[i])
             allowed_locations[
               (coords[i][0] - min_distance):(coords[i][0] + min_distance),

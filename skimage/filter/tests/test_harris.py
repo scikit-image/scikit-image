@@ -1,7 +1,9 @@
 import numpy as np
 
-from skimage.filter import harris
+from skimage import data
 from skimage import img_as_float
+
+from skimage.filter import harris
 
 
 class TestHarris():
@@ -24,5 +26,17 @@ class TestHarris():
         im = np.zeros((50, 50))
         im[4:8, 4:8] = 1
         im = img_as_float(im)
+        results = harris(im, min_distance=3)
+        print results
+        assert (results == np.array([[6, 6]])).all()
+
+    def test_rotated_lena(self):
+        """
+        The harris filter should yield the same results with an image and it's
+        rotation.
+        """
+        im = img_as_float(data.lena().mean(axis=2))
         results = harris(im)
-        assert results == np.array([6, 6])
+        im_rotated = im.T
+        results_rotated = harris(im_rotated)
+        assert (results[:, 0] == results_rotated[:, 1]).all()
