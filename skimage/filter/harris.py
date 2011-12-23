@@ -8,7 +8,7 @@ import numpy as np
 from scipy import ndimage
 
 
-def _compute_harris_response(image, eps=1e-6):
+def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
     """Compute the Harris corner detector response function
     for each pixel in the image
 
@@ -20,6 +20,9 @@ def _compute_harris_response(image, eps=1e-6):
     eps: float, optional
         normalisation factor
 
+    gaussian_deviation: integer, optional
+        standard deviation used for the Gaussian kernel
+
     Returns
     --------
     image: (M, N) ndarray
@@ -29,7 +32,7 @@ def _compute_harris_response(image, eps=1e-6):
         image = image.mean(axis=2)
 
     # derivatives
-    image = ndimage.gaussian_filter(image, 1)
+    image = ndimage.gaussian_filter(image, gaussian_deviation)
     imx = ndimage.sobel(image, axis=0, mode='constant')
     imy = ndimage.sobel(image, axis=1, mode='constant')
 
@@ -56,7 +59,8 @@ def _compute_harris_response(image, eps=1e-6):
     return harris
 
 
-def harris(image, min_distance=10, threshold=0.1, eps=1e-6):
+def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
+           gaussian_deviation=1):
     """Return corners from a Harris response image
 
     Parameters
@@ -73,11 +77,15 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6):
     eps: float, optional
         Normalisation factor
 
+    gaussian_deviation: integer, optional
+        standard deviation used for the Gaussian kernel
+
     returns:
     --------
     array: coordinates of interest points
     """
-    harrisim = _compute_harris_response(image, eps=eps)
+    harrisim = _compute_harris_response(image, eps=eps,
+                    gaussian_deviation=gaussian_deviation)
     corner_threshold = np.max(harrisim.ravel()) * threshold
     # find top corner candidates above a threshold
     # corner_threshold = max(harrisim.ravel()) * threshold
