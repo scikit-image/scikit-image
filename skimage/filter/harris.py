@@ -15,13 +15,13 @@ def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
     Parameters
     ----------
     image: ndarray of floats
-        input image
+        Input image
 
     eps: float, optional
-        normalisation factor
+        Normalisation factor
 
     gaussian_deviation: integer, optional
-        standard deviation used for the Gaussian kernel
+        Standard deviation used for the Gaussian kernel
 
     Returns
     --------
@@ -69,16 +69,16 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
         Input image
 
     min_distance: int, optional
-        minimum number of pixels separating interest points and image boundary
+        Minimum number of pixels separating interest points and image boundary
 
     threshold: float, optional
-        relative threshold impacting the number of interest points.
+        Relative threshold impacting the number of interest points.
 
     eps: float, optional
         Normalisation factor
 
     gaussian_deviation: integer, optional
-        standard deviation used for the Gaussian kernel
+        Standard deviation used for the Gaussian kernel
 
     returns:
     --------
@@ -86,9 +86,9 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     """
     harrisim = _compute_harris_response(image, eps=eps,
                     gaussian_deviation=gaussian_deviation)
-    corner_threshold = np.max(harrisim.ravel()) * threshold
+
     # find top corner candidates above a threshold
-    # corner_threshold = max(harrisim.ravel()) * threshold
+    corner_threshold = np.max(harrisim.ravel()) * threshold
     harrisim_t = (harrisim >= corner_threshold) * 1
 
     # get coordinates of candidates
