@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 import dateutil.parser
+from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 
 cache = '_pr_cache.txt'
@@ -23,6 +24,8 @@ releases = OrderedDict([
     #('0.2', u'2009-11-12 14:48:45 +0200'),
     ('0.3', u'2011-10-10 03:28:47 -0700'),
     ('0.4', u'2011-12-03 14:31:32 -0800')])
+
+month_duration = 16
 
 for r in releases:
     releases[r] = dateutil.parser.parse(releases[r])
@@ -89,17 +92,27 @@ dates_f = seconds_from_epoch(dates)
 
 def date_formatter(value, _):
     dt = epoch + timedelta(seconds=value)
-    return dt.strftime('%Y/%m/%d')
+    return dt.strftime('%Y/%m')
 
 plt.figure(figsize=(7, 5))
-plt.hist(dates_f, bins=80)
+
+now = datetime.now(tz=dates[0].tzinfo)
+this_month = datetime(year=now.year, month=now.month, day=1,
+                      tzinfo=dates[0].tzinfo)
+
+bins = [this_month - relativedelta(months=i) \
+        for i in reversed(range(-1, month_duration))]
+bins = seconds_from_epoch(bins)
+plt.hist(dates_f, bins=bins)
 
 ax = plt.gca()
 ax.xaxis.set_major_formatter(FuncFormatter(date_formatter))
+ax.set_xticks(bins[:-1])
 
 labels = ax.get_xticklabels()
 for l in labels:
     l.set_rotation(40)
+    l.set_size(10)
 
 
 for version, date in releases.items():
