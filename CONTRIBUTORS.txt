@@ -26,9 +26,11 @@
 - Tony Yu
   Reading of paletted images; build, bug and doc fixes.
   Code to generate skimage logo.
+  Otsu thresholding, histogram equalisation, and more.
 
 - Zachary Pincus
-  Tracing of low cost paths, FreeImage I/O plugin, iso-contours
+  Tracing of low cost paths, FreeImage I/O plugin, iso-contours,
+  and more.
 
 - Almar Klein
   Binary heap class for graph algorithms
@@ -45,7 +47,7 @@
 
 - Emmanuelle Guillart
   Total variation noise filtering, integration of CellProfiler's
-  mathematical morphology tools.
+  mathematical morphology tools, tutorials, and more.
 
 - Maël Primet
   Total variation noise filtering
