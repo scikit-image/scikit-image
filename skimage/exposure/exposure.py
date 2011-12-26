@@ -28,6 +28,8 @@ def histogram(image, nbins=256):
     bin_centers : array
         The values at the center of the bins.
     """
+
+    # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
         offset = 0
         if np.min(image) < 0:
