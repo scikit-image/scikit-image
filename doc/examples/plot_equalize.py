@@ -22,15 +22,15 @@ def plot_hist(img, bins=256):
     """Plot histogram and cumulative histogram for image"""
     img_cdf, bins = exposure.cumulative_distribution(img, bins)
     plt.hist(img.ravel(), bins=bins)
+    plt.ylabel('Number of pixels')
+    plt.xlabel('Pixel intensiy')
+
     ax_cdf = plt.twinx()
     ax_cdf.plot(bins, img_cdf, 'r')
     xmin, xmax = dtype_range[img.dtype.type]
     plt.xlim(xmin, xmax)
 
-    plt.ylabel('# pixels')
-    plt.xlabel('pixel intensiy')
-    ax_cdf.set_ylabel('fraction of total intensity')
-
+    ax_cdf.set_ylabel('Fraction of total intensity')
 
 img_orig = data.camera()
 # squeeze image intensities to lower image contrast
@@ -39,12 +39,14 @@ img_eq = exposure.equalize(img)
 
 plt.subplot(2, 2, 1)
 plt.imshow(img, cmap=plt.cm.gray, vmin=0, vmax=255)
+plt.title('Low contrast input image')
 plt.axis('off')
 plt.subplot(2, 2, 2)
 plot_hist(img)
 
 plt.subplot(2, 2, 3)
 plt.imshow(img_eq, cmap=plt.cm.gray, vmin=0, vmax=1)
+plt.title('After\nhistogram equalization')
 plt.axis('off')
 plt.subplot(2, 2, 4)
 plot_hist(img_eq)
