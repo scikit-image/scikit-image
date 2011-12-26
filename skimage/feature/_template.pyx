@@ -8,12 +8,12 @@ from skimage.transform import integral
 
 
 cdef extern from "math.h":
-    double sqrt(double x)
-    double fabs(double x)
+    float sqrt(float x)
+    float fabs(float x)
 
 
 @cython.boundscheck(False)
-cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat,
+cdef float sum_integral(np.ndarray[float, ndim=2,  mode="c"] sat,
         int r0, int c0, int r1, int c1):
     """
     Using a summed area table / integral image, calculate the sum
@@ -25,7 +25,7 @@ cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat,
 
     Parameters
     ----------
-    sat : ndarray of double_t
+    sat : ndarray of float
         Summed area table / integral image.
     r0, c0 : int
         Top-left corner of block to be summed.
@@ -37,7 +37,7 @@ cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat,
     S : int
         Sum over the given window.
     """
-    cdef double S = 0
+    cdef float S = 0
 
     S += sat[r1, c1]
 
@@ -53,27 +53,28 @@ cdef double sum_integral(np.ndarray[np.double_t, ndim=2,  mode="c"] sat,
 
 
 @cython.boundscheck(False)
-def match_template(np.ndarray[np.double_t, ndim=2, mode="c"] image,
-                   np.ndarray[np.double_t, ndim=2, mode="c"] template,
+def match_template(np.ndarray[float, ndim=2, mode="c"] image,
+                   np.ndarray[float, ndim=2, mode="c"] template,
                    int num_type):
     # convolve the image with template by frequency domain multiplication
-    cdef np.ndarray[np.double_t, ndim=2] result
+    cdef np.ndarray[float, ndim=2] result
+    # when `dtype=float` is used, ascontiguousarray returns ``double``.
     result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
-                                              mode="valid"), dtype=np.double)
+                                              mode="valid"), dtype=np.float32)
     # calculate squared integral images used for normalization
-    cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sum
-    cdef np.ndarray[np.double_t, ndim=2,  mode="c"] integral_sqr
+    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sum
+    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sqr
     if num_type == 1:
         integral_sum = integral.integral_image(image)
     integral_sqr = integral.integral_image(image**2)
 
     # use inversed area for accuracy
-    cdef double inv_area = 1.0 / (template.shape[0] * template.shape[1])
+    cdef float inv_area = 1.0 / (template.shape[0] * template.shape[1])
     # calculate template norm according to the following:
     # variance ** 2 = 1/K Sigma[(x_k - mean) ** 2]
     #               = 1/K Sigma[x_k ** 2] - mean ** 2
-    cdef double template_norm
-    cdef double template_mean = np.mean(template)
+    cdef float template_norm
+    cdef float template_mean = np.mean(template)
 
     if num_type == 0:
         template_norm = sqrt((np.std(template) ** 2 +
@@ -83,7 +84,7 @@ def match_template(np.ndarray[np.double_t, ndim=2, mode="c"] image,
 
     # define window of template size in squared integral image
     cdef int i, j
-    cdef double num, window_sum2, window_mean2, normed, t,
+    cdef float num, window_sum2, window_mean2, normed, t,
     # move window through convolution results, normalizing in the process
     for i in range(result.shape[0] - 1):
         for j in range(result.shape[1] - 1):
