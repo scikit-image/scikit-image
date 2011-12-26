@@ -27,18 +27,18 @@ binary = image > thresh
 
 plt.figure(figsize=(10, 3.5))
 plt.subplot(1, 3, 1)
-plt.imshow(image)
-plt.title('original')
+plt.imshow(image, cmap=plt.cm.gray)
+plt.title('Original')
 plt.axis('off')
 
-plt.subplot(1, 3, 2)
+plt.subplot(1, 3, 2, aspect='equal')
 plt.hist(image)
-plt.title('histogram')
+plt.title('Histogram')
 plt.axvline(thresh, color='r')
 
 plt.subplot(1, 3, 3)
-plt.imshow(binary)
-plt.title('thresholded')
+plt.imshow(binary, cmap=plt.cm.gray)
+plt.title('Thresholded')
 plt.axis('off')
 
 plt.show()
