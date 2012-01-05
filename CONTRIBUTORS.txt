@@ -87,3 +87,6 @@
 
 - W. Randolph Franklin
   Point in polygon test.
+
+- Gaël Varoquaux
+  Harris corner detector
