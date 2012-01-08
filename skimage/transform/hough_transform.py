@@ -66,15 +66,15 @@ def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10, theta=No
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    value_threshold: int
+    threshold : int
         Threshold        
-    line_length: int, optional (default 50)
+    line_length : int, optional (default 50)
         Minimum accepted length of detected lines.
         Increase the parameter to extract longer lines.
-    line_gap: int, optional, (default 10)
+    line_gap : int, optional, (default 10)
         Maximum gap between pixels to still form a line. 
         Increase the parameter to merge broken lines more aggresively.
-    theta :1D ndarray, dtype=double, optional, default (-pi/2 .. pi/2)
+    theta : 1D ndarray, dtype=double, optional, default (-pi/2 .. pi/2)
         Angles at which to compute the transform, in radians.
         
     Returns
