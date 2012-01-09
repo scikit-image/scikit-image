@@ -51,11 +51,11 @@ class CvVideo(object):
             self.size = cv.GetSize(img)
         img_mat = np.empty((self.size[1], self.size[0], 3), dtype=np.uint8)
         if cv.GetSize(img) == self.size:
-            cv.Copy(img, img_mat)            
+            cv.Copy(img, cv.fromarray(img_mat))
         else:
-            cv.Resize(img, img_mat)
+            cv.Resize(img, cv.fromarray(img_mat))
         # opencv stores images in BGR format
-        cv.CvtColor(img_mat, img_mat, cv.CV_BGR2RGB)
+        cv.CvtColor(cv.fromarray(img_mat), cv.fromarray(img_mat), cv.CV_BGR2RGB)
         return img_mat
     
     def seek_frame(self, frame_number):
@@ -185,7 +185,7 @@ class GstVideo(object):
             Retrieved image.
         """
         buff = self.appsink.emit('pull-buffer')
-        img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3), dtype='uint8', buffer=buff.data)
+        img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3), dtype=np.uint8, buffer=buff.data)
         return img_mat
 
     def seek_frame(self, frame_number):
@@ -354,7 +354,7 @@ class Video(object):
             Collection of images iterator.
         """
         if not time_range:
-            time_range = range(self.frame_count())
+            time_range = range(int(self.frame_count()))
         return ImageCollection(time_range, load_func=self.get_index_frame)
     
     
