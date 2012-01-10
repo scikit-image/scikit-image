@@ -11,7 +11,7 @@ def test_noisy_peaks():
     for r, c in peak_locations:
         image[r, c] = 1
 
-    peaks_detected = feature.peak_min_dist(image, min_distance=5)
+    peaks_detected = feature.peak_local_max(image, min_distance=5)
 
     assert len(peaks_detected) == len(peak_locations)
     for loc in peaks_detected:

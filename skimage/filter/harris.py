@@ -79,7 +79,7 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     """
     harrisim = _compute_harris_response(image, eps=eps,
                     gaussian_deviation=gaussian_deviation)
-    coordinates = feature.peak_min_dist(harrisim, min_distance=min_distance,
+    coordinates = feature.peak_local_max(harrisim, min_distance=min_distance,
                                         threshold=threshold)
     return coordinates
 
