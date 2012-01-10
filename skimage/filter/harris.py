@@ -103,7 +103,7 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     candidate_values = harrisim[candidates]
 
     # sort candidates
-    index = np.argsort(candidate_values)
+    index = np.argsort(candidate_values)[::-1]
 
     # store allowed point locations in array
     allowed_locations = np.zeros(harrisim.shape)
