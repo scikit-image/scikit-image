@@ -85,6 +85,10 @@
 
 - Nelle Varoquaux
   Renaming of the package to ``skimage``.
+  Harris corner detector
 
 - W. Randolph Franklin
   Point in polygon test.
+
+- Gaël Varoquaux
+  Harris corner detector
