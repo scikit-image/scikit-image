@@ -3,8 +3,11 @@
 Harris Corner detector
 ===============================================================================
 
-The Harris corner filter detects interest points using edge detection in
-multiple direction.
+The Harris corner filter [1]_ detects "interest points" [2]_ using edge
+detection in multiple directions.
+
+.. [1] http://en.wikipedia.org/wiki/Corner_detection
+.. [2] http://en.wikipedia.org/wiki/Interest_point_detection
 """
 
 from matplotlib import pyplot as plt
@@ -26,5 +29,6 @@ def plot_harris_points(image, filtered_coords):
 
 
 im = img_as_float(data.lena())
-filtered_coords = harris(im, 6)
+filtered_coords = harris(im, min_distance=6)
 plot_harris_points(im, filtered_coords)
+
