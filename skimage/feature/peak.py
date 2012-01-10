@@ -2,12 +2,11 @@ import numpy as np
 from scipy import ndimage
 
 
-def peak_min_dist(image, min_distance=10, threshold=0.1):
+def peak_local_max(image, min_distance=10, threshold=0.1):
     """Return coordinates of peaks in an image.
 
-    Candidate peaks are determined by a relative `threshold`, and peaks that
-    are too close (as determined by `min_distance`) to larger peaks are
-    rejected.
+    Peaks are the local maxima in a region of `2 * min_distance + 1`
+    (i.e. peaks are separated by at least `min_distance`).
 
     Parameters
     ----------
