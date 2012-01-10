@@ -1,8 +1,9 @@
-#
-# Harris detector
-#
-# Inspired from Solem's implementation
-# http://www.janeriksolem.net/2009/01/harris-corner-detector-in-python.html
+"""
+Harris corner detector
+
+Inspired from Solem's implementation
+http://www.janeriksolem.net/2009/01/harris-corner-detector-in-python.html
+"""
 
 import numpy as np
 from scipy import ndimage
@@ -14,18 +15,18 @@ def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
 
     Parameters
     ----------
-    image: ndarray of floats
-        Input image
+    image : ndarray of floats
+        Input image.
 
-    eps: float, optional
-        Normalisation factor
+    eps : float, optional
+        Normalisation factor.
 
-    gaussian_deviation: integer, optional
-        Standard deviation used for the Gaussian kernel
+    gaussian_deviation : integer, optional
+        Standard deviation used for the Gaussian kernel.
 
     Returns
     --------
-    image: (M, N) ndarray
+    image : (M, N) ndarray
         Harris image response
     """
     if len(image.shape) == 3:
@@ -43,6 +44,8 @@ def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
     # determinant and trace
     Wdet = Wxx * Wyy - Wxy ** 2
     Wtr = Wxx + Wyy
+    # Alternate formula for Harris response.
+    # Alison Noble, "Descriptions of Image Surfaces", PhD thesis (1989)
     harris = Wdet / (Wtr + eps)
 
     # Non maximum filter of size 3
@@ -65,24 +68,25 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
 
     Parameters
     ----------
-    image: ndarray of floats
-        Input image
+    image : ndarray of floats
+        Input image.
 
-    min_distance: int, optional
-        Minimum number of pixels separating interest points and image boundary
+    min_distance : int, optional
+        Minimum number of pixels separating interest points and image boundary.
 
-    threshold: float, optional
+    threshold : float, optional
         Relative threshold impacting the number of interest points.
 
-    eps: float, optional
-        Normalisation factor
+    eps : float, optional
+        Normalisation factor.
 
-    gaussian_deviation: integer, optional
-        Standard deviation used for the Gaussian kernel
+    gaussian_deviation : integer, optional
+        Standard deviation used for the Gaussian kernel.
 
-    returns:
-    --------
-    array: coordinates of interest points
+    Returns
+    -------
+    coordinates : (N, 2) array
+        (row, column) coordinates of interest points.
     """
     harrisim = _compute_harris_response(image, eps=eps,
                     gaussian_deviation=gaussian_deviation)
@@ -116,3 +120,4 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
               (coords[i][1] - min_distance):(coords[i][1] + min_distance)] = 0
 
     return np.array(filtered_coords)
+
