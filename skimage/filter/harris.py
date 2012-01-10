@@ -4,9 +4,9 @@ Harris corner detector
 Inspired from Solem's implementation
 http://www.janeriksolem.net/2009/01/harris-corner-detector-in-python.html
 """
-
-import numpy as np
 from scipy import ndimage
+
+from skimage import feature
 
 
 def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
@@ -48,17 +48,6 @@ def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
     # Alison Noble, "Descriptions of Image Surfaces", PhD thesis (1989)
     harris = Wdet / (Wtr + eps)
 
-    # Non maximum filter of size 3
-    harris_max = ndimage.maximum_filter(harris, 3, mode='constant')
-    mask = (harris == harris_max)
-    harris *= mask
-
-    # Remove the image borders
-    harris[:3] = 0
-    harris[-3:] = 0
-    harris[:, :3] = 0
-    harris[:, -3:] = 0
-
     return harris
 
 
@@ -90,34 +79,7 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     """
     harrisim = _compute_harris_response(image, eps=eps,
                     gaussian_deviation=gaussian_deviation)
-
-    # find top corner candidates above a threshold
-    corner_threshold = np.max(harrisim.ravel()) * threshold
-    harrisim_t = (harrisim >= corner_threshold) * 1
-
-    # get coordinates of candidates
-    candidates = harrisim_t.nonzero()
-    coords = np.transpose(candidates)
-
-    # ...and their values
-    candidate_values = harrisim[candidates]
-
-    # sort candidates
-    index = np.argsort(candidate_values)[::-1]
-
-    # store allowed point locations in array
-    allowed_locations = np.zeros(harrisim.shape)
-    allowed_locations[min_distance:-min_distance,
-                      min_distance:-min_distance] = 1
-
-    # select the best points taking min_distance into account
-    filtered_coords = []
-    for i in index:
-        if allowed_locations[tuple(coords[i])] == 1:
-            filtered_coords.append(coords[i])
-            allowed_locations[
-              (coords[i][0] - min_distance):(coords[i][0] + min_distance),
-              (coords[i][1] - min_distance):(coords[i][1] + min_distance)] = 0
-
-    return np.array(filtered_coords)
+    coordinates = feature.peak_min_dist(harrisim, min_distance=min_distance,
+                                        threshold=threshold)
+    return coordinates
 
