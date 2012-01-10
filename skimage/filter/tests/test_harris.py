@@ -38,7 +38,8 @@ def test_rotated_lena():
     results = harris(im)
     im_rotated = im.T
     results_rotated = harris(im_rotated)
-    assert (results[:, 0] == results_rotated[:, 1]).all()
+    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
+    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
 
 
 if __name__ == '__main__':
