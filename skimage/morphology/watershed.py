@@ -42,25 +42,32 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     image: ndarray (2-D, 3-D, ...) of integers
         Data array where the lowest value points are labeled first.
     markers: ndarray of the same shape as `image`
-        An array marking the basins with the values to be assigned in the 
-        label matrix. Zero means not a marker. This array should be of an 
+        An array marking the basins with the values to be assigned in the
+        label matrix. Zero means not a marker. This array should be of an
         integer type.
     connectivity: ndarray, optional
         An array with the same number of dimensions as `image` whose
         non-zero elements indicate neighbors for connection.
-        Following the scipy convention, default is a one-connected array of 
+        Following the scipy convention, default is a one-connected array of
         the dimension of the image.
     offset: array_like of shape image.ndim, optional
         offset of the connectivity (one offset per dimension)
     mask: ndarray of bools or 0s and 1s, optional
-        Array of same shape as `image`. Only points at which mask == True 
+        Array of same shape as `image`. Only points at which mask == True
         will be labeled.
-    
-    Returns 
+
+    Returns
     -------
     out: ndarray
         A labeled matrix of the same type and shape as markers
-    
+
+    See also
+    --------
+
+    skimage.segmentation.random_walker: random walker segmentation
+        A segmentation algorithm based on anisotropic diffusion, usually
+        slower than the watershed but with good results on noisy data and
+        boundaries with holes.
 
     Notes
     -----
