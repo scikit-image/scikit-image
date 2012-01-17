@@ -203,6 +203,13 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
         Array in which each pixel has been labeled according to the marker
         that reached the pixel first by anisotropic diffusion.
 
+    See also
+    --------
+
+    skimage.morphology.watershed: watershed segmentation
+        A segmentation algorithm based on mathematical morphology
+        and "flooding" of regions from markers.
+
     Notes
     -----
 
