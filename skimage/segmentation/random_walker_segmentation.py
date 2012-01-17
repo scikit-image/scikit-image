@@ -4,19 +4,9 @@ Random walker segmentation algorithm
 from *Random walks for image segmentation*, Leo Grady, IEEE Trans
 Pattern Anal Mach Intell. 2006 Nov;28(11):1768-83.
 
-Dependencies:
-
-* numpy >= 1.4, scipy
-
-* optional: pyamg
-
 Installing pyamg and using the 'cg_mg' mode of random_walker improves
 significantly the performance.
 """
-
-# Author: Emmanuelle Gouillart <emmanuelle.gouillart@normalesup.org>
-# Copyright (c) 2009-2011, Emmanuelle Gouillart
-# License: BSD
 
 import warnings
 
@@ -108,14 +98,15 @@ def _clean_labels_ar(X, labels):
 
 def _buildAB(lap_sparse, labels):
     """
-        Build the matrix A and rhs B of the linear system to solve
+        Build the matrix A and rhs B of the linear system to solve.
+        A and B are two block of the laplacian of the image graph.
     """
     l_x, l_y, l_z = labels.shape
     labels = labels[labels >= 0]
     indices = np.arange(labels.size)
     unlabeled_indices = indices[labels == 0]
     seeds_indices = indices[labels > 0]
-    # The following two lines take most of the time
+    # The following two lines take most of the time in this function
     B = lap_sparse[unlabeled_indices][:, seeds_indices]
     lap_sparse = lap_sparse[unlabeled_indices][:, unlabeled_indices]
     nlabels = labels.max()
@@ -157,87 +148,117 @@ def _build_laplacian(data, mask=None, beta=50):
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
     """
-        Random walker algorithm for segmentation from markers.
+    Random walker algorithm for segmentation from markers.
 
-        Parameters
-        ----------
+    Parameters
+    ----------
 
-        data : array_like
-            Image to be segmented in phases. `data` can be two- or
-            three-dimensional.
+    data : array_like
+        Image to be segmented in phases. `data` can be two- or
+        three-dimensional.
 
-        labels : array of ints, of same shape as `data`
-            Array of seed markers labeled with different positive integers
-            for different phases. Zero-labeled pixels are unlabeled pixels.
-            Negative labels correspond to inactive pixels that are not taken
-            into account (they are removed from the graph).
+    labels : array of ints, of same shape as `data`
+        Array of seed markers labeled with different positive integers
+        for different phases. Zero-labeled pixels are unlabeled pixels.
+        Negative labels correspond to inactive pixels that are not taken
+        into account (they are removed from the graph).
 
-        beta : float
-            Penalization coefficient for the random walker motion
-            (the greater `beta`, the more difficult the diffusion).
+    beta : float
+        Penalization coefficient for the random walker motion
+        (the greater `beta`, the more difficult the diffusion).
 
-        mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
-            Mode for solving the linear system in the random walker
-            algorithm.
+    mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
+        Mode for solving the linear system in the random walker
+        algorithm.
 
-            - 'bf' (brute force, default): an LU factorization of the
-            Laplacian is computed. This is fast for small images (<1024x1024),
-            but very slow (due to the memory cost) and memory-consuming for
-            big images (in 3-D for example).
+        - 'bf' (brute force, default): an LU factorization of the
+        Laplacian is computed. This is fast for small images (<1024x1024),
+        but very slow (due to the memory cost) and memory-consuming for
+        big images (in 3-D for example).
 
-            - 'cg' (conjugate gradient): the linear system is solved
-            iteratively using the Conjugate Gradient method from
-            scipy.sparse.linalg. This is less memory-consuming than the
-            brute force method for large images, but it is quite slow.
+        - 'cg' (conjugate gradient): the linear system is solved
+        iteratively using the Conjugate Gradient method from
+        scipy.sparse.linalg. This is less memory-consuming than the
+        brute force method for large images, but it is quite slow.
 
-            - 'cg_mg' (conjugate gradient with multigrid preconditioner):
-            a preconditioner is computed using a multigrid solver, then
-            the solution is computed with the Conjugate Gradient method.
-            This mode requires that the pyamg module
-            (http://code.google.com/p/pyamg/) is installed. For images of
-            size > 512x512, this is the recommended (fastest) mode.
+        - 'cg_mg' (conjugate gradient with multigrid preconditioner):
+        a preconditioner is computed using a multigrid solver, then
+        the solution is computed with the Conjugate Gradient method.
+        This mode requires that the pyamg module
+        (http://code.google.com/p/pyamg/) is installed. For images of
+        size > 512x512, this is the recommended (fastest) mode.
 
-        tol : tolerance to achieve when solving the linear system, in
-            cg' and 'cg_mg' modes.
+    tol : tolerance to achieve when solving the linear system, in
+        cg' and 'cg_mg' modes.
 
-        copy : bool
-            If copy is False, the `labels` array will be overwritten with
-            the result of the segmentation. Use copy=False if you want to
-            save on memory.
+    copy : bool
+        If copy is False, the `labels` array will be overwritten with
+        the result of the segmentation. Use copy=False if you want to
+        save on memory.
 
-        Returns
-        -------
+    Returns
+    -------
 
-        output : ndarray of ints
-            Array in which each pixel has been labeled according to the marker
-            that reached the pixel first by anisotropic diffusion.
+    output : ndarray of ints
+        Array in which each pixel has been labeled according to the marker
+        that reached the pixel first by anisotropic diffusion.
 
-        Notes
-        -----
+    Notes
+    -----
 
-        The algorithm was first proposed in *Random walks for image
-        segmentation*, Leo Grady, IEEE Trans Pattern Anal Mach Intell.
-        2006 Nov;28(11):1768-83.
+    The algorithm was first proposed in *Random walks for image
+    segmentation*, Leo Grady, IEEE Trans Pattern Anal Mach Intell.
+    2006 Nov;28(11):1768-83.
 
-        Examples
-        --------
+    The algorithm solves the diffusion equation at infinite times for
+    sources placed on markers of each phase in turn. A pixel is labeled with
+    the phase that has the greatest probability to diffuse first to the pixel.
 
-        >>> a = np.zeros((10, 10)) + 0.2*np.random.random((10, 10))
-        >>> a[5:8, 5:8] += 1
-        >>> b = np.zeros_like(a)
-        >>> b[3,3] = 1 #Marker for first phase
-        >>> b[6,6] = 2 #Marker for second phase
-        >>> random_walker(a, b)
-        array([[ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-               [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
+    The diffusion equation is solved by minimizing x.T L x for each phase,
+    where L is the Laplacian of the weighted graph of the image, and x is
+    the probability that a marker of the given phase arrives first at a pixel
+    by diffusion (x=1 on markers of the phase, x=0 on the other markers, and
+    the other coefficients are looked for). Each pixel is attributed the label
+    for which it has a maximal value of x. The Laplacian L of the image
+    is defined as:
+       - L_ii = d_i, the number of neighbors of pixel i (the degree of i)
+       - L_ij = -w_ij if i and j are adjacent pixels
+    The weight w_ij is a decreasing function of the norm of the local gradient.
+    This ensures that diffusion is easier between pixels of similar values.
+
+    When the Laplacian is decomposed into blocks of marked and unmarked pixels
+
+        L = M B.T
+            B A
+
+    with first indices corresponding to marked pixels, and then to unmarked
+    pixels, minimizing x.T L x for one phase amount to solving
+
+        A x = - B x_m
+
+    where x_m=1 on markers of the given phase, and 0 on other markers.
+    This linear system is solved in the algorithm using a direct method for
+    small images, and an iterative method for larger images.
+
+    Examples
+    --------
+
+    >>> a = np.zeros((10, 10)) + 0.2*np.random.random((10, 10))
+    >>> a[5:8, 5:8] += 1
+    >>> b = np.zeros_like(a)
+    >>> b[3,3] = 1 #Marker for first phase
+    >>> b[6,6] = 2 #Marker for second phase
+    >>> random_walker(a, b)
+    array([[ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+            [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
 
     """
     # We work with 3-D arrays
@@ -282,7 +303,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
 def _solve_bf(lap_sparse, B):
     """
     solves lap_sparse X_i = B_i for each phase i. An LU decomposition
-    of lap_sparse is computed first. For each pixel, the label i 
+    of lap_sparse is computed first. For each pixel, the label i
     corresponding to the maximal X_i is returned.
     """
     lap_sparse = lap_sparse.tocsc()
@@ -313,7 +334,7 @@ def _solve_cg_mg(lap_sparse, B, tol):
     """
     solves lap_sparse X_i = B_i for each phase i, using the conjugate
     gradient method with a multigrid preconditioner (ruge-stuben from
-    pyamg). For each pixel, the label i corresponding to the maximal 
+    pyamg). For each pixel, the label i corresponding to the maximal
     X_i is returned.
     """
     X = []

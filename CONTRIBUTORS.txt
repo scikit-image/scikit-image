@@ -47,7 +47,8 @@
 
 - Emmanuelle Guillart
   Total variation noise filtering, integration of CellProfiler's
-  mathematical morphology tools, tutorials, and more.
+  mathematical morphology tools, random walker segmentation,
+  tutorials, and more.
 
 - Maël Primet
   Total variation noise filtering

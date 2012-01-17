@@ -1,5 +1,5 @@
 import numpy as np
-from random_walker import random_walker
+from skimage.segmentation import random_walker
 try:
     import pyamg
     amg_loaded = True
