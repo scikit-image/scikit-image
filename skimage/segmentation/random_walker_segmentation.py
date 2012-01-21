@@ -31,18 +31,24 @@ from scipy.sparse.linalg import cg
 #-----------Laplacian--------------------
 
 
-def _make_edges_3d(n_x, n_y, n_z):
+def _make_graph_edges_3d(n_x, n_y, n_z):
     """
     Returns a list of edges for a 3D image.
 
     Parameters
-    ===========
+    ----------
     n_x: integer
         The size of the grid in the x direction.
     n_y: integer
         The size of the grid in the y direction
     n_z: integer
         The size of the grid in the z direction
+
+    Returns
+    -------
+    edges : ndarray of shape (2, n_x * n_y * (nz - 1) +
+                                 n_x * (n_y - 1) * nz + (n_x - 1) * n_y * nz)
+        Graph edges with each column describing a node-id pair.
     """
     vertices = np.arange(n_x * n_y * n_z).reshape((n_x, n_y, n_z))
     edges_deep = np.vstack((vertices[:, :, :-1].ravel(),
@@ -55,7 +61,6 @@ def _make_edges_3d(n_x, n_y, n_z):
 
 
 def _compute_weights_3d(edges, data, beta=130, eps=1.e-6):
-    l_x, l_y, l_z = data.shape
     gradients = _compute_gradients_3d(data) ** 2
     beta /= 10 * data.std()
     gradients *= beta
@@ -65,7 +70,6 @@ def _compute_weights_3d(edges, data, beta=130, eps=1.e-6):
 
 
 def _compute_gradients_3d(data):
-    l_x, l_y, l_z = data.shape
     gr_deep = np.abs(data[:, :, :-1] - data[:, :, 1:]).ravel()
     gr_right = np.abs(data[:, :-1] - data[:, 1:]).ravel()
     gr_down = np.abs(data[:-1] - data[1:]).ravel()
@@ -101,7 +105,6 @@ def _buildAB(lap_sparse, labels):
         Build the matrix A and rhs B of the linear system to solve.
         A and B are two block of the laplacian of the image graph.
     """
-    l_x, l_y, l_z = labels.shape
     labels = labels[labels >= 0]
     indices = np.arange(labels.size)
     unlabeled_indices = indices[labels == 0]
@@ -119,25 +122,31 @@ def _buildAB(lap_sparse, labels):
     return lap_sparse, rhs
 
 
-def _trim_edges_weights(edges, weights, mask):
+def _mask_edges_weights(edges, weights, mask):
+    """
+    Remove edges of the graph connected to masked nodes, as well as
+    corresponding weights of the edges.
+    """
     mask0 = np.hstack((mask[:, :, :-1].ravel(), mask[:, :-1].ravel(),
                         mask[:-1].ravel()))
     mask1 = np.hstack((mask[:, :, 1:].ravel(), mask[:, 1:].ravel(),
                             mask[1:].ravel()))
     ind_mask = np.logical_and(mask0, mask1)
     edges, weights = edges[:, ind_mask], weights[ind_mask]
-    maxval = edges.max()
-    order = np.searchsorted(np.unique(edges.ravel()), np.arange(maxval + 1))
+    max_node_index = edges.max()
+    # Reassign edges labels to 0, 1, ... edges_number - 1
+    order = np.searchsorted(np.unique(edges.ravel()),
+                                        np.arange(max_node_index + 1))
     edges = order[edges]
     return edges, weights
 
 
 def _build_laplacian(data, mask=None, beta=50):
     l_x, l_y, l_z = data.shape
-    edges = _make_edges_3d(l_x, l_y, l_z)
+    edges = _make_graph_edges_3d(l_x, l_y, l_z)
     weights = _compute_weights_3d(edges, data, beta=beta, eps=1.e-10)
     if mask is not None:
-        edges, weights = _trim_edges_weights(edges, weights, mask)
+        edges, weights = _mask_edges_weights(edges, weights, mask)
     lap = _make_laplacian_sparse(edges, weights)
     del edges, weights
     return lap
@@ -188,7 +197,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
         (http://code.google.com/p/pyamg/) is installed. For images of
         size > 512x512, this is the recommended (fastest) mode.
 
-    tol : tolerance to achieve when solving the linear system, in
+    tol : float
+        tolerance to achieve when solving the linear system, in
         cg' and 'cg_mg' modes.
 
     copy : bool

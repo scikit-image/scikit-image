@@ -105,3 +105,7 @@ def test_3d_inactive():
     labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     return data, labels, old_labels, after_labels
+
+if __name__ == '__main__':
+    from numpy import testing
+    testing.run_module_suite()
