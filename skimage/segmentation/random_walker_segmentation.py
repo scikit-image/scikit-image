@@ -60,7 +60,7 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
     return edges
 
 
-def _compute_weights_3d(edges, data, beta=130, eps=1.e-6):
+def _compute_weights_3d(data, beta=130, eps=1.e-6):
     gradients = _compute_gradients_3d(data) ** 2
     beta /= 10 * data.std()
     gradients *= beta
@@ -144,7 +144,7 @@ def _mask_edges_weights(edges, weights, mask):
 def _build_laplacian(data, mask=None, beta=50):
     l_x, l_y, l_z = data.shape
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
-    weights = _compute_weights_3d(edges, data, beta=beta, eps=1.e-10)
+    weights = _compute_weights_3d(data, beta=beta, eps=1.e-10)
     if mask is not None:
         edges, weights = _mask_edges_weights(edges, weights, mask)
     lap = _make_laplacian_sparse(edges, weights)
