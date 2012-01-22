@@ -277,7 +277,7 @@ class METADATA_MODELS(object):
     FIMD_ANIMATION = 9
     FIMD_CUSTOM = 10
 
-def read(filename, flags=0):
+def read(filename, flags=0, tags=None):
     """Read an image to a numpy array of shape (width, height) for
     greyscale images, or shape (width, height, nchannels) for RGB or
     RGBA images.
@@ -285,11 +285,15 @@ def read(filename, flags=0):
     """
     bitmap = _read_bitmap(filename, flags)
     try:
-        return _array_from_bitmap(bitmap)
+        array = _array_from_bitmap(bitmap)
+        if tags is not None:
+            tags_out = [_string_tag(bitmap, tag) for tag in tags]
+            return array, tags_out
+        return array
     finally:
         _FI.FreeImage_Unload(bitmap)
 
-def read_multipage(filename, flags=0):
+def read_multipage(filename, flags=0, tags=None):
     """Read a multipage image to a list of numpy arrays, where each
     array is of shape (width, height) for greyscale images, or shape
     (nchannels, width, height) for RGB or RGBA images.
@@ -318,7 +322,12 @@ def read_multipage(filename, flags=0):
                 raise ValueError('Could not open %s as a multi-page image.' 
                                   % filename)
             try:
-                arrays.append(_array_from_bitmap(bitmap))
+                array = _array_from_bitmap(bitmap)
+                if tags is not None:
+                    tags_out = [_string_tag(bitmap, tag) for tag in tags]
+                    arrays.append([array, tags_out])
+                else:
+                    arrays.append(array)
             finally:
                 _FI.FreeImage_UnlockPage(multibitmap, bitmap, False)
         return arrays
@@ -396,7 +405,7 @@ def _string_tag(bitmap, key, model=METADATA_MODELS.FIMD_EXIF_MAIN):
                                      ctypes.byref(tag)):
         return
     char_ptr = ctypes.c_char * _FI.FreeImage_GetTagLength(tag)
-    return char_ptr.from_address(_FI.FreeImage_GetTagValue(tag)).raw()
+    return char_ptr.from_address(_FI.FreeImage_GetTagValue(tag)).value
 
 def write(array, filename, flags=0):
     """Write a (width, height) or (width, height, nchannels) array to
