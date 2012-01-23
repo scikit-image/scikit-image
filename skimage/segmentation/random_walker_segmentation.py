@@ -46,8 +46,10 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
 
     Returns
     -------
-    edges : ndarray of shape (2, n_x * n_y * (nz - 1) +
-                                 n_x * (n_y - 1) * nz + (n_x - 1) * n_y * nz)
+    edges : (2, N) ndarray
+        with the total number of edges N = n_x * n_y * (nz - 1) +
+                                           n_x * (n_y - 1) * nz +
+                                           (n_x - 1) * n_y * nz
         Graph edges with each column describing a node-id pair.
     """
     vertices = np.arange(n_x * n_y * n_z).reshape((n_x, n_y, n_z))
@@ -102,8 +104,8 @@ def _clean_labels_ar(X, labels):
 
 def _buildAB(lap_sparse, labels):
     """
-        Build the matrix A and rhs B of the linear system to solve.
-        A and B are two block of the laplacian of the image graph.
+    Build the matrix A and rhs B of the linear system to solve.
+    A and B are two block of the laplacian of the image graph.
     """
     labels = labels[labels >= 0]
     indices = np.arange(labels.size)
