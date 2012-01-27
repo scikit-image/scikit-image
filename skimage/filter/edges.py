@@ -9,6 +9,7 @@ Original author: Lee Kamentsky
 
 """
 import numpy as np
+from skimage import img_as_float
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 def sobel(image, mask=None):
@@ -62,12 +63,13 @@ def hsobel(image, mask=None):
      -1  -2  -1
 
     """
+    image = img_as_float(image)
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value = 0)
-    result = np.abs(convolve(image.astype(float),
+    result = np.abs(convolve(image,
                              np.array([[ 1, 2, 1],
                                        [ 0, 0, 0],
                                        [-1,-2,-1]]).astype(float) / 4.0))
@@ -99,12 +101,13 @@ def vsobel(image, mask=None):
       1   0  -1
 
     """
+    image = img_as_float(image)
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value=0)
-    result = np.abs(convolve(image.astype(float),
+    result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
                                        [2, 0, -2],
                                        [1, 0, -1]]).astype(float) / 4.0))
@@ -158,12 +161,13 @@ def hprewitt(image, mask=None):
      -1  -1  -1
 
     """
+    image = img_as_float(image)
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value=0)
-    result = np.abs(convolve(image.astype(float),
+    result = np.abs(convolve(image,
                              np.array([[ 1, 1, 1],
                                        [ 0, 0, 0],
                                        [-1,-1,-1]]).astype(float) / 3.0))
@@ -195,12 +199,13 @@ def vprewitt(image, mask=None):
       1   0  -1
 
     """
+    image = img_as_float(image)
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
                               border_value=0)
-    result = np.abs(convolve(image.astype(float),
+    result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
                                        [1, 0, -1],
                                        [1, 0, -1]]).astype(float) / 3.0))
