@@ -33,7 +33,7 @@ examples = glob.glob(os.path.join(example_dir, 'plot_*.py'))
 
 images, links = [], []
 image_url = 'http://scikits-image.org/docs/dev/_images/%s.png'
-link_url = 'http://scikits-image.org/docs/dev/auto_examples/plot_%s.html'
+link_url = 'http://scikits-image.org/docs/dev/auto_examples/%s.html'
 
 for e in examples:
     e = os.path.basename(e)
