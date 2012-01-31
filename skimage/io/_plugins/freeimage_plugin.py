@@ -5,56 +5,97 @@ import os
 import os.path
 from numpy.compat import asbytes
 
-def _load_library(libname, loader_path):
-    """ A small fork of numpy.ctypeslib.load_library
-    to support windll.
-    """
-    if ctypes.__version__ < '1.0.1':
-        import warnings
-        warnings.warn("All features of ctypes interface may not work " \
-                          "with ctypes < 1.0.1")
-
+def _load_library(libname, libdir):
+    """Try to load a libray with the base name 'libname' from the 
+    directory 'libdir', checking for various common shared-lib file
+    extensions. Uses windll to load libaries on windows machines, and
+    cdll to load libraries on other platforms.
+    Returns (library, errors), where library may or may not be None, and
+    errors is a dict, potentially empty, mapping filenames to the ctypes
+    errors raised trying to load those filenames. Non-extant paths are NOT
+    added to the error dict."""
+  
     ext = os.path.splitext(libname)[1]
     if not ext:
         # Try to load library with platform-specific name, otherwise
         # default to libname.[so|pyd].  Sometimes, these files are built
         # erroneously on non-linux platforms.
         libname_ext = ['%s.so' % libname, '%s.pyd' % libname]
-        if sys.platform == 'win32':
+        if sys.platform == 'win32': # 'win32' is returned even on 64-bit win
             libname_ext.insert(0, '%s.dll' % libname)
         elif sys.platform == 'darwin':
             libname_ext.insert(0, '%s.dylib' % libname)
     else:
         libname_ext = [libname]
-
-    loader_path = os.path.abspath(loader_path)
-    if not os.path.isdir(loader_path):
-        libdir = os.path.dirname(loader_path)
-    else:
-        libdir = loader_path
+        
+    library = None
+    errors = {}
+    lib_paths = [os.path.join(libdir, ln) for ln in libname_ext]
+    lib_paths = [lp for lp in lib_paths if os.path.exists(lp)]
     if sys.platform == 'win32':
         loader = ctypes.windll
     else:
         loader = ctypes.cdll
-    for ln in libname_ext:
+    for lp in lib_paths:
         try:
-            return loader[os.path.join(libdir, ln)]
-        except OSError:
-            pass
-    # TODO: Setup errno and other bits to something correctly
-    raise OSError('Unable to find library in any of the foloowing paths: %s' %
-            [os.path.join(libdir, ln) for ln in libname_ext])
+            library = loader[lp]
+        except Exception, e:
+            errors[lp] = e
+    return library, errors
 
+def load_freeimage():
+    lib_dirs = [os.path.dirname(__file__),
+                '/lib',
+                '/usr/lib',
+                '/usr/local/lib',
+                '/opt/local/lib',
+                os.path.join(sys.prefix, 'lib'),
+                os.path.join(sys.prefix, 'DLLs')
+                ]
+                
+    if 'HOME' in os.environ:
+        lib_dirs.append(os.path.join(os.environ['HOME'], 'lib'))
+    
+    lib_dirs = [ld for ld in lib_dirs if os.path.exists(ld)]
+    
+    freeimage = None
+    errors = {}
+    for d in lib_dirs:
+        for libname in ('freeimage', 'FreeImage',
+                        'libfreeimage', 'libFreeImage'):
+            freeimage, new_errors = _load_library(libname, d)
+            if freeimage:
+              break
+            errors.update(new_errors)
+        if freeimage:
+            break
 
-lib_dirs = [os.path.dirname(__file__),
-            '/lib',
-            '/usr/lib',
-            '/usr/local/lib',
-            '/opt/local/lib',
-            ]
+    if freeimage:
+        if sys.platform == 'win32':
+            functype = ctypes.WINFUNCTYPE
+        else:
+            functype = ctypes.CFUNCTYPE
 
-if 'HOME' in os.environ:
-    lib_dirs.append(os.path.join(os.environ['HOME'], 'lib'))
+        @functype(None, ctypes.c_int, ctypes.c_char_p)
+        def error_handler(fif, message):
+            raise RuntimeError('FreeImage error: %s' % message)
+
+        freeimage.FreeImage_SetOutputMessage(error_handler)
+        
+    elif errors:
+        # No freeimage library found, but load-errors reported
+        err_txt = ['%s:\n%s'%(pl, err.message) for pl, err in errors.items()]
+        raise OSError('One or more FreeImage libraries were found, but could '
+                      'not be loaded due to the following errors:\n'+
+                      '\n\n'.join(err_txt))
+    
+    else:
+        # No potential libraries found
+        raise OSError('Could not find a FreeImage library in any of:\n'+
+                      '\n'.join(lib_dirs))
+    return freeimage
+
+_FI = load_freeimage()
 
 API = {
     'FreeImage_Load': (ctypes.c_void_p,
@@ -80,36 +121,8 @@ def register_api(lib,api):
         func.restype = restype
         func.argtypes = argtypes
 
-_FI = None
-for d in lib_dirs:
-    for libname in ('freeimage', 'FreeImage',
-                    'libfreeimage', 'libFreeImage'):
-        try:
-            _FI = _load_library(libname, d)
-        except OSError:
-            pass
-        else:
-            break
-
-    if _FI is not None:
-        break
-
-if not _FI:
-    raise OSError('Could not find libFreeImage in any of the following '
-                  'directories: \'%s\'' % '\', \''.join(lib_dirs))
-
 register_api(_FI, API)
 
-if sys.platform == 'win32':
-    _functype = ctypes.WINFUNCTYPE
-else:
-    _functype = ctypes.CFUNCTYPE
-
-@_functype(None, ctypes.c_int, ctypes.c_char_p)
-def _error_handler(fif, message):
-    raise RuntimeError('FreeImage error: %s' % message)
-
-_FI.FreeImage_SetOutputMessage(_error_handler)
 
 class FI_TYPES(object):
     FIT_UNKNOWN = 0
