@@ -65,7 +65,7 @@ def load_freeimage():
                         'libfreeimage', 'libFreeImage'):
             freeimage, new_errors = _load_library(libname, d)
             if freeimage:
-              break
+                break
             errors.update(new_errors)
         if freeimage:
             break
