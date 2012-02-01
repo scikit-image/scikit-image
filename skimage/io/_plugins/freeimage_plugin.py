@@ -57,22 +57,26 @@ if 'HOME' in os.environ:
     lib_dirs.append(os.path.join(os.environ['HOME'], 'lib'))
 
 API = {
-    'FreeImage_Load': (ctypes.c_void_p,
-                       [ctypes.c_int, ctypes.c_char_p, ctypes.c_int]),
-    'FreeImage_GetWidth': (ctypes.c_uint,
-                           [ctypes.c_void_p]),
-    'FreeImage_GetHeight': (ctypes.c_uint,
-                           [ctypes.c_void_p]),
-    'FreeImage_GetImageType': (ctypes.c_uint,
-                               [ctypes.c_void_p]),
-    'FreeImage_GetBPP': (ctypes.c_uint,
-                         [ctypes.c_void_p]),
-    'FreeImage_GetPitch': (ctypes.c_uint,
-                           [ctypes.c_void_p]),
-    'FreeImage_GetBits': (ctypes.c_void_p,
-                          [ctypes.c_void_p]),
+    # All we're doing here is telling ctypes that some of the FreeImage 
+    # functions return pointers instead of integers. (On 64-bit systems,
+    # without this information the pointers get truncated and crashes result).
+    # There's no need to list functions that return ints, or the types of the
+    # parameters to these or other functions -- that's fine to do implicitly.
+    
+    # Note that the ctypes immediately converts the returned void_p back to a
+    # python int again! This is really not helpful, because then passing it 
+    # back to another library call will cause truncation-to-32-bits on 64-bit
+    # systems. Thanks, ctypes! So after these calls one must immediately
+    # re-wrap the int as a c_void_p if it is to be passed back into FreeImage. 
+    'FreeImage_AllocateT': (ctypes.c_void_p, None),
+    'FreeImage_GetBits': (ctypes.c_void_p, None),
+    'FreeImage_GetPalette': (ctypes.c_void_p, None),
+    'FreeImage_GetTagValue': (ctypes.c_void_p, None),
+    'FreeImage_Load': (ctypes.c_void_p, None),
+    'FreeImage_LockPage': (ctypes.c_void_p, None),
+    'FreeImage_OpenMultiBitmap': (ctypes.c_void_p, None),                       
     }
-
+        
 # Albert's ctypes pattern
 def register_api(lib,api):
     for f, (restype, argtypes) in api.items():
@@ -301,15 +305,18 @@ def read_multipage(filename, flags=0):
     multibitmap = _FI.FreeImage_OpenMultiBitmap(ftype, filename, create_new,
                                                 read_only, keep_cache_in_memory,
                                                 flags)
+    multibitmap = ctypes.c_void_p(multibitmap)
     if not multibitmap:
         raise ValueError('Could not open %s as multi-page image.' % filename)
     try:
-        multibitmap = ctypes.c_void_p(multibitmap)
         pages = _FI.FreeImage_GetPageCount(multibitmap)
         arrays = []
         for i in range(pages):
             bitmap = _FI.FreeImage_LockPage(multibitmap, i)
             bitmap = ctypes.c_void_p(bitmap)
+            if not bitmap:
+                raise ValueError('Could not open %s as a multi-page image.' 
+                                  % filename)
             try:
                 arrays.append(_array_from_bitmap(bitmap))
             finally:
@@ -325,9 +332,10 @@ def _read_bitmap(filename, flags):
     if ftype == -1:
         raise ValueError('Cannot determine type of file %s' % filename)
     bitmap = _FI.FreeImage_Load(ftype, filename, flags)
+    bitmap = ctypes.c_void_p(bitmap)
     if not bitmap:
         raise ValueError('Could not load file %s' % filename)
-    return ctypes.c_void_p(bitmap)
+    return bitmap
 
 def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   """Return an ndarray view on the data in a FreeImage bitmap. Only
@@ -351,8 +359,8 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   return array
 
 def _array_from_bitmap(bitmap):
-    """Convert a FreeImage bitmap pointer to a numpy array
-
+    """Convert a FreeImage bitmap pointer to a numpy array.
+    
     """
     dtype, shape = FI_TYPES.get_type_and_shape(bitmap)
     array = _wrap_bitmap_bits_in_array(bitmap, shape, dtype)
@@ -378,10 +386,12 @@ def _array_from_bitmap(bitmap):
     # after bitmap is freed.
     return n(array).copy()
 
-def string_tag(bitmap, key, model=METADATA_MODELS.FIMD_EXIF_MAIN):
+def _string_tag(bitmap, key, model=METADATA_MODELS.FIMD_EXIF_MAIN):
     """Retrieve the value of a metadata tag with the given string key as a
-    string."""
-    tag = ctypes.c_int()
+    string.
+    
+    """
+    tag = ctypes.c_void_p()
     if not _FI.FreeImage_GetMetadata(model, bitmap, str(key),
                                      ctypes.byref(tag)):
         return
@@ -394,6 +404,7 @@ def write(array, filename, flags=0):
     filename.
 
     """
+    array = numpy.asarray(array)
     filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFIFFromFilename(filename)
     if ftype == -1:
@@ -415,7 +426,7 @@ def write(array, filename, flags=0):
       _FI.FreeImage_Unload(bitmap)
 
 def write_multipage(arrays, filename, flags=0):
-    """Write a list of (width, height) or (nchannels, width, height)
+    """Write a list of (width, height) or (width, height, nchannels)
     arrays to a multipage greyscale, RGB, or RGBA image, with file type
     deduced from the filename.
 
@@ -434,8 +445,8 @@ def write_multipage(arrays, filename, flags=0):
         raise ValueError('Could not open %s for writing multi-page image.' %
                          filename)
     try:
-        multibitmap = ctypes.c_void_p(multibitmap)
         for array in arrays:
+            array = numpy.asarray(array)
             bitmap, fi_type = _array_to_bitmap(array)
             _FI.FreeImage_AppendPage(multibitmap, bitmap)
     finally:
@@ -467,12 +478,12 @@ def _array_to_bitmap(array):
     itemsize = array.dtype.itemsize
     bpp = 8 * itemsize * n_channels
     bitmap = _FI.FreeImage_AllocateT(fi_type, c, r, bpp, 0, 0, 0)
+    bitmap = ctypes.c_void_p(bitmap)
     if not bitmap:
         raise RuntimeError('Could not allocate image for storage')
     try:
         def n(arr): # normalise to freeimage's in-memory format
             return arr.T[:,::-1]
-        bitmap = ctypes.c_void_p(bitmap)
         wrapped_array = _wrap_bitmap_bits_in_array(bitmap, w_shape, dtype)
         # swizzle the color components and flip the scanlines to go to
         # FreeImage's BGR[A] and upside-down internal memory format
@@ -487,6 +498,7 @@ def _array_to_bitmap(array):
             wrapped_array[:] = n(array)
         if len(shape) == 2 and dtype.type == numpy.uint8:
             palette = _FI.FreeImage_GetPalette(bitmap)
+            palette = ctypes.c_void_p(palette)
             if not palette:
                 raise RuntimeError('Could not get image palette')
             ctypes.memmove(palette, _GREY_PALETTE.ctypes.data, 1024)
