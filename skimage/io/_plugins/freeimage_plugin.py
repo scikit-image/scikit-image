@@ -110,12 +110,14 @@ API = {
     # systems. Thanks, ctypes! So after these calls one must immediately
     # re-wrap the int as a c_void_p if it is to be passed back into FreeImage. 
     'FreeImage_AllocateT': (ctypes.c_void_p, None),
+    'FreeImage_FindFirstMetadata': (ctypes.c_void_p, None),          
     'FreeImage_GetBits': (ctypes.c_void_p, None),
     'FreeImage_GetPalette': (ctypes.c_void_p, None),
+    'FreeImage_GetTagKey': (ctypes.c_char_p, None),
     'FreeImage_GetTagValue': (ctypes.c_void_p, None),
     'FreeImage_Load': (ctypes.c_void_p, None),
     'FreeImage_LockPage': (ctypes.c_void_p, None),
-    'FreeImage_OpenMultiBitmap': (ctypes.c_void_p, None),                       
+    'FreeImage_OpenMultiBitmap': (ctypes.c_void_p, None)
     }
         
 # Albert's ctypes pattern
@@ -212,72 +214,116 @@ class FI_TYPES(object):
         return numpy.dtype(dtype), extra_dims + [w, h]
 
 class IO_FLAGS(object):
-    #Bmp
+    FIF_LOAD_NOPIXELS = 0x8000 # loading: load the image header only
+                               # (not supported by all plugins)
+
     BMP_DEFAULT = 0
     BMP_SAVE_RLE = 1
-
-    #Png
-    PNG_DEFAULT = 0
-    PNG_IGNOREGAMMA = 1
-
-    #Gif
-    GIF_DEFAULT = 0
-    GIF_LOAD256 = 1
-    GIF_PLAYBACK = 2
-
-    #Ico
-    ICO_DEFAULT = 0
-    ICO_MAKEALPHA = 1
-
-    #Tiff
-    TIFF_DEFAULT = 0
-    TIFF_CMYK = 0x0001
-    TIFF_NONE = 0x0800
-    TIFF_PACKBITS = 0x0100
-    TIFF_DEFLATE = 0x0200
-    TIFF_ADOBE_DEFLATE = 0x0400
-    TIFF_CCITTFAX3 = 0x1000
-    TIFF_CCITTFAX4 = 0x2000
-    TIFF_LZW = 0x4000
-    TIFF_JPEG = 0x8000
-
-    #Jpeg
-    JPEG_DEFAULT = 0
-    JPEG_FAST = 1
-    JPEG_ACCURATE = 2
-    JPEG_QUALITYSUPERB = 0x80
-    JPEG_QUALITYGOOD = 0x100
-    JPEG_QUALITYNORMAL = 0x200
-    JPEG_QUALITYAVERAGE = 0x400
-    JPEG_QUALITYBAD = 0x800
-    JPEG_CMYK = 0x1000
-    JPEG_PROGRESSIVE = 0x2000
-
-    #Others...
     CUT_DEFAULT = 0
     DDS_DEFAULT = 0
+    EXR_DEFAULT = 0 # save data as half with piz-based wavelet compression
+    EXR_FLOAT = 0x0001 # save data as float instead of as half (not recommended)
+    EXR_NONE = 0x0002 # save with no compression
+    EXR_ZIP = 0x0004 # save with zlib compression, in blocks of 16 scan lines
+    EXR_PIZ = 0x0008 # save with piz-based wavelet compression
+    EXR_PXR24 = 0x0010 # save with lossy 24-bit float compression
+    EXR_B44 = 0x0020 # save with lossy 44% float compression 
+                     # - goes to 22% when combined with EXR_LC
+    EXR_LC = 0x0040 # save images with one luminance and two chroma channels, 
+                    # rather than as RGB (lossy compression)
+    FAXG3_DEFAULT = 0
+    GIF_DEFAULT = 0
+    GIF_LOAD256 = 1 # Load the image as a 256 color image with ununsed 
+                    # palette entries, if it's 16 or 2 color
+    GIF_PLAYBACK = 2 # 'Play' the GIF to generate each frame (as 32bpp) 
+                     # instead of returning raw frame data when loading
     HDR_DEFAULT = 0
+    ICO_DEFAULT = 0
+    ICO_MAKEALPHA = 1 # convert to 32bpp and create an alpha channel from the
+                      # AND-mask when loading
     IFF_DEFAULT = 0
+    J2K_DEFAULT = 0 # save with a 16:1 rate
+    JP2_DEFAULT = 0 # save with a 16:1 rate
+    JPEG_DEFAULT = 0 # loading (see JPEG_FAST); 
+                     # saving (see JPEG_QUALITYGOOD|JPEG_SUBSAMPLING_420)
+    JPEG_FAST = 0x0001 # load the file as fast as possible, 
+                       # sacrificing some quality
+    JPEG_ACCURATE = 0x0002 # load the file with the best quality,
+                           # sacrificing some speed
+    JPEG_CMYK = 0x0004 # load separated CMYK "as is" 
+                       # (use | to combine with other load flags)
+    JPEG_EXIFROTATE = 0x0008 # load and rotate according to 
+                             # Exif 'Orientation' tag if available
+    JPEG_QUALITYSUPERB = 0x80 # save with superb quality (100:1)
+    JPEG_QUALITYGOOD = 0x0100 # save with good quality (75:1)
+    JPEG_QUALITYNORMAL = 0x0200 # save with normal quality (50:1)
+    JPEG_QUALITYAVERAGE = 0x0400 # save with average quality (25:1)
+    JPEG_QUALITYBAD = 0x0800 # save with bad quality (10:1)
+    JPEG_PROGRESSIVE = 0x2000 # save as a progressive-JPEG
+                              # (use | to combine with other save flags)
+    JPEG_SUBSAMPLING_411 = 0x1000 # save with high 4x1 chroma 
+                                  # subsampling (4:1:1) 
+    JPEG_SUBSAMPLING_420 = 0x4000 # save with medium 2x2 medium chroma
+                                  # subsampling (4:2:0) - default value
+    JPEG_SUBSAMPLING_422 = 0x8000 # save with low 2x1 chroma subsampling (4:2:2) 
+    JPEG_SUBSAMPLING_444 = 0x10000 # save with no chroma subsampling (4:4:4)
+    JPEG_OPTIMIZE = 0x20000 # on saving, compute optimal Huffman coding tables
+                            # (can reduce a few percent of file size)
+    JPEG_BASELINE = 0x40000 # save basic JPEG, without metadata or any markers
     KOALA_DEFAULT = 0
     LBM_DEFAULT = 0
     MNG_DEFAULT = 0
     PCD_DEFAULT = 0
-    PCD_BASE = 1
-    PCD_BASEDIV4 = 2
-    PCD_BASEDIV16 = 3
+    PCD_BASE = 1 # load the bitmap sized 768 x 512
+    PCD_BASEDIV4 = 2 # load the bitmap sized 384 x 256
+    PCD_BASEDIV16 = 3 # load the bitmap sized 192 x 128
     PCX_DEFAULT = 0
+    PFM_DEFAULT = 0
+    PICT_DEFAULT = 0
+    PNG_DEFAULT = 0
+    PNG_IGNOREGAMMA = 1 # loading: avoid gamma correction
+    PNG_Z_BEST_SPEED = 0x0001 # save using ZLib level 1 compression flag
+                              # (default value is 6)
+    PNG_Z_DEFAULT_COMPRESSION = 0x0006 # save using ZLib level 6 compression
+                                       # flag (default recommended value)
+    PNG_Z_BEST_COMPRESSION = 0x0009 # save using ZLib level 9 compression flag
+                                    # (default value is 6)
+    PNG_Z_NO_COMPRESSION = 0x0100 # save without ZLib compression
+    PNG_INTERLACED = 0x0200 # save using Adam7 interlacing (use | to combine 
+                            # with other save flags)
     PNM_DEFAULT = 0
-    PNM_SAVE_RAW = 0
-    PNM_SAVE_ASCII = 1
+    PNM_SAVE_RAW = 0 #  Writer saves in RAW format (i.e. P4, P5 or P6)
+    PNM_SAVE_ASCII = 1 # Writer saves in ASCII format (i.e. P1, P2 or P3)
     PSD_DEFAULT = 0
+    PSD_CMYK = 1 # reads tags for separated CMYK (default is conversion to RGB)
+    PSD_LAB = 2 # reads tags for CIELab (default is conversion to RGB)
     RAS_DEFAULT = 0
+    RAW_DEFAULT = 0 # load the file as linear RGB 48-bit
+    RAW_PREVIEW = 1 # try to load the embedded JPEG preview with included 
+                    # Exif Data or default to RGB 24-bit
+    RAW_DISPLAY = 2 # load the file as RGB 24-bit
+    SGI_DEFAULT = 0
     TARGA_DEFAULT = 0
-    TARGA_LOAD_RGB888 = 1
+    TARGA_LOAD_RGB888 = 1 # Convert RGB555 and ARGB8888 -> RGB888.
+    TARGA_SAVE_RLE = 2 # Save with RLE compression
+    TIFF_DEFAULT = 0
+    TIFF_CMYK = 0x0001 # reads/stores tags for separated CMYK
+                       # (use | to combine with compression flags)
+    TIFF_PACKBITS = 0x0100 # save using PACKBITS compression
+    TIFF_DEFLATE = 0x0200 # save using DEFLATE (a.k.a. ZLIB) compression 
+    TIFF_ADOBE_DEFLATE = 0x0400 # save using ADOBE DEFLATE compression
+    TIFF_NONE = 0x0800 # save without any compression
+    TIFF_CCITTFAX3 = 0x1000 # save using CCITT Group 3 fax encoding
+    TIFF_CCITTFAX4 = 0x2000 # save using CCITT Group 4 fax encoding
+    TIFF_LZW = 0x4000 # save using LZW compression
+    TIFF_JPEG = 0x8000 # save using JPEG compression
+    TIFF_LOGLUV = 0x10000 # save using LogLuv compression
     WBMP_DEFAULT = 0
     XBM_DEFAULT = 0
+    XPM_DEFAULT = 0
 
+ 
 class METADATA_MODELS(object):
-    FIMD_NODATA = -1
     FIMD_COMMENTS = 0
     FIMD_EXIF_MAIN = 1
     FIMD_EXIF_EXIF = 2
@@ -288,26 +334,79 @@ class METADATA_MODELS(object):
     FIMD_XMP = 7
     FIMD_GEOTIFF = 8
     FIMD_ANIMATION = 9
-    FIMD_CUSTOM = 10
 
-def read(filename, flags=0):
-    """Read an image to a numpy array of shape (width, height) for
-    greyscale images, or shape (width, height, nchannels) for RGB or
-    RGBA images.
 
-    """
-    bitmap = _read_bitmap(filename, flags)
+class METADATA_DATATYPE(object):
+    FIDT_BYTE = 1 # 8-bit unsigned integer 
+    FIDT_ASCII = 2 # 8-bit bytes w/ last byte null 
+    FIDT_SHORT = 3 # 16-bit unsigned integer 
+    FIDT_LONG = 4 # 32-bit unsigned integer 
+    FIDT_RATIONAL = 5 # 64-bit unsigned fraction 
+    FIDT_SBYTE = 6 # 8-bit signed integer 
+    FIDT_UNDEFINED = 7 # 8-bit untyped data 
+    FIDT_SSHORT = 8 # 16-bit signed integer 
+    FIDT_SLONG = 9 # 32-bit signed integer 
+    FIDT_SRATIONAL = 10 # 64-bit signed fraction 
+    FIDT_FLOAT = 11 # 32-bit IEEE floating point 
+    FIDT_DOUBLE = 12 # 64-bit IEEE floating point 
+    FIDT_IFD = 13 # 32-bit unsigned integer (offset) 
+    FIDT_PALETTE = 14 # 32-bit RGBQUAD 
+
+    dtypes = {
+        FIDT_BYTE: numpy.uint8,
+        FIDT_SHORT: numpy.uint16,
+        FIDT_LONG: numpy.uint32,
+        FIDT_RATIONAL: [('numerator', numpy.uint32), 
+                        ('denominator', numpy.uint32)],
+        FIDT_SBYTE: numpy.int8,
+        FIDT_UNDEFINED: numpy.uint8,
+        FIDT_SSHORT: numpy.int16,
+        FIDT_SLONG: numpy.int32,
+        FIDT_SRATIONAL: [('numerator', numpy.int32),
+                         ('denominator', numpy.int32)],
+        FIDT_FLOAT: numpy.float32,
+        FIDT_DOUBLE: numpy.float64,
+        FIDT_IFD: numpy.uint32,
+        FIDT_PALETTE: [('R', numpy.uint8), ('G', numpy.uint8), 
+                       ('B', numpy.uint8), ('A', numpy.uint8)]
+        }
+
+
+def _process_bitmap(filename, flags, process_func):
+    filename = asbytes(filename)
+    ftype = _FI.FreeImage_GetFileType(filename, 0)
+    if ftype == -1:
+        raise ValueError('Cannot determine type of file %s' % filename)
+    bitmap = _FI.FreeImage_Load(ftype, filename, flags)
+    bitmap = ctypes.c_void_p(bitmap)
+    if not bitmap:
+        raise ValueError('Could not load file %s' % filename)
     try:
-        return _array_from_bitmap(bitmap)
+        return process_func(bitmap)
     finally:
         _FI.FreeImage_Unload(bitmap)
 
-def read_multipage(filename, flags=0):
-    """Read a multipage image to a list of numpy arrays, where each
-    array is of shape (width, height) for greyscale images, or shape
-    (nchannels, width, height) for RGB or RGBA images.
-
+def read(filename, flags=0):
+    """Read an image to a numpy array of shape (height, width) for
+    greyscale images, or shape (height, width, nchannels) for RGB or
+    RGBA images.
+    The `flags` parameter should be one or more values from the IO_FLAGS
+    class defined in this module, or-ed together with | as appropriate.
+    (See the source-code comments for more details.)
     """
+    return _process_bitmap(filename, flags, _array_from_bitmap)
+
+def read_metadata(filename):
+    """Return a dict containing all image metadata.
+    
+    Returned dict maps (metadata_model, tag_name) keys to tag values, where
+    metadata_model is a string name based on the FreeImage "metadata models"
+    defined in the class METADATA_MODELS.
+    """
+    flags = IO_FLAGS.FIF_LOAD_NOPIXELS
+    return _process_bitmap(filename, flags, _read_metadata)
+
+def _process_multipage(filename, flags, process_func):
     filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFileType(filename, 0)
     if ftype == -1:
@@ -323,7 +422,7 @@ def read_multipage(filename, flags=0):
         raise ValueError('Could not open %s as multi-page image.' % filename)
     try:
         pages = _FI.FreeImage_GetPageCount(multibitmap)
-        arrays = []
+        out = []
         for i in range(pages):
             bitmap = _FI.FreeImage_LockPage(multibitmap, i)
             bitmap = ctypes.c_void_p(bitmap)
@@ -331,24 +430,29 @@ def read_multipage(filename, flags=0):
                 raise ValueError('Could not open %s as a multi-page image.' 
                                   % filename)
             try:
-                arrays.append(_array_from_bitmap(bitmap))
+                out.append(process_func(bitmap))
             finally:
                 _FI.FreeImage_UnlockPage(multibitmap, bitmap, False)
-        return arrays
+        return out
     finally:
         _FI.FreeImage_CloseMultiBitmap(multibitmap, 0)
 
-def _read_bitmap(filename, flags):
-    """Load a file to a FreeImage bitmap pointer"""
-    filename = asbytes(filename)
-    ftype = _FI.FreeImage_GetFileType(filename, 0)
-    if ftype == -1:
-        raise ValueError('Cannot determine type of file %s' % filename)
-    bitmap = _FI.FreeImage_Load(ftype, filename, flags)
-    bitmap = ctypes.c_void_p(bitmap)
-    if not bitmap:
-        raise ValueError('Could not load file %s' % filename)
-    return bitmap
+def read_multipage(filename, flags=0):
+    """Read a multipage image to a list of numpy arrays, where each
+    array is of shape (height, width) for greyscale images, or shape
+    (height, width, nchannels) for RGB or RGBA images.
+    The `flags` parameter should be one or more values from the IO_FLAGS
+    class defined in this module, or-ed together with | as appropriate.
+    (See the source-code comments for more details.)
+    """
+    return _process_multipage(filename, flags, _array_from_bitmap)
+
+def read_multipage_metadata(filename):
+    """Read a multipage image to a list of metadata dicts, one dict for each
+    page. The dict format is as in read_metadata().
+    """
+    flags = IO_FLAGS.FIF_LOAD_NOPIXELS
+    return _process_multipage(filename, flags, _read_metadata)
 
 def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   """Return an ndarray view on the data in a FreeImage bitmap. Only
@@ -399,23 +503,43 @@ def _array_from_bitmap(bitmap):
     # after bitmap is freed.
     return n(array).copy()
 
-def _string_tag(bitmap, key, model=METADATA_MODELS.FIMD_EXIF_MAIN):
-    """Retrieve the value of a metadata tag with the given string key as a
-    string.
+def _read_metadata(bitmap):
+    metadata = {}
+    models = [(name[5:], number) for name, number in 
+        METADATA_MODELS.__dict__.items() if name.startswith('FIMD_')]
     
-    """
     tag = ctypes.c_void_p()
-    if not _FI.FreeImage_GetMetadata(model, bitmap, str(key),
-                                     ctypes.byref(tag)):
-        return
-    char_ptr = ctypes.c_char * _FI.FreeImage_GetTagLength(tag)
-    return char_ptr.from_address(_FI.FreeImage_GetTagValue(tag)).raw()
+    for model_name, number in models:
+        mdhandle = _FI.FreeImage_FindFirstMetadata(number, bitmap,
+                                                   ctypes.byref(tag))
+        mdhandle = ctypes.c_void_p(mdhandle)
+        if mdhandle:
+            more = True
+            while more:
+                tag_name = str(_FI.FreeImage_GetTagKey(tag))
+                tag_type = _FI.FreeImage_GetTagType(tag)
+                byte_size = _FI.FreeImage_GetTagLength(tag)
+                char_ptr = ctypes.c_char * byte_size
+                tag_str = char_ptr.from_address(_FI.FreeImage_GetTagValue(tag))
+                if tag_type == METADATA_DATATYPE.FIDT_ASCII:
+                    tag_val = str(tag_str.value)
+                else:
+                    tag_val = numpy.fromstring(tag_str,
+                            dtype=METADATA_DATATYPE.dtypes[tag_type])
+                    if len(tag_val) == 1:
+                        tag_val = tag_val[0]
+                metadata[(model_name, tag_name)] = tag_val
+                more = _FI.FreeImage_FindNextMetadata(mdhandle, ctypes.byref(tag))
+            _FI.FreeImage_FindCloseMetadata(mdhandle)
+    return metadata
 
 def write(array, filename, flags=0):
-    """Write a (width, height) or (width, height, nchannels) array to
+    """Write a (height, width) or (height, width, nchannels) array to
     a greyscale, RGB, or RGBA image, with file type deduced from the
     filename.
-
+    The `flags` parameter should be one or more values from the IO_FLAGS
+    class defined in this module, or-ed together with | as appropriate.
+    (See the source-code comments for more details.)
     """
     array = numpy.asarray(array)
     filename = asbytes(filename)
@@ -439,10 +563,12 @@ def write(array, filename, flags=0):
       _FI.FreeImage_Unload(bitmap)
 
 def write_multipage(arrays, filename, flags=0):
-    """Write a list of (width, height) or (width, height, nchannels)
+    """Write a list of (height, width) or (height, width, nchannels)
     arrays to a multipage greyscale, RGB, or RGBA image, with file type
     deduced from the filename.
-
+    The `flags` parameter should be one or more values from the IO_FLAGS
+    class defined in this module, or-ed together with | as appropriate.
+    (See the source-code comments for more details.)
     """
     filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFIFFromFilename(filename)
