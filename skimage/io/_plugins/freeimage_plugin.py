@@ -110,12 +110,14 @@ API = {
     # systems. Thanks, ctypes! So after these calls one must immediately
     # re-wrap the int as a c_void_p if it is to be passed back into FreeImage. 
     'FreeImage_AllocateT': (ctypes.c_void_p, None),
+    'FreeImage_FindFirstMetadata': (ctypes.c_void_p, None),          
     'FreeImage_GetBits': (ctypes.c_void_p, None),
     'FreeImage_GetPalette': (ctypes.c_void_p, None),
+    'FreeImage_GetTagKey': (ctypes.c_char_p, None),
     'FreeImage_GetTagValue': (ctypes.c_void_p, None),
     'FreeImage_Load': (ctypes.c_void_p, None),
     'FreeImage_LockPage': (ctypes.c_void_p, None),
-    'FreeImage_OpenMultiBitmap': (ctypes.c_void_p, None),                       
+    'FreeImage_OpenMultiBitmap': (ctypes.c_void_p, None)
     }
         
 # Albert's ctypes pattern
@@ -277,7 +279,6 @@ class IO_FLAGS(object):
     XBM_DEFAULT = 0
 
 class METADATA_MODELS(object):
-    FIMD_NODATA = -1
     FIMD_COMMENTS = 0
     FIMD_EXIF_MAIN = 1
     FIMD_EXIF_EXIF = 2
@@ -288,26 +289,75 @@ class METADATA_MODELS(object):
     FIMD_XMP = 7
     FIMD_GEOTIFF = 8
     FIMD_ANIMATION = 9
-    FIMD_CUSTOM = 10
+
+
+class METADATA_DATATYPE(object):
+    FIDT_BYTE = 1 # 8-bit unsigned integer 
+    FIDT_ASCII = 2 # 8-bit bytes w/ last byte null 
+    FIDT_SHORT = 3 # 16-bit unsigned integer 
+    FIDT_LONG = 4 # 32-bit unsigned integer 
+    FIDT_RATIONAL = 5 # 64-bit unsigned fraction 
+    FIDT_SBYTE = 6 # 8-bit signed integer 
+    FIDT_UNDEFINED = 7 # 8-bit untyped data 
+    FIDT_SSHORT = 8 # 16-bit signed integer 
+    FIDT_SLONG = 9 # 32-bit signed integer 
+    FIDT_SRATIONAL = 10 # 64-bit signed fraction 
+    FIDT_FLOAT = 11 # 32-bit IEEE floating point 
+    FIDT_DOUBLE = 12 # 64-bit IEEE floating point 
+    FIDT_IFD = 13 # 32-bit unsigned integer (offset) 
+    FIDT_PALETTE = 14 # 32-bit RGBQUAD 
+
+    dtypes = {
+        FIDT_BYTE: numpy.uint8,
+        FIDT_SHORT: numpy.uint16,
+        FIDT_LONG: numpy.uint32,
+        FIDT_RATIONAL: [('numerator', numpy.uint32), 
+                        ('denominator', numpy.uint32)],
+        FIDT_SBYTE: numpy.int8,
+        FIDT_UNDEFINED: numpy.uint8,
+        FIDT_SSHORT: numpy.int16,
+        FIDT_SLONG: numpy.int32,
+        FIDT_SRATIONAL: [('numerator', numpy.int32),
+                         ('denominator', numpy.int32)],
+        FIDT_FLOAT: numpy.float32,
+        FIDT_DOUBLE: numpy.float64,
+        FIDT_IFD: numpy.uint32,
+        FIDT_PALETTE: [('R', numpy.uint8), ('G', numpy.uint8), 
+                       ('B', numpy.uint8), ('A', numpy.uint8)]
+        }
+
+
+def _process_bitmap(filename, flags, process_func):
+    filename = asbytes(filename)
+    ftype = _FI.FreeImage_GetFileType(filename, 0)
+    if ftype == -1:
+        raise ValueError('Cannot determine type of file %s' % filename)
+    bitmap = _FI.FreeImage_Load(ftype, filename, flags)
+    bitmap = ctypes.c_void_p(bitmap)
+    if not bitmap:
+        raise ValueError('Could not load file %s' % filename)
+    try:
+        return process_func(bitmap)
+    finally:
+        _FI.FreeImage_Unload(bitmap)
 
 def read(filename, flags=0):
     """Read an image to a numpy array of shape (width, height) for
     greyscale images, or shape (width, height, nchannels) for RGB or
     RGBA images.
-
     """
-    bitmap = _read_bitmap(filename, flags)
-    try:
-        return _array_from_bitmap(bitmap)
-    finally:
-        _FI.FreeImage_Unload(bitmap)
+    return _process_bitmap(filename, flags, _array_from_bitmap)
 
-def read_multipage(filename, flags=0):
-    """Read a multipage image to a list of numpy arrays, where each
-    array is of shape (width, height) for greyscale images, or shape
-    (nchannels, width, height) for RGB or RGBA images.
-
+def read_metadata(filename, flags=0):
+    """Return a dict containing all image metadata.
+    
+    Returned dict maps (metadata_model, tag_name) keys to tag values, where
+    metadata_model is a string name based on the FreeImage "metadata models"
+    defined in the class METADATA_MODELS.
     """
+    return _process_bitmap(filename, flags, _read_metadata)
+
+def _process_multipage(filename, flags, process_func):
     filename = asbytes(filename)
     ftype = _FI.FreeImage_GetFileType(filename, 0)
     if ftype == -1:
@@ -323,7 +373,7 @@ def read_multipage(filename, flags=0):
         raise ValueError('Could not open %s as multi-page image.' % filename)
     try:
         pages = _FI.FreeImage_GetPageCount(multibitmap)
-        arrays = []
+        out = []
         for i in range(pages):
             bitmap = _FI.FreeImage_LockPage(multibitmap, i)
             bitmap = ctypes.c_void_p(bitmap)
@@ -331,24 +381,25 @@ def read_multipage(filename, flags=0):
                 raise ValueError('Could not open %s as a multi-page image.' 
                                   % filename)
             try:
-                arrays.append(_array_from_bitmap(bitmap))
+                out.append(process_func(bitmap))
             finally:
                 _FI.FreeImage_UnlockPage(multibitmap, bitmap, False)
-        return arrays
+        return out
     finally:
         _FI.FreeImage_CloseMultiBitmap(multibitmap, 0)
 
-def _read_bitmap(filename, flags):
-    """Load a file to a FreeImage bitmap pointer"""
-    filename = asbytes(filename)
-    ftype = _FI.FreeImage_GetFileType(filename, 0)
-    if ftype == -1:
-        raise ValueError('Cannot determine type of file %s' % filename)
-    bitmap = _FI.FreeImage_Load(ftype, filename, flags)
-    bitmap = ctypes.c_void_p(bitmap)
-    if not bitmap:
-        raise ValueError('Could not load file %s' % filename)
-    return bitmap
+def read_multipage(filename, flags=0):
+    """Read a multipage image to a list of numpy arrays, where each
+    array is of shape (width, height) for greyscale images, or shape
+    (nchannels, width, height) for RGB or RGBA images.
+    """
+    return _process_multipage(filename, flags, _array_from_bitmap)
+
+def read_multipage_metadata(filename, flags=0):
+    """Read a multipage image to a list of metadata dicts, one dict for each
+    page. The dict format is as in read_metadata().
+    """
+    return _process_multipage(filename, flags, _read_metadata)
 
 def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
   """Return an ndarray view on the data in a FreeImage bitmap. Only
@@ -399,17 +450,35 @@ def _array_from_bitmap(bitmap):
     # after bitmap is freed.
     return n(array).copy()
 
-def _string_tag(bitmap, key, model=METADATA_MODELS.FIMD_EXIF_MAIN):
-    """Retrieve the value of a metadata tag with the given string key as a
-    string.
+def _read_metadata(bitmap):
+    metadata = {}
+    models = [(name[5:], number) for name, number in 
+        METADATA_MODELS.__dict__.items() if name.startswith('FIMD_')]
     
-    """
     tag = ctypes.c_void_p()
-    if not _FI.FreeImage_GetMetadata(model, bitmap, str(key),
-                                     ctypes.byref(tag)):
-        return
-    char_ptr = ctypes.c_char * _FI.FreeImage_GetTagLength(tag)
-    return char_ptr.from_address(_FI.FreeImage_GetTagValue(tag)).raw()
+    for model_name, number in models:
+        mdhandle = _FI.FreeImage_FindFirstMetadata(number, bitmap,
+                                                   ctypes.byref(tag))
+        mdhandle = ctypes.c_void_p(mdhandle)
+        if mdhandle:
+            more = True
+            while more:
+                tag_name = str(_FI.FreeImage_GetTagKey(tag))
+                tag_type = _FI.FreeImage_GetTagType(tag)
+                byte_size = _FI.FreeImage_GetTagLength(tag)
+                char_ptr = ctypes.c_char * byte_size
+                tag_str = char_ptr.from_address(_FI.FreeImage_GetTagValue(tag))
+                if tag_type == METADATA_DATATYPE.FIDT_ASCII:
+                    tag_val = str(tag_str.value)
+                else:
+                    tag_val = numpy.fromstring(tag_str,
+                            dtype=METADATA_DATATYPE.dtypes[tag_type])
+                    if len(tag_val) == 1:
+                        tag_val = tag_val[0]
+                metadata[(model_name, tag_name)] = tag_val
+                more = _FI.FreeImage_FindNextMetadata(mdhandle, ctypes.byref(tag))
+            _FI.FreeImage_FindCloseMetadata(mdhandle)
+    return metadata
 
 def write(array, filename, flags=0):
     """Write a (width, height) or (width, height, nchannels) array to
