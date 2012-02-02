@@ -391,7 +391,7 @@ def _process_multipage(filename, flags, process_func):
 def read_multipage(filename, flags=0):
     """Read a multipage image to a list of numpy arrays, where each
     array is of shape (width, height) for greyscale images, or shape
-    (nchannels, width, height) for RGB or RGBA images.
+    (width, height, nchannels) for RGB or RGBA images.
     """
     return _process_multipage(filename, flags, _array_from_bitmap)
 
