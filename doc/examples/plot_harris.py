@@ -13,7 +13,7 @@ detection in multiple directions.
 from matplotlib import pyplot as plt
 
 from skimage import data, img_as_float
-from skimage.filter import harris
+from skimage.feature import harris
 
 
 def plot_harris_points(image, filtered_coords):

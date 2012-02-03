@@ -6,7 +6,7 @@ http://www.janeriksolem.net/2009/01/harris-corner-detector-in-python.html
 """
 from scipy import ndimage
 
-from skimage import feature
+from . import peak
 
 
 def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
@@ -79,7 +79,7 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     """
     harrisim = _compute_harris_response(image, eps=eps,
                     gaussian_deviation=gaussian_deviation)
-    coordinates = feature.peak_local_max(harrisim, min_distance=min_distance,
+    coordinates = peak.peak_local_max(harrisim, min_distance=min_distance,
                                         threshold=threshold)
     return coordinates
 
