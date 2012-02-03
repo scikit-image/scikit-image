@@ -1,6 +1,6 @@
 from __future__ import division
 
-__all__ = ['ssim']
+__all__ = ['structural_similarity']
 
 import numpy as np
 from numpy.lib import stride_tricks
@@ -39,8 +39,8 @@ def _as_windows(X, win_size=7, flatten_first_axis=True):
     return windows
 
 
-def ssim(X, Y, win_size=7, gradient=False, dynamic_range=255):
-    """Compute the structural similarity index between two images.
+def structural_similarity(X, Y, win_size=7, gradient=False, dynamic_range=255):
+    """Compute the mean structural similarity index between two images.
 
     Parameters
     ----------

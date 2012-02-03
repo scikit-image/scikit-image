@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal
 
-from skimage.measure._ssim import ssim, _as_windows
+from skimage.measure._ssim import structural_similarity as ssim, _as_windows
 import scipy.optimize as opt
 
 def test_ssim_patch_range():
@@ -29,7 +29,7 @@ def test_ssim_image():
 
     S0 = ssim(X, X, win_size=3)
     assert_equal(S0, 1)
-    
+
     S1 = ssim(X, Y, win_size=3)
     assert(S1 < 0.3)
 
@@ -45,12 +45,6 @@ def test_ssim_grad():
         return ssim(X, Y, gradient=True)[1]
 
     assert(np.all(opt.check_grad(func, grad, Y) < 0.05))
-
-#    N = 200
-#    X = np.random.random((N, N))
-#    Y = np.random.random((N, N))
-
-#    assert(np.all(np.abs(ssim(X, Y, gradient=True))[1] < 1e-2))
 
 
 if __name__ == "__main__":
