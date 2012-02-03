@@ -22,6 +22,6 @@ def test_metadata():
     assert meta[0][('EXIF_MAIN', 'BitsPerSample')] == 8
     assert meta[1][('EXIF_MAIN', 'Software')].startswith('ImageMagick')
 
-    
+
 if __name__ == "__main__":
     run_module_suite()
