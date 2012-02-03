@@ -120,7 +120,7 @@ def _convert(image, dtype):
             # int8 -> uint32
             image = dtype(image)
             image *= 2**16 + 2**8 + 1
-        result += image
+        result += dtype(image)
         return result
     if kind == 'i':
         # signed integer -> signed integer
