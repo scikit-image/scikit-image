@@ -63,6 +63,8 @@ def _convert(image, dtype):
                  "%s to %s" % (dtypeobj_in, dtypeobj))
 
     if kind_in == 'f':
+        if np.min(image) < 0 or np.max(image) > 1:
+            raise ValueError("Images of type float must be between 0 and 1")
         if kind == 'f':
             # floating point -> floating point
             if itemsize_in > itemsize:
