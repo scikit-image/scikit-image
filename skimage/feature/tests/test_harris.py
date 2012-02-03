@@ -3,7 +3,7 @@ import numpy as np
 from skimage import data
 from skimage import img_as_float
 
-from skimage.filter import harris
+from skimage.feature import harris
 
 
 def test_square_image():
