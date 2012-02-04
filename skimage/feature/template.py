@@ -3,6 +3,8 @@
 import numpy as np
 import _template
 
+from skimage.util.dtype import _convert
+
 try:
     import cv
     opencv_available = True
@@ -80,5 +82,7 @@ def match_template(image, template, method="norm-coeff"):
         method_num = 1
     else:
         raise ValueError("Unknown template method: %s" % method)
+    image = _convert(image, np.float32)
+    template = _convert(template, np.float32)
     return _template.match_template(image, template, method_num)
 
