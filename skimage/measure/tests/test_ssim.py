@@ -35,16 +35,31 @@ def test_ssim_image():
 
 def test_ssim_grad():
     N = 30
+    X = np.random.random((N, N)) * 255
+    Y = np.random.random((N, N)) * 255
+
+    def func(Y):
+        return ssim(X, Y, dynamic_range=255)
+
+    def grad(Y):
+        return ssim(X, Y, dynamic_range=255, gradient=True)[1]
+
+    assert(np.all(opt.check_grad(func, grad, Y) < 0.05))
+
+def test_ssim_dtype():
+    N = 30
     X = np.random.random((N, N))
     Y = np.random.random((N, N))
 
-    def func(Y):
-        return ssim(X, Y)
+    S1 = ssim(X, Y)
 
-    def grad(Y):
-        return ssim(X, Y, gradient=True)[1]
+    X = (X * 255).astype(np.uint8)
+    Y = (X * 255).astype(np.uint8)
 
-    assert(np.all(opt.check_grad(func, grad, Y) < 0.05))
+    S2 = ssim(X, Y)
+
+    assert S1 < 0.1
+    assert S2 < 0.1
 
 
 if __name__ == "__main__":

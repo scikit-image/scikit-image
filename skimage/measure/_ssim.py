@@ -5,6 +5,8 @@ __all__ = ['structural_similarity']
 import numpy as np
 from numpy.lib import stride_tricks
 
+from ..util.dtype import dtype_range
+
 def _as_windows(X, win_size=7, flatten_first_axis=True):
     """Re-stride an array to simulate a sliding window.
 
@@ -39,7 +41,7 @@ def _as_windows(X, win_size=7, flatten_first_axis=True):
     return windows
 
 
-def structural_similarity(X, Y, win_size=7, gradient=False, dynamic_range=255):
+def structural_similarity(X, Y, win_size=7, gradient=False, dynamic_range=None):
     """Compute the mean structural similarity index between two images.
 
     Parameters
@@ -49,12 +51,12 @@ def structural_similarity(X, Y, win_size=7, gradient=False, dynamic_range=255):
     win_size : int
         The side-length of the sliding window used in comparison.  Must
         be an odd value.
-    dynamic_range : int
-        Dynamic range of the input image (distance between minimum and
-        maximum possible values).  This should eventually be
-        auto-computed, but just specifying it manually for now.
     gradient : bool
         If True, also return the gradient.
+    dynamic_range : int
+        Dynamic range of the input image (distance between minimum and
+        maximum possible values).  By default, this is estimated from
+        the image data-type.
 
     Returns
     -------
@@ -80,6 +82,10 @@ def structural_similarity(X, Y, win_size=7, gradient=False, dynamic_range=255):
 
     if not (win_size % 2 == 1):
         raise ValueError('Window size must be odd.')
+
+    if dynamic_range is None:
+        dmin, dmax = dtype_range[X.dtype.type]
+        dynamic_range = dmax - dmin
 
     XW = _as_windows(X, win_size=win_size)
     YW = _as_windows(Y, win_size=win_size)
