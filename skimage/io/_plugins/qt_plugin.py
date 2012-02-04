@@ -134,8 +134,8 @@ def imshow(arr, fancy=False):
     if not fancy:
         iw = ImageWindow(arr, window_manager)
     else:
-        from scivi import SciviImageWindow
-        iw = SciviImageWindow(arr, window_manager)
+        from skivi import SkiviImageWindow
+        iw = SkiviImageWindow(arr, window_manager)
 
     iw.show()
 
