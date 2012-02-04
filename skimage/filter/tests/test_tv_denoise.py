@@ -15,6 +15,8 @@ class TestTvDenoise():
         lena = color.rgb2gray(data.lena())[:256, :256]
         # add noise to lena
         lena += 0.5 * lena.std()*np.random.randn(*lena.shape)
+        # clip noise so that it does not exceed allowed range for float images.
+        lena = np.clip(lena, 0, 1)
         # denoise
         denoised_lena = filter.tv_denoise(lena, weight=60.0)
         # which dtype?

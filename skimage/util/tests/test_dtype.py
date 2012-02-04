@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from skimage import img_as_int, img_as_float, \
                     img_as_uint, img_as_ubyte
-from skimage.util.dtype import _convert
+from skimage.util.dtype import convert
 
 
 dtype_range = {np.uint8: (0, 255),
@@ -40,7 +40,7 @@ def test_range():
 def test_range_extra_dtypes():
     """Test code paths that are not skipped by `test_range`"""
 
-    # Add non-standard data types that are allowed by the `_convert` function.
+    # Add non-standard data types that are allowed by the `convert` function.
     dtype_range_extra = dtype_range.copy()
     dtype_range_extra.update({np.int32: (-2147483648, 2147483647),
                               np.uint32: (0, 4294967295)})
@@ -55,7 +55,7 @@ def test_range_extra_dtypes():
     for dtype_in, dt in dtype_pairs:
         imin, imax = dtype_range_extra[dtype_in]
         x = np.linspace(imin, imax, 10).astype(dtype_in)
-        y = _convert(x, dt)
+        y = convert(x, dt)
         omin, omax = dtype_range_extra[dt]
         yield _verify_range, \
               "From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)), \
