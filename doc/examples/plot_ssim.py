@@ -30,7 +30,7 @@ import numpy as np
 img = img_as_float(data.camera())
 rows, cols = img.shape
 
-noise = np.ones_like(img) * 0.5 * (img.max() - img.min())
+noise = np.ones_like(img) * 0.2 * (img.max() - img.min())
 noise[np.random.random(size=noise.shape) > 0.5] *= -1
 
 def mse(x, y):
@@ -43,29 +43,25 @@ import matplotlib.pyplot as plt
 f, (ax0, ax1, ax2) = plt.subplots(1, 3)
 
 mse_none = mse(img, img)
-ssim_none = ssim(img, img)
+ssim_none = ssim(img, img, dynamic_range=img.max() - img.min())
 
 mse_noise = mse(img, img_noise)
-ssim_noise = ssim(img, img_noise)
+ssim_noise = ssim(img, img_noise, dynamic_range=img_const.max() - img_const.min())
 
 mse_const = mse(img, img_const)
-ssim_const = ssim(img, img_const)
+ssim_const = ssim(img, img_const, dynamic_range=img_noise.max() - img_noise.min())
 
 label = 'MSE: %2.f, SSIM: %.2f'
 
-ax0.imshow(img, cmap=plt.cm.gray)
+ax0.imshow(img, cmap=plt.cm.gray, vmin=0, vmax=1)
 ax0.set_xlabel(label % (mse_none, ssim_none))
 ax0.set_title('Original image')
 
-# exposure.rescale_intensity(img_noise)
-img_noise -= img_noise.min()
-img_noise /= img_noise.max()
-
-ax1.imshow(img_noise, cmap=plt.cm.gray)
+ax1.imshow(img_noise, cmap=plt.cm.gray, vmin=0, vmax=1)
 ax1.set_xlabel(label % (mse_noise, ssim_noise))
 ax1.set_title('Image with noise')
 
-ax2.imshow(img_const, cmap=plt.cm.gray)
+ax2.imshow(img_const, cmap=plt.cm.gray, vmin=0, vmax=1)
 ax2.set_xlabel(label % (mse_const, ssim_const))
 ax2.set_title('Image plus constant')
 
