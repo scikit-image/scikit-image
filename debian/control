@@ -1,4 +1,4 @@
-Source: scikits-image
+Source: skimage
 Section: python
 Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
@@ -7,35 +7,35 @@ Build-Depends: debhelper (>= 7.0.50), python-all-dev (>= 2.6.6-3~), python-numpy
 Standards-Version: 3.9.2
 XS-Python-Version: >= 2.5
 Homepage: http://scikits-image.org
-Vcs-Browser: https://github.com/scikits-image/scikits.image
-Vcs-Git: git://github.com/scikits-image/scikits.image.git
+Vcs-Browser: https://github.com/scikits-image/scikits-image
+Vcs-Git: git://github.com/scikits-image/scikits-image.git
 
-Package: python-scikits.image
+Package: python-skimage
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-numpy, python-scipy, python-scikits.image-lib (>= ${source:Version})
+Depends: ${misc:Depends}, ${python:Depends}, python-numpy, python-scipy, python-skimage-lib (>= ${source:Version})
 Provides: ${python:Provides}
 Recommends: python-nose, python-matplotlib
-Suggests: python-scikits.image-doc, python-opencv
+Suggests: python-skimage-doc, python-opencv
 Description: Python modules for image processing
  scikits-image is a collection of image processing algorithms for
  Python.  It performs tasks such as image loading, filtering,
  morphology, segmentation, color conversions, and transformations.
 
-Package: python-scikits.image-doc
+Package: python-skimage-doc
 Architecture: all
 Section: doc
 Depends: ${misc:Depends}, libjs-jquery
-Suggests: python-scikits.image
+Suggests: python-skimage
 Description: Documentation and examples for scikits-image
  This package contains documentation and example scripts for
- python-scikits.image.
+ python-skimage.
 
-Package: python-scikits.image-lib
+Package: python-skimage-lib
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, ${python:Depends}, python-numpy
-Recommends: python-scikits.image
+Recommends: python-skimage
 Provides: ${python:Provides}
 XB-Python-Version: ${python:Versions}
 Description: Optimized low-level algorithms for scikits-image
- This is an add-on package for python-scikits.image. It provides
+ This is an add-on package for python-skimage. It provides
  optimized, low-level implementations of algorithms.

@@ -1,5 +1,5 @@
-scikits-image (0.3.0-1) UNRELEASED; urgency=low
+scikits-image (0.5.0-1) UNRELEASED; urgency=low
 
   * Initial release. (Closes: #639820)
 
- -- Stefan van der Walt <stefan@sun.ac.za>  Mon, 26 Sep 2011 23:52:45 -0700
+ -- Stefan van der Walt <stefan@sun.ac.za>  Fri, 03 Feb 2012 20:45:51 -0700
