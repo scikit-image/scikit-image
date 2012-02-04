@@ -20,7 +20,7 @@ _supported_types = (np.uint8, np.uint16, np.uint32,
                     np.float16, np.float32, np.float64)
 
 
-def _convert(image, dtype):
+def convert(image, dtype):
     """
     Convert an image to the requested data-type.
 
@@ -167,7 +167,7 @@ def img_as_float(image):
     Negative input values will be shifted to the positive domain.
 
     """
-    return _convert(image, np.float64)
+    return convert(image, np.float64)
 
 
 def img_as_uint(image):
@@ -188,7 +188,7 @@ def img_as_uint(image):
     Negative input values will be shifted to the positive domain.
 
     """
-    return _convert(image, np.uint16)
+    return convert(image, np.uint16)
 
 
 def img_as_int(image):
@@ -210,7 +210,7 @@ def img_as_int(image):
     the output image will still only have positive values.
 
     """
-    return _convert(image, np.int16)
+    return convert(image, np.int16)
 
 
 def img_as_ubyte(image):
@@ -232,4 +232,4 @@ def img_as_ubyte(image):
     the output image will still only have positive values.
 
     """
-    return _convert(image, np.uint8)
+    return convert(image, np.uint8)
