@@ -5,46 +5,6 @@ import _template
 
 from skimage.util.dtype import _convert
 
-try:
-    import cv
-    opencv_available = True
-except ImportError:
-    opencv_available = False
-
-
-
-#XXX add to opencv backend once backend system in place
-def match_template_cv(image, template, out=None,  method="norm-coeff"):
-    """Finds a template in an image using normalized correlation.
-
-    Parameters
-    ----------
-    image : array_like, dtype=float
-        Image to process.
-    template : array_like, dtype=float
-        Template to locate.
-    out: array_like, dtype=float, optional
-        Optional destination.
-    Returns
-    -------
-    output : ndarray, dtype=float
-        Correlation results between 0.0 and 1.0, maximum indicating the most
-        probable match.
-    """
-    if not opencv_available:
-        raise ImportError("Opencv 2.0+ required")
-    if out == None:
-        out = np.empty((image.shape[0] - template.shape[0] + 1,
-                        image.shape[1] - template.shape[1] + 1),
-                       dtype=image.dtype)
-    if method == "norm-corr":
-        cv.MatchTemplate(image, template, out, cv.CV_TM_CCORR_NORMED)
-    elif method == "norm-coeff":
-        cv.MatchTemplate(image, template, out, cv.CV_TM_CCOEFF_NORMED)
-    else:
-        raise ValueError("Unknown template method: %s" % method)
-    return out
-
 
 def match_template(image, template, method="norm-coeff"):
     """Finds a template in an image using normalized correlation.
