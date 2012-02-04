@@ -56,9 +56,9 @@ def plot_img_and_hist(img, axes, bins=256):
 img = data.moon()
 
 # Contrast stretching
-p5 = np.percentile(img, 2)
-p95 = np.percentile(img, 98)
-img_rescale = exposure.rescale_intensity(img, in_range=(p5, p95))
+p2 = np.percentile(img, 2)
+p98 = np.percentile(img, 98)
+img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
 
 # Equalization
 img_eq = exposure.equalize(img)
@@ -74,7 +74,7 @@ ax_hist.set_ylabel('Number of pixels')
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_rescale, axes[:, 1])
 ax_img.set_title('Contrast stretching')
 
-ax_img, _,       ax_cdf = plot_img_and_hist(img_eq, axes[:, 2])
+ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_eq, axes[:, 2])
 ax_img.set_title('Histogram equalization')
 ax_cdf.set_ylabel('Fraction of total intensity')
 
