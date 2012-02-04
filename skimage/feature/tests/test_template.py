@@ -1,10 +1,13 @@
 import numpy as np
-from skimage.feature import match_template
 from numpy.random import randn
+from numpy.testing import assert_array_almost_equal as assert_close
+
+from skimage.feature import match_template, peak_local_max
 
 
 def test_template():
     size = 100
+    # Type conversion of image and target not required but prevents warnings.
     image = np.zeros((400, 400), dtype=np.float32)
     target = np.tri(size) + np.tri(size)[::-1]
     target = target.astype(np.float32)
@@ -16,31 +19,21 @@ def test_template():
     for method in ["norm-corr", "norm-coeff"]:
         result = match_template(image, target, method=method)
         delta = 5
-        found_positions = []
-        # find the targets
-        for i in range(50):
-            index = np.argmax(result)
-            y, x = np.unravel_index(index, result.shape)
-            if not found_positions:
-                found_positions.append((x, y))
-            for position in found_positions:
-                distance = np.sqrt((x - position[0]) ** 2 +
-                                   (y - position[1]) ** 2)
-                if distance > delta:
-                    found_positions.append((x, y))
-            result[y, x] = 0
-            if len(found_positions) == len(target_positions):
-                break
 
-        for x, y in target_positions:
-            print x, y
-            found = False
-            for position in found_positions:
-                distance = np.sqrt((x - position[0]) ** 2 +
-                                   (y - position[1]) ** 2)
-                if distance < delta:
-                    found = True
-            assert found
+        positions = peak_local_max(result, min_distance=delta)
+
+        if len(positions) > 2:
+            # Keep the two maximum peaks.
+            intensities = result[tuple(positions.T)]
+            i_maxsort = np.argsort(intensities)[::-1]
+            positions = positions[i_maxsort][:2]
+
+        # Sort so that order matches `target_positions`.
+        positions = positions[np.argsort(positions[:, 0])]
+
+        for xy_target, xy in zip(target_positions, positions):
+            yield assert_close, xy, xy_target
+
 
 if __name__ == "__main__":
     from numpy import testing
