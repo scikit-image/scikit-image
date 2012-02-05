@@ -637,6 +637,16 @@ th {
   font-size: 80%;
 }
 
+/* ----------------- Example Gallery ----------------- */
+
+.gallery {
+    min-height: 250px;
+}
+
+.gallery p.caption a{
+    text-decoration: none;
+}
+
 /* ----------------- Coverage States ----------------- */
 span.missing{
 	color: #000;
