@@ -225,7 +225,7 @@ div.document h2 {
 }
 
 div.document p {
-  margin-bottom: .5em;
+  margin-bottom: 1.5em;
 }
 
 div.document li.toctree-l1 {
