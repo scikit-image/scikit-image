@@ -3,54 +3,83 @@
 Histogram Equalization
 ======================
 
-This examples takes an image with low contrast and enhances its contrast using
-histogram equalization. Histogram equalization enhances contrast by "spreading
-out the most frequent intensity values" in an image [1]_. The equalized image
-has a roughly linear cumulative distribution function, as shown in this example.
+This examples enhances an image with low contrast, using a method called
+*histogram equalization*, which "spreads out the most frequent intensity
+values" in an image [1]_. The equalized image has a roughly linear cumulative
+distribution function.
+
+While histogram equalization has the advantage that it requires no parameters,
+it sometimes yields unnatural looking images.  An alternative method is
+*contrast stretching*, where the image is rescaled to include all intensities
+that fall within the 2nd and 98th percentiles [2]_.
 
 .. [1] http://en.wikipedia.org/wiki/Histogram_equalization
+.. [2] http://homepages.inf.ed.ac.uk/rbf/HIPR2/stretch.htm
 
 """
-import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.util.dtype import dtype_range
 from skimage import exposure
 
+import matplotlib.pyplot as plt
 
-def plot_hist(img, bins=256):
-    """Plot histogram and cumulative histogram for image"""
-    img_cdf, bins = exposure.cumulative_distribution(img, bins)
-    plt.hist(img.ravel(), bins=bins)
-    plt.ylabel('Number of pixels')
-    plt.xlabel('Pixel intensiy')
+import numpy as np
 
-    ax_cdf = plt.twinx()
-    ax_cdf.plot(bins, img_cdf, 'r')
+def plot_img_and_hist(img, axes, bins=256):
+    """Plot an image along with its histogram and cumulative histogram.
+
+    """
+    ax_img, ax_hist = axes
+    ax_cdf = ax_hist.twinx()
+
+    # Display image
+    ax_img.imshow(img, cmap=plt.cm.gray)
+    ax_img.set_axis_off()
+
+    # Display histogram
+    ax_hist.hist(img.ravel(), bins=bins)
+    ax_hist.ticklabel_format(axis='y', style='scientific', scilimits=(0, 0))
+    ax_hist.set_xlabel('Pixel intensity')
+
     xmin, xmax = dtype_range[img.dtype.type]
-    plt.xlim(xmin, xmax)
+    ax_hist.set_xlim(xmin, xmax)
 
-    ax_cdf.set_ylabel('Fraction of total intensity')
+    # Display cumulative distribution
+    img_cdf, bins = exposure.cumulative_distribution(img, bins)
+    ax_cdf.plot(bins, img_cdf, 'r')
 
-img_orig = data.camera()
-# squeeze image intensities to lower image contrast
-img = img_orig / 5 + 100
+    return ax_img, ax_hist, ax_cdf
+
+
+# Load an example image
+img = data.moon()
+
+# Contrast stretching
+p2 = np.percentile(img, 2)
+p98 = np.percentile(img, 98)
+img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
+
+# Equalization
 img_eq = exposure.equalize(img)
 
-plt.subplot(2, 2, 1)
-plt.imshow(img, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('Low contrast input image')
-plt.axis('off')
-plt.subplot(2, 2, 2)
-plot_hist(img)
 
-plt.subplot(2, 2, 3)
-plt.imshow(img_eq, cmap=plt.cm.gray, vmin=0, vmax=1)
-plt.title('After\nhistogram equalization')
-plt.axis('off')
-plt.subplot(2, 2, 4)
-plot_hist(img_eq)
+# Display results
+f, axes = plt.subplots(2, 3, figsize=(11, 5))
 
-plt.subplots_adjust(left=0.05, hspace=0.25, wspace=0.3, top=0.95, bottom=0.1)
+ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
+ax_img.set_title('Low contrast image')
+ax_hist.set_ylabel('Number of pixels')
+
+ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_rescale, axes[:, 1])
+ax_img.set_title('Contrast stretching')
+
+ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_eq, axes[:, 2])
+ax_img.set_title('Histogram equalization')
+ax_cdf.set_ylabel('Fraction of total intensity')
+
+
+# prevent overlap of y-axis labels
+plt.subplots_adjust(wspace=0.4)
 plt.show()
 
