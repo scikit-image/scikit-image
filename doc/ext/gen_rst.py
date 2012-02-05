@@ -186,6 +186,7 @@ def generate_dir_rst(dir, fhindex, example_dir, root_dir, plot_gallery):
             fhindex.write('.. figure:: %s\n' % thumb)
             if link_name.startswith('._'):
                 link_name = link_name[2:]
+            fhindex.write('   :figclass: gallery\n')
             if dir != '.':
                 fhindex.write('   :target: ./%s/%s.html\n\n' % (dir, fname[:-3]))
             else:

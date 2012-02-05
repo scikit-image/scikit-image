@@ -89,7 +89,8 @@ h1 {
 
 h2 {
   padding-bottom: .5em;
-  border-bottom: 1px solid {{ theme_headercolor2 }};
+  color: {{ theme_headercolor1 }};
+  border-bottom: 1px solid {{ theme_headercolor1 }};
 }
 
 a.headerlink {
@@ -110,11 +111,6 @@ dt:hover > a.headerlink {
 
 img {
   border: 0;
-}
-
-pre {
-  background-color: #EEE;
-  padding: 0.5em;
 }
 
 div.admonition {
@@ -187,6 +183,9 @@ div.document {
 
 div.body {
   padding-right: 2em;
+  min-width: 20em;
+  overflow: hidden;
+  font-size: 90%;
   text-align: {{ theme_textalign }};
 }
 
@@ -222,7 +221,7 @@ div.document h2 {
 }
 
 div.document p {
-  margin-bottom: .5em;
+  margin-bottom: 1.5em;
 }
 
 div.document li.toctree-l1 {
@@ -292,6 +291,7 @@ div.sphinxsidebar .tile {
 }
 
 div.sphinxsidebar ul {
+  margin-bottom: 1.5em;
   list-style-type: none;
 }
 
@@ -422,12 +422,18 @@ table.contentstable p.biglink {
     line-height: 150%;
 }
 
-table.contentstable {
+table.contentstable, table.contentstable td, table.contentstable th {
     border-style: none;
 }
 
-table.contentstable td, table.contentstable th {
-    border-style: none;
+div.body table.contentstable p {
+    margin: 0.5em;
+    text-align: left;
+}
+
+table.contentstable a {
+    text-decoration: none;
+    font-size: 120%;
 }
 
 a.biglink {
@@ -504,11 +510,6 @@ a:hover {
     text-decoration: underline;
 }
 
-div.body p, div.body dd, div.body li {
-    text-align: justify;
-    line-height: 130%;
-}
-
 div.body h1,
 div.body h2,
 div.body h3,
@@ -520,13 +521,13 @@ div.body h6 {
     font-weight: normal;
     color: {{ theme_headtextcolor }};
     border-bottom: 1px solid #ccc;
-    margin: 20px -20px 10px -20px;
-    padding: 3px 0 3px 10px;
+    margin: 20px 20px 10px 0px;
+    padding: 3px 0 3px 0px;
 }
 
-div.body h1 { margin-top: 0; font-size: 200%; }
-div.body h2 { font-size: 160%; }
-div.body h3 { font-size: 140%; }
+div.body h1 { margin-top: 0; font-size: 180%; }
+div.body h2 { font-size: 150%; }
+div.body h3 { font-size: 130%; }
 div.body h4 { font-size: 120%; }
 div.body h5 { font-size: 110%; }
 div.body h6 { font-size: 100%; }
@@ -580,7 +581,8 @@ p.admonition-title:after {
 }
 
 pre {
-    padding: 5px;
+    padding: 1em;
+    margin-bottom: 0.5em;
     background-color: {{ theme_codebgcolor }};
     color: {{ theme_codetextcolor }};
     line-height: 120%;
@@ -592,7 +594,7 @@ pre {
 tt {
     background-color: #ecf0f3;
     padding: 0 1px 0 1px;
-    font-size: 0.95em;
+    font-size: 1em;
 }
 
 table {
@@ -633,6 +635,16 @@ th {
 
 .field-list {
   font-size: 80%;
+}
+
+/* ----------------- Example Gallery ----------------- */
+
+.gallery {
+    min-height: 250px;
+}
+
+.gallery p.caption a{
+    text-decoration: none;
 }
 
 /* ----------------- Coverage States ----------------- */
