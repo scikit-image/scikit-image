@@ -421,12 +421,12 @@ table.contentstable p.biglink {
     line-height: 150%;
 }
 
-table.contentstable {
+table.contentstable, table.contentstable td, table.contentstable th {
     border-style: none;
 }
 
-table.contentstable td, table.contentstable th {
-    border-style: none;
+table.contentstable a {
+    font-size: 120%;
 }
 
 a.biglink {
