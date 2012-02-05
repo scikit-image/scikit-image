@@ -113,11 +113,6 @@ img {
   border: 0;
 }
 
-pre {
-  background-color: #EEE;
-  padding: 0.5em;
-}
-
 div.admonition {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -579,7 +574,7 @@ p.admonition-title:after {
 }
 
 pre {
-    padding: 5px;
+    padding: 1em;
     background-color: {{ theme_codebgcolor }};
     color: {{ theme_codetextcolor }};
     line-height: 120%;
