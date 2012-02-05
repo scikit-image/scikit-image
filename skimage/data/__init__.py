@@ -73,3 +73,12 @@ def coins():
 
     """
     return load("coins.png")
+
+def moon():
+    """Surface of the moon.
+
+    This low-contrast image of the surface of the moon is useful for
+    illustrating histogram equalization and contrast stretching.
+
+    """
+    return load("moon.png")
