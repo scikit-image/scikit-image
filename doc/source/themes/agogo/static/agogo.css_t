@@ -291,6 +291,7 @@ div.sphinxsidebar .tile {
 }
 
 div.sphinxsidebar ul {
+  margin-bottom: 1.5em;
   list-style-type: none;
 }
 
