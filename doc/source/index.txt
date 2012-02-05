@@ -38,11 +38,13 @@ Sections
 
        Conditions on the use and redistribution of this package.
 
+   * - `Examples <auto_examples/index.html>`_
+
+       Introductory examples
+
+     -
 
 
-`Examples <auto_examples/index.html>`_
-
-Introductory examples
 
 Indices and Tables
 ==================
