@@ -20,7 +20,7 @@ _supported_types = (np.uint8, np.uint16, np.uint32,
                     np.float16, np.float32, np.float64)
 
 
-def _convert(image, dtype):
+def convert(image, dtype):
     """
     Convert an image to the requested data-type.
 
@@ -63,6 +63,8 @@ def _convert(image, dtype):
                  "%s to %s" % (dtypeobj_in, dtypeobj))
 
     if kind_in == 'f':
+        if np.min(image) < 0 or np.max(image) > 1:
+            raise ValueError("Images of type float must be between 0 and 1")
         if kind == 'f':
             # floating point -> floating point
             if itemsize_in > itemsize:
@@ -120,7 +122,7 @@ def _convert(image, dtype):
             # int8 -> uint32
             image = dtype(image)
             image *= 2**16 + 2**8 + 1
-        result += image
+        result += dtype(image)
         return result
     if kind == 'i':
         # signed integer -> signed integer
@@ -165,7 +167,7 @@ def img_as_float(image):
     Negative input values will be shifted to the positive domain.
 
     """
-    return _convert(image, np.float64)
+    return convert(image, np.float64)
 
 
 def img_as_uint(image):
@@ -186,7 +188,7 @@ def img_as_uint(image):
     Negative input values will be shifted to the positive domain.
 
     """
-    return _convert(image, np.uint16)
+    return convert(image, np.uint16)
 
 
 def img_as_int(image):
@@ -208,7 +210,7 @@ def img_as_int(image):
     the output image will still only have positive values.
 
     """
-    return _convert(image, np.int16)
+    return convert(image, np.int16)
 
 
 def img_as_ubyte(image):
@@ -230,4 +232,4 @@ def img_as_ubyte(image):
     the output image will still only have positive values.
 
     """
-    return _convert(image, np.uint8)
+    return convert(image, np.uint8)
