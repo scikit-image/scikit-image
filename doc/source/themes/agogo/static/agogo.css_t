@@ -188,6 +188,8 @@ div.document {
 div.body {
   padding-right: 2em;
   text-align: {{ theme_textalign }};
+  overflow: hidden;
+  min-width: 20em;
 }
 
 div.document ul {
@@ -520,8 +522,8 @@ div.body h6 {
     font-weight: normal;
     color: {{ theme_headtextcolor }};
     border-bottom: 1px solid #ccc;
-    margin: 20px -20px 10px -20px;
-    padding: 3px 0 3px 10px;
+    margin: 20px 20px 10px 0px;
+    padding: 3px 0 3px 0px;
 }
 
 div.body h1 { margin-top: 0; font-size: 200%; }
