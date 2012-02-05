@@ -425,7 +425,13 @@ table.contentstable, table.contentstable td, table.contentstable th {
     border-style: none;
 }
 
+div.body table.contentstable p {
+    margin: 0.5em;
+    text-align: left;
+}
+
 table.contentstable a {
+    text-decoration: none;
     font-size: 120%;
 }
 
