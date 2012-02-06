@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
         entry_points={
             'console_scripts': [
-                'scivi = skimage.scripts.scivi:main']
+                'skivi = skimage.scripts.skivi:main']
             },
 
         cmdclass={'build_py': build_py},
