@@ -1,15 +1,15 @@
 '''
-Scivi is written/maintained/developed by:
+Skivi is written/maintained/developed by:
 
 S. Chris Colbert - sccolbert@gmail.com
 
-Scivi is free software and is part of the scikits-image project.
+Skivi is free software and is part of the scikits-image project.
 
-Scivi is governed by the licenses of the scikits-image project.
+Skivi is governed by the licenses of the scikits-image project.
 
 Please report any bugs to the author.
 
-The scivi module is not meant to be used directly.
+The skivi module is not meant to be used directly.
 
 Use skimage.io.imshow(img, fancy=True)'''
 
@@ -119,7 +119,7 @@ class RGBHSVDisplay(QFrame):
 
 
 
-class SciviImageWindow(QMainWindow):
+class SkiviImageWindow(QMainWindow):
     def __init__(self, arr, mgr):
         QMainWindow.__init__(self)
 
@@ -143,7 +143,7 @@ class SciviImageWindow(QMainWindow):
         self.mgr.add_window(self)
         self.main_widget.show()
 
-        self.setWindowTitle('Scivi - The skimage viewer.')
+        self.setWindowTitle('Skivi - The skimage viewer.')
 
         self.mixer_panel = MixerPanel(self.arr)
         self.layout.addWidget(self.mixer_panel, 0, 2)
