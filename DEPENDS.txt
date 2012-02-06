@@ -25,5 +25,5 @@ You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
 `PyQt4 <http://wiki.python.org/moin/PyQt>`_
-   The `qt` plugin that provides ``imshow(x, fancy=True)`` and `scivi`.
+   The `qt` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
 
