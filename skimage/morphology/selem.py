@@ -62,13 +62,13 @@ def rectangle(width, height, dtype=np.uint8):
 def diamond(radius, dtype=np.uint8):
     """
     Generates a flat, diamond-shaped structuring element of a given
-    radius.  A pixel is part of the neighborhood (i.e. labeled 1) iff
+    radius.  A pixel is part of the neighborhood (i.e. labeled 1) if
     the city block/manhattan distance between it and the center of the
     neighborhood is no greater than radius.
 
     Parameters
     ----------
-    radius : string
+    radius : int
        The radius of the diamond-shaped structuring element.
 
     dtype : data-type
@@ -89,12 +89,12 @@ def diamond(radius, dtype=np.uint8):
 def disk(radius, dtype=np.uint8):
     """
     Generates a flat, disk-shaped structuring element of a given radius.
-    A pixel is within the neighborhood iff the euclidean distance between
+    A pixel is within the neighborhood if the euclidean distance between
     it and the origin is no greater than a radius.
     
     Parameters
     ----------
-    radius : string
+    radius : int
        The radius of the disk-shaped structuring element.
 
     dtype : data-type
