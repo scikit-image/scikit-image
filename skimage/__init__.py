@@ -1,5 +1,42 @@
-"""Image Processing SciKit (Toolbox for SciPy)"""
+"""Image Processing SciKit (Toolbox for SciPy)
 
+``scikits-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
+processing and computer vision.
+
+The main package of ``skimage`` just provides a few utilities for converting
+between image data types; for most features, you'll need to import one of the
+subpackages described below:
+
+Subpackages
+-----------
+color
+    Utilities for converting between color spaces.
+data
+    Image data for testing and examples.
+draw
+    Functions for drawing on images.
+exposure
+    Utilities for adjusting the image intensity.
+feature
+    Functions for detecting features in images (e.g. texture, corners, etc.).
+filter
+    Image filters for denoising, sharpening, edge-finding, and more.
+graph
+    Functions based on graph-theoretic representations of images.
+io
+    Utilities for reading, saving, and displaying images and video.
+measure
+    Functions for image measurement.
+morphology
+    Mathematical morphology operations on images.
+segmentation
+    Algorithms segmenting images into regions.
+transform
+    Transform images into domains that are useful for detection and analysis.
+util
+    Utilities for image data-type conversion.
+
+"""
 
 import os.path as _osp
 
