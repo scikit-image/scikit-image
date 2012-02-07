@@ -41,7 +41,8 @@ def _as_windows(X, win_size=7, flatten_first_axis=True):
     return windows
 
 
-def structural_similarity(X, Y, win_size=7, gradient=False, dynamic_range=None):
+def structural_similarity(X, Y, win_size=7,
+                          gradient=False, dynamic_range=None):
     """Compute the mean structural similarity index between two images.
 
     Parameters
