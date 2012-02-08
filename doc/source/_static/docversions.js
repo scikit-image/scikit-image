@@ -4,7 +4,12 @@ function insert_version_links() {
     document.write('<ul class="versions">\n');
 
     for (i = 0; i < labels.length; i++){
-        document.write('<li> <a href="URL">skimage VERSION</a> </li>\n'
+        document.write('<li>');
+        if ((DOCUMENTATION_OPTIONS['VERSION'] == labels[i]) ||
+            (DOCUMENTATION_OPTIONS['VERSION'].match(/dev$/) && (i == 0))) {
+            document.write('&#9656;&nbsp;');
+        }
+        document.write('<a href="URL">skimage VERSION</a> </li>\n'
                         .replace('VERSION', labels[i])
                         .replace('URL', 'http://scikits-image.org/docs/' + labels[i]));
     }
