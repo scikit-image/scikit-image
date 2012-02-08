@@ -1,8 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal
 
-from skimage.measure._structural_similarity import \
-     structural_similarity as ssim, _as_windows
+from skimage.measure import structural_similarity as ssim
 import scipy.optimize as opt
 
 def test_ssim_patch_range():
@@ -12,16 +11,6 @@ def test_ssim_patch_range():
 
     assert(ssim(X, Y, win_size=N) < 0.1)
     assert_equal(ssim(X, X, win_size=N), 1)
-
-def test_as_windows():
-    X = np.arange(100).reshape((10, 10))
-    W = _as_windows(X, win_size=7)
-    assert_equal(W.shape[:2], (4, 4))
-
-    W = _as_windows(X, win_size=3)
-    assert_equal(W[0, 0], [[0, 1, 2],
-                           [10, 11, 12],
-                           [20, 21, 22]])
 
 def test_ssim_image():
     N = 100

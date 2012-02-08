@@ -3,43 +3,9 @@ from __future__ import division
 __all__ = ['structural_similarity']
 
 import numpy as np
-from numpy.lib import stride_tricks
 
 from ..util.dtype import dtype_range
-
-def _as_windows(X, win_size=7, flatten_first_axis=True):
-    """Re-stride an array to simulate a sliding window.
-
-    Parameters
-    ----------
-    X : 2D-ndarray
-        Input image.
-
-    Returns
-    -------
-    window : (N, M, win_size, win_size) ndarray
-        Sliding windows.
-
-    """
-    if not X.ndim == 2:
-        raise ValueError('Input images must be 2-dimensional.')
-
-    X = np.ascontiguousarray(X)
-    r, c = X.shape
-
-    strides = X.strides
-    row_jump, el_jump = strides
-    half_width = (win_size // 2)
-
-    new_strides = (row_jump, el_jump, row_jump, el_jump)
-    new_rows = r - 2 * half_width
-    new_cols = c - 2 * half_width
-    new_shape = (new_rows, new_cols, win_size, win_size)
-
-    windows = stride_tricks.as_strided(X, shape=new_shape, strides=new_strides)
-
-    return windows
-
+from ..util.shape import as_windows
 
 def structural_similarity(X, Y, win_size=7,
                           gradient=False, dynamic_range=None):
@@ -88,8 +54,8 @@ def structural_similarity(X, Y, win_size=7,
         dmin, dmax = dtype_range[X.dtype.type]
         dynamic_range = dmax - dmin
 
-    XW = _as_windows(X, win_size=win_size)
-    YW = _as_windows(Y, win_size=win_size)
+    XW = as_windows(X, win_size=win_size)
+    YW = as_windows(Y, win_size=win_size)
 
     NS = len(XW)
     NP = win_size * win_size
@@ -128,7 +94,7 @@ def structural_similarity(X, Y, win_size=7,
             )
 
         grad = np.zeros_like(X, dtype=float)
-        OW = _as_windows(grad, win_size=win_size)
+        OW = as_windows(grad, win_size=win_size)
 
         OW += local_grad
         grad /= NS
