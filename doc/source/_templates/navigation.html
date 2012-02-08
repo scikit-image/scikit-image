@@ -1,0 +1,12 @@
+{%- block navigation %}
+
+  {% if pagename != 'index' %}
+    <h3>Navigation</h3>
+    <p>
+    <a href="{{ pathto(master_doc) }}">Documentation Home</a>
+    </p>
+    <p>&nbsp;</p>
+  {% endif %}
+
+
+{%- endblock %}
