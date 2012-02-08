@@ -16,9 +16,8 @@ def square(width, dtype=np.uint8):
     width : int
        The width and height of the square
 
-    Additional Parameters
-    ---------------------
-    
+    Other Parameters
+    ----------------
     dtype : data-type
        The data type of the structuring element.
 
@@ -27,6 +26,7 @@ def square(width, dtype=np.uint8):
     selem : ndarray
        A structuring element consisting only of ones, i.e. every
        pixel belongs to the neighborhood.
+
     """
     return np.ones((width, width), dtype=dtype)
 
@@ -44,18 +44,17 @@ def rectangle(width, height, dtype=np.uint8):
     height : int
        The height of the rectangle
 
-    Additional Parameters
-    ---------------------
-    
+    Other Parameters
+    ----------------
     dtype : data-type
        The data type of the structuring element.
 
     Returns
     -------
     selem : ndarray
-
        A structuring element consisting only of ones, i.e. every
        pixel belongs to the neighborhood.
+
     """
     return np.ones((width, height), dtype=dtype)
 
