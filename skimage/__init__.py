@@ -3,38 +3,51 @@
 ``scikits-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
 
-The main package of ``skimage`` just provides a few utilities for converting
-between image data types; for most features, you'll need to import one of the
-subpackages described below:
+The main package of ``skimage`` only provides a few utilities for converting
+between image data types; for most features, you need to import one of the
+following subpackages:
 
 Subpackages
 -----------
 color
-    Utilities for converting between color spaces.
+    Color space conversion.
 data
-    Image data for testing and examples.
+    Test images and example data.
 draw
-    Functions for drawing on images.
+    Image drawing primitives (lines, text, etc.).
 exposure
-    Utilities for adjusting the image intensity.
+    Image intensity adjustment (e.g., histogram equalization).
 feature
-    Functions for detecting features in images (e.g. texture, corners, etc.).
+    Feature detection (e.g. texture analysis, corners, etc.).
 filter
-    Image filters for denoising, sharpening, edge-finding, and more.
+    Sharpening, edge finding, denoising, etc.
 graph
-    Functions based on graph-theoretic representations of images.
+    Graph-theoretic operations, e.g. dynamic programming (shortest paths).
 io
-    Utilities for reading, saving, and displaying images and video.
+    Reading, saving, and displaying images and video.
 measure
-    Functions for image measurement.
+    Measurement of image properties, e.g., similarity and contours.
 morphology
-    Mathematical morphology operations on images.
+    Morphological operations, e.g. opening or skeletonization.
 segmentation
-    Algorithms segmenting images into regions.
+    Splitting an image into self-similar regions.
 transform
-    Transform images into domains that are useful for detection and analysis.
+    Geometric and other transforms, e.g. rotation or the Radon transform.
 util
-    Utilities for image data-type conversion.
+    Generic utilities.
+
+Utility Functions
+-----------------
+get_log
+    Returns the ``skimage`` log.  Use this to print debug output.
+img_as_float
+    Convert an image to floating point format, with values in [0, 1].
+img_as_uint
+    Convert an image to unsigned integer format, with values in [0, 65535].
+img_as_int
+    Convert an image to signed integer format, with values in [-32768, 32767].
+img_as_ubyte
+    Convert an image to unsigned byte format, with values in [0, 255].
 
 """
 
