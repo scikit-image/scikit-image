@@ -5,9 +5,11 @@ function insert_version_links() {
 
     for (i = 0; i < labels.length; i++){
         document.write('<li>');
-        if ((DOCUMENTATION_OPTIONS['VERSION'] == labels[i]) ||
-            (DOCUMENTATION_OPTIONS['VERSION'].match(/dev$/) && (i == 0))) {
-            document.write('&#9656;&nbsp;');
+        if (typeof(DOCUMENTATION_OPTIONS) !== 'undefined') {
+            if ((DOCUMENTATION_OPTIONS['VERSION'] == labels[i]) ||
+                (DOCUMENTATION_OPTIONS['VERSION'].match(/dev$/) && (i == 0))) {
+                document.write('&#9656;&nbsp;');
+            }
         }
         document.write('<a href="URL">skimage VERSION</a> </li>\n'
                         .replace('VERSION', labels[i])
