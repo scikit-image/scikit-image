@@ -16,13 +16,14 @@ import os.path
 import numpy as np
 from numpy.testing import *
 
+from skimage import img_as_float
 from skimage.io import imread
 from skimage.color import (
     rgb2hsv, hsv2rgb,
     rgb2xyz, xyz2rgb,
     rgb2rgbcie, rgbcie2rgb,
     convert_colorspace,
-    rgb2grey
+    rgb2grey, gray2rgb
     )
 
 from skimage import data_dir
@@ -149,6 +150,23 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(g, 1)
 
         assert_equal(g.shape, (1, 1))
+
+def test_gray2rgb():
+    x = np.array([0, 0.5, 1])
+    assert_raises(ValueError, gray2rgb, x)
+
+    x = x.reshape((3, 1))
+    y = gray2rgb(x)
+
+    assert_equal(y.shape, (3, 1, 3))
+    assert_equal(y.dtype, x.dtype)
+
+    x = np.array([[0, 128, 255]], dtype=np.uint8)
+    z = gray2rgb(x)
+
+    assert_equal(z.shape, (1, 3, 3))
+    assert_equal(z[..., 0], x)
+    assert_equal(z[0, 1, :], [128, 128, 128])
 
 if __name__ == "__main__":
     run_module_suite()

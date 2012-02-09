@@ -44,7 +44,7 @@ References
 from __future__ import division
 
 __all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
-           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray']
+           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb']
 
 __docformat__ = "restructuredtext en"
 
@@ -495,7 +495,7 @@ def rgb2grey(rgb):
     CRT phosphors::
 
         Y = 0.2125 R + 0.7154 G + 0.0721 B
-        
+
     If there is an alpha channel present, it is ignored.
 
     Examples
@@ -511,3 +511,29 @@ def rgb2grey(rgb):
     return _convert(grey_from_rgb, rgb[:, :, :3])[..., 0]
 
 rgb2gray = rgb2grey
+
+
+def gray2rgb(image):
+    """Create an RGB representation of a grey-level image.
+
+    Parameters
+    ----------
+    image : array_like
+        Input image of shape ``(M, N)``.
+
+    Returns
+    -------
+    rgb : ndarray
+        RGB image of shape ``(M, N, 3)``.
+
+    Raises
+    ------
+    ValueError
+        If the input is not 2-dimensional.
+
+    """
+    if image.ndim != 2:
+        raise ValueError('Gray-level image should be two-dimensional.')
+
+    M, N = image.shape
+    return np.dstack((image, image, image))
