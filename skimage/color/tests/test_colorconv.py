@@ -44,7 +44,7 @@ class TestColorconv(TestCase):
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
-        rgb = self.img_rgb.astype("float32")[::16, ::16]
+        rgb = img_as_float(self.img_rgb)[::16, ::16]
         hsv = rgb2hsv(rgb).reshape(-1, 3)
         # ground truth from colorsys
         gt = np.array([colorsys.rgb_to_hsv(pt[0], pt[1], pt[2])
