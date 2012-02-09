@@ -234,9 +234,9 @@ def view_as_windows(arr_in, window_shape):
 import numpy as np
 from numpy.lib import stride_tricks
 
-__all__ = ['as_windows']
+__all__ = ['view_as_windows']
 
-def as_windows(X, win_size=7):
+def view_as_windows(X, win_size=7):
     """Re-stride an array to simulate a sliding window.
 
     Parameters
@@ -249,7 +249,8 @@ def as_windows(X, win_size=7):
     Returns
     -------
     window : (N, M, win_size, win_size) ndarray
-        Sliding windows.
+        A view on the original data, representing sliding windows.  Note:
+        modifying this view will also modify the original data.
 
     """
     if not X.ndim == 2:

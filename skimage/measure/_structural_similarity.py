@@ -5,7 +5,7 @@ __all__ = ['structural_similarity']
 import numpy as np
 
 from ..util.dtype import dtype_range
-from ..util.shape import as_windows
+from ..util.shape import view_as_windows
 
 def structural_similarity(X, Y, win_size=7,
                           gradient=False, dynamic_range=None):
@@ -54,8 +54,8 @@ def structural_similarity(X, Y, win_size=7,
         dmin, dmax = dtype_range[X.dtype.type]
         dynamic_range = dmax - dmin
 
-    XW = as_windows(X, win_size=win_size)
-    YW = as_windows(Y, win_size=win_size)
+    XW = view_as_windows(X, win_size=win_size)
+    YW = view_as_windows(Y, win_size=win_size)
 
     NS = len(XW)
     NP = win_size * win_size
@@ -94,7 +94,7 @@ def structural_similarity(X, Y, win_size=7,
             )
 
         grad = np.zeros_like(X, dtype=float)
-        OW = as_windows(grad, win_size=win_size)
+        OW = view_as_windows(grad, win_size=win_size)
 
         OW += local_grad
         grad /= NS
