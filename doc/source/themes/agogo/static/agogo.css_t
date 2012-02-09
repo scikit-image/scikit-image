@@ -337,6 +337,14 @@ div.sidebarblock {
   margin-bottom: .8em;
 }
 
+ul.versions li {
+  color: gray;
+  list-style: circle inside;
+}
+
+ul.versions li#current {
+  list-style: disc inside;
+}
 
 /* Footer */
 
