@@ -103,7 +103,7 @@ def convert_colorspace(arr, fromspace, tospace):
     return todict[tospace](fromdict[fromspace](arr))
 
 
-def _prepare_colorarray(arr, dtype=np.float32):
+def _prepare_colorarray(arr):
     """Check the shape of the array, and give it the requested type."""
     arr = np.asanyarray(arr)
 
@@ -111,7 +111,7 @@ def _prepare_colorarray(arr, dtype=np.float32):
         msg = "the input array must be have a shape == (.,.,3))"
         raise ValueError(msg)
 
-    return arr.astype(dtype)
+    return dtype.img_as_float(arr)
 
 
 def rgb2hsv(rgb):
@@ -303,7 +303,6 @@ def _convert(matrix, arr):
     out : ndarray, dtype=float
         The converted array.
     """
-    arr = dtype.img_as_float(arr)
     arr = _prepare_colorarray(arr)
     arr = np.swapaxes(arr, 0, 2)
     oldshape = arr.shape
