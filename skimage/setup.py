@@ -22,7 +22,7 @@ def configuration(parent_package='', top_path=None):
             config.add_data_dir(dirname)
 
     # Add test directories
-    from os.path import isdir, dirname, join, abspath
+    from os.path import isdir, dirname, join
     rel_isdir = lambda d: isdir(join(curpath, d))
 
     curpath = join(dirname(__file__), './')
@@ -35,6 +35,6 @@ def configuration(parent_package='', top_path=None):
 if __name__ == "__main__":
     from numpy.distutils.core import setup
 
-    config = Configuration(top_path='').todict()
+    config = configuration(top_path='').todict()
     setup(**config)
 
