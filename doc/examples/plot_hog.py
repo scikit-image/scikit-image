@@ -3,9 +3,9 @@ r'''
 Histogram of Oriented Gradients
 ===============================
 
-The Histogram of Oriented Gradient (HOG) feature descriptor is popular
-for object detection
-<http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients>`__.
+The `Histogram of Oriented Gradient
+<http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients>`__ (HOG) feature
+descriptor [1]_ is popular for object detection.
 
 In the following example, we compute the HOG descriptor and display
 a visualisation.
@@ -14,11 +14,12 @@ Algorithm overview
 ------------------
 
 Compute a Histogram of Oriented Gradients (HOG) by
-    1) (optional) global image normalisation
-    2) computing the gradient image in x and y
-    3) computing gradient histograms
-    3) normalising across blocks
-    4) flattening into a feature vector
+
+    1. (optional) global image normalisation
+    2. computing the gradient image in x and y
+    3. computing gradient histograms
+    4. normalising across blocks
+    5. flattening into a feature vector
 
 The first stage applies an optional global image normalisation
 equalisation that is designed to reduce the influence of illumination
@@ -39,7 +40,7 @@ e.g. bar like structures in bicycles and limbs in humans.
 The third stage aims to produce an encoding that is sensitive to
 local image content while remaining resistant to small changes in
 pose or appearance. The adopted method pools gradient orientation
-information locally in the same way as the SIFT [Lowe 2004]
+information locally in the same way as the SIFT [2]_
 feature. The image window is divided into small spatial regions,
 called "cells". For each cell we accumulate a local 1-D histogram
 of gradient or edge orientations over all the pixels in the
@@ -69,9 +70,13 @@ feature vector for use in the window classifier.
 References
 ----------
 
-.. [1] Dalal, N and Triggs, B, Histograms of Oriented Gradients for
-      Human Detection, IEEE Computer Society Conference on Computer
-      Vision and Pattern Recognition 2005 San Diego, CA, USA
+.. [1] Dalal, N. and Triggs, B., "Histograms of Oriented Gradients for
+       Human Detection," IEEE Computer Society Conference on Computer
+       Vision and Pattern Recognition, 2005, San Diego, CA, USA.
+
+.. [2] David G. Lowe, "Distinctive image features from scale-invariant
+       keypoints," International Journal of Computer Vision, 60, 2 (2004),
+       pp. 91-110.
 '''
 
 from skimage.feature import hog
@@ -85,14 +90,14 @@ image = color.rgb2gray(data.lena())
 fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
                     cells_per_block=(1, 1), visualise=True)
 
-plt.figure(figsize=(12, 5))
+plt.figure(figsize=(10, 5))
 
 plt.subplot(121).set_axis_off()
 plt.imshow(image, cmap=plt.cm.gray)
 plt.title('Input image')
 
 # Rescale histogram for better display
-hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 0.03))
+hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 0.02))
 
 plt.subplot(122).set_axis_off()
 plt.imshow(hog_image_rescaled, cmap=plt.cm.gray)
