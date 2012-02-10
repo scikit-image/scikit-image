@@ -4,10 +4,10 @@ Histogram of Oriented Gradients
 ===============================
 
 The Histogram of Oriented Gradient (HOG) feature descriptor is popular
-for object detection 
+for object detection
 <http://en.wikipedia.org/wiki/Histogram_of_oriented_gradients>`__.
 
-In the following example, we compute the HOG descriptor and display 
+In the following example, we compute the HOG descriptor and display
 a visualisation.
 
 Algorithm overview
@@ -19,7 +19,7 @@ Compute a Histogram of Oriented Gradients (HOG) by
     3) computing gradient histograms
     3) normalising across blocks
     4) flattening into a feature vector
-        
+
 The first stage applies an optional global image normalisation
 equalisation that is designed to reduce the influence of illumination
 effects. In practice we use gamma (power law) compression, either
@@ -27,7 +27,7 @@ computing the square root or the log of each colour channel.
 Image texture strength is typically proportional to the local surface
 illumination so this compression helps to reduce the effects of local
 shadowing and illumination variations.
-        
+
 The second stage computes first order image gradients. These capture
 contour, silhouette and some texture information, while providing
 further resistance to illumination variations. The locally dominant
@@ -64,7 +64,7 @@ Gradient (HOG) descriptors.
 
 The final step collects the HOG descriptors from all blocks of a dense
 overlapping grid of blocks covering the detection window into a combined
-feature vector for use in the window classifier.                        
+feature vector for use in the window classifier.
 
 References
 ----------
@@ -80,7 +80,6 @@ from scikits.image.color import rgb2grey
 
 import numpy as np
 import matplotlib.pyplot as plt
-
 
 # Construct test image
 
