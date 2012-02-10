@@ -6,7 +6,7 @@ import os.path
 from numpy.compat import asbytes
 
 
-def _generate_candidate_libs():    
+def _generate_candidate_libs():
     # look for likely library files in the following dirs:
     lib_dirs = [os.path.dirname(__file__),
                 '/lib',
@@ -19,7 +19,7 @@ def _generate_candidate_libs():
     if 'HOME' in os.environ:
         lib_dirs.append(os.path.join(os.environ['HOME'], 'lib'))
     lib_dirs = [ld for ld in lib_dirs if os.path.exists(ld)]
-        
+
     lib_names = ['libfreeimage', 'freeimage'] # should be lower-case!
     # Now attempt to find libraries of that name in the given directory
     # (case-insensitive and without regard for extension)
@@ -31,7 +31,7 @@ def _generate_candidate_libs():
                            if lib.lower().startswith(lib_name) and not
                            os.path.splitext(lib)[1] in ('.py', '.pyc', '.ini')]
     lib_paths = [lp for lp in lib_paths if os.path.exists(lp)]
-        
+
     return lib_dirs, lib_paths
 
 def load_freeimage():
@@ -41,13 +41,13 @@ def load_freeimage():
     else:
         loader = ctypes.cdll
         functype = ctypes.CFUNCTYPE
-    
+
     freeimage = None
     errors = []
     # First try a few bare library names that ctypes might be able to find
-    # in the default locations for each platform. Win DLL names don't need the 
+    # in the default locations for each platform. Win DLL names don't need the
     # extension, but other platforms do.
-    bare_libs = ['FreeImage', 'libfreeimage.dylib', 'libfreeimage.so', 
+    bare_libs = ['FreeImage', 'libfreeimage.dylib', 'libfreeimage.so',
                 'libfreeimage.so.3']
     lib_dirs, lib_paths = _generate_candidate_libs()
     lib_paths = bare_libs + lib_paths
@@ -75,12 +75,12 @@ def load_freeimage():
             # No errors, because no potential libraries found at all!
             raise OSError('Could not find a FreeImage library in any of:\n'+
                           '\n'.join(lib_dirs))
-                      
+
     # FreeImage found
     @functype(None, ctypes.c_int, ctypes.c_char_p)
     def error_handler(fif, message):
         raise RuntimeError('FreeImage error: %s' % message)
-        
+
     freeimage.FreeImage_SetOutputMessage(error_handler)
     return freeimage
 
