@@ -10,7 +10,7 @@ from ._plugins import info as plugin_info
 from ._plugins import configuration as plugin_order
 available_plugins = plugins()
 
-for preferred_plugin in ['pil', 'matplotlib', 'qt', 'null']:
+for preferred_plugin in ['matplotlib', 'pil', 'qt', 'null']:
     if preferred_plugin in available_plugins:
         try:
             use_plugin(preferred_plugin)
