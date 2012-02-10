@@ -1,12 +1,29 @@
 Pre-built installation
 ----------------------
 
-Scikits-image is distributed with the `Enthought Python Distribution (EPD)
-<www.enthought.com/products/epd.php>`__ as well as with `Python(x,y)
-<http://www.pythonxy.com>`__.  On systems that support setuptools, the package
-can be installed with ``easy_install``::
+.. !! Also update scikits-image-web !!
 
-  easy_install scikits-image
+`Windows binaries
+<http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image>`__
+are kindly provided by Christoph Gohlke.
+
+The latest stable release is also included as part of the `Enthought Python
+Distribution (EPD) <http://enthought.com/products/epd.php>`__ and `Python(x,y)
+<http://code.google.com/p/pythonxy/wiki/Welcome>`__.
+
+On systems that support setuptools, the package can be installed from the
+`Python packaging index <http://pypi.python.org/pypi/scikits-image>`__ using
+
+
+::
+
+  easy_install -U scikits-image
+
+or
+
+::
+
+  pip -U scikits-image
 
 Installation from source
 ------------------------
