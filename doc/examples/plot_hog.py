@@ -74,31 +74,27 @@ References
       Vision and Pattern Recognition 2005 San Diego, CA, USA
 '''
 
-from scikits.image.feature import hog
-from scikits.image import data
-from scikits.image.color import rgb2grey
+from skimage.feature import hog
+from skimage import data, color, exposure
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Construct test image
+image = color.rgb2gray(data.lena())
 
-image = data.lena()
-
-# HOG
-
-grey = rgb2grey(image)
-
-fd, hog_image = hog(grey, orientations=8, pixels_per_cell=(16, 16),
+fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
                     cells_per_block=(1, 1), visualise=True)
 
 plt.figure(figsize=(12, 5))
 
-plt.subplot(121)
-plt.imshow(grey, cmap=plt.cm.gray)
+plt.subplot(121).set_axis_off()
+plt.imshow(image, cmap=plt.cm.gray)
 plt.title('Input image')
 
-plt.subplot(122)
-plt.imshow(hog_image, cmap=plt.cm.gray)
+# Rescale histogram for better display
+hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 0.03))
+
+plt.subplot(122).set_axis_off()
+plt.imshow(hog_image_rescaled, cmap=plt.cm.gray)
 plt.title('Histogram of Oriented Gradients')
 plt.show()
