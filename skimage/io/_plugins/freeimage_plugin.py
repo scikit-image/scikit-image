@@ -47,23 +47,21 @@ def load_freeimage():
     # First try a few bare library names that ctypes might be able to find
     # in the default locations for each platform. Win DLL names don't need the 
     # extension, but other platforms do.
-    for lib in ['FreeImage', 'libfreeimage.dylib', 'libfreeimage.so', 
-                'libfreeimage.so.3']:
+    bare_libs = ['FreeImage', 'libfreeimage.dylib', 'libfreeimage.so', 
+                'libfreeimage.so.3']
+    lib_dirs, lib_paths = _generate_candidate_libs()
+    lib_paths = bare_libs + lib_paths
+    for lib in lib_paths:
         try:
             freeimage = loader.LoadLibrary(lib)
             break
-        except:
-            pass
-            # Don't generate an error for any not-found bare libs
-    
-    if freeimage is None:
-      lib_dirs, lib_paths = _generate_candidate_libs()
-      for lib in lib_paths:
-          try:
-              freeimage = loader.LoadLibrary(lib)
-              break
-          except Exception, e:
-              errors.append((lib, e))
+        except Exception, e:
+            if lib not in bare_libs:
+                # Don't record errors when it couldn't load the library from
+                # a bare name -- this fails often, and doesn't provide any
+                # useful debugging information anyway, beyond "couldn't find
+                # library..."
+                errors.append((lib, e))
 
     if freeimage is None:
         if errors:
