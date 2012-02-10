@@ -8,25 +8,36 @@ data types [1]_, *i.e.* "dtypes". To avoid distorting image intensities (see
 `Rescaling intensity values`_), we assume that images use the following dtype
 ranges:
 
-=========  ===============
+=========  =================================
 Data type  Range
-=========  ===============
+=========  =================================
 uint8      0 to 255
 uint16     0 to 65535
+uint32     0 to 2\ :sup:`32`
 float      0 to 1
 int8       -128 to 127
 int16      -32768 to 32767
-=========  ===============
+int32      -2\ :sup:`31` to 2\ :sup:`31` - 1
+=========  =================================
 
 Note that float images are restricted to the range 0 to 1 even though the data
-type itself can exceed this range.
+type itself can exceed this range; all integer dtypes, on the other hand, have
+pixel intensities that can span the entire data type range. Currently, *64-bit
+(u)int images are not supported*.
 
 Functions in ``skimage`` are designed so that they accept any of these dtypes,
 but, for efficiency, *may return an image of a different dtype* (see `Output
 types`_). If you need a particular dtype, ``skimage`` provides utility
 functions that convert dtypes and properly rescale image intensities (see
 `Input types`_). You should **never use** ``astype`` on an image, because it
-violates these assumptions about the dtype range.
+violates these assumptions about the dtype range::
+
+   >>> from skimage import img_as_float
+   >>> image = np.arange(0, 50, 10, dtype=np.uint8)
+   >>> print image.astype(np.float) # These float values are out of range.
+   [  0.  10.  20.  30.  40.]
+   >>> print img_as_float(image)
+   [ 0.          0.03921569  0.07843137  0.11764706  0.15686275]
 
 
 Input types
