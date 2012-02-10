@@ -11,9 +11,9 @@ examples in the documentation.
 Known build errors
 ------------------
 On Windows, the error ``Error:unable to find vcvarsall.bat`` means that
-distutils is not correctly configured to use the C compiler. Edit (create
+distutils is not correctly configured to use the C compiler. Modify (or create,
 if not existing) the configuration file ``distutils.cfg`` (located for
-example at ``C:\Python26\Lib\distutils\distutils.cfg``) to be::
+example at ``C:\Python26\Lib\distutils\distutils.cfg``) to contain::
 
     [build]
     compiler=mingw32
@@ -21,13 +21,16 @@ example at ``C:\Python26\Lib\distutils\distutils.cfg``) to be::
 
 Usage Requirements
 ------------------
-* `Scipy <http://www.scipy.org/>`_
+* `Scipy <http://www.scipy.org/>`__
 
 Optional Requirements
 ---------------------
 You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-`PyQt4 <http://wiki.python.org/moin/PyQt>`_
-   The `qt` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
+`PyQt4 <http://wiki.python.org/moin/PyQt>`__
+   The ``qt`` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
 
+`FreeImage <http://freeimage.sf.net>`__
+   The ``freeimage`` plugin provides support for reading various types of
+   image file formats, including multi-page TIFFs.
