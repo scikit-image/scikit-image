@@ -26,6 +26,7 @@ rst_template = """
 %(docstring)s
 
 **Python source code:** :download:`%(fname)s <%(fname)s>`
+(generated using ``skimage`` |version|)
 
 .. literalinclude:: %(fname)s
     :lines: %(end_row)s-
@@ -40,6 +41,7 @@ plot_rst_template = """
 %(image_list)s
 
 **Python source code:** :download:`%(fname)s <%(fname)s>`
+(generated using ``skimage`` |version|)
 
 .. literalinclude:: %(fname)s
     :lines: %(end_row)s-
