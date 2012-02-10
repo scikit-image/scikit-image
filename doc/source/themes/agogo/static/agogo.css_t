@@ -599,6 +599,11 @@ pre {
     border-right: none;
 }
 
+sup {
+    font-size: x-small;
+    line-height: 0;
+}
+
 tt {
     background-color: #ecf0f3;
     padding: 0 1px 0 1px;
