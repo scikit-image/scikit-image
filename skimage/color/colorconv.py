@@ -104,7 +104,10 @@ def convert_colorspace(arr, fromspace, tospace):
 
 
 def _prepare_colorarray(arr):
-    """Check the shape of the array, and give it the requested type."""
+    """Check the shape of the array and convert it to
+    floating point representation.
+
+    """
     arr = np.asanyarray(arr)
 
     if arr.ndim != 3 or arr.shape[2] != 3:
