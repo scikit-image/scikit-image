@@ -1,2 +1,2 @@
 # THIS FILE IS GENERATED FROM THE SKIMAGE SETUP.PY
-version='unbuilt-dev'
+version='0.5dev'
