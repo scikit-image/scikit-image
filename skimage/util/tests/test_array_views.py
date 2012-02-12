@@ -4,7 +4,7 @@ from numpy.testing import assert_equal
 from skimage.util.array_views import block_view, rolling_view
 
 
-@raises(ValueError)
+@raises(TypeError)
 def test_block_view_block_not_a_tuple():
 
     A = np.arange(10)
@@ -15,7 +15,7 @@ def test_block_view_block_not_a_tuple():
 def test_block_view_negative_shape():
 
     A = np.arange(10)
-    block_view(A, (-2))
+    block_view(A, (-2,))
 
 
 @raises(ValueError)
@@ -67,14 +67,14 @@ def test_block_view_3D_array():
                                           [82, 83]]]]))
 
 
-@raises(ValueError)
+@raises(TypeError)
 def test_rolling_view_input_not_array():
 
     A = [1, 2, 3, 4, 5]
     rolling_view(A, (2,))
 
 
-@raises(ValueError)
+@raises(TypeError)
 def test_rolling_view_window_not_tuple():
 
     A = np.arange(10)
