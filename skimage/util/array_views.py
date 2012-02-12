@@ -209,9 +209,12 @@ def rolling_view(arr, window_shape):
     """
 
     # -- basic requirements on inputs
-    assert isinstance(arr, np.ndarray)
-    assert isinstance(window_shape, tuple)
-    assert len(window_shape) == arr.ndim
+    if not isinstance(arr, np.ndarray):
+        raise ValueError('the input should be an ndarray object')
+    if not isinstance(window_shape, tuple):
+        raise ValueError('the window shape should be a tuple')
+    if not (len(window_shape) == arr.ndim):
+        raise ValueError('array dimension and window length dont match')
 
     # -- input array dimension
     N = arr.ndim
