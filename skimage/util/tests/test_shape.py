@@ -29,7 +29,7 @@ def test_view_as_blocks_block_too_large():
 def test_view_as_blocks_wrong_block_dimension():
 
     A = np.arange(10)
-    view_as_blocks(A, (2,2))
+    view_as_blocks(A, (2, 2))
 
 
 @raises(ValueError)
@@ -49,17 +49,17 @@ def test_view_as_blocks_1D_array():
 
 def test_view_as_blocks_2D_array():
 
-    A = np.arange(4*4).reshape(4,4)
-    B = view_as_blocks(A, (2,2))
-    assert_equal(B[0,1], np.array([[2, 3],
+    A = np.arange(4 * 4).reshape(4, 4)
+    B = view_as_blocks(A, (2, 2))
+    assert_equal(B[0, 1], np.array([[2, 3],
                                    [6, 7]]))
     assert_equal(B[1, 0, 1, 1], 13)
 
 
 def test_view_as_blocks_3D_array():
 
-    A = np.arange(4*4*6).reshape(4,4,6)
-    B = view_as_blocks(A, (1,2,2))
+    A = np.arange(4 * 4 * 6).reshape(4, 4, 6)
+    B = view_as_blocks(A, (1, 2, 2))
     assert_equal(B.shape, (4, 2, 3, 1, 2, 2))
     assert_equal(B[2:, 0, 2], np.array([[[[52, 53],
                                           [58, 59]]],
@@ -85,7 +85,7 @@ def test_view_as_windows_window_not_tuple():
 def test_view_as_windows_wrong_window_dimension():
 
     A = np.arange(10)
-    view_as_windows(A, (2,2))
+    view_as_windows(A, (2, 2))
 
 
 @raises(ValueError)
@@ -119,23 +119,23 @@ def test_view_as_windows_1D():
 
 def test_view_as_windows_2D():
 
-    A = np.arange(5*4).reshape(5, 4)
+    A = np.arange(5 * 4).reshape(5, 4)
     window_shape = (4, 3)
     B = view_as_windows(A, window_shape)
     assert_equal(B.shape, (2, 2, 4, 3))
-    assert_equal(B, np.array([[[[ 0,  1,  2],
-                                [ 4,  5,  6],
-                                [ 8,  9, 10],
+    assert_equal(B, np.array([[[[0,  1,  2],
+                                [4,  5,  6],
+                                [8,  9, 10],
                                 [12, 13, 14]],
-                               [[ 1,  2,  3],
-                                [ 5,  6,  7],
-                                [ 9, 10, 11],
+                               [[1,  2,  3],
+                                [5,  6,  7],
+                                [9, 10, 11],
                                 [13, 14, 15]]],
-                              [[[ 4,  5,  6],
-                                [ 8,  9, 10],
+                              [[[4,  5,  6],
+                                [8,  9, 10],
                                 [12, 13, 14],
                                 [16, 17, 18]],
-                               [[ 5,  6,  7],
-                                [ 9, 10, 11],
+                               [[5,  6,  7],
+                                [9, 10, 11],
                                 [13, 14, 15],
                                 [17, 18, 19]]]]))
