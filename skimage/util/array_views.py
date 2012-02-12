@@ -9,21 +9,17 @@ from numpy.lib.stride_tricks import as_strided as ast
 
 
 def block_view(arr, block):
-    """
-    Offers a view on array 'arr' which allows one to easily
-    pick a 'block' and reason within that block when
-    manipulating the array indices.
+    """Offers a view on array 'arr' which allows one to easily pick a 'block'
+    and reason within that block when manipulating the array indices.
 
     Parameters
     ----------
     arr: ndarray
-        input array from which we want to obtain a
-        block view
+        input array from which we want to obtain a block view
 
     block: tuple
-        each element in the tuple represents the number of
-        input array elements to include in a block along
-        the corresponding direction
+        each element in the tuple represents the number of input array elements
+        to include in a block along the corresponding direction
 
     Returns
     -------
@@ -32,6 +28,7 @@ def block_view(arr, block):
     Examples
     --------
     >>> import numpy as np
+    >>> import block_view
     >>> A = np.arange(4*4).reshape(4,4)
     >>> A
     array([[ 0,  1,  2,  3],
@@ -76,14 +73,10 @@ def block_view(arr, block):
              [82, 83]]]])
     """
 
-    # -- if 'block' is None, we simply return the
-    #    original array.
-    if block == None:
-        return arr
     # -- otherwise we make sure the user gave a
     #    tuple
     if not isinstance(block, tuple):
-        raise ValueError('block needs to be a tuple')
+        raise TypeError('block needs to be a tuple')
 
     # -- basic invalid values for 'block'
     block_shape = np.array(block).astype(np.int)
@@ -114,21 +107,18 @@ def block_view(arr, block):
     return ast(arr, shape=shape, strides=strides)
 
 
-def rolling_view(arr, window_shape):
-    """
-    This function offers a 'rolling view' for any N-dimensional
-    array. The 'window' defines the shape of the elementary
-    N-dimensional orthotope (better know as hyperrectangle [1])
-    of the view.
+def rolling_view(arr, window):
+    """This function offers a 'rolling view' for any N-dimensional array. The
+    'window' defines the shape of the elementary N-dimensional orthotope (better
+    know as hyperrectangle [1]) of the view.
 
     Parameters
     ----------
     arr: ndarray object
         N-dimensional input array
 
-    window_shape: N-tuple
-        tuple of size N that gives the shape of the elementary
-        window
+    window: N-tuple
+        tuple of size N that gives the shape of the elementary window
 
     Returns
     -------
@@ -136,21 +126,19 @@ def rolling_view(arr, window_shape):
 
     Notes
     -----
-    One should be very careful with rolling views when it comes to
-    memory usage. Indeed, although a 'view' has the same memory
-    footprint as its base array, the actual array that emerges when
-    this 'view' is used in a computation is generally a (much)
-    larger array than the original, especially for 2-dimensional
-    arrays and above.
+    One should be very careful with rolling views when it comes to memory usage.
+    Indeed, although a 'view' has the same memory footprint as its base array,
+    the actual array that emerges when this 'view' is used in a computation is
+    generally a (much) larger array than the original, especially for
+    2-dimensional arrays and above.
 
-    For example, let us consider a 3 dimensional array of size
-    (100, 100, 100) of ``float64``. This array takes about 8*100**3
-    Bytes for storage which is just 8 MB. If one decides to build
-    a rolling view on this array with a window of (3, 3, 3) the
-    hypothetical size of the rolling view (if one was to reshape
-    the view for example) would be 8*(100-3+1)**3*3**3 which is
-    about 203 MB! The scaling becomes even worse as the dimension
-    of the input array becomes larger.
+    For example, let us consider a 3 dimensional array of size (100, 100, 100)
+    of ``float64``. This array takes about 8*100**3 Bytes for storage which is
+    just 8 MB. If one decides to build a rolling view on this array with a
+    window of (3, 3, 3) the hypothetical size of the rolling view (if one was to
+    reshape the view for example) would be 8*(100-3+1)**3*3**3 which is about
+    203 MB! The scaling becomes even worse as the dimension of the input array
+    becomes larger.
 
     References
     ----------
@@ -158,11 +146,13 @@ def rolling_view(arr, window_shape):
 
     Examples
     --------
+    >>> import numpy as np
+    >>> import rolling_view
     >>> A = np.arange(10)
     >>> A
     array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    >>> window_shape = (3,)
-    >>> B = rolling_view(A, window_shape)
+    >>> window = (3,)
+    >>> B = rolling_view(A, window)
     >>> B.shape
     (8, 3)
     >>> B
@@ -181,8 +171,8 @@ def rolling_view(arr, window_shape):
            [ 8,  9, 10, 11],
            [12, 13, 14, 15],
            [16, 17, 18, 19]])
-    >>> window_shape = (4, 3)
-    >>> B = rolling_view(A, window_shape)
+    >>> window = (4, 3)
+    >>> B = rolling_view(A, window)
     >>> B.shape
     (2, 2, 4, 3)
     >>> B
@@ -210,28 +200,25 @@ def rolling_view(arr, window_shape):
 
     # -- basic requirements on inputs
     if not isinstance(arr, np.ndarray):
-        raise ValueError('the input should be an ndarray object')
-    if not isinstance(window_shape, tuple):
-        raise ValueError('the window shape should be a tuple')
-    if not (len(window_shape) == arr.ndim):
+        raise TypeError('the input should be an ndarray object')
+    if not isinstance(window, tuple):
+        raise TypeError('the window shape should be a tuple')
+    if not (len(window) == arr.ndim):
         raise ValueError('array dimension and window length dont match')
 
-    # -- input array dimension
-    N = arr.ndim
+    # -- defining some variables
+    arr_shape = np.array(arr.shape)
+    window_shape = np.array(window, dtype=arr_shape.dtype)
 
     # -- compatibility checks
-    if ((np.array(arr.shape).astype(int) - \
-         np.array(window_shape).astype(int)) < 0).any():
-        raise ValueError('window shape is too large')
+    if ((arr_shape - window_shape) < 0).any():
+        raise ValueError("'window_shape' is too large")
 
-    if ((np.array(window_shape).astype(int) - \
-         np.ones(N).astype(int)) < 0).any():
-        raise ValueError('window shape is too small')
+    if ((window_shape - 1) < 0).any():
+        raise ValueError("'window_shape' is too small")
 
     # -- shape of output 'rolling view' array
-    out_shape = tuple([arr.shape[i] - window_shape[i] + 1
-                       for i in range(N)]) + \
-                window_shape
+    out_shape = tuple(arr_shape - window_shape + 1) + window
 
     # -- strides of output 'rolling view' array
     out_strides = arr.strides + arr.strides
