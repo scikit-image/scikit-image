@@ -1,7 +1,3 @@
-# Authors: Nicolas Poilvert <nicolas.poilvert@gmail.com>
-#          Nicolas Pinto <nicolas.pinto@gmail.com>
-# License: BSD 3-clause
-
 __all__ = ['view_as_blocks', 'view_as_windows']
 
 import numpy as np
