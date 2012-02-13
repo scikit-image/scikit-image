@@ -9,7 +9,7 @@ from numpy.lib.stride_tricks import as_strided
 
 
 def view_as_blocks(arr_in, block_shape):
-    """Block view of the input n-dimensionaly array (using re-striding).
+    """Block view of the input n-dimensional array (using re-striding).
 
     Parameters
     ----------
@@ -112,7 +112,7 @@ def view_as_windows(arr_in, window_shape):
 
     window_shape: tuple
         Defines the shape of the elementary n-dimensional orthotope
-        (better know as hyperrectangle [1]) of the rolling window view.
+        (better know as hyperrectangle [1]_) of the rolling window view.
 
     Returns
     -------
