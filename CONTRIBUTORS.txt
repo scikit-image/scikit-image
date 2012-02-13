@@ -3,6 +3,7 @@
 
 - Nicolas Pinto
   Colour spaces and filters
+  Shape views: ``shape.view_as_windows`` and ``shape.view_as_blocks``
 
 - Damian Eads
   Morphological operators
@@ -93,3 +94,6 @@
 
 - Gaël Varoquaux
   Harris corner detector
+
+- Nicolas Poilvert
+  Shape views: ``shape.view_as_windows`` and ``shape.view_as_blocks``
