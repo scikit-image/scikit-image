@@ -17,7 +17,11 @@ integer_types = (np.uint8, np.uint16, np.int8, np.int16)
 
 _supported_types = (np.uint8, np.uint16, np.uint32,
                     np.int8, np.int16, np.int32,
-                    np.float16, np.float32, np.float64)
+                    np.float32, np.float64)
+
+if np.__version__ >= "1.6.0":
+    dtype_range[np.float16] = (0, 1)
+    _supported_types += (np.float16, )
 
 
 def convert(image, dtype):
@@ -62,6 +66,10 @@ def convert(image, dtype):
         log.warn("Possible precision loss when converting from "
                  "%s to %s" % (dtypeobj_in, dtypeobj))
 
+    def _dtype(itemsize, *dtypes):
+        # Return first of `dtypes` with itemsize greater than `itemsize`
+        return next(dt for dt in dtypes if itemsize < np.dtype(dt).itemsize)
+
     if kind_in == 'f':
         if np.min(image) < 0 or np.max(image) > 1:
             raise ValueError("Images of type float must be between 0 and 1")
@@ -72,7 +80,9 @@ def convert(image, dtype):
             return dtype(image)
         # floating point -> integer
         prec_loss()
-        image = np.array(image, dtype=np.promote_types(dtype_in, dtype))
+        # use float type that can represent output integer type
+        image = np.array(image, _dtype(itemsize, dtype_in,
+                                       np.float32, np.float64))
         image *= np.iinfo(dtype).max + 1
         np.clip(image, 0, np.iinfo(dtype).max, out=image)
         return dtype(image)
@@ -80,7 +90,9 @@ def convert(image, dtype):
         # integer -> floating point
         if itemsize_in >= itemsize:
             prec_loss()
-        image = np.array(image, dtype=np.promote_types(dtype_in, dtype))
+        # use float type that can represent input integers
+        image = np.array(image, _dtype(itemsize_in, dtype,
+                                       np.float32, np.float64))
         if np.iinfo(dtype_in).min:
             sign_loss()
             image -= np.iinfo(dtype_in).min
@@ -108,7 +120,9 @@ def convert(image, dtype):
     if kind == 'u':
         # signed integer -> unsigned integer
         sign_loss()
-        image = np.array(image, dtype=np.promote_types(dtype_in, dtype))
+        # use next higher precision signed integer type
+        image = np.array(image, _dtype(itemsize_in,
+                                       np.int16, np.int32, np.int64))
         image -= np.iinfo(dtype_in).min
         if itemsize_in == itemsize:
             return dtype(image)
@@ -129,15 +143,12 @@ def convert(image, dtype):
         if itemsize_in > itemsize:
             prec_loss()
             return dtype(image // 2**(8 * (itemsize_in - itemsize)))
-        # upcast to next higher precision signed integer type
-        dt = next(dt for dt in (np.int16, np.int32, np.int64)
-                  if image.itemsize < np.dtype(dt).itemsize)
-        image = np.array(image, dtype=dt)
+        # use next higher precision signed integer type
+        image = np.array(image, _dtype(itemsize_in,
+                                       np.int16, np.int32, np.int64))
         image -= np.iinfo(dtype_in).min
-        # upcast to next higher precision signed integer type
-        dt = next(dt for dt in (np.int32, np.int64)
-                  if image.itemsize < np.dtype(dt).itemsize)
-        result = np.array(image, dtype=dt)
+        # use next higher precision signed integer type
+        result = np.array(image, _dtype(image.itemsize, np.int32, np.int64))
         result *= 2**(8 * (itemsize - itemsize_in))
         if itemsize - itemsize_in == 3:
             # int8 -> int32
