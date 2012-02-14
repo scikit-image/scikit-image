@@ -1,3 +1,4 @@
+.. _examples_gallery:
 
 General examples
 -------------------
