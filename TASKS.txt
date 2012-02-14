@@ -1,5 +1,7 @@
  ..  role:: strike
 
+.. _howto_contribute:
+
 How to contribute to ``skimage``
 ======================================
 
