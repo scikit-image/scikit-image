@@ -2,8 +2,10 @@ __all__ = ['montage2d']
 
 import numpy as np
 
+EPSILON = 1e-6
 
-def montage2d(arr_in, fill='mean'):
+
+def montage2d(arr_in, fill='mean', normalize=True):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -29,9 +31,12 @@ def montage2d(arr_in, fill='mean'):
         3-dimensional input array representing an ensemble of n_images
         of equal shape (i.e. [height, width]).
 
-    fill: float or 'mean'
+    fill: float or 'mean', optional
         How to fill the 2-dimensional output array when sqrt(n_images)
         is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
+
+    normalize: bool, optional
+        Whether to normalize each image with zero-mean, unit-variance.
 
     Returns
     -------
@@ -67,6 +72,15 @@ def montage2d(arr_in, fill='mean'):
     assert arr_in.ndim == 3
 
     n_images, height, width = arr_in.shape
+
+    # -- normalize if necessary
+    if normalize:
+        arr_in = arr_in.T
+        arr_in -= arr_in.mean(0)
+        astd = arr_in.std(0)
+        astd[astd < EPSILON] = 1
+        arr_in /= astd
+        arr_in = arr_in.T
 
     # -- determine alpha
     alpha = int(np.ceil(np.sqrt(n_images)))
