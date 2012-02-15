@@ -2,7 +2,9 @@
   Project coordination
 
 - Nicolas Pinto
-  Colour spaces and filters
+  Colour spaces and filters.
+  Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
+  Montage helpers: ``util.montage``
 
 - Damian Eads
   Morphological operators
@@ -93,3 +95,6 @@
 
 - Gaël Varoquaux
   Harris corner detector
+
+- Nicolas Poilvert
+  Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
