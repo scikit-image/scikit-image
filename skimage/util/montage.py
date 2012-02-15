@@ -50,13 +50,11 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
     >>> import numpy as np
     >>> from skimage.util.montage import montage2d
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
-    >>> print arr_in
+    >>> print arr_in  # doctest: +NORMALIZE_WHITESPACE
     [[[ 0  1]
       [ 2  3]]
-    <BLANKLINE>
      [[ 4  5]
       [ 6  7]]
-    <BLANKLINE>
      [[ 8  9]
       [10 11]]]
     >>> arr_out = montage2d(arr_in)
