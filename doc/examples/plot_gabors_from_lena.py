@@ -53,7 +53,7 @@ np.random.seed(42)
 patch_shape = 8, 8
 n_filters = 49
 
-lena = color.rgb2gray(data.lena()) / 255.
+lena = color.rgb2gray(data.lena())
 
 # -- filterbank1 on original Lena
 patches1 = view_as_windows(lena, patch_shape)

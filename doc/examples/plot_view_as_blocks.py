@@ -24,7 +24,7 @@ from skimage.util.shape import view_as_blocks
 
 
 # -- get `lena` from skimage.data in grayscale
-l = color.rgb2gray(data.lena()) / 255.
+l = color.rgb2gray(data.lena())
 
 # -- size of blocks
 block_shape = (4, 4)
