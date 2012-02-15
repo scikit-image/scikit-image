@@ -53,6 +53,28 @@ def test_shape():
     assert_equal(arr_out.shape, (alpha * height, alpha * width))
 
 
+def test_rescale_intensity():
+    n_images = 4
+    height, width = 3, 3
+    arr_in = np.arange(n_images * height * width, dtype=np.float32)
+    arr_in = arr_in.reshape(n_images, height, width)
+
+    arr_out = montage2d(arr_in, rescale_intensity=True)
+
+    gt = np.array(
+        [[ 0.   ,  0.125,  0.25 ,  0.   ,  0.125,  0.25 ],
+         [ 0.375,  0.5  ,  0.625,  0.375,  0.5  ,  0.625],
+         [ 0.75 ,  0.875,  1.   ,  0.75 ,  0.875,  1.   ],
+         [ 0.   ,  0.125,  0.25 ,  0.   ,  0.125,  0.25 ],
+         [ 0.375,  0.5  ,  0.625,  0.375,  0.5  ,  0.625],
+         [ 0.75 ,  0.875,  1.   ,  0.75 ,  0.875,  1.   ]]
+        )
+
+    assert_equal(arr_out.min(), 0.0)
+    assert_equal(arr_out.max(), 1.0)
+    assert_array_equal(arr_out, gt)
+
+
 @raises(AssertionError)
 def test_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
