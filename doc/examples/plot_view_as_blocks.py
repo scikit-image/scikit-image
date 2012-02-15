@@ -10,11 +10,12 @@ wants to perform local operations on non-overlapping image patches.
 We use `lena` from `skimage.data` and virtually 'slice' it into square
 blocks.  Then, on each block, we either pool the mean, the max or the
 median value of that block. The results are displayed altogether, along
-with a 'classic' `bicubic` rescaling of the original `lena` image.
+with a spline interpolation of order 3 rescaling of the original `lena`
+image.
 """
 
 import numpy as np
-from scipy.misc import imresize
+from scipy import ndimage as ndi
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 
@@ -46,8 +47,8 @@ median_view = np.median(flatten_view, axis=2)
 plt.figure(figsize=(10, 10))
 
 plt.subplot(221)
-plt.title("Original rescaled\n in bicubic mode")
-l_resized = imresize(l, view.shape[:2], interp='bicubic')
+plt.title("Original rescaled with\n spline interpolation (order=3)")
+l_resized = ndi.zoom(l, 2, order=3)
 plt.imshow(l_resized, cmap=cm.Greys_r)
 
 plt.subplot(222)
