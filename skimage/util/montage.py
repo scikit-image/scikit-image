@@ -75,8 +75,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
     # -- rescale intensity if necessary
     if rescale_intensity:
         for i in xrange(n_images):
-            arr_in[i] = exposure.rescale_intensity(
-                arr_in[i], out_range=(0.0, 1.0))
+            arr_in[i] = exposure.rescale_intensity(arr_in[i])
 
     # -- determine alpha
     alpha = int(np.ceil(np.sqrt(n_images)))
