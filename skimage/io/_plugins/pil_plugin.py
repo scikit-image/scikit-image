@@ -111,3 +111,6 @@ def imshow(arr):
 
     """
     Image.fromarray(img_as_ubyte(arr)).show()
+
+def _app_show():
+    pass
