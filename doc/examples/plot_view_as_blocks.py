@@ -3,25 +3,28 @@
 Block views on images/arrays
 ============================
 
-This example illustrates the use of `view_as_blocks` from `skimage.util.shape`.
-Block views can be incredibly useful when one wants to perform local operations
-on non-overlapping image patches.
+This example illustrates the use of `view_as_blocks` from
+`skimage.util.shape`.  Block views can be incredibly useful when one
+wants to perform local operations on non-overlapping image patches.
 
-We use `lena` from `scipy.misc` and virtually 'slice' it into square blocks.
-Then, on each block, we either pool the mean, the max or the median value of
-that block. The results are displayed altogether, along with a 'classic'
-`bicubic` rescaling of the original `lena` image.
+We use `lena` from `skimage.data` and virtually 'slice' it into square
+blocks.  Then, on each block, we either pool the mean, the max or the
+median value of that block. The results are displayed altogether, along
+with a 'classic' `bicubic` rescaling of the original `lena` image.
 """
 
 import numpy as np
-from scipy.misc import lena, imresize
+from scipy.misc import imresize
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
+
+from skimage import data
+from skimage import color
 from skimage.util.shape import view_as_blocks
 
 
-# -- get `lena` from scipy in grayscale
-l = lena()
+# -- get `lena` from skimage.data in grayscale
+l = color.rgb2gray(data.lena()) / 255.
 
 # -- size of blocks
 block_shape = (4, 4)
@@ -43,7 +46,7 @@ median_view = np.median(flatten_view, axis=2)
 plt.figure(figsize=(10, 10))
 
 plt.subplot(221)
-plt.title("Original rescaled\n in bicubic mode");
+plt.title("Original rescaled\n in bicubic mode")
 l_resized = imresize(l, view.shape[:2], interp='bicubic')
 plt.imshow(l_resized, cmap=cm.Greys_r)
 
@@ -52,7 +55,7 @@ plt.title("Block view with\n local mean pooling")
 plt.imshow(mean_view, cmap=cm.Greys_r)
 
 plt.subplot(223)
-plt.title("Block view with\n local max pooling");
+plt.title("Block view with\n local max pooling")
 plt.imshow(max_view, cmap=cm.Greys_r)
 
 plt.subplot(224)
