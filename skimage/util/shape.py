@@ -7,13 +7,16 @@ from numpy.lib.stride_tricks import as_strided
 def view_as_blocks(arr_in, block_shape):
     """Block view of the input n-dimensional array (using re-striding).
 
+    Blocks are non-overlapping views of the input array.
+
     Parameters
     ----------
-    arr: ndarray
+    arr_in: ndarray
         The n-dimensional input array.
 
     block_shape: tuple
-        The shape of the block.
+        The shape of the block. Each dimension must divide evenly into the
+        corresponding dimensions of `arr_in`.
 
     Returns
     -------
@@ -31,11 +34,15 @@ def view_as_blocks(arr_in, block_shape):
            [ 8,  9, 10, 11],
            [12, 13, 14, 15]])
     >>> B = view_as_blocks(A, block_shape=(2, 2))
+    >>> B[0, 0]
+    array([[0, 1],
+           [4, 5]])
     >>> B[0, 1]
     array([[2, 3],
            [6, 7]])
     >>> B[1, 0, 1, 1]
     13
+
     >>> A = np.arange(4*4*6).reshape(4,4,6)
     >>> A  # doctest: +NORMALIZE_WHITESPACE
     array([[[ 0,  1,  2,  3,  4,  5],
@@ -92,9 +99,10 @@ def view_as_blocks(arr_in, block_shape):
 
 
 def view_as_windows(arr_in, window_shape):
-    """Rolling window view of the input n-dimensionaly array (using
-    re-striding).
+    """Rolling window view of the input n-dimensional array.
 
+    Windows are overlapping views of the input array, with adjacent windows
+    shifted by a single row or column (or an index of a higher dimension).
 
     Parameters
     ----------
@@ -134,6 +142,21 @@ def view_as_windows(arr_in, window_shape):
     --------
     >>> import numpy as np
     >>> from skimage.util.shape import view_as_windows
+    >>> A = np.arange(4*4).reshape(4,4)
+    >>> A
+    array([[ 0,  1,  2,  3],
+           [ 4,  5,  6,  7],
+           [ 8,  9, 10, 11],
+           [12, 13, 14, 15]])
+    >>> window_shape = (2, 2)
+    >>> B = view_as_windows(A, window_shape)
+    >>> B[0, 0]
+    array([[0, 1],
+           [4, 5]])
+    >>> B[0, 1]
+    array([[1, 2],
+           [5, 6]])
+
     >>> A = np.arange(10)
     >>> A
     array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
@@ -150,6 +173,7 @@ def view_as_windows(arr_in, window_shape):
            [5, 6, 7],
            [6, 7, 8],
            [7, 8, 9]])
+
     >>> A = np.arange(5*4).reshape(5, 4)
     >>> A
     array([[ 0,  1,  2,  3],
