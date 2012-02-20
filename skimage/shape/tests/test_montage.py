@@ -2,7 +2,7 @@ from nose.tools import assert_equal, raises
 from numpy.testing import assert_array_equal
 
 import numpy as np
-from skimage.util.montage import montage2d
+from skimage.shape.montage import montage2d
 
 
 def test_simple():
