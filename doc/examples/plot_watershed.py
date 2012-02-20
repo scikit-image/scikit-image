@@ -19,9 +19,10 @@ opposite of the distance) are chosen as markers, and the flooding of
 basins from such markers separates the two circles along a watershed
 line.
 
-See `Wikipedia
-<http://en.wikipedia.org/wiki/Watershed_(image_processing)>`__ for
-more details on the algorithm.
+See Wikipedia_ for more details on the algorithm.
+
+.. _Wikipedia: <http://en.wikipedia.org/wiki/Watershed_(image_processing)>
+
 """
 
 import numpy as np
@@ -36,9 +37,9 @@ r1, r2 = 16, 20
 mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
 mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
 image = np.logical_or(mask_circle1, mask_circle2)
+
 # Now we want to separate the two objects in image
-# Generate the markers as local maxima of the distance
-# to the background
+# Generate the markers as local maxima of the distance to the background
 from scipy import ndimage
 distance = ndimage.distance_transform_edt(image)
 local_maxi = is_local_maximum(distance, image, np.ones((3, 3)))
