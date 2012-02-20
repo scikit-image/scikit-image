@@ -40,6 +40,7 @@ Guidelines
  * No major changes should be committed without review.  Ask on the
    `mailing list <http://groups.google.com/group/scikits-image>`_ if
    you get no response to your pull request.
+ * Examples in the gallery should have a maximum figure width of 8 inches.
 
 Test coverage
 `````````````
