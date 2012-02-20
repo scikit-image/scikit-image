@@ -45,16 +45,15 @@ local_maxi = is_local_maximum(distance, image, np.ones((3, 3)))
 markers = ndimage.label(local_maxi)[0]
 labels = watershed(-distance, markers, mask=image)
 
-plt.figure(figsize=(9, 3))
-plt.subplot(131)
-plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-plt.axis('off')
-plt.subplot(132)
-plt.imshow(-distance, cmap=plt.cm.jet, interpolation='nearest')
-plt.axis('off')
-plt.subplot(133)
-plt.imshow(labels, cmap=plt.cm.spectral, interpolation='nearest')
-plt.axis('off')
+fig, axes = plt.subplots(ncols=3, figsize=(8, 2.7))
+ax0, ax1, ax2 = axes
+
+ax0.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+ax1.imshow(-distance, cmap=plt.cm.jet, interpolation='nearest')
+ax2.imshow(labels, cmap=plt.cm.spectral, interpolation='nearest')
+
+for ax in axes:
+    ax.axis('off')
 
 plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0,
                     right=1)

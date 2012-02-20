@@ -52,7 +52,7 @@ References
 .. [1] C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic
        Hough transform for line detection", in IEEE Computer Society
        Conference on Computer Vision and Pattern Recognition, 1999.
-        
+
 .. [2] Duda, R. O. and P. E. Hart, "Use of the Hough Transformation to
        Detect Lines and Curves in Pictures," Comm. ACM, Vol. 15,
        pp. 11-15 (January, 1972)
@@ -79,7 +79,7 @@ image[idx, idx] = 255
 
 h, theta, d = hough(image)
 
-plt.figure(figsize=(12, 5))
+plt.figure(figsize=(8, 4))
 
 plt.subplot(121)
 plt.imshow(image, cmap=plt.cm.gray)
@@ -101,7 +101,7 @@ image = data.camera()
 edges = canny(image, 2, 1, 25)
 lines = probabilistic_hough(edges, threshold=10, line_length=5, line_gap=3)
 
-plt.figure(figsize=(12, 4))
+plt.figure(figsize=(8, 3))
 
 plt.subplot(131)
 plt.imshow(image, cmap=plt.cm.gray)
@@ -121,3 +121,4 @@ for line in lines:
 plt.title('Lines found with PHT')
 plt.axis('image')
 plt.show()
+

@@ -28,7 +28,7 @@ from scipy.ndimage import zoom
 image = imread(data_dir + "/phantom.png", as_grey=True)
 image = zoom(image, 0.4)
 
-plt.figure(figsize=(9, 8.5), dpi=75)
+plt.figure(figsize=(8, 8.5))
 
 plt.subplot(221)
 plt.title("Original");

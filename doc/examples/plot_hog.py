@@ -90,7 +90,7 @@ image = color.rgb2gray(data.lena())
 fd, hog_image = hog(image, orientations=8, pixels_per_cell=(16, 16),
                     cells_per_block=(1, 1), visualise=True)
 
-plt.figure(figsize=(10, 5))
+plt.figure(figsize=(8, 4))
 
 plt.subplot(121).set_axis_off()
 plt.imshow(image, cmap=plt.cm.gray)

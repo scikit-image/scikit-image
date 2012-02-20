@@ -10,9 +10,9 @@ edges are thinned down to 1-pixel curves by removing non-maximum pixels of the
 gradient magnitude. Finally, edge pixels are kept or removed using hysteresis
 thresholding on the gradient magnitude.
 
-The Canny has three adjustable parameters: the width of the Gaussian (the 
+The Canny has three adjustable parameters: the width of the Gaussian (the
 noisier the image, the greater the width), and the low and high threshold for
-the hysteresis thresholding. 
+the hysteresis thresholding.
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,7 +32,7 @@ edges1 = filter.canny(im)
 edges2 = filter.canny(im, sigma=3)
 
 # display results
-plt.figure(figsize=(10, 4))
+plt.figure(figsize=(8, 3))
 
 plt.subplot(131)
 plt.imshow(im, cmap=plt.cm.jet)
