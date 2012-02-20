@@ -18,6 +18,13 @@ for preferred_plugin in ['matplotlib', 'pil', 'qt', 'null']:
         except ImportError:
             pass
 
+# Use PIL as the default imread plugin, since matplotlib (1.2.x)
+# is buggy (flips PNGs around, returns bytes as floats, etc.)
+try:
+    use_plugin('pil', 'imread')
+except ImportError:
+    pass
+
 from .sift import *
 from .collection import *
 
