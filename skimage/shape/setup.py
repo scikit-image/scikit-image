@@ -20,9 +20,8 @@ def configuration(parent_package='', top_path=None):
         extra_compile_args=[
             "-fopenmp",
             "-O3",
-            "-march=native",
             "-mtune=native",
-            "-funroll-all-loops",
+            "-funroll-loops",
         ],
         extra_link_args=['-fopenmp'],
         )

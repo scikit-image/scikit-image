@@ -78,12 +78,18 @@ def resample(arr_in, out_shape, order=0, intp2d=False):
     # -------------------------------------------------------------------------
     # -- Special case where order=0 (i.e. interpolation 'nearest')
     # -------------------------------------------------------------------------
-    # We use Cython for faster processing. Only float32 is supported for now.
-    # XXX: (WIP) template cython code to be compatible with all dtypes
+    # We use Cython for faster processing.
+
+    # Only float32 is supported for now.
+    # (WIP) template cython code to be compatible with all dtypes
     if arr_in.dtype == np.float32 and order == 0:
-        # prepare output array
+
+        # -- prepare output array
         arr_out = np.empty(out_shape, dtype=arr_in.dtype)
+
+        # -- resample input array
         _resample_float32(arr_in, arr_out)
+
         return arr_out
 
     # -------------------------------------------------------------------------
