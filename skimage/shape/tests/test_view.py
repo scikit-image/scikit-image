@@ -1,7 +1,8 @@
 import numpy as np
 from nose.tools import raises
 from numpy.testing import assert_equal
-from skimage.util.shape import view_as_blocks, view_as_windows
+
+from skimage.shape import view_as_blocks, view_as_windows
 
 
 @raises(TypeError)
