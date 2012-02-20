@@ -10,11 +10,12 @@ from skimage import exposure
 # ===========================
 
 # squeeze image intensities to lower image contrast
-test_img = data.camera() / 5 + 100
+test_img = exposure.rescale_intensity(data.camera() / 5. + 100)
 
 
 def test_equalize_ubyte():
-    img_eq = exposure.equalize(test_img)
+    img = skimage.img_as_ubyte(test_img)
+    img_eq = exposure.equalize(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
     check_cdf_slope(cdf)
