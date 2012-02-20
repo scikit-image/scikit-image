@@ -1,33 +1,29 @@
-from nose.tools import raises
 from numpy.testing import assert_almost_equal as almost
+from numpy.testing import assert_raises
 
 import numpy as np
 
 from skimage.shape import resample
 
 
-@raises(AssertionError)
 def test_wrong_ndim():
     arr = np.random.randn(2, 3, 4, 5)
-    resample(arr, (1, 2, 3, 4))
+    assert_raises(ValueError, resample, arr, (1, 2, 3, 4))
 
 
-@raises(AssertionError)
 def test_wrong_intp2d_type():
     arr = np.random.randn(2, 3, 4)
-    resample(arr, (1, 2, 3), intp2d=2.3)
+    assert_raises(ValueError, resample, arr, (1, 2, 3), intp2d=2.3)
 
 
-@raises(AssertionError)
 def test_wrong_order():
     arr = np.random.randn(2, 3, 4)
-    resample(arr, (1, 2, 3), order=6)
+    assert_raises(ValueError, resample, arr, (1, 2, 3), order=6)
 
 
-@raises(ValueError)
 def test_wrong_third_dimension():
     arr = np.random.randn(2, 3, 4)
-    resample(arr, (1, 2, 3), intp2d=True)
+    assert_raises(ValueError, resample, arr, (1, 2, 3), intp2d=True)
 
 
 def test_intp_of_constant_arr():
@@ -41,7 +37,7 @@ def test_intp_of_constant_arr():
 
     # -- arbitrary constant function
     def f0(x, y):
-        a = 1.234
+        a = 0.784
         return a * np.ones(x.shape)
 
     ref_out = f0(x_out, y_out)
