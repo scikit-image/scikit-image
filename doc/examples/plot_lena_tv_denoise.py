@@ -29,7 +29,7 @@ noisy = l + 0.4 * l.std() * np.random.random(l.shape)
 
 tv_denoised = tv_denoise(noisy, weight=10)
 
-plt.figure(figsize=(12,2.8))
+plt.figure(figsize=(8, 2))
 
 plt.subplot(131)
 plt.imshow(noisy, cmap=plt.cm.gray, vmin=40, vmax=220)

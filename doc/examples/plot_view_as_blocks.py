@@ -44,24 +44,21 @@ max_view = np.max(flatten_view, axis=2)
 median_view = np.median(flatten_view, axis=2)
 
 # -- display resampled images
-plt.figure(figsize=(10, 10))
+fig, axes = plt.subplots(2, 2, figsize=(8, 8))
+ax0, ax1, ax2, ax3 = axes.ravel()
 
-plt.subplot(221)
-plt.title("Original rescaled with\n spline interpolation (order=3)")
+ax0.set_title("Original rescaled with\n spline interpolation (order=3)")
 l_resized = ndi.zoom(l, 2, order=3)
-plt.imshow(l_resized, cmap=cm.Greys_r)
+ax0.imshow(l_resized, cmap=cm.Greys_r)
 
-plt.subplot(222)
-plt.title("Block view with\n local mean pooling")
-plt.imshow(mean_view, cmap=cm.Greys_r)
+ax1.set_title("Block view with\n local mean pooling")
+ax1.imshow(mean_view, cmap=cm.Greys_r)
 
-plt.subplot(223)
-plt.title("Block view with\n local max pooling")
-plt.imshow(max_view, cmap=cm.Greys_r)
+ax2.set_title("Block view with\n local max pooling")
+ax2.imshow(max_view, cmap=cm.Greys_r)
 
-plt.subplot(224)
-plt.title("Block view with\n local median pooling")
-plt.imshow(median_view, cmap=cm.Greys_r)
+ax3.set_title("Block view with\n local median pooling")
+ax3.imshow(median_view, cmap=cm.Greys_r)
 
 plt.subplots_adjust(hspace=0.4, wspace=0.4)
 plt.show()
