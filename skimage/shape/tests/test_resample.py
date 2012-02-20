@@ -3,7 +3,7 @@ from numpy.testing import assert_raises
 
 import numpy as np
 
-from skimage.shape import resample
+from skimage.shape.resample import resample
 
 
 def test_wrong_ndim():

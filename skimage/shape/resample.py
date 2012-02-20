@@ -34,7 +34,7 @@ def resample(arr_in, out_shape, order=0, intp2d=False):
     Example
     -------
     >>> import numpy as np
-    >>> from skimage.shape import resample
+    >>> from skimage.shape.resample import resample
     >>> X = np.random.randn(10, 10, 4)
     >>> X.shape
     (10, 10, 4)
