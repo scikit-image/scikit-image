@@ -58,7 +58,7 @@ markers[data > 1.3] = 2
 labels = random_walker(data, markers, beta=10, mode='bf')
 
 # Plot results
-plt.figure(figsize=(9, 3.5))
+plt.figure(figsize=(8, 3.2))
 plt.subplot(131)
 plt.imshow(data, cmap='gray', interpolation='nearest')
 plt.axis('off')
