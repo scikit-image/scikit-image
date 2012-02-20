@@ -33,15 +33,20 @@ def resample(arr_in, out_shape, order=0, intp2d=False):
 
     Example
     -------
-    XXX: more here
     >>> import numpy as np
     >>> from skimage.shape import resample
     >>> X = np.random.randn(10, 10, 4)
     >>> X.shape
-    >>> (10, 10, 4)
+    (10, 10, 4)
     >>> Y = resample(X, (5, 5, 4), intp2d=True)
     >>> Y.shape
-    >>> (5, 5, 4)
+    (5, 5, 4)
+    >>> X = np.random.randn(256, 256, 96).astype('f')
+    >>> X.shape
+    (256, 256, 96)
+    >>> Y = resample(X, (512, 512, 128))
+    >>> Y.shape
+    (512, 512, 128)
     """
 
     # -- list of interpolation methods
@@ -50,10 +55,16 @@ def resample(arr_in, out_shape, order=0, intp2d=False):
     # -------------------------------------------------------------------------
     # -- Check arguments
     # -------------------------------------------------------------------------
-    assert arr_in.ndim == 3
-    assert order in possible_orders
-    assert type(intp2d) == bool
-    assert len(out_shape) == arr_in.ndim
+    if arr_in.ndim != 3:
+        raise ValueError('input array should be 3 dimensional')
+    if order not in possible_orders:
+        raise ValueError('interpolation order unsupported')
+    if type(intp2d) != bool:
+        raise ValueError("kwarg 'intp2d' is expected to be of bool type")
+    if len(out_shape) != arr_in.ndim:
+        raise ValueError('cannot resample array to higher or lower '
+                         'dimensionality'
+                        )
 
     if intp2d and arr_in.shape[2] != out_shape[2]:
         raise ValueError(
