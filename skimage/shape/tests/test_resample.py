@@ -66,8 +66,8 @@ def test_intp_of_linear_arr():
 
     # -- arbitray linear function
     def f1(x, y):
-        a = 1.234
-        b = 0.987
+        a = 0.234
+        b = 0.443
         return a * x + b * y
 
     ref_out = f1(x_out, y_out)
