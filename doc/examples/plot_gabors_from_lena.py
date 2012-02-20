@@ -31,11 +31,11 @@ is not rocket science.
 .. [3] http://en.wikipedia.org/wiki/Receptive_field
 .. [4] http://en.wikipedia.org/wiki/K-means_clustering
 .. [5] http://en.wikipedia.org/wiki/Lateral_geniculate_nucleus
-.. [6] D. H. Hubel and T. N. Wiesel Receptive Fields of Single Neurones
-in the Cat's Striate Cortex J. Physiol. pp. 574-591 (148) 1959
-.. [7] D. H. Hubel and T. N. Wiesel Receptive Fields, Binocular
-Interaction and Functional Architecture in the Cat's Visual Cortex J.
-Physiol. 160 pp.  106-154 1962
+.. [6] D. H. Hubel and T. N., Wiesel Receptive Fields of Single Neurones
+       in the Cat's Striate Cortex, J. Physiol. pp. 574-591 (148) 1959
+.. [7] D. H. Hubel and T. N., Wiesel Receptive Fields, Binocular
+       Interaction, and Functional Architecture in the Cat's Visual Cortex,
+       J. Physiol. 160 pp.  106-154 1962
 """
 
 import numpy as np

@@ -82,7 +82,6 @@ References
 from skimage.feature import hog
 from skimage import data, color, exposure
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 image = color.rgb2gray(data.lena())
