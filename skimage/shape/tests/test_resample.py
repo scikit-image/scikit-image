@@ -24,7 +24,7 @@ def test_wrong_order():
     resample(arr, (1, 2, 3), order=6)
 
 
-@raises(AssertionError)
+@raises(ValueError)
 def test_wrong_third_dimension():
     arr = np.random.randn(2, 3, 4)
     resample(arr, (1, 2, 3), intp2d=True)
