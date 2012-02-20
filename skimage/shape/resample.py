@@ -1,7 +1,3 @@
-# Authors: Nicolas Poilvert <poilvert@rowland.harvard.edu>
-#          Nicolas Pinto <pinto@alum.mit.edu>
-# License: BSD 3-clause
-
 import numpy as np
 from scipy import ndimage as ndi
 

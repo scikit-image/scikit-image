@@ -5,6 +5,7 @@
   Colour spaces and filters.
   Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
   Montage helpers: ``util.montage``
+  Resample operation: ``shape.resample``
 
 - Damian Eads
   Morphological operators
@@ -98,3 +99,4 @@
 
 - Nicolas Poilvert
   Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
+  Resample operation: ``shape.resample``
