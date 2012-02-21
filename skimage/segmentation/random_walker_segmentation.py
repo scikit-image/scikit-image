@@ -182,22 +182,22 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
         Mode for solving the linear system in the random walker
         algorithm.
 
-        - 'bf' (brute force, default): an LU factorization of the
-        Laplacian is computed. This is fast for small images (<1024x1024),
-        but very slow (due to the memory cost) and memory-consuming for
-        big images (in 3-D for example).
+        - 'bf' (brute force, default): an LU factorization of the Laplacian is
+          computed. This is fast for small images (<1024x1024), but very slow
+          (due to the memory cost) and memory-consuming for big images (in 3-D
+          for example).
 
-        - 'cg' (conjugate gradient): the linear system is solved
-        iteratively using the Conjugate Gradient method from
-        scipy.sparse.linalg. This is less memory-consuming than the
-        brute force method for large images, but it is quite slow.
+        - 'cg' (conjugate gradient): the linear system is solved iteratively
+          using the Conjugate Gradient method from scipy.sparse.linalg. This is
+          less memory-consuming than the brute force method for large images,
+          but it is quite slow.
 
-        - 'cg_mg' (conjugate gradient with multigrid preconditioner):
-        a preconditioner is computed using a multigrid solver, then
-        the solution is computed with the Conjugate Gradient method.
-        This mode requires that the pyamg module
-        (http://code.google.com/p/pyamg/) is installed. For images of
-        size > 512x512, this is the recommended (fastest) mode.
+        - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
+          preconditioner is computed using a multigrid solver, then the
+          solution is computed with the Conjugate Gradient method.  This mode
+          requires that the pyamg module (http://code.google.com/p/pyamg/) is
+          installed. For images of size > 512x512, this is the recommended
+          (fastest) mode.
 
     tol : float
         tolerance to achieve when solving the linear system, in
@@ -240,18 +240,20 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
     the other coefficients are looked for). Each pixel is attributed the label
     for which it has a maximal value of x. The Laplacian L of the image
     is defined as:
+
        - L_ii = d_i, the number of neighbors of pixel i (the degree of i)
        - L_ij = -w_ij if i and j are adjacent pixels
+
     The weight w_ij is a decreasing function of the norm of the local gradient.
     This ensures that diffusion is easier between pixels of similar values.
 
-    When the Laplacian is decomposed into blocks of marked and unmarked pixels
+    When the Laplacian is decomposed into blocks of marked and unmarked pixels::
 
         L = M B.T
             B A
 
     with first indices corresponding to marked pixels, and then to unmarked
-    pixels, minimizing x.T L x for one phase amount to solving
+    pixels, minimizing x.T L x for one phase amount to solving::
 
         A x = - B x_m
 
