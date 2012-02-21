@@ -21,15 +21,6 @@ class MultiImage(object):
         Whether to conserve memory by only caching a single frame. Default is
         True.
 
-    Attributes
-    ----------
-    filename : str
-        The complete path to the image file.
-    conserve_memory : bool
-        Whether memory is conserved by only caching a single frame.
-    numframes : int
-        The number of frames in the image.
-
     Notes
     -----
     If ``conserve_memory=True`` the memory footprint can be reduced, however
