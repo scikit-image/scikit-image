@@ -31,11 +31,11 @@ is not rocket science.
 .. [3] http://en.wikipedia.org/wiki/Receptive_field
 .. [4] http://en.wikipedia.org/wiki/K-means_clustering
 .. [5] http://en.wikipedia.org/wiki/Lateral_geniculate_nucleus
-.. [6] D. H. Hubel and T. N. Wiesel Receptive Fields of Single Neurones
-    in the Cat's Striate Cortex J. Physiol. pp. 574-591 (148) 1959
-.. [7] D. H. Hubel and T. N. Wiesel Receptive Fields, Binocular
-    Interaction and Functional Architecture in the Cat's Visual Cortex J.
-    Physiol. 160 pp.  106-154 1962
+.. [6] D. H. Hubel and T. N., Wiesel Receptive Fields of Single Neurones
+       in the Cat's Striate Cortex, J. Physiol. pp. 574-591 (148) 1959
+.. [7] D. H. Hubel and T. N., Wiesel Receptive Fields, Binocular
+       Interaction, and Functional Architecture in the Cat's Visual Cortex,
+       J. Physiol. 160 pp.  106-154 1962
 """
 
 import numpy as np
@@ -71,27 +71,23 @@ fb2 = fb2.reshape((-1,) + patch_shape)
 fb2_montage = montage2d(fb2, rescale_intensity=True)
 
 # --
-plt.figure(figsize=(9, 3))
+fig, axes = plt.subplots(2, 2, figsize=(7, 6))
+ax0, ax1, ax2, ax3 = axes.ravel()
 
+ax0.imshow(lena, cmap=plt.cm.gray)
+ax0.set_title("Lena (original)")
 
-plt.subplot(2, 2, 1)
-plt.imshow(lena, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title("Lena (original)")
+ax1.imshow(fb1_montage, cmap=plt.cm.gray)
+ax1.set_title("K-means filterbank (codebook)\non Lena (original)")
 
-plt.subplot(2, 2, 2)
-plt.imshow(fb1_montage, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title("K-means filterbank (codebook) on Lena (original)")
+ax2.imshow(lena_dog, cmap=plt.cm.gray)
+ax2.set_title("Lena (LGN-like DoG)")
 
-plt.subplot(2, 2, 3)
-plt.imshow(lena_dog, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title("Lena (LGN-like DoG)")
+ax3.imshow(fb2_montage, cmap=plt.cm.gray)
+ax3.set_title("K-means filterbank (codebook)\non Lena (LGN-like DoG)")
 
-plt.subplot(2, 2, 4)
-plt.imshow(fb2_montage, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title("K-means filterbank (codebook) on Lena (LGN-like DoG)")
+for ax in axes.ravel():
+    ax.axis('off')
 
+fig.subplots_adjust(hspace=0.3)
 plt.show()
