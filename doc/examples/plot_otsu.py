@@ -25,7 +25,7 @@ image = camera()
 thresh = threshold_otsu(image)
 binary = image > thresh
 
-plt.figure(figsize=(10, 3.5))
+plt.figure(figsize=(8, 2.5))
 plt.subplot(1, 3, 1)
 plt.imshow(image, cmap=plt.cm.gray)
 plt.title('Original')

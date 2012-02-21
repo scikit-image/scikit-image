@@ -65,7 +65,7 @@ img_eq = exposure.equalize(img)
 
 
 # Display results
-f, axes = plt.subplots(2, 3, figsize=(11, 5))
+f, axes = plt.subplots(2, 3, figsize=(8, 4))
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
 ax_img.set_title('Low contrast image')

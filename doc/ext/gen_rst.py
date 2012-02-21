@@ -114,27 +114,6 @@ def generate_example_rst(app):
     fhindex = file(os.path.join(root_dir, 'index.txt'), 'w')
     fhindex.write("""\
 
-.. raw:: html
-
-    <style type="text/css">
-    .figure {
-        float: left;
-        margin: 1em;
-    }
-
-    .figure img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 200px;
-    }
-
-    .figure .caption {
-        width: 200px;
-        text-align: center !important;
-    }
-    </style>
-
 Examples
 ========
 
@@ -280,7 +259,7 @@ def generate_file_rst(fname, target_dir, src_dir, plot_gallery):
         this_template = plot_rst_template
         from matplotlib import image
         if os.path.exists(first_image_file):
-            image.thumbnail(first_image_file, thumb_file, 0.2)
+            image.thumbnail(first_image_file, thumb_file, 0.25)
 
     if not os.path.exists(thumb_file):
         # create something not to replace the thumbnail
