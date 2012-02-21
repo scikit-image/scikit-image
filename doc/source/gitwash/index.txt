@@ -1,7 +1,7 @@
 .. _using-git:
 
 Working with *scikits-image* source code
-======================================
+========================================
 
 Contents:
 

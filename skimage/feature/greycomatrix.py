@@ -127,9 +127,9 @@ def greycoprops(P, prop='contrast'):
     - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
     - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`    
     - 'energy': :math:`\\sqrt{ASM}`
-    - 'correlation': 
-.. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\ 
-          (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
+    - 'correlation':
+        .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\ 
+                  (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
     
     Parameters
@@ -140,6 +140,7 @@ def greycoprops(P, prop='contrast'):
         `P[i,j,d,theta]` is the number of times that grey-level j
         occurs at a distance d and at an angle theta from
         grey-level i.
+
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
             'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.

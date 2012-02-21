@@ -7,11 +7,12 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
-        1) (optional) global image normalisation
-        2) computing the gradient image in x and y
-        3) computing gradient histograms
-        3) normalising across blocks
-        4) flattening into a feature vector
+
+        1. (optional) global image normalisation
+        2. computing the gradient image in x and y
+        3. computing gradient histograms
+        4. normalising across blocks
+        5. flattening into a feature vector
 
     Parameters
     ----------
