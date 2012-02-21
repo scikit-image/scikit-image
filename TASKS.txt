@@ -27,13 +27,18 @@ Implement Algorithms
 - Graph cut segmentation
 - Fast 2D convex hull (consider using CellProfiler version)
   `Algorithm overview <http://www.tcs.fudan.edu.cn/rudolf/Courses/Algorithms/Alg_cs_07w/Webprojects/Zhaobo_hull/index.html#section26>`__.
-  `One free implementation <http://cm.bell-labs.com/cm/cs/who/clarkson/2dch.c>`_.
+  `One free implementation
+  <http://cm.bell-labs.com/cm/cs/who/clarkson/2dch.c>`_.
+  [Compare against current implementation]
+- Convex hulls of objects in a labels matrix (simply adapt current convex hull 
+  image code--this one's low hanging fruit).  Generalise this solution to also
+  skeletonize objects in a labels matrix.
 - :strike:`Histograms of oriented gradients`
 - :strike:`Fast radon transform`
 - :strike:`Probabilistic Hough transform`
 
-Drawing
-```````
+Drawing (directly on an ndarray)
+````````````````````````````````
 - Wu's algorithm for lines and circles
 - Text rendering
 
@@ -50,10 +55,11 @@ or tests.
 
    * :strike:`Connected components`
    * :strike:`Grey-level co-occurrence matrices`
-   * Marching squares
+   * :strike:`Marching squares`
    * Nadav's bilateral filtering (first compare against CellProfiler's
      code, based on http://groups.csail.mit.edu/graphics/bilagrid/bilagrid_web.pdf)
-   * 2D iso-contour finding (sub-pixel precision) [ask Zach Pincus]
+     Also see https://github.com/stefanv/scikits-image/tree/bilateral
+   * :strike:`2D iso-contour finding (sub-pixel precision) [ask Zach Pincus]`
    * 2D image warping via thin-plate splines [ask Zach Pincus]
 
 Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
@@ -65,14 +71,12 @@ Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
 * :strike:`Sobel filter - convolution with` ``[[1,2,1], [0,0,0], [-1,-2,-1]]`` :strike:`to detect edges`
 * Roberts filter - convolution with diagonal and anti-diagonal
   kernels to detect edges
-* Convex hulls of objects in a labels matrix
 * Minimum enclosing circles of objects in a labels matrix
-* Map-coloring of a labels matrix - assign each label a color so that
-  all adjacent labels have different colors
+* :strike:`Map-coloring of a labels matrix - assign each label a color so that
+  all adjacent labels have different colors` -- simply plot with colormap "spectral".
 * :strike:`Skeletonize`, spur removal, thinning, thickening, and other morphological
   operations on binary images, framework for creating arbitrary morphological
   operations using a 3x3 grid.
-* Skeletonize objects in a labels matrix
 
 Their SVN repository is read-accessible at
 
@@ -109,7 +113,6 @@ Rework linear filters
 * Fast, SSE2 convolution (high priority) (see prototype in pull requests)
 * Should take kernel or function for parameter (currently only takes function)
 * Kernel shape should be specifiable (currently defaults to image shape)
-* Due to the above, the tests run unnecessarily slowly
 
 io
 ``
@@ -119,11 +122,9 @@ io
 
 docs
 ````
+* Add examples to the gallery
 * Write topics for the `user guide
-  <http://scikits-image.org/docs/dev/user_guide.html>`_:
-
-  - Introduction to I/O and image processing with examples
-
+  <http://scikits-image.org/docs/dev/user_guide.html>`_
 * :strike:`Build docs outside source directory`
 * Integrate BiBTeX plugin into Sphinx build
 * :strike:`Create a kick-ass website`
