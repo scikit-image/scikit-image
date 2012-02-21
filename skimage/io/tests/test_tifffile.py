@@ -6,7 +6,7 @@ from numpy.testing import *
 from numpy.testing.decorators import skipif
 
 try:
-    import skimage.io._plugins.tifffile as tf
+    import skimage.io._plugins.tifffile_plugin as tf
     TF_available = True
     sio.use_plugin('tifffile')
 except OSError:

@@ -6,7 +6,7 @@ from numpy.testing import *
 from numpy.testing.decorators import skipif
 
 try:
-    import skimage.io._plugins.freeimage as fi
+    import skimage.io._plugins.freeimage_plugin as fi
     FI_available = True
     sio.use_plugin('freeimage')
 except OSError:
