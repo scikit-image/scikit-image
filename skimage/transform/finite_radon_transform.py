@@ -97,7 +97,7 @@ def ifrt2(a):
     Notes
     -----
     The FRT has a unique inverse iff n is prime.
-    See [FRT] for an overview.
+    See [1]_ for an overview.
     The idea for this algorithm is due to Vlad Negnevitski.
 
     Examples
@@ -120,7 +120,7 @@ def ifrt2(a):
 
     References
     ----------
-    .. [FRT] A. Kingston and I. Svalbe, "Projective transforms on periodic
+    .. [1] A. Kingston and I. Svalbe, "Projective transforms on periodic
              discrete image arrays," in P. Hawkes (Ed), Advances in Imaging
              and Electron Physics, 139 (2006)
 
