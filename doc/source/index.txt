@@ -11,6 +11,19 @@ This SciKit_ is an image processing toolbox for SciPy_.
 Sections
 ========
 
+.. toctree::
+   :hidden:
+
+   overview
+   api
+   api_changes
+   install
+   user_guide
+   contribute
+   license
+   auto_examples/index
+
+
 .. list-table::
    :class: contentstable
 
