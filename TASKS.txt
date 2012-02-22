@@ -45,7 +45,7 @@ Implement Algorithms
 
 Drawing (directly on an ndarray)
 ````````````````````````````````
-- Wu's algorithm for lines and circles
+- Wu's algorithm for circles
 - Text rendering
 
 Infrastructure
