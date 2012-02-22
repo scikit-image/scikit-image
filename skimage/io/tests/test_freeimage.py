@@ -1,9 +1,11 @@
 import os
 import skimage as si
 import skimage.io as sio
+import numpy as np
 
 from numpy.testing import *
 from numpy.testing.decorators import skipif
+from tempfile import NamedTemporaryFile
 
 try:
     import skimage.io._plugins.freeimage_plugin as fi
@@ -20,40 +22,43 @@ def test_imread():
 
 @skipif(not FI_available)
 def test_imread_uint16():
-    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
-    img = sio.imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
+    expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
+    img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
 @skipif(not FI_available)
 def test_imread_uint16_big_endian():
-    expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
-    img = sio.imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
-    assert img.dtype == np.dtype('>u2')
+    expected = np.load(os.path.join(si.data_dir, 'chessboard_GRAY_U8.npy'))
+    img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16B.tif'))
+    assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
 
 class TestSave:
-    def roundtrip(self, dtype, x, scaling=1):
-        f = NamedTemporaryFile(suffix='.tif')
+    def roundtrip(self, dtype, x, suffix):
+        print dtype, x.shape, suffix
+        f = NamedTemporaryFile(suffix='.'+suffix)
         fname = f.name
         f.close()
         sio.imsave(fname, x)
         y = sio.imread(fname)
-
-        assert_array_almost_equal((x * scaling).astype(np.int32), y)
+        assert_array_equal(x, y)
 
     @skipif(not FI_available)
     def test_imsave_roundtrip(self):
-        for shape in [(10, 10), (10, 10, 3), (10, 10, 4)]:
-            for dtype in (np.uint8, np.uint16, np.float32, np.float64):
-                x = np.ones(shape, dtype=dtype) * np.random.random(shape)
-
-                if np.issubdtype(dtype, float):
-                    yield self.roundtrip, dtype, x, 255
-                else:
-                    x = (x * 255).astype(dtype)
-                    yield self.roundtrip, dtype, x
+        for shape, dtype, format in [
+              [(10, 10), (np.uint8, np.uint16), ('tif', 'png')], 
+              [(10, 10), (np.float32,), ('tif',)], 
+              [(10, 10, 3), (np.uint8,), ('png',)], 
+              [(10, 10, 4), (np.uint8,), ('png',)]
+            ]:
+            tests = [(d,f) for d in dtype for f in format]
+            for d, f in tests:
+                x = np.ones(shape, dtype=d) * np.random.random(shape)
+                if not np.issubdtype(d, float):
+                    x = (x * 255).astype(d)
+                yield self.roundtrip, d, x, f
 
 
 @skipif(not FI_available)
