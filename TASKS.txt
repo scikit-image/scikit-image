@@ -42,9 +42,6 @@ Implement Algorithms
 - Convex hulls of objects in a labels matrix (simply adapt current convex hull 
   image code--this one's low hanging fruit).  Generalise this solution to also
   skeletonize objects in a labels matrix.
-- :strike:`Histograms of oriented gradients`
-- :strike:`Fast radon transform`
-- :strike:`Probabilistic Hough transform`
 
 Drawing (directly on an ndarray)
 ````````````````````````````````
@@ -63,29 +60,22 @@ modified to work as part of the scikit, others may be lacking in documentation
 or tests.
 
    * :strike:`Connected components`
-   * :strike:`Grey-level co-occurrence matrices`
-   * :strike:`Marching squares`
    * Nadav's bilateral filtering (first compare against CellProfiler's
      code, based on http://groups.csail.mit.edu/graphics/bilagrid/bilagrid_web.pdf)
      Also see https://github.com/stefanv/scikits-image/tree/bilateral
-   * :strike:`2D iso-contour finding (sub-pixel precision) [ask Zach Pincus]`
    * 2D image warping via thin-plate splines [ask Zach Pincus]
 
 Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
 `````````````````````````````````````````````````````````````````````````
-* :strike:`Canny filter` (Canny, J., *A Computational Approach To Edge Detection*,
-  IEEE Trans. Pattern Analysis and Machine Intelligence, 8:679-714, 1986)
-* :strike:`Prewitt filter` - convolution with ``[[1,1,1], [0,0,0], [-1,-1,-1]]`` to
-  detect edges
-* :strike:`Sobel filter - convolution with` ``[[1,2,1], [0,0,0], [-1,-2,-1]]`` :strike:`to detect edges`
 * Roberts filter - convolution with diagonal and anti-diagonal
   kernels to detect edges
 * Minimum enclosing circles of objects in a labels matrix
 * :strike:`Map-coloring of a labels matrix - assign each label a color so that
-  all adjacent labels have different colors` -- simply plot with colormap "spectral".
-* :strike:`Skeletonize`, spur removal, thinning, thickening, and other morphological
-  operations on binary images, framework for creating arbitrary morphological
-  operations using a 3x3 grid.
+  all adjacent labels have different colors` -- simply plot with colormap
+  "spectral".
+* spur removal, thinning, thickening, and other morphological operations on
+  binary images, framework for creating arbitrary morphological operations
+  using a 3x3 grid.
 
 Their SVN repository is read-accessible at
 
@@ -134,6 +124,4 @@ docs
 * Add examples to the gallery
 * Write topics for the `user guide
   <http://scikits-image.org/docs/dev/user_guide.html>`_
-* :strike:`Build docs outside source directory`
 * Integrate BiBTeX plugin into Sphinx build
-* :strike:`Create a kick-ass website`
