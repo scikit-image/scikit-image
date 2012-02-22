@@ -47,6 +47,16 @@ plot_rst_template = """
     :lines: %(end_row)s-
     """
 
+
+toctree_template = """
+
+.. toctree::
+   :hidden:
+
+   %s
+
+"""
+
 # The following strings are used when we have several pictures: we use
 # an html div tag that our CSS uses to turn the lists into horizontal
 # lists.
@@ -144,13 +154,10 @@ def generate_dir_rst(dir, fhindex, example_dir, root_dir, plot_gallery):
         print 'Skipping this directory'
         print 80*'_'
         return
-    fhindex.write("""
 
+    example_description = file(os.path.join(src_dir, 'README.txt')).read()
+    fhindex.write("""\n\n%s\n\n""" % example_description)
 
-%s
-
-
-""" % file(os.path.join(src_dir, 'README.txt')).read())
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
 
@@ -159,20 +166,25 @@ def generate_dir_rst(dir, fhindex, example_dir, root_dir, plot_gallery):
         if not a.startswith('plot') and a.endswith('.py'):
             return 'zz' + a
         return a
-    for fname in sorted(os.listdir(src_dir), key=sort_key):
-        if fname.endswith('py'):
-            generate_file_rst(fname, target_dir, src_dir, plot_gallery)
-            thumb = os.path.join(dir, 'images', 'thumb', fname[:-3] + '.png')
-            link_name = os.path.join(dir, fname).replace(os.path.sep, '_')
-            fhindex.write('.. figure:: %s\n' % thumb)
-            if link_name.startswith('._'):
-                link_name = link_name[2:]
-            fhindex.write('   :figclass: gallery\n')
-            if dir != '.':
-                fhindex.write('   :target: ./%s/%s.html\n\n' % (dir, fname[:-3]))
-            else:
-                fhindex.write('   :target: ./%s.html\n\n' % link_name[:-3])
-            fhindex.write('   :ref:`example_%s`\n\n' % link_name)
+
+    examples = [fname for fname in sorted(os.listdir(src_dir), key=sort_key)
+                      if fname.endswith('py')]
+    ex_names = [ex[:-3] for ex in examples] # strip '.py' extension
+    fhindex.write(toctree_template % '\n   '.join(ex_names))
+
+    for fname in examples:
+        generate_file_rst(fname, target_dir, src_dir, plot_gallery)
+        thumb = os.path.join(dir, 'images', 'thumb', fname[:-3] + '.png')
+        link_name = os.path.join(dir, fname).replace(os.path.sep, '_')
+        fhindex.write('.. figure:: %s\n' % thumb)
+        if link_name.startswith('._'):
+            link_name = link_name[2:]
+        fhindex.write('   :figclass: gallery\n')
+        if dir != '.':
+            fhindex.write('   :target: ./%s/%s.html\n\n' % (dir, fname[:-3]))
+        else:
+            fhindex.write('   :target: ./%s.html\n\n' % link_name[:-3])
+        fhindex.write('   :ref:`example_%s`\n\n' % link_name)
     fhindex.write("""
 .. raw:: html
 
