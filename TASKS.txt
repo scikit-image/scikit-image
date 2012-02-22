@@ -70,9 +70,6 @@ Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
 * Roberts filter - convolution with diagonal and anti-diagonal
   kernels to detect edges
 * Minimum enclosing circles of objects in a labels matrix
-* :strike:`Map-coloring of a labels matrix - assign each label a color so that
-  all adjacent labels have different colors` -- simply plot with colormap
-  "spectral".
 * spur removal, thinning, thickening, and other morphological operations on
   binary images, framework for creating arbitrary morphological operations
   using a 3x3 grid.
