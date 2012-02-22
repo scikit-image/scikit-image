@@ -5,6 +5,15 @@
 How to contribute to ``skimage``
 ======================================
 
+.. toctree::
+   :hidden:
+
+   gitwash/index
+   gsoc2011
+   coverage_table
+   cell_profiler
+
+
 Developing Open Source is great fun!  Join us on the `skimage mailing
 list <http://groups.google.com/group/scikits-image>`_ and tell us which of the
 following challenges you'd like to solve.
