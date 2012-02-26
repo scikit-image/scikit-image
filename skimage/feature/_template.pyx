@@ -91,8 +91,8 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     cdef int i, j
     cdef float num, window_sum2, window_mean2, normed, t,
     # move window through convolution results, normalizing in the process
-    for i in range(result.shape[0] - 1):
-        for j in range(result.shape[1] - 1):
+    for i in range(result.shape[0]):
+        for j in range(result.shape[1]):
             num = result[i, j]
             i_end = i + template.shape[0]
             j_end = j + template.shape[1]
@@ -117,8 +117,5 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             else:
                 num = 0
             result[i, j] = num
-    # zero boundaries
-    result[:, -1] = 0
-    result[-1, :] = 0
     return result
 
