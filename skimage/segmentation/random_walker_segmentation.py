@@ -286,7 +286,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
     data = np.atleast_3d(data)
     if copy:
         labels = np.copy(labels)
-    labels = labels.astype(np.int)
+    labels = labels.astype(np.intp)
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
     if np.any(labels < 0):
