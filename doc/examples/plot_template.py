@@ -9,7 +9,9 @@ techniques to find instances of the "target image" in the "test image".
 
 The output of ``match_template`` is an image where we can easily identify peaks
 by eye. We mark the locations of matches (red dots), which are detected using
-a simple peak extraction algorithm.
+a simple peak extraction algorithm. Note that the peaks in the output of
+``match_template`` correspond to the origin (i.e. top-left corner) of the
+template.
 """
 
 import numpy as np
@@ -40,24 +42,25 @@ if len(found_positions) > 2:
 
 x_found, y_found = np.transpose(found_positions)
 
+
+fig, (ax0, ax1, ax2) = plt.subplots(ncols=3, figsize=(8, 3))
 plt.gray()
 
-plt.subplot(1, 3, 1)
-plt.imshow(target)
-plt.title("Target image")
-plt.axis('off')
+ax0.imshow(target)
+ax0.set_title("Target image")
 
-plt.subplot(1, 3, 2)
-plt.imshow(image)
-plt.title("Test image")
-plt.axis('off')
+ax1.imshow(image)
+ax1.plot(x_found, y_found, 'ro', alpha=0.5)
+ax1.set_title("Test image")
+ax1.autoscale(tight=True)
 
-plt.subplot(1, 3, 3)
-plt.imshow(result)
-plt.plot(x_found, y_found, 'ro')
-plt.title("Result from\n``match_template``")
-plt.autoscale(tight=True)
-plt.axis('off')
+ax2.imshow(result)
+ax2.plot(x_found, y_found, 'ro', alpha=0.5)
+ax2.set_title("Result from\n``match_template``")
+ax2.autoscale(tight=True)
+
+for ax in (ax0, ax1, ax2):
+    ax.axis('off')
 
 plt.show()
 
