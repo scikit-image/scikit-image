@@ -26,7 +26,6 @@ def test_squared_dot():
     im[4:8, 4:8] = 1
     im = img_as_float(im)
     results = harris(im, min_distance=3)
-    print results
     assert (results == np.array([[6, 6]])).all()
 
 def test_rotated_lena():
