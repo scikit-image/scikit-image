@@ -9,10 +9,18 @@ from tempfile import NamedTemporaryFile
 
 try:
     import skimage.io._plugins.tifffile_plugin as tf
+    _plugins = sio.plugin_order()
     TF_available = True
     sio.use_plugin('tifffile')
 except OSError:
     TF_available = False
+
+
+def teardown():
+    if TF_available:
+        for k, v in _plugins.items():
+            sio.use_plugin(v[0], k)
+
 
 @skipif(not TF_available)
 def test_imread_uint16():
@@ -20,6 +28,7 @@ def test_imread_uint16():
     img = sio.imread(os.path.join(si.data_dir, 'chessboard_GRAY_U16.tif'))
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
+
 
 @skipif(not TF_available)
 def test_imread_uint16_big_endian():
