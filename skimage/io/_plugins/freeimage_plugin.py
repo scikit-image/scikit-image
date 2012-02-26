@@ -3,7 +3,7 @@ import numpy
 import sys
 import os
 import os.path
-from numpy.compat import asbytes
+from numpy.compat import asbytes, asstr
 
 
 def _generate_candidate_libs():
@@ -505,13 +505,13 @@ def _read_metadata(bitmap):
         if mdhandle:
             more = True
             while more:
-                tag_name = str(_FI.FreeImage_GetTagKey(tag))
+                tag_name = asstr(_FI.FreeImage_GetTagKey(tag))
                 tag_type = _FI.FreeImage_GetTagType(tag)
                 byte_size = _FI.FreeImage_GetTagLength(tag)
                 char_ptr = ctypes.c_char * byte_size
                 tag_str = char_ptr.from_address(_FI.FreeImage_GetTagValue(tag))
                 if tag_type == METADATA_DATATYPE.FIDT_ASCII:
-                    tag_val = str(tag_str.value)
+                    tag_val = asstr(tag_str.value)
                 else:
                     tag_val = numpy.fromstring(tag_str,
                             dtype=METADATA_DATATYPE.dtypes[tag_type])
