@@ -12,7 +12,7 @@ try:
     _plugins = sio.plugin_order()
     TF_available = True
     sio.use_plugin('tifffile')
-except OSError:
+except ImportError:
     TF_available = False
 
 
