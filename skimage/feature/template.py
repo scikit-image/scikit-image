@@ -21,17 +21,20 @@ def match_template(image, template, method='norm-coeff', pad_output=True):
     method : str
         The correlation method used in scanning.
         T represents the template, I the image and R the result.
-        The summation is done over X = 0..w-1 and Y = 0..h-1 of the template.
+        All sums are done over X = 0..w-1 and Y = 0..h-1 of the template.
         'norm-coeff':
-            R(x, y) = Sum(X,Y)[T(X, Y) * I(x + X, y + Y)] / N
-            N = sqrt(Sum(X,Y)[T(X, Y)**2] * Sum(X,Y)[I(x + X, y + Y)**2])
+            R(x, y) = Sum[T(X, Y) * I(x + X, y + Y)] / N
+            N = sqrt(Sum[T(X, Y)**2] * Sum[I(x + X, y + Y)**2])
         'norm-corr':
-            R(x,y) = Sum(X,y)[T'(X, Y) * I'(x + X, y + Y)] / N
-            N = sqrt(Sum(X,y)[T'(X, Y)**2] * Sum(X,Y)[I'(x + X, y + Y)**2])
+            R(x,y) = Sum[T'(X, Y) * I'(x + X, y + Y)] / N
+            N = sqrt(Sum[T'(X, Y)**2] * Sum[I'(x + X, y + Y)**2])
+
             where:
-            T'(x, y) = T(X, Y) - 1/(w * h) * Sum(X',Y')[T(X', Y')]
-            I'(x + X, y + Y) = I(x + X, y + Y)
-                               - 1/(w * h) * Sum(X',Y')[I(x + X', y + Y')]
+
+            T'(x, y) = T(X, Y) - mean(T)
+            I'(x + X, y + Y) = I(x + X, y + Y) - mean[I(X', Y')]
+            mean[I(X', Y')] = mean of image region under the template.
+
     pad_output : bool
         If True, pad output array to be the same size as the input image.
         Otherwise, the output is an array with shape `(M - m + 1, N - n + 1)`
