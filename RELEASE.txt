@@ -23,7 +23,9 @@ How to make a new release of ``skimage``
 
 - Increase the version number in the setup.py file to ``0.Xdev``.
 
-- Update the web frontpage.
+- Update the web frontpage:
   The webpage is kept in a separate repo: scikits-image-web
+  - ``_templates/sidebar_versions.html``
+  - ``index.rst``
 
 - Post release notes on mailing lists, blog, G+, etc.
