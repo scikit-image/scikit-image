@@ -34,6 +34,7 @@ Tasks
 Implement Algorithms
 ````````````````````
 - Graph cut segmentation
+- `Image colorization <http://www.cs.huji.ac.il/~yweiss/Colorization/>`__
 - Fast 2D convex hull (consider using CellProfiler version)
   `Algorithm overview <http://www.tcs.fudan.edu.cn/rudolf/Courses/Algorithms/Alg_cs_07w/Webprojects/Zhaobo_hull/index.html#section26>`__.
   `One free implementation
