@@ -15,7 +15,7 @@ New Features
 - Harris corner detection.
 - Otsu thresholding.
 - Block views, window views and montage.
-- Plugin for Christoph Golke's "tifffile".
+- Plugin for Christoph Gohlke's "tifffile".
 - Peak detection.
 - Improved FreeImage wrappers and meta-data reading.
 - 8-neighbor and background labelling.
