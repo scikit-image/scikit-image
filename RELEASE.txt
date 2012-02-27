@@ -4,12 +4,13 @@ How to make a new release of ``skimage``
 - Update release notes.
 - Update the version number in setup.py and commit
 - Update the docs:
-  - Edit ``doc/_source/_static/docversions.js``
-  - Build a clean version of the docs with ``rm build -rf; make html``.
+  - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
+  - Build a clean version of the docs.  Run "make" in the root dir, then
+    ``rm build -rf; make html`` in the docs.
   - Push upstream using "make gh-pages"
 - Add the version number as a tag in git::
 
-  git tag v0.5
+  git tag v0.6
 
 - Push the new meta-data to github::
 
