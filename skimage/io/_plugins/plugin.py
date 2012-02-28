@@ -79,6 +79,7 @@ command.  A list of all available plugins can be found using
     if plugin is None:
         _, func = plugin_funcs[0]
     else:
+        _load(plugin)
         try:
             func = [f for (p,f) in plugin_funcs if p == plugin][0]
         except IndexError:
@@ -124,8 +125,7 @@ def use(name, kind=None):
         else:
             kind = [kind]
 
-    if not name in available(loaded=True):
-        _load(name)
+    _load(name)
 
     for k in kind:
         if not k in plugin_store:
@@ -182,6 +182,8 @@ def _load(plugin):
     plugins : List of available plugins
 
     """
+    if plugin in available(loaded=True):
+        return
     if not plugin in plugin_module_name:
         raise ValueError("Plugin %s not found." % plugin)
     else:
