@@ -94,8 +94,10 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     for i in range(result.shape[0]):
         for j in range(result.shape[1]):
             num = result[i, j]
-            i_end = i + template.shape[0]
-            j_end = j + template.shape[1]
+            # subtract 1 because `i_end` and `j_end` are used for indexing into
+            # summed-area table, instead of slicing windows of the image.
+            i_end = i + template.shape[0] - 1
+            j_end = j + template.shape[1] - 1
 
             window_mean2 = 0
             if method == 'norm-coeff':
