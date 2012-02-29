@@ -56,24 +56,22 @@ cdef float sum_integral(np.ndarray[float, ndim=2,  mode="c"] sat,
 def match_template(np.ndarray[float, ndim=2, mode="c"] image,
                    np.ndarray[float, ndim=2, mode="c"] template,
                    str method):
-    # convolve the image with template by frequency domain multiplication
     cdef np.ndarray[float, ndim=2] result
+    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sum
+    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sqr
+    cdef float template_mean = np.mean(template)
+    cdef float template_norm
+    cdef float inv_area
+
     # when `dtype=float` is used, ascontiguousarray returns ``double``.
     result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
                                               mode="valid"), dtype=np.float32)
-
-    # calculate squared integral images used for normalization
-    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sum
-    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sqr
-
     if method == 'norm-coeff':
         integral_sum = integral.integral_image(image)
     integral_sqr = integral.integral_image(image**2)
 
     # use inversed area for accuracy
-    cdef float inv_area = 1.0 / (template.shape[0] * template.shape[1])
-    cdef float template_norm
-    cdef float template_mean = np.mean(template)
+    inv_area = 1.0 / (template.shape[0] * template.shape[1])
 
     if method == 'norm-corr':
         # calculate template norm according to the following:
@@ -87,9 +85,8 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     else:
         template_norm = sqrt((template_mean ** 2)) / sqrt(inv_area)
 
-    # define window of template size in squared integral image
     cdef int i, j
-    cdef float num, window_sum2, window_mean2, normed, t,
+    cdef float num, den, window_sqr_sum, window_mean_sqr, window_sum,
     # move window through convolution results, normalizing in the process
     for i in range(result.shape[0]):
         for j in range(result.shape[1]):
@@ -99,19 +96,19 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             i_end = i + template.shape[0] - 1
             j_end = j + template.shape[1] - 1
 
-            window_mean2 = 0
+            window_mean_sqr = 0
             if method == 'norm-coeff':
-                t = sum_integral(integral_sum, i, j, i_end, j_end)
-                window_mean2 = t * t * inv_area
-                num -= t*template_mean
-            # calculate squared template window sum in the image
-            window_sum2 = sum_integral(integral_sqr, i, j, i_end, j_end)
+                window_sum = sum_integral(integral_sum, i, j, i_end, j_end)
+                window_mean_sqr = window_sum * window_sum * inv_area
+                num -= window_sum * template_mean
 
-            normed = sqrt(window_sum2 - window_mean2) * template_norm
+            window_sqr_sum = sum_integral(integral_sqr, i, j, i_end, j_end)
+
+            den = sqrt(window_sqr_sum - window_mean_sqr) * template_norm
             # enforce some limits
-            if fabs(num) < normed:
-                num /= normed
-            elif fabs(num) < normed*1.125:
+            if fabs(num) < den:
+                num /= den
+            elif fabs(num) < den * 1.125:
                 if num > 0:
                     num = 1
                 else:
