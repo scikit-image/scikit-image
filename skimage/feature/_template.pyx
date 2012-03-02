@@ -43,7 +43,7 @@ cdef extern from "math.h":
 
 
 @cython.boundscheck(False)
-cdef float sum_integral(np.ndarray[float, ndim=2,  mode="c"] sat,
+cdef float integrate(np.ndarray[float, ndim=2,  mode="c"] sat,
         int r0, int c0, int r1, int c1):
     """
     Using a summed area table / integral image, calculate the sum
@@ -85,15 +85,15 @@ cdef float sum_integral(np.ndarray[float, ndim=2,  mode="c"] sat,
 @cython.boundscheck(False)
 def match_template(np.ndarray[float, ndim=2, mode="c"] image,
                    np.ndarray[float, ndim=2, mode="c"] template):
-    cdef np.ndarray[float, ndim=2, mode="c"] result
-    cdef np.ndarray[float, ndim=2, mode="c"] integral_sum
-    cdef np.ndarray[float, ndim=2, mode="c"] integral_sqr
+    cdef np.ndarray[float, ndim=2, mode="c"] corr
+    cdef np.ndarray[float, ndim=2, mode="c"] image_sat
+    cdef np.ndarray[float, ndim=2, mode="c"] image_sqr_sat
     cdef float template_mean = np.mean(template)
     cdef float template_ssd
     cdef float inv_area
 
-    integral_sum = integral.integral_image(image)
-    integral_sqr = integral.integral_image(image**2)
+    image_sat = integral.integral_image(image)
+    image_sqr_sat = integral.integral_image(image**2)
 
     template -= template_mean
     template_ssd = np.sum(template**2)
@@ -101,29 +101,27 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     inv_area = 1.0 / (template.shape[0] * template.shape[1])
 
     # when `dtype=float` is used, ascontiguousarray returns ``double``.
-    result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
-                                              mode="valid"), dtype=np.float32)
+    corr = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
+                                            mode="valid"), dtype=np.float32)
 
     cdef int i, j
-    cdef float num, den, window_sqr_sum, window_mean_sqr, window_sum,
+    cdef float den, window_sqr_sum, window_mean_sqr, window_sum,
     # move window through convolution results, normalizing in the process
-    for i in range(result.shape[0]):
-        for j in range(result.shape[1]):
-            num = result[i, j]
+    for i in range(corr.shape[0]):
+        for j in range(corr.shape[1]):
             # subtract 1 because `i_end` and `j_end` are used for indexing into
             # summed-area table, instead of slicing windows of the image.
             i_end = i + template.shape[0] - 1
             j_end = j + template.shape[1] - 1
 
-            window_sum = sum_integral(integral_sum, i, j, i_end, j_end)
+            window_sum = integrate(image_sat, i, j, i_end, j_end)
             window_mean_sqr = window_sum * window_sum * inv_area
-            window_sqr_sum = sum_integral(integral_sqr, i, j, i_end, j_end)
+            window_sqr_sum = integrate(image_sqr_sat, i, j, i_end, j_end)
             den = sqrt((window_sqr_sum - window_mean_sqr) * template_ssd)
 
             if den == 0:
-                num = 0
+                corr[i, j] = 0
             else:
-                num /= den
-            result[i, j] = num
-    return result
+                corr[i, j] /= den
+    return corr
 
