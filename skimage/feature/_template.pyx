@@ -120,16 +120,10 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             window_sqr_sum = sum_integral(integral_sqr, i, j, i_end, j_end)
             den = sqrt((window_sqr_sum - window_mean_sqr) * template_ssd)
 
-            # enforce some limits
-            if fabs(num) < den:
-                num /= den
-            elif fabs(num) < den * 1.125:
-                if num > 0:
-                    num = 1
-                else:
-                    num = -1
-            else:
+            if den == 0:
                 num = 0
+            else:
+                num /= den
             result[i, j] = num
     return result
 
