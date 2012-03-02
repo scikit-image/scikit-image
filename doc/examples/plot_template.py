@@ -29,8 +29,7 @@ for x, y in target_positions:
     image[x:x+size, y:y+size] = target
 image += randn(400, 400)*2
 
-# Match the template.
-result = match_template(image, target, method='norm-corr')
+result = match_template(image, target)
 
 found_positions = peak_local_max(result)
 

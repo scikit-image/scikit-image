@@ -1,4 +1,34 @@
-"""template.py - Template matching
+"""
+Template matching using normalized cross-correlation.
+
+We use fast normalized cross-correlation algorithm (see [1]_ and [2]_) to
+compute match probability. This algorithm calculates the normalized
+cross-correlation of an image, `I`, with a template `T` according to the
+following equation::
+
+                sum{ I(x, y) [T(x, y) - <T>] }
+    -------------------------------------------------------
+    sqrt(sum{ [I(x, y) - <I>]^2 } sum{ [T(x, y) - <T>]^2 })
+
+where `<T>` is the average of the template, and `<I>` is the average of the
+image *coincident with the template*, and sums are over the template and the
+image window coincident with the template. Note that the numerator is simply
+the cross-correlation of the image and the zero-mean template.
+
+To speed up calculations, we use summed-area tables (a.k.a. integral images) to
+quickly calculate sums of image windows inside the loop. This step relies on
+the following relation (see Eq. 10 of [1])::
+
+    sum{ [I(x, y) - <I>]^2 } =
+        sum{ I^2(x, y) } - [sum{ I(x, y) }]^2 / N_x N_y
+
+(Without this relation, you would need to subtract each image-window mean from
+the image window *before* squaring.)
+
+.. [1] Briechle and Hanebeck, "Template Matching using Fast Normalized
+       Cross Correlation", Proceedings of the SPIE (2001).
+.. [2] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light and
+       Magic.
 """
 import cython
 cimport numpy as np
@@ -54,36 +84,25 @@ cdef float sum_integral(np.ndarray[float, ndim=2,  mode="c"] sat,
 
 @cython.boundscheck(False)
 def match_template(np.ndarray[float, ndim=2, mode="c"] image,
-                   np.ndarray[float, ndim=2, mode="c"] template,
-                   str method):
-    cdef np.ndarray[float, ndim=2] result
-    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sum
-    cdef np.ndarray[float, ndim=2,  mode="c"] integral_sqr
+                   np.ndarray[float, ndim=2, mode="c"] template):
+    cdef np.ndarray[float, ndim=2, mode="c"] result
+    cdef np.ndarray[float, ndim=2, mode="c"] integral_sum
+    cdef np.ndarray[float, ndim=2, mode="c"] integral_sqr
     cdef float template_mean = np.mean(template)
-    cdef float template_norm
+    cdef float template_ssd
     cdef float inv_area
+
+    integral_sum = integral.integral_image(image)
+    integral_sqr = integral.integral_image(image**2)
+
+    template -= template_mean
+    template_ssd = np.sum(template**2)
+    # use inversed area for accuracy
+    inv_area = 1.0 / (template.shape[0] * template.shape[1])
 
     # when `dtype=float` is used, ascontiguousarray returns ``double``.
     result = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
                                               mode="valid"), dtype=np.float32)
-    if method == 'norm-coeff':
-        integral_sum = integral.integral_image(image)
-    integral_sqr = integral.integral_image(image**2)
-
-    # use inversed area for accuracy
-    inv_area = 1.0 / (template.shape[0] * template.shape[1])
-
-    if method == 'norm-corr':
-        # calculate template norm according to the following:
-        # variance = 1/K Sum[(x_k - mean) ** 2]
-        #          = 1/K Sum[x_k ** 2] - mean ** 2
-        #template_norm = sqrt((np.std(template) ** 2 +
-                              #template_mean ** 2)) / sqrt(inv_area)
-        # TODO: check equation for template_norm.
-        # The above normalization factor is equivalent to the second-moment.
-        template_norm = sqrt(np.sum(template**2))
-    else:
-        template_norm = sqrt((template_mean ** 2)) / sqrt(inv_area)
 
     cdef int i, j
     cdef float num, den, window_sqr_sum, window_mean_sqr, window_sum,
@@ -96,15 +115,11 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             i_end = i + template.shape[0] - 1
             j_end = j + template.shape[1] - 1
 
-            window_mean_sqr = 0
-            if method == 'norm-coeff':
-                window_sum = sum_integral(integral_sum, i, j, i_end, j_end)
-                window_mean_sqr = window_sum * window_sum * inv_area
-                num -= window_sum * template_mean
-
+            window_sum = sum_integral(integral_sum, i, j, i_end, j_end)
+            window_mean_sqr = window_sum * window_sum * inv_area
             window_sqr_sum = sum_integral(integral_sqr, i, j, i_end, j_end)
+            den = sqrt((window_sqr_sum - window_mean_sqr) * template_ssd)
 
-            den = sqrt(window_sqr_sum - window_mean_sqr) * template_norm
             # enforce some limits
             if fabs(num) < den:
                 num /= den
