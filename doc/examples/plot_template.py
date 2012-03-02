@@ -16,18 +16,18 @@ template.
 
 import numpy as np
 from skimage.feature import match_template, peak_local_max
-from numpy.random import randn
 import matplotlib.pyplot as plt
 
 # We first construct a simple image target:
 size = 100
 target = np.tri(size) + np.tri(size)[::-1]
 # place target in an image at two positions, and add noise.
-image = np.zeros((400, 400))
+image = np.ones((400, 400))
 target_positions = [(50, 50), (200, 200)]
 for x, y in target_positions:
     image[x:x+size, y:y+size] = target
-image += randn(400, 400)*2
+np.random.seed(1)
+image += np.random.randn(400, 400)*2
 
 result = match_template(image, target)
 
