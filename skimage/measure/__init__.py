@@ -1,1 +1,1 @@
-from find_contours import find_contours
+from .find_contours import find_contours
