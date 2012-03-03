@@ -1,6 +1,10 @@
 __all__ = ['hough', 'probabilistic_hough']
 
-from itertools import izip
+try:
+    from itertools import izip
+except ImportError:
+    izip = zip
+
 import numpy as np
 from ._hough_transform import _probabilistic_hough  
 

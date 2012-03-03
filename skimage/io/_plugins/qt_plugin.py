@@ -1,4 +1,4 @@
-from util import prepare_for_display, window_manager, GuiLockError
+from .util import prepare_for_display, window_manager, GuiLockError
 import numpy as np
 import sys
 
@@ -134,7 +134,7 @@ def imshow(arr, fancy=False):
     if not fancy:
         iw = ImageWindow(arr, window_manager)
     else:
-        from skivi import SkiviImageWindow
+        from .skivi import SkiviImageWindow
         iw = SkiviImageWindow(arr, window_manager)
 
     iw.show()

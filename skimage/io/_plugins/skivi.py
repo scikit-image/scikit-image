@@ -22,8 +22,8 @@ from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
                                  QLabel, QWidget, QVBoxLayout, QSlider,
                                  QPainter, QColor, QFrame, QLayoutItem)
 
-from q_color_mixer import MixerPanel
-from q_histogram import QuadHistogram
+from .q_color_mixer import MixerPanel
+from .q_histogram import QuadHistogram
 
 
 class ImageLabel(QLabel):
