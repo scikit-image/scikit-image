@@ -1,9 +1,6 @@
 __all__ = ['hough', 'probabilistic_hough']
 
-try:
-    from itertools import izip
-except ImportError:
-    izip = zip
+from itertools import izip as zip
 
 import numpy as np
 from ._hough_transform import _probabilistic_hough  
@@ -34,7 +31,7 @@ def _hough(img, theta=None):
     # x and y can be large, so we can't just broadcast to 2D
     # arrays as we may run out of memory. Instead we process
     # one vertical slice at a time.
-    for i, (cT, sT) in enumerate(izip(cos_theta, sin_theta)):
+    for i, (cT, sT) in enumerate(zip(cos_theta, sin_theta)):
 
         # compute the base distances
         distances = x * cT + y * sT
