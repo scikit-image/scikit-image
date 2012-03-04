@@ -56,7 +56,10 @@ import os.path as _osp
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
 
-from .version import version as __version__
+try:
+    from .version import version as __version__
+except ImportError:
+    __version__ = "unbuilt-dev"
 
 def _setup_test(verbose=False):
     import gzip
