@@ -70,9 +70,9 @@ def haar(image, levels=2, threshold=.2, locality=5):
             saliency = saliencyMap[row,col]
             if saliency > sthreshold:
                 if  saliency >= np.max(saliencyMap[row-locality:row+locality, col-locality:col+locality]):
-                    features.append((row*2,col*2))
+                    features.append([row*2,col*2])
 
-    return features
+    return np.array(features)
     
 
 
