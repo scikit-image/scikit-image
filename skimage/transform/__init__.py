@@ -4,3 +4,4 @@ from .finite_radon_transform import *
 from .project import *
 from ._project import homography as fast_homography
 from .integral import *
+from .haar2d import haar2d, ihaar2d
