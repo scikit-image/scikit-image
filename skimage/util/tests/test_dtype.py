@@ -74,6 +74,14 @@ def test_float_out_of_range():
     assert_raises(ValueError, img_as_int, too_low)
 
 
+def test_copy():
+    x = np.array([1], dtype=float)
+    y = img_as_float(x)
+    z = img_as_float(x, force_copy=True)
+
+    assert y is x
+    assert z is not x
+
 if __name__ == '__main__':
     np.testing.run_module_suite()
 
