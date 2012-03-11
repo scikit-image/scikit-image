@@ -2,7 +2,7 @@ import numpy as np
 import scipy.ndimage as nd
 import math
 
-def haar2d(image, levels):
+def haar2d(image, levels=1):
     """
     2D Haar wavelet decomposition for levels=levels.
     
@@ -23,16 +23,17 @@ def haar2d(image, levels):
     --------
     skimage.transfrom.ihaar2d
     """
-    assert len(image.shape) == 2, 'Must be 2D image!'
+    if image.ndim != 2:
+        raise ValueError('The input image must be 2-D')
     origRows, origCols = image.shape
     extraRows = 0;
     extraCols = 0;
-    while (((origRows + extraRows) >> levels) << levels != (origRows + extraRows)):
+    while np.left_shift(np.right_shift((origRows + extraRows), levels), levels) != (origRows + extraRows):
         extraRows += 1
-    while (((origCols + extraCols) >> levels) << levels != (origCols + extraCols)):
+    while np.left_shift(np.right_shift((origCols + extraCols), levels), levels) != (origCols + extraCols):
         extraCols += 1
 
-    # Pad image to compatible shape using repitition
+    # Pad image to compatible shape using repetition
     rightFill = np.repeat(image[:, -1:], extraCols, axis=1)
     _image = np.zeros([origRows, origCols + extraCols])
     _image[:, :origCols] = image
@@ -61,7 +62,7 @@ def haar2d(image, levels):
 
     return haarImage
 
-def ihaar2d(image, levels):
+def ihaar2d(image, levels=1):
     """
     2D Haar wavelet decomposition inverse for levels=levels.
     
@@ -81,13 +82,15 @@ def ihaar2d(image, levels):
     --------
     skimage.transform.haar2d
     """    
-    assert len(image.shape) == 2, 'Must be 2D image!'
+    if image.ndim != 2:
+      raise ValueError('The input image must be 2-D')
+    
     origRows, origCols = image.shape
     extraRows = 0;
     extraCols = 0;
-    while (((origRows + extraRows) >> levels) << levels != (origRows + extraRows)):
+    while np.left_shift(np.right_shift((origRows + extraRows), levels), levels) != (origRows + extraRows):
         extraRows += 1
-    while (((origCols + extraCols) >> levels) << levels != (origCols + extraCols)):
+    while np.left_shift(np.right_shift((origCols + extraCols), levels), levels) != (origCols + extraCols):
         extraCols += 1
     assert (extraRows, extraCols) == (0,0), 'Must be compatible shape!'
 

@@ -8,7 +8,12 @@ from skimage.transform.haar2d import haar2d
 
 def haar(image, levels=2, threshold=.2, locality=5):
     """
-    2D Haar wavelet feature detector.
+    2D Haar wavelet feature detector. The levels of the Haar decomposition
+    are equally weigted, so features are salient either if there is change on
+    many levels, or very large change on some level. The maximum level that
+    can be specified for an image depends on the dimensions of the image: 
+    Each image dimension divided by 2 ** N must be >= 1 where N is the number 
+    of levels chosen.
     
     Parameters
     ----------
@@ -23,12 +28,12 @@ def haar(image, levels=2, threshold=.2, locality=5):
 
     Returns
     -------
-    features: list
-       An list containing the coordinates (row,col) of the detected features.
+    features: ndarray
+       An array containing the coordinates [[row,col], ..] of the detected features.
 
     See also
     --------
-    skimage.transfrom.haar2d
+    skimage.transform.haar2d
     """
     
     haarData = haar2d(image, levels)
