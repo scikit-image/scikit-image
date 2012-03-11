@@ -75,7 +75,7 @@ def test_float_out_of_range():
 
 
 def test_copy():
-    x = np.array([1], dtype=float)
+    x = np.array([1], dtype=np.float64)
     y = img_as_float(x)
     z = img_as_float(x, force_copy=True)
 
