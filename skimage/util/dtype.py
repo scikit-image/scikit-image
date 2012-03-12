@@ -24,7 +24,7 @@ if np.__version__ >= "1.6.0":
     _supported_types += (np.float16, )
 
 
-def convert(image, dtype):
+def convert(image, dtype, force_copy=False):
     """
     Convert an image to the requested data-type.
 
@@ -40,6 +40,8 @@ def convert(image, dtype):
         Input image.
     dtype : dtype
         Target data-type.
+    force_copy : bool
+        Force a copy of the data, irrespective of its current dtype.
 
     """
     image = np.asarray(image)
@@ -53,6 +55,8 @@ def convert(image, dtype):
     itemsize_in = dtypeobj_in.itemsize
 
     if dtype_in == dtype:
+        if force_copy:
+            image = image.copy()
         return image
 
     if not (dtype_in in _supported_types and dtype in _supported_types):
@@ -159,13 +163,15 @@ def convert(image, dtype):
         return dtype(result)
 
 
-def img_as_float(image):
+def img_as_float(image, force_copy=False):
     """Convert an image to double-precision floating point format.
 
     Parameters
     ----------
     image : ndarray
         Input image.
+    force_copy : bool
+        Force a copy of the data, irrespective of its current dtype.
 
     Returns
     -------
@@ -178,16 +184,18 @@ def img_as_float(image):
     Negative input values will be shifted to the positive domain.
 
     """
-    return convert(image, np.float64)
+    return convert(image, np.float64, force_copy)
 
 
-def img_as_uint(image):
+def img_as_uint(image, force_copy=False):
     """Convert an image to 16-bit unsigned integer format.
 
     Parameters
     ----------
     image : ndarray
         Input image.
+    force_copy : bool
+        Force a copy of the data, irrespective of its current dtype.
 
     Returns
     -------
@@ -199,16 +207,18 @@ def img_as_uint(image):
     Negative input values will be shifted to the positive domain.
 
     """
-    return convert(image, np.uint16)
+    return convert(image, np.uint16, force_copy)
 
 
-def img_as_int(image):
+def img_as_int(image, force_copy=False):
     """Convert an image to 16-bit signed integer format.
 
     Parameters
     ----------
     image : ndarray
         Input image.
+    force_copy : bool
+        Force a copy of the data, irrespective of its current dtype.
 
     Returns
     -------
@@ -221,16 +231,18 @@ def img_as_int(image):
     the output image will still only have positive values.
 
     """
-    return convert(image, np.int16)
+    return convert(image, np.int16, force_copy)
 
 
-def img_as_ubyte(image):
+def img_as_ubyte(image, force_copy=False):
     """Convert an image to 8-bit unsigned integer format.
 
     Parameters
     ----------
     image : ndarray
         Input image.
+    force_copy : bool
+        Force a copy of the data, irrespective of its current dtype.
 
     Returns
     -------
@@ -243,4 +255,4 @@ def img_as_ubyte(image):
     the output image will still only have positive values.
 
     """
-    return convert(image, np.uint8)
+    return convert(image, np.uint8, force_copy)
