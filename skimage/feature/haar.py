@@ -14,6 +14,9 @@ def haar(image, levels=2, threshold=.2, locality=5):
     can be specified for an image depends on the dimensions of the image: 
     Each image dimension divided by 2 ** N must be >= 1 where N is the number 
     of levels chosen.
+
+    Please refer to http://en.wikipedia.org/wiki/Wavelets for a description
+    of what a 'level' is.
     
     Parameters
     ----------

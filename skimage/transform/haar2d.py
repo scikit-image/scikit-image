@@ -5,6 +5,9 @@ import math
 def haar2d(image, levels=1):
     """
     2D Haar wavelet decomposition for levels=levels.
+
+    Please refer to http://en.wikipedia.org/wiki/Wavelets for a description
+    of what a 'level' is.
     
     Parameters
     ----------
@@ -66,6 +69,9 @@ def ihaar2d(image, levels=1):
     """
     2D Haar wavelet decomposition inverse for levels=levels.
     
+    Please refer to http://en.wikipedia.org/wiki/Wavelets for a description
+    of what a 'level' is.
+
     Parameters
     ----------
     image: nd-array

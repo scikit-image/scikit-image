@@ -6,6 +6,10 @@ Haar Salient Point Detector
 The Haar salient point detector detects "interest points" using a 2D Haar
 wavelet decomposition.
 
+In this example we can see that the types and number of features found is similar
+between Haar and Harris detectors. The Haar detector does seem to have some possible
+'false' features, compared to the Harris detector.
+
 """
 
 from matplotlib import pyplot as plt
