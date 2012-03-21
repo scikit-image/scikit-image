@@ -43,6 +43,11 @@ def lena():
 
     """
     return load("lena.png")
+	
+def text():
+	""" Gray-level "text" image used for corner detection"""
+	
+	return load("text.png")
 
 def checkerboard():
     """Checkerboard image.

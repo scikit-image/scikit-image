@@ -76,7 +76,29 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     -------
     coordinates : (N, 2) array
         (row, column) coordinates of interest points.
+    
+    Examples
+    -------
+    >>> square = np.zeros([10,10])
+    >>> square[2:8,2:8]=1
+    >>> square
+    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    >>> harris(square, min_distance=1)
+    array([[3, 3],
+           [3, 6],
+           [6, 3],
+           [6, 6]])    
     """
+    
     harrisim = _compute_harris_response(image, eps=eps,
                     gaussian_deviation=gaussian_deviation)
     coordinates = peak.peak_local_max(harrisim, min_distance=min_distance,
