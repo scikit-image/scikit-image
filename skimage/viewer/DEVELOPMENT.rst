@@ -2,7 +2,7 @@
 Organization
 ============
 
-`scikits-loupe` is organized into the following subpackages:
+The `viewer` package is organized into the following subpackages:
 
 utils
    Basic utilities shared by other subpackages.
