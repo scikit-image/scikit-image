@@ -1,12 +1,20 @@
 import matplotlib.pyplot as plt
 
-def imshow(*args, **kwargs):
+
+def imshow(image, fancy=False, **kwargs):
     kwargs.setdefault('interpolation', 'nearest')
     kwargs.setdefault('cmap', 'gray')
-    plt.imshow(*args, **kwargs)
+
+    if fancy:
+        from ... import viewer
+        return viewer.ImageViewer(image, **kwargs)
+    else:
+        plt.imshow(image, **kwargs)
+
 
 imread = plt.imread
 show = plt.show
 
 def _app_show():
     show()
+
