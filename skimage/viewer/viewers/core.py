@@ -7,7 +7,7 @@ from ..utils import figimage
 from ..widgets.slider import Slider
 
 
-__all__ = ['imshow', 'ImageViewer', 'CollectionViewer']
+__all__ = ['ImageViewer', 'CollectionViewer']
 
 
 class ImageViewer(object):
@@ -202,13 +202,4 @@ class CollectionViewer(ImageViewer):
             self.update_index(self.num_images - 1)
         elif key == 'home':
             self.update_index(0)
-
-
-def imshow(image, **kwargs):
-    """Return ImageViewer for input image.
-
-    Keyword arguments are passed on to Matplotlib's `imshow` function
-    """
-    image_window = ImageViewer(image, **kwargs)
-    return image_window
 
