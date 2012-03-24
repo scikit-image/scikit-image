@@ -101,8 +101,10 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     inv_area = 1.0 / (template.shape[0] * template.shape[1])
 
     # when `dtype=float` is used, ascontiguousarray returns ``double``.
-    corr = np.ascontiguousarray(fftconvolve(image, np.fliplr(template),
-                                            mode="valid"), dtype=np.float32)
+    corr = np.ascontiguousarray(fftconvolve(image,
+                                            np.flipud(np.fliplr(template)),
+                                            mode="valid"),
+                                dtype=np.float32)
 
     cdef int i, j
     cdef float den, window_sqr_sum, window_mean_sqr, window_sum,
