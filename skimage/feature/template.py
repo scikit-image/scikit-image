@@ -35,13 +35,16 @@ def match_template(image, template, pad_output=True):
     """
     image = _convert(image, np.float32)
     template = _convert(template, np.float32)
-    result = _template.match_template(image, template)
 
     if pad_output:
-        h, w = result.shape
-        full_result = np.zeros(image.shape, dtype=np.float32)
-        full_result[:h, :w] = result
-        return full_result
-    else:
-        return result
+        pad_size = tuple(np.array(image.shape) + np.array(template.shape) - 1)
+        pad_image = np.mean(image) * np.ones(pad_size, dtype=np.float32)
+        h, w = image.shape
+        i0, j0 = template.shape
+        i0 /= 2
+        j0 /= 2
+        pad_image[i0:i0+h, j0:j0+w] = image
+        image = pad_image
+    result = _template.match_template(image, template)
+    return result
 
