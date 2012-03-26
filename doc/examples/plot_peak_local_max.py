@@ -1,14 +1,15 @@
 """
 ===============================================================================
-Peak local maximum
+Finding local maxima
 ===============================================================================
 
-The peak local maximum return coordinates of peaks in a image. The maximum
-filter is used for finding the maximum peaks in the image. It dilates the 
-original image and is used within peak local max function to find the 
-coordinates of maximum peaks, comparing the dilated image with the original. 
-Then, the peak local max function returns the coordinates of points where 
-image = dilated image. 
+The peak local maximum function returns the coordinates of local peaks (maxima)
+in a image. A maximum filter is used for finding local maxima. This operation
+dilates the original image and merges neighboring local maxima closer than the
+size of the dilation. Locations where the original image is equal to the 
+dilated image are returned as local maxima.
+
+
 
 """
 from scipy import ndimage
@@ -18,14 +19,13 @@ from skimage.feature import peak_local_max
 from skimage import data, img_as_float
 
 im = img_as_float(data.coins())
-image = im.copy()
 
-# The image_max is the dilation of im with a 20*20 structuring element
+# image_max is the dilation of im with a 20*20 structuring element
 # It is used within peak_local_max function 
-image_max = ndimage.maximum_filter(image, size=20, mode='constant')
+image_max = ndimage.maximum_filter(im, size=20, mode='constant')
 
-# Comparison between image_max and im to find the coordinates of maximum peaks
-coordinates = peak_local_max(im, min_distance = 20)
+# Comparison between image_max and im to find the coordinates of local maxima
+coordinates = peak_local_max(im, min_distance=20)
 
 # display results
 plt.figure(figsize=(8, 3))
@@ -42,9 +42,9 @@ plt.title('Maximum filter')
 plt.subplot(133)
 plt.imshow(im, cmap=plt.cm.gray)
 a, b = im.shape
-plt.plot([p[1] for p in coordinates],[p[0] for p in coordinates],'r.')
-plt.xlim(0,b)
-plt.ylim(a,0)
+plt.plot([p[1] for p in coordinates], [p[0] for p in coordinates], 'r.')
+plt.xlim(0, b)
+plt.ylim(a, 0)
 plt.axis('off')
 plt.title('Peak local max')
 

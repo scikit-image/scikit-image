@@ -20,28 +20,24 @@ def plot_harris_points(image, filtered_coords):
     """ plots corners found in image"""
 
     plt.plot()
-    plt.imshow(image, cmap=plt.cm.gray)
+    plt.imshow(image)
     plt.plot([p[1] for p in filtered_coords],
              [p[0] for p in filtered_coords],
-             'r.')
+             'b.')
     plt.axis('off')
     plt.show()
 
 # display results
+plt.figure(figsize=(9, 3))
+im_lena = img_as_float(data.lena())
+im_text = img_as_float(data.text())
 
-plt.figure(figsize=(8, 6))
-im = img_as_float(data.lena())
-im2 = img_as_float(data.text())
+filtered_coords = harris(im_lena, min_distance=4)
 
-filtered_coords = harris(im, min_distance=4)
+plt.axes([0, 0, 0.3, 0.95])
+plot_harris_points(im_lena, filtered_coords)
 
-plt.subplot(121)
-plot_harris_points(im, filtered_coords)
+filtered_coords = harris(im_text, min_distance=4)
 
-filtered_coords = harris(im2, min_distance=4)
-
-plt.subplot(122)
-plot_harris_points(im2, filtered_coords)
-
-plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
-                    bottom=0.02, left=0.02, right=0.98)
+plt.axes([0.2, 0, 0.77, 1])
+plot_harris_points(im_text, filtered_coords)

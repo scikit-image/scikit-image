@@ -45,7 +45,16 @@ def lena():
     return load("lena.png")
 	
 def text():
-	""" Gray-level "text" image used for corner detection"""
+	""" Gray-level "text" image used for corner detection.
+    
+    Notes
+    -----
+    This image was downloaded from Wikipedia
+    <http://en.wikipedia.org/wiki/File:Corner.png>`__.
+
+    No known copyright restrictions, released into the public domain.
+
+    """
 	
 	return load("text.png")
 

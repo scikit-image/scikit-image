@@ -23,68 +23,35 @@ def peak_local_max(image, min_distance=10, threshold=0.1):
     -------
     coordinates : (N, 2) array
         (row, column) coordinates of peaks.
-        
+    
+    Notes
+    -----
+    The peak local maximum function returns the coordinates of local peaks (maxima)
+    in a image. A maximum filter is used for finding local maxima. This operation
+    dilates the original image. After comparison between dilated and original image, 
+    peak_local_max function returns the coordinates of peaks where
+    dilated image = original.
+    
     Examples
     --------
-    >>> square = np.zeros([10,10])
-    >>> square[2:8,2:8]=1
-    >>> square[3:7,3:7]=0
-    >>> square
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.,  0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.,  0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.,  0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  0.,  0.,  0.,  0.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    
-    >>> image_max = ndimage.maximum_filter(square, size=3, 
-    mode='constant')
-    
-    image_max is computed in peak_local_max function to enable
-    the calculation of coordinates of peaks. It is the dilation of 
-    square
-    
-    >>> image_max
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  0.],
-           [ 0.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  0.],
-           [ 0.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  0.],
-           [ 0.,  1.,  1.,  1.,  0.,  0.,  1.,  1.,  1.,  0.],
-           [ 0.,  1.,  1.,  1.,  0.,  0.,  1.,  1.,  1.,  0.],
-           [ 0.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  0.],
-           [ 0.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  0.],
-           [ 0.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    
-    After comparison between image_max and square, peak_local_max
-    function returns the coordinates of peaks where
-    square = image_max
-    
-    >>> peak_local_max(square, min_distance=1)
-    array([[2, 2],
-           [2, 3],
-           [2, 4],
-           [2, 5],
-           [2, 6],
-           [2, 7],
-           [3, 2],
-           [3, 7],
-           [4, 2],
-           [4, 7],
-           [5, 2],
-           [5, 7],
-           [6, 2],
-           [6, 7],
-           [7, 2],
-           [7, 3],
-           [7, 4],
-           [7, 5],
-           [7, 6],
-           [7, 7]])
+    >>> im = np.zeros((7, 7))
+    >>> im[3, 4] = 1
+    >>> im[3, 2] = 1.5
+    >>> im
+    array([[ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+           [ 0. ,  0. ,  1.5,  0. ,  1. ,  0. ,  0. ],
+           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
+           [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ]])
+        
+    >>> peak_local_max(im, min_distance=1)
+    array([[3, 2],
+           [3, 4]])
+           
+    >>> peak_local_max(im, min_distance=2)
+    array([[3, 2]])
     
     """
     image = image.copy()

@@ -80,7 +80,7 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     Examples
     -------
     >>> square = np.zeros([10,10])
-    >>> square[2:8,2:8]=1
+    >>> square[2:8,2:8] = 1
     >>> square
     array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
@@ -93,6 +93,9 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
     >>> harris(square, min_distance=1)
+    
+    Corners of the square
+    
     array([[3, 3],
            [3, 6],
            [6, 3],
