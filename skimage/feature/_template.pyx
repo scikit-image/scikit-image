@@ -102,7 +102,7 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
 
     # when `dtype=float` is used, ascontiguousarray returns ``double``.
     corr = np.ascontiguousarray(fftconvolve(image,
-                                            np.flipud(np.fliplr(template)),
+                                            template[::-1, ::-1],
                                             mode="valid"),
                                 dtype=np.float32)
 
