@@ -90,7 +90,7 @@ if test_verbose is None:
     except NameError:
         pass
 
-def get_log(name):
+def get_log(name=None):
     """Return a console logger.
 
     Output may be sent to the logger using the `debug`, `info`, `warning`,
@@ -108,7 +108,32 @@ def get_log(name):
 
     """
     import logging, sys
-    logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
-    return logging.getLogger(name)
+
+    if name is None:
+        name = 'skimage'
+    else:
+        name = 'skimage.' + name
+
+    log = logging.getLogger(name)
+    return log
+
+def _setup_log():
+    """Configure root logger.
+
+    """
+    import logging, sys
+
+    log = logging.getLogger()
+
+    handler = logging.StreamHandler(stream=sys.stdout)
+    formatter = logging.Formatter(
+        '%(name)s: %(levelname)s: %(message)s'
+        )
+    handler.setFormatter(formatter)
+
+    log.addHandler(handler)
+    log.setLevel(logging.WARNING)
+
+_setup_log()
 
 from .util.dtype import *
