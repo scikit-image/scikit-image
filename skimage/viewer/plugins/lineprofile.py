@@ -49,6 +49,9 @@ class LineProfile(Plugin):
         else:
             raise ValueError("Unrecognized `limits`: %s" % limits)
 
+        if not limits is None:
+            self.ax.set_ylim(self.limits)
+
         h, w = self.image.shape
 
         self._init_end_pts = np.array([[w/3, h/2], [2*w/3, h/2]])
@@ -231,7 +234,7 @@ def profile_line(img, end_pts, linewidth=1):
 
     line_x = np.linspace(min(x1, x2), max(x1, x2), np.ceil(length))
     line_y = line_x * a + b
-    y_width = abs(linewidth * np.sin(theta)/2)
+    y_width = abs(linewidth * np.cos(theta)/2)
     perp_ys = np.array([np.linspace(yi - y_width,
                                     yi + y_width, linewidth) for yi in line_y])
     perp_xs = - a * perp_ys + (line_x +  a * line_y)[:, np.newaxis]
