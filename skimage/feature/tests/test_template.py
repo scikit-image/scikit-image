@@ -70,6 +70,21 @@ def test_normalization():
     assert np.allclose(result.flat[iflat_max], 1)
 
 
+def test_no_nans():
+    """Test that `match_template` doesn't return NaN values.
+
+    When image values are only slightly different, floating-point errors can
+    cause a subtraction inside of a square root to go negative (without an
+    explicit check that was added to `match_template`).
+    """
+    np.random.seed(1)
+    image = 10000 + np.random.normal(size=(20, 20))
+    template = np.ones((6, 6))
+    template[:3, :] = 0
+    result = match_template(image, template)
+    assert not np.any(np.isnan(result))
+
+
 def test_switched_arguments():
     image = np.ones((5, 5))
     template = np.ones((3, 3))

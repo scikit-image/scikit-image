@@ -119,11 +119,11 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             window_sum = integrate(image_sat, i, j, i_end, j_end)
             window_mean_sqr = window_sum * window_sum * inv_area
             window_sqr_sum = integrate(image_sqr_sat, i, j, i_end, j_end)
-            den = sqrt((window_sqr_sum - window_mean_sqr) * template_ssd)
-
-            if den == 0:
+            if window_sqr_sum <= window_mean_sqr:
                 corr[i, j] = 0
-            else:
-                corr[i, j] /= den
+                continue
+
+            den = sqrt((window_sqr_sum - window_mean_sqr) * template_ssd)
+            corr[i, j] /= den
     return corr
 
