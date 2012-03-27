@@ -33,6 +33,8 @@ def match_template(image, template, pad_output=True):
         beyond the image edges.
 
     """
+    if np.any(np.less(image.shape, template.shape)):
+        raise ValueError("Image must be larger than template.")
     image = _convert(image, np.float32)
     template = _convert(template, np.float32)
 

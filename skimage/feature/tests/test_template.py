@@ -70,6 +70,12 @@ def test_normalization():
     assert np.allclose(result.flat[iflat_max], 1)
 
 
+def test_switched_arguments():
+    image = np.ones((5, 5))
+    template = np.ones((3, 3))
+    np.testing.assert_raises(ValueError, match_template, template, image)
+
+
 if __name__ == "__main__":
     from numpy import testing
     testing.run_module_suite()
