@@ -32,6 +32,38 @@ def match_template(image, template, pad_input=False):
         `(m, n)` template, the `output` is `(M - m + 1, N - n + 1)` when
         `pad_input = False` and `(M, N)` when `pad_input = True`.
 
+    Examples
+    --------
+    >>> template = np.zeros((3, 3))
+    >>> template[1, 1] = 1
+    >>> print template
+    [[ 0.  0.  0.]
+     [ 0.  1.  0.]
+     [ 0.  0.  0.]]
+    >>> image = np.zeros((6, 6))
+    >>> image[1, 1] = 1
+    >>> image[4, 4] = -1
+    >>> print image
+    [[ 0.  0.  0.  0.  0.  0.]
+     [ 0.  1.  0.  0.  0.  0.]
+     [ 0.  0.  0.  0.  0.  0.]
+     [ 0.  0.  0.  0.  0.  0.]
+     [ 0.  0.  0.  0. -1.  0.]
+     [ 0.  0.  0.  0.  0.  0.]]
+    >>> result = match_template(image, template)
+    >>> print np.round(result, 3)
+    [[ 1.    -0.125  0.     0.   ]
+     [-0.125 -0.125  0.     0.   ]
+     [ 0.     0.     0.125  0.125]
+     [ 0.     0.     0.125 -1.   ]]
+    >>> result = match_template(image, template, pad_input=True)
+    >>> print np.round(result, 3)
+    [[-0.125 -0.125 -0.125  0.     0.     0.   ]
+     [-0.125  1.    -0.125  0.     0.     0.   ]
+     [-0.125 -0.125 -0.125  0.     0.     0.   ]
+     [ 0.     0.     0.     0.125  0.125  0.125]
+     [ 0.     0.     0.     0.125 -1.     0.125]
+     [ 0.     0.     0.     0.125  0.125  0.125]]
     """
     if np.any(np.less(image.shape, template.shape)):
         raise ValueError("Image must be larger than template.")
