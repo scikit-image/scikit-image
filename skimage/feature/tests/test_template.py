@@ -59,8 +59,8 @@ def test_normalization():
     sorted_result = np.argsort(result.flat)
     iflat_min = sorted_result[0]
     iflat_max = sorted_result[-1]
-    min_result = np.unravel_index(iflat_min, (N, N))
-    max_result = np.unravel_index(iflat_max, (N, N))
+    min_result = np.unravel_index(iflat_min, result.shape)
+    max_result = np.unravel_index(iflat_max, result.shape)
 
     # shift result by 1 because of template border
     assert np.all((np.array(min_result) + 1) == (ineg, jneg))

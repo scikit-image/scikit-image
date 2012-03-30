@@ -6,7 +6,7 @@ import _template
 from skimage.util.dtype import _convert
 
 
-def match_template(image, template, pad_output=True):
+def match_template(image, template, pad_output=False):
     """Match a template to an image using normalized correlation.
 
     The output is an array with values between -1.0 and 1.0, which correspond
