@@ -32,7 +32,7 @@ ax2.set_axis_off()
 ax2.set_title('image')
 
 # highlight matched region
-xy = np.unravel_index(np.argmax(result), image.shape)[::-1] # -1 flips ij to xy
+xy = np.unravel_index(np.argmax(result), result.shape)[::-1] #-1 flips ij to xy
 wface, hface = head.shape
 rect = plt.Rectangle(xy, wface, hface, edgecolor='r', facecolor='none')
 ax2.add_patch(rect)
