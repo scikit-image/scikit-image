@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
 
+from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
 
 
@@ -89,6 +90,26 @@ def test_switched_arguments():
     image = np.ones((5, 5))
     template = np.ones((3, 3))
     np.testing.assert_raises(ValueError, match_template, template, image)
+
+
+def test_pad_input():
+    template = 10.0 * diamond(2)
+
+    image = np.zeros((9, 19))
+    mid = slice(2, 7)
+    image[mid, :3] = -template[:, -3:]  # half min template centered at 0
+    image[mid, 4:9] = template          # full max template centered at 6
+    image[mid, -9:-4] = -template       # full min template centered at 12
+    image[mid, -3:] = template[:, :3]   # half max template centered at 18
+
+    result = match_template(image, template, pad_input=True)
+
+    # get the max and min results.
+    sorted_result = np.argsort(result.flat)
+    i, j = np.unravel_index(sorted_result[:2], result.shape)
+    assert_close(j, (12, 0))
+    i, j = np.unravel_index(sorted_result[-2:], result.shape)
+    assert_close(j, (18, 6))
 
 
 if __name__ == "__main__":
