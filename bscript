@@ -6,24 +6,8 @@ from numpy.distutils.misc_util \
 
 from bento.commands import hooks
 
-from bento.commands.extras.waf \
-    import \
-        ConfigureWafContext, BuildWafContext, register_options
-
-@hooks.startup
-def startup(context):
-    context.register_context("configure", ConfigureWafContext)
-    context.register_context("build", BuildWafContext)
-
-@hooks.options
-def options(context):
-    register_options(context)
-
 @hooks.pre_configure
 def pre_configure(context):
     conf = context.waf_context
-    conf.load("cython", tooldir=".")
-
     conf.env.INCLUDES = []
-    conf.env.INCLUDES.extend(get_numpy_include_dirs())
-    conf.env.INCLUDES.append(op.join("skimage", "morphology"))
+    conf.env.INCLUDES.extend(get_numpy_include_dirs() + [op.join("skimage", "morphology")])
