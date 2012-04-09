@@ -30,6 +30,9 @@ def test_radon_iradon():
     reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
     delta = np.mean(abs(image - reconstructed))
     assert delta < 0.05
+    size = 20
+    image = np.tri(size) + np.tri(size)[::-1]
+    reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
    
 def test_iradon_angles():
     """
