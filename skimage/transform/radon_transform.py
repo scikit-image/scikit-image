@@ -135,7 +135,7 @@ def iradon(radon_image, theta=None, output_size=None,
     img = radon_image.copy()
     # resize image to next power of two for fourier analysis
     # speeds up fourier and lessens artifacts
-    order = max(64, 2 ** np.ceil(np.log(2 * n) / np.log(2)))
+    order = max(64., 2 ** np.ceil(np.log(2 * n) / np.log(2)))
     # zero pad input image
     img.resize((order, img.shape[1]))
     # construct the fourier filter
