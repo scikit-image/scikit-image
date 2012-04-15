@@ -19,6 +19,8 @@ def fill_polygon(image, coords, color=1):
         Nx2 array containing x, y coordinates of polygon
     color : integer, optional
         face color of polygon, default: 1
+
+    Reference: http://www.cs.ucdavis.edu/~ma/ECS175_S00/Notes/0411_b.pdf
     '''
 
     if image.ndim != 2:
