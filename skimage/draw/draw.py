@@ -4,7 +4,7 @@ Methods to draw on arrays.
 '''
 
 import numpy as np
-from ._draw import bresenham, cfill_polygon
+from ._draw import bresenham, _fill_polygon
 
 
 def fill_polygon(image, coords, color=1):
@@ -29,4 +29,4 @@ def fill_polygon(image, coords, color=1):
         raise TypeError('The coordinates must be a two dimensional array.')
     if np.any(coords[0,:] != coords[-1,:]):
         raise ValueError('Last coordinate must equal first.')
-    cfill_polygon(image, coords.astype('double'), color)
+    _fill_polygon(image, coords.astype('double'), color)

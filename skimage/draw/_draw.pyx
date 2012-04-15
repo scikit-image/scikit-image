@@ -70,7 +70,7 @@ def bresenham(int y, int x, int y2, int x2):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def cfill_polygon(
+def _fill_polygon(
     np.ndarray[np.uint8_t, ndim=2] image,
     np.ndarray[np.double_t, ndim=2] coords,
     int color
