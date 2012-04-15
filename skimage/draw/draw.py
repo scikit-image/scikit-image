@@ -23,7 +23,7 @@ def fill_polygon(image, coords, color=1):
 
     if image.ndim != 2:
         raise TypeError('The input image must be a two dimensional array.')
-    if image.dtype != 'uint8':
+    if not np.issubdtype(image.dtype, 'uint8'):
         raise TypeError('The input image dtype must be \'uint8\'.')
     if coords.ndim != 2:
         raise TypeError('The coordinates must be a two dimensional array.')
