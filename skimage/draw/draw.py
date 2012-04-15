@@ -23,7 +23,6 @@ def fill_polygon(image, coords, color=1):
 
     if image.ndim != 2:
         raise TypeError('The input image must be a two dimensional array.')
-    print image.dtype
     if image.dtype != 'uint8':
         raise TypeError('The input image dtype must be \'uint8\'.')
     if coords.ndim != 2:
