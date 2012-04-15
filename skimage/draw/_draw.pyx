@@ -75,15 +75,16 @@ def _fill_polygon(
     np.ndarray[np.double_t, ndim=2] coords,
     int color
 ):
-    cdef int x, y, i, node_idx, swap
+    cdef int x, y, i, node_idx
+    cdef double swap
     cdef int rows = image.shape[0]
     cdef int cols = image.shape[1]
     cdef int miny = <int>max(0, floor(coords[:,1].min()))
     cdef int maxy = <int>min(rows, ceil(coords[:,1].max()))
     cdef int num_coords = coords.shape[0]
     # array containing the x positions of the intersections of line - polygon
-    cdef np.ndarray[np.uint32_t, ndim=1] nodes = np.zeros((num_coords-1,),
-        dtype=np.uint32)
+    cdef np.ndarray[np.double_t, ndim=1] nodes = np.zeros((num_coords-1,),
+        dtype=np.double)
 
     for y in xrange(miny, maxy+1):
         #: determine all intersections of line with polygon
@@ -93,9 +94,10 @@ def _fill_polygon(
                 (coords[i,1] < y and coords[i+1,1] >= y)
                 or (coords[i,1] >= y and coords[i+1,1] < y)
             ):
-                nodes[node_idx] = <int>round(
+                nodes[node_idx] = <double>(
                     (coords[i,0]+(y-coords[i,1])
-                    / (coords[i+1,1]-coords[i,1])*(coords[i+1,0]-coords[i,0])))
+                    / (coords[i+1,1]-coords[i,1])*(coords[i+1,0]-coords[i,0]))
+                )
                 node_idx += 1
         # no intersection in current line
         if node_idx == 0:
@@ -119,5 +121,7 @@ def _fill_polygon(
                 nodes[i] = 0
             if nodes[i+1] > cols:
                 nodes[i+1] = cols
-            for x in xrange(nodes[i], nodes[i+1]):
+            if nodes[i+1] % 1 == 0:
+                nodes[i+1] -= 1
+            for x in xrange(<int>ceil(nodes[i]), <int>floor(nodes[i+1])+1):
                 image[y,x] = color
