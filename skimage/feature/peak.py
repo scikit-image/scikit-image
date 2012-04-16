@@ -4,7 +4,7 @@ from scipy import ndimage
 
 
 def peak_local_max(image, min_distance=10, threshold='deprecated',
-                   threshold_abs=0, threshold_rel=0.1):
+                   threshold_abs=0, threshold_rel=0.1, num_peaks=np.inf):
     """Return coordinates of peaks in an image.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
@@ -29,6 +29,10 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
 
     threshold_rel: float
         Minimum intensity of peaks calculated as `max(image) * threshold_rel`.
+
+    num_peaks : int
+        Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
+        return `num_peaks` coordinates based on peak intensity.
 
     Returns
     -------
@@ -60,6 +64,11 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
 
     # get coordinates of peaks
     coordinates = np.transpose(image_t.nonzero())
+
+    if len(coordinates) > num_peaks:
+        intensities = image[tuple(coordinates.T)]
+        idx_maxsort = np.argsort(intensities)[::-1]
+        coordinates = coordinates[idx_maxsort][:2]
 
     return coordinates
 

@@ -50,6 +50,18 @@ def test_flat_peak():
     assert len(peaks) == 4
 
 
+def test_num_peaks():
+    image = np.zeros((3, 7), dtype=np.uint8)
+    image[1, 1] = 10
+    image[1, 3] = 11
+    image[1, 5] = 12
+    assert len(peak.peak_local_max(image, min_distance=1)) == 3
+    peaks_limited = peak.peak_local_max(image, min_distance=1, num_peaks=2)
+    assert len(peaks_limited) == 2
+    assert (1, 3) in peaks_limited
+    assert (1, 5) in peaks_limited
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
