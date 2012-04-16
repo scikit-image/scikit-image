@@ -22,7 +22,7 @@ def test_noisy_peaks():
 def test_relative_threshold():
     image = np.zeros((5, 5), dtype=np.uint8)
     image[1, 1] = 10
-    image[3, 3] = 21
+    image[3, 3] = 20
     peaks = peak.peak_local_max(image, min_distance=1, threshold_rel=0.5)
     assert len(peaks) == 1
     assert_close(peaks, [(3, 3)])
@@ -31,8 +31,8 @@ def test_relative_threshold():
 def test_absolute_threshold():
     image = np.zeros((5, 5), dtype=np.uint8)
     image[1, 1] = 10
-    image[3, 3] = 21
-    peaks = peak.peak_local_max(image, min_distance=1, threshold_abs=11)
+    image[3, 3] = 20
+    peaks = peak.peak_local_max(image, min_distance=1, threshold_abs=10)
     assert len(peaks) == 1
     assert_close(peaks, [(3, 3)])
 

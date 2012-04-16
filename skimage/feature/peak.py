@@ -51,7 +51,7 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
         threshold_rel = threshold
     # find top corner candidates above a threshold
     corner_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
-    image_t = (image >= corner_threshold) * 1
+    image_t = (image > corner_threshold) * 1
 
     # get coordinates of peaks
     coordinates = np.transpose(image_t.nonzero())
