@@ -10,6 +10,9 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
     Peaks are the local maxima in a region of `2 * min_distance + 1`
     (i.e. peaks are separated by at least `min_distance`).
 
+    NOTE: If peaks are flat (i.e. multiple pixels have exact same intensity),
+    the coordinates of all pixels are returned.
+
     Parameters
     ----------
     image: ndarray of floats

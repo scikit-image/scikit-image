@@ -43,6 +43,13 @@ def test_constant_image():
     assert len(peaks) == 0
 
 
+def test_flat_peak():
+    image = np.zeros((5, 5), dtype=np.uint8)
+    image[1:3, 1:3] = 10
+    peaks = peak.peak_local_max(image, min_distance=1)
+    assert len(peaks) == 4
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
