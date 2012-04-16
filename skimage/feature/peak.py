@@ -1,8 +1,10 @@
+import warnings
 import numpy as np
 from scipy import ndimage
 
 
-def peak_local_max(image, min_distance=10, threshold=0.1):
+def peak_local_max(image, min_distance=10, threshold='deprecated',
+                   threshold_abs=0, threshold_rel=0.1):
     """Return coordinates of peaks in an image.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
@@ -13,11 +15,17 @@ def peak_local_max(image, min_distance=10, threshold=0.1):
     image: ndarray of floats
         Input image.
 
-    min_distance: int, optional
+    min_distance: int
         Minimum number of pixels separating peaks and image boundary.
 
-    threshold: float, optional
-        Candidate peaks are calculated as `max(image) * threshold`.
+    threshold : float
+        Deprecated. See `threshold_rel`.
+
+    threshold_abs: float
+        Minimum intensity of peaks.
+
+    threshold_rel: float
+        Minimum intensity of peaks calculated as `max(image) * threshold_rel`.
 
     Returns
     -------
@@ -37,8 +45,12 @@ def peak_local_max(image, min_distance=10, threshold=0.1):
     image[:, :min_distance] = 0
     image[:, -min_distance:] = 0
 
+    if not threshold == 'deprecated':
+        msg = "`threshold` parameter deprecated; use `threshold_rel instead."
+        warnings.warn(msg, DeprecationWarning)
+        threshold_rel = threshold
     # find top corner candidates above a threshold
-    corner_threshold = np.max(image.ravel()) * threshold
+    corner_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
     image_t = (image >= corner_threshold) * 1
 
     # get coordinates of peaks
