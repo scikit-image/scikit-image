@@ -54,9 +54,9 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
         msg = "`threshold` parameter deprecated; use `threshold_rel instead."
         warnings.warn(msg, DeprecationWarning)
         threshold_rel = threshold
-    # find top corner candidates above a threshold
-    corner_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
-    image_t = (image > corner_threshold) * 1
+    # find top peak candidates above a threshold
+    peak_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
+    image_t = (image > peak_threshold) * 1
 
     # get coordinates of peaks
     coordinates = np.transpose(image_t.nonzero())
