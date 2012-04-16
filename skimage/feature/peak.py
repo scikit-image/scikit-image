@@ -32,6 +32,8 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
     coordinates : (N, 2) array
         (row, column) coordinates of peaks.
     """
+    if np.all(image == image.flat[0]):
+        return []
     image = image.copy()
     # Non maximum filter
     size = 2 * min_distance + 1

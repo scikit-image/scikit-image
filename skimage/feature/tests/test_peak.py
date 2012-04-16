@@ -36,6 +36,13 @@ def test_absolute_threshold():
     assert len(peaks) == 1
     assert_close(peaks, [(3, 3)])
 
+
+def test_constant_image():
+    image = 128 * np.ones((20, 20), dtype=np.uint8)
+    peaks = peak.peak_local_max(image, min_distance=1)
+    assert len(peaks) == 0
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
