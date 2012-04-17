@@ -4,62 +4,53 @@ Template Matching
 =================
 
 In this example, we use template matching to identify the occurrence of an
-object in an image. The ``match_template`` function uses normalised correlation
-techniques to find instances of the "target image" in the "test image".
+image patch (in this case, a sub-image centered on a single coin). Here, we
+return a single match (the exact same coin), so the maximum value in the
+``match_template`` result corresponds to the coin location. The other coins
+look similar, and thus have local maxima; if you expect multiple matches, you
+should use a proper peak-finding function.
 
-The output of ``match_template`` is an image where we can easily identify peaks
-by eye. We mark the locations of matches (red dots), which are detected using
-a simple peak extraction algorithm. Note that the peaks in the output of
-``match_template`` correspond to the origin (i.e. top-left corner) of the
-template.
+The ``match_template`` function uses fast, normalized cross-correlation [1]_
+to find instances of the template in the image. Note that the peaks in the
+output of ``match_template`` correspond to the origin (i.e. top-left corner) of
+the template.
+
+.. [1] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light and
+       Magic.
 """
 
 import numpy as np
-from skimage.feature import match_template, peak_local_max
 import matplotlib.pyplot as plt
+from skimage import data
+from skimage.feature import match_template
 
-# We first construct a simple image target:
-size = 100
-target = np.tri(size) + np.tri(size)[::-1]
-# place target in an image at two positions, and add noise.
-image = np.ones((400, 400))
-target_positions = [(50, 50), (200, 200)]
-for x, y in target_positions:
-    image[x:x+size, y:y+size] = target
-np.random.seed(1)
-image += np.random.randn(400, 400)*2
+image = data.coins()
+coin = image[170:220, 75:130]
 
-result = match_template(image, target)
+result = match_template(image, coin)
+ij = np.unravel_index(np.argmax(result), result.shape)
+x, y = ij[::-1]
 
-found_positions = peak_local_max(result)
+fig, (ax1, ax2, ax3) = plt.subplots(ncols=3, figsize=(8, 3))
 
-if len(found_positions) > 2:
-    # Keep the two maximum peaks.
-    intensities = result[tuple(found_positions.T)]
-    i_maxsort = np.argsort(intensities)[::-1]
-    found_positions = found_positions[i_maxsort][:2]
+ax1.imshow(coin)
+ax1.set_axis_off()
+ax1.set_title('template')
 
-x_found, y_found = np.transpose(found_positions)
+ax2.imshow(image)
+ax2.set_axis_off()
+ax2.set_title('image')
+# highlight matched region
+hcoin, wcoin = coin.shape
+rect = plt.Rectangle((x, y), wcoin, hcoin, edgecolor='r', facecolor='none')
+ax2.add_patch(rect)
 
-
-fig, (ax0, ax1, ax2) = plt.subplots(ncols=3, figsize=(8, 3))
-plt.gray()
-
-ax0.imshow(target)
-ax0.set_title("Target image")
-
-ax1.imshow(image)
-ax1.plot(x_found, y_found, 'ro', alpha=0.5)
-ax1.set_title("Test image")
-ax1.autoscale(tight=True)
-
-ax2.imshow(result)
-ax2.plot(x_found, y_found, 'ro', alpha=0.5)
-ax2.set_title("Result from\n``match_template``")
-ax2.autoscale(tight=True)
-
-for ax in (ax0, ax1, ax2):
-    ax.axis('off')
+ax3.imshow(result)
+ax3.set_axis_off()
+ax3.set_title('`match_template`\nresult')
+# highlight matched region
+ax3.autoscale(False)
+ax3.plot(x, y, 'o', markeredgecolor='r', markerfacecolor='none', markersize=10)
 
 plt.show()
 
