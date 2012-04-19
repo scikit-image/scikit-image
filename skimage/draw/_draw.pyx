@@ -1,16 +1,18 @@
 import numpy as np
+import math
+from libc.stdlib cimport malloc, free
 cimport numpy as np
 cimport cython
 
-cdef extern from "math.h":
-    int abs(int i)
+cdef extern from "../morphology/_pnpoly.h":
+     int pnpoly(int nr_verts, double *xp, double *yp,
+                double x, double y)
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def bresenham(int y, int x, int y2, int x2):
-    """
-    Generate line pixel coordinates.
-    
+    """Generate line pixel coordinates.
+
     Parameters
     ----------
     y, x : int
@@ -46,7 +48,7 @@ def bresenham(int y, int x, int y2, int x2):
 
     rr = np.zeros(int(dx) + 1, dtype=np.int32)
     cc = np.zeros(int(dx) + 1, dtype=np.int32)
-    
+
     for i in range(dx):
         if steep:
             rr[i] = x
@@ -64,3 +66,88 @@ def bresenham(int y, int x, int y2, int x2):
     cc[dx] = x2
 
     return rr, cc
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def _polygon_area(np.ndarray[np.double_t, ndim=1] x, np.ndarray[np.double_t, ndim=1] y):
+    """Calculate area of polygon.
+
+    Parameters
+    ----------
+    x : ndarray
+        X coordinates of polygon
+    y : ndarray
+        Y coordinates of polygon
+
+    Returns
+    -------
+    area : double
+        area of polygon
+    """
+    cdef double area
+    cdef int i
+    cdef int j = x.shape[0]-1
+    for i in xrange(x.shape[0]):
+        area += (x[j]+x[i])*(y[j]-y[i])
+        j = i
+    return abs(0.5*area)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def polygon(verts, shape=None):
+    """Generate coordinates of pixels within polygon.
+
+    Parameters
+    ----------
+    verts : Nx2 ndarray
+        (row, col) coordinates
+    shape : tuple, optional
+        image shape which is used to determine maximum extents of output pixel
+        coordinates. This is useful for polygons which exceed the image size,
+        default None
+
+    Returns
+    -------
+    rr, cc : ndarray of int
+        Pixel coordinates of polygon.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+    """
+    cdef int nr_verts = verts.shape[0]
+    cdef int minr = <int>max(0, verts[:,0].min())
+    cdef int maxr = <int>math.ceil(verts[:,0].max())
+    cdef int minc = <int>max(0, verts[:,1].min())
+    cdef int maxc = <int>math.ceil(verts[:,1].max())
+
+    # make sure output coordinates do not exceed image size
+    if shape is not None:
+        maxr = min(shape[0]-1, maxr)
+        maxc = min(shape[1]-1, maxc)
+
+    cdef int r, c
+    cdef int i = 0
+
+    #: make contigous arrays for r, c coordinates
+    verts = verts.astype('double')
+    cdef np.ndarray contiguous_rdata = verts[:,0].copy(order='C')
+    cdef np.ndarray contiguous_cdata = verts[:,1].copy(order='C')
+    cdef np.double_t* rptr = <np.double_t*>contiguous_rdata.data
+    cdef np.double_t* cptr = <np.double_t*>contiguous_cdata.data
+
+    # use area of polygon to determine the rough size of the output arrays
+    cdef double area = _polygon_area(contiguous_cdata, contiguous_rdata)
+
+    #: output coordinate arrays
+    cdef np.ndarray[np.int32_t, ndim=1, mode="c"] rr, cc
+    rr = np.zeros(int(area), dtype=np.int32)
+    cc = np.zeros(int(area), dtype=np.int32)
+
+    for r in range(minr, maxr+1):
+        for c in range(minc, maxc+1):
+            if pnpoly(nr_verts, cptr, rptr, c, r):
+                rr[i] = r
+                cc[i] = c
+                i += 1
+
+    # area >= number of points in polygon, so crop actual points
+    return rr[:i], cc[:i]
