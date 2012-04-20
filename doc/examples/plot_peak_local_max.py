@@ -41,10 +41,8 @@ plt.title('Maximum filter')
 
 plt.subplot(133)
 plt.imshow(im, cmap=plt.cm.gray)
-a, b = im.shape
+plt.autoscale(False)
 plt.plot([p[1] for p in coordinates], [p[0] for p in coordinates], 'r.')
-plt.xlim(0, b)
-plt.ylim(a, 0)
 plt.axis('off')
 plt.title('Peak local max')
 
