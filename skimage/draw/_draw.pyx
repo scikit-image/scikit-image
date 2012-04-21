@@ -1,6 +1,5 @@
 import numpy as np
 import math
-from libc.stdlib cimport malloc, free
 cimport numpy as np
 cimport cython
 
@@ -125,7 +124,6 @@ def polygon(verts, shape=None):
         maxc = min(shape[1]-1, maxc)
 
     cdef int r, c
-    cdef int i = 0
 
     #: make contigous arrays for r, c coordinates
     verts = verts.astype('double')
@@ -134,20 +132,15 @@ def polygon(verts, shape=None):
     cdef np.double_t* rptr = <np.double_t*>contiguous_rdata.data
     cdef np.double_t* cptr = <np.double_t*>contiguous_cdata.data
 
-    # use area of polygon to determine the rough size of the output arrays
-    cdef double area = _polygon_area(contiguous_cdata, contiguous_rdata)
-
     #: output coordinate arrays
-    cdef np.ndarray[np.int32_t, ndim=1, mode="c"] rr, cc
-    rr = np.zeros(int(area), dtype=np.int32)
-    cc = np.zeros(int(area), dtype=np.int32)
+    rr = list()
+    cc = list()
 
     for r in range(minr, maxr+1):
         for c in range(minc, maxc+1):
             if pnpoly(nr_verts, cptr, rptr, c, r):
-                rr[i] = r
-                cc[i] = c
-                i += 1
+                rr.append(r)
+                cc.append(c)
 
     # area >= number of points in polygon, so crop actual points
-    return rr[:i], cc[:i]
+    return np.array(rr), np.array(cc)
