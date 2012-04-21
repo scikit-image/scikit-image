@@ -102,8 +102,8 @@ def polygon(verts, shape=None):
         (row, col) coordinates
     shape : tuple, optional
         image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for polygons which exceed the image size,
-        default None
+        coordinates. This is useful for polygons which exceed the image size.
+        By default the full extents of the polygon are used.
 
     Returns
     -------
