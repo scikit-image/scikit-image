@@ -3,9 +3,11 @@ import math
 cimport numpy as np
 cimport cython
 
+
 cdef extern from "../morphology/_pnpoly.h":
      int pnpoly(int nr_verts, double *xp, double *yp,
                 double x, double y)
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -68,31 +70,7 @@ def bresenham(int y, int x, int y2, int x2):
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def _polygon_area(np.ndarray[np.double_t, ndim=1] x, np.ndarray[np.double_t, ndim=1] y):
-    """Calculate area of polygon.
-
-    Parameters
-    ----------
-    x : ndarray
-        X coordinates of polygon
-    y : ndarray
-        Y coordinates of polygon
-
-    Returns
-    -------
-    area : double
-        area of polygon
-    """
-    cdef double area
-    cdef int i
-    cdef int j = x.shape[0]-1
-    for i in xrange(x.shape[0]):
-        area += (x[j]+x[i])*(y[j]-y[i])
-        j = i
-    return abs(0.5*area)
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
+@cython.nonecheck(False)
 def polygon(verts, shape=None):
     """Generate coordinates of pixels within polygon.
 
@@ -142,5 +120,4 @@ def polygon(verts, shape=None):
                 rr.append(r)
                 cc.append(c)
 
-    # area >= number of points in polygon, so crop actual points
     return np.array(rr), np.array(cc)
