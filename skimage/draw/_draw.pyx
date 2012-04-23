@@ -78,7 +78,7 @@ def polygon(verts, shape=None):
     Parameters
     ----------
     verts : Nx2 ndarray
-        (row, col) coordinates
+        (row, col) vertices of polygon
     shape : tuple, optional
         image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for polygons which exceed the image size.
