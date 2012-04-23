@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from libc.math cimport sqrt
 cimport numpy as np
 cimport cython
 
@@ -121,3 +122,67 @@ def polygon(verts, shape=None):
                 cc.append(c)
 
     return np.array(rr), np.array(cc)
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.nonecheck(False)
+@cython.cdivision(True)
+def ellipse(double cy, double cx, double b, double a, shape=None):
+    """Generate coordinates of pixels within ellipse.
+
+    Parameters
+    ----------
+    cy, cx : double
+        centre coordinate of ellipse
+    b, a: double
+        minor and major semi-axes. (x/a)**2 + (y/b)**2 = 1
+
+    Returns
+    -------
+    rr, cc : ndarray of int
+        Pixel coordinates of ellipse.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+    """
+    cdef int minr = <int>max(0, cy-b)
+    cdef int maxr = <int>math.ceil(cy+b)
+    cdef int minc = <int>max(0, cx-a)
+    cdef int maxc = <int>math.ceil(cx+a)
+
+    # make sure output coordinates do not exceed image size
+    if shape is not None:
+        maxr = min(shape[0]-1, maxr)
+        maxc = min(shape[1]-1, maxc)
+
+    cdef int r, c
+
+    #: output coordinate arrays
+    rr = list()
+    cc = list()
+
+    for r in range(minr, maxr+1):
+        for c in range(minc, maxc+1):
+            if sqrt(((r - cy)/b)**2 + ((c - cx)/a)**2) < 1:
+                rr.append(r)
+                cc.append(c)
+
+    return np.array(rr), np.array(cc)
+
+def circle(double cy, double cx, double radius, shape=None):
+    """Generate coordinates of pixels within circle.
+
+    Parameters
+    ----------
+    cy, cx : double
+        centre coordinate of circle
+    radius: double
+        radius of circle
+
+    Returns
+    -------
+    rr, cc : ndarray of int
+        Pixel coordinates of ellipse.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+    """
+    return ellipse(cy, cx, radius, radius, shape)
