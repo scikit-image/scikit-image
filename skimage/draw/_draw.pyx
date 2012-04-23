@@ -107,23 +107,15 @@ def polygon(y, x, shape=None):
     cdef int r, c
 
     #: make contigous arrays for r, c coordinates
-    y = y.astype('double')
-    x = x.astype('double')
     cdef np.ndarray contiguous_rdata, contiguous_cdata
-    if not y.flags['C_CONTIGUOUS']:
-        contiguous_rdata = y.copy(order='C')
-    else:
-        contiguous_rdata = y
-    if not y.flags['C_CONTIGUOUS']:
-        contiguous_cdata = x.copy(order='C')
-    else:
-        contiguous_cdata = x
+    contiguous_rdata = np.ascontiguousarray(y, 'double')
+    contiguous_cdata = np.ascontiguousarray(x, 'double')
     cdef np.double_t* rptr = <np.double_t*>contiguous_rdata.data
     cdef np.double_t* cptr = <np.double_t*>contiguous_cdata.data
 
     #: output coordinate arrays
-    rr = list()
-    cc = list()
+    cdef list rr = list()
+    cdef list cc = list()
 
     for r in range(minr, maxr+1):
         for c in range(minc, maxc+1):
@@ -167,8 +159,8 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
     cdef int r, c
 
     #: output coordinate arrays
-    rr = list()
-    cc = list()
+    cdef list rr = list()
+    cdef list cc = list()
 
     for r in range(minr, maxr+1):
         for c in range(minc, maxc+1):
