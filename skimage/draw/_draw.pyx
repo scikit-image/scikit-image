@@ -72,13 +72,15 @@ def line(int y, int x, int y2, int x2):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
-def polygon(verts, shape=None):
+def polygon(y, x, shape=None):
     """Generate coordinates of pixels within polygon.
 
     Parameters
     ----------
-    verts : Nx2 ndarray
-        (row, col) vertices of polygon
+    y : (N,) ndarray
+        y coordinates of vertices of polygon
+    x : (N,) ndarray
+        x coordinates of vertices of polygon
     shape : tuple, optional
         image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for polygons which exceed the image size.
@@ -91,11 +93,11 @@ def polygon(verts, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    cdef int nr_verts = verts.shape[0]
-    cdef int minr = <int>max(0, verts[:,0].min())
-    cdef int maxr = <int>math.ceil(verts[:,0].max())
-    cdef int minc = <int>max(0, verts[:,1].min())
-    cdef int maxc = <int>math.ceil(verts[:,1].max())
+    cdef int nr_verts = x.shape[0]
+    cdef int minr = <int>max(0, y.min())
+    cdef int maxr = <int>math.ceil(y.max())
+    cdef int minc = <int>max(0, x.min())
+    cdef int maxc = <int>math.ceil(x.max())
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
@@ -105,9 +107,17 @@ def polygon(verts, shape=None):
     cdef int r, c
 
     #: make contigous arrays for r, c coordinates
-    verts = verts.astype('double')
-    cdef np.ndarray contiguous_rdata = verts[:,0].copy(order='C')
-    cdef np.ndarray contiguous_cdata = verts[:,1].copy(order='C')
+    y = y.astype('double')
+    x = x.astype('double')
+    cdef np.ndarray contiguous_rdata, contiguous_cdata
+    if not y.flags['C_CONTIGUOUS']:
+        contiguous_rdata = y.copy(order='C')
+    else:
+        contiguous_rdata = y
+    if not y.flags['C_CONTIGUOUS']:
+        contiguous_cdata = x.copy(order='C')
+    else:
+        contiguous_cdata = x
     cdef np.double_t* rptr = <np.double_t*>contiguous_rdata.data
     cdef np.double_t* cptr = <np.double_t*>contiguous_cdata.data
 

@@ -31,7 +31,7 @@ poly = np.array((
     (220, 590),
     (300, 300),
 ))
-rr, cc = polygon(poly, img.shape)
+rr, cc = polygon(poly[:,0], poly[:,1], img.shape)
 img[rr,cc,1] = 255
 
 #: fill circle
