@@ -36,9 +36,7 @@ img[rr,cc,1] = 255
 
 #: fill circle
 rr, cc = circle(200, 200, 100, img.shape)
-img[rr,cc,0] = 255
-rr, cc = circle(200, 200, 100, img.shape)
-img[rr,cc,1] = 255
+img[rr,cc,:] = (255, 255, 0)
 
 #: fill ellipse
 rr, cc = ellipse(300, 300, 100, 200, img.shape)
