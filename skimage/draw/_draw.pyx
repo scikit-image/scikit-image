@@ -12,7 +12,7 @@ cdef extern from "../morphology/_pnpoly.h":
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def bresenham(int y, int x, int y2, int x2):
+def line(int y, int x, int y2, int x2):
     """Generate line pixel coordinates.
 
     Parameters

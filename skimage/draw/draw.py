@@ -3,4 +3,4 @@ Methods to draw on arrays.
 
 """
 
-from ._draw import bresenham, polygon, ellipse, circle
+from ._draw import line, polygon, ellipse, circle

@@ -1,13 +1,13 @@
 from numpy.testing import assert_array_equal
 import numpy as np
 
-from skimage.draw import bresenham, polygon, circle, ellipse
+from skimage.draw import line, polygon, circle, ellipse
 
 
-def test_bresenham_horizontal():
+def test_line_horizontal():
     img = np.zeros((10, 10))
 
-    rr, cc = bresenham(0, 0, 0, 9)
+    rr, cc = line(0, 0, 0, 9)
     img[rr, cc] = 1
 
     img_ = np.zeros((10, 10))
@@ -15,10 +15,10 @@ def test_bresenham_horizontal():
 
     assert_array_equal(img, img_)
 
-def test_bresenham_vertical():
+def test_line_vertical():
     img = np.zeros((10, 10))
 
-    rr, cc = bresenham(0, 0, 9, 0)
+    rr, cc = line(0, 0, 9, 0)
     img[rr, cc] = 1
 
     img_ = np.zeros((10, 10))
@@ -26,10 +26,10 @@ def test_bresenham_vertical():
 
     assert_array_equal(img, img_)
 
-def test_bresenham_reverse():
+def test_line_reverse():
     img = np.zeros((10, 10))
 
-    rr, cc = bresenham(0, 9, 0, 0)
+    rr, cc = line(0, 9, 0, 0)
     img[rr, cc] = 1
 
     img_ = np.zeros((10, 10))
@@ -37,10 +37,10 @@ def test_bresenham_reverse():
 
     assert_array_equal(img, img_)
 
-def test_bresenham_diag():
+def test_line_diag():
     img = np.zeros((5, 5))
 
-    rr, cc = bresenham(0, 0, 4, 4)
+    rr, cc = line(0, 0, 4, 4)
     img[rr, cc] = 1
 
     img_ = np.eye(5)
