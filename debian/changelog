@@ -1,4 +1,4 @@
-scikits-image (0.5.0-1) UNRELEASED; urgency=low
+scikits-image (0.5.0+git33-g6aa7d54-1) UNRELEASED; urgency=low
 
   * Initial release. (Closes: #639820)
 
