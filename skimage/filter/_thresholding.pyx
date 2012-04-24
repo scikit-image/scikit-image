@@ -6,12 +6,8 @@ cimport cython
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def _adaptive_threshold(
-    np.ndarray[np.double_t, ndim=2] image,
-    int block_size,
-    double offset,
-    method
-):
+def _threshold_adaptive(np.ndarray[np.double_t, ndim=2] image,
+                        int block_size, double offset, method):
     cdef int r, c
     cdef np.ndarray[np.float64_t, ndim=2] mean_image
     if method == 'gaussian':

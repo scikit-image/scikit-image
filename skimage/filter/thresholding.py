@@ -1,13 +1,13 @@
 import numpy as np
 
 from skimage.exposure import histogram
-from ._thresholding import _adaptive_threshold
+from ._thresholding import _threshold_adaptive
 
 
-__all__ = ['threshold_otsu', 'adaptive_threshold']
+__all__ = ['threshold_otsu', 'threshold_adaptive']
 
 
-def adaptive_threshold(image, block_size, offset, method='gaussian'):
+def threshold_adaptive(image, block_size, offset, method='gaussian'):
     """Applies an adaptive threshold to an array.
 
     Also known as local or dynamic thresholding where the threshold value is the
@@ -40,7 +40,7 @@ def adaptive_threshold(image, block_size, offset, method='gaussian'):
     """
     # not using img_as_float because threshold parameter wouldn't work
     image = image.astype('double')
-    return _adaptive_threshold(image, block_size, offset, method)
+    return _threshold_adaptive(image, block_size, offset, method)
 
 def threshold_otsu(image, nbins=256):
     """Return threshold value based on Otsu's method.
