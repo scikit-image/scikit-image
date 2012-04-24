@@ -35,13 +35,13 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	: # Run unittests
 	export PYTHONPATH=$(PACKAGE_ROOT_DIR)/usr/lib/python$*/dist-packages; \
 	 python$* /usr/bin/nosetests -s \
-	  $(PACKAGE_ROOT_DIR)/usr/lib/python$*/*/skimage
+	  $(PACKAGE_ROOT_DIR)/usr/lib/python$*/*-packages/skimage
 else
 	: # Skip unittests due to nocheck
 endif
 
 	: # Move platform-specific libraries into -lib
-	for lib in $$(find $(PACKAGE_ROOT_DIR)/usr -name '*.so'); do \
+	set -e; for lib in $$(find $(PACKAGE_ROOT_DIR)/usr -name '*.so'); do \
 	   sdir=$$(dirname $$lib) ; \
 	   tdir=$(PACKAGE_ROOT_DIR)-lib/$${sdir#*$(PACKAGE_NAME)/} ; \
 	   mkdir -p $$tdir ; \
@@ -53,8 +53,8 @@ endif
 	-rm -f doc/build/html/_static/jquery.js
 	# Actually due to the problems with underscore pkg across releases just ship one for now
 	#-rm -f doc/build/html/_static/underscore.js
-	-rf -f doc/build/html/_sources
-	-rf -f doc/build/html/.buildinfo
+	-rm -rf doc/build/html/_sources
+	-rm -f doc/build/html/.buildinfo
 
 	: # Move documentation to -doc
 	sdir=$(CURDIR)/doc/build/html ; \
@@ -70,4 +70,4 @@ override_dh_compress:
 	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
 
 override_dh_installdocs:
-	dh_installdocs -A CONTRIBUTORS.txt README.txt DEVELOPMENT.txt TASKS.txt
+	dh_installdocs -A CONTRIBUTORS.txt README.rst DEVELOPMENT.txt TASKS.txt
