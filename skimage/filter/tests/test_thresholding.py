@@ -1,8 +1,9 @@
 import numpy as np
+from numpy.testing import assert_array_equal
 
 import skimage
 from skimage import data
-from skimage.filter.thresholding import threshold_otsu
+from skimage.filter.thresholding import threshold_otsu, adaptive_threshold
 
 
 class TestSimpleImage():
@@ -23,6 +24,28 @@ class TestSimpleImage():
     def test_otsu_float_image(self):
         image = np.float64(self.image)
         assert 2 <= threshold_otsu(image) < 3
+
+    def test_adaptive_threshold_gaussian(self):
+        ref = np.array(
+            [[False, False, False, False,  True],
+             [False, False,  True, False,  True],
+             [False, False,  True,  True, False],
+             [False,  True,  True, False, False],
+             [ True,  True, False, False, False]]
+        )
+        out = adaptive_threshold(self.image, 3, 0, 'gaussian')
+        assert_array_equal(ref, out)
+
+    def test_adaptive_threshold_mean(self):
+        ref = np.array(
+            [[False, False, False, False,  True],
+             [False, False,  True, False, False],
+             [False, False,  True, False, False],
+             [False, False,  True,  True, False],
+             [False,  True, False, False, False]]
+        )
+        out = adaptive_threshold(self.image, 3, 0, 'mean')
+        assert_array_equal(ref, out)
 
 
 def test_otsu_camera_image():
