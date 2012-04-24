@@ -12,7 +12,9 @@ the threshold. Equivalently, this threshold minimizes the intra-class variance.
 
 Additionally an adaptive thresholding is applied. Also known as local or
 dynamic thresholding where the threshold value is the weighted mean for the
-local neighborhood of a pixel subtracted by a constant.
+local neighborhood of a pixel subtracted by a constant. Small filter block sizes
+are suitable for thresholding edges, large filter block sizes suitable for
+thresholding larger homogeneous regions.
 
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
@@ -22,35 +24,47 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage.data import camera
-from skimage.filter import threshold_otsu, adaptive_threshold
+from skimage.filter import threshold_otsu, threshold_adaptive
 
 
 image = camera()
+
+
+#: Otsu thresholding
 thresh = threshold_otsu(image)
 otsu_binary = image > thresh
-adaptive_binary = np.invert(adaptive_threshold(image, 9, 5))
 
-plt.figure(figsize=(8, 2.5))
-plt.subplot(2, 2, 1)
+plt.figure(figsize=(8, 6))
+plt.subplot(2, 3, 1)
 plt.imshow(image, cmap=plt.cm.gray)
 plt.title('Original')
 plt.axis('off')
 
-plt.subplot(2, 2, 2, aspect='equal')
+plt.subplot(2, 3, 2, aspect='equal')
 plt.hist(image)
 plt.title('Histogram')
 plt.axvline(thresh, color='r')
 
-plt.subplot(2, 2, 3)
+plt.subplot(2, 3, 3)
 plt.imshow(otsu_binary, cmap=plt.cm.gray)
 plt.title('Thresholded with Otsu')
 plt.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(adaptive_binary, cmap=plt.cm.gray)
-plt.title('Adaptively thresholded')
+
+#: Adaptive thresholding
+plt.subplot(2, 3, 4)
+plt.imshow(threshold_adaptive(image, 11, 5, 'gaussian'), cmap=plt.cm.gray)
+plt.title('Adaptive edge thresholding')
+plt.axis('off')
+
+plt.subplot(2, 3, 5)
+plt.imshow(threshold_adaptive(image, 125, 7.5, 'gaussian'), cmap=plt.cm.gray)
+plt.title('Adaptive Gaussian')
+plt.axis('off')
+
+plt.subplot(2, 3, 6)
+plt.imshow(threshold_adaptive(image, 125, 7.5, 'mean'), cmap=plt.cm.gray)
+plt.title('Adaptive Mean')
 plt.axis('off')
 
 plt.show()
-
-
