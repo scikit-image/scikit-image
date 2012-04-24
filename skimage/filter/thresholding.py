@@ -25,8 +25,8 @@ def adaptive_threshold(image, block_size, offset, method='gaussian'):
         constant subtracted from weighted mean of neighborhood to calculate
         the local threshold value
     method : string, optional
-        thresholding type which must be one of `gaussian` or `mean`.
-        By default the `gaussian` method is used.
+        thresholding type which must be one of 'gaussian', 'mean' or 'median'.
+        By default the 'gaussian' method is used.
 
     Returns
     -------

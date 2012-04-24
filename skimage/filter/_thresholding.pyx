@@ -19,6 +19,9 @@ def _adaptive_threshold(
         sigma = (block_size - 1) / 6.0
         mean_image = scipy.ndimage.gaussian_filter(image, sigma)
     elif method == 'mean':
+        mask = 1. / block_size**2 * np.ones((block_size, block_size))
+        mean_image = scipy.ndimage.convolve(image, mask)
+    elif method == 'median':
         mean_image = scipy.ndimage.median_filter(image, block_size)
 
     for r in range(image.shape[0]):
