@@ -10,8 +10,8 @@ calculates an "optimal" threshold (marked by a red line in the histogram below)
 by maximizing the variance between two classes of pixels, which are separated by
 the threshold. Equivalently, this threshold minimizes the intra-class variance.
 
-Additionnally an adaptive thresholding is applied. Also known as local or
-dynamic thresholding where the the threshold value is the weighted mean for the
+Additionally an adaptive thresholding is applied. Also known as local or
+dynamic thresholding where the threshold value is the weighted mean for the
 local neighborhood of a pixel subtracted by a constant.
 
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method

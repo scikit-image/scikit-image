@@ -10,8 +10,8 @@ __all__ = ['threshold_otsu', 'adaptive_threshold']
 def adaptive_threshold(image, block_size, offset, method='gaussian'):
     """Applies an adaptive threshold to an array.
 
-    Also known as local or dynamic thresholding where the the threshold value is
-    the weighted mean for the local neighborhood of a pixel subtracted by a
+    Also known as local or dynamic thresholding where the threshold value is the
+    weighted mean for the local neighborhood of a pixel subtracted by a
     constant.
 
     Parameters
