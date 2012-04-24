@@ -19,16 +19,24 @@ from skimage.feature import harris
 def plot_harris_points(image, filtered_coords):
     """ plots corners found in image"""
 
-    plt.plot()
     plt.imshow(image)
-    plt.plot([p[1] for p in filtered_coords],
-             [p[0] for p in filtered_coords],
-             'b.')
+    y, x = np.transpose(filtered_coords)
+    plt.plot(x, y, 'b.')
     plt.axis('off')
-    plt.show()
+ 
+# display results
+plt.figure(figsize=(9, 3))
+im_lena = img_as_float(data.lena())
+im_text = img_as_float(data.text())
 
+filtered_coords = harris(im_lena, min_distance=4)
 
-im = img_as_float(data.lena())
-filtered_coords = harris(im, min_distance=6)
-plot_harris_points(im, filtered_coords)
+plt.axes([0, 0, 0.3, 0.95])
+plot_harris_points(im_lena, filtered_coords)
 
+filtered_coords = harris(im_text, min_distance=4)
+
+plt.axes([0.2, 0, 0.77, 1])
+plot_harris_points(im_text, filtered_coords)
+
+plt.show()
