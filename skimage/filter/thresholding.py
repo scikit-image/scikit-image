@@ -38,7 +38,7 @@ def threshold_adaptive(image, block_size, offset, method='gaussian'):
     http://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations
         .html?highlight=threshold#adaptivethreshold
     """
-    # not using img_as_float because threshold parameter wouldn't work
+    # not using img_as_float because offset parameter wouldn't work
     image = image.astype('double')
     return _threshold_adaptive(image, block_size, offset, method)
 
