@@ -39,12 +39,23 @@ class TestSimpleImage():
     def test_threshold_adaptive_mean(self):
         ref = np.array(
             [[False, False, False, False,  True],
+             [False, False,  True, False,  True],
+             [False, False,  True,  True, False],
+             [False,  True,  True, False, False],
+             [ True,  True, False, False, False]]
+        )
+        out = threshold_adaptive(self.image, 3, 0, 'mean')
+        assert_array_equal(ref, out)
+
+    def test_threshold_adaptive_median(self):
+        ref = np.array(
+            [[False, False, False, False,  True],
              [False, False,  True, False, False],
              [False, False,  True, False, False],
              [False, False,  True,  True, False],
              [False,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, 0, 'mean')
+        out = threshold_adaptive(self.image, 3, 0, 'median')
         assert_array_equal(ref, out)
 
 
