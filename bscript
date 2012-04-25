@@ -6,8 +6,7 @@ from numpy.distutils.misc_util \
 
 from bento.commands import hooks
 
-@hooks.pre_configure
-def pre_configure(context):
+@hooks.post_configure
+def post_configure(context):
     conf = context.waf_context
-    conf.env.INCLUDES = []
-    conf.env.INCLUDES.extend(get_numpy_include_dirs() + [op.join("skimage", "morphology")])
+    conf.env.INCLUDES = get_numpy_include_dirs() + [op.join("skimage", "morphology")]
