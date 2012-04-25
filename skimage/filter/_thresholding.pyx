@@ -6,22 +6,27 @@ cimport cython
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-def _threshold_adaptive(np.ndarray[np.double_t, ndim=2] image,
-                        int block_size, double offset, method):
+def _threshold_adaptive(np.ndarray[np.double_t, ndim=2] image, int block_size,
+                        method, double offset, mode, param):
     cdef int r, c
-    cdef np.ndarray[np.float64_t, ndim=2] mean_image
-    if method == 'gaussian':
-        # covers > 99% of distribution
-        sigma = (block_size - 1) / 6.0
-        mean_image = scipy.ndimage.gaussian_filter(image, sigma)
+    cdef np.ndarray[np.float64_t, ndim=2] thres_image
+
+    if method == 'generic':
+        thres_image = scipy.ndimage.generic_filter(image, param, block_size,
+            mode=mode)
+    elif method == 'gaussian':
+        if param is None:
+            # automatically determine sigme which covers > 99% of distribution
+            sigma = (block_size - 1) / 6.0
+        thres_image = scipy.ndimage.gaussian_filter(image, sigma, mode=mode)
     elif method == 'mean':
         mask = 1. / block_size**2 * np.ones((block_size, block_size))
-        mean_image = scipy.ndimage.convolve(image, mask)
+        thres_image = scipy.ndimage.convolve(image, mask, mode=mode)
     elif method == 'median':
-        mean_image = scipy.ndimage.median_filter(image, block_size)
+        thres_image = scipy.ndimage.median_filter(image, block_size, mode=mode)
 
     for r in range(image.shape[0]):
         for c in range(image.shape[1]):
-            mean_image[r,c] = image[r,c] > (mean_image[r,c] - offset)
+            thres_image[r,c] = image[r,c] > (thres_image[r,c] - offset)
 
-    return mean_image.astype('bool')
+    return thres_image.astype('bool')

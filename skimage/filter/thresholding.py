@@ -7,12 +7,14 @@ from ._thresholding import _threshold_adaptive
 __all__ = ['threshold_otsu', 'threshold_adaptive']
 
 
-def threshold_adaptive(image, block_size, offset, method='gaussian'):
+def threshold_adaptive(image, block_size, method='gaussian', offset=0,
+                       mode='reflect', param=None):
     """Applies an adaptive threshold to an array.
 
     Also known as local or dynamic thresholding where the threshold value is the
     weighted mean for the local neighborhood of a pixel subtracted by a
-    constant.
+    constant. Alternatively the threshold can be determined dynamically by a
+    a given function using the 'generic' method.
 
     Parameters
     ----------
@@ -21,12 +23,18 @@ def threshold_adaptive(image, block_size, offset, method='gaussian'):
     block_size : int
         uneven size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...)
-    offset : float
+    method : {'generic', 'gaussian', 'mean', 'median'}, optional
+        method used to determine adaptive threshold. By default the 'gaussian'
+        method is used.
+    offset : float, optional
         constant subtracted from weighted mean of neighborhood to calculate
-        the local threshold value
-    method : string, optional
-        thresholding type which must be one of 'gaussian', 'mean' or 'median'.
-        By default the 'gaussian' method is used.
+        the local threshold value. Default offset is 0.
+    mode : {‘reflect’,’constant’,’nearest’,’mirror’, ‘wrap’}, optional
+        The mode parameter determines how the array borders are handled, where
+        cval is the value when mode is equal to ‘constant’. Default is ‘reflect’
+    param : {int, function}, optional
+        either specify sigma for 'gaussian' method or function object for
+        'generic' method.
 
     Returns
     -------
@@ -40,7 +48,7 @@ def threshold_adaptive(image, block_size, offset, method='gaussian'):
     """
     # not using img_as_float because offset parameter wouldn't work
     image = image.astype('double')
-    return _threshold_adaptive(image, block_size, offset, method)
+    return _threshold_adaptive(image, block_size, method, offset, mode, param)
 
 def threshold_otsu(image, nbins=256):
     """Return threshold value based on Otsu's method.

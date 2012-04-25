@@ -52,17 +52,20 @@ plt.axis('off')
 
 #: Adaptive thresholding
 plt.subplot(2, 3, 4)
-plt.imshow(threshold_adaptive(image, 11, 5, 'gaussian'), cmap=plt.cm.gray)
+plt.imshow(threshold_adaptive(image, 11, method='gaussian', offset=5),
+    cmap=plt.cm.gray)
 plt.title('Adaptive edge thresholding')
 plt.axis('off')
 
 plt.subplot(2, 3, 5)
-plt.imshow(threshold_adaptive(image, 125, 7.5, 'gaussian'), cmap=plt.cm.gray)
+plt.imshow(threshold_adaptive(image, 125, method='gaussian', offset=7.5),
+    cmap=plt.cm.gray)
 plt.title('Adaptive Gaussian')
 plt.axis('off')
 
 plt.subplot(2, 3, 6)
-plt.imshow(threshold_adaptive(image, 125, 7.5, 'mean'), cmap=plt.cm.gray)
+plt.imshow(threshold_adaptive(image, 125, method='mean', offset=7.5),
+    cmap=plt.cm.gray)
 plt.title('Adaptive Mean')
 plt.axis('off')
 

@@ -25,6 +25,19 @@ class TestSimpleImage():
         image = np.float64(self.image)
         assert 2 <= threshold_otsu(image) < 3
 
+    def test_threshold_adaptive_generic(self):
+        def func(arr):
+            return arr.sum() / arr.shape[0]
+        ref = np.array(
+            [[False, False, False, False,  True],
+             [False, False,  True, False,  True],
+             [False, False,  True,  True, False],
+             [False,  True,  True, False, False],
+             [ True,  True, False, False, False]]
+        )
+        out = threshold_adaptive(self.image, 3, method='generic', param=func)
+        assert_array_equal(ref, out)
+
     def test_threshold_adaptive_gaussian(self):
         ref = np.array(
             [[False, False, False, False,  True],
@@ -33,7 +46,7 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, 0, 'gaussian')
+        out = threshold_adaptive(self.image, 3, method='gaussian')
         assert_array_equal(ref, out)
 
     def test_threshold_adaptive_mean(self):
@@ -44,7 +57,7 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, 0, 'mean')
+        out = threshold_adaptive(self.image, 3, method='mean')
         assert_array_equal(ref, out)
 
     def test_threshold_adaptive_median(self):
@@ -55,7 +68,7 @@ class TestSimpleImage():
              [False, False,  True,  True, False],
              [False,  True, False, False, False]]
         )
-        out = threshold_adaptive(self.image, 3, 0, 'median')
+        out = threshold_adaptive(self.image, 3, method='median')
         assert_array_equal(ref, out)
 
 
