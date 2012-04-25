@@ -29,9 +29,9 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     offset : float, optional
         constant subtracted from weighted mean of neighborhood to calculate
         the local threshold value. Default offset is 0.
-    mode : {‘reflect’,’constant’,’nearest’,’mirror’, ‘wrap’}, optional
+    mode : {'reflect','constant','nearest','mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to ‘constant’. Default is ‘reflect’
+        cval is the value when mode is equal to 'constant'. Default is 'reflect'
     param : {int, function}, optional
         either specify sigma for 'gaussian' method or function object for
         'generic' method.
