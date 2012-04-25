@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal
 
 import skimage
 from skimage import data
-from skimage.filter.thresholding import threshold_otsu, adaptive_threshold
+from skimage.filter.thresholding import threshold_otsu, threshold_adaptive
 
 
 class TestSimpleImage():
@@ -25,7 +25,7 @@ class TestSimpleImage():
         image = np.float64(self.image)
         assert 2 <= threshold_otsu(image) < 3
 
-    def test_adaptive_threshold_gaussian(self):
+    def test_threshold_adaptive_gaussian(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False,  True],
@@ -33,10 +33,10 @@ class TestSimpleImage():
              [False,  True,  True, False, False],
              [ True,  True, False, False, False]]
         )
-        out = adaptive_threshold(self.image, 3, 0, 'gaussian')
+        out = threshold_adaptive(self.image, 3, 0, 'gaussian')
         assert_array_equal(ref, out)
 
-    def test_adaptive_threshold_mean(self):
+    def test_threshold_adaptive_mean(self):
         ref = np.array(
             [[False, False, False, False,  True],
              [False, False,  True, False, False],
@@ -44,7 +44,7 @@ class TestSimpleImage():
              [False, False,  True,  True, False],
              [False,  True, False, False, False]]
         )
-        out = adaptive_threshold(self.image, 3, 0, 'mean')
+        out = threshold_adaptive(self.image, 3, 0, 'mean')
         assert_array_equal(ref, out)
 
 
