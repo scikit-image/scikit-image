@@ -21,7 +21,6 @@ thresholding larger homogeneous regions.
 """
 
 import matplotlib.pyplot as plt
-import numpy as np
 
 from skimage.data import camera
 from skimage.filter import threshold_otsu, threshold_adaptive
