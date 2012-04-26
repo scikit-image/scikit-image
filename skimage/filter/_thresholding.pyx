@@ -20,8 +20,11 @@ def _threshold_adaptive(np.ndarray[np.double_t, ndim=2] image, int block_size,
             sigma = (block_size - 1) / 6.0
         thres_image = scipy.ndimage.gaussian_filter(image, sigma, mode=mode)
     elif method == 'mean':
-        mask = 1. / block_size**2 * np.ones((block_size, block_size))
-        thres_image = scipy.ndimage.convolve(image, mask, mode=mode)
+        mask = 1. / block_size * np.ones((block_size,))
+        # separation of filters to speedup convolution
+        thres_image = scipy.ndimage.convolve1d(image, mask, axis=0, mode=mode)
+        thres_image = scipy.ndimage.convolve1d(thres_image, mask, axis=1,
+            mode=mode)
     elif method == 'median':
         thres_image = scipy.ndimage.median_filter(image, block_size, mode=mode)
 
