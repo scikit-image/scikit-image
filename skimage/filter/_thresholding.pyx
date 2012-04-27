@@ -9,14 +9,14 @@ cimport cython
 def _threshold_adaptive(np.ndarray[np.double_t, ndim=2] image, int block_size,
                         method, double offset, mode, param):
     cdef int r, c
-    cdef np.ndarray[np.float64_t, ndim=2] thres_image
+    cdef np.ndarray[np.double_t, ndim=2] thres_image
 
     if method == 'generic':
         thres_image = scipy.ndimage.generic_filter(image, param, block_size,
             mode=mode)
     elif method == 'gaussian':
         if param is None:
-            # automatically determine sigme which covers > 99% of distribution
+            # automatically determine sigma which covers > 99% of distribution
             sigma = (block_size - 1) / 6.0
         thres_image = scipy.ndimage.gaussian_filter(image, sigma, mode=mode)
     elif method == 'mean':

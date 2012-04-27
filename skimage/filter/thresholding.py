@@ -21,30 +21,47 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     image : NxM ndarray
         Input image.
     block_size : int
-        uneven size of pixel neighborhood which is used to calculate the
-        threshold value (e.g. 3, 5, 7, ..., 21, ...)
+        Uneven size of pixel neighborhood which is used to calculate the
+        threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
-        method used to determine adaptive threshold. By default the 'gaussian'
-        method is used.
+        Method used to determine adaptive threshold fpr local neighbourhood in
+        weighted mean image.
+         * 'generic': use custom function (see `param` parameter)
+         * 'gaussian': apply gaussian filter (see `param` parameter for custom
+                       sigma value)
+         * 'mean': apply arithmetic mean filter
+         * 'median' apply median rank filter
+        By default the 'gaussian' method is used.
     offset : float, optional
-        constant subtracted from weighted mean of neighborhood to calculate
+        Constant subtracted from weighted mean of neighborhood to calculate
         the local threshold value. Default offset is 0.
-    mode : {'reflect','constant','nearest','mirror', 'wrap'}, optional
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to 'constant'. Default is 'reflect'
+        cval is the value when mode is equal to 'constant'.
+        Default is 'reflect'.
     param : {int, function}, optional
-        either specify sigma for 'gaussian' method or function object for
-        'generic' method.
+        Either specify sigma for 'gaussian' method or function object for
+        'generic' method. This functions takes the flat array of local
+        neighbourhood as a single argument and returns the calculated threshold
+        for the centre pixel.
 
     Returns
     -------
     threshold : NxM ndarray
-        thresholded binary image
+        Thresholded binary image
 
     References
     ----------
     http://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations
         .html?highlight=threshold#adaptivethreshold
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> binary_image1 = threshold_adaptive(image, 15, 'mean')
+    >>> func = lambda arr: arr.mean()
+    >>> binary_image2 = threshold_adaptive(image, 15, 'generic', param=func)
     """
     # not using img_as_float because offset parameter wouldn't work
     image = image.astype('double')
