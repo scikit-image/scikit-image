@@ -39,6 +39,7 @@ for bm in benchmarks:
 sys.path.remove(SUITE_PATH)
 
 # TODO: Cleaning out the repo may not be necessary
+#       (Strange: removing clean up doesn't seem to change the run time)
 PREPARE = """
 python setup.py clean
 """
@@ -50,10 +51,8 @@ python setup.py build_ext --inplace
 # These modules are available for import in any benchmarking module
 dependencies = ['vb_common.py']
 
-# Date of scikits-image --> skimage rename
-START_DATE = datetime(2011, 10, 12)
+START_DATE = datetime(2011, 10, 26) # date Cython MD5 hash was implemented
 # START_DATE = datetime(2012, 4, 23) # use recent date for testing
 
 repo = GitRepo(REPO_PATH)
-
 
