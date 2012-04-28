@@ -110,7 +110,7 @@ def get_log(name=None):
            http://docs.python.org/library/logging.html
 
     """
-    import logging, sys
+    import logging
 
     if name is None:
         name = 'skimage'
@@ -128,7 +128,11 @@ def _setup_log():
 
     log = logging.getLogger()
 
-    handler = logging.StreamHandler(stream=sys.stdout)
+    try:
+        handler = logging.StreamHandler(stream=sys.stdout)
+    except TypeError:
+        handler = logging.StreamHandler(strm=sys.stdout)
+
     formatter = logging.Formatter(
         '%(name)s: %(levelname)s: %(message)s'
         )
