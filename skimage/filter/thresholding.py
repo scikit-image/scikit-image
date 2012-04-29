@@ -1,5 +1,5 @@
 import numpy as np
-
+import scipy.ndimage
 from skimage.exposure import histogram
 from ._thresholding import _threshold_adaptive
 
@@ -63,9 +63,30 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = threshold_adaptive(image, 15, 'generic', param=func)
     """
-    # not using img_as_float because offset parameter wouldn't work
-    image = image.astype('double')
-    return _threshold_adaptive(image, block_size, method, offset, mode, param)
+    thresh_image = np.zeros(image.shape, 'double')
+    if method == 'generic':
+        scipy.ndimage.generic_filter(image, param, block_size,
+            output=thresh_image, mode=mode)
+    elif method == 'gaussian':
+        if param is None:
+            # automatically determine sigma which covers > 99% of distribution
+            sigma = (block_size - 1) / 6.0
+        scipy.ndimage.gaussian_filter(image, sigma, output=thresh_image,
+            mode=mode)
+    elif method == 'mean':
+        mask = 1. / block_size * np.ones((block_size,))
+        # separation of filters to speedup convolution
+        scipy.ndimage.convolve1d(image, mask, axis=0, output=thresh_image,
+            mode=mode)
+        scipy.ndimage.convolve1d(thresh_image, mask, axis=1,
+            output=thresh_image, mode=mode)
+    elif method == 'median':
+        scipy.ndimage.median_filter(image, block_size, output=thresh_image,
+            mode=mode)
+
+    thresh_image = image > (thresh_image - offset)
+
+    return thresh_image.astype('bool')
 
 def threshold_otsu(image, nbins=256):
     """Return threshold value based on Otsu's method.
