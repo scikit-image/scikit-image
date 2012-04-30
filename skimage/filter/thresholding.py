@@ -84,9 +84,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
         scipy.ndimage.median_filter(image, block_size, output=thresh_image,
             mode=mode)
 
-    thresh_image = image > (thresh_image - offset)
-
-    return thresh_image.astype('bool')
+    return image > (thresh_image - offset)
 
 def threshold_otsu(image, nbins=256):
     """Return threshold value based on Otsu's method.
