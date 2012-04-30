@@ -1,10 +1,8 @@
+__all__ = ['threshold_otsu', 'threshold_adaptive']
+
 import numpy as np
 import scipy.ndimage
 from skimage.exposure import histogram
-from ._thresholding import _threshold_adaptive
-
-
-__all__ = ['threshold_otsu', 'threshold_adaptive']
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
