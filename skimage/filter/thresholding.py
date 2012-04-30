@@ -71,6 +71,8 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
             sigma = (block_size - 1) / 6.0
+        else:
+            sigma = param
         scipy.ndimage.gaussian_filter(image, sigma, output=thresh_image,
             mode=mode)
     elif method == 'mean':
