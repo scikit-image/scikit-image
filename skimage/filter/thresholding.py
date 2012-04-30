@@ -24,7 +24,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
         Uneven size of pixel neighborhood which is used to calculate the
         threshold value (e.g. 3, 5, 7, ..., 21, ...).
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
-        Method used to determine adaptive threshold fpr local neighbourhood in
+        Method used to determine adaptive threshold for local neighbourhood in
         weighted mean image.
          * 'generic': use custom function (see `param` parameter)
          * 'gaussian': apply gaussian filter (see `param` parameter for custom
