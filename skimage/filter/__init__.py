@@ -4,4 +4,4 @@ from .canny import canny
 from .edges import sobel, hsobel, vsobel, hprewitt, vprewitt, prewitt
 from .tv_denoise import tv_denoise
 from .rank_order import rank_order
-from .thresholding import threshold_otsu
+from .thresholding import threshold_otsu, threshold_adaptive

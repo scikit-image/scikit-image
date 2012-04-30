@@ -104,3 +104,4 @@
 
 - Johannes Schönberger
   Polygon, circle and ellipse drawing functions
+  Adaptive thresholding
