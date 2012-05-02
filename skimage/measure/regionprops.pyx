@@ -143,12 +143,12 @@ def regionprops(image, properties='all'):
             The length of the minor axis of the ellipse that has the same
             normalized second central moments as the region.
         * Moments 3x3 ndarray
-            Spatial moments Mu_pq up to 3rd order.
+            Spatial moments up to 3rd order.
             .. math::
                 \texttt{m} _{ji}= \sum _{x,y} \left (\texttt{array} (x,y) \\
                     \cdot x^j \cdot y^i \right)
         * NormalizedMoments : 3x3 ndarray
-            Normalized moments (translation and scale invariant) Nu_pq up to 3rd
+            Normalized moments (translation and scale invariant) up to 3rd
             order.
             .. math::
                 \texttt{nu} _{ji} = \\
