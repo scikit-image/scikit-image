@@ -115,11 +115,14 @@ def regionprops(image, properties='all'):
         * Area : int
            Number of pixels of region.
         * BoundingBox : tuple
-           Bounding box `(minr, minc, maxr, maxc)`
+           Bounding box `(min_row, min_col, max_row, max_col)`
         * CentralMoments : 3x3 ndarray
-            Central moments (translation invariant) Mu_pq up to 3rd order.
+            Central moments (translation invariant) up to 3rd order.
+            .. math::
+                \texttt{mu} _{ji} = \sum _{x,y} \left (\texttt{array} (x,y) \\
+                    \cdot (x - \bar{x} )^j \cdot (y - \bar{y} )^i \right)
         * Centroid : array
-            Centroid coordinate tuple `(r, c)`.
+            Centroid coordinate tuple `(row, col)`.
         * ConvexArea : int
             Number of pixels of convex hull image.
         * ConvexImage : HxJ ndarray
@@ -152,9 +155,15 @@ def regionprops(image, properties='all'):
             normalized second central moments as the region.
         * Moments 3x3 ndarray
             Spatial moments Mu_pq up to 3rd order.
+            .. math::
+                \texttt{m} _{ji}= \sum _{x,y} \left (\texttt{array} (x,y) \\
+                    \cdot x^j \cdot y^i \right)
         * NormalizedMoments : 3x3 ndarray
             Normalized moments (translation and scale invariant) Nu_pq up to 3rd
             order.
+            .. math::
+                \texttt{nu} _{ji} = \\
+                    \frac{\texttt{mu}_{ji}}{\texttt{m}_{00}^{(i+j)/2+1}}
         * Orientation : float
             Angle between the X-axis and the major axis of the ellipse that has
             the same second-moments as the region. Ranging from `-pi/2` to
@@ -254,7 +263,6 @@ def regionprops(image, properties='all'):
             obj_props['ConvexImage'] = _convex_image
 
         if 'Eccentricity' in properties:
-            # linear eccentricity of ellipse
             obj_props['Eccentricity'] = \
                 sqrt(1 - (fmin(l1, l2) / fmax(l1, l2)) ** 2)
 
