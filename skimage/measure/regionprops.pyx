@@ -45,17 +45,6 @@ cdef tuple PROPS = (
 )
 
 
-def _moments(np.ndarray[np.uint8_t, ndim=2] array, int order):
-    cdef int p, q, r, c
-    cdef np.ndarray[np.double_t, ndim=2] m
-    m = np.zeros((order + 1, order + 1), 'double')
-    for p in range(order + 1):
-        for q in range(order + 1):
-            for r in range(array.shape[0]):
-                for c in range(array.shape[1]):
-                    m[p,q] += array[r,c] * r ** q * c ** p
-    return m
-
 def _central_moments(np.ndarray[np.uint8_t, ndim=2] array, double cr, double cc,
                      int order):
     cdef int p, q, r, c
@@ -221,7 +210,7 @@ def regionprops(image, properties='all'):
         r0 = sl[0].start
         c0 = sl[1].start
 
-        m = _moments(array, 3)
+        m = _central_moments(array, 0, 0, 3)
         # centroid
         cr = m[0,1] / m[0,0]
         cc = m[1,0] / m[0,0]
