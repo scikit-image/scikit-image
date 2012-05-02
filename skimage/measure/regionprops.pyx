@@ -48,34 +48,34 @@ cdef tuple PROPS = (
 def _moments(np.ndarray[np.uint8_t, ndim=2] array, int order):
     cdef int p, q, r, c
     cdef np.ndarray[np.double_t, ndim=2] m
-    m = np.zeros((order+1, order+1), 'double')
-    for p in range(order+1):
-        for q in range(order+1):
+    m = np.zeros((order + 1, order + 1), 'double')
+    for p in range(order + 1):
+        for q in range(order + 1):
             for r in range(array.shape[0]):
                 for c in range(array.shape[1]):
-                    m[p,q] += array[r,c] * r**q * c**p
+                    m[p,q] += array[r,c] * r ** q * c ** p
     return m
 
 def _central_moments(np.ndarray[np.uint8_t, ndim=2] array, double cr, double cc,
                      int order):
     cdef int p, q, r, c
     cdef np.ndarray[np.double_t, ndim=2] mu
-    mu = np.zeros((order+1, order+1), 'double')
-    for p in range(order+1):
-        for q in range(order+1):
+    mu = np.zeros((order + 1, order + 1), 'double')
+    for p in range(order + 1):
+        for q in range(order + 1):
             for r in range(array.shape[0]):
                 for c in range(array.shape[1]):
-                    mu[p,q] += array[r,c] * (r-cr)**q * (c-cc)**p
+                    mu[p,q] += array[r,c] * (r - cr) ** q * (c - cc) ** p
     return mu
 
 def _normalized_moments(np.ndarray[np.double_t, ndim=2] mu, int order):
     cdef int p, q
     cdef np.ndarray[np.double_t, ndim=2] nu
-    nu = np.zeros((order+1, order+1), 'double')
-    for p in range(order+1):
-        for q in range(order+1):
+    nu = np.zeros((order + 1, order + 1), 'double')
+    for p in range(order + 1):
+        for q in range(order + 1):
             if p + q >= 2:
-                nu[p,q] = mu[p,q] / mu[0,0]**(<double>(p+q) / 2 + 1)
+                nu[p,q] = mu[p,q] / mu[0,0]**(<double>(p + q) / 2 + 1)
             else:
                 nu[p,q] = np.nan
     return nu
@@ -224,8 +224,8 @@ def regionprops(image, properties='all'):
         b = mu[1,1] / mu[0,0]
         c = mu[0,2] / mu[0,0]
         # eigenvalues of covariance matrix
-        l1 = fabs(0.5*(a+c-sqrt((a-c)**2+4*b**2)))
-        l2 = fabs(0.5*(a+c+sqrt((a-c)**2+4*b**2)))
+        l1 = fabs(0.5 * (a + c - sqrt((a - c) ** 2 + 4 * b ** 2)))
+        l2 = fabs(0.5 * (a + c + sqrt((a - c) ** 2 + 4 * b ** 2)))
 
         # cached results which are used by several properties
         _filled_image = None
@@ -238,7 +238,7 @@ def regionprops(image, properties='all'):
             obj_props['BoundingBox'] = (r0, c0, sl[0].stop, sl[1].stop)
 
         if 'Centroid' in properties:
-            obj_props['Centroid'] = cr+r0, cc+c0
+            obj_props['Centroid'] = cr + r0, cc + c0
 
         if 'CentralMoments' in properties:
             obj_props['CentralMoments'] = mu
@@ -255,7 +255,8 @@ def regionprops(image, properties='all'):
 
         if 'Eccentricity' in properties:
             # linear eccentricity of ellipse
-            obj_props['Eccentricity'] = sqrt(1-(fmin(l1, l2)/fmax(l1, l2))**2)
+            obj_props['Eccentricity'] = \
+                sqrt(1 - (fmin(l1, l2) / fmax(l1, l2)) ** 2)
 
         if 'EquivDiameter' in properties:
             obj_props['EquivDiameter'] = sqrt(4 * m[0,0] / PI)
@@ -299,7 +300,7 @@ def regionprops(image, properties='all'):
             obj_props['NormalizedMoments'] = nu
 
         if 'Orientation' in properties:
-            obj_props['Orientation'] = - 0.5 * atan2(2*b, a-c)
+            obj_props['Orientation'] = - 0.5 * atan2(2 * b, a - c)
 
         if 'Solidity' in properties:
             if _convex_image is None:
