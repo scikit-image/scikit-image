@@ -10,6 +10,7 @@ def rescale(x):
 
 def test_radon_iradon():
     size = 100
+    debug = False
     image = np.tri(size) + np.tri(size)[::-1]
     for filter_type in ["ramp", "shepp-logan", "cosine", "hamming", "hann"]:
         reconstructed = iradon(radon(image), filter=filter_type)
@@ -18,12 +19,13 @@ def test_radon_iradon():
         reconstructed = rescale(reconstructed)
         delta = np.mean(np.abs(image - reconstructed))
 
-        ## print delta
-        ## import matplotlib.pyplot as plt
-        ## f, (ax1, ax2) = plt.subplots(1, 2)
-        ## ax1.imshow(image, cmap=plt.cm.gray)
-        ## ax2.imshow(reconstructed, cmap=plt.cm.gray)
-        ## plt.show()
+        if debug:
+            print delta
+            import matplotlib.pyplot as plt
+            f, (ax1, ax2) = plt.subplots(1, 2)
+            ax1.imshow(image, cmap=plt.cm.gray)
+            ax2.imshow(reconstructed, cmap=plt.cm.gray)
+            plt.show()
 
         assert delta < 0.05
 
@@ -60,7 +62,34 @@ def test_iradon_angles():
     # Loss of quality when the number of projections is reduced
     assert delta_80 > delta_200
 
+def test_radon_minimal():
+    """
+    Test for small images for various angles
+    """
+    thetas = [np.arange(180)]
+    for theta in thetas:
+        a = np.zeros((3, 3))
+        a[1, 1] = 1
+        p = radon(a, theta)
+        reconstructed = iradon(p, theta)
+        reconstructed /= np.max(reconstructed)
+        assert np.all(abs(a - reconstructed) < 0.3) 
         
+        b = np.zeros((4, 4))
+        b[1:3, 1:3] = 1
+        p = radon(b, theta)
+        reconstructed = iradon(p, theta)
+        reconstructed /= np.max(reconstructed)
+        assert np.all(abs(b - reconstructed) < 0.3) 
+        
+        c = np.zeros((5, 5))
+        c[1:3, 1:3] = 1
+        p = radon(c, theta)
+        reconstructed = iradon(p, theta)
+        reconstructed /= np.max(reconstructed)
+        assert np.all(abs(c - reconstructed) < 0.3) 
+     
+
 if __name__ == "__main__":
     run_module_suite()
 
