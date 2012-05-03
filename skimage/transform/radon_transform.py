@@ -44,8 +44,8 @@ def radon(image, theta=None):
         theta = np.arange(180)    
     height, width = image.shape
     diagonal = np.sqrt(height ** 2 + width ** 2)
-    heightpad = np.ceil(diagonal - height) + 2
-    widthpad = np.ceil(diagonal - width) + 2
+    heightpad = np.ceil(diagonal - height)
+    widthpad = np.ceil(diagonal - width)
     padded_image = np.zeros((int(height + heightpad),
                              int(width + widthpad)))
     y0, y1 = int(np.ceil(heightpad / 2)), \
@@ -57,13 +57,15 @@ def radon(image, theta=None):
     out = np.zeros((max(padded_image.shape), len(theta)))
 
     h, w = padded_image.shape
-    shift0 = np.array([[1, 0, -w/2.],
-                       [0, 1, -h/2.],
+    dh, dw = h / 2, w / 2
+    shift0 = np.array([[1, 0, -dw],
+                       [0, 1, -dh],
                        [0, 0, 1]])
 
-    shift1 = np.array([[1, 0, w/2.],
-                       [0, 1, h/2.],
+    shift1 = np.array([[1, 0, dw],
+                       [0, 1, dh],
                        [0, 0, 1]])
+
 
     def build_rotation(theta):
         T = -np.deg2rad(theta)
@@ -129,7 +131,7 @@ def iradon(radon_image, theta=None, output_size=None,
     th = (np.pi / 180.0) * theta        
     # if output size not specified, estimate from input radon image
     if not output_size:
-        output_size = 2 * np.floor(radon_image.shape[0] / (2 * np.sqrt(2)))
+        output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2 / 2.0)))
     n = radon_image.shape[0]
   
     img = radon_image.copy()
@@ -166,13 +168,14 @@ def iradon(radon_image, theta=None, output_size=None,
     # resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
-    mid_index = np.ceil(n/2);
+    mid_index = np.ceil(n / 2.0)
+    
     x = output_size
     y = output_size
     [X, Y] = np.mgrid[0.0:x, 0.0:y]
-    xpr = X - (output_size + 1.0) / 2.0
-    ypr = Y - (output_size + 1.0) / 2.0
-    
+    xpr = X - int(output_size) / 2
+    ypr = Y - int(output_size) / 2 
+
     # reconstruct image by interpolation
     if interpolation == "nearest":   
         for i in range(len(theta)):
