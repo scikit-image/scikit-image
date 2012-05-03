@@ -12,9 +12,6 @@ import numpy as np
 import skimage
 
 
-eps = np.finfo(float).eps
-
-
 def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
 
