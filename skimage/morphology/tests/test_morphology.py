@@ -3,8 +3,9 @@ import os.path
 import numpy as np
 from numpy import testing
 
+import skimage
 from skimage import data_dir
-from skimage.morphology.grey import *
+from skimage.morphology import grey
 from skimage.morphology import selem
 
 
@@ -24,43 +25,43 @@ class TestMorphology():
 
     def test_erode_diamond(self):
         self.morph_worker(lena, "diamond-erode-matlab-output.npz",
-                          erosion, selem.diamond)
+                          grey.erosion, selem.diamond)
 
     def test_dilate_diamond(self):
         self.morph_worker(lena, "diamond-dilate-matlab-output.npz",
-                          dilation, selem.diamond)
+                          grey.dilation, selem.diamond)
 
     def test_open_diamond(self):
         self.morph_worker(lena, "diamond-open-matlab-output.npz",
-                          opening, selem.diamond)
+                          grey.opening, selem.diamond)
 
     def test_close_diamond(self):
         self.morph_worker(lena, "diamond-close-matlab-output.npz",
-                          closing, selem.diamond)
+                          grey.closing, selem.diamond)
 
     def test_tophat_diamond(self):
         self.morph_worker(lena, "diamond-tophat-matlab-output.npz",
-                          white_tophat, selem.diamond)
+                          grey.white_tophat, selem.diamond)
 
     def test_bothat_diamond(self):
         self.morph_worker(lena, "diamond-bothat-matlab-output.npz",
-                          black_tophat, selem.diamond)
+                          grey.black_tophat, selem.diamond)
 
     def test_erode_disk(self):
         self.morph_worker(lena, "disk-erode-matlab-output.npz",
-                          erosion, selem.disk)
+                          grey.erosion, selem.disk)
 
     def test_dilate_disk(self):
         self.morph_worker(lena, "disk-dilate-matlab-output.npz",
-                          dilation, selem.disk)
+                          grey.dilation, selem.disk)
 
     def test_open_disk(self):
         self.morph_worker(lena, "disk-open-matlab-output.npz",
-                          opening, selem.disk)
+                          grey.opening, selem.disk)
 
     def test_close_disk(self):
         self.morph_worker(lena, "disk-close-matlab-output.npz",
-                          closing, selem.disk)
+                          grey.closing, selem.disk)
 
 
 class TestEccentricStructuringElements():
@@ -74,46 +75,46 @@ class TestEccentricStructuringElements():
 
     def test_dilate_erode_symmetry(self):
         for s in self.selems:
-            c = erosion(self.black_pixel, s)
-            d = dilation(self.white_pixel, s)
+            c = grey.erosion(self.black_pixel, s)
+            d = grey.dilation(self.white_pixel, s)
             assert np.all(c == (255 - d))
 
     def test_open_black_pixel(self):
         for s in self.selems:
-            grey_open = opening(self.black_pixel, s)
+            grey_open = grey.opening(self.black_pixel, s)
             assert np.all(grey_open == self.black_pixel)
 
     def test_close_white_pixel(self):
         for s in self.selems:
-            grey_close = closing(self.white_pixel, s)
+            grey_close = grey.closing(self.white_pixel, s)
             assert np.all(grey_close == self.white_pixel)
 
     def test_open_white_pixel(self):
         for s in self.selems:
-            assert np.all(opening(self.white_pixel, s) == 0)
+            assert np.all(grey.opening(self.white_pixel, s) == 0)
 
     def test_close_black_pixel(self):
         for s in self.selems:
-            assert np.all(closing(self.black_pixel, s) == 255)
+            assert np.all(grey.closing(self.black_pixel, s) == 255)
 
     def test_white_tophat_white_pixel(self):
         for s in self.selems:
-            tophat = white_tophat(self.white_pixel, s)
+            tophat = grey.white_tophat(self.white_pixel, s)
             assert np.all(tophat == self.white_pixel)
 
     def test_black_tophat_black_pixel(self):
         for s in self.selems:
-            tophat = black_tophat(self.black_pixel, s)
+            tophat = grey.black_tophat(self.black_pixel, s)
             assert np.all(tophat == (255 - self.black_pixel))
 
     def test_white_tophat_black_pixel(self):
         for s in self.selems:
-            tophat = white_tophat(self.black_pixel, s)
+            tophat = grey.white_tophat(self.black_pixel, s)
             assert np.all(tophat == 0)
 
     def test_black_tophat_white_pixel(self):
         for s in self.selems:
-            tophat = black_tophat(self.white_pixel, s)
+            tophat = grey.black_tophat(self.white_pixel, s)
             assert np.all(tophat == 0)
 
 
@@ -132,10 +133,10 @@ class TestDTypes():
         self.expected_closing = np.load(fname_closing)[arrname]
 
     def _test_image(self, image):
-        result_opening = opening(image, self.disk)
+        result_opening = grey.opening(image, self.disk)
         testing.assert_equal(result_opening, self.expected_opening)
 
-        result_closing = closing(image, self.disk)
+        result_closing = grey.closing(image, self.disk)
         testing.assert_equal(result_closing, self.expected_closing)
 
     def test_float(self):
