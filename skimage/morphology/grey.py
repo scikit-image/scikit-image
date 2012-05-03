@@ -12,6 +12,12 @@ import numpy as np
 import skimage
 
 
+__all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
+           'black_tophat', 'greyscale_erode', 'greyscale_dilate',
+           'greyscale_open', 'greyscale_close', 'greyscale_white_top_hat',
+           'greyscale_black_top_hat']
+
+
 def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
 
