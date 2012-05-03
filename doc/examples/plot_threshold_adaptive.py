@@ -21,7 +21,7 @@ from skimage import data
 from skimage.filter import threshold_otsu, threshold_adaptive
 
 
-image = data.text()
+image = data.page()
 
 global_thresh = threshold_otsu(image)
 binary_global = image > global_thresh

@@ -96,3 +96,12 @@ def moon():
 
     """
     return load("moon.png")
+
+def page():
+    """Scanned page.
+
+    This image of printed text is useful for demonstrations requiring uneven
+    background illumination.
+
+    """
+    return load("page.png")
