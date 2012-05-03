@@ -4,7 +4,7 @@
 
 import numpy as np
 from scipy.ndimage import interpolation as ndii
-from .warp import _stackcopy
+from ._warp import _stackcopy
 
 __all__ = ['homography']
 
