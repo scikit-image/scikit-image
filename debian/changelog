@@ -1,5 +1,5 @@
-skimage (0.5.0-1) UNRELEASED; urgency=low
+skimage (0.6.0-1) UNRELEASED; urgency=low
 
   * Initial release. (Closes: #639820)
 
- -- Stefan van der Walt <stefan@sun.ac.za>  Fri, 03 Feb 2012 20:45:51 -0800
+ -- Stefan van der Walt <stefan@sun.ac.za>  Thu, 03 May 2012 17:41:51 -0800
