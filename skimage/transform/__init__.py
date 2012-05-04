@@ -5,4 +5,4 @@ from .project import *
 from ._project import homography as fast_homography
 from .integral import *
 from ._warp import warp
-from ._swirl import swirl
+from ._warp_zoo import swirl
