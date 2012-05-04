@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import numpy as np
 from numpy.testing import *
 from skimage.transform import *
@@ -20,7 +22,7 @@ def test_radon_iradon():
         delta = np.mean(np.abs(image - reconstructed))
 
         if debug:
-            print delta
+            print(delta)
             import matplotlib.pyplot as plt
             f, (ax1, ax2) = plt.subplots(1, 2)
             ax1.imshow(image, cmap=plt.cm.gray)
