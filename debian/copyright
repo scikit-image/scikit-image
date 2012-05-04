@@ -1,9 +1,57 @@
-Format-Specification: http://wiki.debian.org/Proposals/CopyrightFormat
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: scikits-image
-Upstream-Source-Location: http://scikits-image.org
+Upstream-Contact: Stéfan van der Walt <stefan@sun.ac.za>
+Source: http://github.com/scikits-image/scikits-image
 
 Files: *
-Copyright: Copyright (C) 2009 - 2012, the scikits-image team
+Copyright: 2009-2012, the scikits-image team
+License: BSD-3
+
+Files: doc/sphinxext/docscrape.py doc/sphinxext/docscrape_sphinx.py
+       doc/sphinxext/numpydoc.py
+Copyright: 2008, Stefan van der Walt <stefan@mentat.za.net>
+           2008, Pauli Virtanen <pav@iki.fi>
+License: BSD-2
+
+Files: doc/ext/plot_directive.py
+Copyright: 2002-2008, John D. Hunter
+License: PSF
+
+Files: doc/source/themes/agogo/layout.html
+       doc/source/themes/agogo/static/agogo.css_t
+Copyright: 2007-2010, by the Sphinx team
+License: BSD-3
+
+Files: skimage/filter/canny.py skimage/filter/ctmf.py
+       skimage/filter/_ctmf.pyx skimage/filter/edges.py
+       skimage/filter/rank_order.py
+       skimage/morphology/heap_general.pxi
+       skimage/morphology/heap_watershed.pxi
+       skimage/morphology/_skeletonize.pyx
+       skimage/morphology/tests/test_watershed.py
+       skimage/morphology/watershed.py
+       skimage/morphology/_watershed.py
+Copyright: 2003-2009, Massachusetts Institute of Technology
+           2009-2011, Broad Institute
+License: BSD-3
+
+Files: skimage/morphology/tests/test_watershed.py
+Copyright: 2003-2005, Peter J. Verveer
+License: BSD-3
+
+Files: skimage/graph/_mcp.pyx
+Copyright: 2009, Zachary Pincus
+License: BSD-2
+
+Files: skimage/graph/heap.pyx
+Copyright: 2009, Almar Klein
+License: BSD-2
+
+Files: skimage/morphology/_pnpoly.h
+Copyright: 1970-2003, Wm. Randolph Franklin
+License: BSD-3
+
+
 License: BSD-3
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are
@@ -31,18 +79,28 @@ License: BSD-3
   IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
   POSSIBILITY OF SUCH DAMAGE.
 
-Files: doc/sphinxext/docscrape.py doc/sphinxext/docscrape_sphinx.py doc/sphinxext/numpydoc.py
-Copyright: Copyright (C) 2008 Stefan van der Walt <stefan@mentat.za.net>, Pauli Virtanen <pav@iki.fi>
-License: BSD
+License: BSD-2
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+  .
   1. Redistributions of source code must retain the above copyright
      notice, this list of conditions and the following disclaimer.
   2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in
-     the documentation and/or other materials provided with the
-     distribution.
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+  .
+  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Files: doc/ext/plot_directive.py
-Copyright: Copyright (c) 2002-2008 John D. Hunter
 License: PSF
   1. This LICENSE AGREEMENT is between John D. Hunter (“JDH”), and the
   Individual or Organization (“Licensee”) accessing and otherwise
@@ -90,102 +148,3 @@ License: PSF
   8. By copying, installing or otherwise using matplotlib 0.98.3,
   Licensee agrees to be bound by the terms and conditions of this
   License Agreement.
-
-Files: doc/source/themes/agogo/layout.html
-       doc/source/themes/agogo/static/agogo.css_t
-Copyright: Copyright 2007-2010 by the Sphinx team
-License: BSD
-
-Files: skimage/filter/canny.py skimage/filter/ctmf.py
-       skimage/filter/_ctmf.pyx skimage/filter/edges.py
-       skimage/filter/rank_order.py
-       skimage/morphology/heap_general.pxi
-       skimage/morphology/heap_watershed.pxi
-       skimage/morphology/_skeletonize.pyx
-       skimage/morphology/tests/test_watershed.py
-       skimage/morphology/watershed.py
-       skimage/morphology/_watershed.py
-Copyright: Copyright (c) 2003-2009 Massachusetts Institute of Technology
-           Copyright (c) 2009-2011 Broad Institute
-License: BSD
-
-Files: skimage/morphology/tests/test_watershed.py
-Copyright: Copyright (C) 2003-2005 Peter J. Verveer
-License: BSD
-
-Files: skimage/graph/_mcp.pyx
-Copyright: Copyright (c) 2009 Zachary Pincus
-License: BSD
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-  .
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-  .
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Files: skimage/graph/heap.pyx
-Copyright: Copyright (c) 2009 Almar Klein
-License: BSD
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions
-  are met:
-  .
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-  .
-  THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Files: skimage/morphology/_pnpoly.h
-Copyright: Copyright (c) 1970-2003, Wm. Randolph Franklin
-License: BSD
-   Permission is hereby granted, free of charge, to any person
-   obtaining a copy of this software and associated documentation
-   files (the "Software"), to deal in the Software without
-   restriction, including without limitation the rights to use, copy,
-   modify, merge, publish, distribute, sublicense, and/or sell copies
-   of the Software, and to permit persons to whom the Software is
-   furnished to do so, subject to the following conditions:
-   .
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimers.
-    2. Redistributions in binary form must reproduce the above
-       copyright notice in the documentation and/or other materials
-       provided with the distribution.
-    3. The name of W. Randolph Franklin may not be used to endorse or
-       promote products derived from this Software without specific
-       prior written permission.
-   .
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-   SOFTWARE.
