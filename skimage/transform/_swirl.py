@@ -7,9 +7,12 @@ from ._warp import warp
 def _swirl_mapping(xy, center, rotation, strength, radius):
     x, y = xy.T
     x0, y0 = center
+    rho = np.sqrt((x - x0)**2 + (y - y0)**2)
+
+    # Ensure that the transformation decays to approximately 1/1000-th
+    # within the specified radius.
     radius = radius / 5 * np.log(2)
 
-    rho = np.sqrt((x - x0)**2 + (y - y0)**2)
     theta = rotation + strength * \
             np.exp(-rho / radius) + \
             np.arctan2(y - y0, x - x0)
@@ -32,8 +35,8 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     strength : float
         The amount of swirling applied.
     radius : float
-        The extent of the swirling in pixels.  The effect dies out
-        rapidly beyond radius.
+        The extent of the swirl in pixels.  The effect dies out
+        rapidly beyond `radius`.
     rotation : float
         Additional rotation applied to the image.
 
@@ -47,10 +50,11 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     output_shape : tuple or ndarray
         Size of the generated output image.
     order : int
-        Order of splines used in interpolation, passed as-is to ndimage.
+        Order of splines used in interpolation.  See
+        `scipy.ndimage.map_coordinates` for detail.
     mode : string
-        How to handle values outside the image borders, passed as-is
-        to ndimage.
+        How to handle values outside the image borders.  See
+        `scipy.ndimage.map_coordinates` for detail.
     cval : string
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -65,6 +69,6 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
                  'strength': strength,
                  'radius': radius}
 
-    return warp(image, _swirl_mapping, tf_args=warp_args,
+    return warp(image, _swirl_mapping, map_args=warp_args,
                 output_shape=output_shape,
                 order=order, mode=mode, cval=cval)

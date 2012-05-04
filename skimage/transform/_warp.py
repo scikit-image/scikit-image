@@ -7,13 +7,21 @@ from skimage.util import img_as_float
 eps = np.finfo(float).eps
 
 def _stackcopy(a, b):
-    """a[:,:,0] = a[:,:,1] = ... = b"""
+    """Copy b into each color layer of a, such that::
+
+      a[:,:,0] = a[:,:,1] = ... = b
+
+    Notes
+    -----
+    Color images are stored as an ``MxNx3`` or ``MxNx4`` arrays.
+
+    """
     if a.ndim == 3:
         a.transpose().swapaxes(1, 2)[:] = b
     else:
         a[:] = b
 
-def warp(image, coord_tf, tf_args={},
+def warp(image, reverse_map, map_args={},
          output_shape=None, order=1, mode='constant', cval=0.):
     """Warp an image according to a given coordinate transformation.
 
@@ -21,20 +29,20 @@ def warp(image, coord_tf, tf_args={},
     ----------
     image : 2-D array
         Input image.
-    coord_tf : callable xy = f(xy, **kwargs)
-        Function that transforms an Nx2 array of ``(x, y)`` coordinates
-        in the *output image* into their corresponding coordinates in the
-        *source image*.  Note that this is a reverse mapping (also
-        see examples below).
-    tf_args : dict, optional
-        Keyword arguments passed to `coord_tf`.
+    reverse_map : callable xy = f(xy, **kwargs)
+        Reverse coordinate map.  A function that transforms an Nx2 array of
+        ``(x, y)`` coordinates in the *output image* into their corresponding
+        coordinates in the *source image*.  Also see examples below.
+    map_args : dict, optional
+        Keyword arguments passed to `reverse_map`.
     output_shape : tuple (rows, cols)
         Shape of the output image generated.
     order : int
-        Order of splines used in interpolation.
+        Order of splines used in interpolation. See
+        `scipy.ndimage.map_coordinates` for detail.
     mode : string
-        How to handle values outside the image borders.  Passed as-is
-        to ndimage.
+        How to handle values outside the image borders.  See
+        `scipy.ndimage.map_coordinates` for detail.
     cval : string
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
@@ -65,17 +73,24 @@ def warp(image, coord_tf, tf_args={},
 
     coords = np.empty(np.r_[3, output_shape], dtype=float)
 
-    # Construct transformed coordinates
+    ## Construct transformed coordinates
+
     rows, cols = output_shape[:2]
+
+    # Reshape grid coordinates into a (P, 2) array of (x, y) pairs
     tf_coords = np.indices((cols, rows), dtype=float).reshape(2, -1).T
 
-    tf_coords = coord_tf(tf_coords, **tf_args)
+    # Map each (x, y) pair to the source image according to
+    # the user-provided mapping
+    tf_coords = reverse_map(tf_coords, **map_args)
+
+    # Reshape back to a (2, M, N) coordinate grid
     tf_coords = tf_coords.T.reshape((-1, cols, rows)).swapaxes(1, 2)
 
-    # y-coordinate mapping
+    # Place the y-coordinate mapping
     _stackcopy(coords[1, ...], tf_coords[0, ...])
 
-    # x-coordinate mapping
+    # Place the x-coordinate mapping
     _stackcopy(coords[0, ...], tf_coords[1, ...])
 
     # colour-coordinate mapping

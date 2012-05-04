@@ -36,7 +36,6 @@ The corresponding call to warp is::
 
 The swirl transformation
 ````````````````````````
-
 Consider the coordinate :math:`(x, y)` in the output image.  The reverse
 mapping for the swirl transformation first computes, relative to a center
 :math:`(x_0, y_0)`, its polar coordinates,
@@ -60,9 +59,10 @@ and then transforms them according to
     \theta' = \phi + s \, e^{-\rho / r + \theta}
 
 where ``strength`` is a parameter for the amount of swirl, ``radius`` indicates
-the extent of the transform in pixels, and ``rotation`` adds a rotation angle.
-The transformation of ``radius`` into :math:`r` is to ensure that the
-transformation decays to :math:`\approx 1/1000^{\mathsf{th}}` within the specified radius.
+the swirl extent in pixels, and ``rotation`` adds a rotation angle.  The
+transformation of ``radius`` into :math:`r` is to ensure that the
+transformation decays to :math:`\approx 1/1000^{\mathsf{th}}` within the
+specified radius.
 """
 
 from skimage import data
