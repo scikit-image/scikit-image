@@ -186,6 +186,9 @@ def regionprops(image, properties='all'):
     cdef np.ndarray[np.double_t, ndim=2] m, mu, nu
     cdef double cr, cc, a, b, c
 
+    if not np.issubdtype(image.dtype, 'int'):
+        raise TypeError('labelled image must be of integer dtype')
+
     # determine all properties if nothing specified
     if properties == 'all':
         properties = PROPS
