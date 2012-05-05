@@ -1,21 +1,17 @@
-#cython: boundscheck=False
-#cython: wraparound=False
-#cython: cdivision=True
-from scipy import ndimage
+# coding: utf-8
+import math
 import numpy as np
-cimport numpy as np
-cimport cython
-from libc.math cimport sqrt, atan2, fabs, fmin, fmax
+from scipy import ndimage
 
 from skimage.morphology import convex_hull_image
+from . import _regionprops
 
 
 __all__ = ['regionprops']
 
 
 STREL_8 = np.ones((3, 3), 'int8')
-cdef float PI = 3.14159265
-cdef tuple PROPS = (
+PROPS = (
     'Area',
     'BoundingBox',
     'CentralMoments',
@@ -44,52 +40,6 @@ cdef tuple PROPS = (
 #    'SubarrayIdx'
 )
 
-
-def _central_moments(np.ndarray[np.uint8_t, ndim=2] array, double cr, double cc,
-                     int order):
-    cdef int p, q, r, c
-    cdef np.ndarray[np.double_t, ndim=2] mu
-    mu = np.zeros((order + 1, order + 1), 'double')
-    for p in range(order + 1):
-        for q in range(order + 1):
-            for r in range(array.shape[0]):
-                for c in range(array.shape[1]):
-                    mu[p,q] += array[r,c] * (r - cr) ** q * (c - cc) ** p
-    return mu
-
-def _normalized_moments(np.ndarray[np.double_t, ndim=2] mu, int order):
-    cdef int p, q
-    cdef np.ndarray[np.double_t, ndim=2] nu
-    nu = np.zeros((order + 1, order + 1), 'double')
-    for p in range(order + 1):
-        for q in range(order + 1):
-            if p + q >= 2:
-                nu[p,q] = mu[p,q] / mu[0,0]**(<double>(p + q) / 2 + 1)
-            else:
-                nu[p,q] = np.nan
-    return nu
-
-def _hu_moments(np.ndarray[np.double_t, ndim=2] nu):
-    cdef np.ndarray[np.double_t, ndim=1] hu = np.zeros((7,), 'double')
-    cdef double t0 = nu[3,0] + nu[1,2]
-    cdef double t1 = nu[2,1] + nu[0,3]
-    cdef double q0 = t0 * t0
-    cdef double q1 = t1 * t1
-    cdef double n4 = 4 * nu[1,1]
-    cdef double s = nu[2,0] + nu[0,2]
-    cdef double d = nu[2,0] - nu[0,2]
-    hu[0] = s
-    hu[1] = d * d + n4 * nu[1,1]
-    hu[3] = q0 + q1
-    hu[5] = d * (q0 - q1) + n4 * t0 * t1
-    t0 *= q0 - 3 * q1
-    t1 *= 3 * q0 - q1
-    q0 = nu[3,0]- 3 * nu[1,2]
-    q1 = 3 * nu[2,1] - nu[0,3]
-    hu[2] = q0 * q0 + q1 * q1
-    hu[4] = q0 * t0 + q1 * t1
-    hu[6] = q1 * t0 - q0 * t1
-    return hu
 
 def regionprops(image, properties='all'):
     """Measure properties of labeled image regions.
@@ -182,10 +132,6 @@ def regionprops(image, properties='all'):
     >>> label_img = label(img)
     >>> props = regionprops(label_img)
     """
-    cdef int i, r0, c0, label
-    cdef np.ndarray[np.double_t, ndim=2] m, mu, nu
-    cdef double cr, cc, a, b, c
-
     if not np.issubdtype(image.dtype, 'int'):
         raise TypeError('labelled image must be of integer dtype')
 
@@ -213,24 +159,24 @@ def regionprops(image, properties='all'):
         r0 = sl[0].start
         c0 = sl[1].start
 
-        m = _central_moments(array, 0, 0, 3)
+        m = _regionprops._central_moments(array, 0, 0, 3)
         # centroid
         cr = m[0,1] / m[0,0]
         cc = m[1,0] / m[0,0]
-        mu = _central_moments(array, cr, cc, 3)
-        nu = _normalized_moments(mu, 3)
+        mu = _regionprops.central_moments(array, cr, cc, 3)
 
         # elements of second order central moment covariance matrix
         a = mu[2,0] / mu[0,0]
         b = mu[1,1] / mu[0,0]
         c = mu[0,2] / mu[0,0]
         # eigenvalues of covariance matrix
-        l1 = fabs(0.5 * (a + c - sqrt((a - c) ** 2 + 4 * b ** 2)))
-        l2 = fabs(0.5 * (a + c + sqrt((a - c) ** 2 + 4 * b ** 2)))
+        l1 = abs(0.5 * (a + c - math.sqrt((a - c) ** 2 + 4 * b ** 2)))
+        l2 = abs(0.5 * (a + c + math.sqrt((a - c) ** 2 + 4 * b ** 2)))
 
         # cached results which are used by several properties
         _filled_image = None
         _convex_image = None
+        _nu = None
 
         if 'Area' in properties:
             obj_props['Area'] = m[0,0]
@@ -256,10 +202,10 @@ def regionprops(image, properties='all'):
 
         if 'Eccentricity' in properties:
             obj_props['Eccentricity'] = \
-                sqrt(1 - (fmin(l1, l2) / fmax(l1, l2)) ** 2)
+                math.sqrt(1 - (min(l1, l2) / max(l1, l2)) ** 2)
 
         if 'EquivDiameter' in properties:
-            obj_props['EquivDiameter'] = sqrt(4 * m[0,0] / PI)
+            obj_props['EquivDiameter'] = math.sqrt(4 * m[0,0] / math.pi)
 
         if 'EulerNumber' in properties:
             if _filled_image is None:
@@ -272,7 +218,9 @@ def regionprops(image, properties='all'):
             obj_props['Extent'] = m[0,0] / (array.shape[0] * array.shape[1])
 
         if 'HuMoments' in properties:
-            obj_props['HuMoments'] = _hu_moments(nu)
+            if _nu is None:
+                _nu = _regionprops.normalized_moments(mu, 3)
+            obj_props['HuMoments'] = _regionprops.hu_moments(_nu)
 
         if 'Image' in properties:
             obj_props['Image'] = array
@@ -288,19 +236,21 @@ def regionprops(image, properties='all'):
             obj_props['FilledImage'] = _filled_image
 
         if 'MinorAxisLength' in properties:
-            obj_props['MinorAxisLength'] = fmin(l1, l2)
+            obj_props['MinorAxisLength'] = min(l1, l2)
 
         if 'MajorAxisLength' in properties:
-            obj_props['MajorAxisLength'] = fmax(l1, l2)
+            obj_props['MajorAxisLength'] = max(l1, l2)
 
         if 'Moments' in properties:
             obj_props['Moments'] = m
 
         if 'NormalizedMoments' in properties:
-            obj_props['NormalizedMoments'] = nu
+            if _nu is None:
+                _nu = _regionprops.normalized_moments(mu, 3)
+            obj_props['NormalizedMoments'] = _nu
 
         if 'Orientation' in properties:
-            obj_props['Orientation'] = - 0.5 * atan2(2 * b, a - c)
+            obj_props['Orientation'] = - 0.5 * math.atan2(2 * b, a - c)
 
         if 'Solidity' in properties:
             if _convex_image is None:
