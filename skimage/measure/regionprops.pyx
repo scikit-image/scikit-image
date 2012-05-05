@@ -168,10 +168,10 @@ def regionprops(image, properties='all'):
 
     References
     ----------
-    B. Jähne. Digitale Bildverarbeitung. Springer-Verlag,
+    B. Jähne. Digital Image Processing. Springer-Verlag,
         Berlin-Heidelberg, 6. edition, 2005.
     T. H. Reiss. Recognizing Planar Objects Using Invariant Image Features,
-        Bd. 676 von Lecture notes in computer science. Springer, Berlin, 1993.
+        LNICS, p. 676. Springer, Berlin, 1993.
     http://en.wikipedia.org/wiki/Image_moment
 
     Examples
