@@ -14,6 +14,16 @@ try:
 except OSError:
     FI_available = False
 
+
+def setup_module(self):
+    """The effect of the `plugin.use` call may be overridden by later imports.
+    Call `use_plugin` directly before the tests to ensure that freeimage is
+    used.
+
+    """
+    sio.use_plugin('freeimage')
+
+
 @skipif(not FI_available)
 def test_imread():
     img = sio.imread(os.path.join(si.data_dir, 'color.png'))
