@@ -23,7 +23,10 @@ def setup_module(self):
     Call `use_plugin` directly before the tests to ensure that PIL is used.
 
     """
-    use_plugin('pil')
+    try:
+        use_plugin('pil')
+    except ImportError:
+        pass
 
 @skipif(not PIL_available)
 def test_imread_flatten():

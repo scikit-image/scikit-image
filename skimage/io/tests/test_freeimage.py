@@ -21,7 +21,10 @@ def setup_module(self):
     used.
 
     """
-    sio.use_plugin('freeimage')
+    try:
+        sio.use_plugin('freeimage')
+    except OSError:
+        pass
 
 
 @skipif(not FI_available)
