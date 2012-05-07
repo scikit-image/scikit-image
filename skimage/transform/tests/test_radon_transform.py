@@ -37,7 +37,7 @@ def test_radon_iradon():
     size = 20
     image = np.tri(size) + np.tri(size)[::-1]
     reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
-   
+
 def test_iradon_angles():
     """
     Test with different number of projections
@@ -47,7 +47,7 @@ def test_iradon_angles():
     image = np.tri(size) + np.tri(size)[::-1]
     # Large number of projections: a good quality is expected
     nb_angles = 200
-    radon_image_200 = radon(image, theta=np.linspace(0, 180, nb_angles, 
+    radon_image_200 = radon(image, theta=np.linspace(0, 180, nb_angles,
                     endpoint=False))
     reconstructed = iradon(radon_image_200)
     delta_200 = np.mean(abs(rescale(image) - rescale(reconstructed)))
@@ -75,23 +75,22 @@ def test_radon_minimal():
         p = radon(a, theta)
         reconstructed = iradon(p, theta)
         reconstructed /= np.max(reconstructed)
-        assert np.all(abs(a - reconstructed) < 0.3) 
-        
+        assert np.all(abs(a - reconstructed) < 0.4)
+
         b = np.zeros((4, 4))
         b[1:3, 1:3] = 1
         p = radon(b, theta)
         reconstructed = iradon(p, theta)
         reconstructed /= np.max(reconstructed)
-        assert np.all(abs(b - reconstructed) < 0.3) 
-        
+        assert np.all(abs(b - reconstructed) < 0.4)
+
         c = np.zeros((5, 5))
         c[1:3, 1:3] = 1
         p = radon(c, theta)
         reconstructed = iradon(p, theta)
         reconstructed /= np.max(reconstructed)
-        assert np.all(abs(c - reconstructed) < 0.3) 
-     
+        assert np.all(abs(c - reconstructed) < 0.4)
+
 
 if __name__ == "__main__":
     run_module_suite()
-
