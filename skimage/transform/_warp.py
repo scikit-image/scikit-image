@@ -10,15 +10,19 @@ def _stackcopy(a, b):
 
       a[:,:,0] = a[:,:,1] = ... = b
 
+    Parameters
+    ----------
+    a : (M, N) or (M, N, P) ndarray
+        Target array.
+    b : (M, N)
+        Source array.
+
     Notes
     -----
     Color images are stored as an ``MxNx3`` or ``MxNx4`` arrays.
 
     """
-    if a.ndim == 3:
-        a.transpose().swapaxes(1, 2)[:] = b
-    else:
-        a[:] = b
+    a[:] = b[:, :, np.newaxis]
 
 def warp(image, reverse_map, map_args={},
          output_shape=None, order=1, mode='constant', cval=0.):
