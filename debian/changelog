@@ -1,5 +1,7 @@
-skimage (0.5.0+git79-g12669d6-1) UNRELEASED; urgency=low
+skimage (0.5.0+git100-gfeb3e92-1) unstable; urgency=low
 
+  [ Stefan van der Walt ]
   * Initial release. (Closes: #639820)
 
- -- Stefan van der Walt <stefan@sun.ac.za>  Fri, 03 Feb 2012 20:45:51 -0800
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 07 May 2012 22:16:14 -0400
+
