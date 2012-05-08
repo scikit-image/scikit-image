@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-from skimage.transform.project import _stackcopy
+from skimage.transform._warp import _stackcopy
 from skimage.transform import homography, fast_homography
 from skimage import data
 from skimage.color import rgb2gray
