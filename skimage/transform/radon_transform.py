@@ -1,23 +1,23 @@
 """
 radon.py - Radon and inverse radon transforms
 
-Based on code of Justin K. Romberg 
+Based on code of Justin K. Romberg
 (http://www.clear.rice.edu/elec431/projects96/DSP/bpanalysis.html)
 J. Gillam and Chris Griffin.
 
-References: 
+References:
     -B.R. Ramesh, N. Srinivasa, K. Rajgopal, "An Algorithm for Computing
     the Discrete Radon Transform With Some Applications", Proceedings of
     the Fourth IEEE Region 10 International Conference, TENCON '89, 1989.
     -A. C. Kak, Malcolm Slaney, "Principles of Computerized Tomographic
     Imaging", IEEE Press 1988.
 """
-
+from __future__ import division
 import numpy as np
 from scipy.fftpack import fftshift, fft, ifft
 from ._project import homography
 
-__all__ = ["radon", "iradon"] 
+__all__ = ["radon", "iradon"]
 
 
 def radon(image, theta=None):
@@ -31,7 +31,7 @@ def radon(image, theta=None):
         Input image.
     theta : array_like, dtype=float, optional (default np.arange(180))
         Projection angles (in degrees).
-    
+
     Returns
     -------
     output : ndarray
@@ -41,7 +41,7 @@ def radon(image, theta=None):
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
     if theta == None:
-        theta = np.arange(180)    
+        theta = np.arange(180)
     height, width = image.shape
     diagonal = np.sqrt(height ** 2 + width ** 2)
     heightpad = np.ceil(diagonal - height)
@@ -57,7 +57,7 @@ def radon(image, theta=None):
     out = np.zeros((max(padded_image.shape), len(theta)))
 
     h, w = padded_image.shape
-    dh, dw = h / 2, w / 2
+    dh, dw = h // 2, w // 2
     shift0 = np.array([[1, 0, -dw],
                        [0, 1, -dh],
                        [0, 0, 1]])
@@ -92,7 +92,7 @@ def iradon(radon_image, theta=None, output_size=None,
 
     Reconstruct an image from the radon transform, using the filtered
     back projection algorithm.
-        
+
     Parameters
     ----------
     radon_image : array_like, dtype=float
@@ -110,7 +110,7 @@ def iradon(radon_image, theta=None, output_size=None,
     interpolation : str, optional (default linear)
         Interpolation method used in reconstruction.
         Methods available: nearest, linear.
-    
+
     Returns
     -------
     output : ndarray
@@ -121,19 +121,19 @@ def iradon(radon_image, theta=None, output_size=None,
     It applies the fourier slice theorem to reconstruct an image by
     multiplying the frequency domain of the filter with the FFT of the
     projection data. This algorithm is called filtered back projection.
-    
+
     """
     if radon_image.ndim != 2:
         raise ValueError('The input image must be 2-D')
     if theta == None:
         m, n = radon_image.shape
         theta = np.linspace(0, 180, n, endpoint=False)
-    th = (np.pi / 180.0) * theta        
+    th = (np.pi / 180.0) * theta
     # if output size not specified, estimate from input radon image
     if not output_size:
         output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2 / 2.0)))
     n = radon_image.shape[0]
-  
+
     img = radon_image.copy()
     # resize image to next power of two for fourier analysis
     # speeds up fourier and lessens artifacts
@@ -142,7 +142,7 @@ def iradon(radon_image, theta=None, output_size=None,
     img.resize((order, img.shape[1]))
     # construct the fourier filter
     freqs = np.zeros((order, 1))
-    
+
     f = fftshift(abs(np.mgrid[-1:1:2 / order])).reshape(-1, 1)
     w = 2 * np.pi * f
     # start from first element to avoid divide by zero
@@ -160,8 +160,8 @@ def iradon(radon_image, theta=None, output_size=None,
         f[1:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
-        
-    filter_ft = np.tile(f, (1, len(theta)))        
+
+    filter_ft = np.tile(f, (1, len(theta)))
     # apply filter in fourier domain
     projection = fft(img, axis=0) * filter_ft
     radon_filtered = np.real(ifft(projection, axis=0))
@@ -169,15 +169,15 @@ def iradon(radon_image, theta=None, output_size=None,
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
     mid_index = np.ceil(n / 2.0)
-    
+
     x = output_size
     y = output_size
     [X, Y] = np.mgrid[0.0:x, 0.0:y]
-    xpr = X - int(output_size) / 2
-    ypr = Y - int(output_size) / 2 
+    xpr = X - int(output_size) // 2
+    ypr = Y - int(output_size) // 2
 
     # reconstruct image by interpolation
-    if interpolation == "nearest":   
+    if interpolation == "nearest":
         for i in range(len(theta)):
             k = np.round(mid_index + xpr * np.sin(th[i]) - ypr * np.cos(th[i]))
             reconstructed += radon_filtered[
@@ -186,12 +186,12 @@ def iradon(radon_image, theta=None, output_size=None,
         for i in range(len(theta)):
           t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
           a = np.floor(t)
-          b = mid_index + a 
+          b = mid_index + a
           b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
           b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
           reconstructed += (t - a) * radon_filtered[b0, i] + \
                            (a - t + 1) * radon_filtered[b1, i]
     else:
         raise ValueError("Unknown interpolation: %s" % interpolation)
-        
+
     return reconstructed * np.pi / (2 * len(th))
