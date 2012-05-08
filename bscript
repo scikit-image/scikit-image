@@ -1,0 +1,12 @@
+import os.path as op
+
+from numpy.distutils.misc_util \
+    import \
+        get_numpy_include_dirs
+
+from bento.commands import hooks
+
+@hooks.post_configure
+def post_configure(context):
+    conf = context.waf_context
+    conf.env.INCLUDES = get_numpy_include_dirs() + [op.join("skimage", "morphology")]
