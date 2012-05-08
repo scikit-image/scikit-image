@@ -4,7 +4,6 @@ import numpy as np
 from scipy import ndimage
 from skimage.util import img_as_float
 
-eps = np.finfo(float).eps
 
 def _stackcopy(a, b):
     """Copy b into each color layer of a, such that::
@@ -30,7 +29,7 @@ def warp(image, reverse_map, map_args={},
     image : 2-D array
         Input image.
     reverse_map : callable xy = f(xy, **kwargs)
-        Reverse coordinate map.  A function that transforms an Nx2 array of
+        Reverse coordinate map.  A function that transforms a Px2 array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
         coordinates in the *source image*.  Also see examples below.
     map_args : dict, optional
