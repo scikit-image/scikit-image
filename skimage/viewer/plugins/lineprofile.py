@@ -13,7 +13,7 @@ class LineProfile(Plugin):
 
     Parameters
     ----------
-    image_window : ImageViewer instance.
+    image_viewer : ImageViewer instance.
         Window containing image used in measurement.
     useblit : bool
         If True, use blitting to speed up animation. Only available on some
@@ -32,10 +32,10 @@ class LineProfile(Plugin):
     """
 
 
-    def __init__(self, image_window, useblit=None,
+    def __init__(self, image_viewer, useblit=None,
                  linewidth=1, epsilon=5, limits='image'):
 
-        Plugin.__init__(self, image_window, useblit=useblit, figsize=(8, 3))
+        Plugin.__init__(self, image_viewer, useblit=useblit, figsize=(8, 3))
 
         self.linewidth = linewidth
         self.epsilon = epsilon

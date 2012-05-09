@@ -18,12 +18,12 @@ class ContrastSetter(Plugin):
 
     Parameters
     ----------
-    image_window : ImageViewer instance.
+    image_viewer : ImageViewer instance.
         Window containing image used in measurement.
 
     """
 
-    def __init__(self, image_window):
+    def __init__(self, image_viewer):
         with utils.toolbar_off():
             figure = plt.figure(figsize=(6.5, 2))
         ax_hist = plt.subplot2grid((6, 1), (0, 0), rowspan=4)
@@ -31,7 +31,7 @@ class ContrastSetter(Plugin):
         ax_high = plt.subplot2grid((6, 1), (5, 0), rowspan=1)
         self.ax_hist = ax_hist
 
-        Plugin.__init__(self, image_window, figure=figure)
+        Plugin.__init__(self, image_viewer, figure=figure)
 
         hmin, hmax = dtype_range[self.image.dtype.type]
         if hmax > 255:

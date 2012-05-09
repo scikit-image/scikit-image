@@ -73,15 +73,15 @@ the edge detector:
 
        Parameters
        ----------
-       image_window : ImageViewer instance.
+       image_viewer : ImageViewer instance.
            Window containing image used in measurement.
        """
 
-       def __init__(self, image_window, sigma_range=(0, 5), low_range=(0, 1),
+       def __init__(self, image_viewer, sigma_range=(0, 5), low_range=(0, 1),
                     high_range=(0, 1)):
            # custom figure to control the layout of sliders
            figure, axes = plt.subplots(nrows=3, figsize=(6, 1))
-           Plugin.__init__(self, image_window, figure=figure)
+           Plugin.__init__(self, image_viewer, figure=figure)
 
            # unpack the 3 axes created above and use them for slider widgets.
            ax_sigma, ax_low, ax_high = axes

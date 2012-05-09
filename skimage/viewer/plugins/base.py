@@ -12,7 +12,7 @@ class Plugin(object):
 
     Parameters
     ----------
-    image_window : ImageViewer instance.
+    image_viewer : ImageViewer instance.
         Window containing image used in measurement/manipulation.
     useblit : bool
         If True, use blitting to speed up animation. Only available on some
@@ -41,9 +41,9 @@ class Plugin(object):
         If False, the widget does not respond to events.
     """
 
-    def __init__(self, image_window, useblit=None, figsize=None, figure=None,
+    def __init__(self, image_viewer, useblit=None, figsize=None, figure=None,
                  no_toolbar=True):
-        self.imgview = image_window
+        self.imgview = image_viewer
         self.image = self.imgview._img
         # Add Plugin to imgview's list to prevent garbage-collection.
         # Reference must be removed when closing plugin.

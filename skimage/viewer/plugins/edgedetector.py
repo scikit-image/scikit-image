@@ -15,18 +15,18 @@ class EdgeDetector(Plugin):
 
     Parameters
     ----------
-    image_window : ImageViewer instance.
+    image_viewer : ImageViewer instance.
         Window containing image used in measurement.
     """
 
 
-    def __init__(self, image_window, sigma_range=(0, 5), low_range=(0, 1),
+    def __init__(self, image_viewer, sigma_range=(0, 5), low_range=(0, 1),
                  high_range=(0, 1)):
 
         with utils.toolbar_off():
             figure, axes = plt.subplots(nrows=3, figsize=(6, 1))
         ax_sigma, ax_low, ax_high = axes
-        Plugin.__init__(self, image_window, figure=figure)
+        Plugin.__init__(self, image_viewer, figure=figure)
 
         self.slider_sigma = Slider(ax_sigma, sigma_range, label='sigma',
                                    value=1, on_release=self.update_image)
