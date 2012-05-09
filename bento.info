@@ -43,6 +43,9 @@ Library:
     Extension: skimage.feature._greycomatrix
         Sources:
             skimage/feature/_greycomatrix.pyx
+    Extension: skimage.feature._template
+        Sources:
+            skimage/feature/_template.pyx
     Extension: skimage.io._plugins._colormixer
         Sources:
             skimage/io/_plugins/_colormixer.pyx
