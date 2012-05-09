@@ -1,7 +1,7 @@
 """template.py - Template matching
 """
 import numpy as np
-import _template
+from . import _template
 
 from skimage.util.dtype import convert
 
