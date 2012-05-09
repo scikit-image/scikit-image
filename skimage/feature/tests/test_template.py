@@ -7,15 +7,14 @@ from skimage.feature import match_template, peak_local_max
 
 def test_template():
     size = 100
-    # Type conversion of image and target not required but prevents warnings.
-    image = np.zeros((400, 400), dtype=np.float32)
-    target = np.tri(size) + np.tri(size)[::-1]
-    target = target.astype(np.float32)
+    # Float prefactors ensure that image range is between 0 and 1
+    image = 0.5 * np.ones((400, 400))
+    target = 0.1 * (np.tri(size) + np.tri(size)[::-1])
     target_positions = [(50, 50), (200, 200)]
     for x, y in target_positions:
         image[x:x + size, y:y + size] = target
     np.random.seed(1)
-    image += np.random.randn(400, 400) * 2
+    image += 0.1 * np.random.uniform(size=(400, 400))
 
     result = match_template(image, target)
     delta = 5
@@ -46,9 +45,9 @@ def test_normalization():
     N = 20
     ipos, jpos = (2, 3)
     ineg, jneg = (12, 11)
-    image = np.zeros((N, N))
-    image[ipos:ipos + n, jpos:jpos + n] = 10
-    image[ineg:ineg + n, jneg:jneg + n] = -10
+    image = 0.5 * np.ones((N, N))
+    image[ipos:ipos + n, jpos:jpos + n] = 1
+    image[ineg:ineg + n, jneg:jneg + n] = 0
 
     # white square with a black border
     template = np.zeros((n+2, n+2))
@@ -79,7 +78,7 @@ def test_no_nans():
     explicit check that was added to `match_template`).
     """
     np.random.seed(1)
-    image = 10000 + np.random.normal(size=(20, 20))
+    image = 0.5 + 1e-9 * np.random.normal(size=(20, 20))
     template = np.ones((6, 6))
     template[:3, :] = 0
     result = match_template(image, template)
@@ -93,14 +92,21 @@ def test_switched_arguments():
 
 
 def test_pad_input():
-    template = 10.0 * diamond(2)
+    """Test `match_template` when `pad_input=True`.
 
-    image = np.zeros((9, 19))
+    This test places two full templates (one with values lower than the image
+    mean, the other higher) and two half templates, which are on the edges of
+    the image. The two full templates should score the top (positive and
+    negative) matches and the centers of the half templates should score 2nd.
+    """
+    # Float prefactors ensure that image range is between 0 and 1
+    template = 0.5 * diamond(2)
+    image = 0.5 * np.ones((9, 19))
     mid = slice(2, 7)
-    image[mid, :3] = -template[:, -3:]  # half min template centered at 0
-    image[mid, 4:9] = template          # full max template centered at 6
-    image[mid, -9:-4] = -template       # full min template centered at 12
-    image[mid, -3:] = template[:, :3]   # half max template centered at 18
+    image[mid, :3] -= template[:, -3:]  # half min template centered at 0
+    image[mid, 4:9] += template         # full max template centered at 6
+    image[mid, -9:-4] -= template       # full min template centered at 12
+    image[mid, -3:] += template[:, :3]  # half max template centered at 18
 
     result = match_template(image, template, pad_input=True)
 
