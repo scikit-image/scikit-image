@@ -1,0 +1,116 @@
+====================
+Scikits-image viewer
+====================
+
+
+`skimage.viewer` provides a matplotlib_-based `ImageViewer` for displaying images, with the goal of making
+it easy to create interactive image editors. You can simply use it to display
+an image::
+
+   >>> from skimage import data
+   >>> from skimage.viewer import ImageViewer
+
+   >>> image = data.camera()
+
+   >>> view = ImageViewer(image)
+   >>> view.show()
+
+Of course, you can easily use matplotlib's `imshow` function (or alternatively,
+`skimage.io.imshow` which adds support for multiple io-plugins) to display
+images. The advantage of `ImageViewer` is that you can (fairly) easily add
+plugins. Before discussing how to do that, let's list some important attributes
+of `ImageViewer`::
+
+
+    image : array
+        Image being viewed. Setting this value will update the displayed frame.
+    canvas, fig, ax : matplotlib canvas, figure, and axes
+        matplotlib canvas, figure, and axes used to display image.
+    plugins : list
+        List of attached plugins.
+
+`ImageViewer.image` is implemented as a property---so that setting `image`
+will update the displayed plot. Also, you can see from the list above that you
+have access to matplotlib `canvas`, `figure`, and `axes` objects if needed.
+
+The final attribute listed above is just a Python list of plugins, which
+contains references to plugins for manipulating images. Currently, only a few
+plugins are implemented, but it should be fairly easy to write your own. Before
+going into the details, let's see an example of how a plugin is added to the
+viewer::
+
+   >>> import skimage
+   >>> from skimage.viewer.plugins import EdgeDetector
+
+   >>> image = skimage.img_as_float(data.camera())
+   >>> view = ImageViewer(image)
+   >>> EdgeDetector(view)
+   >>> view.show()
+
+As you can see above, the plugin (here, `EdgeDetector`) is simply initialized
+with the viewer. This call adds the viewer to the plugin (which is required
+because the plugin is manipulating the image and needs to update the viewer),
+and under the hood, the plugin is adding itself to the viewer (this cross
+reference is used to clean things up if the viewer is closed---it isn't too
+important to understand).
+
+To explain how to create a plugin, let's look at a slightly-simplified version
+of `EdgeDetector`. The main parts to notice are that the plugin 1) subclasses
+`Plugin`, 2) takes an `ImageViewer` instance as an argument, and 3) creates its 
+own `figure`, which holds some slider widgets for adjusting the parameters of
+the edge detector:
+
+.. code-block:: python
+
+   import matplotlib.pyplot as plt
+
+   from skimage.filter import canny
+   from skimage.viewer.plugins.base import Plugin
+   from skimage.viewer.widgets.slider import Slider
+
+   class EdgeDetector(Plugin):
+       """Plugin to detect edges in an image using a Sobel detector.
+
+       Parameters
+       ----------
+       image_window : ImageViewer instance.
+           Window containing image used in measurement.
+       """
+
+       def __init__(self, image_window, sigma_range=(0, 5), low_range=(0, 1),
+                    high_range=(0, 1)):
+           # custom figure to control the layout of sliders
+           figure, axes = plt.subplots(nrows=3, figsize=(6, 1))
+           Plugin.__init__(self, image_window, figure=figure)
+
+           # unpack the 3 axes created above and use them for slider widgets.
+           ax_sigma, ax_low, ax_high = axes
+           self.slider_sigma = Slider(ax_sigma, sigma_range, label='sigma',
+                                      value=1, on_release=self.update_image)
+           self.slider_low = Slider(ax_low, low_range, label='low',
+                                    value=0.5, on_release=self.update_image)
+           self.slider_high = Slider(ax_high, high_range, label='high',
+                                     value=0.7, on_release=self.update_image)
+
+           # save original image b/c we always want to filter the original.
+           self.original_image = self.imgview.image.copy()
+           self.update_image()
+
+       def update_image(self, event=None):
+
+           self.imgview.image = canny(self.original_image,
+                                      sigma=self.slider_sigma.value,
+                                      low_threshold=self.slider_low.value,
+                                      high_threshold=self.slider_high.value)
+           self.imgview.redraw()
+
+This plugin defines an `update_image` method to run the `canny` edge detector
+on the image. This method is called whenever you adjust the sliders, which
+control the parameters to `canny`.
+
+The actual implementation of `EdgeDetector` has a few other parts (slightly
+enhancing user-interaction and aesthetics), but this is really all you need to
+write your own plugin.
+
+.. _matplotlib: http://matplotlib.sourceforge.net/
+
