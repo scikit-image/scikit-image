@@ -3,7 +3,7 @@
 import numpy as np
 import _template
 
-from skimage.util.dtype import _convert
+from skimage.util.dtype import convert
 
 
 def match_template(image, template, pad_input=False):
@@ -67,8 +67,8 @@ def match_template(image, template, pad_input=False):
     """
     if np.any(np.less(image.shape, template.shape)):
         raise ValueError("Image must be larger than template.")
-    image = _convert(image, np.float32)
-    template = _convert(template, np.float32)
+    image = convert(image, np.float32)
+    template = convert(template, np.float32)
 
     if pad_input:
         pad_size = tuple(np.array(image.shape) + np.array(template.shape) - 1)
