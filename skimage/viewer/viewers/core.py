@@ -14,8 +14,8 @@ class ImageViewer(object):
     """Window for displaying images.
 
     This window is a simple container object that holds a Matplotlib axes
-    for showing images. This doesn't subclass the Matplotlib axes (or figure)
-    because there be dragons.
+    for showing images. `ImageViewer` doesn't subclass the Matplotlib axes (or
+    figure) because of the high probability of name collisions.
 
     Parameters
     ----------
