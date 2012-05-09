@@ -28,7 +28,7 @@
 - Tony Yu
   Reading of paletted images; build, bug and doc fixes.
   Code to generate skimage logo.
-  Otsu thresholding, histogram equalisation, and more.
+  Otsu thresholding, histogram equalisation, template matching, and more.
 
 - Zachary Pincus
   Tracing of low cost paths, FreeImage I/O plugin, iso-contours,
