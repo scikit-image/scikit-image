@@ -104,13 +104,15 @@ the edge detector:
                                       high_threshold=self.slider_high.value)
            self.imgview.redraw()
 
-This plugin defines an `update_image` method to run the `canny` edge detector
-on the image. This method is called whenever you adjust the sliders, which
-control the parameters to `canny`.
+Note that the `ImageViewer` instance gets passed to the `Plugin` base class,
+which saves it in the `imgview` attribute. The viewer can then be accessed in
+order to update the displayed image (see `update_image` method). Finally, the slider widgets are connected to the `update_image` method so that the `canny`
+filter is applied to the image whenever you adjust the sliders.
 
 The actual implementation of `EdgeDetector` has a few other parts (slightly
 enhancing user-interaction and aesthetics), but this is really all you need to
-write your own plugin.
+write your own plugin. You can find more examples by browsing the source in
+`skimage.viewer.plugins`.
 
 .. _matplotlib: http://matplotlib.sourceforge.net/
 
