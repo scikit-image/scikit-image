@@ -58,7 +58,7 @@ class LineProfile(Plugin):
         self.end_pts = self._init_end_pts.copy()
 
         x, y = np.transpose(self.end_pts)
-        self.scan_line = self.imgview.ax.plot(x, y, 'y-s', markersize=5,
+        self.scan_line = self.viewer.ax.plot(x, y, 'y-s', markersize=5,
                                              lw=linewidth, alpha=0.5,
                                              solid_capstyle='butt')[0]
         self.artists.append(self.scan_line)
@@ -75,7 +75,7 @@ class LineProfile(Plugin):
         self.connect_event('motion_notify_event', self.on_move)
         self.connect_event('scroll_event', self.on_scroll)
 
-        self.imgview.redraw()
+        self.viewer.redraw()
         print self.help()
 
     def remove_artist(self, artist):
@@ -159,7 +159,7 @@ class LineProfile(Plugin):
     def on_move(self, event):
         if event.button != 1: return
         if self._active_pt is None: return
-        if not self.imgview.ax.in_axes(event): return
+        if not self.viewer.ax.in_axes(event): return
         x,y = event.xdata, event.ydata
         self.line_changed(x, y)
 
@@ -181,14 +181,14 @@ class LineProfile(Plugin):
         self.ax.relim()
 
         if self.useblit:
-            self.imgview.canvas.restore_region(self.img_background)
+            self.viewer.canvas.restore_region(self.img_background)
             self.ax.draw_artist(self.scan_line)
             self.ax.draw_artist(self.profile)
-            self.imgview.canvas.blit(self.imgview.ax.bbox)
+            self.viewer.canvas.blit(self.viewer.ax.bbox)
 
         self._autoscale_view()
 
-        self.imgview.redraw()
+        self.viewer.redraw()
         self.redraw()
 
 

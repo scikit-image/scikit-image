@@ -33,7 +33,7 @@ class Plugin(object):
         The parent figure for the widget.
     canvas : :class:`~matplotlib.backend_bases.FigureCanvasBase` subclass
         The parent figure canvs for the widget.
-    imgview : ImageViewer
+    viewer : ImageViewer
         Window containing image used in measurement.
     image : array
         Image used in measurement/manipulation.
@@ -43,11 +43,11 @@ class Plugin(object):
 
     def __init__(self, image_viewer, useblit=None, figsize=None, figure=None,
                  no_toolbar=True):
-        self.imgview = image_viewer
-        self.image = self.imgview._img
-        # Add Plugin to imgview's list to prevent garbage-collection.
+        self.viewer = image_viewer
+        self.image = self.viewer._img
+        # Add Plugin to viewer's list to prevent garbage-collection.
         # Reference must be removed when closing plugin.
-        self.imgview.plugins.append(self)
+        self.viewer.plugins.append(self)
 
         if figure is None:
             if figsize is None:
@@ -82,8 +82,8 @@ class Plugin(object):
         The saved image is used to "clear" the figure before redrawing artists.
         """
         if self.useblit:
-            bbox = self.imgview.ax.bbox
-            self.img_background = self.imgview.canvas.copy_from_bbox(bbox)
+            bbox = self.viewer.ax.bbox
+            self.img_background = self.viewer.canvas.copy_from_bbox(bbox)
 
     def on_close(self, event):
         """Disconnect all artists and events from ImageViewer.
@@ -93,8 +93,8 @@ class Plugin(object):
         """
         self.disconnect_image_events()
         self.remove_artists()
-        self.imgview.plugins.remove(self)
-        self.imgview.redraw()
+        self.viewer.plugins.remove(self)
+        self.viewer.redraw()
 
     def ignore(self, event):
         """Return True if event should be ignored.
@@ -110,16 +110,16 @@ class Plugin(object):
         This should be used in lieu of `figure.canvas.mpl_connect` since this
         function stores call back ids for later clean up.
         """
-        cid = self.imgview.connect_event(event, callback)
+        cid = self.viewer.connect_event(event, callback)
         self.cids.append(cid)
 
     def disconnect_image_events(self):
         """Disconnect all events created by this widget."""
         for c in self.cids:
-            self.imgview.disconnect_event(c)
+            self.viewer.disconnect_event(c)
 
     def remove_artists(self):
         """Disconnect artists that are connected to the *image plot*."""
         for a in self.artists:
-            self.imgview.remove_artist(a)
+            self.viewer.remove_artist(a)
 

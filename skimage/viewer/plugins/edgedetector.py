@@ -37,7 +37,7 @@ class EdgeDetector(Plugin):
         self.slider_low.slidermax = self.slider_high
         self.slider_high.slidermin = self.slider_low
 
-        self.original_image = self.imgview.image.copy()
+        self.original_image = self.viewer.image.copy()
         self.update_image()
 
         print self.help
@@ -67,9 +67,9 @@ class EdgeDetector(Plugin):
 
     def update_image(self, event=None):
 
-        self.imgview.image = canny(self.original_image,
-                                   sigma=self.sigma,
-                                   low_threshold=self.low,
-                                   high_threshold=self.high)
-        self.imgview.redraw()
+        self.viewer.image = canny(self.original_image,
+                                  sigma=self.sigma,
+                                  low_threshold=self.low,
+                                  high_threshold=self.high)
+        self.viewer.redraw()
 

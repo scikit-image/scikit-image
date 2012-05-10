@@ -75,7 +75,7 @@ class ContrastSetter(Plugin):
         self.connect_event('key_press_event', self.on_key_press)
         self.connect_event('scroll_event', self.on_scroll)
         self.canvas.mpl_connect('scroll_event', self.on_scroll)
-        self.original_image = self.imgview.image.copy()
+        self.original_image = self.viewer.image.copy()
         self.update_image()
         print self.help
 
@@ -97,8 +97,8 @@ class ContrastSetter(Plugin):
 
     def update_image(self, event=None):
         self.draw_background()
-        self.imgview.climits = (self.low, self.high)
-        self.imgview.redraw()
+        self.viewer.climits = (self.low, self.high)
+        self.viewer.redraw()
         self.redraw()
 
     def draw_background(self):

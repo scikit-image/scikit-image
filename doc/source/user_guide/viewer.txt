@@ -93,19 +93,19 @@ the edge detector:
                                      value=0.7, on_release=self.update_image)
 
            # save original image b/c we always want to filter the original.
-           self.original_image = self.imgview.image.copy()
+           self.original_image = self.viewer.image.copy()
            self.update_image()
 
        def update_image(self, event=None):
 
-           self.imgview.image = canny(self.original_image,
-                                      sigma=self.slider_sigma.value,
-                                      low_threshold=self.slider_low.value,
-                                      high_threshold=self.slider_high.value)
-           self.imgview.redraw()
+           self.viewer.image = canny(self.original_image,
+                                     sigma=self.slider_sigma.value,
+                                     low_threshold=self.slider_low.value,
+                                     high_threshold=self.slider_high.value)
+           self.viewer.redraw()
 
 Note that the `ImageViewer` instance gets passed to the `Plugin` base class,
-which saves it in the `imgview` attribute. The viewer can then be accessed in
+which saves it in the `viewer` attribute. The viewer can then be accessed in
 order to update the displayed image (see `update_image` method). Finally, the slider widgets are connected to the `update_image` method so that the `canny`
 filter is applied to the image whenever you adjust the sliders.
 
