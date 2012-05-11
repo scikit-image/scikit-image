@@ -213,7 +213,7 @@ def regionprops(image, properties='all'):
                 _filled_image = ndimage.binary_fill_holes(array, STREL_8)
             euler_array = _filled_image != array
             _, num = ndimage.label(euler_array, STREL_8)
-            obj_props['EulerNumber'] = 1 - num
+            obj_props['EulerNumber'] =  - num
 
         if 'Extent' in properties:
             obj_props['Extent'] = m[0,0] / (array.shape[0] * array.shape[1])
