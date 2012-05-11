@@ -4,7 +4,7 @@ import numpy as np
 from scipy import ndimage
 
 from skimage.morphology import convex_hull_image
-from . import _regionprops
+from . import _moments
 
 
 __all__ = ['regionprops']
@@ -159,11 +159,11 @@ def regionprops(image, properties='all'):
         r0 = sl[0].start
         c0 = sl[1].start
 
-        m = _regionprops._central_moments(array, 0, 0, 3)
+        m = _moments.central_moments(array, 0, 0, 3)
         # centroid
         cr = m[0,1] / m[0,0]
         cc = m[1,0] / m[0,0]
-        mu = _regionprops.central_moments(array, cr, cc, 3)
+        mu = _moments.central_moments(array, cr, cc, 3)
 
         # elements of second order central moment covariance matrix
         a = mu[2,0] / mu[0,0]
@@ -219,8 +219,8 @@ def regionprops(image, properties='all'):
 
         if 'HuMoments' in properties:
             if _nu is None:
-                _nu = _regionprops.normalized_moments(mu, 3)
-            obj_props['HuMoments'] = _regionprops.hu_moments(_nu)
+                _nu = _moments.normalized_moments(mu, 3)
+            obj_props['HuMoments'] = _moments.hu_moments(_nu)
 
         if 'Image' in properties:
             obj_props['Image'] = array
@@ -246,7 +246,7 @@ def regionprops(image, properties='all'):
 
         if 'NormalizedMoments' in properties:
             if _nu is None:
-                _nu = _regionprops.normalized_moments(mu, 3)
+                _nu = _moments.normalized_moments(mu, 3)
             obj_props['NormalizedMoments'] = _nu
 
         if 'Orientation' in properties:
