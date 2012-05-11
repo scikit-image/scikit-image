@@ -42,14 +42,14 @@ PROPS = (
 
 
 def regionprops(image, properties='all'):
-    """Measure properties of labeled image regions.
+    """Measure properties of labelled image regions.
 
     Parameters
     ----------
     image : NxM ndarray
         Labelled input image.
     properties : {'all', list, tuple}
-        Shape measurements to be determined for each labeled image region.
+        Shape measurements to be determined for each labelled image region.
         Default is 'all'. The following properties can be determined:
         * Area : int
            Number of pixels of region.
@@ -131,6 +131,7 @@ def regionprops(image, properties='all'):
     >>> img = coins() > 110
     >>> label_img = label(img)
     >>> props = regionprops(label_img)
+    >>> props[0]['Centroid'] # centroid of first labelled object
     """
     if not np.issubdtype(image.dtype, 'int'):
         raise TypeError('labelled image must be of integer dtype')
