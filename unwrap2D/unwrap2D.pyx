@@ -10,6 +10,7 @@ def unwrap2D(float[:,::1] array, unsigned char[:,::1] mask,
     cdef float[:,::1] unwrapped_array = np.empty_like(array)
     cdef int h = array.shape[0]
     cdef int w = array.shape[1]
+    #TODO: check for masked array/
     unwrap(&array[0,0], 
            &unwrapped_array[0,0], 
            &mask[0,0], 
