@@ -6,7 +6,7 @@ from numpy import outer, arange, ones, abs, empty, power, indices
 
 
 def test_unwrap2D():
-    nx, ny = 10, 3
+    nx, ny = 10, 10
     x = np.arange(nx)
     y = np.arange(ny)
     x.shape = (1,-1)
@@ -14,7 +14,8 @@ def test_unwrap2D():
 
     z = np.exp(1j*x*0.2*np.pi) * np.exp(1j*y*0.1*np.pi)
     phi_w = np.angle(z)
-    mask = 255*np.ones((nx, ny), dtype = np.uint8)
+    mask = 0*np.ones((nx, ny), dtype = np.uint8)
+    mask[4:6, 5:7] = 1
     phi = unwrap2D(phi_w.astype(np.float32), mask)
     return phi_w/(np.pi*2), np.asarray(phi)/(np.pi*2)
     
@@ -46,5 +47,7 @@ if __name__=="__main__":
     #NumpyTest().run()
     import matplotlib.pyplot as plt
     p,p2 = test_unwrap2D()
-    plt.imshow(p2)
-    plt
+    plt.clf()
+    plt.imshow(p2, interpolation = 'nearest')
+    plt.draw()
+    plt.show()
