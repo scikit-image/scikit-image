@@ -53,8 +53,8 @@ typedef struct pixelm PIXELM;
 struct edge
 {    
   float reliab;			//reliabilty of the edge and it depends on the two pixels
-  struct PIXELM *pointer_1;		//pointer to the first pixel
-  struct PIXELM *pointer_2;		//pointer to the second pixel
+	PIXELM *pointer_1;		//pointer to the first pixel
+	PIXELM *pointer_2;		//pointer to the second pixel
   int increment;			//No. of 2*pi to add to one of the pixels to unwrap it with respect to the second 
 }; 
 
@@ -698,6 +698,7 @@ int unwrap(float* WrappedImage, float* UnwrappedImage, unsigned char* input_mask
 	free(pixel);
 	free(extended_mask);
 
-	return 1;
 	No_of_edges = 0;
+    return 1;
+    
 }
