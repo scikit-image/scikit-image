@@ -1,5 +1,5 @@
 # coding: utf-8
-import math
+from math import sqrt, atan, pi as PI
 import numpy as np
 from scipy import ndimage
 
@@ -67,8 +67,15 @@ def regionprops(image, properties='all'):
         * ConvexImage : HxJ ndarray
             Convex hull image which has the same size as bounding box.
         * Eccentricity : float
-            Linear eccentricity of the ellipse that has the same second-moments
-            as the region (0 <= eccentricity <= 1).
+            Eccentricity of the ellipse that has the same second-moments as the
+            region (1 <= Eccentricity < Inf), where Eccentricity = 1 corresponds
+            to a circular disk and elongated regions have Eccentricity > 1.
+            .. math::
+                a_1 = \mu _{2,0} + \mu _{0,2} + \sqrt{(\mu _{2,0} - \\
+                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
+                a_2 = \mu _{2,0} + \mu _{0,2} - \sqrt{(\mu _{2,0} - \\
+                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
+                Ecc = \frac{a_1}{a_2}
         * EquivDiameter : float
             The diameter of a circle with the same area as the region.
         * EulerNumber : int
@@ -89,9 +96,17 @@ def regionprops(image, properties='all'):
         * MajorAxisLength : float
             The length of the major axis of the ellipse that has the same
             normalized second central moments as the region.
+            .. math::
+                a_1 = \mu _{2,0} + \mu _{0,2} + \sqrt{(\mu _{2,0} - \\
+                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
+                A = \sqrt{\frac{2 a_1}{\mu _{0,0}}}
         * MinorAxisLength : float
             The length of the minor axis of the ellipse that has the same
             normalized second central moments as the region.
+            .. math::
+                a_2 = \mu _{2,0} + \mu _{0,2} - \sqrt{(\mu _{2,0} - \\
+                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
+                A = \sqrt{\frac{2 a_2}{\mu _{0,0}}}
         * Moments 3x3 ndarray
             Spatial moments up to 3rd order.
             .. math::
@@ -118,6 +133,8 @@ def regionprops(image, properties='all'):
 
     References
     ----------
+    Wilhelm Burger, Mark Burge. Principles of Digital Image Processing: Core
+        Algorithms. Springer-Verlag, London, 2009.
     B. Jähne. Digital Image Processing. Springer-Verlag,
         Berlin-Heidelberg, 6. edition, 2005.
     T. H. Reiss. Recognizing Planar Objects Using Invariant Image Features,
@@ -166,18 +183,17 @@ def regionprops(image, properties='all'):
         cc = m[1,0] / m[0,0]
         mu = _moments.central_moments(array, cr, cc, 3)
 
-        # elements of second order central moment covariance matrix
-        a = mu[2,0] / mu[0,0]
-        b = mu[1,1] / mu[0,0]
-        c = mu[0,2] / mu[0,0]
-        # eigenvalues of covariance matrix
-        l1 = abs(0.5 * (a + c - math.sqrt((a - c) ** 2 + 4 * b ** 2)))
-        l2 = abs(0.5 * (a + c + math.sqrt((a - c) ** 2 + 4 * b ** 2)))
+        # elements of the inertia tensor
+        a = mu[2,0]
+        b = mu[1,1]
+        c = mu[0,2]
 
         # cached results which are used by several properties
         _filled_image = None
         _convex_image = None
         _nu = None
+        _a1 = None
+        _a2 = None
 
         if 'Area' in properties:
             obj_props['Area'] = m[0,0]
@@ -202,11 +218,14 @@ def regionprops(image, properties='all'):
             obj_props['ConvexImage'] = _convex_image
 
         if 'Eccentricity' in properties:
-            obj_props['Eccentricity'] = \
-                math.sqrt(1 - (min(l1, l2) / max(l1, l2)) ** 2)
+            if _a2 is None:
+                _a2 = a + c - sqrt((a - c)**2 + 4 * b ** 2)
+            if _a1 is None:
+                _a1 = a + c + sqrt((a - c)**2 + 4 * b ** 2)
+            obj_props['Eccentricity'] = _a1 / _a2
 
         if 'EquivDiameter' in properties:
-            obj_props['EquivDiameter'] = math.sqrt(4 * m[0,0] / math.pi)
+            obj_props['EquivDiameter'] = sqrt(4 * m[0,0] / PI)
 
         if 'EulerNumber' in properties:
             if _filled_image is None:
@@ -236,11 +255,15 @@ def regionprops(image, properties='all'):
                 _filled_image = ndimage.binary_fill_holes(array, STREL_8)
             obj_props['FilledImage'] = _filled_image
 
-        if 'MinorAxisLength' in properties:
-            obj_props['MinorAxisLength'] = min(l1, l2)
-
         if 'MajorAxisLength' in properties:
-            obj_props['MajorAxisLength'] = max(l1, l2)
+            if _a1 is None:
+                _a1 = a + c + sqrt((a - c)**2 + 4 * b ** 2)
+            obj_props['MajorAxisLength'] = sqrt(2 * _a1 / m[0,0])
+
+        if 'MinorAxisLength' in properties:
+            if _a2 is None:
+                _a2 = a1 = a + c - sqrt((a - c)**2 + 4 * b ** 2)
+            obj_props['MinorAxisLength'] = sqrt(2 * _a2 / m[0,0])
 
         if 'Moments' in properties:
             obj_props['Moments'] = m
@@ -251,7 +274,7 @@ def regionprops(image, properties='all'):
             obj_props['NormalizedMoments'] = _nu
 
         if 'Orientation' in properties:
-            obj_props['Orientation'] = - 0.5 * math.atan2(2 * b, a - c)
+            obj_props['Orientation'] = - 0.5 * atan(2 * b / (a - c))
 
         if 'Solidity' in properties:
             if _convex_image is None:

@@ -75,9 +75,7 @@ def test_convex_image():
 
 def test_eccentricity():
     eps = regionprops(SAMPLE, ['Eccentricity'])[0]['Eccentricity']
-    # MATLAB has different interpretation of ellipse than found in literature,
-    # here implemented as found in literature
-    assert_almost_equal(eps, 0.941726665966)
+    assert_almost_equal(eps, 2.9728364645382)
 
 def test_equiv_diameter():
     diameter = regionprops(SAMPLE, ['EquivDiameter'])[0]['EquivDiameter']
@@ -129,13 +127,13 @@ def test_minor_axis_length():
     length = regionprops(SAMPLE, ['MinorAxisLength'])[0]['MinorAxisLength']
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
-    assert_almost_equal(length, 5.92837619822)
+    assert_almost_equal(length, 4.869651403631)
 
 def test_major_axis_length():
     length = regionprops(SAMPLE, ['MajorAxisLength'])[0]['MajorAxisLength']
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
-    assert_almost_equal(length, 17.6240929376)
+    assert_almost_equal(length, 8.396211749968)
 
 def test_moments():
     m = regionprops(SAMPLE, ['Moments'])[0]['Moments']
