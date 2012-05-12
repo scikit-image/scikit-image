@@ -141,8 +141,8 @@ void quicker_sort(EDGE *left, EDGE *right)
 
 //--------------end quicker_sort algorithm -----------------------------------
 
-//--------------------start initialse pixels ----------------------------------
-//initialse pixels. See the explination of the pixel class above.
+//--------------------start initialize pixels ----------------------------------
+//initialize pixels. See the explination of the pixel class above.
 //initially every pixel is assumed to belong to a group consisting of only itself
 void  initialisePIXELs(float *WrappedImage, unsigned char *input_mask, unsigned char *extended_mask, PIXELM *pixel, int image_width, int image_height)
 {
@@ -156,8 +156,6 @@ void  initialisePIXELs(float *WrappedImage, unsigned char *input_mask, unsigned 
 	{
 		for (j=0; j < image_width; j++)
 		{
-			//pixel_pointer->x = j;
-  			//pixel_pointer->y = i;
 			pixel_pointer->increment = 0;
 			pixel_pointer->number_of_pixels_in_group = 1;		
   			pixel_pointer->value = *wrapped_image_pointer;
@@ -176,7 +174,7 @@ void  initialisePIXELs(float *WrappedImage, unsigned char *input_mask, unsigned 
 		}
 	}
 }
-//-------------------end initialise pixels -----------
+//-------------------end initialize pixels -----------
 
 //gamma function in the paper
 float wrap(float pixel_value)
@@ -681,7 +679,8 @@ void  returnImage(PIXELM *pixel, float *unwrappedImage, int image_width, int ima
 
 //the main function of the unwrapper
 int unwrap(float* WrappedImage, float* UnwrappedImage, unsigned char* input_mask, 
-	   int image_width, int image_height)
+	   int image_width, int image_height, 
+	   int wrap_around_x, int wrap_around_y)
 {
     unsigned char *extended_mask;
     int image_size = image_height * image_width;
