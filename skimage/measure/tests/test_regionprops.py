@@ -160,9 +160,9 @@ def test_normalized_moments():
     assert_almost_equal(nu[3,0], -0.017278118992041805)
 
 def test_orientation():
-   orientation = regionprops(SAMPLE, ['Orientation'])[0]['Orientation']
-   # determined with MATLAB
-   assert_almost_equal(orientation, 0.10446844651921)
+    orientation = regionprops(SAMPLE, ['Orientation'])[0]['Orientation']
+    # determined with MATLAB
+    assert_almost_equal(orientation, 0.10446844651921)
 
 def test_solidity():
     solidity = regionprops(SAMPLE, ['Solidity'])[0]['Solidity']
