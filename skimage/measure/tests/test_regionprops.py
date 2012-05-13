@@ -36,10 +36,8 @@ def test_central_moments():
     mu = regionprops(SAMPLE, ['CentralMoments'])[0]['CentralMoments']
     #: determined with OpenCV
     assert_almost_equal(mu[0,2], 436.00000000000045)
-
-    # bug in OpenCV and Wikipedia?
-    assert_almost_equal(mu[0,3], -0.016762262088312843)
-
+    # different from OpenCV results, bug in OpenCV
+    assert_almost_equal(mu[0,3], -737.333333333333)
     assert_almost_equal(mu[1,1], -87.33333333333303)
     assert_almost_equal(mu[1,2], -127.5555555555593)
     assert_almost_equal(mu[2,0], 1259.7777777777774)
@@ -97,16 +95,15 @@ def test_extent():
 
 def test_hu_moments():
     hu = regionprops(SAMPLE, ['HuMoments'])[0]['HuMoments']
-    # determined with OpenCV
-    ref = np.array(
-        [[ 3.27117627e-01],
-         [ 2.63869194e-02],
-         [ 1.86845507e-02],
-         [ 2.47503247e-03],
-         [-6.25438993e-06],
-         [-2.02071583e-04],
-         [ 1.56259006e-05]]
-    )
+    ref = np.array([
+        3.27117627e-01,
+        2.63869194e-02,
+        2.35390060e-02,
+        1.23151193e-03,
+        1.38882330e-06,
+        -2.72586158e-05,
+        6.48350653e-06
+    ])
     # bug in OpenCV caused in Central Moments calculation?
     assert_array_almost_equal(hu, ref)
 
