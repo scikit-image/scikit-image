@@ -25,7 +25,7 @@ def test_unwrap2D():
             phi_w_ma/(np.pi*2), phi_ma/(np.pi*2),)
     
 def test_unwrap3D():
-    x, y, z = np.ogrid[:8, :8, :4]
+    x, y, z = np.ogrid[:8, :12, :4]
 
     phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
     phi_wrapped = np.angle(np.exp(1j*phi))

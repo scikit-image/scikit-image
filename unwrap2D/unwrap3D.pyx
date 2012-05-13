@@ -11,7 +11,7 @@ def _unwrap3D(float[:,:,::1] array,
     unwrap3D(&array[0,0,0], 
              &unwrapped_array[0,0,0], 
              &mask[0,0,0], 
-             array.shape[0], array.shape[1], array.shape[2], #TODO: check!!!
+             array.shape[2], array.shape[1], array.shape[0], #TODO: check!!!
              wrap_around_x, wrap_around_y, wrap_around_z,
              )
  
