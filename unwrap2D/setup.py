@@ -7,7 +7,6 @@ import numpy as np
 ext_modules = [
     Extension('unwrap2D', 
               ['unwrap2D.pyx',
-               #'Miguel_2D_unwrapper_with_mask_and_wrap_around_option.cpp',
                'Miguel_2D_unwrapper_with_mask_and_wrap_around_option.c',
                ],
               include_dirs = [np.get_include(),],

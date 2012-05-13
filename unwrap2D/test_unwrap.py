@@ -1,5 +1,5 @@
 from numpy.testing import *
-from unwrap2D import unwrap2D
+from unwrap import unwrap2D
 
 import numpy as np
 from numpy import outer, arange, ones, abs, empty, power, indices
