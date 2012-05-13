@@ -68,14 +68,8 @@ def regionprops(image, properties='all'):
             Convex hull image which has the same size as bounding box.
         * Eccentricity : float
             Eccentricity of the ellipse that has the same second-moments as the
-            region (1 <= Eccentricity < Inf), where Eccentricity = 1 corresponds
-            to a circular disk and elongated regions have Eccentricity > 1.
-            .. math::
-                a_1 = \mu _{2,0} + \mu _{0,2} + \sqrt{(\mu _{2,0} - \\
-                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
-                a_2 = \mu _{2,0} + \mu _{0,2} - \sqrt{(\mu _{2,0} - \\
-                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
-                Ecc = \frac{a_1}{a_2}
+            region. The eccentricity is the ratio of the distance between its
+            minor and major axis length. The value is between 0 and 1.
         * EquivDiameter : float
             The diameter of a circle with the same area as the region.
         * EulerNumber : int
@@ -96,17 +90,9 @@ def regionprops(image, properties='all'):
         * MajorAxisLength : float
             The length of the major axis of the ellipse that has the same
             normalized second central moments as the region.
-            .. math::
-                a_1 = \mu _{2,0} + \mu _{0,2} + \sqrt{(\mu _{2,0} - \\
-                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
-                A = \sqrt{\frac{2 a_1}{\mu _{0,0}}}
         * MinorAxisLength : float
             The length of the minor axis of the ellipse that has the same
             normalized second central moments as the region.
-            .. math::
-                a_2 = \mu _{2,0} + \mu _{0,2} - \sqrt{(\mu _{2,0} - \\
-                    \mu _{0,2})^2 + 4 {\mu _{1,1}}^2}
-                A = \sqrt{\frac{2 a_2}{\mu _{0,0}}}
         * Moments 3x3 ndarray
             Spatial moments up to 3rd order.
             .. math::
@@ -183,10 +169,13 @@ def regionprops(image, properties='all'):
         cc = m[1,0] / m[0,0]
         mu = _moments.central_moments(array, cr, cc, 3)
 
-        # elements of the inertia tensor
-        a = mu[2,0]
-        b = mu[1,1]
-        c = mu[0,2]
+        #: elements of the inertia tensor [a b; b c]
+        a = mu[2,0] / mu[0,0]
+        b = mu[1,1] / mu[0,0]
+        c = mu[0,2] / mu[0,0]
+        #: eigen values of inertia tensor
+        l1 = (a + c) / 2 + sqrt(4 * b ** 2 + (a - c) ** 2) / 2
+        l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
 
         # cached results which are used by several properties
         _filled_image = None
@@ -218,11 +207,7 @@ def regionprops(image, properties='all'):
             obj_props['ConvexImage'] = _convex_image
 
         if 'Eccentricity' in properties:
-            if _a2 is None:
-                _a2 = a + c - sqrt((a - c)**2 + 4 * b ** 2)
-            if _a1 is None:
-                _a1 = a + c + sqrt((a - c)**2 + 4 * b ** 2)
-            obj_props['Eccentricity'] = _a1 / _a2
+            obj_props['Eccentricity'] = sqrt(1 - l2 / l1)
 
         if 'EquivDiameter' in properties:
             obj_props['EquivDiameter'] = sqrt(4 * m[0,0] / PI)
@@ -256,14 +241,10 @@ def regionprops(image, properties='all'):
             obj_props['FilledImage'] = _filled_image
 
         if 'MajorAxisLength' in properties:
-            if _a1 is None:
-                _a1 = a + c + sqrt((a - c)**2 + 4 * b ** 2)
-            obj_props['MajorAxisLength'] = sqrt(2 * _a1 / m[0,0])
+            obj_props['MajorAxisLength'] = 4 * sqrt(l1)
 
         if 'MinorAxisLength' in properties:
-            if _a2 is None:
-                _a2 = a1 = a + c - sqrt((a - c)**2 + 4 * b ** 2)
-            obj_props['MinorAxisLength'] = sqrt(2 * _a2 / m[0,0])
+            obj_props['MinorAxisLength'] = 4 * sqrt(l2)
 
         if 'Moments' in properties:
             obj_props['Moments'] = m
