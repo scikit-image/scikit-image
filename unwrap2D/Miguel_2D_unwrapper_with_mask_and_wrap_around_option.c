@@ -13,7 +13,6 @@
 //When the mask is 0 this means that the pixel is invalid (noisy or corrupted pixel)
 //This program takes into consideration the image wrap around problem encountered in MRI imaging.
 
-//TODO stdlib instead of malloc.h ? (calloc?)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,11 +33,6 @@ typedef struct
   int y_connectivity;
   int no_of_edges;
 } params_t;
-
-
-//int x_connectivity = 1;
-//int y_connectivity = 1;
-int No_of_edges = 0;
 
 //PIXELM information
 struct pixelm
@@ -70,7 +64,6 @@ struct edge
 }; 
 
 typedef struct edge EDGE;
-
 
 //---------------start quicker_sort algorithm --------------------------------
 #define swap(x,y) {EDGE t; t=x; x=y; y=t;}
@@ -424,6 +417,7 @@ void  horizontalEDGEs(PIXELM *pixel, EDGE *edge,
   int i, j;
   EDGE *edge_pointer = edge;
   PIXELM *pixel_pointer = pixel;
+  int no_of_edges = params->no_of_edges;
 	
   for (i = 0; i < image_height; i++)
     {
@@ -436,7 +430,7 @@ void  horizontalEDGEs(PIXELM *pixel, EDGE *edge,
 	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + 1)->reliability;
 	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer + 1)->value);
 	      edge_pointer++;
-	      No_of_edges++;
+	      no_of_edges++;
 	    }
 	  pixel_pointer++;
 	}
@@ -455,11 +449,12 @@ void  horizontalEDGEs(PIXELM *pixel, EDGE *edge,
 	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width + 1)->reliability;
 	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer  - image_width + 1)->value);
 	      edge_pointer++;
-	      No_of_edges++;
+	      no_of_edges++;
 	    }
 	  pixel_pointer+=image_width;
 	}
     }
+  params->no_of_edges = no_of_edges;
 }
 
 //calculate the reliability of the vertical edges of the image
@@ -470,8 +465,9 @@ void  verticalEDGEs(PIXELM *pixel, EDGE *edge,
 		    params_t *params)
 {
   int i, j;
+  int no_of_edges = params->no_of_edges;
   PIXELM *pixel_pointer = pixel;
-  EDGE *edge_pointer = edge + No_of_edges; 
+  EDGE *edge_pointer = edge + no_of_edges; 
 
   for (i=0; i < image_height - 1; i++)
     {
@@ -484,7 +480,7 @@ void  verticalEDGEs(PIXELM *pixel, EDGE *edge,
 	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer + image_width)->reliability;
 	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer + image_width)->value);
 	      edge_pointer++;
-	      No_of_edges++;
+	      no_of_edges++;
 	    }
 	  pixel_pointer++;
 	} //j loop
@@ -503,15 +499,16 @@ void  verticalEDGEs(PIXELM *pixel, EDGE *edge,
 	      edge_pointer->reliab = pixel_pointer->reliability + (pixel_pointer - image_width *(image_height - 1))->reliability;
 	      edge_pointer->increment = find_wrap(pixel_pointer->value, (pixel_pointer - image_width *(image_height - 1))->value);
 	      edge_pointer++;
-	      No_of_edges++;
+	      no_of_edges++;
 	    }
 	  pixel_pointer++;
 	}
     }
+  params->no_of_edges = no_of_edges;
 }
 
 //gather the pixels of the image into groups 
-void  gatherPIXELs(EDGE *edge, int image_width, int image_height)
+void  gatherPIXELs(EDGE *edge, params_t *params)
 {
   int k;
   PIXELM *PIXEL1;   
@@ -521,7 +518,7 @@ void  gatherPIXELs(EDGE *edge, int image_width, int image_height)
   EDGE *pointer_edge = edge;
   int incremento;
 
-  for (k = 0; k < No_of_edges; k++)
+  for (k = 0; k < params->no_of_edges; k++)
     {
       PIXEL1 = pointer_edge->pointer_1;
       PIXEL2 = pointer_edge->pointer_2;
@@ -683,14 +680,14 @@ void  returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int im
 }
 
 //the main function of the unwrapper
-int unwrap(float* wrapped_image, float* UnwrappedImage, unsigned char* input_mask, 
-	   int image_width, int image_height, 
-	   int wrap_around_x, int wrap_around_y)
+unwrap2D(float* wrapped_image, float* UnwrappedImage, unsigned char* input_mask, 
+	 int image_width, int image_height, 
+	 int wrap_around_x, int wrap_around_y)
 {
+  params_t params = {TWOPI, 0, 0, 0};
   unsigned char *extended_mask;
   int image_size = image_height * image_width;
   int No_of_Edges_initially = 2 * image_width * image_height;
-  params_t params = {TWOPI, 0, 0, 0};
     
   extended_mask = (unsigned char *) calloc(image_size, sizeof(unsigned char));
   PIXELM *pixel = (PIXELM *) calloc(image_size, sizeof(PIXELM));
@@ -704,23 +701,20 @@ int unwrap(float* wrapped_image, float* UnwrappedImage, unsigned char* input_mas
     
   //sort the EDGEs depending on their reiability. The PIXELs with higher
   //relibility (small value) first
-  quicker_sort(edge, edge + No_of_edges - 1);
+  quicker_sort(edge, edge + params.no_of_edges - 1);
     
   //gather PIXELs into groups
-  gatherPIXELs(edge, image_width, image_height);
+  gatherPIXELs(edge, &params);
     
   unwrapImage(pixel, image_width, image_height);
   maskImage(pixel, input_mask, image_width, image_height);
     
   //copy the image from PIXELM structure to the unwrapped phase array
   //passed to this function
+  //TODO: replace by (cython?) function to directly write into numpy array ?
   returnImage(pixel, UnwrappedImage, image_width, image_height);
     
   free(edge);
   free(pixel);
   free(extended_mask);
-    
-  No_of_edges = 0;
-  return 1;
-    
 }
