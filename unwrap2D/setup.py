@@ -11,12 +11,18 @@ ext_modules = [
                ],
               include_dirs = [np.get_include(),],
               ),
+    Extension('unwrap3D', 
+              ['unwrap3D.pyx',
+               'Hussein_3D_unwrapper_with_mask_and_wrap_around_option.c',
+               ],
+              include_dirs = [np.get_include(),],
+              ),
     ]
 
 import numpy as np
 
 setup(
-    name = 'unwrp2D',
+    name = 'unwrap',
     #ext_modules = cythonize(['cytransient.pyx',], 
     #                        include_path = [np.get_include(),],
     #                        ),
