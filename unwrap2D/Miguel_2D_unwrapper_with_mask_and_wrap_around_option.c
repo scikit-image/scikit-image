@@ -684,7 +684,7 @@ unwrap2D(float* wrapped_image, float* UnwrappedImage, unsigned char* input_mask,
 	 int image_width, int image_height, 
 	 int wrap_around_x, int wrap_around_y)
 {
-  params_t params = {TWOPI, 0, 0, 0};
+  params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
   unsigned char *extended_mask;
   int image_size = image_height * image_width;
   int No_of_Edges_initially = 2 * image_width * image_height;

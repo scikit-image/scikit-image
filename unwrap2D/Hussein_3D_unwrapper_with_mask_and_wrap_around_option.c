@@ -1015,7 +1015,7 @@ unwrap3D(float* wrapped_volume, float* unwrapped_volume, unsigned char* input_ma
 	 int volume_width, int volume_height, int volume_depth,
 	 int wrap_around_x, int wrap_around_y, int wrap_around_z)
 {
-  params_t params = {TWOPI, 0, 0, 0, 0}
+  params_t params = {TWOPI, wrap_around_x, wrap_around_y, wrap_around_z, 0};
   unsigned char *extended_mask;
   int volume_size = volume_height * volume_width * volume_depth;
   int No_of_Edges_initially = 3 * volume_width * volume_height * volume_depth;
@@ -1025,8 +1025,8 @@ unwrap3D(float* wrapped_volume, float* unwrapped_volume, unsigned char* input_ma
   EDGE *edge = (EDGE *) calloc(No_of_Edges_initially, sizeof(EDGE));;
 
   extend_mask(input_mask, extended_mask, volume_width, volume_height, volume_depth, &params);
-  initialiseVOXELs(WrappedVolume, input_mask, extended_mask, voxel, volume_width, volume_height, volume_depth);
-  calculate_reliability(WrappedVolume, voxel, volume_width, volume_height, volume_depth, &params);
+  initialiseVOXELs(wrapped_volume, input_mask, extended_mask, voxel, volume_width, volume_height, volume_depth);
+  calculate_reliability(wrapped_volume, voxel, volume_width, volume_height, volume_depth, &params);
   horizontalEDGEs(voxel, edge, volume_width, volume_height, volume_depth, &params);
   verticalEDGEs(voxel, edge, volume_width, volume_height, volume_depth, &params);
   normalEDGEs(voxel, edge, volume_width, volume_height, volume_depth, &params);
@@ -1041,7 +1041,7 @@ unwrap3D(float* wrapped_volume, float* unwrapped_volume, unsigned char* input_ma
   maskVolume(voxel, input_mask, volume_width, volume_height, volume_depth);
 
   //copy the volume from VOXELM structure to the unwrapped phase array passed to this function
-  returnVolume(voxel, UnwrappedVolume, volume_width, volume_height, volume_depth);
+  returnVolume(voxel, unwrapped_volume, volume_width, volume_height, volume_depth);
 
   free(edge);
   free(voxel);
