@@ -29,6 +29,9 @@ PROPS = (
     'HuMoments',
     'Image',
     'MajorAxisLength',
+    'MaxIntensity',
+    'MeanIntensity',
+    'MinIntensity',
     'MinorAxisLength',
     'Moments',
     'NormalizedMoments',
@@ -38,19 +41,26 @@ PROPS = (
 #    'PixelList',
     'Solidity',
 #    'SubarrayIdx'
+    'WeightedCentralMoments',
+    'WeightedCentroid',
+    'WeightedHuMoments',
+    'WeightedMoments',
+    'WeightedNormalizedMoments'
 )
 
 
-def regionprops(image, properties='all'):
+def regionprops(label_image, properties=['Area', 'Centroid'],
+                intensity_image=None):
     """Measure properties of labelled image regions.
 
     Parameters
     ----------
-    image : N x M ndarray
+    label_image : N x M ndarray
         Labelled input image.
     properties : {'all', list}
         Shape measurements to be determined for each labelled image region.
-        Default is 'all'. The following properties can be determined:
+        Default is `['Area', 'Centroid']`. The following properties can be
+        determined:
         * Area : int
            Number of pixels of region.
         * BoundingBox : tuple
@@ -65,7 +75,7 @@ def regionprops(image, properties='all'):
         * ConvexArea : int
             Number of pixels of convex hull image.
         * ConvexImage : H x J ndarray
-            Convex hull image which has the same size as bounding box.
+            Binary convex hull image which has the same size as bounding box.
         * Eccentricity : float
             Eccentricity of the ellipse that has the same second-moments as the
             region. The eccentricity is the ratio of the distance between its
@@ -81,19 +91,25 @@ def regionprops(image, properties='all'):
         * FilledArea : int
             Number of pixels of filled region.
         * FilledImage : H x J ndarray
-            Region image with filled holes which has the same size as bounding
-            box.
+            Binary region image with filled holes which has the same size as
+            bounding box.
         * HuMoments : tuple
             Hu moments (translation, scale and rotation invariant).
         * Image : H x J ndarray
-            Sliced region image which has the same size as bounding box.
+            Sliced binary region image which has the same size as bounding box.
         * MajorAxisLength : float
             The length of the major axis of the ellipse that has the same
             normalized second central moments as the region.
+        * MaxIntensity: float
+            Value with the greatest intensity in the region.
+        * MeanIntensity: float
+            Value with the mean intensity in the region.
+        * MinIntensity: float
+            Value with the least intensity in the region.
         * MinorAxisLength : float
             The length of the minor axis of the ellipse that has the same
             normalized second central moments as the region.
-        * Moments 3 x 3 ndarray
+        * Moments : 3 x 3 ndarray
             Spatial moments up to 3rd order.
                 m_ji = sum{ array(x, y) * x^j * y^i }
             where the sum is over the `x`, `y` coordinates of the region.
@@ -108,6 +124,30 @@ def regionprops(image, properties='all'):
             `-pi/2` in counter-clockwise direction.
         * Solidity : float
             Ratio of pixels in the region to pixels of the convex hull image.
+        * WeightedCentralMoments : 3 x 3 ndarray
+            Central moments (translation invariant) of intensity image up to 3rd
+            order.
+                wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+            where the sum is over the `x`, `y` coordinates of the region,
+            and `x_c` and `y_c` are the coordinates of the region's centroid.
+        * WeightedCentroid : array
+            Centroid coordinate tuple `(row, col)` weighted with intensity
+            image.
+        * WeightedHuMoments : tuple
+            Hu moments (translation, scale and rotation invariant) of intensity
+            image.
+        * WeightedMoments : 3 x 3 ndarray
+            Spatial moments of intensity image up to 3rd order.
+                wm_ji = sum{ array(x, y) * x^j * y^i }
+            where the sum is over the `x`, `y` coordinates of the region.
+        * WeightedNormalizedMoments : 3 x 3 ndarray
+            Normalized moments (translation and scale invariant) of intensity
+            image up to 3rd order.
+                wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
+            where `wm_00` is the zeroth spatial moment (intensity-weighted
+            area).
+    intensity_image : N x M ndarray, optional
+        Intensity image with same size as labelled image. Default is None.
 
     Returns
     -------
@@ -134,7 +174,7 @@ def regionprops(image, properties='all'):
     >>> props = regionprops(label_img)
     >>> props[0]['Centroid'] # centroid of first labelled object
     """
-    if not np.issubdtype(image.dtype, 'int'):
+    if not np.issubdtype(label_image.dtype, 'int'):
         raise TypeError('labelled image must be of integer dtype')
 
     # determine all properties if nothing specified
@@ -143,7 +183,7 @@ def regionprops(image, properties='all'):
 
     props = []
 
-    objects = ndimage.find_objects(image)
+    objects = ndimage.find_objects(label_image)
     for i, sl in enumerate(objects):
         label = i + 1
 
@@ -153,9 +193,7 @@ def regionprops(image, properties='all'):
 
         obj_props['Label'] = label
 
-        # binary image of i-th label, converting to uint8 because Cython
-        # does not have support for bool dtype
-        array = (image[sl] == label).astype('uint8')
+        array = (label_image[sl] == label).astype('double')
 
         # upper left corner of object bbox
         r0 = sl[0].start
@@ -203,7 +241,10 @@ def regionprops(image, properties='all'):
             obj_props['ConvexImage'] = _convex_image
 
         if 'Eccentricity' in properties:
-            obj_props['Eccentricity'] = sqrt(1 - l2 / l1)
+            if l1 == 0:
+                obj_props['Eccentricity'] = 0
+            else:
+                obj_props['Eccentricity'] = sqrt(1 - l2 / l1)
 
         if 'EquivDiameter' in properties:
             obj_props['EquivDiameter'] = sqrt(4 * m[0,0] / PI)
@@ -251,11 +292,62 @@ def regionprops(image, properties='all'):
             obj_props['NormalizedMoments'] = _nu
 
         if 'Orientation' in properties:
-            obj_props['Orientation'] = - 0.5 * atan(2 * b / (a - c))
+            if a - c == 0:
+                obj_props['Orientation'] = PI / 2
+            else:
+                obj_props['Orientation'] = - 0.5 * atan(2 * b / (a - c))
 
         if 'Solidity' in properties:
             if _convex_image is None:
                 _convex_image = convex_hull_image(array)
             obj_props['Solidity'] = m[0,0] / np.sum(_convex_image)
+
+
+        if intensity_image is not None:
+            weighted_array = array * intensity_image[sl]
+
+            wm = _moments.central_moments(weighted_array, 0, 0, 3)
+            # weighted centroid
+            wcr = wm[0,1] / wm[0,0]
+            wcc = wm[1,0] / wm[0,0]
+            wmu = _moments.central_moments(weighted_array, wcr, wcc, 3)
+
+            # cached results which are used by several properties
+            _wnu = None
+            _vals = None
+
+            if 'MaxIntensity' in properties:
+                if _vals is None:
+                    _vals = weighted_array[array.astype('bool')]
+                obj_props['MaxIntensity'] = np.max(_vals)
+
+            if 'MeanIntensity' in properties:
+                if _vals is None:
+                    _vals = weighted_array[array.astype('bool')]
+                obj_props['MeanIntensity'] = np.mean(_vals)
+
+            if 'MinIntensity' in properties:
+                if _vals is None:
+                    _vals = weighted_array[array.astype('bool')]
+                obj_props['MinIntensity'] = np.min(_vals)
+
+            if 'WeightedCentralMoments' in properties:
+                obj_props['WeightedCentralMoments'] = wmu
+
+            if 'WeightedCentroid' in properties:
+                obj_props['WeightedCentroid'] = wcr + r0, wcc + c0
+
+            if 'WeightedHuMoments' in properties:
+                if _wnu is None:
+                    _wnu = _moments.normalized_moments(wmu, 3)
+                obj_props['WeightedHuMoments'] = _moments.hu_moments(_wnu)
+
+            if 'WeightedMoments' in properties:
+                obj_props['WeightedMoments'] = wm
+
+            if 'WeightedNormalizedMoments' in properties:
+                if _wnu is None:
+                    _wnu = _moments.normalized_moments(wmu, 3)
+                obj_props['WeightedNormalizedMoments'] = _wnu
 
     return props

@@ -17,6 +17,8 @@ SAMPLE = np.array(
      [0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
      [0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1]]
 )
+INTENSITY_SAMPLE = SAMPLE.copy()
+INTENSITY_SAMPLE[1,9:11] = 2
 
 
 def test_area():
@@ -120,17 +122,32 @@ def test_filled_area():
     area = regionprops(SAMPLE_mod, ['FilledArea'])[0]['FilledArea']
     assert area == np.sum(SAMPLE)
 
-def test_minor_axis_length():
-    length = regionprops(SAMPLE, ['MinorAxisLength'])[0]['MinorAxisLength']
-    # MATLAB has different interpretation of ellipse than found in literature,
-    # here implemented as found in literature
-    assert_almost_equal(length, 9.739302807263)
-
 def test_major_axis_length():
     length = regionprops(SAMPLE, ['MajorAxisLength'])[0]['MajorAxisLength']
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     assert_almost_equal(length, 16.7924234999)
+
+def test_max_intensity():
+    intensity = regionprops(SAMPLE, ['MaxIntensity'], INTENSITY_SAMPLE
+                            )[0]['MaxIntensity']
+    assert_almost_equal(intensity, 2)
+
+def test_mean_intensity():
+    intensity = regionprops(SAMPLE, ['MeanIntensity'], INTENSITY_SAMPLE
+                            )[0]['MeanIntensity']
+    assert_almost_equal(intensity, 1.02777777777777)
+
+def test_min_intensity():
+    intensity = regionprops(SAMPLE, ['MinIntensity'], INTENSITY_SAMPLE
+                            )[0]['MinIntensity']
+    assert_almost_equal(intensity, 1)
+
+def test_minor_axis_length():
+    length = regionprops(SAMPLE, ['MinorAxisLength'])[0]['MinorAxisLength']
+    # MATLAB has different interpretation of ellipse than found in literature,
+    # here implemented as found in literature
+    assert_almost_equal(length, 9.739302807263)
 
 def test_moments():
     m = regionprops(SAMPLE, ['Moments'])[0]['Moments']
@@ -166,6 +183,67 @@ def test_solidity():
     # determined with MATLAB
     assert_almost_equal(solidity, 0.580645161290323)
 
+def test_weighted_central_moments():
+    wmu = regionprops(SAMPLE, ['WeightedCentralMoments'], INTENSITY_SAMPLE
+                     )[0]['WeightedCentralMoments']
+    ref = np.array(
+        [[  7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
+            -7.5943608473e+02],
+         [  3.7303493627e-14, -8.7837837838e+01, -1.4801314828e+02,
+            -1.2714707125e+03],
+         [  1.2602837838e+03,  2.1571526662e+03,  6.6989799420e+03,
+             1.5304076361e+04],
+         [ -7.6561796932e+02, -4.2385971907e+03, -9.9501164076e+03,
+            -3.3156729271e+04]]
+    )
+    np.set_printoptions(precision=10)
+    print wmu
+    assert_array_almost_equal(wmu, ref)
+
+def test_weighted_centroid():
+    centroid = regionprops(SAMPLE, ['WeightedCentroid'], INTENSITY_SAMPLE
+                           )[0]['WeightedCentroid']
+    assert_array_almost_equal(centroid, (5.540540540540, 9.445945945945))
+
+def test_weighted_hu_moments():
+    whu = regionprops(SAMPLE, ['WeightedHuMoments'], INTENSITY_SAMPLE
+                     )[0]['WeightedHuMoments']
+    ref = np.array([
+        3.1750587329e-01,
+        2.1417517159e-02,
+        2.3609322038e-02,
+        1.2565683360e-03,
+        8.3014209421e-07,
+        -3.5073773473e-05,
+        6.7936409056e-06
+    ])
+    assert_array_almost_equal(whu, ref)
+
+def test_weighted_moments():
+    wm = regionprops(SAMPLE, ['WeightedMoments'], INTENSITY_SAMPLE
+                     )[0]['WeightedMoments']
+    ref = np.array(
+        [[  7.4000000000e+01, 4.1000000000e+02, 2.7500000000e+03,
+            1.9778000000e+04],
+         [  6.9900000000e+02, 3.7850000000e+03, 2.4855000000e+04,
+            1.7500100000e+05],
+         [  7.8630000000e+03, 4.4063000000e+04, 2.9347700000e+05,
+            2.0810510000e+06],
+         [  9.7317000000e+04, 5.7256700000e+05, 3.9007170000e+06,
+            2.8078871000e+07]]
+    )
+    assert_array_almost_equal(wm, ref)
+
+def test_weighted_normalized_moments():
+    wnu = regionprops(SAMPLE, ['WeightedNormalizedMoments'], INTENSITY_SAMPLE
+                     )[0]['WeightedNormalizedMoments']
+    ref = np.array(
+        [[       np.nan,        np.nan,  0.0873590903, -0.0161217406],
+         [       np.nan, -0.0160405109, -0.0031421072, -0.0031376984],
+         [  0.230146783,  0.0457932622,  0.0165315478,  0.0043903193],
+         [-0.0162529732, -0.0104598869, -0.0028544152, -0.0011057191]]
+    )
+    assert_array_almost_equal(wnu, ref)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

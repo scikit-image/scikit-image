@@ -5,7 +5,7 @@ import numpy as np
 cimport numpy as np
 
 
-def central_moments(np.ndarray[np.uint8_t, ndim=2] array, double cr, double cc,
+def central_moments(np.ndarray[np.double_t, ndim=2] array, double cr, double cc,
                      int order):
     cdef int p, q, r, c
     cdef np.ndarray[np.double_t, ndim=2] mu
