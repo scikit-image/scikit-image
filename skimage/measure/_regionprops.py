@@ -55,11 +55,11 @@ def regionprops(image, properties='all'):
            Number of pixels of region.
         * BoundingBox : tuple
            Bounding box `(min_row, min_col, max_row, max_col)`
-        * CentralMoments : 3x3 ndarray
+        * CentralMoments : 3 x 3 ndarray
             Central moments (translation invariant) up to 3rd order.
-            .. math::
-                \texttt{mu} _{ji} = \sum _{x,y} \left (\texttt{array} (x,y) \\
-                    \cdot (x - \bar{x} )^j \cdot (y - \bar{y} )^i \right)
+                mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+            where the sum is over the `x`, `y` coordinates of the region,
+            and `x_c` and `y_c` are the coordinates of the region's centroid.
         * Centroid : array
             Centroid coordinate tuple `(row, col)`.
         * ConvexArea : int
@@ -93,17 +93,15 @@ def regionprops(image, properties='all'):
         * MinorAxisLength : float
             The length of the minor axis of the ellipse that has the same
             normalized second central moments as the region.
-        * Moments 3x3 ndarray
+        * Moments 3 x 3 ndarray
             Spatial moments up to 3rd order.
-            .. math::
-                \texttt{m} _{ji}= \sum _{x,y} \left (\texttt{array} (x,y) \\
-                    \cdot x^j \cdot y^i \right)
-        * NormalizedMoments : 3x3 ndarray
+                m_ji = sum{ array(x, y) * x^j * y^i }
+            where the sum is over the `x`, `y` coordinates of the region.
+        * NormalizedMoments : 3 x 3 ndarray
             Normalized moments (translation and scale invariant) up to 3rd
             order.
-            .. math::
-                \texttt{nu} _{ji} = \\
-                    \frac{\texttt{mu}_{ji}}{\texttt{m}_{00}^{(i+j)/2+1}}
+                nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
+            where `m_00` is the zeroth spatial moment.
         * Orientation : float
             Angle between the X-axis and the major axis of the ellipse that has
             the same second-moments as the region. Ranging from `-pi/2` to
