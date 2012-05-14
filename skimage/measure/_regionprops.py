@@ -181,8 +181,6 @@ def regionprops(image, properties='all'):
         _filled_image = None
         _convex_image = None
         _nu = None
-        _a1 = None
-        _a2 = None
 
         if 'Area' in properties:
             obj_props['Area'] = m[0,0]
