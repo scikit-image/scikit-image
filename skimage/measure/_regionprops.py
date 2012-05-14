@@ -46,7 +46,7 @@ def regionprops(image, properties='all'):
 
     Parameters
     ----------
-    image : NxM ndarray
+    image : N x M ndarray
         Labelled input image.
     properties : {'all', list, tuple}
         Shape measurements to be determined for each labelled image region.
@@ -64,7 +64,7 @@ def regionprops(image, properties='all'):
             Centroid coordinate tuple `(row, col)`.
         * ConvexArea : int
             Number of pixels of convex hull image.
-        * ConvexImage : HxJ ndarray
+        * ConvexImage : H x J ndarray
             Convex hull image which has the same size as bounding box.
         * Eccentricity : float
             Eccentricity of the ellipse that has the same second-moments as the
@@ -80,12 +80,12 @@ def regionprops(image, properties='all'):
             Computed as `Area / (rows*cols)`
         * FilledArea : int
             Number of pixels of filled region.
-        * FilledImage : HxJ ndarray
+        * FilledImage : H x J ndarray
             Region image with filled holes which has the same size as bounding
             box.
         * HuMoments : tuple
             Hu moments (translation, scale and rotation invariant).
-        * Image : HxJ ndarray
+        * Image : H x J ndarray
             Sliced region image which has the same size as bounding box.
         * MajorAxisLength : float
             The length of the major axis of the ellipse that has the same
