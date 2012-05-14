@@ -48,7 +48,7 @@ def regionprops(image, properties='all'):
     ----------
     image : N x M ndarray
         Labelled input image.
-    properties : {'all', list, tuple}
+    properties : {'all', list}
         Shape measurements to be determined for each labelled image region.
         Default is 'all'. The following properties can be determined:
         * Area : int
