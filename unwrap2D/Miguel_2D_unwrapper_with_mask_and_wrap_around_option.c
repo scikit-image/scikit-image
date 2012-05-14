@@ -20,8 +20,8 @@
 //TODO: remove global variables
 //TODO: make thresholds independent
 
-static float PI = 3.141592654;
-static float TWOPI = 6.283185307;
+static float PI = 3.141592654f;
+static float TWOPI = 6.283185307f;
 
 #define NOMASK 0
 #define MASK 1
@@ -35,7 +35,7 @@ typedef struct
 } params_t;
 
 //PIXELM information
-struct pixelm
+struct PIXELM
 {
   int increment;		//No. of 2*pi to add to the pixel to unwrap it
   int number_of_pixels_in_group;//No. of pixel in the pixel group
@@ -45,16 +45,16 @@ struct pixelm
   unsigned char extended_mask;	//0 pixel is masked. NOMASK pixel is not masked
   int group;			//group No.
   int new_group;
-  struct pixelm *head;		//pointer to the first pixel in the group in the linked list
-  struct pixelm *last;		//pointer to the last pixel in the group
-  struct pixelm *next;		//pointer to the next pixel in the group
+  struct PIXELM *head;		//pointer to the first pixel in the group in the linked list
+  struct PIXELM *last;		//pointer to the last pixel in the group
+  struct PIXELM *next;		//pointer to the next pixel in the group
 };
 
-typedef struct pixelm PIXELM;
+typedef struct PIXELM PIXELM;
 
 //the EDGE is the line that connects two pixels.
 //if we have S pixels, then we have S horizontal edges and S vertical edges
-struct edge
+struct EDGE
 {    
   float reliab;			//reliabilty of the edge and it depends on the two pixels
   PIXELM *pointer_1;		//pointer to the first pixel
@@ -63,7 +63,7 @@ struct edge
 				//unwrap it with respect to the second
 }; 
 
-typedef struct edge EDGE;
+typedef struct EDGE EDGE;
 
 //---------------start quicker_sort algorithm --------------------------------
 #define swap(x,y) {EDGE t; t=x; x=y; y=t;}
@@ -155,7 +155,7 @@ void  initialisePIXELs(float *wrapped_image, unsigned char *input_mask, unsigned
 	  pixel_pointer->increment = 0;
 	  pixel_pointer->number_of_pixels_in_group = 1;		
 	  pixel_pointer->value = *wrapped_image_pointer;
-	  pixel_pointer->reliability = 9999999 + rand();
+	  pixel_pointer->reliability = 9999999.f + rand();
 	  pixel_pointer->input_mask = *input_mask_pointer;
 	  pixel_pointer->extended_mask = *extended_mask_pointer;
 	  pixel_pointer->head = pixel_pointer;
@@ -631,8 +631,8 @@ void  maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width, int i
 
   PIXELM *pointer_pixel = pixel;
   unsigned char *IMP = input_mask;	//input mask pointer
-  float min=99999999.;
-  int i, j;
+  float min=99999999.f;
+  int i;
   int image_size = image_width * image_height;
 
   //find the minimum of the unwrapped phase
@@ -686,12 +686,14 @@ unwrap2D(float* wrapped_image, float* UnwrappedImage, unsigned char* input_mask,
 {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, 0};
   unsigned char *extended_mask;
+  PIXELM *pixel;
+  EDGE *edge;
   int image_size = image_height * image_width;
   int No_of_Edges_initially = 2 * image_width * image_height;
     
   extended_mask = (unsigned char *) calloc(image_size, sizeof(unsigned char));
-  PIXELM *pixel = (PIXELM *) calloc(image_size, sizeof(PIXELM));
-  EDGE *edge = (EDGE *) calloc(No_of_Edges_initially, sizeof(EDGE));;
+  pixel = (PIXELM *) calloc(image_size, sizeof(PIXELM));
+  edge = (EDGE *) calloc(No_of_Edges_initially, sizeof(EDGE));
     
   extend_mask(input_mask, extended_mask, image_width, image_height, &params);
   initialisePIXELs(wrapped_image, input_mask, extended_mask, pixel, image_width, image_height);

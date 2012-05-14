@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-static float PI = 3.141592654;
-static float TWOPI = 6.283185307;
+static float PI = 3.141592654f;
+static float TWOPI = 6.283185307f;
 
 #define NOMASK 0
 #define MASK 1
@@ -35,7 +35,7 @@ typedef struct
 } params_t;  
 
 //VOXELM information
-struct voxelm
+struct VOXELM
 {
   int increment;		//No. of 2*pi to add to the voxel to unwrap it
   int number_of_voxels_in_group;//No. of voxel in the voxel group
@@ -45,16 +45,16 @@ struct voxelm
   unsigned char extended_mask;	//MASK voxel is masked. NOMASK voxel is not masked
   int group;			//group No.
   int new_group;
-  struct voxelm *head;		//pointer to the first voxel in the group in the linked list
-  struct voxelm *last;		//pointer to the last voxel in the group
-  struct voxelm *next;		//pointer to the next voxel in the group
+  struct VOXELM *head;		//pointer to the first voxel in the group in the linked list
+  struct VOXELM *last;		//pointer to the last voxel in the group
+  struct VOXELM *next;		//pointer to the next voxel in the group
 };
 
-typedef struct voxelm VOXELM;
+typedef struct VOXELM VOXELM;
 
 //the EDGE is the line that connects two voxels.
 //if we have S voxels, then we have S horizontal edges and S vertical edges
-struct edge
+struct EDGE
 {    
   float reliab;			//reliabilty of the edge and it depends on the two voxels
   VOXELM *pointer_1;		//pointer to the first voxel
@@ -64,7 +64,7 @@ struct edge
 				//the second
 };
 
-typedef struct edge EDGE;
+typedef struct EDGE EDGE;
 
 //---------------start quicker_sort algorithm --------------------------------
 #define swap(x,y) {EDGE t; t=x; x=y; y=t;}
@@ -159,7 +159,7 @@ void  initialiseVOXELs(float *WrappedVolume, unsigned char *input_mask, unsigned
 	      voxel_pointer->increment = 0;
 	      voxel_pointer->number_of_voxels_in_group = 1;		
 	      voxel_pointer->value = *wrapped_volume_pointer;
-	      voxel_pointer->reliability = 9999999 + rand();
+	      voxel_pointer->reliability = 9999999.f + rand();
 	      voxel_pointer->input_mask = *input_mask_pointer;
 	      voxel_pointer->extended_mask = *extended_mask_pointer;
 	      voxel_pointer->head = voxel_pointer;
@@ -738,6 +738,8 @@ void  verticalEDGEs(VOXELM *voxel, EDGE *edge, int volume_width, int volume_heig
   int no_of_edges = params->no_of_edges;
   VOXELM *voxel_pointer = voxel;
   EDGE *edge_pointer = edge + no_of_edges; 
+  int frame_size = volume_width * volume_height;
+  int next_voxel = frame_size - volume_width;
 
   for (n=0; n < volume_depth; n++)
     {
@@ -760,8 +762,6 @@ void  verticalEDGEs(VOXELM *voxel, EDGE *edge, int volume_width, int volume_heig
       voxel_pointer += volume_width;
     } 
 
-  int frame_size = volume_width * volume_height;
-  int next_voxel = frame_size - volume_width;
   if (params->y_connectivity == 1)
     {
       voxel_pointer = voxel + frame_size - volume_width;
@@ -793,7 +793,8 @@ void  normalEDGEs(VOXELM *voxel, EDGE *edge, int volume_width, int volume_height
   int frame_size = volume_width * volume_height;
   int volume_size = volume_width * volume_height * volume_depth;
   VOXELM *voxel_pointer = voxel;
-  EDGE *edge_pointer = edge + no_of_edges; 
+  EDGE *edge_pointer = edge + no_of_edges;
+  int next_voxel = volume_size - frame_size;
 
   for (n=0; n < volume_depth - 1; n++)
     {
@@ -816,7 +817,6 @@ void  normalEDGEs(VOXELM *voxel, EDGE *edge, int volume_width, int volume_height
     }
 
 	
-  int next_voxel = volume_size - frame_size;
   if (params->z_connectivity == 1)
     {
       voxel_pointer = voxel + next_voxel;
@@ -1017,12 +1017,14 @@ unwrap3D(float* wrapped_volume, float* unwrapped_volume, unsigned char* input_ma
 {
   params_t params = {TWOPI, wrap_around_x, wrap_around_y, wrap_around_z, 0};
   unsigned char *extended_mask;
+  VOXELM *voxel;
+  EDGE *edge;
   int volume_size = volume_height * volume_width * volume_depth;
   int No_of_Edges_initially = 3 * volume_width * volume_height * volume_depth;
 
   extended_mask = (unsigned char *) calloc(volume_size, sizeof(unsigned char));
-  VOXELM *voxel = (VOXELM *) calloc(volume_size, sizeof(VOXELM));
-  EDGE *edge = (EDGE *) calloc(No_of_Edges_initially, sizeof(EDGE));;
+  voxel = (VOXELM *) calloc(volume_size, sizeof(VOXELM));
+  edge = (EDGE *) calloc(No_of_Edges_initially, sizeof(EDGE));;
 
   extend_mask(input_mask, extended_mask, volume_width, volume_height, volume_depth, &params);
   initialiseVOXELs(wrapped_volume, input_mask, extended_mask, voxel, volume_width, volume_height, volume_depth);
