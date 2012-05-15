@@ -1,4 +1,4 @@
-cdef extern unwrap2D(float* wrapped_image, 
+cdef extern void unwrap2D(float* wrapped_image, 
                      float* unwrapped_image, 
                      unsigned char* input_mask, 
                      int image_width, int image_height,
