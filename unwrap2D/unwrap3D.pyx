@@ -1,4 +1,4 @@
-cdef extern unwrap3D(float* wrapped_volume, 
+cdef extern void unwrap3D(float* wrapped_volume, 
                      float* unwrapped_volume, 
                      unsigned char* input_mask, 
                      int image_width, int image_height, int volume_depth,
