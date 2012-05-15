@@ -1011,6 +1011,7 @@ void  returnVolume(VOXELM *voxel, float *unwrappedVolume, int volume_width, int 
 }
 
 //the main function of the unwrapper
+void
 unwrap3D(float* wrapped_volume, float* unwrapped_volume, unsigned char* input_mask,
 	 int volume_width, int volume_height, int volume_depth,
 	 int wrap_around_x, int wrap_around_y, int wrap_around_z)
