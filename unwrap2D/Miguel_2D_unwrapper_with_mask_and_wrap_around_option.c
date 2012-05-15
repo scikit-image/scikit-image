@@ -1,9 +1,9 @@
 // 2D phase unwrapping, modified for inclusion in scipy by Gregor Thalhammer
 
-//This program was written by Munther Gdeisat and Miguel Arevallilo Herra´ez to program the two-dimensional unwrapper
+//This program was written by Munther Gdeisat and Miguel Arevallilo Herraï¿½ez to program the two-dimensional unwrapper
 //entitled "Fast two-dimensional phase-unwrapping algorithm based on sorting by 
 //reliability following a noncontinuous path"
-//by  Miguel Arevallilo Herra´ez, David R. Burton, Michael J. Lalor, and Munther A. Gdeisat
+//by  Miguel Arevallilo Herraï¿½ez, David R. Burton, Michael J. Lalor, and Munther A. Gdeisat
 //published in the Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002.
 //This program was written by Munther Gdeisat, Liverpool John Moores University, United Kingdom.
 //Date 26th August 2007
@@ -680,6 +680,7 @@ void  returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int im
 }
 
 //the main function of the unwrapper
+void
 unwrap2D(float* wrapped_image, float* UnwrappedImage, unsigned char* input_mask, 
 	 int image_width, int image_height, 
 	 int wrap_around_x, int wrap_around_y)
