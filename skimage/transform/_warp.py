@@ -22,7 +22,11 @@ def _stackcopy(a, b):
     Color images are stored as an ``MxNx3`` or ``MxNx4`` arrays.
 
     """
-    a[:] = b[:, :, np.newaxis]
+    if a.ndim == 3:
+        a[:] = b[:, :, np.newaxis]
+    else:
+        a[:] = b
+
 
 def warp(image, reverse_map, map_args={},
          output_shape=None, order=1, mode='constant', cval=0.):
