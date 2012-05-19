@@ -340,6 +340,9 @@ class METADATA_DATATYPE(object):
     FIDT_DOUBLE = 12 # 64-bit IEEE floating point
     FIDT_IFD = 13 # 32-bit unsigned integer (offset)
     FIDT_PALETTE = 14 # 32-bit RGBQUAD
+    FIDT_LONG8 = 16 # 64-bit unsigned integer 
+    FIDT_SLONG8 = 17 # 64-bit signed integer
+    FIDT_IFD8 = 18 # 64-bit unsigned integer (offset)
 
     dtypes = {
         FIDT_BYTE: numpy.uint8,
@@ -357,7 +360,10 @@ class METADATA_DATATYPE(object):
         FIDT_DOUBLE: numpy.float64,
         FIDT_IFD: numpy.uint32,
         FIDT_PALETTE: [('R', numpy.uint8), ('G', numpy.uint8),
-                       ('B', numpy.uint8), ('A', numpy.uint8)]
+                       ('B', numpy.uint8), ('A', numpy.uint8)],
+        FIDT_LONG8: numpy.uint64,
+        FIDT_SLONG8: numpy.int64,
+        FIDT_IFD8: numpy.uint64
         }
 
 
