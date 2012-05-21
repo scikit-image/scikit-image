@@ -1,3 +1,10 @@
+skimage (0.5.0+git100-gfeb3e92-2) unstable; urgency=low
+
+  * debian/rules: globally export MPLCONFIGDIR and HOME so they would be
+    in effect also for unittests resolving FTBFS on build boxes.
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 21 May 2012 13:11:43 -0400
+
 skimage (0.5.0+git100-gfeb3e92-1) unstable; urgency=low
 
   [ Stefan van der Walt ]

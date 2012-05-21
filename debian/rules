@@ -7,6 +7,9 @@ PACKAGE_ROOT_DIR = $(CURDIR)/debian/${PACKAGE_NAME}
 PYVERS = $(shell pyversions -vr)
 PYVER = $(shell pyversions  -vd)
 
+export MPLCONFIGDIR=$(CURDIR)/build
+export HOME=$(CURDIR)/build
+
 # Mega rule
 %:
 	dh $@ --buildsystem python_distutils
@@ -17,6 +20,12 @@ ifeq (,$(filter noclean,$(DEB_BUILD_OPTIONS)))
 	dh_clean
 endif
 
+# Assure Agg backend for matplotlib to avoid any possible complication
+override_dh_auto_configure:
+	mkdir -p $(MPLCONFIGDIR)
+	echo "backend : Agg" >| $(MPLCONFIGDIR)/matplotlibrc
+	dh_auto_configure
+
 # Build docs during install
 override_dh_auto_install: ${PYVERS:%=python-install%}
 
@@ -26,7 +35,7 @@ python-install%:
 
 	: # Build Documentation
 ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
-	export PYTHONPATH=$(PACKAGE_ROOT_DIR)/usr/lib/python$*/dist-packages MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
+	export PYTHONPATH=$(PACKAGE_ROOT_DIR)/usr/lib/python$*/dist-packages; \
 	 cd doc; test -d build/html || $(MAKE) html
 	python$* setup.py install --install-layout=deb --root=$(PACKAGE_ROOT_DIR)
 	: # Use jquery and underscore from Debian package, so prune shipped one
