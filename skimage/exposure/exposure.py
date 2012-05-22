@@ -177,6 +177,9 @@ def rescale_intensity(image, in_range=None, out_range=None):
     else:
         omin, omax = out_range
 
+    if imin >= 0:
+        omin = 0
+
     image = np.clip(image, imin, imax)
 
     image = (image - imin) / float(imax - imin)
