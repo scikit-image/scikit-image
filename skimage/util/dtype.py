@@ -48,8 +48,21 @@ def convert(image, dtype, force_copy=False, uniform=False):
     force_copy : bool
         Force a copy of the data, irrespective of its current dtype.
     uniform : bool
-        Quantize the floating point range to integer range uniformly instead
-        of scaling and rounding floating point values to the nearest integers.
+        Uniformly quantize the floating point range to the integer range.
+        By default (uniform=False) floating point values are scaled and
+        rounded to the nearest integers, which minimized back and forth
+        conversion errors.
+
+    References
+    ----------
+    (1) DirectX data conversion rules.
+        http://msdn.microsoft.com/en-us/library/windows/desktop/dd607323%28v=vs.85%29.aspx
+    (2) Data Conversions.
+        In "OpenGL ES 2.0 Specification v2.0.25", pp 7-8. Khronos Group, 2010.
+    (3) Proper treatment of pixels as integers. A.W. Paeth.
+        In "Graphics Gems I", pp 249-256. Morgan Kaufmann, 1990.
+    (4) Dirty Pixels. J. Blinn.
+        In "Jim Blinn's corner: Dirty Pixels", pp 47-57. Morgan Kaufmann, 1998.
 
     """
     image = np.asarray(image)
