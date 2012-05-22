@@ -50,7 +50,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     uniform : bool
         Uniformly quantize the floating point range to the integer range.
         By default (uniform=False) floating point values are scaled and
-        rounded to the nearest integers, which minimized back and forth
+        rounded to the nearest integers, which minimizes back and forth
         conversion errors.
 
     References
