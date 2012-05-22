@@ -9,7 +9,7 @@ from skimage.util import img_as_ubyte
 try:
     import multiprocessing
     CPU_COUNT = multiprocessing.cpu_count()
-except ImportError:
+except:
     CPU_COUNT = 2
 
 class GuiLockError(Exception):
