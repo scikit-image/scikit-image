@@ -4,10 +4,10 @@ Summary: Image processing routines for SciPy
 Url: http://scikits-image.org
 DownloadUrl: http://github.com/scikits-image/scikits-image
 Description:     Image Processing SciKit
-    
+
     Image processing algorithms for SciPy, including IO, morphology, filtering,
     warping, color manipulation, object detection, etc.
-    
+
     Please refer to the online documentation at
     http://scikits-image.org/
 Maintainer: Stefan van der Walt
@@ -52,6 +52,9 @@ Library:
     Extension: skimage.measure._find_contours
         Sources:
             skimage/measure/_find_contours.pyx
+    Extension: skimage.measure._moments
+        Sources:
+            skimage/measure/_moments.pyx
     Extension: skimage.graph._mcp
         Sources:
             skimage/graph/_mcp.pyx
