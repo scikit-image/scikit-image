@@ -195,7 +195,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     if kind_in == 'u':
         if kind == 'i':
-           # unsigned integer -> signed integer
+            # unsigned integer -> signed integer
             image = _scale(image, 8*itemsize_in, 8*itemsize-1)
             return image.view(dtype)
         else:
