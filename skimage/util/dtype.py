@@ -33,7 +33,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     Floating point values are expected to be normalized. They will be
     clipped to the range [0.0, 1.0] or [-1.0, 1.0] when converting to
-    unsigned respectively signed integers.
+    unsigned or signed integers respectively.
 
     Numbers are not shifted to the negative side when converting from
     unsigned to signed integer types. Negative values will be clipped from
