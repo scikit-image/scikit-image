@@ -28,16 +28,16 @@ def convert(image, dtype, force_copy=False, uniform=False):
     """
     Convert an image to the requested data-type.
 
-    Warnings are issued in case of precision loss, or when
-    negative values have to be scaled into the positive domain.
+    Warnings are issued in case of precision loss, or when negative values
+    are clipped during conversion to unsigned integer types (sign loss).
 
     Floating point values are expected to be normalized. They will be
     clipped to the range [0.0, 1.0] or [-1.0, 1.0] when converting to
     unsigned or signed integers respectively.
 
     Numbers are not shifted to the negative side when converting from
-    unsigned to signed integer types. Negative values will be clipped from
-    signed integers when converting to unsigned integers.
+    unsigned to signed integer types. Negative values will be clipped when
+    converting to unsigned integers.
 
     Parameters
     ----------
