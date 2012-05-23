@@ -162,7 +162,7 @@ def convert(image, dtype, force_copy=False, uniform=False, frange=[-1.5, 1.5]):
     if kind_in == 'f':
         if frange and np.min(image) < frange[0] or np.max(image) > frange[1]:
             raise ValueError("Images of type float must be between %d and %d",
-                             frange)
+                             tuple(frange))
         if kind == 'f':
             # floating point -> floating point
             if itemsize_in > itemsize:
