@@ -113,7 +113,8 @@ def convert(image, dtype, force_copy=False, uniform=False):
             prec_loss()
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, m))
-                np.divide(a, 2**(n - m), out=b)
+                np.divide(a, 2**(n - m), out=b, dtype=a.dtype,
+                          casting='unsafe')
                 return b
             else:
                 a //= 2**(n - m)
@@ -122,11 +123,11 @@ def convert(image, dtype, force_copy=False, uniform=False):
             # exact upscale to a multiple of n bits
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, m))
-                np.multiply(a, (2**m - 1) / (2**n - 1), out=b)
+                np.multiply(a, (2**m - 1) // (2**n - 1), out=b, dtype=b.dtype)
                 return b
             else:
                 a = np.array(a, _dtype2(kind, m, a.dtype.itemsize), copy=False)
-                a *= (2**m - 1) / (2**n - 1)
+                a *= (2**m - 1) // (2**n - 1)
                 return a
         else:
             # upscale to a multiple of n bits,
@@ -135,12 +136,12 @@ def convert(image, dtype, force_copy=False, uniform=False):
             o = (m // n + 1) * n
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, o))
-                np.multiply(a, (2**o - 1) / (2**n - 1), out=b)
+                np.multiply(a, (2**o - 1) // (2**n - 1), out=b, dtype=b.dtype)
                 b //= 2**(o - m)
                 return b
             else:
                 a = np.array(a, _dtype2(kind, o, a.dtype.itemsize), copy=False)
-                a *= (2**o - 1) / (2**n - 1)
+                a *= (2**o - 1) // (2**n - 1)
                 a //= 2**(o - m)
                 return a
 
@@ -206,7 +207,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
         sign_loss()
         image = _scale(image, 8*itemsize_in-1, 8*itemsize)
         result = np.empty(image.shape, dtype)
-        np.maximum(image, 0, out=result)
+        np.maximum(image, 0, out=result, dtype=image.dtype, casting='unsafe')
         return result
 
     # signed integer -> signed integer
