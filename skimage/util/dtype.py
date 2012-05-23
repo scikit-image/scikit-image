@@ -24,7 +24,7 @@ if np.__version__ >= "1.6.0":
     _supported_types += (np.float16, )
 
 
-def convert(image, dtype, force_copy=False, uniform=False):
+def convert(image, dtype, force_copy=False, uniform=False, frange=[-1.5, 1.5]):
     """
     Convert an image to the requested data-type.
 
@@ -52,6 +52,13 @@ def convert(image, dtype, force_copy=False, uniform=False):
         By default (uniform=False) floating point values are scaled and
         rounded to the nearest integers, which minimizes back and forth
         conversion errors.
+    frange: [fmin, fmax]
+        Range of floating point values. An error is raised if any input
+        floating point values are smaller than fmin or larger than fmax.
+        The default is [-1.5, 1.5], which allows for some outliers but
+        catches the common case where normalized integer images are of
+        floating point type. No range check is performed if `frange` is empty
+        or evaluates to False.
 
     References
     ----------
@@ -153,6 +160,9 @@ def convert(image, dtype, force_copy=False, uniform=False):
         imax_in = np.iinfo(dtype_in).max
 
     if kind_in == 'f':
+        if frange and np.min(image) < frange[0] or np.max(image) > frange[1]:
+            raise ValueError("Images of type float must be between %d and %d",
+                             frange)
         if kind == 'f':
             # floating point -> floating point
             if itemsize_in > itemsize:
