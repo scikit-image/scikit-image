@@ -217,7 +217,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     image -= np.iinfo(dtype_in).min
     image = _scale(image, 8*itemsize_in, 8*itemsize, copy=False)
     image += np.iinfo(dtype).min
-    return image
+    return dtype(image)
 
 
 def img_as_float(image, force_copy=False):
