@@ -12,9 +12,10 @@ dtype_range = {np.uint8: (0, 255),
                np.float32: (-1.0, 1.0),
                np.float64: (-1.0, 1.0)}
 
-def _verify_range(msg, x, vmin, vmax):
+def _verify_range(msg, x, vmin, vmax, dtype):
     assert_equal(x[0], vmin)
     assert_equal(x[-1], vmax)
+    assert x.dtype == dtype
 
 def test_range():
     for dtype in dtype_range:
@@ -33,9 +34,9 @@ def test_range():
                 omin = 0
                 imin = 0
 
-            yield _verify_range, \
-                  "From %s to %s" % (np.dtype(dtype), np.dtype(dt)), \
-                  y, omin, omax
+            yield (_verify_range,
+                   "From %s to %s" % (np.dtype(dtype), np.dtype(dt)),
+                   y, omin, omax, np.dtype(dt))
 
 
 def test_range_extra_dtypes():
@@ -58,9 +59,9 @@ def test_range_extra_dtypes():
         x = np.linspace(imin, imax, 10).astype(dtype_in)
         y = convert(x, dt)
         omin, omax = dtype_range_extra[dt]
-        yield _verify_range, \
-              "From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)), \
-              y, omin, omax
+        yield (_verify_range,
+               "From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
+               y, omin, omax, np.dtype(dt))
 
 
 def test_unsupported_dtype():
