@@ -66,14 +66,10 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     """
     image = np.asarray(image)
-    dtype = np.dtype(dtype).type
-    dtype_in = image.dtype.type
     dtypeobj = np.dtype(dtype)
-    dtypeobj_in = np.dtype(dtype_in)
-    kind = dtypeobj.kind
-    kind_in = dtypeobj_in.kind
-    itemsize = dtypeobj.itemsize
-    itemsize_in = dtypeobj_in.itemsize
+    dtypeobj_in = image.dtype
+    dtype = dtypeobj.type
+    dtype_in = dtypeobj_in.type
 
     if dtype_in == dtype:
         if force_copy:
@@ -145,6 +141,17 @@ def convert(image, dtype, force_copy=False, uniform=False):
                 a //= 2**(o - m)
                 return a
 
+    kind = dtypeobj.kind
+    kind_in = dtypeobj_in.kind
+    itemsize = dtypeobj.itemsize
+    itemsize_in = dtypeobj_in.itemsize
+    if kind in 'ui':
+        imin = np.iinfo(dtype).min
+        imax = np.iinfo(dtype).max
+    if kind_in in 'ui':
+        imin_in = np.iinfo(dtype_in).min
+        imax_in = np.iinfo(dtype_in).max
+
     if kind_in == 'f':
         if kind == 'f':
             # floating point -> floating point
@@ -159,20 +166,20 @@ def convert(image, dtype, force_copy=False, uniform=False):
                                        np.float32, np.float64))
         if not uniform:
             if kind == 'u':
-                image *= np.iinfo(dtype).max
+                image *= imax
             else:
-                image *= np.iinfo(dtype).max - np.iinfo(dtype).min
+                image *= imax - imin
                 image -= 1.0
                 image /= 2.0
             np.rint(image, out=image)
-            np.clip(image, np.iinfo(dtype).min, np.iinfo(dtype).max, out=image)
+            np.clip(image, imin, imax, out=image)
         elif kind == 'u':
-            image *= np.iinfo(dtype).max + 1
-            np.clip(image, 0, np.iinfo(dtype).max, out=image)
+            image *= imax + 1
+            np.clip(image, 0, imax, out=image)
         else:
-            image *= (np.iinfo(dtype).max - np.iinfo(dtype).min + 1.0) / 2.0
+            image *= (imax - imin + 1.0) / 2.0
             np.floor(image, out=image)
-            np.clip(image, np.iinfo(dtype).min, np.iinfo(dtype).max, out=image)
+            np.clip(image, imin, imax, out=image)
         return dtype(image)
 
     if kind == 'f':
@@ -183,14 +190,14 @@ def convert(image, dtype, force_copy=False, uniform=False):
         image = np.array(image, _dtype(itemsize_in, dtype,
                                        np.float32, np.float64))
         if kind_in == 'u':
-            image /= np.iinfo(dtype_in).max
+            image /= imax_in
             # DirectX uses this conversion also for signed ints
-            #if np.iinfo(dtype_in).min:
+            #if imin_in:
             #    np.maximum(image, -1.0, out=image)
         else:
             image *= 2.0
             image += 1.0
-            image /= np.iinfo(dtype_in).max - np.iinfo(dtype_in).min
+            image /= imax_in - imin_in
         return dtype(image)
 
     if kind_in == 'u':
@@ -214,9 +221,9 @@ def convert(image, dtype, force_copy=False, uniform=False):
     if itemsize_in > itemsize:
         return _scale(image, 8*itemsize_in-1, 8*itemsize-1)
     image = image.astype(_dtype2('i', itemsize*8))
-    image -= np.iinfo(dtype_in).min
+    image -= imin_in
     image = _scale(image, 8*itemsize_in, 8*itemsize, copy=False)
-    image += np.iinfo(dtype).min
+    image += imin
     return dtype(image)
 
 
