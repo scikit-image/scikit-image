@@ -169,10 +169,9 @@ def convert(image, dtype, force_copy=False, uniform=False):
             image *= np.iinfo(dtype).max + 1
             np.clip(image, 0, np.iinfo(dtype).max, out=image)
         else:
-            image += 1.0
             image *= (np.iinfo(dtype).max - np.iinfo(dtype).min + 1.0) / 2.0
+            np.floor(image, out=image)
             np.clip(image, np.iinfo(dtype).min, np.iinfo(dtype).max, out=image)
-            image -= np.iinfo(dtype).min
         return dtype(image)
 
     if kind == 'f':
