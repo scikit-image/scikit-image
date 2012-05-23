@@ -197,7 +197,6 @@ def test_weighted_central_moments():
             -3.3156729271e+04]]
     )
     np.set_printoptions(precision=10)
-    print wmu
     assert_array_almost_equal(wmu, ref)
 
 def test_weighted_centroid():
