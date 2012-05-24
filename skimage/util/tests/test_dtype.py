@@ -69,13 +69,6 @@ def test_unsupported_dtype():
     assert_raises(ValueError, img_as_int, x)
 
 
-def test_float_out_of_range():
-    too_high = np.array([2], dtype=np.float32)
-    assert_raises(ValueError, img_as_int, too_high)
-    too_low = np.array([-2], dtype=np.float32)
-    assert_raises(ValueError, img_as_int, too_low)
-
-
 def test_copy():
     x = np.array([1], dtype=np.float64)
     y = img_as_float(x)
