@@ -24,16 +24,15 @@ if np.__version__ >= "1.6.0":
     _supported_types += (np.float16, )
 
 
-def convert(image, dtype, force_copy=False, uniform=False, frange=[-1.5, 1.5]):
+def convert(image, dtype, force_copy=False, uniform=False):
     """
     Convert an image to the requested data-type.
 
     Warnings are issued in case of precision loss, or when negative values
     are clipped during conversion to unsigned integer types (sign loss).
 
-    Floating point values are expected to be normalized. They will be
-    clipped to the range [0.0, 1.0] or [-1.0, 1.0] when converting to
-    unsigned or signed integers respectively.
+    Floating point values will be clipped to the range [0.0, 1.0] or
+    [-1.0, 1.0] when converting to unsigned or signed integers respectively.
 
     Numbers are not shifted to the negative side when converting from
     unsigned to signed integer types. Negative values will be clipped when
@@ -52,13 +51,6 @@ def convert(image, dtype, force_copy=False, uniform=False, frange=[-1.5, 1.5]):
         By default (uniform=False) floating point values are scaled and
         rounded to the nearest integers, which minimizes back and forth
         conversion errors.
-    frange: [fmin, fmax]
-        Range of floating point values. An error is raised if any input
-        floating point values are smaller than fmin or larger than fmax.
-        The default is [-1.5, 1.5], which allows for some outliers but
-        catches the common case where normalized integer images are of
-        floating point type. No range check is performed if `frange` is empty
-        or evaluates to False.
 
     References
     ----------
@@ -105,7 +97,7 @@ def convert(image, dtype, force_copy=False, uniform=False, frange=[-1.5, 1.5]):
         return np.dtype(kind + str(s))
 
     def _scale(a, n, m, copy=True):
-        # Scale unsigned integers from n to m bits
+        # Scale unsigned/positive integers from n to m bits
         # Numbers can be represented exactly only if m is a multiple of n
         # Output array is of same kind as input.
         kind = a.dtype.kind
@@ -160,9 +152,6 @@ def convert(image, dtype, force_copy=False, uniform=False, frange=[-1.5, 1.5]):
         imax_in = np.iinfo(dtype_in).max
 
     if kind_in == 'f':
-        if frange and np.min(image) < frange[0] or np.max(image) > frange[1]:
-            raise ValueError("Images of type float must be between %g and %g",
-                             tuple(frange))
         if kind == 'f':
             # floating point -> floating point
             if itemsize_in > itemsize:
