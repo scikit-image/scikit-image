@@ -19,7 +19,8 @@ except ImportError:
 def teardown():
     if TF_available:
         for k, v in _plugins.items():
-            sio.use_plugin(v[0], k)
+            if len(v) > 0:
+                sio.use_plugin(v[0], k)
 
 
 @skipif(not TF_available)
