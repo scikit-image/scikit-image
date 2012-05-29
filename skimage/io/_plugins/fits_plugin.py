@@ -96,11 +96,11 @@ def imread_collection(load_pattern, conserve_memory=True):
                 # Ignore (primary) header units with no data (use '.size'
                 # rather than '.data' to avoid actually loading the image):
                 try:
-                    if hdu.size() > 0:
-                        ext_list.append((filename, n))
+                    data_size = hdu.size()
                 except TypeError:  # (size changed to int in PyFITS 3.1)
-                    if hdu.size > 0:
-                        ext_list.append((filename, n))
+                    data_size = hdu.size
+                if data_size > 0:
+                    ext_list.append((filename, n))
         hdulist.close()
 
     return io.ImageCollection(ext_list, load_func=FITSFactory,
