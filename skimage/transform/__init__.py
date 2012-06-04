@@ -4,5 +4,4 @@ from .finite_radon_transform import *
 from .project import *
 from ._project import homography as fast_homography
 from .integral import *
-from ._warp import warp
-from ._warp_zoo import swirl
+from .geometric import warp, make_tform, swirl, homography
