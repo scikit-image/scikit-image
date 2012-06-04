@@ -298,6 +298,16 @@ def make_tform(ttype, **kwargs):
     -------
     tform : :class:`Transformation`
         tform object containing the transformation parameters
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.transform import make_tform
+    >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
+    >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
+    >>> tform = make_tform('similarity', src=src, dst=dst)
+    >>> print tform.matrix
+    >>> print tform.inv(tform.fwd(src)) # == src
     """
 
     ttype = ttype.lower()
