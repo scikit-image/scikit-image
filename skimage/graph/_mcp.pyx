@@ -111,8 +111,8 @@ def _offset_edge_map(shape, offsets):
     maxes = offsets.max(axis=0)
     mins = offsets.min(axis=0)
     for pos, neg, mx, mn in zip(pos_edges, neg_edges, maxes, mins):
-      pos[pos > mx] = 0
-      neg[neg < mn] = 0    
+        pos[pos > mx] = 0
+        neg[neg < mn] = 0    
     return pos_edges.astype(EDGE_D), neg_edges.astype(EDGE_D)
 
 def make_offsets(d, fully_connected):
