@@ -77,47 +77,43 @@ def _offset_edge_map(shape, offsets):
     """Return an array with positions marked where offsets will step
     out of bounds.
 
-    Given a shape (of length n) and a list of n-d offsets, return a shape + (n,)
-    sized edge_map, where, for each dimension edge_map[...,dim] has zeros at
-    indices at which none of the given offsets (in that dimension) will step
-    out of bounds. If the value is nonzero, it gives the largest offset (in
-    terms of absolute value) that will step out of bounds in that direction.
+    Given a shape (of length n) and a list of n-d offsets, return a two arrays
+    of (n,) + shape: pos_edge_map and neg_edge_map.
+    For each dimension xxx_edge_map[dim, ...] has zeros at indices at which
+    none of the given offsets (in that dimension) of the given sign (positive
+    or negative, respectively) will step out of bounds. If the value is
+    nonzero, it gives the largest offset (in terms of absolute value) that
+    will step out of bounds in that direction.
 
     An example will be explanatory:
     >>> offsets = [[-2,0], [1,1], [0,2]]
-    >>> edge_map = _offset_edge_map((4,4), offsets)
-    >>> edge_map[...,0]
-    array([[-2, -2, -2, -2],
+    >>> pos_edge_map, neg_edge_map = _offset_edge_map((4,4), offsets)
+    >>> neg_edge_map[0]
+    array([[-1, -1, -1, -1],
           [-2, -2, -2, -2],
           [ 0,  0,  0,  0],
-          [ 1,  1,  1,  1]], dtype=int8)
+          [ 0,  0,  0,  0]], dtype=int8)
 
-    >>> edge_map[...,1]
+    >>> pos_edge_map[1]
     array([[0, 0, 2, 1],
           [0, 0, 2, 1],
           [0, 0, 2, 1],
           [0, 0, 2, 1]], dtype=int8)
 
     """
-    d = len(shape)
-    edges = np.zeros(shape+(d,), order='F', dtype=EDGE_D)
+    indices = np.indices(shape) # indices.shape = (n,)+shape
+    
+    #get the distance from each index to the upper or lower edge in each dim
+    pos_edges = (shape - indices.T).T
+    neg_edges = -1 - indices
+    # now set the distances to zero if none of the given offsets could reach
     offsets = np.asarray(offsets)
-    for i in range(d):
-        slices = [slice(None)] * (d+1)
-        slices[d] = i
-        distinct_offsets = set(offsets[:,i])
-        if 0 in distinct_offsets:
-            distinct_offsets.remove(0)
-        for offset in sorted(distinct_offsets, key=np.absolute, reverse=True):
-            # process offsets with larger absolute values first, so that smaller
-            # offsets will overwrite the correct region of the offsets array.
-            slice_stop = -offset
-            if offset > 0:
-                slice_stop -= 1
-            slice_step = -np.sign(offset)
-            slices[i] = slice(None, slice_stop, slice_step)
-            edges[tuple(slices)] = offset
-    return edges
+    maxes = offsets.max(axis=0)
+    mins = offsets.min(axis=0)
+    for pos, neg, mx, mn in zip(pos_edges, neg_edges, maxes, mins):
+        pos[pos > mx] = 0
+        neg[neg < mn] = 0    
+    return pos_edges.astype(EDGE_D), neg_edges.astype(EDGE_D)
 
 def make_offsets(d, fully_connected):
     """Make a list of offsets from a center point defining a n-dim
@@ -296,9 +292,10 @@ cdef class MCP:
         # The edge map stores more than a boolean "on some edge" flag so as to
         # allow us to examine the non-out-of-bounds neighbors for a given edge
         # point while excluding the neighbors which are outside the array.
-        self.flat_edge_map = \
-            _offset_edge_map(costs.shape, self.offsets).reshape(
-                (size, self.dim), order='F')
+        pos, neg = _offset_edge_map(costs.shape, self.offsets)
+        self.flat_pos_edge_map = pos.reshape((self.dim, size), order='F')
+        self.flat_neg_edge_map = neg.reshape((self.dim, size), order='F')
+            
 
         # The offset lengths are the distances traveled along each offset
         self.offset_lengths = np.sqrt(
@@ -393,7 +390,10 @@ cdef class MCP:
              self.flat_cumulative_costs
         cdef np.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
              self.traceback_offsets
-        cdef np.ndarray[EDGE_T, ndim=2] flat_edge_map = self.flat_edge_map
+        cdef np.ndarray[EDGE_T, ndim=2] flat_pos_edge_map = \
+             self.flat_pos_edge_map
+        cdef np.ndarray[EDGE_T, ndim=2] flat_neg_edge_map = \
+             self.flat_neg_edge_map
         cdef np.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
         cdef np.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
         cdef np.ndarray[FLOAT_T, ndim=1] offset_lengths = self.offset_lengths
@@ -413,7 +413,7 @@ cdef class MCP:
         cdef BOOL_T is_at_edge, use_offset
         cdef INDEX_T d, i
         cdef OFFSET_T offset
-        cdef EDGE_T edge_val
+        cdef EDGE_T pos_edge_val, neg_edge_val
         cdef int num_ends_found = 0
         cdef FLOAT_T inf = np.inf
         cdef FLOAT_T travel_cost
@@ -449,7 +449,8 @@ cdef class MCP:
             # edge along any axis
             is_at_edge = 0
             for d in range(dim):
-                if flat_edge_map[index, d] != 0:
+                if (flat_pos_edge_map[d, index] != 0 or 
+                    flat_neg_edge_map[d, index] != 0):
                     is_at_edge = 1
                     break
 
@@ -466,14 +467,11 @@ cdef class MCP:
                 if is_at_edge:
                     for d in range(dim):
                         offset = offsets[i, d]
-                        edge_val = flat_edge_map[index, d]
-                        if (offset < 0 and
-                            edge_val < 0 and
-                            offset <= edge_val) or \
-                           (offset > 0 and
-                            edge_val > 0 and
-                            offset >= edge_val):
-
+                        pos_edge_val = flat_pos_edge_map[d, index]
+                        neg_edge_val = flat_neg_edge_map[d, index]
+                        if (pos_edge_val > 0 and offset >= pos_edge_val) or \
+                           (neg_edge_val < 0 and offset <= neg_edge_val):
+                            # the offset puts us out of bounds...
                             use_offset = 0
                             break
                 # If not at an edge, or the specific offset doesn't
