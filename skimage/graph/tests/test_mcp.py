@@ -114,8 +114,23 @@ def test_no_diagonal():
                         (7, 2)])
 
 
+def test_offsets():
+  offsets = [(1,i) for i in range(10)] + [(1, -i) for i in range(1,10)]
+  m = mcp.MCP(a, offsets=offsets)
+  costs, traceback = m.find_costs([(1,6)])
+  assert_array_equal(traceback,  
+                     [[-1, -1, -1, -1, -1, -1, -1, -1],
+                      [-1, -1, -1, -1, -1, -1, -1, -1],
+                      [15, 14, 13, 12, 11, 10,  0,  1],
+                      [10,  0,  1,  2,  3,  4,  5,  6],
+                      [10,  0,  1,  2,  3,  4,  5,  6],
+                      [10,  0,  1,  2,  3,  4,  5,  6],
+                      [10,  0,  1,  2,  3,  4,  5,  6],
+                      [10,  0,  1,  2,  3,  4,  5,  6]])
+  
+
 def test_crashing():
-    for shape in [(100, 100), (5, 8, 13, 17)]:
+    for shape in [(100, 100), (5, 8, 13, 17)]*5:
         yield _test_random, shape
 
 def _test_random(shape):
