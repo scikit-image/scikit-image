@@ -174,6 +174,8 @@ def rescale_intensity(image, in_range=None, out_range=None):
 
     if out_range is None:
         omin, omax = dtype_range[dtype]
+        if imin >= 0:
+            omin = 0
     else:
         omin, omax = out_range
 
