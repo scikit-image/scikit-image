@@ -109,8 +109,8 @@ def convert(image, dtype, force_copy=False, uniform=False):
             prec_loss()
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, m))
-                np.divide(a, 2**(n - m), out=b, dtype=a.dtype,
-                          casting='unsafe')
+                np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
+                                casting='unsafe')
                 return b
             else:
                 a //= 2**(n - m)
