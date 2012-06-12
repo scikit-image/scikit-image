@@ -38,15 +38,17 @@ def cython(pyx_files, working_path=''):
             cmd = 'cython -o %s %s' % (c_file, pyxfile)
             print(cmd)
 
-            if platform.system() == 'Windows':
+            try:
+                status = subprocess.call(['cython', '-o', c_file, pyxfile])
+            except WindowsError:
+                # On Windows cython.exe may be missing if Cython was installed
+                # via distutils. Run the cython.py script instead.
                 status = subprocess.call(
                     [sys.executable,
                      os.path.join(os.path.dirname(sys.executable),
                                   'Scripts', 'cython.py'),
                      '-o', c_file, pyxfile],
                     shell=True)
-            else:
-                status = subprocess.call(['cython', '-o', c_file, pyxfile])
 
 def _md5sum(f):
     m = hashlib.new('md5')
