@@ -11,6 +11,7 @@ import os as _os
 from ..io import imread
 from skimage import data_dir
 
+
 def load(f):
     """Load an image file located in the data directory.
 
@@ -26,12 +27,14 @@ def load(f):
     """
     return imread(_os.path.join(data_dir, f))
 
+
 def camera():
     """Gray-level "camera" image, often used for segmentation
     and denoising examples.
 
     """
     return load("camera.png")
+
 
 def lena():
     """Colour "Lena" image.
@@ -43,6 +46,7 @@ def lena():
 
     """
     return load("lena.png")
+
 
 def text():
 	""" Gray-level "text" image used for corner detection.
@@ -68,6 +72,7 @@ def checkerboard():
     """
     return load("chessboard_GRAY.png")
 
+
 def coins():
     """Greek coins from Pompeii.
 
@@ -88,6 +93,7 @@ def coins():
     """
     return load("coins.png")
 
+
 def moon():
     """Surface of the moon.
 
@@ -96,6 +102,7 @@ def moon():
 
     """
     return load("moon.png")
+
 
 def page():
     """Scanned page.

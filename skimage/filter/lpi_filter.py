@@ -11,9 +11,11 @@ from scipy.fftpack import fftshift, ifftshift
 
 eps = np.finfo(float).eps
 
+
 def _min_limit(x, val=eps):
     mask = np.abs(x) < eps
     x[mask] = np.sign(x[mask]) * eps
+
 
 def _centre(x, oshape):
     """Return an array of oshape from the centre of x.
@@ -22,6 +24,7 @@ def _centre(x, oshape):
     start = (np.array(x.shape) - np.array(oshape)) / 2. + 1
     out = x[[slice(s, s + n) for s, n in zip(start, oshape)]]
     return out
+
 
 def _pad(data, shape):
     """Pad the data to the given shape with zeros.
@@ -36,7 +39,6 @@ def _pad(data, shape):
     out = np.zeros(shape)
     out[[slice(0, n) for n in data.shape]] = data
     return out
-
 
 
 class LPIFilter2D(object):
@@ -83,21 +85,21 @@ class LPIFilter2D(object):
 
         """
         dshape = np.array(data.shape)
-        dshape += (dshape % 2 == 0) # all filter dimensions must be uneven
+        dshape += (dshape % 2 == 0)  # all filter dimensions must be uneven
         oshape = np.array(data.shape) * 2 - 1
 
         if self._cache is None or np.any(self._cache.shape != oshape):
             coords = np.mgrid[[slice(0, float(n)) for n in dshape]]
             # this steps over two sets of coordinates,
             # not over the coordinates individually
-            for k,coord in enumerate(coords):
-                coord -= (dshape[k] - 1)/2.
-            coords = coords.reshape(2, -1).T # coordinate pairs (r,c)
+            for k, coord in enumerate(coords):
+                coord -= (dshape[k] - 1) / 2.
+            coords = coords.reshape(2, -1).T  # coordinate pairs (r,c)
 
-            f = self.impulse_response(coords[:,0],coords[:,1],
+            f = self.impulse_response(coords[:, 0], coords[:, 1],
                                       **self.filter_params).reshape(dshape)
 
-            f = _pad(f,oshape)
+            f = _pad(f, oshape)
             F = np.dual.fftn(f)
             self._cache = F
         else:
@@ -108,7 +110,7 @@ class LPIFilter2D(object):
 
         return F, G
 
-    def __call__(self,data):
+    def __call__(self, data):
         """Apply the filter to the given data.
 
         *Parameters*:
@@ -119,6 +121,7 @@ class LPIFilter2D(object):
         out = np.dual.ifftn(F * G)
         out = np.abs(_centre(out, data.shape))
         return out
+
 
 def forward(data, impulse_response=None, filter_params={},
             predefined_filter=None):
@@ -155,6 +158,7 @@ def forward(data, impulse_response=None, filter_params={},
         predefined_filter = LPIFilter2D(impulse_response, **filter_params)
     return predefined_filter(data)
 
+
 def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
             predefined_filter=None):
     """Apply the filter in reverse to the given data.
@@ -189,11 +193,12 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     F, G = filt._prepare(data)
     _min_limit(F)
 
-    F = 1/F
+    F = 1 / F
     mask = np.abs(F) > max_gain
     F[mask] = np.sign(F[mask]) * max_gain
 
     return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+
 
 def wiener(data, impulse_response=None, filter_params={}, K=0.25,
            predefined_filter=None):
@@ -227,12 +232,12 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     F, G = filt._prepare(data)
     _min_limit(F)
 
-    H_mag_sqr = np.abs(F)**2
-    F = 1/F * H_mag_sqr / (H_mag_sqr + K)
+    H_mag_sqr = np.abs(F) ** 2
+    F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
 
     return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)
+
 
 def constrained_least_squares(data, lam, impulse_response=None,
                               filter_params={}):
     raise NotImplementedError
-

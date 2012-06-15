@@ -1,9 +1,9 @@
 import numpy as np
 from numpy.testing import *
 
-from skimage.measure import find_contours 
+from skimage.measure import find_contours
 
-a = np.ones((8,8), dtype=np.float32)
+a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
 a[1, 1:-1] = 0
 
@@ -16,8 +16,9 @@ a[1, 1:-1] = 0
 ##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
 ##        [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]], dtype=float32)
 
-x,y = np.mgrid[-1:1:5j,-1:1:5j]
-r = np.sqrt(x**2 + y**2)
+x, y = np.mgrid[-1:1:5j, -1:1:5j]
+r = np.sqrt(x ** 2 + y ** 2)
+
 
 def test_binary():
   contours = find_contours(a, 0.5)

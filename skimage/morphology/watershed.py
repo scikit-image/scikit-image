@@ -32,6 +32,7 @@ from ..filter import rank_order
 from . import _watershed
 import warnings
 
+
 def watershed(image, markers, connectivity=None, offset=None, mask=None):
     """
     Return a matrix labeled using the watershed segmentation algorithm
@@ -87,8 +88,8 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
 
     This implementation converts all arguments to specific, lowest common
     denominator types, then passes these to a C algorithm.
-    
-    Markers can be determined manually, or automatically using for example 
+
+    Markers can be determined manually, or automatically using for example
     the local minima of the gradient of the image, or the local maxima of the
     distance function to the background for separating overlapping objects
     (see example).
@@ -138,7 +139,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         #
         offset = np.array(c_connectivity.shape) // 2
 
-    # pad the image, markers, and mask so that we can use the mask to 
+    # pad the image, markers, and mask so that we can use the mask to
     # keep from running off the edges
     pads = offset
 
@@ -165,10 +166,10 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     if mask != None:
         c_mask = np.ascontiguousarray(mask, dtype=bool)
         if c_mask.ndim != c_markers.ndim:
-            raise ValueError, "mask must have same # of dimensions as image"
+            raise ValueError("mask must have same # of dimensions as image")
         if c_markers.shape != c_mask.shape:
-            raise ValueError, "mask must have same shape as image"
-        c_markers[np.logical_not(mask)]=0
+            raise ValueError("mask must have same shape as image")
+        c_markers[np.logical_not(mask)] = 0
     else:
         c_mask = None
     c_output = c_markers.copy()
@@ -190,8 +191,8 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         ignore = True
         for j in range(len(c_connectivity.shape)):
             elems = c_image.shape[j]
-            idx   = (i // multiplier) % c_connectivity.shape[j]
-            off   = idx - offset[j]
+            idx = (i // multiplier) % c_connectivity.shape[j]
+            off = idx - offset[j]
             if off:
                 ignore = False
             offs.append(off)
@@ -214,10 +215,10 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         else:
             c_mask = c_mask.astype(np.int8).flatten()
         _watershed.watershed(c_image.flatten(),
-                             pq, age, c, 
-                             c_image.ndim, 
+                             pq, age, c,
+                             c_image.ndim,
                              c_mask,
-                             np.array(c_image.shape,np.int32),
+                             np.array(c_image.shape, np.int32),
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
                                                 image.ndim]
@@ -235,13 +236,13 @@ def is_local_maximum(image, labels=None, footprint=None):
     ----------
     image: ndarray (2-D, 3-D, ...)
         intensity image
-        
-    labels: ndarray, optional 
+
+    labels: ndarray, optional
         find maxima only within labels. Zero is reserved for background.
-    
+
     footprint: ndarray of bools, optional
         binary mask indicating the neighborhood to be examined
-        `footprint` must be a matrix with odd dimensions, the center is taken 
+        `footprint` must be a matrix with odd dimensions, the center is taken
         to be the point in question.
 
     Returns
@@ -289,7 +290,7 @@ def is_local_maximum(image, labels=None, footprint=None):
         footprint = np.ones([3] * image.ndim, dtype=np.uint8)
     assert((np.all(footprint.shape) & 1) == 1)
     footprint = (footprint != 0)
-    footprint_extent = (np.array(footprint.shape)-1) // 2
+    footprint_extent = (np.array(footprint.shape) - 1) // 2
     if np.all(footprint_extent == 0):
         return labels > 0
     result = (labels > 0).copy()
@@ -297,17 +298,17 @@ def is_local_maximum(image, labels=None, footprint=None):
     # Create a labels matrix with zeros at the borders that might be
     # hit by the footprint.
     #
-    big_labels = np.zeros(np.array(labels.shape) + footprint_extent*2,
+    big_labels = np.zeros(np.array(labels.shape) + footprint_extent * 2,
                           labels.dtype)
-    big_labels[[slice(fe,-fe) for fe in footprint_extent]] = labels
+    big_labels[[slice(fe, -fe) for fe in footprint_extent]] = labels
     #
     # Find the relative indexes of each footprint element
     #
     image_strides = np.array(image.strides) // image.dtype.itemsize
     big_strides = np.array(big_labels.strides) // big_labels.dtype.itemsize
     result_strides = np.array(result.strides) // result.dtype.itemsize
-    footprint_offsets = np.mgrid[[slice(-fe,fe+1) for fe in footprint_extent]]
-    
+    footprint_offsets = np.mgrid[[slice(-fe, fe + 1) for fe in footprint_extent]]
+
     fp_image_offsets = np.sum(image_strides[:, np.newaxis] *
                               footprint_offsets[:, footprint], 0)
     fp_big_offsets = np.sum(big_strides[:, np.newaxis] *
@@ -315,9 +316,9 @@ def is_local_maximum(image, labels=None, footprint=None):
     #
     # Get the index of each labeled pixel in the image and big_labels arrays
     #
-    indexes = np.mgrid[[slice(0,x) for x in labels.shape]][:, labels > 0]
+    indexes = np.mgrid[[slice(0, x) for x in labels.shape]][:, labels > 0]
     image_indexes = np.sum(image_strides[:, np.newaxis] * indexes, 0)
-    big_indexes = np.sum(big_strides[:, np.newaxis] * 
+    big_indexes = np.sum(big_strides[:, np.newaxis] *
                          (indexes + footprint_extent[:, np.newaxis]), 0)
     result_indexes = np.sum(result_strides[:, np.newaxis] * indexes, 0)
     #
@@ -335,18 +336,15 @@ def is_local_maximum(image, labels=None, footprint=None):
         same_label = (big_labels_raveled[big_indexes + fp_big_offset] ==
                       big_labels_raveled[big_indexes])
         less_than = (image_raveled[image_indexes[same_label]] <
-                     image_raveled[image_indexes[same_label]+ fp_image_offset])
+                     image_raveled[image_indexes[same_label] + fp_image_offset])
         result_raveled[result_indexes[same_label][less_than]] = False
-        
+
     return result
 
 
-
 # ---------------------- deprecated ------------------------------
-# Deprecate slower pure-Python code, that we keep only for 
+# Deprecate slower pure-Python code, that we keep only for
 # pedagogical purposes
-
-
 def __heapify_markers(markers, image):
     """Create a priority queue heap with the markers on it"""
     stride = np.array(image.strides) // image.itemsize
@@ -354,24 +352,25 @@ def __heapify_markers(markers, image):
     ncoords = coords.shape[0]
     if ncoords > 0:
         pixels = image[markers != 0]
-        age    = np.arange(ncoords)
+        age = np.arange(ncoords)
         offset = np.zeros(coords.shape[0], int)
         for i in range(image.ndim):
             offset = offset + stride[i] * coords[:, i]
         pq = np.column_stack((pixels, age, offset, coords))
         # pixels = top priority, age=second
-        ordering = np.lexsort((age, pixels)) 
+        ordering = np.lexsort((age, pixels))
         pq = pq[ordering, :]
     else:
         pq = np.zeros((0, markers.ndim + 3), int)
     return (pq, ncoords)
-    
+
+
 def _slow_watershed(image, markers, connectivity=8, mask=None):
     """Return a matrix labeled using the watershed algorithm
-    
+
     Use the `watershed` function for a faster execution.
     This pure Python function is solely for pedagogical purposes.
-    
+
     Parameters
     ----------
     image: 2-d ndarray of integers
@@ -380,16 +379,16 @@ def _slow_watershed(image, markers, connectivity=8, mask=None):
     markers: 2-d ndarray of integers
         a two-dimensional matrix marking the basins with the values
         to be assigned in the label matrix. Zero means not a marker.
-    connectivity: {4, 8}, optional 
+    connectivity: {4, 8}, optional
         either 4 for four-connected or 8 (default) for eight-connected
-    mask: 2-d ndarray of bools, optional    
+    mask: 2-d ndarray of bools, optional
         don't label points in the mask
 
-    Returns 
+    Returns
     -------
     out: ndarray
         A labeled matrix of the same type and shape as markers
-    
+
 
     Notes
     -----
@@ -409,20 +408,20 @@ def _slow_watershed(image, markers, connectivity=8, mask=None):
 
     This implementation converts all arguments to specific, lowest common
     denominator types, then passes these to a C algorithm.
-    
-    Markers can be determined manually, or automatically using for example 
+
+    Markers can be determined manually, or automatically using for example
     the local minima of the gradient of the image, or the local maxima of the
     distance function to the background for separating overlapping objects.
     """
     if connectivity not in (4, 8):
         raise ValueError("Connectivity was %d: it should be either \
-        four or eight" %(connectivity))
-    
+        four or eight" % (connectivity))
+
     image = np.array(image)
     markers = np.array(markers)
     labels = markers.copy()
-    max_x  = markers.shape[0]
-    max_y  = markers.shape[1]
+    max_x = markers.shape[0]
+    max_y = markers.shape[1]
     if connectivity == 4:
         connect_increments = ((1, 0), (0, 1), (-1, 0), (0, -1))
     else:

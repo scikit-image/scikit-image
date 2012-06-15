@@ -8,6 +8,7 @@ import numpy as np
 # Shared image queue
 _image_stack = []
 
+
 def push(img):
     """Push an image onto the shared image stack.
 
@@ -22,6 +23,7 @@ def push(img):
 
     _image_stack.append(img)
 
+
 def pop():
     """Pop an image from the shared image stack.
 
@@ -32,6 +34,7 @@ def pop():
 
     """
     return _image_stack.pop()
+
 
 def imread(fname, as_grey=False, plugin=None, flatten=None,
            **plugin_args):
@@ -75,6 +78,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         img = rgb2grey(img)
 
     return img
+
 
 def imread_collection(load_pattern, conserve_memory=True,
                       plugin=None, **plugin_args):
@@ -128,6 +132,7 @@ def imsave(fname, arr, plugin=None, **plugin_args):
     """
     return call_plugin('imsave', fname, arr, plugin=plugin, **plugin_args)
 
+
 def imshow(arr, plugin=None, **plugin_args):
     """Display an image.
 
@@ -147,6 +152,7 @@ def imshow(arr, plugin=None, **plugin_args):
 
     """
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
+
 
 def show():
     '''Display pending images.

@@ -134,7 +134,5 @@ class TestColorMixer(object):
         assert_equal(self.img, np.zeros_like(self.state))
 
 
-
-
 if __name__ == "__main__":
     run_module_suite()

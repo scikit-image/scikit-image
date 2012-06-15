@@ -38,15 +38,15 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
     -------
     coordinates : (N, 2) array
         (row, column) coordinates of peaks.
-    
+
     Notes
     -----
     The peak local maximum function returns the coordinates of local peaks (maxima)
     in a image. A maximum filter is used for finding local maxima. This operation
-    dilates the original image. After comparison between dilated and original image, 
+    dilates the original image. After comparison between dilated and original image,
     peak_local_max function returns the coordinates of peaks where
     dilated image = original.
-    
+
     Examples
     --------
     >>> im = np.zeros((7, 7))
@@ -60,14 +60,14 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ]])
-        
+
     >>> peak_local_max(im, min_distance=1)
     array([[3, 2],
            [3, 4]])
-           
+
     >>> peak_local_max(im, min_distance=2)
     array([[3, 2]])
-    
+
     """
     if np.all(image == image.flat[0]):
         return []
@@ -101,4 +101,3 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
         coordinates = coordinates[idx_maxsort][:2]
 
     return coordinates
-

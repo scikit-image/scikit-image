@@ -12,7 +12,8 @@ def test_stackcopy():
     y = np.eye(3, 3)
     _stackcopy(x, y)
     for i in range(layers):
-        assert_array_almost_equal(x[...,i], y)
+        assert_array_almost_equal(x[..., i], y)
+
 
 def test_homography():
     x = np.arange(9, dtype=np.uint8).reshape((3, 3)) + 1
@@ -23,10 +24,11 @@ def test_homography():
     x90 = homography(x, M, order=1)
     assert_array_almost_equal(x90, np.rot90(x))
 
+
 def test_fast_homography():
     img = rgb2gray(data.lena()).astype(np.uint8)
     img = img[:, :100]
-    
+
     theta = np.deg2rad(30)
     scale = 0.5
     tx, ty = 50, 50
@@ -53,7 +55,7 @@ def test_fast_homography():
 
         d = np.mean(np.abs(p0 - p1))
         assert d < 0.2
-    
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

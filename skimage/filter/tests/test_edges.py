@@ -7,6 +7,7 @@ from scipy.ndimage import binary_dilation, binary_erosion
 import skimage.filter as F
 from skimage import data_dir, img_as_float
 
+
 class TestSobel():
     def test_00_00_zeros(self):
         """Sobel on an array of all zeros"""
@@ -70,6 +71,7 @@ class TestHSobel():
         result = F.hsobel(image)
         assert (np.all(result == 0))
 
+
 class TestVSobel():
     def test_00_00_zeros(self):
         """Vertical sobel on an array of all zeros"""
@@ -100,6 +102,7 @@ class TestVSobel():
         result = F.vsobel(image)
         eps = .000001
         assert (np.all(np.abs(result) < eps))
+
 
 class TestPrewitt():
     def test_00_00_zeros(self):
@@ -132,9 +135,10 @@ class TestPrewitt():
         image = (j >= 0).astype(float)
         result = F.prewitt(image)
         eps = .000001
-        j[np.abs(i)==5] = 10000
+        j[np.abs(i) == 5] = 10000
         assert (np.all(result[j == 0] == 1))
         assert (np.all(np.abs(result[np.abs(j) > 1]) < eps))
+
 
 class TestHPrewitt():
     def test_00_00_zeros(self):
@@ -168,6 +172,7 @@ class TestHPrewitt():
         result = F.hprewitt(image)
         eps = .000001
         assert (np.all(np.abs(result) < eps))
+
 
 class TestVPrewitt():
     def test_00_00_zeros(self):

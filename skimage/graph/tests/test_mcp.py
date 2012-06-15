@@ -3,7 +3,7 @@ from numpy.testing import *
 
 import skimage.graph.mcp as mcp
 
-a = np.ones((8,8), dtype=np.float32)
+a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
 a[1, 1:-1] = 0
 
@@ -16,19 +16,20 @@ a[1, 1:-1] = 0
 ##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
 ##        [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]], dtype=float32)
 
+
 def test_basic():
     m = mcp.MCP(a, fully_connected=True)
-    costs, traceback = m.find_costs([(1,6)])
+    costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((7, 2))
     assert_array_equal(costs,
-                       [[ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-                        [ 1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.],
-                        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
-                        [ 1.,  0.,  1.,  2.,  2.,  2.,  2.,  2.],
-                        [ 1.,  0.,  1.,  2.,  3.,  3.,  3.,  3.],
-                        [ 1.,  0.,  1.,  2.,  3.,  4.,  4.,  4.],
-                        [ 1.,  0.,  1.,  2.,  3.,  4.,  5.,  5.],
-                        [ 1.,  1.,  1.,  2.,  3.,  4.,  5.,  6.]])
+                       [[1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+                        [1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.],
+                        [1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
+                        [1.,  0.,  1.,  2.,  2.,  2.,  2.,  2.],
+                        [1.,  0.,  1.,  2.,  3.,  3.,  3.,  3.],
+                        [1.,  0.,  1.,  2.,  3.,  4.,  4.,  4.],
+                        [1.,  0.,  1.,  2.,  3.,  4.,  5.,  5.],
+                        [1.,  1.,  1.,  2.,  3.,  4.,  5.,  6.]])
 
     assert_array_equal(return_path,
                        [(1, 6),
@@ -43,8 +44,9 @@ def test_basic():
                         (6, 1),
                         (7, 2)])
 
+
 def test_neg_inf():
-    expected_costs = np.where(a==1, np.inf, 0)
+    expected_costs = np.where(a == 1, np.inf, 0)
     expected_path = [(1, 6),
                      (1, 5),
                      (1, 4),
@@ -55,8 +57,8 @@ def test_neg_inf():
                      (4, 1),
                      (5, 1),
                      (6, 1)]
-    test_neg = np.where(a==1, -1, 0)
-    test_inf = np.where(a==1, np.inf, 0)
+    test_neg = np.where(a == 1, -1, 0)
+    test_inf = np.where(a == 1, np.inf, 0)
     m = mcp.MCP(test_neg, fully_connected=True)
     costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((6, 1))
@@ -67,11 +69,12 @@ def test_neg_inf():
     return_path = m.traceback((6, 1))
     assert_array_equal(costs, expected_costs)
     assert_array_equal(return_path, expected_path)
-  
+
 
 def test_route():
-    return_path, cost = mcp.route_through_array(a, (1,6), (7,2), geometric=True)
-    assert_almost_equal(cost, np.sqrt(2)/2)
+    return_path, cost = mcp.route_through_array(
+        a, (1, 6), (7, 2), geometric=True)
+    assert_almost_equal(cost, np.sqrt(2) / 2)
     assert_array_equal(return_path,
                        [(1, 6),
                         (1, 5),
@@ -85,19 +88,20 @@ def test_route():
                         (6, 1),
                         (7, 2)])
 
+
 def test_no_diagonal():
     m = mcp.MCP(a, fully_connected=False)
-    costs, traceback = m.find_costs([(1,6)])
+    costs, traceback = m.find_costs([(1, 6)])
     return_path = m.traceback((7, 2))
     assert_array_equal(costs,
-                       [[ 2.,  1.,  1.,  1.,  1.,  1.,  1.,  2.],
-                        [ 1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.],
-                        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  2.],
-                        [ 1.,  0.,  1.,  2.,  2.,  2.,  2.,  3.],
-                        [ 1.,  0.,  1.,  2.,  3.,  3.,  3.,  4.],
-                        [ 1.,  0.,  1.,  2.,  3.,  4.,  4.,  5.],
-                        [ 1.,  0.,  1.,  2.,  3.,  4.,  5.,  6.],
-                        [ 2.,  1.,  2.,  3.,  4.,  5.,  6.,  7.]])
+                       [[2.,  1.,  1.,  1.,  1.,  1.,  1.,  2.],
+                        [1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.],
+                        [1.,  0.,  1.,  1.,  1.,  1.,  1.,  2.],
+                        [1.,  0.,  1.,  2.,  2.,  2.,  2.,  3.],
+                        [1.,  0.,  1.,  2.,  3.,  3.,  3.,  4.],
+                        [1.,  0.,  1.,  2.,  3.,  4.,  4.,  5.],
+                        [1.,  0.,  1.,  2.,  3.,  4.,  5.,  6.],
+                        [2.,  1.,  2.,  3.,  4.,  5.,  6.,  7.]])
     assert_array_equal(return_path,
                        [(1, 6),
                         (1, 5),
@@ -115,34 +119,36 @@ def test_no_diagonal():
 
 
 def test_offsets():
-  offsets = [(1,i) for i in range(10)] + [(1, -i) for i in range(1,10)]
-  m = mcp.MCP(a, offsets=offsets)
-  costs, traceback = m.find_costs([(1,6)])
-  assert_array_equal(traceback,  
-                     [[-1, -1, -1, -1, -1, -1, -1, -1],
-                      [-1, -1, -1, -1, -1, -1, -1, -1],
-                      [15, 14, 13, 12, 11, 10,  0,  1],
-                      [10,  0,  1,  2,  3,  4,  5,  6],
-                      [10,  0,  1,  2,  3,  4,  5,  6],
-                      [10,  0,  1,  2,  3,  4,  5,  6],
-                      [10,  0,  1,  2,  3,  4,  5,  6],
-                      [10,  0,  1,  2,  3,  4,  5,  6]])
-  
+    offsets = [(1, i) for i in range(10)] + [(1, -i) for i in range(1, 10)]
+    m = mcp.MCP(a, offsets=offsets)
+    costs, traceback = m.find_costs([(1, 6)])
+    assert_array_equal(traceback,
+                       [[-1, -1, -1, -1, -1, -1, -1, -1],
+                        [-1, -1, -1, -1, -1, -1, -1, -1],
+                        [15, 14, 13, 12, 11, 10,  0,  1],
+                        [10,  0,  1,  2,  3,  4,  5,  6],
+                        [10,  0,  1,  2,  3,  4,  5,  6],
+                        [10,  0,  1,  2,  3,  4,  5,  6],
+                        [10,  0,  1,  2,  3,  4,  5,  6],
+                        [10,  0,  1,  2,  3,  4,  5,  6]])
+
 
 def test_crashing():
-    for shape in [(100, 100), (5, 8, 13, 17)]*5:
+    for shape in [(100, 100), (5, 8, 13, 17)] * 5:
         yield _test_random, shape
+
 
 def _test_random(shape):
     # Just tests for crashing -- not for correctness.
     np.random.seed(0)
     a = np.random.random(shape).astype(np.float32)
-    starts = [[0]*len(shape), [-1]*len(shape),
-              (np.random.random(len(shape))*shape).astype(int)]
-    ends = [(np.random.random(len(shape))*shape).astype(int) for i in range(4)]
+    starts = [[0] * len(shape), [-1] * len(shape),
+              (np.random.random(len(shape)) * shape).astype(int)]
+    ends = [(np.random.random(len(shape)) * shape).astype(int)
+         for i in range(4)]
     m = mcp.MCP(a, fully_connected=True)
     costs, offsets = m.find_costs(starts)
-    for point in [(np.random.random(len(shape))*shape).astype(int)
+    for point in [(np.random.random(len(shape)) * shape).astype(int)
                   for i in range(4)]:
         m.traceback(point)
     m._reset()

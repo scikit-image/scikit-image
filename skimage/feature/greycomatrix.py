@@ -4,7 +4,6 @@ properties to characterize image textures.
 """
 
 import numpy as np
-import skimage.util
 
 from ._greycomatrix import _glcm_loop
 
@@ -28,17 +27,17 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     levels : int, optional
         The input image should contain integers in [0, levels-1],
         where levels indicate the number of grey-levels counted
-        (typically 256 for an 8-bit image). The maximum value is 
-        256.        
+        (typically 256 for an 8-bit image). The maximum value is
+        256.
     symmetric : bool, optional
-        If True, the output matrix `P[:, :, d, theta]` is symmetric. This 
-        is accomplished by ignoring the order of value pairs, so both 
-        (i, j) and (j, i) are accumulated when (i, j) is encountered 
-        for a given offset. The default is False. 
+        If True, the output matrix `P[:, :, d, theta]` is symmetric. This
+        is accomplished by ignoring the order of value pairs, so both
+        (i, j) and (j, i) are accumulated when (i, j) is encountered
+        for a given offset. The default is False.
     normed : bool, optional
-        If True, normalize each matrix `P[:, :, d, theta]` by dividing 
+        If True, normalize each matrix `P[:, :, d, theta]` by dividing
         by the total number of accumulated co-occurrences for the given
-        offset. The elements of the resulting matrix sum to 1. The 
+        offset. The elements of the resulting matrix sum to 1. The
         default is False.
 
     Returns
@@ -54,10 +53,10 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     ----------
     .. [1] The GLCM Tutorial Home Page,
            http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
-    .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P. 
+    .. [2] Pattern Recognition Engineering, Morton Nadler & Eric P.
            Smith
     .. [3] Wikipedia, http://en.wikipedia.org/wiki/Co-occurrence_matrix
-    
+
 
     Examples
     --------
@@ -74,7 +73,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
            [0, 2, 0, 0],
            [0, 0, 3, 1],
            [0, 0, 0, 1]], dtype=uint32)
-    >>> result[:, :, 0, 1] 
+    >>> result[:, :, 0, 1]
     array([[3, 0, 2, 0],
            [0, 2, 2, 0],
            [0, 0, 1, 2],
@@ -82,7 +81,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
 
     """
 
-    assert levels <= 256    
+    assert levels <= 256
     image = np.ascontiguousarray(image)
     assert image.ndim == 2
     assert image.min() >= 0
@@ -95,7 +94,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
 
     P = np.zeros((levels, levels, len(distances), len(angles)),
                  dtype=np.uint32, order='C')
-    
+
     # count co-occurences
     _glcm_loop(image, distances, angles, levels, P)
 
@@ -103,8 +102,7 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     if symmetric:
         Pt = np.transpose(P, (1, 0, 2, 3))
         P = P + Pt
- 
-                
+
     # normalize each GLMC
     if normed:
         P = P.astype(np.float64)
@@ -117,25 +115,25 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
 
 def greycoprops(P, prop='contrast'):
     """Calculate texture properties of a GLCM.
-    
-    Compute a feature of a grey level co-occurrence matrix to serve as 
+
+    Compute a feature of a grey level co-occurrence matrix to serve as
     a compact summary of the matrix. The properties are computed as
     follows:
 
     - 'contrast': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}(i-j)^2`
     - 'dissimilarity': :math:`\\sum_{i,j=0}^{levels-1}P_{i,j}|i-j|`
     - 'homogeneity': :math:`\\sum_{i,j=0}^{levels-1}\\frac{P_{i,j}}{1+(i-j)^2}`
-    - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`    
+    - 'ASM': :math:`\\sum_{i,j=0}^{levels-1} P_{i,j}^2`
     - 'energy': :math:`\\sqrt{ASM}`
     - 'correlation':
-        .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\ 
+        .. math:: \\sum_{i,j=0}^{levels-1} P_{i,j}\\left[\\frac{(i-\\mu_i) \\
                   (j-\\mu_j)}{\\sqrt{(\\sigma_i^2)(\\sigma_j^2)}}\\right]
 
-    
+
     Parameters
-    ----------    
+    ----------
     P : ndarray
-        Input array. `P` is the grey-level co-occurrence histogram 
+        Input array. `P` is the grey-level co-occurrence histogram
         for which to compute the specified property. The value
         `P[i,j,d,theta]` is the number of times that grey-level j
         occurs at a distance d and at an angle theta from
@@ -144,42 +142,42 @@ def greycoprops(P, prop='contrast'):
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
             'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
-    
+
     Returns
     -------
     results : 2-D ndarray
-        2-dimensional array. `results[d, a]` is the property 'prop' for 
+        2-dimensional array. `results[d, a]` is the property 'prop' for
         the d'th distance and the a'th angle.
-    
+
     References
     ----------
     .. [1] The GLCM Tutorial Home Page,
-           http://www.fp.ucalgary.ca/mhallbey/tutorial.htm    
-    
+           http://www.fp.ucalgary.ca/mhallbey/tutorial.htm
+
     Examples
     --------
     Compute the contrast for GLCMs with distances [1, 2] and angles
-    [0 degrees, 90 degrees] 
-    
+    [0 degrees, 90 degrees]
+
     >>> image = np.array([[0, 0, 1, 1],
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4, 
+    >>> g = greycomatrix(image, [1, 2], [0, np.pi/2], levels=4,
     ...                  normed=True, symmetric=True)
     >>> contrast = greycoprops(g, 'contrast')
     >>> contrast
     array([[ 0.58333333,  1.        ],
            [ 1.25      ,  2.75      ]])
-    
+
     """
-    
+
     assert P.ndim == 4
     (num_level, num_level2, num_dist, num_angle) = P.shape
     assert num_level == num_level2
     assert num_dist > 0
     assert num_angle > 0
-    
+
     # create weights for specified property
     I, J = np.ogrid[0:num_level, 0:num_level]
     if prop == 'contrast':
@@ -193,7 +191,7 @@ def greycoprops(P, prop='contrast'):
     else:
         raise ValueError('%s is an invalid property' % (prop))
 
-    # compute property for each GLCM 
+    # compute property for each GLCM
     if prop == 'energy':
         asm = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
         results = np.sqrt(asm)
@@ -205,19 +203,19 @@ def greycoprops(P, prop='contrast'):
         J = np.array(range(num_level)).reshape((1, num_level, 1, 1))
         diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
         diff_j = J - np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
-        
-        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2), 
+
+        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2),
                                            axes=(0, 1))[0, 0])
-        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2), 
+        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2),
                                            axes=(0, 1))[0, 0])
-        cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)), 
+        cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)),
                                  axes=(0, 1))[0, 0]
-        
+
         # handle the special case of standard deviations near zero
         mask_0 = std_i < 1e-15
         mask_0[std_j < 1e-15] = True
         results[mask_0] = 1
-        
+
         # handle the standard case
         mask_1 = mask_0 == False
         results[mask_1] = cov[mask_1] / (std_i[mask_1] * std_j[mask_1])

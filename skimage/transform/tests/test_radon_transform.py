@@ -4,11 +4,13 @@ import numpy as np
 from numpy.testing import *
 from skimage.transform import *
 
+
 def rescale(x):
     x = x.astype(float)
     x -= x.min()
     x /= x.max()
     return x
+
 
 def test_radon_iradon():
     size = 100

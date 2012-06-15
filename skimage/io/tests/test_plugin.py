@@ -20,10 +20,12 @@ except OSError:
 
 
 def setup_module(self):
-    plugin.use('test') # see ../_plugins/test_plugin.py
+    plugin.use('test')  # see ../_plugins/test_plugin.py
+
 
 def teardown_module(self):
     io.reset_plugins()
+
 
 class TestPlugin:
     def test_read(self):

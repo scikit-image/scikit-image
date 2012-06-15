@@ -9,6 +9,7 @@ __docformat__ = "restructuredtext en"
 import numpy as np
 from numpy import roll, newaxis
 
+
 def frt2(a):
     """Compute the 2-dimensional finite radon transform (FRT) for an n x n
     integer array.
@@ -65,7 +66,7 @@ def frt2(a):
 
     ai = a.copy()
     n = ai.shape[0]
-    f = np.empty((n+1, n), np.uint32)
+    f = np.empty((n + 1, n), np.uint32)
     f[0] = ai.sum(axis=0)
     for m in range(1, n):
         # Roll the pth row of ai left by p places
@@ -125,7 +126,7 @@ def ifrt2(a):
              and Electron Physics, 139 (2006)
 
     """
-    if a.ndim != 2 or a.shape[0] != a.shape[1]+1:
+    if a.ndim != 2 or a.shape[0] != a.shape[1] + 1:
         raise ValueError("Input must be an (n+1) row x n column, 2-D array")
 
     ai = a.copy()[:-1]
@@ -138,5 +139,5 @@ def ifrt2(a):
             ai[row] = roll(ai[row], row)
         f[m] = ai.sum(axis=0)
     f += a[-1][newaxis].T
-    f = (f - ai[0].sum())/n
+    f = (f - ai[0].sum()) / n
     return f

@@ -201,14 +201,14 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
 
         m = _moments.central_moments(array, 0, 0, 3)
         # centroid
-        cr = m[0,1] / m[0,0]
-        cc = m[1,0] / m[0,0]
+        cr = m[0, 1] / m[0, 0]
+        cc = m[1, 0] / m[0, 0]
         mu = _moments.central_moments(array, cr, cc, 3)
 
         #: elements of the inertia tensor [a b; b c]
-        a = mu[2,0] / mu[0,0]
-        b = mu[1,1] / mu[0,0]
-        c = mu[0,2] / mu[0,0]
+        a = mu[2, 0] / mu[0, 0]
+        b = mu[1, 1] / mu[0, 0]
+        c = mu[0, 2] / mu[0, 0]
         #: eigen values of inertia tensor
         l1 = (a + c) / 2 + sqrt(4 * b ** 2 + (a - c) ** 2) / 2
         l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
@@ -219,7 +219,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         _nu = None
 
         if 'Area' in properties:
-            obj_props['Area'] = m[0,0]
+            obj_props['Area'] = m[0, 0]
 
         if 'BoundingBox' in properties:
             obj_props['BoundingBox'] = (r0, c0, sl[0].stop, sl[1].stop)
@@ -247,17 +247,17 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
                 obj_props['Eccentricity'] = sqrt(1 - l2 / l1)
 
         if 'EquivDiameter' in properties:
-            obj_props['EquivDiameter'] = sqrt(4 * m[0,0] / PI)
+            obj_props['EquivDiameter'] = sqrt(4 * m[0, 0] / PI)
 
         if 'EulerNumber' in properties:
             if _filled_image is None:
                 _filled_image = ndimage.binary_fill_holes(array, STREL_8)
             euler_array = _filled_image != array
             _, num = ndimage.label(euler_array, STREL_8)
-            obj_props['EulerNumber'] =  - num
+            obj_props['EulerNumber'] = - num
 
         if 'Extent' in properties:
-            obj_props['Extent'] = m[0,0] / (array.shape[0] * array.shape[1])
+            obj_props['Extent'] = m[0, 0] / (array.shape[0] * array.shape[1])
 
         if 'HuMoments' in properties:
             if _nu is None:
@@ -300,16 +300,15 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         if 'Solidity' in properties:
             if _convex_image is None:
                 _convex_image = convex_hull_image(array)
-            obj_props['Solidity'] = m[0,0] / np.sum(_convex_image)
-
+            obj_props['Solidity'] = m[0, 0] / np.sum(_convex_image)
 
         if intensity_image is not None:
             weighted_array = array * intensity_image[sl]
 
             wm = _moments.central_moments(weighted_array, 0, 0, 3)
             # weighted centroid
-            wcr = wm[0,1] / wm[0,0]
-            wcc = wm[1,0] / wm[0,0]
+            wcr = wm[0, 1] / wm[0, 0]
+            wcc = wm[1, 0] / wm[0, 0]
             wmu = _moments.central_moments(weighted_array, wcr, wcc, 3)
 
             # cached results which are used by several properties

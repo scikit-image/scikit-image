@@ -11,6 +11,7 @@ from skimage.morphology import selem
 
 lena = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
 
+
 class TestMorphology():
 
     def morph_worker(self, img, fn, morph_func, strel_func):
@@ -155,4 +156,3 @@ class TestDTypes():
 
 if __name__ == '__main__':
     testing.run_module_suite()
-

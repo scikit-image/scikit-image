@@ -61,6 +61,7 @@ try:
 except ImportError:
     __version__ = "unbuilt-dev"
 
+
 def _setup_test(verbose=False):
     import gzip
     import functools
@@ -93,6 +94,7 @@ if test_verbose is None:
     except NameError:
         pass
 
+
 def get_log(name=None):
     """Return a console logger.
 
@@ -120,11 +122,13 @@ def get_log(name=None):
     log = logging.getLogger(name)
     return log
 
+
 def _setup_log():
     """Configure root logger.
 
     """
-    import logging, sys
+    import logging
+    import sys
 
     log = logging.getLogger()
 

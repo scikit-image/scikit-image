@@ -3,7 +3,8 @@ __all__ = ['hough', 'probabilistic_hough']
 from itertools import izip as zip
 
 import numpy as np
-from ._hough_transform import _probabilistic_hough  
+from ._hough_transform import _probabilistic_hough
+
 
 def _hough(img, theta=None):
     if img.ndim != 2:
@@ -68,28 +69,28 @@ def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10, theta=No
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
     threshold : int
-        Threshold        
+        Threshold
     line_length : int, optional (default 50)
         Minimum accepted length of detected lines.
         Increase the parameter to extract longer lines.
     line_gap : int, optional, (default 10)
-        Maximum gap between pixels to still form a line. 
+        Maximum gap between pixels to still form a line.
         Increase the parameter to merge broken lines more aggresively.
     theta : 1D ndarray, dtype=double, optional, default (-pi/2 .. pi/2)
         Angles at which to compute the transform, in radians.
-        
+
     Returns
     -------
     lines : list
-      List of lines identified, lines in format ((x0, y0), (x1, y0)), indicating 
+      List of lines identified, lines in format ((x0, y0), (x1, y0)), indicating
       line start and end.
 
     References
     ----------
-    .. [1]  C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic Hough 
-            transform for line detection", in  IEEE Computer Society Conference on 
-            Computer Vision and Pattern Recognition, 1999. 
-    """    
+    .. [1]  C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic Hough
+            transform for line detection", in  IEEE Computer Society Conference on
+            Computer Vision and Pattern Recognition, 1999.
+    """
     return _probabilistic_hough(img, threshold, line_length, line_gap, theta)
 
 
@@ -141,5 +142,3 @@ def hough(img, theta=None):
 
     """
     return _hough(img, theta)
-
-

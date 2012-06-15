@@ -61,7 +61,7 @@ def diff(a, b):
         b = np.asarray(b)
     if (0 in a.shape) and (0 in b.shape):
         return 0.0
-    b[a==0] = 0
+    b[a == 0] = 0
     if (a.dtype in [np.complex64, np.complex128] or
         b.dtype in [np.complex64, np.complex128]):
         a = np.asarray(a, np.complex128)
@@ -72,11 +72,13 @@ def diff(a, b):
         a = a.astype(np.float64)
         b = np.asarray(b)
         b = b.astype(np.float64)
-        t = ((a - b)**2).sum()
+        t = ((a - b) ** 2).sum()
     return math.sqrt(t)
 
+
 class TestWatershed(unittest.TestCase):
-    eight = np.ones((3, 3),bool)
+    eight = np.ones((3, 3), bool)
+
     def test_watershed01(self):
         "watershed 1"
         data = np.array([[0, 0, 0, 0, 0, 0, 0],
@@ -100,7 +102,7 @@ class TestWatershed(unittest.TestCase):
                                   [  0, 0, 0, 0, 0, 0, 0],
                                   [  0, 0, 0, 0, 0, 0, 0]],
                                  np.int8)
-        out = watershed(data, markers,self.eight)
+        out = watershed(data, markers, self.eight)
         expected = np.array([[-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
@@ -320,7 +322,7 @@ class TestWatershed(unittest.TestCase):
                             [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
                             [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
                             [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]])
-        mask = (data!=255)
+        mask = (data != 255)
         markers = np.zeros(data.shape,int)
         markers[6, 7] = 1
         markers[14, 7] = 2
@@ -331,8 +333,8 @@ class TestWatershed(unittest.TestCase):
         #
         size1 = np.sum(out == 1)
         size2 = np.sum(out == 2)
-        self.assertTrue(abs(size1-size2) <= 6)
-    
+        self.assertTrue(abs(size1 - size2) <= 6)
+
     def test_watershed08(self):
         "The border pixels + an edge are all the same value"
         data = np.array([[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
@@ -367,11 +369,11 @@ class TestWatershed(unittest.TestCase):
         #
         size1 = np.sum(out == 1)
         size2 = np.sum(out == 2)
-        self.assertTrue(abs(size1-size2) <= 6)
-    
+        self.assertTrue(abs(size1 - size2) <= 6)
+
     def test_watershed09(self):
         """Test on an image of reasonable size
-        
+
         This is here both for timing (does it take forever?) and to
         ensure that the memory constraints are reasonable
         """
@@ -383,9 +385,9 @@ class TestWatershed(unittest.TestCase):
             image[x,y] = 1
             markers[x, y] = idx
             idx += 1
-        
+
         image = scipy.ndimage.gaussian_filter(image, 4)
-        before = time.clock() 
+        before = time.clock()
         out = watershed(image, markers, self.eight)
         elapsed = time.clock() - before
         before = time.clock()
@@ -399,7 +401,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         labels = np.zeros((10, 20), int)
         result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(~ result))
-        
+
     def test_01_01_one_point(self):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
@@ -407,7 +409,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         labels[5, 5] = 1
         result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(result == (labels == 1)))
-        
+
     def test_01_02_adjacent_and_same(self):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
@@ -415,7 +417,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         labels[5, 5:6] = 1
         result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(result == (labels == 1)))
-        
+
     def test_01_03_adjacent_and_different(self):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
@@ -427,7 +429,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         self.assertTrue(np.all(result == expected))
         result = is_local_maximum(image, labels)
         self.assertTrue(np.all(result == expected))
-        
+
     def test_01_04_not_adjacent_and_different(self):
         image = np.zeros((10,20))
         labels = np.zeros((10,20), int)
@@ -437,7 +439,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         expected = (labels == 1)
         result = is_local_maximum(image, labels, np.ones((3,3), bool))
         self.assertTrue(np.all(result == expected))
-        
+
     def test_01_05_two_objects(self):
         image = np.zeros((10,20))
         labels = np.zeros((10,20), int)
@@ -459,26 +461,26 @@ class TestIsLocalMaximum(unittest.TestCase):
         expected = (labels > 0)
         result = is_local_maximum(image, labels, np.ones((3,3), bool))
         self.assertTrue(np.all(result == expected))
-        
+
     def test_02_01_four_quadrants(self):
         np.random.seed(21)
         image = np.random.uniform(size=(40,60))
         i,j = np.mgrid[0:40,0:60]
         labels = 1 + (i >= 20) + (j >= 30) * 2
         i,j = np.mgrid[-3:4,-3:4]
-        footprint = (i*i + j*j <=9)
+        footprint = (i * i + j * j <= 9)
         expected = np.zeros(image.shape, float)
         for imin, imax in ((0, 20), (20, 40)):
             for jmin, jmax in ((0, 30), (30, 60)):
                 expected[imin:imax,jmin:jmax] = scipy.ndimage.maximum_filter(
-                    image[imin:imax, jmin:jmax], footprint = footprint)
+                    image[imin:imax, jmin:jmax], footprint=footprint)
         expected = (expected == image)
         result = is_local_maximum(image, labels, footprint)
         self.assertTrue(np.all(result == expected))
-        
+
     def test_03_01_disk_1(self):
         '''regression test of img-1194, footprint = [1]
-        
+
         Test is_local_maximum when every point is a local maximum
         '''
         np.random.seed(31)
@@ -488,6 +490,6 @@ class TestIsLocalMaximum(unittest.TestCase):
         self.assertTrue(np.all(result))
         result = is_local_maximum(image, footprint=footprint)
         self.assertTrue(np.all(result))
-        
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

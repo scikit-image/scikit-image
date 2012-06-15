@@ -2,6 +2,7 @@ import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
 from scipy.ndimage import uniform_filter
 
+
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cells_per_block=(3, 3), visualise=False, normalise=False):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
@@ -118,12 +119,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cond2 = temp_ori > 0
         temp_mag = np.where(cond2, magnitude, 0)
 
-        orientation_histogram[:,:,i] = uniform_filter(temp_mag, size=(cy, cx))[cy/2::cy, cx/2::cx]
-
+        orientation_histogram[:, :, i] = uniform_filter(temp_mag,
+             size=(cy, cx))[cy / 2::cy, cx / 2::cx]
 
     # now for each cell, compute the histogram
     #orientation_histogram = np.zeros((n_cellsx, n_cellsy, orientations))
-
     radius = min(cx, cy) // 2 - 1
     hog_image = None
     if visualise:
@@ -131,7 +131,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     if visualise:
         from skimage import draw
-        
+
         for x in range(n_cellsx):
             for y in range(n_cellsy):
                 for o in range(orientations):

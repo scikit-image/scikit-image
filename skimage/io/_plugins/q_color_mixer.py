@@ -36,7 +36,8 @@ class IntelligentSlider(QWidget):
         self.name_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.value_label = QLabel()
-        self.value_label.setText('%2.2f' % (self.slider.value() * self.a + self.b))
+        self.value_label.setText(
+            '%2.2f' % (self.slider.value() * self.a + self.b))
         self.value_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.layout = QGridLayout(self)
@@ -120,11 +121,9 @@ class MixerPanel(QtGui.QFrame):
         self.rgb_widget.layout.addWidget(self.gs, 2, 1)
         self.rgb_widget.layout.addWidget(self.bs, 2, 2)
 
-
         #---------------------------------------------------------------
         # HSV sliders
         #---------------------------------------------------------------
-
         # radio buttons
         self.hsv_add = QtGui.QRadioButton('Additive')
         self.hsv_mul = QtGui.QRadioButton('Multiplicative')
@@ -147,11 +146,9 @@ class MixerPanel(QtGui.QFrame):
         self.hsv_widget.layout.addWidget(self.ss, 2, 1)
         self.hsv_widget.layout.addWidget(self.vs, 2, 2)
 
-
         #---------------------------------------------------------------
         # Brightness/Contrast sliders
         #---------------------------------------------------------------
-
         # sliders
         cont = IntelligentSlider('x', 0.002, 0, self.bright_changed)
         bright = IntelligentSlider('+', 0.51, -255, self.bright_changed)
@@ -164,10 +161,9 @@ class MixerPanel(QtGui.QFrame):
         self.bright_widget.layout.addWidget(self.cont, 0, 0)
         self.bright_widget.layout.addWidget(self.bright, 0, 1)
 
-
-        #-----------------------------------------------------------------------
+        #----------------------------------------------------------------------
         # Gamma Slider
-        #-----------------------------------------------------------------------
+        #----------------------------------------------------------------------
         gamma = IntelligentSlider('gamma', 0.005, 0, self.gamma_changed)
         self.gamma = gamma
 
@@ -176,11 +172,9 @@ class MixerPanel(QtGui.QFrame):
         self.gamma_widget.layout = QtGui.QGridLayout(self.gamma_widget)
         self.gamma_widget.layout.addWidget(self.gamma, 0, 0)
 
-
         #---------------------------------------------------------------
         # Sigmoid Gamma sliders
         #---------------------------------------------------------------
-
         # sliders
         alpha = IntelligentSlider('alpha', 0.011, 1, self.sig_gamma_changed)
         beta = IntelligentSlider('beta', 0.012, 0, self.sig_gamma_changed)
@@ -224,7 +218,6 @@ class MixerPanel(QtGui.QFrame):
         self.combo_box.setCurrentIndex(0)
         self.rgb_mul.setChecked(True)
         self.hsv_mul.setChecked(True)
-
 
     def set_callback(self, callback):
         self.callback = callback
@@ -280,7 +273,6 @@ class MixerPanel(QtGui.QFrame):
         self.gamma.set_value(1)
         self.a_gamma.set_value(1)
         self.b_gamma.set_value(0.5)
-
 
     def rgb_changed(self, name, val):
         if name == 'R':

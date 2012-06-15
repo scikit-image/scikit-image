@@ -94,7 +94,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     def _dtype2(kind, bits, itemsize=1):
         # Return dtype of `kind` that can store a `bits` wide unsigned int
         c = lambda x, y: x <= y if kind == 'u' else x < y
-        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i*8))
+        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i * 8))
         return np.dtype(kind + str(s))
 
     def _scale(a, n, m, copy=True):
@@ -109,21 +109,21 @@ def convert(image, dtype, force_copy=False, uniform=False):
             prec_loss()
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, m))
-                np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
+                np.floor_divide(a, 2 ** (n - m), out=b, dtype=a.dtype,
                                 casting='unsafe')
                 return b
             else:
-                a //= 2**(n - m)
+                a //= 2 ** (n - m)
                 return a
         elif m % n == 0:
             # exact upscale to a multiple of n bits
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, m))
-                np.multiply(a, (2**m - 1) // (2**n - 1), out=b, dtype=b.dtype)
+                np.multiply(a, (2 ** m - 1) // (2 ** n - 1), out=b, dtype=b.dtype)
                 return b
             else:
                 a = np.array(a, _dtype2(kind, m, a.dtype.itemsize), copy=False)
-                a *= (2**m - 1) // (2**n - 1)
+                a *= (2 ** m - 1) // (2 ** n - 1)
                 return a
         else:
             # upscale to a multiple of n bits,
@@ -132,13 +132,13 @@ def convert(image, dtype, force_copy=False, uniform=False):
             o = (m // n + 1) * n
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, o))
-                np.multiply(a, (2**o - 1) // (2**n - 1), out=b, dtype=b.dtype)
-                b //= 2**(o - m)
+                np.multiply(a, (2 ** o - 1) // (2 ** n - 1), out=b, dtype=b.dtype)
+                b //= 2 ** (o - m)
                 return b
             else:
                 a = np.array(a, _dtype2(kind, o, a.dtype.itemsize), copy=False)
-                a *= (2**o - 1) // (2**n - 1)
-                a //= 2**(o - m)
+                a *= (2 ** o - 1) // (2 ** n - 1)
+                a //= 2 ** (o - m)
                 return a
 
     kind = dtypeobj.kind
@@ -205,26 +205,26 @@ def convert(image, dtype, force_copy=False, uniform=False):
     if kind_in == 'u':
         if kind == 'i':
             # unsigned integer -> signed integer
-            image = _scale(image, 8*itemsize_in, 8*itemsize-1)
+            image = _scale(image, 8 * itemsize_in, 8 * itemsize - 1)
             return image.view(dtype)
         else:
             # unsigned integer -> unsigned integer
-            return _scale(image, 8*itemsize_in, 8*itemsize)
+            return _scale(image, 8 * itemsize_in, 8 * itemsize)
 
     if kind == 'u':
         # signed integer -> unsigned integer
         sign_loss()
-        image = _scale(image, 8*itemsize_in-1, 8*itemsize)
+        image = _scale(image, 8 * itemsize_in - 1, 8 * itemsize)
         result = np.empty(image.shape, dtype)
         np.maximum(image, 0, out=result, dtype=image.dtype, casting='unsafe')
         return result
 
     # signed integer -> signed integer
     if itemsize_in > itemsize:
-        return _scale(image, 8*itemsize_in-1, 8*itemsize-1)
-    image = image.astype(_dtype2('i', itemsize*8))
+        return _scale(image, 8 * itemsize_in - 1, 8 * itemsize - 1)
+    image = image.astype(_dtype2('i', itemsize * 8))
     image -= imin_in
-    image = _scale(image, 8*itemsize_in, 8*itemsize, copy=False)
+    image = _scale(image, 8 * itemsize_in, 8 * itemsize, copy=False)
     image += imin
     return dtype(image)
 

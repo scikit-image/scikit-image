@@ -12,6 +12,7 @@ import numpy as np
 from skimage import img_as_float
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
+
 def sobel(image, mask=None):
     """Calculate the absolute magnitude Sobel to find edges.
 
@@ -36,7 +37,8 @@ def sobel(image, mask=None):
     Note that ``scipy.ndimage.sobel`` returns a directional Sobel which
     has to be further processed to perform edge detection.
     """
-    return np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
+    return np.sqrt(hsobel(image, mask) ** 2 + vsobel(image, mask) ** 2)
+
 
 def hsobel(image, mask=None):
     """Find the horizontal edges of an image using the Sobel transform.
@@ -114,6 +116,7 @@ def vsobel(image, mask=None):
     result[big_mask == False] = 0
     return result
 
+
 def prewitt(image, mask=None):
     """Find the edge magnitude using the Prewitt transform.
 
@@ -135,6 +138,7 @@ def prewitt(image, mask=None):
     and vertical Prewitt transforms.
     """
     return np.sqrt(hprewitt(image, mask) ** 2 + vprewitt(image, mask) ** 2)
+
 
 def hprewitt(image, mask=None):
     """Find the horizontal edges of an image using the Prewitt transform.
@@ -173,6 +177,7 @@ def hprewitt(image, mask=None):
                                        [-1,-1,-1]]).astype(float) / 3.0))
     result[big_mask == False] = 0
     return result
+
 
 def vprewitt(image, mask=None):
     """Find the vertical edges of an image using the Prewitt transform.

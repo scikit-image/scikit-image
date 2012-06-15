@@ -57,8 +57,7 @@ class TestColorconv(TestCase):
         self.assertRaises(ValueError, rgb2hsv, self.img_grayscale)
 
     def test_rgb2hsv_error_one_element(self):
-        self.assertRaises(ValueError, rgb2hsv, self.img_rgb[0,0])
-
+        self.assertRaises(ValueError, rgb2hsv, self.img_rgb[0, 0])
 
     # HSV to RGB
     def test_hsv2rgb_conversion(self):
@@ -74,19 +73,18 @@ class TestColorconv(TestCase):
         self.assertRaises(ValueError, hsv2rgb, self.img_grayscale)
 
     def test_hsv2rgb_error_one_element(self):
-        self.assertRaises(ValueError, hsv2rgb, self.img_rgb[0,0])
-
+        self.assertRaises(ValueError, hsv2rgb, self.img_rgb[0, 0])
 
     # RGB to XYZ
     def test_rgb2xyz_conversion(self):
-        gt = np.array([[[ 0.950456,  1.      ,  1.088754],
-                        [ 0.538003,  0.787329,  1.06942 ],
-                        [ 0.592876,  0.28484 ,  0.969561],
-                        [ 0.180423,  0.072169,  0.950227]],
-                       [[ 0.770033,  0.927831,  0.138527],
-                        [ 0.35758 ,  0.71516 ,  0.119193],
-                        [ 0.412453,  0.212671,  0.019334],
-                        [ 0.      ,  0.      ,  0.      ]]])
+        gt = np.array([[[0.950456,  1.,  1.088754],
+                        [0.538003,  0.787329,  1.06942],
+                        [0.592876,  0.28484,  0.969561],
+                        [0.180423,  0.072169,  0.950227]],
+                       [[0.770033,  0.927831,  0.138527],
+                        [0.35758,  0.71516,  0.119193],
+                        [0.412453,  0.212671,  0.019334],
+                        [0.,  0.,  0.]]])
         assert_almost_equal(rgb2xyz(self.colbars_array), gt)
 
     # stop repeating the "raises" checks for all other functions that are
@@ -95,8 +93,7 @@ class TestColorconv(TestCase):
         self.assertRaises(ValueError, rgb2xyz, self.img_grayscale)
 
     def test_rgb2xyz_error_one_element(self):
-        self.assertRaises(ValueError, rgb2xyz, self.img_rgb[0,0])
-
+        self.assertRaises(ValueError, rgb2xyz, self.img_rgb[0, 0])
 
     # XYZ to RGB
     def test_xyz2rgb_conversion(self):
@@ -104,19 +101,17 @@ class TestColorconv(TestCase):
         assert_almost_equal(xyz2rgb(rgb2xyz(self.colbars_array)),
                             self.colbars_array)
 
-
     # RGB to RGB CIE
     def test_rgb2rgbcie_conversion(self):
-        gt = np.array([[[ 0.1488856 ,  0.18288098,  0.19277574],
-                        [ 0.01163224,  0.16649536,  0.18948516],
-                        [ 0.12259182,  0.03308008,  0.17298223],
+        gt = np.array([[[0.1488856,  0.18288098,  0.19277574],
+                        [0.01163224,  0.16649536,  0.18948516],
+                        [0.12259182,  0.03308008,  0.17298223],
                         [-0.01466154,  0.01669446,  0.16969164]],
-                       [[ 0.16354714,  0.16618652,  0.0230841 ],
-                        [ 0.02629378,  0.1498009 ,  0.01979351],
-                        [ 0.13725336,  0.01638562,  0.00329059],
-                        [ 0.        ,  0.        ,  0.        ]]])
+                       [[0.16354714,  0.16618652,  0.0230841],
+                        [0.02629378,  0.1498009,  0.01979351],
+                        [0.13725336,  0.01638562,  0.00329059],
+                        [0.,  0.,  0.]]])
         assert_almost_equal(rgb2rgbcie(self.colbars_array), gt)
-
 
     # RGB CIE to RGB
     def test_rgbcie2rgb_conversion(self):
@@ -151,6 +146,7 @@ class TestColorconv(TestCase):
 
         assert_equal(g.shape, (1, 1))
 
+
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
     assert_raises(ValueError, gray2rgb, x)
@@ -170,4 +166,3 @@ def test_gray2rgb():
 
 if __name__ == "__main__":
     run_module_suite()
-
