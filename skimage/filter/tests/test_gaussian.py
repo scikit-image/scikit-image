@@ -26,7 +26,7 @@ class TestGaussian(unittest.TestCase):
         self.assertTrue(np.all(np.abs(blurred_ubyte - control) < 0.001))  
 
     def test_gaussian_ellips(self):
-        '''Test blurring the image with circular gaussian kernel'''
+        '''Test blurring the image with ellipsoidal gaussian kernel'''
         image = data.camera()
         blurred = filter.gaussian(image, (2.5, 0.5))
         blurred_ubyte = skimage.img_as_ubyte(norm_float(blurred))
