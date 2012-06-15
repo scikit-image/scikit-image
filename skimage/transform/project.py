@@ -4,17 +4,11 @@
 
 import numpy as np
 from scipy.ndimage import interpolation as ndii
+from ._warp import _stackcopy
 
 __all__ = ['homography']
 
 eps = np.finfo(float).eps
-
-def _stackcopy(a, b):
-    """a[:,:,0] = a[:,:,1] = ... = b"""
-    if a.ndim == 3:
-        a.transpose().swapaxes(1, 2)[:] = b
-    else:
-        a[:] = b
 
 def homography(image, H, output_shape=None, order=1,
                mode='constant', cval=0.):
@@ -105,6 +99,8 @@ def homography(image, H, output_shape=None, order=1,
         output_shape = ishape
 
     coords = np.empty(np.r_[3, output_shape], dtype=float)
+
+    # TODO: Refactor this method to use transform.warp instead.
 
     # Construct transformed coordinates
     rows, cols = output_shape[:2]

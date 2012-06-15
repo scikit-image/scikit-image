@@ -18,6 +18,16 @@ else:
     PIL_available = True
 
 
+def setup_module(self):
+    """The effect of the `plugin.use` call may be overridden by later imports.
+    Call `use_plugin` directly before the tests to ensure that PIL is used.
+
+    """
+    try:
+        use_plugin('pil')
+    except ImportError:
+        pass
+
 @skipif(not PIL_available)
 def test_imread_flatten():
     # a color image is flattened
@@ -55,7 +65,7 @@ def test_bilevel():
 def test_imread_uint16():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
-    assert img.dtype == np.uint16
+    assert np.issubdtype(img.dtype, np.uint16)
     assert_array_almost_equal(img, expected)
 
 @skipif(not PIL_available)
@@ -87,3 +97,6 @@ class TestSave:
                 else:
                     x = (x * 255).astype(dtype)
                     yield self.roundtrip, dtype, x
+
+if __name__ == "__main__":
+    run_module_suite()

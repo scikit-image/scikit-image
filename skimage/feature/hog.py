@@ -97,7 +97,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     magnitude = sqrt(gx ** 2 + gy ** 2)
     orientation = arctan2(gy, (gx + 1e-15)) * (180 / pi) + 90
 
-    sx, sy = image.shape
+    sy, sx = image.shape
     cx, cy = pixels_per_cell
     bx, by = cells_per_block
 
@@ -105,7 +105,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     n_cellsy = int(np.floor(sy // cy))  # number of cells in y
 
     # compute orientations integral images
-    orientation_histogram = np.zeros((n_cellsx, n_cellsy, orientations))
+    orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
     for i in range(orientations):
         #create new integral image for this orientation
         # isolate orientations in this range
@@ -118,7 +118,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cond2 = temp_ori > 0
         temp_mag = np.where(cond2, magnitude, 0)
 
-        orientation_histogram[:,:,i] = uniform_filter(temp_mag, size=(cx, cy))[cx/2::cx, cy/2::cy].T
+        orientation_histogram[:,:,i] = uniform_filter(temp_mag, size=(cy, cx))[cy/2::cy, cx/2::cx]
 
 
     # now for each cell, compute the histogram
@@ -140,7 +140,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                     dy = radius * sin(float(o) / orientations * np.pi)
                     rr, cc = draw.bresenham(centre[0] - dx, centre[1] - dy,
                                             centre[0] + dx, centre[1] + dy)
-                    hog_image[rr, cc] += orientation_histogram[x, y, o]
+                    hog_image[rr, cc] += orientation_histogram[y, x, o]
 
     """
     The fourth stage computes normalisation, which takes local groups of
@@ -159,14 +159,14 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     n_blocksx = (n_cellsx - bx) + 1
     n_blocksy = (n_cellsy - by) + 1
-    normalised_blocks = np.zeros((n_blocksx, n_blocksy,
-                                  bx, by, orientations))
+    normalised_blocks = np.zeros((n_blocksy, n_blocksx,
+                                  by, bx, orientations))
 
     for x in range(n_blocksx):
         for y in range(n_blocksy):
-            block = orientation_histogram[x:x + bx, y:y + by, :]
+            block = orientation_histogram[y:y + by, x:x + bx, :]
             eps = 1e-5
-            normalised_blocks[x, y, :] = block / sqrt(block.sum() ** 2 + eps)
+            normalised_blocks[y, x, :] = block / sqrt(block.sum() ** 2 + eps)
 
     """
     The final step collects the HOG descriptors from all blocks of a dense

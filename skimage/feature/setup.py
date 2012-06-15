@@ -12,8 +12,11 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['_greycomatrix.pyx'], working_path=base_path)
+    cython(['_template.pyx'], working_path=base_path)
 
     config.add_extension('_greycomatrix', sources=['_greycomatrix.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_template', sources=['_template.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

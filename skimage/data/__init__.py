@@ -44,6 +44,20 @@ def lena():
     """
     return load("lena.png")
 
+def text():
+	""" Gray-level "text" image used for corner detection.
+
+    Notes
+    -----
+    This image was downloaded from Wikipedia
+    <http://en.wikipedia.org/wiki/File:Corner.png>`__.
+
+    No known copyright restrictions, released into the public domain.
+
+    """
+
+	return load("text.png")
+
 def checkerboard():
     """Checkerboard image.
 
@@ -82,3 +96,12 @@ def moon():
 
     """
     return load("moon.png")
+
+def page():
+    """Scanned page.
+
+    This image of printed text is useful for demonstrations requiring uneven
+    background illumination.
+
+    """
+    return load("page.png")

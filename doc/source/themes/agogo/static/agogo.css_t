@@ -737,3 +737,16 @@ p.rubric {
     font-weight: bold;
     font-size: 120%;
 }
+
+/* Math */
+img.math {
+    vertical-align: middle;
+}
+
+div.body div.math p {
+    text-align: center;
+}
+
+span.eqno {
+    float: right;
+}

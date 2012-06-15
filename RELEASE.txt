@@ -2,7 +2,7 @@ How to make a new release of ``skimage``
 ========================================
 
 - Update release notes.
-- Update the version number in setup.py and commit
+- Update the version number in setup.py and bento.info and commit
 - Update the docs:
   - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
   - Build a clean version of the docs.  Run "make" in the root dir, then

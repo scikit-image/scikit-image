@@ -1,8 +1,9 @@
 import numpy as np
+from numpy.testing import assert_array_equal
 
 import skimage
 from skimage import data
-from skimage.filter.thresholding import threshold_otsu
+from skimage.filter.thresholding import threshold_otsu, threshold_adaptive
 
 
 class TestSimpleImage():
@@ -23,6 +24,52 @@ class TestSimpleImage():
     def test_otsu_float_image(self):
         image = np.float64(self.image)
         assert 2 <= threshold_otsu(image) < 3
+
+    def test_threshold_adaptive_generic(self):
+        def func(arr):
+            return arr.sum() / arr.shape[0]
+        ref = np.array(
+            [[False, False, False, False,  True],
+             [False, False,  True, False,  True],
+             [False, False,  True,  True, False],
+             [False,  True,  True, False, False],
+             [ True,  True, False, False, False]]
+        )
+        out = threshold_adaptive(self.image, 3, method='generic', param=func)
+        assert_array_equal(ref, out)
+
+    def test_threshold_adaptive_gaussian(self):
+        ref = np.array(
+            [[False, False, False, False,  True],
+             [False, False,  True, False,  True],
+             [False, False,  True,  True, False],
+             [False,  True,  True, False, False],
+             [ True,  True, False, False, False]]
+        )
+        out = threshold_adaptive(self.image, 3, method='gaussian')
+        assert_array_equal(ref, out)
+
+    def test_threshold_adaptive_mean(self):
+        ref = np.array(
+            [[False, False, False, False,  True],
+             [False, False,  True, False,  True],
+             [False, False,  True,  True, False],
+             [False,  True,  True, False, False],
+             [ True,  True, False, False, False]]
+        )
+        out = threshold_adaptive(self.image, 3, method='mean')
+        assert_array_equal(ref, out)
+
+    def test_threshold_adaptive_median(self):
+        ref = np.array(
+            [[False, False, False, False,  True],
+             [False, False,  True, False, False],
+             [False, False,  True, False, False],
+             [False, False,  True,  True, False],
+             [False,  True, False, False, False]]
+        )
+        out = threshold_adaptive(self.image, 3, method='median')
+        assert_array_equal(ref, out)
 
 
 def test_otsu_camera_image():
