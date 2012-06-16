@@ -33,6 +33,7 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
 
     # We compute the distances twice since otherwise
     # we might get crazy memory overhead (width * height * windowsize**2)
+    # if you want to speed up things: computing exp in C is the bottleneck ;)
 
     # TODO do smoothing beforehand?
     # TODO manage borders somehow?
@@ -64,7 +65,7 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
                 for c in xrange(channels):
                     dist += (current_pixel_p[c] - image[x_, y_, c])**2
                 dist += (x - x_)**2 + (y - y_)**2
-                densities[x, y] += float(exp(-dist / sigma))
+                densities[x, y] += exp(-dist / sigma)
         current_pixel_p += channels
 
     print("densities: %f" % (time() - start))

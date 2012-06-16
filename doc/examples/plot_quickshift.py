@@ -9,8 +9,8 @@ from IPython.core.debugger import Tracer
 tracer = Tracer()
 
 
-img = img_as_float(lena())[::2, ::2, :].copy("C")
-segments = quickshift(img)
+img = img_as_float(lena())
+segments = quickshift(img, sigma=5, tau=20)
 segments = np.unique(segments, return_inverse=True)[1].reshape(img.shape[:2])
 
 plt.subplot(131, title="original")
