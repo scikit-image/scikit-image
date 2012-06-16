@@ -7,9 +7,6 @@ import scipy
 #from ..color import rgb2grey
 from skimage.morphology.ccomp cimport find_root, join_trees
 
-from IPython.core.debugger import Tracer
-tracer = Tracer()
-
 
 def felzenszwalb_segmentation(image, k, sigma=0.8):
     k = float(k)
@@ -29,16 +26,15 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
         dright_cost.ravel(), uright_cost.ravel()])
     # compute edges between pixels:
     width, height = image.shape[:2]
-    indices = np.arange(width * height).reshape(width, height)
-    right_edges = np.c_[indices[1:, :].ravel(), indices[:-1, :].ravel()]
-    down_edges = np.c_[indices[:, 1:].ravel(), indices[:, :-1].ravel()]
-    dright_edges = np.c_[indices[1:, 1:].ravel(), indices[:-1, :-1].ravel()]
-    uright_edges = np.c_[indices[:-1, 1:].ravel(), indices[1:, :-1].ravel()]
+    cdef np.ndarray[np.int_t, ndim=2] segments = np.arange(width * height).reshape(width, height)
+    right_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
+    down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
+    dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
+    uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
     edges = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
     # initialize data structures for segment size
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
-    cdef np.ndarray[np.int_t, ndim=2] segments = indices.reshape(width, height)
     cdef np.int_t *segments_p = <np.int_t*>segments.data
     cdef np.int_t seg_new
     segment_size = defaultdict(lambda: 1)
