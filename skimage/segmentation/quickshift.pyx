@@ -3,6 +3,9 @@ cimport numpy as np
 
 from itertools import product
 
+cdef extern from "math.h":
+    double exp(double)
+
 
 def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, tau=10):
     """Computes quickshift clustering in RGB-(x,y) space.
@@ -37,6 +40,9 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     
     cdef int width = image.shape[0]
     cdef int height = image.shape[1]
+    cdef int channels = image.shape[2]
+    cdef float closest, dist
+    cdef int x, y, xx, yy, x_, y_
 
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities = np.zeros((width, height))
 
@@ -46,15 +52,18 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
         for xx, yy in product(xrange(-w / 2, w / 2 + 1), repeat=2):
             x_, y_ = x + xx, y + yy
             if 0 <= x_ < width and 0 <= y_ < height:
-                dist = np.sum((current_pixel - image[x_, y_, :])**2) + (x - x_)**2 + (y - y_)**2
-                densities[x, y] += np.exp(-dist / sigma)
+                dist = 0
+                for c in xrange(channels):
+                    dist += (current_pixel[c] - image[x_, y_, c])**2
+                dist += (x - x_)**2 + (y - y_)**2
+                densities[x, y] += float(exp(-dist / sigma))
 
     # this will break ties that otherwise would give us headache
 
     densities += np.random.normal(scale=0.00001, size=(width, height))
     # default parent to self:
-    parent = np.arange(width * height).reshape(width, height)
-    dist_parent = np.zeros((width, height))
+    cdef np.ndarray[dtype=np.int_t, ndim=2] parent = np.arange(width * height).reshape(width, height)
+    cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent = np.zeros((width, height))
     # find nearest node with higher density
     for x, y in product(xrange(width), xrange(height)):
         current_density = densities[x, y]
@@ -64,17 +73,20 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
             x_, y_ = x + xx, y + yy
             if 0 <= x_ < width and 0 <= y_ < height:
                 if densities[x_, y_] > current_density:
-                    dist = np.sum((current_pixel - image[x_, y_, :])**2) + (x - x_)**2 + (y - y_)**2
+                    dist = 0
+                    for c in xrange(channels):
+                        dist += (current_pixel[c] - image[x_, y_, c])**2
+                    dist += (x - x_)**2 + (y - y_)**2
                     if dist < closest:
                         closest = dist
                         parent[x, y] = x_ * width + y_
         dist_parent[x, y] = closest
 
-    dist_parent = dist_parent.ravel()
+    dist_parent_flat = dist_parent.ravel()
     flat = parent.ravel()
-    flat[dist_parent > tau] = np.arange(width * height)[dist_parent > tau]
+    flat[dist_parent_flat > tau] = np.arange(width * height)[dist_parent_flat > tau]
     old = np.zeros_like(flat)
     while (old != flat).any():
         old = flat
         flat = flat[flat]
-    return flat.reshape(parent.shape)
+    return flat.reshape(width, height)
