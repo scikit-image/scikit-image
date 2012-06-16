@@ -1,10 +1,11 @@
 import numpy as np
+cimport numpy as np
 from collections import defaultdict
 import scipy
 
 #from ..util import img_as_float
 #from ..color import rgb2grey
-from .union_find import UnionFind
+from skimage.morphology.ccomp cimport find_root, join_trees
 
 from IPython.core.debugger import Tracer
 tracer = Tracer()
@@ -37,24 +38,23 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
     # initialize data structures for segment size
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
-    segments = UnionFind()
+    cdef np.ndarray[np.int_t, ndim=2] segments = indices.reshape(width, height)
+    cdef np.int_t *segments_p = <np.int_t*>segments.data
+    cdef np.int_t seg_new
     segment_size = defaultdict(lambda: 1)
     # inner cost of segments
     cint = defaultdict(lambda: 0)
     for edge, cost in zip(edges[edge_queue], costs[edge_queue]):
-        seg0 = segments[edge[0]]
-        seg1 = segments[edge[1]]
+        seg0 = find_root(segments_p, edge[0])
+        seg1 = find_root(segments_p, edge[1])
         if seg0 == seg1:
             continue
         inner_cost0 = cint[seg0] + k / segment_size[seg0]
         inner_cost1 = cint[seg1] + k / segment_size[seg1]
         if cost < min(inner_cost0, inner_cost1):
-            seg_new = segments.union(seg0, seg1)
             # update size and cost
+            join_trees(segments_p, seg0, seg1)
+            seg_new = find_root(segments_p, seg0)
             segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
             cint[seg_new] = cost
-    out = np.zeros(width * height, dtype=np.int)
-    for i in xrange(width * height):
-        out[i] = segments[i]
-    out = out.reshape(width, height)
-    return out
+    return segments
