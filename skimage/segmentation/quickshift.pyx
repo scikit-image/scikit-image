@@ -3,11 +3,13 @@ cimport numpy as np
 
 from itertools import product
 
+from time import time
+
 cdef extern from "math.h":
     double exp(double)
 
 
-def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, tau=10):
+def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, tau=10, return_tree=False):
     """Computes quickshift clustering in RGB-(x,y) space.
 
     Parameters
@@ -20,6 +22,8 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     tau: float
         Cut-off point for data distances.
         Higher means less clusters.
+    return_tree: bool
+        Whether to return the full segmentation hierarchy tree
 
     Returns
     -------
@@ -45,7 +49,7 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     cdef int x, y, xx, yy, x_, y_
 
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities = np.zeros((width, height))
-
+    start = time()
     # compute densities
     for x, y in product(xrange(width), xrange(height)):
         current_pixel = image[x, y, :]
@@ -57,6 +61,7 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
                     dist += (current_pixel[c] - image[x_, y_, c])**2
                 dist += (x - x_)**2 + (y - y_)**2
                 densities[x, y] += float(exp(-dist / sigma))
+    print("densities: %f" % (time() - start))
 
     # this will break ties that otherwise would give us headache
 
@@ -64,6 +69,7 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     # default parent to self:
     cdef np.ndarray[dtype=np.int_t, ndim=2] parent = np.arange(width * height).reshape(width, height)
     cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent = np.zeros((width, height))
+    start = time()
     # find nearest node with higher density
     for x, y in product(xrange(width), xrange(height)):
         current_density = densities[x, y]
@@ -81,7 +87,9 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
                         closest = dist
                         parent[x, y] = x_ * width + y_
         dist_parent[x, y] = closest
+    print("parents: %f" % (time() - start))
 
+    start = time()
     dist_parent_flat = dist_parent.ravel()
     flat = parent.ravel()
     flat[dist_parent_flat > tau] = np.arange(width * height)[dist_parent_flat > tau]
@@ -89,4 +97,8 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     while (old != flat).any():
         old = flat
         flat = flat[flat]
-    return flat.reshape(width, height)
+    print("rest: %f" % (time() - start))
+    flat = flat.reshape(width, height)
+    if return_tree:
+        return flat, parent
+    return flat
