@@ -3,7 +3,6 @@ cimport numpy as np
 
 from itertools import product
 
-from time import time
 
 cdef extern from "math.h":
     double exp(double)
@@ -67,7 +66,6 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     cdef np.float_t* current_entry_p
 
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities = np.zeros((width, height))
-    start = time()
     # compute densities
     for x, y in product(xrange(width), xrange(height)):
         for xx, yy in product(xrange(-w / 2, w / 2 + 1), repeat=2):
@@ -81,15 +79,12 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
                 densities[x, y] += exp(-dist / sigma)
         current_pixel_p += channels
 
-    print("densities: %f" % (time() - start))
-
     # this will break ties that otherwise would give us headache
 
     densities += np.random.normal(scale=0.00001, size=(width, height))
     # default parent to self:
     cdef np.ndarray[dtype=np.int_t, ndim=2] parent = np.arange(width * height).reshape(width, height)
     cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent = np.zeros((width, height))
-    start = time()
     # find nearest node with higher density
     current_pixel_p = image_p
     for x, y in product(xrange(width), xrange(height)):
@@ -108,9 +103,7 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
                         parent[x, y] = x_ * width + y_
         dist_parent[x, y] = closest
         current_pixel_p += channels
-    print("parents: %f" % (time() - start))
 
-    start = time()
     dist_parent_flat = dist_parent.ravel()
     flat = parent.ravel()
     flat[dist_parent_flat > tau] = np.arange(width * height)[dist_parent_flat > tau]
@@ -118,7 +111,6 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     while (old != flat).any():
         old = flat
         flat = flat[flat]
-    print("rest: %f" % (time() - start))
     flat = flat.reshape(width, height)
     if return_tree:
         return flat, parent
