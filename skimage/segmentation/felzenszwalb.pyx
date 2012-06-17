@@ -97,6 +97,7 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
             segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
             cint[seg_new] = cost
     # unravel the union find tree
+    flat = segments.ravel()
     old = np.zeros_like(flat)
     while (old != flat).any():
         old = flat
