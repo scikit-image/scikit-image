@@ -31,7 +31,6 @@ from skimage.util import img_as_float
 
 img = img_as_float(lena())[::2, ::2, :].copy("C")
 segments = quickshift(img, sigma=5, tau=20)
-segments = np.unique(segments, return_inverse=True)[1].reshape(img.shape[:2])
 
 print("number of segments: %d" % len(np.unique(segments)))
 
