@@ -3,6 +3,7 @@ cimport numpy as np
 from collections import defaultdict
 import scipy
 
+
 #from ..util import img_as_float
 #from ..color import rgb2grey
 #from skimage.morphology.ccomp cimport find_root, join_trees
@@ -58,8 +59,6 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
     image = scipy.ndimage.gaussian_filter(image, sigma=sigma)
 
     # compute edge weights in 8 connectivity:
-    #right_cost = np.sum((image[1:, :, :] - image[:-1, :, :]) ** 2, axis=2)
-    #down_cost = np.sum((image[:, 1:, :] - image[:, :-1, :]) ** 2, axis=2)
     right_cost = np.abs((image[1:, :] - image[:-1, :]))
     down_cost = np.abs((image[:, 1:] - image[:, :-1]))
     dright_cost = np.abs((image[1:, 1:] - image[:-1, :-1]))
@@ -77,25 +76,35 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
     # initialize data structures for segment size
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
+    edges = np.ascontiguousarray(edges[edge_queue])
+    costs = np.ascontiguousarray(costs[edge_queue])
     cdef np.int_t *segments_p = <np.int_t*>segments.data
+    cdef np.int_t *edges_p = <np.int_t*>edges.data
+    cdef np.float_t *costs_p = <np.float_t*>costs.data
     cdef np.ndarray[np.int_t, ndim=1] segment_size = np.ones(width * height, dtype=np.int)
     # inner cost of segments
     cdef np.ndarray[np.float_t, ndim=1] cint = np.zeros(width * height)
     cdef int seg0, seg1, seg_new
     cdef float cost, inner_cost0, inner_cost1
-    for edge, cost in zip(edges[edge_queue], costs[edge_queue]):
-        seg0 = find_root(segments_p, edge[0])
-        seg1 = find_root(segments_p, edge[1])
+    # set costs_p back one. we increase it before we use it
+    # since we might continue before that.
+    costs_p -= 1
+    for e in xrange(costs.size):
+        seg0 = find_root(segments_p, edges_p[0])
+        seg1 = find_root(segments_p, edges_p[1])
+        edges_p += 2
+        costs_p += 1
         if seg0 == seg1:
             continue
         inner_cost0 = cint[seg0] + k / segment_size[seg0]
         inner_cost1 = cint[seg1] + k / segment_size[seg1]
-        if cost < min(inner_cost0, inner_cost1):
+        if costs_p[0] < min(inner_cost0, inner_cost1):
             # update size and cost
             join_trees(segments_p, seg0, seg1)
             seg_new = find_root(segments_p, seg0)
             segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
-            cint[seg_new] = cost
+            cint[seg_new] = costs_p[0]
+    
     # unravel the union find tree
     flat = segments.ravel()
     old = np.zeros_like(flat)
