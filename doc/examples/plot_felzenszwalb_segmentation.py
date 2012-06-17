@@ -27,13 +27,17 @@ img = img_as_float(lena())
 segments = felzenszwalb_segmentation(img, scale=1)
 segments = np.unique(segments, return_inverse=True)[1].reshape(img.shape[:2])
 
+print("number of segments: %d" % len(np.unique(segments)))
+
 plt.subplot(131, title="original")
 plt.imshow(img, interpolation='nearest')
+plt.axis("off")
 
-plt.subplot(132, title="superpixels")
+plt.subplot(132, title="segmentation")
 # shuffle the labels for better visualization
 permuted_labels = np.random.permutation(segments.max() + 1)
 plt.imshow(permuted_labels[segments], interpolation='nearest')
+plt.axis("off")
 
 plt.subplot(133, title="mean color")
 colors = [np.bincount(segments.ravel(), img[:, :, c].ravel()) for c in
@@ -41,5 +45,8 @@ colors = [np.bincount(segments.ravel(), img[:, :, c].ravel()) for c in
 counts = np.bincount(segments.ravel())
 colors = np.vstack(colors) / counts
 plt.imshow(colors.T[segments], interpolation='nearest')
-print("number of segments: %d" % len(np.unique(segments)))
+plt.axis("off")
+
+plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
+                    bottom=0.02, left=0.02, right=0.98)
 plt.show()

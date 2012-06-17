@@ -54,6 +54,16 @@ cdef join_trees(np.int_t *forest, np.int_t n, np.int_t m):
 def felzenszwalb_segmentation_grey(image, scale=200, sigma=0.8):
     """Computes Felsenszwalb's efficient graph based segmentation for a single channel.
 
+    Produces an oversegmentation of a 2d image using a fast, minimum spanning
+    tree based clustering on the image grid.  The parameter ``scale`` sets an
+    observation level. Higher scale means less and larger segments. ``sigma``
+    is the diameter of a Gaussian kernel, used for smoothing the image prior to
+    segmentation.
+
+    The number of produced segments as well as their size can only be
+    controlled indirectly through ``scale``. Segment size within an image can
+    vary greatly depending on local contrast.
+
     Parameters
     ----------
     image: ndarray, [width, height]
