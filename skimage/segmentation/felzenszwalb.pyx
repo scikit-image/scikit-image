@@ -64,8 +64,8 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
     down_cost = np.abs((image[:, 1:] - image[:, :-1]))
     dright_cost = np.abs((image[1:, 1:] - image[:-1, :-1]))
     uright_cost = np.abs((image[1:, :-1] - image[:-1, 1:]))
-    costs = np.hstack([right_cost.ravel(), down_cost.ravel(),
-        dright_cost.ravel(), uright_cost.ravel()])
+    cdef np.ndarray[np.float_t, ndim=1] costs = np.hstack([right_cost.ravel(), down_cost.ravel(),
+        dright_cost.ravel(), uright_cost.ravel()]).astype(np.float)
     # compute edges between pixels:
     width, height = image.shape[:2]
     cdef np.ndarray[np.int_t, ndim=2] segments = np.arange(width * height).reshape(width, height)
@@ -73,7 +73,7 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
     down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
     dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
     uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
-    edges = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
+    cdef np.ndarray[np.int_t, ndim=2] edges = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
     # initialize data structures for segment size
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
