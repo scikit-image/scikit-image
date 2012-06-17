@@ -1,3 +1,21 @@
+"""
+=================================================
+Felzenszwalb's efficient graph based segmentation
+=================================================
+
+This fast 2d image segmentation algorithm, proposed in [1]_ is popular in the
+computer vision community. It is often used to extract "superpixels", small
+homogeneous image regions, which build the basis for further processing.
+
+The algorithm has a single ``scale`` parameter that influences the segment
+size. The actual size and number of segments can vary greatly, depending on
+local contrast.
+
+.. [1] Efficient graph-based image segmentation, Felzenszwalb, P.F. and
+       Huttenlocher, D.P.  International Journal of Computer Vision, 2004
+"""
+print __doc__
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -23,5 +41,5 @@ colors = [np.bincount(segments.ravel(), img[:, :, c].ravel()) for c in
 counts = np.bincount(segments.ravel())
 colors = np.vstack(colors) / counts
 plt.imshow(colors.T[segments], interpolation='nearest')
+print("number of segments: %d" % len(np.unique(segments)))
 plt.show()
-print("num segments: %d" % len(np.unique(segments)))
