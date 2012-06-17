@@ -51,11 +51,30 @@ cdef join_trees(np.int_t *forest, np.int_t n, np.int_t m):
         set_root(forest, m, root)
 
 
-def felzenszwalb_segmentation(image, k, sigma=0.8):
-    k = float(k)
-    #image = img_as_float(image)
-    #image = rgb2grey(image)
-    image = image[:, :, 0]
+def felzenszwalb_segmentation_grey(image, scale=200, sigma=0.8):
+    """Computes Felsenszwalb's efficient graph based segmentation for a single channel.
+
+    Parameters
+    ----------
+    image: ndarray, [width, height]
+        Input image
+
+    scale: float
+        Free parameter. Higher means larger clusters.
+        For 0-255 data, hundereds are good.
+
+    sigma: float
+        Width of Gaussian kernel used in preprocessing.
+
+    Returns
+    -------
+    segment_mask: ndarray, [width, height]
+        Integer mask indicating segment labels.
+    """
+    if image.ndim != 2:
+        raise ValueError("This algorithm works only on single-channel 2d images."
+                "Got image of shape %s" % str(image.shape))
+    scale = float(scale)
     image = scipy.ndimage.gaussian_filter(image, sigma=sigma)
 
     # compute edge weights in 8 connectivity:
@@ -96,8 +115,8 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
         costs_p += 1
         if seg0 == seg1:
             continue
-        inner_cost0 = cint[seg0] + k / segment_size[seg0]
-        inner_cost1 = cint[seg1] + k / segment_size[seg1]
+        inner_cost0 = cint[seg0] + scale / segment_size[seg0]
+        inner_cost1 = cint[seg1] + scale / segment_size[seg1]
         if costs_p[0] < min(inner_cost0, inner_cost1):
             # update size and cost
             join_trees(segments_p, seg0, seg1)

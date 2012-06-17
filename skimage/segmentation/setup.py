@@ -11,8 +11,8 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('segmentation', parent_package, top_path)
 
-    cython(['felzenszwalb.pyx'], working_path=base_path)
-    config.add_extension('felzenszwalb', sources=['felzenszwalb.c'],
+    cython(['_felzenszwalb.pyx'], working_path=base_path)
+    config.add_extension('_felzenszwalb', sources=['_felzenszwalb.c'],
                          include_dirs=[get_numpy_include_dirs()])
     cython(['quickshift.pyx'], working_path=base_path)
     config.add_extension('quickshift', sources=['quickshift.c'],
