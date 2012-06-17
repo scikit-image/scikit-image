@@ -78,10 +78,11 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
     cdef np.int_t *segments_p = <np.int_t*>segments.data
-    cdef np.int_t seg_new
     cdef np.ndarray[np.int_t, ndim=1] segment_size = np.ones(width * height, dtype=np.int)
     # inner cost of segments
-    cint = defaultdict(lambda: 0)
+    cdef np.ndarray[np.float_t, ndim=1] cint = np.zeros(width * height)
+    cdef int seg0, seg1, seg_new
+    cdef float cost, inner_cost0, inner_cost1
     for edge, cost in zip(edges[edge_queue], costs[edge_queue]):
         seg0 = find_root(segments_p, edge[0])
         seg1 = find_root(segments_p, edge[1])
@@ -100,3 +101,4 @@ def felzenszwalb_segmentation(image, k, sigma=0.8):
     while (old != flat).any():
         old = flat
         flat = flat[flat]
+    return flat.reshape((width, height))
