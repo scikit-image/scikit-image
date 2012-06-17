@@ -10,7 +10,9 @@ cdef extern from "math.h":
 
 
 def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, tau=10, return_tree=False):
-    """Computes quickshift clustering in RGB-(x,y) space.
+    """Segments image using quickshift clustering in Color-(x,y) space.
+
+    Produces an oversegmentation of the image using the quickshift mode-seeking algorithm.
 
     Parameters
     ----------
@@ -29,26 +31,37 @@ def quickshift(np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image, sigma=5, ta
     -------
     segment_mask: ndarray, [width, height]
         Integer mask indicating segment labels.
+
+    Notes
+    -----
+    The authors advocate to convert the image to Lab color space prior to segmentation.
+
+    References
+    ----------
+    .. [1] Quick shift and kernel methods for mode seeking, Vedaldi, A. and Soatto, S.
+           European Conference on Computer Vision, 2008
+
+
     """
 
     # We compute the distances twice since otherwise
-    # we might get crazy memory overhead (width * height * windowsize**2)
-    # if you want to speed up things: computing exp in C is the bottleneck ;)
+    # we get crazy memory overhead (width * height * windowsize**2)
 
     # TODO do smoothing beforehand?
     # TODO manage borders somehow?
+    # TODO join orphant roots?
 
     # window size for neighboring pixels to consider
     if sigma < 1:
         raise ValueError("Sigma should be >= 1")
     cdef int w = int(2 * sigma)
-    
+
     cdef int width = image.shape[0]
     cdef int height = image.shape[1]
     cdef int channels = image.shape[2]
     cdef float closest, dist
     cdef int x, y, xx, yy, x_, y_
-    
+
     cdef np.float_t* image_p = <np.float_t*> image.data
     cdef np.float_t* current_pixel_p = image_p
     cdef np.float_t* current_entry_p

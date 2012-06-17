@@ -3,12 +3,19 @@ import numpy as np
 
 from ._felzenszwalb import felzenszwalb_segmentation_grey
 
-from IPython.core.debugger import Tracer
-tracer = Tracer()
-
 
 def felzenszwalb_segmentation(image, scale=200, sigma=0.8):
     """Computes Felsenszwalb's segmentation for multi channel images.
+
+    Produces an oversegmentation of a multichannel (i.e. RGB) image
+    using a fast, minimum spanning tree based clustering on the image grid.
+    The parameter ``scale`` sets an observation level. Higher scale means
+    less and larger segments. ``sigma`` is the diameter of a Gaussian kernel,
+    used for smoothing the image prior to segmentation.
+
+    The number of produced segments as well as their size can only be
+    controlled indirectly through ``scale``. Segment size within an image can
+    vary greatly depending on local contrast.
 
     Calls the algorithm on each channel separately, then combines
     using "and", i.e. two pixels are in the same segment if they are
@@ -30,6 +37,11 @@ def felzenszwalb_segmentation(image, scale=200, sigma=0.8):
     -------
     segment_mask: ndarray, [width, height]
         Integer mask indicating segment labels.
+
+    References
+    ----------
+    .. [1] Efficient graph-based image segmentation, Felzenszwalb, P.F. and
+           Huttenlocher, D.P.  International Journal of Computer Vision, 2004
     """
 
     #image = img_as_float(image)
