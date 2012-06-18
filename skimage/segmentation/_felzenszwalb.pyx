@@ -3,52 +3,7 @@ cimport numpy as np
 from collections import defaultdict
 import scipy
 
-
-#from ..util import img_as_float
-#from ..color import rgb2grey
-#from skimage.morphology.ccomp cimport find_root, join_trees
-
-DTYPE = np.int
-ctypedef np.int_t DTYPE_t
-
-cdef DTYPE_t find_root(np.int_t *forest, np.int_t n):
-    """Find the root of node n.
-
-    """
-    cdef np.int_t root = n
-    while (forest[root] < root):
-        root = forest[root]
-    return root
-
-cdef set_root(np.int_t *forest, np.int_t n, np.int_t root):
-    """
-    Set all nodes on a path to point to new_root.
-
-    """
-    cdef np.int_t j
-    while (forest[n] < n):
-        j = forest[n]
-        forest[n] = root
-        n = j
-
-    forest[n] = root
-
-
-cdef join_trees(np.int_t *forest, np.int_t n, np.int_t m):
-    """Join two trees containing nodes n and m.
-
-    """
-    cdef np.int_t root = find_root(forest, n)
-    cdef np.int_t root_m
-
-    if (n != m):
-        root_m = find_root(forest, m)
-
-        if (root > root_m):
-            root = root_m
-
-        set_root(forest, n, root)
-        set_root(forest, m, root)
+from skimage.morphology.ccomp cimport find_root, join_trees
 
 
 def felzenszwalb_segmentation_grey(image, scale=200, sigma=0.8):
