@@ -36,7 +36,7 @@ PROPS = (
     'Moments',
     'NormalizedMoments',
     'Orientation',
-#    'Perimeter',
+    'Perimeter',
 #    'PixelIdxList',
 #    'PixelList',
     'Solidity',
@@ -122,6 +122,9 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             Angle between the X-axis and the major axis of the ellipse that has
             the same second-moments as the region. Ranging from `-pi/2` to
             `-pi/2` in counter-clockwise direction.
+        * Perimeter : float
+            A simple approximation of the region boundary. It is not the same as 
+            the value returned by the 'regionprops' function in MATLAB.
         * Solidity : float
             Ratio of pixels in the region to pixels of the convex hull image.
         * WeightedCentralMoments : 3 x 3 ndarray
@@ -296,7 +299,10 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
                 obj_props['Orientation'] = PI / 2
             else:
                 obj_props['Orientation'] = - 0.5 * atan(2 * b / (a - c))
-
+        
+        if 'Perimeter' in properties:
+            obj_props['Perimeter'] = np.sum(np.abs(np.diff(array,1,0))) + np.sum(np.abs(np.diff(array,1,1)))
+        
         if 'Solidity' in properties:
             if _convex_image is None:
                 _convex_image = convex_hull_image(array)
