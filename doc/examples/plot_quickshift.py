@@ -28,9 +28,8 @@ from skimage.data import lena
 from skimage.segmentation import quickshift
 from skimage.util import img_as_float
 
-
 img = img_as_float(lena())[::2, ::2, :].copy("C")
-segments = quickshift(img, sigma=5, tau=20)
+segments = quickshift(img, kernel_size=5, max_dist=20)
 
 print("number of segments: %d" % len(np.unique(segments)))
 
