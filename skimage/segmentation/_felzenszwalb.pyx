@@ -1,12 +1,13 @@
 import numpy as np
 cimport numpy as np
-from collections import defaultdict
 import scipy
 
 from skimage.morphology.ccomp cimport find_root, join_trees
 
+from ..util import img_as_float
 
-def felzenszwalb_segmentation_grey(image, scale=200, sigma=0.8):
+
+def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8):
     """Computes Felsenszwalb's efficient graph based segmentation for a single channel.
 
     Produces an oversegmentation of a 2d image using a fast, minimum spanning
@@ -26,7 +27,6 @@ def felzenszwalb_segmentation_grey(image, scale=200, sigma=0.8):
 
     scale: float
         Free parameter. Higher means larger clusters.
-        For 0-255 data, hundereds are good.
 
     sigma: float
         Width of Gaussian kernel used in preprocessing.
@@ -39,6 +39,7 @@ def felzenszwalb_segmentation_grey(image, scale=200, sigma=0.8):
     if image.ndim != 2:
         raise ValueError("This algorithm works only on single-channel 2d images."
                 "Got image of shape %s" % str(image.shape))
+    image = img_as_float(image)
     scale = float(scale)
     image = scipy.ndimage.gaussian_filter(image, sigma=sigma)
 
@@ -88,11 +89,12 @@ def felzenszwalb_segmentation_grey(image, scale=200, sigma=0.8):
             seg_new = find_root(segments_p, seg0)
             segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
             cint[seg_new] = costs_p[0]
-    
+
     # unravel the union find tree
     flat = segments.ravel()
     old = np.zeros_like(flat)
     while (old != flat).any():
         old = flat
         flat = flat[flat]
+    flat = np.unique(flat, return_inverse=True)[1]
     return flat.reshape((width, height))

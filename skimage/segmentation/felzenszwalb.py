@@ -1,11 +1,11 @@
 import warnings
 import numpy as np
 
-from ._felzenszwalb import felzenszwalb_segmentation_grey
+from ._felzenszwalb import _felzenszwalb_segmentation_grey
 
 
-def felzenszwalb_segmentation(image, scale=200, sigma=0.8):
-    """Computes Felsenszwalb's segmentation for multi channel images.
+def felzenszwalb_segmentation(image, scale=1, sigma=0.8):
+    """Computes Felsenszwalb's efficient graph based image segmentation.
 
     Produces an oversegmentation of a multichannel (i.e. RGB) image
     using a fast, minimum spanning tree based clustering on the image grid.
@@ -47,7 +47,7 @@ def felzenszwalb_segmentation(image, scale=200, sigma=0.8):
     #image = img_as_float(image)
     if image.ndim == 2:
         # assume single channel image
-        return felzenszwalb_segmentation_grey(image, scale=scale, sigma=sigma)
+        return _felzenszwalb_segmentation_grey(image, scale=scale, sigma=sigma)
 
     elif image.ndim != 3:
         raise ValueError("Got image with ndim=%d, don't know"
@@ -62,13 +62,11 @@ def felzenszwalb_segmentation(image, scale=200, sigma=0.8):
     # compute quickshift for each channel
     for c in xrange(n_channels):
         channel = np.ascontiguousarray(image[:, :, c])
-        seg = felzenszwalb_segmentation_grey(channel, scale=scale, sigma=sigma)
-        segmentations.append(seg)
+        s = _felzenszwalb_segmentation_grey(channel, scale=scale, sigma=sigma)
+        segmentations.append(s)
 
     # put pixels in same segment only if in the same segment in all images
     # we do this by combining the channels to one number
-    segmentations = [np.unique(s, return_inverse=True)[1] for s in
-            segmentations]
     n0 = max(segmentations[0])
     n1 = max(segmentations[1])
     hasher = np.array([n1 * n0, n0, 1])
