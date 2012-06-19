@@ -1,5 +1,6 @@
 import numpy as np
 cimport numpy as np
+cimport cython
 
 from itertools import product
 
@@ -10,6 +11,9 @@ cdef extern from "math.h":
     double exp(double)
 
 
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
 def quickshift(image, sigma=5, tau=10, return_tree=False, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
@@ -70,24 +74,22 @@ def quickshift(image, sigma=5, tau=10, return_tree=False, random_seed=None):
     cdef int height = image_c.shape[1]
     cdef int channels = image_c.shape[2]
     cdef float closest, dist
-    cdef int x, y, xx, yy, x_, y_
+    cdef int x, y, x_, y_
 
     cdef np.float_t* image_p = <np.float_t*> image_c.data
     cdef np.float_t* current_pixel_p = image_p
-    cdef np.float_t* current_entry_p
 
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities = np.zeros((width, height))
     # compute densities
     for x, y in product(xrange(width), xrange(height)):
-        for xx, yy in product(xrange(-w / 2, w / 2 + 1), repeat=2):
-            x_, y_ = x + xx, y + yy
-            if 0 <= x_ < width and 0 <= y_ < height:
-                dist = 0
-                current_entry_p = current_pixel_p
-                for c in xrange(channels):
-                    dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
-                dist += (x - x_)**2 + (y - y_)**2
-                densities[x, y] += exp(-dist / sigma)
+        x_min, x_max = max(x - w, 0), min(x + w + 1, width)
+        y_min, y_max = max(y - w, 0), min(y + w + 1, height)
+        for x_, y_ in product(xrange(x_min, x_max), xrange(y_min, y_max)):
+            dist = 0
+            for c in xrange(channels):
+                dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
+            dist += (x - x_)**2 + (y - y_)**2
+            densities[x, y] += exp(-dist / sigma)
         current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
@@ -101,17 +103,17 @@ def quickshift(image, sigma=5, tau=10, return_tree=False, random_seed=None):
     for x, y in product(xrange(width), xrange(height)):
         current_density = densities[x, y]
         closest = np.inf
-        for xx, yy in product(xrange(-w / 2, w / 2 + 1), repeat=2):
-            x_, y_ = x + xx, y + yy
-            if 0 <= x_ < width and 0 <= y_ < height:
-                if densities[x_, y_] > current_density:
-                    dist = 0
-                    for c in xrange(channels):
-                        dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
-                    dist += (x - x_)**2 + (y - y_)**2
-                    if dist < closest:
-                        closest = dist
-                        parent[x, y] = x_ * width + y_
+        x_min, x_max = max(x - w, 0), min(x + w + 1, width)
+        y_min, y_max = max(y - w, 0), min(y + w + 1, height)
+        for x_, y_ in product(xrange(x_min, x_max), xrange(y_min, y_max)):
+            if densities[x_, y_] > current_density:
+                dist = 0
+                for c in xrange(channels):
+                    dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
+                dist += (x - x_)**2 + (y - y_)**2
+                if dist < closest:
+                    closest = dist
+                    parent[x, y] = x_ * width + y_
         dist_parent[x, y] = closest
         current_pixel_p += channels
 
