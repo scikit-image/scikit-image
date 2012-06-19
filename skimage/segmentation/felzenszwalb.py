@@ -67,8 +67,8 @@ def felzenszwalb_segmentation(image, scale=1, sigma=0.8):
 
     # put pixels in same segment only if in the same segment in all images
     # we do this by combining the channels to one number
-    n0 = max(segmentations[0])
-    n1 = max(segmentations[1])
+    n0 = segmentations[0].max() + 1
+    n1 = segmentations[1].max() + 1
     hasher = np.array([n1 * n0, n0, 1])
     segmentations = np.dstack(segmentations).reshape(-1, n_channels)
     segmentation = np.dot(segmentations, hasher)
