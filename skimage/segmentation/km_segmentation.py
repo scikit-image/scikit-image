@@ -1,7 +1,10 @@
 import numpy as np
+from scipy import ndimage
+from ..util import img_as_float
 
 
-def km_segmentation(image, n_segments=100, ratio=50, max_iter=100):
+def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
+    image = ndimage.gaussian_filter(img_as_float(image), sigma)
     # initialize on grid:
     height, width = image.shape[:2]
     # approximate grid size for desired n_segments
@@ -12,7 +15,11 @@ def km_segmentation(image, n_segments=100, ratio=50, max_iter=100):
 
     means_color = image[means_y, means_x, :]
     means = np.dstack([means_y, means_x, means_color]).reshape(-1, 5)
-    image = np.dstack([grid_y, grid_x, image * ratio])
+    # we do the scaling of ratio in the same way as in the SLIC paper
+    # so the values have the same meaning
+    ratio = (ratio / float(step)) ** 2
+    print(ratio)
+    image = np.dstack([grid_y, grid_x, image / ratio])
 
     nearest_mean = np.zeros((height, width), dtype=np.int)
     distance = np.ones((height, width), dtype=np.float) * np.inf
