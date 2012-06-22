@@ -29,9 +29,9 @@ def test_color():
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
     assert_array_equal(seg[:10, :10], 0)
-    assert_array_equal(seg[10:, :10], 3)
+    assert_array_equal(seg[10:, :10], 2)
     assert_array_equal(seg[:10, 10:], 1)
-    assert_array_equal(seg[10:, 10:], 2)
+    assert_array_equal(seg[10:, 10:], 3)
 
 
 if __name__ == '__main__':
