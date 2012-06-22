@@ -64,8 +64,8 @@ class WindowManager(object):
             self._gui_lock = False
             self._guikit = ''
         else:
-            raise RuntimeError(
-                'Only the toolkit that owns the lock may release it')
+            raise RuntimeError('Only the toolkit that owns the lock may'
+                               'release it')
 
     def add_window(self, win):
         self._check_locked()
@@ -191,7 +191,6 @@ class ImgThread(threading.Thread):
 class ThreadDispatch(object):
     def __init__(self, img, stateimg, func, *args):
 
-        width = img.shape[1]
         height = img.shape[0]
         self.cores = CPU_COUNT
         self.threads = []

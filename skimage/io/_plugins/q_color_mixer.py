@@ -1,7 +1,6 @@
 # the module for the qt color_mixer plugin
 from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import (QWidget, QStackedWidget, QSlider, QVBoxLayout,
-                         QGridLayout, QLabel)
+from PyQt4.QtGui import (QWidget, QStackedWidget, QSlider, QGridLayout, QLabel)
 
 from util import ColorMixer
 
@@ -36,8 +35,8 @@ class IntelligentSlider(QWidget):
         self.name_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.value_label = QLabel()
-        self.value_label.setText(
-            '%2.2f' % (self.slider.value() * self.a + self.b))
+        self.value_label.setText('%2.2f' % (self.slider.value() * self.a
+                                             + self.b))
         self.value_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.layout = QGridLayout(self)

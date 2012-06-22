@@ -85,8 +85,8 @@ def test_metadata():
     assert meta[('EXIF_MAIN', 'Orientation')] == 1
     assert meta[('EXIF_MAIN', 'Software')].startswith('ImageMagick')
 
-    meta = fi.read_multipage_metadata(
-        os.path.join(si.data_dir, 'multipage.tif'))
+    meta = fi.read_multipage_metadata(os.path.join(si.data_dir,
+                                                   'multipage.tif'))
     assert len(meta) == 2
     assert meta[0][('EXIF_MAIN', 'Orientation')] == 1
     assert meta[1][('EXIF_MAIN', 'Software')].startswith('ImageMagick')

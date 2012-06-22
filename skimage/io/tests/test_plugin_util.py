@@ -13,8 +13,7 @@ class TestPrepareForDisplay:
         assert x.dtype == np.dtype(np.uint8)
 
     def test_grey(self):
-        x = prepare_for_display(
-            np.arange(12, dtype=float).reshape((4, 3)) / 11.)
+        x = prepare_for_display(np.arange(12, dtype=float).reshape((4, 3)) / 11)
         assert_array_equal(x[..., 0], x[..., 2])
         assert x[0, 0, 0] == 0
         assert x[3, 2, 0] == 255

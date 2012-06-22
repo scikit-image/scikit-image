@@ -1,6 +1,5 @@
 import numpy as np
 import os
-import time
 from skimage.io import ImageCollection
 
 try:
@@ -57,8 +56,8 @@ class CvVideo(object):
         else:
             cv.Resize(img, cv.fromarray(img_mat))
         # opencv stores images in BGR format
-        cv.CvtColor(
-            cv.fromarray(img_mat), cv.fromarray(img_mat), cv.CV_BGR2RGB)
+        cv.CvtColor(cv.fromarray(img_mat), cv.fromarray(img_mat),
+                    cv.CV_BGR2RGB)
         return img_mat
 
     def seek_frame(self, frame_number):
@@ -70,8 +69,8 @@ class CvVideo(object):
         frame_number : int
             Frame position
         """
-        cv.SetCaptureProperty(
-            self.capture, cv.CV_CAP_PROP_POS_FRAMES, frame_number)
+        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_FRAMES,
+                              frame_number)
 
     def seek_time(self, milliseconds):
         """
@@ -82,8 +81,8 @@ class CvVideo(object):
         milliseconds : int
             Time position
         """
-        cv.SetCaptureProperty(
-            self.capture, cv.CV_CAP_PROP_POS_MSEC, milliseconds)
+        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_MSEC,
+                              milliseconds)
 
     def frame_count(self):
         """
@@ -120,9 +119,9 @@ class GstVideo(object):
     size: tuple, optional
         Size of returned array.
     sync: bool, optional (default False)
-        Frames are extracted per frame or per time basis.
-        If enabled the video time step continues onward according to the play rate.
-        Useful for ip cameras and other real time video feeds.
+        Frames are extracted per frame or per time basis. If enabled the video
+        time step continues onward according to the play rate.  Useful for ip
+        cameras and other real time video feeds.
     """
     def __init__(self, source=None, size=None, sync=False):
         if not gstreamer_available:
@@ -178,7 +177,7 @@ class GstVideo(object):
         self.appsink.set_property('caps', gst.caps_from_string(caps))
         if self.pipeline.set_state(gst.STATE_PLAYING) == gst.STATE_CHANGE_FAILURE:
             raise NameError("Failed to load video source %s" % self.source)
-        buff = self.appsink.emit('pull-preroll')
+        self.appsink.emit('pull-preroll')
 
     def get(self):
         """
@@ -190,7 +189,8 @@ class GstVideo(object):
             Retrieved image.
         """
         buff = self.appsink.emit('pull-buffer')
-        img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3), dtype=np.uint8, buffer=buff.data)
+        img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3),
+                             dtype=np.uint8, buffer=buff.data)
         return img_mat
 
     def seek_frame(self, frame_number):

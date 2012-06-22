@@ -145,7 +145,7 @@ def _test_random(shape):
     starts = [[0] * len(shape), [-1] * len(shape),
               (np.random.random(len(shape)) * shape).astype(int)]
     ends = [(np.random.random(len(shape)) * shape).astype(int)
-         for i in range(4)]
+            for i in range(4)]
     m = mcp.MCP(a, fully_connected=True)
     costs, offsets = m.find_costs(starts)
     for point in [(np.random.random(len(shape)) * shape).astype(int)

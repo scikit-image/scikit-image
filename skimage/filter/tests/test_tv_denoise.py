@@ -27,8 +27,8 @@ class TestTvDenoise():
         grad_denoised = ndimage.morphological_gradient(
             denoised_lena, size=((3, 3)))
         # test if the total variation has decreased
-        assert np.sqrt(
-            (grad_denoised ** 2).sum()) < np.sqrt((grad ** 2).sum()) / 2
+        assert (np.sqrt((grad_denoised ** 2).sum())
+                < np.sqrt((grad ** 2).sum()) / 2)
         denoised_lena_int = filter.tv_denoise(img_as_uint(lena),
                                               weight=60.0, keep_type=True)
         assert denoised_lena_int.dtype is np.dtype('uint16')
