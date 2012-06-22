@@ -21,7 +21,7 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
 
     Parameters
     ----------
-    image: ndarray, [width, height, channels]
+    image: (width, height, channels) ndarray 
         Input image
     ratio: float, between 0 and 1.
         Balances color-space proximity and image-space proximity.
@@ -54,7 +54,7 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
 
     """
     image = np.atleast_3d(image)
-    cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c = img_as_float(np.ascontiguousarray(image)) * ratio
+    cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c = np.ascontiguousarray(img_as_float(image)) * ratio
 
     if random_seed is None:
         random_state = np.random.RandomState()

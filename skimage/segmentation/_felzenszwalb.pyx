@@ -22,12 +22,10 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8):
 
     Parameters
     ----------
-    image: ndarray, [width, height]
+    image: (width, height) ndarray
         Input image
-
     scale: float
         Free parameter. Higher means larger clusters.
-
     sigma: float
         Width of Gaussian kernel used in preprocessing.
 
@@ -74,7 +72,7 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8):
     # set costs_p back one. we increase it before we use it
     # since we might continue before that.
     costs_p -= 1
-    for e in xrange(costs.size):
+    for e in range(costs.size):
         seg0 = find_root(segments_p, edges_p[0])
         seg1 = find_root(segments_p, edges_p[1])
         edges_p += 2

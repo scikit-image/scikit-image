@@ -23,13 +23,10 @@ def felzenszwalb_segmentation(image, scale=1, sigma=0.8):
 
     Parameters
     ----------
-    image: ndarray, [width, height]
+    image: (width, height) ndarray
         Input image
-
     scale: float
         Free parameter. Higher means larger clusters.
-        For 0-255 data, hundereds are good.
-
     sigma: float
         Width of Gaussian kernel used in preprocessing.
 
@@ -69,9 +66,8 @@ def felzenszwalb_segmentation(image, scale=1, sigma=0.8):
     # we do this by combining the channels to one number
     n0 = segmentations[0].max() + 1
     n1 = segmentations[1].max() + 1
-    hasher = np.array([n1 * n0, n0, 1])
-    segmentations = np.dstack(segmentations).reshape(-1, n_channels)
-    segmentation = np.dot(segmentations, hasher)
+    segmentation = (segmentations[0] + segmentations[1] * n0
+            + segmentations[2] * n0 * n1)
     # make segment labels consecutive numbers starting at 0
     labels = np.unique(segmentation, return_inverse=True)[1]
     return labels.reshape(image.shape[:2])

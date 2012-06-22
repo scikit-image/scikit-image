@@ -4,4 +4,4 @@ from .km_segmentation import km_segmentation
 from .quickshift import quickshift
 
 __all__ = [random_walker, quickshift, felzenszwalb_segmentation,
-        km_segmentation]
+    km_segmentation]
