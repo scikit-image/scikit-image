@@ -111,6 +111,6 @@ def disk(radius, dtype=np.uint8):
     """
     L = np.linspace(-radius, radius, 2 * radius + 1)
     (X, Y) = np.meshgrid(L, L)
-    s = X ** 2
-    s += Y ** 2
+    s = X**2
+    s += Y**2
     return np.array(s <= radius * radius, dtype=dtype)

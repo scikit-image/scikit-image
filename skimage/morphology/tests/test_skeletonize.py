@@ -80,8 +80,8 @@ class TestSkeletonize():
 
         # foreground object 3
         ir, ic = np.indices(image.shape)
-        circle1 = (ic - 135) ** 2 + (ir - 150) ** 2 < 30 ** 2
-        circle2 = (ic - 135) ** 2 + (ir - 150) ** 2 < 20 ** 2
+        circle1 = (ic - 135)**2 + (ir - 150)**2 < 30**2
+        circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
         image[circle1] = 1
         image[circle2] = 0
         result = skeletonize(image)

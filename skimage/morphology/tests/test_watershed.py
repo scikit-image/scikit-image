@@ -72,7 +72,7 @@ def diff(a, b):
         a = a.astype(np.float64)
         b = np.asarray(b)
         b = b.astype(np.float64)
-        t = ((a - b) ** 2).sum()
+        t = ((a - b)**2).sum()
     return math.sqrt(t)
 
 

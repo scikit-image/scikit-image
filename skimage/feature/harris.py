@@ -42,7 +42,7 @@ def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
     Wyy = ndimage.gaussian_filter(imy * imy, 1.5, mode='constant')
 
     # determinant and trace
-    Wdet = Wxx * Wyy - Wxy ** 2
+    Wdet = Wxx * Wyy - Wxy**2
     Wtr = Wxx + Wyy
     # Alternate formula for Harris response.
     # Alison Noble, "Descriptions of Image Surfaces", PhD thesis (1989)

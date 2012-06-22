@@ -17,7 +17,7 @@ a[1, 1:-1] = 0
 ##        [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]], dtype=float32)
 
 x, y = np.mgrid[-1:1:5j, -1:1:5j]
-r = np.sqrt(x ** 2 + y ** 2)
+r = np.sqrt(x**2 + y**2)
 
 
 def test_binary():

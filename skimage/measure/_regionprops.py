@@ -210,8 +210,8 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         b = mu[1, 1] / mu[0, 0]
         c = mu[0, 2] / mu[0, 0]
         #: eigen values of inertia tensor
-        l1 = (a + c) / 2 + sqrt(4 * b ** 2 + (a - c) ** 2) / 2
-        l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
+        l1 = (a + c) / 2 + sqrt(4 * b**2 + (a - c)**2) / 2
+        l2 = (a + c) / 2 - sqrt(4 * b**2 + (a - c)**2) / 2
 
         # cached results which are used by several properties
         _filled_image = None

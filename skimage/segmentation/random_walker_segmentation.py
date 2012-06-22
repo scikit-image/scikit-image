@@ -63,7 +63,7 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
 
 
 def _compute_weights_3d(data, beta=130, eps=1.e-6):
-    gradients = _compute_gradients_3d(data) ** 2
+    gradients = _compute_gradients_3d(data)**2
     beta /= 10 * data.std()
     gradients *= beta
     weights = np.exp(- gradients)

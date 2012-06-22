@@ -181,11 +181,11 @@ def greycoprops(P, prop='contrast'):
     # create weights for specified property
     I, J = np.ogrid[0:num_level, 0:num_level]
     if prop == 'contrast':
-        weights = (I - J) ** 2
+        weights = (I - J)**2
     elif prop == 'dissimilarity':
         weights = np.abs(I - J)
     elif prop == 'homogeneity':
-        weights = 1. / (1. + (I - J) ** 2)
+        weights = 1. / (1. + (I - J)**2)
     elif prop in ['ASM', 'energy', 'correlation']:
         pass
     else:
@@ -193,10 +193,10 @@ def greycoprops(P, prop='contrast'):
 
     # compute property for each GLCM
     if prop == 'energy':
-        asm = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
+        asm = np.apply_over_axes(np.sum, (P**2), axes=(0, 1))[0, 0]
         results = np.sqrt(asm)
     elif prop == 'ASM':
-        results = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
+        results = np.apply_over_axes(np.sum, (P**2), axes=(0, 1))[0, 0]
     elif prop == 'correlation':
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
@@ -204,9 +204,9 @@ def greycoprops(P, prop='contrast'):
         diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
         diff_j = J - np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
 
-        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2),
+        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i)**2),
                                            axes=(0, 1))[0, 0])
-        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2),
+        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j)**2),
                                            axes=(0, 1))[0, 0])
         cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)),
                                  axes=(0, 1))[0, 0]

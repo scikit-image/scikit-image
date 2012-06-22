@@ -37,7 +37,7 @@ def sobel(image, mask=None):
     Note that ``scipy.ndimage.sobel`` returns a directional Sobel which
     has to be further processed to perform edge detection.
     """
-    return np.sqrt(hsobel(image, mask) ** 2 + vsobel(image, mask) ** 2)
+    return np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
 
 
 def hsobel(image, mask=None):
@@ -137,7 +137,7 @@ def prewitt(image, mask=None):
     Return the square root of the sum of squares of the horizontal
     and vertical Prewitt transforms.
     """
-    return np.sqrt(hprewitt(image, mask) ** 2 + vprewitt(image, mask) ** 2)
+    return np.sqrt(hprewitt(image, mask)**2 + vprewitt(image, mask)**2)
 
 
 def hprewitt(image, mask=None):

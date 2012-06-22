@@ -7,7 +7,7 @@ from ._warp import warp
 def _swirl_mapping(xy, center, rotation, strength, radius):
     x, y = xy.T
     x0, y0 = center
-    rho = np.sqrt((x - x0) ** 2 + (y - y0) ** 2)
+    rho = np.sqrt((x - x0)**2 + (y - y0)**2)
 
     # Ensure that the transformation decays to approximately 1/1000-th
     # within the specified radius.

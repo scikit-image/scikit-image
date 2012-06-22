@@ -244,11 +244,11 @@ def medial_axis(image, mask=None, return_distance=False):
     # OR
     # 3. Keep if # pixels in neighbourhood is 2 or less
     # Note that table is independent of image
-    center_is_foreground = (np.arange(512) & 2 ** 4).astype(bool)
+    center_is_foreground = (np.arange(512) & 2**4).astype(bool)
     table = (center_is_foreground  # condition 1.
                 &
             (np.array([ndimage.label(_pattern_of(index), _eight_connect)[1] !=
-                        ndimage.label(_pattern_of(index & ~ 2 ** 4),
+                        ndimage.label(_pattern_of(index & ~ 2**4),
                                     _eight_connect)[1]
                         for index in range(512)])  # condition 2
                 |
@@ -311,9 +311,9 @@ def _pattern_of(index):
     Return the pattern represented by an index value
     Byte decomposition of index
     """
-    return np.array([[index & 2 ** 0, index & 2 ** 1, index & 2 ** 2],
-                     [index & 2 ** 3, index & 2 ** 4, index & 2 ** 5],
-                     [index & 2 ** 6, index & 2 ** 7, index & 2 ** 8]], bool)
+    return np.array([[index & 2**0, index & 2**1, index & 2**2],
+                     [index & 2**3, index & 2**4, index & 2**5],
+                     [index & 2**6, index & 2**7, index & 2**8]], bool)
 
 
 def _table_lookup(image, table):

@@ -56,12 +56,12 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
         d[:, :, 1:] += pz[:, :, :-1]
 
         out = im + d
-        E = (d ** 2).sum()
+        E = (d**2).sum()
 
         gx[:-1] = np.diff(out, axis=0)
         gy[:, :-1] = np.diff(out, axis=1)
         gz[:, :, :-1] = np.diff(out, axis=2)
-        norm = np.sqrt(gx ** 2 + gy ** 2 + gz ** 2)
+        norm = np.sqrt(gx**2 + gy**2 + gz**2)
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1.
@@ -147,10 +147,10 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
         d[:, 1:] += py[:, :-1]
 
         out = im + d
-        E = (d ** 2).sum()
+        E = (d**2).sum()
         gx[:-1] = np.diff(out, axis=0)
         gy[:, :-1] = np.diff(out, axis=1)
-        norm = np.sqrt(gx ** 2 + gy ** 2)
+        norm = np.sqrt(gx**2 + gy**2)
         E += weight * norm.sum()
         norm *= 0.5 / weight
         norm += 1

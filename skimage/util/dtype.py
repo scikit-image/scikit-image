@@ -109,21 +109,21 @@ def convert(image, dtype, force_copy=False, uniform=False):
             prec_loss()
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, m))
-                np.floor_divide(a, 2 ** (n - m), out=b, dtype=a.dtype,
+                np.floor_divide(a, 2**(n - m), out=b, dtype=a.dtype,
                                 casting='unsafe')
                 return b
             else:
-                a //= 2 ** (n - m)
+                a //= 2**(n - m)
                 return a
         elif m % n == 0:
             # exact upscale to a multiple of n bits
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, m))
-                np.multiply(a, (2 ** m - 1) // (2 ** n - 1), out=b, dtype=b.dtype)
+                np.multiply(a, (2**m - 1) // (2**n - 1), out=b, dtype=b.dtype)
                 return b
             else:
                 a = np.array(a, _dtype2(kind, m, a.dtype.itemsize), copy=False)
-                a *= (2 ** m - 1) // (2 ** n - 1)
+                a *= (2**m - 1) // (2**n - 1)
                 return a
         else:
             # upscale to a multiple of n bits,
@@ -132,13 +132,13 @@ def convert(image, dtype, force_copy=False, uniform=False):
             o = (m // n + 1) * n
             if copy:
                 b = np.empty(a.shape, _dtype2(kind, o))
-                np.multiply(a, (2 ** o - 1) // (2 ** n - 1), out=b, dtype=b.dtype)
-                b //= 2 ** (o - m)
+                np.multiply(a, (2**o - 1) // (2**n - 1), out=b, dtype=b.dtype)
+                b //= 2**(o - m)
                 return b
             else:
                 a = np.array(a, _dtype2(kind, o, a.dtype.itemsize), copy=False)
-                a *= (2 ** o - 1) // (2 ** n - 1)
-                a //= 2 ** (o - m)
+                a *= (2**o - 1) // (2**n - 1)
+                a //= 2**(o - m)
                 return a
 
     kind = dtypeobj.kind
