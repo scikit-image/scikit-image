@@ -21,15 +21,9 @@ available_plugins = plugins()
 
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
-    # ('imread' must be last because the list gets modified on last iteration.)
     io_funcs = ['imsave', 'imshow', 'imread_collection', 'imread']
     preferred_plugins = ['matplotlib', 'pil', 'qt', 'freeimage', 'null']
     for func in io_funcs:
-        if func == 'imread':
-            # Use PIL as the default imread plugin, since matplotlib (1.2.x)
-            # is buggy (flips PNGs around, returns bytes as floats, etc.)
-            preferred_plugins.remove('pil')
-            preferred_plugins.insert(0, 'pil')
         for plugin in preferred_plugins:
             if plugin not in available_plugins:
                 continue
@@ -38,6 +32,12 @@ def _load_preferred_plugins():
                 break
             except (ImportError, RuntimeError):
                 pass
+# Use PIL as the default imread plugin, since matplotlib (1.2.x)
+# is buggy (flips PNGs around, returns bytes as floats, etc.)
+try:
+    use_plugin('pil', 'imread')
+except ImportError:
+    pass
 _load_preferred_plugins()
 
 
