@@ -6,7 +6,7 @@ from numpy.testing.decorators import skipif
 from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
-from skimage.io import imread, imsave, use_plugin
+from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 try:
     from PIL import Image
@@ -16,6 +16,10 @@ except ImportError:
     PIL_available = False
 else:
     PIL_available = True
+
+
+def teardown():
+    reset_plugins()
 
 
 def setup_module(self):
