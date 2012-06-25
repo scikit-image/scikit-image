@@ -35,8 +35,8 @@ def _make_similarity(src, dst):
         X = a0*x - b0*y + a1
         Y = b0*x + a0*y + a2
     where the homogeneous transformation matrix is:
-        [[a1 -b1  a0]
-         [b1  a1  b0]
+        [[a0 -b0  a1]
+         [b0  a0  b1]
          [0   0    1]]
     """
     xs = src[:,0]
@@ -45,32 +45,27 @@ def _make_similarity(src, dst):
     yd = dst[:,1]
     rows = src.shape[0]
 
+    #: params: a0, a1, b0, b1
     A = np.zeros((rows*2, 4))
-    b = np.zeros((rows*2,))
-
     A[:rows,0] = xs
     A[:rows,2] = - ys
     A[:rows,1] = 1
     A[rows:,2] = xs
     A[rows:,0] = ys
     A[rows:,3] = 1
-    b[:rows] = xd
-    b[rows:] = yd
+
+    b = np.hstack([xd, yd])
 
     a0, a1, b0, b1 = np.linalg.lstsq(A, b)[0]
-    matrix = np.eye(3)
-    matrix[0,0] = a0
-    matrix[0,1] = - b0
-    matrix[0,2] = a1
-    matrix[1,0] = b0
-    matrix[1,1] = a0
-    matrix[1,2] = b1
+    matrix = np.array([[a0, -b0, a1],
+                       [b0,  a0, b1],
+                       [ 0,   0,  1]])
     return matrix
 
 def _make_affine(src, dst):
     """Determine parameters of the 2D affine transformation:
-        X = a0*x + a1*y + a3
-        Y = b0*x + b1*y + b3
+        X = a0*x + a1*y + a2
+        Y = b0*x + b1*y + b2
     where the homogeneous transformation matrix is:
         [[a0  a1  a2]
          [b0  b1  b2]
@@ -82,9 +77,8 @@ def _make_affine(src, dst):
     yd = dst[:,1]
     rows = src.shape[0]
 
+    #: params: a0, a1, a2, b0, b1, b2
     A = np.zeros((rows*2, 6))
-    b = np.zeros((rows*2,))
-
     A[:rows,0] = xs
     A[:rows,1] = ys
     A[:rows,2] = 1
@@ -92,22 +86,22 @@ def _make_affine(src, dst):
     A[rows:,4] = ys
     A[rows:,5] = 1
 
-    b[:rows] = xd
-    b[rows:] = yd
+    b = np.hstack([xd, yd])
 
-    params = np.linalg.lstsq(A, b)[0]
-    matrix = np.eye(3)
-    matrix[:2,:] = params.reshape((2, 3))
+    a0, a1, a2, b0, b1, b2 = np.linalg.lstsq(A, b)[0]
+    matrix = np.array([[a0, a1, a2],
+                       [b0, b1, b2],
+                       [0,   0,  1]])
     return matrix
 
 def _make_projective(src, dst):
     """Determine transformation matrix of the 2D projective transformation:
-        X = (a0 + a1*x + a2*y) / (c0*x + c1*y + c3)
-        Y = (b0 + b1*x + b2*y) / (c0*x + c1*y + c3)
+        X = (a0 + a1*x + a2*y) / (c0*x + c1*y + 1)
+        Y = (b0 + b1*x + b2*y) / (c0*x + c1*y + 1)
     where the homogeneous transformation matrix is:
         [[a0  a1  a2]
          [b0  b1  b2]
-         [c0  c1  c3]]
+         [c0  c1   1]]
     """
     xs = src[:,0]
     ys = src[:,1]
@@ -115,10 +109,8 @@ def _make_projective(src, dst):
     yd = dst[:,1]
     rows = src.shape[0]
 
+    #: params: a0, a1, a2, b0, b1, b2, c0, c1
     A = np.zeros((rows*2, 8))
-    b = np.zeros((rows*2,))
-
-
     A[:rows,0] = xs
     A[:rows,1] = ys
     A[:rows,2] = 1
@@ -129,12 +121,14 @@ def _make_projective(src, dst):
     A[rows:,5] = 1
     A[rows:,6] = - yd * xs
     A[rows:,7] = - yd * ys
-    b[:rows] = dst[:,0]
-    b[rows:] = dst[:,1]
 
-    matrix = np.eye(3).flatten()
-    matrix[:8] = np.linalg.lstsq(A, b)[0]
-    return matrix.reshape((3, 3))
+    b = np.hstack([xd, yd])
+
+    a0, a1, a2, b0, b1, b2, c0, c1 = np.linalg.lstsq(A, b)[0]
+    matrix = np.array([[a0, a1, a2],
+                       [b0, b1, b2],
+                       [c0, c1,  1]])
+    return matrix
 
 def _make_polynomial(src, dst, order):
     """Determine parameters of 2D polynomial transformation of order n:
@@ -149,17 +143,16 @@ def _make_polynomial(src, dst, order):
 
     # number of unknown polynomial coefficients
     u = (order + 1) * (order + 2)
-    A = np.zeros((rows*2, u))
-    b = np.zeros((rows*2,))
 
+    A = np.zeros((rows*2, u))
     pidx = 0
     for j in xrange(order+1):
         for i in xrange(j+1):
             A[:rows,pidx] = xs ** (j - i) * ys ** i
             A[rows:,pidx+u/2] = xs ** (j - i) * ys ** i
             pidx += 1
-    b[:rows] = xd
-    b[rows:] = yd
+
+    b = np.hstack([xd, yd])
 
     return np.linalg.lstsq(A, b)[0]
 
@@ -171,8 +164,8 @@ def _make_rotation(angle):
     """
     R = [
         [math.cos(angle), -math.sin(angle), 0],
-        [math.sin(angle), math.cos(angle), 0],
-        [0, 0, 1],
+        [math.sin(angle),  math.cos(angle), 0],
+        [0,                              0, 1],
     ]
     return np.array(R)
 
@@ -180,8 +173,9 @@ def _transform(coords, matrix):
     src = np.vstack((coords[:,0], coords[:,1], np.ones((coords.shape[0],))))
     dst = np.dot(src.transpose(), matrix.transpose())
     # rescale to homogeneous coordinates
-    dst[:,0] *= 1 / dst[:,2]
-    dst[:,1] *= 1 / dst[:,2]
+    dst[:,0] /= dst[:,2]
+    dst[:,1] /= dst[:,2]
+    # values close to zero because of limited numerical precision
     dst[np.abs(dst) < EPS] = 0
     return dst[:,:2]
 
@@ -334,10 +328,6 @@ def warp(image, reverse_map=None, map_args={}, tform=None,
         coordinates in the *source image*.  Also see examples below.
     map_args : dict, optional
         Keyword arguments passed to `reverse_map`.
-    tform : :class:`Transformation` object
-        The inverse transformation will be used to transform coordinates in the
-        *output image* into their corresponding coordinates in the
-        *source image*.
     output_shape : tuple (rows, cols)
         Shape of the output image generated.
     order : int
@@ -385,10 +375,7 @@ def warp(image, reverse_map=None, map_args={}, tform=None,
 
     # Map each (x, y) pair to the source image according to
     # the user-provided mapping
-    if callable(reverse_map):
-        tf_coords = reverse_map(tf_coords, **map_args)
-    else:
-        tf_coords = tform.inv(tf_coords)
+    tf_coords = reverse_map(tf_coords, **map_args)
 
     # Reshape back to a (2, M, N) coordinate grid
     tf_coords = tf_coords.T.reshape((-1, cols, rows)).swapaxes(1, 2)
@@ -564,5 +551,5 @@ def homography(image, H, output_shape=None, order=1,
                   category=DeprecationWarning)
 
     tform = make_tform('projective', matrix=H)
-    return warp(image, tform=tform, output_shape=output_shape, order=order,
-                mode=mode, cval=cval)
+    return warp(image, reverse_map=tform.inv, output_shape=output_shape,
+                order=order, mode=mode, cval=cval)
