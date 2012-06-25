@@ -79,6 +79,7 @@ h1, h2, h3, h4 {
   font-weight: normal;
   color: {{ theme_headercolor2 }};
   margin-bottom: .8em;
+  clear: left;
 }
 
 h1 {
