@@ -30,6 +30,7 @@ def _stackcopy(a, b):
     else:
         a[:] = b
 
+
 def _make_similarity(src, dst):
     """Determine parameters of the 2D similarity transformation:
         X = a0*x - b0*y + a1
@@ -39,20 +40,20 @@ def _make_similarity(src, dst):
          [b0  a0  b1]
          [0   0    1]]
     """
-    xs = src[:,0]
-    ys = src[:,1]
-    xd = dst[:,0]
-    yd = dst[:,1]
+    xs = src[:, 0]
+    ys = src[:, 1]
+    xd = dst[:, 0]
+    yd = dst[:, 1]
     rows = src.shape[0]
 
     #: params: a0, a1, b0, b1
-    A = np.zeros((rows*2, 4))
-    A[:rows,0] = xs
-    A[:rows,2] = - ys
-    A[:rows,1] = 1
-    A[rows:,2] = xs
-    A[rows:,0] = ys
-    A[rows:,3] = 1
+    A = np.zeros((rows * 2, 4))
+    A[:rows, 0] = xs
+    A[:rows, 2] = - ys
+    A[:rows, 1] = 1
+    A[rows:, 2] = xs
+    A[rows:, 0] = ys
+    A[rows:, 3] = 1
 
     b = np.hstack([xd, yd])
 
@@ -61,6 +62,7 @@ def _make_similarity(src, dst):
                        [b0,  a0, b1],
                        [ 0,   0,  1]])
     return matrix
+
 
 def _make_affine(src, dst):
     """Determine parameters of the 2D affine transformation:
@@ -71,20 +73,20 @@ def _make_affine(src, dst):
          [b0  b1  b2]
          [0   0    1]]
     """
-    xs = src[:,0]
-    ys = src[:,1]
-    xd = dst[:,0]
-    yd = dst[:,1]
+    xs = src[:, 0]
+    ys = src[:, 1]
+    xd = dst[:, 0]
+    yd = dst[:, 1]
     rows = src.shape[0]
 
     #: params: a0, a1, a2, b0, b1, b2
-    A = np.zeros((rows*2, 6))
-    A[:rows,0] = xs
-    A[:rows,1] = ys
-    A[:rows,2] = 1
-    A[rows:,3] = xs
-    A[rows:,4] = ys
-    A[rows:,5] = 1
+    A = np.zeros((rows * 2, 6))
+    A[:rows, 0] = xs
+    A[:rows, 1] = ys
+    A[:rows, 2] = 1
+    A[rows:, 3] = xs
+    A[rows:, 4] = ys
+    A[rows:, 5] = 1
 
     b = np.hstack([xd, yd])
 
@@ -93,6 +95,7 @@ def _make_affine(src, dst):
                        [b0, b1, b2],
                        [0,   0,  1]])
     return matrix
+
 
 def _make_projective(src, dst):
     """Determine transformation matrix of the 2D projective transformation:
@@ -103,24 +106,24 @@ def _make_projective(src, dst):
          [b0  b1  b2]
          [c0  c1   1]]
     """
-    xs = src[:,0]
-    ys = src[:,1]
-    xd = dst[:,0]
-    yd = dst[:,1]
+    xs = src[:, 0]
+    ys = src[:, 1]
+    xd = dst[:, 0]
+    yd = dst[:, 1]
     rows = src.shape[0]
 
     #: params: a0, a1, a2, b0, b1, b2, c0, c1
-    A = np.zeros((rows*2, 8))
-    A[:rows,0] = xs
-    A[:rows,1] = ys
-    A[:rows,2] = 1
-    A[:rows,6] = - xd * xs
-    A[:rows,7] = - xd * ys
-    A[rows:,3] = xs
-    A[rows:,4] = ys
-    A[rows:,5] = 1
-    A[rows:,6] = - yd * xs
-    A[rows:,7] = - yd * ys
+    A = np.zeros((rows * 2, 8))
+    A[:rows, 0] = xs
+    A[:rows, 1] = ys
+    A[:rows, 2] = 1
+    A[:rows, 6] = - xd * xs
+    A[:rows, 7] = - xd * ys
+    A[rows:, 3] = xs
+    A[rows:, 4] = ys
+    A[rows:, 5] = 1
+    A[rows:, 6] = - yd * xs
+    A[rows:, 7] = - yd * ys
 
     b = np.hstack([xd, yd])
 
@@ -130,31 +133,33 @@ def _make_projective(src, dst):
                        [c0, c1,  1]])
     return matrix
 
+
 def _make_polynomial(src, dst, order):
     """Determine parameters of 2D polynomial transformation of order n:
         X = sum[j=0:n]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:n]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
     """
-    xs = src[:,0]
-    ys = src[:,1]
-    xd = dst[:,0]
-    yd = dst[:,1]
+    xs = src[:, 0]
+    ys = src[:, 1]
+    xd = dst[:, 0]
+    yd = dst[:, 1]
     rows = src.shape[0]
 
     # number of unknown polynomial coefficients
     u = (order + 1) * (order + 2)
 
-    A = np.zeros((rows*2, u))
+    A = np.zeros((rows * 2, u))
     pidx = 0
-    for j in xrange(order+1):
-        for i in xrange(j+1):
-            A[:rows,pidx] = xs ** (j - i) * ys ** i
-            A[rows:,pidx+u/2] = xs ** (j - i) * ys ** i
+    for j in xrange(order + 1):
+        for i in xrange(j + 1):
+            A[:rows, pidx] = xs ** (j - i) * ys ** i
+            A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
             pidx += 1
 
     b = np.hstack([xd, yd])
 
     return np.linalg.lstsq(A, b)[0]
+
 
 def _make_rotation(angle):
     """Determine homogeneous transformation matrix of 2D rotation:
@@ -169,29 +174,32 @@ def _make_rotation(angle):
     ]
     return np.array(R)
 
+
 def _transform(coords, matrix):
-    src = np.vstack((coords[:,0], coords[:,1], np.ones((coords.shape[0],))))
+    x, y = np.transpose(coords)
+    src = np.vstack((x, y, np.ones_like(x)))
     dst = np.dot(src.transpose(), matrix.transpose())
     # rescale to homogeneous coordinates
-    dst[:,0] /= dst[:,2]
-    dst[:,1] /= dst[:,2]
+    dst[:, 0] /= dst[:, 2]
+    dst[:, 1] /= dst[:, 2]
     # values close to zero because of limited numerical precision
     dst[np.abs(dst) < EPS] = 0
-    return dst[:,:2]
+    return dst[:, :2]
+
 
 def _transform_polynomial(coords, matrix):
-    x = coords[:,0]
-    y = coords[:,1]
+    x = coords[:, 0]
+    y = coords[:, 1]
     u = len(matrix)
     # number of coefficients -> u = (order + 1) * (order + 2)
-    order = int((-3 + math.sqrt(9 - 4 * (2 - u))) / 2)
+    order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
     dst = np.zeros(coords.shape)
 
     pidx = 0
-    for j in xrange(order+1):
-        for i in xrange(j+1):
-            dst[:,0] += matrix[pidx] * x ** (j - i) * y ** i
-            dst[:,1] += matrix[pidx+u/2] * x ** (j - i) * y ** i
+    for j in xrange(order + 1):
+        for i in xrange(j + 1):
+            dst[:, 0] += matrix[pidx] * x ** (j - i) * y ** i
+            dst[:, 1] += matrix[pidx + u / 2] * x ** (j - i) * y ** i
             pidx += 1
 
     return dst
@@ -283,8 +291,8 @@ def make_tform(ttype, **kwargs):
             'polynomial'        `src, `dst`, `order` (polynomial order)
             'rotation'          `angle`
 
-        Alternatively you can explicitly define a 3x3 homogeneous transformation
-        matrix with the `matrix` parameter.
+        Alternatively you can explicitly define a 3x3 homogeneous
+        transformation matrix with the `matrix` parameter.
 
         See examples section below for usage.
 
@@ -314,8 +322,9 @@ def make_tform(ttype, **kwargs):
         matrix = TRANSFORMATIONS[ttype][0](**kwargs)
     return Transformation(ttype, matrix)
 
-def warp(image, reverse_map=None, map_args={}, tform=None,
-         output_shape=None, order=1, mode='constant', cval=0.):
+
+def warp(image, reverse_map=None, map_args={}, output_shape=None, order=1,
+         mode='constant', cval=0.):
     """Warp an image according to a given coordinate transformation.
 
     Parameters
@@ -398,10 +407,11 @@ def warp(image, reverse_map=None, map_args={}, tform=None,
     # so clip to ensure valid data
     return np.clip(mapped.squeeze(), 0, 1)
 
+
 def _swirl_mapping(xy, center, rotation, strength, radius):
     x, y = xy.T
     x0, y0 = center
-    rho = np.sqrt((x - x0)**2 + (y - y0)**2)
+    rho = np.sqrt((x - x0) ** 2 + (y - y0) ** 2)
 
     # Ensure that the transformation decays to approximately 1/1000-th
     # within the specified radius.
@@ -415,6 +425,7 @@ def _swirl_mapping(xy, center, rotation, strength, radius):
     xy[..., 1] = y0 + rho * np.sin(theta)
 
     return xy
+
 
 def swirl(image, center=None, strength=1, radius=100, rotation=0,
           output_shape=None, order=1, mode='constant', cval=0):
@@ -466,6 +477,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     return warp(image, _swirl_mapping, map_args=warp_args,
                 output_shape=output_shape,
                 order=order, mode=mode, cval=cval)
+
 
 def homography(image, H, output_shape=None, order=1,
                mode='constant', cval=0.):
