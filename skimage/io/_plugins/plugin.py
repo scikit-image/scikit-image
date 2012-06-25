@@ -2,22 +2,31 @@
 
 """
 
-__all__ = ['use', 'available', 'call', 'info', 'configuration']
+__all__ = ['use', 'available', 'call', 'info', 'configuration', 'reset_plugins']
 
 import warnings
 from ConfigParser import ConfigParser
 import os.path
 from glob import glob
 
-plugin_store = {'imread': [],
-                'imsave': [],
-                'imshow': [],
-                'imread_collection': [],
-                '_app_show': []}
+plugin_store = None
 
 plugin_provides = {}
 plugin_module_name = {}
 plugin_meta_data = {}
+
+def reset_plugins():
+    """Clear the plugin state to the default, i.e., where no plugins are loaded.
+
+    """
+    global plugin_store
+    plugin_store = {'imread': [],
+                    'imsave': [],
+                    'imshow': [],
+                    'imread_collection': [],
+                    '_app_show': []}
+
+reset_plugins()
 
 def _scan_plugins():
     """Scan the plugins directory for .ini files and parse them

@@ -27,6 +27,10 @@ def setup_module(self):
         pass
 
 
+def teardown():
+    sio.reset_plugins()
+
+
 @skipif(not FI_available)
 def test_imread():
     img = sio.imread(os.path.join(si.data_dir, 'color.png'))
