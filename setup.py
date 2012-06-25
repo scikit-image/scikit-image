@@ -17,7 +17,7 @@ MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
 URL                 = 'http://scikits-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikits-image/scikits-image'
-VERSION             = '0.6'
+VERSION             = '0.7dev'
 
 import os
 import setuptools
