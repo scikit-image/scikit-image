@@ -32,12 +32,14 @@ def _load_preferred_plugins():
                 break
             except (ImportError, RuntimeError):
                 pass
-# Use PIL as the default imread plugin, since matplotlib (1.2.x)
-# is buggy (flips PNGs around, returns bytes as floats, etc.)
-try:
-    use_plugin('pil', 'imread')
-except ImportError:
-    pass
+
+    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
+    # is buggy (flips PNGs around, returns bytes as floats, etc.)
+    try:
+        use_plugin('pil', 'imread')
+    except ImportError:
+        pass
+
 _load_preferred_plugins()
 
 
