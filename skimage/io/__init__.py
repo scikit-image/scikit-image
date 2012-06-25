@@ -8,6 +8,7 @@ from ._plugins import use as use_plugin
 from ._plugins import available as plugins
 from ._plugins import info as plugin_info
 from ._plugins import configuration as plugin_order
+from ._plugins import reset_plugins as _reset_plugins
 
 from .sift import *
 from .collection import *
@@ -40,8 +41,9 @@ def _load_preferred_plugins():
     except ImportError:
         pass
 
-_load_preferred_plugins()
-
+def reset_plugins():
+    _reset_plugins()
+    _load_preferred_plugins()
 
 def _update_doc(doc):
     """Add a list of plugins to the module docstring, formatted as
@@ -72,3 +74,5 @@ def _update_doc(doc):
     return doc
 
 __doc__ = _update_doc(__doc__)
+
+reset_plugins()

@@ -26,6 +26,11 @@ def test_fits_plugin_import():
     else:
         assert pyfits_available == True
 
+
+def teardown():
+    io.reset_plugins()
+
+
 @skipif(not pyfits_available)
 def test_imread_MEF():
     io.use_plugin('fits')
