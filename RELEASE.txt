@@ -5,9 +5,12 @@ How to make a new release of ``skimage``
 - Update the version number in setup.py and bento.info and commit
 - Update the docs:
   - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
-  - Build a clean version of the docs.  Run "make" in the root dir, then
+  - Build a clean version of the docs: run "make" in the root dir, then
     ``rm build -rf; make html`` in the docs.
-  - Push upstream using "make gh-pages"
+  - Push upstream using "make gh-pages; cd gh-pages; git push"
+    (Note: the version list won't display correctly until after you've also
+     rebuilt the dev docs later on; they're grabbed from
+     ``skimage.org/docs/dev/.../docversions.js``.)
 - Add the version number as a tag in git::
 
   git tag v0.6
@@ -21,7 +24,8 @@ How to make a new release of ``skimage``
   python setup.py register
   python setup.py sdist upload
 
-- Increase the version number in the setup.py file to ``0.Xdev``.
+- Increase the version number in the setup.py and bento.info file to ``0.Xdev``
+  and ``0.X.0.dev`` respectively.
 
 - Update the web frontpage:
   The webpage is kept in a separate repo: scikits-image-web
@@ -29,3 +33,5 @@ How to make a new release of ``skimage``
   - ``index.rst``
 
 - Post release notes on mailing lists, blog, G+, etc.
+
+- Regenerate the dev docs, upload.
