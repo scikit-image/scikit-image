@@ -63,7 +63,6 @@ except ImportError:
 
 
 def _setup_test(verbose=False):
-    import gzip
     import functools
 
     args = ['', '--exe', '-w', pkg_dir]

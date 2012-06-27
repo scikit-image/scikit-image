@@ -5,6 +5,7 @@ from collections import deque
 
 _param_options = ('high', 'low')
 
+
 def find_contours(array, level,
                   fully_connected='low', positive_orientation='low'):
     """Find iso-valued contours in a 2D array for a given level value.
@@ -83,10 +84,10 @@ def find_contours(array, level,
 
     This means that to find reasonable contours, it is best to find contours
     midway between the expected "light" and "dark" values. In particular,
-    given a binarized array, *do not* choose to find contours at the low or high
-    value of the array. This will often yield degenerate contours, especially
-    around structures that are a single array element wide. Instead choose
-    a middle value, as above.
+    given a binarized array, *do not* choose to find contours at the low or
+    high value of the array. This will often yield degenerate contours,
+    especially around structures that are a single array element wide. Instead
+    choose a middle value, as above.
 
     References
     ----------
@@ -129,7 +130,8 @@ def _assemble_contours(points_iterator):
         # This happens when (and only when) one vertex of the square is
         # exactly the contour level, and the rest are above or below.
         # This degnerate vertex will be picked up later by neighboring squares.
-        if from_point == to_point: continue
+        if from_point == to_point:
+            continue
 
         tail_data = starts.get(to_point)
         head_data = ends.get(from_point)

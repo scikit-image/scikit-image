@@ -6,6 +6,7 @@ from skimage.transform import homography, fast_homography
 from skimage import data
 from skimage.color import rgb2gray
 
+
 def test_stackcopy():
     layers = 4
     x = np.empty((3, 3, layers))
@@ -17,10 +18,10 @@ def test_stackcopy():
 
 def test_homography():
     x = np.arange(9, dtype=np.uint8).reshape((3, 3)) + 1
-    theta = -np.pi/2
-    M = np.array([[np.cos(theta),-np.sin(theta),0],
-                  [np.sin(theta), np.cos(theta),2],
-                  [0,             0,            1]])
+    theta = -np.pi / 2
+    M = np.array([[np.cos(theta), -np.sin(theta), 0],
+                  [np.sin(theta),  np.cos(theta), 2],
+                  [0,              0,             1]])
     x90 = homography(x, M, order=1)
     assert_array_almost_equal(x90, np.rot90(x))
 

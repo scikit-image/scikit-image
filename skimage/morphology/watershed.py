@@ -24,13 +24,12 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 
-from _heapq import heapify, heappush, heappop
+from _heapq import heappush, heappop
 import numpy as np
 import scipy.ndimage
 from ..filter import rank_order
 
 from . import _watershed
-import warnings
 
 
 def watershed(image, markers, connectivity=None, offset=None, mask=None):
@@ -123,17 +122,17 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     The algorithm works also for 3-D images, and can be used for example to
     separate overlapping spheres.
     """
-    
+
     if connectivity == None:
         c_connectivity = scipy.ndimage.generate_binary_structure(image.ndim, 1)
     else:
         c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image.ndim:
-            raise ValueError,"Connectivity dimension must be same as image"
+            raise ValueError("Connectivity dimension must be same as image")
     if offset == None:
-        if any([x%2==0 for x in c_connectivity.shape]):
-            raise ValueError,"Connectivity array must have an unambiguous \
-            center"
+        if any([x % 2 == 0 for x in c_connectivity.shape]):
+            raise ValueError("Connectivity array must have an unambiguous "
+                    "center")
         #
         # offset to center of connectivity array
         #
@@ -144,7 +143,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     pads = offset
 
     def pad(im):
-        new_im = np.zeros([i + 2*p for i, p in zip(im.shape, pads)], im.dtype)
+        new_im = np.zeros([i + 2 * p for i, p in zip(im.shape, pads)], im.dtype)
         new_im[[slice(p, -p, None) for p in pads]] = im
         return new_im
 
@@ -158,9 +157,8 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     c_image = rank_order(image)[0].astype(np.int32)
     c_markers = np.ascontiguousarray(markers, dtype=np.int32)
     if c_markers.ndim != c_image.ndim:
-        raise ValueError,\
-            "markers (ndim=%d) must have same # of dimensions "\
-            "as image (ndim=%d)"%(c_markers.ndim, cimage.ndim)
+        raise ValueError("markers (ndim=%d) must have same # of dimensions "
+                         "as image (ndim=%d)" % (c_markers.ndim, c_image.ndim))
     if c_markers.shape != c_image.shape:
         raise ValueError("image and markers must have the same shape")
     if mask != None:
@@ -190,7 +188,6 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         indexes = []
         ignore = True
         for j in range(len(c_connectivity.shape)):
-            elems = c_image.shape[j]
             idx = (i // multiplier) % c_connectivity.shape[j]
             off = idx - offset[j]
             if off:
@@ -231,7 +228,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
 def is_local_maximum(image, labels=None, footprint=None):
     """
     Return a boolean array of points that are local maxima
- 
+
     Parameters
     ----------
     image: ndarray (2-D, 3-D, ...)

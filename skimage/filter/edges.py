@@ -70,13 +70,14 @@ def hsobel(image, mask=None):
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
                               generate_binary_structure(2, 2),
-                              border_value = 0)
+                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[ 1, 2, 1],
                                        [ 0, 0, 0],
                                        [-1,-2,-1]]).astype(float) / 4.0))
     result[big_mask == False] = 0
     return result
+
 
 def vsobel(image, mask=None):
     """Find the vertical edges of an image using the Sobel transform.

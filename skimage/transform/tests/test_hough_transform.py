@@ -59,8 +59,9 @@ def test_probabilistic_hough():
         img[i, i] = 100
     # decrease default theta sampling because similar orientations may confuse
     # as mentioned in article of Galambos et al
-    theta=np.linspace(0, np.pi, 45)
-    lines = probabilistic_hough(img, theta=theta, threshold=10, line_length=10, line_gap=1)
+    theta = np.linspace(0, np.pi, 45)
+    lines = probabilistic_hough(img, theta=theta, threshold=10, line_length=10,
+                                line_gap=1)
     # sort the lines according to the x-axis
     sorted_lines = []
     for line in lines:
@@ -73,4 +74,3 @@ def test_probabilistic_hough():
 
 if __name__ == "__main__":
     run_module_suite()
-

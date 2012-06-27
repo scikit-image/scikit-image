@@ -40,6 +40,7 @@ def test_radon_iradon():
     image = np.tri(size) + np.tri(size)[::-1]
     reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
 
+
 def test_iradon_angles():
     """
     Test with different number of projections
@@ -62,9 +63,11 @@ def test_iradon_angles():
     s = radon_image_80.sum(axis=0)
     assert np.allclose(s, s[0], rtol=0.01)
     reconstructed = iradon(radon_image_80)
-    delta_80 = np.mean(abs(image/np.max(image) - reconstructed/np.max(reconstructed)))
+    delta_80 = np.mean(abs(image / np.max(image) -
+                           reconstructed / np.max(reconstructed)))
     # Loss of quality when the number of projections is reduced
     assert delta_80 > delta_200
+
 
 def test_radon_minimal():
     """

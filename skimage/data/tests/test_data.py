@@ -1,6 +1,5 @@
 import skimage.data as data
-from numpy.testing import assert_equal, assert_array_equal
-import numpy as np
+from numpy.testing import assert_equal
 
 
 def test_lena():
@@ -17,7 +16,7 @@ def test_camera():
 
 def test_checkerboard():
     """ Test that checkerboard image can be loaded. """
-    checkerboard = data.checkerboard()
+    data.checkerboard()
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

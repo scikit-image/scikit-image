@@ -140,7 +140,6 @@ def iradon(radon_image, theta=None, output_size=None,
     # zero pad input image
     img.resize((order, img.shape[1]))
     # construct the fourier filter
-    freqs = np.zeros((order, 1))
 
     f = fftshift(abs(np.mgrid[-1:1:2 / order])).reshape(-1, 1)
     w = 2 * np.pi * f

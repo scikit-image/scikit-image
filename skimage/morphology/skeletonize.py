@@ -79,7 +79,7 @@ def skeletonize(image):
            [0, 0, 0, 0, 1, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-           
+
     """
     # look up table - there is one entry for each of the 2^8=256 possible
     # combinations of 8 binary neighbours. 1's, 2's and 3's are candidates
@@ -318,9 +318,9 @@ def _pattern_of(index):
 
 def _table_lookup(image, table):
     """
-    Perform a morphological transform on an image, directed by its 
+    Perform a morphological transform on an image, directed by its
     neighbors
-    
+
     Parameters
     ----------
     image : ndarray
@@ -330,7 +330,7 @@ def _table_lookup(image, table):
         the values of that pixel and its 8-connected neighbors.
     border_value : bool
         The value of pixels beyond the border of the image.
-    
+
     Returns
     -------
     result : ndarray of same shape as `image`
@@ -340,7 +340,7 @@ def _table_lookup(image, table):
     -----
     The pixels are numbered like this::
 
-    
+
       0 1 2
       3 4 5
       6 7 8
@@ -358,11 +358,11 @@ def _table_lookup(image, table):
         indexer[1:, 1:]   += image[:-1, :-1] * 2**0
         indexer[1:, :]    += image[:-1, :] * 2**1
         indexer[1:, :-1]  += image[:-1, 1:] * 2**2
-        
+
         indexer[:, 1:]    += image[:, :-1] * 2**3
         indexer[:, :]     += image[:, :] * 2**4
         indexer[:, :-1]   += image[:, 1:] * 2**5
-    
+
         indexer[:-1, 1:]  += image[1:, :-1] * 2**6
         indexer[:-1, :]   += image[1:, :] * 2**7
         indexer[:-1, :-1] += image[1:, 1:] * 2**8
@@ -370,4 +370,3 @@ def _table_lookup(image, table):
         indexer = _table_lookup_index(np.ascontiguousarray(image, np.uint8))
     image = table[indexer]
     return image
-

@@ -21,39 +21,40 @@ r = np.sqrt(x**2 + y**2)
 
 
 def test_binary():
-  contours = find_contours(a, 0.5)
-  assert len(contours) == 1
-  assert_array_equal(contours[0],
-                     [[ 6. ,  1.5],
-                      [ 5. ,  1.5],
-                      [ 4. ,  1.5],
-                      [ 3. ,  1.5],
-                      [ 2. ,  1.5],
-                      [ 1.5,  2. ],
-                      [ 1.5,  3. ],
-                      [ 1.5,  4. ],
-                      [ 1.5,  5. ],
-                      [ 1.5,  6. ],
-                      [ 1. ,  6.5],
-                      [ 0.5,  6. ],
-                      [ 0.5,  5. ],
-                      [ 0.5,  4. ],
-                      [ 0.5,  3. ],
-                      [ 0.5,  2. ],
-                      [ 0.5,  1. ],
-                      [ 1. ,  0.5],
-                      [ 2. ,  0.5],
-                      [ 3. ,  0.5],
-                      [ 4. ,  0.5],
-                      [ 5. ,  0.5],
-                      [ 6. ,  0.5],
-                      [ 6.5,  1. ],
-                      [ 6. ,  1.5]])
+    contours = find_contours(a, 0.5)
+    assert len(contours) == 1
+    assert_array_equal(contours[0],
+                     [[6. ,  1.5],
+                      [5. ,  1.5],
+                      [4. ,  1.5],
+                      [3. ,  1.5],
+                      [2. ,  1.5],
+                      [1.5,  2. ],
+                      [1.5,  3. ],
+                      [1.5,  4. ],
+                      [1.5,  5. ],
+                      [1.5,  6. ],
+                      [1. ,  6.5],
+                      [0.5,  6. ],
+                      [0.5,  5. ],
+                      [0.5,  4. ],
+                      [0.5,  3. ],
+                      [0.5,  2. ],
+                      [0.5,  1. ],
+                      [1. ,  0.5],
+                      [2. ,  0.5],
+                      [3. ,  0.5],
+                      [4. ,  0.5],
+                      [5. ,  0.5],
+                      [6. ,  0.5],
+                      [6.5,  1. ],
+                      [6. ,  1.5]])
+
 
 def test_float():
-  contours = find_contours(r, 0.5)
-  assert len(contours) == 1
-  assert_array_equal(contours[0],
+    contours = find_contours(r, 0.5)
+    assert len(contours) == 1
+    assert_array_equal(contours[0],
                     [[ 2.,  3.],
                      [ 1.,  2.],
                      [ 2.,  1.],
@@ -61,7 +62,6 @@ def test_float():
                      [ 2.,  3.]])
 
 
-    
 if __name__ == '__main__':
     from numpy.testing import run_module_suite
     run_module_suite()
