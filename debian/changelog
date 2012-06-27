@@ -1,3 +1,9 @@
+skimage (0.6-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Wed, 27 Jun 2012 15:31:26 -0400
+
 skimage (0.5.0+git100-gfeb3e92-2) unstable; urgency=low
 
   * debian/rules: globally export MPLCONFIGDIR and HOME so they would be
