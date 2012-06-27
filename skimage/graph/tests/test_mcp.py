@@ -72,8 +72,8 @@ def test_neg_inf():
 
 
 def test_route():
-    return_path, cost = mcp.route_through_array(
-        a, (1, 6), (7, 2), geometric=True)
+    return_path, cost = mcp.route_through_array(a, (1, 6), (7, 2),
+                                                geometric=True)
     assert_almost_equal(cost, np.sqrt(2) / 2)
     assert_array_equal(return_path,
                        [(1, 6),

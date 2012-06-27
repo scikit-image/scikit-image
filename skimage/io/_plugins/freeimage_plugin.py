@@ -73,7 +73,7 @@ def load_freeimage():
             # candidate libs
             err_txt = ['%s:\n%s' % (l, str(e.message)) for l, e in errors]
             raise OSError('One or more FreeImage libraries were found, but '
-                          'could not be loaded due to the following errors:\n' +
+                          'could not be loaded due to the following errors:\n'
                           '\n\n'.join(err_txt))
         else:
             # No errors, because no potential libraries found at all!
@@ -211,7 +211,7 @@ class FI_TYPES(object):
 
 class IO_FLAGS(object):
     FIF_LOAD_NOPIXELS = 0x8000  # loading: load the image header only
-                               # (not supported by all plugins)
+                                # (not supported by all plugins)
 
     BMP_DEFAULT = 0
     BMP_SAVE_RLE = 1
@@ -230,41 +230,41 @@ class IO_FLAGS(object):
     FAXG3_DEFAULT = 0
     GIF_DEFAULT = 0
     GIF_LOAD256 = 1  # Load the image as a 256 color image with ununsed
-                    # palette entries, if it's 16 or 2 color
+                     # palette entries, if it's 16 or 2 color
     GIF_PLAYBACK = 2  # 'Play' the GIF to generate each frame (as 32bpp)
-                     # instead of returning raw frame data when loading
+                      # instead of returning raw frame data when loading
     HDR_DEFAULT = 0
     ICO_DEFAULT = 0
     ICO_MAKEALPHA = 1  # convert to 32bpp and create an alpha channel from the
-                      # AND-mask when loading
+                       # AND-mask when loading
     IFF_DEFAULT = 0
     J2K_DEFAULT = 0  # save with a 16:1 rate
     JP2_DEFAULT = 0  # save with a 16:1 rate
     JPEG_DEFAULT = 0  # loading (see JPEG_FAST);
-                     # saving (see JPEG_QUALITYGOOD|JPEG_SUBSAMPLING_420)
+                      # saving (see JPEG_QUALITYGOOD|JPEG_SUBSAMPLING_420)
     JPEG_FAST = 0x0001  # load the file as fast as possible,
-                       # sacrificing some quality
+                        # sacrificing some quality
     JPEG_ACCURATE = 0x0002  # load the file with the best quality,
-                           # sacrificing some speed
+                            # sacrificing some speed
     JPEG_CMYK = 0x0004  # load separated CMYK "as is"
-                       # (use | to combine with other load flags)
+                        # (use | to combine with other load flags)
     JPEG_EXIFROTATE = 0x0008  # load and rotate according to
-                             # Exif 'Orientation' tag if available
+                              # Exif 'Orientation' tag if available
     JPEG_QUALITYSUPERB = 0x80  # save with superb quality (100:1)
     JPEG_QUALITYGOOD = 0x0100  # save with good quality (75:1)
     JPEG_QUALITYNORMAL = 0x0200  # save with normal quality (50:1)
     JPEG_QUALITYAVERAGE = 0x0400  # save with average quality (25:1)
     JPEG_QUALITYBAD = 0x0800  # save with bad quality (10:1)
     JPEG_PROGRESSIVE = 0x2000  # save as a progressive-JPEG
-                              # (use | to combine with other save flags)
+                               # (use | to combine with other save flags)
     JPEG_SUBSAMPLING_411 = 0x1000  # save with high 4x1 chroma
-                                  # subsampling (4:1:1)
+                                   # subsampling (4:1:1)
     JPEG_SUBSAMPLING_420 = 0x4000  # save with medium 2x2 medium chroma
-                                  # subsampling (4:2:0) - default value
+                                   # subsampling (4:2:0) - default value
     JPEG_SUBSAMPLING_422 = 0x8000  # save with low 2x1 chroma subsampling (4:2:2)
     JPEG_SUBSAMPLING_444 = 0x10000  # save with no chroma subsampling (4:4:4)
     JPEG_OPTIMIZE = 0x20000  # on saving, compute optimal Huffman coding tables
-                            # (can reduce a few percent of file size)
+                             # (can reduce a few percent of file size)
     JPEG_BASELINE = 0x40000  # save basic JPEG, without metadata or any markers
     KOALA_DEFAULT = 0
     LBM_DEFAULT = 0
@@ -279,14 +279,14 @@ class IO_FLAGS(object):
     PNG_DEFAULT = 0
     PNG_IGNOREGAMMA = 1  # loading: avoid gamma correction
     PNG_Z_BEST_SPEED = 0x0001  # save using ZLib level 1 compression flag
-                              # (default value is 6)
+                               # (default value is 6)
     PNG_Z_DEFAULT_COMPRESSION = 0x0006  # save using ZLib level 6 compression
-                                       # flag (default recommended value)
+                                        # flag (default recommended value)
     PNG_Z_BEST_COMPRESSION = 0x0009  # save using ZLib level 9 compression flag
-                                    # (default value is 6)
+                                     # (default value is 6)
     PNG_Z_NO_COMPRESSION = 0x0100  # save without ZLib compression
     PNG_INTERLACED = 0x0200  # save using Adam7 interlacing (use | to combine
-                            # with other save flags)
+                             # with other save flags)
     PNM_DEFAULT = 0
     PNM_SAVE_RAW = 0  # Writer saves in RAW format (i.e. P4, P5 or P6)
     PNM_SAVE_ASCII = 1  # Writer saves in ASCII format (i.e. P1, P2 or P3)
@@ -296,7 +296,7 @@ class IO_FLAGS(object):
     RAS_DEFAULT = 0
     RAW_DEFAULT = 0  # load the file as linear RGB 48-bit
     RAW_PREVIEW = 1  # try to load the embedded JPEG preview with included
-                    # Exif Data or default to RGB 24-bit
+                     # Exif Data or default to RGB 24-bit
     RAW_DISPLAY = 2  # load the file as RGB 24-bit
     SGI_DEFAULT = 0
     TARGA_DEFAULT = 0
@@ -304,7 +304,7 @@ class IO_FLAGS(object):
     TARGA_SAVE_RLE = 2  # Save with RLE compression
     TIFF_DEFAULT = 0
     TIFF_CMYK = 0x0001  # reads/stores tags for separated CMYK
-                       # (use | to combine with compression flags)
+                        # (use | to combine with compression flags)
     TIFF_PACKBITS = 0x0100  # save using PACKBITS compression
     TIFF_DEFLATE = 0x0200  # save using DEFLATE (a.k.a. ZLIB) compression
     TIFF_ADOBE_DEFLATE = 0x0400  # save using ADOBE DEFLATE compression

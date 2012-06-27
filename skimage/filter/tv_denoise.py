@@ -252,7 +252,7 @@ def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     elif im.ndim == 3:
         out = _tv_denoise_3d(im, weight, eps, n_iter_max)
     else:
-        raise ValueError('only 2-d and 3-d images may be denoised with this'
+        raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
     if keep_type:
         return out.astype(im_type)

@@ -64,7 +64,7 @@ class WindowManager(object):
             self._gui_lock = False
             self._guikit = ''
         else:
-            raise RuntimeError('Only the toolkit that owns the lock may'
+            raise RuntimeError('Only the toolkit that owns the lock may '
                                'release it')
 
     def add_window(self, win):
