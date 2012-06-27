@@ -6,7 +6,7 @@ from numpy.testing.decorators import skipif
 from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
-from skimage.io import imread, imsave, use_plugin
+from skimage.io import imread, imsave, use_plugin, reset_plugins
 
 try:
     from PIL import Image
@@ -16,6 +16,10 @@ except ImportError:
     PIL_available = False
 else:
     PIL_available = True
+
+
+def teardown():
+    reset_plugins()
 
 
 def setup_module(self):
@@ -65,10 +69,12 @@ def test_bilevel():
 def test_imread_uint16():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
-    assert img.dtype == np.uint16
+    assert np.issubdtype(img.dtype, np.uint16)
     assert_array_almost_equal(img, expected)
 
-@skipif(not PIL_available)
+# Big endian images not correctly loaded for PIL < 1.1.7
+# Renable test when PIL 1.1.7 is more common.
+@skipif(True)
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
@@ -97,3 +103,6 @@ class TestSave:
                 else:
                     x = (x * 255).astype(dtype)
                     yield self.roundtrip, dtype, x
+
+if __name__ == "__main__":
+    run_module_suite()

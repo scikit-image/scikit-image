@@ -95,7 +95,11 @@ def imread_collection(load_pattern, conserve_memory=True):
                isinstance(hdu, pyfits.PrimaryHDU):
                 # Ignore (primary) header units with no data (use '.size'
                 # rather than '.data' to avoid actually loading the image):
-                if hdu.size() > 0:
+                try:
+                    data_size = hdu.size()
+                except TypeError:  # (size changed to int in PyFITS 3.1)
+                    data_size = hdu.size
+                if data_size > 0:
                     ext_list.append((filename, n))
         hdulist.close()
 

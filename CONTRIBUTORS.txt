@@ -28,7 +28,7 @@
 - Tony Yu
   Reading of paletted images; build, bug and doc fixes.
   Code to generate skimage logo.
-  Otsu thresholding, histogram equalisation, and more.
+  Otsu thresholding, histogram equalisation, template matching, and more.
 
 - Zachary Pincus
   Tracing of low cost paths, FreeImage I/O plugin, iso-contours,
@@ -46,6 +46,7 @@
 
 - Pieter Holtzhausen
   Incorporating CellProfiler's Sobel edge detector, build and bug fixes.
+  Radon transform, template matching.
 
 - Emmanuelle Guillart
   Total variation noise filtering, integration of CellProfiler's
@@ -105,3 +106,4 @@
 - Johannes Schönberger
   Polygon, circle and ellipse drawing functions
   Adaptive thresholding
+  Implementation of Matlab's `regionprops`

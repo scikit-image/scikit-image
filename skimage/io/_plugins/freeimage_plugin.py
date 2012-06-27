@@ -55,19 +55,22 @@ def load_freeimage():
         try:
             freeimage = loader.LoadLibrary(lib)
             break
-        except Exception, e:
+        except Exception:
             if lib not in bare_libs:
                 # Don't record errors when it couldn't load the library from
                 # a bare name -- this fails often, and doesn't provide any
                 # useful debugging information anyway, beyond "couldn't find
                 # library..."
-                errors.append((lib, e))
+                # Get exception instance in Python 2.x/3.x compatible manner
+                e_type, e_value, e_tb = sys.exc_info()
+                del e_tb
+                errors.append((lib, e_value))
 
     if freeimage is None:
         if errors:
             # No freeimage library loaded, and load-errors reported for some
             # candidate libs
-            err_txt = ['%s:\n%s'%(l, e.message) for l, e in errors]
+            err_txt = ['%s:\n%s'%(l, str(e.message)) for l, e in errors]
             raise OSError('One or more FreeImage libraries were found, but '
                           'could not be loaded due to the following errors:\n'+
                           '\n\n'.join(err_txt))
@@ -340,6 +343,9 @@ class METADATA_DATATYPE(object):
     FIDT_DOUBLE = 12 # 64-bit IEEE floating point
     FIDT_IFD = 13 # 32-bit unsigned integer (offset)
     FIDT_PALETTE = 14 # 32-bit RGBQUAD
+    FIDT_LONG8 = 16 # 64-bit unsigned integer 
+    FIDT_SLONG8 = 17 # 64-bit signed integer
+    FIDT_IFD8 = 18 # 64-bit unsigned integer (offset)
 
     dtypes = {
         FIDT_BYTE: numpy.uint8,
@@ -357,7 +363,10 @@ class METADATA_DATATYPE(object):
         FIDT_DOUBLE: numpy.float64,
         FIDT_IFD: numpy.uint32,
         FIDT_PALETTE: [('R', numpy.uint8), ('G', numpy.uint8),
-                       ('B', numpy.uint8), ('A', numpy.uint8)]
+                       ('B', numpy.uint8), ('A', numpy.uint8)],
+        FIDT_LONG8: numpy.uint64,
+        FIDT_SLONG8: numpy.int64,
+        FIDT_IFD8: numpy.uint64
         }
 
 

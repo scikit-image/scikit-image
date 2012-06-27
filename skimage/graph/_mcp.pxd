@@ -17,7 +17,8 @@ cdef class MCP:
     cdef object flat_costs
     cdef object flat_cumulative_costs
     cdef object traceback_offsets
-    cdef object flat_edge_map
+    cdef object flat_pos_edge_map
+    cdef object flat_neg_edge_map
     cdef readonly object offsets
     cdef object flat_offsets
     cdef object offset_lengths
