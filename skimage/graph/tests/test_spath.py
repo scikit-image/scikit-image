@@ -3,6 +3,7 @@ from numpy.testing import *
 
 import skimage.graph.spath as spath
 
+
 def test_basic():
     x = np.array([[1, 1, 3],
                   [0, 2, 0],
@@ -11,6 +12,7 @@ def test_basic():
     assert_array_equal(path, [0, 0, 1])
     assert_equal(cost, 1)
 
+
 def test_reach():
     x = np.array([[1, 1, 3],
                   [0, 2, 0],
@@ -18,6 +20,7 @@ def test_reach():
     path, cost = spath.shortest_path(x, reach=2)
     assert_array_equal(path, [0, 0, 2])
     assert_equal(cost, 0)
+
 
 def test_non_square():
     x = np.array([[1, 1, 1, 1, 5, 5, 5],

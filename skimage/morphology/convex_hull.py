@@ -4,6 +4,7 @@ import numpy as np
 from ._pnpoly import points_inside_poly, grid_points_inside_poly
 from ._convex_hull import possible_hull
 
+
 def convex_hull_image(image):
     """Compute the convex hull image of a binary image.
 
@@ -34,7 +35,7 @@ def convex_hull_image(image):
     # hull.
     coords = possible_hull(image.astype(np.uint8))
     N = len(coords)
-    
+
     # Add a vertex for the middle of each pixel edge
     coords_corners = np.empty((N * 4, 2))
     for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5),
@@ -61,5 +62,5 @@ def convex_hull_image(image):
     # For each pixel coordinate, check whether that pixel
     # lies inside the convex hull
     mask = grid_points_inside_poly(image.shape[:2], v)
-    
+
     return mask

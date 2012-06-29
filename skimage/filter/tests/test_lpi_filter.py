@@ -7,12 +7,13 @@ from skimage import data_dir
 from skimage.io import *
 from skimage.filter import *
 
+
 class TestLPIFilter2D():
     img = imread(os.path.join(data_dir, 'camera.png'),
-                 flatten=True)[:50,:50]
+                 flatten=True)[:50, :50]
 
-    def filt_func(self,r,c):
-        return np.exp(-np.hypot(r,c)/1)
+    def filt_func(self, r, c):
+        return np.exp(-np.hypot(r, c) / 1)
 
     def setUp(self):
         self.f = LPIFilter2D(self.filt_func)
@@ -33,27 +34,26 @@ class TestLPIFilter2D():
         g = inverse(F, predefined_filter=self.f)
         assert_equal(g.shape, self.img.shape)
 
-        g1 = inverse(F[::-1,::-1], predefined_filter=self.f)
-        assert ((g - g1[::-1,::-1]).sum() < 55)
+        g1 = inverse(F[::-1, ::-1], predefined_filter=self.f)
+        assert ((g - g1[::-1, ::-1]).sum() < 55)
 
         # test cache
-        g1 = inverse(F[::-1,::-1], predefined_filter=self.f)
-        assert ((g - g1[::-1,::-1]).sum() < 55)
+        g1 = inverse(F[::-1, ::-1], predefined_filter=self.f)
+        assert ((g - g1[::-1, ::-1]).sum() < 55)
 
         g1 = inverse(F[::-1, ::-1], self.filt_func)
-        assert ((g - g1[::-1,::-1]).sum() < 55)
+        assert ((g - g1[::-1, ::-1]).sum() < 55)
 
     def test_wiener(self):
         F = self.f(self.img)
         g = wiener(F, predefined_filter=self.f)
         assert_equal(g.shape, self.img.shape)
 
-        g1 = wiener(F[::-1,::-1], predefined_filter=self.f)
-        assert ((g - g1[::-1,::-1]).sum() < 1)
+        g1 = wiener(F[::-1, ::-1], predefined_filter=self.f)
+        assert ((g - g1[::-1, ::-1]).sum() < 1)
 
-        g1 = wiener(F[::-1,::-1], self.filt_func)
-        assert ((g - g1[::-1,::-1]).sum() < 1)
+        g1 = wiener(F[::-1, ::-1], self.filt_func)
+        assert ((g - g1[::-1, ::-1]).sum() < 1)
 
 if __name__ == "__main__":
     run_module_suite()
-

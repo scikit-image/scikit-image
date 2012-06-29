@@ -77,8 +77,7 @@ def match_template(image, template, pad_input=False):
         i0, j0 = template.shape
         i0 /= 2
         j0 /= 2
-        pad_image[i0:i0+h, j0:j0+w] = image
+        pad_image[i0:i0 + h, j0:j0 + w] = image
         image = pad_image
     result = _template.match_template(image, template)
     return result
-

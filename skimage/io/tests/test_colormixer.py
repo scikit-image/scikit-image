@@ -3,6 +3,7 @@ import numpy as np
 
 import skimage.io._plugins._colormixer as cm
 
+
 class ColorMixerTest(object):
     def setup(self):
         self.state = np.ones((18, 33, 3), dtype=np.uint8) * 200
@@ -91,7 +92,8 @@ class TestColorMixer(object):
     def test_gamma(self):
         gamma = 1.5
         cm.gamma(self.img, self.state, gamma)
-        img = np.asarray(((self.state/255.)**(1/gamma))*255, dtype='uint8')
+        img = np.asarray(((self.state / 255.)**(1 / gamma)) * 255,
+                         dtype='uint8')
         assert_array_almost_equal(img, self.img)
 
     def test_rgb_2_hsv(self):
@@ -112,7 +114,6 @@ class TestColorMixer(object):
         assert_almost_equal(np.array([g]), np.array([0]))
         assert_almost_equal(np.array([b]), np.array([0]))
 
-
     def test_hsv_add(self):
         cm.hsv_add(self.img, self.state, 360, 0, 0)
         assert_almost_equal(self.img, self.state)
@@ -123,7 +124,7 @@ class TestColorMixer(object):
 
     def test_hsv_add_clip_pos(self):
         cm.hsv_add(self.img, self.state, 0, 0, 1)
-        assert_equal(self.img, np.ones_like(self.state)*255)
+        assert_equal(self.img, np.ones_like(self.state) * 255)
 
     def test_hsv_mul(self):
         cm.hsv_multiply(self.img, self.state, 360, 1, 1)
@@ -132,8 +133,6 @@ class TestColorMixer(object):
     def test_hsv_mul_clip_neg(self):
         cm.hsv_multiply(self.img, self.state, 0, 0, 0)
         assert_equal(self.img, np.zeros_like(self.state))
-
-
 
 
 if __name__ == "__main__":

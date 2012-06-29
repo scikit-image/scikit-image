@@ -75,12 +75,15 @@ class TestSimpleImage():
 def test_otsu_camera_image():
     assert threshold_otsu(data.camera()) == 87
 
+
 def test_otsu_coins_image():
     assert threshold_otsu(data.coins()) == 107
+
 
 def test_otsu_coins_image_as_float():
     coins = skimage.img_as_float(data.coins())
     assert 0.41 < threshold_otsu(coins) < 0.42
+
 
 def test_otsu_lena_image():
     assert threshold_otsu(data.lena()) == 141
@@ -88,4 +91,3 @@ def test_otsu_lena_image():
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
-

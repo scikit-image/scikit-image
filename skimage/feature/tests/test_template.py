@@ -50,8 +50,8 @@ def test_normalization():
     image[ineg:ineg + n, jneg:jneg + n] = 0
 
     # white square with a black border
-    template = np.zeros((n+2, n+2))
-    template[1:1+n, 1:1+n] = 1
+    template = np.zeros((n + 2, n + 2))
+    template[1:1 + n, 1:1 + n] = 1
 
     result = match_template(image, template)
 
@@ -121,4 +121,3 @@ def test_pad_input():
 if __name__ == "__main__":
     from numpy import testing
     testing.run_module_suite()
-

@@ -43,7 +43,6 @@ Original author: Lee Kamentsky
 
 
 import math
-import time
 import unittest
 
 import numpy as np
@@ -54,6 +53,7 @@ from skimage.morphology.watershed import watershed, \
 
 eps = 1e-12
 
+
 def diff(a, b):
     if not isinstance(a, np.ndarray):
         a = np.asarray(a)
@@ -61,7 +61,7 @@ def diff(a, b):
         b = np.asarray(b)
     if (0 in a.shape) and (0 in b.shape):
         return 0.0
-    b[a==0] = 0
+    b[a == 0] = 0
     if (a.dtype in [np.complex64, np.complex128] or
         b.dtype in [np.complex64, np.complex128]):
         a = np.asarray(a, np.complex128)
@@ -75,8 +75,10 @@ def diff(a, b):
         t = ((a - b)**2).sum()
     return math.sqrt(t)
 
+
 class TestWatershed(unittest.TestCase):
-    eight = np.ones((3, 3),bool)
+    eight = np.ones((3, 3), bool)
+
     def test_watershed01(self):
         "watershed 1"
         data = np.array([[0, 0, 0, 0, 0, 0, 0],
@@ -100,7 +102,7 @@ class TestWatershed(unittest.TestCase):
                                   [  0, 0, 0, 0, 0, 0, 0],
                                   [  0, 0, 0, 0, 0, 0, 0]],
                                  np.int8)
-        out = watershed(data, markers,self.eight)
+        out = watershed(data, markers, self.eight)
         expected = np.array([[-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
@@ -120,28 +122,27 @@ class TestWatershed(unittest.TestCase):
     def test_watershed02(self):
         "watershed 2"
         data = np.array([[0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 1, 0, 0, 0, 1, 0],
+                         [0, 1, 0, 0, 0, 1, 0],
+                         [0, 1, 0, 0, 0, 1, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0]], np.uint8)
+        markers = np.array([[-1, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0],
-                            [0, 1, 1, 1, 1, 1, 0],
-                               [0, 1, 0, 0, 0, 1, 0],
-                               [0, 1, 0, 0, 0, 1, 0],
-                               [0, 1, 0, 0, 0, 1, 0],
-                               [0, 1, 1, 1, 1, 1, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0]], np.uint8)
-        markers = np.array([[ -1, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 1, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0]],
-                                 np.int8)
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 1, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0]], np.int8)
         out = watershed(data, markers)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
@@ -159,26 +160,25 @@ class TestWatershed(unittest.TestCase):
     def test_watershed03(self):
         "watershed 3"
         data = np.array([[0, 0, 0, 0, 0, 0, 0],
-                               [0, 1, 1, 1, 1, 1, 0],
-                               [0, 1, 0, 1, 0, 1, 0],
-                               [0, 1, 0, 1, 0, 1, 0],
-                               [0, 1, 0, 1, 0, 1, 0],
-                               [0, 1, 1, 1, 1, 1, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0]], np.uint8)
-        markers = np.array([[ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 2, 0, 3, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, -1]],
-                                 np.int8)
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 1, 0, 1, 0, 1, 0],
+                         [0, 1, 0, 1, 0, 1, 0],
+                         [0, 1, 0, 1, 0, 1, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0]], np.uint8)
+        markers = np.array([[0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 2, 0, 3, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, -1]], np.int8)
         out = watershed(data, markers)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  0,  2,  0,  3,  0, -1],
@@ -200,21 +200,20 @@ class TestWatershed(unittest.TestCase):
                                [0, 1, 0, 1, 0, 1, 0],
                                [0, 1, 0, 1, 0, 1, 0],
                                [0, 1, 1, 1, 1, 1, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0, 0, 0]], np.uint8)
-        markers = np.array([[ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 2, 0, 3, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, -1]],
-                                 np.int8)
+        markers = np.array([[0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 2, 0, 3, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, -1]], np.int8)
         out = watershed(data, markers, self.eight)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
@@ -222,35 +221,34 @@ class TestWatershed(unittest.TestCase):
                       [-1,  2,  2,  0,  3,  3, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
                       [-1,  2,  2,  0,  3,  3, -1],
-                      [-1, -1, -1, -1, -1, -1, -1],                      
-                      [-1, -1, -1, -1, -1, -1, -1],                      
-                      [-1, -1, -1, -1, -1, -1, -1],                      
+                      [-1, -1, -1, -1, -1, -1, -1],
+                      [-1, -1, -1, -1, -1, -1, -1],
+                      [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]], out)
         self.failUnless(error < eps)
 
     def test_watershed05(self):
         "watershed 5"
         data = np.array([[0, 0, 0, 0, 0, 0, 0],
-                               [0, 1, 1, 1, 1, 1, 0],
-                               [0, 1, 0, 1, 0, 1, 0],
-                               [0, 1, 0, 1, 0, 1, 0],
-                               [0, 1, 0, 1, 0, 1, 0],
-                               [0, 1, 1, 1, 1, 1, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0]], np.uint8)
-        markers = np.array([[ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 3, 0, 2, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, 0],
-                                  [ 0, 0, 0, 0, 0, 0, -1]],
-                                 np.int8)
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 1, 0, 1, 0, 1, 0],
+                         [0, 1, 0, 1, 0, 1, 0],
+                         [0, 1, 0, 1, 0, 1, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0]], np.uint8)
+        markers = np.array([[0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 3, 0, 2, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, -1]], np.int8)
         out = watershed(data, markers, self.eight)
         error = diff([[-1, -1, -1, -1, -1, -1, -1],
                       [-1,  3,  3,  0,  2,  2, -1],
@@ -267,24 +265,23 @@ class TestWatershed(unittest.TestCase):
     def test_watershed06(self):
         "watershed 6"
         data = np.array([[0, 1, 0, 0, 0, 1, 0],
-                               [0, 1, 0, 0, 0, 1, 0],
-                               [0, 1, 0, 0, 0, 1, 0],
-                               [0, 1, 1, 1, 1, 1, 0],
-                               [0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                               [0, 0, 0, 0, 0, 0, 0]], np.uint8)
-        markers = np.array([[ 0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 1, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  0, 0, 0, 0, 0, 0, 0],
-                                  [  -1, 0, 0, 0, 0, 0, 0]],
-                                 np.int8)
+                         [0, 1, 0, 0, 0, 1, 0],
+                         [0, 1, 0, 0, 0, 1, 0],
+                         [0, 1, 1, 1, 1, 1, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 0, 0]], np.uint8)
+        markers = np.array([[0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 1, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [0, 0, 0, 0, 0, 0, 0],
+                            [-1, 0, 0, 0, 0, 0, 0]], np.int8)
         out = watershed(data, markers, self.eight)
         error = diff([[-1,  1,  1,  1,  1,  1, -1],
                       [-1,  1,  1,  1,  1,  1, -1],
@@ -300,28 +297,28 @@ class TestWatershed(unittest.TestCase):
     def test_watershed07(self):
         "A regression test of a competitive case that failed"
         data = np.array([[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-                            [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-                            [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
-                            [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
-                            [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
-                            [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
-                            [255,255,204,153,111, 72, 39,  1, 1, 39, 72,111,153,204,255,255],
-                            [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
-                            [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
-                            [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
-                            [255,255,255,255,255,204,153,103,103,153,204,255,255,255,255,255],
-                            [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
-                            [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
-                            [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
-                            [255,255,204,153,111, 72, 39,  1,  1, 39, 72,111,153,204,255,255],
-                            [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
-                            [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
-                            [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
-                            [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
-                            [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-                            [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]])
-        mask = (data!=255)
-        markers = np.zeros(data.shape,int)
+                         [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
+                         [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
+                         [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
+                         [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
+                         [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
+                         [255,255,204,153,111, 72, 39,  1, 1, 39, 72,111,153,204,255,255],
+                         [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
+                         [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
+                         [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
+                         [255,255,255,255,255,204,153,103,103,153,204,255,255,255,255,255],
+                         [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
+                         [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
+                         [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
+                         [255,255,204,153,111, 72, 39,  1,  1, 39, 72,111,153,204,255,255],
+                         [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
+                         [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
+                         [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
+                         [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
+                         [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
+                         [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]])
+        mask = (data != 255)
+        markers = np.zeros(data.shape, int)
         markers[6, 7] = 1
         markers[14, 7] = 2
         out = watershed(data, markers, self.eight, mask=mask)
@@ -331,35 +328,35 @@ class TestWatershed(unittest.TestCase):
         #
         size1 = np.sum(out == 1)
         size2 = np.sum(out == 2)
-        self.assertTrue(abs(size1-size2) <= 6)
-    
+        self.assertTrue(abs(size1 - size2) <= 6)
+
     def test_watershed08(self):
         "The border pixels + an edge are all the same value"
         data = np.array([[255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-                            [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-                            [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
-                            [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
-                            [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
-                            [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
-                            [255,255,204,153,111, 72, 39,  1, 1, 39, 72,111,153,204,255,255],
-                            [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
-                            [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
-                            [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
-                            [255,255,255,255,255,204,153,141,141,153,204,255,255,255,255,255],
-                            [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
-                            [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
-                            [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
-                            [255,255,204,153,111, 72, 39,  1,  1, 39, 72,111,153,204,255,255],
-                            [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
-                            [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
-                            [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
-                            [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
-                            [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
-                            [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]])
+                         [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
+                         [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
+                         [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
+                         [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
+                         [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
+                         [255,255,204,153,111, 72, 39,  1,  1, 39, 72,111,153,204,255,255],
+                         [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
+                         [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
+                         [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
+                         [255,255,255,255,255,204,153,141,141,153,204,255,255,255,255,255],
+                         [255,255,255,255,204,183,141, 94, 94,141,183,204,255,255,255,255],
+                         [255,255,255,204,183,141,111, 72, 72,111,141,183,204,255,255,255],
+                         [255,255,204,183,141,111, 72, 39, 39, 72,111,141,183,204,255,255],
+                         [255,255,204,153,111, 72, 39,  1,  1, 39, 72,111,153,204,255,255],
+                         [255,255,204,153,111, 94, 72, 52, 52, 72, 94,111,153,204,255,255],
+                         [255,255,204,183,153,141,111,103,103,111,141,153,183,204,255,255],
+                         [255,255,255,204,204,183,153,153,153,153,183,204,204,255,255,255],
+                         [255,255,255,255,255,204,204,204,204,204,204,255,255,255,255,255],
+                         [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255],
+                         [255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255]])
         mask = (data != 255)
-        markers = np.zeros(data.shape,int)
-        markers[6,7] = 1
-        markers[14,7] = 2
+        markers = np.zeros(data.shape, int)
+        markers[6, 7] = 1
+        markers[14, 7] = 2
         out = watershed(data, markers, self.eight, mask=mask)
         #
         # The two objects should be the same size, except possibly for the
@@ -367,30 +364,27 @@ class TestWatershed(unittest.TestCase):
         #
         size1 = np.sum(out == 1)
         size2 = np.sum(out == 2)
-        self.assertTrue(abs(size1-size2) <= 6)
-    
+        self.assertTrue(abs(size1 - size2) <= 6)
+
     def test_watershed09(self):
         """Test on an image of reasonable size
-        
+
         This is here both for timing (does it take forever?) and to
         ensure that the memory constraints are reasonable
         """
         image = np.zeros((1000, 1000))
         coords = np.random.uniform(0, 1000, (100, 2)).astype(int)
-        markers = np.zeros((1000, 1000),int)
+        markers = np.zeros((1000, 1000), int)
         idx = 1
-        for x,y in coords:
-            image[x,y] = 1
+        for x, y in coords:
+            image[x, y] = 1
             markers[x, y] = idx
             idx += 1
-        
+
         image = scipy.ndimage.gaussian_filter(image, 4)
-        before = time.clock() 
-        out = watershed(image, markers, self.eight)
-        elapsed = time.clock() - before
-        before = time.clock()
-        out = scipy.ndimage.watershed_ift(image.astype(np.uint16), markers, self.eight)
-        elapsed = time.clock() - before
+        watershed(image, markers, self.eight)
+        scipy.ndimage.watershed_ift(image.astype(np.uint16), markers,
+                                    self.eight)
 
 
 class TestIsLocalMaximum(unittest.TestCase):
@@ -399,7 +393,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         labels = np.zeros((10, 20), int)
         result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(~ result))
-        
+
     def test_01_01_one_point(self):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
@@ -407,7 +401,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         labels[5, 5] = 1
         result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(result == (labels == 1)))
-        
+
     def test_01_02_adjacent_and_same(self):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
@@ -415,7 +409,7 @@ class TestIsLocalMaximum(unittest.TestCase):
         labels[5, 5:6] = 1
         result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(result == (labels == 1)))
-        
+
     def test_01_03_adjacent_and_different(self):
         image = np.zeros((10, 20))
         labels = np.zeros((10, 20), int)
@@ -427,67 +421,67 @@ class TestIsLocalMaximum(unittest.TestCase):
         self.assertTrue(np.all(result == expected))
         result = is_local_maximum(image, labels)
         self.assertTrue(np.all(result == expected))
-        
+
     def test_01_04_not_adjacent_and_different(self):
-        image = np.zeros((10,20))
-        labels = np.zeros((10,20), int)
-        image[5,5] = 1
-        image[5,8] = .5
+        image = np.zeros((10, 20))
+        labels = np.zeros((10, 20), int)
+        image[5, 5] = 1
+        image[5, 8] = .5
         labels[image > 0] = 1
         expected = (labels == 1)
-        result = is_local_maximum(image, labels, np.ones((3,3), bool))
+        result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(result == expected))
-        
+
     def test_01_05_two_objects(self):
-        image = np.zeros((10,20))
-        labels = np.zeros((10,20), int)
-        image[5,5] = 1
-        image[5,15] = .5
-        labels[5,5] = 1
-        labels[5,15] = 2
+        image = np.zeros((10, 20))
+        labels = np.zeros((10, 20), int)
+        image[5, 5] = 1
+        image[5, 15] = .5
+        labels[5, 5] = 1
+        labels[5, 15] = 2
         expected = (labels > 0)
-        result = is_local_maximum(image, labels, np.ones((3,3), bool))
+        result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(result == expected))
 
     def test_01_06_adjacent_different_objects(self):
-        image = np.zeros((10,20))
-        labels = np.zeros((10,20), int)
-        image[5,5] = 1
-        image[5,6] = .5
-        labels[5,5] = 1
-        labels[5,6] = 2
+        image = np.zeros((10, 20))
+        labels = np.zeros((10, 20), int)
+        image[5, 5] = 1
+        image[5, 6] = .5
+        labels[5, 5] = 1
+        labels[5, 6] = 2
         expected = (labels > 0)
-        result = is_local_maximum(image, labels, np.ones((3,3), bool))
+        result = is_local_maximum(image, labels, np.ones((3, 3), bool))
         self.assertTrue(np.all(result == expected))
-        
+
     def test_02_01_four_quadrants(self):
         np.random.seed(21)
-        image = np.random.uniform(size=(40,60))
-        i,j = np.mgrid[0:40,0:60]
+        image = np.random.uniform(size=(40, 60))
+        i, j = np.mgrid[0:40, 0:60]
         labels = 1 + (i >= 20) + (j >= 30) * 2
-        i,j = np.mgrid[-3:4,-3:4]
-        footprint = (i*i + j*j <=9)
+        i, j = np.mgrid[-3:4, -3:4]
+        footprint = (i * i + j * j <= 9)
         expected = np.zeros(image.shape, float)
         for imin, imax in ((0, 20), (20, 40)):
             for jmin, jmax in ((0, 30), (30, 60)):
-                expected[imin:imax,jmin:jmax] = scipy.ndimage.maximum_filter(
-                    image[imin:imax, jmin:jmax], footprint = footprint)
+                expected[imin:imax, jmin:jmax] = scipy.ndimage.maximum_filter(
+                    image[imin:imax, jmin:jmax], footprint=footprint)
         expected = (expected == image)
         result = is_local_maximum(image, labels, footprint)
         self.assertTrue(np.all(result == expected))
-        
+
     def test_03_01_disk_1(self):
         '''regression test of img-1194, footprint = [1]
-        
+
         Test is_local_maximum when every point is a local maximum
         '''
         np.random.seed(31)
-        image = np.random.uniform(size=(10,20))
+        image = np.random.uniform(size=(10, 20))
         footprint = np.array([[1]])
-        result = is_local_maximum(image, np.ones((10,20)), footprint)
+        result = is_local_maximum(image, np.ones((10, 20)), footprint)
         self.assertTrue(np.all(result))
         result = is_local_maximum(image, footprint=footprint)
         self.assertTrue(np.all(result))
-        
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

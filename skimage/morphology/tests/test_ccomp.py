@@ -3,6 +3,7 @@ from numpy.testing import assert_array_equal, run_module_suite
 
 from skimage.morphology import label
 
+
 class TestConnectedComponents:
     def setup(self):
         self.x = np.array([[0, 0, 3, 2, 1, 9],

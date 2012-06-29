@@ -9,6 +9,7 @@ except ImportError:
                       "Please refer to http://www.gdal.org/ "
                       "for further instructions.")
 
+
 def imread(fname, dtype=None):
     """Load an image from file.
 
@@ -16,4 +17,3 @@ def imread(fname, dtype=None):
     ds = gdal.Open(fname)
 
     return ds.ReadAsArray().astype(dtype)
-
