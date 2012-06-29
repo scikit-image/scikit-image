@@ -1,6 +1,7 @@
 import numpy as np
 from . import _spath
 
+
 def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
     """Find the shortest path through an n-d array from one side to another.
 
@@ -39,7 +40,7 @@ def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
     # a grid defined by the reach.
     if axis < 0:
         axis += arr.ndim
-    offset_ind_shape = (2*reach + 1,) * (arr.ndim - 1)
+    offset_ind_shape = (2 * reach + 1,) * (arr.ndim - 1)
     offset_indices = np.indices(offset_ind_shape) - reach
     offset_indices = np.insert(offset_indices, axis,
                                np.ones(offset_ind_shape), axis=0)
@@ -49,7 +50,7 @@ def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
     # Valid starting positions are anywhere on the hyperplane defined by
     # position 0 on the given axis. Ending positions are anywhere on the
     # hyperplane at position -1 along the same.
-    non_axis_shape = arr.shape[:axis] + arr.shape[axis+1:]
+    non_axis_shape = arr.shape[:axis] + arr.shape[axis + 1:]
     non_axis_indices = np.indices(non_axis_shape)
     non_axis_size = np.multiply.reduce(non_axis_shape)
     start_indices = np.insert(non_axis_indices, axis,
@@ -72,7 +73,7 @@ def shortest_path(arr, reach=1, axis=-1, output_indexlist=False):
 
     if not output_indexlist:
         traceback = np.array(traceback)
-        traceback = np.concatenate([traceback[:,:axis], traceback[:,axis+1:]],
+        traceback = np.concatenate([traceback[:, :axis], traceback[:, axis + 1:]],
                                    axis=1)
         traceback = np.squeeze(traceback)
 

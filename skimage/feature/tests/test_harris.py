@@ -13,6 +13,7 @@ def test_square_image():
     assert results.any()
     assert len(results) == 1
 
+
 def test_noisy_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.
@@ -21,12 +22,14 @@ def test_noisy_square_image():
     assert results.any()
     assert len(results) == 1
 
+
 def test_squared_dot():
     im = np.zeros((50, 50))
     im[4:8, 4:8] = 1
     im = img_as_float(im)
     results = harris(im, min_distance=3)
     assert (results == np.array([[6, 6]])).all()
+
 
 def test_rotated_lena():
     """
@@ -44,4 +47,3 @@ def test_rotated_lena():
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
-

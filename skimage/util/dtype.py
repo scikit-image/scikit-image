@@ -94,7 +94,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     def _dtype2(kind, bits, itemsize=1):
         # Return dtype of `kind` that can store a `bits` wide unsigned int
         c = lambda x, y: x <= y if kind == 'u' else x < y
-        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i*8))
+        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i * 8))
         return np.dtype(kind + str(s))
 
     def _scale(a, n, m, copy=True):
@@ -205,26 +205,26 @@ def convert(image, dtype, force_copy=False, uniform=False):
     if kind_in == 'u':
         if kind == 'i':
             # unsigned integer -> signed integer
-            image = _scale(image, 8*itemsize_in, 8*itemsize-1)
+            image = _scale(image, 8 * itemsize_in, 8 * itemsize - 1)
             return image.view(dtype)
         else:
             # unsigned integer -> unsigned integer
-            return _scale(image, 8*itemsize_in, 8*itemsize)
+            return _scale(image, 8 * itemsize_in, 8 * itemsize)
 
     if kind == 'u':
         # signed integer -> unsigned integer
         sign_loss()
-        image = _scale(image, 8*itemsize_in-1, 8*itemsize)
+        image = _scale(image, 8 * itemsize_in - 1, 8 * itemsize)
         result = np.empty(image.shape, dtype)
         np.maximum(image, 0, out=result, dtype=image.dtype, casting='unsafe')
         return result
 
     # signed integer -> signed integer
     if itemsize_in > itemsize:
-        return _scale(image, 8*itemsize_in-1, 8*itemsize-1)
-    image = image.astype(_dtype2('i', itemsize*8))
+        return _scale(image, 8 * itemsize_in - 1, 8 * itemsize - 1)
+    image = image.astype(_dtype2('i', itemsize * 8))
     image -= imin_in
-    image = _scale(image, 8*itemsize_in, 8*itemsize, copy=False)
+    image = _scale(image, 8 * itemsize_in, 8 * itemsize, copy=False)
     image += imin
     return dtype(image)
 

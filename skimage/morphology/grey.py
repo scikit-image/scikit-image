@@ -71,7 +71,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
         import skimage.morphology.cmorph as cmorph
         out = cmorph.erode(image, selem, out=out,
                            shift_x=shift_x, shift_y=shift_y)
-        return out;
+        return out
     except ImportError:
         raise ImportError("cmorph extension not available.")
 
@@ -130,7 +130,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
         from . import cmorph
         out = cmorph.dilate(image, selem, out=out,
                             shift_x=shift_x, shift_y=shift_y)
-        return out;
+        return out
     except ImportError:
         raise ImportError("cmorph extension not available.")
 
@@ -342,23 +342,27 @@ def greyscale_erode(*args, **kwargs):
     warnings.warn("`greyscale_erode` renamed `erosion`.")
     return erosion(*args, **kwargs)
 
+
 def greyscale_dilate(*args, **kwargs):
     warnings.warn("`greyscale_dilate` renamed `dilation`.")
     return dilation(*args, **kwargs)
+
 
 def greyscale_open(*args, **kwargs):
     warnings.warn("`greyscale_open` renamed `opening`.")
     return opening(*args, **kwargs)
 
+
 def greyscale_close(*args, **kwargs):
     warnings.warn("`greyscale_close` renamed `closing`.")
     return closing(*args, **kwargs)
+
 
 def greyscale_white_top_hat(*args, **kwargs):
     warnings.warn("`greyscale_white_top_hat` renamed `white_tophat`.")
     return white_tophat(*args, **kwargs)
 
+
 def greyscale_black_top_hat(*args, **kwargs):
     warnings.warn("`greyscale_black_top_hat` renamed `black_tophat`.")
     return black_tophat(*args, **kwargs)
-

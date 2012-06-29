@@ -6,6 +6,7 @@ import os.path
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
+
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
@@ -30,10 +31,10 @@ def configuration(parent_package='', top_path=None):
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
-    setup(maintainer = 'scikits-image Developers',
-          maintainer_email = 'scikits-image@googlegroups.com',
-          description = 'Image I/O Routines',
-          url = 'https://github.com/scikits-image/scikits-image',
-          license = 'Modified BSD',
+    setup(maintainer='scikits-image Developers',
+          maintainer_email='scikits-image@googlegroups.com',
+          description='Image I/O Routines',
+          url='https://github.com/scikits-image/scikits-image',
+          license='Modified BSD',
           **(configuration(top_path='').todict())
           )

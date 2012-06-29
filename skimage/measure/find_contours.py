@@ -5,6 +5,7 @@ from collections import deque
 
 _param_options = ('high', 'low')
 
+
 def find_contours(array, level,
                   fully_connected='low', positive_orientation='low'):
     """Find iso-valued contours in a 2D array for a given level value.
@@ -83,10 +84,10 @@ def find_contours(array, level,
 
     This means that to find reasonable contours, it is best to find contours
     midway between the expected "light" and "dark" values. In particular,
-    given a binarized array, *do not* choose to find contours at the low or high
-    value of the array. This will often yield degenerate contours, especially
-    around structures that are a single array element wide. Instead choose
-    a middle value, as above.
+    given a binarized array, *do not* choose to find contours at the low or
+    high value of the array. This will often yield degenerate contours,
+    especially around structures that are a single array element wide. Instead
+    choose a middle value, as above.
 
     References
     ----------
@@ -101,8 +102,8 @@ def find_contours(array, level,
     level = float(level)
     if (fully_connected not in _param_options or
        positive_orientation not in _param_options):
-       raise ValueError('Parameters "fully_connected" and'
-       ' "positive_orientation" must be either "high" or "low".')
+        raise ValueError('Parameters "fully_connected" and'
+        ' "positive_orientation" must be either "high" or "low".')
     point_list = _find_contours.iterate_and_store(array, level,
         fully_connected == 'high')
     contours = _assemble_contours(_take_2(point_list))
@@ -110,12 +111,14 @@ def find_contours(array, level,
         contours = [c[::-1] for c in contours]
     return contours
 
+
 def _take_2(seq):
-        iterator = iter(seq)
-        while(True):
-            n1 = iterator.next()
-            n2 = iterator.next()
-            yield (n1, n2)
+    iterator = iter(seq)
+    while(True):
+        n1 = iterator.next()
+        n2 = iterator.next()
+        yield (n1, n2)
+
 
 def _assemble_contours(points_iterator):
     current_index = 0
@@ -127,7 +130,8 @@ def _assemble_contours(points_iterator):
         # This happens when (and only when) one vertex of the square is
         # exactly the contour level, and the rest are above or below.
         # This degnerate vertex will be picked up later by neighboring squares.
-        if from_point == to_point: continue
+        if from_point == to_point:
+            continue
 
         tail_data = starts.get(to_point)
         head_data = ends.get(from_point)
@@ -143,7 +147,7 @@ def _assemble_contours(points_iterator):
                 head.append(to_point)
                 del starts[to_point]
                 del ends[from_point]
-            else: # tail is not head
+            else:  # tail is not head
                 # We need to join two distinct contours.
                 # We want to keep the first contour segment created, so that
                 # the final contours are ordered left->right, top->bottom.
@@ -157,7 +161,7 @@ def _assemble_contours(points_iterator):
                     # remove the old end of head and add the new end.
                     del ends[from_point]
                     ends[head[-1]] = (head, head_num)
-                else: # tail_num <= head_num
+                else:  # tail_num <= head_num
                     # head was created second. Prepend head to tail.
                     tail.extendleft(reversed(head))
                     # remove all traces of head:

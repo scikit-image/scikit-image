@@ -86,6 +86,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
 
     return image > (thresh_image - offset)
 
+
 def threshold_otsu(image, nbins=256):
     """Return threshold value based on Otsu's method.
 

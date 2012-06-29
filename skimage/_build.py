@@ -1,9 +1,8 @@
 import sys
 import os
-import shutil
 import hashlib
 import subprocess
-import platform
+
 
 def cython(pyx_files, working_path=''):
     """Use Cython to convert the given files to C.
@@ -39,16 +38,17 @@ def cython(pyx_files, working_path=''):
             print(cmd)
 
             try:
-                status = subprocess.call(['cython', '-o', c_file, pyxfile])
+                subprocess.call(['cython', '-o', c_file, pyxfile])
             except WindowsError:
                 # On Windows cython.exe may be missing if Cython was installed
                 # via distutils. Run the cython.py script instead.
-                status = subprocess.call(
+                subprocess.call(
                     [sys.executable,
                      os.path.join(os.path.dirname(sys.executable),
                                   'Scripts', 'cython.py'),
                      '-o', c_file, pyxfile],
                     shell=True)
+
 
 def _md5sum(f):
     m = hashlib.new('md5')
@@ -59,6 +59,7 @@ def _md5sum(f):
             break
         m.update(d)
     return m.hexdigest()
+
 
 def _changed(filename):
     """Compare the hash of a Cython file to the cached hash value on disk.

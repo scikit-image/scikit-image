@@ -41,7 +41,7 @@ class TestImageCollection():
         def return_img(n):
             return self.collection[n]
         assert_raises(IndexError, return_img, num)
-        assert_raises(IndexError, return_img, -num-1)
+        assert_raises(IndexError, return_img, -num - 1)
 
     def test_files_property(self):
         assert isinstance(self.collection.files, list)
@@ -52,6 +52,7 @@ class TestImageCollection():
 
     def test_custom_load(self):
         load_pattern = [(1, 'one'), (2, 'two')]
+
         def load_fn(x):
             return x
 
@@ -83,7 +84,7 @@ class TestMultiImage():
         def return_img(n):
             return self.img[n]
         assert_raises(IndexError, return_img, num)
-        assert_raises(IndexError, return_img, -num-1)
+        assert_raises(IndexError, return_img, -num - 1)
 
     @skipif(not PIL_available)
     def test_files_property(self):
@@ -102,10 +103,5 @@ class TestMultiImage():
         assert_raises(AttributeError, set_mem, True)
 
 
-
-
-
-
 if __name__ == "__main__":
     run_module_suite()
-

@@ -10,6 +10,7 @@ __all__ = ['homography']
 
 eps = np.finfo(float).eps
 
+
 def homography(image, H, output_shape=None, order=1,
                mode='constant', cval=0.):
     """Perform a projective transformation (homography) on an image.
@@ -86,7 +87,7 @@ def homography(image, H, output_shape=None, order=1,
            [  0,   0,   0, 255,   0],
            [  0,   0,   0,   0,   0],
            [  0,   0,   0,   0,   0]], dtype=uint8)
-           
+
     """
     if image.ndim < 2:
         raise ValueError("Input must have more than 1 dimension.")
@@ -120,13 +121,13 @@ def homography(image, H, output_shape=None, order=1,
     tf_coords[..., :2] /= tf_coords[..., 2, np.newaxis]
 
     # y-coordinate mapping
-    _stackcopy(coords[0,...], tf_coords[...,1])
+    _stackcopy(coords[0, ...], tf_coords[..., 1])
 
     # x-coordinate mapping
-    _stackcopy(coords[1,...], tf_coords[...,0])
+    _stackcopy(coords[1, ...], tf_coords[..., 0])
 
     # colour-coordinate mapping
-    coords[2,...] = range(bands)
+    coords[2, ...] = range(bands)
 
     # Prefilter not necessary for order 1 interpolation
     prefilter = order > 1

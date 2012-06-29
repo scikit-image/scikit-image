@@ -3,6 +3,7 @@ from numpy.testing import *
 
 from skimage.transform import *
 
+
 def test_frt():
     SIZE = 59
     try:
@@ -15,4 +16,4 @@ def test_frt():
     L = np.tri(SIZE, dtype=np.int32) + np.tri(SIZE, dtype=np.int32)[::-1]
     f = frt2(L)
     fi = ifrt2(f)
-    assert len(np.nonzero(L-fi)[0]) == 0
+    assert len(np.nonzero(L - fi)[0]) == 0

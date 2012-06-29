@@ -74,4 +74,3 @@ def test_rescale_out_range():
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
-

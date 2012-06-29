@@ -1,11 +1,12 @@
 import numpy as np
-import os, time
+import os
 from skimage.io import ImageCollection
 
 try:
     import pygst
     pygst.require("0.10")
-    import gst, gobject
+    import gst
+    import gobject
     gobject.threads_init()
     from gst.extend.discoverer import Discoverer
     gstreamer_available = True
@@ -36,11 +37,11 @@ class CvVideo(object):
         self.source = source
         self.capture = cv.CreateFileCapture(self.source)
         self.size = size
-        
+
     def get(self):
         """
         Retrieve a video frame as a numpy array.
-        
+
         Returns
         -------
         output : array (image)
@@ -55,31 +56,34 @@ class CvVideo(object):
         else:
             cv.Resize(img, cv.fromarray(img_mat))
         # opencv stores images in BGR format
-        cv.CvtColor(cv.fromarray(img_mat), cv.fromarray(img_mat), cv.CV_BGR2RGB)
+        cv.CvtColor(cv.fromarray(img_mat), cv.fromarray(img_mat),
+                    cv.CV_BGR2RGB)
         return img_mat
-    
+
     def seek_frame(self, frame_number):
         """
         Seek to specified frame in video.
-        
+
         Parameters
         ----------
         frame_number : int
             Frame position
         """
-        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_FRAMES, frame_number)
-        
+        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_FRAMES,
+                              frame_number)
+
     def seek_time(self, milliseconds):
         """
         Seek to specified time in video.
-        
+
         Parameters
         ----------
         milliseconds : int
             Time position
         """
-        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_MSEC, milliseconds)
-    
+        cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_MSEC,
+                              milliseconds)
+
     def frame_count(self):
         """
         Returns frame count of video.
@@ -90,7 +94,7 @@ class CvVideo(object):
             Frame count.
         """
         return cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_COUNT)
-    
+
     def duration(self):
         """
         Returns time length of video in milliseconds.
@@ -102,8 +106,8 @@ class CvVideo(object):
         """
         return cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FPS) * \
             cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_COUNT)
-    
-        
+
+
 class GstVideo(object):
     """
     GStreamer-based video loader.
@@ -115,9 +119,9 @@ class GstVideo(object):
     size: tuple, optional
         Size of returned array.
     sync: bool, optional (default False)
-        Frames are extracted per frame or per time basis.
-        If enabled the video time step continues onward according to the play rate.
-        Useful for ip cameras and other real time video feeds.
+        Frames are extracted per frame or per time basis. If enabled the video
+        time step continues onward according to the play rate.  Useful for ip
+        cameras and other real time video feeds.
     """
     def __init__(self, source=None, size=None, sync=False):
         if not gstreamer_available:
@@ -127,7 +131,7 @@ class GstVideo(object):
         self.video_length = 0
         self.video_rate = 0
         # extract video size
-        if not size: 
+        if not size:
             gobject.idle_add(self._discover_one)
             self.mainloop = gobject.MainLoop()
             self.mainloop.run()
@@ -143,7 +147,7 @@ class GstVideo(object):
         """
         discoverer = Discoverer(self.source)
         discoverer.connect('discovered', self._discovered)
-        discoverer.discover()          
+        discoverer.discover()
         return False
 
     def _discovered(self, d, is_media):
@@ -152,13 +156,13 @@ class GstVideo(object):
         """
         if is_media:
             self.size = (d.videowidth, d.videoheight)
-            self.video_length = d.videolength / gst.MSECOND            
+            self.video_length = d.videolength / gst.MSECOND
             self.video_rate = d.videorate.num
         self.mainloop.quit()
         return False
-    
+
     def _create_main_pipeline(self, source, size, sync):
-        """ 
+        """
         Create the frame extraction pipeline.
         """
         pipeline_string = "uridecodebin name=decoder uri=%s ! ffmpegcolorspace ! videoscale ! appsink name=play_sink" % self.source
@@ -173,42 +177,43 @@ class GstVideo(object):
         self.appsink.set_property('caps', gst.caps_from_string(caps))
         if self.pipeline.set_state(gst.STATE_PLAYING) == gst.STATE_CHANGE_FAILURE:
             raise NameError("Failed to load video source %s" % self.source)
-        buff = self.appsink.emit('pull-preroll')
-      
+        self.appsink.emit('pull-preroll')
+
     def get(self):
         """
         Retrieve a video frame as a numpy array.
-        
+
         Returns
         -------
         output : array (image)
             Retrieved image.
         """
         buff = self.appsink.emit('pull-buffer')
-        img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3), dtype=np.uint8, buffer=buff.data)
+        img_mat = np.ndarray(shape=(self.size[1], self.size[0], 3),
+                             dtype=np.uint8, buffer=buff.data)
         return img_mat
 
     def seek_frame(self, frame_number):
         """
         Seek to specified frame in video.
-        
+
         Parameters
         ----------
         frame_number : int
             Frame position
         """
         self.pipeline.seek_simple(gst.FORMAT_DEFAULT, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, frame_number)
-        
+
     def seek_time(self, milliseconds):
         """
         Seek to specified time in video.
-        
+
         Parameters
         ----------
         milliseconds : int
             Time position
         """
-        self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, milliseconds/1000.0 * gst.SECOND)
+        self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, milliseconds / 1000.0 * gst.SECOND)
 
     def frame_count(self):
         """
@@ -219,8 +224,8 @@ class GstVideo(object):
         output : int
             Frame count.
         """
-        return self.video_length/1000*self.video_rate
-    
+        return self.video_length / 1000 * self.video_rate
+
     def duration(self):
         """
         Returns time length of video in milliseconds.
@@ -236,7 +241,7 @@ class GstVideo(object):
 class Video(object):
     """
     Video loader. Supports Opencv and Gstreamer backends.
-    
+
     Parameters
     ----------
     source : str
@@ -248,7 +253,7 @@ class Video(object):
         If enabled the video time step continues onward according to the play rate.
         Useful for IP cameras and other real time video feeds.
     backend: str, 'gstreamer' or 'opencv'
-        Backend to use. 
+        Backend to use.
     """
     def __init__(self, source=None, size=None, sync=False, backend=None):
         if backend == None:
@@ -270,29 +275,29 @@ class Video(object):
     def get(self):
         """
         Retrieve the next video frame as a numpy array.
-        
+
         Returns
         -------
         output : array (image)
             Retrieved image.
         """
         return self.video.get()
-    
+
     def seek_frame(self, frame_number):
         """
         Seek to specified frame in video.
-        
+
         Parameters
         ----------
         frame_number : int
             Frame position
         """
         self.video.seek_frame(frame_number)
-        
+
     def seek_time(self, milliseconds):
         """
         Seek to specified time in video.
-        
+
         Parameters
         ----------
         milliseconds : int
@@ -310,7 +315,7 @@ class Video(object):
             Frame count.
         """
         return self.video.frame_count()
-    
+
     def duration(self):
         """
         Returns time length of video in milliseconds.
@@ -321,11 +326,11 @@ class Video(object):
             Time length [ms].
         """
         return self.video.duration()
-     
+
     def get_index_frame(self, frame_number):
         """
         Retrieve a specified video frame as a numpy array.
-        
+
         Parameters
         ----------
         frame_number : int
@@ -335,28 +340,27 @@ class Video(object):
         -------
         output : array (image)
             Retrieved image.
-        """        
+        """
         self.video.seek_frame(frame_number)
         return self.video.get()
-    
+
     def get_collection(self, time_range=None):
         """
         Returns an ImageCollection object.
-        
+
         Parameters
         ----------
         time_range: range (int), optional
             Time steps to extract, defaults to the entire length of video.
-                
+
         Returns
         -------
-        output: ImageCollection            
+        output: ImageCollection
             Collection of images iterator.
         """
         if not time_range:
             time_range = range(int(self.frame_count()))
         return ImageCollection(time_range, load_func=self.get_index_frame)
-    
-    
-__all__ = ["Video"]
 
+
+__all__ = ["Video"]

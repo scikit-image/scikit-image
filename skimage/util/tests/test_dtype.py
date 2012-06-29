@@ -12,10 +12,12 @@ dtype_range = {np.uint8: (0, 255),
                np.float32: (-1.0, 1.0),
                np.float64: (-1.0, 1.0)}
 
+
 def _verify_range(msg, x, vmin, vmax, dtype):
     assert_equal(x[0], vmin)
     assert_equal(x[-1], vmax)
     assert x.dtype == dtype
+
 
 def test_range():
     for dtype in dtype_range:

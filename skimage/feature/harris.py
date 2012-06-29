@@ -42,7 +42,7 @@ def _compute_harris_response(image, eps=1e-6, gaussian_deviation=1):
     Wyy = ndimage.gaussian_filter(imy * imy, 1.5, mode='constant')
 
     # determinant and trace
-    Wdet = Wxx * Wyy - Wxy ** 2
+    Wdet = Wxx * Wyy - Wxy**2
     Wtr = Wxx + Wyy
     # Alternate formula for Harris response.
     # Alison Noble, "Descriptions of Image Surfaces", PhD thesis (1989)
@@ -76,7 +76,7 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
     -------
     coordinates : (N, 2) array
         (row, column) coordinates of interest points.
-    
+
     Examples
     -------
     >>> square = np.zeros([10,10])
@@ -93,18 +93,17 @@ def harris(image, min_distance=10, threshold=0.1, eps=1e-6,
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
     >>> harris(square, min_distance=1)
-    
+
     Corners of the square
-    
+
     array([[3, 3],
            [3, 6],
            [6, 3],
-           [6, 6]])    
+           [6, 6]])
     """
-    
+
     harrisim = _compute_harris_response(image, eps=eps,
                     gaussian_deviation=gaussian_deviation)
     coordinates = peak.peak_local_max(harrisim, min_distance=min_distance,
                                         threshold=threshold)
     return coordinates
-

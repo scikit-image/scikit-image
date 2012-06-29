@@ -485,7 +485,7 @@ def rgb2grey(rgb):
     Raises
     ------
     ValueError
-        If `rgb2grey` is not a 3-D array of shape (.., .., 3) or 
+        If `rgb2grey` is not a 3-D array of shape (.., .., 3) or
         (.., .., 4).
 
     References

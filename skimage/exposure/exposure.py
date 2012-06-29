@@ -183,4 +183,3 @@ def rescale_intensity(image, in_range=None, out_range=None):
 
     image = (image - imin) / float(imax - imin)
     return dtype(image * (omax - omin) + omin)
-
