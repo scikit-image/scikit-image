@@ -92,10 +92,12 @@ def test_polynomial():
     assert_array_almost_equal(tform.fwd(SRC), DST, 6)
 
 def test_homography():
-    x = img_as_float(np.arange(9, dtype=np.uint8).reshape((3, 3)) + 1)
+    x = np.zeros((5,5), dtype=np.uint8)
+    x[1, 1] = 255
+    x = img_as_float(x)
     theta = -np.pi/2
     M = np.array([[np.cos(theta),-np.sin(theta),0],
-                  [np.sin(theta), np.cos(theta),2],
+                  [np.sin(theta), np.cos(theta),4],
                   [0,             0,            1]])
     x90 = homography(x, M, order=1)
     assert_array_almost_equal(x90, np.rot90(x))

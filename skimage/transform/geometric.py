@@ -5,9 +5,6 @@ from scipy import ndimage
 from skimage.util import img_as_float
 
 
-EPS = np.spacing(1)
-
-
 def _stackcopy(a, b):
     """Copy b into each color layer of a, such that::
 
@@ -182,8 +179,6 @@ def _transform(coords, matrix):
     # rescale to homogeneous coordinates
     dst[:, 0] /= dst[:, 2]
     dst[:, 1] /= dst[:, 2]
-    # values close to zero because of limited numerical precision
-    dst[np.abs(dst) < EPS] = 0
     return dst[:, :2]
 
 
