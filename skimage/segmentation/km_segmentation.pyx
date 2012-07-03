@@ -24,19 +24,19 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
     ratio = (ratio / float(step)) ** 2
     print(ratio)
     cdef np.ndarray[dtype=np.float_t, ndim=3] image_yx = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
-    cdef int i, k, x, y, x_min, x_max, y_min, y_max
-    cdef float dist_mean
+    cdef int i, k, x, y, x_min, x_max, y_min, y_max, changes
+    cdef double dist_mean
 
     cdef np.ndarray[dtype=np.int_t, ndim=2] nearest_mean = np.zeros((height, width), dtype=np.int)
     cdef np.ndarray[dtype=np.float_t, ndim=2] distance = np.ones((height, width), dtype=np.float) * np.inf
     cdef np.float_t* image_p = <np.float_t*> image_yx.data
     cdef np.float_t* distance_p = <np.float_t*> distance.data
+    cdef np.float_t* current_distance
     cdef np.float_t* current_pixel
-    cdef float tmp
+    cdef double tmp
     for i in xrange(max_iter):
+        changes = 0
         print("iteration %d" % i)
-        nearest_mean_old = nearest_mean.copy()
-        # we construct a new means every iteration, adjust pointer
         current_mean = <np.float_t*> means.data
         # assign pixels to means
         for k in xrange(n_means):
@@ -47,6 +47,7 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
             x_max = int(min(current_mean[1] + 2 * step, height))
             for y in xrange(y_min, y_max):
                 current_pixel = &image_p[5 * (y * width + x_min)]
+                current_distance = &distance_p[y * width + x_min]
                 for x in xrange(x_min, x_max):
                     mean_entry = current_mean
                     dist_mean = 0
@@ -54,14 +55,16 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
                         # you would think the compiler can optimize this itself.
                         # mine can't (with O2)
                         tmp = current_pixel[0] - mean_entry[0]
+                        dist_mean += tmp * tmp
                         current_pixel += 1
                         mean_entry += 1
-                        dist_mean += tmp * tmp
-                    if distance[y, x] > dist_mean:
+                    # some precision issue here. Doesnt work if testing ">"
+                    if current_distance[0] - dist_mean > 1e-10:
                         nearest_mean[y, x] = k
-                        distance[y, x] = dist_mean
+                        current_distance[0] = dist_mean
+                        changes += 1
+                    current_distance += 1
             current_mean += 5
-        if (nearest_mean == nearest_mean_old).all():
             break
         # recompute means:
         means_list = [np.bincount(nearest_mean.ravel(), image_yx[:, :, j].ravel())
