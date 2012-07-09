@@ -146,6 +146,9 @@ class TestColorconv(TestCase):
 
         assert_equal(g.shape, (1, 1))
 
+    def test_rgb2grey_on_grey(self):
+        rgb2grey(np.random.random((5, 5)))
+
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
