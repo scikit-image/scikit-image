@@ -28,7 +28,7 @@ def _stackcopy(a, b):
         a[:] = b
 
 
-def _make_similarity(src, dst):
+def _estimate_similarity(src, dst):
     """Determine parameters of the 2D similarity transformation:
         X = a0*x - b0*y + a1
         Y = b0*x + a0*y + a2
@@ -36,6 +36,7 @@ def _make_similarity(src, dst):
         [[a0 -b0  a1]
          [b0  a0  b1]
          [0   0    1]]
+
     """
     xs = src[:, 0]
     ys = src[:, 1]
@@ -61,7 +62,7 @@ def _make_similarity(src, dst):
     return matrix
 
 
-def _make_affine(src, dst):
+def _estimate_affine(src, dst):
     """Determine parameters of the 2D affine transformation:
         X = a0*x + a1*y + a2
         Y = b0*x + b1*y + b2
@@ -69,6 +70,7 @@ def _make_affine(src, dst):
         [[a0  a1  a2]
          [b0  b1  b2]
          [0   0    1]]
+
     """
     xs = src[:, 0]
     ys = src[:, 1]
@@ -94,7 +96,7 @@ def _make_affine(src, dst):
     return matrix
 
 
-def _make_projective(src, dst):
+def _estimate_projective(src, dst):
     """Determine transformation matrix of the 2D projective transformation:
         X = (a0 + a1*x + a2*y) / (c0*x + c1*y + 1)
         Y = (b0 + b1*x + b2*y) / (c0*x + c1*y + 1)
@@ -102,6 +104,7 @@ def _make_projective(src, dst):
         [[a0  a1  a2]
          [b0  b1  b2]
          [c0  c1   1]]
+
     """
     xs = src[:, 0]
     ys = src[:, 1]
@@ -131,10 +134,11 @@ def _make_projective(src, dst):
     return matrix
 
 
-def _make_polynomial(src, dst, order):
+def _estimate_polynomial(src, dst, order):
     """Determine parameters of 2D polynomial transformation of order n:
         X = sum[j=0:n]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
         Y = sum[j=0:n]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+
     """
     xs = src[:, 0]
     ys = src[:, 1]
@@ -158,21 +162,21 @@ def _make_polynomial(src, dst, order):
     return np.linalg.lstsq(A, b)[0]
 
 
-def _make_rotation(angle):
-    """Determine homogeneous transformation matrix of 2D rotation:
-        [[cos(angle) -sin(angle) 0]
-         [sin(angle)  cos(angle) 0]
-         [0           0          1]]
+def geometric_transform(coords, matrix):
+    """Apply 2D geometric transformation.
+
+    Parameters
+        ----------
+        ttype : Nx2 array
+            x, y coordinates to transform
+        matrix : 3x3 array
+            homogeneous transformation matrix
+
+    Returns
+    -------
+    coords : Nx2 array
+            transformed coordinates
     """
-    R = [
-        [math.cos(angle), -math.sin(angle), 0],
-        [math.sin(angle),  math.cos(angle), 0],
-        [0,                              0, 1],
-    ]
-    return np.array(R)
-
-
-def _transform(coords, matrix):
     x, y = np.transpose(coords)
     src = np.vstack((x, y, np.ones_like(x)))
     dst = np.dot(src.transpose(), matrix.transpose())
@@ -200,32 +204,28 @@ def _transform_polynomial(coords, matrix):
     return dst
 
 
-TRANSFORMATIONS = {
-    'similarity': (_make_similarity, _transform),
-    'affine': (_make_affine, _transform),
-    'projective': (_make_projective, _transform),
-    'polynomial': (_make_polynomial, _transform_polynomial),
-    'rotation': (_make_rotation, _transform),
-}
+class GeometricTransformation(object):
 
-
-class Transformation(object):
-
-    def __init__(self, ttype, matrix):
-        """Create transformation which contains the transformation parameters
-        and can perform forward and inverse transformations.
+    def __init__(self, ttype, params, transform_func):
+        """Create geometric transformation which contains the transformation
+        parameters and can perform forward and reverse transformations.
 
         Parameters
         ----------
         ttype : str
-            one of similarity, affine, projective, polynomial, rotation
-        matrix : 3x3 array
-            homogeneous transformation matrix
+            transformation type - one of 'similarity', 'affine', 'projective',
+            'polynomial'
+        params : array
+            transformation parameters
+        transform_func : callable = func(coords, matrix)
+            transformation function
+
         """
         self.ttype = ttype
-        self.matrix = matrix
+        self.params = params
+        self.transform_func = transform_func
 
-    def fwd(self, coords):
+    def forward(self, coords):
         """Apply forward transformation.
 
         Parameters
@@ -237,11 +237,12 @@ class Transformation(object):
         -------
         coords : Nx2 array
             transformed coordinates
-        """
-        return TRANSFORMATIONS[self.ttype][1](coords, self.matrix)
 
-    def inv(self, coords):
-        """Apply inverse transformation.
+        """
+        return self.transform_func(coords, self.params)
+
+    def reverse(self, coords):
+        """Apply reverse transformation.
 
         Parameters
         ----------
@@ -252,30 +253,38 @@ class Transformation(object):
         -------
         coords : Nx2 array
             transformed coordinates
+
         """
         if self.ttype == 'polynomial':
             raise Exception(
-                'There is no explicit way to do the inverse polynomial '
-                'transformation. Instead determine the inverse transformation '
-                'parameters and use the forward transformation instead.')
-        matrix = np.linalg.inv(self.matrix)
-        return TRANSFORMATIONS[self.ttype][1](coords, matrix)
+                'There is no explicit way to do the reverse polynomial '
+                'transformation. Instead determine the reverse transformation '
+                'parameters by exchanging source and destination coordinates.'
+                'Then apply the forward transformation.')
+        inv_matrix = np.linalg.inv(self.params)
+        return self.transform_func(coords, inv_matrix)
 
 
-def make_tform(ttype, **kwargs):
-    """Create geometric transformation.
+ESTIMATED_TRANSFORMATIONS = {
+    'similarity': (_estimate_similarity, geometric_transform),
+    'affine': (_estimate_affine, geometric_transform),
+    'projective': (_estimate_projective, geometric_transform),
+    'polynomial': (_estimate_polynomial, _transform_polynomial),
+}
+
+
+def estimate_transformation(ttype, *args, **kwargs):
+    """Estimate 2D geometric transformation parameters.
 
     You can determine the over-, well- and under-determined parameters
     with the least-squares method.
-
-
 
     Number of source must match number of destination coordinates.
 
     Parameters
     ----------
     ttype : str
-        one of similarity, affine, projective, polynomial, rotation
+        one of similarity, affine, projective, polynomial
     kwargs : array or int
         function parameters (src, dst, n, angle):
 
@@ -284,17 +293,14 @@ def make_tform(ttype, **kwargs):
             'affine'            `src, `dst`
             'projective'        `src, `dst`
             'polynomial'        `src, `dst`, `order` (polynomial order)
-            'rotation'          `angle`
-
-        Alternatively you can explicitly define a 3x3 homogeneous
-        transformation matrix with the `matrix` parameter.
 
         See examples section below for usage.
 
     Returns
     -------
-    tform : :class:`Transformation`
-        tform object containing the transformation parameters
+    tform : :class:`GeometricTransformation`
+        tform object containing the transformation parameters and providing
+        access to forward and reverse transformation functions
 
     Examples
     --------
@@ -302,20 +308,23 @@ def make_tform(ttype, **kwargs):
     >>> from skimage.transform import make_tform
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
-    >>> tform = make_tform('similarity', src=src, dst=dst)
-    >>> print tform.matrix
-    >>> print tform.inv(tform.fwd(src)) # == src
-    """
+    >>> tform = estimate_transformation('similarity', src, dst)
+    >>> print tform.params
+    >>> print tform.reverse(tform.forward(src)) # == src
+    >>> # warp image using the transformation
+    >>> from skimage import data
+    >>> image = data.camera()
+    >>> warp(image, reverse_map=tform.forward)
+    >>> warp(image, reverse_map=tform.reverse)
 
+    """
     ttype = ttype.lower()
-    if ttype not in TRANSFORMATIONS:
+    if ttype not in ESTIMATED_TRANSFORMATIONS:
         raise NotImplemented('the transformation type \'%s\' is not'
                              'implemented' % ttype)
-    if 'matrix' in kwargs:
-        matrix = kwargs['matrix']
-    else:
-        matrix = TRANSFORMATIONS[ttype][0](**kwargs)
-    return Transformation(ttype, matrix)
+    matrix = ESTIMATED_TRANSFORMATIONS[ttype][0](*args, **kwargs)
+    transform_func = ESTIMATED_TRANSFORMATIONS[ttype][1]
+    return GeometricTransformation(ttype, matrix, transform_func)
 
 
 def warp(image, reverse_map=None, map_args={}, output_shape=None, order=1,
@@ -557,6 +566,6 @@ def homography(image, H, output_shape=None, order=1,
                   'use the `warp` and `tform` function instead',
                   category=DeprecationWarning)
 
-    tform = make_tform('projective', matrix=H)
-    return warp(image, reverse_map=tform.inv, output_shape=output_shape,
+    tform = GeometricTransformation('projective', H, geometric_transform)
+    return warp(image, reverse_map=tform.reverse, output_shape=output_shape,
                 order=order, mode=mode, cval=cval)

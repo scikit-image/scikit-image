@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from skimage.transform.geometric import _stackcopy
-from skimage.transform import make_tform
+from skimage.transform import estimate_transformation
 from skimage.transform import homography, fast_homography
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
@@ -36,60 +36,65 @@ def test_stackcopy():
     y = np.eye(3, 3)
     _stackcopy(x, y)
     for i in range(layers):
-        assert_array_almost_equal(x[...,i], y)
+        assert_array_almost_equal(x[..., i], y)
+
 
 def test_similarity():
     #: exact solution
-    tform = make_tform('similarity', src=SRC[:2,:], dst=DST[:2,:])
-    assert_array_almost_equal(tform.fwd(SRC[:2,:]), DST[:2,:])
-    assert_array_almost_equal(tform.inv(tform.fwd(SRC)), SRC)
+    tform = estimate_transformation('similarity', SRC[:2, :], DST[:2, :])
+    assert_array_almost_equal(tform.forward(SRC[:2, :]), DST[:2, :])
+    assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
 
     #: over-determined
-    tform = make_tform('similarity', src=SRC, dst=DST)
+    tform = estimate_transformation('similarity', SRC, DST)
     ref = np.array(
         [[2.3632898110e+02, -5.5876792257e+00, 2.5331569391e+03],
          [5.5876792257e+00, 2.3632898110e+02, 2.4358232635e+03],
          [0.0000000000e+00, 0.0000000000e+00, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.matrix, ref)
-    assert_array_almost_equal(tform.inv(tform.fwd(SRC)), SRC)
+    assert_array_almost_equal(tform.params, ref)
+    assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
+
 
 def test_affine():
     #: exact solution
-    tform = make_tform('affine', src=SRC[:3,:], dst=DST[:3,:])
-    assert_array_almost_equal(tform.fwd(SRC[:3,:]), DST[:3,:])
-    assert_array_almost_equal(tform.inv(tform.fwd(SRC)), SRC)
+    tform = estimate_transformation('affine', SRC[:3, :], DST[:3, :])
+    assert_array_almost_equal(tform.forward(SRC[:3, :]), DST[:3, :])
+    assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
 
     #: over-determined
-    tform = make_tform('affine', src=SRC, dst=DST)
+    tform = estimate_transformation('affine', SRC, DST)
     ref = np.array(
         [[2.2573930047e+02, 7.1588596765e+00, 2.5126622012e+03],
          [2.1234856855e+01, 2.4931019555e+02, 2.4143862183e+03],
          [0.0000000000e+00, 0.0000000000e+00, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.matrix, ref)
-    assert_array_almost_equal(tform.inv(tform.fwd(SRC)), SRC)
+    assert_array_almost_equal(tform.params, ref)
+    assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
+
 
 def test_projective():
     #: exact solution
-    tform = make_tform('projective', src=SRC[:4,:], dst=DST[:4,:])
+    tform = estimate_transformation('projective', SRC[:4, :], DST[:4, :])
     ref = np.array(
         [[  1.9466901291e+02, -1.1888183994e+01, 2.2832379309e+03],
          [ -8.6910077540e+00,  2.2162069773e+02, 2.2211673699e+03],
          [ -1.2695966735e-02, -9.6053624285e-03, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.matrix, ref, 6)
-    assert_array_almost_equal(tform.inv(tform.fwd(SRC)), SRC)
+    assert_array_almost_equal(tform.params, ref, 6)
+    assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
 
     #: over-determined
-    tform = make_tform('projective', src=SRC[:4,:], dst=DST[:4,:])
+    tform = estimate_transformation('projective', SRC[:4, :], DST[:4, :])
     ref = np.array(
         [[  1.9466901291e+02, -1.1888183994e+01, 2.2832379309e+03],
          [ -8.6910077540e+00,  2.2162069773e+02, 2.2211673699e+03],
          [ -1.2695966735e-02, -9.6053624285e-03, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.matrix, ref, 6)
-    assert_array_almost_equal(tform.inv(tform.fwd(SRC)), SRC)
+    assert_array_almost_equal(tform.params, ref, 6)
+    assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
+
 
 def test_polynomial():
-    tform = make_tform('polynomial', src=SRC, dst=DST, order=10)
-    assert_array_almost_equal(tform.fwd(SRC), DST, 6)
+    tform = estimate_transformation('polynomial', SRC, DST, order=10)
+    assert_array_almost_equal(tform.forward(SRC), DST, 6)
+
 
 def test_homography():
     x = np.zeros((5,5), dtype=np.uint8)
@@ -101,6 +106,7 @@ def test_homography():
                   [0,             0,            1]])
     x90 = homography(x, M, order=1)
     assert_array_almost_equal(x90, np.rot90(x))
+
 
 def test_fast_homography():
     img = rgb2gray(data.lena()).astype(np.uint8)
@@ -132,6 +138,7 @@ def test_fast_homography():
 
         d = np.mean(np.abs(p0 - p1))
         assert d < 0.2
+
 
 def test_swirl():
     image = img_as_float(data.checkerboard())
