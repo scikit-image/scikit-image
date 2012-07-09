@@ -97,5 +97,12 @@ def test_radon_minimal():
         assert np.all(abs(c - reconstructed) < 0.4)
 
 
+def test_reconstruct_with_wrong_angles():
+    a = np.zeros((3, 3))
+    p = radon(a, theta=[0, 1, 2])
+    iradon(p, theta=[0, 1, 2])
+    assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
+
+
 if __name__ == "__main__":
     run_module_suite()
