@@ -292,14 +292,19 @@ class AffineTransformation(GeometricTransformation):
 
 class ProjectiveTransformation(GeometricTransformation):
 
+    """2D projective transformation of the following form
+        X = (a0 + a1*x + a2*y) / (c0*x + c1*y + 1)
+        Y = (b0 + b1*x + b2*y) / (c0*x + c1*y + 1)
+    where the homogeneous transformation matrix is:
+        [[a0  a1  a2]
+         [b0  b1  b2]
+         [c0  c1   1]]
+
+    """
+
     def estimate(self, src, dst):
-        """Estimate transformation matrix of the 2D projective transformation:
-            X = (a0 + a1*x + a2*y) / (c0*x + c1*y + 1)
-            Y = (b0 + b1*x + b2*y) / (c0*x + c1*y + 1)
-        where the homogeneous transformation matrix is:
-            [[a0  a1  a2]
-             [b0  b1  b2]
-             [c0  c1   1]]
+        """Set the transformation matrix with the explicit transformation
+        parameters.
 
         Parameters
         ----------
@@ -338,6 +343,12 @@ class ProjectiveTransformation(GeometricTransformation):
 
 class PolynomialTransformation(GeometricTransformation):
 
+    """2D affine transformation of the following form
+        X = sum[j=0:n]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
+        Y = sum[j=0:n]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+
+    """
+
     def __init__(self, coeffs=None):
         """Create polynomial transformation which contains the transformation
         parameters and can perform forward and reverse transformations.
@@ -351,9 +362,8 @@ class PolynomialTransformation(GeometricTransformation):
         self.coeffs = coeffs
 
     def estimate(self, src, dst, order):
-        """Estimate parameters of 2D polynomial transformation of order n:
-            X = sum[j=0:n]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
-            Y = sum[j=0:n]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+        """Set the transformation matrix with the explicit transformation
+        parameters.
 
         Parameters
         ----------
