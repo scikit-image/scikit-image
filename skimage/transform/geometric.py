@@ -320,8 +320,8 @@ def estimate_transformation(ttype, src, dst, order=None):
     """
     ttype = ttype.lower()
     if ttype not in ESTIMATED_TRANSFORMATIONS:
-        raise NotImplemented('the transformation type \'%s\' is not'
-                             'implemented' % ttype)
+        raise ValueError('the transformation type \'%s\' is not'
+                         'implemented' % ttype)
     args = [src, dst]
     if order is not None and ttype == 'polynomial':
         args.append(order)
