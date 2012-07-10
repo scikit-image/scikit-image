@@ -155,6 +155,9 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
         raise ValueError('Neighbors must be either 4 or 8.')
 
     # Initialize the first row
+    if data[0, 0] == background:
+        link_bg(forest_p, 0, &background_node)
+
     for j in range(1, cols):
         if data[0, j] == background:
             link_bg(forest_p, j, &background_node)

@@ -61,8 +61,8 @@ try:
 except ImportError:
     __version__ = "unbuilt-dev"
 
+
 def _setup_test(verbose=False):
-    import gzip
     import functools
 
     args = ['', '--exe', '-w', pkg_dir]
@@ -93,7 +93,8 @@ if test_verbose is None:
     except NameError:
         pass
 
-def get_log(name):
+
+def get_log(name=None):
     """Return a console logger.
 
     Output may be sent to the logger using the `debug`, `info`, `warning`,
@@ -110,8 +111,39 @@ def get_log(name):
            http://docs.python.org/library/logging.html
 
     """
-    import logging, sys
-    logging.basicConfig(stream=sys.stdout, level=logging.WARNING)
-    return logging.getLogger(name)
+    import logging
+
+    if name is None:
+        name = 'skimage'
+    else:
+        name = 'skimage.' + name
+
+    log = logging.getLogger(name)
+    return log
+
+
+def _setup_log():
+    """Configure root logger.
+
+    """
+    import logging
+    import sys
+
+    log = logging.getLogger()
+
+    try:
+        handler = logging.StreamHandler(stream=sys.stdout)
+    except TypeError:
+        handler = logging.StreamHandler(strm=sys.stdout)
+
+    formatter = logging.Formatter(
+        '%(name)s: %(levelname)s: %(message)s'
+        )
+    handler.setFormatter(formatter)
+
+    log.addHandler(handler)
+    log.setLevel(logging.WARNING)
+
+_setup_log()
 
 from .util.dtype import *

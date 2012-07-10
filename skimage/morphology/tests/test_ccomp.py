@@ -3,6 +3,7 @@ from numpy.testing import assert_array_equal, run_module_suite
 
 from skimage.morphology import label
 
+
 class TestConnectedComponents:
     def setup(self):
         self.x = np.array([[0, 0, 3, 2, 1, 9],
@@ -60,6 +61,27 @@ class TestConnectedComponents:
                            [[0, -1, -1],
                             [0,  0,  1],
                             [-1, -1, -1]])
+
+    def test_background_two_regions(self):
+        x = np.array([[0, 0, 6],
+                      [0, 0, 6],
+                      [5, 5, 5]])
+
+        assert_array_equal(label(x, background=0),
+                           [[-1, -1, 0],
+                            [-1, -1, 0],
+                            [ 1,  1, 1]])
+
+    def test_background_one_region_center(self):
+        x = np.array([[0, 0, 0],
+                      [0, 1, 0],
+                      [0, 0, 0]])
+
+        assert_array_equal(label(x, neighbors=4, background=0),
+                           [[-1, -1, -1],
+                            [-1,  0, -1],
+                            [-1, -1, -1]])
+
 
 if __name__ == "__main__":
     run_module_suite()

@@ -1,4 +1,6 @@
 """skimage viewer"""
+
+
 def main():
     import skimage.io as io
     import sys
@@ -10,4 +12,3 @@ def main():
     io.use_plugin('qt')
     io.imshow(io.imread(sys.argv[1]), fancy=True)
     io.show()
-

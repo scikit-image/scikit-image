@@ -485,7 +485,7 @@ def rgb2grey(rgb):
     Raises
     ------
     ValueError
-        If `rgb2grey` is not a 3-D array of shape (.., .., 3) or 
+        If `rgb2grey` is not a 3-D array of shape (.., .., 3) or
         (.., .., 4).
 
     References
@@ -511,6 +511,9 @@ def rgb2grey(rgb):
     >>> lena = imread(os.path.join(data_dir, 'lena.png'))
     >>> lena_grey = rgb2grey(lena)
     """
+    if rgb.ndim == 2:
+        return rgb
+
     return _convert(grey_from_rgb, rgb[:, :, :3])[..., 0]
 
 rgb2gray = rgb2grey

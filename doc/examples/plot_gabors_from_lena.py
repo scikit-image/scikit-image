@@ -77,13 +77,13 @@ ax0, ax1, ax2, ax3 = axes.ravel()
 ax0.imshow(lena, cmap=plt.cm.gray)
 ax0.set_title("Lena (original)")
 
-ax1.imshow(fb1_montage, cmap=plt.cm.gray)
+ax1.imshow(fb1_montage, cmap=plt.cm.gray, interpolation='nearest')
 ax1.set_title("K-means filterbank (codebook)\non Lena (original)")
 
 ax2.imshow(lena_dog, cmap=plt.cm.gray)
 ax2.set_title("Lena (LGN-like DoG)")
 
-ax3.imshow(fb2_montage, cmap=plt.cm.gray)
+ax3.imshow(fb2_montage, cmap=plt.cm.gray, interpolation='nearest')
 ax3.set_title("K-means filterbank (codebook)\non Lena (LGN-like DoG)")
 
 for ax in axes.ravel():

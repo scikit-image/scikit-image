@@ -26,6 +26,7 @@ def integral_image(x):
     """
     return x.cumsum(1).cumsum(0)
 
+
 def integrate(ii, r0, c0, r1, c1):
     """Use an integral image to integrate over a given window.
 

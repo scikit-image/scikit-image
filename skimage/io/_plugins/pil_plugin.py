@@ -11,6 +11,7 @@ except ImportError:
 
 from skimage.util import img_as_ubyte
 
+
 def imread(fname, dtype=None):
     """Load an image from file.
 
@@ -32,6 +33,7 @@ def imread(fname, dtype=None):
         im = im.convert('RGBA')
 
     return np.array(im, dtype=dtype)
+
 
 def _palette_is_grayscale(pil_image):
     """Return True if PIL image in palette mode is grayscale.
@@ -55,6 +57,7 @@ def _palette_is_grayscale(pil_image):
     # Image is grayscale if channel differences (R - G and G - B)
     # are all zero.
     return np.allclose(np.diff(valid_palette), 0)
+
 
 def imsave(fname, arr):
     """Save an image to disk.
@@ -100,6 +103,7 @@ def imsave(fname, arr):
     img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
     img.save(fname)
 
+
 def imshow(arr):
     """Display an image, using PIL's default display command.
 
@@ -111,6 +115,7 @@ def imshow(arr):
 
     """
     Image.fromarray(img_as_ubyte(arr)).show()
+
 
 def _app_show():
     pass

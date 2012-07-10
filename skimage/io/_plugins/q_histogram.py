@@ -39,7 +39,7 @@ class ColorHistogram(QWidget):
         orig_height = self.height()
 
         # fill perc % of the widget
-        perc =  1
+        perc = 1
         width = int(orig_width * perc)
         height = int(orig_height * perc)
 
@@ -60,14 +60,14 @@ class ColorHistogram(QWidget):
         remainder = width % nbars
         bar_width = [int(width / nbars)] * nbars
         for i in range(remainder):
-            bar_width[i]+=1
+            bar_width[i] += 1
 
         paint = QPainter()
         paint.begin(self)
 
         # determine the scaling factor
         max_val = np.max(self.counts)
-        scale =  1. * height / max_val
+        scale = 1. * height / max_val
 
         # determine if we have a colormap and drop into the appopriate
         # loop.
@@ -95,7 +95,6 @@ class ColorHistogram(QWidget):
 
         paint.end()
 
-
     def update_hist(self, counts, cmap):
         self._validate_input(counts, cmap)
         self.counts = counts
@@ -121,17 +120,17 @@ class QuadHistogram(QFrame):
         self.b_hist = ColorHistogram(b, (0, 0, 255))
         self.v_hist = ColorHistogram(v, (0, 0, 0))
 
-        self.setFrameStyle(QFrame.StyledPanel|QFrame.Sunken)
+        self.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
         self.layout = QGridLayout(self)
         self.layout.setMargin(0)
 
         order_map = {'R': self.r_hist, 'G': self.g_hist, 'B': self.b_hist,
                      'V': self.v_hist}
 
-        if layout=='vertical':
+        if layout == 'vertical':
             for i in range(len(order)):
                 self.layout.addWidget(order_map[order[i]], i, 0)
-        elif layout=='horizontal':
+        elif layout == 'horizontal':
             for i in range(len(order)):
                 self.layout.addWidget(order_map[order[i]], 0, i)
 

@@ -2,22 +2,32 @@
 
 """
 
-__all__ = ['use', 'available', 'call', 'info', 'configuration']
+__all__ = ['use', 'available', 'call', 'info', 'configuration', 'reset_plugins']
 
-import warnings
 from ConfigParser import ConfigParser
 import os.path
 from glob import glob
 
-plugin_store = {'imread': [],
-                'imsave': [],
-                'imshow': [],
-                'imread_collection': [],
-                '_app_show': []}
+plugin_store = None
 
 plugin_provides = {}
 plugin_module_name = {}
 plugin_meta_data = {}
+
+
+def reset_plugins():
+    """Clear the plugin state to the default, i.e., where no plugins are loaded
+
+    """
+    global plugin_store
+    plugin_store = {'imread': [],
+                    'imsave': [],
+                    'imshow': [],
+                    'imread_collection': [],
+                    '_app_show': []}
+
+reset_plugins()
+
 
 def _scan_plugins():
     """Scan the plugins directory for .ini files and parse them
@@ -50,6 +60,7 @@ def _scan_plugins():
 
 _scan_plugins()
 
+
 def call(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
 
@@ -81,12 +92,13 @@ command.  A list of all available plugins can be found using
     else:
         _load(plugin)
         try:
-            func = [f for (p,f) in plugin_funcs if p == plugin][0]
+            func = [f for (p, f) in plugin_funcs if p == plugin][0]
         except IndexError:
             raise RuntimeError('Could not find the plugin "%s" for %s.' % \
                                (plugin, kind))
 
     return func(*args, **kwargs)
+
 
 def use(name, kind=None):
     """Set the default plugin for a specified operation.  The plugin
@@ -140,6 +152,7 @@ def use(name, kind=None):
 
         plugin_store[k] = funcs
 
+
 def available(loaded=False):
     """List available plugins.
 
@@ -168,6 +181,7 @@ def available(loaded=False):
                          if not f.startswith('_')]
 
     return d
+
 
 def _load(plugin):
     """Load the given plugin.
@@ -202,6 +216,7 @@ def _load(plugin):
             if not (plugin, func) in store:
                 store.append((plugin, func))
 
+
 def info(plugin):
     """Return plugin meta-data.
 
@@ -220,6 +235,7 @@ def info(plugin):
         return plugin_meta_data[plugin]
     except KeyError:
         raise ValueError('No information on plugin "%s"' % plugin)
+
 
 def configuration():
     """Return the currently preferred plugin order.

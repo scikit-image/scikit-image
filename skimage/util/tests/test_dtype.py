@@ -9,12 +9,15 @@ dtype_range = {np.uint8: (0, 255),
                np.uint16: (0, 65535),
                np.int8: (-128, 127),
                np.int16: (-32768, 32767),
-               np.float32: (0, 1),
-               np.float64: (0, 1)}
+               np.float32: (-1.0, 1.0),
+               np.float64: (-1.0, 1.0)}
 
-def _verify_range(msg, x, vmin, vmax):
+
+def _verify_range(msg, x, vmin, vmax, dtype):
     assert_equal(x[0], vmin)
     assert_equal(x[-1], vmax)
+    assert x.dtype == dtype
+
 
 def test_range():
     for dtype in dtype_range:
@@ -29,12 +32,13 @@ def test_range():
 
             omin, omax = dtype_range[dt]
 
-            if imin == 0:
+            if imin == 0 or omin == 0:
                 omin = 0
+                imin = 0
 
-            yield _verify_range, \
-                  "From %s to %s" % (np.dtype(dtype), np.dtype(dt)), \
-                  y, omin, omax
+            yield (_verify_range,
+                   "From %s to %s" % (np.dtype(dtype), np.dtype(dt)),
+                   y, omin, omax, np.dtype(dt))
 
 
 def test_range_extra_dtypes():
@@ -57,9 +61,9 @@ def test_range_extra_dtypes():
         x = np.linspace(imin, imax, 10).astype(dtype_in)
         y = convert(x, dt)
         omin, omax = dtype_range_extra[dt]
-        yield _verify_range, \
-              "From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)), \
-              y, omin, omax
+        yield (_verify_range,
+               "From %s to %s" % (np.dtype(dtype_in), np.dtype(dt)),
+               y, omin, omax, np.dtype(dt))
 
 
 def test_unsupported_dtype():
@@ -70,10 +74,17 @@ def test_unsupported_dtype():
 def test_float_out_of_range():
     too_high = np.array([2], dtype=np.float32)
     assert_raises(ValueError, img_as_int, too_high)
-    too_low = np.array([-1], dtype=np.float32)
+    too_low = np.array([-2], dtype=np.float32)
     assert_raises(ValueError, img_as_int, too_low)
 
 
+def test_copy():
+    x = np.array([1], dtype=np.float64)
+    y = img_as_float(x)
+    z = img_as_float(x, force_copy=True)
+
+    assert y is x
+    assert z is not x
+
 if __name__ == '__main__':
     np.testing.run_module_suite()
-

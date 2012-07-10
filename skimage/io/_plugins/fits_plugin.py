@@ -49,9 +49,9 @@ def imread(fname, dtype=None):
     for hdu in hdulist:
         if isinstance(hdu, pyfits.ImageHDU) or \
            isinstance(hdu, pyfits.PrimaryHDU):
-           if hdu.data is not None:
-               img_array = hdu.data
-               break
+            if hdu.data is not None:
+                img_array = hdu.data
+                break
     hdulist.close()
 
     return img_array
@@ -95,7 +95,11 @@ def imread_collection(load_pattern, conserve_memory=True):
                isinstance(hdu, pyfits.PrimaryHDU):
                 # Ignore (primary) header units with no data (use '.size'
                 # rather than '.data' to avoid actually loading the image):
-                if hdu.size() > 0:
+                try:
+                    data_size = hdu.size()
+                except TypeError:  # (size changed to int in PyFITS 3.1)
+                    data_size = hdu.size
+                if data_size > 0:
                     ext_list.append((filename, n))
         hdulist.close()
 
@@ -105,7 +109,7 @@ def imread_collection(load_pattern, conserve_memory=True):
 
 def FITSFactory(image_ext):
     """Load an image extension from a FITS file and return a NumPy array
-    
+
     Parameters
     ----------
 
@@ -132,7 +136,7 @@ def FITSFactory(image_ext):
         raise ValueError("Expected a (filename, extension) tuple")
 
     hdulist = pyfits.open(filename)
-        
+
     data = hdulist[extnum].data
 
     hdulist.close()
@@ -142,4 +146,3 @@ def FITSFactory(image_ext):
                   (extnum, filename))
 
     return data
-

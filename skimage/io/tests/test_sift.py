@@ -7,6 +7,7 @@ import os
 
 from skimage.io import load_sift, load_surf
 
+
 def test_load_sift():
     f = NamedTemporaryFile(delete=False)
     fname = f.name
@@ -39,6 +40,7 @@ def test_load_sift():
     assert_equal(len(features['data'][0]), 128)
     assert_equal(features['row'][0], 133.92)
     assert_equal(features['column'][1], 99.75)
+
 
 def test_load_surf():
     f = NamedTemporaryFile(delete=False)

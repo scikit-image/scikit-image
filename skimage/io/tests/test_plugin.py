@@ -4,8 +4,6 @@ from skimage import io
 from skimage.io._plugins import plugin
 from numpy.testing.decorators import skipif
 
-from copy import deepcopy
-
 try:
     io.use_plugin('pil')
     PIL_available = True
@@ -22,11 +20,12 @@ except OSError:
 
 
 def setup_module(self):
-    self.backup_plugin_store = deepcopy(plugin.plugin_store)
-    plugin.use('test') # see ../_plugins/test_plugin.py
+    plugin.use('test')  # see ../_plugins/test_plugin.py
+
 
 def teardown_module(self):
-    plugin.plugin_store = self.backup_plugin_store
+    io.reset_plugins()
+
 
 class TestPlugin:
     def test_read(self):
