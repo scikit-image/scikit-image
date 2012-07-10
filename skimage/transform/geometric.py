@@ -285,7 +285,7 @@ def estimate_transformation(ttype, src, dst, order=None):
     ----------
     ttype : str
         one of similarity, affine, projective, polynomial
-    kwargs : array or int
+    kwargs :: array or int
         function parameters (src, dst, n, angle):
 
             NAME / TTYPE        FUNCTION PARAMETERS
