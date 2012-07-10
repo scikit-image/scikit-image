@@ -2,7 +2,9 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from skimage.transform.geometric import _stackcopy
-from skimage.transform import estimate_transformation
+from skimage.transform import estimate_transformation, \
+    SimilarityTransformation, AffineTransformation, ProjectiveTransformation, \
+    PolynomialTransformation
 from skimage.transform import homography, fast_homography
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
@@ -39,7 +41,7 @@ def test_stackcopy():
         assert_array_almost_equal(x[..., i], y)
 
 
-def test_similarity():
+def test_similarity_estimation():
     #: exact solution
     tform = estimate_transformation('similarity', SRC[:2, :], DST[:2, :])
     assert_array_almost_equal(tform.forward(SRC[:2, :]), DST[:2, :])
@@ -51,11 +53,22 @@ def test_similarity():
         [[2.3632898110e+02, -5.5876792257e+00, 2.5331569391e+03],
          [5.5876792257e+00, 2.3632898110e+02, 2.4358232635e+03],
          [0.0000000000e+00, 0.0000000000e+00, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.params, ref)
+    assert_array_almost_equal(tform.matrix, ref)
     assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
 
 
-def test_affine():
+def test_similarity_explicit():
+    tform = SimilarityTransformation()
+    scale = 0.1
+    rotation = 1
+    translation = (1, 1)
+    tform.from_params(scale, rotation, translation)
+    assert_array_almost_equal(tform.scale, scale)
+    assert_array_almost_equal(tform.rotation, rotation)
+    assert_array_almost_equal(tform.translation, translation)
+
+
+def test_affine_estimation():
     #: exact solution
     tform = estimate_transformation('affine', SRC[:3, :], DST[:3, :])
     assert_array_almost_equal(tform.forward(SRC[:3, :]), DST[:3, :])
@@ -67,8 +80,21 @@ def test_affine():
         [[2.2573930047e+02, 7.1588596765e+00, 2.5126622012e+03],
          [2.1234856855e+01, 2.4931019555e+02, 2.4143862183e+03],
          [0.0000000000e+00, 0.0000000000e+00, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.params, ref)
+    assert_array_almost_equal(tform.matrix, ref)
     assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
+
+
+def test_affine_explicit():
+    tform = AffineTransformation()
+    scale = (0.1, 0.13)
+    rotation = 1
+    shear = 0.1
+    translation = (1, 1)
+    tform.from_params(scale, rotation, shear, translation)
+    assert_array_almost_equal(tform.scale, scale)
+    assert_array_almost_equal(tform.rotation, rotation)
+    assert_array_almost_equal(tform.shear, shear)
+    assert_array_almost_equal(tform.translation, translation)
 
 
 def test_projective():
@@ -78,7 +104,7 @@ def test_projective():
         [[  1.9466901291e+02, -1.1888183994e+01, 2.2832379309e+03],
          [ -8.6910077540e+00,  2.2162069773e+02, 2.2211673699e+03],
          [ -1.2695966735e-02, -9.6053624285e-03, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.params, ref, 6)
+    assert_array_almost_equal(tform.matrix, ref, 6)
     assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
 
     #: over-determined
@@ -87,7 +113,7 @@ def test_projective():
         [[  1.9466901291e+02, -1.1888183994e+01, 2.2832379309e+03],
          [ -8.6910077540e+00,  2.2162069773e+02, 2.2211673699e+03],
          [ -1.2695966735e-02, -9.6053624285e-03, 1.0000000000e+00]])
-    assert_array_almost_equal(tform.params, ref, 6)
+    assert_array_almost_equal(tform.matrix, ref, 6)
     assert_array_almost_equal(tform.reverse(tform.forward(SRC)), SRC)
 
 

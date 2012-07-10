@@ -28,140 +28,6 @@ def _stackcopy(a, b):
         a[:] = b
 
 
-def _estimate_similarity(src, dst):
-    """Determine parameters of the 2D similarity transformation:
-        X = a0*x - b0*y + a1
-        Y = b0*x + a0*y + a2
-    where the homogeneous transformation matrix is:
-        [[a0 -b0  a1]
-         [b0  a0  b1]
-         [0   0    1]]
-
-    """
-    xs = src[:, 0]
-    ys = src[:, 1]
-    xd = dst[:, 0]
-    yd = dst[:, 1]
-    rows = src.shape[0]
-
-    #: params: a0, a1, b0, b1
-    A = np.zeros((rows * 2, 4))
-    A[:rows, 0] = xs
-    A[:rows, 2] = - ys
-    A[:rows, 1] = 1
-    A[rows:, 2] = xs
-    A[rows:, 0] = ys
-    A[rows:, 3] = 1
-
-    b = np.hstack([xd, yd])
-
-    a0, a1, b0, b1 = np.linalg.lstsq(A, b)[0]
-    matrix = np.array([[a0, -b0, a1],
-                       [b0,  a0, b1],
-                       [ 0,   0,  1]])
-    return matrix
-
-
-def _estimate_affine(src, dst):
-    """Determine parameters of the 2D affine transformation:
-        X = a0*x + a1*y + a2
-        Y = b0*x + b1*y + b2
-    where the homogeneous transformation matrix is:
-        [[a0  a1  a2]
-         [b0  b1  b2]
-         [0   0    1]]
-
-    """
-    xs = src[:, 0]
-    ys = src[:, 1]
-    xd = dst[:, 0]
-    yd = dst[:, 1]
-    rows = src.shape[0]
-
-    #: params: a0, a1, a2, b0, b1, b2
-    A = np.zeros((rows * 2, 6))
-    A[:rows, 0] = xs
-    A[:rows, 1] = ys
-    A[:rows, 2] = 1
-    A[rows:, 3] = xs
-    A[rows:, 4] = ys
-    A[rows:, 5] = 1
-
-    b = np.hstack([xd, yd])
-
-    a0, a1, a2, b0, b1, b2 = np.linalg.lstsq(A, b)[0]
-    matrix = np.array([[a0, a1, a2],
-                       [b0, b1, b2],
-                       [0,   0,  1]])
-    return matrix
-
-
-def _estimate_projective(src, dst):
-    """Determine transformation matrix of the 2D projective transformation:
-        X = (a0 + a1*x + a2*y) / (c0*x + c1*y + 1)
-        Y = (b0 + b1*x + b2*y) / (c0*x + c1*y + 1)
-    where the homogeneous transformation matrix is:
-        [[a0  a1  a2]
-         [b0  b1  b2]
-         [c0  c1   1]]
-
-    """
-    xs = src[:, 0]
-    ys = src[:, 1]
-    xd = dst[:, 0]
-    yd = dst[:, 1]
-    rows = src.shape[0]
-
-    #: params: a0, a1, a2, b0, b1, b2, c0, c1
-    A = np.zeros((rows * 2, 8))
-    A[:rows, 0] = xs
-    A[:rows, 1] = ys
-    A[:rows, 2] = 1
-    A[:rows, 6] = - xd * xs
-    A[:rows, 7] = - xd * ys
-    A[rows:, 3] = xs
-    A[rows:, 4] = ys
-    A[rows:, 5] = 1
-    A[rows:, 6] = - yd * xs
-    A[rows:, 7] = - yd * ys
-
-    b = np.hstack([xd, yd])
-
-    a0, a1, a2, b0, b1, b2, c0, c1 = np.linalg.lstsq(A, b)[0]
-    matrix = np.array([[a0, a1, a2],
-                       [b0, b1, b2],
-                       [c0, c1,  1]])
-    return matrix
-
-
-def _estimate_polynomial(src, dst, order):
-    """Determine parameters of 2D polynomial transformation of order n:
-        X = sum[j=0:n]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
-        Y = sum[j=0:n]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
-
-    """
-    xs = src[:, 0]
-    ys = src[:, 1]
-    xd = dst[:, 0]
-    yd = dst[:, 1]
-    rows = src.shape[0]
-
-    # number of unknown polynomial coefficients
-    u = (order + 1) * (order + 2)
-
-    A = np.zeros((rows * 2, u))
-    pidx = 0
-    for j in xrange(order + 1):
-        for i in xrange(j + 1):
-            A[:rows, pidx] = xs ** (j - i) * ys ** i
-            A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
-            pidx += 1
-
-    b = np.hstack([xd, yd])
-
-    return np.linalg.lstsq(A, b)[0]
-
-
 def geometric_transform(coords, matrix):
     """Apply 2D geometric transformation.
 
@@ -186,44 +52,20 @@ def geometric_transform(coords, matrix):
     return dst[:, :2]
 
 
-def _transform_polynomial(coords, matrix):
-    x = coords[:, 0]
-    y = coords[:, 1]
-    u = len(matrix)
-    # number of coefficients -> u = (order + 1) * (order + 2)
-    order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
-    dst = np.zeros(coords.shape)
-
-    pidx = 0
-    for j in xrange(order + 1):
-        for i in xrange(j + 1):
-            dst[:, 0] += matrix[pidx] * x ** (j - i) * y ** i
-            dst[:, 1] += matrix[pidx + u / 2] * x ** (j - i) * y ** i
-            pidx += 1
-
-    return dst
-
-
 class GeometricTransformation(object):
 
-    def __init__(self, ttype, params, transform_func):
+    def __init__(self, matrix=None):
         """Create geometric transformation which contains the transformation
         parameters and can perform forward and reverse transformations.
 
         Parameters
         ----------
-        ttype : str
-            transformation type - one of 'similarity', 'affine', 'projective',
-            'polynomial'
-        params : array
-            transformation parameters
-        transform_func : callable = func(coords, matrix)
-            transformation function
+        matrix : 3x3 array, optional
+            homogeneous transformation matrix
 
         """
-        self.ttype = ttype
-        self.params = params
-        self.transform_func = transform_func
+        self.matrix = matrix
+        self.inverse_matrix = None
 
     def forward(self, coords):
         """Apply forward transformation.
@@ -239,7 +81,9 @@ class GeometricTransformation(object):
             transformed coordinates
 
         """
-        return self.transform_func(coords, self.params)
+        if self.matrix is None:
+            raise Exception('Transformation matrix must be set or estimated.')
+        return geometric_transform(coords, self.matrix)
 
     def reverse(self, coords):
         """Apply reverse transformation.
@@ -255,21 +99,332 @@ class GeometricTransformation(object):
             transformed coordinates
 
         """
-        if self.ttype == 'polynomial':
-            raise Exception(
-                'There is no explicit way to do the reverse polynomial '
-                'transformation. Instead determine the reverse transformation '
-                'parameters by exchanging source and destination coordinates.'
-                'Then apply the forward transformation.')
-        inv_matrix = np.linalg.inv(self.params)
-        return self.transform_func(coords, inv_matrix)
+        if self.matrix is None:
+            raise Exception('Transformation matrix must be set or estimated.')
+        if self.inverse_matrix is None:
+            self.inverse_matrix = np.linalg.inv(self.matrix)
+        return geometric_transform(coords, self.inverse_matrix)
+
+    def union(self, other):
+        return GeometricTransformation(self.matrix.dot(other.matrix))
+
+    def __mul__(self, other):
+        return self.union(self, other)
+
+    def __add__(self, other):
+        return self.union(self, other)
 
 
-ESTIMATED_TRANSFORMATIONS = {
-    'similarity': (_estimate_similarity, geometric_transform),
-    'affine': (_estimate_affine, geometric_transform),
-    'projective': (_estimate_projective, geometric_transform),
-    'polynomial': (_estimate_polynomial, _transform_polynomial),
+class SimilarityTransformation(GeometricTransformation):
+
+    """2D similarity transformation of the following form:
+        X = a0*x - b0*y + a1 =
+          = m*x*cos(rotation) - m*y*sin(rotation) + a1
+        Y = b0*x + a0*y + b1 =
+          = m*x*sin(rotation) + m*y*cos(rotation) + b1
+    where the homogeneous transformation matrix is:
+        [[a0 -b0  a1]
+         [b0  a0  b1]
+         [0   0    1]]
+
+    """
+
+    def estimate(self, src, dst):
+        """Set the transformation matrix with the estimated parameters of the
+        given control points.
+
+        Parameters
+        ----------
+        src : Nx2 array
+            source coordinates
+        dst : Nx2 array
+            destination coordinates
+
+        """
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+        rows = src.shape[0]
+
+        #: params: a0, a1, b0, b1
+        A = np.zeros((rows * 2, 4))
+        A[:rows, 0] = xs
+        A[:rows, 2] = - ys
+        A[:rows, 1] = 1
+        A[rows:, 2] = xs
+        A[rows:, 0] = ys
+        A[rows:, 3] = 1
+
+        b = np.hstack([xd, yd])
+
+        a0, a1, b0, b1 = np.linalg.lstsq(A, b)[0]
+        self.matrix = np.array([[a0, -b0, a1],
+                                [b0,  a0, b1],
+                                [ 0,   0,  1]])
+
+    def from_params(self, scale, rotation, translation):
+        """Set the transformation matrix with the explicit transformation
+        parameters.
+
+        Parameters
+        ----------
+        scale : float
+            scale factor
+        rotation : float
+            rotation angle in counter-clockwise direction
+        translation : (tx, ty) as array, list or tuple
+            x, y translation parameters
+
+        """
+        self.matrix = np.array([
+            [math.cos(rotation), - math.sin(rotation), 0],
+            [math.sin(rotation),   math.cos(rotation), 0],
+            [                 0,                    0, 1]
+        ])
+        self.matrix *= scale
+        self.matrix[0:2, 2] = translation
+
+    @property
+    def scale(self):
+        return self.matrix[0, 0] / math.cos(self.rotation)
+
+    @property
+    def rotation(self):
+        return math.atan2(self.matrix[1, 0], self.matrix[1, 1])
+
+    @property
+    def translation(self):
+        return self.matrix[0:2, 2]
+
+
+class AffineTransformation(GeometricTransformation):
+
+    """2D affine transformation of the following form
+        X = a0*x + a1*y + a2 =
+          = sx*x*cos(rotation) - sy*y*sin(rotation+shear) + a2
+        Y = b0*x + b1*y + b2 =
+          = sx*x*sin(rotation) + sy*y*cos(rotation+shear) + b2
+    where the homogeneous transformation matrix is:
+        [[a0  a1  a2]
+         [b0  b1  b2]
+         [0   0    1]]
+
+    """
+
+    def estimate(self, src, dst):
+        """Set the transformation matrix with the estimated parameters of the
+        given control points.
+
+        Parameters
+        ----------
+        src : Nx2 array
+            source coordinates
+        dst : Nx2 array
+            destination coordinates
+
+        """
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+        rows = src.shape[0]
+
+        #: params: a0, a1, a2, b0, b1, b2
+        A = np.zeros((rows * 2, 6))
+        A[:rows, 0] = xs
+        A[:rows, 1] = ys
+        A[:rows, 2] = 1
+        A[rows:, 3] = xs
+        A[rows:, 4] = ys
+        A[rows:, 5] = 1
+
+        b = np.hstack([xd, yd])
+
+        a0, a1, a2, b0, b1, b2 = np.linalg.lstsq(A, b)[0]
+        self.matrix = np.array([[a0, a1, a2],
+                                [b0, b1, b2],
+                                [0,   0,  1]])
+
+    def from_params(self, scale, rotation, shear, translation):
+        """Set the transformation matrix with the explicit transformation
+        parameters.
+
+        Parameters
+        ----------
+        scale : (sx, sy) as array, list or tuple
+            scale factors
+        rotation : float
+            rotation angle in counter-clockwise direction
+        shear : float
+            shear angle in counter-clockwise direction
+        translation : (tx, ty) as array, list or tuple
+            translation parameters
+
+        """
+        sx, sy = scale
+        self.matrix = np.array([
+            [sx * math.cos(rotation), - sy * math.sin(rotation + shear), 0],
+            [sx * math.sin(rotation),   sy * math.cos(rotation + shear), 0],
+            [                 0,                                      0, 1]
+        ])
+        self.matrix[0:2, 2] = translation
+
+    @property
+    def scale(self):
+        sx = math.sqrt(self.matrix[0, 0] ** 2 + self.matrix[1, 0] ** 2)
+        sy = math.sqrt(self.matrix[0, 1] ** 2 + self.matrix[1, 1] ** 2)
+        return sx, sy
+
+    @property
+    def rotation(self):
+        return math.atan2(self.matrix[1, 0], self.matrix[0, 0])
+
+    @property
+    def shear(self):
+        beta = math.atan2(- self.matrix[0, 1], self.matrix[1, 1])
+        return beta - self.rotation
+
+    @property
+    def translation(self):
+        return self.matrix[0:2, 2]
+
+
+class ProjectiveTransformation(GeometricTransformation):
+
+    def estimate(self, src, dst):
+        """Estimate transformation matrix of the 2D projective transformation:
+            X = (a0 + a1*x + a2*y) / (c0*x + c1*y + 1)
+            Y = (b0 + b1*x + b2*y) / (c0*x + c1*y + 1)
+        where the homogeneous transformation matrix is:
+            [[a0  a1  a2]
+             [b0  b1  b2]
+             [c0  c1   1]]
+
+        Parameters
+        ----------
+        src : Nx2 array
+            source coordinates
+        dst : Nx2 array
+            destination coordinates
+
+        """
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+        rows = src.shape[0]
+
+        #: params: a0, a1, a2, b0, b1, b2, c0, c1
+        A = np.zeros((rows * 2, 8))
+        A[:rows, 0] = xs
+        A[:rows, 1] = ys
+        A[:rows, 2] = 1
+        A[:rows, 6] = - xd * xs
+        A[:rows, 7] = - xd * ys
+        A[rows:, 3] = xs
+        A[rows:, 4] = ys
+        A[rows:, 5] = 1
+        A[rows:, 6] = - yd * xs
+        A[rows:, 7] = - yd * ys
+
+        b = np.hstack([xd, yd])
+
+        a0, a1, a2, b0, b1, b2, c0, c1 = np.linalg.lstsq(A, b)[0]
+        self.matrix = np.array([[a0, a1, a2],
+                                [b0, b1, b2],
+                                [c0, c1,  1]])
+
+
+class PolynomialTransformation(GeometricTransformation):
+
+    def __init__(self, coeffs=None):
+        """Create polynomial transformation which contains the transformation
+        parameters and can perform forward and reverse transformations.
+
+        Parameters
+        ----------
+        coeffs : array, optional
+            polynomial coefficients
+
+        """
+        self.coeffs = coeffs
+
+    def estimate(self, src, dst, order):
+        """Estimate parameters of 2D polynomial transformation of order n:
+            X = sum[j=0:n]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
+            Y = sum[j=0:n]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+
+        Parameters
+        ----------
+        src : Nx2 array
+            source coordinates
+        dst : Nx2 array
+            destination coordinates
+        order : int
+            polynomial order (number of coefficients is order + 1)
+
+        """
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+        rows = src.shape[0]
+
+        # number of unknown polynomial coefficients
+        u = (order + 1) * (order + 2)
+
+        A = np.zeros((rows * 2, u))
+        pidx = 0
+        for j in xrange(order + 1):
+            for i in xrange(j + 1):
+                A[:rows, pidx] = xs ** (j - i) * ys ** i
+                A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
+                pidx += 1
+
+        b = np.hstack([xd, yd])
+
+        self.coeffs = np.linalg.lstsq(A, b)[0]
+
+    def forward(self, coords):
+        x = coords[:, 0]
+        y = coords[:, 1]
+        u = len(self.coeffs)
+        # number of coefficients -> u = (order + 1) * (order + 2)
+        order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
+        dst = np.zeros(coords.shape)
+
+        pidx = 0
+        for j in xrange(order + 1):
+            for i in xrange(j + 1):
+                dst[:, 0] += self.coeffs[pidx] * x ** (j - i) * y ** i
+                dst[:, 1] += self.coeffs[pidx + u / 2] * x ** (j - i) * y ** i
+                pidx += 1
+
+        return dst
+
+    def reverse(self, coords):
+        raise Exception(
+            'There is no explicit way to do the reverse polynomial '
+            'transformation. Instead determine the reverse transformation '
+            'parameters by exchanging source and destination coordinates.'
+            'Then apply the forward transformation.')
+
+    def union(self, other):
+        raise Exception('Cannot unite polynomial transformations.')
+
+    def __mul__(self, other):
+        return self.union(self, other)
+
+    def __add__(self, other):
+        return self.union(self, other)
+
+
+TRANSFORMATIONS = {
+    'similarity': SimilarityTransformation,
+    'affine': AffineTransformation,
+    'projective': ProjectiveTransformation,
+    'polynomial': PolynomialTransformation,
 }
 
 
@@ -298,7 +453,7 @@ def estimate_transformation(ttype, src, dst, order=None):
 
     Returns
     -------
-    tform : :class:`GeometricTransformation`
+    tform : subclass of :class:`GeometricTransformation`
         tform object containing the transformation parameters and providing
         access to forward and reverse transformation functions
 
@@ -309,7 +464,7 @@ def estimate_transformation(ttype, src, dst, order=None):
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
     >>> tform = estimate_transformation('similarity', src, dst)
-    >>> print tform.params
+    >>> print tform.matrix
     >>> print tform.reverse(tform.forward(src)) # == src
     >>> # warp image using the transformation
     >>> from skimage import data
@@ -319,15 +474,15 @@ def estimate_transformation(ttype, src, dst, order=None):
 
     """
     ttype = ttype.lower()
-    if ttype not in ESTIMATED_TRANSFORMATIONS:
+    if ttype not in TRANSFORMATIONS:
         raise ValueError('the transformation type \'%s\' is not'
                          'implemented' % ttype)
     args = [src, dst]
     if order is not None and ttype == 'polynomial':
         args.append(order)
-    matrix = ESTIMATED_TRANSFORMATIONS[ttype][0](*args)
-    transform_func = ESTIMATED_TRANSFORMATIONS[ttype][1]
-    return GeometricTransformation(ttype, matrix, transform_func)
+    tform = TRANSFORMATIONS[ttype]()
+    tform.estimate(*args)
+    return tform
 
 
 def warp(image, reverse_map=None, map_args={}, output_shape=None, order=1,
@@ -569,6 +724,6 @@ def homography(image, H, output_shape=None, order=1,
                   'use the `warp` and `tform` function instead',
                   category=DeprecationWarning)
 
-    tform = GeometricTransformation('projective', H, geometric_transform)
+    tform = ProjectiveTransformation(H)
     return warp(image, reverse_map=tform.reverse, output_shape=output_shape,
                 order=order, mode=mode, cval=cval)
