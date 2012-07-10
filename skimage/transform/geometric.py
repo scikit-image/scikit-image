@@ -273,7 +273,7 @@ ESTIMATED_TRANSFORMATIONS = {
 }
 
 
-def estimate_transformation(ttype, *args, **kwargs):
+def estimate_transformation(ttype, src, dst, order=None):
     """Estimate 2D geometric transformation parameters.
 
     You can determine the over-, well- and under-determined parameters
@@ -322,7 +322,10 @@ def estimate_transformation(ttype, *args, **kwargs):
     if ttype not in ESTIMATED_TRANSFORMATIONS:
         raise NotImplemented('the transformation type \'%s\' is not'
                              'implemented' % ttype)
-    matrix = ESTIMATED_TRANSFORMATIONS[ttype][0](*args, **kwargs)
+    args = [src, dst]
+    if order is not None and ttype == 'polynomial':
+        args.append(order)
+    matrix = ESTIMATED_TRANSFORMATIONS[ttype][0](*args)
     transform_func = ESTIMATED_TRANSFORMATIONS[ttype][1]
     return GeometricTransformation(ttype, matrix, transform_func)
 
