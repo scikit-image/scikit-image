@@ -122,6 +122,27 @@ def test_polynomial():
     assert_array_almost_equal(tform.forward(SRC), DST, 6)
 
 
+def test_union():
+    tform1 = SimilarityTransformation()
+    scale1 = 0.1
+    rotation1 = 1
+    translation1 = (0, 0)
+    tform1.from_params(scale1, rotation1, translation1)
+
+    tform2 = SimilarityTransformation()
+    scale2 = 0.1
+    rotation2 = 1
+    translation2 = (0, 0)
+    tform2.from_params(scale2, rotation2, translation2)
+
+    tform = tform1.union(tform2)
+    tform = tform1 + tform2
+    tform = tform1 * tform2
+
+    assert_array_almost_equal(tform.scale, scale1 * scale2)
+    assert_array_almost_equal(tform.rotation, rotation1 + rotation2)
+
+
 def test_homography():
     x = np.zeros((5,5), dtype=np.uint8)
     x[1, 1] = 255

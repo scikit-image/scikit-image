@@ -106,13 +106,17 @@ class GeometricTransformation(object):
         return geometric_transform(coords, self.inverse_matrix)
 
     def union(self, other):
-        return GeometricTransformation(self.matrix.dot(other.matrix))
+        if type(self) == type(other):
+            transformation = self.__class__
+        else:
+            transformation = GeometricTransformation
+        return transformation(self.matrix.dot(other.matrix))
 
     def __mul__(self, other):
-        return self.union(self, other)
+        return self.union(other)
 
     def __add__(self, other):
-        return self.union(self, other)
+        return self.union(other)
 
 
 class SimilarityTransformation(GeometricTransformation):
