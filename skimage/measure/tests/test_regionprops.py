@@ -194,6 +194,10 @@ def test_orientation():
     # determined with MATLAB
     assert_almost_equal(orientation, 0.10446844651921)
 
+def test_perimeter():
+    perimeter = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
+    assert_almost_equal(perimeter, 59.2132034355964)
+
 def test_solidity():
     solidity = regionprops(SAMPLE, ['Solidity'])[0]['Solidity']
     # determined with MATLAB
