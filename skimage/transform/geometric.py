@@ -105,18 +105,15 @@ class GeometricTransformation(object):
             self.inverse_matrix = np.linalg.inv(self.matrix)
         return geometric_transform(coords, self.inverse_matrix)
 
-    def union(self, other):
+    def __mul__(self, other):
         if type(self) == type(other):
             transformation = self.__class__
         else:
             transformation = GeometricTransformation
         return transformation(self.matrix.dot(other.matrix))
 
-    def __mul__(self, other):
-        return self.union(other)
-
     def __add__(self, other):
-        return self.union(other)
+        return self.__mul__(other)
 
 
 class SimilarityTransformation(GeometricTransformation):
@@ -423,15 +420,6 @@ class PolynomialTransformation(GeometricTransformation):
             'transformation. Instead determine the reverse transformation '
             'parameters by exchanging source and destination coordinates.'
             'Then apply the forward transformation.')
-
-    def union(self, other):
-        raise Exception('Cannot unite polynomial transformations.')
-
-    def __mul__(self, other):
-        return self.union(self, other)
-
-    def __add__(self, other):
-        return self.union(self, other)
 
 
 TRANSFORMATIONS = {

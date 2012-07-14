@@ -135,7 +135,6 @@ def test_union():
     translation2 = (0, 0)
     tform2.from_params(scale2, rotation2, translation2)
 
-    tform = tform1.union(tform2)
     tform = tform1 + tform2
     tform = tform1 * tform2
 
