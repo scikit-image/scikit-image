@@ -495,10 +495,12 @@ def warp(image, reverse_map=None, map_args={}, output_shape=None, order=1,
     ----------
     image : 2-D array
         Input image.
-    reverse_map : callable xy = f(xy, **kwargs)
-        Reverse coordinate map.  A function that transforms a Px2 array of
+    reverse_map : transformation object, callable xy = f(xy, **kwargs)
+        Reverse coordinate map. A function that transforms a Px2 array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
-        coordinates in the *source image*.  Also see examples below.
+        coordinates in the *source image*. In case of a transformation object
+        its `reverse` method will be used as transformation function. Also see
+        examples below.
     map_args : dict, optional
         Keyword arguments passed to `reverse_map`.
     output_shape : tuple (rows, cols)
@@ -548,6 +550,8 @@ def warp(image, reverse_map=None, map_args={}, output_shape=None, order=1,
 
     # Map each (x, y) pair to the source image according to
     # the user-provided mapping
+    if callable(getattr(reverse_map, 'reverse', None)):
+        reverse_map = reverse_map.reverse
     tf_coords = reverse_map(tf_coords, **map_args)
 
     # Reshape back to a (2, M, N) coordinate grid

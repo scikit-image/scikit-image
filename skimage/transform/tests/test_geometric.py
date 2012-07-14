@@ -2,10 +2,9 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 
 from skimage.transform.geometric import _stackcopy
-from skimage.transform import estimate_transformation, \
-    SimilarityTransformation, AffineTransformation, ProjectiveTransformation, \
-    PolynomialTransformation
-from skimage.transform import homography, fast_homography
+from skimage.transform import estimate_transformation, homography, warp, \
+    fast_homography, SimilarityTransformation, AffineTransformation, \
+    ProjectiveTransformation, PolynomialTransformation
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -142,8 +141,23 @@ def test_union():
     assert_array_almost_equal(tform.rotation, rotation1 + rotation2)
 
 
+def test_warp():
+    x = np.zeros((5, 5), dtype=np.uint8)
+    x[2, 2] = 255
+    x = img_as_float(x)
+    theta = -np.pi/2
+    tform = SimilarityTransformation()
+    tform.from_params(1, theta, (0, 4))
+
+    x90 = warp(x, tform, order=1)
+    assert_array_almost_equal(x90, np.rot90(x))
+
+    x90 = warp(x, tform.reverse, order=1)
+    assert_array_almost_equal(x90, np.rot90(x))
+
+
 def test_homography():
-    x = np.zeros((5,5), dtype=np.uint8)
+    x = np.zeros((5, 5), dtype=np.uint8)
     x[1, 1] = 255
     x = img_as_float(x)
     theta = -np.pi/2
