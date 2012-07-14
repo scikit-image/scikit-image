@@ -395,6 +395,19 @@ class PolynomialTransformation(GeometricTransformation):
         self.coeffs = np.linalg.lstsq(A, b)[0]
 
     def forward(self, coords):
+        """Apply forward transformation.
+
+        Parameters
+        ----------
+        coords : Nx2 array
+            source coordinates
+
+        Returns
+        -------
+        coords : Nx2 array
+            transformed coordinates
+
+        """
         x = coords[:, 0]
         y = coords[:, 1]
         u = len(self.coeffs)
