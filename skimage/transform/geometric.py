@@ -105,15 +105,12 @@ class GeometricTransformation(object):
             self.inverse_matrix = np.linalg.inv(self.matrix)
         return geometric_transform(coords, self.inverse_matrix)
 
-    def __mul__(self, other):
+    def __add__(self, other):
         if type(self) == type(other):
             transformation = self.__class__
         else:
             transformation = GeometricTransformation
-        return transformation(self.matrix.dot(other.matrix))
-
-    def __add__(self, other):
-        return self.__mul__(other)
+        return transformation(other.matrix.dot(self.matrix))
 
 
 class SimilarityTransformation(GeometricTransformation):
@@ -462,17 +459,27 @@ def estimate_transformation(ttype, src, dst, order=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import make_tform
+    >>> from skimage import transform as tf
+    >>> # estimate transformation parameters
     >>> src = np.array([0, 0, 10, 10]).reshape((2, 2))
     >>> dst = np.array([12, 14, 1, -20]).reshape((2, 2))
-    >>> tform = estimate_transformation('similarity', src, dst)
-    >>> print tform.matrix
-    >>> print tform.reverse(tform.forward(src)) # == src
-    >>> # warp image using the transformation
+    >>> tform = tf.estimate_transformation('similarity', src, dst)
+    >>> tform.matrix
+    >>> tform.reverse(tform.forward(src)) # == src
+    >>> # warp image using the estimated transformation
     >>> from skimage import data
     >>> image = data.camera()
-    >>> warp(image, reverse_map=tform.forward)
-    >>> warp(image, reverse_map=tform.reverse)
+    >>> tf.warp(image, tform) # == warp(image, reverse_map=tform.reverse)
+    >>> tf.warp(image, reverse_map=tform.forward)
+    >>> # create transformation with explicit parameters
+    >>> tform2 = tf.SimilarityTransformation()
+    >>> scale = 1.1
+    >>> rotation = 1
+    >>> translation = (10, 20)
+    >>> tform2.from_params(scale, rotation, translation)
+    >>> # unite transformations, applied in order from left to right
+    >>> tform3 = tform + tform2
+    >>> tform3.forward(src) # == tform2.forward(tform.forward(src))
 
     """
     ttype = ttype.lower()

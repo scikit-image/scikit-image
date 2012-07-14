@@ -135,7 +135,6 @@ def test_union():
     tform2.from_params(scale2, rotation2, translation2)
 
     tform = tform1 + tform2
-    tform = tform1 * tform2
 
     assert_array_almost_equal(tform.scale, scale1 * scale2)
     assert_array_almost_equal(tform.rotation, rotation1 + rotation2)
