@@ -10,6 +10,9 @@ from . import _moments
 __all__ = ['regionprops']
 
 
+STREL_4 = np.array([[0, 1, 0],
+                    [1, 1, 1],
+                    [0, 1, 0]])
 STREL_8 = np.ones((3, 3), 'int8')
 PROPS = (
     'Area',
@@ -36,7 +39,7 @@ PROPS = (
     'Moments',
     'NormalizedMoments',
     'Orientation',
-#    'Perimeter',
+    'Perimeter',
 #    'PixelIdxList',
 #    'PixelList',
     'Solidity',
@@ -122,6 +125,9 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             Angle between the X-axis and the major axis of the ellipse that has
             the same second-moments as the region. Ranging from `-pi/2` to
             `-pi/2` in counter-clockwise direction.
+        * Perimeter : float
+            Perimeter of object which approximates the contour as a line through
+            the centers of border pixels using a 4-connectivity.
         * Solidity : float
             Ratio of pixels in the region to pixels of the convex hull image.
         * WeightedCentralMoments : 3 x 3 ndarray
@@ -210,8 +216,8 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         b = mu[1, 1] / mu[0, 0]
         c = mu[0, 2] / mu[0, 0]
         #: eigen values of inertia tensor
-        l1 = (a + c) / 2 + sqrt(4 * b**2 + (a - c)**2) / 2
-        l2 = (a + c) / 2 - sqrt(4 * b**2 + (a - c)**2) / 2
+        l1 = (a + c) / 2 + sqrt(4 * b ** 2 + (a - c) ** 2) / 2
+        l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
 
         # cached results which are used by several properties
         _filled_image = None
@@ -297,6 +303,9 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             else:
                 obj_props['Orientation'] = - 0.5 * atan(2 * b / (a - c))
 
+        if 'Perimeter' in properties:
+            obj_props['Perimeter'] = perimeter(array, 4)
+
         if 'Solidity' in properties:
             if _convex_image is None:
                 _convex_image = convex_hull_image(array)
@@ -350,3 +359,50 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
                 obj_props['WeightedNormalizedMoments'] = _wnu
 
     return props
+
+
+def perimeter(image, neighbourhood=4):
+    """Calculate total perimeter of all objects in binary image.
+
+    Parameters
+    ----------
+    image : array
+        binary image
+    neighbourhood: 4 or 8, optional
+        neighbourhood connectivity for border pixel determination, default 4
+
+    Returns
+    -------
+    perimeter : float
+        total perimeter of all objects in binary image
+
+    References
+    ----------
+    K. Benkrid, D. Crookes. Design and FPGA Implementation of a Perimeter
+        Estimator. The Queen's University of Belfast.
+        http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
+    """
+    if neighbourhood == 4:
+        strel = STREL_4
+    else:
+        strel = STREL_8
+    eroded_image = ndimage.binary_erosion(image, strel)
+    border_image = image - eroded_image
+
+    # perimeter contribution: corresponding values in convolved image
+    perimeter_weights = {
+        1:               (5, 7, 15, 17, 25, 27),
+        sqrt(2):         (21, 33),
+        1 + sqrt(2) / 2: (13, 23)
+    }
+    perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
+                                                               [ 2, 1,  2],
+                                                               [10, 2, 10]]))
+    total_perimeter = 0
+    for weight, values in perimeter_weights.items():
+        num_values = 0
+        for value in values:
+            num_values += np.sum(perimeter_image == value)
+        total_perimeter += num_values * weight
+
+    return total_perimeter
