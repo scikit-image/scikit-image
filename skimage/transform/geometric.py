@@ -43,13 +43,22 @@ def geometric_transform(coords, matrix):
     coords : Nx2 array
             transformed coordinates
     """
+    coords = np.asarray(coords)
+    shape = coords.shape
+    if shape == (2,):
+        coords = np.array([coords])
+
     x, y = np.transpose(coords)
     src = np.vstack((x, y, np.ones_like(x)))
     dst = np.dot(src.transpose(), matrix.transpose())
     # rescale to homogeneous coordinates
     dst[:, 0] /= dst[:, 2]
     dst[:, 1] /= dst[:, 2]
-    return dst[:, :2]
+
+    if shape == (2,):
+        return dst[0, :2]
+    else:
+        return dst[:, :2]
 
 
 class GeometricTransformation(object):
