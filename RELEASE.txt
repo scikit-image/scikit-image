@@ -5,12 +5,9 @@ How to make a new release of ``skimage``
 - Update the version number in setup.py and bento.info and commit
 - Update the docs:
   - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
-  - Build a clean version of the docs: run "make" in the root dir, then
+  - Build a clean version of the docs.  Run "make" in the root dir, then
     ``rm build -rf; make html`` in the docs.
-  - Push upstream using "make gh-pages; cd gh-pages; git push"
-    (Note: the version list won't display correctly until after you've also
-     rebuilt the dev docs later on; they're grabbed from
-     ``skimage.org/docs/dev/.../docversions.js``.)
+  - Push upstream using "make gh-pages"
 - Add the version number as a tag in git::
 
   git tag v0.6
@@ -24,8 +21,7 @@ How to make a new release of ``skimage``
   python setup.py register
   python setup.py sdist upload
 
-- Increase the version number in the setup.py and bento.info file to ``0.Xdev``
-  and ``0.X.0.dev`` respectively.
+- Increase the version number in the setup.py file to ``0.Xdev``.
 
 - Update the web frontpage:
   The webpage is kept in a separate repo: scikits-image-web
@@ -34,4 +30,40 @@ How to make a new release of ``skimage``
 
 - Post release notes on mailing lists, blog, G+, etc.
 
-- Regenerate the dev docs, upload.
+Debian
+------
+
+- Tag the release as per instructions above.
+- git checkout debian
+- git merge v0.x.x
+- uscan <- not sure if this step is necessary
+- Update changelog (emacs has a good mode, requires package dpkg-dev-el)
+  - C-C C-v add new version, C-c C-c timestamp / save
+- git commit -m 'Changelog entry for 0.x.x'
+- git-buildpackage -uc -us -rfakeroot
+- Sign the changes: debsign skimage_0.x.x-x_amd64.changes
+- cd ../build-area && dput mentors skimage_0.x.x-x_amd64.changes
+- The package should now be available at:
+
+  http://mentors.debian.net/package/skimage
+
+For the last lines above to work, you need ``~/.gbp.conf``::
+
+  [DEFAULT]
+  upstream-tag = %(version)s
+
+  [git-buildpackage]
+  sign-tags = True
+  export-dir = ../build-area/
+  tarball-dir = ../tarballs/
+
+As well as ``~/dput.cf``::
+
+  [mentors]
+  fqdn = mentors.debian.net
+  incoming = /upload
+  method = http
+  allow_unsigned_uploads = 0
+  progress_indicator = 2
+  # Allow uploads for UNRELEASED packages
+  allowed_distributions = .*
