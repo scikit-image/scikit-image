@@ -1,6 +1,7 @@
 skimage (0.6.1-1) unstable; urgency=low
 
-  * Upstream bugfix release.
+  * Upstream bugfix release (correctly compare dtypes in the freeimage loader
+    on all platforms).
   * Add python-support as build dependency (Closes: #681896).
 
  -- Stefan van der Walt <stefan@sun.ac.za>  Tue, 17 Jul 2012 15:03:25 -0400
