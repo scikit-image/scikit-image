@@ -1,11 +1,47 @@
 import numpy as np
 cimport numpy as np
+from time import time
 from scipy import ndimage
 from ..util import img_as_float
 
 
 def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
+    """Segments image using k-means clustering in Color-(x,y) space.
+
+    Parameters
+    ----------
+    image: (width, height, 3) ndarray 
+        Input image
+    ratio: float
+        Balances color-space proximity and image-space proximity.
+        Higher values give more weight to color-space.
+    max_iter: int
+        maximum number of iterations of k-means
+    sigma: float
+        Width of Gaussian smoothing kernel for preprocessing.
+
+    Returns
+    -------
+    segment_mask: ndarray, [width, height]
+        Integer mask indicating segment labels.
+
+    Notes
+    -----
+    The image is smoothed using a Gaussian kernel prior to segmentation.
+    Best results are achieved if the image is given in Lab color space.
+
+    References
+    ----------
+    .. [1] Slic superpixels, Achanta, R. and Shaji, A. and Smith, K. and Lucchi,
+           A. and Fua, P. and Suesstrunk, S.
+           Technical Report 2010
+
+    """
+    image = np.atleast_3d(image)
+    if image.shape[2] != 3:
+        ValueError("Only 3-channel 2d images are supported.")
     image = ndimage.gaussian_filter(img_as_float(image), sigma)
+
     # initialize on grid:
     height, width = image.shape[:2]
     # approximate grid size for desired n_segments
@@ -22,7 +58,6 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
     ratio = (ratio / float(step)) ** 2
-    print(ratio)
     cdef np.ndarray[dtype=np.float_t, ndim=3] image_yx = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
     cdef int i, k, x, y, x_min, x_max, y_min, y_max, changes
     cdef double dist_mean
@@ -36,7 +71,6 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
     cdef double tmp
     for i in xrange(max_iter):
         changes = 0
-        print("iteration %d" % i)
         current_mean = <np.float_t*> means.data
         # assign pixels to means
         for k in xrange(n_means):
@@ -65,6 +99,7 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
                         changes += 1
                     current_distance += 1
             current_mean += 5
+        if changes == 0:
             break
         # recompute means:
         means_list = [np.bincount(nearest_mean.ravel(), image_yx[:, :, j].ravel())
