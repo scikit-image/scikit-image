@@ -134,6 +134,8 @@ class Slider(base.MPLWidgetCompatibility, mwidgets.Slider):
             func(value)
 
     def on_release(self, event):
+        if self.ignore(event) or not event.inaxes == self.ax:
+            return
         if self.release_callback is not None:
             self.release_callback(self.value)
 
