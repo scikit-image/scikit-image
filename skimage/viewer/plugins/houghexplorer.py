@@ -3,6 +3,7 @@ from skimage.transform import probabilistic_hough
 
 import matplotlib.pyplot as plt
 import matplotlib.collections as mcoll
+from matplotlib.colors import LinearSegmentedColormap
 
 from .base import Plugin
 from ..widgets.slider import Slider
@@ -10,6 +11,37 @@ from .. import utils
 
 
 __all__ = ['HoughExplorer']
+
+
+class LinearColormap(LinearSegmentedColormap):
+    """LinearSegmentedColormap in which color varies smoothly.
+
+    This class is a simplification of LinearSegmentedColormap, which doesn't
+    support jumps in color intensities.
+
+    Parameters
+    ----------
+    name : str
+        Name of colormap.
+
+    segmented_data : dict
+        Dictionary of 'red', 'green', 'blue', and (optionally) 'alpha' values.
+        Each color key contains a list of `x`, `y` tuples. `x` must increase
+        monotonically from 0 to 1 and corresponds to input values for a mappable
+        object (e.g. an image). `y` corresponds to the color intensity.
+
+    """
+    def __init__(self, name, segmented_data, **kwargs):
+        segmented_data = dict((key, [(x, y, y) for x, y in value])
+                              for key, value in segmented_data.iteritems())
+        LinearSegmentedColormap.__init__(self, name, segmented_data, **kwargs)
+
+
+cg_speq = {'blue':  [(0.0, 0.0), (1.0, 0.0)],
+           'green': [(0.0, 0.7), (1.0, 0.7)],
+           'red':   [(0.0, 0.0), (1.0, 0.0)],
+           'alpha': [(0.0, 0.0), (1.0, 1.0)]}
+clear_green = LinearColormap('clear_green', cg_speq)
 
 
 
@@ -63,7 +95,7 @@ class HoughExplorer(Plugin):
 
         self._hough_lines = []
 
-        self.canny_image = None
+        self._canny_img_plot = None
         self.update_image()
 
         print self.help
@@ -112,6 +144,13 @@ class HoughExplorer(Plugin):
                                  sigma=self.sigma,
                                  low_threshold=self.low,
                                  high_threshold=self.high)
+
+        if self._canny_img_plot is None:
+            self._canny_img_plot = self.viewer.ax.imshow(self.canny_image,
+                                                         cmap=clear_green)
+        else:
+            self._canny_img_plot.set_array(self.canny_image)
+
         self.update_lines()
 
     def update_lines(self, event=None):
