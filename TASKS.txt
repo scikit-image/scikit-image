@@ -1,5 +1,57 @@
  ..  role:: strike
 
+
+SciPy 2012 Sprint
+=================
+
+Welcome! Stefan van der Walt and Tony Yu are organizing a coding sprint for
+scikits-image at SciPy 2012. Anyone who's interested can join the party on July 20th starting at 9 AM (location to be determined).
+
+We have a list of tasks for all levels of programmers, but we'd be really
+interested in new ideas as well.
+
+Basic
+-----
+
+These tasks should just require some basic Python knowledge.
+
+Code review
+```````````
+
+* geometric transformation PR
+* morphological reconstruction PR
+* Testing visualization tools
+
+Docs
+````
+
+* Task-based examples (`Where's Waldo`_, `Flatten Sudoku Puzzle`_)
+* Organize/add-topics to user guide (Add overview of packages)
+
+.. _Flatten Sudoku Puzzle: http://stackoverflow.com/questions/10196198/how-to-remove-convexity-defects-in-sudoku-square/11366549#11366549
+.. _Where's Waldo: http://stackoverflow.com/questions/8479058/how-do-i-find-waldo-with-mathematica
+
+Features
+````````
+
+* Add text, anti-aliasing to the draw module
+* Lab color space conversion
+* Add slicing to ImageCollection object
+* Add imread_collection to all imread backends
+* Add an htmlrepr to the Image object, and return Image objects from all I/O routines? (allows automatic display of images in IPython notebook)
+* Add @greyimage decorator to check if input is a greyscale image
+
+Intermediate
+------------
+
+These tasks may require some understanding of image processing algorithms or
+scikits-image internals.
+
+* Add binary features (BRIEF, BRISK, FREAK)
+* Blurring kernel estimation
+* Better video loading (move to plugin framework, add backends)
+
+
 .. _howto_contribute:
 
 How to contribute to ``skimage``
