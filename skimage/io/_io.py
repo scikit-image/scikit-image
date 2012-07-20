@@ -1,9 +1,16 @@
 __all__ = ['imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
+import base64
+
 from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
 import numpy as np
+
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
 
 
 # Shared image queue
@@ -48,6 +55,12 @@ class Image(np.ndarray):
             subclass_state[tag] = getattr(self, tag)
         object_state[2] = (object_state[2], subclass_state)
         return tuple(object_state)
+
+    def _repr_html_(self):
+        str_buffer = StringIO.StringIO()
+        imsave(str_buffer, self, format_str='png')
+        base64_str = base64.b64encode(str_buffer.getvalue())
+        return '<img src="data:image/png;base64,%s">' % base64_str
 
     def __setstate__(self, state):
         nd_state, subclass_state = state
