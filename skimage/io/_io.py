@@ -56,11 +56,15 @@ class Image(np.ndarray):
         object_state[2] = (object_state[2], subclass_state)
         return tuple(object_state)
 
-    def _repr_html_(self):
+    def _repr_png_(self):
         str_buffer = StringIO.StringIO()
         imsave(str_buffer, self, format_str='png')
-        base64_str = base64.b64encode(str_buffer.getvalue())
-        return '<img src="data:image/png;base64,%s">' % base64_str
+        return str_buffer.getvalue()
+
+    def _repr_jpeg_(self):
+        str_buffer = StringIO.StringIO()
+        imsave(str_buffer, self, format_str='jpeg')
+        return str_buffer.getvalue()
 
     def __setstate__(self, state):
         nd_state, subclass_state = state
