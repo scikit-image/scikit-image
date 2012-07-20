@@ -164,8 +164,10 @@ def rgb2hsv(rgb):
 
     # -- S channel
     delta = arr.ptp(-1)
+    # Ignore warning for zero divided by zero
+    old_settings = np.seterr(invalid='ignore')
     out_s = delta / out_v
-    out_s[delta == 0] = 0
+    out_s[delta == 0.] = 0.
 
     # -- H channel
     # red is max
@@ -180,6 +182,9 @@ def rgb2hsv(rgb):
     idx = (arr[:, :, 2] == out_v)
     out[idx, 0] = 4. + (arr[idx, 0] - arr[idx, 1]) / delta[idx]
     out_h = (out[:, :, 0] / 6.) % 1.
+    out_h[delta == 0.] = 0.
+
+    np.seterr(**old_settings)
 
     # -- output
     out[:, :, 0] = out_h
