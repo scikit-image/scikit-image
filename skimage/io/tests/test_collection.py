@@ -111,6 +111,12 @@ class TestMultiImage():
             self.img.conserve_memory = val
         assert_raises(AttributeError, set_mem, True)
 
+    @skipif(not PIL_available)
+    def test_concatenate(self):
+        ar = self.img.concatenate()
+        assert_equal(ar.shape, (len(self.img),) + 
+                                self.img[0].shape)
+
 
 if __name__ == "__main__":
     run_module_suite()
