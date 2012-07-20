@@ -73,11 +73,13 @@ class TestSimpleImage():
 
 
 def test_otsu_camera_image():
-    assert threshold_otsu(data.camera()) == 87
+    camera = skimage.img_as_ubyte(data.camera())
+    assert threshold_otsu(camera) == 87
 
 
 def test_otsu_coins_image():
-    assert threshold_otsu(data.coins()) == 107
+    coins = skimage.img_as_ubyte(data.coins())
+    assert threshold_otsu(coins) == 107
 
 
 def test_otsu_coins_image_as_float():
@@ -86,7 +88,8 @@ def test_otsu_coins_image_as_float():
 
 
 def test_otsu_lena_image():
-    assert threshold_otsu(data.lena()) == 141
+    lena = skimage.img_as_ubyte(data.lena())
+    assert threshold_otsu(lena) == 141
 
 
 if __name__ == '__main__':
