@@ -24,9 +24,11 @@ class TestAlphanumericKey():
     def setUp(self):
         self.test_string = 'z23a'
         self.test_str_result = ['z', 23, 'a']
-        self.filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png']
+        self.filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png',
+            'e9.png', 'e10.png', 'em.png']
         self.sorted_filenames = \
-            ['f9.9.png', 'f9.10.png', 'f10.9.png', 'f10.10.png']
+            ['e9.png', 'e10.png', 'em.png', 'f9.9.png', 'f9.10.png',
+            'f10.9.png', 'f10.10.png']
 
     def test_string_split(self):
         assert_equal(alphanumeric_key(self.test_string), self.test_str_result)
