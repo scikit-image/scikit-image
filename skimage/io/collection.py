@@ -267,8 +267,11 @@ class ImageCollection(object):
            Imagecollection of the selected images or an ndarray if a single 
            image is specified.
         """
+        if hasattr(n, '__index__'):
+            n = n.__index__()
+        
         if type(n) not in [int, slice]:
-            raise TypeError('slicing must be an int or slice object')
+            raise TypeError('slicing must be with an int or slice object')
         
         if type(n) is int:
             n = self._check_imgnum(n)
@@ -283,7 +286,6 @@ class ImageCollection(object):
         
         else:   # slice object was provided
             fidx = range(len(self.files))[n]
-            fidx.sort()
             if len(fidx) == 1:  # only one item requested
                 return self.__getitem__(fidx[0])
             else:    
@@ -291,18 +293,19 @@ class ImageCollection(object):
                 # in the original ImageCollection will be copied by reference
                 # to the new object.  Image data loaded after this creation 
                 # are not linked.
-                newIC = copy(self)
-                newIC._files = [self.files[i] for i in fidx] 
+                fidx.sort()
+                new_ic = copy(self)
+                new_ic._files = [self.files[i] for i in fidx] 
                 if self.conserve_memory:  
                     if self._cached in fidx:
-                        newIC._cached = fidx[self._cached]
-                        newIC.data = np.copy(self.data)
+                        new_ic._cached = fidx[self._cached]
+                        new_ic.data = np.copy(self.data)
                     else:
-                        newIC.data = np.empty(1, dtype=object)
+                        new_ic.data = np.empty(1, dtype=object)
                 else:
-                    newIC.data = self.data[fidx]
+                    new_ic.data = self.data[fidx]
 
-                return newIC
+                return new_ic
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
