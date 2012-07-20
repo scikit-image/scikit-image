@@ -11,7 +11,7 @@ try:
     import skimage.io._plugins.freeimage_plugin as fi
     FI_available = True
     sio.use_plugin('freeimage')
-except OSError:
+except RuntimeError:
     FI_available = False
 
 
@@ -23,7 +23,7 @@ def setup_module(self):
     """
     try:
         sio.use_plugin('freeimage')
-    except OSError:
+    except RuntimeError:
         pass
 
 

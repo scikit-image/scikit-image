@@ -15,7 +15,7 @@ try:
     io.use_plugin('freeimage')
     FI_available = True
     priority_plugin = 'freeimage'
-except OSError:
+except RuntimeError:
     FI_available = False
 
 
