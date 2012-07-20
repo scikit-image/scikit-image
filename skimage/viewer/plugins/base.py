@@ -27,16 +27,17 @@ class Plugin(QtGui.QDialog):
     overlay : array
         Image used in measurement/manipulation.
     """
-    def __init__(self, callback, parent=None, height=100, width=400):
-        self._viewer = parent
-        QtGui.QDialog.__init__(self, parent)
+    def __init__(self, image_viewer, callback=None, height=100, width=400):
+        self._viewer = image_viewer
+        QtGui.QDialog.__init__(self, image_viewer)
         self.setWindowTitle('Image Plugin')
         self.layout = QtGui.QGridLayout(self)
         self.resize(width, height)
         self.row = 0
-        self.callback = callback
+        if callback is not None:
+            self.callback = callback
 
-        self.arguments = [parent.original_image]
+        self.arguments = [image_viewer.original_image]
         self.keyword_arguments= {}
 
         self.overlay = self._viewer.overlay

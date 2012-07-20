@@ -4,10 +4,10 @@ from skimage.filter import canny
 
 class CannyPlugin(Plugin):
 
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, image_viewer, *args, **kwargs):
         height = kwargs.get('height', 100)
         width = kwargs.get('width', 400)
-        super(CannyPlugin, self).__init__(self.callback, parent=parent,
+        super(CannyPlugin, self).__init__(image_viewer,
                                           width=width, height=height)
         self.add_keyword_argument('sigma', 0.005, 0, self.caller)
         self.add_keyword_argument('low_threshold', 0.255, 0, self.caller)
