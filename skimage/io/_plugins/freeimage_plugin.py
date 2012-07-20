@@ -72,13 +72,13 @@ def load_freeimage():
             # No freeimage library loaded, and load-errors reported for some
             # candidate libs
             err_txt = ['%s:\n%s' % (l, str(e.message)) for l, e in errors]
-            raise OSError('One or more FreeImage libraries were found, but '
-                          'could not be loaded due to the following errors:\n'
-                          '\n\n'.join(err_txt))
+            raise RuntimeError('One or more FreeImage libraries were found, but '
+                               'could not be loaded due to the following errors:\n'
+                               '\n\n'.join(err_txt))
         else:
             # No errors, because no potential libraries found at all!
-            raise OSError('Could not find a FreeImage library in any of:\n' +
-                          '\n'.join(lib_dirs))
+            raise RuntimeError('Could not find a FreeImage library in any of:\n' +
+                               '\n'.join(lib_dirs))
 
     # FreeImage found
     @functype(None, ctypes.c_int, ctypes.c_char_p)
