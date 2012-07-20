@@ -307,3 +307,23 @@ class ImageCollection(object):
 
         """
         self.data = np.empty_like(self.data)
+
+    def concatenate(self):
+        """Concatenate all images in the collection on a new axis.
+
+        Returns
+        -------
+        ar : np.ndarray
+            An array having one more dimension than the images in `self`.
+
+        Raises
+        ------
+        ValueError
+            If images in the collection don't have identical shapes.
+        """
+        all_images = [img[np.newaxis, ...] for img in self]
+        try:
+            ar = np.concatenate(all_images)
+        except ValueError:
+            raise ValueError('Image dimensions must agree.')
+        return ar
