@@ -1,5 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal
+from numpy.testing.decorators import knownfailureif
 
 import skimage
 from skimage import data
@@ -72,10 +73,20 @@ class TestSimpleImage():
         assert_array_equal(ref, out)
 
 
+_using_matplotlib_io_msg = 'Matplotlib always returns float arrays scaled ' + \
+                           'from [0, 1], while PIL will return arrays with ' + \
+                           'varying dtype\'s.'
+def _using_matplotlib_io():
+    imread_plugins = skimage.io.plugin_order()['imread']
+    return imread_plugins[0] == 'matplotlib'
+
+
+@knownfailureif(_using_matplotlib_io, _using_matplotlib_io_msg)
 def test_otsu_camera_image():
     assert threshold_otsu(data.camera()) == 87
 
 
+@knownfailureif(_using_matplotlib_io, _using_matplotlib_io_msg)
 def test_otsu_coins_image():
     assert threshold_otsu(data.coins()) == 107
 
@@ -85,6 +96,7 @@ def test_otsu_coins_image_as_float():
     assert 0.41 < threshold_otsu(coins) < 0.42
 
 
+@knownfailureif(_using_matplotlib_io, _using_matplotlib_io_msg)
 def test_otsu_lena_image():
     assert threshold_otsu(data.lena()) == 141
 
