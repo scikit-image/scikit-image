@@ -109,7 +109,7 @@ plt.title('Input image')
 
 plt.subplot(132)
 plt.imshow(edges, cmap=plt.cm.gray)
-plt.title('Sobel edges')
+plt.title('Canny edges')
 
 plt.subplot(133)
 plt.imshow(edges * 0)
