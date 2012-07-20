@@ -72,7 +72,6 @@ def _setup_test(verbose=False):
     try:
         import nose as _nose
     except ImportError:
-        print("Could not load nose.  Unit tests not available.")
         return None
     else:
         f = functools.partial(_nose.run, 'skimage', argv=args)
