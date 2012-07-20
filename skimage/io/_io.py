@@ -1,4 +1,4 @@
-__all__ = ['imread', 'imread_collection', 'imsave', 'imshow', 'show',
+__all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
 import base64
