@@ -2,12 +2,41 @@
 
 from __future__ import with_statement
 
-__all__ = ['MultiImage', 'ImageCollection', 'imread']
+__all__ = ['MultiImage', 'ImageCollection', 'imread', 'concatenate_images']
 
 from glob import glob
 
 import numpy as np
 from ._io import imread
+
+def concatenate_images(ic):
+    """Concatenate all images in the image collection into an array.
+
+    Parameters
+    ----------
+    ic: an iterable of images (including ImageCollection and MultiImage)
+        The images to be concatenated.
+
+    Returns
+    -------
+    ar : np.ndarray
+        An array having one more dimension than the images in `ic`.
+
+    See Also
+    --------
+    `ImageCollection.concatenate`, `MultiImage.concatenate`
+
+    Raises
+    ------
+    ValueError
+        If images in `ic` don't have identical shapes.
+    """
+    all_images = [img[np.newaxis, ...] for img in ic]
+    try:
+        ar = np.concatenate(all_images)
+    except ValueError:
+        raise ValueError('Image dimensions must agree.')
+    return ar
 
 
 class MultiImage(object):
@@ -142,6 +171,24 @@ class MultiImage(object):
     def __str__(self):
         return str(self.filename) + ' [%s frames]' % self._numframes
 
+    def concatenate(self):
+        """Concatenate all images in the multi-image into an array.
+
+        Returns
+        -------
+        ar : np.ndarray
+            An array having one more dimension than the images in `self`.
+
+        See Also
+        --------
+        `concatenate_images`
+
+        Raises
+        ------
+        ValueError
+            If images in the `MultiImage` don't have identical shapes.
+        """
+        return concatenate_images(self)
 
 class ImageCollection(object):
     """Load and manage a collection of image files.
@@ -307,3 +354,23 @@ class ImageCollection(object):
 
         """
         self.data = np.empty_like(self.data)
+
+    def concatenate(self):
+        """Concatenate all images in the collection into an array.
+
+        Returns
+        -------
+        ar : np.ndarray
+            An array having one more dimension than the images in `self`.
+
+        See Also
+        --------
+        `concatenate_images`
+
+        Raises
+        ------
+        ValueError
+            If images in the `ImageCollection` don't have identical shapes.
+        """
+        return concatenate_images(self)
+
