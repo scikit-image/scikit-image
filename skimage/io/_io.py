@@ -5,8 +5,62 @@ from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
 import numpy as np
 
+
 # Shared image queue
 _image_stack = []
+
+
+class Image(np.ndarray):
+    """Image data with tags."""
+
+    tags = {'filename': '',
+            'EXIF': {},
+            'info': {}}
+
+    def __new__(image_cls, arr, **kwargs):
+        """Set the image data and tags according to given parameters.
+
+        Input:
+        ------
+        `image_cls` : Image class specification
+            This is not normally specified by the user.
+        `arr` : ndarray
+            Image data.
+        ``**kwargs`` : Image tags as keywords
+            Specified in the form ``tag0=value``, ``tag1=value``.
+
+        """
+        x = np.asarray(arr).view(image_cls)
+        for tag, value in Image.tags.items():
+            setattr(x, tag, kwargs.get(tag, getattr(arr, tag, value)))
+        return x
+
+    def __array_finalize__(self, obj):
+        """Copy object tags."""
+        for tag, value in Image.tags.items():
+            setattr(self, tag, getattr(obj, tag, value))
+        return
+
+    def __reduce__(self):
+        object_state = list(np.ndarray.__reduce__(self))
+        subclass_state = {}
+        for tag in self.tags:
+            subclass_state[tag] = getattr(self, tag)
+        object_state[2] = (object_state[2], subclass_state)
+        return tuple(object_state)
+
+    def __setstate__(self, state):
+        nd_state, subclass_state = state
+        np.ndarray.__setstate__(self, nd_state)
+
+        for tag in subclass_state:
+            setattr(self, tag, subclass_state[tag])
+
+    @property
+    def exposure(self):
+        """Return exposure time based on EXIF tag."""
+        exposure = self.EXIF['EXIF ExposureTime'].values[0]
+        return exposure.num / float(exposure.den)
 
 
 def push(img):
@@ -77,7 +131,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if as_grey and getattr(img, 'ndim', 0) >= 3:
         img = rgb2grey(img)
 
-    return img
+    return Image(img)
 
 
 def imread_collection(load_pattern, conserve_memory=True,
