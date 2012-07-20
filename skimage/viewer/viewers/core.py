@@ -53,6 +53,17 @@ class ImageViewer(QtGui.QMainWindow):
         self.canvas = ImageCanvas(self.main_widget, image)
         self.fig = self.canvas.fig
         self.ax = self.canvas.ax
+        self.ax.autoscale(enable=False)
+        self.image_plot = self.ax.images[0]
+        self.plugins = []
+
+        # List of axes artists to check for removal.
+        self._axes_artists = [self.ax.artists,
+                              self.ax.collections,
+                              self.ax.images,
+                              self.ax.lines,
+                              self.ax.patches,
+                              self.ax.texts]
 
         self.layout = QtGui.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
@@ -61,6 +72,8 @@ class ImageViewer(QtGui.QMainWindow):
         # self.statusBar().showMessage("coordinates")
         self.original_image = image
         self.image = image
+
+        self.overlay_plot = None
         self._overlay = None
 
     @property
@@ -80,10 +93,10 @@ class ImageViewer(QtGui.QMainWindow):
     @overlay.setter
     def overlay(self, image):
         self._overlay = image
-        if len(self.ax.images) == 1:
-            self.ax.imshow(image, cmap=self.overlay_cmap)
+        if self.overlay_plot is None:
+            self.overlay_plot = self.ax.imshow(image, cmap=self.overlay_cmap)
         else:
-            self.ax.images[1].set_array(image)
+            self.overlay_plot.set_array(image)
         self.canvas.draw_idle()
 
     def closeEvent(self, ce):
@@ -93,4 +106,32 @@ class ImageViewer(QtGui.QMainWindow):
         super(ImageViewer, self).show()
         sys.exit(qApp.exec_())
 
+    @property
+    def climits(self):
+        return self.image_plot.get_clim()
+
+    @climits.setter
+    def climits(self, limits):
+        cmin, cmax = limits
+        self.image_plot.set_clim(vmin=cmin, vmax=cmax)
+
+    def connect_event(self, event, callback):
+        cid = self.canvas.mpl_connect(event, callback)
+        return cid
+
+    def disconnect_event(self, callback_id):
+        self.canvas.mpl_disconnect(callback_id)
+
+    def add_artist(self, artist):
+        self.ax.add_artist(artist)
+
+    def remove_artist(self, artist):
+        """Disconnect all artists created by this widget."""
+        # There's probably a smarter way to do this.
+        for artist_list in self._axes_artists:
+            if artist in artist_list:
+                artist_list.remove(artist)
+
+    def redraw(self):
+        self.canvas.draw_idle()
 
