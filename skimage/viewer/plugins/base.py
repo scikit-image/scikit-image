@@ -46,6 +46,8 @@ class Plugin(QtGui.QDialog):
     overlay : array
         Image used in measurement/manipulation.
     """
+    draws_on_image = False
+
     def __init__(self, image_viewer, callback=None, height=100, width=400,
                  useblit=None):
         self.image_viewer = image_viewer
@@ -72,7 +74,17 @@ class Plugin(QtGui.QDialog):
         self.cids = []
         self.artists = []
 
-        self.connect_event('draw_event', self.on_draw)
+        if self.draws_on_image:
+            self.connect_event('draw_event', self.on_draw)
+
+    def on_draw(self, event):
+        """Save image background when blitting.
+
+        The saved image is used to "clear" the figure before redrawing artists.
+        """
+        if self.useblit:
+            bbox = self.image_viewer.ax.bbox
+            self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
 
     def caller(self, *args):
         arguments = [self._get_value(a) for a in self.arguments]
@@ -162,16 +174,6 @@ class PlotPlugin(Plugin):
         Plugin.__init__(self, image_viewer, **kwargs)
         # Add plot for displaying intensity profile.
         self.add_plot()
-        self.connect_event('draw_event', self.on_draw)
-
-    def on_draw(self, event):
-        """Save image background when blitting.
-
-        The saved image is used to "clear" the figure before redrawing artists.
-        """
-        if self.useblit:
-            bbox = self.image_viewer.ax.bbox
-            self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
 
     def add_plot(self, height=4, width=4):
         self.canvas = PlotCanvas(self, height, width)
