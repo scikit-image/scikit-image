@@ -553,12 +553,14 @@ def gray2rgb(image):
 _one_third = 1.0 / 3.0
 _sixteen_hundred_sixteenth = 16.0 / 116.0
 # Observer= 2A, Illuminant= D65
-_xref = 0.95047
-_yref = 1.0
-_zref = 1.08883
+_xref = 0.95047 
+_yref = 1.
+_zref = 1.08883 
 _inv_xref = 1.0 / _xref
 _inv_yref = 1.0 / _yref
 _inv_zref = 1.0 / _zref
+
+
 
 #--------------------------------------------------------------
 # The conversion functions that make use of the constants above
@@ -602,7 +604,7 @@ def xyz2lab(xyz):
     >>> lena_xyz = rgb2xyz(lena)
     >>> lena_lab = xyz2lab(lena_xyz)
     """
-    arr = _prepare_colorarray(xyz)
+    arr = _prepare_colorarray(xyz).copy()
     out = np.empty_like(arr)
 
     # scale by CIE XYZ tristimulus values of the reference white point
@@ -661,22 +663,21 @@ def lab2xyz(lab):
 
     """
 
-    arr = _prepare_colorarray(lab)
+    arr = _prepare_colorarray(lab).copy()
     out = np.empty_like(arr)
 
     L, a, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
     y = (L + 16.) / 116.
-    x = a / 500. + y
-    z = y - b / 200.
+    x = (a / 500.) + y
+    z = y - (b / 200.)
 
     out[:, :, 0] = x
     out[:, :, 1] = y
     out[:, :, 2] = z
 
-    out_cube = np.power(out,3)
-    mask = out > 0.206893
+    mask = out > 0.2068966
     out[mask] = np.power(out[mask], 3.)
-    out[~mask] = (out[~mask] - _sixteen_hundred_sixteenth) / 7.787
+    out[~mask] = (out[~mask] - _sixteen_hundred_sixteenth) / 7.787*1000
 
     # rescale Observer= 2 deg, Illuminant= D65
     #x, y, z = out[:, :, 0], out[:, :, 1], out[:, :, 2]
