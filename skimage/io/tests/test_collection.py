@@ -23,9 +23,12 @@ if sys.version_info[0] > 2:
 class TestImageCollection():
     pattern = [os.path.join(data_dir, pic) for pic in ['camera.png',
                                                        'color.png']]
+    pattern_matched = [os.path.join(data_dir, pic) for pic in 
+                                                    ['camera.png', 'moon.png']]
 
     def setUp(self):
         self.collection = ImageCollection(self.pattern)
+        self.collection_matched = ImageCollection(self.pattern_matched)
 
     def test_len(self):
         assert len(self.collection) == 2
@@ -58,6 +61,12 @@ class TestImageCollection():
 
         ic = ImageCollection(load_pattern, load_func=load_fn)
         assert_equal(ic[1], (2, 'two'))
+
+    def test_concatenate(self):
+        ar = self.collection_matched.concatenate()
+        assert_equal(ar.shape, (len(self.collection_matched),) + 
+                                self.collection[0].shape)
+        assert_raises(ValueError, self.collection.concatenate)
 
 
 class TestMultiImage():
