@@ -44,7 +44,9 @@ References
 from __future__ import division
 
 __all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
-           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb']
+           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb',
+           'xyz2lab', 'lab2xyz',
+           ]
 
 __docformat__ = "restructuredtext en"
 
@@ -543,3 +545,148 @@ def gray2rgb(image):
 
     M, N = image.shape
     return np.dstack((image, image, image))
+
+
+#----------------------
+# Constants for CIE LAB
+#----------------------
+_one_third = 1.0 / 3.0
+_sixteen_hundred_sixteenth = 16.0 / 116.0
+# Observer= 2A, Illuminant= D65
+_xref = 0.95047
+_yref = 1.0
+_zref = 1.08883
+_inv_xref = 1.0 / _xref
+_inv_yref = 1.0 / _yref
+_inv_zref = 1.0 / _zref
+
+#--------------------------------------------------------------
+# The conversion functions that make use of the constants above
+#--------------------------------------------------------------
+
+def xyz2lab(xyz):
+    """XYZ to CIE-LAB color space conversion.
+
+    Parameters
+    ----------
+    xyz : array_like
+        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in CIE-LAB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `xyz` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Observer= 2A, Illuminant= D65
+    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+    
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
+    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+ 
+    Examples
+    --------
+    >>> import os
+    >>> from skimage import data_dir 
+    >>> from skimage.color import rgb2xyz, xyz2lab
+    >>> from skimage.io import imread
+    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena_xyz = rgb2xyz(lena)
+    >>> lena_lab = xyz2lab(lena_xyz)
+    """
+    arr = _prepare_colorarray(xyz)
+    out = np.empty_like(arr)
+
+    # scale by CIE XYZ tristimulus values of the reference white point
+    x, y, z = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    x *= _inv_xref
+    y *= _inv_yref
+    z *= _inv_zref
+
+    # Nonlinear distortion and linear transformation
+    mask = arr > 0.008856
+    arr[mask] = np.power(arr[mask], _one_third)
+    arr[~mask] = 7.787 * arr[~mask] + _sixteen_hundred_sixteenth
+    
+    # Vector scaling
+    L = (116. * y) - 16.
+    a = 500.0 * (x - y)
+    b = 200.0 * (y - z)
+
+    # -- output
+    out[:, :, 0] = L
+    out[:, :, 1] = a
+    out[:, :, 2] = b
+
+    # remove NaN
+    out[np.isnan(out)] = 0
+
+    return out
+
+def lab2xyz(lab):
+    """CIE-LAB to XYZcolor space conversion.
+
+    Parameters
+    ----------
+    lab : array_like
+        The image in lab format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `lab` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Observer= 2A, Illuminant= D65
+    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
+    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+
+    """
+
+    arr = _prepare_colorarray(lab)
+    out = np.empty_like(arr)
+
+    L, a, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    y = (L + 16.) / 116.
+    x = a / 500. + y
+    z = y - b / 200.
+
+    out[:, :, 0] = x
+    out[:, :, 1] = y
+    out[:, :, 2] = z
+
+    out_cube = np.power(out,3)
+    mask = out > 0.206893
+    out[mask] = np.power(out[mask], 3.)
+    out[~mask] = (out[~mask] - _sixteen_hundred_sixteenth) / 7.787
+
+    # rescale Observer= 2 deg, Illuminant= D65
+    #x, y, z = out[:, :, 0], out[:, :, 1], out[:, :, 2]
+    out[:, :, 0] *= _xref       
+    out[:, :, 1] *= _yref     
+    out[:, :, 2] *= _zref 
+
+    # remove NaN
+    out[np.isnan(out)] = 0
+
+    return out
+
+
