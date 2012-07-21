@@ -27,6 +27,29 @@ class ImageCanvas(FigureCanvasQTAgg):
 
 
 class ImageViewer(QtGui.QMainWindow):
+    """Viewer for displaying images.
+
+    This viewer is a simple container object that holds a Matplotlib axes
+    for showing images. `ImageViewer` doesn't subclass the Matplotlib axes (or
+    figure) because of the high probability of name collisions.
+
+    Parameters
+    ----------
+    image : array
+        Image being viewed.
+
+    Attributes
+    ----------
+    canvas, fig, ax : Matplotlib canvas, figure, and axes
+        Matplotlib canvas, figure, and axes used to display image.
+    image : array
+        Image being viewed. Setting this value will update the displayed frame.
+    original_image : array
+        Plugins typically operate on (but don't change) the original image.
+    plugins : list
+        List of attached plugins.
+    """
+
 
     def __init__(self, image):
         # Start main loop
@@ -54,7 +77,11 @@ class ImageViewer(QtGui.QMainWindow):
         self.fig = self.canvas.fig
         self.ax = self.canvas.ax
         self.ax.autoscale(enable=False)
-        self.image_plot = self.ax.images[0]
+
+        self._image_plot = self.ax.images[0]
+        self._overlay_plot = None
+        self._overlay = None
+
         self.plugins = []
 
         # List of axes artists to check for removal.
@@ -73,9 +100,6 @@ class ImageViewer(QtGui.QMainWindow):
         self.original_image = image
         self.image = image
 
-        self.overlay_plot = None
-        self._overlay = None
-
     @property
     def image(self):
         return self._img
@@ -83,7 +107,7 @@ class ImageViewer(QtGui.QMainWindow):
     @image.setter
     def image(self, image):
         self._img = image
-        self.ax.images[0].set_array(image)
+        self._image_plot.set_array(image)
         self.canvas.draw_idle()
 
     @property
@@ -93,10 +117,10 @@ class ImageViewer(QtGui.QMainWindow):
     @overlay.setter
     def overlay(self, image):
         self._overlay = image
-        if self.overlay_plot is None:
-            self.overlay_plot = self.ax.imshow(image, cmap=self.overlay_cmap)
+        if self._overlay_plot is None:
+            self._overlay_plot = self.ax.imshow(image, cmap=self.overlay_cmap)
         else:
-            self.overlay_plot.set_array(image)
+            self._overlay_plot.set_array(image)
         self.canvas.draw_idle()
 
     def closeEvent(self, ce):
@@ -106,27 +130,21 @@ class ImageViewer(QtGui.QMainWindow):
         super(ImageViewer, self).show()
         sys.exit(qApp.exec_())
 
-    @property
-    def climits(self):
-        return self.image_plot.get_clim()
-
-    @climits.setter
-    def climits(self, limits):
-        cmin, cmax = limits
-        self.image_plot.set_clim(vmin=cmin, vmax=cmax)
-
     def connect_event(self, event, callback):
+        """Connect callback function to matplotlib event and return id."""
         cid = self.canvas.mpl_connect(event, callback)
         return cid
 
     def disconnect_event(self, callback_id):
+        """Disconnect callback by its id (returned by `connect_event`)."""
         self.canvas.mpl_disconnect(callback_id)
 
     def add_artist(self, artist):
+        """Add matplotlib artist to image viewer."""
         self.ax.add_artist(artist)
 
     def remove_artist(self, artist):
-        """Disconnect all artists created by this widget."""
+        """Disconnect matplotlib artist from image viewer."""
         # There's probably a smarter way to do this.
         for artist_list in self._axes_artists:
             if artist in artist_list:
@@ -134,4 +152,3 @@ class ImageViewer(QtGui.QMainWindow):
 
     def redraw(self):
         self.canvas.draw_idle()
-

@@ -113,9 +113,6 @@ class Plugin(QtGui.QDialog):
         self.row += 1
         return name.replace(' ', '_'), slider
 
-    def redraw(self):
-        self.canvas.draw_idle()
-
     def closeEvent(self, event):
         """Disconnect all artists and events from ImageViewer.
 
@@ -174,6 +171,10 @@ class PlotPlugin(Plugin):
         Plugin.__init__(self, image_viewer, **kwargs)
         # Add plot for displaying intensity profile.
         self.add_plot()
+
+    def redraw(self):
+        """Redraw plot."""
+        self.canvas.draw_idle()
 
     def add_plot(self, height=4, width=4):
         self.canvas = PlotCanvas(self, height, width)
