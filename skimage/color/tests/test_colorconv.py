@@ -23,7 +23,8 @@ from skimage.color import (
     rgb2xyz, xyz2rgb,
     rgb2rgbcie, rgbcie2rgb,
     convert_colorspace,
-    rgb2grey, gray2rgb
+    rgb2grey, gray2rgb,
+    lab2xyz, xyz2lab
     )
 
 from skimage import data_dir
@@ -100,6 +101,10 @@ class TestColorconv(TestCase):
         # only roundtrip test, we checked rgb2xyz above already
         assert_almost_equal(xyz2rgb(rgb2xyz(self.colbars_array)),
                             self.colbars_array)
+
+    def test_xyz2lab_conversion(self):
+        gt = rgb2xyz(self.colbars_array)
+        assert_almost_equal(lab2xyz(xyz2lab(gt)), gt)
 
     # RGB to RGB CIE
     def test_rgb2rgbcie_conversion(self):
