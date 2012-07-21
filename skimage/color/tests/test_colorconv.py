@@ -23,7 +23,8 @@ from skimage.color import (
     rgb2xyz, xyz2rgb,
     rgb2rgbcie, rgbcie2rgb,
     convert_colorspace,
-    rgb2grey, gray2rgb
+    rgb2grey, gray2rgb,
+    xyz2lab, lab2xyz,
     )
 
 from skimage import data_dir
@@ -42,6 +43,20 @@ class TestColorconv(TestCase):
     colbars_array = np.swapaxes(colbars.reshape(3, 4, 2), 0, 2)
     colbars_point75 = colbars * 0.75
     colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
+
+    xyz_array = np.array([[[0.4124, 0.21260, 0.01930]], #red
+                    [[0, 0, 0]], #black
+                    [[.9505, 1., 1.089]], #white
+                    [[.1805, .0722, .9505]], #blue
+                    [[.07719, .15438, .02573]], #green
+                    ])
+                 
+    lab_array = np.array([[[53.233, 80.109, 67.220]], #red
+                    [[0.,0.,0.]], #black
+                    [[100.0, 0.005, -0.010]], #white
+                    [[32.303, 79.197, -107.864]], #blue
+                    [[46.229, -51.7, 49.898]], #green
+                    ])
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
@@ -149,6 +164,13 @@ class TestColorconv(TestCase):
     def test_rgb2grey_on_grey(self):
         rgb2grey(np.random.random((5, 5)))
 
+    # test matrices for xyz2lab and lab2xyz generated using http://www.easyrgb.com/index.php?X=CALC
+    # Note: easyrgb website displays xyz*100
+    def test_xyz2lab(self):
+        assert_array_almost_equal(xyz2lab(self.xyz_array), self.lab_array, decimal=3)
+
+    def test_lab2xyz(self):        
+        assert_array_almost_equal(lab2xyz(self.lab_array), self.xyz_array, decimal=3)
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
