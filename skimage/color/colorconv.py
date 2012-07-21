@@ -267,7 +267,7 @@ def lab2xyz(lab):
     xyz = np.empty_like(lab)
     xyz[tmp > eps] = xyz[tmp > eps] ** 3
     xyz[tmp <= eps] = (xyz[tmp <= eps] * 116. - 16) / k
-    xyz /= reference_white
+    xyz *= reference_white
 
     return xyz
 
