@@ -7,6 +7,7 @@ from numpy.testing.decorators import skipif
 
 from skimage import data_dir
 from skimage.io import ImageCollection, MultiImage
+from skimage.io import Image as ioImage
 
 
 try:
@@ -36,7 +37,7 @@ class TestImageCollection():
     def test_getitem(self):
         num = len(self.collection)
         for i in range(-num, num):
-            assert type(self.collection[i]) is np.ndarray
+            assert type(self.collection[i]) is ioImage
         assert_array_almost_equal(self.collection[0],
                                   self.collection[-num])
 
