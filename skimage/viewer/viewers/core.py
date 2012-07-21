@@ -46,6 +46,9 @@ class ImageViewer(QtGui.QMainWindow):
         Image being viewed. Setting this value will update the displayed frame.
     original_image : array
         Plugins typically operate on (but don't change) the original image.
+    overlay : array
+        Overlay displayed on top of image. This overlay defaults to a color map
+        with alpha values varying linearly from 0 to 1.
     plugins : list
         List of attached plugins.
     """
@@ -100,6 +103,16 @@ class ImageViewer(QtGui.QMainWindow):
         self.original_image = image
         self.image = image
 
+    def closeEvent(self, ce):
+        self.close()
+
+    def show(self):
+        super(ImageViewer, self).show()
+        sys.exit(qApp.exec_())
+
+    def redraw(self):
+        self.canvas.draw_idle()
+
     @property
     def image(self):
         return self._img
@@ -108,7 +121,7 @@ class ImageViewer(QtGui.QMainWindow):
     def image(self, image):
         self._img = image
         self._image_plot.set_array(image)
-        self.canvas.draw_idle()
+        self.redraw()
 
     @property
     def overlay(self):
@@ -125,13 +138,6 @@ class ImageViewer(QtGui.QMainWindow):
         else:
             self._overlay_plot.set_array(image)
         self.canvas.draw_idle()
-
-    def closeEvent(self, ce):
-        self.close()
-
-    def show(self):
-        super(ImageViewer, self).show()
-        sys.exit(qApp.exec_())
 
     def connect_event(self, event, callback):
         """Connect callback function to matplotlib event and return id."""
@@ -152,6 +158,3 @@ class ImageViewer(QtGui.QMainWindow):
         for artist_list in self._axes_artists:
             if artist in artist_list:
                 artist_list.remove(artist)
-
-    def redraw(self):
-        self.canvas.draw_idle()
