@@ -155,7 +155,7 @@ def imsave(filename, img, format_str=None):
                           img.strides[0], QImage.Format_RGB888)
     if _is_filelike(filename):
         byte_array = QtCore.QByteArray()
-        qbuffer = QtCore.QBuffer()
+        qbuffer = QtCore.QBuffer(byte_array)
         qbuffer.open(QtCore.QIODevice.ReadWrite)
         saved = qimg.save(qbuffer, format_str.upper())
         qbuffer.seek(0)
