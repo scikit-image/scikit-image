@@ -44,7 +44,8 @@ References
 from __future__ import division
 
 __all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
-           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb']
+           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb',
+           'xyz2lab', 'lab2xyz']
 
 __docformat__ = "restructuredtext en"
 
@@ -195,6 +196,80 @@ def rgb2hsv(rgb):
     out[np.isnan(out)] = 0
 
     return out
+
+
+def xyz2lab(xyz):
+    """ XYZ to CIELAB colorspace conversion.
+
+    Parameters
+    ----------
+    xyz : (w, h, 3) nd-array
+        Image in XYZ format.
+
+    Returns
+    -------
+    Lab : (w, h, 3) nd-array
+        Image converted to CIELab format.
+
+    Note
+    ----
+    Uses reference white [0.950456, 1.0, 1.088754]
+    """
+    xyz = _prepare_colorarray(xyz)
+
+    reference_white = np.array([0.950456, 1.0, 1.088754])
+
+    xyz_n = xyz / reference_white
+    transformed = np.empty_like(xyz)
+
+    eps = 0.00856
+    k = 903.3
+    transformed[xyz_n > eps] = xyz_n[xyz_n > eps] ** (1. / 3.)
+    transformed[xyz_n <= eps] = (k * xyz_n[xyz_n <= eps] + 16.) / 116.
+    Lab = np.empty_like(xyz)
+    Lab[:, :, 0] = 116. * transformed[:, :, 1] - 16.
+    Lab[:, :, 1] = 500. * (transformed[:, :, 0] - transformed[:, :, 1])
+    Lab[:, :, 2] = 200. * (transformed[:, :, 1] - transformed[:, :, 2])
+    return Lab
+
+
+def lab2xyz(lab):
+    """CIELAB to XYZ colorspace conversion.
+
+    Parameters
+    ----------
+    lab : (w, h, 3) nd-array
+        Image in CIELab format.
+
+    Returns
+    -------
+    xyz : (w, h, 3) nd-array
+        Image converted to XYZ format.
+
+    Note
+    ----
+    Uses reference white [0.950456, 1.0, 1.088754]
+    """
+
+    lab = _prepare_colorarray(lab)
+
+    reference_white = np.array([0.950456, 1.0, 1.088754])
+
+    L_shift = (lab[:, :, 0] + 16) / 116.
+    a_shift = lab[:, :, 1] / 500.
+    b_shift = lab[:, :, 2] / 200.
+
+    tmp = np.dstack([L_shift + a_shift, L_shift, L_shift - b_shift])
+
+    eps = 6. / 29.
+    k = 903.3
+
+    xyz = np.empty_like(lab)
+    xyz[tmp > eps] = xyz[tmp > eps] ** 3
+    xyz[tmp <= eps] = (xyz[tmp <= eps] * 116. - 16) / k
+    xyz /= reference_white
+
+    return xyz
 
 
 def hsv2rgb(hsv):
