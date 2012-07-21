@@ -59,12 +59,16 @@ class Image(np.ndarray):
     def _repr_png_(self):
         str_buffer = StringIO.StringIO()
         imsave(str_buffer, self, format_str='png')
-        return str_buffer.getvalue()
+        return_str = str_buffer.getvalue()
+        str_buffer.close()
+        return return_str
 
     def _repr_jpeg_(self):
         str_buffer = StringIO.StringIO()
         imsave(str_buffer, self, format_str='jpeg')
-        return str_buffer.getvalue()
+        return_str = str_buffer.getvalue()
+        str_buffer.close()
+        return return_str
 
     def __setstate__(self, state):
         nd_state, subclass_state = state
