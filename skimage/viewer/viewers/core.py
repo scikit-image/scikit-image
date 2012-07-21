@@ -52,8 +52,6 @@ class ImageViewer(QtGui.QMainWindow):
     plugins : list
         List of attached plugins.
     """
-
-
     def __init__(self, image):
         # Start main loop
         global qApp
@@ -85,6 +83,8 @@ class ImageViewer(QtGui.QMainWindow):
         self._overlay_plot = None
         self._overlay = None
 
+        self.original_image = image
+        self.image = image
         self.plugins = []
 
         # List of axes artists to check for removal.
@@ -98,10 +98,14 @@ class ImageViewer(QtGui.QMainWindow):
         self.layout = QtGui.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
 
-        #TODO: Add coordinate display
-        # self.statusBar().showMessage("coordinates")
-        self.original_image = image
-        self.image = image
+        #TODO: Set status bar to fixed-width font so status doesn't wiggle
+        status_bar = self.statusBar()
+        self.status_message = status_bar.showMessage
+        sb_size = status_bar.sizeHint()
+        cs_size = self.canvas.sizeHint()
+        self.resize(cs_size.width(), cs_size.height() + sb_size.height())
+
+        self.connect_event('motion_notify_event', self.update_status_bar)
 
     def closeEvent(self, ce):
         self.close()
@@ -158,3 +162,18 @@ class ImageViewer(QtGui.QMainWindow):
         for artist_list in self._axes_artists:
             if artist in artist_list:
                 artist_list.remove(artist)
+
+    def update_status_bar(self, event):
+        if event.inaxes and event.inaxes.get_navigate():
+            self.status_message(self._format_coord(event.xdata, event.ydata))
+        else:
+            self.status_message('')
+
+    def _format_coord(self, x, y):
+        # callback function to format coordinate display in status bar
+        x = int(x + 0.5)
+        y = int(y + 0.5)
+        try:
+            return "%4s @ [%4s, %4s]" % (self.image[y, x], x, y)
+        except IndexError:
+            return ""
