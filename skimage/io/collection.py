@@ -11,12 +11,6 @@ import numpy as np
 from ._io import imread
 
 
-def _tryint(s):
-    try:
-        return int(s)
-    except ValueError:
-        return s
-
 def alphanumeric_key(s):
     """Convert string to list of strings and ints that gives intuitive sorting.
 
@@ -34,11 +28,11 @@ def alphanumeric_key(s):
     ['z', 23, 'a']
     >>> filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png']
     >>> sorted(filenames)
-    ['f10.10.png', 'f10.9.png', 'f9.10.png', 'f9.9.png']
+    ['f10.10.png', 'f10.9.png', 'f9.10.png', 'f9.9.png', 'e10.png']
     >>> sorted(filenames, key=alphanumeric_key)
-    ['f9.9.png', 'f9.10.png', 'f10.9.png', 'f10.10.png']
+    ['e10.png', 'f9.9.png', 'f9.10.png', 'f10.9.png', 'f10.10.png']
     """
-    k = [_tryint(c) for c in re.split('([0-9]+)', s)]
+    k = [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)]
     return k
 
 class MultiImage(object):
