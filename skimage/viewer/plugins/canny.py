@@ -18,3 +18,7 @@ class CannyPlugin(Plugin):
     def callback(self, *args, **kwargs):
         image = canny(*args, **kwargs)
         self.image_viewer.overlay = image
+
+    def closeEvent(self, event):
+        self.image_viewer.overlay = None
+        super(CannyPlugin, self).closeEvent(event)

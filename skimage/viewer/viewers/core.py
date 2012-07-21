@@ -117,7 +117,10 @@ class ImageViewer(QtGui.QMainWindow):
     @overlay.setter
     def overlay(self, image):
         self._overlay = image
-        if self._overlay_plot is None:
+        if image is None:
+            self.ax.images.remove(self._overlay_plot)
+            self._overlay_plot = None
+        elif self._overlay_plot is None:
             self._overlay_plot = self.ax.imshow(image, cmap=self.overlay_cmap)
         else:
             self._overlay_plot.set_array(image)
