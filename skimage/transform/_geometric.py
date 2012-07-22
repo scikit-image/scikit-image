@@ -374,24 +374,19 @@ class SimilarityTransform(ProjectiveTransform):
 class PolynomialTransform(GeometricTransform):
     """2D transformation of the form::
 
-        X = sum[j=0:n]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
-        Y = sum[j=0:n]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+        X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
+        Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
 
-    TODO: Describe structure of coefficients.
-          Shall we store it as a (2, M) ndarray?
+    Parameters
+    ----------
+    coeffs : 2xN array, optional
+        Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
+        a_ji is defined in `coeffs[0, :]` and b_ji in `coeffs[1, :]`.
 
     """
 
     def __init__(self, coeffs=None):
-        """Create polynomial transformation.
-
-        Parameters
-        ----------
-        coeffs : array, optional
-            polynomial coefficients
-
-        """
-        self.coeffs = coeffs
+        self._coeffs = coeffs
 
     def estimate(self, src, dst, order):
         """Set the transformation matrix with the explicit transformation
@@ -426,7 +421,7 @@ class PolynomialTransform(GeometricTransform):
 
         b = np.hstack([xd, yd])
 
-        self.coeffs = np.linalg.lstsq(A, b)[0]
+        self._coeffs = np.linalg.lstsq(A, b)[0].reshape((2, u / 2))
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -444,7 +439,7 @@ class PolynomialTransform(GeometricTransform):
         """
         x = coords[:, 0]
         y = coords[:, 1]
-        u = len(self.coeffs.ravel())
+        u = len(self._coeffs.ravel())
         # number of coefficients -> u = (order + 1) * (order + 2)
         order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
         dst = np.zeros(coords.shape)
@@ -452,8 +447,8 @@ class PolynomialTransform(GeometricTransform):
         pidx = 0
         for j in xrange(order + 1):
             for i in xrange(j + 1):
-                dst[:, 0] += self.coeffs[pidx] * x ** (j - i) * y ** i
-                dst[:, 1] += self.coeffs[pidx + u / 2] * x ** (j - i) * y ** i
+                dst[:, 0] += self._coeffs[0, pidx] * x ** (j - i) * y ** i
+                dst[:, 1] += self._coeffs[1, pidx] * x ** (j - i) * y ** i
                 pidx += 1
 
         return dst
