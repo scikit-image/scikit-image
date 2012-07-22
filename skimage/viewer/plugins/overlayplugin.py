@@ -35,3 +35,7 @@ class OverlayPlugin(Plugin):
         else:
             self._overlay_plot.set_array(image)
         self.image_viewer.redraw()
+
+    def closeEvent(self, event):
+        self.overlay = None
+        super(OverlayPlugin, self).closeEvent(event)

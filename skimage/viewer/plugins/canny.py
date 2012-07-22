@@ -21,7 +21,3 @@ class CannyPlugin(OverlayPlugin):
     def image_filter(self, *args, **kwargs):
         image = canny(*args, **kwargs)
         self.overlay = image
-
-    def closeEvent(self, event):
-        self.overlay = None
-        super(CannyPlugin, self).closeEvent(event)
