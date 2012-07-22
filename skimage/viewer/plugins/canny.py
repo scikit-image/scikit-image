@@ -1,5 +1,5 @@
-from .base import OverlayPlugin
 from skimage.filter import canny
+from .overlayplugin import OverlayPlugin
 
 
 class CannyPlugin(OverlayPlugin):

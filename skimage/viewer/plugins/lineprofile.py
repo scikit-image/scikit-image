@@ -2,7 +2,7 @@ import numpy as np
 import scipy.ndimage as ndi
 from skimage.util.dtype import dtype_range
 
-from .base import PlotPlugin
+from .plotplugin import PlotPlugin
 
 
 __all__ = ['LineProfile']

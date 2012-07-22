@@ -1,31 +1,7 @@
 from PyQt4 import QtGui
 
-import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from skimage.io._plugins.q_color_mixer import IntelligentSlider
-
-from skimage.viewer.utils import clear_red
-
-
-class PlotCanvas(FigureCanvasQTAgg):
-    """Canvas for displaying images.
-
-    This canvas derives from Matplotlib, and has attributes `fig` and `ax`,
-    which point to Matplotlib figure and axes.
-    """
-    def __init__(self, parent, height, width, **kwargs):
-        print height, width
-        self.fig, self.ax = plt.subplots(figsize=(height, width), **kwargs)
-
-        FigureCanvasQTAgg.__init__(self, self.fig)
-        FigureCanvasQTAgg.setSizePolicy(self,
-                                        QtGui.QSizePolicy.Expanding,
-                                        QtGui.QSizePolicy.Expanding)
-        FigureCanvasQTAgg.updateGeometry(self)
-        # Note: `setParent` must be called after `FigureCanvasQTAgg.__init__`.
-        self.setParent(parent)
 
 
 class Plugin(QtGui.QDialog):
@@ -147,75 +123,3 @@ class Plugin(QtGui.QDialog):
         """Disconnect artists that are connected to the *image plot*."""
         for a in self.artists:
             self.image_viewer.remove_artist(a)
-
-
-class PlotPlugin(Plugin):
-    """Plugin for ImageViewer that contains a plot Canvas.
-
-    Parameters
-    ----------
-    image_viewer : ImageViewer instance.
-        Window containing image used in measurement/manipulation.
-
-    Attributes
-    ----------
-    image_viewer : ImageViewer
-        Window containing image used in measurement.
-    image : array
-        Image used in measurement/manipulation.
-    """
-    def __init__(self, image_viewer, **kwargs):
-        Plugin.__init__(self, image_viewer, **kwargs)
-        # Add plot for displaying intensity profile.
-        self.add_plot()
-
-    def redraw(self):
-        """Redraw plot."""
-        self.canvas.draw_idle()
-
-    def add_plot(self, height=4, width=4):
-        self.canvas = PlotCanvas(self, height, width)
-        self.fig = self.canvas.fig
-        #TODO: Converted color is slightly different than Qt background.
-        qpalette = QtGui.QPalette()
-        qcolor = qpalette.color(QtGui.QPalette.Window)
-        bgcolor = qcolor.toRgb().value()
-        if np.isscalar(bgcolor):
-            bgcolor = str(bgcolor / 255.)
-        self.fig.patch.set_facecolor(bgcolor)
-        self.ax = self.canvas.ax
-        self.layout.addWidget(self.canvas, self.row, 0)
-
-
-class OverlayPlugin(Plugin):
-    """Plugin for ImageViewer that displays an overlay on top of main image.
-
-    Attributes
-    ----------
-    overlay : array
-        Overlay displayed on top of image. This overlay defaults to a color map
-        with alpha values varying linearly from 0 to 1.
-    """
-
-    def __init__(self, image_viewer, **kwargs):
-        Plugin.__init__(self, image_viewer, **kwargs)
-        self.overlay_cmap = clear_red
-        self._overlay_plot = None
-        self._overlay = None
-
-    @property
-    def overlay(self):
-        return self._overlay
-
-    @overlay.setter
-    def overlay(self, image):
-        self._overlay = image
-        ax = self.image_viewer.ax
-        if image is None:
-            ax.images.remove(self._overlay_plot)
-            self._overlay_plot = None
-        elif self._overlay_plot is None:
-            self._overlay_plot = ax.imshow(image, cmap=self.overlay_cmap)
-        else:
-            self._overlay_plot.set_array(image)
-        self.image_viewer.redraw()
