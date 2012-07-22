@@ -80,7 +80,7 @@ class Plugin(QtGui.QDialog):
 
     def add_argument(self, name, low, high, callback, **kwargs):
         name, slider = self.add_slider(name, low, high, callback, **kwargs)
-        self.arguments[name] = slider
+        self.arguments.append(slider)
 
     def add_keyword_argument(self, name, low, high, callback, **kwargs):
         name, slider = self.add_slider(name, low, high, callback, **kwargs)

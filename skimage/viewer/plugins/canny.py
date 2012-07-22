@@ -1,4 +1,5 @@
 from skimage.filter import canny
+
 from .overlayplugin import OverlayPlugin
 
 
