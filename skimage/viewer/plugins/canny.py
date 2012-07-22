@@ -1,8 +1,8 @@
-from .base import Plugin
+from .base import OverlayPlugin
 from skimage.filter import canny
 
 
-class CannyPlugin(Plugin):
+class CannyPlugin(OverlayPlugin):
 
     name = 'Canny Filter'
 
@@ -22,8 +22,8 @@ class CannyPlugin(Plugin):
 
     def callback(self, *args, **kwargs):
         image = canny(*args, **kwargs)
-        self.image_viewer.overlay = image
+        self.overlay = image
 
     def closeEvent(self, event):
-        self.image_viewer.overlay = None
+        self.overlay = None
         super(CannyPlugin, self).closeEvent(event)

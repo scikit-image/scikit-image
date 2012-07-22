@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from skimage.io._plugins.q_color_mixer import IntelligentSlider
 
+from skimage.viewer.utils import clear_red
+
 
 class PlotCanvas(FigureCanvasQTAgg):
     """Canvas for displaying images.
@@ -33,6 +35,11 @@ class Plugin(QtGui.QDialog):
     ----------
     image_viewer : ImageViewer instance.
         Window containing image used in measurement/manipulation.
+    callback : function
+        Function that gets called to update ImageViewer. Alternatively, this
+        can also be defined as a method in a Plugin subclass.
+    height, width : int
+        Size of plugin window in pixels.
     useblit : bool
         If True, use blitting to speed up animation. Only available on some
         backends. If None, set to True when using Agg backend, otherwise False.
@@ -42,8 +49,6 @@ class Plugin(QtGui.QDialog):
     image_viewer : ImageViewer
         Window containing image used in measurement.
     image : array
-        Image used in measurement/manipulation.
-    overlay : array
         Image used in measurement/manipulation.
     """
     name = 'Plugin'
@@ -65,7 +70,6 @@ class Plugin(QtGui.QDialog):
         self.arguments = [image_viewer.original_image]
         self.keyword_arguments= {}
 
-        self.overlay = self.image_viewer.overlay
         self.image = self.image_viewer.image
 
         if useblit is None:
@@ -152,11 +156,6 @@ class PlotPlugin(Plugin):
     ----------
     image_viewer : ImageViewer instance.
         Window containing image used in measurement/manipulation.
-    figure : :class:`~matplotlib.figure.Figure`
-        If None, create a figure with a single axes.
-    useblit : bool
-        If True, use blitting to speed up animation. Only available on some
-        backends. If None, set to True when using Agg backend, otherwise False.
 
     Attributes
     ----------
@@ -164,10 +163,8 @@ class PlotPlugin(Plugin):
         Window containing image used in measurement.
     image : array
         Image used in measurement/manipulation.
-    overlay : array
-        Image used in measurement/manipulation.
     """
-    def __init__(self, image_viewer, useblit=None, **kwargs):
+    def __init__(self, image_viewer, **kwargs):
         Plugin.__init__(self, image_viewer, **kwargs)
         # Add plot for displaying intensity profile.
         self.add_plot()
@@ -188,3 +185,37 @@ class PlotPlugin(Plugin):
         self.fig.patch.set_facecolor(bgcolor)
         self.ax = self.canvas.ax
         self.layout.addWidget(self.canvas, self.row, 0)
+
+
+class OverlayPlugin(Plugin):
+    """Plugin for ImageViewer that displays an overlay on top of main image.
+
+    Attributes
+    ----------
+    overlay : array
+        Overlay displayed on top of image. This overlay defaults to a color map
+        with alpha values varying linearly from 0 to 1.
+    """
+
+    def __init__(self, image_viewer, **kwargs):
+        Plugin.__init__(self, image_viewer, **kwargs)
+        self.overlay_cmap = clear_red
+        self._overlay_plot = None
+        self._overlay = None
+
+    @property
+    def overlay(self):
+        return self._overlay
+
+    @overlay.setter
+    def overlay(self, image):
+        self._overlay = image
+        ax = self.image_viewer.ax
+        if image is None:
+            ax.images.remove(self._overlay_plot)
+            self._overlay_plot = None
+        elif self._overlay_plot is None:
+            self._overlay_plot = ax.imshow(image, cmap=self.overlay_cmap)
+        else:
+            self._overlay_plot.set_array(image)
+        self.image_viewer.redraw()

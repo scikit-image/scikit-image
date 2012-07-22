@@ -3,7 +3,7 @@ import sys
 from PyQt4 import QtGui, QtCore
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 
-from skimage.viewer.utils import figimage, clear_red
+from skimage.viewer.utils import figimage
 
 
 qApp = None
@@ -46,9 +46,6 @@ class ImageViewer(QtGui.QMainWindow):
         Image being viewed. Setting this value will update the displayed frame.
     original_image : array
         Plugins typically operate on (but don't change) the original image.
-    overlay : array
-        Overlay displayed on top of image. This overlay defaults to a color map
-        with alpha values varying linearly from 0 to 1.
     plugins : list
         List of attached plugins.
     """
@@ -60,8 +57,6 @@ class ImageViewer(QtGui.QMainWindow):
         super(ImageViewer, self).__init__()
 
         #TODO: Add ImageViewer to skimage.io window manager
-
-        self.overlay_cmap = clear_red
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
@@ -80,8 +75,6 @@ class ImageViewer(QtGui.QMainWindow):
         self.ax.autoscale(enable=False)
 
         self._image_plot = self.ax.images[0]
-        self._overlay_plot = None
-        self._overlay = None
 
         self.original_image = image
         self.image = image
@@ -126,22 +119,6 @@ class ImageViewer(QtGui.QMainWindow):
         self._img = image
         self._image_plot.set_array(image)
         self.redraw()
-
-    @property
-    def overlay(self):
-        return self._overlay
-
-    @overlay.setter
-    def overlay(self, image):
-        self._overlay = image
-        if image is None:
-            self.ax.images.remove(self._overlay_plot)
-            self._overlay_plot = None
-        elif self._overlay_plot is None:
-            self._overlay_plot = self.ax.imshow(image, cmap=self.overlay_cmap)
-        else:
-            self._overlay_plot.set_array(image)
-        self.canvas.draw_idle()
 
     def connect_event(self, event, callback):
         """Connect callback function to matplotlib event and return id."""
