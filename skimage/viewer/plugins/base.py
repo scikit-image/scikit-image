@@ -78,17 +78,14 @@ class Plugin(QtGui.QDialog):
         else:
             return param
 
-    def add_argument(self, name, low, high, **kwargs):
-        name, slider = self.add_slider(name, low, high, **kwargs)
-        self.arguments.append(slider)
-
-    def add_keyword_argument(self, name, low, high, **kwargs):
-        name, slider = self.add_slider(name, low, high, **kwargs)
-        self.keyword_arguments[name] = slider
-
-    def add_slider(self, name, low, high, **kwargs):
+    def add_widget(self, name, low, high, **kwargs):
         slider = Slider(name, low, high, **kwargs)
-        slider.callback = self.filter_image
+        if slider.ptype == 'kwarg':
+            self.keyword_arguments[name] = slider
+            slider.callback = self.filter_image
+        elif slider.ptype == 'arg':
+            self.keyword_arguments[name] = slider
+            self.arguments.append(slider)
         self.layout.addWidget(slider, self.row, 0)
         self.row += 1
         return name.replace(' ', '_'), slider
