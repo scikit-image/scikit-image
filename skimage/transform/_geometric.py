@@ -339,7 +339,7 @@ class SimilarityTransform(ProjectiveTransform):
 
         """
         if scale is None:
-            scale = (1, 1)
+            scale = 1
         if rotation is None:
             rotation = 0
         if translation is None:
