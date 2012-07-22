@@ -104,6 +104,8 @@ class ImageViewer(QtGui.QMainWindow):
         self.close()
 
     def show(self):
+        for p in self.plugins:
+            p.show()
         super(ImageViewer, self).show()
         sys.exit(qApp.exec_())
 

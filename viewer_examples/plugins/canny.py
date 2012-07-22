@@ -5,6 +5,5 @@ from skimage.viewer.plugins.canny import CannyPlugin
 
 image = data.camera()
 viewer = ImageViewer(image)
-p = CannyPlugin(viewer)
-p.show()
+CannyPlugin(viewer)
 viewer.show()
