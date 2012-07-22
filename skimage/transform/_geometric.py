@@ -52,7 +52,6 @@ class GeometricTransform(object):
         """
         raise NotImplementedError()
 
-
     def inverse(self, coords):
         """Apply inverse transformation.
 
@@ -68,7 +67,6 @@ class GeometricTransform(object):
 
         """
         raise NotImplementedError()
-
 
     def __add__(self, other):
         """Combine this transformation with another.
@@ -131,7 +129,6 @@ class ProjectiveTransform(GeometricTransform):
     def inverse(self, coords):
         return self._apply_mat(coords, self._inv_matrix)
 
-
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit transformation
         parameters.
@@ -183,7 +180,6 @@ class ProjectiveTransform(GeometricTransform):
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
-
 
 
 class AffineTransform(ProjectiveTransform):
@@ -560,4 +556,3 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     # The spline filters sometimes return results outside [0, 1],
     # so clip to ensure valid data
     return np.clip(mapped.squeeze(), 0, 1)
-
