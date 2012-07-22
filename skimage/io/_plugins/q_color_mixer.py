@@ -6,7 +6,6 @@ from PyQt4.QtCore import Qt
 from util import ColorMixer
 
 
-
 class IntelligentSlider(QWidget):
     ''' A slider that adds a 'name' attribute and calls a callback
     with 'name' as an argument to the registered callback.
@@ -19,7 +18,8 @@ class IntelligentSlider(QWidget):
     The range of the slider is hardcoded from zero - 1000,
     but it supports a conversion factor so you can scale the results'''
 
-    def __init__(self, name, a, b, callback, orientation='vertical'):
+    def __init__(self, name, a, b, callback, orientation='vertical',
+                 update_on='move'):
         QWidget.__init__(self)
         self.name = name
         self.callback = callback
@@ -41,7 +41,12 @@ class IntelligentSlider(QWidget):
         self.slider = QSlider(orientation_slider)
         self.slider.setRange(0, 1000)
         self.slider.setValue(500)
-        self.slider.valueChanged.connect(self.slider_changed)
+        if update_on == 'move':
+            self.slider.sliderMoved.connect(self.slider_changed)
+        elif update_on == 'release':
+            self.slider.sliderReleased.connect(self.slider_changed)
+        else:
+            raise ValueError("Unexpected value %s for 'update_on'" % update_on)
 
         self.name_label = QLabel()
         self.name_label.setText(self.name)
@@ -62,9 +67,12 @@ class IntelligentSlider(QWidget):
             self.layout.addWidget(self.name_label, 0, 0)
             self.layout.addWidget(self.slider, 0, 1, alignment)
             self.layout.addWidget(self.value_label, 0, 2)
+        else:
+            msg = "Unexpected value %s for 'orientation'"
+            raise ValueError(msg % orientation)
 
     # bind this to the valueChanged signal of the slider
-    def slider_changed(self, val):
+    def slider_changed(self):
         val = self.val()
         self.value_label.setText(str(val)[:4])
 

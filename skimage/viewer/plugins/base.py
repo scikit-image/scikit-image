@@ -98,17 +98,17 @@ class Plugin(QtGui.QDialog):
         else:
             return param
 
-    def add_argument(self, name, low, high, callback):
-        name, slider = self.add_slider(name, low, high, callback)
+    def add_argument(self, name, low, high, callback, **kwargs):
+        name, slider = self.add_slider(name, low, high, callback, **kwargs)
         self.arguments[name] = slider
 
-    def add_keyword_argument(self, name, low, high, callback):
-        name, slider = self.add_slider(name, low, high, callback)
+    def add_keyword_argument(self, name, low, high, callback, **kwargs):
+        name, slider = self.add_slider(name, low, high, callback, **kwargs)
         self.keyword_arguments[name] = slider
 
-    def add_slider(self, name, low, high, callback):
+    def add_slider(self, name, low, high, callback, **kwargs):
         slider = IntelligentSlider(name, low, high, callback,
-                                   orientation='horizontal')
+                                   orientation='horizontal', **kwargs)
         self.layout.addWidget(slider, self.row, 0)
         self.row += 1
         return name.replace(' ', '_'), slider
