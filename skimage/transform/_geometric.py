@@ -271,6 +271,40 @@ class SimilarityTransform(AffineTransform):
                                  shear=0,
                                  translation=translation)
 
+    def estimate(self, src, dst):
+        """Set the transformation matrix with the explicit transformation
+        parameters.
+
+        Parameters
+        ----------
+        src : Nx2 array
+            source coordinates
+        dst : Nx2 array
+            destination coordinates
+
+        """
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+        rows = src.shape[0]
+
+        #: params: a0, a1, b0, b1
+        A = np.zeros((rows * 2, 4))
+        A[:rows, 0] = xs
+        A[:rows, 2] = - ys
+        A[:rows, 1] = 1
+        A[rows:, 2] = xs
+        A[rows:, 0] = ys
+        A[rows:, 3] = 1
+
+        b = np.hstack([xd, yd])
+
+        a0, a1, b0, b1 = np.linalg.lstsq(A, b)[0]
+        self._matrix = np.array([[a0, -b0, a1],
+                                 [b0,  a0, b1],
+                                 [ 0,   0,  1]])
+
 
 class PolynomialTransform(GeometricTransform):
     """2D transformation of the form::
