@@ -176,7 +176,13 @@ class ProjectiveTransform(GeometricTransform):
 
         """
         if isinstance(other, ProjectiveTransform):
-            return ProjectiveTransform(np.dot(other._matrix, self._matrix))
+            # combination of the same types result in a transformation of this
+            # type again, otherwise use general projective transformation
+            if type(self) == type(other):
+                tform = self.__class__
+            else:
+                tform = ProjectiveTransform
+            return tform(other._matrix.dot(self._matrix))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
