@@ -46,6 +46,7 @@ class Plugin(QtGui.QDialog):
     overlay : array
         Image used in measurement/manipulation.
     """
+    name = 'Plugin'
     draws_on_image = False
 
     def __init__(self, image_viewer, callback=None, height=100, width=400,
@@ -54,7 +55,7 @@ class Plugin(QtGui.QDialog):
         QtGui.QDialog.__init__(self, image_viewer)
         self.image_viewer.plugins.append(self)
 
-        self.setWindowTitle('Image Plugin')
+        self.setWindowTitle(self.name)
         self.layout = QtGui.QGridLayout(self)
         self.resize(width, height)
         self.row = 0
@@ -66,7 +67,6 @@ class Plugin(QtGui.QDialog):
 
         self.overlay = self.image_viewer.overlay
         self.image = self.image_viewer.image
-
 
         if useblit is None:
             useblit = True if mpl.backends.backend.endswith('Agg') else False

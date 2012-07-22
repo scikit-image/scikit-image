@@ -4,6 +4,8 @@ from skimage.filter import canny
 
 class CannyPlugin(Plugin):
 
+    name = 'Canny Filter'
+
     def __init__(self, image_viewer, *args, **kwargs):
         height = kwargs.get('height', 100)
         width = kwargs.get('width', 400)
