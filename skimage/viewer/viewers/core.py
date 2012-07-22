@@ -103,7 +103,19 @@ class ImageViewer(QtGui.QMainWindow):
     def closeEvent(self, ce):
         self.close()
 
+    def auto_layout(self):
+        """Move viewer to top-left and align plugin on right edge of viewer."""
+        size = self.geometry()
+        self.move(0, 0)
+        w = size.width()
+        y = 0
+        #TODO: Layout isn't correct for multiple plots (overlaps).
+        for p in self.plugins:
+            p.move(w, y)
+            y += p.geometry().height()
+
     def show(self):
+        self.auto_layout()
         for p in self.plugins:
             p.show()
         super(ImageViewer, self).show()
