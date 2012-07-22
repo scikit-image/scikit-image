@@ -78,17 +78,16 @@ class Plugin(QtGui.QDialog):
         else:
             return param
 
-    def add_widget(self, name, low, high, **kwargs):
-        slider = Slider(name, low, high, **kwargs)
-        if slider.ptype == 'kwarg':
-            self.keyword_arguments[name] = slider
-            slider.callback = self.filter_image
-        elif slider.ptype == 'arg':
-            self.keyword_arguments[name] = slider
-            self.arguments.append(slider)
-        self.layout.addWidget(slider, self.row, 0)
+    def add_widget(self, widget):
+        if widget.ptype == 'kwarg':
+            name = widget.name.replace(' ', '_')
+            self.keyword_arguments[name] = widget
+            widget.callback = self.filter_image
+        elif widget.ptype == 'arg':
+            self.arguments.append(widget)
+            widget.callback = self.filter_image
+        self.layout.addWidget(widget, self.row, 0)
         self.row += 1
-        return name.replace(' ', '_'), slider
 
     def closeEvent(self, event):
         """Disconnect all artists and events from ImageViewer.

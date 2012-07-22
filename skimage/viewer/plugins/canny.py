@@ -1,6 +1,7 @@
 from skimage.filter import canny
 
 from .overlayplugin import OverlayPlugin
+from ..widgets import Slider
 
 
 class CannyPlugin(OverlayPlugin):
@@ -12,9 +13,9 @@ class CannyPlugin(OverlayPlugin):
         width = kwargs.get('width', 400)
         super(CannyPlugin, self).__init__(image_viewer,
                                           width=width, height=height)
-        self.add_widget('sigma', 0, 5, update_on='release')
-        self.add_widget('low_threshold', 0, 255, update_on='release')
-        self.add_widget('high_threshold', 0, 255, update_on='release')
+        self.add_widget(Slider('sigma', 0, 5, update_on='release'))
+        self.add_widget(Slider('low threshold', 0, 255, update_on='release'))
+        self.add_widget(Slider('high threshold', 0, 255, update_on='release'))
         # Update image overlay to default slider values.
         self.filter_image()
 

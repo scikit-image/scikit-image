@@ -7,8 +7,9 @@ class Slider(IntelligentSlider):
     ----------
     name : str
         Name of slider parameter. If this parameter is passed as a keyword
-        argument, it must match the name of that keyword argument. In addition,
-        this name is displayed as the name of the slider.
+        argument, it must match the name of that keyword argument (spaces are
+        replaced with underscores). In addition, this name is displayed as the
+        name of the slider.
     low, high : float
         Range of slider values.
     ptype : {'arg' | 'kwarg' | ...}
