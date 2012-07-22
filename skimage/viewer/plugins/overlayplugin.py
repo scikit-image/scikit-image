@@ -1,6 +1,5 @@
-from ..utils import clear_red
-
 from .base import Plugin
+from ..utils import ClearColormap
 
 
 class OverlayPlugin(Plugin):
@@ -12,12 +11,19 @@ class OverlayPlugin(Plugin):
         Overlay displayed on top of image. This overlay defaults to a color map
         with alpha values varying linearly from 0 to 1.
     """
+    colors = {'red': (1, 0, 0),
+              'yellow': (1, 1, 0),
+              'green': (0, 1, 0),
+              'cyan': (0, 1, 1)}
 
     def __init__(self, image_viewer, **kwargs):
         Plugin.__init__(self, image_viewer, **kwargs)
-        self.overlay_cmap = clear_red
         self._overlay_plot = None
         self._overlay = None
+        self.cmap = None
+        self.color_names = self.colors.keys()
+        #TODO: `color` doesn't update GUI widget when set manually.
+        self.color = 0
 
     @property
     def overlay(self):
@@ -31,7 +37,7 @@ class OverlayPlugin(Plugin):
             ax.images.remove(self._overlay_plot)
             self._overlay_plot = None
         elif self._overlay_plot is None:
-            self._overlay_plot = ax.imshow(image, cmap=self.overlay_cmap)
+            self._overlay_plot = ax.imshow(image, cmap=self.cmap)
         else:
             self._overlay_plot.set_array(image)
         self.image_viewer.redraw()
@@ -39,3 +45,19 @@ class OverlayPlugin(Plugin):
     def closeEvent(self, event):
         self.overlay = None
         super(OverlayPlugin, self).closeEvent(event)
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, index):
+        # Update colormap whenever color is changed.
+        name = self.color_names[index]
+        self._color = name
+        rgb = self.colors[name]
+        self.cmap = ClearColormap(rgb)
+
+        if self._overlay_plot is not None:
+            self._overlay_plot.set_cmap(self.cmap)
+        self.image_viewer.redraw()

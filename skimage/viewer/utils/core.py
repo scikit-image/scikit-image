@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
 
-__all__ = ['figimage', 'LinearColormap', 'ClearColormap', 'clear_red']
+__all__ = ['figimage', 'LinearColormap', 'ClearColormap']
 
 
 def figimage(image, scale=1, dpi=None, **kwargs):
@@ -65,13 +65,10 @@ class LinearColormap(LinearSegmentedColormap):
 class ClearColormap(LinearColormap):
     """Color map that varies linearly from alpha = 0 to 1
     """
-    def __init__(self, name, rgb):
+    def __init__(self, rgb, name='clear_color'):
         r, g, b = rgb
         cg_speq = {'blue':  [(0.0, b), (1.0, b)],
                    'green': [(0.0, g), (1.0, g)],
                    'red':   [(0.0, r), (1.0, r)],
                    'alpha': [(0.0, 0.0), (1.0, 1.0)]}
         LinearColormap.__init__(self, name, cg_speq)
-
-clear_red = ClearColormap('clear_red', (0.7, 0, 0))
-

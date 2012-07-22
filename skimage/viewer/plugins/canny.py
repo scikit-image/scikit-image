@@ -1,7 +1,7 @@
 from skimage.filter import canny
 
 from .overlayplugin import OverlayPlugin
-from ..widgets import Slider
+from ..widgets import Slider, ComboBox
 
 
 class CannyPlugin(OverlayPlugin):
@@ -16,6 +16,7 @@ class CannyPlugin(OverlayPlugin):
         self.add_widget(Slider('sigma', 0, 5, update_on='release'))
         self.add_widget(Slider('low threshold', 0, 255, update_on='release'))
         self.add_widget(Slider('high threshold', 0, 255, update_on='release'))
+        self.add_widget(ComboBox('color', self.color_names, ptype='plugin'))
         # Update image overlay to default slider values.
         self.filter_image()
 

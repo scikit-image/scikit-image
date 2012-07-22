@@ -1,7 +1,6 @@
 from PyQt4 import QtGui
 
 import matplotlib as mpl
-from ..widgets import Slider
 
 
 class Plugin(QtGui.QDialog):
@@ -43,6 +42,7 @@ class Plugin(QtGui.QDialog):
         if image_filter is not None:
             self.image_filter = image_filter
 
+        #TODO: Always passing image as first argument may be bad assumption.
         self.arguments = [image_viewer.original_image]
         self.keyword_arguments= {}
 
@@ -86,8 +86,13 @@ class Plugin(QtGui.QDialog):
         elif widget.ptype == 'arg':
             self.arguments.append(widget)
             widget.callback = self.filter_image
+        elif widget.ptype == 'plugin':
+            widget.callback = self.update_plugin
         self.layout.addWidget(widget, self.row, 0)
         self.row += 1
+
+    def update_plugin(self, name, value):
+        setattr(self, name, value)
 
     def closeEvent(self, event):
         """Disconnect all artists and events from ImageViewer.
