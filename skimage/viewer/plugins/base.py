@@ -1,7 +1,7 @@
 from PyQt4 import QtGui
 
 import matplotlib as mpl
-from skimage.io._plugins.q_color_mixer import IntelligentSlider
+from ..widgets import Slider
 
 
 class Plugin(QtGui.QDialog):
@@ -78,17 +78,17 @@ class Plugin(QtGui.QDialog):
         else:
             return param
 
-    def add_argument(self, name, low, high, callback, **kwargs):
-        name, slider = self.add_slider(name, low, high, callback, **kwargs)
+    def add_argument(self, name, low, high, **kwargs):
+        name, slider = self.add_slider(name, low, high, **kwargs)
         self.arguments.append(slider)
 
-    def add_keyword_argument(self, name, low, high, callback, **kwargs):
-        name, slider = self.add_slider(name, low, high, callback, **kwargs)
+    def add_keyword_argument(self, name, low, high, **kwargs):
+        name, slider = self.add_slider(name, low, high, **kwargs)
         self.keyword_arguments[name] = slider
 
-    def add_slider(self, name, low, high, callback, **kwargs):
-        slider = IntelligentSlider(name, low, high, callback,
-                                   orientation='horizontal', **kwargs)
+    def add_slider(self, name, low, high, **kwargs):
+        slider = Slider(name, low, high, **kwargs)
+        slider.callback = self.caller
         self.layout.addWidget(slider, self.row, 0)
         self.row += 1
         return name.replace(' ', '_'), slider
@@ -110,6 +110,13 @@ class Plugin(QtGui.QDialog):
 
         This should be used in lieu of `figure.canvas.mpl_connect` since this
         function stores call back ids for later clean up.
+
+        Parameters
+        ----------
+        event : str
+            Matplotlib event.
+        callback : function
+            Callback function with a matplotlib Event object as its argument.
         """
         cid = self.image_viewer.connect_event(event, callback)
         self.cids.append(cid)

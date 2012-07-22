@@ -12,12 +12,9 @@ class CannyPlugin(OverlayPlugin):
         width = kwargs.get('width', 400)
         super(CannyPlugin, self).__init__(image_viewer,
                                           width=width, height=height)
-        self.add_keyword_argument('sigma', 0.005, 0, self.caller,
-                                  update_on='release')
-        self.add_keyword_argument('low_threshold', 0.255, 0, self.caller,
-                                  update_on='release')
-        self.add_keyword_argument('high_threshold', 0.255, 0, self.caller,
-                                  update_on='release')
+        self.add_keyword_argument('sigma', 0, 5, update_on='release')
+        self.add_keyword_argument('low_threshold', 0, 255, update_on='release')
+        self.add_keyword_argument('high_threshold', 0, 255, update_on='release')
         # Call callback so that image is updated to slider values.
         self.caller()
 
