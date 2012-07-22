@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_equal, assert_array_almost_equal
 
 from skimage.transform._geometric import _stackcopy
 from skimage.transform import (estimate_transform, SimilarityTransform,
@@ -43,11 +43,25 @@ def test_similarity_estimation():
     tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
     assert_array_almost_equal(tform(SRC[:2, :]), DST[:2, :])
     assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
+    assert_equal(tform._matrix[0, 0], tform._matrix[1, 1])
+    assert_equal(tform._matrix[0, 1], - tform._matrix[1, 0])
 
     #: over-determined
     tform = estimate_transform('similarity', SRC, DST)
     assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
+    assert_equal(tform._matrix[0, 0], tform._matrix[1, 1])
+    assert_equal(tform._matrix[0, 1], - tform._matrix[1, 0])
 
+
+def test_similarity_implicit():
+    tform = SimilarityTransform()
+    scale = 0.1
+    rotation = 1
+    translation = (1, 1)
+    tform.compose_implicit(scale, rotation, translation)
+    assert_array_almost_equal(tform.scale, scale)
+    assert_array_almost_equal(tform.rotation, rotation)
+    assert_array_almost_equal(tform.translation, translation)
 
 
 def test_affine_estimation():
@@ -59,6 +73,19 @@ def test_affine_estimation():
     #: over-determined
     tform = estimate_transform('affine', SRC, DST)
     assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
+
+
+def test_affine_implicit():
+    tform = AffineTransform()
+    scale = (0.1, 0.13)
+    rotation = 1
+    shear = 0.1
+    translation = (1, 1)
+    tform.compose_implicit(scale, rotation, shear, translation)
+    assert_array_almost_equal(tform.scale, scale)
+    assert_array_almost_equal(tform.rotation, rotation)
+    assert_array_almost_equal(tform.shear, shear)
+    assert_array_almost_equal(tform.translation, translation)
 
 
 def test_projective():
@@ -77,9 +104,13 @@ def test_polynomial():
 
 
 def test_union():
-    tform1 = SimilarityTransform(1, 0.3)
-    tform2 = SimilarityTransform(1, 0.6)
-    tform3 = SimilarityTransform(1, 0.9)
+    tform1 = SimilarityTransform()
+    tform1.compose_implicit(scale=0.1, rotation=0.3)
+    tform2 = SimilarityTransform()
+    tform2.compose_implicit(scale=0.1, rotation=0.9)
+    tform3 = SimilarityTransform()
+    tform3.compose_implicit(scale=0.1**2, rotation=0.3+0.9)
+
 
     tform = tform1 + tform2
 

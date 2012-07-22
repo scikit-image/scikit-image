@@ -30,11 +30,6 @@ def _stackcopy(a, b):
 class GeometricTransform(object):
     """Perform geometric transformations on a set of coordinates.
 
-    Parameters
-    ----------
-    matrix : 3x3 array, optional
-        Homogeneous transformation matrix.
-
     """
     def __call__(self, coords):
         """Apply forward transformation.
@@ -98,6 +93,11 @@ class ProjectiveTransform(GeometricTransform):
       [[1 0 10]
        [0 1 20]
        [0 0 1 ]].
+
+    Parameters
+    ----------
+    matrix : 3x3 array, optional
+        Homogeneous transformation matrix.
 
     """
 
@@ -201,22 +201,30 @@ class AffineTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    scale : (sx, sy), floats
-        Scale factors.
-    rotation : float
-        Rotation angle in radians, counter-clockwise direction.
-    shear : float
-        Shear angle in radians, counter-clockwise direction.
-    translation : (tx, ty), floats
-        Translation in x and y.
+    matrix : 3x3 array, optional
+        Homogeneous transformation matrix.
 
     """
 
     _coefs = range(6)
 
-    def __init__(self, scale=None, rotation=None, shear=None, translation=None):
-        ProjectiveTransform.__init__(self)
+    def compose_implicit(self, scale=None, rotation=None, shear=None,
+                    translation=None):
+        """Set the transformation matrix with the implicit transformation
+        parameters.
 
+        Parameters
+        ----------
+        scale : (sx, sy) as array, list or tuple
+            scale factors
+        rotation : float
+            rotation angle in counter-clockwise direction
+        shear : float
+            shear angle in counter-clockwise direction
+        translation : (tx, ty) as array, list or tuple
+            translation parameters
+
+        """
         if scale is None:
             scale = (1, 1)
         if rotation is None:
@@ -226,18 +234,35 @@ class AffineTransform(ProjectiveTransform):
         if translation is None:
             translation = (0, 0)
 
-        a = rotation
         sx, sy = scale
-        tx, ty = translation
-
         self._matrix = np.array([
-            [sx * math.cos(a), - sy * math.sin(a + shear), tx],
-            [sx * math.sin(a),   sy * math.cos(a + shear), ty],
-            [0,                  0,                        1]
+            [sx * math.cos(rotation), - sy * math.sin(rotation + shear), 0],
+            [sx * math.sin(rotation),   sy * math.cos(rotation + shear), 0],
+            [                      0,                                 0, 1]
         ])
+        self._matrix[0:2, 2] = translation
+
+    @property
+    def scale(self):
+        sx = math.sqrt(self._matrix[0, 0] ** 2 + self._matrix[1, 0] ** 2)
+        sy = math.sqrt(self._matrix[0, 1] ** 2 + self._matrix[1, 1] ** 2)
+        return sx, sy
+
+    @property
+    def rotation(self):
+        return math.atan2(self._matrix[1, 0], self._matrix[0, 0])
+
+    @property
+    def shear(self):
+        beta = math.atan2(- self._matrix[0, 1], self._matrix[1, 1])
+        return beta - self.rotation
+
+    @property
+    def translation(self):
+        return self._matrix[0:2, 2]
 
 
-class SimilarityTransform(AffineTransform):
+class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form::
 
         X = a0*x + b0*y + a1 =
@@ -254,22 +279,10 @@ class SimilarityTransform(AffineTransform):
 
     Parameters
     ----------
-    scale : float, optional
-        Scale / zoom factor.
-    rotation : float, optional
-        Rotation angle, counter-clockwise, in radians.
-    translation : (tx, ty) of float
-        x, y translation parameters
+    matrix : 3x3 array, optional
+        Homogeneous transformation matrix.
 
     """
-
-    def __init__(self, scale=None, rotation=None, translation=None):
-        if scale is not None:
-            scale = (scale, scale)
-        AffineTransform.__init__(self, scale=scale,
-                                 rotation=rotation,
-                                 shear=0,
-                                 translation=translation)
 
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit transformation
@@ -304,6 +317,52 @@ class SimilarityTransform(AffineTransform):
         self._matrix = np.array([[a0, -b0, a1],
                                  [b0,  a0, b1],
                                  [ 0,   0,  1]])
+
+    def compose_implicit(self, scale=None, rotation=None, translation=None):
+        """Set the transformation matrix with the implicit transformation
+        parameters.
+
+        Parameters
+        ----------
+        scale : float, optional
+            scale factor
+        rotation : float, optional
+            rotation angle in counter-clockwise direction
+        translation : (tx, ty) as array, list or tuple, optional
+            x, y translation parameters
+
+        """
+        if scale is None:
+            scale = (1, 1)
+        if rotation is None:
+            rotation = 0
+        if translation is None:
+            translation = (0, 0)
+
+        self._matrix = np.array([
+            [math.cos(rotation), - math.sin(rotation), 0],
+            [math.sin(rotation),   math.cos(rotation), 0],
+            [                 0,                    0, 1]
+        ])
+        self._matrix *= scale
+        self._matrix[0:2, 2] = translation
+
+    @property
+    def scale(self):
+        if math.cos(self.rotation) == 0:
+            # sin(self.rotation) == 1
+            scale = self._matrix[0, 1]
+        else:
+            scale = self._matrix[0, 0] / math.cos(self.rotation)
+        return scale
+
+    @property
+    def rotation(self):
+        return math.atan2(self._matrix[1, 0], self._matrix[1, 1])
+
+    @property
+    def translation(self):
+        return self._matrix[0:2, 2]
 
 
 class PolynomialTransform(GeometricTransform):
@@ -449,7 +508,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     >>> tform = tf.estimate_transform('similarity', src, dst)
 
-    >>> tform.inverse(tform.forward(src)) # == src
+    >>> tform.inverse(tform(src)) # == src
 
     >>> # warp image using the estimated transformation
     >>> from skimage import data
@@ -458,15 +517,12 @@ def estimate_transform(ttype, src, dst, **kwargs):
     >>> warp(image, inverse_map=tform.inverse)
 
     >>> # create transformation with explicit parameters
-    >>> scale = 1.1
-    >>> rotation = 1
-    >>> translation = (10, 20)
-    >>>
-    >>> tform2 = tf.SimilarityTransform(scale, rotation, translation)
+    >>> tform2 = tf.SimilarityTransform()
+    >>> tform2.compose_implicit(scale=1.1, rotation=1, translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right
     >>> tform3 = tform + tform2
-    >>> tform3.forward(src) # == tform2.forward(tform.forward(src))
+    >>> tform3(src) # == tform2(tform(src))
 
     """
     ttype = ttype.lower()
