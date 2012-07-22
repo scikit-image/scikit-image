@@ -15,10 +15,10 @@ class CannyPlugin(OverlayPlugin):
         self.add_keyword_argument('sigma', 0, 5, update_on='release')
         self.add_keyword_argument('low_threshold', 0, 255, update_on='release')
         self.add_keyword_argument('high_threshold', 0, 255, update_on='release')
-        # Call callback so that image is updated to slider values.
-        self.caller()
+        # Update image overlay to default slider values.
+        self.filter_image()
 
-    def callback(self, *args, **kwargs):
+    def image_filter(self, *args, **kwargs):
         image = canny(*args, **kwargs)
         self.overlay = image
 

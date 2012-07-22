@@ -30,7 +30,7 @@ class Plugin(QtGui.QDialog):
     name = 'Plugin'
     draws_on_image = False
 
-    def __init__(self, image_viewer, callback=None, height=100, width=400,
+    def __init__(self, image_viewer, image_filter=None, height=100, width=400,
                  useblit=None):
         self.image_viewer = image_viewer
         QtGui.QDialog.__init__(self, image_viewer)
@@ -40,8 +40,8 @@ class Plugin(QtGui.QDialog):
         self.layout = QtGui.QGridLayout(self)
         self.resize(width, height)
         self.row = 0
-        if callback is not None:
-            self.callback = callback
+        if image_filter is not None:
+            self.image_filter = image_filter
 
         self.arguments = [image_viewer.original_image]
         self.keyword_arguments= {}
@@ -66,11 +66,11 @@ class Plugin(QtGui.QDialog):
             bbox = self.image_viewer.ax.bbox
             self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
 
-    def caller(self, *args):
+    def filter_image(self, *args):
         arguments = [self._get_value(a) for a in self.arguments]
         kwargs = dict([(name, self._get_value(a))
                        for name, a in self.keyword_arguments.iteritems()])
-        self.callback(*arguments, **kwargs)
+        self.image_filter(*arguments, **kwargs)
 
     def _get_value(self, param):
         if hasattr(param, 'val'):
@@ -88,7 +88,7 @@ class Plugin(QtGui.QDialog):
 
     def add_slider(self, name, low, high, **kwargs):
         slider = Slider(name, low, high, **kwargs)
-        slider.callback = self.caller
+        slider.callback = self.filter_image
         self.layout.addWidget(slider, self.row, 0)
         self.row += 1
         return name.replace(' ', '_'), slider
