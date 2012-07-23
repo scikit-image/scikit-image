@@ -5,6 +5,7 @@ from __future__ import with_statement
 __all__ = ['MultiImage', 'ImageCollection', 'imread', 'concatenate_images']
 
 from glob import glob
+import re
 
 import numpy as np
 from ._io import imread
@@ -38,6 +39,30 @@ def concatenate_images(ic):
         raise ValueError('Image dimensions must agree.')
     return ar
 
+
+def alphanumeric_key(s):
+    """Convert string to list of strings and ints that gives intuitive sorting.
+
+    Parameters
+    ----------
+    s: string
+
+    Returns
+    -------
+    k: a list of strings and ints
+
+    Examples
+    --------
+    >>> alphanumeric_key('z23a')
+    ['z', 23, 'a']
+    >>> filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png']
+    >>> sorted(filenames)
+    ['f10.10.png', 'f10.9.png', 'f9.10.png', 'f9.9.png', 'e10.png']
+    >>> sorted(filenames, key=alphanumeric_key)
+    ['e10.png', 'f9.9.png', 'f9.10.png', 'f10.9.png', 'f10.10.png']
+    """
+    k = [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)]
+    return k
 
 class MultiImage(object):
     """A class containing a single multi-frame image.
@@ -260,7 +285,7 @@ class ImageCollection(object):
     (128, 128, 3)
 
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
-
+    
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
@@ -269,7 +294,7 @@ class ImageCollection(object):
             self._files = []
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
-            self._files.sort()
+            self._files = sorted(self._files, key=alphanumeric_key)
         else:
             self._files = load_pattern
 

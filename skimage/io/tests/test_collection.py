@@ -7,6 +7,7 @@ from numpy.testing.decorators import skipif
 
 from skimage import data_dir
 from skimage.io import ImageCollection, MultiImage
+from skimage.io.collection import alphanumeric_key
 
 
 try:
@@ -18,6 +19,23 @@ else:
 
 if sys.version_info[0] > 2:
     basestring = str
+
+class TestAlphanumericKey():
+    def setUp(self):
+        self.test_string = 'z23a'
+        self.test_str_result = ['z', 23, 'a']
+        self.filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png',
+            'e9.png', 'e10.png', 'em.png']
+        self.sorted_filenames = \
+            ['e9.png', 'e10.png', 'em.png', 'f9.9.png', 'f9.10.png',
+            'f10.9.png', 'f10.10.png']
+
+    def test_string_split(self):
+        assert_equal(alphanumeric_key(self.test_string), self.test_str_result)
+
+    def test_string_sort(self):
+        sorted_filenames = sorted(self.filenames, key=alphanumeric_key)
+        assert_equal(sorted_filenames, self.sorted_filenames)
 
 
 class TestImageCollection():
