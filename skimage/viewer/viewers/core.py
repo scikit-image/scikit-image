@@ -10,10 +10,7 @@ qApp = None
 
 
 class ImageCanvas(FigureCanvasQTAgg):
-    """Canvas for displaying images.
-
-    This canvas derives from Matplotlib, so your normal 
-    """
+    """Canvas for displaying images."""
     def __init__(self, parent, image, **kwargs):
         self.fig, self.ax = figimage(image, **kwargs)
 
@@ -91,7 +88,6 @@ class ImageViewer(QtGui.QMainWindow):
         self.layout = QtGui.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
 
-        #TODO: Set status bar to fixed-width font so status doesn't wiggle
         status_bar = self.statusBar()
         self.status_message = status_bar.showMessage
         sb_size = status_bar.sizeHint()
@@ -109,7 +105,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.move(0, 0)
         w = size.width()
         y = 0
-        #TODO: Layout isn't correct for multiple plots (overlaps).
+        #TODO: Layout isn't correct for multiple plugins (overlaps).
         for p in self.plugins:
             p.move(w, y)
             y += p.geometry().height()

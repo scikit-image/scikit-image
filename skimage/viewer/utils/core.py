@@ -65,10 +65,10 @@ class LinearColormap(LinearSegmentedColormap):
 class ClearColormap(LinearColormap):
     """Color map that varies linearly from alpha = 0 to 1
     """
-    def __init__(self, rgb, name='clear_color'):
+    def __init__(self, rgb, max_alpha=1, name='clear_color'):
         r, g, b = rgb
         cg_speq = {'blue':  [(0.0, b), (1.0, b)],
                    'green': [(0.0, g), (1.0, g)],
                    'red':   [(0.0, r), (1.0, r)],
-                   'alpha': [(0.0, 0.0), (1.0, 1.0)]}
+                   'alpha': [(0.0, 0.0), (1.0, max_alpha)]}
         LinearColormap.__init__(self, name, cg_speq)
