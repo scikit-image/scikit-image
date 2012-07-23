@@ -72,11 +72,11 @@ class LineProfile(PlotPlugin):
         self.profile = self.ax.plot(scan_data, 'k-')[0]
         self._autoscale_view()
 
-        self.connect_event('key_press_event', self.on_key_press)
-        self.connect_event('button_press_event', self.on_mouse_press)
-        self.connect_event('button_release_event', self.on_mouse_release)
-        self.connect_event('motion_notify_event', self.on_move)
-        self.connect_event('scroll_event', self.on_scroll)
+        self.connect_image_event('key_press_event', self.on_key_press)
+        self.connect_image_event('button_press_event', self.on_mouse_press)
+        self.connect_image_event('button_release_event', self.on_mouse_release)
+        self.connect_image_event('motion_notify_event', self.on_move)
+        self.connect_image_event('scroll_event', self.on_scroll)
 
         self.image_viewer.redraw()
 

@@ -69,7 +69,7 @@ class Plugin(QtGui.QDialog):
         self.arguments.append(self.image_viewer.original_image)
 
         if self.draws_on_image:
-            self.connect_event('draw_event', self.on_draw)
+            self.connect_image_event('draw_event', self.on_draw)
 
     def on_draw(self, event):
         """Save image background when blitting.
@@ -108,17 +108,17 @@ class Plugin(QtGui.QDialog):
     def closeEvent(self, event):
         """Disconnect all artists and events from ImageViewer.
 
-        Note that events must be connected using `self.connect_event` and
+        Note that events must be connected using `self.connect_image_event` and
         artists must be appended to `self.artists`.
         """
         self.disconnect_image_events()
-        self.remove_artists()
+        self.remove_image_artists()
         self.image_viewer.plugins.remove(self)
         self.image_viewer.redraw()
         self.close()
 
-    def connect_event(self, event, callback):
-        """Connect callback with an event.
+    def connect_image_event(self, event, callback):
+        """Connect callback with an event in the image viewer.
 
         This should be used in lieu of `figure.canvas.mpl_connect` since this
         function stores call back ids for later clean up.
@@ -138,7 +138,7 @@ class Plugin(QtGui.QDialog):
         for c in self.cids:
             self.image_viewer.disconnect_event(c)
 
-    def remove_artists(self):
-        """Disconnect artists that are connected to the *image plot*."""
+    def remove_image_artists(self):
+        """Disconnect artists that are connected to the image viewer."""
         for a in self.artists:
             self.image_viewer.remove_artist(a)
