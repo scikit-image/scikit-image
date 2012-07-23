@@ -76,10 +76,7 @@ class Plugin(QtGui.QDialog):
         self.image_filter(*arguments, **kwargs)
 
     def _get_value(self, param):
-        if hasattr(param, 'val'):
-            return param.val()
-        else:
-            return param
+        return param if not hasattr(param, 'val') else param.val()
 
     def add_widget(self, widget):
         if widget.ptype == 'kwarg':
