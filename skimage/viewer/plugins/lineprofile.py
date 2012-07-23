@@ -34,8 +34,7 @@ class LineProfile(PlotPlugin):
     draws_on_image = True
 
     def __init__(self, useblit=None, linewidth=1, epsilon=5, limits='image'):
-        super(LineProfile, self).__init__(height=200, width=600,
-                                          useblit=useblit)
+        super(LineProfile, self).__init__(useblit=useblit)
         self.linewidth = linewidth
         self.epsilon = epsilon
         self._active_pt = None

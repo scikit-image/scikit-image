@@ -28,16 +28,17 @@ class Plugin(QtGui.QDialog):
     name = 'Plugin'
     draws_on_image = False
 
-    def __init__(self, image_filter=None, height=100, width=400, useblit=None):
-        QtGui.QDialog.__init__(self)
+    def __init__(self, image_filter=None, height=0, width=400, useblit=None):
+        super(Plugin, self).__init__()
+
         self.image_viewer = None
+        if image_filter is not None:
+            self.image_filter = image_filter
 
         self.setWindowTitle(self.name)
         self.layout = QtGui.QGridLayout(self)
         self.resize(width, height)
         self.row = 0
-        if image_filter is not None:
-            self.image_filter = image_filter
 
         self.arguments = []
         self.keyword_arguments= {}

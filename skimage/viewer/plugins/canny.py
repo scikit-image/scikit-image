@@ -9,8 +9,6 @@ class CannyPlugin(OverlayPlugin):
     name = 'Canny Filter'
 
     def __init__(self, *args, **kwargs):
-        kwargs.setdefault('height', 100)
-        kwargs.setdefault('width', 400)
         super(CannyPlugin, self).__init__(**kwargs)
 
         self.add_widget(Slider('sigma', 0, 5, update_on='release'))

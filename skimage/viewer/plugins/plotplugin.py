@@ -23,6 +23,7 @@ class PlotCanvas(FigureCanvasQTAgg):
         FigureCanvasQTAgg.updateGeometry(self)
         # Note: `setParent` must be called after `FigureCanvasQTAgg.__init__`.
         self.setParent(parent)
+        self.setMinimumHeight(150)
 
 
 class PlotPlugin(Plugin):
