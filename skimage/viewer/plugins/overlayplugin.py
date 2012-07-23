@@ -16,12 +16,15 @@ class OverlayPlugin(Plugin):
               'green': (0, 1, 0),
               'cyan': (0, 1, 1)}
 
-    def __init__(self, image_viewer, **kwargs):
-        Plugin.__init__(self, image_viewer, **kwargs)
+    def __init__(self, **kwargs):
+        super(OverlayPlugin, self).__init__(**kwargs)
         self._overlay_plot = None
         self._overlay = None
         self.cmap = None
         self.color_names = self.colors.keys()
+
+    def attach(self, image_viewer):
+        super(OverlayPlugin, self).attach(image_viewer)
         #TODO: `color` doesn't update GUI widget when set manually.
         self.color = 0
 

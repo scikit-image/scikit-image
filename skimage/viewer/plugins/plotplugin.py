@@ -40,8 +40,9 @@ class PlotPlugin(Plugin):
     image : array
         Image used in measurement/manipulation.
     """
-    def __init__(self, image_viewer, **kwargs):
-        Plugin.__init__(self, image_viewer, **kwargs)
+
+    def attach(self, image_viewer):
+        super(PlotPlugin, self).attach(image_viewer)
         # Add plot for displaying intensity profile.
         self.add_plot()
 

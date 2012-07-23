@@ -5,5 +5,5 @@ from skimage.viewer.plugins.lineprofile import LineProfile
 
 image = data.camera()
 viewer = ImageViewer(image)
-LineProfile(viewer)
+viewer += LineProfile()
 viewer.show()

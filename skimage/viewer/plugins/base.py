@@ -1,4 +1,5 @@
 from PyQt4 import QtGui
+from PyQt4.QtCore import Qt
 
 import matplotlib as mpl
 
@@ -23,17 +24,13 @@ class Plugin(QtGui.QDialog):
     ----------
     image_viewer : ImageViewer
         Window containing image used in measurement.
-    image : array
-        Image used in measurement/manipulation.
     """
     name = 'Plugin'
     draws_on_image = False
 
-    def __init__(self, image_viewer, image_filter=None, height=100, width=400,
-                 useblit=None):
-        self.image_viewer = image_viewer
-        QtGui.QDialog.__init__(self, image_viewer)
-        self.image_viewer.plugins.append(self)
+    def __init__(self, image_filter=None, height=100, width=400, useblit=None):
+        QtGui.QDialog.__init__(self)
+        self.image_viewer = None
 
         self.setWindowTitle(self.name)
         self.layout = QtGui.QGridLayout(self)
@@ -42,17 +39,23 @@ class Plugin(QtGui.QDialog):
         if image_filter is not None:
             self.image_filter = image_filter
 
-        #TODO: Always passing image as first argument may be bad assumption.
-        self.arguments = [image_viewer.original_image]
+        self.arguments = []
         self.keyword_arguments= {}
-
-        self.image = self.image_viewer.image
 
         if useblit is None:
             useblit = True if mpl.backends.backend.endswith('Agg') else False
         self.useblit = useblit
         self.cids = []
         self.artists = []
+
+    def attach(self, image_viewer):
+        self.setParent(image_viewer)
+        self.setWindowFlags(Qt.Dialog)
+
+        self.image_viewer = image_viewer
+        self.image_viewer.plugins.append(self)
+        #TODO: Always passing image as first argument may be bad assumption.
+        self.arguments.append(self.image_viewer.original_image)
 
         if self.draws_on_image:
             self.connect_event('draw_event', self.on_draw)

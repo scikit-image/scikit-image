@@ -96,6 +96,10 @@ class ImageViewer(QtGui.QMainWindow):
 
         self.connect_event('motion_notify_event', self.update_status_bar)
 
+    def __iadd__(self, plugin):
+        plugin.attach(self)
+        return self
+
     def closeEvent(self, ce):
         self.close()
 

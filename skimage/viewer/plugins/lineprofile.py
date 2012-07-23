@@ -33,42 +33,45 @@ class LineProfile(PlotPlugin):
     name = 'Line Profile'
     draws_on_image = True
 
-    def __init__(self, image_viewer, useblit=None,
-                 linewidth=1, epsilon=5, limits='image'):
-        super(LineProfile, self).__init__(image_viewer, height=200, width=600,
+    def __init__(self, useblit=None, linewidth=1, epsilon=5, limits='image'):
+        super(LineProfile, self).__init__(height=200, width=600,
                                           useblit=useblit)
-
         self.linewidth = linewidth
         self.epsilon = epsilon
+        self._active_pt = None
+        self._limit_type = limits
+        self.line_kwargs = dict(color='y', lw=linewidth, alpha=0.5, marker='s',
+                                markersize=5, solid_capstyle='butt')
+        print self.help()
 
-        if limits == 'image':
-            self.limits = (np.min(self.image), np.max(self.image))
-        elif limits == 'dtype':
-            self.limits = dtype_range[self.image.dtype.type]
-        elif limits is None or len(limits) == 2:
-            self.limits = limits
+    def attach(self, image_viewer):
+        super(LineProfile, self).attach(image_viewer)
+
+        image = image_viewer.original_image
+
+        if self._limit_type == 'image':
+            self.limits = (np.min(image), np.max(image))
+        elif self._limit_type == 'dtype':
+            self.self._limit_type = dtype_range[image.dtype.type]
+        elif self._limit_type is None or len(self._limit_type) == 2:
+            self.limits = self._limit_type
         else:
-            raise ValueError("Unrecognized `limits`: %s" % limits)
+            raise ValueError("Unrecognized `limits`: %s" % self._limit_type)
 
-        if not limits is None:
+        if not self._limit_type is None:
             self.ax.set_ylim(self.limits)
 
-        h, w = self.image.shape
-
+        h, w = image.shape
         self._init_end_pts = np.array([[w/3, h/2], [2*w/3, h/2]])
         self.end_pts = self._init_end_pts.copy()
 
         x, y = np.transpose(self.end_pts)
-        self.scan_line = self.image_viewer.ax.plot(x, y, 'y-s', markersize=5,
-                                                   lw=linewidth, alpha=0.5,
-                                                   solid_capstyle='butt')[0]
+        self.scan_line = image_viewer.ax.plot(x, y, **self.line_kwargs)[0]
         self.artists.append(self.scan_line)
 
-        scan_data = profile_line(self.image, self.end_pts)
+        scan_data = profile_line(image, self.end_pts)
         self.profile = self.ax.plot(scan_data, 'k-')[0]
         self._autoscale_view()
-
-        self._active_pt = None
 
         self.connect_event('key_press_event', self.on_key_press)
         self.connect_event('button_press_event', self.on_mouse_press)
@@ -77,7 +80,6 @@ class LineProfile(PlotPlugin):
         self.connect_event('scroll_event', self.on_scroll)
 
         self.image_viewer.redraw()
-        print self.help()
 
     def help(self):
         helpstr = ("Line profile tool",
@@ -169,7 +171,8 @@ class LineProfile(PlotPlugin):
         self.scan_line.set_data(np.transpose(self.end_pts))
         self.scan_line.set_linewidth(self.linewidth)
 
-        scan = profile_line(self.image, self.end_pts, linewidth=self.linewidth)
+        scan = profile_line(self.image_viewer.original_image, self.end_pts,
+                            linewidth=self.linewidth)
         self.profile.set_xdata(np.arange(scan.shape[0]))
         self.profile.set_ydata(scan)
 
