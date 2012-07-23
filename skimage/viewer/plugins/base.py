@@ -48,6 +48,16 @@ class Plugin(QtGui.QDialog):
         self.cids = []
         self.artists = []
 
+    @property
+    def image_viewer(self):
+        if self._image_viewer is None:
+            raise RuntimeError("Plugin is not attached to ImageViewer")
+        return self._image_viewer
+
+    @image_viewer.setter
+    def image_viewer(self, image_viewer):
+        self._image_viewer = image_viewer
+
     def attach(self, image_viewer):
         self.setParent(image_viewer)
         self.setWindowFlags(Qt.Dialog)
