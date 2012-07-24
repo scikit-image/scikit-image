@@ -32,8 +32,7 @@ class Plugin(QtGui.QDialog):
         super(Plugin, self).__init__()
 
         self.image_viewer = None
-        if image_filter is not None:
-            self.image_filter = image_filter
+        self.image_filter = image_filter
 
         self.setWindowTitle(self.name)
         self.layout = QtGui.QGridLayout(self)
@@ -70,6 +69,8 @@ class Plugin(QtGui.QDialog):
 
         if self.draws_on_image:
             self.connect_image_event('draw_event', self.on_draw)
+        # Call filter so that filtered image matches widget values
+        self.filter_image()
 
     def on_draw(self, event):
         """Save image background when blitting.
@@ -81,6 +82,8 @@ class Plugin(QtGui.QDialog):
             self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
 
     def filter_image(self, *args):
+        if self.image_filter is None:
+            return
         arguments = [self._get_value(a) for a in self.arguments]
         kwargs = dict([(name, self._get_value(a))
                        for name, a in self.keyword_arguments.iteritems()])

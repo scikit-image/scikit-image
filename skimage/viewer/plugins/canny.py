@@ -15,8 +15,3 @@ class CannyPlugin(OverlayPlugin):
         self.add_widget(Slider('low threshold', 0, 255, update_on='release'))
         self.add_widget(Slider('high threshold', 0, 255, update_on='release'))
         self.add_widget(ComboBox('color', self.color_names, ptype='plugin'))
-
-    def attach(self, image_viewer):
-        super(CannyPlugin, self).attach(image_viewer)
-        # Update image overlay to default slider values.
-        self.filter_image()
