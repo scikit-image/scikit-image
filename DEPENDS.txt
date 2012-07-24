@@ -4,9 +4,12 @@ Build Requirements
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
 * `Cython >= 0.15 <http://www.cython.org/>`__
 
-
 `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
 examples in the documentation.
+
+Runtime requirements
+--------------------
+* `SciPy >= 0.10 <http://scipy.org>`__
 
 Known build errors
 ------------------
@@ -34,3 +37,4 @@ functionality is only available with the following installed:
 `FreeImage <http://freeimage.sf.net>`__
    The ``freeimage`` plugin provides support for reading various types of
    image file formats, including multi-page TIFFs.
+

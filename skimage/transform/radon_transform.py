@@ -40,8 +40,9 @@ def radon(image, theta=None):
     """
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
-    if theta == None:
+    if theta is None:
         theta = np.arange(180)
+
     height, width = image.shape
     diagonal = np.sqrt(height**2 + width**2)
     heightpad = np.ceil(diagonal - height)
@@ -124,9 +125,17 @@ def iradon(radon_image, theta=None, output_size=None,
     """
     if radon_image.ndim != 2:
         raise ValueError('The input image must be 2-D')
-    if theta == None:
+
+    if theta is None:
         m, n = radon_image.shape
         theta = np.linspace(0, 180, n, endpoint=False)
+    else:
+        theta = np.asarray(theta)
+
+    if len(theta) != radon_image.shape[1]:
+        raise ValueError("The given ``theta`` does not match the number of "
+                         "projections in ``radon_image``.")
+
     th = (np.pi / 180.0) * theta
     # if output size not specified, estimate from input radon image
     if not output_size:
@@ -160,9 +169,11 @@ def iradon(radon_image, theta=None, output_size=None,
         raise ValueError("Unknown filter: %s" % filter)
 
     filter_ft = np.tile(f, (1, len(theta)))
+
     # apply filter in fourier domain
     projection = fft(img, axis=0) * filter_ft
     radon_filtered = np.real(ifft(projection, axis=0))
+
     # resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
@@ -180,6 +191,7 @@ def iradon(radon_image, theta=None, output_size=None,
             k = np.round(mid_index + xpr * np.sin(th[i]) - ypr * np.cos(th[i]))
             reconstructed += radon_filtered[
                 ((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]
+
     elif interpolation == "linear":
         for i in range(len(theta)):
             t = xpr * np.sin(th[i]) - ypr * np.cos(th[i])
@@ -189,6 +201,7 @@ def iradon(radon_image, theta=None, output_size=None,
             b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
             reconstructed += (t - a) * radon_filtered[b0, i] + \
                              (a - t + 1) * radon_filtered[b1, i]
+
     else:
         raise ValueError("Unknown interpolation: %s" % interpolation)
 

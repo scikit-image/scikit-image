@@ -72,13 +72,13 @@ def load_freeimage():
             # No freeimage library loaded, and load-errors reported for some
             # candidate libs
             err_txt = ['%s:\n%s' % (l, str(e.message)) for l, e in errors]
-            raise OSError('One or more FreeImage libraries were found, but '
-                          'could not be loaded due to the following errors:\n'
-                          '\n\n'.join(err_txt))
+            raise RuntimeError('One or more FreeImage libraries were found, but '
+                               'could not be loaded due to the following errors:\n'
+                               '\n\n'.join(err_txt))
         else:
             # No errors, because no potential libraries found at all!
-            raise OSError('Could not find a FreeImage library in any of:\n' +
-                          '\n'.join(lib_dirs))
+            raise RuntimeError('Could not find a FreeImage library in any of:\n' +
+                               '\n'.join(lib_dirs))
 
     # FreeImage found
     @functype(None, ctypes.c_int, ctypes.c_char_p)
@@ -156,20 +156,20 @@ class FI_TYPES(object):
         }
 
     fi_types = {
-        (numpy.uint8, 1): FIT_BITMAP,
-        (numpy.uint8, 3): FIT_BITMAP,
-        (numpy.uint8, 4): FIT_BITMAP,
-        (numpy.uint16, 1): FIT_UINT16,
-        (numpy.int16, 1): FIT_INT16,
-        (numpy.uint32, 1): FIT_UINT32,
-        (numpy.int32, 1): FIT_INT32,
-        (numpy.float32, 1): FIT_FLOAT,
-        (numpy.float64, 1): FIT_DOUBLE,
-        (numpy.complex128, 1): FIT_COMPLEX,
-        (numpy.uint16, 3): FIT_RGB16,
-        (numpy.uint16, 4): FIT_RGBA16,
-        (numpy.float32, 3): FIT_RGBF,
-        (numpy.float32, 4): FIT_RGBAF
+        (numpy.dtype('uint8'), 1): FIT_BITMAP,
+        (numpy.dtype('uint8'), 3): FIT_BITMAP,
+        (numpy.dtype('uint8'), 4): FIT_BITMAP,
+        (numpy.dtype('uint16'), 1): FIT_UINT16,
+        (numpy.dtype('int16'), 1): FIT_INT16,
+        (numpy.dtype('uint32'), 1): FIT_UINT32,
+        (numpy.dtype('int32'), 1): FIT_INT32,
+        (numpy.dtype('float32'), 1): FIT_FLOAT,
+        (numpy.dtype('float64'), 1): FIT_DOUBLE,
+        (numpy.dtype('complex128'), 1): FIT_COMPLEX,
+        (numpy.dtype('uint16'), 3): FIT_RGB16,
+        (numpy.dtype('uint16'), 4): FIT_RGBA16,
+        (numpy.dtype('float32'), 3): FIT_RGBF,
+        (numpy.dtype('float32'), 4): FIT_RGBAF
         }
 
     extra_dims = {
@@ -624,7 +624,7 @@ def _array_to_bitmap(array):
     else:
         n_channels = shape[0]
     try:
-        fi_type = FI_TYPES.fi_types[(dtype.type, n_channels)]
+        fi_type = FI_TYPES.fi_types[(dtype, n_channels)]
     except KeyError:
         raise ValueError('Cannot write arrays of given type and shape.')
 
