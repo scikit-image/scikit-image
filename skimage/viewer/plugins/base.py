@@ -32,7 +32,9 @@ class Plugin(QtGui.QDialog):
         super(Plugin, self).__init__()
 
         self.image_viewer = None
-        self.image_filter = image_filter
+        # If subclass defines `image_filter` method ignore input.
+        if not hasattr(self, 'image_filter'):
+            self.image_filter = image_filter
 
         self.setWindowTitle(self.name)
         self.layout = QtGui.QGridLayout(self)
