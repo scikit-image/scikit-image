@@ -350,6 +350,11 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels = labels.astype(np.float)
         X = np.array([_clean_labels_ar(Xline, labels,
                 copy=True).reshape(data.shape) for Xline in X])
+        for i in range(1, int(labels.max()) + 1):
+            mask_i = np.squeeze(labels == i)
+            X[i - 1, mask_i] = 1
+            X[np.setdiff1d(np.arange(0, labels.max(), dtype=np.int),
+                                        [i - 1]), mask_i] = 0
     else:
         X = _clean_labels_ar(X + 1, labels).reshape(data.shape)
     return X

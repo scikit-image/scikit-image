@@ -58,7 +58,7 @@ def test_2d_bf():
                                     return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
                         full_prob_bf[0, 25:45, 40:60]).all()
-    return data, labels_bf
+    return data, labels_bf, full_prob_bf
 
 
 def test_2d_cg():
