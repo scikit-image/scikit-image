@@ -1,13 +1,11 @@
 import numpy as np
-from scipy import sqrt, pi, arctan2, cos, sin
 
 from ._shapecontext import _shapecontext
 
 def shapecontext(image, r_min, r_max, current_pixel, radial_bins=5, polar_bins=12):
     """Compute Shape Context descriptor for a given point.
 
-    Compute Shape Context by
-
+    Compute Shape Context by summing non-zero points into a log-polar histogram.
 
     Parameters
     ----------
