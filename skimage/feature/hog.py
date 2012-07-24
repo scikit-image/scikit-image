@@ -120,7 +120,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         temp_mag = np.where(cond2, magnitude, 0)
 
         orientation_histogram[:, :, i] = uniform_filter(temp_mag,
-             size=(cy, cx))[cy / 2::cy, cx / 2::cx]
+             size=(cy, cx))[cy / 2: n_cellsy*cy: cy, cx / 2: n_cellsx*cx: cx]
 
     # now for each cell, compute the histogram
     #orientation_histogram = np.zeros((n_cellsx, n_cellsy, orientations))

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Image Processing SciKit
 =======================
 
@@ -33,4 +34,16 @@ Please read LICENSE.txt in this directory.
 Contact
 -------
 Stefan van der Walt <stefan at sun.ac.za>
+=======
+The repository has moved!
+=========================
+
+Please note that, due to the package rename (which helps us to provide
+namespace clashes), ``scikits-image`` is now located at
+
+`https://github.com/scikits-image/scikits-image
+<https://github.com/scikits-image/scikits-image>`__.
+
+We apologise for the inconvenience; hopefully this is the last time we move!
+>>>>>>> 6146b622c4ce9bfd331821aed88dafc315a0d7fd
 
