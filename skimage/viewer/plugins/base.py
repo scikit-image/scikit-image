@@ -92,7 +92,7 @@ class Plugin(QtGui.QDialog):
 
     def display_filtered_image(self, image):
         """Override this method to display image on image viewer."""
-        pass
+        self.image_viewer.image = image
 
     def _get_value(self, param):
         return param if not hasattr(param, 'val') else param.val()
@@ -112,6 +112,7 @@ class Plugin(QtGui.QDialog):
 
     def __iadd__(self, widget):
         self.add_widget(widget)
+        return self
 
     def update_plugin(self, name, value):
         setattr(self, name, value)
