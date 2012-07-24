@@ -45,6 +45,10 @@ class OverlayPlugin(Plugin):
             self._overlay_plot.set_array(image)
         self.image_viewer.redraw()
 
+    def display_filtered_image(self, image):
+        """Display image over image in viewer."""
+        self.overlay = image
+
     def closeEvent(self, event):
         self.overlay = None
         super(OverlayPlugin, self).closeEvent(event)

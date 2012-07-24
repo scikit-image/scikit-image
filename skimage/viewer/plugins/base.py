@@ -84,7 +84,12 @@ class Plugin(QtGui.QDialog):
         arguments = [self._get_value(a) for a in self.arguments]
         kwargs = dict([(name, self._get_value(a))
                        for name, a in self.keyword_arguments.iteritems()])
-        self.image_filter(*arguments, **kwargs)
+        filtered = self.image_filter(*arguments, **kwargs)
+        self.display_filtered_image(filtered)
+
+    def display_filtered_image(self, image):
+        """Override this method to display image on image viewer."""
+        pass
 
     def _get_value(self, param):
         return param if not hasattr(param, 'val') else param.val()
@@ -101,6 +106,9 @@ class Plugin(QtGui.QDialog):
             widget.callback = self.update_plugin
         self.layout.addWidget(widget, self.row, 0)
         self.row += 1
+
+    def __iadd__(self, widget):
+        self.add_widget(widget)
 
     def update_plugin(self, name, value):
         setattr(self, name, value)

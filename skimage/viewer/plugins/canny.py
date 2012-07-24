@@ -9,7 +9,7 @@ class CannyPlugin(OverlayPlugin):
     name = 'Canny Filter'
 
     def __init__(self, *args, **kwargs):
-        super(CannyPlugin, self).__init__(**kwargs)
+        super(CannyPlugin, self).__init__(image_filter=canny, **kwargs)
 
         self.add_widget(Slider('sigma', 0, 5, update_on='release'))
         self.add_widget(Slider('low threshold', 0, 255, update_on='release'))
@@ -20,7 +20,3 @@ class CannyPlugin(OverlayPlugin):
         super(CannyPlugin, self).attach(image_viewer)
         # Update image overlay to default slider values.
         self.filter_image()
-
-    def image_filter(self, *args, **kwargs):
-        image = canny(*args, **kwargs)
-        self.overlay = image
