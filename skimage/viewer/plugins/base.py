@@ -110,7 +110,7 @@ class Plugin(QtGui.QDialog):
         self.layout.addWidget(widget, self.row, 0)
         self.row += 1
 
-    def __iadd__(self, widget):
+    def __add__(self, widget):
         self.add_widget(widget)
         return self
 
