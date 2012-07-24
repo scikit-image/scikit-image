@@ -16,6 +16,8 @@ from PyQt4 import QtCore
 from skimage.io._plugins.q_color_mixer import IntelligentSlider
 
 
+#TODO: Add WidgetBase class (requires reimplementation of IntelligentSlider).
+
 class Slider(IntelligentSlider):
     """Slider widget.
 
