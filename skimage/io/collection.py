@@ -5,6 +5,7 @@ from __future__ import with_statement
 __all__ = ['MultiImage', 'ImageCollection', 'imread', 'concatenate_images']
 
 from glob import glob
+from copy import copy
 import re
 
 import numpy as np
@@ -322,29 +323,56 @@ class ImageCollection(object):
         return self._conserve_memory
 
     def __getitem__(self, n):
-        """Return image n in the collection.
+        """Return selected image(s) in the collection.
 
         Loading is done on demand.
 
         Parameters
         ----------
-        n : int
-            The image number to be returned.
+        n : int or slice
+            The image number to be returned, or a slice selecting the images 
+            and ordering to be returned in a new ImageCollection.
 
         Returns
         -------
-        img : ndarray
-           The `n`-th image in the collection.
+        img : ndarray or ImageCollection.
+            The `n`-th image in the collection, or a new ImageCollection with
+            the selected images.
+
         """
-        n = self._check_imgnum(n)
-        idx = n % len(self.data)
+        if hasattr(n, '__index__'):
+            n = n.__index__()
+        
+        if type(n) not in [int, slice]:
+            raise TypeError('slicing must be with an int or slice object')
+        
+        if type(n) is int:
+            n = self._check_imgnum(n)
+            idx = n % len(self.data)
 
-        if (self.conserve_memory and n != self._cached) or \
-               (self.data[idx] is None):
-            self.data[idx] = self.load_func(self.files[n])
-            self._cached = n
+            if (self.conserve_memory and n != self._cached) or \
+                (self.data[idx] is None):
+                self.data[idx] = self.load_func(self.files[n])
+                self._cached = n
 
-        return self.data[idx]
+            return self.data[idx]
+        else:   
+            # A slice object was provided, so create a new ImageCollection 
+            # object. Any loaded image data in the original ImageCollection 
+            # will be copied by reference to the new object.  Image data 
+            # loaded after this creation is not linked.
+            fidx = range(len(self.files))[n]
+            new_ic = copy(self)
+            new_ic._files = [self.files[i] for i in fidx] 
+            if self.conserve_memory:  
+                if self._cached in fidx:
+                    new_ic._cached = fidx.index(self._cached)
+                    new_ic.data = np.copy(self.data)
+                else:
+                    new_ic.data = np.empty(1, dtype=object)
+            else:
+                new_ic.data = self.data[fidx]
+            return new_ic
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
