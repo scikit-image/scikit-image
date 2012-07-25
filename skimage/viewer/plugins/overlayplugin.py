@@ -5,11 +5,18 @@ from ..utils import ClearColormap
 class OverlayPlugin(Plugin):
     """Plugin for ImageViewer that displays an overlay on top of main image.
 
+    The base Plugin class displays the filtered image directly on the viewer.
+    OverlayPlugin will instead overlay an image with a transparent colormap.
+
+    See base Plugin class for additional details.
+
     Attributes
     ----------
     overlay : array
         Overlay displayed on top of image. This overlay defaults to a color map
         with alpha values varying linearly from 0 to 1.
+    color : int
+        Color of overlay.
     """
     colors = {'red': (1, 0, 0),
               'yellow': (1, 1, 0),
@@ -46,10 +53,11 @@ class OverlayPlugin(Plugin):
         self.image_viewer.redraw()
 
     def display_filtered_image(self, image):
-        """Display image over image in viewer."""
+        """Display filtered image as an overlay on top of image in viewer."""
         self.overlay = image
 
     def closeEvent(self, event):
+        # clear overlay from ImageViewer on close
         self.overlay = None
         super(OverlayPlugin, self).closeEvent(event)
 
@@ -60,7 +68,10 @@ class OverlayPlugin(Plugin):
     @color.setter
     def color(self, index):
         # Update colormap whenever color is changed.
-        name = self.color_names[index]
+        if isinstance(index, basestring) and index not in self.color_names:
+            raise ValueError("%s not defined in OverlayPlugin.colors" % index)
+        else:
+            name = self.color_names[index]
         self._color = name
         rgb = self.colors[name]
         self.cmap = ClearColormap(rgb)
