@@ -105,11 +105,7 @@ def imsave(fname, arr, format_str=None):
         arr = arr.astype(np.uint8)
 
     img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
-
-    if isinstance(fname, basestring):
-        img.save(fname, format=format_str)
-    elif callable(getattr(fname, 'write', None)):
-        img.save(fname, format=format_str)
+    img.save(fname, format=format_str)
 
 
 def imshow(arr):
