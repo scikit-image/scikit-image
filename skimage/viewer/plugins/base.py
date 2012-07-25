@@ -1,3 +1,6 @@
+"""
+Base class for Plugins that interact with ImageViewer.
+"""
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
 
@@ -5,25 +8,64 @@ import matplotlib as mpl
 
 
 class Plugin(QtGui.QDialog):
-    """Base class for widgets that interact with the axes.
+    """Base class for plugins that interact with an ImageViewer.
+
+    A plugin connects an image filter (or another function) to an image viewer.
+    Note that a Plugin is initialized *without* an image viewer and attached in
+    a later step. See example below for details.
 
     Parameters
     ----------
-    image_viewer : ImageViewer instance.
+    image_viewer : ImageViewer
         Window containing image used in measurement/manipulation.
-    callback : function
-        Function that gets called to update ImageViewer. Alternatively, this
-        can also be defined as a method in a Plugin subclass.
+    image_filter : function
+        Function that gets called to update image in image viewer. This value
+        can be `None` if, for example, you have a plugin that extracts
+        information from an image and doesn't manipulate it. Alternatively,
+        this function can be defined as a method in a Plugin subclass.
     height, width : int
-        Size of plugin window in pixels.
+        Size of plugin window in pixels. Note that Qt will automatically resize
+        a window to fit components. So if you're adding rows of components, you
+        can leave `height = 0` and just let Qt determine the final height.
     useblit : bool
         If True, use blitting to speed up animation. Only available on some
-        backends. If None, set to True when using Agg backend, otherwise False.
+        Matplotlib backends. If None, set to True when using Agg backend.
+        This only has an effect if you draw on top of an image viewer.
 
     Attributes
     ----------
     image_viewer : ImageViewer
         Window containing image used in measurement.
+    name : str
+        Name of plugin. This is displayed as the window title.
+    artist : list
+        List of Matplotlib artists. Any artists created by the plugin should
+        be added to this list so that it gets cleaned up on close.
+
+    Examples
+    --------
+    >>> def my_func(image, arg1, arg2, optional_arg=0):
+    >>>     ...
+    >>>
+    >>> viewer = ImageViewer(image)
+    >>>
+    >>> plugin = Plugin(image_filter=my_func)
+    >>> plugin += Widget('arg1', ..., ptype='arg')
+    >>> plugin += Widget('arg2', ..., ptype='arg')
+    >>> plugin += Widget('optional_arg', ..., ptype='kwarg')
+    >>>
+    >>> viewer.show()
+
+    The plugin will automatically delegate parameters to `image_filter` based
+    on its parameter type, i.e., `ptype` (widgets for required arguments must
+    be added in the order they appear in the function). The image attached
+    to the viewer is **automatically passed as the first argument** to the
+    filter function.
+
+    #TODO: Add flag so image is not passed to filter function by default.
+
+    `ptype = 'kwarg'` is the default for most widgets so it's unnecessary here.
+
     """
     name = 'Plugin'
     draws_on_image = False
@@ -61,6 +103,16 @@ class Plugin(QtGui.QDialog):
         self._image_viewer = image_viewer
 
     def attach(self, image_viewer):
+        """Attach the plugin to an  ImageViewer.
+
+        Note that the ImageViewer will automatically call this method when the
+        plugin is added to the ImageViewer. For example:
+
+        >>> viewer += Plugin(...)
+
+        Also note that `attach` automatically calls the filter function so that
+        the image matches the filtered value specified by attached widgets.
+        """
         self.setParent(image_viewer)
         self.setWindowFlags(Qt.Dialog)
 
@@ -74,32 +126,16 @@ class Plugin(QtGui.QDialog):
         # Call filter so that filtered image matches widget values
         self.filter_image()
 
-    def on_draw(self, event):
-        """Save image background when blitting.
-
-        The saved image is used to "clear" the figure before redrawing artists.
-        """
-        if self.useblit:
-            bbox = self.image_viewer.ax.bbox
-            self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
-
-    def filter_image(self, *args):
-        if self.image_filter is None:
-            return
-        arguments = [self._get_value(a) for a in self.arguments]
-        kwargs = dict([(name, self._get_value(a))
-                       for name, a in self.keyword_arguments.iteritems()])
-        filtered = self.image_filter(*arguments, **kwargs)
-        self.display_filtered_image(filtered)
-
-    def display_filtered_image(self, image):
-        """Override this method to display image on image viewer."""
-        self.image_viewer.image = image
-
-    def _get_value(self, param):
-        return param if not hasattr(param, 'val') else param.val()
-
     def add_widget(self, widget):
+        """Add widget to plugin.
+
+        Alternatively, Plugin's `__add__` method is overloaded to add widgets:
+
+        >>> plugin += Widget(...)
+
+        Widgets can adjust required or optional arguments of filter function or
+        parameters for the plugin. This is specified by the Widget's `ptype'.
+        """
         if widget.ptype == 'kwarg':
             name = widget.name.replace(' ', '_')
             self.keyword_arguments[name] = widget
@@ -116,11 +152,54 @@ class Plugin(QtGui.QDialog):
         self.add_widget(widget)
         return self
 
+    def on_draw(self, event):
+        """Save image background when blitting.
+
+        The saved image is used to "clear" the figure before redrawing artists.
+        """
+        if self.useblit:
+            bbox = self.image_viewer.ax.bbox
+            self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
+
+    def filter_image(self, *widget_arg):
+        """Call `image_filter` with widget args and kwargs
+
+        Note: `display_filtered_image` is automatically called.
+        """
+        # `widget_arg` is passed by the active widget but is unused since all
+        # filter arguments are pulled directly from attached the widgets.
+
+        if self.image_filter is None:
+            return
+        arguments = [self._get_value(a) for a in self.arguments]
+        kwargs = dict([(name, self._get_value(a))
+                       for name, a in self.keyword_arguments.iteritems()])
+        filtered = self.image_filter(*arguments, **kwargs)
+        self.display_filtered_image(filtered)
+
+    def _get_value(self, param):
+        # If param is a widget, return its `val` attribute.
+        return param if not hasattr(param, 'val') else param.val()
+
+    def display_filtered_image(self, image):
+        """Display the filtered image on image viewer.
+
+        If you don't want to simply replace the displayed image with the
+        filtered image (e.g., you want to display a transparent overlay),
+        you can override this method.
+        """
+        self.image_viewer.image = image
+
     def update_plugin(self, name, value):
+        """Update keyword parameters of the plugin itself.
+
+        These parameters will typically be implemented as class properties so
+        that they update the image or some other component.
+        """
         setattr(self, name, value)
 
     def closeEvent(self, event):
-        """Disconnect all artists and events from ImageViewer.
+        """On close disconnect all artists and events from ImageViewer.
 
         Note that events must be connected using `self.connect_image_event` and
         artists must be appended to `self.artists`.
