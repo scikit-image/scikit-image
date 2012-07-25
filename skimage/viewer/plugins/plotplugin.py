@@ -27,19 +27,12 @@ class PlotCanvas(FigureCanvasQTAgg):
 
 
 class PlotPlugin(Plugin):
-    """Plugin for ImageViewer that contains a plot Canvas.
+    """Plugin for ImageViewer that contains a plot canvas.
 
-    Parameters
-    ----------
-    image_viewer : ImageViewer instance.
-        Window containing image used in measurement/manipulation.
+    Base class for plugins that contain a Matplotlib plot canvas, which can,
+    for example, display an image histogram.
 
-    Attributes
-    ----------
-    image_viewer : ImageViewer
-        Window containing image used in measurement.
-    image : array
-        Image used in measurement/manipulation.
+    See base Plugin class for additional details.
     """
 
     def attach(self, image_viewer):
