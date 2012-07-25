@@ -1,8 +1,6 @@
 __all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
-import base64
-
 from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
 import numpy as np
