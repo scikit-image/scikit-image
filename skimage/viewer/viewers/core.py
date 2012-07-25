@@ -104,7 +104,7 @@ class ImageViewer(QtGui.QMainWindow):
         cs_size = self.canvas.sizeHint()
         self.resize(cs_size.width(), cs_size.height() + sb_size.height())
 
-        self.connect_event('motion_notify_event', self.update_status_bar)
+        self.connect_event('motion_notify_event', self._update_status_bar)
 
     def __add__(self, plugin):
         """Add plugin to ImageViewer"""
@@ -126,7 +126,10 @@ class ImageViewer(QtGui.QMainWindow):
             y += p.geometry().height()
 
     def show(self):
-        """Show ImageViewer and attached plugins."""
+        """Show ImageViewer and attached plugins.
+
+        This behaves much like `matplotlib.pyplot.show` and `QWidget.show`.
+        """
         self.auto_layout()
         for p in self.plugins:
             p.show()
@@ -158,13 +161,23 @@ class ImageViewer(QtGui.QMainWindow):
     def remove_artist(self, artist):
         """Disconnect matplotlib artist from image viewer.
 
+        The `closeEvent` method of a Plugin should remove artists (Matplotlib
+        lines, markers, etc.) from the viewer so that they aren't stranded.
+
+        Parameters
+        ----------
+        artist : Matplotlib Artist
+            Artists created by Matplotlib functions (e.g., `plot` returns list
+            of `Line2D` artists) should be saved by the plugin for removal.
         """
-        # There's probably a smarter way to do this.
+        # Note: an `add_artist` method is unnecessary since Matplotlib
+
+        # There's probably a smarter way to find where the artist is stored.
         for artist_list in self._axes_artists:
             if artist in artist_list:
                 artist_list.remove(artist)
 
-    def update_status_bar(self, event):
+    def _update_status_bar(self, event):
         if event.inaxes and event.inaxes.get_navigate():
             self.status_message(self._format_coord(event.xdata, event.ydata))
         else:
