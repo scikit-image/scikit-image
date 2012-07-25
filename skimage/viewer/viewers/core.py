@@ -1,3 +1,6 @@
+"""
+ImageViewer class for viewing and interacting with images.
+"""
 import sys
 
 from PyQt4 import QtGui, QtCore
@@ -42,9 +45,16 @@ class ImageViewer(QtGui.QMainWindow):
     image : array
         Image being viewed. Setting this value will update the displayed frame.
     original_image : array
-        Plugins typically operate on (but don't change) the original image.
+        Plugins typically operate on (but don't change) the *original* image.
     plugins : list
         List of attached plugins.
+
+    Examples
+    --------
+    >>> viewer = ImageViewer(image)
+    >>> viewer += SomePlugin()
+    >>> viewer.show()
+
     """
     def __init__(self, image):
         # Start main loop
@@ -97,10 +107,11 @@ class ImageViewer(QtGui.QMainWindow):
         self.connect_event('motion_notify_event', self.update_status_bar)
 
     def __add__(self, plugin):
+        """Add plugin to ImageViewer"""
         plugin.attach(self)
         return self
 
-    def closeEvent(self, ce):
+    def closeEvent(self, event):
         self.close()
 
     def auto_layout(self):
@@ -109,12 +120,13 @@ class ImageViewer(QtGui.QMainWindow):
         self.move(0, 0)
         w = size.width()
         y = 0
-        #TODO: Layout isn't correct for multiple plugins (overlaps).
+        #TODO: Layout isn't quite correct for multiple plugins (overlaps).
         for p in self.plugins:
             p.move(w, y)
             y += p.geometry().height()
 
     def show(self):
+        """Show ImageViewer and attached plugins."""
         self.auto_layout()
         for p in self.plugins:
             p.show()
@@ -143,12 +155,10 @@ class ImageViewer(QtGui.QMainWindow):
         """Disconnect callback by its id (returned by `connect_event`)."""
         self.canvas.mpl_disconnect(callback_id)
 
-    def add_artist(self, artist):
-        """Add matplotlib artist to image viewer."""
-        self.ax.add_artist(artist)
-
     def remove_artist(self, artist):
-        """Disconnect matplotlib artist from image viewer."""
+        """Disconnect matplotlib artist from image viewer.
+
+        """
         # There's probably a smarter way to do this.
         for artist_list in self._axes_artists:
             if artist in artist_list:
