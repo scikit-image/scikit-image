@@ -107,6 +107,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     # compute orientations integral images
     orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
+    subsample = np.index_exp[cy / 2:cy * n_cellsy:cy, cx / 2:cx * n_cellsx:cx]
     for i in range(orientations):
         #create new integral image for this orientation
         # isolate orientations in this range
@@ -119,19 +120,17 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cond2 = temp_ori > 0
         temp_mag = np.where(cond2, magnitude, 0)
 
-        orientation_histogram[:, :, i] = uniform_filter(temp_mag,
-             size=(cy, cx))[cy / 2::cy, cx / 2::cx]
+        temp_filt = uniform_filter(temp_mag, size=(cy, cx))
+        orientation_histogram[:, :, i] = temp_filt[subsample]
 
     # now for each cell, compute the histogram
-    #orientation_histogram = np.zeros((n_cellsx, n_cellsy, orientations))
-    radius = min(cx, cy) // 2 - 1
     hog_image = None
-    if visualise:
-        hog_image = np.zeros((sy, sx), dtype=float)
 
     if visualise:
         from skimage import draw
 
+        radius = min(cx, cy) // 2 - 1
+        hog_image = np.zeros((sy, sx), dtype=float)
         for x in range(n_cellsx):
             for y in range(n_cellsy):
                 for o in range(orientations):

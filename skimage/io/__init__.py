@@ -31,7 +31,7 @@ def _load_preferred_plugins():
             try:
                 use_plugin(plugin, kind=func)
                 break
-            except (ImportError, RuntimeError):
+            except (ImportError, RuntimeError, OSError):
                 pass
 
     # Use PIL as the default imread plugin, since matplotlib (1.2.x)

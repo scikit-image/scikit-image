@@ -72,26 +72,20 @@ def _setup_test(verbose=False):
     try:
         import nose as _nose
     except ImportError:
-        print("Could not load nose.  Unit tests not available.")
-        return None
+        def broken_test_func():
+            """This would invoke the skimage test suite, but nose couldn't be
+            imported so the test suite can not run.
+            """
+            raise ImportError("Could not load nose.  Unit tests not available.")
+        return broken_test_func
     else:
         f = functools.partial(_nose.run, 'skimage', argv=args)
         f.__doc__ = 'Invoke the skimage test suite.'
         return f
 
-test = _setup_test()
-if test is None:
-    try:
-        del test
-    except NameError:
-        pass
 
+test = _setup_test()
 test_verbose = _setup_test(verbose=True)
-if test_verbose is None:
-    try:
-        del test
-    except NameError:
-        pass
 
 
 def get_log(name=None):
