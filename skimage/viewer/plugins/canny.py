@@ -5,6 +5,7 @@ from ..widgets import Slider, ComboBox
 
 
 class CannyPlugin(OverlayPlugin):
+    """Canny filter plugin to show edges of an image."""
 
     name = 'Canny Filter'
 
