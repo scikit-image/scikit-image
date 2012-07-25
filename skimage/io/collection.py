@@ -258,14 +258,15 @@ class ImageCollection(object):
         Parameters
         ----------
         n : int or slice
-            Slice selecting images for the new ImageCollection or the image
-            number to be returned.
+            The image number to be returned, or a slice selecting the images 
+            and ordering to be returned in a new ImageCollection.
 
         Returns
         -------
-        img : ImageCollection or ndarray
-           Imagecollection of the selected images or an ndarray if a single 
-           image is specified.
+        img : ndarray or ImageCollection.
+            The `n`-th image in the collection, or a new ImageCollection with
+            the selected images.
+
         """
         if hasattr(n, '__index__'):
             n = n.__index__()
@@ -283,29 +284,23 @@ class ImageCollection(object):
                 self._cached = n
 
             return self.data[idx]
-        
-        else:   # slice object was provided
+        else:   
+            # A slice object was provided, so create a new ImageCollection 
+            # object. Any loaded image data in the original ImageCollection 
+            # will be copied by reference to the new object.  Image data 
+            # loaded after this creation is not linked.
             fidx = range(len(self.files))[n]
-            if len(fidx) == 1:  # only one item requested
-                return self.__getitem__(fidx[0])
-            else:    
-                # create a new ImageCollection object, any loaded image data
-                # in the original ImageCollection will be copied by reference
-                # to the new object.  Image data loaded after this creation 
-                # are not linked.
-                fidx.sort()
-                new_ic = copy(self)
-                new_ic._files = [self.files[i] for i in fidx] 
-                if self.conserve_memory:  
-                    if self._cached in fidx:
-                        new_ic._cached = fidx[self._cached]
-                        new_ic.data = np.copy(self.data)
-                    else:
-                        new_ic.data = np.empty(1, dtype=object)
+            new_ic = copy(self)
+            new_ic._files = [self.files[i] for i in fidx] 
+            if self.conserve_memory:  
+                if self._cached in fidx:
+                    new_ic._cached = fidx.index(self._cached)
+                    new_ic.data = np.copy(self.data)
                 else:
-                    new_ic.data = self.data[fidx]
-
-                return new_ic
+                    new_ic.data = np.empty(1, dtype=object)
+            else:
+                new_ic.data = self.data[fidx]
+            return new_ic
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""

@@ -44,10 +44,14 @@ class TestImageCollection():
         assert_raises(IndexError, return_img, -num - 1)
 
     def test_slicing(self):
-        assert type(self.collection[:] is ImageCollection)
+        assert type(self.collection[:]) is ImageCollection
         assert len(self.collection[:]) == 2
-        assert_array_almost_equal(self.collection[0], self.collection[:1])
-        assert_array_almost_equal(self.collection[1], self.collection[1:])
+        assert len(self.collection[:1]) == 1
+        assert len(self.collection[1:]) == 1
+        assert_array_almost_equal(self.collection[0], self.collection[:1][0])
+        assert_array_almost_equal(self.collection[1], self.collection[1:][0])
+        assert_array_almost_equal(self.collection[1], self.collection[::-1][0])
+        assert_array_almost_equal(self.collection[0], self.collection[::-1][1])
 
     def test_files_property(self):
         assert isinstance(self.collection.files, list)
