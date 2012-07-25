@@ -11,13 +11,10 @@ __all__ = ['LineProfile']
 class LineProfile(PlotPlugin):
     """Plugin to compute interpolated intensity under a scan line on an image.
 
+    See PlotPlugin and Plugin classes for additional details.
+
     Parameters
     ----------
-    image_viewer : ImageViewer instance.
-        Window containing image used in measurement.
-    useblit : bool
-        If True, use blitting to speed up animation. Only available on some
-        backends. If None, set to True when using Agg backend, otherwise False.
     linewidth : float
         Line width for interpolation. Wider lines average over more pixels.
     epsilon : float
@@ -33,8 +30,8 @@ class LineProfile(PlotPlugin):
     name = 'Line Profile'
     draws_on_image = True
 
-    def __init__(self, useblit=None, linewidth=1, epsilon=5, limits='image'):
-        super(LineProfile, self).__init__(useblit=useblit)
+    def __init__(self, linewidth=1, epsilon=5, limits='image', **kwargs):
+        super(LineProfile, self).__init__(**kwargs)
         self.linewidth = linewidth
         self.epsilon = epsilon
         self._active_pt = None
