@@ -52,15 +52,6 @@ class OverlayPlugin(Plugin):
             self._overlay_plot.set_array(image)
         self.image_viewer.redraw()
 
-    def display_filtered_image(self, image):
-        """Display filtered image as an overlay on top of image in viewer."""
-        self.overlay = image
-
-    def closeEvent(self, event):
-        # clear overlay from ImageViewer on close
-        self.overlay = None
-        super(OverlayPlugin, self).closeEvent(event)
-
     @property
     def color(self):
         return self._color
@@ -79,3 +70,12 @@ class OverlayPlugin(Plugin):
         if self._overlay_plot is not None:
             self._overlay_plot.set_cmap(self.cmap)
         self.image_viewer.redraw()
+
+    def display_filtered_image(self, image):
+        """Display filtered image as an overlay on top of image in viewer."""
+        self.overlay = image
+
+    def closeEvent(self, event):
+        # clear overlay from ImageViewer on close
+        self.overlay = None
+        super(OverlayPlugin, self).closeEvent(event)
