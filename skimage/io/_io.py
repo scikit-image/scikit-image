@@ -22,20 +22,18 @@ class Image(np.ndarray):
             'EXIF': {},
             'info': {}}
 
-    def __new__(image_cls, arr, **kwargs):
+    def __new__(cls, arr, **kwargs):
         """Set the image data and tags according to given parameters.
 
         Input:
         ------
-        `image_cls` : Image class specification
-            This is not normally specified by the user.
-        `arr` : ndarray
+        arr : ndarray
             Image data.
-        ``**kwargs`` : Image tags as keywords
+        kwargs : Image tags as keywords
             Specified in the form ``tag0=value``, ``tag1=value``.
 
         """
-        x = np.asarray(arr).view(image_cls)
+        x = np.asarray(arr).view(cls)
         for tag, value in Image.tags.items():
             setattr(x, tag, kwargs.get(tag, getattr(arr, tag, value)))
         return x
