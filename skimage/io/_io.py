@@ -53,15 +53,14 @@ class Image(np.ndarray):
         return tuple(object_state)
 
     def _repr_png_(self):
-        str_buffer = StringIO.StringIO()
-        imsave(str_buffer, self, format_str='png')
-        return_str = str_buffer.getvalue()
-        str_buffer.close()
-        return return_str
+        return self._repr_image_format('png')
 
     def _repr_jpeg_(self):
+        return self._repr_image_format('jpeg')
+
+    def _repr_image_format(self, format_str):
         str_buffer = StringIO.StringIO()
-        imsave(str_buffer, self, format_str='jpeg')
+        imsave(str_buffer, self, format_str=format_str)
         return_str = str_buffer.getvalue()
         str_buffer.close()
         return return_str
