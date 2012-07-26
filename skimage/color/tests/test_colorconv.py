@@ -25,6 +25,7 @@ from skimage.color import (
     convert_colorspace,
     rgb2grey, gray2rgb,
     xyz2lab, lab2xyz,
+    lab2rgb, rgb2lab
     )
 
 from skimage import data_dir
@@ -44,18 +45,17 @@ class TestColorconv(TestCase):
     colbars_point75 = colbars * 0.75
     colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
 
-    xyz_array = np.array([[[0.4124, 0.21260, 0.01930]], #red
-                    [[0, 0, 0]], #black
-                    [[.9505, 1., 1.089]], #white
-                    [[.1805, .0722, .9505]], #blue
-                    [[.07719, .15438, .02573]], #green
+    xyz_array = np.array([[[0.4124, 0.21260, 0.01930]],  # red
+                    [[0, 0, 0]],  # black
+                    [[.9505, 1., 1.089]],  # white
+                    [[.1805, .0722, .9505]],  # blue
+                    [[.07719, .15438, .02573]],  # green
                     ])
-                 
-    lab_array = np.array([[[53.233, 80.109, 67.220]], #red
-                    [[0.,0.,0.]], #black
-                    [[100.0, 0.005, -0.010]], #white
-                    [[32.303, 79.197, -107.864]], #blue
-                    [[46.229, -51.7, 49.898]], #green
+    lab_array = np.array([[[53.233, 80.109, 67.220]],  # red
+                    [[0., 0., 0.]],  # black
+                    [[100.0, 0.005, -0.010]],  # white
+                    [[32.303, 79.197, -107.864]],  # blue
+                    [[46.229, -51.7, 49.898]],  # green
                     ])
 
     # RGB to HSV
@@ -167,10 +167,17 @@ class TestColorconv(TestCase):
     # test matrices for xyz2lab and lab2xyz generated using http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
     def test_xyz2lab(self):
-        assert_array_almost_equal(xyz2lab(self.xyz_array), self.lab_array, decimal=3)
+        assert_array_almost_equal(xyz2lab(self.xyz_array),
+                                  self.lab_array, decimal=3)
 
-    def test_lab2xyz(self):        
-        assert_array_almost_equal(lab2xyz(self.lab_array), self.xyz_array, decimal=3)
+    def test_lab2xyz(self):
+        assert_array_almost_equal(lab2xyz(self.lab_array),
+                                  self.xyz_array, decimal=3)
+
+    def test_lab_rgb_roundtrip(self):
+        img_rgb = img_as_float(self.img_rgb)
+        assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
+
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
