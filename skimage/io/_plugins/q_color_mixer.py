@@ -8,7 +8,7 @@ from util import ColorMixer
 
 class IntelligentSlider(QWidget):
     ''' A slider that adds a 'name' attribute and calls a callback
-    with 'name' as an argument to the registered callback.
+    with 'name' as an argument to the registerd callback.
 
     This allows you to create large groups of sliders in a loop,
     but still keep track of the individual events
@@ -18,8 +18,7 @@ class IntelligentSlider(QWidget):
     The range of the slider is hardcoded from zero - 1000,
     but it supports a conversion factor so you can scale the results'''
 
-    def __init__(self, name, a, b, callback, orientation='vertical',
-                 update_on='move'):
+    def __init__(self, name, a, b, callback):
         QWidget.__init__(self)
         self.name = name
         self.callback = callback
@@ -27,52 +26,27 @@ class IntelligentSlider(QWidget):
         self.b = b
         self.manually_triggered = False
 
-        if orientation == 'vertical':
-            orientation_slider = Qt.Vertical
-            alignment = QtCore.Qt.AlignHCenter
-            align_text = QtCore.Qt.AlignCenter
-            align_value = QtCore.Qt.AlignCenter
-        elif orientation == 'horizontal':
-            orientation_slider = Qt.Horizontal
-            alignment = QtCore.Qt.AlignVCenter
-            align_text = QtCore.Qt.AlignLeft
-            align_value = QtCore.Qt.AlignRight
-
-        self.slider = QSlider(orientation_slider)
+        self.slider = QSlider()
         self.slider.setRange(0, 1000)
         self.slider.setValue(500)
-        if update_on == 'move':
-            self.slider.sliderMoved.connect(self.slider_changed)
-        elif update_on == 'release':
-            self.slider.sliderReleased.connect(self.slider_changed)
-        else:
-            raise ValueError("Unexpected value %s for 'update_on'" % update_on)
+        self.slider.valueChanged.connect(self.slider_changed)
 
         self.name_label = QLabel()
         self.name_label.setText(self.name)
-        self.name_label.setAlignment(align_text)
+        self.name_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.value_label = QLabel()
         self.value_label.setText('%2.2f' % (self.slider.value() * self.a
                                              + self.b))
-        self.value_label.setAlignment(align_value)
+        self.value_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.layout = QGridLayout(self)
-
-        if orientation == 'vertical':
-            self.layout.addWidget(self.name_label, 0, 0)
-            self.layout.addWidget(self.slider, 1, 0, alignment)
-            self.layout.addWidget(self.value_label, 2, 0)
-        elif orientation == 'horizontal':
-            self.layout.addWidget(self.name_label, 0, 0)
-            self.layout.addWidget(self.slider, 0, 1, alignment)
-            self.layout.addWidget(self.value_label, 0, 2)
-        else:
-            msg = "Unexpected value %s for 'orientation'"
-            raise ValueError(msg % orientation)
+        self.layout.addWidget(self.name_label, 0, 0)
+        self.layout.addWidget(self.slider, 1, 0, QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.value_label, 2, 0)
 
     # bind this to the valueChanged signal of the slider
-    def slider_changed(self):
+    def slider_changed(self, val):
         val = self.val()
         self.value_label.setText(str(val)[:4])
 
