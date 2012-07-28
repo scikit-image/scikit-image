@@ -16,12 +16,27 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 
-__all__ = ['Slider', 'ComboBox']
+__all__ = ['BaseWidget', 'Slider', 'ComboBox']
 
 
-#TODO: Add WidgetBase class (requires reimplementation of IntelligentSlider).
+class BaseWidget(QtGui.QWidget):
 
-class Slider(QtGui.QWidget):
+    def __init__(self, name, ptype, callback):
+        super(BaseWidget, self).__init__()
+        self.name = name
+        self.ptype = ptype
+        self.callback = callback
+
+    @property
+    def val(self):
+        msg = "Subclass of BaseWidget requires `val` property"
+        raise NotImplementedError(msg)
+
+    def _value_changed(self, value):
+        self.callback(self.name, value)
+
+
+class Slider(BaseWidget):
     """Slider widget.
 
     'name' attribute and calls a callback
@@ -56,10 +71,7 @@ class Slider(QtGui.QWidget):
     def __init__(self, name, low=0.0, high=1.0, value=None, ptype='kwarg',
                  callback=None, max_edit_width=60, orientation='horizontal',
                  update_on='move'):
-        super(Slider, self).__init__()
-        self.name = name
-        self.ptype = ptype
-        self.callback = callback
+        super(Slider, self).__init__(name, ptype, callback)
 
         # divide slider into 1000 discrete values
         slider_min = 0
@@ -142,11 +154,8 @@ class Slider(QtGui.QWidget):
     def val(self):
         return self.slider.value() * self._scale + self._low
 
-    def _value_changed(self, value):
-        self.callback(self.name, value)
 
-
-class ComboBox(QtGui.QWidget):
+class ComboBox(BaseWidget):
     """ComboBox widget for selecting among a list of choices.
 
     Parameters
@@ -163,11 +172,8 @@ class ComboBox(QtGui.QWidget):
     """
 
     def __init__(self, name, items, ptype='kwarg', callback=None):
-        super(ComboBox, self).__init__()
-        self.ptype = ptype
-        self.callback = callback
+        super(ComboBox, self).__init__(name, ptype, callback)
 
-        self.name = name
         self.name_label = QtGui.QLabel()
         self.name_label.setText(self.name)
         self.name_label.setAlignment(QtCore.Qt.AlignLeft)
@@ -186,6 +192,3 @@ class ComboBox(QtGui.QWidget):
     @property
     def val(self):
         return self._combo_box.value()
-
-    def _value_changed(self, value):
-        self.callback(self.name, value)
