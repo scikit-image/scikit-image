@@ -179,7 +179,7 @@ class Plugin(QtGui.QDialog):
 
     def _get_value(self, param):
         # If param is a widget, return its `val` attribute.
-        return param if not hasattr(param, 'val') else param.val()
+        return param if not hasattr(param, 'val') else param.val
 
     def display_filtered_image(self, image):
         """Display the filtered image on image viewer.

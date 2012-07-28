@@ -11,15 +11,27 @@ specified by its `ptype` attribute, which can be:
         a class property that updates the display.
 
 """
+from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-from skimage.io._plugins.q_color_mixer import IntelligentSlider
+
+
+__all__ = ['Slider', 'ComboBox']
 
 
 #TODO: Add WidgetBase class (requires reimplementation of IntelligentSlider).
 
-class Slider(IntelligentSlider):
+class Slider(QtGui.QWidget):
     """Slider widget.
+
+    'name' attribute and calls a callback
+    with 'name' as an argument to the registered callback.
+
+    This allows you to create large groups of sliders in a loop,
+    but still keep track of the individual events
+
+    It also prints a label below the slider.
+
 
     Parameters
     ----------
@@ -30,14 +42,108 @@ class Slider(IntelligentSlider):
         name of the slider.
     low, high : float
         Range of slider values.
+    value : float
+        Default slider value. If None, use midpoint between `low` and `high`.
     ptype : {'arg' | 'kwarg' | 'plugin'}
         Parameter type.
+    callback : function
+        Callback function called in response to slider changes.
+    orientation : {'horizontal' | 'vertical'}
+        Slider orientation.
+    update_on : {'move' | 'release'}
+        Control when callback function is called: on slider move or release.
     """
-    def __init__(self, name, low, high, ptype='kwarg', callback=None, **kwargs):
+    def __init__(self, name, low=0.0, high=1.0, value=None, ptype='kwarg',
+                 callback=None, max_edit_width=60, orientation='horizontal',
+                 update_on='move'):
+        super(Slider, self).__init__()
+        self.name = name
         self.ptype = ptype
-        kwargs.setdefault('orientation', 'horizontal')
-        scale = (high - low) / 1000.0
-        super(Slider, self).__init__(name, scale, low, callback, **kwargs)
+        self.callback = callback
+
+        # divide slider into 1000 discrete values
+        slider_min = 0
+        slider_max = 1000
+        if value is None:
+            value = 500
+        scale = float(high - low) / slider_max
+        self._scale = scale
+        self._low = low
+        self._high = high
+
+        if orientation == 'vertical':
+            orientation_slider = Qt.Vertical
+            alignment = QtCore.Qt.AlignHCenter
+            align_text = QtCore.Qt.AlignHCenter
+            align_value = QtCore.Qt.AlignHCenter
+            self.layout = QtGui.QVBoxLayout(self)
+        elif orientation == 'horizontal':
+            orientation_slider = Qt.Horizontal
+            alignment = QtCore.Qt.AlignVCenter
+            align_text = QtCore.Qt.AlignLeft
+            align_value = QtCore.Qt.AlignRight
+            self.layout = QtGui.QHBoxLayout(self)
+        else:
+            msg = "Unexpected value %s for 'orientation'"
+            raise ValueError(msg % orientation)
+
+        self.slider = QtGui.QSlider(orientation_slider)
+        self.slider.setRange(slider_min, slider_max)
+        self.slider.setValue(value)
+        if update_on == 'move':
+            self.slider.valueChanged.connect(self._on_slider_changed)
+        elif update_on == 'release':
+            self.slider.sliderReleased.connect(self._on_slider_changed)
+        else:
+            raise ValueError("Unexpected value %s for 'update_on'" % update_on)
+
+        self.name_label = QtGui.QLabel()
+        self.name_label.setText(self.name)
+        self.name_label.setAlignment(align_text)
+
+        self.editbox = QtGui.QLineEdit()
+        self.editbox.setMaximumWidth(max_edit_width)
+        self.editbox.setText('%2.2f' % self.val)
+        self.editbox.setAlignment(align_value)
+        self.editbox.editingFinished.connect(self._on_editbox_changed)
+
+        self.layout.addWidget(self.name_label, alignment=align_text)
+        self.layout.addWidget(self.slider, alignment=alignment)
+        self.layout.addWidget(self.editbox, alignment=align_value)
+
+    def _on_slider_changed(self):
+        """Call callback function with slider's name and value as parameters"""
+        value = self.val
+        self.editbox.setText(str(value)[:4])
+        self.callback(self.name, value)
+
+    def _on_editbox_changed(self):
+        """Validate input and set slider value"""
+        try:
+            value = float(self.editbox.text())
+        except ValueError:
+            self._bad_editbox_input()
+            return
+        if not self._low <= value <= self._high:
+            self._bad_editbox_input()
+            return
+
+        slider_value = (value - self._low) / self._scale
+        self.slider.setValue(slider_value)
+        self._good_editbox_input()
+
+    def _good_editbox_input(self):
+        self.editbox.setStyleSheet("background-color: rgb(255, 255, 255)")
+
+    def _bad_editbox_input(self):
+        self.editbox.setStyleSheet("background-color: rgb(255, 200, 200)")
+
+    @property
+    def val(self):
+        return self.slider.value() * self._scale + self._low
+
+    def _value_changed(self, value):
+        self.callback(self.name, value)
 
 
 class ComboBox(QtGui.QWidget):
