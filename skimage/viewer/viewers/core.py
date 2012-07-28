@@ -4,26 +4,18 @@ ImageViewer class for viewing and interacting with images.
 import sys
 
 from PyQt4 import QtGui, QtCore
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 
-from skimage.viewer.utils import figimage
+from ..utils import figimage, MatplotlibCanvas
 
 
 qApp = None
 
 
-class ImageCanvas(FigureCanvasQTAgg):
+class ImageCanvas(MatplotlibCanvas):
     """Canvas for displaying images."""
     def __init__(self, parent, image, **kwargs):
         self.fig, self.ax = figimage(image, **kwargs)
-
-        FigureCanvasQTAgg.__init__(self, self.fig)
-        FigureCanvasQTAgg.setSizePolicy(self,
-                                        QtGui.QSizePolicy.Expanding,
-                                        QtGui.QSizePolicy.Expanding)
-        FigureCanvasQTAgg.updateGeometry(self)
-        # Note: `setParent` must be called after `FigureCanvasQTAgg.__init__`.
-        self.setParent(parent)
+        super(ImageCanvas, self).__init__(parent, self.fig, **kwargs)
 
 
 class ImageViewer(QtGui.QMainWindow):

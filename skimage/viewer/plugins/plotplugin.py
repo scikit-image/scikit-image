@@ -2,12 +2,12 @@ import numpy as np
 from PyQt4 import QtGui
 
 import matplotlib.pyplot as plt
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 
+from ..utils import MatplotlibCanvas
 from .base import Plugin
 
 
-class PlotCanvas(FigureCanvasQTAgg):
+class PlotCanvas(MatplotlibCanvas):
     """Canvas for displaying images.
 
     This canvas derives from Matplotlib, and has attributes `fig` and `ax`,
@@ -15,16 +15,8 @@ class PlotCanvas(FigureCanvasQTAgg):
     """
     def __init__(self, parent, height, width, **kwargs):
         self.fig, self.ax = plt.subplots(figsize=(height, width), **kwargs)
-
-        FigureCanvasQTAgg.__init__(self, self.fig)
-        FigureCanvasQTAgg.setSizePolicy(self,
-                                        QtGui.QSizePolicy.Expanding,
-                                        QtGui.QSizePolicy.Expanding)
-        FigureCanvasQTAgg.updateGeometry(self)
-        # Note: `setParent` must be called after `FigureCanvasQTAgg.__init__`.
-        self.setParent(parent)
+        super(PlotCanvas, self).__init__(parent, self.fig, **kwargs)
         self.setMinimumHeight(150)
-
 
 class PlotPlugin(Plugin):
     """Plugin for ImageViewer that contains a plot canvas.

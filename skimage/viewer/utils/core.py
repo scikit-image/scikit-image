@@ -1,9 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+from PyQt4 import QtGui
 
 
-__all__ = ['figimage', 'LinearColormap', 'ClearColormap']
+__all__ = ['figimage', 'LinearColormap', 'ClearColormap', 'MatplotlibCanvas']
 
 
 def figimage(image, scale=1, dpi=None, **kwargs):
@@ -72,3 +74,16 @@ class ClearColormap(LinearColormap):
                    'red':   [(0.0, r), (1.0, r)],
                    'alpha': [(0.0, 0.0), (1.0, max_alpha)]}
         LinearColormap.__init__(self, name, cg_speq)
+
+
+class MatplotlibCanvas(FigureCanvasQTAgg):
+    """Canvas for displaying images."""
+    def __init__(self, parent, figure, **kwargs):
+        self.fig = figure
+        FigureCanvasQTAgg.__init__(self, self.fig)
+        FigureCanvasQTAgg.setSizePolicy(self,
+                                        QtGui.QSizePolicy.Expanding,
+                                        QtGui.QSizePolicy.Expanding)
+        FigureCanvasQTAgg.updateGeometry(self)
+        # Note: `setParent` must be called after `FigureCanvasQTAgg.__init__`.
+        self.setParent(parent)
