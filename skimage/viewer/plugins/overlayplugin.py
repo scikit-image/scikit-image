@@ -1,5 +1,13 @@
+import numpy as np
+
+from skimage.util import dtype
 from .base import Plugin
 from ..utils import ClearColormap
+
+
+#TODO: Maybe this bool definition should be moved to skimage.util.dtype.
+dtype_range = dtype.dtype_range.copy()
+dtype_range[np.bool_] = (False, True)
 
 
 class OverlayPlugin(Plugin):
@@ -47,7 +55,9 @@ class OverlayPlugin(Plugin):
             ax.images.remove(self._overlay_plot)
             self._overlay_plot = None
         elif self._overlay_plot is None:
-            self._overlay_plot = ax.imshow(image, cmap=self.cmap)
+            vmin, vmax = dtype_range[image.dtype.type]
+            self._overlay_plot = ax.imshow(image, cmap=self.cmap,
+                                           vmin=vmin, vmax=vmax)
         else:
             self._overlay_plot.set_array(image)
         self.image_viewer.redraw()
