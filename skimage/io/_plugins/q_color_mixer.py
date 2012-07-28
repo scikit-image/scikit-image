@@ -1,7 +1,6 @@
 # the module for the qt color_mixer plugin
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import (QWidget, QStackedWidget, QSlider, QGridLayout, QLabel)
-from PyQt4.QtCore import Qt
 
 from util import ColorMixer
 
