@@ -62,7 +62,8 @@ class Slider(BaseWidget):
     ptype : {'arg' | 'kwarg' | 'plugin'}
         Parameter type.
     callback : function
-        Callback function called in response to slider changes.
+        Callback function called in response to slider changes. This function
+        is typically set when the widget is added to a plugin.
     orientation : {'horizontal' | 'vertical'}
         Slider orientation.
     update_on : {'move' | 'release'}
@@ -169,6 +170,9 @@ class ComboBox(BaseWidget):
         Allowed parameter values.
     ptype : {'arg' | 'kwarg' | 'plugin'}
         Parameter type.
+    callback : function
+        Callback function called in response to slider changes. This function
+        is typically set when the widget is added to a plugin.
     """
 
     def __init__(self, name, items, ptype='kwarg', callback=None):
