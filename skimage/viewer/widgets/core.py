@@ -81,9 +81,11 @@ class Slider(BaseWidget):
         # divide slider into 1000 discrete values
         slider_min = 0
         slider_max = 1000
-        if value is None:
-            value = 500
         scale = float(high - low) / slider_max
+        if value is None:
+            slider_value = 500
+        else:
+            slider_value = (value - low) / scale
         self._scale = scale
         self._low = low
         self._high = high
@@ -106,7 +108,7 @@ class Slider(BaseWidget):
 
         self.slider = QtGui.QSlider(orientation_slider)
         self.slider.setRange(slider_min, slider_max)
-        self.slider.setValue(value)
+        self.slider.setValue(slider_value)
         if update_on == 'move':
             self.slider.valueChanged.connect(self._on_slider_changed)
         elif update_on == 'release':
