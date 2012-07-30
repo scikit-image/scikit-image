@@ -288,6 +288,9 @@ grey_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
                           [0, 0, 0],
                           [0, 0, 0]])
 
+# CIE LAB constants for Observer= 2A, Illuminant= D65
+lab_ref_white = np.array([0.95047, 1., 1.08883])
+
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
 #-------------------------------------------------------------
@@ -547,10 +550,6 @@ def gray2rgb(image):
     return np.dstack((image, image, image))
 
 
-#--------------------------------------------------------------
-# The conversion functions that make use of the constants above
-#--------------------------------------------------------------
-
 def xyz2lab(xyz):
     """XYZ to CIE-LAB color space conversion.
 
@@ -581,24 +580,16 @@ def xyz2lab(xyz):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
+    >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2lab
-    >>> from skimage.io import imread
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena = data.lena()
     >>> lena_xyz = rgb2xyz(lena)
     >>> lena_lab = xyz2lab(lena_xyz)
     """
     arr = _prepare_colorarray(xyz)
 
-    #----------------------
-    # Constants for CIE LAB
-    #----------------------
-    # Observer= 2A, Illuminant= D65
-    ref_white = np.array([0.95047, 1., 1.08883])
-
     # scale by CIE XYZ tristimulus values of the reference white point
-    arr = arr / ref_white
+    arr = arr / lab_ref_white
 
     # Nonlinear distortion and linear transformation
     mask = arr > 0.008856
@@ -659,8 +650,7 @@ def lab2xyz(lab):
     out[~mask] = (out[~mask] - 16.0 / 116.) / 7.787
 
     # rescale Observer= 2 deg, Illuminant= D65
-    ref_white = np.array([0.95047, 1., 1.08883])
-    out *= ref_white
+    out *= lab_ref_white
     return out
 
 
