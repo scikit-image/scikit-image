@@ -83,11 +83,8 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_hsv = convert_colorspace(lena, 'RGB', 'HSV')
     """
     fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
@@ -151,11 +148,9 @@ def rgb2hsv(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import color
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_hsv = color.rgb2hsv(lena)
     """
     arr = _prepare_colorarray(rgb)
@@ -226,11 +221,8 @@ def hsv2rgb(hsv):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_hsv = rgb2hsv(lena)
     >>> lena_rgb = hsv2rgb(lena_hsv)
     """
@@ -351,14 +343,11 @@ def xyz2rgb(xyz):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
+    >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2rgb
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena = data.lena()
     >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_rgb = xyz2rgb(lena_hsv)
+    >>> lena_rgb = xyz2rgb(lena_xyz)
     """
     return _convert(rgb_from_xyz, xyz)
 
@@ -392,11 +381,8 @@ def rgb2xyz(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_xyz = rgb2xyz(lena)
     """
     return _convert(xyz_from_rgb, rgb)
@@ -426,12 +412,9 @@ def rgb2rgbcie(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
+    >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena = data.lena()
     >>> lena_rgbcie = rgb2rgbcie(lena)
     """
     return _convert(rgbcie_from_rgb, rgb)
@@ -461,14 +444,11 @@ def rgbcie2rgb(rgbcie):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
+    >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie, rgbcie2rgb
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena = data.lena()
     >>> lena_rgbcie = rgb2rgbcie(lena)
-    >>> lena_rgb = rgbcie2rgb(lena_hsv)
+    >>> lena_rgb = rgbcie2rgb(lena_rgbcie)
     """
     return _convert(rgb_from_rgbcie, rgbcie)
 
@@ -508,12 +488,9 @@ def rgb2grey(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
     >>> from skimage.color import rgb2grey
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_grey = rgb2grey(lena)
     """
     if rgb.ndim == 2:
