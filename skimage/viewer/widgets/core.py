@@ -63,6 +63,8 @@ class Slider(BaseWidget):
         Range of slider values.
     value : float
         Default slider value. If None, use midpoint between `low` and `high`.
+    value : {'float' | 'int'}
+        Numeric type of slider value.
     ptype : {'arg' | 'kwarg' | 'plugin'}
         Parameter type.
     callback : function
@@ -73,31 +75,24 @@ class Slider(BaseWidget):
     update_on : {'move' | 'release'}
         Control when callback function is called: on slider move or release.
     """
-    def __init__(self, name, low=0.0, high=1.0, value=None, ptype='kwarg',
-                 callback=None, max_edit_width=60, orientation='horizontal',
-                 update_on='move'):
+    def __init__(self, name, low=0.0, high=1.0, value=None, value_type='float',
+                 ptype='kwarg', callback=None, max_edit_width=60,
+                 orientation='horizontal', update_on='move'):
         super(Slider, self).__init__(name, ptype, callback)
 
-        # divide slider into 1000 discrete values
-        slider_min = 0
-        slider_max = 1000
-        scale = float(high - low) / slider_max
         if value is None:
-            slider_value = 500
-        else:
-            slider_value = (value - low) / scale
-        self._scale = scale
-        self._low = low
-        self._high = high
+            value = (high - low) / 2.
 
+        # Set widget orientation
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         if orientation == 'vertical':
-            orientation_slider = Qt.Vertical
+            self.slider = QtGui.QSlider(Qt.Vertical)
             alignment = QtCore.Qt.AlignHCenter
             align_text = QtCore.Qt.AlignHCenter
             align_value = QtCore.Qt.AlignHCenter
             self.layout = QtGui.QVBoxLayout(self)
         elif orientation == 'horizontal':
-            orientation_slider = Qt.Horizontal
+            self.slider = QtGui.QSlider(Qt.Horizontal)
             alignment = QtCore.Qt.AlignVCenter
             align_text = QtCore.Qt.AlignLeft
             align_value = QtCore.Qt.AlignRight
@@ -105,10 +100,30 @@ class Slider(BaseWidget):
         else:
             msg = "Unexpected value %s for 'orientation'"
             raise ValueError(msg % orientation)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        self.slider = QtGui.QSlider(orientation_slider)
-        self.slider.setRange(slider_min, slider_max)
-        self.slider.setValue(slider_value)
+        # Set slider behavior for float and int values.
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if value_type == 'float':
+            # divide slider into 1000 discrete values
+            slider_max = 1000
+            self._scale = float(high - low) / slider_max
+            self.slider.setRange(0, slider_max)
+            self.value_fmt = '%2.2f'
+        elif value_type == 'int':
+            self.slider.setRange(low, high)
+            self.value_fmt = '%d'
+        else:
+            msg = "Expected `value_type` to be 'float' or 'int'; received: %s"
+            raise ValueError(msg % value_type)
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        self.value_type = value_type
+        self._low = low
+        self._high = high
+        # Update slider position to default value
+        self.val = value
+
         if update_on == 'move':
             self.slider.valueChanged.connect(self._on_slider_changed)
         elif update_on == 'release':
@@ -122,7 +137,7 @@ class Slider(BaseWidget):
 
         self.editbox = QtGui.QLineEdit()
         self.editbox.setMaximumWidth(max_edit_width)
-        self.editbox.setText('%2.2f' % self.val)
+        self.editbox.setText(self.value_fmt % self.val)
         self.editbox.setAlignment(align_value)
         self.editbox.editingFinished.connect(self._on_editbox_changed)
 
@@ -147,8 +162,7 @@ class Slider(BaseWidget):
             self._bad_editbox_input()
             return
 
-        slider_value = (value - self._low) / self._scale
-        self.slider.setValue(slider_value)
+        self.val = value
         self._good_editbox_input()
 
     def _good_editbox_input(self):
@@ -159,7 +173,16 @@ class Slider(BaseWidget):
 
     @property
     def val(self):
-        return self.slider.value() * self._scale + self._low
+        value = self.slider.value()
+        if self.value_type == 'float':
+            value = value * self._scale + self._low
+        return value
+
+    @val.setter
+    def val(self, value):
+        if self.value_type == 'float':
+            value = (value - self._low) / self._scale
+        self.slider.setValue(value)
 
 
 class ComboBox(BaseWidget):
