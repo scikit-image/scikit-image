@@ -182,11 +182,11 @@ def greycoprops(P, prop='contrast'):
     # create weights for specified property
     I, J = np.ogrid[0:num_level, 0:num_level]
     if prop == 'contrast':
-        weights = (I - J)**2
+        weights = (I - J) ** 2
     elif prop == 'dissimilarity':
         weights = np.abs(I - J)
     elif prop == 'homogeneity':
-        weights = 1. / (1. + (I - J)**2)
+        weights = 1. / (1. + (I - J) ** 2)
     elif prop in ['ASM', 'energy', 'correlation']:
         pass
     else:
@@ -194,10 +194,10 @@ def greycoprops(P, prop='contrast'):
 
     # compute property for each GLCM
     if prop == 'energy':
-        asm = np.apply_over_axes(np.sum, (P**2), axes=(0, 1))[0, 0]
+        asm = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
         results = np.sqrt(asm)
     elif prop == 'ASM':
-        results = np.apply_over_axes(np.sum, (P**2), axes=(0, 1))[0, 0]
+        results = np.apply_over_axes(np.sum, (P ** 2), axes=(0, 1))[0, 0]
     elif prop == 'correlation':
         results = np.zeros((num_dist, num_angle), dtype=np.float64)
         I = np.array(range(num_level)).reshape((num_level, 1, 1, 1))
@@ -205,9 +205,9 @@ def greycoprops(P, prop='contrast'):
         diff_i = I - np.apply_over_axes(np.sum, (I * P), axes=(0, 1))[0, 0]
         diff_j = J - np.apply_over_axes(np.sum, (J * P), axes=(0, 1))[0, 0]
 
-        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i)**2),
+        std_i = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_i) ** 2),
                                            axes=(0, 1))[0, 0])
-        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j)**2),
+        std_j = np.sqrt(np.apply_over_axes(np.sum, (P * (diff_j) ** 2),
                                            axes=(0, 1))[0, 0])
         cov = np.apply_over_axes(np.sum, (P * (diff_i * diff_j)),
                                  axes=(0, 1))[0, 0]
@@ -226,6 +226,7 @@ def greycoprops(P, prop='contrast'):
 
     return results
 
+
 def bit_rotate_right(value, length):
     """Cyclic bit shift to the right.
 
@@ -239,9 +240,10 @@ def bit_rotate_right(value, length):
     """
     return (value >> 1) | ((value & 1) << (length - 1))
 
+
 def local_binary_pattern(image, P, R, method='default'):
-    """Texture classification using gray scale and rotation invariant LBP (Local
-    Binary Patterns).
+    """Texture classification using gray scale and rotation invariant LBP
+    (Local Binary Patterns).
 
     Parameters
     ----------
@@ -301,8 +303,8 @@ def local_binary_pattern(image, P, R, method='default'):
 
         #: signed / thresholded texture
         signed = texture.copy()
-        signed[signed>=0] = 1
-        signed[signed<0] = 0
+        signed[signed >= 0] = 1
+        signed[signed < 0] = 0
 
         if method in ('uniform', 'var'):
             #: determine number of 0 - 1 changes
@@ -324,7 +326,8 @@ def local_binary_pattern(image, P, R, method='default'):
                 #: shift LBP P times to the right and get minimum value
                 rotation_chain[0] = lbp
                 for i in xrange(1, P):
-                    rotation_chain[i] = bit_rotate_right(rotation_chain[i-1], P)
+                    rotation_chain[i] = \
+                        bit_rotate_right(rotation_chain[i - 1], P)
                 lbp = np.min(rotation_chain)
 
         return lbp
