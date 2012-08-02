@@ -1,5 +1,5 @@
 # coding: utf-8
-from math import sqrt, atan, pi as PI
+from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
@@ -301,7 +301,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             if a - c == 0:
                 obj_props['Orientation'] = PI / 2
             else:
-                obj_props['Orientation'] = - 0.5 * atan(2 * b / (a - c))
+                obj_props['Orientation'] = - 0.5 * atan2(2 * b, (a - c))
 
         if 'Perimeter' in properties:
             obj_props['Perimeter'] = perimeter(array, 4)
