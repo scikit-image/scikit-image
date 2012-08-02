@@ -1,8 +1,10 @@
 import numpy as np
-from skimage.feature import greycomatrix, greycoprops
+from skimage.feature._texture import greycomatrix, greycoprops, \
+    local_binary_pattern, bit_rotate_right
 
 
 class TestGLCM():
+
     def setup(self):
         self.image = np.array([[0, 0, 1, 1],
                                [0, 0, 1, 1],
@@ -139,6 +141,67 @@ class TestGLCM():
         for prop in ['contrast', 'dissimilarity', 'homogeneity',
                      'energy', 'correlation', 'ASM']:
             greycoprops(result, prop)
+
+
+class TestLBP():
+
+    def setup(self):
+        self.image = np.array([[255,   6, 255,   0,  141,   0],
+                               [ 48, 250, 204, 166,  223,  63],
+                               [  8,   0, 159,  50,  255,  30],
+                               [167, 255,  63,  40,  128, 255],
+                               [  0, 255,  30,  34,  255,  24],
+                               [146, 241, 255,   0,  189, 126]], dtype=np.uint8)
+
+    def test_bit_rotate_right(self):
+        np.testing.assert_equal(bit_rotate_right(11, 4), 13)
+
+    def test_default(self):
+        lbp = local_binary_pattern(self.image, 8, 1)
+        ref = np.array([[  0, 251,   0, 255,  96, 255],
+                        [143,   0,  20, 153,  64,  56],
+                        [238, 255,  12, 191,   0, 252],
+                        [129,   0,  62, 159, 199,   0],
+                        [255,   4, 255, 175,   0, 254],
+                        [  3,   5,   0, 255,   4,  24]])
+        np.testing.assert_array_equal(lbp, ref)
+
+    def test_ror(self):
+        lbp = local_binary_pattern(self.image, 8, 1, 'ror')
+        ref = np.array([[  0, 127,   0, 255,   3, 255],
+                        [ 31,   0,   5,  51,   1,   7],
+                        [119, 255,   3, 127,   0,  63],
+                        [  3,   0,  31,  63,  31,   0],
+                        [255,   1, 255,  95,   0, 127],
+                        [  3,   5,   0, 255,   1,   3]])
+        np.testing.assert_array_equal(lbp, ref)
+
+    def test_uniform(self):
+        lbp = local_binary_pattern(self.image, 8, 1, 'uniform')
+        ref = np.array([[0, 7, 0, 8, 2, 8],
+                        [5, 0, 9, 9, 1, 3],
+                        [9, 8, 2, 7, 0, 6],
+                        [2, 0, 5, 6, 5, 0],
+                        [8, 1, 8, 9, 0, 7],
+                        [2, 9, 0, 8, 1, 2]])
+        np.testing.assert_array_equal(lbp, ref)
+
+    def test_var(self):
+        lbp = local_binary_pattern(self.image, 8, 1, 'var')
+        ref = np.array([[0.        , 0.00072786, 0.        , 0.00115377,
+                         0.00032355, 0.00224467],
+                        [0.00051758, 0.        , 0.0026383 , 0.00163246,
+                         0.00027414, 0.00041124],
+                        [0.00192834, 0.00130368, 0.00042095, 0.00171894,
+                         0.        , 0.00063726],
+                        [0.00023048, 0.        , 0.00082291, 0.00225386,
+                         0.00076696, 0.        ],
+                        [0.00097253, 0.00013236, 0.0009134 , 0.0014467 ,
+                         0.        , 0.00082472],
+                        [0.00024701, 0.0012277 , 0.        , 0.00109869,
+                         0.00015445, 0.00035881]])
+        np.testing.assert_array_almost_equal(lbp, ref)
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
