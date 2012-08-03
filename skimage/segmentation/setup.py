@@ -17,8 +17,8 @@ def configuration(parent_package='', top_path=None):
     cython(['quickshift.pyx'], working_path=base_path)
     config.add_extension('quickshift', sources=['quickshift.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    cython(['km_segmentation.pyx'], working_path=base_path)
-    config.add_extension('km_segmentation', sources=['km_segmentation.c'],
+    cython(['slic.pyx'], working_path=base_path)
+    config.add_extension('slic', sources=['slic.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

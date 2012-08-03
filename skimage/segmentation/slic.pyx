@@ -5,7 +5,7 @@ from scipy import ndimage
 from ..util import img_as_float
 
 
-def km_segmentation(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
+def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -32,9 +32,9 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
 
     References
     ----------
-    .. [1] Slic superpixels, Achanta, R. and Shaji, A. and Smith, K. and Lucchi,
-           A. and Fua, P. and Suesstrunk, S.
-           Technical Report 2010
+    .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
+        Pascal Fua, and Sabine Süsstrunk, SLIC Superpixels Compared to
+        State-of-the-art Superpixel Methods, TPAMI, May 2012.
 
     """
     image = np.atleast_3d(image)
