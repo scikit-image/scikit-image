@@ -250,7 +250,7 @@ def local_binary_pattern(image, P, R, method='default'):
     image : NxM array
         graylevel image
     P : int
-        number of circularly symmetric neighbor set points (quantization of the
+        number of circularly symmetric neighbour set points (quantization of the
         angular space)
     R : float
         radius of circle (spatial resolution of the operator)
@@ -287,7 +287,7 @@ def local_binary_pattern(image, P, R, method='default'):
     coords = np.vstack([rp, cp]) + math.ceil(R)
     # maximum size of neighbourhood for filtering
     max_size = 2 * math.ceil(R) + 1
-    # center index of flattened neightbourhood
+    # center index of flattened neighbourhood
     center_index = (max_size ** 2 - 1) / 2
 
     if method == 'ror':
@@ -297,17 +297,17 @@ def local_binary_pattern(image, P, R, method='default'):
     def compute_lbp(texture):
         # subtract value of center pixel
         texture -= texture[center_index]
-        #: get texture elements using bilinear interpolation
+        # get texture elements using bilinear interpolation
         texture = texture.reshape(max_size, max_size)
         texture = ndimage.map_coordinates(texture, coords, order=1)
 
-        #: signed / thresholded texture
+        # signed / thresholded texture
         signed = texture.copy()
         signed[signed >= 0] = 1
         signed[signed < 0] = 0
 
         if method in ('uniform', 'var'):
-            #: determine number of 0 - 1 changes
+            # determine number of 0 - 1 changes
             changes = np.sum(np.abs(np.diff(signed)))
 
             if changes <= 2:
@@ -323,7 +323,7 @@ def local_binary_pattern(image, P, R, method='default'):
             lbp = np.sum(signed * weights)
 
             if method == 'ror':
-                #: shift LBP P times to the right and get minimum value
+                # shift LBP P times to the right and get minimum value
                 rotation_chain[0] = lbp
                 for i in xrange(1, P):
                     rotation_chain[i] = \
