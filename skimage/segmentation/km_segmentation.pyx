@@ -5,12 +5,12 @@ from scipy import ndimage
 from ..util import img_as_float
 
 
-def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
+def km_segmentation(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
     ----------
-    image: (width, height, 3) ndarray 
+    image: (width, height, 3) ndarray
         Input image
     ratio: float
         Balances color-space proximity and image-space proximity.
@@ -50,7 +50,8 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
     means_y = grid_y[::step, ::step]
     means_x = grid_x[::step, ::step]
 
-    means_color = image[means_y, means_x, :]
+    n_seeds = len(means_y)
+    means_color = np.zeros((n_seeds, n_seeds, 3))
     cdef np.ndarray[dtype=np.float_t, ndim=2] means = np.dstack([means_y, means_x, means_color]).reshape(-1, 5)
     cdef np.float_t* current_mean
     cdef np.float_t* mean_entry
@@ -63,13 +64,14 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
     cdef double dist_mean
 
     cdef np.ndarray[dtype=np.int_t, ndim=2] nearest_mean = np.zeros((height, width), dtype=np.int)
-    cdef np.ndarray[dtype=np.float_t, ndim=2] distance = np.ones((height, width), dtype=np.float) * np.inf
+    cdef np.ndarray[dtype=np.float_t, ndim=2] distance = np.empty((height, width))
     cdef np.float_t* image_p = <np.float_t*> image_yx.data
     cdef np.float_t* distance_p = <np.float_t*> distance.data
     cdef np.float_t* current_distance
     cdef np.float_t* current_pixel
     cdef double tmp
     for i in xrange(max_iter):
+        distance.fill(np.inf)
         changes = 0
         current_mean = <np.float_t*> means.data
         # assign pixels to means
@@ -105,5 +107,6 @@ def km_segmentation(image, n_segments=100, ratio=10., max_iter=100, sigma=1.0):
         means_list = [np.bincount(nearest_mean.ravel(), image_yx[:, :, j].ravel())
                 for j in xrange(5)]
         in_mean = np.bincount(nearest_mean.ravel())
+        in_mean[in_mean == 0] = 1
         means = (np.vstack(means_list) / in_mean).T.copy("C")
     return nearest_mean
