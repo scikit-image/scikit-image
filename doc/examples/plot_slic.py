@@ -8,10 +8,9 @@ import numpy as np
 from skimage.data import lena
 from skimage.segmentation import slic, visualize_boundaries
 from skimage.util import img_as_float
-from skimage.color import rgb2lab
 
 img = img_as_float(lena()).copy("C")
-segments = slic(rgb2lab(img), ratio=10.0, n_segments=1000)
+segments = slic(img, ratio=10.0, n_segments=1000)
 
 print("number of segments: %d" % len(np.unique(segments)))
 

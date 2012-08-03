@@ -3,9 +3,10 @@ cimport numpy as np
 from time import time
 from scipy import ndimage
 from ..util import img_as_float
+from ..color import rgb2lab
 
 
-def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
+def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=True):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -19,6 +20,9 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
         maximum number of iterations of k-means
     sigma: float
         Width of Gaussian smoothing kernel for preprocessing.
+    convert2lab: bool
+        Whether the input should be converted to Lab colorspace prior to segmentation.
+        For this purpose, the input is assumed to be RGB. Highly recommended.
 
     Returns
     -------
@@ -28,7 +32,6 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
     Notes
     -----
     The image is smoothed using a Gaussian kernel prior to segmentation.
-    Best results are achieved if the image is given in Lab color space.
 
     References
     ----------
@@ -41,6 +44,8 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1):
     if image.shape[2] != 3:
         ValueError("Only 3-channel 2d images are supported.")
     image = ndimage.gaussian_filter(img_as_float(image), sigma)
+    if convert2lab:
+        image = rgb2lab(image)
 
     # initialize on grid:
     height, width = image.shape[:2]
