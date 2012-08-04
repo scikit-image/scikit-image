@@ -3,6 +3,7 @@ cimport numpy as np
 cimport cython
 
 from itertools import product
+from scipy import ndimage
 
 from ..util import img_as_float
 from ..color import rgb2lab
@@ -15,7 +16,7 @@ cdef extern from "math.h":
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, convert2lab=True, random_seed=None):
+def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking algorithm.
@@ -34,7 +35,9 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, c
         Cut-off point for data distances.
         Higher means less clusters.
     return_tree: bool
-        Whether to return the full segmentation hierarchy tree
+        Whether to return the full segmentation hierarchy tree and distances.
+    sigma: float
+        Width for Gaussian smoothing as preprocessing. Zero means no smoothing.
     convert2lab: bool
         Whether the input should be converted to Lab colorspace prior to segmentation.
         For this purpose, the input is assumed to be RGB.
@@ -64,6 +67,7 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, c
             ValueError("Only RGB images can be converted to Lab space.")
         image = rgb2lab(image)
 
+    image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
     cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c = np.ascontiguousarray(image) * ratio
 
     if random_seed is None:
