@@ -19,7 +19,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=Tru
     max_iter: int
         maximum number of iterations of k-means
     sigma: float
-        Width of Gaussian smoothing kernel for preprocessing.
+        Width of Gaussian smoothing kernel for preprocessing. Zero means no smoothing.
     convert2lab: bool
         Whether the input should be converted to Lab colorspace prior to segmentation.
         For this purpose, the input is assumed to be RGB. Highly recommended.
@@ -43,7 +43,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=Tru
     image = np.atleast_3d(image)
     if image.shape[2] != 3:
         ValueError("Only 3-channel 2d images are supported.")
-    image = ndimage.gaussian_filter(img_as_float(image), sigma)
+    image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
     if convert2lab:
         image = rgb2lab(image)
 
