@@ -65,7 +65,6 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
     # we get crazy memory overhead (width * height * windowsize**2)
 
     # TODO do smoothing beforehand?
-    # TODO manage borders somehow?
     # TODO join orphant roots?
 
     # window size for neighboring pixels to consider
@@ -92,7 +91,7 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
             for c in xrange(channels):
                 dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
             dist += (x - x_)**2 + (y - y_)**2
-            densities[x, y] += exp(-dist / kernel_size)
+            densities[x, y] += exp(-dist / (2 * kernel_size**2))
         current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
@@ -117,7 +116,7 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
                 if dist < closest:
                     closest = dist
                     parent[x, y] = x_ * width + y_
-        dist_parent[x, y] = closest
+        dist_parent[x, y] = np.sqrt(closest)
         current_pixel_p += channels
 
     dist_parent_flat = dist_parent.ravel()
@@ -130,5 +129,5 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
     flat = np.unique(flat, return_inverse=True)[1]
     flat = flat.reshape(width, height)
     if return_tree:
-        return flat, parent
+        return flat, parent, dist_parent
     return flat
