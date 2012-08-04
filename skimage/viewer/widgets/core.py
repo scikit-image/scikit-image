@@ -19,17 +19,22 @@ from PyQt4.QtCore import Qt
 from PyQt4 import QtGui
 from PyQt4 import QtCore
 
+from ..utils import RequiredAttr
+
 
 __all__ = ['BaseWidget', 'Slider', 'ComboBox']
 
 
 class BaseWidget(QtGui.QWidget):
 
+    plugin = RequiredAttr("Widget is not attached to a Plugin.")
+
     def __init__(self, name, ptype, callback):
         super(BaseWidget, self).__init__()
         self.name = name
         self.ptype = ptype
         self.callback = callback
+        self.plugin = None
 
     @property
     def val(self):

@@ -137,6 +137,7 @@ class Plugin(QtGui.QDialog):
             widget.callback = self.filter_image
         elif widget.ptype == 'plugin':
             widget.callback = self.update_plugin
+        widget.plugin = self
         self.layout.addWidget(widget, self.row, 0)
         self.row += 1
 
