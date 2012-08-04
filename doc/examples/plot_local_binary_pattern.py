@@ -3,34 +3,23 @@
 Local Binary Pattern for texture classification
 ===============================================
 
-In this example, we will see how to classify textures based on LBP (Local
-Binary Pattern). This example uses different rotated textures, taken from
-http://sipi.usc.edu/database/database.php?volume=rotate.
-
-The histogram of the LBP result is a good measure to classify textures. For
-simplicity the histogram distributions are then tested against each other using
-the Kullback-Leibler-Divergence.
-
-Preparation
-===========
-
-First you need to download and extract the texture image set from
-http://sipi.usc.edu/database/database.php?volume=rotate. Make sure you change
-the path to the extracted images in the script (`IMAGE_FOLDER`). You must run
-the `dump_refs` function only once, so the computation is faster. Finally you
-can match any of the rotated images against the reference textures.
+In this example, we will see how to classify textures based on LBP (Local Binary
+Pattern). The histogram of the LBP result is a good measure to classify
+textures. For simplicity the histogram distributions are then tested against
+each other using the Kullback-Leibler-Divergence.
 """
 
 import os
 import glob
 import numpy as np
 import pylab
+import scipy.ndimage as nd
 import skimage.feature as ft
 from skimage.io import imread
+from skimage import data
 
 
-IMAGE_FOLDER = 'images'
-REF_DUMP_FOLDER = 'refs'
+# settings for LBP
 METHOD = 'uniform'
 P = 16
 R = 2
@@ -43,31 +32,14 @@ def kullback_leibler_divergence(p, q):
     return np.sum(p[filt] * np.log2(p[filt] / q[filt]))
 
 
-def dump_refs(refs):
-    os.mkdir(REF_DUMP_FOLDER)
-    file_names = glob.glob('%s/*.000.tiff' % IMAGE_FOLDER)
-    for file_name in file_names:
-        name, _ = os.path.splitext(os.path.basename(file_name))
-        lbp = ft.local_binary_pattern(ref, P, R, METHOD)
-        np.save('refs/%s.npy' % name, lbp)
-
-
-def load_refs():
-    file_names = glob.glob('refs/*.000.npy')
-    refs = {}
-    for file_name in file_names:
-        name, _ = os.path.splitext(os.path.basename(file_name))
-        refs[name] = np.load(file_name)
-    return refs
-
-
 def match(refs, img):
     best_score = 10
     best_name = None
     lbp = ft.local_binary_pattern(img, P, R, METHOD)
-    hist, _ = np.histogram(lbp, normed=True, bins=P+2, range=(0, P+2))
+    hist, _ = np.histogram(lbp, normed=True, bins=P + 2, range=(0, P + 2))
     for name, ref in refs.items():
-        ref_hist, _ = np.histogram(ref, normed=True, bins=P+2, range=(0, P+2))
+        ref_hist, _ = np.histogram(ref, normed=True, bins=P + 2,
+                                   range=(0, P + 2))
         score = kullback_leibler_divergence(hist, ref_hist)
         if score < best_score:
             best_score = score
@@ -75,15 +47,16 @@ def match(refs, img):
     return best_name
 
 
-# compute LBP for each reference image once and dump result, once run this
-# should be commented out
-dump_refs(refs)
+brick = data.load('brick.png')
+grass = data.load('grass.png')
+wall = data.load('rough-wall.png')
 
-# match any rotated image against reference textures
-refs = load_refs()
-img = imread(os.path.join(IMAGE_FOLDER, 'grass.060.tiff'))
-print match(refs, img) # grass.000
-img = imread(os.path.join(IMAGE_FOLDER, 'brick.060.tiff'))
-print match(refs, img) # brick.000
-img = imread(os.path.join(IMAGE_FOLDER, 'bubbles.060.tiff'))
-print match(refs, img) # bubbles.000
+refs = {
+    'brick': ft.local_binary_pattern(brick, P, R, METHOD),
+    'grass': ft.local_binary_pattern(grass, P, R, METHOD),
+    'wall': ft.local_binary_pattern(wall, P, R, METHOD)
+}
+
+print match(refs, nd.rotate(brick, angle=30, reshape=False))
+print match(refs, nd.rotate(brick, angle=70, reshape=False))
+print match(refs, nd.rotate(grass, angle=145, reshape=False))
