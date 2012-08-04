@@ -5,7 +5,24 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 from PyQt4 import QtGui
 
 
-__all__ = ['figimage', 'LinearColormap', 'ClearColormap', 'MatplotlibCanvas']
+__all__ = ['figimage', 'LinearColormap', 'ClearColormap', 'MatplotlibCanvas',
+           'RequiredAttr']
+
+
+class RequiredAttr(object):
+    """A class attribute that must be set before use."""
+
+    def __init__(self, msg):
+        self.msg = msg
+        self.val = None
+
+    def __get__(self, obj, objtype):
+        if self.val is None:
+            raise RuntimeError(self.msg)
+        return self.val
+
+    def __set__(self, obj, val):
+        self.val = val
 
 
 def figimage(image, scale=1, dpi=None, **kwargs):

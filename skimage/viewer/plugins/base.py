@@ -3,8 +3,9 @@ Base class for Plugins that interact with ImageViewer.
 """
 from PyQt4 import QtGui
 from PyQt4.QtCore import Qt
-
 import matplotlib as mpl
+
+from ..utils import RequiredAttr
 
 
 class Plugin(QtGui.QDialog):
@@ -68,6 +69,7 @@ class Plugin(QtGui.QDialog):
 
     """
     name = 'Plugin'
+    image_viewer = RequiredAttr("%s is not attached to ImageViewer" % name)
     draws_on_image = False
 
     def __init__(self, image_filter=None, height=0, width=400, useblit=None):
@@ -92,18 +94,8 @@ class Plugin(QtGui.QDialog):
         self.cids = []
         self.artists = []
 
-    @property
-    def image_viewer(self):
-        if self._image_viewer is None:
-            raise RuntimeError("Plugin is not attached to ImageViewer")
-        return self._image_viewer
-
-    @image_viewer.setter
-    def image_viewer(self, image_viewer):
-        self._image_viewer = image_viewer
-
     def attach(self, image_viewer):
-        """Attach the plugin to an  ImageViewer.
+        """Attach the plugin to an ImageViewer.
 
         Note that the ImageViewer will automatically call this method when the
         plugin is added to the ImageViewer. For example:
