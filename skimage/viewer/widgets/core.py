@@ -11,8 +11,8 @@ parameter type specified by its `ptype` attribute, which can be:
 
     'arg' : positional argument passed to Plugin's `filter_image` method.
     'kwarg' : keyword argument passed to Plugin's `filter_image` method.
-    'plugin' : attribute of Plugin. You'll probably need to make the attribute
-        a class property that updates the display.
+    'plugin' : attribute of Plugin. You'll probably need to add a class
+        property of the same name that updates the display.
 
 """
 from PyQt4.QtCore import Qt
@@ -41,16 +41,7 @@ class BaseWidget(QtGui.QWidget):
 
 
 class Slider(BaseWidget):
-    """Slider widget.
-
-    'name' attribute and calls a callback
-    with 'name' as an argument to the registered callback.
-
-    This allows you to create large groups of sliders in a loop,
-    but still keep track of the individual events
-
-    It also prints a label below the slider.
-
+    """Slider widget for adjusting numeric parameters.
 
     Parameters
     ----------
