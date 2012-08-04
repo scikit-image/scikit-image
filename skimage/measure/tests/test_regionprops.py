@@ -1,6 +1,7 @@
 from numpy.testing import assert_array_equal, assert_almost_equal, \
     assert_array_almost_equal
 import numpy as np
+import math
 
 from skimage.measure import regionprops
 
@@ -193,6 +194,9 @@ def test_orientation():
     orientation = regionprops(SAMPLE, ['Orientation'])[0]['Orientation']
     # determined with MATLAB
     assert_almost_equal(orientation, 0.10446844651921)
+    # test correct quadrant determination
+    orientation2 = regionprops(SAMPLE.T, ['Orientation'])[0]['Orientation']
+    assert_almost_equal(orientation2, math.pi / 2 - orientation)
 
 def test_perimeter():
     perimeter = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
