@@ -7,16 +7,43 @@ from skimage import io
 from .core import BaseWidget
 
 
-__all__ = ['SaveButtons']
+__all__ = ['OKCancelButtons', 'SaveButtons']
+
+
+class OKCancelButtons(BaseWidget):
+    """Buttons that close the parent plugin.
+
+    OK will replace the original image with the current (filtered) image.
+    Cancel will just close the plugin.
+    """
+    def __init__(self):
+        name = 'OK/Cancel'
+        super(OKCancelButtons, self).__init__(name)
+
+        self.ok = QtGui.QPushButton('OK')
+        self.ok.clicked.connect(self.update_original_image)
+        self.cancel = QtGui.QPushButton('Cancel')
+        self.cancel.clicked.connect(self.close_plugin)
+
+        self.layout = QtGui.QHBoxLayout(self)
+        self.layout.addWidget(self.cancel)
+        self.layout.addWidget(self.ok)
+
+    def update_original_image(self):
+        image = self.plugin.image_viewer.image
+        self.plugin.image_viewer.original_image = image
+        self.plugin.close()
+
+    def close_plugin(self):
+        # Image viewer will restore original image on close.
+        self.plugin.close()
 
 
 class SaveButtons(BaseWidget):
+    """Buttons to save image to io.stack or to a file."""
 
-    def __init__(self, default_format='png'):
-        name = 'Save to:'
-        ptype = None
-        callback = None
-        super(SaveButtons, self).__init__(name, ptype, callback)
+    def __init__(self, name='Save to:', default_format='png'):
+        super(SaveButtons, self).__init__(name)
 
         self.default_format = default_format
 

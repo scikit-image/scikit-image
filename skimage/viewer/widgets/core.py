@@ -29,7 +29,7 @@ class BaseWidget(QtGui.QWidget):
 
     plugin = RequiredAttr("Widget is not attached to a Plugin.")
 
-    def __init__(self, name, ptype, callback):
+    def __init__(self, name, ptype=None, callback=None):
         super(BaseWidget, self).__init__()
         self.name = name
         self.ptype = ptype
