@@ -200,6 +200,7 @@ class Plugin(QtGui.QDialog):
         self.disconnect_image_events()
         self.remove_image_artists()
         self.image_viewer.plugins.remove(self)
+        self.image_viewer.reset_image()
         self.image_viewer.redraw()
         self.close()
 

@@ -76,7 +76,7 @@ class ImageViewer(QtGui.QMainWindow):
         self._image_plot = self.ax.images[0]
 
         self.original_image = image
-        self.image = image
+        self.image = image.copy()
         self.plugins = []
 
         # List of axes artists to check for removal.
@@ -140,6 +140,9 @@ class ImageViewer(QtGui.QMainWindow):
         self._img = image
         self._image_plot.set_array(image)
         self.redraw()
+
+    def reset_image(self):
+        self.image = self.original_image.copy()
 
     def connect_event(self, event, callback):
         """Connect callback function to matplotlib event and return id."""
