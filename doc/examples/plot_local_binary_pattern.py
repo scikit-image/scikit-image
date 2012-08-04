@@ -12,7 +12,8 @@ each other using the Kullback-Leibler-Divergence.
 import os
 import glob
 import numpy as np
-import pylab
+import matplotlib
+import matplotlib.pyplot as plt
 import scipy.ndimage as nd
 import skimage.feature as ft
 from skimage.io import imread
@@ -57,6 +58,30 @@ refs = {
     'wall': ft.local_binary_pattern(wall, P, R, METHOD)
 }
 
+# classify rotated textures
 print match(refs, nd.rotate(brick, angle=30, reshape=False))
 print match(refs, nd.rotate(brick, angle=70, reshape=False))
 print match(refs, nd.rotate(grass, angle=145, reshape=False))
+
+# plot histograms of LBP of textures
+matplotlib.rcParams['font.size'] = 9
+plt.figure(figsize=(9, 6))
+plt.subplot(231)
+plt.imshow(brick)
+plt.axis('off')
+plt.gray()
+plt.subplot(234)
+plt.hist(refs['brick'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+plt.subplot(232)
+plt.imshow(grass)
+plt.axis('off')
+plt.gray()
+plt.subplot(235)
+plt.hist(refs['grass'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+plt.subplot(233)
+plt.imshow(wall)
+plt.axis('off')
+plt.gray()
+plt.subplot(236)
+plt.hist(refs['wall'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+plt.show()
