@@ -5,6 +5,7 @@ cimport cython
 from itertools import product
 
 from ..util import img_as_float
+from ..color import rgb2lab
 
 
 cdef extern from "math.h":
@@ -14,7 +15,7 @@ cdef extern from "math.h":
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, random_seed=None):
+def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking algorithm.
@@ -34,6 +35,9 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
         Higher means less clusters.
     return_tree: bool
         Whether to return the full segmentation hierarchy tree
+    convert2lab: bool
+        Whether the input should be converted to Lab colorspace prior to segmentation.
+        For this purpose, the input is assumed to be RGB.
     random_seed: None or int
         Random seed used for breaking ties
 
@@ -44,7 +48,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
 
     Notes
     -----
-    The authors advocate to convert the image to Lab color space prior to segmentation.
+    The authors advocate to convert the image to Lab color space prior to segmentation, though
+    this is not strictly necessary. For this to work, the image must be given in RGB format.
 
     References
     ----------
@@ -53,8 +58,13 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
 
 
     """
-    image = np.atleast_3d(image)
-    cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c = np.ascontiguousarray(img_as_float(image)) * ratio
+    image = img_as_float(np.atleast_3d(image))
+    if convert2lab:
+        if image.shape[2] != 3:
+            ValueError("Only RGB images can be converted to Lab space.")
+        image = rgb2lab(image)
+
+    cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c = np.ascontiguousarray(image) * ratio
 
     if random_seed is None:
         random_state = np.random.RandomState()
@@ -64,13 +74,16 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
     # We compute the distances twice since otherwise
     # we get crazy memory overhead (width * height * windowsize**2)
 
-    # TODO do smoothing beforehand?
     # TODO join orphant roots?
+    # Some nodes might not have a point of higher density within the
+    # search window. We could do a global search over these in the end.
+    # Reference implementation doesn't do that, though, and it only has
+    # an effect for very high max_dist.
 
     # window size for neighboring pixels to consider
     if kernel_size < 1:
         raise ValueError("Sigma should be >= 1")
-    cdef int w = int(2 * kernel_size)
+    cdef int w = int(3 * kernel_size)
 
     cdef int width = image_c.shape[0]
     cdef int height = image_c.shape[1]
@@ -95,8 +108,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
         current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
-
     densities += random_state.normal(scale=0.00001, size=(width, height))
+
     # default parent to self:
     cdef np.ndarray[dtype=np.int_t, ndim=2] parent = np.arange(width * height).reshape(width, height)
     cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent = np.zeros((width, height))
@@ -121,8 +134,10 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, r
 
     dist_parent_flat = dist_parent.ravel()
     flat = parent.ravel()
+    # remove parents with distance > max_dist
     flat[dist_parent_flat > max_dist] = np.arange(width * height)[dist_parent_flat > max_dist]
     old = np.zeros_like(flat)
+    # flatten forest (mark each pixel with root of corresponding tree)
     while (old != flat).any():
         old = flat
         flat = flat[flat]
