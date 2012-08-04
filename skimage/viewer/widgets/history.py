@@ -16,16 +16,19 @@ class OKCancelButtons(BaseWidget):
     OK will replace the original image with the current (filtered) image.
     Cancel will just close the plugin.
     """
-    def __init__(self):
+    def __init__(self, button_width=80):
         name = 'OK/Cancel'
         super(OKCancelButtons, self).__init__(name)
 
         self.ok = QtGui.QPushButton('OK')
         self.ok.clicked.connect(self.update_original_image)
+        self.ok.setMaximumWidth(button_width)
         self.cancel = QtGui.QPushButton('Cancel')
         self.cancel.clicked.connect(self.close_plugin)
+        self.cancel.setMaximumWidth(button_width)
 
         self.layout = QtGui.QHBoxLayout(self)
+        self.layout.addStretch()
         self.layout.addWidget(self.cancel)
         self.layout.addWidget(self.ok)
 
