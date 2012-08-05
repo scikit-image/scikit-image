@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 
-from ._felzenszwalb import _felzenszwalb_grey
+from .felzenszwalb_cy import _felzenszwalb_grey
 
 
 def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
