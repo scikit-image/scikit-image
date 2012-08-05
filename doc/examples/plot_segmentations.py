@@ -4,10 +4,10 @@ Comparison of segmentation and superpixel algorithms
 ====================================================
 
 This example compares three popular low-level image segmentation methods.  As
-it is difficult do obtain good segmentations, and the definition of "good"
-often depends on the application, these methods are usually used for optaining
+it is difficult to obtain good segmentations, and the definition of "good"
+often depends on the application, these methods are usually used for obtaining
 an oversegmentation, also known as superpixels. These superpixels then serve as
-the level of operation for more sophisticated algorithms such as CRFs.
+a basis for more sophisticated algorithms such as CRFs.
 
 
 Felzenszwalb's efficient graph based segmentation
@@ -26,16 +26,17 @@ Quickshift image segmentation
 -----------------------------
 
 Quickshift is a relatively recent 2d image segmentation algorithm, based on an
-approximation of kernelized mean-shift. Therefore it belongs to the family
-of local mode-seeking algorithms and is applied to the color+coordinate space,
-see [2]_.
+approximation of kernelized mean-shift. Therefore it belongs to the family of
+local mode-seeking algorithms and is applied to the 5d space consisting of
+color information and image location.  see [2]_.
 
 One of the benefits of quickshift is that it actually computes a
 hierarchical segmentation on multiple scales simultaneously.
 
-Quickshift has two parameters, one controlling the scale of the local
-density approximation, the other selecting a level in the hierarchical
-segmentation that is produced.
+Quickshift has three parameters: ``sigma`` controls the scale of the local
+density approximation, ``max_dist`` other selecting a level in the hierarchical
+segmentation that is produced. There is also a trade-off between distance in
+color-space and distance in image-space, given by ``ratio``.
 
 .. [2] Quick shift and kernel methods for mode seeking,
        Vedaldi, A. and Soatto, S.
@@ -44,11 +45,13 @@ segmentation that is produced.
 
 SLIC - K-Means based image segmentation
 ---------------------------------------
-This algorithm simply performs K-kmeans in the 5d color-coordinate space and is
-therefore closely related to quickshift. As the clustering method is simpler,
-it is very efficient. It is essential for this algorithm to work in Lab color
-space to obtain good results.  The algorithm quickly gained momentum and is now
-widely used. See [3] for details.
+This algorithm simply performs K-kmeans in the 5d space of color information
+and image location and is therefore closely related to quickshift. As the
+clustering method is simpler, it is very efficient. It is essential for this
+algorithm to work in Lab color space to obtain good results.  The algorithm
+quickly gained momentum and is now widely used. See [3] for details.  The
+``ratio`` parameter trades off color-similarity and proximity, as in the case
+of Quickshift, while ``n_segments`` chooses the number of centers for kmeans.
 
 .. [3] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
     Pascal Fua, and Sabine Suesstrunk, SLIC Superpixels Compared to
@@ -76,8 +79,11 @@ print("Quickshift number of segments: %d" % len(np.unique(segments_quick)))
 fig, ax = plt.subplots(1, 3)
 
 ax[0].imshow(visualize_boundaries(img, segments_fz))
+ax[0].set_title("Felzenszwalbs's method")
 ax[1].imshow(visualize_boundaries(img, segments_slic))
+ax[1].set_title("SLIC")
 ax[2].imshow(visualize_boundaries(img, segments_quick))
+ax[2].set_title("Quickshift")
 for a in ax:
     a.set_xticks(())
     a.set_yticks(())
