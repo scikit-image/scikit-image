@@ -219,7 +219,8 @@ class MultiImage(object):
 class ImageCollection(object):
     """Load and manage a collection of image files.
 
-    Note that files are always stored in alphabetical order.
+    Note that files are always stored in alphabetical order. Also note that
+    slicing returns a new ImageCollection, *not* a view into the data.
 
     Parameters
     ----------
@@ -286,7 +287,7 @@ class ImageCollection(object):
     (128, 128, 3)
 
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
-    
+
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
@@ -330,7 +331,7 @@ class ImageCollection(object):
         Parameters
         ----------
         n : int or slice
-            The image number to be returned, or a slice selecting the images 
+            The image number to be returned, or a slice selecting the images
             and ordering to be returned in a new ImageCollection.
 
         Returns
@@ -342,10 +343,10 @@ class ImageCollection(object):
         """
         if hasattr(n, '__index__'):
             n = n.__index__()
-        
+
         if type(n) not in [int, slice]:
             raise TypeError('slicing must be with an int or slice object')
-        
+
         if type(n) is int:
             n = self._check_imgnum(n)
             idx = n % len(self.data)
@@ -356,15 +357,15 @@ class ImageCollection(object):
                 self._cached = n
 
             return self.data[idx]
-        else:   
-            # A slice object was provided, so create a new ImageCollection 
-            # object. Any loaded image data in the original ImageCollection 
-            # will be copied by reference to the new object.  Image data 
+        else:
+            # A slice object was provided, so create a new ImageCollection
+            # object. Any loaded image data in the original ImageCollection
+            # will be copied by reference to the new object.  Image data
             # loaded after this creation is not linked.
             fidx = range(len(self.files))[n]
             new_ic = copy(self)
-            new_ic._files = [self.files[i] for i in fidx] 
-            if self.conserve_memory:  
+            new_ic._files = [self.files[i] for i in fidx]
+            if self.conserve_memory:
                 if self._cached in fidx:
                     new_ic._cached = fidx.index(self._cached)
                     new_ic.data = np.copy(self.data)
