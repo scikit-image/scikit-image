@@ -3,12 +3,11 @@
 Comparison of segmentation and superpixel algorithms
 ====================================================
 
-This example compares three popular low-level image segmentation methods.
-As it is difficult do obtain good segmentations, and the definition of "good"
-often depends on the application, these methods are usually used
-for optaining an oversegmentation, also known as superpixels. These superpixels
-then serve as the level of operation for more sophisticated algorithms such as CRFs.
-
+This example compares three popular low-level image segmentation methods.  As
+it is difficult do obtain good segmentations, and the definition of "good"
+often depends on the application, these methods are usually used for optaining
+an oversegmentation, also known as superpixels. These superpixels then serve as
+the level of operation for more sophisticated algorithms such as CRFs.
 
 
 Felzenszwalb's efficient graph based segmentation
