@@ -7,7 +7,7 @@ from skimage.morphology.ccomp cimport find_root, join_trees
 from ..util import img_as_float
 
 
-def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8):
+def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8, min_size=20):
     """Computes Felsenszwalb's efficient graph based segmentation for a single channel.
 
     Produces an oversegmentation of a 2d image using a fast, minimum spanning
@@ -28,6 +28,8 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8):
         Free parameter. Higher means larger clusters.
     sigma: float
         Width of Gaussian kernel used in preprocessing.
+    min_size: int
+        Minimum component size. Enforced using postprocessing.
 
     Returns
     -------
@@ -38,7 +40,8 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8):
         raise ValueError("This algorithm works only on single-channel 2d images."
                 "Got image of shape %s" % str(image.shape))
     image = img_as_float(image)
-    scale = float(scale)
+    # rescale scale to behave like in reference implementation
+    scale = float(scale) / 255.
     image = scipy.ndimage.gaussian_filter(image, sigma=sigma)
 
     # compute edge weights in 8 connectivity:
@@ -87,6 +90,15 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8):
             seg_new = find_root(segments_p, seg0)
             segment_size[seg_new] = segment_size[seg0] + segment_size[seg1]
             cint[seg_new] = costs_p[0]
+
+    # postprocessing to remove small segments
+    edges_p = <np.int_t*>edges.data
+    for e in range(costs.size):
+        seg0 = find_root(segments_p, edges_p[0])
+        seg1 = find_root(segments_p, edges_p[1])
+        edges_p += 2
+        if segment_size[seg0] < min_size or segment_size[seg1] < min_size:
+            join_trees(segments_p, seg0, seg1)
 
     # unravel the union find tree
     flat = segments.ravel()

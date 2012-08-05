@@ -4,7 +4,7 @@ import numpy as np
 from ._felzenszwalb import _felzenszwalb_segmentation_grey
 
 
-def felzenszwalb_segmentation(image, scale=1, sigma=0.8):
+def felzenszwalb_segmentation(image, scale=1, sigma=0.8, min_size=20):
     """Computes Felsenszwalb's efficient graph based image segmentation.
 
     Produces an oversegmentation of a multichannel (i.e. RGB) image
@@ -29,6 +29,8 @@ def felzenszwalb_segmentation(image, scale=1, sigma=0.8):
         Free parameter. Higher means larger clusters.
     sigma: float
         Width of Gaussian kernel used in preprocessing.
+    min_size: int
+        Minimum component size. Enforced using postprocessing.
 
     Returns
     -------
@@ -59,7 +61,8 @@ def felzenszwalb_segmentation(image, scale=1, sigma=0.8):
     # compute quickshift for each channel
     for c in xrange(n_channels):
         channel = np.ascontiguousarray(image[:, :, c])
-        s = _felzenszwalb_segmentation_grey(channel, scale=scale, sigma=sigma)
+        s = _felzenszwalb_segmentation_grey(channel, scale=scale, sigma=sigma,
+                min_size=min_size)
         segmentations.append(s)
 
     # put pixels in same segment only if in the same segment in all images
