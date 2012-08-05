@@ -49,9 +49,9 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8, min_size=20):
         down_cost.ravel(), dright_cost.ravel(),
         uright_cost.ravel()]).astype(np.float)
     # compute edges between pixels:
-    width, height = image.shape[:2]
+    height, width = image.shape[:2]
     cdef np.ndarray[np.int_t, ndim=2] segments \
-            = np.arange(width * height).reshape(width, height)
+            = np.arange(width * height).reshape(height, width)
     right_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
     down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
     dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
@@ -107,4 +107,4 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8, min_size=20):
         old = flat
         flat = flat[flat]
     flat = np.unique(flat, return_inverse=True)[1]
-    return flat.reshape((width, height))
+    return flat.reshape((height, width))

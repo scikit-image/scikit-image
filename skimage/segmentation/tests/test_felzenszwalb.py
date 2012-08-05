@@ -6,7 +6,7 @@ from skimage.segmentation import felzenszwalb_segmentation
 
 def test_grey():
     # very weak tests. This algorithm is pretty unstable.
-    img = np.zeros((20, 20))
+    img = np.zeros((20, 21))
     img[:10, 10:] = 0.2
     img[10:, :10] = 0.4
     img[10:, 10:] = 0.6
@@ -21,7 +21,7 @@ def test_grey():
 
 def test_color():
     # very weak tests. This algorithm is pretty unstable.
-    img = np.zeros((20, 20, 3))
+    img = np.zeros((20, 21, 3))
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
     img[10:, 10:, 2] = 1

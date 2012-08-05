@@ -53,13 +53,13 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     # initialize on grid:
     height, width = image.shape[:2]
     # approximate grid size for desired n_segments
-    step = np.sqrt(height * width / n_segments)
+    step = np.ceil(np.sqrt(height * width / n_segments))
     grid_y, grid_x = np.mgrid[:height, :width]
     means_y = grid_y[::step, ::step]
     means_x = grid_x[::step, ::step]
+    print(means_y, means_x)
 
-    n_seeds = len(means_y)
-    means_color = np.zeros((n_seeds, n_seeds, 3))
+    means_color = np.zeros((means_y.shape[0], means_y.shape[1], 3))
     cdef np.ndarray[dtype=np.float_t, ndim=2] means \
             = np.dstack([means_y, means_x, means_color]).reshape(-1, 5)
     cdef np.float_t* current_mean
@@ -92,7 +92,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
             y_min = int(max(current_mean[0] - 2 * step, 0))
             y_max = int(min(current_mean[0] + 2 * step, height))
             x_min = int(max(current_mean[1] - 2 * step, 0))
-            x_max = int(min(current_mean[1] + 2 * step, height))
+            x_max = int(min(current_mean[1] + 2 * step, width))
             for y in xrange(y_min, y_max):
                 current_pixel = &image_p[5 * (y * width + x_min)]
                 current_distance = &distance_p[y * width + x_min]

@@ -91,8 +91,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
         raise ValueError("Sigma should be >= 1")
     cdef int w = int(3 * kernel_size)
 
-    cdef int width = image_c.shape[0]
-    cdef int height = image_c.shape[1]
+    cdef int height = image_c.shape[0]
+    cdef int width = image_c.shape[1]
     cdef int channels = image_c.shape[2]
     cdef float closest, dist
     cdef int x, y, x_, y_
@@ -101,11 +101,11 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
     cdef np.float_t* current_pixel_p = image_p
 
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities \
-            = np.zeros((width, height))
+            = np.zeros((height, width))
     # compute densities
-    for x, y in product(xrange(width), xrange(height)):
-        x_min, x_max = max(x - w, 0), min(x + w + 1, width)
-        y_min, y_max = max(y - w, 0), min(y + w + 1, height)
+    for x, y in product(xrange(height), xrange(width)):
+        x_min, x_max = max(x - w, 0), min(x + w + 1, height)
+        y_min, y_max = max(y - w, 0), min(y + w + 1, width)
         for x_, y_ in product(xrange(x_min, x_max), xrange(y_min, y_max)):
             dist = 0
             for c in xrange(channels):
@@ -115,20 +115,20 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
         current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
-    densities += random_state.normal(scale=0.00001, size=(width, height))
+    densities += random_state.normal(scale=0.00001, size=(height, width))
 
     # default parent to self:
     cdef np.ndarray[dtype=np.int_t, ndim=2] parent \
-            = np.arange(width * height).reshape(width, height)
+            = np.arange(width * height).reshape(height, width)
     cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent \
-            = np.zeros((width, height))
+            = np.zeros((height, width))
     # find nearest node with higher density
     current_pixel_p = image_p
-    for x, y in product(xrange(width), xrange(height)):
+    for x, y in product(xrange(height), xrange(width)):
         current_density = densities[x, y]
         closest = np.inf
-        x_min, x_max = max(x - w, 0), min(x + w + 1, width)
-        y_min, y_max = max(y - w, 0), min(y + w + 1, height)
+        x_min, x_max = max(x - w, 0), min(x + w + 1, height)
+        y_min, y_max = max(y - w, 0), min(y + w + 1, width)
         for x_, y_ in product(xrange(x_min, x_max), xrange(y_min, y_max)):
             if densities[x_, y_] > current_density:
                 dist = 0
@@ -152,7 +152,7 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
         old = flat
         flat = flat[flat]
     flat = np.unique(flat, return_inverse=True)[1]
-    flat = flat.reshape(width, height)
+    flat = flat.reshape(height, width)
     if return_tree:
         return flat, parent, dist_parent
     return flat
