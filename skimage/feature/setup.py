@@ -12,10 +12,10 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('feature', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_greycomatrix_cy.pyx'], working_path=base_path)
+    cython(['_texture.pyx'], working_path=base_path)
     cython(['_template.pyx'], working_path=base_path)
 
-    config.add_extension('_greycomatrix_cy', sources=['_greycomatrix_cy.c'],
+    config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_template', sources=['_template.c'],
                          include_dirs=[get_numpy_include_dirs()])

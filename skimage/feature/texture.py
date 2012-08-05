@@ -6,7 +6,7 @@ import math
 import numpy as np
 from scipy import ndimage
 
-from ._greycomatrix import _glcm_loop
+from ._texture import _glcm_loop, _local_binary_pattern
 
 
 def greycomatrix(image, distances, angles, levels=256, symmetric=False,
@@ -227,20 +227,6 @@ def greycoprops(P, prop='contrast'):
     return results
 
 
-def bit_rotate_right(value, length):
-    """Cyclic bit shift to the right.
-
-    Parameters
-    ----------
-    value : int
-        integer value to shift
-    length : int
-        number of bits of integer
-
-    """
-    return (value >> 1) | ((value & 1) << (length - 1))
-
-
 def local_binary_pattern(image, P, R, method='default'):
     """Texture classification using gray scale and rotation invariant LBP
     (Local Binary Patterns).
@@ -278,66 +264,13 @@ def local_binary_pattern(image, P, R, method='default'):
         http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/\
         Articoliriferimento/LBP.pdf, 2002.
     """
-    method = method.lower()
-    # texture weights
-    weights = 2 ** np.arange(P)
-    # local position of texture elements
-    rp = - R * np.sin(2 * math.pi * np.arange(P) / P)
-    cp = R * np.cos(2 * math.pi * np.arange(P) / P)
-    coords = np.vstack([rp, cp]) + math.ceil(R)
-    # maximum size of neighbourhood for filtering
-    max_size = 2 * math.ceil(R) + 1
-    # center index of flattened neighbourhood
-    center_index = (max_size ** 2 - 1) / 2
 
-    if method == 'ror':
-        # allocate array for rotation invariance
-        rotation_chain = np.zeros(P, dtype='int')
-
-    def compute_lbp(texture):
-        # subtract value of center pixel
-        texture -= texture[center_index]
-        # get texture elements using bilinear interpolation
-        texture = texture.reshape(max_size, max_size)
-        texture = ndimage.map_coordinates(texture, coords, order=1)
-
-        # signed / thresholded texture
-        signed = texture.copy()
-        signed[signed >= 0] = 1
-        signed[signed < 0] = 0
-
-        if method in ('uniform', 'var'):
-            # determine number of 0 - 1 changes
-            changes = np.sum(np.abs(np.diff(signed)))
-
-            if changes <= 2:
-                lbp = np.sum(signed)
-            else:
-                lbp = P + 1
-
-            if method == 'var':
-                lbp /= np.var(texture)
-        else:
-
-            # method == 'default'
-            lbp = np.sum(signed * weights)
-
-            if method == 'ror':
-                # shift LBP P times to the right and get minimum value
-                rotation_chain[0] = lbp
-                for i in xrange(1, P):
-                    rotation_chain[i] = \
-                        bit_rotate_right(rotation_chain[i - 1], P)
-                lbp = np.min(rotation_chain)
-
-        return lbp
-
-    dtype = 'int'
-    if method == 'var':
-        dtype = 'float'
-    output = np.zeros(image.shape, dtype)
-
-    ndimage.generic_filter(image, compute_lbp, size=(max_size, max_size),
-                           mode='constant', cval=0, output=output)
-
+    methods = {
+        'default': 0,
+        'ror': 1,
+        'uniform': 2,
+        'var': 3
+    }
+    image = np.array(image, dtype='double', copy=True)
+    output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
