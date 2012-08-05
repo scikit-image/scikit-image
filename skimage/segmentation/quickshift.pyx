@@ -16,14 +16,16 @@ cdef extern from "math.h":
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, sigma=0, convert2lab=True, random_seed=None):
+def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
+        sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
-    Produces an oversegmentation of the image using the quickshift mode-seeking algorithm.
+    Produces an oversegmentation of the image using the quickshift mode-seeking
+    algorithm.
 
     Parameters
     ----------
-    image: (width, height, channels) ndarray 
+    image: (width, height, channels) ndarray
         Input image
     ratio: float, between 0 and 1.
         Balances color-space proximity and image-space proximity.
@@ -39,8 +41,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, s
     sigma: float
         Width for Gaussian smoothing as preprocessing. Zero means no smoothing.
     convert2lab: bool
-        Whether the input should be converted to Lab colorspace prior to segmentation.
-        For this purpose, the input is assumed to be RGB.
+        Whether the input should be converted to Lab colorspace prior to
+        segmentation.  For this purpose, the input is assumed to be RGB.
     random_seed: None or int
         Random seed used for breaking ties
 
@@ -51,12 +53,14 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, s
 
     Notes
     -----
-    The authors advocate to convert the image to Lab color space prior to segmentation, though
-    this is not strictly necessary. For this to work, the image must be given in RGB format.
+    The authors advocate to convert the image to Lab color space prior to
+    segmentation, though this is not strictly necessary. For this to work, the
+    image must be given in RGB format.
 
     References
     ----------
-    .. [1] Quick shift and kernel methods for mode seeking, Vedaldi, A. and Soatto, S.
+    .. [1] Quick shift and kernel methods for mode seeking,
+           Vedaldi, A. and Soatto, S.
            European Conference on Computer Vision, 2008
 
 
@@ -68,7 +72,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, s
         image = rgb2lab(image)
 
     image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
-    cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c = np.ascontiguousarray(image) * ratio
+    cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c \
+            = np.ascontiguousarray(image) * ratio
 
     if random_seed is None:
         random_state = np.random.RandomState()
@@ -98,7 +103,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, s
     cdef np.float_t* image_p = <np.float_t*> image_c.data
     cdef np.float_t* current_pixel_p = image_p
 
-    cdef np.ndarray[dtype=np.float_t, ndim=2] densities = np.zeros((width, height))
+    cdef np.ndarray[dtype=np.float_t, ndim=2] densities \
+            = np.zeros((width, height))
     # compute densities
     for x, y in product(xrange(width), xrange(height)):
         x_min, x_max = max(x - w, 0), min(x + w + 1, width)
@@ -115,8 +121,10 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, s
     densities += random_state.normal(scale=0.00001, size=(width, height))
 
     # default parent to self:
-    cdef np.ndarray[dtype=np.int_t, ndim=2] parent = np.arange(width * height).reshape(width, height)
-    cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent = np.zeros((width, height))
+    cdef np.ndarray[dtype=np.int_t, ndim=2] parent \
+            = np.arange(width * height).reshape(width, height)
+    cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent \
+            = np.zeros((width, height))
     # find nearest node with higher density
     current_pixel_p = image_p
     for x, y in product(xrange(width), xrange(height)):
@@ -139,7 +147,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False, s
     dist_parent_flat = dist_parent.ravel()
     flat = parent.ravel()
     # remove parents with distance > max_dist
-    flat[dist_parent_flat > max_dist] = np.arange(width * height)[dist_parent_flat > max_dist]
+    too_far = dist_parent_flat > max_dist
+    flat[too_far] = np.arange(width * height)[too_far]
     old = np.zeros_like(flat)
     # flatten forest (mark each pixel with root of corresponding tree)
     while (old != flat).any():

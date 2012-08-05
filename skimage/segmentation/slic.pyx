@@ -6,7 +6,8 @@ from ..util import img_as_float
 from ..color import rgb2lab
 
 
-def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=True):
+def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
+        convert2lab=True):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -19,10 +20,12 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=Tru
     max_iter: int
         maximum number of iterations of k-means
     sigma: float
-        Width of Gaussian smoothing kernel for preprocessing. Zero means no smoothing.
+        Width of Gaussian smoothing kernel for preprocessing. Zero means no
+        smoothing.
     convert2lab: bool
-        Whether the input should be converted to Lab colorspace prior to segmentation.
-        For this purpose, the input is assumed to be RGB. Highly recommended.
+        Whether the input should be converted to Lab colorspace prior to
+        segmentation.  For this purpose, the input is assumed to be RGB. Highly
+        recommended.
 
     Returns
     -------
@@ -57,19 +60,23 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=Tru
 
     n_seeds = len(means_y)
     means_color = np.zeros((n_seeds, n_seeds, 3))
-    cdef np.ndarray[dtype=np.float_t, ndim=2] means = np.dstack([means_y, means_x, means_color]).reshape(-1, 5)
+    cdef np.ndarray[dtype=np.float_t, ndim=2] means \
+            = np.dstack([means_y, means_x, means_color]).reshape(-1, 5)
     cdef np.float_t* current_mean
     cdef np.float_t* mean_entry
     n_means = means.shape[0]
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
     ratio = (ratio / float(step)) ** 2
-    cdef np.ndarray[dtype=np.float_t, ndim=3] image_yx = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
+    cdef np.ndarray[dtype=np.float_t, ndim=3] image_yx \
+            = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
     cdef int i, k, x, y, x_min, x_max, y_min, y_max, changes
     cdef double dist_mean
 
-    cdef np.ndarray[dtype=np.int_t, ndim=2] nearest_mean = np.zeros((height, width), dtype=np.int)
-    cdef np.ndarray[dtype=np.float_t, ndim=2] distance = np.empty((height, width))
+    cdef np.ndarray[dtype=np.int_t, ndim=2] nearest_mean \
+            = np.zeros((height, width), dtype=np.int)
+    cdef np.ndarray[dtype=np.float_t, ndim=2] distance \
+            = np.empty((height, width))
     cdef np.float_t* image_p = <np.float_t*> image_yx.data
     cdef np.float_t* distance_p = <np.float_t*> distance.data
     cdef np.float_t* current_distance
@@ -93,8 +100,8 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=Tru
                     mean_entry = current_mean
                     dist_mean = 0
                     for c in range(5):
-                        # you would think the compiler can optimize this itself.
-                        # mine can't (with O2)
+                        # you would think the compiler can optimize this
+                        # itself. mine can't (with O2)
                         tmp = current_pixel[0] - mean_entry[0]
                         dist_mean += tmp * tmp
                         current_pixel += 1
@@ -109,8 +116,8 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1, convert2lab=Tru
         if changes == 0:
             break
         # recompute means:
-        means_list = [np.bincount(nearest_mean.ravel(), image_yx[:, :, j].ravel())
-                for j in xrange(5)]
+        means_list = [np.bincount(nearest_mean.ravel(),
+                      image_yx[:, :, j].ravel()) for j in xrange(5)]
         in_mean = np.bincount(nearest_mean.ravel())
         in_mean[in_mean == 0] = 1
         means = (np.vstack(means_list) / in_mean).T.copy("C")

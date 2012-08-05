@@ -8,7 +8,7 @@ from ..util import img_as_float
 
 
 def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8, min_size=20):
-    """Computes Felsenszwalb's efficient graph based segmentation for a single channel.
+    """Felzenszwalb's efficient graph based segmentation for a single channel.
 
     Produces an oversegmentation of a 2d image using a fast, minimum spanning
     tree based clustering on the image grid.  The parameter ``scale`` sets an
@@ -37,8 +37,8 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8, min_size=20):
         Integer mask indicating segment labels.
     """
     if image.ndim != 2:
-        raise ValueError("This algorithm works only on single-channel 2d images."
-                "Got image of shape %s" % str(image.shape))
+        raise ValueError("This algorithm works only on single-channel 2d"
+                "images. Got image of shape %s" % str(image.shape))
     image = img_as_float(image)
     # rescale scale to behave like in reference implementation
     scale = float(scale) / 255.
@@ -49,16 +49,19 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8, min_size=20):
     down_cost = np.abs((image[:, 1:] - image[:, :-1]))
     dright_cost = np.abs((image[1:, 1:] - image[:-1, :-1]))
     uright_cost = np.abs((image[1:, :-1] - image[:-1, 1:]))
-    cdef np.ndarray[np.float_t, ndim=1] costs = np.hstack([right_cost.ravel(), down_cost.ravel(),
-        dright_cost.ravel(), uright_cost.ravel()]).astype(np.float)
+    cdef np.ndarray[np.float_t, ndim=1] costs = np.hstack([right_cost.ravel(),
+        down_cost.ravel(), dright_cost.ravel(),
+        uright_cost.ravel()]).astype(np.float)
     # compute edges between pixels:
     width, height = image.shape[:2]
-    cdef np.ndarray[np.int_t, ndim=2] segments = np.arange(width * height).reshape(width, height)
+    cdef np.ndarray[np.int_t, ndim=2] segments \
+            = np.arange(width * height).reshape(width, height)
     right_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
     down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
     dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
     uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
-    cdef np.ndarray[np.int_t, ndim=2] edges = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
+    cdef np.ndarray[np.int_t, ndim=2] edges \
+            = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
     # initialize data structures for segment size
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
@@ -67,7 +70,8 @@ def _felzenszwalb_segmentation_grey(image, scale=1, sigma=0.8, min_size=20):
     cdef np.int_t *segments_p = <np.int_t*>segments.data
     cdef np.int_t *edges_p = <np.int_t*>edges.data
     cdef np.float_t *costs_p = <np.float_t*>costs.data
-    cdef np.ndarray[np.int_t, ndim=1] segment_size = np.ones(width * height, dtype=np.int)
+    cdef np.ndarray[np.int_t, ndim=1] segment_size \
+            = np.ones(width * height, dtype=np.int)
     # inner cost of segments
     cdef np.ndarray[np.float_t, ndim=1] cint = np.zeros(width * height)
     cdef int seg0, seg1, seg_new

@@ -77,11 +77,9 @@ def test_otsu_camera_image():
     assert 86 < threshold_otsu(camera) < 88
 
 
-
 def test_otsu_coins_image():
     coins = skimage.img_as_ubyte(data.coins())
     assert 106 < threshold_otsu(coins) < 108
-
 
 
 def test_otsu_coins_image_as_float():
