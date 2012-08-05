@@ -57,7 +57,6 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     grid_y, grid_x = np.mgrid[:height, :width]
     means_y = grid_y[::step, ::step]
     means_x = grid_x[::step, ::step]
-    print(means_y, means_x)
 
     means_color = np.zeros((means_y.shape[0], means_y.shape[1], 3))
     cdef np.ndarray[dtype=np.float_t, ndim=2] means \

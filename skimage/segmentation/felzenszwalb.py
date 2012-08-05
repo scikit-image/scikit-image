@@ -1,10 +1,10 @@
 import warnings
 import numpy as np
 
-from ._felzenszwalb import _felzenszwalb_segmentation_grey
+from ._felzenszwalb import _felzenszwalb_grey
 
 
-def felzenszwalb_segmentation(image, scale=1, sigma=0.8, min_size=20):
+def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
     """Computes Felsenszwalb's efficient graph based image segmentation.
 
     Produces an oversegmentation of a multichannel (i.e. RGB) image
@@ -46,7 +46,7 @@ def felzenszwalb_segmentation(image, scale=1, sigma=0.8, min_size=20):
     #image = img_as_float(image)
     if image.ndim == 2:
         # assume single channel image
-        return _felzenszwalb_segmentation_grey(image, scale=scale, sigma=sigma)
+        return _felzenszwalb_grey(image, scale=scale, sigma=sigma)
 
     elif image.ndim != 3:
         raise ValueError("Got image with ndim=%d, don't know"
@@ -61,7 +61,7 @@ def felzenszwalb_segmentation(image, scale=1, sigma=0.8, min_size=20):
     # compute quickshift for each channel
     for c in xrange(n_channels):
         channel = np.ascontiguousarray(image[:, :, c])
-        s = _felzenszwalb_segmentation_grey(channel, scale=scale, sigma=sigma,
+        s = _felzenszwalb_grey(channel, scale=scale, sigma=sigma,
                 min_size=min_size)
         segmentations.append(s)
 
