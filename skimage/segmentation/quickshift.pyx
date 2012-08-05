@@ -75,15 +75,12 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
     cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c \
             = np.ascontiguousarray(image) * ratio
 
-    if random_seed is None:
-        random_state = np.random.RandomState()
-    else:
-        random_state = np.random.RandomState(random_seed)
+    random_state = np.random.RandomState(random_seed)
 
     # We compute the distances twice since otherwise
     # we get crazy memory overhead (width * height * windowsize**2)
 
-    # TODO join orphant roots?
+    # TODO join orphaned roots?
     # Some nodes might not have a point of higher density within the
     # search window. We could do a global search over these in the end.
     # Reference implementation doesn't do that, though, and it only has
