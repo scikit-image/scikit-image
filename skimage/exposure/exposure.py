@@ -2,10 +2,13 @@ import numpy as np
 
 from skimage import img_as_float
 from skimage.util.dtype import dtype_range
+from skimage.color import rgb2gray
+from skimage.util.dtype import convert
 
+from _adapthist import _adapthist
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
-           'rescale_intensity']
+           'rescale_intensity', 'adapthist']
 
 
 def histogram(image, nbins=256):
@@ -189,3 +192,56 @@ def rescale_intensity(image, in_range=None, out_range=None):
 
     image = (image - imin) / float(imax - imin)
     return dtype(image * (omax - omin) + omin)
+
+
+def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
+    '''Contrast Limited Adaptive Histogram Equalization
+
+    Parameters
+    ----------
+    image : array-like
+        original image
+    nx : int, optional
+        Tile regions in the X direction (2, 16)
+    ny : int, optional
+        Tile regions in the Y direction (2, 16)
+    clip_limit : float: optional
+        Normalized cliplimit (higher values give more contrast)
+    nbins : int, optional
+        Greybins for histogram ("dynamic range")
+    out_range : str, optional
+        Range of the output image data.
+           - 'original' - Use original image limits
+           - 'full' - Use full range of image data type
+
+    Returns
+    -------
+    out - np.ndarray :
+        equalized image - may be a different shape than the original
+    '''
+    in_type = image.dtype.type
+    if out_range == 'full':
+        out_range = None
+    else:
+        out_range = (image.min(), image.max())
+    # must be converted to 12 bit for CLAHE
+    image = skimage.img_as_uint(image)
+    MAX_VAL = 2 ** 12 - 1
+    image = rescale_intensity(image, out_range=(0, MAX_VAL))
+    # handle color images - CLAHE accepts scalar images only
+    args = [image.copy(), 0, MAX_VAL, nx, ny, nbins, clip_limit]
+    if image.ndim == 3:
+        image = image[:, :, :3]
+        for channel in range(3):
+            args[0] = image[:, :, channel]
+            out = _adapthist(*args)
+            image[:out.shape[0], :out.shape[1], channel] = out
+    else:
+        out = _adapthist(*args)
+        image[:out.shape[0], :out.shape[1]] = out
+    # restore to desired output type and output limits
+    image = rescale_intensity(image)
+    if in_type != np.uint16:
+        image = convert(image, in_type)
+    image = rescale_intensity(image, out_range=out_range)
+    return image
