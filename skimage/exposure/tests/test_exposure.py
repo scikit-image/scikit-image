@@ -96,7 +96,7 @@ def test_adapthist_float():
     adapted = exposure.adapthist(img, nx=10, ny=9, clip_limit=0.01,
                         nbins=128, out_range='original')
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(adapted.min() , img.min())
+    assert_almost_equal(adapted.min(), img.min())
     assert_almost_equal(adapted.min(), img.min())
     assert img.shape == adapted.shape
     assert peak_snr(img, adapted) > 136

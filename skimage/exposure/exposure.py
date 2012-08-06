@@ -212,7 +212,7 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
     -------
     out - np.ndarray :
         equalized image - may be a different shape than the original
-        
+
     Notes
     -----
     * The underlying algorithm relies on an image whose rows and columns are even multiples of
