@@ -69,7 +69,7 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
 cdef _bilinear_interpolation(np.ndarray[double, ndim=2] image,
                              np.ndarray[double, ndim=2] coords,
                              np.ndarray[double, ndim=1] output,
-                             double r0=0, double c0=0):
+                             double r0=0, double c0=0, double cval=0):
     cdef double r, c, dr, dc
     cdef int i, minr, minc, maxr, maxc
 
@@ -82,10 +82,15 @@ cdef _bilinear_interpolation(np.ndarray[double, ndim=2] image,
         maxc = <int>ceil(c)
         dr = r - minr
         dc = c - minc
-        top = (1 - dc) * image[minr, minc] + dc * image[minr, maxc]
-        bottom = (1 - dc) * image[maxr, minc] + dc * image[maxr, maxc]
-        output[i] = (1 - dr) * top + dr * bottom
-
+        if (
+            minr < 0 or maxr >= image.shape[0]
+            or minc < 0 or maxc >= image.shape[1]
+        ):
+            output[i] = cval
+        else:
+            top = (1 - dc) * image[minr, minc] + dc * image[minr, maxc]
+            bottom = (1 - dc) * image[maxr, minc] + dc * image[maxr, maxc]
+            output[i] = (1 - dr) * top + dr * bottom
 
 
 @cython.boundscheck(False)
