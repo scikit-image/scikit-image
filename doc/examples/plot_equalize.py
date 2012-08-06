@@ -63,9 +63,12 @@ img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
 # Equalization
 img_eq = exposure.equalize(img)
 
+# Adaptive Equalization
+img_adapteq = exposure.adapthist(img)
+
 
 # Display results
-f, axes = plt.subplots(2, 3, figsize=(8, 4))
+f, axes = plt.subplots(2, 4, figsize=(8, 4))
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
 ax_img.set_title('Low contrast image')
@@ -78,6 +81,9 @@ ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_eq, axes[:, 2])
 ax_img.set_title('Histogram equalization')
 ax_cdf.set_ylabel('Fraction of total intensity')
 
+ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_eq, axes[:, 3])
+ax_img.set_title('Adaptive equalization')
+ax_cdf.set_ylabel('Fraction of total intensity')
 
 # prevent overlap of y-axis labels
 plt.subplots_adjust(wspace=0.4)
