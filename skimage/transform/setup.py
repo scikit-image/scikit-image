@@ -23,6 +23,10 @@ def configuration(parent_package='', top_path=None):
 
     cython(['_resample.pyx'], working_path=base_path)
     config.add_extension('_resample', sources=['_resample.c'],
+                         extra_compile_args=["-fopenmp",
+                                             "-O3",
+                                             "-funroll-loops"],
+                         extra_link_args=['-fopenmp'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
