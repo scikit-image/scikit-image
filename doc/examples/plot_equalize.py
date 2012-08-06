@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
+
 def plot_img_and_hist(img, axes, bins=256):
     """Plot an image along with its histogram and cumulative histogram.
 
@@ -88,4 +89,3 @@ ax_cdf.set_ylabel('Fraction of total intensity')
 # prevent overlap of y-axis labels
 plt.subplots_adjust(wspace=0.4)
 plt.show()
-
