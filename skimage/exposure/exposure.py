@@ -212,6 +212,14 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
     -------
     out - np.ndarray :
         equalized image - may be a different shape than the original
+        
+    Notes
+    -----
+    * The underlying algorithm relies on an image whose rows and columns are even multiples of
+    the number of tiles, so the extra rows and columns are left at their original values, thus
+    preserving the input image shape.
+    * For RGB or RGBA images, the algorithm is run on each channel.
+    * For RGBA images, the original alpha channel is removed.
     '''
     in_type = image.dtype.type
     if out_range == 'full':
