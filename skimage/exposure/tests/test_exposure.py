@@ -5,6 +5,7 @@ import skimage
 from skimage import data
 from skimage import exposure
 from skimage.color import rgb2gray
+from skimage.util.dtype import dtype_range
 
 
 # Test histogram equalization
@@ -94,6 +95,7 @@ def test_adapthist_float():
     img = skimage.img_as_float(data.lena())
     adapted = exposure.adapthist(img, nx=10, ny=9, clip_limit=0.01,
                         nbins=128, out_range='original')
+    assert_almost_equal = np.testing.assert_almost_equal
     assert_almost_equal(adapted.min() , img.min())
     assert_almost_equal(adapted.min(), img.min())
     assert img.shape == adapted.shape

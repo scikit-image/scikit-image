@@ -64,7 +64,7 @@ img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
 img_eq = exposure.equalize(img)
 
 # Adaptive Equalization
-img_adapteq = exposure.adapthist(img)
+img_adapteq = exposure.adapthist(img, clip_limit=0.03)
 
 
 # Display results
@@ -81,7 +81,7 @@ ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_eq, axes[:, 2])
 ax_img.set_title('Histogram equalization')
 ax_cdf.set_ylabel('Fraction of total intensity')
 
-ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_eq, axes[:, 3])
+ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_adapteq, axes[:, 3])
 ax_img.set_title('Adaptive equalization')
 ax_cdf.set_ylabel('Fraction of total intensity')
 
