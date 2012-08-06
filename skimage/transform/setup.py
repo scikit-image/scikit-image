@@ -14,12 +14,15 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['_hough_transform.pyx'], working_path=base_path)
-    cython(['_project.pyx'], working_path=base_path)
-
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
+    cython(['_project.pyx'], working_path=base_path)
     config.add_extension('_project', sources=['_project.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+
+    cython(['_resample.pyx'], working_path=base_path)
+    config.add_extension('_resample', sources=['_resample.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
