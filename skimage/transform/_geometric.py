@@ -133,6 +133,11 @@ class ProjectiveTransform(GeometricTransform):
         """Set the transformation matrix with the explicit transformation
         parameters.
 
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source must match number of destination coordinates.
+
         Parameters
         ----------
         src : Nx2 array
@@ -148,7 +153,7 @@ class ProjectiveTransform(GeometricTransform):
         rows = src.shape[0]
 
         #: params: a0, a1, a2, b0, b1, b2, c0, c1
-        A = np.zeros((rows * 2, 8))
+        A = np.zeros((rows * 2, 9))
         A[:rows, 0] = xs
         A[:rows, 1] = ys
         A[:rows, 2] = 1
@@ -159,14 +164,18 @@ class ProjectiveTransform(GeometricTransform):
         A[rows:, 5] = 1
         A[rows:, 6] = - yd * xs
         A[rows:, 7] = - yd * ys
+        A[:rows, 8] = xd
+        A[rows:, 8] = yd
 
         # Select relevant columns, depending on coeffs
-        A = A[:, self._coefs]
+        A = A[:, self._coefs + [8]]
 
-        b = np.hstack([xd, yd])
+        _, _, V = np.linalg.svd(A)
 
         H = np.zeros((3, 3))
-        H.flat[self._coefs] = np.linalg.lstsq(A, b)[0]
+        # solution is eigen vector that corresponds to smallest eigen value
+        # and normed by c3
+        H.flat[self._coefs + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
         self._matrix = H
@@ -294,6 +303,11 @@ class SimilarityTransform(ProjectiveTransform):
         """Set the transformation matrix with the explicit transformation
         parameters.
 
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source must match number of destination coordinates.
+
         Parameters
         ----------
         src : Nx2 array
@@ -309,17 +323,20 @@ class SimilarityTransform(ProjectiveTransform):
         rows = src.shape[0]
 
         #: params: a0, a1, b0, b1
-        A = np.zeros((rows * 2, 4))
+        A = np.zeros((rows * 2, 5))
         A[:rows, 0] = xs
         A[:rows, 2] = - ys
         A[:rows, 1] = 1
         A[rows:, 2] = xs
         A[rows:, 0] = ys
         A[rows:, 3] = 1
+        A[:rows, 4] = xd
+        A[rows:, 4] = yd
 
-        b = np.hstack([xd, yd])
+        _, _, V = np.linalg.svd(A)
 
-        a0, a1, b0, b1 = np.linalg.lstsq(A, b)[0]
+        a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
+
         self._matrix = np.array([[a0, -b0, a1],
                                  [b0,  a0, b1],
                                  [ 0,   0,  1]])
@@ -392,6 +409,11 @@ class PolynomialTransform(GeometricTransform):
         """Set the transformation matrix with the explicit transformation
         parameters.
 
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source must match number of destination coordinates.
+
         Parameters
         ----------
         src : Nx2 array
@@ -411,7 +433,7 @@ class PolynomialTransform(GeometricTransform):
         # number of unknown polynomial coefficients
         u = (order + 1) * (order + 2)
 
-        A = np.zeros((rows * 2, u))
+        A = np.zeros((rows * 2, u + 1))
         pidx = 0
         for j in xrange(order + 1):
             for i in xrange(j + 1):
@@ -419,9 +441,14 @@ class PolynomialTransform(GeometricTransform):
                 A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
                 pidx += 1
 
-        b = np.hstack([xd, yd])
+        A[:rows, -1] = xd
+        A[rows:, -1] = yd
 
-        self._coeffs = np.linalg.lstsq(A, b)[0].reshape((2, u / 2))
+        _, _, V = np.linalg.svd(A)
+
+        coeffs = - V[-1, :-1] / V[-1, -1]
+
+        self._coeffs = coeffs.reshape((2, u / 2))
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -473,7 +500,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
     """Estimate 2D geometric transformation parameters.
 
     You can determine the over-, well- and under-determined parameters
-    with the least-squares method.
+    with the total least-squares method.
 
     Number of source must match number of destination coordinates.
 

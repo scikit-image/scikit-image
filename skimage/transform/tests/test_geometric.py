@@ -42,7 +42,6 @@ def test_similarity_estimation():
     #: exact solution
     tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
     assert_array_almost_equal(tform(SRC[:2, :]), DST[:2, :])
-    assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
     assert_equal(tform._matrix[0, 0], tform._matrix[1, 1])
     assert_equal(tform._matrix[0, 1], - tform._matrix[1, 0])
 
@@ -68,7 +67,6 @@ def test_affine_estimation():
     #: exact solution
     tform = estimate_transform('affine', SRC[:3, :], DST[:3, :])
     assert_array_almost_equal(tform(SRC[:3, :]), DST[:3, :])
-    assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
 
     #: over-determined
     tform = estimate_transform('affine', SRC, DST)
@@ -91,10 +89,10 @@ def test_affine_implicit():
 def test_projective():
     #: exact solution
     tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
-    assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
+    assert_array_almost_equal(tform(SRC[:4, :]), DST[:4, :])
 
     #: over-determined
-    tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
+    tform = estimate_transform('projective', SRC, DST)
     assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
 
 
