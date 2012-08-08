@@ -173,8 +173,8 @@ class ProjectiveTransform(GeometricTransform):
         _, _, V = np.linalg.svd(A)
 
         H = np.zeros((3, 3))
-        # solution is eigen vector that corresponds to smallest eigen value
-        # and normed by c3
+        # solution is right singular vector that corresponds to smallest
+        # singular value and normed by c3
         H.flat[self._coefs + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
@@ -335,6 +335,8 @@ class SimilarityTransform(ProjectiveTransform):
 
         _, _, V = np.linalg.svd(A)
 
+        # solution is right singular vector that corresponds to smallest
+        # singular value and normed by c3
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
         self._matrix = np.array([[a0, -b0, a1],
@@ -446,6 +448,8 @@ class PolynomialTransform(GeometricTransform):
 
         _, _, V = np.linalg.svd(A)
 
+        # solution is right singular vector that corresponds to smallest
+        # singular value and normed by c3
         coeffs = - V[-1, :-1] / V[-1, -1]
 
         self._coeffs = coeffs.reshape((2, u / 2))
