@@ -160,7 +160,7 @@ class ProjectiveTransform(GeometricTransform):
                   ]
             x.T = [a0 a1 a2 b0 b1 b2 c0 c1 c3]
 
-        In case of total least-squares the solutions of this homogeneous system
+        In case of total least-squares the solution of this homogeneous system
         of equations is the right singular vector of A which corresponds to the
         smallest singular value normed by the coefficient c3.
 
@@ -388,7 +388,7 @@ class SimilarityTransform(ProjectiveTransform):
                   ]
             x.T = [a0 a1 b0 b1 c3]
 
-        In case of total least-squares the solutions of this homogeneous system
+        In case of total least-squares the solution of this homogeneous system
         of equations is the right singular vector of A which corresponds to the
         smallest singular value normed by the coefficient c3.
 
@@ -493,7 +493,7 @@ class PolynomialTransform(GeometricTransform):
             x.T = [a00 a10 a11 a20 a21 a22 ... ann
                    b00 b10 b11 b20 b21 b22 ... bnn c3]
 
-        In case of total least-squares the solutions of this homogeneous system
+        In case of total least-squares the solution of this homogeneous system
         of equations is the right singular vector of A which corresponds to the
         smallest singular value normed by the coefficient c3.
 
