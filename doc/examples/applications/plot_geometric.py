@@ -28,17 +28,17 @@ Geometric transformations can either be created using the explicit parameters
 """
 
 #: create using explicit parameters
-tform = tf.SimilarityTransformation()
+tform = tf.SimilarityTransform()
 scale = 1
 rotation = math.pi/2
 translation = (0, 1)
-tform.from_params(scale, rotation, translation)
-print tform.matrix
+tform.compose_implicit(scale, rotation, translation)
+print tform._matrix
 
 #: create using transformation matrix
-matrix = tform.matrix.copy()
+matrix = tform._matrix.copy()
 matrix[1, 2] = 2
-tform2 = tf.SimilarityTransformation(matrix)
+tform2 = tf.SimilarityTransform(matrix)
 
 """
 These transformation objects can be used to forward and reverse transform
@@ -46,8 +46,8 @@ coordinates between the source and destination coordinate systems:
 """
 
 coord = [1, 0]
-print tform2.forward(coord)
-print tform2.reverse(tform.forward(coord))
+print tform2(coord)
+print tform2.inverse(tform(coord))
 
 """
 Image warping
@@ -57,11 +57,11 @@ Geometric transformations can also be used to warp images:
 """
 
 text = data.text()
-tform.from_params(1, math.pi/4, (text.shape[0] / 2, -100))
+tform.compose_implicit(1, math.pi/4, (text.shape[0] / 2, -100))
 
-# uses tform.reverse, alternatively use tf.warp(text, tform.reverse)
+# uses tform.inverse, alternatively use tf.warp(text, tform.inverse)
 rotated = tf.warp(text, tform)
-back_rotated = tf.warp(rotated, tform.forward)
+back_rotated = tf.warp(rotated, tform)
 
 plt.figure(figsize=(8, 3))
 plt.subplot(131)
@@ -112,7 +112,8 @@ dst = np.array((
     (300, 0)
 ))
 
-tform3 = tf.estimate_transformation('projective', src, dst)
+tform3 = tf.ProjectiveTransform()
+tform3.estimate(src, dst)
 warped = tf.warp(text, tform3, output_shape=(50, 300))
 
 plt.figure(figsize=(8, 3))
