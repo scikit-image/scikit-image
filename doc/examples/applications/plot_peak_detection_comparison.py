@@ -158,7 +158,7 @@ White tophat
 """
 selem = morph.disk(10)
 img_t = np.uint8(img_smooth)
-opening = morph.greyscale_open(img_t, selem)
+opening = morph.opening(img_t, selem)
 top_hat = img_t - opening
 
 imshow(opening, vmin=0, vmax=255)
@@ -177,7 +177,7 @@ plt.title("Tophat with disk of r = 10")
 """
 
 selem = morph.disk(5)
-top_hat = morph.greyscale_white_top_hat(img_t, selem)
+top_hat = morph.white_tophat(img_t, selem)
 
 imshow(top_hat)
 plt.title("Tophat with disk of r = 5")
@@ -187,7 +187,7 @@ plt.title("Tophat with disk of r = 5")
 """
 
 selem = morph.square(20)
-opening = morph.greyscale_open(img_t, selem)
+opening = morph.opening(img_t, selem)
 # scikit's top hat filter uses uint8 and doesn't check for over(under)flow.
 mask = opening > img_t
 opening[mask] = img_t[mask]
