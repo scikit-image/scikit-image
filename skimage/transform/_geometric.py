@@ -18,7 +18,7 @@ def _stackcopy(a, b):
 
     Notes
     -----
-    Color images are stored as an ``MxNx3`` or ``MxNx4`` arrays.
+    Color images are stored as an ``(M, N, 3)`` or ``(M, N, 4)`` arrays.
 
     """
     if a.ndim == 3:
@@ -36,12 +36,12 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        coords : Nx2 array
+        coords : (N, 2) array
             source coordinates
 
         Returns
         -------
-        coords : Nx2 array
+        coords : (N, 2) array
             transformed coordinates
 
         """
@@ -52,12 +52,12 @@ class GeometricTransform(object):
 
         Parameters
         ----------
-        coords : Nx2 array
+        coords : (N, 2) array
             source coordinates
 
         Returns
         -------
-        coords : Nx2 array
+        coords : (N, 2) array
             transformed coordinates
 
         """
@@ -78,17 +78,13 @@ class ProjectiveTransform(GeometricTransform):
     For each homogeneous coordinate :math:`\mathbf{x} = [x, y, 1]^T`, its
     target position is calculated by multiplying with the given matrix,
     :math:`H`, to give :math:`H \mathbf{x}`.  E.g., to rotate by theta degrees
-    clockwise, the matrix should be
-
-    ::
+    clockwise, the matrix should be::
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]
        [0            0         1]]
 
-    or, to translate x by 10 and y by 20,
-
-    ::
+    or, to translate x by 10 and y by 20::
 
       [[1 0 10]
        [0 1 20]
@@ -96,12 +92,12 @@ class ProjectiveTransform(GeometricTransform):
 
     Parameters
     ----------
-    matrix : 3x3 array, optional
+    matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
 
     """
 
-    _coefs = range(8)
+    coeffs = range(8)
 
     def __init__(self, matrix=None):
         self._matrix = matrix
@@ -136,13 +132,13 @@ class ProjectiveTransform(GeometricTransform):
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
 
-        Number of source must match number of destination coordinates.
+        Number of source and destination coordinates must match.
 
         Parameters
         ----------
-        src : Nx2 array
+        src : (N, 2) array
             source coordinates
-        dst : Nx2 array
+        dst : (N, 2) array
             destination coordinates
 
         """
@@ -152,7 +148,7 @@ class ProjectiveTransform(GeometricTransform):
         yd = dst[:, 1]
         rows = src.shape[0]
 
-        #: params: a0, a1, a2, b0, b1, b2, c0, c1
+        # params: a0, a1, a2, b0, b1, b2, c0, c1
         A = np.zeros((rows * 2, 9))
         A[:rows, 0] = xs
         A[:rows, 1] = ys
@@ -167,15 +163,15 @@ class ProjectiveTransform(GeometricTransform):
         A[:rows, 8] = xd
         A[rows:, 8] = yd
 
-        # Select relevant columns, depending on coeffs
-        A = A[:, self._coefs + [8]]
+        # Select relevant columns, depending on params
+        A = A[:, self.coeffs + [8]]
 
         _, _, V = np.linalg.svd(A)
 
         H = np.zeros((3, 3))
         # solution is right singular vector that corresponds to smallest
         # singular value and normed by c3
-        H.flat[self._coefs + [8]] = - V[-1, :-1] / V[-1, -1]
+        H.flat[self.coeffs + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
         self._matrix = H
@@ -216,12 +212,12 @@ class AffineTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : 3x3 array, optional
+    matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
 
     """
 
-    _coefs = range(6)
+    coeffs = range(6)
 
     def compose_implicit(self, scale=None, rotation=None, shear=None,
                     translation=None):
@@ -294,25 +290,24 @@ class SimilarityTransform(ProjectiveTransform):
 
     Parameters
     ----------
-    matrix : 3x3 array, optional
+    matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
 
     """
 
     def estimate(self, src, dst):
-        """Set the transformation matrix with the explicit transformation
-        parameters.
+        """Set the transformation matrix with the explicit parameters.
 
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
 
-        Number of source must match number of destination coordinates.
+        Number of source and destination coordinates must match.
 
         Parameters
         ----------
-        src : Nx2 array
+        src : (N, 2) array
             source coordinates
-        dst : Nx2 array
+        dst : (N, 2) array
             destination coordinates
 
         """
@@ -322,7 +317,7 @@ class SimilarityTransform(ProjectiveTransform):
         yd = dst[:, 1]
         rows = src.shape[0]
 
-        #: params: a0, a1, b0, b1
+        # params: a0, a1, b0, b1
         A = np.zeros((rows * 2, 5))
         A[:rows, 0] = xs
         A[:rows, 2] = - ys
@@ -398,14 +393,14 @@ class PolynomialTransform(GeometricTransform):
 
     Parameters
     ----------
-    coeffs : 2xN array, optional
+    params : (2, N) array, optional
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
-        a_ji is defined in `coeffs[0, :]` and b_ji in `coeffs[1, :]`.
+        a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
     """
 
-    def __init__(self, coeffs=None):
-        self._coeffs = coeffs
+    def __init__(self, params=None):
+        self._params = params
 
     def estimate(self, src, dst, order):
         """Set the transformation matrix with the explicit transformation
@@ -414,13 +409,13 @@ class PolynomialTransform(GeometricTransform):
         You can determine the over-, well- and under-determined parameters
         with the total least-squares method.
 
-        Number of source must match number of destination coordinates.
+        Number of source and destination coordinates must match.
 
         Parameters
         ----------
-        src : Nx2 array
+        src : (N, 2) array
             source coordinates
-        dst : Nx2 array
+        dst : (N, 2) array
             destination coordinates
         order : int
             polynomial order (number of coefficients is order + 1)
@@ -437,8 +432,8 @@ class PolynomialTransform(GeometricTransform):
 
         A = np.zeros((rows * 2, u + 1))
         pidx = 0
-        for j in xrange(order + 1):
-            for i in xrange(j + 1):
+        for j in range(order + 1):
+            for i in range(j + 1):
                 A[:rows, pidx] = xs ** (j - i) * ys ** i
                 A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
                 pidx += 1
@@ -450,36 +445,36 @@ class PolynomialTransform(GeometricTransform):
 
         # solution is right singular vector that corresponds to smallest
         # singular value and normed by c3
-        coeffs = - V[-1, :-1] / V[-1, -1]
+        params = - V[-1, :-1] / V[-1, -1]
 
-        self._coeffs = coeffs.reshape((2, u / 2))
+        self._params = params.reshape((2, u / 2))
 
     def __call__(self, coords):
         """Apply forward transformation.
 
         Parameters
         ----------
-        coords : Nx2 array
+        coords : (N, 2) array
             source coordinates
 
         Returns
         -------
-        coords : Nx2 array
+        coords : (N, 2) array
             transformed coordinates
 
         """
         x = coords[:, 0]
         y = coords[:, 1]
-        u = len(self._coeffs.ravel())
+        u = len(self._params.ravel())
         # number of coefficients -> u = (order + 1) * (order + 2)
         order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
         dst = np.zeros(coords.shape)
 
         pidx = 0
-        for j in xrange(order + 1):
-            for i in xrange(j + 1):
-                dst[:, 0] += self._coeffs[0, pidx] * x ** (j - i) * y ** i
-                dst[:, 1] += self._coeffs[1, pidx] * x ** (j - i) * y ** i
+        for j in range(order + 1):
+            for i in range(j + 1):
+                dst[:, 0] += self._params[0, pidx] * x ** (j - i) * y ** i
+                dst[:, 1] += self._params[1, pidx] * x ** (j - i) * y ** i
                 pidx += 1
 
         return dst
@@ -506,7 +501,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
     You can determine the over-, well- and under-determined parameters
     with the total least-squares method.
 
-    Number of source must match number of destination coordinates.
+    Number of source and destination coordinates must match.
 
     Parameters
     ----------
@@ -573,14 +568,14 @@ def matrix_transform(coords, matrix):
 
     Parameters
     ----------
-    coords : Nx2 array
+    coords : (N, 2) array
         x, y coordinates to transform
-    matrix : 3x3 array
+    matrix : (3, 3) array
         Homogeneous transformation matrix.
 
     Returns
     -------
-    coords : Nx2 array
+    coords : (N, 2) array
             transformed coordinates
 
     """
@@ -596,7 +591,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     image : 2-D array
         Input image.
     inverse_map : transformation object, callable xy = f(xy, **kwargs)
-        Inverse coordinate map. A function that transforms a Px2 array of
+        Inverse coordinate map. A function that transforms a (N, 2) array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
         coordinates in the *source image*. In case of a transformation object
         its `inverse` method will be used as transformation function. Also see

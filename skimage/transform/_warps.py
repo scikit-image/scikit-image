@@ -152,7 +152,7 @@ def homography(image, H, output_shape=None, order=1,
     """
     import warnings
     warnings.warn('the homography function is deprecated; '
-                  'use the `warp` and `tform` function instead',
+                  'use the `warp` and `ProjectiveTransform` class instead',
                   category=DeprecationWarning)
 
     tform = ProjectiveTransform(H)
