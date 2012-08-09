@@ -19,16 +19,14 @@ def reconstruction(image, mask, selem=None, offset=None):
     Reconstruction requires a "seed" image and a "mask" image. The seed image
     gets dilated until it is constrained by the mask. The "seed" and "mask"
     images will be the minimum and maximum possible values of the reconstructed
-    image.
+    image, respectively.
 
     Parameters
     ----------
     image : ndarray
         The seed image.
-
     mask : ndarray
         The maximum allowed value at each point.
-
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
 
@@ -84,9 +82,9 @@ def reconstruction(image, mask, selem=None, offset=None):
     assert tuple(image.shape) == tuple(mask.shape)
     assert np.all(image <= mask)
     try:
-        from ._morphrec import reconstruction_loop
+        from ._greyreconstruct import reconstruction_loop
     except ImportError:
-        raise ImportError("_morphrec extension not available.")
+        raise ImportError("_greyreconstruct extension not available.")
 
     if selem is None:
         selem = np.ones([3]*image.ndim, bool)
