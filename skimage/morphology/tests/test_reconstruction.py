@@ -26,7 +26,7 @@ def test_image_less_than_mask():
     """Test reconstruction where the image is uniform and less than mask"""
     image = np.ones((5, 5))
     mask = np.ones((5, 5)) * 2
-    assert np.all(reconstruction(image,mask) == 1)
+    assert np.all(reconstruction(image, mask) == 1)
 
 
 def test_one_image_peak():
@@ -34,7 +34,7 @@ def test_one_image_peak():
     image = np.ones((5, 5))
     image[2, 2] = 2
     mask = np.ones((5, 5)) * 3
-    assert np.all(reconstruction(image,mask) == 2)
+    assert np.all(reconstruction(image, mask) == 2)
 
 
 def test_two_image_peaks():
@@ -59,7 +59,7 @@ def test_two_image_peaks():
                          [1, 1, 1, 1, 1, 3, 3, 3],
                          [1, 1, 1, 1, 1, 3, 3, 3],
                          [1, 1, 1, 1, 1, 3, 3, 3]])
-    assert np.all(reconstruction(image,mask) == expected)
+    assert np.all(reconstruction(image, mask) == expected)
 
 
 def test_zero_image_one_mask():
