@@ -103,9 +103,9 @@ def reconstruction(image, mask, selem=None, offset=None):
     # image and mask pixels when sorting which makes list manipulations easier
     padding = (np.array(selem.shape) / 2).astype(int)
     dims = np.zeros(image.ndim + 1, dtype=int)
-    dims[1:] = np.array(image.shape)+2*padding
+    dims[1:] = np.array(image.shape) + 2 * padding
     dims[0] = 2
-    inside_slices = [slice(p,-p) for p in padding]
+    inside_slices = [slice(p, -p) for p in padding]
     values = np.ones(dims) * np.min(image)
     values[[0] + inside_slices] = image
     values[[1] + inside_slices] = mask
