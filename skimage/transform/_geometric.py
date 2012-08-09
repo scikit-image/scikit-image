@@ -214,44 +214,41 @@ class AffineTransform(ProjectiveTransform):
     ----------
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
+    scale : (sx, sy) as array, list or tuple, optional
+        scale factors
+    rotation : float, optional
+        rotation angle in counter-clockwise direction, optional
+    shear : float, optional
+        shear angle in counter-clockwise direction
+    translation : (tx, ty) as array, list or tuple, optional
+        translation parameters
 
     """
 
     coeffs = range(6)
 
-    def compose_implicit(self, scale=None, rotation=None, shear=None,
-                    translation=None):
-        """Set the transformation matrix with the implicit transformation
-        parameters.
+    def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
+                 translation=None):
+        params = (scale, rotation, shear, translation)
+        if matrix is not None:
+            self._matrix = matrix
+        elif any(param is not None for param in params):
+            if scale is None:
+                scale = (1, 1)
+            if rotation is None:
+                rotation = 0
+            if shear is None:
+                shear = 0
+            if translation is None:
+                translation = (0, 0)
 
-        Parameters
-        ----------
-        scale : (sx, sy) as array, list or tuple
-            scale factors
-        rotation : float
-            rotation angle in counter-clockwise direction
-        shear : float
-            shear angle in counter-clockwise direction
-        translation : (tx, ty) as array, list or tuple
-            translation parameters
-
-        """
-        if scale is None:
-            scale = (1, 1)
-        if rotation is None:
-            rotation = 0
-        if shear is None:
-            shear = 0
-        if translation is None:
-            translation = (0, 0)
-
-        sx, sy = scale
-        self._matrix = np.array([
-            [sx * math.cos(rotation), - sy * math.sin(rotation + shear), 0],
-            [sx * math.sin(rotation),   sy * math.cos(rotation + shear), 0],
-            [                      0,                                 0, 1]
-        ])
-        self._matrix[0:2, 2] = translation
+            sx, sy = scale
+            self._matrix = np.array([
+                [sx * math.cos(rotation), - sy * math.sin(rotation + shear), 0],
+                [sx * math.sin(rotation),   sy * math.cos(rotation + shear), 0],
+                [                      0,                                 0, 1]
+            ])
+            self._matrix[0:2, 2] = translation
 
     @property
     def scale(self):
@@ -292,8 +289,35 @@ class SimilarityTransform(ProjectiveTransform):
     ----------
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
+    scale : float, optional
+            scale factor
+    rotation : float, optional
+        rotation angle in counter-clockwise direction
+    translation : (tx, ty) as array, list or tuple, optional
+        x, y translation parameters
 
     """
+
+    def __init__(self, matrix=None, scale=None, rotation=None,
+                 translation=None):
+        params = (scale, rotation, translation)
+        if matrix is not None:
+            self._matrix = matrix
+        elif any(param is not None for param in params):
+            if scale is None:
+                scale = 1
+            if rotation is None:
+                rotation = 0
+            if translation is None:
+                translation = (0, 0)
+
+            self._matrix = np.array([
+                [math.cos(rotation), - math.sin(rotation), 0],
+                [math.sin(rotation),   math.cos(rotation), 0],
+                [                 0,                    0, 1]
+            ])
+            self._matrix *= scale
+            self._matrix[0:2, 2] = translation
 
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit parameters.
@@ -337,35 +361,6 @@ class SimilarityTransform(ProjectiveTransform):
         self._matrix = np.array([[a0, -b0, a1],
                                  [b0,  a0, b1],
                                  [ 0,   0,  1]])
-
-    def compose_implicit(self, scale=None, rotation=None, translation=None):
-        """Set the transformation matrix with the implicit transformation
-        parameters.
-
-        Parameters
-        ----------
-        scale : float, optional
-            scale factor
-        rotation : float, optional
-            rotation angle in counter-clockwise direction
-        translation : (tx, ty) as array, list or tuple, optional
-            x, y translation parameters
-
-        """
-        if scale is None:
-            scale = 1
-        if rotation is None:
-            rotation = 0
-        if translation is None:
-            translation = (0, 0)
-
-        self._matrix = np.array([
-            [math.cos(rotation), - math.sin(rotation), 0],
-            [math.sin(rotation),   math.cos(rotation), 0],
-            [                 0,                    0, 1]
-        ])
-        self._matrix *= scale
-        self._matrix[0:2, 2] = translation
 
     @property
     def scale(self):

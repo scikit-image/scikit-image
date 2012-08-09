@@ -53,11 +53,11 @@ def test_similarity_estimation():
 
 
 def test_similarity_implicit():
-    tform = SimilarityTransform()
     scale = 0.1
     rotation = 1
     translation = (1, 1)
-    tform.compose_implicit(scale, rotation, translation)
+    tform = SimilarityTransform(scale=scale, rotation=rotation,
+                                translation=translation)
     assert_array_almost_equal(tform.scale, scale)
     assert_array_almost_equal(tform.rotation, rotation)
     assert_array_almost_equal(tform.translation, translation)
@@ -74,12 +74,12 @@ def test_affine_estimation():
 
 
 def test_affine_implicit():
-    tform = AffineTransform()
     scale = (0.1, 0.13)
     rotation = 1
     shear = 0.1
     translation = (1, 1)
-    tform.compose_implicit(scale, rotation, shear, translation)
+    tform = AffineTransform(scale=scale, rotation=rotation, shear=shear,
+                            translation=translation)
     assert_array_almost_equal(tform.scale, scale)
     assert_array_almost_equal(tform.rotation, rotation)
     assert_array_almost_equal(tform.shear, shear)
@@ -102,13 +102,9 @@ def test_polynomial():
 
 
 def test_union():
-    tform1 = SimilarityTransform()
-    tform1.compose_implicit(scale=0.1, rotation=0.3)
-    tform2 = SimilarityTransform()
-    tform2.compose_implicit(scale=0.1, rotation=0.9)
-    tform3 = SimilarityTransform()
-    tform3.compose_implicit(scale=0.1**2, rotation=0.3+0.9)
-
+    tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
+    tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
+    tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
 
     tform = tform1 + tform2
 
