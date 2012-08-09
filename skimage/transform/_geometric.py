@@ -77,8 +77,13 @@ class ProjectiveTransform(GeometricTransform):
 
     For each homogeneous coordinate :math:`\mathbf{x} = [x, y, 1]^T`, its
     target position is calculated by multiplying with the given matrix,
-    :math:`H`, to give :math:`H \mathbf{x}`.  E.g., to rotate by theta degrees
-    clockwise, the matrix should be::
+    :math:`H`, to give :math:`H \mathbf{x}`::
+
+      [[a0 a1 a2]
+       [b0 b1 b2]
+       [c0 c1 1 ]].
+
+    E.g., to rotate by theta degrees clockwise, the matrix should be::
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]
@@ -133,6 +138,41 @@ class ProjectiveTransform(GeometricTransform):
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = (a0*x + a1*y + a2) / (c0*x + c1*y + 1)
+            Y = (b0*x + b1*y + b2) / (c0*x + c1*y + 1)
+
+        These equations can be transformed to the following form::
+
+            0 = a0*x + a1*y + a2 - c0*x*X - c1*y*X - X
+            0 = b0*x + b1*y + b2 - c0*x*Y - c1*y*Y - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[x y 1 0 0 0 -x*X -y*X -X]
+                   [0 0 0 x y 1 -x*Y -y*Y -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c0 c1 c3]
+
+        In case of total least-squares the solutions of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
+
+        In case of the affine transformation the coefficients c0 and c1 are 0.
+        Thus the system of equations is::
+
+            A   = [[x y 1 0 0 0 -X]
+                   [0 0 0 x y 1 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 a2 b0 b1 b2 c3]
 
         Parameters
         ----------
@@ -273,7 +313,7 @@ class AffineTransform(ProjectiveTransform):
 class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form::
 
-        X = a0*x + b0*y + a1 =
+        X = a0*x - b0*y + a1 =
           = m*x*cos(rotation) + m*y*sin(rotation) + a1
 
         Y = b0*x + a0*y + b1 =
@@ -326,6 +366,31 @@ class SimilarityTransform(ProjectiveTransform):
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = a0*x - b0*y + a1
+            Y = b0*x + a0*y + b1
+
+        These equations can be transformed to the following form::
+
+            0 = a0*x - b0*y + a1 - X
+            0 = b0*x + a0*y + b1 - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[x 1 -y 0 -X]
+                   [y 0  x 1 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a0 a1 b0 b1 c3]
+
+        In case of total least-squares the solutions of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
 
         Parameters
         ----------
@@ -405,6 +470,32 @@ class PolynomialTransform(GeometricTransform):
         with the total least-squares method.
 
         Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
+            Y = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i ))
+
+        These equations can be transformed to the following form::
+
+            0 = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i )) - X
+            0 = sum[j=0:order]( sum[i=0:j]( b_ji * x**(j - i) * y**i )) - Y
+
+        which exist for each set of corresponding points, so we have a set of
+        N * 2 equations. The coefficients appear linearly so we can write
+        A x = 0, where::
+
+            A   = [[1 x y x**2 x*y y**2 ... 0 ...             0 -X]
+                   [0 ...                 0 1 x y x**2 x*y y**2 -Y]
+                    ...
+                    ...
+                  ]
+            x.T = [a00 a10 a11 a20 a21 a22 ... ann
+                   b00 b10 b11 b20 b21 b22 ... bnn c3]
+
+        In case of total least-squares the solutions of this homogeneous system
+        of equations is the right singular vector of A which corresponds to the
+        smallest singular value normed by the coefficient c3.
 
         Parameters
         ----------
