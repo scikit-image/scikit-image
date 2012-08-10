@@ -11,8 +11,8 @@ def test_warp():
     x = np.zeros((5, 5), dtype=np.uint8)
     x[2, 2] = 255
     x = img_as_float(x)
-    theta = -np.pi/2
-    tform = SimilarityTransform(1, theta, (0, 4))
+    theta = - np.pi / 2
+    tform = SimilarityTransform(scale=1, rotation=theta, translation=(0, 4))
 
     x90 = warp(x, tform, order=1)
     assert_array_almost_equal(x90, np.rot90(x))

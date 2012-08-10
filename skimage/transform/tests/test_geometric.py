@@ -39,20 +39,26 @@ def test_stackcopy():
 
 
 def test_similarity_estimation():
-    #: exact solution
+    # exact solution
     tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
     assert_array_almost_equal(tform(SRC[:2, :]), DST[:2, :])
     assert_equal(tform._matrix[0, 0], tform._matrix[1, 1])
     assert_equal(tform._matrix[0, 1], - tform._matrix[1, 0])
 
-    #: over-determined
-    tform = estimate_transform('similarity', SRC, DST)
-    assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
-    assert_equal(tform._matrix[0, 0], tform._matrix[1, 1])
-    assert_equal(tform._matrix[0, 1], - tform._matrix[1, 0])
+    # over-determined
+    tform2 = estimate_transform('similarity', SRC, DST)
+    assert_array_almost_equal(tform2.inverse(tform2(SRC)), SRC)
+    assert_equal(tform2._matrix[0, 0], tform2._matrix[1, 1])
+    assert_equal(tform2._matrix[0, 1], - tform2._matrix[1, 0])
+
+    # via estimate method
+    tform3 = SimilarityTransform()
+    tform3.estimate(SRC, DST)
+    assert_array_almost_equal(tform3._matrix, tform2._matrix)
 
 
-def test_similarity_implicit():
+def test_similarity_init():
+    # init with implicit parameters
     scale = 0.1
     rotation = 1
     translation = (1, 1)
@@ -62,18 +68,30 @@ def test_similarity_implicit():
     assert_array_almost_equal(tform.rotation, rotation)
     assert_array_almost_equal(tform.translation, translation)
 
+    # init with transformation matrix
+    tform2 = SimilarityTransform(tform._matrix)
+    assert_array_almost_equal(tform2.scale, scale)
+    assert_array_almost_equal(tform2.rotation, rotation)
+    assert_array_almost_equal(tform2.translation, translation)
+
 
 def test_affine_estimation():
-    #: exact solution
+    # exact solution
     tform = estimate_transform('affine', SRC[:3, :], DST[:3, :])
     assert_array_almost_equal(tform(SRC[:3, :]), DST[:3, :])
 
-    #: over-determined
-    tform = estimate_transform('affine', SRC, DST)
-    assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
+    # over-determined
+    tform2 = estimate_transform('affine', SRC, DST)
+    assert_array_almost_equal(tform2.inverse(tform2(SRC)), SRC)
+
+    # via estimate method
+    tform3 = AffineTransform()
+    tform3.estimate(SRC, DST)
+    assert_array_almost_equal(tform3._matrix, tform2._matrix)
 
 
-def test_affine_implicit():
+def test_affine_init():
+    # init with implicit parameters
     scale = (0.1, 0.13)
     rotation = 1
     shear = 0.1
@@ -85,20 +103,45 @@ def test_affine_implicit():
     assert_array_almost_equal(tform.shear, shear)
     assert_array_almost_equal(tform.translation, translation)
 
+    # init with transformation matrix
+    tform2 = AffineTransform(tform._matrix)
+    assert_array_almost_equal(tform2.scale, scale)
+    assert_array_almost_equal(tform2.rotation, rotation)
+    assert_array_almost_equal(tform2.shear, shear)
+    assert_array_almost_equal(tform2.translation, translation)
 
-def test_projective():
-    #: exact solution
+
+def test_projective_estimation():
+    # exact solution
     tform = estimate_transform('projective', SRC[:4, :], DST[:4, :])
     assert_array_almost_equal(tform(SRC[:4, :]), DST[:4, :])
 
-    #: over-determined
+    # over-determined
+    tform2 = estimate_transform('projective', SRC, DST)
+    assert_array_almost_equal(tform2.inverse(tform2(SRC)), SRC)
+
+    # via estimate method
+    tform3 = ProjectiveTransform()
+    tform3.estimate(SRC, DST)
+    assert_array_almost_equal(tform3._matrix, tform2._matrix)
+
+
+def test_projective_init():
     tform = estimate_transform('projective', SRC, DST)
-    assert_array_almost_equal(tform.inverse(tform(SRC)), SRC)
+    # init with transformation matrix
+    tform2 = ProjectiveTransform(tform._matrix)
+    assert_array_almost_equal(tform2._matrix, tform._matrix)
 
 
-def test_polynomial():
+def test_polynomial_estimation():
+    # over-determined
     tform = estimate_transform('polynomial', SRC, DST, order=10)
     assert_array_almost_equal(tform(SRC), DST, 6)
+
+    # via estimate method
+    tform2 = PolynomialTransform()
+    tform2.estimate(SRC, DST, order=10)
+    assert_array_almost_equal(tform2._params, tform._params)
 
 
 def test_union():
