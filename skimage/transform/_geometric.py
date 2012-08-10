@@ -259,9 +259,9 @@ class AffineTransform(ProjectiveTransform):
     scale : (sx, sy) as array, list or tuple, optional
         scale factors
     rotation : float, optional
-        rotation angle in counter-clockwise direction, optional
+        rotation angle in counter-clockwise direction as radians
     shear : float, optional
-        shear angle in counter-clockwise direction
+        shear angle in counter-clockwise direction as radians
     translation : (tx, ty) as array, list or tuple, optional
         translation parameters
 
@@ -334,9 +334,9 @@ class SimilarityTransform(ProjectiveTransform):
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
     scale : float, optional
-            scale factor
+        scale factor
     rotation : float, optional
-        rotation angle in counter-clockwise direction
+        rotation angle in counter-clockwise direction as radians
     translation : (tx, ty) as array, list or tuple, optional
         x, y translation parameters
 
