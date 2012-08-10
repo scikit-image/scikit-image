@@ -105,6 +105,8 @@ class ProjectiveTransform(GeometricTransform):
     coeffs = range(8)
 
     def __init__(self, matrix=None):
+        if matrix is not None and matrix.shape != (3, 3):
+            raise ValueError("invalid shape of transformation matrix")
         self._matrix = matrix
 
     @property
@@ -269,10 +271,12 @@ class AffineTransform(ProjectiveTransform):
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
                  translation=None):
+        if matrix is not None and matrix.shape != (3, 3):
+            raise ValueError("invalid shape of transformation matrix")
+        self._matrix = matrix
+
         params = (scale, rotation, shear, translation)
-        if matrix is not None:
-            self._matrix = matrix
-        elif any(param is not None for param in params):
+        if any(param is not None for param in params):
             if scale is None:
                 scale = (1, 1)
             if rotation is None:
@@ -340,10 +344,12 @@ class SimilarityTransform(ProjectiveTransform):
 
     def __init__(self, matrix=None, scale=None, rotation=None,
                  translation=None):
+        if matrix is not None and matrix.shape != (3, 3):
+            raise ValueError("invalid shape of transformation matrix")
+        self._matrix = matrix
+
         params = (scale, rotation, translation)
-        if matrix is not None:
-            self._matrix = matrix
-        elif any(param is not None for param in params):
+        if any(param is not None for param in params):
             if scale is None:
                 scale = 1
             if rotation is None:
@@ -460,6 +466,8 @@ class PolynomialTransform(GeometricTransform):
     """
 
     def __init__(self, params=None):
+        if params is not None and params.shape[0] != 2:
+            raise ValueError("invalid shape of transformation parameters")
         self._params = params
 
     def estimate(self, src, dst, order):
