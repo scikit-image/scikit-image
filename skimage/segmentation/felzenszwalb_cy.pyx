@@ -1,13 +1,16 @@
 import numpy as np
 cimport numpy as np
 import scipy
+cimport cython
 
 from skimage.morphology.ccomp cimport find_root, join_trees
 
 from ..util import img_as_float
 
-
-def _felzenszwalb_grey(image, scale=1, sigma=0.8, min_size=20):
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+def _felzenszwalb_grey(image, double scale=1, sigma=0.8, int min_size=20):
     """Felzenszwalb's efficient graph based segmentation for a single channel.
 
     Produces an oversegmentation of a 2d image using a fast, minimum spanning
@@ -70,7 +73,7 @@ def _felzenszwalb_grey(image, scale=1, sigma=0.8, min_size=20):
             = np.ones(width * height, dtype=np.int)
     # inner cost of segments
     cdef np.ndarray[np.float_t, ndim=1] cint = np.zeros(width * height)
-    cdef int seg0, seg1, seg_new
+    cdef int seg0, seg1, seg_new, e
     cdef float cost, inner_cost0, inner_cost1
     # set costs_p back one. we increase it before we use it
     # since we might continue before that.
