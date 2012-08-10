@@ -16,7 +16,7 @@ cdef extern from "math.h":
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
+def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=False,
         sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
@@ -94,7 +94,8 @@ def quickshift(image, ratio=1., kernel_size=5, max_dist=10, return_tree=False,
     cdef int height = image_c.shape[0]
     cdef int width = image_c.shape[1]
     cdef int channels = image_c.shape[2]
-    cdef float closest, dist
+    cdef double current_density, closest, dist
+
     cdef int x, y, x_, y_
 
     cdef np.float_t* image_p = <np.float_t*> image_c.data
