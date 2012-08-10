@@ -11,6 +11,7 @@ from ..color import rgb2lab
 
 cdef extern from "math.h":
     double exp(double)
+    double sqrt(double)
 
 
 @cython.boundscheck(False)
@@ -104,16 +105,18 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities \
             = np.zeros((height, width))
     # compute densities
-    for x, y in product(xrange(height), xrange(width)):
-        x_min, x_max = max(x - w, 0), min(x + w + 1, height)
-        y_min, y_max = max(y - w, 0), min(y + w + 1, width)
-        for x_, y_ in product(xrange(x_min, x_max), xrange(y_min, y_max)):
-            dist = 0
-            for c in xrange(channels):
-                dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
-            dist += (x - x_)**2 + (y - y_)**2
-            densities[x, y] += exp(-dist / (2 * kernel_size**2))
-        current_pixel_p += channels
+    for x in range(height):
+        for y in range(width):
+            x_min, x_max = max(x - w, 0), min(x + w + 1, height)
+            y_min, y_max = max(y - w, 0), min(y + w + 1, width)
+            for x_ in range(x_min, x_max):
+                for y_ in range(y_min, y_max):
+                    dist = 0
+                    for c in range(channels):
+                        dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
+                    dist += (x - x_)**2 + (y - y_)**2
+                    densities[x, y] += exp(-dist / (2 * kernel_size**2))
+            current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
     densities += random_state.normal(scale=0.00001, size=(height, width))
@@ -125,22 +128,24 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
             = np.zeros((height, width))
     # find nearest node with higher density
     current_pixel_p = image_p
-    for x, y in product(xrange(height), xrange(width)):
-        current_density = densities[x, y]
-        closest = np.inf
-        x_min, x_max = max(x - w, 0), min(x + w + 1, height)
-        y_min, y_max = max(y - w, 0), min(y + w + 1, width)
-        for x_, y_ in product(xrange(x_min, x_max), xrange(y_min, y_max)):
-            if densities[x_, y_] > current_density:
-                dist = 0
-                for c in xrange(channels):
-                    dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
-                dist += (x - x_)**2 + (y - y_)**2
-                if dist < closest:
-                    closest = dist
-                    parent[x, y] = x_ * width + y_
-        dist_parent[x, y] = np.sqrt(closest)
-        current_pixel_p += channels
+    for x in range(height):
+        for y in range(width):
+            current_density = densities[x, y]
+            closest = np.inf
+            x_min, x_max = max(x - w, 0), min(x + w + 1, height)
+            y_min, y_max = max(y - w, 0), min(y + w + 1, width)
+            for x_ in range(x_min, x_max):
+                for y_ in range(y_min, y_max):
+                    if densities[x_, y_] > current_density:
+                        dist = 0
+                        for c in range(channels):
+                            dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
+                        dist += (x - x_)**2 + (y - y_)**2
+                        if dist < closest:
+                            closest = dist
+                            parent[x, y] = x_ * width + y_
+            dist_parent[x, y] = sqrt(closest)
+            current_pixel_p += channels
 
     dist_parent_flat = dist_parent.ravel()
     flat = parent.ravel()
