@@ -77,8 +77,7 @@ cdef link_bg(np.int_t *forest, np.int_t n, np.int_t *background_node):
 
 # Connected components search as described in Fiorio et al.
 
-def label(np.ndarray[DTYPE_t, ndim=2] input,
-          np.int_t neighbors=8, np.int_t background=-1):
+def label(input, np.int_t neighbors=8, np.int_t background=-1):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -89,7 +88,7 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
            [ ]           [ ]  [ ]  [ ]
             |               \  |  /
       [ ]--[ ]--[ ]      [ ]--[ ]--[ ]
-            |               /  |  \ 
+            |               /  |  \
            [ ]           [ ]  [ ]  [ ]
 
     Parameters
@@ -139,7 +138,8 @@ def label(np.ndarray[DTYPE_t, ndim=2] input,
     cdef np.int_t rows = input.shape[0]
     cdef np.int_t cols = input.shape[1]
 
-    cdef np.ndarray[DTYPE_t, ndim=2] data = input.copy()
+    cdef np.ndarray[DTYPE_t, ndim=2] data = np.array(input, copy=True,
+                                                     dtype=DTYPE)
     cdef np.ndarray[DTYPE_t, ndim=2] forest
 
     forest = np.arange(data.size, dtype=DTYPE).reshape((rows, cols))
