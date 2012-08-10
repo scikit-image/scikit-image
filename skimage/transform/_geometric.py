@@ -679,9 +679,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     inverse_map : transformation object, callable xy = f(xy, **kwargs)
         Inverse coordinate map. A function that transforms a (N, 2) array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
-        coordinates in the *source image*. In case of a transformation object
-        its `inverse` method will be used as transformation function. Also see
-        examples below.
+        coordinates in the *source image* (e.g. a transformation object or its
+        inverse).
     map_args : dict, optional
         Keyword arguments passed to `inverse_map`.
     output_shape : tuple (rows, cols)
@@ -735,8 +734,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     # Map each (x, y) pair to the source image according to
     # the user-provided mapping
-    if callable(getattr(inverse_map, 'inverse', None)):
-        inverse_map = inverse_map.inverse
     tf_coords = inverse_map(tf_coords, **map_args)
 
     # Reshape back to a (2, M, N) coordinate grid
