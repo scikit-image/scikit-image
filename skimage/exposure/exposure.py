@@ -2,7 +2,7 @@ import numpy as np
 
 import skimage
 from skimage.util.dtype import dtype_range
-from skimage.color import rgb2gray
+import skimage.color as color
 from skimage.util.dtype import convert
 
 from _adapthist import _adapthist
@@ -210,7 +210,7 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
 
     Returns
     -------
-    out - np.ndarray :
+    out : np.ndarray
         equalized image - may be a different shape than the original
 
     Notes
@@ -218,8 +218,17 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
     * The underlying algorithm relies on an image whose rows and columns are even multiples of
     the number of tiles, so the extra rows and columns are left at their original values, thus
     preserving the input image shape.
-    * For RGB or RGBA images, the algorithm is run on each channel.
+    * For grayscale images, CLAHE is performed on one channel, and a grayscale is returned
+    * For color images, the following steps are performed:
+       - The image is converted to LAB color space
+       - The CLAHE algorithm is run on the L channel
+       - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
+
+    References
+    ----------
+    .. [1] http://tog.acm.org/resources/GraphicsGems/
+    .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     '''
     in_type = image.dtype.type
     if out_range == 'full':
@@ -227,23 +236,50 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
     else:
         out_range = (image.min(), image.max())
     # must be converted to 12 bit for CLAHE
-    image = skimage.img_as_uint(image)
+    int_image = skimage.img_as_uint(image)
     MAX_VAL = 2 ** 12 - 1
-    image = rescale_intensity(image, out_range=(0, MAX_VAL))
+    int_image = rescale_intensity(int_image, out_range=(0, MAX_VAL))
     # handle color images - CLAHE accepts scalar images only
-    args = [image.copy(), 0, MAX_VAL, nx, ny, nbins, clip_limit]
+    args = [int_image.copy(), 0, MAX_VAL, nx, ny, nbins, clip_limit]
     if image.ndim == 3:
-        image = image[:, :, :3]
-        for channel in range(3):
-            args[0] = image[:, :, channel]
+        # check for grayscale
+        if (np.allclose(image[:, :, 0], image[:, :, 1]) and
+            np.allclose(image[:, :, 2], image[:, :, 3])):
+            args[0] = image[:, :, 0]
             out = _adapthist(*args)
-            image[:out.shape[0], :out.shape[1], channel] = out
+            image = int_image[:, :, :3]
+            for channel in range(3):
+                image[:out.shape[0], :out.shape[1], channel] = out
+        # for color images, convert to LAB space for processing
+        else:
+            lab_img = color.rgb2lab(skimage.img_as_float(image))
+            L_chan = lab_img[:, :, 0]
+            L_chan /= np.max(np.abs(L_chan))
+            L_chan = skimage.img_as_uint(L_chan)
+            args[0] = rescale_intensity(L_chan, out_range=(0, MAX_VAL))
+            new_L = _adapthist(*args).astype(float)
+            new_L = rescale_intensity(new_L, out_range=(0, 100))
+            lab_img[:new_L.shape[0], :new_L.shape[1], 0] = new_L
+            image = color.lab2rgb(lab_img)
+            image = rescale_intensity(image, out_range=(0, 1))
     else:
         out = _adapthist(*args)
+        image = int_image
         image[:out.shape[0], :out.shape[1]] = out
     # restore to desired output type and output limits
     image = rescale_intensity(image)
-    if in_type != np.uint16:
-        image = convert(image, in_type)
+    image = convert(image, in_type)
     image = rescale_intensity(image, out_range=out_range)
     return image
+
+if __name__ == '__main__':
+    from skimage import data
+    import matplotlib.pyplot as plt
+    img = skimage.img_as_uint(data.lena())
+    adapted = adapthist(img, nx=10, ny=9, clip_limit=0.01,
+                            nbins=128, out_range='original')
+    plt.imshow(img)
+    plt.figure(); plt.imshow(skimage.img_as_ubyte(adapted))
+    plt.figure(); plt.imshow(color.lab2rgb(color.rgb2lab(img)))
+    plt.show()
+    print 'Done'
