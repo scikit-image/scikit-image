@@ -107,3 +107,4 @@
   Polygon, circle and ellipse drawing functions
   Adaptive thresholding
   Implementation of Matlab's `regionprops`
+  Polygon approximation
