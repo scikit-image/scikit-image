@@ -16,7 +16,11 @@ _image_stack = []
 
 
 class Image(np.ndarray):
-    """Image data with tags."""
+    """Class representing Image data.
+
+    These objects have tags for image metadata and IPython display protocol
+    methods for image display.
+    """
 
     tags = {'filename': '',
             'EXIF': {},
