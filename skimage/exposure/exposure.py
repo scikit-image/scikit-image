@@ -188,16 +188,17 @@ def rescale_intensity(image, in_range=None, out_range=None):
     return dtype(image * (omax - omin) + omin)
 
 
-def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
+def adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01, nbins=256,
+               out_range='full'):
     '''Contrast Limited Adaptive Histogram Equalization
 
     Parameters
     ----------
     image : array-like
         original image
-    nx : int, optional
+    ntiles_x : int, optional
         Tile regions in the X direction (2, 16)
-    ny : int, optional
+    ntiles_y : int, optional
         Tile regions in the Y direction (2, 16)
     clip_limit : float: optional
         Normalized cliplimit (higher values give more contrast)
@@ -237,15 +238,16 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
         out_range = (image.min(), image.max())
     # must be converted to 12 bit for CLAHE
     int_image = skimage.img_as_uint(image)
-    MAX_VAL = 2 ** 12 - 1
-    int_image = rescale_intensity(int_image, out_range=(0, MAX_VAL))
+    max_val = 2 ** 12 - 1
+    int_image = rescale_intensity(int_image, out_range=(0, max_val))
     # handle color images - CLAHE accepts scalar images only
-    args = [int_image.copy(), 0, MAX_VAL, nx, ny, nbins, clip_limit]
+    args = [int_image.copy(), 0, max_val, ntiles_x, ntiles_y, nbins,
+            clip_limit]
     if image.ndim == 3:
         # check for grayscale
         if (np.allclose(image[:, :, 0], image[:, :, 1]) and
-            np.allclose(image[:, :, 2], image[:, :, 3])):
-            args[0] = image[:, :, 0]
+            np.allclose(image[:, :, 1], image[:, :, 2])):
+            args[0] = int_image[:, :, 0]
             out = _adapthist(*args)
             image = int_image[:, :, :3]
             for channel in range(3):
@@ -253,13 +255,13 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
         # for color images, convert to LAB space for processing
         else:
             lab_img = color.rgb2lab(skimage.img_as_float(image))
-            L_chan = lab_img[:, :, 0]
-            L_chan /= np.max(np.abs(L_chan))
-            L_chan = skimage.img_as_uint(L_chan)
-            args[0] = rescale_intensity(L_chan, out_range=(0, MAX_VAL))
-            new_L = _adapthist(*args).astype(float)
-            new_L = rescale_intensity(new_L, out_range=(0, 100))
-            lab_img[:new_L.shape[0], :new_L.shape[1], 0] = new_L
+            l_chan = lab_img[:, :, 0]
+            l_chan /= np.max(np.abs(l_chan))
+            l_chan = skimage.img_as_uint(l_chan)
+            args[0] = rescale_intensity(l_chan, out_range=(0, max_val))
+            new_l = _adapthist(*args).astype(float)
+            new_l = rescale_intensity(new_l, out_range=(0, 100))
+            lab_img[:new_l.shape[0], :new_l.shape[1], 0] = new_l
             image = color.lab2rgb(lab_img)
             image = rescale_intensity(image, out_range=(0, 1))
     else:
@@ -271,15 +273,3 @@ def adapthist(image, nx=8, ny=8, clip_limit=0.01, nbins=256, out_range='full'):
     image = convert(image, in_type)
     image = rescale_intensity(image, out_range=out_range)
     return image
-
-if __name__ == '__main__':
-    from skimage import data
-    import matplotlib.pyplot as plt
-    img = skimage.img_as_uint(data.lena())
-    adapted = adapthist(img, nx=10, ny=9, clip_limit=0.01,
-                            nbins=128, out_range='original')
-    plt.imshow(img)
-    plt.figure(); plt.imshow(skimage.img_as_ubyte(adapted))
-    plt.figure(); plt.imshow(color.lab2rgb(color.rgb2lab(img)))
-    plt.show()
-    print 'Done'
