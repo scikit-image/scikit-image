@@ -271,12 +271,16 @@ class AffineTransform(ProjectiveTransform):
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
                  translation=None):
-        if matrix is not None and matrix.shape != (3, 3):
-            raise ValueError("invalid shape of transformation matrix")
         self._matrix = matrix
+        params = any(param is not None
+                     for param in (scale, rotation, shear, translation))
 
-        params = (scale, rotation, shear, translation)
-        if any(param is not None for param in params):
+        if params and matrix is not None:
+            raise ValueError("You cannot specify the transformation matrix and "
+                             "the implicit parameters at the same time.")
+        elif matrix is not None and matrix.shape != (3, 3):
+            raise ValueError("Invalid shape of transformation matrix.")
+        elif params:
             if scale is None:
                 scale = (1, 1)
             if rotation is None:
@@ -344,12 +348,16 @@ class SimilarityTransform(ProjectiveTransform):
 
     def __init__(self, matrix=None, scale=None, rotation=None,
                  translation=None):
-        if matrix is not None and matrix.shape != (3, 3):
-            raise ValueError("invalid shape of transformation matrix")
         self._matrix = matrix
+        params = any(param is not None
+                     for param in (scale, rotation, translation))
 
-        params = (scale, rotation, translation)
-        if any(param is not None for param in params):
+        if params and matrix is not None:
+            raise ValueError("You cannot specify the transformation matrix and "
+                             "the implicit parameters at the same time.")
+        elif matrix is not None and matrix.shape != (3, 3):
+            raise ValueError("Invalid shape of transformation matrix.")
+        elif params:
             if scale is None:
                 scale = 1
             if rotation is None:
