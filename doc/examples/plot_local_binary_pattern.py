@@ -24,6 +24,7 @@ from skimage import data
 METHOD = 'uniform'
 P = 16
 R = 2
+matplotlib.rcParams['font.size'] = 9
 
 
 def kullback_leibler_divergence(p, q):
@@ -64,24 +65,20 @@ print match(refs, nd.rotate(brick, angle=70, reshape=False))
 print match(refs, nd.rotate(grass, angle=145, reshape=False))
 
 # plot histograms of LBP of textures
-matplotlib.rcParams['font.size'] = 9
-plt.figure(figsize=(9, 6))
-plt.subplot(231)
-plt.imshow(brick)
-plt.axis('off')
+fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3,
+                                                       figsize=(9, 6))
 plt.gray()
-plt.subplot(234)
-plt.hist(refs['brick'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
-plt.subplot(232)
-plt.imshow(grass)
-plt.axis('off')
-plt.gray()
-plt.subplot(235)
-plt.hist(refs['grass'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
-plt.subplot(233)
-plt.imshow(wall)
-plt.axis('off')
-plt.gray()
-plt.subplot(236)
-plt.hist(refs['wall'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+
+ax1.imshow(brick)
+ax1.axis('off')
+ax4.hist(refs['brick'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+
+ax2.imshow(grass)
+ax2.axis('off')
+ax5.hist(refs['grass'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+
+ax3.imshow(wall)
+ax3.axis('off')
+ax6.hist(refs['wall'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+
 plt.show()
