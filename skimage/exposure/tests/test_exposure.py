@@ -97,6 +97,7 @@ def test_adapthist_grayscale():
     '''
     img = skimage.img_as_float(data.lena())
     img = rgb2gray(img)
+    img = np.dstack((img, img, img))
     adapted = exposure.adapthist(img, nx=10, ny=9, clip_limit=0.01,
                         nbins=128, out_range='original')
     assert_almost_equal = np.testing.assert_almost_equal
