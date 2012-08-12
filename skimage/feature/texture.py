@@ -228,12 +228,13 @@ def greycoprops(P, prop='contrast'):
 
 
 def local_binary_pattern(image, P, R, method='default'):
-    """Texture classification using gray scale and rotation invariant LBP
-    (Local Binary Patterns).
+    """Gray scale and rotation invariant LBP (Local Binary Patterns).
+
+    LBP is an invariant descriptor that can be used for texture classification.
 
     Parameters
     ----------
-    image : NxM array
+    image : (N, M) array
         graylevel image
     P : int
         number of circularly symmetric neighbour set points (quantization of the
@@ -254,15 +255,16 @@ def local_binary_pattern(image, P, R, method='default'):
 
     Returns
     -------
-    output : NxM array
+    output : (N, M) array
         LBP image
 
     References
     ----------
-    Timo Ojala, Matti Pietikainen, Topi Maenpaa. Multiresolution Gray-Scale and
-        Rotation Invariant Texture Classification with Local Binary Patterns.
-        http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/\
-        Articoliriferimento/LBP.pdf, 2002.
+    .. [1] Multiresolution Gray-Scale and Rotation Invariant Texture
+           Classification with Local Binary Patterns.
+           Timo Ojala, Matti Pietikainen, Topi Maenpaa.
+           http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/\
+           Articoliriferimento/LBP.pdf, 2002.
     """
 
     methods = {
