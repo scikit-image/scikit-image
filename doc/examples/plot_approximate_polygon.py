@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage.draw import ellipse
 from skimage.measure import find_contours, approximate_polygon
-from skimage.morphology import erosion
+
 
 img = np.zeros((800, 800), 'int32')
 
@@ -23,7 +23,6 @@ img[rr, cc] = 1
 plt.gray()
 plt.imshow(img)
 
-strel = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], 'uint8')
 for contour in find_contours(img, 0):
     coords = approximate_polygon(contour, 4)
     plt.plot(coords[:, 1], coords[:, 0], '-r', linewidth=2)
