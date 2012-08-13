@@ -33,8 +33,9 @@ def approximate_polygon(coords, tolerance):
     chain[0] = True
     chain[-1] = True
     pos_stack = [(0, chain.shape[0] - 1)]
+    end_of_chain = False
 
-    while 1:
+    while not end_of_chain:
         start, end = pos_stack.pop()
         # determine properties of current line segment
         r0, c0 = coords[start, :]
@@ -83,6 +84,6 @@ def approximate_polygon(coords, tolerance):
             chain[new_end] = True
 
         if len(pos_stack) == 0:
-            break
+            end_of_chain = True
 
     return coords[chain, :]
