@@ -1,3 +1,9 @@
+skimage (0.7.0-1) unstable; urgency=low
+
+  * Add python-qt4 as a recommended package (Closes: #684753).
+
+ --
+
 skimage (0.6.1-1) unstable; urgency=low
 
   * Upstream bugfix release (correctly compare dtypes in the freeimage loader
