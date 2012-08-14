@@ -26,7 +26,7 @@ def concatenate_images(ic):
 
     See Also
     --------
-    `ImageCollection.concatenate`, `MultiImage.concatenate`
+    ImageCollection.concatenate, MultiImage.concatenate
 
     Raises
     ------
@@ -207,7 +207,7 @@ class MultiImage(object):
 
         See Also
         --------
-        `concatenate_images`
+        concatenate_images
 
         Raises
         ------
@@ -419,7 +419,7 @@ class ImageCollection(object):
 
         See Also
         --------
-        `concatenate_images`
+        concatenate_images
 
         Raises
         ------
