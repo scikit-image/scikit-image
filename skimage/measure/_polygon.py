@@ -7,6 +7,9 @@ def approximate_polygon(coords, tolerance):
 
     It is based on the Douglas-Peucker algorithm.
 
+    Note that the approximated polygon is always within the convex hull of the
+    original polygon.
+
     Parameters
     ----------
     coords : (N, 2) array
@@ -105,6 +108,9 @@ SUBDIVISION_DEGREES = {
 
 def subdivide_polygon(coords, degree=2):
     """Subdivision of polygonal curves using B-Splines.
+
+    Note that the resulting curve is always within the convex hull of the
+    original polygon.
 
     Parameters
     ----------
