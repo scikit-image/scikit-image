@@ -117,7 +117,7 @@ def subdivide_polygon(coords, degree=2):
     ----------
     coords : (N, 2) array
         Coordinate array.
-    method : {1, 2, 3, 4, 5, 6, 7}
+    degree : {1, 2, 3, 4, 5, 6, 7}
         Degree of B-Spline. Default is 2.
 
     Returns
