@@ -93,7 +93,8 @@ def approximate_polygon(coords, tolerance):
     return coords[chain, :]
 
 
-SUBDIVISION_DEGREES = {
+# B-Spline subdivision
+_SUBDIVISION_MASKS = {
     # degree: (mask_even, mask_odd)
     #         extracted from (degree + 2)th row of Pascal's triangle
     1: ([1, 1], [1, 1]),
@@ -128,7 +129,7 @@ def subdivide_polygon(coords, degree=2):
     ----------
     .. [1] http://mrl.nyu.edu/publications/subdiv-course2000/coursenotes00.pdf
     """
-    if degree not in SUBDIVISION_DEGREES:
+    if degree not in _SUBDIVISION_MASKS:
         raise ValueError("Invalid B-Spline degree. Only degree 1 - 7 is "
                          "supported.")
 
@@ -141,10 +142,10 @@ def subdivide_polygon(coords, degree=2):
         # circular convolution by wrapping boundaries
         method = 'same'
 
-    mask_even, mask_odd = SUBDIVISION_DEGREES[degree]
+    mask_even, mask_odd = _SUBDIVISION_MASKS[degree]
     # divide by total weight
-    mask_even = np.array(mask_even, 'float') / 2 ** degree
-    mask_odd = np.array(mask_odd, 'float') / 2 ** degree
+    mask_even = np.array(mask_even, np.float) / (2 ** degree)
+    mask_odd = np.array(mask_odd, np.float) / (2 ** degree)
 
     even = signal.convolve2d(coords.T, np.atleast_2d(mask_even), mode=method,
                              boundary='wrap')
