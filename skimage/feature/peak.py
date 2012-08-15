@@ -95,9 +95,9 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
     # get coordinates of peaks
     coordinates = np.transpose(image_t.nonzero())
 
-    if len(coordinates) > num_peaks:
-        intensities = image[tuple(coordinates.T)]
+    if coordinates.shape[0] > num_peaks:
+        intensities = image[coordinates[:, 0], coordinates[:, 1]]
         idx_maxsort = np.argsort(intensities)[::-1]
-        coordinates = coordinates[idx_maxsort][:2]
+        coordinates = coordinates[idx_maxsort][:num_peaks]
 
     return coordinates
