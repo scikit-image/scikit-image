@@ -9,17 +9,10 @@ algorithm.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import signal
 from skimage.draw import ellipse
-from skimage.measure import find_contours, approximate_polygon
+from skimage.measure import find_contours, approximate_polygon, \
+    subdivide_polygon
 
-
-img = np.zeros((800, 800), 'int32')
-
-rr, cc = ellipse(250, 250, 180, 230, img.shape)
-img[rr, cc] = 1
-rr, cc = ellipse(600, 600, 150, 90, img.shape)
-img[rr, cc] = 1
 
 hand = np.array([[1.64516129, 1.16145833],
                  [1.64516129, 1.59375   ],
@@ -44,17 +37,12 @@ hand = np.array([[1.64516129, 1.16145833],
                  [2.1733871 , 1.703125  ],
                  [2.07782258, 1.16666667]])
 
-
-def doo_sabin_subdivision(points):
-    new_points = np.zeros((2 * (len(points) - 1), 2))
-    new_points[::2] = 3 / 4. * points[:-1] + 1 / 4. * points[1:]
-    new_points[1::2] = 1 / 4. * points[:-1] + 3 / 4. * points[1:]
-    return new_points
-
+# subdivide polygon using 2nd degree B-Splines
 new_hand = hand.copy()
 for _ in range(5):
-    new_hand = doo_sabin_subdivision(new_hand)
+    new_hand = subdivide_polygon(new_hand, degree=2)
 
+# approximate subdivided polygon with Douglas-Peucker algorithm
 appr_hand = approximate_polygon(new_hand, tolerance=0.02)
 
 print "Number of coordinates:", len(hand), len(new_hand), len(appr_hand)
@@ -65,9 +53,18 @@ ax1.plot(hand[:, 0], hand[:, 1])
 ax1.plot(new_hand[:, 0], new_hand[:, 1])
 ax1.plot(appr_hand[:, 0], appr_hand[:, 1])
 
+
+# create two ellipses in image
+img = np.zeros((800, 800), 'int32')
+rr, cc = ellipse(250, 250, 180, 230, img.shape)
+img[rr, cc] = 1
+rr, cc = ellipse(600, 600, 150, 90, img.shape)
+img[rr, cc] = 1
+
 plt.gray()
 ax2.imshow(img)
 
+# approximate / simplify coordinates of the two ellipses
 for contour in find_contours(img, 0):
     coords = approximate_polygon(contour, tolerance=2.5)
     ax2.plot(coords[:, 1], coords[:, 0], '-r', linewidth=2)
