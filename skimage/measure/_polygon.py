@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import signal
 
 
 def approximate_polygon(coords, tolerance):
@@ -87,3 +88,66 @@ def approximate_polygon(coords, tolerance):
             end_of_chain = True
 
     return coords[chain, :]
+
+
+SUBDIVISION_DEGREES = {
+    # degree: (mask_even, mask_odd)
+    #         extracted from (degree + 2)th row of Pascal's triangle
+    1: ([1, 1], [1, 1]),
+    2: ([3, 1], [1, 3]),
+    3: ([1, 6, 1], [0, 4, 4]),
+    4: ([5, 10, 1], [1, 10, 5]),
+    5: ([1, 15, 15, 1], [0, 6, 20, 6]),
+    6: ([7, 35, 21, 1], [1, 21, 35, 7]),
+    7: ([1, 28, 70, 28, 1], [0, 8, 56, 56, 8]),
+}
+
+
+def subdivide_polygon(coords, degree=2):
+    """Subdivision of polygonal curves using B-Splines.
+
+    Parameters
+    ----------
+    coords : (N, 2) array
+        Coordinate array.
+    method : {1, 2, 3, 4, 5, 6, 7}
+        Degree of B-Spline. Default is 2.
+
+    Returns
+    -------
+    coords : (M, 2) array
+        Subdivided coordinate array.
+
+    References
+    ----------
+    .. [1] http://mrl.nyu.edu/publications/subdiv-course2000/coursenotes00.pdf
+    """
+    if degree not in SUBDIVISION_DEGREES:
+        raise ValueError("Invalid B-Spline degree. Only degree 1 - 7 is "
+                         "supported.")
+
+    circular = np.all(coords[0, :] == coords[-1, :])
+
+    method = 'valid'
+    if circular:
+        coords = coords[:-1, :]
+        method = 'same'
+
+    mask_even, mask_odd = SUBDIVISION_DEGREES[degree]
+    mask_even = np.array(mask_even, 'float') / 2 ** degree
+    mask_odd = np.array(mask_odd, 'float') / 2 ** degree
+
+    even = signal.convolve2d(coords.T, np.atleast_2d(mask_even), mode=method,
+                             boundary='wrap')
+    odd = signal.convolve2d(coords.T, np.atleast_2d(mask_odd), mode=method,
+                            boundary='wrap')
+
+    out = np.zeros((even.shape[1] + odd.shape[1], 2))
+    out[1::2] = even.T
+    out[::2] = odd.T
+
+    if circular:
+        # close polygon
+        out = np.vstack([out, out[0, :]])
+
+    return out
