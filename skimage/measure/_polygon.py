@@ -136,10 +136,13 @@ def subdivide_polygon(coords, degree=2):
 
     method = 'valid'
     if circular:
+        # remove last coordinate because of wrapping
         coords = coords[:-1, :]
+        # circular convolution by wrapping boundaries
         method = 'same'
 
     mask_even, mask_odd = SUBDIVISION_DEGREES[degree]
+    # divide by total weight
     mask_even = np.array(mask_even, 'float') / 2 ** degree
     mask_odd = np.array(mask_odd, 'float') / 2 ** degree
 
