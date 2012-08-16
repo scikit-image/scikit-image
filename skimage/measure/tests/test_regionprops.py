@@ -197,6 +197,19 @@ def test_orientation():
     # test correct quadrant determination
     orientation2 = regionprops(SAMPLE.T, ['Orientation'])[0]['Orientation']
     assert_almost_equal(orientation2, math.pi / 2 - orientation)
+    # test diagonal regions
+    diag = np.eye(10, dtype=int)
+    orientation_diag = regionprops(diag, ['Orientation'])[0]['Orientation']
+    assert_almost_equal(orientation_diag, -math.pi / 4)
+    orientation_diag = regionprops(np.flipud(diag), ['Orientation']
+                                  )[0]['Orientation']
+    assert_almost_equal(orientation_diag, math.pi / 4)
+    orientation_diag = regionprops(np.fliplr(diag), ['Orientation']
+                                  )[0]['Orientation']
+    assert_almost_equal(orientation_diag, math.pi / 4)
+    orientation_diag = regionprops(np.fliplr(np.flipud(diag)), ['Orientation']
+                                  )[0]['Orientation']
+    assert_almost_equal(orientation_diag, -math.pi / 4)
 
 def test_perimeter():
     perimeter = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
