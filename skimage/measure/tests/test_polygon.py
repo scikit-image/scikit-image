@@ -25,15 +25,31 @@ def test_approximate_polygon():
 
 
 def test_subdivide_polygon():
-    for degree in range(1, 7):
-        # test circular
-        out = subdivide_polygon(square, degree)
-        np.testing.assert_array_equal(out[-1], out[0])
-        np.testing.assert_equal(out.shape[0], 2 * square.shape[0] - 1)
-        # test non-circular
-        out = subdivide_polygon(square[:-1], degree)
-        mask_len = len(_SUBDIVISION_MASKS[degree][0])
-        np.testing.assert_equal(out.shape[0], 2 * (square.shape[0] - mask_len))
+    new_square1 = square
+    new_square2 = square[:-1]
+    new_square3 = square[:-1]
+    # test iterative subdvision
+    for _ in range(10):
+        square1, square2, square3 = new_square1, new_square2, new_square3
+        # test different B-Spline degrees
+        for degree in range(1, 7):
+            mask_len = len(_SUBDIVISION_MASKS[degree][0])
+            # test circular
+            new_square1 = subdivide_polygon(square1, degree)
+            np.testing.assert_array_equal(new_square1[-1], new_square1[0])
+            np.testing.assert_equal(new_square1.shape[0],
+                                    2 * square1.shape[0] - 1)
+            # test non-circular
+            new_square2 = subdivide_polygon(square2, degree)
+            np.testing.assert_equal(new_square2.shape[0],
+                                    2 * (square2.shape[0] - mask_len + 1))
+            # test non-circular, preserve_ends
+            new_square3 = subdivide_polygon(square3, degree, True)
+            np.testing.assert_equal(new_square3[0], square3[0])
+            np.testing.assert_equal(new_square3[-1], square3[-1])
+            print mask_len
+            np.testing.assert_equal(new_square3.shape[0],
+                                    2 * (square3.shape[0] - mask_len + 2))
 
 
 if __name__ == "__main__":
