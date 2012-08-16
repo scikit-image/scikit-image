@@ -190,6 +190,7 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
     for tfr in range(out_r):
         for tfc in range(out_c):
             tf(tfc, tfr, <double*>M.data, &c, &r)
-            out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows, cols, r, c, mode_c)
+            out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
+                                                   cols, r, c, mode_c)
 
     return out
