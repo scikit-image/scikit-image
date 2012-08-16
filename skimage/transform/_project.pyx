@@ -12,6 +12,22 @@ from libc.math cimport ceil, floor
 cdef inline double bilinear_interpolation(double* image, int rows, int cols,
                                           double r, double c, char mode,
                                           double cval=0):
+    """Bilinear interpolation at a given position in the image.
+
+    Parameters
+    ----------
+    image : double array
+        Input image.
+    rows, cols: int
+        Shape of image.
+    r, c : int
+        Position at which to interpolate.
+    mode : {'C', 'W', 'M'}
+        Wrapping mode. Constant, Wrap or Mirror.
+    cval : double
+        Constant value to use for constant mode.
+
+    """
     cdef double dr, dc
     cdef int minr, minc, maxr, maxc
 
@@ -34,7 +50,7 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
 
     Parameters
     ----------
-    image : array of dtype double
+    image : double array
         Input image.
     rows, cols: int
         Shape of image.
