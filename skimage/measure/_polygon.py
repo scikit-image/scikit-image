@@ -107,18 +107,21 @@ _SUBDIVISION_MASKS = {
 }
 
 
-def subdivide_polygon(coords, degree=2):
+def subdivide_polygon(coords, degree=2, preserve_ends=False):
     """Subdivision of polygonal curves using B-Splines.
 
     Note that the resulting curve is always within the convex hull of the
-    original polygon.
+    original polygon. Circular polygons stay closed after subdivision.
 
     Parameters
     ----------
     coords : (N, 2) array
         Coordinate array.
-    degree : {1, 2, 3, 4, 5, 6, 7}
+    degree : {1, 2, 3, 4, 5, 6, 7}, optional
         Degree of B-Spline. Default is 2.
+    preserve_ends : bool, optional
+        Preserve first and last coordinate of non-circular polygon. Default is
+        False.
 
     Returns
     -------
@@ -159,5 +162,8 @@ def subdivide_polygon(coords, degree=2):
     if circular:
         # close polygon
         out = np.vstack([out, out[0, :]])
+
+    if preserve_ends and not circular:
+        out = np.vstack([coords[0, :], out, coords[-1, :]])
 
     return out
