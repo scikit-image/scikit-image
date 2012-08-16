@@ -16,7 +16,8 @@ def configuration(parent_package='', top_path=None):
     cython(['_template.pyx'], working_path=base_path)
 
     config.add_extension('_texture', sources=['_texture.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs(),
+                                       '../transform'])
     config.add_extension('_template', sources=['_template.c'],
                          include_dirs=[get_numpy_include_dirs()])
 

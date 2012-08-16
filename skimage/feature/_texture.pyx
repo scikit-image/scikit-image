@@ -1,10 +1,13 @@
+#cython: cdivison=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
 cimport numpy as np
-cimport cython
-from libc.math cimport sin, cos, abs, ceil, floor
+from libc.math cimport sin, cos, abs
+from skimage.transform._project cimport bilinear_interpolation
 
 
-@cython.boundscheck(False)
 def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
                           negative_indices=False, mode='c'] image,
                np.ndarray[dtype=np.float64_t, ndim=1,
@@ -62,42 +65,7 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
                             out[i, j, d_idx, a_idx] += 1
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
-@cython.cdivision(True)
-cdef _bilinear_interpolation(np.ndarray[double, ndim=2] image,
-                             np.ndarray[double, ndim=2] coords,
-                             np.ndarray[double, ndim=1] output,
-                             double r0=0, double c0=0, double cval=0):
-    cdef double r, c, dr, dc
-    cdef int i, minr, minc, maxr, maxc
-
-    for i in range(coords.shape[0]):
-        r = r0 + coords[i, 0]
-        c = c0 + coords[i, 1]
-        minr = <int>floor(r)
-        minc = <int>floor(c)
-        maxr = <int>ceil(r)
-        maxc = <int>ceil(c)
-        dr = r - minr
-        dc = c - minc
-        if (
-            minr < 0 or maxr >= image.shape[0]
-            or minc < 0 or maxc >= image.shape[1]
-        ):
-            output[i] = cval
-        else:
-            top = (1 - dc) * image[minr, minc] + dc * image[minr, maxc]
-            bottom = (1 - dc) * image[maxr, minc] + dc * image[maxr, maxc]
-            output[i] = (1 - dr) * top + dr * bottom
-
-
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
-@cython.cdivision(True)
-cdef int _bit_rotate_right(int value, int length):
+cdef inline int _bit_rotate_right(int value, int length):
     """Cyclic bit shift to the right.
 
     Parameters
@@ -111,10 +79,6 @@ cdef int _bit_rotate_right(int value, int length):
     return (value >> 1) | ((value & 1) << (length - 1))
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
-@cython.cdivision(True)
 def _local_binary_pattern(np.ndarray[double, ndim=2] image,
                           int P, float R, int method=0):
     # texture weights
@@ -132,11 +96,16 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
     output_shape = (image.shape[0], image.shape[1])
     cdef np.ndarray[double, ndim=2] output = np.zeros(output_shape, 'double')
 
+    cdef int rows = image.shape[0]
+    cdef int cols = image.shape[1]
+
     cdef double lbp
     cdef int r, c, changes, i
     for r in range(image.shape[0]):
         for c in range(image.shape[1]):
-            _bilinear_interpolation(image, coords, texture, r, c)
+            for i in range(P):
+                texture[i] = bilinear_interpolation(<double*>image.data,
+                    rows, cols, r + coords[i, 0], c + coords[i, 1], 'C')
             # signed / thresholded texture
             for i in range(P):
                 if texture[i] - image[r, c] >= 0:
