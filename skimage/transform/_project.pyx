@@ -108,7 +108,8 @@ cdef inline int coord_map(int dim, int coord, char mode):
     return coord
 
 
-cdef inline tf(double x, double y, double* H, double *x_, double *y_):
+cdef inline _matrix_transform(double x, double y, double* H, double *x_,
+                              double *y_):
     """Apply a homography to a coordinate.
 
     Parameters
@@ -205,7 +206,7 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
 
     for tfr in range(out_r):
         for tfc in range(out_c):
-            tf(tfc, tfr, <double*>M.data, &c, &r)
+            _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
             out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
                                                    cols, r, c, mode_c)
 
