@@ -40,7 +40,7 @@ hand = np.array([[1.64516129, 1.16145833],
 # subdivide polygon using 2nd degree B-Splines
 new_hand = hand.copy()
 for _ in range(5):
-    new_hand = subdivide_polygon(new_hand, degree=2)
+    new_hand = subdivide_polygon(new_hand, degree=2, preserve_ends=True)
 
 # approximate subdivided polygon with Douglas-Peucker algorithm
 appr_hand = approximate_polygon(new_hand, tolerance=0.02)
