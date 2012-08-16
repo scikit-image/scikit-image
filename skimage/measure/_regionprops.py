@@ -124,7 +124,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         * Orientation : float
             Angle between the X-axis and the major axis of the ellipse that has
             the same second-moments as the region. Ranging from `-pi/2` to
-            `-pi/2` in counter-clockwise direction.
+            `pi/2` in counter-clockwise direction.
         * Perimeter : float
             Perimeter of object which approximates the contour as a line through
             the centers of border pixels using a 4-connectivity.
@@ -299,7 +299,10 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
 
         if 'Orientation' in properties:
             if a - c == 0:
-                obj_props['Orientation'] = PI / 2
+                if b > 0:
+                    obj_props['Orientation'] = -PI / 4.
+                else:
+                    obj_props['Orientation'] = PI / 4.
             else:
                 obj_props['Orientation'] = - 0.5 * atan2(2 * b, (a - c))
 
