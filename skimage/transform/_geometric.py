@@ -297,6 +297,11 @@ class AffineTransform(ProjectiveTransform):
                 [                      0,                                 0, 1]
             ])
             self._matrix[0:2, 2] = translation
+        else:
+            # -- Default to an identity transform
+            self._matrix = np.asarray(
+                    [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+                    dtype='float64')
 
     @property
     def scale(self):
