@@ -15,7 +15,7 @@ def configuration(parent_package='', top_path=None):
     cython(['ccomp.pyx'], working_path=base_path)
     cython(['cmorph.pyx'], working_path=base_path)
     cython(['_watershed.pyx'], working_path=base_path)
-    cython(['_skeletonize.pyx'], working_path=base_path)
+    cython(['_skeletonize_cy.pyx'], working_path=base_path)
     cython(['_pnpoly.pyx'], working_path=base_path)
     cython(['_convex_hull.pyx'], working_path=base_path)
 
@@ -25,7 +25,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_watershed', sources=['_watershed.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_skeletonize', sources=['_skeletonize.c'],
+    config.add_extension('_skeletonize_cy', sources=['_skeletonize_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_pnpoly', sources=['_pnpoly.c'],
                          include_dirs=[get_numpy_include_dirs()])
