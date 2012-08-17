@@ -721,7 +721,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     mode : string
         How to handle values outside the image borders.  See
         `scipy.ndimage.map_coordinates` for detail.
-    cval : string
+    cval : float
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
