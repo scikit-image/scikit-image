@@ -771,4 +771,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     # The spline filters sometimes return results outside [0, 1],
     # so clip to ensure valid data
-    return np.clip(mapped.squeeze(), 0, 1)
+    clipped = np.clip(mapped, 0, 1)
+    if mode == 'constant' and not (0 <= cval <= 1):
+        clipped[mapped == cval] = cval
+
+    # Remove singleton dim introduced by atleast_3d
+    return clipped.squeeze()
