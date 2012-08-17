@@ -84,23 +84,36 @@ peaks on the left to go undetected.
 
 Morphological reconstruction
 ============================
+
+Morphological reconstruction uses two images: a seed image and a mask image.
+Initially, all values of the reconstructed image start off pixel at the values
+of the seed image. A seed pixels of high intensity spread outwards until it
+hits the mask image (i.e. the mask value for a pixel is lower than the
+high-intensity value). Note that the mask is a gray-scale image that limits the
+maximum intensity at a pixel. This algorithm is clearer with pictures, which
+we generate below.
+
+One common case uses mask and seed images derived from the same image but
+shifted in intensity. Note: be careful when shifting images integer values,
+since this can lead to under/overflow of values. To prevent the uint8 image we
+started with from underflowing during subtraction, we first convert to float:
 """
 
-import numpy as np
-img_r = np.int32(img_smooth)
+from skimage import img_as_float
+img_r = img_as_float(img_smooth)
 
 import skimage.morphology as morph
-h = 20
+h = 0.1
 rec = morph.reconstruction(img_r-h, img_r)
 
-imshow(img_r, vmin=0, vmax=255)
+imshow(img_r, vmin=0, vmax=1)
 plt.title("original (smoothed) image")
 
 """
 .. image:: PLOT2RST.current_figure
 """
 
-imshow(rec, vmin=0, vmax=255)
+imshow(rec, vmin=0, vmax=1)
 plt.title("background image (reconstruction)")
 
 """
@@ -156,10 +169,10 @@ features.
 White tophat
 ============
 """
+
 selem = morph.disk(10)
-img_t = np.uint8(img_smooth)
-opening = morph.opening(img_t, selem)
-top_hat = img_t - opening
+opening = morph.opening(img_smooth, selem)
+top_hat = img_smooth - opening
 
 imshow(opening, vmin=0, vmax=255)
 plt.title("Greyscale opening of image")
@@ -177,7 +190,7 @@ plt.title("Tophat with disk of r = 10")
 """
 
 selem = morph.disk(5)
-top_hat = morph.white_tophat(img_t, selem)
+top_hat = morph.white_tophat(img_smooth, selem)
 
 imshow(top_hat)
 plt.title("Tophat with disk of r = 5")
@@ -187,11 +200,11 @@ plt.title("Tophat with disk of r = 5")
 """
 
 selem = morph.square(20)
-opening = morph.opening(img_t, selem)
+opening = morph.opening(img_smooth, selem)
 # scikit's top hat filter uses uint8 and doesn't check for over(under)flow.
-mask = opening > img_t
-opening[mask] = img_t[mask]
-top_hat = img_t - opening
+mask = opening > img_smooth
+opening[mask] = img_smooth[mask]
+top_hat = img_smooth - opening
 
 imshow(opening, vmin=0, vmax=255)
 plt.title("Greyscale opening of image")
