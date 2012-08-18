@@ -3,7 +3,7 @@ from scipy import ndimage
 from skimage import data
 from skimage import feature
 from skimage import img_as_float
-from skimage import draw
+from skimage.draw import draw
 from numpy.testing import *
 
 def test_histogram_of_oriented_gradients():
@@ -32,6 +32,8 @@ def test_hog_basic_orientations_and_data_types():
     #  4) verify that all results are equal where expected
     #  5) verify that computed feature vector is as expected
     #  6) repeat the scenario for 90, 180 and 270 degrees rotated images
+    #
+    # author: Pavel Campr
 
     # size of testing image
     width = height = 35
@@ -58,7 +60,7 @@ def test_hog_basic_orientations_and_data_types():
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
         if False:
-            from pylab import *
+            import matplotlib.pyplot as plt
             plt.figure()
             plt.subplot(2, 3, 1); plt.imshow(image_float); plt.colorbar(); plt.title('image')
             plt.subplot(2, 3, 2); plt.imshow(hog_img_float); plt.colorbar(); plt.title('HOG result visualisation (float img)')
@@ -85,6 +87,8 @@ def test_hog_basic_orientations_and_data_types():
         elif rot in [1, 3]:
             # image is rotated by 90 and 270 degrees
             desired = [1, 0, 0, 0]
+        else:
+            raise Exception('Result is not determined for this rotation.')
 
         assert_almost_equal(actual, desired, decimal=2)
 
@@ -95,6 +99,8 @@ def test_hog_orientations_circle():
     #  3) verify that the resulting feature vector contains uniformly distributed values for all orientations,
     #     i.e. no orientation is lost or emphasized
     #  4) repeat the scenario for other 'orientations' option
+    #
+    # author: Pavel Campr
 
     # size of testing image
     width = height = 100
@@ -111,8 +117,7 @@ def test_hog_orientations_circle():
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
         if False:
-            from pylab import *
-
+            import matplotlib.pyplot as plt
             plt.figure()
             plt.subplot(1, 2, 1); plt.imshow(image); plt.colorbar(); plt.title('image_float')
             plt.subplot(1, 2, 2); plt.imshow(hog_img); plt.colorbar(); plt.title('HOG result visualisation, orientations=%d' % (orientations))
