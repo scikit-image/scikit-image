@@ -1,5 +1,6 @@
 """
-`reconstruction` originally part of CellProfiler, code licensed under both GPL and BSD licenses.
+`reconstruction` originally part of CellProfiler, code licensed under both GPL
+and BSD licenses.
 
 Website: http://www.cellprofiler.org
 Copyright (c) 2003-2009 Massachusetts Institute of Technology
@@ -14,17 +15,18 @@ from skimage.filter.rank_order import rank_order
 
 
 def reconstruction(image, mask, selem=None, offset=None):
-    """Perform a morphological reconstruction of the image.
+    """Perform a morphological reconstruction of an image.
 
-    Reconstruction requires a "seed" image and a "mask" image. The seed image
-    gets dilated until it is constrained by the mask. The "seed" and "mask"
+    Reconstruction requires a "seed" image and a "mask" image. Currently, this
+    only implements reconstruction by dilation, such that the seed image is
+    dilated until it is constrained by the mask. Thus, he "seed" and "mask"
     images will be the minimum and maximum possible values of the reconstructed
     image, respectively.
 
     Parameters
     ----------
     image : ndarray
-        The seed image.
+        The seed image; a.k.a. marker image.
     mask : ndarray
         The maximum allowed value at each point.
     selem : ndarray
@@ -42,9 +44,13 @@ def reconstruction(image, mask, selem=None, offset=None):
     Pattern Recognition Letters 25 (2004) 1759-1767.
 
     Applications for greyscale reconstruction are discussed in:
-    Vincent, L., "Morphological Grayscale Reconstruction in Image Analysis:
-    Applications and Efficient Algorithms", IEEE Transactions on Image
-    Processing (1993)
+
+    [1] Vincent, L., "Morphological Grayscale Reconstruction in Image Analysis:
+        Applications and Efficient Algorithms", IEEE Transactions on Image
+        Processing (1993)
+
+    [2] Soille, P., "Morphological Image Analysis: Principles and Applications",
+        Chapter 6, 2nd edition (2003), ISBN 3540429883.
 
     Examples
     --------
@@ -98,27 +104,27 @@ def reconstruction(image, mask, selem=None, offset=None):
     # Cross out the center of the selem
     selem[[slice(d, d + 1) for d in offset]] = False
 
-    # Construct an array that's padded on the edges so we can ignore boundaries
-    # The array is a dstack of the image and the mask; this lets us interleave
-    # image and mask pixels when sorting which makes list manipulations easier
+    # Make padding for edges of reconstructed image so we can ignore boundaries
     padding = (np.array(selem.shape) / 2).astype(int)
     dims = np.zeros(image.ndim + 1, dtype=int)
     dims[1:] = np.array(image.shape) + 2 * padding
     dims[0] = 2
     inside_slices = [slice(p, -p) for p in padding]
+    # Set padded region to minimum image intensity and mask along first axis so
+    # we can interleave image and mask pixels when sorting.
     values = np.ones(dims) * np.min(image)
     values[[0] + inside_slices] = image
     values[[1] + inside_slices] = mask
 
-    # Create a list of strides across the array to get the neighbors
-    # within a flattened array
+    # Create a list of strides across the array to get the neighbors within
+    # a flattened array
     value_stride = np.array(values.strides[1:]) / values.dtype.itemsize
     image_stride = values.strides[0] / values.dtype.itemsize
     selem_mgrid = np.mgrid[[slice(-o, d - o)
                             for d, o in zip(selem.shape, offset)]]
     selem_offsets = selem_mgrid[:, selem].transpose()
-    strides = np.array([np.sum(value_stride * selem_offset)
-                        for selem_offset in selem_offsets], np.int32)
+    nb_strides = np.array([np.sum(value_stride * selem_offset)
+                           for selem_offset in selem_offsets], np.int32)
     values = values.flatten()
     value_sort = np.lexsort([-values]).astype(np.int32)
 
@@ -130,10 +136,11 @@ def reconstruction(image, mask, selem=None, offset=None):
 
     # Create a rank-order value array so that the Cython inner-loop
     # can operate on a uniform data type
+    # fragile: `reconstruction_loop` needs 'uint32' conversion by `rank_order`
     values, value_map = rank_order(values)
     current = value_sort[0]
 
-    reconstruction_loop(values, prev, next, strides, current, image_stride)
+    reconstruction_loop(values, prev, next, nb_strides, current, image_stride)
 
     # Reshape the values array to the shape of the padded image
     # and return the unpadded portion of that result
