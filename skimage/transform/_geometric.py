@@ -298,10 +298,8 @@ class AffineTransform(ProjectiveTransform):
             ])
             self._matrix[0:2, 2] = translation
         else:
-            # -- Default to an identity transform
-            self._matrix = np.asarray(
-                    [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
-                    dtype='float64')
+            # Default to an identity transform
+            self._matrix = np.eye(3)
 
     @property
     def scale(self):
@@ -377,6 +375,9 @@ class SimilarityTransform(ProjectiveTransform):
             ])
             self._matrix *= scale
             self._matrix[0:2, 2] = translation
+        else:
+            # Default to an identity transform
+            self._matrix = np.eye(3)
 
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit parameters.
