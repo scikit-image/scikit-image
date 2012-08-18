@@ -14,14 +14,12 @@ import numpy as np
 from skimage.filter.rank_order import rank_order
 
 
-def reconstruction(image, mask, selem=None, offset=None):
+def reconstruction(image, mask, selem=None, offset=None, method='dilation'):
     """Perform a morphological reconstruction of an image.
 
-    Reconstruction requires a "seed" image and a "mask" image. Currently, this
-    only implements reconstruction by dilation, such that the seed image is
-    dilated until it is constrained by the mask. Thus, he "seed" and "mask"
-    images will be the minimum and maximum possible values of the reconstructed
-    image, respectively.
+    Reconstruction requires a "seed" image and a "mask" image of equal shape.
+    These images set the minimum and maximum possible values of the
+    reconstructed image.
 
     Parameters
     ----------
@@ -31,6 +29,11 @@ def reconstruction(image, mask, selem=None, offset=None):
         The maximum allowed value at each point.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
+    method : {'dilation'|'erosion'}
+        Perform reconstruction by dilation or erosion. In dilation (erosion),
+        the seed image is dilated (eroded) until limited by the mask image.
+        For dilation, each seed value must be less than or equal to the
+        corresponding mask value; for erosion, the reverse is true.
 
     Returns
     -------
@@ -48,7 +51,6 @@ def reconstruction(image, mask, selem=None, offset=None):
     [1] Vincent, L., "Morphological Grayscale Reconstruction in Image Analysis:
         Applications and Efficient Algorithms", IEEE Transactions on Image
         Processing (1993)
-
     [2] Soille, P., "Morphological Image Analysis: Principles and Applications",
         Chapter 6, 2nd edition (2003), ISBN 3540429883.
 
@@ -62,7 +64,7 @@ def reconstruction(image, mask, selem=None, offset=None):
     we want to extract:
 
     >>> import numpy as np
-    >>> from scikits.image.morphology.grey import grey_reconstruction
+    >>> from skimage.morphology import reconstruction
     >>> y, x = np.mgrid[:20:0.5, :20:0.5]
     >>> bumps = np.sin(x) + np.sin(y)
 
@@ -71,7 +73,7 @@ def reconstruction(image, mask, selem=None, offset=None):
 
     >>> h = 0.3
     >>> seed = bumps - h
-    >>> rec = grey_reconstruction(seed, bumps)
+    >>> rec = reconstruction(seed, bumps)
 
     The resulting reconstructed image looks exactly like the original image,
     but with the peaks of the bumps cut off. Subtracting this reconstructed
@@ -86,7 +88,12 @@ def reconstruction(image, mask, selem=None, offset=None):
 
     """
     assert tuple(image.shape) == tuple(mask.shape)
-    assert np.all(image <= mask)
+    if method == 'dilation' and np.any(image > mask):
+        raise ValueError("Intensity of seed image must be less than that "
+                         "of the mask image for reconstruction by dilation.")
+    elif method == 'erosion' and np.any(image < mask):
+        raise ValueError("Intensity of seed image must be greater than that "
+                         "of the mask image for reconstruction by erosion.")
     try:
         from ._greyreconstruct import reconstruction_loop
     except ImportError:
@@ -112,7 +119,11 @@ def reconstruction(image, mask, selem=None, offset=None):
     inside_slices = [slice(p, -p) for p in padding]
     # Set padded region to minimum image intensity and mask along first axis so
     # we can interleave image and mask pixels when sorting.
-    values = np.ones(dims) * np.min(image)
+    if method == 'dilation':
+        pad_value = np.min(image)
+    elif method == 'erosion':
+        pad_value = np.max(image)
+    values = np.ones(dims) * pad_value
     values[[0] + inside_slices] = image
     values[[1] + inside_slices] = mask
 
@@ -126,23 +137,30 @@ def reconstruction(image, mask, selem=None, offset=None):
     nb_strides = np.array([np.sum(value_stride * selem_offset)
                            for selem_offset in selem_offsets], np.int32)
     values = values.flatten()
-    value_sort = np.lexsort([-values]).astype(np.int32)
+    index_sorted = np.argsort(-values).astype(np.int32)
+    if method == 'erosion':
+        index_sorted = index_sorted[::-1]
 
     # Make a linked list of pixels sorted by value. -1 is the list terminator.
     prev = -np.ones(len(values), np.int32)
     next = -np.ones(len(values), np.int32)
-    prev[value_sort[1:]] = value_sort[:-1]
-    next[value_sort[:-1]] = value_sort[1:]
+    prev[index_sorted[1:]] = index_sorted[:-1]
+    next[index_sorted[:-1]] = index_sorted[1:]
 
     # Create a rank-order value array so that the Cython inner-loop
     # can operate on a uniform data type
-    rec_img, value_map = rank_order(values)
-    current = value_sort[0]
+    if method == 'dilation':
+        value_rank, value_map = rank_order(values)
+    elif method == 'erosion':
+        value_rank, value_map = rank_order(-values)
+        value_map = -value_map
+    current = index_sorted[0]
 
-    reconstruction_loop(rec_img, prev, next, nb_strides, current, image_stride)
+    reconstruction_loop(value_rank, prev, next, nb_strides, current,
+                        image_stride)
 
     # Reshape reconstructed image to original image shape and remove padding.
-    rec_img = value_map[rec_img[:image_stride]]
+    rec_img = value_map[value_rank[:image_stride]]
     rec_img.shape = np.array(image.shape) + 2 * padding
     return rec_img[inside_slices]
 
