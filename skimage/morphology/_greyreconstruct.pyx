@@ -18,14 +18,14 @@ cimport cython
 
 @cython.boundscheck(False)
 def reconstruction_loop(np.ndarray[dtype=np.uint32_t, ndim=1,
-                                   negative_indices=False, mode='c'] avalues,
+                                   negative_indices=False, mode='c'] rank_array,
                         np.ndarray[dtype=np.int32_t, ndim=1,
                                    negative_indices=False, mode='c'] aprev,
                         np.ndarray[dtype=np.int32_t, ndim=1,
                                    negative_indices=False, mode='c'] anext,
                         np.ndarray[dtype=np.int32_t, ndim=1,
                                    negative_indices=False, mode='c'] astrides,
-                        np.int32_t current,
+                        np.int32_t current_idx,
                         int image_stride):
     """The inner loop for reconstruction.
 
@@ -41,66 +41,66 @@ def reconstruction_loop(np.ndarray[dtype=np.uint32_t, ndim=1,
 
     Parameters
     ----------
-    avalues : array
+    rank_array : array
         The rank order of the flattened seed and mask images.
     aprev, anext: arrays
         Indices of previous and next pixels in rank sorted order.
     astrides : array
         Strides to neighbors of the current pixel.
-    current : int
+    current_idx : int
         Index of lowest-ranked pixel used as starting point in reconstruction
         loop.
     image_stride : int
-        Stride between seed image and mask image in `avalues`.
+        Stride between seed image and mask image in `rank_array`.
     """
     cdef:
-        np.int32_t neighbor
-        np.uint32_t neighbor_value
-        np.uint32_t current_value
-        np.uint32_t mask_value
+        np.int32_t neighbor_idx
+        np.uint32_t neighbor_rank
+        np.uint32_t current_rank
+        np.uint32_t mask_rank
         np.int32_t current_link
         int i
         np.int32_t nprev
         np.int32_t nnext
         int nstrides = astrides.shape[0]
-        np.uint32_t *values = <np.uint32_t *>(avalues.data)
+        np.uint32_t *ranks = <np.uint32_t *>(rank_array.data)
         np.int32_t *prev = <np.int32_t *>(aprev.data)
         np.int32_t *next = <np.int32_t *>(anext.data)
         np.int32_t *strides = <np.int32_t *>(astrides.data)
 
-    while current != -1:
-        if current < image_stride:
-            current_value = values[current]
-            if current_value == 0:
+    while current_idx != -1:
+        if current_idx < image_stride:
+            current_rank = ranks[current_idx]
+            if current_rank == 0:
                 break
             for i in range(nstrides):
-                neighbor = current + strides[i]
-                neighbor_value = values[neighbor]
+                neighbor_idx = current_idx + strides[i]
+                neighbor_rank = ranks[neighbor_idx]
                 # Only propagate neighbors ranked below the current rank
-                if neighbor_value < current_value:
-                    mask_value = values[neighbor + image_stride]
+                if neighbor_rank < current_rank:
+                    mask_rank = ranks[neighbor_idx + image_stride]
                     # Only propagate neighbors ranked below the mask rank
-                    if neighbor_value < mask_value:
+                    if neighbor_rank < mask_rank:
                         # Raise the neighbor to the mask rank if
                         # the mask ranked below the current rank
-                        if mask_value < current_value:
-                            current_link = neighbor + image_stride
-                            values[neighbor] = mask_value
+                        if mask_rank < current_rank:
+                            current_link = neighbor_idx + image_stride
+                            ranks[neighbor_idx] = mask_rank
                         else:
-                            current_link = current
-                            values[neighbor] = current_value
+                            current_link = current_idx
+                            ranks[neighbor_idx] = current_rank
                         # unlink the neighbor
-                        nprev = prev[neighbor]
-                        nnext = next[neighbor]
+                        nprev = prev[neighbor_idx]
+                        nnext = next[neighbor_idx]
                         next[nprev] = nnext
                         if nnext != -1:
                             prev[nnext] = nprev
                         # link to the neighbor after the current link
                         nnext = next[current_link]
-                        next[neighbor] = nnext
-                        prev[neighbor] = current_link
+                        next[neighbor_idx] = nnext
+                        prev[neighbor_idx] = current_link
                         if nnext >= 0:
-                            prev[nnext] = neighbor
-                            next[current_link] = neighbor
-        current = next[current]
+                            prev[nnext] = neighbor_idx
+                            next[current_link] = neighbor_idx
+        current_idx = next[current_idx]
 

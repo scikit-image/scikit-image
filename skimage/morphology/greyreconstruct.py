@@ -1,6 +1,6 @@
 """
-`reconstruction` originally part of CellProfiler, code licensed under both GPL
-and BSD licenses.
+This morphological reconstruction routine was adapted from CellProfiler, code
+licensed under both GPL and BSD licenses.
 
 Website: http://www.cellprofiler.org
 Copyright (c) 2003-2009 Massachusetts Institute of Technology
@@ -14,7 +14,7 @@ import numpy as np
 from skimage.filter.rank_order import rank_order
 
 
-def reconstruction(image, mask, selem=None, offset=None, method='dilation'):
+def reconstruction(seed, mask, selem=None, offset=None, method='dilation'):
     """Perform a morphological reconstruction of an image.
 
     Reconstruction requires a "seed" image and a "mask" image of equal shape.
@@ -23,7 +23,7 @@ def reconstruction(image, mask, selem=None, offset=None, method='dilation'):
 
     Parameters
     ----------
-    image : ndarray
+    seed : ndarray
         The seed image; a.k.a. marker image.
     mask : ndarray
         The maximum allowed value at each point.
@@ -87,11 +87,11 @@ def reconstruction(image, mask, selem=None, offset=None, method='dilation'):
     transforms, but don't require a structuring element.
 
     """
-    assert tuple(image.shape) == tuple(mask.shape)
-    if method == 'dilation' and np.any(image > mask):
+    assert tuple(seed.shape) == tuple(mask.shape)
+    if method == 'dilation' and np.any(seed > mask):
         raise ValueError("Intensity of seed image must be less than that "
                          "of the mask image for reconstruction by dilation.")
-    elif method == 'erosion' and np.any(image < mask):
+    elif method == 'erosion' and np.any(seed < mask):
         raise ValueError("Intensity of seed image must be greater than that "
                          "of the mask image for reconstruction by erosion.")
     try:
@@ -100,7 +100,7 @@ def reconstruction(image, mask, selem=None, offset=None, method='dilation'):
         raise ImportError("_greyreconstruct extension not available.")
 
     if selem is None:
-        selem = np.ones([3]*image.ndim, dtype=bool)
+        selem = np.ones([3] * seed.ndim, dtype=bool)
     else:
         selem = selem.copy()
 
@@ -113,54 +113,55 @@ def reconstruction(image, mask, selem=None, offset=None, method='dilation'):
 
     # Make padding for edges of reconstructed image so we can ignore boundaries
     padding = (np.array(selem.shape) / 2).astype(int)
-    dims = np.zeros(image.ndim + 1, dtype=int)
-    dims[1:] = np.array(image.shape) + 2 * padding
+    dims = np.zeros(seed.ndim + 1, dtype=int)
+    dims[1:] = np.array(seed.shape) + 2 * padding
     dims[0] = 2
     inside_slices = [slice(p, -p) for p in padding]
     # Set padded region to minimum image intensity and mask along first axis so
     # we can interleave image and mask pixels when sorting.
     if method == 'dilation':
-        pad_value = np.min(image)
+        pad_value = np.min(seed)
     elif method == 'erosion':
-        pad_value = np.max(image)
-    values = np.ones(dims) * pad_value
-    values[[0] + inside_slices] = image
-    values[[1] + inside_slices] = mask
+        pad_value = np.max(seed)
+    images = np.ones(dims) * pad_value
+    images[[0] + inside_slices] = seed
+    images[[1] + inside_slices] = mask
 
     # Create a list of strides across the array to get the neighbors within
     # a flattened array
-    value_stride = np.array(values.strides[1:]) / values.dtype.itemsize
-    image_stride = values.strides[0] / values.dtype.itemsize
+    value_stride = np.array(images.strides[1:]) / images.dtype.itemsize
+    image_stride = images.strides[0] / images.dtype.itemsize
     selem_mgrid = np.mgrid[[slice(-o, d - o)
                             for d, o in zip(selem.shape, offset)]]
     selem_offsets = selem_mgrid[:, selem].transpose()
     nb_strides = np.array([np.sum(value_stride * selem_offset)
                            for selem_offset in selem_offsets], np.int32)
-    values = values.flatten()
-    index_sorted = np.argsort(-values).astype(np.int32)
-    if method == 'erosion':
+
+    images = images.flatten()
+
+    # Erosion goes smallest to largest; dilation goes largest to smallest.
+    index_sorted = np.argsort(images).astype(np.int32)
+    if method == 'dilation':
         index_sorted = index_sorted[::-1]
 
     # Make a linked list of pixels sorted by value. -1 is the list terminator.
-    prev = -np.ones(len(values), np.int32)
-    next = -np.ones(len(values), np.int32)
+    prev = -np.ones(len(images), np.int32)
+    next = -np.ones(len(images), np.int32)
     prev[index_sorted[1:]] = index_sorted[:-1]
     next[index_sorted[:-1]] = index_sorted[1:]
 
-    # Create a rank-order value array so that the Cython inner-loop
-    # can operate on a uniform data type
+    # Cython inner-loop compares the rank of pixel values.
     if method == 'dilation':
-        value_rank, value_map = rank_order(values)
+        value_rank, value_map = rank_order(images)
     elif method == 'erosion':
-        value_rank, value_map = rank_order(-values)
+        value_rank, value_map = rank_order(-images)
         value_map = -value_map
-    current = index_sorted[0]
 
-    reconstruction_loop(value_rank, prev, next, nb_strides, current,
-                        image_stride)
+    start = index_sorted[0]
+    reconstruction_loop(value_rank, prev, next, nb_strides, start, image_stride)
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]
-    rec_img.shape = np.array(image.shape) + 2 * padding
+    rec_img.shape = np.array(seed.shape) + 2 * padding
     return rec_img[inside_slices]
 
