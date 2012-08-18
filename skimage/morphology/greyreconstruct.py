@@ -136,15 +136,13 @@ def reconstruction(image, mask, selem=None, offset=None):
 
     # Create a rank-order value array so that the Cython inner-loop
     # can operate on a uniform data type
-    # fragile: `reconstruction_loop` needs 'uint32' conversion by `rank_order`
-    values, value_map = rank_order(values)
+    rec_img, value_map = rank_order(values)
     current = value_sort[0]
 
-    reconstruction_loop(values, prev, next, nb_strides, current, image_stride)
+    reconstruction_loop(rec_img, prev, next, nb_strides, current, image_stride)
 
-    # Reshape the values array to the shape of the padded image
-    # and return the unpadded portion of that result
-    values = value_map[values[:image_stride]]
-    values.shape = np.array(image.shape) + 2 * padding
-    return values[inside_slices]
+    # Reshape reconstructed image to original image shape and remove padding.
+    rec_img = value_map[rec_img[:image_stride]]
+    rec_img.shape = np.array(image.shape) + 2 * padding
+    return rec_img[inside_slices]
 
