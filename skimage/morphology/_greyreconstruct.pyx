@@ -18,26 +18,47 @@ cimport cython
 
 @cython.boundscheck(False)
 def reconstruction_loop(np.ndarray[dtype=np.uint32_t, ndim=1,
-                                   negative_indices = False,
-                                   mode = 'c'] avalues,
+                                   negative_indices=False, mode='c'] avalues,
                         np.ndarray[dtype=np.int32_t, ndim=1,
-                                   negative_indices = False,
-                                   mode = 'c'] aprev,
+                                   negative_indices=False, mode='c'] aprev,
                         np.ndarray[dtype=np.int32_t, ndim=1,
-                                   negative_indices = False,
-                                   mode = 'c'] anext,
+                                   negative_indices=False, mode='c'] anext,
                         np.ndarray[dtype=np.int32_t, ndim=1,
-                                   negative_indices = False,
-                                   mode = 'c'] astrides,
+                                   negative_indices=False, mode='c'] astrides,
                         np.int32_t current,
                         int image_stride):
-    """The inner loop for reconstruction"""
+    """The inner loop for reconstruction.
+
+    This algorithm uses the rank-order of pixels. If low intensity pixels have
+    a low rank and high intensity pixels have a high rank, then this loop
+    performs reconstruction by dilation. If this ranking is reversed, the
+    result is reconstruction by erosion.
+
+    For each pixel in the seed image, check its neighbors. If its neighbor's
+    rank is below that of the current pixel, replace the neighbor's rank with
+    the rank of the current pixel. This dilation is limited by the mask, i.e.
+    the rank at each pixel cannot exceed the mask as that pixel.
+
+    Parameters
+    ----------
+    avalues : array
+        The rank order of the flattened seed and mask images.
+    aprev, anext: arrays
+        Indices of previous and next pixels in rank sorted order.
+    astrides : array
+        Strides to neighbors of the current pixel.
+    current : int
+        Index of lowest-ranked pixel used as starting point in reconstruction
+        loop.
+    image_stride : int
+        Stride between seed image and mask image in `avalues`.
+    """
     cdef:
         np.int32_t neighbor
         np.uint32_t neighbor_value
         np.uint32_t current_value
         np.uint32_t mask_value
-        np.int32_t link
+        np.int32_t current_link
         int i
         np.int32_t nprev
         np.int32_t nnext
@@ -55,18 +76,18 @@ def reconstruction_loop(np.ndarray[dtype=np.uint32_t, ndim=1,
             for i in range(nstrides):
                 neighbor = current + strides[i]
                 neighbor_value = values[neighbor]
-                # Only do neighbors less than the current value
+                # Only propagate neighbors ranked below the current rank
                 if neighbor_value < current_value:
                     mask_value = values[neighbor + image_stride]
-                    # Only do neighbors less than the mask value
+                    # Only propagate neighbors ranked below the mask rank
                     if neighbor_value < mask_value:
-                        # Raise the neighbor to the mask value if
-                        # the mask is less than current
+                        # Raise the neighbor to the mask rank if
+                        # the mask ranked below the current rank
                         if mask_value < current_value:
-                            link = neighbor + image_stride
+                            current_link = neighbor + image_stride
                             values[neighbor] = mask_value
                         else:
-                            link = current
+                            current_link = current
                             values[neighbor] = current_value
                         # unlink the neighbor
                         nprev = prev[neighbor]
@@ -74,12 +95,12 @@ def reconstruction_loop(np.ndarray[dtype=np.uint32_t, ndim=1,
                         next[nprev] = nnext
                         if nnext != -1:
                             prev[nnext] = nprev
-                        # link the neighbor after the link
-                        nnext = next[link]
+                        # link to the neighbor after the current link
+                        nnext = next[current_link]
                         next[neighbor] = nnext
-                        prev[neighbor] = link
+                        prev[neighbor] = current_link
                         if nnext >= 0:
                             prev[nnext] = neighbor
-                            next[link] = neighbor
+                            next[current_link] = neighbor
         current = next[current]
 
