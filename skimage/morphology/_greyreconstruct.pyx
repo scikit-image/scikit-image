@@ -8,9 +8,6 @@ All rights reserved.
 Original author: Lee Kamentsky
 
 """
-
-from __future__ import division
-
 cimport cython
 
 
@@ -38,8 +35,7 @@ def reconstruction_loop(unsigned int[:] ranks, int[:] prev, int[:] next,
     strides : array
         Strides to neighbors of the current pixel.
     current_idx : int
-        Index of lowest-ranked pixel used as starting point in reconstruction
-        loop.
+        Index of highest-ranked pixel used as starting point in loop.
     image_stride : int
         Stride between seed image and mask image in `ranks`.
     """
