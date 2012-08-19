@@ -105,7 +105,10 @@ class ProjectiveTransform(GeometricTransform):
     coeffs = range(8)
 
     def __init__(self, matrix=None):
-        if matrix is not None and matrix.shape != (3, 3):
+        if matrix is None:
+            # default to an identity transform
+            matrix = np.eye(3)
+        if matrix.shape != (3, 3):
             raise ValueError("invalid shape of transformation matrix")
         self._matrix = matrix
 
@@ -271,15 +274,16 @@ class AffineTransform(ProjectiveTransform):
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
                  translation=None):
-        self._matrix = matrix
         params = any(param is not None
                      for param in (scale, rotation, shear, translation))
 
         if params and matrix is not None:
             raise ValueError("You cannot specify the transformation matrix and "
                              "the implicit parameters at the same time.")
-        elif matrix is not None and matrix.shape != (3, 3):
-            raise ValueError("Invalid shape of transformation matrix.")
+        elif matrix is not None:
+            if matrix.shape != (3, 3):
+                raise ValueError("Invalid shape of transformation matrix.")
+            self._matrix = matrix
         elif params:
             if scale is None:
                 scale = (1, 1)
@@ -297,6 +301,9 @@ class AffineTransform(ProjectiveTransform):
                 [                      0,                                 0, 1]
             ])
             self._matrix[0:2, 2] = translation
+        else:
+            # default to an identity transform
+            self._matrix = np.eye(3)
 
     @property
     def scale(self):
@@ -348,15 +355,16 @@ class SimilarityTransform(ProjectiveTransform):
 
     def __init__(self, matrix=None, scale=None, rotation=None,
                  translation=None):
-        self._matrix = matrix
         params = any(param is not None
                      for param in (scale, rotation, translation))
 
         if params and matrix is not None:
             raise ValueError("You cannot specify the transformation matrix and "
                              "the implicit parameters at the same time.")
-        elif matrix is not None and matrix.shape != (3, 3):
-            raise ValueError("Invalid shape of transformation matrix.")
+        elif matrix is not None:
+            if matrix.shape != (3, 3):
+                raise ValueError("Invalid shape of transformation matrix.")
+            self._matrix = matrix
         elif params:
             if scale is None:
                 scale = 1
@@ -372,6 +380,9 @@ class SimilarityTransform(ProjectiveTransform):
             ])
             self._matrix *= scale
             self._matrix[0:2, 2] = translation
+        else:
+            # default to an identity transform
+            self._matrix = np.eye(3)
 
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit parameters.
@@ -474,7 +485,10 @@ class PolynomialTransform(GeometricTransform):
     """
 
     def __init__(self, params=None):
-        if params is not None and params.shape[0] != 2:
+        if params is None:
+            # default to transformation which preserves original coordinates
+            params = np.array([[0, 1, 0], [0, 0, 1]])
+        if params.shape[0] != 2:
             raise ValueError("invalid shape of transformation parameters")
         self._params = params
 
