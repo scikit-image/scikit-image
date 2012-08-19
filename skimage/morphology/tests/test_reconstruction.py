@@ -8,6 +8,7 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 import numpy as np
+from numpy.testing import assert_array_almost_equal as assert_close
 
 from skimage.morphology.greyreconstruct import reconstruction
 
@@ -66,6 +67,14 @@ def test_zero_image_one_mask():
     """Test reconstruction with an image of all zeros and a mask that's not"""
     result = reconstruction(np.zeros((10, 10)), np.ones((10, 10)))
     assert np.all(result == 0)
+
+
+def test_fill_hole():
+    """Test reconstruction by erosion, which should fill holes in mask."""
+    seed = np.array([0, 8, 8, 8, 8, 8, 8, 8, 8, 0])
+    mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
+    result = reconstruction(seed, mask, method='erosion')
+    assert_close(result, np.array([0, 3, 6, 4, 4, 4, 4, 4, 2, 0]))
 
 
 if __name__ == '__main__':
