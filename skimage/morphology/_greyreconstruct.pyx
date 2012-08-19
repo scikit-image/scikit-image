@@ -10,23 +10,13 @@ Original author: Lee Kamentsky
 """
 
 from __future__ import division
-import numpy as np
 
-cimport numpy as np
 cimport cython
 
 
 @cython.boundscheck(False)
-def reconstruction_loop(np.ndarray[dtype=np.uint32_t, ndim=1,
-                                   negative_indices=False, mode='c'] rank_array,
-                        np.ndarray[dtype=np.int32_t, ndim=1,
-                                   negative_indices=False, mode='c'] aprev,
-                        np.ndarray[dtype=np.int32_t, ndim=1,
-                                   negative_indices=False, mode='c'] anext,
-                        np.ndarray[dtype=np.int32_t, ndim=1,
-                                   negative_indices=False, mode='c'] astrides,
-                        np.int32_t current_idx,
-                        int image_stride):
+def reconstruction_loop(unsigned int[:] ranks, int[:] prev, int[:] next,
+                        int[:] strides, int current_idx, int image_stride):
     """The inner loop for reconstruction.
 
     This algorithm uses the rank-order of pixels. If low intensity pixels have
@@ -41,32 +31,21 @@ def reconstruction_loop(np.ndarray[dtype=np.uint32_t, ndim=1,
 
     Parameters
     ----------
-    rank_array : array
+    ranks : array
         The rank order of the flattened seed and mask images.
-    aprev, anext: arrays
+    prev, next: arrays
         Indices of previous and next pixels in rank sorted order.
-    astrides : array
+    strides : array
         Strides to neighbors of the current pixel.
     current_idx : int
         Index of lowest-ranked pixel used as starting point in reconstruction
         loop.
     image_stride : int
-        Stride between seed image and mask image in `rank_array`.
+        Stride between seed image and mask image in `ranks`.
     """
-    cdef:
-        np.int32_t neighbor_idx
-        np.uint32_t neighbor_rank
-        np.uint32_t current_rank
-        np.uint32_t mask_rank
-        np.int32_t current_link
-        int i
-        np.int32_t nprev
-        np.int32_t nnext
-        int nstrides = astrides.shape[0]
-        np.uint32_t *ranks = <np.uint32_t *>(rank_array.data)
-        np.int32_t *prev = <np.int32_t *>(aprev.data)
-        np.int32_t *next = <np.int32_t *>(anext.data)
-        np.int32_t *strides = <np.int32_t *>(astrides.data)
+    cdef unsigned int neighbor_rank, current_rank, mask_rank
+    cdef int i, current_link, neighbor_idx, nprev, nnext
+    cdef int nstrides = strides.shape[0]
 
     while current_idx != -1:
         if current_idx < image_stride:
