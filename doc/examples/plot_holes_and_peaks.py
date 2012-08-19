@@ -1,7 +1,7 @@
 """
-==========
-Fill holes
-==========
+===============================
+Filling holes and finding peaks
+===============================
 
 In this example, we fill holes (i.e. isolated, dark spots) in an image using
 morphological reconstruction by erosion. Erosion expands the minimal values of
@@ -62,7 +62,23 @@ original image.
 """
 
 imshow(image - filled)
-plt.title('dark holes')
+plt.title('holes')
+
+"""
+.. image:: PLOT2RST.current_figure
+
+Alternatively, we can find bright spots in an image using morphological
+reconstruction by dilation. Dilation is the inverse of erosion and expands the
+*maximal* values of the seed image until it encounters a mask image. Since this
+is an inverse operation, we initialize the seed image to the minimum image
+intensity instead of the maximum. The remainder of the process is the same.
+"""
+
+seed = np.copy(image)
+seed[1:-1, 1:-1] = image.min()
+rec = reconstruction(seed, mask, method='dilation')
+imshow(image - rec)
+plt.title('peaks')
 plt.show()
 
 """
