@@ -40,28 +40,10 @@ def reconstruction(seed, mask, selem=None, offset=None, method='dilation'):
     reconstructed : ndarray
        The result of morphological reconstruction.
 
-    Notes
-    -----
-    The algorithm is taken from:
-    Robinson, "Efficient morphological reconstruction: a downhill filter",
-    Pattern Recognition Letters 25 (2004) 1759-1767.
-
-    Applications for greyscale reconstruction are discussed in:
-
-    [1] Vincent, L., "Morphological Grayscale Reconstruction in Image Analysis:
-        Applications and Efficient Algorithms", IEEE Transactions on Image
-        Processing (1993)
-    [2] Soille, P., "Morphological Image Analysis: Principles and Applications",
-        Chapter 6, 2nd edition (2003), ISBN 3540429883.
-
     Examples
     --------
-    Uses for greyscale reconstruction are described in Vincent (1993). For
-    example, let's try to extract the features of an image by subtracting a
+    Here, we try to extract the bright features of an image by subtracting a
     background image created by reconstruction.
-
-    First, create an image where the "bumps" are the features that
-    we want to extract:
 
     >>> import numpy as np
     >>> from skimage.morphology import reconstruction
@@ -73,19 +55,30 @@ def reconstruction(seed, mask, selem=None, offset=None, method='dilation'):
 
     >>> h = 0.3
     >>> seed = bumps - h
-    >>> rec = reconstruction(seed, bumps)
+    >>> background = reconstruction(seed, bumps)
 
     The resulting reconstructed image looks exactly like the original image,
     but with the peaks of the bumps cut off. Subtracting this reconstructed
     image from the original image leaves just the peaks of the bumps
 
-    >>> hdome = bumps - rec
+    >>> hdome = bumps - background
 
-    This operation is known as the h-dome of the image, which leaves features
-    of height `h` in the subtracted image. The h-dome transform, and its
-    inverse h-basin, are analogous to the white top-hat and black top-hat
-    transforms, but don't require a structuring element.
+    This operation is known as the h-dome of the image and leaves features
+    of height `h` in the subtracted image.
 
+    Notes
+    -----
+    The algorithm is taken from:
+    [1] Robinson, "Efficient morphological reconstruction: a downhill filter",
+        Pattern Recognition Letters 25 (2004) 1759-1767.
+
+    Applications for greyscale reconstruction are discussed in:
+
+    [2] Vincent, L., "Morphological Grayscale Reconstruction in Image Analysis:
+        Applications and Efficient Algorithms", IEEE Transactions on Image
+        Processing (1993)
+    [3] Soille, P., "Morphological Image Analysis: Principles and Applications",
+        Chapter 6, 2nd edition (2003), ISBN 3540429883.
     """
     assert tuple(seed.shape) == tuple(mask.shape)
     if method == 'dilation' and np.any(seed > mask):
