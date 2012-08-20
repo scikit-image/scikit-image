@@ -32,8 +32,6 @@ def test_hog_basic_orientations_and_data_types():
     #  4) verify that all results are equal where expected
     #  5) verify that computed feature vector is as expected
     #  6) repeat the scenario for 90, 180 and 270 degrees rotated images
-    #
-    # author: Pavel Campr
 
     # size of testing image
     width = height = 35
@@ -99,8 +97,6 @@ def test_hog_orientations_circle():
     #  3) verify that the resulting feature vector contains uniformly distributed values for all orientations,
     #     i.e. no orientation is lost or emphasized
     #  4) repeat the scenario for other 'orientations' option
-    #
-    # author: Pavel Campr
 
     # size of testing image
     width = height = 100
