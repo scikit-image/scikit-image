@@ -1,5 +1,8 @@
+import sys
 from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
+
+import scipy.misc # -- greyscale lena that works without PIL png support
 
 from skimage.transform import (warp, homography, fast_homography,
                                SimilarityTransform, ProjectiveTransform,
@@ -66,6 +69,10 @@ def test_fast_homography():
 
 
 def test_swirl():
+    if not data.checkerboard().shape:
+        print >> sys.stderr, ('Failed to read image data.checkerboard()'
+                ' -- Skipping test_fast_homography')
+        return
     image = img_as_float(data.checkerboard())
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
@@ -79,6 +86,28 @@ def test_const_cval_out_of_range():
     img = np.random.randn(100, 100)
     warped = warp(img, AffineTransform(translation=(10, 10)), cval=-10)
     assert np.any(warped < 0)
+
+
+def test_warp_identity():
+    lena = scipy.misc.lena().astype('float32') / 255
+    assert len(lena.shape) == 2
+    assert np.allclose(lena,
+            warp(lena, AffineTransform(rotation=0)))
+    assert not np.allclose(lena,
+            warp(lena, AffineTransform(rotation=0.1)))
+
+    rgb_lena = np.transpose(
+            np.asarray([lena, np.zeros_like(lena), lena]),
+            (1, 2, 0))
+    warped_rgb_lena = warp(rgb_lena, AffineTransform(rotation=0.1))
+
+    assert np.allclose(rgb_lena,
+            warp(rgb_lena, AffineTransform(rotation=0)))
+    assert not np.allclose(rgb_lena, warped_rgb_lena)
+    # assert no cross-talk between bands
+    assert np.all(0 == warped_rgb_lena[:, :, 1])
+
+
 
 
 
