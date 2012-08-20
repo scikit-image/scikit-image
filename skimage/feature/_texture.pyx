@@ -81,6 +81,32 @@ cdef inline int _bit_rotate_right(int value, int length):
 
 def _local_binary_pattern(np.ndarray[double, ndim=2] image,
                           int P, float R, char method='D'):
+    """Gray scale and rotation invariant LBP (Local Binary Patterns).
+
+    LBP is an invariant descriptor that can be used for texture classification.
+
+    Parameters
+    ----------
+    image : (N, M) double array
+        Graylevel image.
+    P : int
+        Number of circularly symmetric neighbour set points (quantization of the
+        angular space).
+    R : float
+        Radius of circle (spatial resolution of the operator).
+    method : {'D', 'R', 'U', 'V'}
+        Method to determine the pattern::
+        * 'D': 'default'
+        * 'R': 'ror'
+        * 'U': 'uniform'
+        * 'V': 'var'
+
+    Returns
+    -------
+    output : (N, M) array
+        LBP image.
+    """
+
     # texture weights
     cdef np.ndarray[int, ndim=1] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
