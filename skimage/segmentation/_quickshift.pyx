@@ -18,7 +18,7 @@ cdef extern from "math.h":
 @cython.wraparound(False)
 @cython.cdivision(True)
 def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=False,
-        sigma=0, convert2lab=True, random_seed=None):
+               sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -78,9 +78,6 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
 
     random_state = np.random.RandomState(random_seed)
 
-    # We compute the distances twice since otherwise
-    # we get crazy memory overhead (width * height * windowsize**2)
-
     # TODO join orphaned roots?
     # Some nodes might not have a point of higher density within the
     # search window. We could do a global search over these in the end.
@@ -97,7 +94,7 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
     cdef int channels = image_c.shape[2]
     cdef double current_density, closest, dist
 
-    cdef int x, y, x_, y_
+    cdef int r, c, r_, c_, channel
 
     cdef np.float_t* image_p = <np.float_t*> image_c.data
     cdef np.float_t* current_pixel_p = image_p
@@ -105,17 +102,17 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities \
             = np.zeros((height, width))
     # compute densities
-    for x in range(height):
-        for y in range(width):
-            x_min, x_max = max(x - w, 0), min(x + w + 1, height)
-            y_min, y_max = max(y - w, 0), min(y + w + 1, width)
-            for x_ in range(x_min, x_max):
-                for y_ in range(y_min, y_max):
+    for r in range(height):
+        for c in range(width):
+            r_min, r_max = max(r - w, 0), min(r + w + 1, height)
+            c_min, c_max = max(c - w, 0), min(c + w + 1, width)
+            for r_ in range(r_min, r_max):
+                for c_ in range(c_min, c_max):
                     dist = 0
-                    for c in range(channels):
-                        dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
-                    dist += (x - x_)**2 + (y - y_)**2
-                    densities[x, y] += exp(-dist / (2 * kernel_size**2))
+                    for channel in range(channels):
+                        dist += (current_pixel_p[channel] - image_c[r_, c_, channel])**2
+                    dist += (r - r_)**2 + (c - c_)**2
+                    densities[r, c] += exp(-dist / (2 * kernel_size**2))
             current_pixel_p += channels
 
     # this will break ties that otherwise would give us headache
@@ -128,23 +125,25 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
             = np.zeros((height, width))
     # find nearest node with higher density
     current_pixel_p = image_p
-    for x in range(height):
-        for y in range(width):
-            current_density = densities[x, y]
+    for r in range(height):
+        for c in range(width):
+            current_density = densities[r, c]
             closest = np.inf
-            x_min, x_max = max(x - w, 0), min(x + w + 1, height)
-            y_min, y_max = max(y - w, 0), min(y + w + 1, width)
-            for x_ in range(x_min, x_max):
-                for y_ in range(y_min, y_max):
-                    if densities[x_, y_] > current_density:
+            r_min, r_max = max(r - w, 0), min(r + w + 1, height)
+            c_min, c_max = max(c - w, 0), min(c + w + 1, width)
+            for r_ in range(r_min, r_max):
+                for c_ in range(c_min, c_max):
+                    if densities[r_, c_] > current_density:
                         dist = 0
-                        for c in range(channels):
-                            dist += (current_pixel_p[c] - image_c[x_, y_, c])**2
-                        dist += (x - x_)**2 + (y - y_)**2
+                        # We compute the distances twice since otherwise
+                        # we get crazy memory overhead (width * height * windowsize**2)
+                        for channel in range(channels):
+                            dist += (current_pixel_p[channel] - image_c[r_, c_, channel])**2
+                        dist += (r - r_)**2 + (c - c_)**2
                         if dist < closest:
                             closest = dist
-                            parent[x, y] = x_ * width + y_
-            dist_parent[x, y] = sqrt(closest)
+                            parent[r, c] = r_ * width + c_
+            dist_parent[r, c] = sqrt(closest)
             current_pixel_p += channels
 
     dist_parent_flat = dist_parent.ravel()
