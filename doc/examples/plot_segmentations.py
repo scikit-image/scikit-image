@@ -12,7 +12,7 @@ a basis for more sophisticated algorithms such as CRFs.
 
 Felzenszwalb's efficient graph based segmentation
 -------------------------------------------------
-This fast 2d image segmentation algorithm, proposed in [1]_ is popular in the
+This fast 2D image segmentation algorithm, proposed in [1]_ is popular in the
 computer vision community.
 The algorithm has a single ``scale`` parameter that influences the segment
 size. The actual size and number of segments can vary greatly, depending on
@@ -25,9 +25,9 @@ local contrast.
 Quickshift image segmentation
 -----------------------------
 
-Quickshift is a relatively recent 2d image segmentation algorithm, based on an
+Quickshift is a relatively recent 2D image segmentation algorithm, based on an
 approximation of kernelized mean-shift. Therefore it belongs to the family of
-local mode-seeking algorithms and is applied to the 5d space consisting of
+local mode-seeking algorithms and is applied to the 5D space consisting of
 color information and image location [2]_.
 
 One of the benefits of quickshift is that it actually computes a

@@ -45,7 +45,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     """
     image = np.atleast_3d(image)
     if image.shape[2] != 3:
-        ValueError("Only 3-channel 2d images are supported.")
+        ValueError("Only 3-channel 2D images are supported.")
     image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
     if convert2lab:
         image = rgb2lab(image)
@@ -82,21 +82,21 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     cdef np.float_t* current_distance
     cdef np.float_t* current_pixel
     cdef double tmp
-    for i in xrange(max_iter):
+    for i in range(max_iter):
         distance.fill(np.inf)
         changes = 0
         current_mean = <np.float_t*> means.data
         # assign pixels to means
-        for k in xrange(n_means):
+        for k in range(n_means):
             # compute windows:
             y_min = int(max(current_mean[0] - 2 * step, 0))
             y_max = int(min(current_mean[0] + 2 * step, height))
             x_min = int(max(current_mean[1] - 2 * step, 0))
             x_max = int(min(current_mean[1] + 2 * step, width))
-            for y in xrange(y_min, y_max):
+            for y in range(y_min, y_max):
                 current_pixel = &image_p[5 * (y * width + x_min)]
                 current_distance = &distance_p[y * width + x_min]
-                for x in xrange(x_min, x_max):
+                for x in range(x_min, x_max):
                     mean_entry = current_mean
                     dist_mean = 0
                     for c in range(5):
@@ -117,7 +117,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
             break
         # recompute means:
         means_list = [np.bincount(nearest_mean.ravel(),
-                      image_yx[:, :, j].ravel()) for j in xrange(5)]
+                      image_yx[:, :, j].ravel()) for j in range(5)]
         in_mean = np.bincount(nearest_mean.ravel())
         in_mean[in_mean == 0] = 1
         means = (np.vstack(means_list) / in_mean).T.copy("C")

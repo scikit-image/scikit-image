@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 
-from .felzenszwalb_cy import _felzenszwalb_grey
+from ._felzenszwalb_cy import _felzenszwalb_grey
 
 
 def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
@@ -60,7 +60,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
                       " wanted?" % image.shape[2])
     segmentations = []
     # compute quickshift for each channel
-    for c in xrange(n_channels):
+    for c in range(n_channels):
         channel = np.ascontiguousarray(image[:, :, c])
         s = _felzenszwalb_grey(channel, scale=scale, sigma=sigma,
                                min_size=min_size)
