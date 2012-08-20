@@ -92,6 +92,23 @@ class TestSkeletonize():
         blocks = correlate(result, mask, mode='constant')
         assert not numpy.any(blocks == 4)
 
+    def test_lut_fix(self):
+        im = np.zeros((6, 6), np.uint8)
+        im[1, 2] = 1
+        im[2, 2] = 1
+        im[2, 3] = 1
+        im[3, 3] = 1
+        im[3, 4] = 1
+        im[4, 4] = 1
+        im[4, 5] = 1
+        result = skeletonize(im)
+        expected = np.array([[0, 0, 0, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0],
+                             [0, 0, 0, 1, 0, 0],
+                             [0, 0, 0, 0, 1, 0],
+                             [0, 0, 0, 0, 0, 1],
+                             [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        assert np.all(result == expected)
 
 class TestMedialAxis():
     def test_00_00_zeros(self):
