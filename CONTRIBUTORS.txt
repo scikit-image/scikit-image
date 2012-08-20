@@ -108,3 +108,6 @@
   Adaptive thresholding
   Implementation of Matlab's `regionprops`
   Estimation of geometric transformation parameters
+  
+- Pavel Campr
+  Fixes and tests for Histograms of Oriented Gradients.

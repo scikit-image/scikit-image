@@ -59,7 +59,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     shadowing and illumination variations.
     """
 
-    if image.ndim > 3:
+    if image.ndim > 2:
         raise ValueError("Currently only supports grey-level images")
 
     if normalise:
@@ -74,6 +74,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     which act as primitive bar detectors - a useful feature for capturing,
     e.g. bar like structures in bicycles and limbs in humans.
     """
+
+    if image.dtype.kind == 'u':
+        # convert uint image to float
+        # to avoid problems with subtracting unsigned numbers in np.diff()
+        image = image.astype('float')
 
     gx = np.zeros(image.shape)
     gy = np.zeros(image.shape)
@@ -96,7 +101,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     """
 
     magnitude = sqrt(gx**2 + gy**2)
-    orientation = arctan2(gy, (gx + 1e-15)) * (180 / pi) + 90
+    orientation = arctan2(gy, gx) * (180 / pi) % 180
 
     sy, sx = image.shape
     cx, cy = pixels_per_cell
@@ -113,11 +118,11 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         # isolate orientations in this range
 
         temp_ori = np.where(orientation < 180 / orientations * (i + 1),
-                            orientation, 0)
+                            orientation, -1)
         temp_ori = np.where(orientation >= 180 / orientations * i,
-                            temp_ori, 0)
+                            temp_ori, -1)
         # select magnitudes for those orientations
-        cond2 = temp_ori > 0
+        cond2 = temp_ori > -1
         temp_mag = np.where(cond2, magnitude, 0)
 
         temp_filt = uniform_filter(temp_mag, size=(cy, cx))
@@ -137,8 +142,8 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                     centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
                     dx = radius * cos(float(o) / orientations * np.pi)
                     dy = radius * sin(float(o) / orientations * np.pi)
-                    rr, cc = draw.bresenham(centre[0] - dx, centre[1] - dy,
-                                            centre[0] + dx, centre[1] + dy)
+                    rr, cc = draw.bresenham(centre[0] - dy, centre[1] - dx,
+                                            centre[0] + dy, centre[1] + dx)
                     hog_image[rr, cc] += orientation_histogram[y, x, o]
 
     """
