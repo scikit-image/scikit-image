@@ -2,7 +2,8 @@ from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 
 from skimage.transform import (warp, homography, fast_homography,
-                               SimilarityTransform, ProjectiveTransform)
+                               SimilarityTransform, ProjectiveTransform,
+                               AffineTransform)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -72,6 +73,13 @@ def test_swirl():
     unswirled = tf.swirl(swirled, strength=-10, **swirl_params)
 
     assert np.mean(np.abs(image - unswirled)) < 0.01
+
+
+def test_const_cval_out_of_range():
+    img = np.random.randn(100, 100)
+    warped = warp(img, AffineTransform(translation=(10, 10)), cval=-10)
+    assert np.any(warped < 0)
+
 
 
 if __name__ == "__main__":
