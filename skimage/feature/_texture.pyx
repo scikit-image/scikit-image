@@ -80,7 +80,7 @@ cdef inline int _bit_rotate_right(int value, int length):
 
 
 def _local_binary_pattern(np.ndarray[double, ndim=2] image,
-                          int P, float R, int method=0):
+                          int P, float R, char method='D'):
     # texture weights
     cdef np.ndarray[int, ndim=1] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
@@ -116,7 +116,7 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
             lbp = 0
 
             # if method == 'uniform' or method == 'var':
-            if method == 2 or method == 3:
+            if method == 'U' or method == 'V':
                 # determine number of 0 - 1 changes
                 changes = 0
                 for i in range(P - 1):
@@ -128,7 +128,7 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
                 else:
                     lbp = P + 1
 
-                if method == 3:
+                if method == 'V':
                     var = np.var(texture)
                     if var != 0:
                         lbp /= var
@@ -139,7 +139,8 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
                 for i in range(P):
                     lbp += signed_texture[i] * weights[i]
 
-                if method == 1:
+                # method == 'ror'
+                if method == 'R':
                     # shift LBP P times to the right and get minimum value
                     rotation_chain[0] = <int>lbp
                     for i in range(1, P):

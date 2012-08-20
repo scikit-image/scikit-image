@@ -235,14 +235,14 @@ def local_binary_pattern(image, P, R, method='default'):
     Parameters
     ----------
     image : (N, M) array
-        graylevel image
+        Graylevel image.
     P : int
-        number of circularly symmetric neighbour set points (quantization of the
-        angular space)
+        Number of circularly symmetric neighbour set points (quantization of the
+        angular space).
     R : float
-        radius of circle (spatial resolution of the operator)
-    method : {'default', 'ror', 'uniform', 'var'}
-        method to determine the pattern::
+        Radius of circle (spatial resolution of the operator).
+    method : {'D', 'R', 'U', 'V'}
+        Method to determine the pattern::
         * 'default': original local binary pattern which is gray scale but not
             rotation invariant.
         * 'ror': extension of default implementation which is gray scale and
@@ -256,7 +256,7 @@ def local_binary_pattern(image, P, R, method='default'):
     Returns
     -------
     output : (N, M) array
-        LBP image
+        LBP image.
 
     References
     ----------
@@ -268,10 +268,10 @@ def local_binary_pattern(image, P, R, method='default'):
     """
 
     methods = {
-        'default': 0,
-        'ror': 1,
-        'uniform': 2,
-        'var': 3
+        'default': ord('D'),
+        'ror': ord('R'),
+        'uniform': ord('U'),
+        'var': ord('V')
     }
     image = np.array(image, dtype='double', copy=True)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
