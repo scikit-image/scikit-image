@@ -73,10 +73,12 @@ plt.gray()
 ax1.imshow(brick)
 ax1.axis('off')
 ax4.hist(refs['brick'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+ax4.set_ylabel('Percentage')
 
 ax2.imshow(grass)
 ax2.axis('off')
 ax5.hist(refs['grass'].ravel(), normed=True, bins=P + 2, range=(0, P + 2))
+ax5.set_xlabel('Uniform LBP values')
 
 ax3.imshow(wall)
 ax3.axis('off')
