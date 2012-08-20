@@ -74,6 +74,7 @@
 
 - Andreas Mueller
   Example data set loader.
+  Quickshift image segmentation, Felzenszwalbs fast graph based segmentation.
 
 - Yaroslav Halchenko
   For sharing his expert advice on Debian packaging.

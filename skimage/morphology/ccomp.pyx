@@ -24,7 +24,6 @@ See also:
 # The term "forest" is used to indicate an array that stores one or more trees
 
 DTYPE = np.int
-ctypedef np.int_t DTYPE_t
 
 cdef DTYPE_t find_root(np.int_t *forest, np.int_t n):
     """Find the root of node n.
