@@ -82,19 +82,19 @@ cdef inline int _bit_rotate_right(int value, int length):
 def _local_binary_pattern(np.ndarray[double, ndim=2] image,
                           int P, float R, int method=0):
     # texture weights
-    cdef np.ndarray[int, ndim=1] weights = 2 ** np.arange(P, dtype='int32')
+    cdef np.ndarray[int, ndim=1] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
-    rp = - R * np.sin(2 * np.pi * np.arange(P, dtype='double') / P)
-    cp = R * np.cos(2 * np.pi * np.arange(P, dtype='double') / P)
+    rp = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.double) / P)
+    cp = R * np.cos(2 * np.pi * np.arange(P, dtype=np.double) / P)
     cdef np.ndarray[double, ndim=2] coords = np.round(np.vstack([rp, cp]).T, 5)
 
     # pre allocate arrays for computation
-    cdef np.ndarray[double, ndim=1] texture = np.zeros(P, 'double')
-    cdef np.ndarray[char, ndim=1] signed_texture = np.zeros(P, 'int8')
-    cdef np.ndarray[int, ndim=1] rotation_chain = np.zeros(P, 'int32')
+    cdef np.ndarray[double, ndim=1] texture = np.zeros(P, np.double)
+    cdef np.ndarray[char, ndim=1] signed_texture = np.zeros(P, np.int8)
+    cdef np.ndarray[int, ndim=1] rotation_chain = np.zeros(P, np.int32)
 
     output_shape = (image.shape[0], image.shape[1])
-    cdef np.ndarray[double, ndim=2] output = np.zeros(output_shape, 'double')
+    cdef np.ndarray[double, ndim=2] output = np.zeros(output_shape, np.double)
 
     cdef int rows = image.shape[0]
     cdef int cols = image.shape[1]
