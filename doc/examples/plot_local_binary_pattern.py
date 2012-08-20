@@ -57,8 +57,12 @@ refs = {
 }
 
 # classify rotated textures
+print 'Rotated images matched against references using LBP:'
+print 'original: brick, rotated: 30deg, match result:',
 print match(refs, nd.rotate(brick, angle=30, reshape=False))
+print 'original: brick, rotated: 70deg, match result:',
 print match(refs, nd.rotate(brick, angle=70, reshape=False))
+print 'original: grass, rotated: 145deg, match result:',
 print match(refs, nd.rotate(grass, angle=145, reshape=False))
 
 # plot histograms of LBP of textures
