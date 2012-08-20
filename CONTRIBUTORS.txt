@@ -108,3 +108,4 @@
   Adaptive thresholding
   Implementation of Matlab's `regionprops`
   Estimation of geometric transformation parameters
+  Local binary pattern texture classification
