@@ -2,7 +2,7 @@ from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 
 from skimage.transform import (warp, homography, fast_homography,
-                               SimilarityTransform)
+                               SimilarityTransform, ProjectiveTransform)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -34,7 +34,7 @@ def test_homography():
 
 
 def test_fast_homography():
-    img = rgb2gray(data.lena()).astype(np.uint8)
+    img = rgb2gray(data.lena())
     img = img[:, :100]
 
     theta = np.deg2rad(30)
@@ -49,20 +49,19 @@ def test_fast_homography():
     H[:2, 2] = [tx, ty]
 
     for mode in ('constant', 'mirror', 'wrap'):
-        p0 = homography(img, H, mode=mode, order=1)
+        p0 = warp(img, ProjectiveTransform(H).inverse, mode=mode, order=1)
         p1 = fast_homography(img, H, mode=mode)
-        p1 = np.round(p1)
 
-        ## import matplotlib.pyplot as plt
-        ## f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
-        ## ax0.imshow(img)
-        ## ax1.imshow(p0, cmap=plt.cm.gray)
-        ## ax2.imshow(p1, cmap=plt.cm.gray)
-        ## ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
-        ## plt.show()
+        # import matplotlib.pyplot as plt
+        # f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
+        # ax0.imshow(img)
+        # ax1.imshow(p0, cmap=plt.cm.gray)
+        # ax2.imshow(p1, cmap=plt.cm.gray)
+        # ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
+        # plt.show()
 
         d = np.mean(np.abs(p0 - p1))
-        assert d < 0.2
+        assert d < 0.001
 
 
 def test_swirl():

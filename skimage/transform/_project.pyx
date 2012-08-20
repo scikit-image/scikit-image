@@ -1,38 +1,66 @@
-#cython: cdivison=True boundscheck=False
+#cython: cdivison=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 
-__all__ = ['homography']
-
-cimport cython
 cimport numpy as np
-
 import numpy as np
-import cython
-
 from cython.operator import dereference
+from libc.math cimport ceil, floor
 
-np.import_array()
 
-cdef extern from "math.h":
-    double floor(double)
-    double fmod(double, double)
+cdef inline double bilinear_interpolation(double* image, int rows, int cols,
+                                          double r, double c, char mode,
+                                          double cval=0):
+    """Bilinear interpolation at a given position in the image.
 
-cdef double get_pixel(double *image, int rows, int cols,
-                      int r, int c, char mode, double cval=0):
+    Parameters
+    ----------
+    image : double array
+        Input image.
+    rows, cols: int
+        Shape of image.
+    r, c : int
+        Position at which to interpolate.
+    mode : {'C', 'W', 'M'}
+        Wrapping mode. Constant, Wrap or Mirror.
+    cval : double
+        Constant value to use for constant mode.
+
+    """
+    cdef double dr, dc
+    cdef int minr, minc, maxr, maxc
+
+    minr = <int>floor(r)
+    minc = <int>floor(c)
+    maxr = <int>ceil(r)
+    maxc = <int>ceil(c)
+    dr = r - minr
+    dc = c - minc
+    top = (1 - dc) * get_pixel(image, rows, cols, minr, minc, mode, cval) \
+          + dc * get_pixel(image, rows, cols, minr, maxc, mode, cval)
+    bottom = (1 - dc) * get_pixel(image, rows, cols, maxr, minc, mode, cval) \
+             + dc * get_pixel(image, rows, cols, maxr, maxc, mode, cval)
+    return (1 - dr) * top + dr * bottom
+
+
+cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
+                             char mode, double cval=0):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
     ----------
-    image : *double
+    image : double array
         Input image.
-    rows, cols : int
-        Dimensions of image.
+    rows, cols: int
+        Shape of image.
     r, c : int
         Position at which to get the pixel.
     mode : {'C', 'W', 'M'}
-        Wrapping mode.  Constant, Wrap or Mirror.
+        Wrapping mode. Constant, Wrap or Mirror.
     cval : double
-        Constant value to use for mode constant.
-    
+        Constant value to use for constant mode.
+
     """
     if mode == 'C':
         if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
@@ -40,13 +68,13 @@ cdef double get_pixel(double *image, int rows, int cols,
         else:
             return image[r * cols + c]
     else:
-        return image[coord_map(rows, r, mode) * cols +
-                     coord_map(cols, c, mode)]
+        return image[coord_map(rows, r, mode) * cols + coord_map(cols, c, mode)]
 
-cdef int coord_map(int dim, int coord, char mode):
+
+cdef inline int coord_map(int dim, int coord, char mode):
     """
-    Wrap a coordinate, according to a given dimension and mode.
-    
+    Wrap a coordinate, according to a given mode.
+
     Parameters
     ----------
     dim : int
@@ -56,7 +84,7 @@ cdef int coord_map(int dim, int coord, char mode):
     mode : {'W', 'M'}
         Whether to wrap or mirror the coordinate if it
         falls outside [0, dim).
-    
+
     """
     dim = dim - 1
     if mode == 'M': # mirror
@@ -79,7 +107,9 @@ cdef int coord_map(int dim, int coord, char mode):
 
     return coord
 
-cdef tf(double x, double y, double* H, double *x_, double *y_):
+
+cdef inline _matrix_transform(double x, double y, double* H, double *x_,
+                              double *y_):
     """Apply a homography to a coordinate.
 
     Parameters
@@ -98,18 +128,15 @@ cdef tf(double x, double y, double* H, double *x_, double *y_):
     yy = H[3] * x + H[4] * y + H[5]
     zz =  H[6] * x + H[7] * y + H[8]
 
-    xx = xx / zz
-    yy = yy / zz
+    x_[0] = xx / zz
+    y_[0] = yy / zz
 
-    x_[0] = xx
-    y_[0] = yy
 
-@cython.boundscheck(False)
 def homography(np.ndarray image, np.ndarray H, output_shape=None,
                mode='constant', double cval=0):
     """
     Projective transformation (homography).
-    
+
     Perform a projective transformation (homography) of a
     floating point image, using bi-linear interpolation.
 
@@ -140,8 +167,6 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
         Transformation matrix H that defines the homography.
     output_shape : tuple (rows, cols)
         Shape of the output image generated.
-    order : int
-        Order of splines used in interpolation.
     mode : {'constant', 'mirror', 'wrap'}
         How to handle values outside the image borders.
     cval : string
@@ -150,8 +175,7 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
 
     """
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] img = \
-         np.ascontiguousarray(image, dtype=np.double)
+    cdef np.ndarray[dtype=np.double_t, ndim=2] img = image.astype(np.double)
     cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] M = \
          np.ascontiguousarray(np.linalg.inv(H))
 
@@ -165,7 +189,6 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
     elif mode == 'mirror':
         mode_c = ord('M')
 
-    cdef int out_r, out_c, columns, rows
     if output_shape is None:
         out_r = img.shape[0]
         out_c = img.shape[1]
@@ -173,37 +196,18 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
         out_r = output_shape[0]
         out_c = output_shape[1]
 
-    rows = img.shape[0]
-    columns = img.shape[1]
-
     cdef np.ndarray[dtype=np.double_t, ndim=2] out = \
          np.zeros((out_r, out_c), dtype=np.double)
-    
-    cdef int tfr, tfc, r_int, c_int
-    cdef double y0, y1, y2, y3
-    cdef double r, c, z, t, u
+
+    cdef int tfr, tfc
+    cdef double r, c
+    cdef int rows = img.shape[0]
+    cdef int cols = img.shape[1]
 
     for tfr in range(out_r):
         for tfc in range(out_c):
-            tf(tfc, tfr, <double*>M.data, &c, &r)
-            r_int = <int>floor(r)
-            c_int = <int>floor(c)
-
-            t = r - r_int
-            u = c - c_int
-
-            y0 = get_pixel(<double*>img.data, rows, columns,
-                           r_int, c_int, mode_c)
-            y1 = get_pixel(<double*>img.data, rows, columns,
-                           r_int + 1, c_int, mode_c)
-            y2 = get_pixel(<double*>img.data, rows, columns,
-                           r_int + 1, c_int + 1, mode_c)
-            y3 = get_pixel(<double*>img.data, rows, columns,
-                           r_int, c_int + 1, mode_c)
-
-            out[tfr, tfc] = \
-                (1 - t) * (1 - u) * y0 + \
-                t * (1 - u) * y1 + \
-                t * u * y2 + (1 - t) * u * y3;
+            _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
+            out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
+                                                   cols, r, c, mode_c)
 
     return out
