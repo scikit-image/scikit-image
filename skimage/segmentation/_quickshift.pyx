@@ -26,30 +26,30 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
 
     Parameters
     ----------
-    image: (width, height, channels) ndarray
-        Input image
-    ratio: float, between 0 and 1.
+    image : (width, height, channels) ndarray
+        Input image.
+    ratio : float, between 0 and 1.
         Balances color-space proximity and image-space proximity.
         Higher values give more weight to color-space.
-    kernel_size: float
+    kernel_size : float
         Width of Gaussian kernel used in smoothing the
-        sample density. Higher means less clusters.
-    max_dist: float
+        sample density. Higher means fewer clusters.
+    max_dist : float
         Cut-off point for data distances.
-        Higher means less clusters.
-    return_tree: bool
+        Higher means fewer clusters.
+    return_tree : bool
         Whether to return the full segmentation hierarchy tree and distances.
-    sigma: float
+    sigma : float
         Width for Gaussian smoothing as preprocessing. Zero means no smoothing.
-    convert2lab: bool
+    convert2lab : bool
         Whether the input should be converted to Lab colorspace prior to
-        segmentation.  For this purpose, the input is assumed to be RGB.
-    random_seed: None or int
-        Random seed used for breaking ties
+        segmentation. For this purpose, the input is assumed to be RGB.
+    random_seed : None or int
+        Random seed used for breaking ties.
 
     Returns
     -------
-    segment_mask: ndarray, [width, height]
+    segment_mask : (width, height) ndarray
         Integer mask indicating segment labels.
 
     Notes

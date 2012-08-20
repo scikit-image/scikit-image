@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_array_equal
 from nose.tools import assert_greater
-from skimage.segmentation import felzenszwalb_segmentation
+from skimage.segmentation import felzenszwalb
 
 
 def test_grey():
@@ -10,7 +10,7 @@ def test_grey():
     img[:10, 10:] = 0.2
     img[10:, :10] = 0.4
     img[10:, 10:] = 0.6
-    seg = felzenszwalb_segmentation(img, sigma=0)
+    seg = felzenszwalb(img, sigma=0)
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
     # that mostly respect the 4 regions:
@@ -25,7 +25,7 @@ def test_color():
     img[:10, :10, 0] = 1
     img[10:, :10, 1] = 1
     img[10:, 10:, 2] = 1
-    seg = felzenszwalb_segmentation(img, sigma=0)
+    seg = felzenszwalb(img, sigma=0)
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
     assert_array_equal(seg[:10, :10], 0)

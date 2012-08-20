@@ -12,24 +12,24 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
 
     Parameters
     ----------
-    image: (width, height, 3) ndarray
-        Input image
+    image : (width, height, 3) ndarray
+        Input image.
     ratio: float
         Balances color-space proximity and image-space proximity.
         Higher values give more weight to color-space.
-    max_iter: int
-        maximum number of iterations of k-means
-    sigma: float
+    max_iter : int
+        Maximum number of iterations of k-means.
+    sigma : float
         Width of Gaussian smoothing kernel for preprocessing. Zero means no
         smoothing.
-    convert2lab: bool
+    convert2lab : bool
         Whether the input should be converted to Lab colorspace prior to
         segmentation.  For this purpose, the input is assumed to be RGB. Highly
         recommended.
 
     Returns
     -------
-    segment_mask: ndarray, [width, height]
+    segment_mask : (width, height) ndarray
         Integer mask indicating segment labels.
 
     Notes
@@ -100,7 +100,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
                     mean_entry = current_mean
                     dist_mean = 0
                     for c in range(5):
-                        # you would think the compiler can optimize this
+                        # you would think the compiler can optimize the squaring
                         # itself. mine can't (with O2)
                         tmp = current_pixel[0] - mean_entry[0]
                         dist_mean += tmp * tmp

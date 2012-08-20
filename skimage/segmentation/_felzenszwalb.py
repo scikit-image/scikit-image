@@ -17,24 +17,24 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
     controlled indirectly through ``scale``. Segment size within an image can
     vary greatly depending on local contrast.
 
-    Calls the algorithm on each channel separately, then combines
-    using "and", i.e. two pixels are in the same segment if they are
-    in the same segment for each channel.
+    For RGB images, the algorithm computes a separate segmentation for each
+    channel and then combines these. The combined segmentation is the
+    intersection of the separate segmentations on the color channels.
 
     Parameters
     ----------
-    image: (width, height) ndarray
-        Input image
-    scale: float
+    image : (width, height, 3) or (width, height) ndarray
+        Input image.
+    scale : float
         Free parameter. Higher means larger clusters.
-    sigma: float
+    sigma : float
         Width of Gaussian kernel used in preprocessing.
-    min_size: int
+    min_size : int
         Minimum component size. Enforced using postprocessing.
 
     Returns
     -------
-    segment_mask: ndarray, [width, height]
+    segment_mask : (width, height) ndarray
         Integer mask indicating segment labels.
 
     References
@@ -49,20 +49,21 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
         return _felzenszwalb_grey(image, scale=scale, sigma=sigma)
 
     elif image.ndim != 3:
-        raise ValueError("Got image with ndim=%d, don't know"
-                " what to do." % image.ndim)
+        raise ValueError("Felzenswalb segmentation can only operate on RGB and"
+                         " grey images, but input array of ndim %d given."
+                         % image.ndim)
 
     # assume we got 2d image with multiple channels
     n_channels = image.shape[2]
     if n_channels != 3:
         warnings.warn("Got image with %d channels. Is that really what you"
-                " wanted?" % image.shape[2])
+                      " wanted?" % image.shape[2])
     segmentations = []
     # compute quickshift for each channel
     for c in xrange(n_channels):
         channel = np.ascontiguousarray(image[:, :, c])
         s = _felzenszwalb_grey(channel, scale=scale, sigma=sigma,
-                min_size=min_size)
+                               min_size=min_size)
         segmentations.append(s)
 
     # put pixels in same segment only if in the same segment in all images
@@ -70,7 +71,7 @@ def felzenszwalb(image, scale=1, sigma=0.8, min_size=20):
     n0 = segmentations[0].max() + 1
     n1 = segmentations[1].max() + 1
     segmentation = (segmentations[0] + segmentations[1] * n0
-            + segmentations[2] * n0 * n1)
+                    + segmentations[2] * n0 * n1)
     # make segment labels consecutive numbers starting at 0
     labels = np.unique(segmentation, return_inverse=True)[1]
     return labels.reshape(image.shape[:2])

@@ -28,13 +28,13 @@ Quickshift image segmentation
 Quickshift is a relatively recent 2d image segmentation algorithm, based on an
 approximation of kernelized mean-shift. Therefore it belongs to the family of
 local mode-seeking algorithms and is applied to the 5d space consisting of
-color information and image location.  see [2]_.
+color information and image location [2]_.
 
 One of the benefits of quickshift is that it actually computes a
 hierarchical segmentation on multiple scales simultaneously.
 
-Quickshift has three parameters: ``sigma`` controls the scale of the local
-density approximation, ``max_dist`` other selecting a level in the hierarchical
+Quickshift has two main parameters: ``sigma`` controls the scale of the local
+density approximation, ``max_dist`` selects a level in the hierarchical
 segmentation that is produced. There is also a trade-off between distance in
 color-space and distance in image-space, given by ``ratio``.
 
@@ -45,7 +45,7 @@ color-space and distance in image-space, given by ``ratio``.
 
 SLIC - K-Means based image segmentation
 ---------------------------------------
-This algorithm simply performs K-kmeans in the 5d space of color information
+This algorithm simply performs K-means in the 5d space of color information
 and image location and is therefore closely related to quickshift. As the
 clustering method is simpler, it is very efficient. It is essential for this
 algorithm to work in Lab color space to obtain good results.  The algorithm
@@ -57,7 +57,6 @@ of Quickshift, while ``n_segments`` chooses the number of centers for kmeans.
     Pascal Fua, and Sabine Suesstrunk, SLIC Superpixels Compared to
     State-of-the-art Superpixel Methods, TPAMI, May 2012.
 """
-print __doc__
 
 import matplotlib.pyplot as plt
 import numpy as np

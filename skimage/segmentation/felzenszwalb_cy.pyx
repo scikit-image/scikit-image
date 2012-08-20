@@ -14,7 +14,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, int min_size=20):
     """Felzenszwalb's efficient graph based segmentation for a single channel.
 
     Produces an oversegmentation of a 2d image using a fast, minimum spanning
-    tree based clustering on the image grid. 
+    tree based clustering on the image grid.
     The number of produced segments as well as their size can only be
     controlled indirectly through ``scale``. Segment size within an image can
     vary greatly depending on local contrast.
@@ -22,11 +22,12 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, int min_size=20):
     Parameters
     ----------
     image: ndarray
-        Input image
+        Input image.
     scale: float
         Sets the obervation level. Higher means larger clusters.
     sigma: float
-        Width of Gaussian kernel used in preprocessing.
+        Width of Gaussian smoothing kernel used in preprocessing.
+        Larger sigma gives smother segment boundaries.
     min_size: int
         Minimum component size. Enforced using postprocessing.
 
