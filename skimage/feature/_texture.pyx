@@ -18,7 +18,7 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
                np.ndarray[dtype=np.uint32_t, ndim=4,
                           negative_indices=False, mode='c'] out
                ):
-    """Perform co-occurnace matrix accumulation
+    """Perform co-occurnace matrix accumulation.
 
     Parameters
     ----------
