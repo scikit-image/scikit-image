@@ -14,7 +14,7 @@ def test_grey():
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
     # that mostly respect the 4 regions:
-    for i in xrange(4):
+    for i in range(4):
         hist = np.histogram(img[seg == i], bins=[0, 0.1, 0.3, 0.5, 1])[0]
         assert_greater(hist[i], 40)
 

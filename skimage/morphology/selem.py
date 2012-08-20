@@ -84,7 +84,7 @@ def diamond(radius, dtype=np.uint8):
        are 1 and 0 otherwise.
     """
     half = radius
-    (I, J) = np.meshgrid(xrange(0, radius * 2 + 1), xrange(0, radius * 2 + 1))
+    (I, J) = np.meshgrid(range(0, radius * 2 + 1), range(0, radius * 2 + 1))
     s = np.abs(I - half) + np.abs(J - half)
     return np.array(s <= radius, dtype=dtype)
 
