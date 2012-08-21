@@ -717,7 +717,7 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
 
     Returns
     -------
-    coords : (orows * ocols, ) array 
+    coords : (3, orows, ocols, bands) array 
             Coordinates for `scipy.ndimage.map_coordinates`, that will yield
             an image of shape (orows, ocols, bands) by drawing from source
             points according to the `coord_transform_fn`.
@@ -744,12 +744,12 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
     ...     return xy
     >>>
     >>> coords = warp_coords(30, 30, 3, shift_right)
-    >>> image = data.camera()
-    >>> warped_image = map_coordinates(coords, image)
+    >>> image = data.lena().astype(np.float32)
+    >>> warped_image = map_coordinates(image, coords)
 
     """
 
-    coords = np.empty(np.r_[3, (orows, ocols, bands)], dtype=dtype)
+    coords = np.empty((3, orows, ocols, bands), dtype=dtype)
 
     # Reshape grid coordinates into a (P, 2) array of (x, y) pairs
     tf_coords = np.indices((ocols, orows), dtype=dtype).reshape(2, -1).T
@@ -832,6 +832,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     def coord_transform_fn(*args):
         return inverse_map(*args, **map_args)
+
 
     coords = warp_coords(rows, cols, bands, coord_transform_fn)
 

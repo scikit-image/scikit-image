@@ -119,16 +119,13 @@ def test_warp_coords_example():
     from skimage import data
     from scipy.ndimage import map_coordinates
     def shift_right(xy):
-        print 'xyshape', xy.shape
         xy[:, 0] -= 10
         return xy
 
     image = data.lena().astype(np.float32)
-    print 'testing'
-    print image.dtype, image.shape
-    coords = warp_coords(512, 512, 3, shift_right)
-    print 'warp_coords', coords.dtype, coords.shape
-    warped_image = map_coordinates(coords, image)
+    assert 3 == image.shape[2]
+    coords = warp_coords(30, 30, 3, shift_right)
+    warped_image = map_coordinates(image[:, :, 0], coords[:2])
 
 
 if __name__ == "__main__":
