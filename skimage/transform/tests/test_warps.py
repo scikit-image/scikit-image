@@ -87,7 +87,7 @@ def test_swirl():
 def test_const_cval_out_of_range():
     img = np.random.randn(100, 100)
     warped = warp(img, AffineTransform(translation=(10, 10)), cval=-10)
-    assert np.any(warped < 0)
+    assert np.sum(warped < 0) == (2 * 100 * 10 - 10 * 10)
 
 
 def test_warp_identity():
