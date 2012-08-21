@@ -14,8 +14,11 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['interpolation.pyx'], working_path=base_path)
+    cython(['transform.pyx'], working_path=base_path)
 
     config.add_extension('interpolation', sources=['interpolation.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('transform', sources=['transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
