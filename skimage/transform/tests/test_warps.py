@@ -2,8 +2,6 @@ import sys
 from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 
-import scipy.misc # -- greyscale lena that works without PIL png support
-
 from skimage.transform import (warp, homography, fast_homography,
                                SimilarityTransform, ProjectiveTransform,
                                AffineTransform)
@@ -71,7 +69,7 @@ def test_fast_homography():
 def test_swirl():
     if not data.checkerboard().shape:
         print >> sys.stderr, ('Failed to read image data.checkerboard()'
-                ' -- Skipping test_fast_homography')
+                ' -- Skipping test_swirl')
         return
     image = img_as_float(data.checkerboard())
 
@@ -89,7 +87,12 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    lena = scipy.misc.lena().astype('float32') / 255
+    lena = data.lena()
+    if not lena.shape:
+        print >> sys.stderr, ('Failed to read image data.lena()'
+                ' -- Skipping test_warp_identity')
+        return
+    lena = img_as_float(rgb2gray(lena))
     assert len(lena.shape) == 2
     assert np.allclose(lena,
             warp(lena, AffineTransform(rotation=0)))
@@ -106,9 +109,6 @@ def test_warp_identity():
     assert not np.allclose(rgb_lena, warped_rgb_lena)
     # assert no cross-talk between bands
     assert np.all(0 == warped_rgb_lena[:, :, 1])
-
-
-
 
 
 if __name__ == "__main__":
