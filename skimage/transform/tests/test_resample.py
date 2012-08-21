@@ -64,7 +64,7 @@ def test_intp_of_linear_arr():
     y_out = 1. * y_out / y_out.max() * (w_in - 1.)
     z_out = 1. * z_out / z_out.max() * (d_in - 1.)
 
-    # -- arbitray linear function
+    # -- arbitrary linear function
     def f1(x, y):
         a = 0.234
         b = 0.443
