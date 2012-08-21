@@ -685,19 +685,28 @@ def matrix_transform(coords, matrix):
 
 
 def warp_coords(orows, ocols, bands, coord_transform_fn,
-        dtype='float64'):
-    """
-    Return `coords` ndarray suitable for `scipy.ndimage.map_coordinates`, which will yield an
-    image of shape (orows, ocols, bands) by drawing from source points according to the
-    `coord_transform_fn`.
+                dtype=np.float64):
+    """Build the source coordinates for the output pixels of an image warp.
 
     Parameters
     ----------
-    orows: number of output rows
-    ocols: number of output columns
-    bands: number of color bands (aka channels)
-    coord_transform_fn: something like GeometricTransform.inverse_map
-    dtype: dtype for return value (should probably be 'float32' or 'float64')
+    orows : int
+        number of output rows
+    ocols : int
+        number of output columns
+    bands : int
+        number of color bands (aka channels)
+    coord_transform_fn : callable like GeometricTransform.inverse_map
+        Return input coordinates for given output coordinates
+    dtype : np.dtype or string
+        dtype for return value (sane choices: float32 or float64)
+
+    Returns
+    -------
+    coords : (orows * ocols, ) array 
+            Coordinates for `scipy.ndimage.map_coordinates`, that will yield
+            an image of shape (orows, ocols, bands) by drawing from source
+            points according to the `coord_transform_fn`.
 
     Notes
     -----

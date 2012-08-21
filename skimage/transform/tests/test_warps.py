@@ -2,7 +2,7 @@ import sys
 from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 
-from skimage.transform import (warp, fast_homography,
+from skimage.transform import (warp, warp_coords, fast_homography,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform)
@@ -118,6 +118,22 @@ def test_warp_identity():
     assert not np.allclose(rgb_lena, warped_rgb_lena)
     # assert no cross-talk between bands
     assert np.all(0 == warped_rgb_lena[:, :, 1])
+
+
+def test_warp_coords_example():
+    from skimage import data
+    from scipy.ndimage import map_coordinates
+    def shift_right(xy):
+        print 'xyshape', xy.shape
+        xy[:, 0] -= 10
+        return xy
+
+    image = data.lena().astype(np.float32)
+    print 'testing'
+    print image.dtype, image.shape
+    coords = warp_coords(512, 512, 3, shift_right)
+    print 'warp_coords', coords.dtype, coords.shape
+    warped_image = map_coordinates(coords, image)
 
 
 if __name__ == "__main__":
