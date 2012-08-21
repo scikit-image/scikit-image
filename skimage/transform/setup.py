@@ -20,7 +20,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
 
     config.add_extension('_project', sources=['_project.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
 
     return config
 

@@ -5,7 +5,7 @@
 import numpy as np
 cimport numpy as np
 from libc.math cimport sin, cos, abs
-from skimage.transform._project cimport bilinear_interpolation
+from skimage._shared.interpolation cimport bilinear_interpolation
 
 
 def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,

@@ -13,6 +13,11 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('_shared', parent_package, top_path)
     config.add_data_dir('tests')
 
+    cython(['interpolation.pyx'], working_path=base_path)
+
+    config.add_extension('interpolation', sources=['interpolation.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+
     return config
 
 
