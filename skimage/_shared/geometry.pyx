@@ -30,6 +30,7 @@ cdef inline unsigned char point_in_polygon(int nr_verts, double *xp, double *yp,
         j = i
     return c
 
+
 cdef void points_in_polygon(int nr_verts, double *xp, double *yp,
                             int nr_points, double *x, double *y,
                             unsigned char *result):
