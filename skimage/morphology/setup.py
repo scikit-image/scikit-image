@@ -28,7 +28,7 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_skeletonize_cy', sources=['_skeletonize_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_pnpoly', sources=['_pnpoly.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs(), '../shared'])
     config.add_extension('_convex_hull', sources=['_convex_hull.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
