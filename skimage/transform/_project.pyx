@@ -5,7 +5,8 @@
 
 cimport numpy as np
 import numpy as np
-from skimage._shared.interpolation cimport bilinear_interpolation
+from skimage._shared.interpolation cimport (nearest_neighbour,
+                                            bilinear_interpolation)
 
 
 cdef inline _matrix_transform(double x, double y, double* H, double *x_,
@@ -32,7 +33,7 @@ cdef inline _matrix_transform(double x, double y, double* H, double *x_,
     y_[0] = yy / zz
 
 
-def homography(np.ndarray image, np.ndarray H, output_shape=None,
+def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
                mode='constant', double cval=0):
     """
     Projective transformation (homography).
@@ -67,6 +68,10 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
         Transformation matrix H that defines the homography.
     output_shape : tuple (rows, cols)
         Shape of the output image generated.
+    order : {0, 1}
+        Order of interpolation::
+        * 0: Nearest-neighbour interpolation.
+        * 1: Bilinear interpolation (default).
     mode : {'constant', 'mirror', 'wrap'}
         How to handle values outside the image borders.
     cval : string
@@ -104,10 +109,17 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
     cdef int rows = img.shape[0]
     cdef int cols = img.shape[1]
 
-    for tfr in range(out_r):
-        for tfc in range(out_c):
-            _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
-            out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
-                                                   cols, r, c, mode_c)
+    if order == 0:
+        for tfr in range(out_r):
+            for tfc in range(out_c):
+                _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
+                out[tfr, tfc] = nearest_neighbour(<double*>img.data, rows,
+                                                  cols, r, c, mode_c)
+    elif order == 1:
+        for tfr in range(out_r):
+            for tfc in range(out_c):
+                _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
+                out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
+                                                       cols, r, c, mode_c)
 
     return out

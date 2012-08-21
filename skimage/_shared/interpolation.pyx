@@ -2,7 +2,31 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-from libc.math cimport ceil, floor
+from libc.math cimport ceil, floor, round
+
+
+cdef inline double nearest_neighbour(double* image, int rows, int cols,
+                                     double r, double c, char mode,
+                                     double cval=0):
+    """Nearest neighbour interpolation at a given position in the image.
+
+    Parameters
+    ----------
+    image : double array
+        Input image.
+    rows, cols: int
+        Shape of image.
+    r, c : int
+        Position at which to interpolate.
+    mode : {'C', 'W', 'M'}
+        Wrapping mode. Constant, Wrap or Mirror.
+    cval : double
+        Constant value to use for constant mode.
+
+    """
+
+    return get_pixel(image, rows, cols, <int>round(r), <int>round(c),
+                     mode, cval)
 
 
 cdef inline double bilinear_interpolation(double* image, int rows, int cols,

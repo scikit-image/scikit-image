@@ -48,20 +48,23 @@ def test_fast_homography():
     H[:2, :2] = [[C, -S], [S, C]]
     H[:2, 2] = [tx, ty]
 
-    for mode in ('constant', 'mirror', 'wrap'):
-        p0 = warp(img, ProjectiveTransform(H).inverse, mode=mode, order=1)
-        p1 = fast_homography(img, H, mode=mode)
+    tform = ProjectiveTransform(H)
 
-        # import matplotlib.pyplot as plt
-        # f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
-        # ax0.imshow(img)
-        # ax1.imshow(p0, cmap=plt.cm.gray)
-        # ax2.imshow(p1, cmap=plt.cm.gray)
-        # ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
-        # plt.show()
+    for order in range(2):
+        for mode in ('constant', 'mirror', 'wrap'):
+            p0 = warp(img, tform.inverse, mode=mode, order=order)
+            p1 = fast_homography(img, H, mode=mode, order=order)
 
-        d = np.mean(np.abs(p0 - p1))
-        assert d < 0.001
+            # import matplotlib.pyplot as plt
+            # f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
+            # ax0.imshow(img)
+            # ax1.imshow(p0, cmap=plt.cm.gray)
+            # ax2.imshow(p1, cmap=plt.cm.gray)
+            # ax3.imshow(np.abs(p0 - p1), cmap=plt.cm.gray)
+            # plt.show()
+
+            d = np.mean(np.abs(p0 - p1))
+            assert d < 0.001
 
 
 def test_swirl():
