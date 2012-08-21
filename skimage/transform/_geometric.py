@@ -717,7 +717,7 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
 
     Returns
     -------
-    coords : (3, orows, ocols, bands) array 
+    coords : (3, orows, ocols, bands) array of dtype `dtype`
             Coordinates for `scipy.ndimage.map_coordinates`, that will yield
             an image of shape (orows, ocols, bands) by drawing from source
             points according to the `coord_transform_fn`.
