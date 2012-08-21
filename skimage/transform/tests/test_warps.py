@@ -2,9 +2,10 @@ import sys
 from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 
-from skimage.transform import (warp, homography, fast_homography,
-                               SimilarityTransform, ProjectiveTransform,
-                               AffineTransform)
+from skimage.transform import (warp, fast_homography,
+                               AffineTransform,
+                               ProjectiveTransform,
+                               SimilarityTransform)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -31,7 +32,10 @@ def test_homography():
     M = np.array([[np.cos(theta),-np.sin(theta),0],
                   [np.sin(theta), np.cos(theta),4],
                   [0,             0,            1]])
-    x90 = homography(x, M, order=1)
+
+    x90 = warp(x,
+            inverse_map=ProjectiveTransform(M).inverse,
+            order=1)
     assert_array_almost_equal(x90, np.rot90(x))
 
 
