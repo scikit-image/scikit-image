@@ -1,5 +1,4 @@
 cimport numpy as cnp
-import numpy as np
 
 
 cdef float integrate(cnp.ndarray[float, ndim=2,  mode="c"] sat,
