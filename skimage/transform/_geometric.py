@@ -27,45 +27,6 @@ def _stackcopy(a, b):
         a[:] = b
 
 
-def _build_coords(orows, ocols, bands, coord_transform_fn,
-        dtype='float64'):
-    """
-    Return coords object suitable for scipy.ndimage.map_coordinates
-
-    Parameters
-    ----------
-    orows: number of output rows
-    ocols: number of output columns
-    bands: number of color bands (aka channels)
-    coord_transform_fn: something like GeometricTransform.inverse_map
-    interp_dtype: precision of interpolation e.g. 'float32' or 'float64'
-
-    """
-
-    coords = np.empty(np.r_[3, (orows, ocols, bands)], dtype=dtype)
-
-    # Reshape grid coordinates into a (P, 2) array of (x, y) pairs
-    tf_coords = np.indices((ocols, orows), dtype=dtype).reshape(2, -1).T
-
-    # Map each (x, y) pair to the source image according to
-    # the user-provided mapping
-    tf_coords = coord_transform_fn(tf_coords)
-
-    # Reshape back to a (2, M, N) coordinate grid
-    tf_coords = tf_coords.T.reshape((-1, ocols, orows)).swapaxes(1, 2)
-
-    # Place the y-coordinate mapping
-    _stackcopy(coords[1, ...], tf_coords[0, ...])
-
-    # Place the x-coordinate mapping
-    _stackcopy(coords[0, ...], tf_coords[1, ...])
-
-    # colour-coordinate mapping
-    coords[2, ...] = range(bands)
-
-    return coords
-
-
 class GeometricTransform(object):
     """Perform geometric transformations on a set of coordinates.
 
@@ -737,6 +698,72 @@ def matrix_transform(coords, matrix):
     return ProjectiveTransform(matrix)(coords)
 
 
+def warp_coords(orows, ocols, bands, coord_transform_fn,
+        dtype='float64'):
+    """
+    Return `coords` ndarray suitable for `scipy.ndimage.map_coordinates`, which will yield an
+    image of shape (orows, ocols, bands) by drawing from source points according to the
+    `coord_transform_fn`.
+
+    Parameters
+    ----------
+    orows: number of output rows
+    ocols: number of output columns
+    bands: number of color bands (aka channels)
+    coord_transform_fn: something like GeometricTransform.inverse_map
+    dtype: dtype for return value (should probably be 'float32' or 'float64')
+
+    Notes
+    -----
+    This is a lower-level routine that produces the source coordinates used by `warp()`.
+
+    It is provided separately from `warp` to give additional flexibility to users who would
+    like, for example, to re-use a particular coordinate mapping, to use specific dtypes at
+    various points along the the image-warping process, or to implement different
+    post-processing logic than `warp` performs after the call to `ndimage.map_coordinates`.
+
+
+    Examples
+    --------
+    Produce a coordinate map that Shifts an image to the right:
+
+    >>> from skimage import data
+    >>> from scipy.ndimage import map_coordinates
+    >>>
+    >>> def shift_right(xy):
+    ...     xy[:, 0] -= 10
+    ...     return xy
+    >>>
+    >>> coords = warp_coords(30, 30, 3, shift_right)
+    >>> image = data.camera()
+    >>> warped_image = map_coordinates(coords, image)
+
+    """
+
+    coords = np.empty(np.r_[3, (orows, ocols, bands)], dtype=dtype)
+
+    # Reshape grid coordinates into a (P, 2) array of (x, y) pairs
+    tf_coords = np.indices((ocols, orows), dtype=dtype).reshape(2, -1).T
+
+    # Map each (x, y) pair to the source image according to
+    # the user-provided mapping
+    tf_coords = coord_transform_fn(tf_coords)
+
+    # Reshape back to a (2, M, N) coordinate grid
+    tf_coords = tf_coords.T.reshape((-1, ocols, orows)).swapaxes(1, 2)
+
+    # Place the y-coordinate mapping
+    _stackcopy(coords[1, ...], tf_coords[0, ...])
+
+    # Place the x-coordinate mapping
+    _stackcopy(coords[0, ...], tf_coords[1, ...])
+
+    # colour-coordinate mapping
+    coords[2, ...] = range(bands)
+
+    return coords
+
+
 def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
          mode='constant', cval=0., reverse_map=None):
     """Warp an image according to a given coordinate transformation.
@@ -797,7 +824,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     def coord_transform_fn(*args):
         return inverse_map(*args, **map_args)
 
-    coords = _build_coords(rows, cols, bands, coord_transform_fn)
+    coords = warp_coords(rows, cols, bands, coord_transform_fn)
 
     # Prefilter not necessary for order 1 interpolation
     prefilter = order > 1
