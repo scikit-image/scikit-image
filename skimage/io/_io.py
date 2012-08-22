@@ -42,20 +42,6 @@ class Image(np.ndarray):
             setattr(x, tag, kwargs.get(tag, getattr(arr, tag, value)))
         return x
 
-    def __array_finalize__(self, obj):
-        """Copy object tags."""
-        for tag, value in Image.tags.items():
-            setattr(self, tag, getattr(obj, tag, value))
-        return
-
-    def __reduce__(self):
-        object_state = list(np.ndarray.__reduce__(self))
-        subclass_state = {}
-        for tag in self.tags:
-            subclass_state[tag] = getattr(self, tag)
-        object_state[2] = (object_state[2], subclass_state)
-        return tuple(object_state)
-
     def _repr_png_(self):
         return self._repr_image_format('png')
 
@@ -68,19 +54,6 @@ class Image(np.ndarray):
         return_str = str_buffer.getvalue()
         str_buffer.close()
         return return_str
-
-    def __setstate__(self, state):
-        nd_state, subclass_state = state
-        np.ndarray.__setstate__(self, nd_state)
-
-        for tag in subclass_state:
-            setattr(self, tag, subclass_state[tag])
-
-    @property
-    def exposure(self):
-        """Return exposure time based on EXIF tag."""
-        exposure = self.EXIF['EXIF ExposureTime'].values[0]
-        return exposure.num / float(exposure.den)
 
 
 def push(img):
