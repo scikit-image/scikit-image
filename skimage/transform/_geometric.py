@@ -710,7 +710,7 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
         number of output columns
     bands : int
         number of color bands (aka channels)
-    coord_transform_fn : callable like GeometricTransform.inverse_map
+    coord_transform_fn : callable like GeometricTransform.inverse
         Return input coordinates for given output coordinates
     dtype : np.dtype or string
         dtype for return value (sane choices: float32 or float64)
