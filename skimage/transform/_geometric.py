@@ -724,12 +724,14 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
 
     Notes
     -----
-    This is a lower-level routine that produces the source coordinates used by `warp()`.
+    This is a lower-level routine that produces the source coordinates used by
+    `warp()`.
 
-    It is provided separately from `warp` to give additional flexibility to users who would
-    like, for example, to re-use a particular coordinate mapping, to use specific dtypes at
-    various points along the the image-warping process, or to implement different
-    post-processing logic than `warp` performs after the call to `ndimage.map_coordinates`.
+    It is provided separately from `warp` to give additional flexibility to
+    users who would like, for example, to re-use a particular coordinate
+    mapping, to use specific dtypes at various points along the the
+    image-warping process, or to implement different post-processing logic
+    than `warp` performs after the call to `ndimage.map_coordinates`.
 
 
     Examples
