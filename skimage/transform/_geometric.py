@@ -835,7 +835,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     def coord_transform_fn(*args):
         return inverse_map(*args, **map_args)
 
-
     coords = warp_coords(rows, cols, bands, coord_transform_fn)
 
     # Prefilter not necessary for order 1 interpolation
