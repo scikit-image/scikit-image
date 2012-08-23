@@ -109,16 +109,13 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef int rows = img.shape[0]
     cdef int cols = img.shape[1]
 
-    if order == 0:
-        for tfr in range(out_r):
-            for tfc in range(out_c):
-                _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
+    for tfr in range(out_r):
+        for tfc in range(out_c):
+            _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
+            if order == 0:
                 out[tfr, tfc] = nearest_neighbour(<double*>img.data, rows,
                                                   cols, r, c, mode_c)
-    elif order == 1:
-        for tfr in range(out_r):
-            for tfc in range(out_c):
-                _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
+            elif order == 1:
                 out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
                                                        cols, r, c, mode_c)
 
