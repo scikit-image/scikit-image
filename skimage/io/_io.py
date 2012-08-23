@@ -138,8 +138,8 @@ def imshow(arr, plugin=None, **plugin_args):
 
     Parameters
     ----------
-    arr : ndarray
-        Image data.
+    arr : ndarray or str
+        Image data or name of image file.
     plugin : str
         Name of plugin to use.  By default, the different plugins are
         tried (starting with the Python Imaging Library) until a suitable
@@ -151,6 +151,8 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
+    if isinstance(arr, basestring):
+        arr = call_plugin('imread', arr, plugin=plugin)
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 
 
