@@ -160,6 +160,7 @@ class Slider(BaseWidget):
 
         self.val = value
         self._good_editbox_input()
+        self.callback(self.name, value)
 
     def _good_editbox_input(self):
         self.editbox.setStyleSheet("background-color: rgb(255, 255, 255)")
