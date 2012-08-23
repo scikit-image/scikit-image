@@ -1,6 +1,6 @@
-import sys
 from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
+from scipy.ndimage import map_coordinates
 
 from skimage.transform import (warp, warp_coords, fast_homography,
                                AffineTransform,
@@ -28,10 +28,10 @@ def test_homography():
     x = np.zeros((5, 5), dtype=np.uint8)
     x[1, 1] = 255
     x = img_as_float(x)
-    theta = -np.pi/2
-    M = np.array([[np.cos(theta),-np.sin(theta),0],
-                  [np.sin(theta), np.cos(theta),4],
-                  [0,             0,            1]])
+    theta = -np.pi / 2
+    M = np.array([[np.cos(theta), - np.sin(theta), 0],
+                  [np.sin(theta),   np.cos(theta), 4],
+                  [0,               0,             1]])
 
     x90 = warp(x,
             inverse_map=ProjectiveTransform(M).inverse,
@@ -40,7 +40,7 @@ def test_homography():
 
 
 def test_fast_homography():
-    img = rgb2gray(data.lena())
+    img = rgb2gray(data.lena()).astype(np.uint8)
     img = img[:, :100]
 
     theta = np.deg2rad(30)
@@ -71,10 +71,6 @@ def test_fast_homography():
 
 
 def test_swirl():
-    if not data.checkerboard().shape:
-        print >> sys.stderr, ('Failed to read image data.checkerboard()'
-                ' -- Skipping test_swirl')
-        return
     image = img_as_float(data.checkerboard())
 
     swirl_params = {'radius': 80, 'rotation': 0, 'order': 2, 'mode': 'reflect'}
@@ -91,41 +87,25 @@ def test_const_cval_out_of_range():
 
 
 def test_warp_identity():
-    lena = data.lena()
-    if not lena.shape:
-        print >> sys.stderr, ('Failed to read image data.lena()'
-                ' -- Skipping test_warp_identity')
-        return
-    lena = img_as_float(rgb2gray(lena))
+    lena = img_as_float(rgb2gray(data.lena()))
     assert len(lena.shape) == 2
-    assert np.allclose(lena,
-            warp(lena, AffineTransform(rotation=0)))
-    assert not np.allclose(lena,
-            warp(lena, AffineTransform(rotation=0.1)))
-
-    rgb_lena = np.transpose(
-            np.asarray([lena, np.zeros_like(lena), lena]),
-            (1, 2, 0))
+    assert np.allclose(lena, warp(lena, AffineTransform(rotation=0)))
+    assert not np.allclose(lena, warp(lena, AffineTransform(rotation=0.1)))
+    rgb_lena = np.transpose(np.asarray([lena, np.zeros_like(lena), lena]),
+                            (1, 2, 0))
     warped_rgb_lena = warp(rgb_lena, AffineTransform(rotation=0.1))
-
-    assert np.allclose(rgb_lena,
-            warp(rgb_lena, AffineTransform(rotation=0)))
+    assert np.allclose(rgb_lena, warp(rgb_lena, AffineTransform(rotation=0)))
     assert not np.allclose(rgb_lena, warped_rgb_lena)
     # assert no cross-talk between bands
     assert np.all(0 == warped_rgb_lena[:, :, 1])
 
 
 def test_warp_coords_example():
-    from skimage import data
-    from scipy.ndimage import map_coordinates
-    def shift_right(xy):
-        xy[:, 0] -= 10
-        return xy
-
     image = data.lena().astype(np.float32)
     assert 3 == image.shape[2]
-    coords = warp_coords(30, 30, 3, shift_right)
-    warped_image = map_coordinates(image[:, :, 0], coords[:2])
+    tform = SimilarityTransform(translation=(0, -10))
+    coords = warp_coords(30, 30, 3, tform)
+    warped_image1 = map_coordinates(image[:, :, 0], coords[:2])
 
 
 if __name__ == "__main__":
