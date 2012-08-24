@@ -105,11 +105,8 @@
   Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
 
 - Johannes Schönberger
-  Polygon, circle and ellipse drawing functions
-  Adaptive thresholding
-  Implementation of Matlab's `regionprops`
-  Estimation of geometric transformation parameters
-  Local binary pattern texture classification
+  Drawing functions, adaptive thresholding, regionprops, geometric
+  transformations, LBPs, polygon approximations, and more.
 
 - Pavel Campr
   Fixes and tests for Histograms of Oriented Gradients.
