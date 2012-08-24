@@ -1,12 +1,59 @@
-__all__ = ['imread', 'imread_collection', 'imsave', 'imshow', 'show',
+__all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
 from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
 import numpy as np
 
+try:
+    import cStringIO as StringIO
+except ImportError:
+    import StringIO
+
+
 # Shared image queue
 _image_stack = []
+
+
+class Image(np.ndarray):
+    """Class representing Image data.
+
+    These objects have tags for image metadata and IPython display protocol
+    methods for image display.
+    """
+
+    tags = {'filename': '',
+            'EXIF': {},
+            'info': {}}
+
+    def __new__(cls, arr, **kwargs):
+        """Set the image data and tags according to given parameters.
+
+        Input:
+        ------
+        arr : ndarray
+            Image data.
+        kwargs : Image tags as keywords
+            Specified in the form ``tag0=value``, ``tag1=value``.
+
+        """
+        x = np.asarray(arr).view(cls)
+        for tag, value in Image.tags.items():
+            setattr(x, tag, kwargs.get(tag, getattr(arr, tag, value)))
+        return x
+
+    def _repr_png_(self):
+        return self._repr_image_format('png')
+
+    def _repr_jpeg_(self):
+        return self._repr_image_format('jpeg')
+
+    def _repr_image_format(self, format_str):
+        str_buffer = StringIO.StringIO()
+        imsave(str_buffer, self, format_str=format_str)
+        return_str = str_buffer.getvalue()
+        str_buffer.close()
+        return return_str
 
 
 def push(img):
@@ -77,7 +124,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if as_grey and getattr(img, 'ndim', 0) >= 3:
         img = rgb2grey(img)
 
-    return img
+    return Image(img)
 
 
 def imread_collection(load_pattern, conserve_memory=True,

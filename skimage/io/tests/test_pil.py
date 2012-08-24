@@ -33,6 +33,7 @@ def setup_module(self):
         pass
 
 
+
 @skipif(not PIL_available)
 def test_imread_flatten():
     # a color image is flattened
@@ -76,6 +77,20 @@ def test_imread_uint16():
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
     assert_array_almost_equal(img, expected)
+
+
+@skipif(not PIL_available)
+def test_repr_png():
+    img_path = os.path.join(data_dir, 'camera.png')
+    original_img = imread(img_path)
+    original_img_str = original_img._repr_png_()
+
+    with NamedTemporaryFile(suffix='.png', mode='r+') as temp_png:
+        temp_png.write(original_img_str)
+        temp_png.seek(0)
+        round_trip = imread(temp_png)
+
+    assert np.all(original_img == round_trip)
 
 
 # Big endian images not correctly loaded for PIL < 1.1.7
