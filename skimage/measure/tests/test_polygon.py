@@ -47,7 +47,7 @@ def test_subdivide_polygon():
             new_square3 = subdivide_polygon(square3, degree, True)
             np.testing.assert_equal(new_square3[0], square3[0])
             np.testing.assert_equal(new_square3[-1], square3[-1])
-            print mask_len
+
             np.testing.assert_equal(new_square3.shape[0],
                                     2 * (square3.shape[0] - mask_len + 2))
 
