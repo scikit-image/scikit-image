@@ -1,7 +1,8 @@
 from __future__ import division
 import numpy as np
 
-__all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte']
+__all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
+           'img_as_bool']
 
 from .. import get_log
 log = get_log('dtype_converter')
@@ -15,7 +16,8 @@ dtype_range = {np.uint8: (0, 255),
 
 integer_types = (np.uint8, np.uint16, np.int8, np.int16)
 
-_supported_types = (np.uint8, np.uint16, np.uint32,
+_supported_types = (np.bool_, np.bool8,
+                    np.uint8, np.uint16, np.uint32,
                     np.int8, np.int16, np.int32,
                     np.float32, np.float64)
 
@@ -145,6 +147,10 @@ def convert(image, dtype, force_copy=False, uniform=False):
     kind_in = dtypeobj_in.kind
     itemsize = dtypeobj.itemsize
     itemsize_in = dtypeobj_in.itemsize
+
+    if kind == 'b' or kind_in == 'b':
+        return dtype(image)
+
     if kind in 'ui':
         imin = np.iinfo(dtype).min
         imax = np.iinfo(dtype).max
@@ -322,3 +328,26 @@ def img_as_ubyte(image, force_copy=False):
 
     """
     return convert(image, np.uint8, force_copy)
+
+
+def img_as_bool(image, force_copy=False):
+    """Convert an image to boolean format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of bool (bool_)
+        Output image.
+
+    Notes
+    -----
+    All non-zero elements are treated as True.
+
+    """
+    return convert(image, np.bool_, force_copy)
