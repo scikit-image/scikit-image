@@ -61,10 +61,15 @@ Stylistic Guidelines
  * When documenting array parameters, use ``image : (M, N) ndarray``,
    ``image : (M, N, 3) ndarray`` and then refer to ``M`` and ``N`` in the
    docstring.
- * Set up your editor to remove trailing whitespace.
+
+ * Set up your editor to remove trailing whitespace.  Follow `PEP08
+   <www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
+
  * If a function name, say ``segment(...)``, has the same name as the file in
    which it is implemented, name that file ``_segment.py`` so that it can still
-   be imported.
+   be imported.  All Cython files start with an underscore, e.g.
+   ``_some_module.pyx``.
+
  * Functions should support all input image dtypes.  Use utility functions such
    as ``img_as_float`` to help convert to an appropriate type.  The output
    format can be whatever is most efficient.  This allows us to string together
