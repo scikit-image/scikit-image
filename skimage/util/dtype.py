@@ -7,7 +7,9 @@ __all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
 from .. import get_log
 log = get_log('dtype_converter')
 
-dtype_range = {np.uint8: (0, 255),
+dtype_range = {np.bool_: (False, True),
+               np.bool8: (False, True),
+               np.uint8: (0, 255),
                np.uint16: (0, 65535),
                np.int8: (-128, 127),
                np.int16: (-32768, 32767),
