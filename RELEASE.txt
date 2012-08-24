@@ -7,6 +7,8 @@ How to make a new release of ``skimage``
   - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
   - Build a clean version of the docs.  Run "make" in the root dir, then
     ``rm build -rf; make html`` in the docs.
+  - Run ``make html`` again to copy the newly generated ``random.js`` into
+    place.
   - Push upstream using "make gh-pages"
 - Add the version number as a tag in git::
 
