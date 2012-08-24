@@ -9,38 +9,68 @@ Development process
    instructions on making your own fork.
  * Create a new branch for the feature you want to work on.  Since the
    branch name will appear in the merge message, use a sensible name
-   such as 'your_name-transform-speedups'.
+   such as 'transform-speedups'.
  * Commit locally as you progress.
  * Push your changes back to github and create a pull request by
    clicking "request pull" in GitHub.
  * Optionally, mail the mailing list, explaining your changes.
+
+.. note::
+
+   Do *not* merge the main branch into yours.  If GitHub indicates that the
+   Pull Request can no longer be merged automatically, rebase onto master.
+
+   (If you are curious, here's a further discussion on
+   the `dangers of rebasing <http://tinyurl.com/lll385>`__.  Also
+   see this `LWN article <http://tinyurl.com/nqcbkj>`__.)
+
+* To reviewers: add a short explanation of what a branch did to the merge
+  message or, if closing a bug, add "Closes gh-XXXX".
 
 You may also read this summary by Fernando Perez of the IPython
 project on how they manage to keep review overhead to a minimum:
 
 http://mail.scipy.org/pipermail/ipython-dev/2010-October/006746.html
 
-.. note::
-
-   Do *not* merge the main branch into yours.  You may rebase,
-   as long as you are `aware of its dangers <http://tinyurl.com/lll385>`_
-   (also see `LWN article <http://tinyurl.com/nqcbkj>`_).
-
-* To reviewers: add a short explanation of what a branch did to the merge
-  message or, if closing a bug, add "Closes gh-XXXX".
-
 Guidelines
 ``````````
  * All code should have tests (see "Test coverage" below for more details).
  * All code should be documented, to the same
    `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
-   as NumPy and SciPy.  If possible, also add a section to the user guide.
+   as NumPy and SciPy.  For new functionality, always add an example to the
+   gallery.
  * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
    where possible.
  * No major changes should be committed without review.  Ask on the
    `mailing list <http://groups.google.com/group/scikits-image>`_ if
    you get no response to your pull request.
  * Examples in the gallery should have a maximum figure width of 8 inches.
+
+Stylistic Guidelines
+````````````````````
+ * Use numpy data types instead of strings (``np.uint8`` instead of
+   ``"uint8"``).
+
+ * Use the following import conventions::
+
+     import numpy as np
+     import matplotlib.pyplot as plt
+
+     cimport numpy as cnp # in Cython code
+
+ * When documenting array parameters, use ``image : (M, N) ndarray``,
+   ``image : (M, N, 3) ndarray`` and then refer to ``M`` and ``N`` in the
+   docstring.
+ * Set up your editor to remove trailing whitespace.
+ * If a function name, say ``segment(...)``, has the same name as the file in
+   which it is implemented, name that file ``_segment.py`` so that it can still
+   be imported.
+ * Functions should support all input image dtypes.  Use utility functions such
+   as ``img_as_float`` to help convert to an appropriate type.  The output
+   format can be whatever is most efficient.  This allows us to string together
+   several functions into a pipeline, e.g.::
+
+     hough(canny(my_image))
 
 Test coverage
 `````````````
