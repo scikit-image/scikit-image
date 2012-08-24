@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from skimage import img_as_int, img_as_float, \
-                    img_as_uint, img_as_ubyte
+                    img_as_uint, img_as_ubyte, img_as_bool
 from skimage.util.dtype import convert
 
 
@@ -85,6 +85,20 @@ def test_copy():
 
     assert y is x
     assert z is not x
+
+
+def test_bool():
+    img_ = np.zeros((10, 10), np.bool_)
+    img8 = np.zeros((10, 10), np.bool8)
+    img_[1, 1] = True
+    img8[1, 1] = True
+    funcs = (img_as_float, img_as_int, img_as_ubyte, img_as_uint, img_as_bool)
+    for func in funcs:
+        converted_ = func(img_)
+        assert np.sum(converted_) == 1
+        converted8 = func(img8)
+        assert np.sum(converted8) == 1
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
