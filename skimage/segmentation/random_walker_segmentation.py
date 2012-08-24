@@ -163,7 +163,7 @@ def _build_laplacian(data, mask=None, beta=50):
 
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
-        return_full_prob=False, reorder_labels=False):
+        return_full_prob=False):
     """
     Random walker algorithm for segmentation from markers.
 
@@ -179,8 +179,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         for different phases. Zero-labeled pixels are unlabeled pixels.
         Negative labels correspond to inactive pixels that are not taken
         into account (they are removed from the graph). If labels are not
-        consecutive integers and `reorder_labels` is True, the labels array
-        will be transformed so that labels are consecutive.
+        consecutive integers, the labels array will be transformed so that
+        labels are consecutive.
 
     beta : float
         Penalization coefficient for the random walker motion
@@ -219,10 +219,6 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     return_full_prob : bool, default False
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
-
-    reorder_labels : bool, default False
-        If True, labels is transformed so that its values are consecutive
-        integers.
 
     Returns
     -------
@@ -308,7 +304,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     data = np.atleast_3d(data)
     if copy:
         labels = np.copy(labels)
-    if reorder_labels:
+    label_values = np.unique(labels)
+    # Reorder label values to have consecutive integers (no gaps)
+    if np.any(np.diff(label_values) > 1):
         mask = labels >= 0
         labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
     labels = labels.astype(np.int32)
