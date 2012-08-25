@@ -5,6 +5,7 @@ import sys
 
 from PyQt4 import QtGui, QtCore
 
+from skimage.util.dtype import dtype_range
 from ..utils import figimage, MatplotlibCanvas
 
 
@@ -139,6 +140,8 @@ class ImageViewer(QtGui.QMainWindow):
     def image(self, image):
         self._img = image
         self._image_plot.set_array(image)
+        clim = dtype_range[image.dtype.type]
+        self._image_plot.set_clim(clim)
         self.redraw()
 
     def reset_image(self):
