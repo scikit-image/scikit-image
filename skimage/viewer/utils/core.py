@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 
 try:
@@ -28,7 +30,7 @@ class RequiredAttr(object):
 
     def __get__(self, obj, objtype):
         if self.val is None:
-            raise RuntimeError(self.msg)
+            warnings.warn(self.msg)
         return self.val
 
     def __set__(self, obj, val):
