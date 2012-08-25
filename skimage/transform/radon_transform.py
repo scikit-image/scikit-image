@@ -100,7 +100,7 @@ def iradon(radon_image, theta=None, output_size=None,
         the image corresponds to a projection along a different angle.
     theta : array_like, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
-        between 0 and 180 (if the shape of `radon_image` is nxm)
+        between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int
         Number of rows and columns in the reconstruction.
     filter : str, optional (default ramp)
