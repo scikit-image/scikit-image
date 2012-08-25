@@ -135,30 +135,36 @@ def rescale_intensity(image, in_range=None, out_range=None):
     Examples
     --------
     By default, intensities are stretched to the limits allowed by the dtype:
+
     >>> image = np.array([51, 102, 153], dtype=np.uint8)
     >>> rescale_intensity(image)
     array([  0, 127, 255], dtype=uint8)
 
     It's easy to accidentally convert an image dtype from uint8 to float:
+
     >>> 1.0 * image
     array([  51.,  102.,  153.])
 
     Use `rescale_intensity` to rescale to the proper range for float dtypes:
+
     >>> image_float = 1.0 * image
     >>> rescale_intensity(image_float)
     array([ 0. ,  0.5,  1. ])
 
     To maintain the low contrast of the original, use the `in_range` parameter:
+
     >>> rescale_intensity(image_float, in_range=(0, 255))
     array([ 0.2,  0.4,  0.6])
 
     If the min/max value of `in_range` is more/less than the min/max image
     intensity, then the intensity levels are clipped:
+
     >>> rescale_intensity(image_float, in_range=(0, 102))
     array([ 0.5,  1. ,  1. ])
 
     If you have an image with signed integers but want to rescale the image to
     just the positive range, use the `out_range` parameter:
+
     >>> image = np.array([-10, 0, 10], dtype=np.int8)
     >>> rescale_intensity(image, out_range=(0, 127))
     array([  0,  63, 127], dtype=int8)
