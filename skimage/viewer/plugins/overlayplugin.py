@@ -1,13 +1,6 @@
-import numpy as np
-
-from skimage.util import dtype
+from skimage.util.dtype import dtype_range
 from .base import Plugin
 from ..utils import ClearColormap
-
-
-#TODO: Maybe this bool definition should be moved to skimage.util.dtype.
-dtype_range = dtype.dtype_range.copy()
-dtype_range[np.bool_] = (False, True)
 
 
 class OverlayPlugin(Plugin):
