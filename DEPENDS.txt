@@ -2,7 +2,7 @@ Build Requirements
 ------------------
 * `Python >= 2.5 <http://python.org>`__
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
-* `Cython >= 0.15 <http://www.cython.org/>`__
+* `Cython >= 0.16 <http://www.cython.org/>`__
 
 
 `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
