@@ -1,11 +1,11 @@
-#cython: cdivison=True
+#cython: cdivision=True
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
 cimport numpy as np
 from libc.math cimport sin, cos, abs
-from skimage.transform._project cimport bilinear_interpolation
+from skimage._shared.interpolation cimport bilinear_interpolation
 
 
 def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,

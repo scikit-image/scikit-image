@@ -3,11 +3,7 @@ import math
 from libc.math cimport sqrt
 cimport numpy as np
 cimport cython
-
-
-cdef extern from "../morphology/_pnpoly.h":
-     int pnpoly(int nr_verts, double *xp, double *yp,
-                double x, double y)
+from skimage._shared.geometry cimport point_in_polygon
 
 
 @cython.boundscheck(False)
@@ -119,7 +115,7 @@ def polygon(y, x, shape=None):
 
     for r in range(minr, maxr+1):
         for c in range(minc, maxc+1):
-            if pnpoly(nr_verts, cptr, rptr, c, r):
+            if point_in_polygon(nr_verts, cptr, rptr, c, r):
                 rr.append(r)
                 cc.append(c)
 

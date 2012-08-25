@@ -1,17 +1,13 @@
 import numpy as np
 cimport numpy as np
 cimport cython
+from libc.math cimport exp, sqrt
 
 from itertools import product
 from scipy import ndimage
 
 from ..util import img_as_float
 from ..color import rgb2lab
-
-
-cdef extern from "math.h":
-    double exp(double)
-    double sqrt(double)
 
 
 @cython.boundscheck(False)
