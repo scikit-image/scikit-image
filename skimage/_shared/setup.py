@@ -10,19 +10,21 @@ base_path = os.path.abspath(os.path.dirname(__file__))
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
-    config = Configuration('transform', parent_package, top_path)
+    config = Configuration('_shared', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_hough_transform.pyx'], working_path=base_path)
-    cython(['_project.pyx'], working_path=base_path)
+    cython(['geometry.pyx'], working_path=base_path)
+    cython(['interpolation.pyx'], working_path=base_path)
+    cython(['transform.pyx'], working_path=base_path)
 
-    config.add_extension('_hough_transform', sources=['_hough_transform.c'],
+    config.add_extension('geometry', sources=['geometry.c'])
+    config.add_extension('interpolation', sources=['interpolation.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('transform', sources=['transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
-    config.add_extension('_project', sources=['_project.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
-
     return config
+
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup

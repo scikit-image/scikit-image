@@ -1,111 +1,12 @@
-#cython: cdivison=True
+#cython: cdivision=True
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
 
 cimport numpy as np
 import numpy as np
-from cython.operator import dereference
-from libc.math cimport ceil, floor
-
-
-cdef inline double bilinear_interpolation(double* image, int rows, int cols,
-                                          double r, double c, char mode,
-                                          double cval=0):
-    """Bilinear interpolation at a given position in the image.
-
-    Parameters
-    ----------
-    image : double array
-        Input image.
-    rows, cols: int
-        Shape of image.
-    r, c : int
-        Position at which to interpolate.
-    mode : {'C', 'W', 'M'}
-        Wrapping mode. Constant, Wrap or Mirror.
-    cval : double
-        Constant value to use for constant mode.
-
-    """
-    cdef double dr, dc
-    cdef int minr, minc, maxr, maxc
-
-    minr = <int>floor(r)
-    minc = <int>floor(c)
-    maxr = <int>ceil(r)
-    maxc = <int>ceil(c)
-    dr = r - minr
-    dc = c - minc
-    top = (1 - dc) * get_pixel(image, rows, cols, minr, minc, mode, cval) \
-          + dc * get_pixel(image, rows, cols, minr, maxc, mode, cval)
-    bottom = (1 - dc) * get_pixel(image, rows, cols, maxr, minc, mode, cval) \
-             + dc * get_pixel(image, rows, cols, maxr, maxc, mode, cval)
-    return (1 - dr) * top + dr * bottom
-
-
-cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
-                             char mode, double cval=0):
-    """Get a pixel from the image, taking wrapping mode into consideration.
-
-    Parameters
-    ----------
-    image : double array
-        Input image.
-    rows, cols: int
-        Shape of image.
-    r, c : int
-        Position at which to get the pixel.
-    mode : {'C', 'W', 'M'}
-        Wrapping mode. Constant, Wrap or Mirror.
-    cval : double
-        Constant value to use for constant mode.
-
-    """
-    if mode == 'C':
-        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
-            return cval
-        else:
-            return image[r * cols + c]
-    else:
-        return image[coord_map(rows, r, mode) * cols + coord_map(cols, c, mode)]
-
-
-cdef inline int coord_map(int dim, int coord, char mode):
-    """
-    Wrap a coordinate, according to a given mode.
-
-    Parameters
-    ----------
-    dim : int
-        Maximum coordinate.
-    coord : int
-        Coord provided by user.  May be < 0 or > dim.
-    mode : {'W', 'M'}
-        Whether to wrap or mirror the coordinate if it
-        falls outside [0, dim).
-
-    """
-    dim = dim - 1
-    if mode == 'M': # mirror
-        if (coord < 0):
-            # How many times times does the coordinate wrap?
-            if (<int>(-coord / dim) % 2 != 0):
-                return dim - <int>(-coord % dim)
-            else:
-                return <int>(-coord % dim)
-        elif (coord > dim):
-            if (<int>(coord / dim) % 2 != 0):
-                return <int>(dim - (coord % dim))
-            else:
-                return <int>(coord % dim)
-    elif mode == 'W': # wrap
-        if (coord < 0):
-            return <int>(dim - (-coord % dim))
-        elif (coord > dim):
-            return <int>(coord % dim)
-
-    return coord
+from skimage._shared.interpolation cimport (nearest_neighbour,
+                                            bilinear_interpolation)
 
 
 cdef inline _matrix_transform(double x, double y, double* H, double *x_,
@@ -132,7 +33,7 @@ cdef inline _matrix_transform(double x, double y, double* H, double *x_,
     y_[0] = yy / zz
 
 
-def homography(np.ndarray image, np.ndarray H, output_shape=None,
+def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
                mode='constant', double cval=0):
     """
     Projective transformation (homography).
@@ -167,6 +68,10 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
         Transformation matrix H that defines the homography.
     output_shape : tuple (rows, cols)
         Shape of the output image generated.
+    order : {0, 1}
+        Order of interpolation::
+        * 0: Nearest-neighbour interpolation.
+        * 1: Bilinear interpolation (default).
     mode : {'constant', 'mirror', 'wrap'}
         How to handle values outside the image borders.
     cval : string
@@ -175,13 +80,15 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
 
     """
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2] img = image.astype(np.double)
+    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] img = \
+         np.ascontiguousarray(image, dtype=np.double)
     cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] M = \
          np.ascontiguousarray(np.linalg.inv(H))
 
     if mode not in ('constant', 'wrap', 'mirror'):
         raise ValueError("Invalid mode specified.  Please use "
                          "`constant`, `wrap` or `mirror`.")
+    cdef char mode_c
     if mode == 'constant':
         mode_c = ord('C')
     elif mode == 'wrap':
@@ -189,6 +96,7 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
     elif mode == 'mirror':
         mode_c = ord('M')
 
+    cdef int out_r, out_c
     if output_shape is None:
         out_r = img.shape[0]
         out_c = img.shape[1]
@@ -207,7 +115,11 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None,
     for tfr in range(out_r):
         for tfc in range(out_c):
             _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
-            out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
-                                                   cols, r, c, mode_c)
+            if order == 0:
+                out[tfr, tfc] = nearest_neighbour(<double*>img.data, rows,
+                                                  cols, r, c, mode_c)
+            elif order == 1:
+                out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
+                                                       cols, r, c, mode_c)
 
     return out

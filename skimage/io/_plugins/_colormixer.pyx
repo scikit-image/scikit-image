@@ -8,15 +8,10 @@ integers, so currently the only way to clip results efficiently
 one.
 
 """
-
+import cython
 import numpy as np
 cimport numpy as np
-
-import cython
-
-cdef extern from "math.h":
-    float exp(float) nogil
-    float pow(float, float) nogil
+from libc.math cimport exp, pow
 
 
 @cython.boundscheck(False)
@@ -189,7 +184,6 @@ def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i,j,2] = lut[stateimg[i,j,2]]
 
 
-
 @cython.boundscheck(False)
 def gamma(np.ndarray[np.uint8_t, ndim=3] img,
           np.ndarray[np.uint8_t, ndim=3] stateimg,
@@ -217,7 +211,6 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i,j,0] = lut[stateimg[i,j,0]]
                 img[i,j,1] = lut[stateimg[i,j,1]]
                 img[i,j,2] = lut[stateimg[i,j,2]]
-
 
 
 @cython.cdivision(True)
@@ -282,6 +275,7 @@ cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     HSV[0] = H
     HSV[1] = S
     HSV[2] = V
+
 
 @cython.cdivision(True)
 cdef void hsv_2_rgb(float* HSV, float* RGB) nogil:
@@ -387,6 +381,7 @@ def py_hsv_2_rgb(H, S, V):
     B = int(RGB[2] * 255)
 
     return (R, G, B)
+
 
 def py_rgb_2_hsv(R, G, B):
     '''Convert an HSV value to RGB.
@@ -561,9 +556,3 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i, j, 0] = <np.uint8_t>RGB[0]
                 img[i, j, 1] = <np.uint8_t>RGB[1]
                 img[i, j, 2] = <np.uint8_t>RGB[2]
-
-
-
-
-
-
