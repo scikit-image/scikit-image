@@ -1,7 +1,10 @@
 import os
 from textwrap import dedent
 
-from PyQt4 import QtGui
+try:
+    from PyQt4 import QtGui
+except ImportError:
+    print("Could not import PyQt4 -- skimage.viewer not available.")
 
 from skimage import io
 from .core import BaseWidget
