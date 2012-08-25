@@ -3,7 +3,12 @@ ImageViewer class for viewing and interacting with images.
 """
 import sys
 
-from PyQt4 import QtGui, QtCore
+try:
+    from PyQt4 import QtGui, QtCore
+    from PyQt4.QtGui import QMainWindow
+except ImportError:
+    QMainWindow = object # hack to prevent nosetest and autodoc errors
+    print("Could not import PyQt4 -- skimage.viewer not available.")
 
 from ..utils import figimage, MatplotlibCanvas
 
@@ -18,7 +23,7 @@ class ImageCanvas(MatplotlibCanvas):
         super(ImageCanvas, self).__init__(parent, self.fig, **kwargs)
 
 
-class ImageViewer(QtGui.QMainWindow):
+class ImageViewer(QMainWindow):
     """Viewer for displaying images.
 
     This viewer is a simple container object that holds a Matplotlib axes
