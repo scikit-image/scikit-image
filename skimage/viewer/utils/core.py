@@ -1,8 +1,20 @@
+import warnings
+
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
-from PyQt4 import QtGui
+
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import LinearSegmentedColormap
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+except ImportError:
+    FigureCanvasQTAgg = object # hack to prevent nosetest and autodoc errors
+    LinearSegmentedColormap = object
+    print("Could not import matplotlib -- skimage.viewer not available.")
+
+try:
+    from PyQt4 import QtGui
+except ImportError:
+    print("Could not import PyQt4 -- skimage.viewer not available.")
 
 
 __all__ = ['figimage', 'LinearColormap', 'ClearColormap', 'MatplotlibCanvas',
@@ -18,7 +30,7 @@ class RequiredAttr(object):
 
     def __get__(self, obj, objtype):
         if self.val is None:
-            raise RuntimeError(self.msg)
+            warnings.warn(self.msg)
         return self.val
 
     def __set__(self, obj, val):
