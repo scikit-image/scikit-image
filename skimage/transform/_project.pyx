@@ -80,13 +80,15 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
 
     """
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2] img = image.astype(np.double)
+    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] img = \
+         np.ascontiguousarray(image, dtype=np.double)
     cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] M = \
          np.ascontiguousarray(np.linalg.inv(H))
 
     if mode not in ('constant', 'wrap', 'mirror'):
         raise ValueError("Invalid mode specified.  Please use "
                          "`constant`, `wrap` or `mirror`.")
+    cdef char mode_c
     if mode == 'constant':
         mode_c = ord('C')
     elif mode == 'wrap':
@@ -94,6 +96,7 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     elif mode == 'mirror':
         mode_c = ord('M')
 
+    cdef int out_r, out_c
     if output_shape is None:
         out_r = img.shape[0]
         out_c = img.shape[1]
