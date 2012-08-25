@@ -139,7 +139,6 @@ def greycoprops(P, prop='contrast'):
         `P[i,j,d,theta]` is the number of times that grey-level j
         occurs at a distance d and at an angle theta from
         grey-level i.
-
     prop : {'contrast', 'dissimilarity', 'homogeneity', 'energy', \
             'correlation', 'ASM'}, optional
         The property of the GLCM to compute. The default is 'contrast'.
@@ -241,8 +240,9 @@ def local_binary_pattern(image, P, R, method='default'):
         angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
-    method : {'D', 'R', 'U', 'V'}
-        Method to determine the pattern::
+    method : {'default', 'ror', 'uniform', 'var'}
+        Method to determine the pattern.
+
         * 'default': original local binary pattern which is gray scale but not
             rotation invariant.
         * 'ror': extension of default implementation which is gray scale and
