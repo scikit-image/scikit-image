@@ -16,7 +16,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
 
     Parameters
     ----------
-    image : NxM ndarray
+    image : (N, M) ndarray
         Input image.
     block_size : int
         Uneven size of pixel neighborhood which is used to calculate the
@@ -45,7 +45,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
 
     Returns
     -------
-    threshold : NxM ndarray
+    threshold : (N, M) ndarray
         Thresholded binary image
 
     References

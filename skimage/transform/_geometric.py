@@ -7,7 +7,7 @@ from skimage.util import img_as_float
 def _stackcopy(a, b):
     """Copy b into each color layer of a, such that::
 
-      a[:,:,0] = a[:,:,1] = ... = b
+        a[:,:,0] = a[:,:,1] = ... = b
 
     Parameters
     ----------
@@ -37,12 +37,12 @@ class GeometricTransform(object):
         Parameters
         ----------
         coords : (N, 2) array
-            source coordinates
+            Source coordinates.
 
         Returns
         -------
         coords : (N, 2) array
-            transformed coordinates
+            Transformed coordinates.
 
         """
         raise NotImplementedError()
@@ -53,12 +53,12 @@ class GeometricTransform(object):
         Parameters
         ----------
         coords : (N, 2) array
-            source coordinates
+            Source coordinates.
 
         Returns
         -------
         coords : (N, 2) array
-            transformed coordinates
+            Transformed coordinates.
 
         """
         raise NotImplementedError()
@@ -182,9 +182,9 @@ class ProjectiveTransform(GeometricTransform):
         Parameters
         ----------
         src : (N, 2) array
-            source coordinates
+            Source coordinates.
         dst : (N, 2) array
-            destination coordinates
+            Destination coordinates.
 
         """
         xs = src[:, 0]
@@ -260,13 +260,13 @@ class AffineTransform(ProjectiveTransform):
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
     scale : (sx, sy) as array, list or tuple, optional
-        scale factors
+        Scale factors.
     rotation : float, optional
-        rotation angle in counter-clockwise direction as radians
+        Rotation angle in counter-clockwise direction as radians.
     shear : float, optional
-        shear angle in counter-clockwise direction as radians
+        Shear angle in counter-clockwise direction as radians.
     translation : (tx, ty) as array, list or tuple, optional
-        translation parameters
+        Translation parameters.
 
     """
 
@@ -345,11 +345,11 @@ class SimilarityTransform(ProjectiveTransform):
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
     scale : float, optional
-        scale factor
+        Scale factor.
     rotation : float, optional
-        rotation angle in counter-clockwise direction as radians
+        Rotation angle in counter-clockwise direction as radians.
     translation : (tx, ty) as array, list or tuple, optional
-        x, y translation parameters
+        x, y translation parameters.
 
     """
 
@@ -420,9 +420,9 @@ class SimilarityTransform(ProjectiveTransform):
         Parameters
         ----------
         src : (N, 2) array
-            source coordinates
+            Source coordinates.
         dst : (N, 2) array
-            destination coordinates
+            Destination coordinates.
 
         """
         xs = src[:, 0]
@@ -530,11 +530,11 @@ class PolynomialTransform(GeometricTransform):
         Parameters
         ----------
         src : (N, 2) array
-            source coordinates
+            Source coordinates.
         dst : (N, 2) array
-            destination coordinates
+            Destination coordinates.
         order : int
-            polynomial order (number of coefficients is order + 1)
+            Polynomial order (number of coefficients is order + 1).
 
         """
         xs = src[:, 0]
@@ -576,7 +576,7 @@ class PolynomialTransform(GeometricTransform):
         Returns
         -------
         coords : (N, 2) array
-            transformed coordinates
+            Transformed coordinates.
 
         """
         x = coords[:, 0]
@@ -692,7 +692,7 @@ def matrix_transform(coords, matrix):
     Returns
     -------
     coords : (N, 2) array
-            transformed coordinates
+        Transformed coordinates.
 
     """
     return ProjectiveTransform(matrix)(coords)
@@ -705,13 +705,13 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
     Parameters
     ----------
     orows : int
-        number of output rows
+        Number of output rows.
     ocols : int
-        number of output columns
+        Number of output columns.
     bands : int
-        number of color bands (aka channels)
+        Number of color bands (aka channels).
     coord_transform_fn : callable like GeometricTransform.inverse
-        Return input coordinates for given output coordinates
+        Return input coordinates for given output coordinates.
     dtype : np.dtype or string
         dtype for return value (sane choices: float32 or float64)
 

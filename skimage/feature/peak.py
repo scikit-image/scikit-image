@@ -15,21 +15,16 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
 
     Parameters
     ----------
-    image: ndarray of floats
+    image : ndarray of floats
         Input image.
-
-    min_distance: int
+    min_distance : int
         Minimum number of pixels separating peaks and image boundary.
-
     threshold : float
         Deprecated. See `threshold_rel`.
-
-    threshold_abs: float
+    threshold_abs : float
         Minimum intensity of peaks.
-
-    threshold_rel: float
+    threshold_rel : float
         Minimum intensity of peaks calculated as `max(image) * threshold_rel`.
-
     num_peaks : int
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` coordinates based on peak intensity.
