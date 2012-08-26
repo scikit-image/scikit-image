@@ -1,1 +1,2 @@
-from .draw import *
+from ._draw import line, polygon, ellipse, circle
+bresenham = line
