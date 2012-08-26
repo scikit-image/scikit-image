@@ -1,30 +1,5 @@
 import math
 import numpy as np
-from scipy import ndimage
-from skimage.util import img_as_float
-
-
-def _stackcopy(a, b):
-    """Copy b into each color layer of a, such that::
-
-        a[:,:,0] = a[:,:,1] = ... = b
-
-    Parameters
-    ----------
-    a : (M, N) or (M, N, P) ndarray
-        Target array.
-    b : (M, N)
-        Source array.
-
-    Notes
-    -----
-    Color images are stored as an ``(M, N, 3)`` or ``(M, N, 4)`` arrays.
-
-    """
-    if a.ndim == 3:
-        a[:] = b[:, :, np.newaxis]
-    else:
-        a[:] = b
 
 
 class GeometricTransform(object):
@@ -603,7 +578,7 @@ class PolynomialTransform(GeometricTransform):
             'then apply the forward transformation.')
 
 
-TRANSFORMATIONS = {
+TRANSFORMS = {
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
     'projective': ProjectiveTransform,
@@ -669,11 +644,11 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     """
     ttype = ttype.lower()
-    if ttype not in TRANSFORMATIONS:
+    if ttype not in TRANSFORMS:
         raise ValueError('the transformation type \'%s\' is not'
                          'implemented' % ttype)
 
-    tform = TRANSFORMATIONS[ttype]()
+    tform = TRANSFORMS[ttype]()
     tform.estimate(src, dst, **kwargs)
 
     return tform
@@ -696,158 +671,3 @@ def matrix_transform(coords, matrix):
 
     """
     return ProjectiveTransform(matrix)(coords)
-
-
-def warp_coords(orows, ocols, bands, coord_transform_fn,
-                dtype=np.float64):
-    """Build the source coordinates for the output pixels of an image warp.
-
-    Parameters
-    ----------
-    orows : int
-        Number of output rows.
-    ocols : int
-        Number of output columns.
-    bands : int
-        Number of color bands (aka channels).
-    coord_transform_fn : callable like GeometricTransform.inverse
-        Return input coordinates for given output coordinates.
-    dtype : np.dtype or string
-        dtype for return value (sane choices: float32 or float64)
-
-    Returns
-    -------
-    coords : (3, orows, ocols, bands) array of dtype `dtype`
-            Coordinates for `scipy.ndimage.map_coordinates`, that will yield
-            an image of shape (orows, ocols, bands) by drawing from source
-            points according to the `coord_transform_fn`.
-
-    Notes
-    -----
-    This is a lower-level routine that produces the source coordinates used by
-    `warp()`.
-
-    It is provided separately from `warp` to give additional flexibility to
-    users who would like, for example, to re-use a particular coordinate
-    mapping, to use specific dtypes at various points along the the
-    image-warping process, or to implement different post-processing logic
-    than `warp` performs after the call to `ndimage.map_coordinates`.
-
-
-    Examples
-    --------
-    Produce a coordinate map that Shifts an image to the right:
-
-    >>> from skimage import data
-    >>> from scipy.ndimage import map_coordinates
-    >>>
-    >>> def shift_right(xy):
-    ...     xy[:, 0] -= 10
-    ...     return xy
-    >>>
-    >>> coords = warp_coords(30, 30, 3, shift_right)
-    >>> image = data.lena().astype(np.float32)
-    >>> warped_image = map_coordinates(image, coords)
-
-    """
-
-    coords = np.empty((3, orows, ocols, bands), dtype=dtype)
-
-    # Reshape grid coordinates into a (P, 2) array of (x, y) pairs
-    tf_coords = np.indices((ocols, orows), dtype=dtype).reshape(2, -1).T
-
-    # Map each (x, y) pair to the source image according to
-    # the user-provided mapping
-    tf_coords = coord_transform_fn(tf_coords)
-
-    # Reshape back to a (2, M, N) coordinate grid
-    tf_coords = tf_coords.T.reshape((-1, ocols, orows)).swapaxes(1, 2)
-
-    # Place the y-coordinate mapping
-    _stackcopy(coords[1, ...], tf_coords[0, ...])
-
-    # Place the x-coordinate mapping
-    _stackcopy(coords[0, ...], tf_coords[1, ...])
-
-    # colour-coordinate mapping
-    coords[2, ...] = range(bands)
-
-    return coords
-
-
-def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
-         mode='constant', cval=0., reverse_map=None):
-    """Warp an image according to a given coordinate transformation.
-
-    Parameters
-    ----------
-    image : 2-D array
-        Input image.
-    inverse_map : transformation object, callable xy = f(xy, **kwargs)
-        Inverse coordinate map. A function that transforms a (N, 2) array of
-        ``(x, y)`` coordinates in the *output image* into their corresponding
-        coordinates in the *source image* (e.g. a transformation object or its
-        inverse).
-    map_args : dict, optional
-        Keyword arguments passed to `inverse_map`.
-    output_shape : tuple (rows, cols)
-        Shape of the output image generated.
-    order : int
-        Order of splines used in interpolation. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : float
-        Used in conjunction with mode 'constant', the value outside
-        the image boundaries.
-
-    Examples
-    --------
-    Shift an image to the right:
-
-    >>> from skimage import data
-    >>> image = data.camera()
-    >>>
-    >>> def shift_right(xy):
-    ...     xy[:, 0] -= 10
-    ...     return xy
-    >>>
-    >>> warp(image, shift_right)
-
-    """
-    # Backward API compatibility
-    if reverse_map is not None:
-        inverse_map = reverse_map
-
-    if image.ndim < 2:
-        raise ValueError("Input must have more than 1 dimension.")
-
-    image = np.atleast_3d(img_as_float(image))
-    ishape = np.array(image.shape)
-    bands = ishape[2]
-
-    if output_shape is None:
-        output_shape = ishape
-
-    rows, cols = output_shape[:2]
-
-    def coord_transform_fn(*args):
-        return inverse_map(*args, **map_args)
-
-    coords = warp_coords(rows, cols, bands, coord_transform_fn)
-
-    # Prefilter not necessary for order 1 interpolation
-    prefilter = order > 1
-    mapped = ndimage.map_coordinates(image, coords, prefilter=prefilter,
-                                     mode=mode, order=order, cval=cval)
-
-    # The spline filters sometimes return results outside [0, 1],
-    # so clip to ensure valid data
-    clipped = np.clip(mapped, 0, 1)
-
-    if mode == 'constant' and not (0 <= cval <= 1):
-        clipped[mapped == cval] = cval
-
-    # Remove singleton dim introduced by atleast_3d
-    return clipped.squeeze()

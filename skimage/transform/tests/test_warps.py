@@ -2,7 +2,7 @@ from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform import (warp, warp_coords, fast_homography,
+from skimage.transform import (warp, warp_coords,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform)
@@ -55,11 +55,12 @@ def test_fast_homography():
     H[:2, 2] = [tx, ty]
 
     tform = ProjectiveTransform(H)
+    coords = warp_coords(tform.inverse, (img.shape[0], img.shape[1]))
 
     for order in range(2):
-        for mode in ('constant', 'mirror', 'wrap'):
-            p0 = warp(img, tform.inverse, mode=mode, order=order)
-            p1 = fast_homography(img, H, mode=mode, order=order)
+        for mode in ('constant', 'reflect', 'wrap'):
+            p0 = map_coordinates(img, coords, mode=mode, order=order)
+            p1 = warp(img, tform, mode=mode, order=order)
 
             # import matplotlib.pyplot as plt
             # f, (ax0, ax1, ax2, ax3) = plt.subplots(1, 4)
@@ -85,8 +86,9 @@ def test_swirl():
 
 def test_const_cval_out_of_range():
     img = np.random.randn(100, 100)
-    warped = warp(img, AffineTransform(translation=(10, 10)), cval=-10)
-    assert np.sum(warped < 0) == (2 * 100 * 10 - 10 * 10)
+    cval = - 10
+    warped = warp(img, AffineTransform(translation=(10, 10)), cval=cval)
+    assert np.sum(warped == cval) == (2 * 100 * 10 - 10 * 10)
 
 
 def test_warp_identity():
@@ -107,7 +109,7 @@ def test_warp_coords_example():
     image = data.lena().astype(np.float32)
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
-    coords = warp_coords(30, 30, 3, tform)
+    coords = warp_coords(tform, (30, 30, 3))
     warped_image1 = map_coordinates(image[:, :, 0], coords[:2])
 
 

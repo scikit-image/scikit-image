@@ -18,8 +18,8 @@ cdef inline double nearest_neighbour(double* image, int rows, int cols,
         Shape of image.
     r, c : int
         Position at which to interpolate.
-    mode : {'C', 'W', 'M'}
-        Wrapping mode. Constant, Wrap or Mirror.
+    mode : {'C', 'W', 'R'}
+        Wrapping mode. Constant, Wrap or Reflect.
     cval : double
         Constant value to use for constant mode.
 
@@ -42,8 +42,8 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
         Shape of image.
     r, c : int
         Position at which to interpolate.
-    mode : {'C', 'W', 'M'}
-        Wrapping mode. Constant, Wrap or Mirror.
+    mode : {'C', 'W', 'R'}
+        Wrapping mode. Constant, Wrap or Reflect.
     cval : double
         Constant value to use for constant mode.
 
@@ -76,8 +76,8 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
         Shape of image.
     r, c : int
         Position at which to get the pixel.
-    mode : {'C', 'W', 'M'}
-        Wrapping mode. Constant, Wrap or Mirror.
+    mode : {'C', 'W', 'R'}
+        Wrapping mode. Constant, Wrap or Reflect.
     cval : double
         Constant value to use for constant mode.
 
@@ -101,13 +101,13 @@ cdef inline int coord_map(int dim, int coord, char mode):
         Maximum coordinate.
     coord : int
         Coord provided by user.  May be < 0 or > dim.
-    mode : {'W', 'M'}
-        Whether to wrap or mirror the coordinate if it
+    mode : {'W', 'R'}
+        Whether to wrap or reflect the coordinate if it
         falls outside [0, dim).
 
     """
     dim = dim - 1
-    if mode == 'M': # mirror
+    if mode == 'R': # reflect
         if (coord < 0):
             # How many times times does the coordinate wrap?
             if (<int>(-coord / dim) % 2 != 0):

@@ -14,12 +14,12 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['_hough_transform.pyx'], working_path=base_path)
-    cython(['_project.pyx'], working_path=base_path)
+    cython(['_warps_cy.pyx'], working_path=base_path)
 
     config.add_extension('_hough_transform', sources=['_hough_transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
-    config.add_extension('_project', sources=['_project.c'],
+    config.add_extension('_warps_cy', sources=['_warps_cy.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
 
     return config

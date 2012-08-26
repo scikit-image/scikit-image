@@ -33,7 +33,7 @@ cdef inline _matrix_transform(double x, double y, double* H, double *x_,
     y_[0] = yy / zz
 
 
-def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
+def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
                mode='constant', double cval=0):
     """Projective transformation (homography).
 
@@ -71,7 +71,7 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
         Order of interpolation::
         * 0: Nearest-neighbour interpolation.
         * 1: Bilinear interpolation (default).
-    mode : {'constant', 'mirror', 'wrap'}
+    mode : {'constant', 'reflect', 'wrap'}
         How to handle values outside the image borders.
     cval : string
         Used in conjunction with mode 'C' (constant), the value
@@ -82,18 +82,18 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] img = \
          np.ascontiguousarray(image, dtype=np.double)
     cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] M = \
-         np.ascontiguousarray(np.linalg.inv(H))
+         np.ascontiguousarray(H)
 
-    if mode not in ('constant', 'wrap', 'mirror'):
+    if mode not in ('constant', 'wrap', 'reflect'):
         raise ValueError("Invalid mode specified.  Please use "
-                         "`constant`, `wrap` or `mirror`.")
+                         "`constant`, `wrap` or `reflect`.")
     cdef char mode_c
     if mode == 'constant':
         mode_c = ord('C')
     elif mode == 'wrap':
         mode_c = ord('W')
-    elif mode == 'mirror':
-        mode_c = ord('M')
+    elif mode == 'reflect':
+        mode_c = ord('R')
 
     cdef int out_r, out_c
     if output_shape is None:
@@ -116,9 +116,9 @@ def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
             _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
             if order == 0:
                 out[tfr, tfc] = nearest_neighbour(<double*>img.data, rows,
-                                                  cols, r, c, mode_c)
+                                                  cols, r, c, mode_c, cval)
             elif order == 1:
                 out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
-                                                       cols, r, c, mode_c)
+                                                       cols, r, c, mode_c, cval)
 
     return out
