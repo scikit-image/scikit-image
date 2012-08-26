@@ -29,8 +29,9 @@ def load(f):
 
 
 def camera():
-    """Gray-level "camera" image, often used for segmentation
-    and denoising examples.
+    """Gray-level "camera" image.
+
+    Often used for segmentation and denoising examples.
 
     """
     return load("camera.png")
@@ -49,7 +50,7 @@ def lena():
 
 
 def text():
-    """ Gray-level "text" image used for corner detection.
+    """Gray-level "text" image used for corner detection.
 
     Notes
     -----

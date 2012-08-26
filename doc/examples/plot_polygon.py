@@ -1,10 +1,10 @@
 """
-====================
-Approximate Polygons
-====================
+===================================
+Approximatea and subdivide polygons
+===================================
 
-This example shows how to approximate polygonal chains with the Douglas-Peucker
-algorithm.
+This example shows how to approximate (Douglas-Peucker algorithm) and subdivide
+(B-Splines) polygonal chains.
 """
 
 import numpy as np

@@ -95,7 +95,8 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
     R : float
         Radius of circle (spatial resolution of the operator).
     method : {'D', 'R', 'U', 'V'}
-        Method to determine the pattern::
+        Method to determine the pattern.
+
         * 'D': 'default'
         * 'R': 'ror'
         * 'U': 'uniform'
