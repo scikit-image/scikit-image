@@ -211,6 +211,68 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     return clipped.squeeze()
 
 
+def rotate(image, angle, preserve_shape=False, order=1,
+           mode='constant', cval=0.):
+    """Rotate image by a certain angle around its center.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    angle : float
+        Rotation angle in degrees in counter-clockwise direction.
+    preserve_shape : bool, optional
+        Determine whether the shape of the output image will be automatically
+        calculated, so the complete rotated image exactly fits. Default is
+        False.
+
+    Returns
+    -------
+    rotated : ndarray
+        Rotated version of the input.
+
+    Other parameters
+    ----------------
+    order : int
+        Order of splines used in interpolation.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    mode : string
+        How to handle values outside the image borders.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    cval : string
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    """
+
+    rows, cols = image.shape[0], image.shape[1]
+
+    # rotation around center
+    translation = np.array((cols, rows)) / 2.
+    tform1 = SimilarityTransform(translation=-translation)
+    tform2 = SimilarityTransform(rotation=np.deg2rad(angle))
+    tform3 = SimilarityTransform(translation=translation)
+    tform = tform1 + tform2 + tform3
+
+    output_shape = None
+    if not preserve_shape:
+        # determine shape of output image
+        corners = tform([[0, 0], [0, rows], [cols, 0], [cols, rows]])
+        corners = np.round(corners, 4)
+        minc = np.floor(corners[:, 0].min())
+        minr = np.floor(corners[:, 1].min())
+        maxc = np.ceil(corners[:, 0].max())
+        maxr = np.ceil(corners[:, 1].max())
+        output_shape = [maxr - minr, maxc - minc]
+
+        # fit output image in new shape
+        tform4 = SimilarityTransform(translation=(minc, minr + 1))
+        tform = tform4 + tform
+
+    return warp(image, tform, output_shape=output_shape, order=order,
+                mode=mode, cval=cval)
+
+
 def _swirl_mapping(xy, center, rotation, strength, radius):
     x, y = xy.T
     x0, y0 = center

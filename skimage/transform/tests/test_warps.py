@@ -2,7 +2,7 @@ from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform import (warp, warp_coords,
+from skimage.transform import (warp, warp_coords, rotate,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform)
@@ -72,6 +72,13 @@ def test_fast_homography():
 
             d = np.mean(np.abs(p0 - p1))
             assert d < 0.001
+
+
+def test_rotate():
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    x90 = rotate(x, 90)
+    assert_array_almost_equal(x90, np.rot90(x))
 
 
 def test_swirl():
