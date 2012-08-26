@@ -78,8 +78,8 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     ...     xy[:, 0] -= 10
     ...     return xy
     >>>
-    >>> coords = warp_coords(30, 30, 3, shift_right)
     >>> image = data.lena().astype(np.float32)
+    >>> coords = warp_coords(shift_right, image.shape)
     >>> warped_image = map_coordinates(image, coords)
 
     """
