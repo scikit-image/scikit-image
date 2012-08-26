@@ -248,7 +248,7 @@ def rotate(image, angle, preserve_shape=False, order=1,
     rows, cols = image.shape[0], image.shape[1]
 
     # rotation around center
-    translation = np.array((cols, rows)) / 2.
+    translation = np.floor(np.array((cols, rows )) / 2.)
     tform1 = SimilarityTransform(translation=-translation)
     tform2 = SimilarityTransform(rotation=np.deg2rad(angle))
     tform3 = SimilarityTransform(translation=translation)
@@ -257,16 +257,19 @@ def rotate(image, angle, preserve_shape=False, order=1,
     output_shape = None
     if not preserve_shape:
         # determine shape of output image
-        corners = tform([[0, 0], [0, rows], [cols, 0], [cols, rows]])
-        corners = np.round(corners, 4)
-        minc = np.floor(corners[:, 0].min())
-        minr = np.floor(corners[:, 1].min())
-        maxc = np.ceil(corners[:, 0].max())
-        maxr = np.ceil(corners[:, 1].max())
-        output_shape = [maxr - minr, maxc - minc]
+        corners = np.array([[1, 1], [1, rows], [cols, 1], [cols, rows]])
+        corners = tform2(tform1(corners - 1))
+        minc = corners[:, 0].min()
+        minr = corners[:, 1].min()
+        maxc = corners[:, 0].max()
+        maxr = corners[:, 1].max()
+        out_rows = maxr - minr + 1
+        out_cols = maxc - minc + 1
+        output_shape = (out_rows, out_cols)
 
         # fit output image in new shape
-        tform4 = SimilarityTransform(translation=(minc, minr + 1))
+        translation = ((cols - out_cols) / 2., (rows - out_rows) / 2.)
+        tform4 = SimilarityTransform(translation=translation)
         tform = tform4 + tform
 
     return warp(image, tform, output_shape=output_shape, order=order,
