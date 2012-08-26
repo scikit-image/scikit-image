@@ -35,8 +35,7 @@ cdef inline _matrix_transform(double x, double y, double* H, double *x_,
 
 def homography(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
                mode='constant', double cval=0):
-    """
-    Projective transformation (homography).
+    """Projective transformation (homography).
 
     Perform a projective transformation (homography) of a
     floating point image, using bi-linear interpolation.

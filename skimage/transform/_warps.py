@@ -74,7 +74,11 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
 
 def homography(image, H, output_shape=None, order=1,
                mode='constant', cval=0.):
-    """Perform a projective transformation (homography) on an image.
+    """
+    .. deprecated::
+        0.7
+
+    Perform a projective transformation (homography) on an image.
 
     For each pixel, given its homogeneous coordinate :math:`\mathbf{x}
     = [x, y, 1]^T`, its target position is calculated by multiplying
