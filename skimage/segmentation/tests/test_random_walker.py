@@ -138,6 +138,18 @@ def test_3d_inactive():
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
     return data, labels, old_labels, after_labels
 
+
+def test_multispectral():
+    n = 30
+    lx, ly, lz = n, n, n
+    data, labels = make_3d_syntheticdata( lx, ly, lz )
+    data = [data, data] # Result should be identical
+    multi_labels = random_walker(data, labels, mode='cg')
+    single_labels = random_walker(data[0], labels, mode='cg')
+    assert (multi_labels.reshape(data[0].shape)[13:17, 13:17, 13:17] == 2).all()
+    assert (single_labels.reshape(data[0].shape)[13:17, 13:17, 13:17] == 2).all()
+    return data, multi_labels, single_labels, labels
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
