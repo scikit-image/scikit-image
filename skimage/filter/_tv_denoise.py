@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.util import dtype
+from skimage import img_as_float
 
 
 def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
@@ -171,7 +171,7 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
         i += 1
     return out
     
-def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
+def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
     """
     Perform total-variation denoising on 2-d and 3-d images
 
@@ -191,11 +191,6 @@ def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
         determines the stop criterion. The algorithm stops when:
 
             (E_(n-1) - E_n) < eps * E_0
-
-    keep_type: bool, optional (False)
-        whether the output has the same dtype as the input array.
-        keep_type is False by default, and the dtype of the output
-        is np.float
 
     n_iter_max: int, optional
         maximal number of iterations used for the optimization.
@@ -245,7 +240,7 @@ def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     """
     im_type = im.dtype
     if not im_type.kind == 'f':
-        im = im.astype(np.float)
+        im = img_as_float(im)
 
     if im.ndim == 2:
         out = _tv_denoise_2d(im, weight, eps, n_iter_max)
@@ -254,9 +249,4 @@ def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     else:
         raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
-    if keep_type:
-        return out.astype(im_type)
-    else:
-        if not im_type.kind == 'f':
-            out = dtype.convert(out.astype(im_type), np.float)
-        return out      
+    return out      

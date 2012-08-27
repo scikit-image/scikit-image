@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import run_module_suite
 
 from skimage import filter, data, color
-from skimage import img_as_uint
+from skimage import img_as_uint, img_as_ubyte
 
 
 class TestTvDenoise():
@@ -29,8 +29,8 @@ class TestTvDenoise():
         # test if the total variation has decreased
         assert (np.sqrt((grad_denoised**2).sum())
                 < np.sqrt((grad**2).sum()) / 2)
-        denoised_lena_int = filter.tv_denoise(img_as_uint(lena),
-                                              weight=60.0, keep_type=True)
+        denoised_lena_int = img_as_uint(filter.tv_denoise(img_as_ubyte(lena),
+                                              weight=60.0))
         assert denoised_lena_int.dtype is np.dtype('uint16')
 
     def test_tv_denoise_float_result_range(self):
@@ -55,13 +55,13 @@ class TestTvDenoise():
         mask += 20 * np.random.randn(*mask.shape)
         mask[mask < 0] = 0
         mask[mask > 255] = 255
-        res = filter.tv_denoise(mask.astype(np.uint8),
-                                weight=100, keep_type=True)
+        res = img_as_ubyte(filter.tv_denoise(mask.astype(np.uint8),
+                                weight=100))
         assert res.std() < mask.std()
         assert res.dtype is np.dtype('uint8')
-        res = filter.tv_denoise(mask.astype(np.uint8), weight=100)
+        res = img_as_ubyte(filter.tv_denoise(mask.astype(np.uint8), weight=100))
         assert res.std() < mask.std()
-        assert res.dtype is not np.dtype('uint8')
+
         # test wrong number of dimensions
         a = np.random.random((8, 8, 8, 8))
         try:
