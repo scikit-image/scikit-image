@@ -170,7 +170,30 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
         i += 1
     return out
 
+def _renormalize_image(image, data_type):
+    """
+    inplace renormalize image date to obey the float range [0.0:1.0]
 
+    Parameters
+    ----------
+    immage: ndarray
+        input data to be renormalized
+
+    data_type: type,
+        image data type before running tv_denoise
+
+    Notes
+    -------
+    the minimum and maximum values of the image data type define the range
+    which is mapped to the interval [0.0:1.0] 
+
+    """
+    type_info = np.iinfo(data_type)
+    start = type_info.min
+    width = type_info.max - type_info.min
+    np.subtract(image, start, image)
+    np.divide(image, width, image)  
+    
 def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     """
     Perform total-variation denoising on 2-d and 3-d images
@@ -257,4 +280,6 @@ def tv_denoise(im, weight=50, eps=2.e-4, keep_type=False, n_iter_max=200):
     if keep_type:
         return out.astype(im_type)
     else:
-        return out
+        if not im_type.kind == 'f':
+            _renormalize_image(out, im_type)
+        return out      

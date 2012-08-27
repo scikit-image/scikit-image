@@ -33,6 +33,16 @@ class TestTvDenoise():
                                               weight=60.0, keep_type=True)
         assert denoised_lena_int.dtype is np.dtype('uint16')
 
+    def test_tv_denoise_float_result_range(self):
+        # lena image
+        lena = color.rgb2gray(data.lena())[:256, :256]
+        int_lena = np.multiply(lena, 255).astype(np.uint8)
+        assert np.max(int_lena) > 1       
+        denoised_int_lena = filter.tv_denoise(int_lena, weight=60.0)
+        # test if the value range of output float data is within [0.0:1.0]
+        assert np.max(denoised_int_lena) <= 1.0
+        assert np.min(denoised_int_lena) >= 0.0        
+        
     def test_tv_denoise_3d(self):
         """
         Apply the TV denoising algorithm on a 3D image representing
@@ -58,7 +68,6 @@ class TestTvDenoise():
             res = filter.tv_denoise(a)
         except ValueError:
             pass
-
 
 if __name__ == "__main__":
     run_module_suite()
