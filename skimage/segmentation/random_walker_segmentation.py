@@ -27,6 +27,8 @@ try:
 except ImportError:
     amg_loaded = False
 from scipy.sparse.linalg import cg
+from ..util import img_as_float
+from ..filter import rank_order
 
 #-----------Laplacian--------------------
 
@@ -96,7 +98,10 @@ def _make_laplacian_sparse(edges, weights):
     return lap.tocsr()
 
 
-def _clean_labels_ar(X, labels):
+def _clean_labels_ar(X, labels, copy=False):
+    X = X.astype(labels.dtype)
+    if copy:
+        labels = np.copy(labels)
     labels = np.ravel(labels)
     labels[labels == 0] = X
     return labels
@@ -130,15 +135,15 @@ def _mask_edges_weights(edges, weights, mask):
     corresponding weights of the edges.
     """
     mask0 = np.hstack((mask[:, :, :-1].ravel(), mask[:, :-1].ravel(),
-                        mask[:-1].ravel()))
+                       mask[:-1].ravel()))
     mask1 = np.hstack((mask[:, :, 1:].ravel(), mask[:, 1:].ravel(),
-                            mask[1:].ravel()))
+                       mask[1:].ravel()))
     ind_mask = np.logical_and(mask0, mask1)
     edges, weights = edges[:, ind_mask], weights[ind_mask]
     max_node_index = edges.max()
     # Reassign edges labels to 0, 1, ... edges_number - 1
     order = np.searchsorted(np.unique(edges.ravel()),
-                                        np.arange(max_node_index + 1))
+                            np.arange(max_node_index + 1))
     edges = order[edges]
     return edges, weights
 
@@ -157,7 +162,8 @@ def _build_laplacian(data, mask=None, beta=50):
 #----------- Random walker algorithm --------------------------------
 
 
-def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
+def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
+                  return_full_prob=False):
     """
     Random walker algorithm for segmentation from markers.
 
@@ -172,7 +178,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
         Negative labels correspond to inactive pixels that are not taken
-        into account (they are removed from the graph).
+        into account (they are removed from the graph). If labels are not
+        consecutive integers, the labels array will be transformed so that
+        labels are consecutive.
 
     beta : float
         Penalization coefficient for the random walker motion
@@ -208,12 +216,20 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
         the result of the segmentation. Use copy=False if you want to
         save on memory.
 
+    return_full_prob : bool, default False
+        If True, the probability that a pixel belongs to each of the labels
+        will be returned, instead of only the most likely label.
+
     Returns
     -------
 
-    output : ndarray of ints
-        Array in which each pixel has been labeled according to the marker
-        that reached the pixel first by anisotropic diffusion.
+    output : ndarray
+        If `return_full_prob` is False, array of ints of same shape as `data`,
+        in which each pixel has been labeled according to the marker that
+        reached the pixel first by anisotropic diffusion.
+        If `return_full_prob` is True, array of floats of shape
+        `(nlabels, data.shape)`. `output[label_nb, i, j]` is the probability
+        that label `label_nb` reaches the pixel `(i, j)` first.
 
     See also
     --------
@@ -247,7 +263,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
     The weight w_ij is a decreasing function of the norm of the local gradient.
     This ensures that diffusion is easier between pixels of similar values.
 
-    When the Laplacian is decomposed into blocks of marked and unmarked pixels::
+    When the Laplacian is decomposed into blocks of marked and unmarked
+    pixels::
 
         L = M B.T
             B A
@@ -257,7 +274,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
 
         A x = - B x_m
 
-    where x_m=1 on markers of the given phase, and 0 on other markers.
+    where x_m = 1 on markers of the given phase, and 0 on other markers.
     This linear system is solved in the algorithm using a direct method for
     small images, and an iterative method for larger images.
 
@@ -282,11 +299,17 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
             [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
 
     """
-    # We work with 3-D arrays
+    # We work with 3-D arrays of floats
+    data = img_as_float(data)
     data = np.atleast_3d(data)
     if copy:
         labels = np.copy(labels)
-    labels = labels.astype(np.intp)
+    label_values = np.unique(labels)
+    # Reorder label values to have consecutive integers (no gaps)
+    if np.any(np.diff(label_values) != 1):
+        mask = labels >= 0
+        labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
+    labels = labels.astype(np.int32)
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
     if np.any(labels < 0):
@@ -304,7 +327,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
     # where X[i, j] is the probability that a marker of label i arrives
     # first at pixel j by anisotropic diffusion.
     if mode == 'cg':
-        X = _solve_cg(lap_sparse, B, tol=tol)
+        X = _solve_cg(lap_sparse, B, tol=tol,
+                      return_full_prob=return_full_prob)
     if mode == 'cg_mg':
         if not amg_loaded:
             warnings.warn(
@@ -313,15 +337,28 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True):
             instead.""")
             X = _solve_cg(lap_sparse, B, tol=tol)
         else:
-            X = _solve_cg_mg(lap_sparse, B, tol=tol)
+            X = _solve_cg_mg(lap_sparse, B, tol=tol,
+                             return_full_prob=return_full_prob)
     if mode == 'bf':
-        X = _solve_bf(lap_sparse, B)
-    X = _clean_labels_ar(X + 1, labels)
+        X = _solve_bf(lap_sparse, B,
+                      return_full_prob=return_full_prob)
+    # Clean up results
     data = np.squeeze(data)
-    return X.reshape(data.shape)
+    if return_full_prob:
+        labels = labels.astype(np.float)
+        X = np.array([_clean_labels_ar(Xline, labels,
+                copy=True).reshape(data.shape) for Xline in X])
+        for i in range(1, int(labels.max()) + 1):
+            mask_i = np.squeeze(labels == i)
+            X[i - 1, mask_i] = 1
+            X[np.setdiff1d(np.arange(0, labels.max(), dtype=np.int),
+                           [i - 1]), mask_i] = 0
+    else:
+        X = _clean_labels_ar(X + 1, labels).reshape(data.shape)
+    return X
 
 
-def _solve_bf(lap_sparse, B):
+def _solve_bf(lap_sparse, B, return_full_prob=False):
     """
     solves lap_sparse X_i = B_i for each phase i. An LU decomposition
     of lap_sparse is computed first. For each pixel, the label i
@@ -331,11 +368,12 @@ def _solve_bf(lap_sparse, B):
     solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
     X = np.array([solver(np.array((-B[i]).todense()).ravel())\
             for i in range(len(B))])
-    X = np.argmax(X, axis=0)
+    if not return_full_prob:
+        X = np.argmax(X, axis=0)
     return X
 
 
-def _solve_cg(lap_sparse, B, tol):
+def _solve_cg(lap_sparse, B, tol, return_full_prob=False):
     """
     solves lap_sparse X_i = B_i for each phase i, using the conjugate
     gradient method. For each pixel, the label i corresponding to the
@@ -346,12 +384,13 @@ def _solve_cg(lap_sparse, B, tol):
     for i in range(len(B)):
         x0 = cg(lap_sparse, -B[i].todense(), tol=tol)[0]
         X.append(x0)
-    X = np.array(X)
-    X = np.argmax(X, axis=0)
+    if not return_full_prob:
+        X = np.array(X)
+        X = np.argmax(X, axis=0)
     return X
 
 
-def _solve_cg_mg(lap_sparse, B, tol):
+def _solve_cg_mg(lap_sparse, B, tol, return_full_prob=False):
     """
     solves lap_sparse X_i = B_i for each phase i, using the conjugate
     gradient method with a multigrid preconditioner (ruge-stuben from
@@ -364,6 +403,7 @@ def _solve_cg_mg(lap_sparse, B, tol):
     for i in range(len(B)):
         x0 = cg(lap_sparse, -B[i].todense(), tol=tol, M=M, maxiter=30)[0]
         X.append(x0)
-    X = np.array(X)
-    X = np.argmax(X, axis=0)
+    if not return_full_prob:
+        X = np.array(X)
+        X = np.argmax(X, axis=0)
     return X
