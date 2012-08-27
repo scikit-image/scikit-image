@@ -67,8 +67,8 @@ def match_template(image, template, pad_input=False):
     """
     if np.any(np.less(image.shape, template.shape)):
         raise ValueError("Image must be larger than template.")
-    image = convert(image, np.float32)
-    template = convert(template, np.float32)
+    image = np.ascontiguousarray(image, dtype=np.float32)
+    template = np.ascontiguousarray(template, dtype=np.float32)
 
     if pad_input:
         pad_size = tuple(np.array(image.shape) + np.array(template.shape) - 1)
