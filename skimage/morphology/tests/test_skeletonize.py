@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.morphology import skeletonize, medial_axis
 import numpy.testing
-from skimage.draw import draw
+from skimage import draw
 from scipy.ndimage import correlate
 from skimage.io import imread
 from skimage import data_dir

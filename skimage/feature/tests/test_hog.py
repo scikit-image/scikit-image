@@ -3,7 +3,7 @@ from scipy import ndimage
 from skimage import data
 from skimage import feature
 from skimage import img_as_float
-from skimage.draw import draw
+from skimage import draw
 from numpy.testing import *
 
 def test_histogram_of_oriented_gradients():
