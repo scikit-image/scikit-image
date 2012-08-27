@@ -349,8 +349,11 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
 def homography(image, H, output_shape=None, order=1,
                mode='constant', cval=0.):
     """
-    .. deprecated::
-        0.7
+    .. note:: Deprecated in skimage 0.7
+        `homography` will be removed in skimage 0.8, it is replaced by
+        `warp` because the latter provides the same functionality::
+
+            warp(image, ProjectiveTransform(H))
 
     Perform a projective transformation (homography) on an image.
 
