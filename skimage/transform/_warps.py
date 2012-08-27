@@ -211,8 +211,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     return clipped.squeeze()
 
 
-def rotate(image, angle, preserve_shape=False, order=1,
-           mode='constant', cval=0.):
+def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     """Rotate image by a certain angle around its center.
 
     Parameters
@@ -221,7 +220,7 @@ def rotate(image, angle, preserve_shape=False, order=1,
         Input image.
     angle : float
         Rotation angle in degrees in counter-clockwise direction.
-    preserve_shape : bool, optional
+    resize: bool, optional
         Determine whether the shape of the output image will be automatically
         calculated, so the complete rotated image exactly fits. Default is
         False.
@@ -255,7 +254,7 @@ def rotate(image, angle, preserve_shape=False, order=1,
     tform = tform1 + tform2 + tform3
 
     output_shape = None
-    if not preserve_shape:
+    if not resize:
         # determine shape of output image
         corners = np.array([[1, 1], [1, rows], [cols, rows], [cols, 1]])
         corners = tform(corners - 1)
