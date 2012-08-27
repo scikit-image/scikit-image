@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal, assert_equal
-from skimage.morphology import clear_border
+from skimage.segmentation import clear_border
 
 
 def test_clear_border():
