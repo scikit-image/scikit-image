@@ -1,6 +1,5 @@
 import numpy as np
-from skimage.measure import regionprops
-from skimage.morphology import label
+from scipy.ndimage import label
 
 
 def clear_border(image, buffer_size=0, bgval=0):
@@ -11,26 +10,42 @@ def clear_border(image, buffer_size=0, bgval=0):
     Parameters
     ----------
     image : (N, M) array
-        binary image
+        Binary image.
     buffer_size : int, optional
-        define additional buffer around image border
+        Define additional buffer around image border.
     bgval : float or int, optional
-        value for cleared objects
+        Value for cleared objects.
 
     Returns
     -------
     image : (N, M) array
-        cleared binary image
+        Cleared binary image.
+
     """
+
     rows, cols = image.shape
-    for prop in regionprops(label(image), ['BoundingBox', 'Image']):
-        minr, minc, maxr, maxc = prop['BoundingBox']
-        if (
-            minr <= buffer_size
-            or minc <= buffer_size
-            or maxr >= rows - buffer_size
-            or maxc >= cols - buffer_size
-        ):
-            r, c = np.nonzero(prop['Image'])
-            image[minr + r, minc + c] = bgval
+    if buffer_size >= rows or buffer_size >= cols:
+        raise ValueError("buffer size may not be greater than image size")
+
+    # create borders with buffer_size
+    borders = np.zeros_like(image, np.bool_)
+    ext = buffer_size + 1
+    borders[:ext] = True
+    borders[- ext:] = True
+    borders[:, :ext] = True
+    borders[:, - ext:] = True
+
+    labels, number = label(image)
+
+    # determine all objects that are connected to borders
+    borders_indices = np.unique(labels[borders])
+    indices = np.arange(number + 1)
+    # mask all label indices that are connected to borders
+    label_mask = np.in1d(indices, borders_indices)
+    # create mask for pixels to clear
+    mask = label_mask[labels.ravel()].reshape(labels.shape)
+
+    # clear border pixels
+    image[mask] = bgval
+
     return image

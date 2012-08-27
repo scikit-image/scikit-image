@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal, assert_equal
 from skimage.morphology import clear_border
 
 
-def test_possible_hull():
+def test_clear_border():
     image = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 1, 0],
          [0, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -25,7 +25,7 @@ def test_possible_hull():
 
     # test background value
     result = clear_border(image.copy(), 1, 2)
-    assert_array_equal(result, 2 * image)
+    assert_array_equal(result, 2 * np.ones_like(image))
 
 
 if __name__ == "__main__":
