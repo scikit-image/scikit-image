@@ -135,15 +135,15 @@ def _mask_edges_weights(edges, weights, mask):
     corresponding weights of the edges.
     """
     mask0 = np.hstack((mask[:, :, :-1].ravel(), mask[:, :-1].ravel(),
-                        mask[:-1].ravel()))
+                       mask[:-1].ravel()))
     mask1 = np.hstack((mask[:, :, 1:].ravel(), mask[:, 1:].ravel(),
-                            mask[1:].ravel()))
+                       mask[1:].ravel()))
     ind_mask = np.logical_and(mask0, mask1)
     edges, weights = edges[:, ind_mask], weights[ind_mask]
     max_node_index = edges.max()
     # Reassign edges labels to 0, 1, ... edges_number - 1
     order = np.searchsorted(np.unique(edges.ravel()),
-                                        np.arange(max_node_index + 1))
+                            np.arange(max_node_index + 1))
     edges = order[edges]
     return edges, weights
 
@@ -163,7 +163,7 @@ def _build_laplacian(data, mask=None, beta=50):
 
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
-        return_full_prob=False):
+                  return_full_prob=False):
     """
     Random walker algorithm for segmentation from markers.
 
@@ -306,7 +306,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels = np.copy(labels)
     label_values = np.unique(labels)
     # Reorder label values to have consecutive integers (no gaps)
-    if np.any(np.diff(label_values) > 1):
+    if np.any(np.diff(label_values) != 1):
         mask = labels >= 0
         labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
     labels = labels.astype(np.int32)
@@ -328,7 +328,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     # first at pixel j by anisotropic diffusion.
     if mode == 'cg':
         X = _solve_cg(lap_sparse, B, tol=tol,
-                            return_full_prob=return_full_prob)
+                      return_full_prob=return_full_prob)
     if mode == 'cg_mg':
         if not amg_loaded:
             warnings.warn(
@@ -338,10 +338,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             X = _solve_cg(lap_sparse, B, tol=tol)
         else:
             X = _solve_cg_mg(lap_sparse, B, tol=tol,
-                            return_full_prob=return_full_prob)
+                             return_full_prob=return_full_prob)
     if mode == 'bf':
         X = _solve_bf(lap_sparse, B,
-                            return_full_prob=return_full_prob)
+                      return_full_prob=return_full_prob)
     # Clean up results
     data = np.squeeze(data)
     if return_full_prob:
@@ -352,7 +352,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             mask_i = np.squeeze(labels == i)
             X[i - 1, mask_i] = 1
             X[np.setdiff1d(np.arange(0, labels.max(), dtype=np.int),
-                                        [i - 1]), mask_i] = 0
+                           [i - 1]), mask_i] = 0
     else:
         X = _clean_labels_ar(X + 1, labels).reshape(data.shape)
     return X
