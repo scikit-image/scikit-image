@@ -64,17 +64,30 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
     return edges
 
 
-def _compute_weights_3d(data, beta=130, eps=1.e-6):
-    gradients = _compute_gradients_3d(data)**2
-    beta /= 10 * data.std()
+def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.):
+    # Weight calculation is main difference in multispectral version
+    # Original gradient**2 replaced with sqrt( sum of gradients**2 )
+    for i, spectrum in enumerate(data):
+        if i == 0:
+            gradients = _compute_gradients_3d(spectrum, depth=depth)**2
+        else:
+            gradients += _compute_gradients_3d(spectrum)**2
+
+    gradients = np.sqrt(gradients)
+
+    # New final term in beta to give == results in trivial case where
+    # multiple identical spectra are passed.  
+    # It may be faster and/or more memory efficient do an approximate 
+    # std() combining spectrum.std() together than this 2nd term.
+    beta /= 10 * np.asarray(data).std() * np.sqrt( len(data) )
     gradients *= beta
     weights = np.exp(- gradients)
     weights += eps
     return weights
 
 
-def _compute_gradients_3d(data):
-    gr_deep = np.abs(data[:, :, :-1] - data[:, :, 1:]).ravel()
+def _compute_gradients_3d(data, depth=1.):
+    gr_deep = np.abs(data[:, :, :-1] - data[:, :, 1:]).ravel() / depth
     gr_right = np.abs(data[:, :-1] - data[:, 1:]).ravel()
     gr_down = np.abs(data[:-1] - data[1:]).ravel()
     return np.r_[gr_deep, gr_right, gr_down]
@@ -148,10 +161,10 @@ def _mask_edges_weights(edges, weights, mask):
     return edges, weights
 
 
-def _build_laplacian(data, mask=None, beta=50):
-    l_x, l_y, l_z = data.shape
+def _build_laplacian(data, mask=None, beta=50, depth=1.):
+    l_x, l_y, l_z = data[0].shape
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
-    weights = _compute_weights_3d(data, beta=beta, eps=1.e-10)
+    weights = _compute_weights_3d(data, beta=beta, eps=1.e-10, depth=depth)
     if mask is not None:
         edges, weights = _mask_edges_weights(edges, weights, mask)
     lap = _make_laplacian_sparse(edges, weights)
@@ -162,17 +175,19 @@ def _build_laplacian(data, mask=None, beta=50):
 #----------- Random walker algorithm --------------------------------
 
 
-def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
-                  return_full_prob=False):
+def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3, 
+                  copy=True, return_full_prob=False):
     """
-    Random walker algorithm for segmentation from markers.
+    Multispectral random walker algorithm for segmentation from markers.
 
     Parameters
     ----------
 
-    data : array_like
-        Image to be segmented in phases. `data` can be two- or
-        three-dimensional.
+    data : array_like OR iterable of arrays
+        Image to be segmented in phases. Non-multispectral `data` can be 
+        two- or three-dimensional; multispectral data is provided as an 
+        iterable of like-sized 2D or 3D arrays.  Data spacing is assumed
+        isotropic unless depth kwarg is used.
 
     labels : array of ints, of same shape as `data`
         Array of seed markers labeled with different positive integers
@@ -185,6 +200,11 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
+
+    depth : float, default 1.
+        Correction for non-isotropic voxel depths in 3D volumes.
+        Default (1.) implies isotropy.  This factor is derived as follows:
+        depth = (slice thickness) / (in-plane voxel dimension)
 
     mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
         Mode for solving the linear system in the random walker
@@ -299,9 +319,19 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
 
     """
-    # We work with 3-D arrays of floats
-    data = img_as_float(data)
-    data = np.atleast_3d(data)
+    # Parse input data
+    if isinstance( data, np.ndarray ):
+        # Wrap into single-element list
+        data = [ np.atleast_3d( img_as_float(data) ) ]
+    else:
+        # We work with 3-D arrays of floats
+        newdata = []
+        for spectrum in data:
+            newdata.append( np.atleast_3d( img_as_float(spectrum) ) )
+        del data
+        data = newdata
+        del newdata
+
     if copy:
         labels = np.copy(labels)
     label_values = np.unique(labels)
@@ -318,9 +348,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         del filled
     labels = np.atleast_3d(labels)
     if np.any(labels < 0):
-        lap_sparse = _build_laplacian(data, mask=labels >= 0, beta=beta)
+        lap_sparse = _build_laplacian(data, mask=labels >= 0, beta=beta,
+                                      depth=depth)
     else:
-        lap_sparse = _build_laplacian(data, beta=beta)
+        lap_sparse = _build_laplacian(data, beta=beta, depth=depth)
     lap_sparse, B = _buildAB(lap_sparse, labels)
     # We solve the linear system
     # lap_sparse X = B
@@ -343,18 +374,19 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         X = _solve_bf(lap_sparse, B,
                       return_full_prob=return_full_prob)
     # Clean up results
-    data = np.squeeze(data)
+    for spectrum in data:
+        spectrum = spectrum.squeeze()
     if return_full_prob:
         labels = labels.astype(np.float)
         X = np.array([_clean_labels_ar(Xline, labels,
-                copy=True).reshape(data.shape) for Xline in X])
+                copy=True).reshape(data[0].shape) for Xline in X])
         for i in range(1, int(labels.max()) + 1):
             mask_i = np.squeeze(labels == i)
             X[i - 1, mask_i] = 1
             X[np.setdiff1d(np.arange(0, labels.max(), dtype=np.int),
                            [i - 1]), mask_i] = 0
     else:
-        X = _clean_labels_ar(X + 1, labels).reshape(data.shape)
+        X = _clean_labels_ar(X + 1, labels).reshape(data[0].shape)
     return X
 
 
