@@ -54,7 +54,11 @@ def test_2d_bf():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
-    return data, labels_bf
+    full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+                                    return_full_prob=True)
+    assert (full_prob_bf[1, 25:45, 40:60] >=
+                        full_prob_bf[0, 25:45, 40:60]).all()
+    return data, labels_bf, full_prob_bf
 
 
 def test_2d_cg():
@@ -63,6 +67,10 @@ def test_2d_cg():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels_cg = random_walker(data, labels, beta=90, mode='cg')
     assert (labels_cg[25:45, 40:60] == 2).all()
+    full_prob = random_walker(data, labels, beta=90, mode='cg',
+                                    return_full_prob=True)
+    assert (full_prob[1, 25:45, 40:60] >=
+                        full_prob[0, 25:45, 40:60]).all()
     return data, labels_cg
 
 
@@ -72,7 +80,31 @@ def test_2d_cg_mg():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
+    full_prob = random_walker(data, labels, beta=90, mode='cg_mg',
+                                    return_full_prob=True)
+    assert (full_prob[1, 25:45, 40:60] >=
+                        full_prob[0, 25:45, 40:60]).all()
     return data, labels_cg_mg
+
+def test_types():
+    lx = 70
+    ly = 100
+    data, labels = make_2d_syntheticdata(lx, ly)
+    data = 255 * (data - data.min()) / (data.max() - data.min())
+    data = data.astype(np.uint8)
+    labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
+    assert (labels_cg_mg[25:45, 40:60] == 2).all()
+    return data, labels_cg_mg
+
+def test_reorder_labels():
+    lx = 70
+    ly = 100
+    data, labels = make_2d_syntheticdata(lx, ly)
+    labels[labels == 2] = 4
+    labels_bf = random_walker(data, labels, beta=90, mode='bf')
+    assert (labels_bf[25:45, 40:60] == 2).all()
+    return data, labels_bf
+
 
 
 def test_2d_inactive():
