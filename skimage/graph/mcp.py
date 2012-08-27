@@ -28,11 +28,33 @@ def route_through_array(array, start, end, fully_connected=True,
     path : list
         List of n-d index tuples defining the path from `start` to `end`.
     cost : float
-        Cost of the path.
+        Cost of the path. If `geometric` is False, the cost of the path is
+        the sum of the values of `array` along the path. If `geometric` is
+        True, a finer computation is made (see the documentation of the
+        MCP_Geometric class).
+
+    See Also
+    --------
+    MCP, MCP_Geometric
 
     Examples
     --------
     >>> from skimage.graph import route_through_array
+    >>> image = np.array([[1, 3], [10, 12]])
+    >>> image
+    array([[ 1,  3],
+           [10, 12]])
+    >>> # Forbid diagonal steps
+    >>> route_through_array(image, [0, 0], [1, 1], fully_connected=False)
+    ([(0, 0), (0, 1), (1, 1)], 9.5)
+    >>> # Now allow diagonal steps: the path goes directly from start to end
+    >>> route_through_array(image, [0, 0], [1, 1])
+    ([(0, 0), (1, 1)], 9.1923881554251192)
+    >>> # Cost is the sum of array values along the path (16 = 1 + 3 + 12)
+    >>> route_through_array(image, [0, 0], [1, 1], fully_connected=False,
+    ... geometric=False)
+    ([(0, 0), (0, 1), (1, 1)], 16.0)
+    >>> # Larger array where we display the path that is selected
     >>> image = np.arange((36)).reshape((6, 6))
     >>> image
     array([[ 0,  1,  2,  3,  4,  5],
@@ -48,19 +70,6 @@ def route_through_array(array, start, end, fully_connected=True,
     >>> path[indices[0], indices[1]] = 1
     >>> path
     array([[1, 1, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0, 1],
-           [0, 0, 0, 0, 0, 1],
-           [0, 0, 0, 0, 0, 1],
-           [0, 0, 0, 0, 0, 1],
-           [0, 0, 0, 0, 0, 1]])
-    >>> # Forbid diagonal steps
-    >>> indices, weight = route_through_array(image, (0, 0), (5, 5), \
-    fully_connected=False)
-    >>> indices = np.array(indices).T
-    >>> path = np.zeros_like(image)
-    >>> path[indices[0], indices[1]] = 1
-    >>> path
-    array([[1, 1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0, 1],
            [0, 0, 0, 0, 0, 1],
            [0, 0, 0, 0, 0, 1],
