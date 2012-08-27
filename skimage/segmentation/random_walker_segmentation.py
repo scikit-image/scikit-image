@@ -366,7 +366,8 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
             """pyamg (http://code.google.com/p/pyamg/)) is needed to use
             this mode, but is not installed. The 'cg' mode will be used
             instead.""")
-            X = _solve_cg(lap_sparse, B, tol=tol)
+            X = _solve_cg(lap_sparse, B, tol=tol, 
+                          return_full_prob=return_full_prob)
         else:
             X = _solve_cg_mg(lap_sparse, B, tol=tol,
                              return_full_prob=return_full_prob)
