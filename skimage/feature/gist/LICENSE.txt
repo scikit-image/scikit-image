@@ -1,0 +1,5 @@
+
+Licence: Python Software Foundation License, http://docs.python.org/license.html
+
+Source : http://lear.inrialpes.fr/software
+

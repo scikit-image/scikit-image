@@ -4,7 +4,6 @@
 *egg-info
 *.so
 *.bak
-*.c
 *.new
 *.md5
 *.old
