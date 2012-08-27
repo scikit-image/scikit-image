@@ -9,8 +9,8 @@ from skimage._shared.interpolation cimport (nearest_neighbour,
                                             bilinear_interpolation)
 
 
-cdef inline _matrix_transform(double x, double y, double* H, double *x_,
-                              double *y_):
+cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
+                                   double *y_):
     """Apply a homography to a coordinate.
 
     Parameters
