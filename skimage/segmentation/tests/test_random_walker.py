@@ -143,11 +143,12 @@ def test_multispectral():
     n = 30
     lx, ly, lz = n, n, n
     data, labels = make_3d_syntheticdata( lx, ly, lz )
-    data = [data, data] # Result should be identical
-    multi_labels = random_walker(data, labels, mode='cg')
-    single_labels = random_walker(data[0], labels, mode='cg')
-    assert (multi_labels.reshape(data[0].shape)[13:17, 13:17, 13:17] == 2).all()
-    assert (single_labels.reshape(data[0].shape)[13:17, 13:17, 13:17] == 2).all()
+    data.shape += (1,)
+    data = data.repeat(2, axis=3) # Result should be identical
+    multi_labels = random_walker(data, labels, mode='cg', multichannel=True)
+    single_labels = random_walker(data[:,:,:,0], labels, mode='cg')
+    assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
+    assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     return data, multi_labels, single_labels, labels
 
 if __name__ == '__main__':

@@ -64,22 +64,29 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
     return edges
 
 
-def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.):
+def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.,
+                        multichannel=False):
     # Weight calculation is main difference in multispectral version
     # Original gradient**2 replaced with sqrt( sum of gradients**2 )
-    for i, spectrum in enumerate(data):
-        if i == 0:
-            gradients = _compute_gradients_3d(spectrum, depth=depth)**2
-        else:
-            gradients += _compute_gradients_3d(spectrum)**2
+    if not multichannel:
+        gradients = _compute_gradients_3d( data, depth=depth )**2
+    else:
+        for channel in range(data.shape[-1]):
+            if channel == 0:
+                gradients = _compute_gradients_3d(data[..., channel],
+                                                  depth=depth)**2
+            else:
+                gradients += _compute_gradients_3d(data[..., channel],
+                                                   depth=depth)**2
 
-    gradients = np.sqrt(gradients)
+    # gradients = np.sqrt(gradients)
 
-    # New final term in beta to give == results in trivial case where
-    # multiple identical spectra are passed.  
-    # It may be faster and/or more memory efficient do an approximate 
-    # std() combining spectrum.std() together than this 2nd term.
-    beta /= 10 * np.asarray(data).std() * np.sqrt( len(data) )
+    # All channels considered together in this standard deviation
+    beta /= 10 * data.std()
+    if multichannel:
+        # New final term in beta to give == results in trivial case where
+        # multiple identical spectra are passed.
+        beta /= np.sqrt( data.shape[-1] )
     gradients *= beta
     weights = np.exp(- gradients)
     weights += eps
@@ -161,10 +168,14 @@ def _mask_edges_weights(edges, weights, mask):
     return edges, weights
 
 
-def _build_laplacian(data, mask=None, beta=50, depth=1.):
-    l_x, l_y, l_z = data[0].shape
+def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
+    if not multichannel:
+        l_x, l_y, l_z = data.shape
+    else:
+        l_x, l_y, l_z = data.shape[0], data.shape[1], data.shape[2]
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
-    weights = _compute_weights_3d(data, beta=beta, eps=1.e-10, depth=depth)
+    weights = _compute_weights_3d(data, beta=beta, eps=1.e-10, depth=depth,
+                                  multichannel=multichannel)
     if mask is not None:
         edges, weights = _mask_edges_weights(edges, weights, mask)
     lap = _make_laplacian_sparse(edges, weights)
@@ -175,19 +186,21 @@ def _build_laplacian(data, mask=None, beta=50, depth=1.):
 #----------- Random walker algorithm --------------------------------
 
 
-def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3, 
-                  copy=True, return_full_prob=False):
+def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
+                  copy=True, multichannel=False, scaling='all',
+                  return_full_prob=False):
     """
-    Multispectral random walker algorithm for segmentation from markers.
+    Multichannel random walker algorithm for segmentation from markers.
 
     Parameters
     ----------
 
-    data : array_like OR iterable of arrays
-        Image to be segmented in phases. Non-multispectral `data` can be 
-        two- or three-dimensional; multispectral data is provided as an 
-        iterable of like-sized 2D or 3D arrays.  Data spacing is assumed
-        isotropic unless depth kwarg is used.
+    data : array_like
+        Image to be segmented in phases. Gray-level`data` can be two- or
+        three-dimensional; multichannel data can be three- or four-
+        dimensional (requires multichannel=True) with the highest
+        dimension denoting channels.  Data spacing is assumed isotropic
+        unless depth keyword argument is used.
 
     labels : array of ints, of same shape as `data`
         Array of seed markers labeled with different positive integers
@@ -235,6 +248,21 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
         If copy is False, the `labels` array will be overwritten with
         the result of the segmentation. Use copy=False if you want to
         save on memory.
+
+    multichannel : bool, default False
+        If True, input data is parsed as multichannel data (see 'data' above
+        for proper input format in this case)
+
+    scaling : string, default 'all'
+        Controls input scaling if multichannel=True (otherwise no effect).
+
+        - 'all' (default): Data from all channels is combined when scaling
+          input data to the range [0,1] as type np.float64. Recommended
+          option for RGB(A) inputs.
+
+        - 'separate': Each channel is scaled individually, separate from the
+          others, to the range [0,1]. Select this if the channels are very
+          different, for example if one were x-ray CT and another MRI data.
 
     return_full_prob : bool, default False
         If True, the probability that a pixel belongs to each of the labels
@@ -320,17 +348,22 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
 
     """
     # Parse input data
-    if isinstance( data, np.ndarray ):
-        # Wrap into single-element list
-        data = [ np.atleast_3d( img_as_float(data) ) ]
-    else:
+    if not multichannel:
         # We work with 3-D arrays of floats
-        newdata = []
-        for spectrum in data:
-            newdata.append( np.atleast_3d( img_as_float(spectrum) ) )
-        del data
-        data = newdata
-        del newdata
+        dims = data.shape
+        data = np.atleast_3d( img_as_float(data) )
+    else:
+        dims = data[..., 0].shape
+        data = np.atleast_3d( data )    # Should never be needed
+        if scaling.lower().strip() == 'all':
+            data = img_as_float( data )
+        else:
+            newdata = np.zeros(data.shape, dtype=np.float64)
+            for channel in range( data.shape[-1] ):
+                newdata[..., channel] = img_as_float( data[..., channel] )
+            del data
+            data = newdata
+            del newdata
 
     if copy:
         labels = np.copy(labels)
@@ -349,9 +382,10 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
     labels = np.atleast_3d(labels)
     if np.any(labels < 0):
         lap_sparse = _build_laplacian(data, mask=labels >= 0, beta=beta,
-                                      depth=depth)
+                                      depth=depth, multichannel=multichannel)
     else:
-        lap_sparse = _build_laplacian(data, beta=beta, depth=depth)
+        lap_sparse = _build_laplacian(data, beta=beta, depth=depth,
+                                      multichannel=multichannel)
     lap_sparse, B = _buildAB(lap_sparse, labels)
     # We solve the linear system
     # lap_sparse X = B
@@ -366,7 +400,7 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
             """pyamg (http://code.google.com/p/pyamg/)) is needed to use
             this mode, but is not installed. The 'cg' mode will be used
             instead.""")
-            X = _solve_cg(lap_sparse, B, tol=tol, 
+            X = _solve_cg(lap_sparse, B, tol=tol,
                           return_full_prob=return_full_prob)
         else:
             X = _solve_cg_mg(lap_sparse, B, tol=tol,
@@ -375,19 +409,17 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
         X = _solve_bf(lap_sparse, B,
                       return_full_prob=return_full_prob)
     # Clean up results
-    for spectrum in data:
-        spectrum = spectrum.squeeze()
     if return_full_prob:
         labels = labels.astype(np.float)
         X = np.array([_clean_labels_ar(Xline, labels,
-                copy=True).reshape(data[0].shape) for Xline in X])
+                copy=True).reshape(dims) for Xline in X])
         for i in range(1, int(labels.max()) + 1):
             mask_i = np.squeeze(labels == i)
             X[i - 1, mask_i] = 1
             X[np.setdiff1d(np.arange(0, labels.max(), dtype=np.int),
                            [i - 1]), mask_i] = 0
     else:
-        X = _clean_labels_ar(X + 1, labels).reshape(data[0].shape)
+        X = _clean_labels_ar(X + 1, labels).reshape(dims)
     return X
 
 
