@@ -78,9 +78,6 @@ def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.,
             else:
                 gradients += _compute_gradients_3d(data[..., channel],
                                                    depth=depth)**2
-
-    # gradients = np.sqrt(gradients)
-
     # All channels considered together in this standard deviation
     beta /= 10 * data.std()
     if multichannel:
