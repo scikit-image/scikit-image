@@ -7,7 +7,7 @@ from libc.math cimport ceil, floor, round
 
 cdef inline double nearest_neighbour(double* image, int rows, int cols,
                                      double r, double c, char mode,
-                                     double cval=0):
+                                     double cval):
     """Nearest neighbour interpolation at a given position in the image.
 
     Parameters
@@ -31,7 +31,7 @@ cdef inline double nearest_neighbour(double* image, int rows, int cols,
 
 cdef inline double bilinear_interpolation(double* image, int rows, int cols,
                                           double r, double c, char mode,
-                                          double cval=0):
+                                          double cval):
     """Bilinear interpolation at a given position in the image.
 
     Parameters
@@ -65,7 +65,7 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
 
 
 cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
-                             char mode, double cval=0):
+                             char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters

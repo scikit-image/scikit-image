@@ -111,14 +111,17 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef int rows = img.shape[0]
     cdef int cols = img.shape[1]
 
+    cdef double (*interp_func)(double*, int, int, double, double,
+                               char, double)
+    if order == 0:
+        interp_func = nearest_neighbour
+    elif order == 1:
+        interp_func = bilinear_interpolation
+
     for tfr in range(out_r):
         for tfc in range(out_c):
             _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
-            if order == 0:
-                out[tfr, tfc] = nearest_neighbour(<double*>img.data, rows,
-                                                  cols, r, c, mode_c, cval)
-            elif order == 1:
-                out[tfr, tfc] = bilinear_interpolation(<double*>img.data, rows,
-                                                       cols, r, c, mode_c, cval)
+            out[tfr, tfc] = interp_func(<double*>img.data, rows, cols, r, c,
+                                        mode_c, cval)
 
     return out

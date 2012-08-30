@@ -132,7 +132,7 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
         for c in range(image.shape[1]):
             for i in range(P):
                 texture[i] = bilinear_interpolation(<double*>image.data,
-                    rows, cols, r + coords[i, 0], c + coords[i, 1], 'C')
+                    rows, cols, r + coords[i, 0], c + coords[i, 1], 'C', 0)
             # signed / thresholded texture
             for i in range(P):
                 if texture[i] - image[r, c] >= 0:
