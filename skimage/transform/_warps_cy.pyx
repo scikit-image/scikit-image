@@ -5,8 +5,9 @@
 
 cimport numpy as np
 import numpy as np
-from skimage._shared.interpolation cimport (nearest_neighbour,
-                                            bilinear_interpolation)
+from skimage._shared.interpolation cimport (nearest_neighbour_interpolation,
+                                            bilinear_interpolation,
+                                            bicubic_interpolation)
 
 
 cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
@@ -108,9 +109,11 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef double (*interp_func)(double*, int, int, double, double,
                                char, double)
     if order == 0:
-        interp_func = nearest_neighbour
+        interp_func = nearest_neighbour_interpolation
     elif order == 1:
         interp_func = bilinear_interpolation
+    elif order == 3:
+        interp_func = bicubic_interpolation
 
     for tfr in range(out_r):
         for tfc in range(out_c):

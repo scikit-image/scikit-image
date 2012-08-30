@@ -57,7 +57,7 @@ def test_fast_homography():
     tform = ProjectiveTransform(H)
     coords = warp_coords(tform.inverse, (img.shape[0], img.shape[1]))
 
-    for order in range(2):
+    for order in range(4):
         for mode in ('constant', 'reflect', 'wrap'):
             p0 = map_coordinates(img, coords, mode=mode, order=order)
             p1 = warp(img, tform, mode=mode, order=order)

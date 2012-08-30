@@ -834,7 +834,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     # use fast Cython version for specific parameters
     fast_modes = ('constant', 'reflect', 'wrap')
-    if order in (0, 1) and mode in fast_modes and not map_args:
+    if order in (0, 1, 3) and mode in fast_modes and not map_args:
         matrix = None
         if isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
             matrix = inverse_map._matrix

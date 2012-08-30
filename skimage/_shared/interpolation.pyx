@@ -5,16 +5,17 @@
 from libc.math cimport ceil, floor, round
 
 
-cdef inline double nearest_neighbour(double* image, int rows, int cols,
-                                     double r, double c, char mode,
-                                     double cval):
+cdef inline double nearest_neighbour_interpolation(double* image, int rows,
+                                                   int cols, double r,
+                                                   double c, char mode,
+                                                   double cval):
     """Nearest neighbour interpolation at a given position in the image.
 
     Parameters
     ----------
     image : double array
         Input image.
-    rows, cols: int
+    rows, cols : int
         Shape of image.
     r, c : int
         Position at which to interpolate.
@@ -22,6 +23,11 @@ cdef inline double nearest_neighbour(double* image, int rows, int cols,
         Wrapping mode. Constant, Wrap or Reflect.
     cval : double
         Constant value to use for constant mode.
+
+    Returns
+    -------
+    value : double
+        Interpolated value.
 
     """
 
@@ -38,7 +44,7 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
     ----------
     image : double array
         Input image.
-    rows, cols: int
+    rows, cols : int
         Shape of image.
     r, c : int
         Position at which to interpolate.
@@ -46,6 +52,11 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
         Wrapping mode. Constant, Wrap or Reflect.
     cval : double
         Constant value to use for constant mode.
+
+    Returns
+    -------
+    value : double
+        Interpolated value.
 
     """
     cdef double dr, dc
@@ -64,6 +75,79 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
     return (1 - dr) * top + dr * bottom
 
 
+cdef inline double cubic_interpolation(double x, double[4] f):
+    """Ccubic interpolation.
+
+    Parameters
+    ----------
+    x : double
+        Position in the interval [0, 1].
+    f : double[4]
+        Function values at positions [0, 1/3, 2/3, 1].
+
+    Returns
+    -------
+    value : double
+        Interpolated value.
+
+    """
+    return \
+        f[1] + 0.5 * x * \
+            (f[2] - f[0] + x * \
+                (2.0 * f[0] - 5.0 * f[1] + 4.0 * f[2] - f[3] + x * \
+                    (3.0 * (f[1] - f[2]) + f[3] - f[0])))
+
+
+cdef inline double bicubic_interpolation(double* image, int rows, int cols,
+                                         double r, double c, char mode,
+                                         double cval):
+    """Bicubic interpolation at a given position in the image.
+
+    Parameters
+    ----------
+    image : double array
+        Input image.
+    rows, cols : int
+        Shape of image.
+    r, c : int
+        Position at which to interpolate.
+    mode : {'C', 'W', 'R'}
+        Wrapping mode. Constant, Wrap or Reflect.
+    cval : double
+        Constant value to use for constant mode.
+
+    Returns
+    -------
+    value : double
+        Interpolated value.
+
+    """
+
+    cdef int r0 = <int>r
+    cdef int c0 = <int>c
+    if r < 0:
+        r0 -= 1
+    if c < 0:
+        c0 -= 1
+    # scale position to range [0, 1]
+    cdef double xr = (r - r0 + 1) / 3
+    cdef double xc = (c - c0 + 1) / 3
+
+    cdef double fc[4], fr[4]
+
+    cdef int pr, pc
+
+    for pr in range(r0 - 1, r0 + 3):
+
+        # do row-wise cubic interpolation
+        for pc in range(c0 - 1, c0 + 3):
+            fc[pc + 1 - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
+        fr[pr + 1 - r0] = cubic_interpolation(xc, fc)
+
+    # do cubic interpolation for interpolated values of each row
+    return cubic_interpolation(xr, fr)
+
+
 cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
                              char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
@@ -72,7 +156,7 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
     ----------
     image : double array
         Input image.
-    rows, cols: int
+    rows, cols : int
         Shape of image.
     r, c : int
         Position at which to get the pixel.
@@ -80,6 +164,11 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
         Wrapping mode. Constant, Wrap or Reflect.
     cval : double
         Constant value to use for constant mode.
+
+    Returns
+    -------
+    value : double
+        Pixel value at given position.
 
     """
     if mode == 'C':
