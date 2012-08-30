@@ -8,8 +8,12 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
                                           double r, double c, char mode,
                                           double cval)
 
-cdef inline double cubic_interpolation(double x, double[4] f)
+cdef inline double quadratic_interpolation(double x, double[3] f)
+cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
+                                             double r, double c, char mode,
+                                             double cval)
 
+cdef inline double cubic_interpolation(double x, double[4] f)
 cdef inline double bicubic_interpolation(double* image, int rows, int cols,
                                          double r, double c, char mode,
                                          double cval)

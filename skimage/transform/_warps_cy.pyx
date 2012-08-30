@@ -7,6 +7,7 @@ cimport numpy as np
 import numpy as np
 from skimage._shared.interpolation cimport (nearest_neighbour_interpolation,
                                             bilinear_interpolation,
+                                            biquadratic_interpolation,
                                             bicubic_interpolation)
 
 
@@ -72,6 +73,7 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
         Order of interpolation::
         * 0: Nearest-neighbour interpolation.
         * 1: Bilinear interpolation (default).
+        * 2: Biquadratic interpolation (default).
         * 3: Bicubic interpolation.
     mode : {'constant', 'reflect', 'wrap'}
         How to handle values outside the image borders.
@@ -113,6 +115,8 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
         interp_func = nearest_neighbour_interpolation
     elif order == 1:
         interp_func = bilinear_interpolation
+    elif order == 2:
+        interp_func = biquadratic_interpolation
     elif order == 3:
         interp_func = bicubic_interpolation
 

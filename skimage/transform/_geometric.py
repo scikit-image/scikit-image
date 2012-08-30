@@ -833,7 +833,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     bands = ishape[2]
 
     # use fast Cython version for specific interpolation orders
-    if order in (0, 1, 3) and not map_args:
+    if order in range(4) and not map_args:
         matrix = None
         if isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
             matrix = inverse_map._matrix

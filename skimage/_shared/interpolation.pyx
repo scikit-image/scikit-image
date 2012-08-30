@@ -75,8 +75,80 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
     return (1 - dr) * top + dr * bottom
 
 
+cdef inline double quadratic_interpolation(double x, double[3] f):
+    """Quadratic interpolation.
+
+    Parameters
+    ----------
+    x : double
+        Position in the interval [-1, 1].
+    f : double[4]
+        Function values at positions [-1, 0, 1].
+
+    Returns
+    -------
+    value : double
+        Interpolated value.
+
+    """
+    return f[1] - 0.25 * (f[0] - f[2]) * x
+
+
+cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
+                                             double r, double c, char mode,
+                                             double cval):
+    """Biquadratic interpolation at a given position in the image.
+
+    Parameters
+    ----------
+    image : double array
+        Input image.
+    rows, cols : int
+        Shape of image.
+    r, c : int
+        Position at which to interpolate.
+    mode : {'C', 'W', 'R', 'N'}
+        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    cval : double
+        Constant value to use for constant mode.
+
+    Returns
+    -------
+    value : double
+        Interpolated value.
+
+    """
+
+    cdef int r0 = <int>round(r)
+    cdef int c0 = <int>round(c)
+    if r < 0:
+        r0 -= 1
+    if c < 0:
+        c0 -= 1
+    # scale position to range [-1, 1]
+    cdef double xr = (r - r0) - 1
+    cdef double xc = (c - c0) - 1
+    if r == r0:
+        xr += 1
+    if c == c0:
+        xc += 1
+
+    cdef double fc[3], fr[3]
+
+    cdef int pr, pc
+
+    # row-wise cubic interpolation
+    for pr in range(r0, r0 + 3):
+        for pc in range(c0, c0 + 3):
+            fc[pc - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
+        fr[pr - r0] = quadratic_interpolation(xc, fc)
+
+    # cubic interpolation for interpolated values of each row
+    return quadratic_interpolation(xr, fr)
+
+
 cdef inline double cubic_interpolation(double x, double[4] f):
-    """Ccubic interpolation.
+    """Cubic interpolation.
 
     Parameters
     ----------
