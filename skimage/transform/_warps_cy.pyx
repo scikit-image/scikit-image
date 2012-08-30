@@ -72,6 +72,7 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
         Order of interpolation::
         * 0: Nearest-neighbour interpolation.
         * 1: Bilinear interpolation (default).
+        * 3: Bicubic interpolation.
     mode : {'constant', 'reflect', 'wrap'}
         How to handle values outside the image borders.
     cval : string
