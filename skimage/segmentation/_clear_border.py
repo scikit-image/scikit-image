@@ -21,6 +21,24 @@ def clear_border(image, buffer_size=0, bgval=0):
     image : (N, M) array
         Cleared binary image.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.segmentation import clear_border
+    >>> image = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
+    ...                   [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    ...                   [1, 0, 0, 1, 0, 1, 0, 0, 0],
+    ...                   [0, 0, 1, 1, 1, 1, 1, 0, 0],
+    ...                   [0, 1, 1, 1, 1, 1, 1, 1, 0],
+    ...                   [0, 0, 0, 0, 0, 0, 0, 0, 0]])
+    >>> clear_border(image)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 1, 0, 1, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0]])
+
     """
 
     rows, cols = image.shape
