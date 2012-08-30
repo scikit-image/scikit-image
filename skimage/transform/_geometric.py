@@ -834,7 +834,9 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     # use fast Cython version for specific parameters
     fast_modes = ('constant', 'reflect', 'wrap')
-    if order in (0, 1, 3) and mode in fast_modes and not map_args:
+    fast_orders = (0, 1, 3)
+
+    if order in fast_orders and mode in fast_modes and not map_args:
         matrix = None
         if isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
             matrix = inverse_map._matrix
@@ -851,29 +853,30 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             out = np.dstack(dims)
             if orig_ndim == 2:
                 out = out[..., 0]
-            return out
 
-    if output_shape is None:
-        output_shape = ishape
+    else: # use ndimage.map_coordinates
 
-    rows, cols = output_shape[:2]
+        if output_shape is None:
+            output_shape = ishape
 
-    def coord_map(*args):
-        return inverse_map(*args, **map_args)
+        rows, cols = output_shape[:2]
 
-    coords = warp_coords(coord_map, (rows, cols, bands))
+        def coord_map(*args):
+            return inverse_map(*args, **map_args)
 
-    # Prefilter not necessary for order 1 interpolation
-    prefilter = order > 1
-    mapped = ndimage.map_coordinates(image, coords, prefilter=prefilter,
-                                     mode=mode, order=order, cval=cval)
+        coords = warp_coords(coord_map, (rows, cols, bands))
+
+        # Prefilter not necessary for order 1 interpolation
+        prefilter = order > 1
+        out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
+                                      mode=mode, order=order, cval=cval)
 
     # The spline filters sometimes return results outside [0, 1],
     # so clip to ensure valid data
-    clipped = np.clip(mapped, 0, 1)
+    clipped = np.clip(out, 0, 1)
 
     if mode == 'constant' and not (0 <= cval <= 1):
-        clipped[mapped == cval] = cval
+        clipped[out == cval] = cval
 
     # Remove singleton dim introduced by atleast_3d
     return clipped.squeeze()
