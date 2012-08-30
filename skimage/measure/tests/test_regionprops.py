@@ -78,6 +78,14 @@ def test_convex_image():
     assert_array_equal(img, ref)
 
 
+def test_coordinates():
+    sample = np.zeros((10, 10), dtype=np.int8)
+    coords = np.array([[3, 2], [3, 3], [3, 4]])
+    sample[coords[:, 0], coords[:, 1]] = 1
+    prop_coords = regionprops(sample, ['Coordinates'])[0]['Coordinates']
+    assert_array_equal(prop_coords, coords)
+
+
 def test_eccentricity():
     eps = regionprops(SAMPLE, ['Eccentricity'])[0]['Eccentricity']
     assert_almost_equal(eps, 0.814629313427)
