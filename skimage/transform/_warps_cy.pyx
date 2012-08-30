@@ -86,9 +86,9 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] M = \
          np.ascontiguousarray(H)
 
-    if mode not in ('constant', 'wrap', 'reflect'):
+    if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
         raise ValueError("Invalid mode specified.  Please use "
-                         "`constant`, `wrap` or `reflect`.")
+                         "`constant`, `nearest`, `wrap` or `reflect`.")
     cdef char mode_c = ord(mode[0].upper())
 
     cdef int out_r, out_c

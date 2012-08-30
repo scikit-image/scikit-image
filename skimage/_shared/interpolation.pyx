@@ -19,8 +19,8 @@ cdef inline double nearest_neighbour_interpolation(double* image, int rows,
         Shape of image.
     r, c : int
         Position at which to interpolate.
-    mode : {'C', 'W', 'R'}
-        Wrapping mode. Constant, Wrap or Reflect.
+    mode : {'C', 'W', 'R', 'N'}
+        Wrapping mode. Constant, Wrap, Reflect or Nearest.
     cval : double
         Constant value to use for constant mode.
 
@@ -48,8 +48,8 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
         Shape of image.
     r, c : int
         Position at which to interpolate.
-    mode : {'C', 'W', 'R'}
-        Wrapping mode. Constant, Wrap or Reflect.
+    mode : {'C', 'W', 'R', 'N'}
+        Wrapping mode. Constant, Wrap, Reflect or Nearest.
     cval : double
         Constant value to use for constant mode.
 
@@ -111,8 +111,8 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
         Shape of image.
     r, c : int
         Position at which to interpolate.
-    mode : {'C', 'W', 'R'}
-        Wrapping mode. Constant, Wrap or Reflect.
+    mode : {'C', 'W', 'R', 'N'}
+        Wrapping mode. Constant, Wrap, Reflect or Nearest.
     cval : double
         Constant value to use for constant mode.
 
@@ -160,8 +160,8 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
         Shape of image.
     r, c : int
         Position at which to get the pixel.
-    mode : {'C', 'W', 'R'}
-        Wrapping mode. Constant, Wrap or Reflect.
+    mode : {'C', 'W', 'R', 'N'}
+        Wrapping mode. Constant, Wrap, Reflect or Nearest.
     cval : double
         Constant value to use for constant mode.
 
@@ -190,28 +190,33 @@ cdef inline int coord_map(int dim, int coord, char mode):
         Maximum coordinate.
     coord : int
         Coord provided by user.  May be < 0 or > dim.
-    mode : {'W', 'R'}
+    mode : {'W', 'R', 'N'}
         Whether to wrap or reflect the coordinate if it
         falls outside [0, dim).
 
     """
     dim = dim - 1
     if mode == 'R': # reflect
-        if (coord < 0):
+        if coord < 0:
             # How many times times does the coordinate wrap?
-            if (<int>(-coord / dim) % 2 != 0):
+            if <int>(-coord / dim) % 2 != 0:
                 return dim - <int>(-coord % dim)
             else:
                 return <int>(-coord % dim)
-        elif (coord > dim):
-            if (<int>(coord / dim) % 2 != 0):
+        elif coord > dim:
+            if <int>(coord / dim) % 2 != 0:
                 return <int>(dim - (coord % dim))
             else:
                 return <int>(coord % dim)
     elif mode == 'W': # wrap
-        if (coord < 0):
+        if coord < 0:
             return <int>(dim - (-coord % dim))
-        elif (coord > dim):
+        elif coord > dim:
             return <int>(coord % dim)
+    elif mode == 'N': # nearest
+        if coord < 0:
+            return 0
+        elif coord > dim:
+            return dim
 
     return coord
