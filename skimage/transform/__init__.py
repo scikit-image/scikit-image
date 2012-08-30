@@ -5,4 +5,4 @@ from .integral import *
 from ._geometric import (warp, warp_coords, estimate_transform,
                          SimilarityTransform, AffineTransform,
                          ProjectiveTransform, PolynomialTransform)
-from ._warps import rotate, swirl, homography
+from ._warps import resize, rotate, swirl, homography

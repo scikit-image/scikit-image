@@ -1,5 +1,54 @@
 import numpy as np
-from ._geometric import warp, SimilarityTransform
+from ._geometric import warp, SimilarityTransform, AffineTransform
+
+
+def resize(image, output_shape, order=1, mode='constant', cval=0.):
+    """Resize image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    output_shape : tuple or ndarray
+        Size of the generated output image `(rows, cols)`.
+
+    Returns
+    -------
+    resized : ndarray
+        Resized version of the input.
+
+    Other parameters
+    ----------------
+    order : int
+        Order of splines used in interpolation.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    mode : string
+        How to handle values outside the image borders.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    cval : string
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    """
+
+    rows, cols = output_shape
+    orig_rows, orig_cols = image.shape[0], image.shape[1]
+
+    rscale = float(orig_rows) / rows
+    cscale = float(orig_cols) / cols
+
+    # 3 control points necessary to estimate exact AffineTransform
+    src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
+    dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+    # take into account that 0th pixel is at position (0.5, 0.5)
+    dst_corners[:, 0] = cscale * (src_corners[:, 0] + 0.5) - 0.5
+    dst_corners[:, 1] = rscale * (src_corners[:, 1] + 0.5) - 0.5
+
+    tform = AffineTransform()
+    tform.estimate(src_corners, dst_corners)
+
+    return warp(image, tform, output_shape=output_shape, order=order,
+                mode=mode, cval=cval)
 
 
 def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
