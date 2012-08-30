@@ -87,13 +87,7 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     if mode not in ('constant', 'wrap', 'reflect'):
         raise ValueError("Invalid mode specified.  Please use "
                          "`constant`, `wrap` or `reflect`.")
-    cdef char mode_c
-    if mode == 'constant':
-        mode_c = ord('C')
-    elif mode == 'wrap':
-        mode_c = ord('W')
-    elif mode == 'reflect':
-        mode_c = ord('R')
+    cdef char mode_c = ord(mode[0].upper())
 
     cdef int out_r, out_c
     if output_shape is None:
