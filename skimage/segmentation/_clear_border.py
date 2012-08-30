@@ -46,7 +46,7 @@ def clear_border(image, buffer_size=0, bgval=0):
         raise ValueError("buffer size may not be greater than image size")
 
     # create borders with buffer_size
-    borders = np.zeros_like(image, np.bool_)
+    borders = np.zeros_like(image, dtype=np.bool_)
     ext = buffer_size + 1
     borders[:ext] = True
     borders[- ext:] = True
