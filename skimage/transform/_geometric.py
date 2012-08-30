@@ -643,8 +643,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
     >>> warp(image, inverse_map=tform.inverse)
 
     >>> # create transformation with explicit parameters
-    >>> tform2 = tf.SimilarityTransform()
-    >>> tform2.compose_implicit(scale=1.1, rotation=1, translation=(10, 20))
+    >>> tform2 = tf.SimilarityTransform(scale=1.1, rotation=1,
+    ...     translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right
     >>> tform3 = tform + tform2
