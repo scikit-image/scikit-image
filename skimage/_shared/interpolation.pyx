@@ -123,28 +123,27 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
 
     """
 
-    cdef int r0 = <int>r
-    cdef int c0 = <int>c
+    cdef int r0 = <int>r - 1
+    cdef int c0 = <int>c - 1
     if r < 0:
         r0 -= 1
     if c < 0:
         c0 -= 1
     # scale position to range [0, 1]
-    cdef double xr = (r - r0 + 1) / 3
-    cdef double xc = (c - c0 + 1) / 3
+    cdef double xr = (r - r0) / 3
+    cdef double xc = (c - c0) / 3
 
     cdef double fc[4], fr[4]
 
     cdef int pr, pc
 
-    for pr in range(r0 - 1, r0 + 3):
+    # row-wise cubic interpolation
+    for pr in range(r0, r0 + 4):
+        for pc in range(c0, c0 + 4):
+            fc[pc - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
+        fr[pr - r0] = cubic_interpolation(xc, fc)
 
-        # do row-wise cubic interpolation
-        for pc in range(c0 - 1, c0 + 3):
-            fc[pc + 1 - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
-        fr[pr + 1 - r0] = cubic_interpolation(xc, fc)
-
-    # do cubic interpolation for interpolated values of each row
+    # cubic interpolation for interpolated values of each row
     return cubic_interpolation(xr, fr)
 
 
