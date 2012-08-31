@@ -591,29 +591,19 @@ class PiecewiseAffineTransform(ProjectiveTransform):
     """
 
     def __init__(self):
-        pass
+        self.tess = None
+        self.triAffines = []
 
     def estimate(self, src, dst):
 
-        #Convert input to correct types
-        dstPoints = np.array(dst)
-        srcPoints = np.array(src)
-
         #Split input shape into mesh
-        self.tess = spatial.Delaunay(srcPoints)
-
-        #Calculate ROI in source control points
-        xmin, xmax = srcPoints[:,0].min(), srcPoints[:,0].max()
-        ymin, ymax = srcPoints[:,1].min(), srcPoints[:,1].max()
+        self.tess = spatial.Delaunay(src)
 
         #Find affine mapping from input positions to mean shape
         self.triAffines = []
         for tri in self.tess.vertices:
-            srcTri = np.hstack((srcPoints[tri,:], np.ones((3,1)))).transpose()
-            dstTri = np.hstack((dstPoints[tri,:], np.ones((3,1)))).transpose()
-
             affine = AffineTransform()
-            affine.estimate(srcTri, dstTri)
+            affine.estimate(src[tri,:], dst[tri,:])
             self.triAffines.append(affine)
 
     def __call__(self, coords):
@@ -639,8 +629,8 @@ class PiecewiseAffineTransform(ProjectiveTransform):
             
             if simplexIndex == -1:
                 #This point is outside the hull of the control points
-                out[ptNum,0] = 0
-                out[ptNum,1] = 0
+                out[ptNum,0] = -1
+                out[ptNum,1] = -1
                 continue
 
             #Calculate position in the input image
@@ -656,6 +646,7 @@ TRANSFORMS = {
     'affine': AffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
+	'piecewiseaffine': PiecewiseAffineTransform,
 }
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
@@ -673,7 +664,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     Parameters
     ----------
-    ttype : {'similarity', 'affine', 'projective', 'polynomial'}
+    ttype : {'similarity', 'affine', 'piecewiseaffine', 'projective', 'polynomial'}
         Type of transform.
     kwargs : array or int
         Function parameters (src, dst, n, angle)::
@@ -681,6 +672,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
             NAME / TTYPE        FUNCTION PARAMETERS
             'similarity'        `src, `dst`
             'affine'            `src, `dst`
+            'piecewiseaffine'   `src, `dst`
             'projective'        `src, `dst`
             'polynomial'        `src, `dst`, `order` (polynomial order)
 
