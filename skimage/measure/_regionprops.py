@@ -77,8 +77,10 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             Centroid coordinate tuple `(row, col)`.
         * ConvexArea : int
             Number of pixels of convex hull image.
-        * ConvexImage : H x J ndarray
+        * ConvexImage : (H, J) ndarray
             Binary convex hull image which has the same size as bounding box.
+        * Coordinates : (N, 2) ndarray
+            Coordinate list `(row, col)` of the region.
         * Eccentricity : float
             Eccentricity of the ellipse that has the same second-moments as the
             region. The eccentricity is the ratio of the distance between its
@@ -93,12 +95,12 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             Computed as `Area / (rows*cols)`
         * FilledArea : int
             Number of pixels of filled region.
-        * FilledImage : H x J ndarray
+        * FilledImage : (H, J) ndarray
             Binary region image with filled holes which has the same size as
             bounding box.
         * HuMoments : tuple
             Hu moments (translation, scale and rotation invariant).
-        * Image : H x J ndarray
+        * Image : (H, J) ndarray
             Sliced binary region image which has the same size as bounding box.
         * MajorAxisLength : float
             The length of the major axis of the ellipse that has the same
@@ -142,7 +144,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         * WeightedHuMoments : tuple
             Hu moments (translation, scale and rotation invariant) of intensity
             image.
-        * WeightedMoments : 3 x 3 ndarray
+        * WeightedMoments : (3, 3) ndarray
             Spatial moments of intensity image up to 3rd order.
                 wm_ji = sum{ array(x, y) * x^j * y^i }
             where the sum is over the `x`, `y` coordinates of the region.
@@ -152,7 +154,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
                 wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
             where `wm_00` is the zeroth spatial moment (intensity-weighted
             area).
-    intensity_image : N x M ndarray, optional
+    intensity_image : (N, M) ndarray, optional
         Intensity image with same size as labelled image. Default is None.
 
     Returns
@@ -163,13 +165,14 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
 
     References
     ----------
-    Wilhelm Burger, Mark Burge. Principles of Digital Image Processing: Core
-        Algorithms. Springer-Verlag, London, 2009.
-    B. Jähne. Digital Image Processing. Springer-Verlag,
-        Berlin-Heidelberg, 6. edition, 2005.
-    T. H. Reiss. Recognizing Planar Objects Using Invariant Image Features,
-        from Lecture notes in computer science, p. 676. Springer, Berlin, 1993.
-    http://en.wikipedia.org/wiki/Image_moment
+    .. [1] Wilhelm Burger, Mark Burge. Principles of Digital Image Processing:
+           Core Algorithms. Springer-Verlag, London, 2009.
+    .. [2] B. Jähne. Digital Image Processing. Springer-Verlag,
+           Berlin-Heidelberg, 6. edition, 2005.
+    .. [3] T. H. Reiss. Recognizing Planar Objects Using Invariant Image
+           Features, from Lecture notes in computer science, p. 676. Springer,
+           Berlin, 1993.
+    .. [4] http://en.wikipedia.org/wiki/Image_moment
 
     Examples
     --------
@@ -245,6 +248,10 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             if _convex_image is None:
                 _convex_image = convex_hull_image(array)
             obj_props['ConvexImage'] = _convex_image
+
+        if 'Coordinates' in properties:
+            rr, cc = np.nonzero(array)
+            obj_props['Coordinates'] = np.vstack((rr + r0, cc + c0)).T
 
         if 'Eccentricity' in properties:
             if l1 == 0:
