@@ -40,7 +40,7 @@ borders = np.logical_xor(bw, cleared)
 label_image[borders] = -1
 
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
-ax.imshow(label_image)
+ax.imshow(label_image, cmap='jet')
 
 for region in regionprops(label_image, ['Area', 'BoundingBox']):
 
