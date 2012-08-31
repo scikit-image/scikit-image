@@ -20,7 +20,9 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
 
     config.add_extension('_warps_cy', sources=['_warps_cy.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'],
+                         extra_compile_args=['-fopenmp'],
+                         extra_link_args=['-fopenmp'])
 
     return config
 
