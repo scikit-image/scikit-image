@@ -600,10 +600,10 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
     def estimate(self, src, dst):
 
-        #Split input shape into mesh
+        #Triangulate input positions into mesh
         self.tess = spatial.Delaunay(src)
 
-        #Find affine mapping from input positions to mean shape
+        #Find affine mapping from source positions to destination
         self.triAffines = []
         for tri in self.tess.vertices:
             affine = AffineTransform()
@@ -637,7 +637,7 @@ class PiecewiseAffineTransform(ProjectiveTransform):
                 out[ptNum,1] = -1
                 continue
 
-            #Calculate position in the input image
+            #Calculate affine transformed position
             affine = self.triAffines[simplexIndex]
             destPos = affine(pt)
             out[ptNum,0] = destPos[0][0]
@@ -650,7 +650,7 @@ TRANSFORMS = {
     'affine': AffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
-	'piecewiseaffine': PiecewiseAffineTransform,
+    'piecewiseaffine': PiecewiseAffineTransform,
 }
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
