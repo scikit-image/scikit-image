@@ -1,10 +1,9 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_array_almost_equal
-
 from skimage.transform._geometric import _stackcopy
-from skimage.transform import (estimate_transform, SimilarityTransform,
-                               AffineTransform, ProjectiveTransform,
-                               PolynomialTransform)
+from skimage.transform import (estimate_transform,
+                               SimilarityTransform, AffineTransform,
+                               ProjectiveTransform, PolynomialTransform)
 
 
 SRC = np.array([

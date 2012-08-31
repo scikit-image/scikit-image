@@ -15,7 +15,7 @@ References:
 from __future__ import division
 import numpy as np
 from scipy.fftpack import fftshift, fft, ifft
-from ._project import homography
+from ._warps_cy import _warp_fast
 
 __all__ = ["radon", "iradon"]
 
@@ -77,8 +77,8 @@ def radon(image, theta=None):
         return shift1.dot(R).dot(shift0)
 
     for i in range(len(theta)):
-        rotated = homography(padded_image,
-                             build_rotation(-theta[i]))
+        rotated = _warp_fast(padded_image,
+                             np.linalg.inv(build_rotation(-theta[i])))
 
         out[:, i] = rotated.sum(0)[::-1]
 

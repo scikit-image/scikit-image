@@ -2,29 +2,7 @@ import math
 import numpy as np
 from scipy import ndimage
 from skimage.util import img_as_float
-
-
-def _stackcopy(a, b):
-    """Copy b into each color layer of a, such that::
-
-        a[:,:,0] = a[:,:,1] = ... = b
-
-    Parameters
-    ----------
-    a : (M, N) or (M, N, P) ndarray
-        Target array.
-    b : (M, N)
-        Source array.
-
-    Notes
-    -----
-    Color images are stored as an ``(M, N, 3)`` or ``(M, N, 4)`` arrays.
-
-    """
-    if a.ndim == 3:
-        a[:] = b[:, :, np.newaxis]
-    else:
-        a[:] = b
+from ._warps_cy import _warp_fast
 
 
 class GeometricTransform(object):
@@ -603,12 +581,17 @@ class PolynomialTransform(GeometricTransform):
             'then apply the forward transformation.')
 
 
-TRANSFORMATIONS = {
+TRANSFORMS = {
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
 }
+HOMOGRAPHY_TRANSFORMS = (
+    SimilarityTransform,
+    AffineTransform,
+    ProjectiveTransform
+)
 
 
 def estimate_transform(ttype, src, dst, **kwargs):
@@ -660,8 +643,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
     >>> warp(image, inverse_map=tform.inverse)
 
     >>> # create transformation with explicit parameters
-    >>> tform2 = tf.SimilarityTransform()
-    >>> tform2.compose_implicit(scale=1.1, rotation=1, translation=(10, 20))
+    >>> tform2 = tf.SimilarityTransform(scale=1.1, rotation=1,
+    ...     translation=(10, 20))
 
     >>> # unite transformations, applied in order from left to right
     >>> tform3 = tform + tform2
@@ -669,11 +652,11 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     """
     ttype = ttype.lower()
-    if ttype not in TRANSFORMATIONS:
+    if ttype not in TRANSFORMS:
         raise ValueError('the transformation type \'%s\' is not'
                          'implemented' % ttype)
 
-    tform = TRANSFORMATIONS[ttype]()
+    tform = TRANSFORMS[ttype]()
     tform.estimate(src, dst, **kwargs)
 
     return tform
@@ -698,26 +681,44 @@ def matrix_transform(coords, matrix):
     return ProjectiveTransform(matrix)(coords)
 
 
-def warp_coords(orows, ocols, bands, coord_transform_fn,
-                dtype=np.float64):
+def _stackcopy(a, b):
+    """Copy b into each color layer of a, such that::
+
+      a[:,:,0] = a[:,:,1] = ... = b
+
+    Parameters
+    ----------
+    a : (M, N) or (M, N, P) ndarray
+        Target array.
+    b : (M, N)
+        Source array.
+
+    Notes
+    -----
+    Color images are stored as an ``(M, N, 3)`` or ``(M, N, 4)`` arrays.
+
+    """
+    if a.ndim == 3:
+        a[:] = b[:, :, np.newaxis]
+    else:
+        a[:] = b
+
+
+def warp_coords(coord_map, shape, dtype=np.float64):
     """Build the source coordinates for the output pixels of an image warp.
 
     Parameters
     ----------
-    orows : int
-        Number of output rows.
-    ocols : int
-        Number of output columns.
-    bands : int
-        Number of color bands (aka channels).
-    coord_transform_fn : callable like GeometricTransform.inverse
+    coord_map : callable like GeometricTransform.inverse
         Return input coordinates for given output coordinates.
+    shape : tuple
+        Shape of output image ``(rows, cols[, bands])``.
     dtype : np.dtype or string
-        dtype for return value (sane choices: float32 or float64)
+        dtype for return value (sane choices: float32 or float64).
 
     Returns
     -------
-    coords : (3, orows, ocols, bands) array of dtype `dtype`
+    coords : (ndim, rows, cols[, bands]) array of dtype `dtype`
             Coordinates for `scipy.ndimage.map_coordinates`, that will yield
             an image of shape (orows, ocols, bands) by drawing from source
             points according to the `coord_transform_fn`.
@@ -745,23 +746,26 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
     ...     xy[:, 0] -= 10
     ...     return xy
     >>>
-    >>> coords = warp_coords(30, 30, 3, shift_right)
     >>> image = data.lena().astype(np.float32)
+    >>> coords = warp_coords(shift_right, image.shape)
     >>> warped_image = map_coordinates(image, coords)
 
     """
-
-    coords = np.empty((3, orows, ocols, bands), dtype=dtype)
+    rows, cols = shape[0], shape[1]
+    coords_shape = [len(shape), rows, cols]
+    if len(shape) == 3:
+        coords_shape.append(shape[2])
+    coords = np.empty(coords_shape, dtype=dtype)
 
     # Reshape grid coordinates into a (P, 2) array of (x, y) pairs
-    tf_coords = np.indices((ocols, orows), dtype=dtype).reshape(2, -1).T
+    tf_coords = np.indices((cols, rows), dtype=dtype).reshape(2, -1).T
 
     # Map each (x, y) pair to the source image according to
     # the user-provided mapping
-    tf_coords = coord_transform_fn(tf_coords)
+    tf_coords = coord_map(tf_coords)
 
     # Reshape back to a (2, M, N) coordinate grid
-    tf_coords = tf_coords.T.reshape((-1, ocols, orows)).swapaxes(1, 2)
+    tf_coords = tf_coords.T.reshape((-1, cols, rows)).swapaxes(1, 2)
 
     # Place the y-coordinate mapping
     _stackcopy(coords[1, ...], tf_coords[0, ...])
@@ -769,8 +773,8 @@ def warp_coords(orows, ocols, bands, coord_transform_fn,
     # Place the x-coordinate mapping
     _stackcopy(coords[0, ...], tf_coords[1, ...])
 
-    # colour-coordinate mapping
-    coords[2, ...] = range(bands)
+    if len(shape) == 3:
+        coords[2, ...] = range(shape[2])
 
     return coords
 
@@ -823,31 +827,53 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if image.ndim < 2:
         raise ValueError("Input must have more than 1 dimension.")
 
+    orig_ndim = image.ndim
     image = np.atleast_3d(img_as_float(image))
     ishape = np.array(image.shape)
     bands = ishape[2]
 
-    if output_shape is None:
-        output_shape = ishape
+    # use fast Cython version for specific interpolation orders
+    if order in range(4) and not map_args:
+        matrix = None
+        if isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
+            matrix = inverse_map._matrix
+        elif inverse_map.__name__ == 'inverse' \
+                and inverse_map.im_class in HOMOGRAPHY_TRANSFORMS:
+            matrix = np.linalg.inv(inverse_map.im_self._matrix)
+        if matrix is not None:
+            # transform all bands
+            dims = []
+            for dim in range(image.shape[2]):
+                dims.append(_warp_fast(image[..., dim], matrix,
+                            output_shape=output_shape,
+                            order=order, mode=mode, cval=cval))
+            out = np.dstack(dims)
+            if orig_ndim == 2:
+                out = out[..., 0]
 
-    rows, cols = output_shape[:2]
+    else: # use ndimage.map_coordinates
 
-    def coord_transform_fn(*args):
-        return inverse_map(*args, **map_args)
+        if output_shape is None:
+            output_shape = ishape
 
-    coords = warp_coords(rows, cols, bands, coord_transform_fn)
+        rows, cols = output_shape[:2]
 
-    # Prefilter not necessary for order 1 interpolation
-    prefilter = order > 1
-    mapped = ndimage.map_coordinates(image, coords, prefilter=prefilter,
-                                     mode=mode, order=order, cval=cval)
+        def coord_map(*args):
+            return inverse_map(*args, **map_args)
+
+        coords = warp_coords(coord_map, (rows, cols, bands))
+
+        # Prefilter not necessary for order 1 interpolation
+        prefilter = order > 1
+        out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
+                                      mode=mode, order=order, cval=cval)
 
     # The spline filters sometimes return results outside [0, 1],
     # so clip to ensure valid data
-    clipped = np.clip(mapped, 0, 1)
+    clipped = np.clip(out, 0, 1)
 
     if mode == 'constant' and not (0 <= cval <= 1):
-        clipped[mapped == cval] = cval
+        clipped[out == cval] = cval
 
     # Remove singleton dim introduced by atleast_3d
     return clipped.squeeze()
