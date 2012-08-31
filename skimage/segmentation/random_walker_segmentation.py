@@ -67,23 +67,17 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
 def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.,
                         multichannel=False):
     # Weight calculation is main difference in multispectral version
-    # Original gradient**2 replaced with sqrt( sum of gradients**2 )
-    if not multichannel:
-        gradients = _compute_gradients_3d( data, depth=depth )**2
-    else:
-        for channel in range(data.shape[-1]):
-            if channel == 0:
-                gradients = _compute_gradients_3d(data[..., channel],
-                                                  depth=depth)**2
-            else:
-                gradients += _compute_gradients_3d(data[..., channel],
-                                                   depth=depth)**2
+    # Original gradient**2 replaced with sum of gradients ** 2
+    gradients = 0
+    for channel in range(0, data.shape[-1]):
+        gradients += _compute_gradients_3d(data[..., channel],
+                                               depth=depth) ** 2
     # All channels considered together in this standard deviation
     beta /= 10 * data.std()
     if multichannel:
         # New final term in beta to give == results in trivial case where
         # multiple identical spectra are passed.
-        beta /= np.sqrt( data.shape[-1] )
+        beta /= np.sqrt(data.shape[-1])
     gradients *= beta
     weights = np.exp(- gradients)
     weights += eps
@@ -166,10 +160,7 @@ def _mask_edges_weights(edges, weights, mask):
 
 
 def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
-    if not multichannel:
-        l_x, l_y, l_z = data.shape
-    else:
-        l_x, l_y, l_z = data.shape[0], data.shape[1], data.shape[2]
+    l_x, l_y, l_z = data.shape[:3]
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
     weights = _compute_weights_3d(data, beta=beta, eps=1.e-10, depth=depth,
                                   multichannel=multichannel)
@@ -183,21 +174,21 @@ def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
 #----------- Random walker algorithm --------------------------------
 
 
-def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
-                  copy=True, multichannel=False, scaling='all',
-                  return_full_prob=False):
+def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
+                  multichannel=False, return_full_prob=False, depth=1.):
     """
-    Multichannel random walker algorithm for segmentation from markers.
+    Random walker algorithm for segmentation from markers, for gray-level or
+    multichannel images.
 
     Parameters
     ----------
 
     data : array_like
-        Image to be segmented in phases. Gray-level`data` can be two- or
+        Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
-        dimensional (requires multichannel=True) with the highest
-        dimension denoting channels.  Data spacing is assumed isotropic
-        unless depth keyword argument is used.
+        dimensional (multichannel=True) with the highest dimension denoting
+        channels. Data spacing is assumed isotropic unless depth keyword
+        argument is used.
 
     labels : array of ints, of same shape as `data`
         Array of seed markers labeled with different positive integers
@@ -210,11 +201,6 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-
-    depth : float, default 1.
-        Correction for non-isotropic voxel depths in 3D volumes.
-        Default (1.) implies isotropy.  This factor is derived as follows:
-        depth = (slice thickness) / (in-plane voxel dimension)
 
     mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
         Mode for solving the linear system in the random walker
@@ -250,20 +236,16 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
         If True, input data is parsed as multichannel data (see 'data' above
         for proper input format in this case)
 
-    scaling : string, default 'all'
-        Controls input scaling if multichannel=True (otherwise no effect).
-
-        - 'all' (default): Data from all channels is combined when scaling
-          input data to the range [0,1] as type np.float64. Recommended
-          option for RGB(A) inputs.
-
-        - 'separate': Each channel is scaled individually, separate from the
-          others, to the range [0,1]. Select this if the channels are very
-          different, for example if one were x-ray CT and another MRI data.
-
     return_full_prob : bool, default False
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
+
+    depth : float, default 1.
+        Correction for non-isotropic voxel depths in 3D volumes.
+        Default (1.) implies isotropy.  This factor is derived as follows:
+        depth = (out-of-plane voxel spacing) / (in-plane voxel spacing), where
+        in-plane voxel spacing represents the first two spatial dimensions and
+        out-of-plane voxel spacing represents the third spatial dimension.
 
     Returns
     -------
@@ -285,6 +267,16 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
 
     Notes
     -----
+
+    Multichannel inputs are scaled with all channel data combined. Ensure all
+    channels are separately normalized prior to running this algorithm.
+
+    The `depth` argument is specifically for certain types of 3-dimensional
+    volumes which, due to how they were acquired, have different spacing
+    along in-plane and out-of-plane dimensions. This is commonly encountered
+    in medical imaging. The `depth` argument corrects gradients calculated
+    along the third spatial dimension for the otherwise inherent assumption
+    that all points are equally spaced.
 
     The algorithm was first proposed in *Random walks for image
     segmentation*, Leo Grady, IEEE Trans Pattern Anal Mach Intell.
@@ -346,21 +338,18 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
     """
     # Parse input data
     if not multichannel:
-        # We work with 3-D arrays of floats
+        # We work with 4-D arrays of floats
         dims = data.shape
-        data = np.atleast_3d( img_as_float(data) )
+        data = np.atleast_3d(img_as_float(data))
+        data.shape += (1,)
     else:
         dims = data[..., 0].shape
-        data = np.atleast_3d( data )    # Should never be needed
-        if scaling.lower().strip() == 'all':
-            data = img_as_float( data )
-        else:
-            newdata = np.zeros(data.shape, dtype=np.float64)
-            for channel in range( data.shape[-1] ):
-                newdata[..., channel] = img_as_float( data[..., channel] )
-            del data
-            data = newdata
-            del newdata
+        assert multichannel and data.ndim > 2, 'For multichannel input, data \
+                                                must have >= 3 dimensions.'
+        data = img_as_float(data)
+        if data.ndim == 3:
+            data.shape += (1,)
+            data = data.transpose((0, 1, 3, 2))
 
     if copy:
         labels = np.copy(labels)
@@ -409,7 +398,7 @@ def random_walker(data, labels, beta=130, depth=1., mode='bf', tol=1.e-3,
     if return_full_prob:
         labels = labels.astype(np.float)
         X = np.array([_clean_labels_ar(Xline, labels,
-                copy=True).reshape(dims) for Xline in X])
+                     copy=True).reshape(dims) for Xline in X])
         for i in range(1, int(labels.max()) + 1):
             mask_i = np.squeeze(labels == i)
             X[i - 1, mask_i] = 1
@@ -429,7 +418,7 @@ def _solve_bf(lap_sparse, B, return_full_prob=False):
     lap_sparse = lap_sparse.tocsc()
     solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
     X = np.array([solver(np.array((-B[i]).todense()).ravel())\
-            for i in range(len(B))])
+                  for i in range(len(B))])
     if not return_full_prob:
         X = np.argmax(X, axis=0)
     return X
