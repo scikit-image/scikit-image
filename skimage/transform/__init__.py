@@ -4,5 +4,6 @@ from .finite_radon_transform import *
 from .integral import *
 from ._geometric import (warp, warp_coords, estimate_transform,
                          SimilarityTransform, AffineTransform,
-                         ProjectiveTransform, PolynomialTransform)
-from ._warps import resize, rotate, swirl, homography
+                         ProjectiveTransform, PolynomialTransform,
+                         PiecewiseAffineTransform)
+from ._warps import swirl, homography

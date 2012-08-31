@@ -1,6 +1,6 @@
 import math
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage, spatial
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
 
@@ -580,6 +580,76 @@ class PolynomialTransform(GeometricTransform):
             'parameters by exchanging source and destination coordinates,'
             'then apply the forward transformation.')
 
+class PiecewiseAffineTransform(ProjectiveTransform):
+
+    """2D piecewise affine transformation.
+
+    Parameters
+    ----------
+    TODO
+
+    """
+
+    def __init__(self):
+        pass
+
+    def estimate(self, src, dst):
+
+        #Convert input to correct types
+        dstPoints = np.array(dst)
+        srcPoints = np.array(src)
+
+        #Split input shape into mesh
+        self.tess = spatial.Delaunay(srcPoints)
+
+        #Calculate ROI in source control points
+        xmin, xmax = srcPoints[:,0].min(), srcPoints[:,0].max()
+        ymin, ymax = srcPoints[:,1].min(), srcPoints[:,1].max()
+
+        #Find affine mapping from input positions to mean shape
+        self.triAffines = []
+        for tri in self.tess.vertices:
+            srcTri = np.hstack((srcPoints[tri,:], np.ones((3,1)))).transpose()
+            dstTri = np.hstack((dstPoints[tri,:], np.ones((3,1)))).transpose()
+
+            affine = AffineTransform()
+            affine.estimate(srcTri, dstTri)
+            self.triAffines.append(affine)
+
+    def __call__(self, coords):
+        """Apply forward transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            source coordinates
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
+        
+        out = np.ones((coords.shape[0], 2)) * -1
+
+        for ptNum, pt in enumerate(coords):
+            #Determine which triangle contains the point
+            simplexIndex = self.tess.find_simplex(pt)
+            
+            if simplexIndex == -1:
+                #This point is outside the hull of the control points
+                out[ptNum,0] = 0
+                out[ptNum,1] = 0
+                continue
+
+            #Calculate position in the input image
+            affine = self.triAffines[simplexIndex]
+            destPos = affine(pt)
+            out[ptNum,0] = destPos[0][0]
+            out[ptNum,1] = destPos[0][1]
+
+        return out
 
 TRANSFORMS = {
     'similarity': SimilarityTransform,
@@ -592,7 +662,6 @@ HOMOGRAPHY_TRANSFORMS = (
     AffineTransform,
     ProjectiveTransform
 )
-
 
 def estimate_transform(ttype, src, dst, **kwargs):
     """Estimate 2D geometric transformation parameters.
