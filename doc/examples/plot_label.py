@@ -3,7 +3,13 @@
 Label image regions
 ===================
 
-This example shows how to segment an image with image labelling.
+This example shows how to segment an image with image labelling. The following
+steps are applied:
+
+1. Thresholding with automatic Otsu method
+2. Close small holes with binary closing
+3. Remove artifacts touching image border
+4. Measure image regions to filter small objects
 
 """
 
