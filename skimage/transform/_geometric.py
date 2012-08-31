@@ -599,6 +599,18 @@ class PiecewiseAffineTransform(ProjectiveTransform):
         self.triAffines = []
 
     def estimate(self, src, dst):
+        """Set the control points with which to perform the piecewise affine mapping.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        """
 
         #Triangulate input positions into mesh
         self.tess = spatial.Delaunay(src)
