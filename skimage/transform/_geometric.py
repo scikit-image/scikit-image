@@ -584,6 +584,10 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
     """2D piecewise affine transformation.
 
+    Control points are used to define the mapping. The transform is based on
+    a Delaunay triangulation of the points to form a mesh. Each triangle is
+    used to find a local affine transform.
+
     Parameters
     ----------
     TODO
