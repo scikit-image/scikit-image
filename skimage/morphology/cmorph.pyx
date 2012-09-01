@@ -5,15 +5,13 @@
 
 import numpy as np
 cimport numpy as np
-cimport cython
-from cpython cimport bool
 from libc.stdlib cimport malloc, free
 
 
 def dilate(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] selem,
            np.ndarray[np.uint8_t, ndim=2] out=None,
-           shift_x=False, shift_y=False):
+           char shift_x=0, char shift_y=0):
 
     cdef int rows = image.shape[0]
     cdef int cols = image.shape[1]
@@ -68,7 +66,7 @@ def dilate(np.ndarray[np.uint8_t, ndim=2] image,
 def erode(np.ndarray[np.uint8_t, ndim=2] image,
           np.ndarray[np.uint8_t, ndim=2] selem,
           np.ndarray[np.uint8_t, ndim=2] out=None,
-          shift_x=False, shift_y=False):
+          char shift_x=0, char shift_y=0):
 
     cdef int rows = image.shape[0]
     cdef int cols = image.shape[1]
