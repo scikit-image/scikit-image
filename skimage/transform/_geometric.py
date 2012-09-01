@@ -832,6 +832,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ishape = np.array(image.shape)
     bands = ishape[2]
 
+    out = None
+
     # use fast Cython version for specific interpolation orders
     if order in range(4) and not map_args:
         matrix = None
@@ -851,7 +853,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             if orig_ndim == 2:
                 out = out[..., 0]
 
-    else: # use ndimage.map_coordinates
+    if out is None: # use ndimage.map_coordinates
 
         if output_shape is None:
             output_shape = ishape
