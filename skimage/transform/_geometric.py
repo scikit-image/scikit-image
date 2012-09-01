@@ -597,6 +597,7 @@ class PiecewiseAffineTransform(ProjectiveTransform):
     def __init__(self):
         self.tess = None
         self.triAffines = []
+        self._matrix = None
 
     def estimate(self, src, dst):
         """Set the control points with which to perform the piecewise affine mapping.
