@@ -5,7 +5,6 @@
 
 cimport numpy as np
 import numpy as np
-from cython.parallel import prange
 from skimage._shared.interpolation cimport (nearest_neighbour_interpolation,
                                             bilinear_interpolation,
                                             biquadratic_interpolation,
@@ -13,7 +12,7 @@ from skimage._shared.interpolation cimport (nearest_neighbour_interpolation,
 
 
 cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
-                                   double *y_) nogil:
+                                   double *y_):
     """Apply a homography to a coordinate.
 
     Parameters
@@ -102,9 +101,8 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
         out_r = output_shape[0]
         out_c = output_shape[1]
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] out = \
+    cdef np.ndarray[dtype=np.double_t, ndim=2] out = \
          np.zeros((out_r, out_c), dtype=np.double)
-    cdef double* out_data = <double*>out.data
 
     cdef int tfr, tfc
     cdef double r, c
@@ -112,7 +110,7 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef int cols = img.shape[1]
 
     cdef double (*interp_func)(double*, int, int, double, double,
-                               char, double) nogil
+                               char, double)
     if order == 0:
         interp_func = nearest_neighbour_interpolation
     elif order == 1:
@@ -122,12 +120,10 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     elif order == 3:
         interp_func = bicubic_interpolation
 
-    for tfr in prange(out_r, nogil=True):
-        # make r, c thread local variables
-        r = c = 0
+    for tfr in range(out_r):
         for tfc in range(out_c):
             _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
-            out_data[tfr * out_r + tfc] = interp_func(<double*>img.data, rows,
-                                                      cols, r, c, mode_c, cval)
+            out[tfr, tfc] = interp_func(<double*>img.data, rows, cols, r, c,
+                                        mode_c, cval)
 
     return out

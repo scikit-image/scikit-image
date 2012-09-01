@@ -8,7 +8,7 @@ from libc.math cimport ceil, floor, round
 cdef inline double nearest_neighbour_interpolation(double* image, int rows,
                                                    int cols, double r,
                                                    double c, char mode,
-                                                   double cval) nogil:
+                                                   double cval):
     """Nearest neighbour interpolation at a given position in the image.
 
     Parameters
@@ -37,7 +37,7 @@ cdef inline double nearest_neighbour_interpolation(double* image, int rows,
 
 cdef inline double bilinear_interpolation(double* image, int rows, int cols,
                                           double r, double c, char mode,
-                                          double cval) nogil:
+                                          double cval):
     """Bilinear interpolation at a given position in the image.
 
     Parameters
@@ -75,7 +75,7 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
     return (1 - dr) * top + dr * bottom
 
 
-cdef inline double quadratic_interpolation(double x, double[3] f) nogil:
+cdef inline double quadratic_interpolation(double x, double[3] f):
     """Quadratic interpolation.
 
     Parameters
@@ -96,7 +96,7 @@ cdef inline double quadratic_interpolation(double x, double[3] f) nogil:
 
 cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
                                              double r, double c, char mode,
-                                             double cval) nogil:
+                                             double cval):
     """Biquadratic interpolation at a given position in the image.
 
     Parameters
@@ -147,7 +147,7 @@ cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
     return quadratic_interpolation(xr, fr)
 
 
-cdef inline double cubic_interpolation(double x, double[4] f) nogil:
+cdef inline double cubic_interpolation(double x, double[4] f):
     """Cubic interpolation.
 
     Parameters
@@ -172,7 +172,7 @@ cdef inline double cubic_interpolation(double x, double[4] f) nogil:
 
 cdef inline double bicubic_interpolation(double* image, int rows, int cols,
                                          double r, double c, char mode,
-                                         double cval) nogil:
+                                         double cval):
     """Bicubic interpolation at a given position in the image.
 
     Parameters
@@ -220,7 +220,7 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
 
 
 cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
-                             char mode, double cval) nogil:
+                             char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -251,7 +251,7 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
         return image[coord_map(rows, r, mode) * cols + coord_map(cols, c, mode)]
 
 
-cdef inline int coord_map(int dim, int coord, char mode) nogil:
+cdef inline int coord_map(int dim, int coord, char mode):
     """
     Wrap a coordinate, according to a given mode.
 
