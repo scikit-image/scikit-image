@@ -40,9 +40,6 @@ Library:
     Extension: skimage.morphology._pnpoly
         Sources:
             skimage/morphology/_pnpoly.pyx
-    Extension: skimage.feature._greycomatrix
-        Sources:
-            skimage/feature/_greycomatrix.pyx
     Extension: skimage.feature._template
         Sources:
             skimage/feature/_template.pyx
@@ -76,15 +73,9 @@ Library:
     Extension: skimage.morphology._convex_hull
         Sources:
             skimage/morphology/_convex_hull.pyx
-    Extension: skimage.morphology._skeletonize
-        Sources:
-            skimage/morphology/_skeletonize.pyx
     Extension: skimage.draw._draw
         Sources:
             skimage/draw/_draw.pyx
-    Extension: skimage.transform._project
-        Sources:
-            skimage/transform/_project.pyx
     Extension: skimage.graph._spath
         Sources:
             skimage/graph/_spath.pyx
@@ -94,6 +85,36 @@ Library:
     Extension: skimage.graph.heap
         Sources:
             skimage/graph/heap.pyx
+    Extension: skimage.morphology._greyreconstruct
+        Sources:
+            skimage/morphology/_greyreconstruct.pyx
+    Extension: skimage.feature._texture
+        Sources:
+            skimage/feature/_texture.pyx
+    Extension: skimage._shared.transform
+        Sources:
+            skimage/_shared/transform.pyx
+    Extension: skimage.segmentation._slic
+        Sources:
+            skimage/segmentation/_slic.pyx
+    Extension: skimage.segmentation._quickshift
+        Sources:
+            skimage/segmentation/_quickshift.pyx
+    Extension: skimage.morphology._skeletonize_cy
+        Sources:
+            skimage/morphology/_skeletonize_cy.pyx
+    Extension: skimage.transform._warps_cy
+        Sources:
+            skimage/transform/_warps_cy.pyx
+    Extension: skimage._shared.interpolation
+        Sources:
+            skimage/_shared/interpolation.pyx
+    Extension: skimage.segmentation._felzenszwalb_cy
+        Sources:
+            skimage/segmentation/_felzenszwalb_cy.pyx
+    Extension: skimage._shared.geometry
+        Sources:
+            skimage/_shared/geometry.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi
