@@ -6,10 +6,10 @@
 __docformat__ = 'restructuredtext en'
 
 import warnings
-
 import numpy as np
-
 import skimage
+
+from . import cmorph
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
@@ -66,14 +66,8 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
     image = skimage.img_as_ubyte(image)
-
-    try:
-        import skimage.morphology.cmorph as cmorph
-        out = cmorph.erode(image, selem, out=out,
-                           shift_x=shift_x, shift_y=shift_y)
-        return out
-    except ImportError:
-        raise ImportError("cmorph extension not available.")
+    return cmorph.erode(image, selem, out=out,
+                        shift_x=shift_x, shift_y=shift_y)
 
 
 def dilation(image, selem, out=None, shift_x=False, shift_y=False):
@@ -125,14 +119,8 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
     image = skimage.img_as_ubyte(image)
-
-    try:
-        from . import cmorph
-        out = cmorph.dilate(image, selem, out=out,
-                            shift_x=shift_x, shift_y=shift_y)
-        return out
-    except ImportError:
-        raise ImportError("cmorph extension not available.")
+    return cmorph.dilate(image, selem, out=out,
+                         shift_x=shift_x, shift_y=shift_y)
 
 
 def opening(image, selem, out=None):
