@@ -224,6 +224,8 @@ latex_documents = [
 # Make numpydoc to generate plots for example sections
 #numpydoc_use_plots = True
 
+numpydoc_show_class_members = False
+
 # -----------------------------------------------------------------------------
 # Plots
 # -----------------------------------------------------------------------------
