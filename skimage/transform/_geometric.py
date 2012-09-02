@@ -80,7 +80,7 @@ class ProjectiveTransform(GeometricTransform):
 
     """
 
-    coeffs = range(8)
+    _coeffs = range(8)
 
     def __init__(self, matrix=None):
         if matrix is None:
@@ -187,14 +187,14 @@ class ProjectiveTransform(GeometricTransform):
         A[rows:, 8] = yd
 
         # Select relevant columns, depending on params
-        A = A[:, self.coeffs + [8]]
+        A = A[:, self._coeffs + [8]]
 
         _, _, V = np.linalg.svd(A)
 
         H = np.zeros((3, 3))
         # solution is right singular vector that corresponds to smallest
         # singular value
-        H.flat[self.coeffs + [8]] = - V[-1, :-1] / V[-1, -1]
+        H.flat[self._coeffs + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
         self._matrix = H
@@ -248,7 +248,7 @@ class AffineTransform(ProjectiveTransform):
 
     """
 
-    coeffs = range(6)
+    _coeffs = range(6)
 
     def __init__(self, matrix=None, scale=None, rotation=None, shear=None,
                  translation=None):
