@@ -58,7 +58,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
 
     Parameters
     ----------
-    label_image : N x M ndarray
+    label_image : (N, M) ndarray
         Labelled input image.
     properties : {'all', list}
         Shape measurements to be determined for each labelled image region.
@@ -71,7 +71,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         * BoundingBox : tuple
            Bounding box `(min_row, min_col, max_row, max_col)`
 
-        * CentralMoments : 3 x 3 ndarray
+        * CentralMoments : (3, 3) ndarray
             Central moments (translation invariant) up to 3rd order.
 
                 mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
@@ -137,14 +137,14 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             The length of the minor axis of the ellipse that has the same
             normalized second central moments as the region.
 
-        * Moments : 3 x 3 ndarray
+        * Moments : (3, 3) ndarray
             Spatial moments up to 3rd order.
 
                 m_ji = sum{ array(x, y) * x^j * y^i }
 
             where the sum is over the `x`, `y` coordinates of the region.
 
-        * NormalizedMoments : 3 x 3 ndarray
+        * NormalizedMoments : (3, 3) ndarray
             Normalized moments (translation and scale invariant) up to 3rd
             order.
 
@@ -164,7 +164,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         * Solidity : float
             Ratio of pixels in the region to pixels of the convex hull image.
 
-        * WeightedCentralMoments : 3 x 3 ndarray
+        * WeightedCentralMoments : (3, 3) ndarray
             Central moments (translation invariant) of intensity image up to 3rd
             order.
 
@@ -188,7 +188,7 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
 
             where the sum is over the `x`, `y` coordinates of the region.
 
-        * WeightedNormalizedMoments : 3 x 3 ndarray
+        * WeightedNormalizedMoments : (3, 3) ndarray
             Normalized moments (translation and scale invariant) of intensity
             image up to 3rd order.
 
