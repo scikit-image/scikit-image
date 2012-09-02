@@ -158,28 +158,28 @@ def test_binary_erosion():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_lena, strel)
     grey_res = grey.erosion(bw_lena, strel)
-    assert np.all(binary_res == grey_res)
+    testing.assert_array_equal(binary_res, grey_res)
 
 
 def test_binary_dilation():
     strel = selem.square(3)
     binary_res = binary.binary_dilation(bw_lena, strel)
     grey_res = grey.dilation(bw_lena, strel)
-    assert np.all(binary_res == grey_res)
+    testing.assert_array_equal(binary_res, grey_res)
 
 
 def test_binary_closing():
     strel = selem.square(3)
     binary_res = binary.binary_closing(bw_lena, strel)
     grey_res = grey.closing(bw_lena, strel)
-    assert np.all(binary_res == grey_res)
+    testing.assert_array_equal(binary_res, grey_res)
 
 
 def test_binary_opening():
     strel = selem.square(3)
     binary_res = binary.binary_opening(bw_lena, strel)
     grey_res = grey.opening(bw_lena, strel)
-    assert np.all(binary_res == grey_res)
+    testing.assert_array_equal(binary_res, grey_res)
 
 
 if __name__ == '__main__':
