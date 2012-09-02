@@ -27,7 +27,7 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     Returns
     -------
     out: ndarray
-        denoised array
+        denoised array of floats
 
     Notes
     -----
@@ -110,7 +110,7 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
     Returns
     -------
     out: ndarray
-        denoised array
+        denoised array of floats
 
     Notes
     -----
@@ -198,8 +198,7 @@ def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
     Returns
     -------
     out: ndarray
-        denoised array
-
+        denoised array of floats
 
     Notes
     -----
