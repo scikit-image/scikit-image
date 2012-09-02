@@ -7,7 +7,7 @@ __docformat__ = 'restructuredtext en'
 
 import warnings
 import numpy as np
-import skimage
+from skimage import img_as_ubyte
 
 from . import cmorph
 
@@ -63,8 +63,8 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
 
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
-    image = skimage.img_as_ubyte(image)
-    selem = skimage.img_as_ubyte(selem)
+    image = img_as_ubyte(image)
+    selem = img_as_ubyte(selem)
     return cmorph.erode(image, selem, out=out,
                         shift_x=shift_x, shift_y=shift_y)
 
@@ -115,8 +115,8 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
 
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
-    image = skimage.img_as_ubyte(image)
-    selem = skimage.img_as_ubyte(selem)
+    image = img_as_ubyte(image)
+    selem = img_as_ubyte(selem)
     return cmorph.dilate(image, selem, out=out,
                          shift_x=shift_x, shift_y=shift_y)
 
@@ -262,7 +262,7 @@ def white_tophat(image, selem, out=None):
    """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
-    image = skimage.img_as_ubyte(image)
+    image = img_as_ubyte(image)
 
     out = opening(image, selem, out=out)
     out = image - out
@@ -312,7 +312,7 @@ def black_tophat(image, selem, out=None):
 
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
-    image = skimage.img_as_ubyte(image)
+    image = img_as_ubyte(image)
 
     out = closing(image, selem, out=out)
     out = out - image

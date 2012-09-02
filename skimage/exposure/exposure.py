@@ -1,6 +1,6 @@
 import numpy as np
 
-import skimage
+from skimage import img_as_float
 from skimage.util.dtype import dtype_range
 
 
@@ -101,7 +101,7 @@ def equalize(image, nbins=256):
     .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 
     """
-    image = skimage.img_as_float(image)
+    image = img_as_float(image)
     cdf, bin_centers = cumulative_distribution(image, nbins)
     out = np.interp(image.flat, bin_centers, cdf)
     return out.reshape(image.shape)
