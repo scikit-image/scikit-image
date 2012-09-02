@@ -14,6 +14,8 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     ----------
     image : (width, height, 3) ndarray
         Input image.
+    n_segments : int
+        The (approximate) number of labels in the segmented output image.
     ratio: float
         Balances color-space proximity and image-space proximity.
         Higher values give more weight to color-space.
@@ -42,6 +44,14 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         Pascal Fua, and Sabine Süsstrunk, SLIC Superpixels Compared to
         State-of-the-art Superpixel Methods, TPAMI, May 2012.
 
+    Examples
+    --------
+    >>> from skimage.segmentation import slic
+    >>> from skimage.data import lena
+    >>> img = lena()
+    >>> segments = slic(img, n_segments=100, ratio=10)
+    >>> # Increasing the ratio parameter yields more square regions
+    >>> segments = slic(img, n_segments=100, ratio=20)
     """
     image = np.atleast_3d(image)
     if image.shape[2] != 3:
