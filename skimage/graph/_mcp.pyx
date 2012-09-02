@@ -102,7 +102,7 @@ def _offset_edge_map(shape, offsets):
 
     """
     indices = np.indices(shape) # indices.shape = (n,)+shape
-    
+
     #get the distance from each index to the upper or lower edge in each dim
     pos_edges = (shape - indices.T).T
     neg_edges = -1 - indices
@@ -112,7 +112,7 @@ def _offset_edge_map(shape, offsets):
     mins = offsets.min(axis=0)
     for pos, neg, mx, mn in zip(pos_edges, neg_edges, maxes, mins):
         pos[pos > mx] = 0
-        neg[neg < mn] = 0    
+        neg[neg < mn] = 0
     return pos_edges.astype(EDGE_D), neg_edges.astype(EDGE_D)
 
 def make_offsets(d, fully_connected):
@@ -216,7 +216,7 @@ cdef class MCP:
     `costs` array at each point on the path. The class MCP_Geometric, on the
     other hand, accounts for the fact that diagonal vs. axial moves are of
     different lengths, and weights the path cost accordingly.
-    
+
     Array elements with infinite or negative costs will simply be ignored, as
     will paths whose cumulative cost overflows to infinite.
 
@@ -295,7 +295,7 @@ cdef class MCP:
         pos, neg = _offset_edge_map(costs.shape, self.offsets)
         self.flat_pos_edge_map = pos.reshape((self.dim, size), order='F')
         self.flat_neg_edge_map = neg.reshape((self.dim, size), order='F')
-            
+
 
         # The offset lengths are the distances traveled along each offset
         self.offset_lengths = np.sqrt(
@@ -449,7 +449,7 @@ cdef class MCP:
             # edge along any axis
             is_at_edge = 0
             for d in range(dim):
-                if (flat_pos_edge_map[d, index] != 0 or 
+                if (flat_pos_edge_map[d, index] != 0 or
                     flat_neg_edge_map[d, index] != 0):
                     is_at_edge = 1
                     break
@@ -490,7 +490,7 @@ cdef class MCP:
                 new_cost = flat_costs[new_index]
                 if new_cost < 0 or new_cost == inf:
                     continue
-                
+
                 # Now we ask the heap to append or update the cost to
                 # this new point, but only if that point isn't already
                 # in the heap, or it is but the new cost is lower.
