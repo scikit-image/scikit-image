@@ -29,8 +29,8 @@ class Image(np.ndarray):
     def __new__(cls, arr, **kwargs):
         """Set the image data and tags according to given parameters.
 
-        Input:
-        ------
+        Parameters
+        ----------
         arr : ndarray
             Image data.
         kwargs : Image tags as keywords
