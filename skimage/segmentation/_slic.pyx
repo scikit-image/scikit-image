@@ -48,7 +48,6 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     --------
     >>> from skimage.segmentation import slic
     >>> from skimage.data import lena
-    >>> from skimage.util import img_as_float
     >>> img = lena()
     >>> segments = slic(img, n_segments=100, ratio=10)
     >>> # Increasing the ratio parameter yields more square regions
