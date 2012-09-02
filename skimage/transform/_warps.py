@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import ndimage
 from ._geometric import (warp, SimilarityTransform, AffineTransform,
                          ProjectiveTransform)
 
@@ -11,7 +12,10 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
     image : ndarray
         Input image.
     output_shape : tuple or ndarray
-        Size of the generated output image `(rows, cols)`.
+        Size of the generated output image `(rows, cols[, dim])`. If `dim` is
+        not provided, the number of channels are preserved. In case the number
+        of input channels does not equal the number of output channels a
+        3-dimensional interpolation is applied.
 
     Returns
     -------
@@ -32,24 +36,45 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
     """
 
-    rows, cols = output_shape
+    rows, cols = output_shape[0], output_shape[1]
     orig_rows, orig_cols = image.shape[0], image.shape[1]
 
     row_scale = float(orig_rows) / rows
     col_scale = float(orig_cols) / cols
 
-    # 3 control points necessary to estimate exact AffineTransform
-    src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-    dst_corners = np.zeros(src_corners.shape, dtype=np.double)
-    # take into account that 0th pixel is at position (0.5, 0.5)
-    dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
-    dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
+    # 3-dimensional interpolation
+    if len(output_shape) == 3 and (image.ndim == 2
+                                   or output_shape[2] != image.shape[2]):
+        dim = output_shape[2]
+        orig_dim = 1 if image.ndim == 2 else image.shape[2]
+        dim_scale = float(orig_dim) / dim
 
-    tform = AffineTransform()
-    tform.estimate(src_corners, dst_corners)
+        map_rows, map_cols, map_dims = np.mgrid[:rows, :cols, :dim]
+        map_rows = row_scale * (map_rows + 0.5) - 0.5
+        map_cols = col_scale * (map_cols + 0.5) - 0.5
+        map_dims = dim_scale * (map_dims + 0.5) - 0.5
 
-    return warp(image, tform, output_shape=output_shape, order=order,
-                mode=mode, cval=cval)
+        coord_map = np.array([map_rows, map_cols, map_dims])
+
+        out = ndimage.map_coordinates(image, coord_map, order=order, mode=mode,
+                                      cval=cval)
+
+    else: # 2-dimensional interpolation
+
+        # 3 control points necessary to estimate exact AffineTransform
+        src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
+        dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+        # take into account that 0th pixel is at position (0.5, 0.5)
+        dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
+        dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
+
+        tform = AffineTransform()
+        tform.estimate(src_corners, dst_corners)
+
+        out = warp(image, tform, output_shape=output_shape, order=order,
+                   mode=mode, cval=cval)
+
+    return out
 
 
 def rescale(image, scale, order=1, mode='constant', cval=0.):
