@@ -12,6 +12,10 @@ except ImportError:
 
 from skimage.util.dtype import dtype_range
 from ..utils import figimage, MatplotlibCanvas
+from ..widgets import Slider
+
+
+__all__ = ['ImageViewer', 'CollectionViewer']
 
 
 qApp = None
@@ -194,3 +198,86 @@ class ImageViewer(QMainWindow):
             return "%4s @ [%4s, %4s]" % (self.image[y, x], x, y)
         except IndexError:
             return ""
+
+
+class CollectionViewer(ImageViewer):
+    """Viewer for displaying image collections.
+
+    Select the displayed frame of the image collection using the slider or
+    with the following keyboard shortcuts:
+
+        left/right arrows
+            Previous/next image in collection.
+        number keys, 0--9
+            0% to 90% of collection. For example, "5" goes to the image in the
+            middle (i.e. 50%) of the collection.
+        home/end keys
+            First/last image in collection.
+
+    Subclasses and plugins will likely extend the `update_image` method to add
+    custom overlays or filter the displayed image.
+
+    Parameters
+    ----------
+    image_collection : list of images
+        List of images to be displayed.
+    update_on : {'on_slide' | 'on_release'}
+        Control whether image is updated on slide or release of the image
+        slider. Using 'on_release' will give smoother behavior when displaying
+        large images or when writing a plugin/subclass that requires heavy
+        computation.
+    """
+
+    def __init__(self, image_collection, update_on='move', **kwargs):
+        self.image_collection = image_collection
+        self.index = 0
+        self.num_images = len(self.image_collection)
+
+        first_image = image_collection[0]
+        super(CollectionViewer, self).__init__(first_image)
+
+        slider_kws = dict(value=0, low=0, high=self.num_images-1)
+        slider_kws['update_on'] = update_on
+        slider_kws['callback'] = self.update_index
+        slider_kws['value_type'] = 'int'
+        self.slider = Slider('frame', **slider_kws)
+        self.layout.addWidget(self.slider)
+
+        #TODO: Adjust height to accomodate slider; the following doesn't work
+        # s_size = self.slider.sizeHint()
+        # cs_size = self.canvas.sizeHint()
+        # self.resize(cs_size.width(), cs_size.height() + s_size.height())
+
+    def update_index(self, name, index):
+        """Select image on display using index into image collection."""
+        index = int(round(index))
+
+        if index == self.index:
+            return
+
+        # clip index value to collection limits
+        index = max(index, 0)
+        index = min(index, self.num_images-1)
+
+        self.index = index
+        self.slider.val = index
+        self.update_image(self.image_collection[index])
+
+    def update_image(self, image):
+        """Update displayed image.
+
+        This method can be overridden or extended in subclasses and plugins to
+        react to image changes.
+        """
+        self.image = image
+
+    def keyPressEvent(self, event):
+        if type(event) == QtGui.QKeyEvent:
+            key = event.key()
+            # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
+            if 48 <= key < 58:
+                index = 0.1 * int(key - 48) * self.num_images
+                self.update_index('', index)
+            event.accept()
+        else:
+            event.ignore()
