@@ -6,10 +6,10 @@
 __docformat__ = 'restructuredtext en'
 
 import warnings
-
 import numpy as np
-
 import skimage
+
+from . import cmorph
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
@@ -28,15 +28,12 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-       Image array.
-
+        Image array.
     selem : ndarray
-       The neighborhood expressed as a 2-D array of 1's and 0's.
-
+        The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-       The array to store the result of the morphology. If None is
-       passed, a new array will be allocated.
-
+        The array to store the result of the morphology. If None is
+        passed, a new array will be allocated.
     shift_x, shift_y : bool
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
@@ -44,7 +41,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     Returns
     -------
     eroded : uint8 array
-       The result of the morphological erosion.
+        The result of the morphological erosion.
 
     Examples
     --------
@@ -63,17 +60,13 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype='uint8')
 
     """
+
     if image is out:
         raise NotImplementedError("In-place erosion not supported!")
     image = skimage.img_as_ubyte(image)
-
-    try:
-        import skimage.morphology.cmorph as cmorph
-        out = cmorph.erode(image, selem, out=out,
-                           shift_x=shift_x, shift_y=shift_y)
-        return out
-    except ImportError:
-        raise ImportError("cmorph extension not available.")
+    selem = skimage.img_as_ubyte(selem)
+    return cmorph.erode(image, selem, out=out,
+                        shift_x=shift_x, shift_y=shift_y)
 
 
 def dilation(image, selem, out=None, shift_x=False, shift_y=False):
@@ -87,15 +80,12 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     ----------
 
     image : ndarray
-       Image array.
-
+        Image array.
     selem : ndarray
-       The neighborhood expressed as a 2-D array of 1's and 0's.
-
+        The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-       The array to store the result of the morphology. If None, is
-       passed, a new array will be allocated.
-
+        The array to store the result of the morphology. If None, is
+        passed, a new array will be allocated.
     shift_x, shift_y : bool
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
@@ -103,7 +93,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     Returns
     -------
     dilated : uint8 array
-       The result of the morphological dilation.
+        The result of the morphological dilation.
 
     Examples
     --------
@@ -122,17 +112,13 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0]], dtype='uint8')
 
     """
+
     if image is out:
         raise NotImplementedError("In-place dilation not supported!")
     image = skimage.img_as_ubyte(image)
-
-    try:
-        from . import cmorph
-        out = cmorph.dilate(image, selem, out=out,
-                            shift_x=shift_x, shift_y=shift_y)
-        return out
-    except ImportError:
-        raise ImportError("cmorph extension not available.")
+    selem = skimage.img_as_ubyte(selem)
+    return cmorph.dilate(image, selem, out=out,
+                         shift_x=shift_x, shift_y=shift_y)
 
 
 def opening(image, selem, out=None):
@@ -146,19 +132,17 @@ def opening(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       Image array.
-
+        Image array.
     selem : ndarray
-       The neighborhood expressed as a 2-D array of 1's and 0's.
-
+        The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-       The array to store the result of the morphology. If None
-       is passed, a new array will be allocated.
+        The array to store the result of the morphology. If None
+        is passed, a new array will be allocated.
 
     Returns
     -------
     opening : uint8 array
-       The result of the morphological opening.
+        The result of the morphological opening.
 
     Examples
     --------
@@ -177,6 +161,7 @@ def opening(image, selem, out=None):
            [0, 0, 0, 0, 0]], dtype='uint8')
 
     """
+
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
@@ -197,19 +182,17 @@ def closing(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       Image array.
-
+        Image array.
     selem : ndarray
-       The neighborhood expressed as a 2-D array of 1's and 0's.
-
+        The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-       The array to store the result of the morphology. If None,
-       is passed, a new array will be allocated.
+        The array to store the result of the morphology. If None,
+        is passed, a new array will be allocated.
 
     Returns
     -------
     closing : uint8 array
-       The result of the morphological closing.
+        The result of the morphological closing.
 
     Examples
     --------
@@ -228,6 +211,7 @@ def closing(image, selem, out=None):
            [0, 0, 0, 0, 0]], dtype='uint8')
 
     """
+
     h, w = selem.shape
     shift_x = True if (w % 2) == 0 else False
     shift_y = True if (h % 2) == 0 else False
@@ -247,19 +231,17 @@ def white_tophat(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       Image array.
-
+        Image array.
     selem : ndarray
-       The neighborhood expressed as a 2-D array of 1's and 0's.
-
+        The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-       The array to store the result of the morphology. If None
-       is passed, a new array will be allocated.
+        The array to store the result of the morphology. If None
+        is passed, a new array will be allocated.
 
     Returns
     -------
     opening : uint8 array
-       The result of the morphological white top hat.
+        The result of the morphological white top hat.
 
     Examples
     --------
@@ -298,14 +280,12 @@ def black_tophat(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-       Image array.
-
+        Image array.
     selem : ndarray
-       The neighborhood expressed as a 2-D array of 1's and 0's.
-
+        The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-       The array to store the result of the morphology. If None
-       is passed, a new array will be allocated.
+        The array to store the result of the morphology. If None
+        is passed, a new array will be allocated.
 
     Returns
     -------
@@ -329,6 +309,7 @@ def black_tophat(image, selem, out=None):
            [0, 0, 0, 0, 0]], dtype='uint8')
 
     """
+
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
     image = skimage.img_as_ubyte(image)

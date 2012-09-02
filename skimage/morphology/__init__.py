@@ -1,3 +1,5 @@
+from .binary import (binary_erosion, binary_dilation, binary_opening,
+                     binary_closing)
 from .grey import *
 from .selem import *
 from .ccomp import label

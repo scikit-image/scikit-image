@@ -5,11 +5,11 @@ from numpy import testing
 
 import skimage
 from skimage import data_dir
-from skimage.morphology import grey
-from skimage.morphology import selem
+from skimage.morphology import binary, grey, selem
 
 
 lena = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
+bw_lena = lena > 0.4
 
 
 class TestMorphology():
@@ -152,6 +152,34 @@ class TestDTypes():
     def test_uint(self):
         image = skimage.img_as_uint(lena)
         self._test_image(image)
+
+
+def test_binary_erosion():
+    strel = selem.square(3)
+    binary_res = binary.binary_erosion(bw_lena, strel)
+    grey_res = grey.erosion(bw_lena, strel)
+    testing.assert_array_equal(binary_res, grey_res)
+
+
+def test_binary_dilation():
+    strel = selem.square(3)
+    binary_res = binary.binary_dilation(bw_lena, strel)
+    grey_res = grey.dilation(bw_lena, strel)
+    testing.assert_array_equal(binary_res, grey_res)
+
+
+def test_binary_closing():
+    strel = selem.square(3)
+    binary_res = binary.binary_closing(bw_lena, strel)
+    grey_res = grey.closing(bw_lena, strel)
+    testing.assert_array_equal(binary_res, grey_res)
+
+
+def test_binary_opening():
+    strel = selem.square(3)
+    binary_res = binary.binary_opening(bw_lena, strel)
+    grey_res = grey.opening(bw_lena, strel)
+    testing.assert_array_equal(binary_res, grey_res)
 
 
 if __name__ == '__main__':
