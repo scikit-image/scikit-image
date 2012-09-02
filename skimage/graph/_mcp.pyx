@@ -130,8 +130,8 @@ def make_offsets(d, fully_connected):
     -------
     offsets : list of tuples of length `d`
 
-    Example
-    -------
+    Examples
+    --------
 
     The singly-connected 2-d neighborhood is four offsets:
 

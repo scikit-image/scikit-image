@@ -45,8 +45,8 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
         Output array where 'alpha' has been determined automatically to
         fit (at least) the `n_images` in `arr_in`.
 
-    Example
-    -------
+    Examples
+    --------
     >>> import numpy as np
     >>> from skimage.util.montage import montage2d
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
