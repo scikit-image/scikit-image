@@ -221,9 +221,6 @@ latex_documents = [
 # -----------------------------------------------------------------------------
 # Numpy extensions
 # -----------------------------------------------------------------------------
-# Make numpydoc to generate plots for example sections
-#numpydoc_use_plots = True
-
 numpydoc_show_class_members = False
 
 # -----------------------------------------------------------------------------
@@ -259,7 +256,9 @@ plot2rst_index_name = 'README'
 plot2rst_rcparams = {'image.cmap' : 'gray',
                      'image.interpolation' : 'none'}
 
-
+# -----------------------------------------------------------------------------
+# intersphinx
+# -----------------------------------------------------------------------------
 _python_doc_base = 'http://docs.python.org/2.7'
 intersphinx_mapping = {
     _python_doc_base: None,
