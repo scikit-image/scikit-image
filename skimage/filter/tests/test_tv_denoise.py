@@ -27,11 +27,9 @@ class TestTvDenoise():
         grad_denoised = ndimage.morphological_gradient(
             denoised_lena, size=((3, 3)))
         # test if the total variation has decreased
+        assert grad_denoised.dtype == np.float
         assert (np.sqrt((grad_denoised**2).sum())
                 < np.sqrt((grad**2).sum()) / 2)
-        denoised_lena_int = img_as_uint(filter.tv_denoise(img_as_ubyte(lena),
-                                              weight=60.0))
-        assert denoised_lena_int.dtype is np.dtype('uint16')
 
     def test_tv_denoise_float_result_range(self):
         # lena image
@@ -40,6 +38,7 @@ class TestTvDenoise():
         assert np.max(int_lena) > 1       
         denoised_int_lena = filter.tv_denoise(int_lena, weight=60.0)
         # test if the value range of output float data is within [0.0:1.0]
+        assert denoised_int_lena.dtype == np.float
         assert np.max(denoised_int_lena) <= 1.0
         assert np.min(denoised_int_lena) >= 0.0        
         
@@ -55,12 +54,9 @@ class TestTvDenoise():
         mask += 20 * np.random.randn(*mask.shape)
         mask[mask < 0] = 0
         mask[mask > 255] = 255
-        res = img_as_ubyte(filter.tv_denoise(mask.astype(np.uint8),
-                                weight=100))
-        assert res.std() < mask.std()
-        assert res.dtype is np.dtype('uint8')
-        res = img_as_ubyte(filter.tv_denoise(mask.astype(np.uint8), weight=100))
-        assert res.std() < mask.std()
+        res = filter.tv_denoise(mask.astype(np.uint8), weight=100)
+        assert res.dtype == np.float
+        assert res.std() * 255 < mask.std() 
 
         # test wrong number of dimensions
         a = np.random.random((8, 8, 8, 8))
@@ -68,6 +64,7 @@ class TestTvDenoise():
             res = filter.tv_denoise(a)
         except ValueError:
             pass
+
 
 if __name__ == "__main__":
     run_module_suite()
