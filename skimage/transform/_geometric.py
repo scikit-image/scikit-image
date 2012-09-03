@@ -111,6 +111,19 @@ class ProjectiveTransform(GeometricTransform):
         return self._apply_mat(coords, self._matrix)
 
     def inverse(self, coords):
+        """Apply inverse transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Source coordinates.
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
         return self._apply_mat(coords, self._inv_matrix)
 
     def estimate(self, src, dst):
