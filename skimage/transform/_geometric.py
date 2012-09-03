@@ -390,6 +390,37 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
         return out
 
+    def inverse(self, coords):
+        """Apply inverse transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Source coordinates.
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
+
+        out = np.empty_like(coords)
+
+        simplex = self.tesselation.find_simplex(coords)
+
+        out[simplex == -1, :] = -1
+
+        for index in range(len(self.tesselation.vertices)):
+            # affine transform for triangle
+            affine = self.affines[index]
+            # all coordinates within triangle
+            index_mask = simplex == index
+
+            out[index_mask, :] = affine.inverse(coords[index_mask, :])
+
+        return out
+
 
 class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form::
