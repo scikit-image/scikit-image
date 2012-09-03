@@ -2,7 +2,7 @@ import numpy as np
 from skimage.util.dtype import convert as convert_func
 
 
-def check_array(arg_name, channels=None, dtype=None, convert=False):
+def check_array(arg_name=None, channels=None, dtype=None, convert=False):
     """Decorator to check input parameters of a function.
 
     If the input matches the specified conditions the decorated function is
@@ -11,7 +11,7 @@ def check_array(arg_name, channels=None, dtype=None, convert=False):
     Parameters
     ----------
     arg_name : str
-        Name of argument.
+        Name of argument. Default behaviour is to use the first argument (None).
     channels : int
         Check array for number of channels. Default is None.
     dtype : str or ``numpy.dtype``
@@ -60,6 +60,8 @@ def check_array(arg_name, channels=None, dtype=None, convert=False):
 
             return func(*args, **kwargs)
 
+        if arg_name is None:
+            arg_name = func.func_code.co_varnames[0]
         arg_pos = func.func_code.co_varnames.index(arg_name)
 
         # copy function signature
