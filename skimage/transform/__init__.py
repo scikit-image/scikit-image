@@ -6,4 +6,5 @@ from ._geometric import (warp, warp_coords, estimate_transform,
                          SimilarityTransform, AffineTransform,
                          ProjectiveTransform, PolynomialTransform, 
                          PiecewiseAffineTransform)
-from ._warps import swirl, homography
+from ._warps import swirl, homography, resize, rotate
+
