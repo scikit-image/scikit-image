@@ -62,5 +62,9 @@ def check_array(arg_pos, kwarg_name, channels=None, dtype=None, convert=False):
 
             return func(*args, **kwargs)
 
+        # copy function signature
+        inner.__name__ = func.__name__
+        inner.__doc__ = func.__doc__
+
         return inner
     return wrapper
