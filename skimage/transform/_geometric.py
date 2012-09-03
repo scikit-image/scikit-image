@@ -111,6 +111,19 @@ class ProjectiveTransform(GeometricTransform):
         return self._apply_mat(coords, self._matrix)
 
     def inverse(self, coords):
+        """Apply inverse transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Source coordinates.
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
         return self._apply_mat(coords, self._inv_matrix)
 
     def estimate(self, src, dst):
@@ -301,6 +314,128 @@ class AffineTransform(ProjectiveTransform):
     @property
     def translation(self):
         return self._matrix[0:2, 2]
+
+
+class PiecewiseAffineTransform(ProjectiveTransform):
+
+    """2D piecewise affine transformation.
+
+    Control points are used to define the mapping. The transform is based on
+    a Delaunay triangulation of the points to form a mesh. Each triangle is
+    used to find a local affine transform.
+
+    """
+
+    def __init__(self):
+        self._tesselation = None
+        self._inverse_tesselation = None
+        self.affines = []
+        self.inverse_affines = []
+
+    def estimate(self, src, dst):
+        """Set the control points with which to perform the piecewise mapping.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        """
+
+        # forward piecewise affine
+        # triangulate input positions into mesh
+        self._tesselation = spatial.Delaunay(src)
+        # find affine mapping from source positions to destination
+        self.affines = []
+        for tri in self._tesselation.vertices:
+            affine = AffineTransform()
+            affine.estimate(src[tri, :], dst[tri, :])
+            self.affines.append(affine)
+
+        # inverse piecewise affine
+        # triangulate input positions into mesh
+        self._inverse_tesselation = spatial.Delaunay(dst)
+        # find affine mapping from source positions to destination
+        self.inverse_affines = []
+        for tri in self._inverse_tesselation.vertices:
+            affine = AffineTransform()
+            affine.estimate(dst[tri, :], src[tri, :])
+            self.inverse_affines.append(affine)
+
+
+    def __call__(self, coords):
+        """Apply forward transformation.
+
+        Coordinates outside of the mesh will be set to `- 1`.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Source coordinates.
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
+
+        out = np.empty_like(coords, np.double)
+
+        # determine triangle index for each coordinate
+        simplex = self._tesselation.find_simplex(coords)
+
+        # coordinates outside of mesh
+        out[simplex == -1, :] = -1
+
+        for index in range(len(self._tesselation.vertices)):
+            # affine transform for triangle
+            affine = self.affines[index]
+            # all coordinates within triangle
+            index_mask = simplex == index
+
+            out[index_mask, :] = affine(coords[index_mask, :])
+
+        return out
+
+    def inverse(self, coords):
+        """Apply inverse transformation.
+
+        Coordinates outside of the mesh will be set to `- 1`.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            Source coordinates.
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
+
+        out = np.empty_like(coords, np.double)
+
+        # determine triangle index for each coordinate
+        simplex = self._inverse_tesselation.find_simplex(coords)
+
+        # coordinates outside of mesh
+        out[simplex == -1, :] = -1
+
+        for index in range(len(self._inverse_tesselation.vertices)):
+            # affine transform for triangle
+            affine = self.inverse_affines[index]
+            # all coordinates within triangle
+            index_mask = simplex == index
+
+            out[index_mask, :] = affine(coords[index_mask, :])
+
+        return out
 
 
 class SimilarityTransform(ProjectiveTransform):
@@ -580,96 +715,20 @@ class PolynomialTransform(GeometricTransform):
             'parameters by exchanging source and destination coordinates,'
             'then apply the forward transformation.')
 
-class PiecewiseAffineTransform(ProjectiveTransform):
-
-    """2D piecewise affine transformation.
-
-    Control points are used to define the mapping. The transform is based on
-    a Delaunay triangulation of the points to form a mesh. Each triangle is
-    used to find a local affine transform.
-
-    Parameters
-    ----------
-    TODO
-
-    """
-
-    def __init__(self):
-        self.tess = None
-        self.triAffines = []
-        self._matrix = None
-
-    def estimate(self, src, dst):
-        """Set the control points with which to perform the piecewise affine mapping.
-
-        Number of source and destination coordinates must match.
-
-        Parameters
-        ----------
-        src : (N, 2) array
-            Source coordinates.
-        dst : (N, 2) array
-            Destination coordinates.
-
-        """
-
-        #Triangulate input positions into mesh
-        self.tess = spatial.Delaunay(src)
-
-        #Find affine mapping from source positions to destination
-        self.triAffines = []
-        for tri in self.tess.vertices:
-            affine = AffineTransform()
-            affine.estimate(src[tri,:], dst[tri,:])
-            self.triAffines.append(affine)
-
-    def __call__(self, coords):
-        """Apply forward transformation.
-
-        Parameters
-        ----------
-        coords : (N, 2) array
-            source coordinates
-
-        Returns
-        -------
-        coords : (N, 2) array
-            Transformed coordinates.
-
-        """
-        
-        out = np.ones((coords.shape[0], 2)) * -1
-
-        for ptNum, pt in enumerate(coords):
-            #Determine which triangle contains the point
-            simplexIndex = self.tess.find_simplex(pt)
-            
-            if simplexIndex == -1:
-                #This point is outside the hull of the control points
-                out[ptNum,0] = -1
-                out[ptNum,1] = -1
-                continue
-
-            #Calculate affine transformed position
-            affine = self.triAffines[simplexIndex]
-            destPos = affine(pt)
-            out[ptNum,0] = destPos[0][0]
-            out[ptNum,1] = destPos[0][1]
-
-        return out
 
 TRANSFORMS = {
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
+    'piecewise-affine': PiecewiseAffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
-    'piecewiseaffine': PiecewiseAffineTransform,
 }
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
     AffineTransform,
     ProjectiveTransform
 )
+
 
 def estimate_transform(ttype, src, dst, **kwargs):
     """Estimate 2D geometric transformation parameters.
@@ -681,7 +740,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     Parameters
     ----------
-    ttype : {'similarity', 'affine', 'piecewiseaffine', 'projective', 'polynomial'}
+    ttype : {'similarity', 'affine', 'piecewise-affine', 'projective', \
+             'polynomial'}
         Type of transform.
     kwargs : array or int
         Function parameters (src, dst, n, angle)::
@@ -689,7 +749,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
             NAME / TTYPE        FUNCTION PARAMETERS
             'similarity'        `src, `dst`
             'affine'            `src, `dst`
-            'piecewiseaffine'   `src, `dst`
+            'piecewise-affine'  `src, `dst`
             'projective'        `src, `dst`
             'polynomial'        `src, `dst`, `order` (polynomial order)
 
@@ -915,9 +975,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     # use fast Cython version for specific interpolation orders
     if order in range(4) and not map_args:
         matrix = None
-        if isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
+        if inverse_map in HOMOGRAPHY_TRANSFORMS:
             matrix = inverse_map._matrix
-        elif inverse_map.__name__ == 'inverse' \
+        elif hasattr(inverse_map, '__name__') \
+                and inverse_map.__name__ == 'inverse' \
                 and inverse_map.im_class in HOMOGRAPHY_TRANSFORMS:
             matrix = np.linalg.inv(inverse_map.im_self._matrix)
         if matrix is not None:
