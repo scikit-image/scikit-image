@@ -2,7 +2,7 @@ import numpy as np
 from skimage.util.dtype import convert
 
 
-def check_array(arg_pos, kwarg_name, channels=None, dtype=None, convert=False):
+def check_array(arg_name, channels=None, dtype=None, convert=False):
     """Decorator to check input parameters of a function.
 
     If the input matches the specified conditions the decorated function is
@@ -10,9 +10,7 @@ def check_array(arg_pos, kwarg_name, channels=None, dtype=None, convert=False):
 
     Parameters
     ----------
-    arg_pos : int
-        Position of argument.
-    kwarg_name : str
+    arg_name : str
         Name of argument.
     channels : int
         Check array for number of channels. Default is None.
@@ -26,12 +24,12 @@ def check_array(arg_pos, kwarg_name, channels=None, dtype=None, convert=False):
     def wrapper(func):
         def inner(*args, **kwargs):
 
-            if kwarg_name in kwargs:
-                array = kwargs[kwarg_name]
+            if arg_name in kwargs:
+                array = kwargs[arg_name]
             else:
                 array = args[arg_pos]
 
-            image_desc = 'parameter `%s`' % kwarg_name
+            image_desc = 'parameter `%s`' % arg_name
 
             error_msg = None
 
@@ -54,13 +52,15 @@ def check_array(arg_pos, kwarg_name, channels=None, dtype=None, convert=False):
                 raise ValueError(error_msg + ' for %s' % image_desc)
 
             # pass updated array
-            if kwarg_name in kwargs:
-                kwargs[kwarg_name] = array
+            if arg_name in kwargs:
+                kwargs[arg_name] = array
             else:
                 args = list(args)
                 args[arg_pos] = array
 
             return func(*args, **kwargs)
+
+        arg_pos = func.func_code.co_varnames.index(arg_name)
 
         # copy function signature
         inner.__name__ = func.__name__
