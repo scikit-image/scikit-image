@@ -16,7 +16,7 @@ image = data.lena()
 rows, cols = image.shape[0], image.shape[1]
 
 src_cols = np.linspace(0, cols, 20)
-src_rows = np.linspace(0, rows, 20)
+src_rows = np.linspace(0, rows, 10)
 src_rows, src_cols = np.meshgrid(src_rows, src_cols)
 src = np.dstack([src_cols.flat, src_rows.flat])[0]
 
@@ -31,8 +31,11 @@ dst = np.vstack([dst_cols, dst_rows]).T
 tform = PiecewiseAffineTransform()
 tform.estimate(src, dst)
 
-output_shape = (image.shape[0] - 1.5 * 50, image.shape[1])
-out = warp(image, tform, output_shape=output_shape)
+out_rows = image.shape[0] - 1.5 * 50
+out_cols = cols
+out = warp(image, tform, output_shape=(out_rows, out_cols))
 
 plt.imshow(out)
+plt.plot(tform.inverse(src)[:, 0], tform.inverse(src)[:, 1], '.b')
+plt.axis((0, out_cols, out_rows, 0))
 plt.show()
