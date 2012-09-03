@@ -2,7 +2,7 @@ import numpy as np
 from skimage.util.dtype import convert as convert_func
 
 
-def check_array(arg_name=None, channels=None, dtype=None, convert=True):
+def check_array(name=None, channels=None, dtype=None, convert=True):
     """Decorator to check input parameters of a function.
 
     If the input matches the specified conditions the decorated function is
@@ -10,7 +10,7 @@ def check_array(arg_name=None, channels=None, dtype=None, convert=True):
 
     Parameters
     ----------
-    arg_name : str
+    name : str
         Name of argument. Default behaviour is to use the first argument (None).
     channels : int
         Check array for number of channels. Default is None.
@@ -26,8 +26,13 @@ def check_array(arg_name=None, channels=None, dtype=None, convert=True):
 
             if arg_name in kwargs:
                 array = kwargs[arg_name]
-            else:
+            elif len(args) > arg_pos:
                 array = args[arg_pos]
+            else:
+                array = None
+
+            if array is None:
+                return func(*args, **kwargs)
 
             image_desc = 'parameter `%s`' % arg_name
 
@@ -60,13 +65,21 @@ def check_array(arg_name=None, channels=None, dtype=None, convert=True):
 
             return func(*args, **kwargs)
 
-        if arg_name is None:
-            arg_name = func.func_code.co_varnames[0]
-        arg_pos = func.func_code.co_varnames.index(arg_name)
+        decorated_func = func
+        if hasattr(decorated_func, '__decorated_func'):
+            decorated_func = decorated_func.__decorated_func
+
+        if name is None:
+            arg_name = decorated_func.func_code.co_varnames[0]
+        else:
+            arg_name = name
+
+        arg_pos = decorated_func.func_code.co_varnames.index(arg_name)
 
         # copy function signature
         inner.__name__ = func.__name__
         inner.__doc__ = func.__doc__
+        inner.__decorated_func = decorated_func
 
         return inner
     return wrapper
