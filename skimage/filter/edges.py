@@ -10,6 +10,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from skimage import img_as_float
+from skimage.util import check_array
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 
@@ -40,6 +41,8 @@ def sobel(image, mask=None):
     return np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
 
 
+@check_array('image', dtype=np.float64)
+@check_array('mask', channels=1, dtype=np.bool_)
 def hsobel(image, mask=None):
     """Find the horizontal edges of an image using the Sobel transform.
 
@@ -65,7 +68,7 @@ def hsobel(image, mask=None):
      -1  -2  -1
 
     """
-    image = img_as_float(image)
+
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
@@ -79,6 +82,8 @@ def hsobel(image, mask=None):
     return result
 
 
+@check_array('image', dtype=np.float64)
+@check_array('mask', channels=1, dtype=np.bool_)
 def vsobel(image, mask=None):
     """Find the vertical edges of an image using the Sobel transform.
 
@@ -104,7 +109,7 @@ def vsobel(image, mask=None):
       1   0  -1
 
     """
-    image = img_as_float(image)
+
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
@@ -141,6 +146,8 @@ def prewitt(image, mask=None):
     return np.sqrt(hprewitt(image, mask)**2 + vprewitt(image, mask)**2)
 
 
+@check_array('image', dtype=np.float64)
+@check_array('mask', channels=1, dtype=np.bool_)
 def hprewitt(image, mask=None):
     """Find the horizontal edges of an image using the Prewitt transform.
 
@@ -166,7 +173,7 @@ def hprewitt(image, mask=None):
      -1  -1  -1
 
     """
-    image = img_as_float(image)
+
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
@@ -180,6 +187,8 @@ def hprewitt(image, mask=None):
     return result
 
 
+@check_array('image', dtype=np.float64)
+@check_array('mask', channels=1, dtype=np.bool_)
 def vprewitt(image, mask=None):
     """Find the vertical edges of an image using the Prewitt transform.
 
@@ -205,7 +214,7 @@ def vprewitt(image, mask=None):
       1   0  -1
 
     """
-    image = img_as_float(image)
+
     if mask is None:
         mask = np.ones(image.shape, bool)
     big_mask = binary_erosion(mask,
