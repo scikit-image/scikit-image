@@ -58,102 +58,145 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
 
     Parameters
     ----------
-    label_image : N x M ndarray
+    label_image : (N, M) ndarray
         Labelled input image.
     properties : {'all', list}
         Shape measurements to be determined for each labelled image region.
         Default is `['Area', 'Centroid']`. The following properties can be
         determined:
+
         * Area : int
            Number of pixels of region.
+
         * BoundingBox : tuple
            Bounding box `(min_row, min_col, max_row, max_col)`
-        * CentralMoments : 3 x 3 ndarray
+
+        * CentralMoments : (3, 3) ndarray
             Central moments (translation invariant) up to 3rd order.
+
                 mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+
             where the sum is over the `x`, `y` coordinates of the region,
             and `x_c` and `y_c` are the coordinates of the region's centroid.
+
         * Centroid : array
             Centroid coordinate tuple `(row, col)`.
+
         * ConvexArea : int
             Number of pixels of convex hull image.
+
         * ConvexImage : (H, J) ndarray
             Binary convex hull image which has the same size as bounding box.
+
         * Coordinates : (N, 2) ndarray
             Coordinate list `(row, col)` of the region.
+
         * Eccentricity : float
             Eccentricity of the ellipse that has the same second-moments as the
             region. The eccentricity is the ratio of the distance between its
             minor and major axis length. The value is between 0 and 1.
+
         * EquivDiameter : float
             The diameter of a circle with the same area as the region.
+
         * EulerNumber : int
             Euler number of region. Computed as number of objects (= 1)
             subtracted by number of holes (8-connectivity).
+
         * Extent : float
             Ratio of pixels in the region to pixels in the total bounding box.
             Computed as `Area / (rows*cols)`
+
         * FilledArea : int
             Number of pixels of filled region.
+
         * FilledImage : (H, J) ndarray
             Binary region image with filled holes which has the same size as
             bounding box.
+
         * HuMoments : tuple
             Hu moments (translation, scale and rotation invariant).
+
         * Image : (H, J) ndarray
             Sliced binary region image which has the same size as bounding box.
+
         * MajorAxisLength : float
             The length of the major axis of the ellipse that has the same
             normalized second central moments as the region.
+
         * MaxIntensity: float
             Value with the greatest intensity in the region.
+
         * MeanIntensity: float
             Value with the mean intensity in the region.
+
         * MinIntensity: float
             Value with the least intensity in the region.
+
         * MinorAxisLength : float
             The length of the minor axis of the ellipse that has the same
             normalized second central moments as the region.
-        * Moments : 3 x 3 ndarray
+
+        * Moments : (3, 3) ndarray
             Spatial moments up to 3rd order.
+
                 m_ji = sum{ array(x, y) * x^j * y^i }
+
             where the sum is over the `x`, `y` coordinates of the region.
-        * NormalizedMoments : 3 x 3 ndarray
+
+        * NormalizedMoments : (3, 3) ndarray
             Normalized moments (translation and scale invariant) up to 3rd
             order.
+
                 nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
+
             where `m_00` is the zeroth spatial moment.
+
         * Orientation : float
             Angle between the X-axis and the major axis of the ellipse that has
             the same second-moments as the region. Ranging from `-pi/2` to
             `pi/2` in counter-clockwise direction.
+
         * Perimeter : float
             Perimeter of object which approximates the contour as a line through
             the centers of border pixels using a 4-connectivity.
+
         * Solidity : float
             Ratio of pixels in the region to pixels of the convex hull image.
-        * WeightedCentralMoments : 3 x 3 ndarray
+
+        * WeightedCentralMoments : (3, 3) ndarray
             Central moments (translation invariant) of intensity image up to 3rd
             order.
+
                 wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+
             where the sum is over the `x`, `y` coordinates of the region,
             and `x_c` and `y_c` are the coordinates of the region's centroid.
+
         * WeightedCentroid : array
             Centroid coordinate tuple `(row, col)` weighted with intensity
             image.
+
         * WeightedHuMoments : tuple
             Hu moments (translation, scale and rotation invariant) of intensity
             image.
+
         * WeightedMoments : (3, 3) ndarray
             Spatial moments of intensity image up to 3rd order.
+
                 wm_ji = sum{ array(x, y) * x^j * y^i }
+
             where the sum is over the `x`, `y` coordinates of the region.
-        * WeightedNormalizedMoments : 3 x 3 ndarray
+
+        * WeightedNormalizedMoments : (3, 3) ndarray
             Normalized moments (translation and scale invariant) of intensity
             image up to 3rd order.
+
                 wnu_ji = wmu_ji / wm_00^[(i+j)/2 + 1]
+
             where `wm_00` is the zeroth spatial moment (intensity-weighted
             area).
+
     intensity_image : (N, M) ndarray, optional
         Intensity image with same size as labelled image. Default is None.
 
@@ -214,11 +257,11 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
         cc = m[1, 0] / m[0, 0]
         mu = _moments.central_moments(array, cr, cc, 3)
 
-        #: elements of the inertia tensor [a b; b c]
+        # elements of the inertia tensor [a b; b c]
         a = mu[2, 0] / mu[0, 0]
         b = mu[1, 1] / mu[0, 0]
         c = mu[0, 2] / mu[0, 0]
-        #: eigen values of inertia tensor
+        # eigen values of inertia tensor
         l1 = (a + c) / 2 + sqrt(4 * b ** 2 + (a - c) ** 2) / 2
         l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
 
@@ -378,7 +421,7 @@ def perimeter(image, neighbourhood=4):
     ----------
     image : array
         binary image
-    neighbourhood: 4 or 8, optional
+    neighbourhood : 4 or 8, optional
         neighbourhood connectivity for border pixel determination, default 4
 
     Returns
@@ -388,9 +431,9 @@ def perimeter(image, neighbourhood=4):
 
     References
     ----------
-    K. Benkrid, D. Crookes. Design and FPGA Implementation of a Perimeter
-        Estimator. The Queen's University of Belfast.
-        http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
+    .. [1] K. Benkrid, D. Crookes. Design and FPGA Implementation of
+           a Perimeter Estimator. The Queen's University of Belfast.
+           http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
     """
     if neighbourhood == 4:
         strel = STREL_4

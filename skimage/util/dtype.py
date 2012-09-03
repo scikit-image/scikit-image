@@ -344,7 +344,7 @@ def img_as_bool(image, force_copy=False):
 
     Returns
     -------
-    out : ndarray of bool (bool_)
+    out : ndarray of bool (`bool_`)
         Output image.
 
     Notes
