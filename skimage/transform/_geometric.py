@@ -327,8 +327,10 @@ class PiecewiseAffineTransform(ProjectiveTransform):
     """
 
     def __init__(self):
-        self.tesselation = None
+        self._tesselation = None
+        self._inverse_tesselation = None
         self.affines = []
+        self.inverse_affines = []
 
     def estimate(self, src, dst):
         """Set the control points with which to perform the piecewise mapping.
@@ -344,15 +346,26 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
         """
 
+        # forward piecewise affine
         # triangulate input positions into mesh
-        self.tesselation = spatial.Delaunay(src)
-
+        self._tesselation = spatial.Delaunay(src)
         # find affine mapping from source positions to destination
         self.affines = []
-        for tri in self.tesselation.vertices:
+        for tri in self._tesselation.vertices:
             affine = AffineTransform()
             affine.estimate(src[tri, :], dst[tri, :])
             self.affines.append(affine)
+
+        # inverse piecewise affine
+        # triangulate input positions into mesh
+        self._inverse_tesselation = spatial.Delaunay(dst)
+        # find affine mapping from source positions to destination
+        self.inverse_affines = []
+        for tri in self._inverse_tesselation.vertices:
+            affine = AffineTransform()
+            affine.estimate(dst[tri, :], src[tri, :])
+            self.inverse_affines.append(affine)
+
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -371,13 +384,15 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
         """
 
-        out = np.empty_like(coords)
+        out = np.empty_like(coords, np.double)
 
-        simplex = self.tesselation.find_simplex(coords)
+        # determine triangle index for each coordinate
+        simplex = self._tesselation.find_simplex(coords)
 
+        # coordinates outside of mesh
         out[simplex == -1, :] = -1
 
-        for index in range(len(self.tesselation.vertices)):
+        for index in range(len(self._tesselation.vertices)):
             # affine transform for triangle
             affine = self.affines[index]
             # all coordinates within triangle
@@ -404,19 +419,21 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
         """
 
-        out = np.empty_like(coords)
+        out = np.empty_like(coords, np.double)
 
-        simplex = self.tesselation.find_simplex(coords)
+        # determine triangle index for each coordinate
+        simplex = self._inverse_tesselation.find_simplex(coords)
 
+        # coordinates outside of mesh
         out[simplex == -1, :] = -1
 
-        for index in range(len(self.tesselation.vertices)):
+        for index in range(len(self._inverse_tesselation.vertices)):
             # affine transform for triangle
-            affine = self.affines[index]
+            affine = self.inverse_affines[index]
             # all coordinates within triangle
             index_mask = simplex == index
 
-            out[index_mask, :] = affine.inverse(coords[index_mask, :])
+            out[index_mask, :] = affine(coords[index_mask, :])
 
         return out
 
