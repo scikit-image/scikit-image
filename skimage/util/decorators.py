@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.util.dtype import convert
+from skimage.util.dtype import convert as convert_func
 
 
 def check_array(arg_name, channels=None, dtype=None, convert=False):
@@ -44,7 +44,7 @@ def check_array(arg_name, channels=None, dtype=None, convert=False):
             if dtype is not None:
                 if np.dtype(dtype) != array.dtype:
                     if convert:
-                        array = convert(array, dtype)
+                        array = convert_func(array, dtype)
                     else:
                         error_msg = 'invalid dtype'
 
