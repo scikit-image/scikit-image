@@ -324,16 +324,11 @@ class PiecewiseAffineTransform(ProjectiveTransform):
     a Delaunay triangulation of the points to form a mesh. Each triangle is
     used to find a local affine transform.
 
-    Parameters
-    ----------
-    TODO
-
     """
 
     def __init__(self):
         self.tesselation = None
         self.affines = []
-        self._matrix = None
 
     def estimate(self, src, dst):
         """Set the control points with which to perform the piecewise mapping.
