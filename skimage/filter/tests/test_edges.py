@@ -1,11 +1,6 @@
-import os
-
-from numpy.testing import *
 import numpy as np
-from scipy.ndimage import binary_dilation, binary_erosion
 
 import skimage.filter as F
-from skimage import data_dir, img_as_float
 
 
 class TestSobel():
@@ -208,4 +203,5 @@ class TestVPrewitt():
 
 
 if __name__ == "__main__":
-    run_module_suite()
+    from numpy import testing
+    testing.run_module_suite()
