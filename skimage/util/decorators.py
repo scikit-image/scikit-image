@@ -2,7 +2,7 @@ import numpy as np
 from skimage.util.dtype import convert as convert_func
 
 
-def check_array(arg_name=None, channels=None, dtype=None, convert=False):
+def check_array(arg_name=None, channels=None, dtype=None, convert=True):
     """Decorator to check input parameters of a function.
 
     If the input matches the specified conditions the decorated function is
@@ -17,7 +17,7 @@ def check_array(arg_name=None, channels=None, dtype=None, convert=False):
     dtype : str or ``numpy.dtype``
         Check array for specific dtype. Default is None.
     convert : bool
-        Automatically convert image to specified `dtype`. Default is False.
+        Automatically convert image to specified `dtype`. Default is True.
 
     """
 
