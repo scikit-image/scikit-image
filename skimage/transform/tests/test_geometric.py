@@ -3,7 +3,8 @@ from numpy.testing import assert_equal, assert_array_almost_equal
 from skimage.transform._geometric import _stackcopy
 from skimage.transform import (estimate_transform,
                                SimilarityTransform, AffineTransform,
-                               ProjectiveTransform, PolynomialTransform)
+                               ProjectiveTransform, PolynomialTransform,
+                               PiecewiseAffineTransform)
 
 
 SRC = np.array([
@@ -108,6 +109,14 @@ def test_affine_init():
     assert_array_almost_equal(tform2.rotation, rotation)
     assert_array_almost_equal(tform2.shear, shear)
     assert_array_almost_equal(tform2.translation, translation)
+
+
+def test_piecewise_affine():
+    tform = PiecewiseAffineTransform()
+    tform.estimate(SRC, DST)
+    # make sure each single affine transform is exactly estimated
+    assert_array_almost_equal(tform(SRC), DST)
+    assert_array_almost_equal(tform.inverse(DST), SRC)
 
 
 def test_projective_estimation():
