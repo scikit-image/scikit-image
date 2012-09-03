@@ -303,6 +303,85 @@ class AffineTransform(ProjectiveTransform):
         return self._matrix[0:2, 2]
 
 
+class PiecewiseAffineTransform(ProjectiveTransform):
+
+    """2D piecewise affine transformation.
+
+    Control points are used to define the mapping. The transform is based on
+    a Delaunay triangulation of the points to form a mesh. Each triangle is
+    used to find a local affine transform.
+
+    Parameters
+    ----------
+    TODO
+
+    """
+
+    def __init__(self):
+        self.tesselation = None
+        self.affines = []
+        self._matrix = None
+
+    def estimate(self, src, dst):
+        """Set the control points with which to perform the piecewise mapping.
+
+        Number of source and destination coordinates must match.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        """
+
+        # triangulate input positions into mesh
+        self.tesselation = spatial.Delaunay(src)
+
+        # find affine mapping from source positions to destination
+        self.affines = []
+        for tri in self.tesselation.vertices:
+            affine = AffineTransform()
+            affine.estimate(src[tri, :], dst[tri, :])
+            self.affines.append(affine)
+
+    def __call__(self, coords):
+        """Apply forward transformation.
+
+        Parameters
+        ----------
+        coords : (N, 2) array
+            source coordinates
+
+        Returns
+        -------
+        coords : (N, 2) array
+            Transformed coordinates.
+
+        """
+
+        out = - 1 * np.ones((coords.shape[0], 2))
+
+        for index, pt in enumerate(coords):
+            # determine which triangle contains the point
+            simplex_index = self.tesselation.find_simplex(pt)
+
+            if simplex_index == - 1:
+                # this point is outside the hull of the control points
+                out[index, 0] = - 1
+                out[index, 1] = - 1
+                continue
+
+            # calculate affine transformed position
+            affine = self.affines[simplex_index]
+            dst_pos = affine(pt)
+            out[index, 0] = dst_pos[0][0]
+            out[index, 1] = dst_pos[0][1]
+
+        return out
+
+
 class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form::
 
@@ -580,96 +659,20 @@ class PolynomialTransform(GeometricTransform):
             'parameters by exchanging source and destination coordinates,'
             'then apply the forward transformation.')
 
-class PiecewiseAffineTransform(ProjectiveTransform):
-
-    """2D piecewise affine transformation.
-
-    Control points are used to define the mapping. The transform is based on
-    a Delaunay triangulation of the points to form a mesh. Each triangle is
-    used to find a local affine transform.
-
-    Parameters
-    ----------
-    TODO
-
-    """
-
-    def __init__(self):
-        self.tess = None
-        self.triAffines = []
-        self._matrix = None
-
-    def estimate(self, src, dst):
-        """Set the control points with which to perform the piecewise affine mapping.
-
-        Number of source and destination coordinates must match.
-
-        Parameters
-        ----------
-        src : (N, 2) array
-            Source coordinates.
-        dst : (N, 2) array
-            Destination coordinates.
-
-        """
-
-        #Triangulate input positions into mesh
-        self.tess = spatial.Delaunay(src)
-
-        #Find affine mapping from source positions to destination
-        self.triAffines = []
-        for tri in self.tess.vertices:
-            affine = AffineTransform()
-            affine.estimate(src[tri,:], dst[tri,:])
-            self.triAffines.append(affine)
-
-    def __call__(self, coords):
-        """Apply forward transformation.
-
-        Parameters
-        ----------
-        coords : (N, 2) array
-            source coordinates
-
-        Returns
-        -------
-        coords : (N, 2) array
-            Transformed coordinates.
-
-        """
-        
-        out = np.ones((coords.shape[0], 2)) * -1
-
-        for ptNum, pt in enumerate(coords):
-            #Determine which triangle contains the point
-            simplexIndex = self.tess.find_simplex(pt)
-            
-            if simplexIndex == -1:
-                #This point is outside the hull of the control points
-                out[ptNum,0] = -1
-                out[ptNum,1] = -1
-                continue
-
-            #Calculate affine transformed position
-            affine = self.triAffines[simplexIndex]
-            destPos = affine(pt)
-            out[ptNum,0] = destPos[0][0]
-            out[ptNum,1] = destPos[0][1]
-
-        return out
 
 TRANSFORMS = {
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
+    'piecewise-affine': PiecewiseAffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
-    'piecewiseaffine': PiecewiseAffineTransform,
 }
 HOMOGRAPHY_TRANSFORMS = (
     SimilarityTransform,
     AffineTransform,
     ProjectiveTransform
 )
+
 
 def estimate_transform(ttype, src, dst, **kwargs):
     """Estimate 2D geometric transformation parameters.
@@ -681,7 +684,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     Parameters
     ----------
-    ttype : {'similarity', 'affine', 'piecewiseaffine', 'projective', 'polynomial'}
+    ttype : {'similarity', 'affine', 'piecewise-affine', 'projective', \
+             'polynomial'}
         Type of transform.
     kwargs : array or int
         Function parameters (src, dst, n, angle)::
@@ -689,7 +693,7 @@ def estimate_transform(ttype, src, dst, **kwargs):
             NAME / TTYPE        FUNCTION PARAMETERS
             'similarity'        `src, `dst`
             'affine'            `src, `dst`
-            'piecewiseaffine'   `src, `dst`
+            'piecewise-affine'  `src, `dst`
             'projective'        `src, `dst`
             'polynomial'        `src, `dst`, `order` (polynomial order)
 
