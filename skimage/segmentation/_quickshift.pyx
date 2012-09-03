@@ -13,8 +13,8 @@ from ..color import rgb2lab
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=False,
-               sigma=0, convert2lab=True, random_seed=None):
+def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
+               return_tree=False, sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
 
     Produces an oversegmentation of the image using the quickshift mode-seeking
@@ -106,7 +106,8 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
                 for c_ in range(c_min, c_max):
                     dist = 0
                     for channel in range(channels):
-                        dist += (current_pixel_p[channel] - image_c[r_, c_, channel])**2
+                        dist += (current_pixel_p[channel] -
+                                 image_c[r_, c_, channel])**2
                     dist += (r - r_)**2 + (c - c_)**2
                     densities[r, c] += exp(-dist / (2 * kernel_size**2))
             current_pixel_p += channels
@@ -132,9 +133,11 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10, return_tree=Fa
                     if densities[r_, c_] > current_density:
                         dist = 0
                         # We compute the distances twice since otherwise
-                        # we get crazy memory overhead (width * height * windowsize**2)
+                        # we get crazy memory overhead
+                        # (width * height * windowsize**2)
                         for channel in range(channels):
-                            dist += (current_pixel_p[channel] - image_c[r_, c_, channel])**2
+                            dist += (current_pixel_p[channel] -
+                                     image_c[r_, c_, channel])**2
                         dist += (r - r_)**2 + (c - c_)**2
                         if dist < closest:
                             closest = dist

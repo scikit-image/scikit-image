@@ -7,7 +7,8 @@ This example compares three popular low-level image segmentation methods.  As
 it is difficult to obtain good segmentations, and the definition of "good"
 often depends on the application, these methods are usually used for obtaining
 an oversegmentation, also known as superpixels. These superpixels then serve as
-a basis for more sophisticated algorithms such as CRFs.
+a basis for more sophisticated algorithms such as conditional random fields
+(CRF).
 
 
 Felzenszwalb's efficient graph based segmentation
