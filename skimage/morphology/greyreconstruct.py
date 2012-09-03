@@ -101,17 +101,18 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     Notes
     -----
-    The algorithm is taken from:
-    [1] Robinson, "Efficient morphological reconstruction: a downhill filter",
-        Pattern Recognition Letters 25 (2004) 1759-1767.
+    The algorithm is taken from [1]_. Applications for greyscale reconstruction
+    are discussed in [2]_ and [3]_.
 
-    Applications for greyscale reconstruction are discussed in:
-
-    [2] Vincent, L., "Morphological Grayscale Reconstruction in Image Analysis:
-        Applications and Efficient Algorithms", IEEE Transactions on Image
-        Processing (1993)
-    [3] Soille, P., "Morphological Image Analysis: Principles and Applications",
-        Chapter 6, 2nd edition (2003), ISBN 3540429883.
+    References
+    ----------
+    .. [1] Robinson, "Efficient morphological reconstruction: a downhill
+           filter", Pattern Recognition Letters 25 (2004) 1759-1767.
+    .. [2] Vincent, L., "Morphological Grayscale Reconstruction in Image
+           Analysis: Applications and Efficient Algorithms", IEEE Transactions
+           on Image Processing (1993)
+    .. [3] Soille, P., "Morphological Image Analysis: Principles and
+           Applications", Chapter 6, 2nd edition (2003), ISBN 3540429883.
     """
     assert tuple(seed.shape) == tuple(mask.shape)
     if method == 'dilation' and np.any(seed > mask):

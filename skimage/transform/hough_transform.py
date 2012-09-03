@@ -61,8 +61,9 @@ except ImportError:
     pass
 
 
-def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10, theta=None):
-    """Performs a progressive probabilistic line Hough transform and returns the detected lines.
+def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10,
+                        theta=None):
+    """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters
     ----------
@@ -87,9 +88,9 @@ def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10, theta=No
 
     References
     ----------
-    .. [1]  C. Galamhos, J. Matas and J. Kittler,"Progressive probabilistic Hough
-            transform for line detection", in  IEEE Computer Society Conference on
-            Computer Vision and Pattern Recognition, 1999.
+    .. [1] C. Galamhos, J. Matas and J. Kittler, "Progressive probabilistic
+           Hough transform for line detection", in IEEE Computer Society
+           Conference on Computer Vision and Pattern Recognition, 1999.
     """
     return _probabilistic_hough(img, threshold, line_length, line_gap, theta)
 

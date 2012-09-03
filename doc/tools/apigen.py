@@ -269,10 +269,6 @@ class ApiDocWriter(object):
 
         ad = '.. AUTO-GENERATED FILE -- DO NOT EDIT!\n\n'
 
-        chap_title = uri_short
-        #ad += (chap_title+'\n'+ self.rst_section_levels[1] * len(chap_title)
-        #       + '\n\n')
-
         # Set the chapter title to read 'module' for all modules except for the
         # main packages
         if '.' in uri:
@@ -281,21 +277,8 @@ class ApiDocWriter(object):
             title = ':mod:`' + uri_short + '`'
         ad += title + '\n' + self.rst_section_levels[1] * len(title)
 
-        if len(classes):
-            ad += '\nInheritance diagram for ``%s``:\n\n' % uri
-            ad += '.. inheritance-diagram:: %s \n' % uri
-            ad += '   :parts: 3\n'
-
         ad += '\n.. automodule:: ' + uri + '\n'
         ad += '\n.. currentmodule:: ' + uri + '\n'
-#        multi_class = len(classes) > 1
-#        multi_fx = len(functions) > 1
-#        if multi_class:
-#            ad += '\n' + 'Classes' + '\n' + \
-#                  self.rst_section_levels[2] * 7 + '\n'
-#        elif len(classes) and multi_fx:
-#            ad += '\n' + 'Class' + '\n' + \
-#                  self.rst_section_levels[2] * 5 + '\n'
         for c in classes:
             ad += '\n:class:`' + c + '`\n' \
                   + self.rst_section_levels[2] * \
@@ -305,15 +288,8 @@ class ApiDocWriter(object):
             ad += '  :members:\n' \
                   '  :undoc-members:\n' \
                   '  :show-inheritance:\n' \
-                  '  :inherited-members:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
-#        if multi_fx:
-#        ad += '\n' + 'Functions' + '\n' + \
-#              self.rst_section_levels[2] * 9 + '\n\n'
-#        elif len(functions) and multi_class:
-#            ad += '\n' + 'Function' + '\n' + \
-#                  self.rst_section_levels[2] * 8 + '\n\n'
         ad += '.. autosummary::\n\n'
         for f in functions:
             ad += '   ' + uri + '.' + f + '\n'

@@ -787,7 +787,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ----------
     image : 2-D array
         Input image.
-    inverse_map : transformation object, callable xy = f(xy, **kwargs)
+    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``
         Inverse coordinate map. A function that transforms a (N, 2) array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
         coordinates in the *source image* (e.g. a transformation object or its
