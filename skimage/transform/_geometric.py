@@ -361,23 +361,19 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
         """
 
-        out = - 1 * np.ones((coords.shape[0], 2))
+        out = np.empty_like(coords)
 
-        for index, pt in enumerate(coords):
-            # determine which triangle contains the point
-            simplex_index = self.tesselation.find_simplex(pt)
+        simplex = self.tesselation.find_simplex(coords)
 
-            if simplex_index == - 1:
-                # this point is outside the hull of the control points
-                out[index, 0] = - 1
-                out[index, 1] = - 1
-                continue
+        out[simplex == -1, :] = -1
 
-            # calculate affine transformed position
-            affine = self.affines[simplex_index]
-            dst_pos = affine(pt)
-            out[index, 0] = dst_pos[0][0]
-            out[index, 1] = dst_pos[0][1]
+        for index in range(len(self.tesselation.vertices)):
+            # affine transform for triangle
+            affine = self.affines[index]
+            # all coordinates within triangle
+            index_mask = simplex == index
+
+            out[index_mask, :] = affine(coords[index_mask, :])
 
         return out
 
