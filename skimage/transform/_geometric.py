@@ -357,10 +357,12 @@ class PiecewiseAffineTransform(ProjectiveTransform):
     def __call__(self, coords):
         """Apply forward transformation.
 
+        Coordinates outside of the mesh will be set to `- 1`.
+
         Parameters
         ----------
         coords : (N, 2) array
-            source coordinates
+            Source coordinates.
 
         Returns
         -------
@@ -387,6 +389,8 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
     def inverse(self, coords):
         """Apply inverse transformation.
+
+        Coordinates outside of the mesh will be set to `- 1`.
 
         Parameters
         ----------
