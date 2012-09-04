@@ -22,6 +22,8 @@ def sobel(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -49,6 +51,8 @@ def hsobel(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -88,6 +92,8 @@ def vsobel(image, mask=None):
         Image to process
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -127,6 +133,8 @@ def prewitt(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -150,6 +158,8 @@ def hprewitt(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -189,6 +199,8 @@ def vprewitt(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
