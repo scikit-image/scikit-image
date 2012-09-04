@@ -13,6 +13,26 @@ from skimage import img_as_float
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 
+EROSION_SELEM = generate_binary_structure(2, 2)
+
+
+def _mask_filter_result(result, mask):
+    """Return result after masking.
+
+    Input masks are eroded so that mask areas in the original image don't
+    affect values in the result.
+    """
+    if mask is None:
+        result[0, :] = 0
+        result[-1, :] = 0
+        result[:, 0] = 0
+        result[:, -1] = 0
+        return result
+    else:
+        mask = binary_erosion(mask, EROSION_SELEM, border_value=0)
+        return result * mask
+
+
 def sobel(image, mask=None):
     """Calculate the absolute magnitude Sobel to find edges.
 
@@ -22,6 +42,8 @@ def sobel(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -49,6 +71,8 @@ def hsobel(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -66,17 +90,11 @@ def hsobel(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[ 1, 2, 1],
                                        [ 0, 0, 0],
                                        [-1,-2,-1]]).astype(float) / 4.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)
 
 
 def vsobel(image, mask=None):
@@ -88,6 +106,8 @@ def vsobel(image, mask=None):
         Image to process
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -105,17 +125,11 @@ def vsobel(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
                                        [2, 0, -2],
                                        [1, 0, -1]]).astype(float) / 4.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)
 
 
 def prewitt(image, mask=None):
@@ -127,6 +141,8 @@ def prewitt(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -150,6 +166,8 @@ def hprewitt(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -167,17 +185,11 @@ def hprewitt(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[ 1, 1, 1],
                                        [ 0, 0, 0],
                                        [-1,-1,-1]]).astype(float) / 3.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)
 
 
 def vprewitt(image, mask=None):
@@ -189,6 +201,8 @@ def vprewitt(image, mask=None):
         Image to process.
     mask : array_like, dtype=bool, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
@@ -206,14 +220,8 @@ def vprewitt(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
                                        [1, 0, -1],
                                        [1, 0, -1]]).astype(float) / 3.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)
