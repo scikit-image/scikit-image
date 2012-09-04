@@ -22,6 +22,7 @@ PROPS = (
     'ConvexArea',
 #    'ConvexHull',
     'ConvexImage',
+    'Coordinates',
     'Eccentricity',
     'EquivDiameter',
     'EulerNumber',
