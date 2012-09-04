@@ -23,12 +23,14 @@ def _mask_filter_result(result, mask):
     affect values in the result.
     """
     if mask is None:
-        mask = np.zeros(result.shape, bool)
-        mask[1:-1, 1:-1] = True
+        result[0, :] = 0
+        result[-1, :] = 0
+        result[:, 0] = 0
+        result[:, -1] = 0
+        return result
     else:
         mask = binary_erosion(mask, EROSION_SELEM, border_value=0)
-    result[mask == False] = 0
-    return result
+        return result * mask
 
 
 def sobel(image, mask=None):
