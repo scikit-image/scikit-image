@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.testing import assert_array_almost_equal as assert_close
 
 import skimage.filter as F
 
@@ -194,6 +195,40 @@ def test_vprewitt_horizontal():
     result = F.vprewitt(image)
     eps = .000001
     assert (np.all(np.abs(result) < eps))
+
+
+def test_horizontal_mask_line():
+    """Horizontal edge filters mask pixels surrounding input mask."""
+    vgrad, _ = np.mgrid[:1:11j, :1:11j] # vertical gradient with spacing 0.1
+    vgrad[5, :] = 1                     # bad horizontal line
+
+    mask = np.ones_like(vgrad)
+    mask[5, :] = 0                      # mask bad line
+
+    expected = np.zeros_like(vgrad)
+    expected[1:-1, 1:-1] = 0.2          # constant gradient for most of image,
+    expected[4:7, 1:-1] = 0             # but line and neighbors masked
+
+    for grad_func in (F.hprewitt, F.hsobel):
+        result = grad_func(vgrad, mask)
+        yield assert_close, result, expected
+
+
+def test_vertical_mask_line():
+    """Vertical edge filters mask pixels surrounding input mask."""
+    _, hgrad = np.mgrid[:1:11j, :1:11j] # horizontal gradient with spacing 0.1
+    hgrad[:, 5] = 1                     # bad vertical line
+
+    mask = np.ones_like(hgrad)
+    mask[:, 5] = 0                      # mask bad line
+
+    expected = np.zeros_like(hgrad)
+    expected[1:-1, 1:-1] = 0.2          # constant gradient for most of image,
+    expected[1:-1, 4:7] = 0             # but line and neighbors masked
+
+    for grad_func in (F.vprewitt, F.vsobel):
+        result = grad_func(hgrad, mask)
+        yield assert_close, result, expected
 
 
 if __name__ == "__main__":
