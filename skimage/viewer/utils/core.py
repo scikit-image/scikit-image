@@ -17,8 +17,25 @@ except ImportError:
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
 
-__all__ = ['figimage', 'LinearColormap', 'ClearColormap', 'MatplotlibCanvas',
-           'RequiredAttr']
+__all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
+           'LinearColormap', 'ClearColormap', 'MatplotlibCanvas']
+
+
+QApp = None
+
+
+def init_qtapp():
+    """Initialize QAppliction.
+
+    The QApplication needs to be initialized before creating any QWidgets
+    """
+    global QApp
+    if QApp is None:
+        QApp = QtGui.QApplication([])
+
+def start_qtapp():
+    """Start Qt mainloop"""
+    QApp.exec_()
 
 
 class RequiredAttr(object):

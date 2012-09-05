@@ -14,7 +14,7 @@ try:
 except ImportError:
     print("Could not import matplotlib -- skimage.viewer not available.")
 
-from ..utils import RequiredAttr
+from ..utils import RequiredAttr, init_qtapp
 
 
 class Plugin(QDialog):
@@ -82,6 +82,7 @@ class Plugin(QDialog):
     draws_on_image = False
 
     def __init__(self, image_filter=None, height=0, width=400, useblit=None):
+        init_qtapp()
         super(Plugin, self).__init__()
 
         self.image_viewer = None
