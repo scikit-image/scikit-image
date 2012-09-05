@@ -4,7 +4,8 @@ from .finite_radon_transform import *
 from .integral import *
 from ._geometric import (warp, warp_coords, estimate_transform,
                          SimilarityTransform, AffineTransform,
-                         ProjectiveTransform, PolynomialTransform, 
+                         ProjectiveTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
 from ._warps import swirl, homography, resize, rotate
-
+from .pyramid import (pyramid_reduce, pyramid_expand,
+                      build_gaussian_pyramid, build_laplacian_pyramid)
