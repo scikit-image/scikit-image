@@ -7,5 +7,5 @@ from ._geometric import (warp, warp_coords, estimate_transform,
                          ProjectiveTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
 from ._warps import swirl, homography, resize, rotate
-from .pyramid import (pyramid_reduce, pyramid_expand,
-                      build_gaussian_pyramid, build_laplacian_pyramid)
+from .pyramids import (pyramid_reduce, pyramid_expand,
+                       build_gaussian_pyramid, build_laplacian_pyramid)
