@@ -1,8 +1,6 @@
 """
 ImageViewer class for viewing and interacting with images.
 """
-import sys
-
 try:
     from PyQt4 import QtGui, QtCore
     from PyQt4.QtGui import QMainWindow
@@ -11,20 +9,18 @@ except ImportError:
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
 from skimage.util.dtype import dtype_range
-from ..utils import figimage, MatplotlibCanvas
+from .. import utils
 from ..widgets import Slider
 
 
 __all__ = ['ImageViewer', 'CollectionViewer']
 
 
-qApp = None
 
-
-class ImageCanvas(MatplotlibCanvas):
+class ImageCanvas(utils.MatplotlibCanvas):
     """Canvas for displaying images."""
     def __init__(self, parent, image, **kwargs):
-        self.fig, self.ax = figimage(image, **kwargs)
+        self.fig, self.ax = utils.figimage(image, **kwargs)
         super(ImageCanvas, self).__init__(parent, self.fig, **kwargs)
 
 
@@ -60,9 +56,7 @@ class ImageViewer(QMainWindow):
     """
     def __init__(self, image):
         # Start main loop
-        global qApp
-        if qApp is None:
-            qApp = QtGui.QApplication(sys.argv)
+        utils.init_qtapp()
         super(ImageViewer, self).__init__()
 
         #TODO: Add ImageViewer to skimage.io window manager
@@ -136,7 +130,7 @@ class ImageViewer(QMainWindow):
         for p in self.plugins:
             p.show()
         super(ImageViewer, self).show()
-        qApp.exec_()
+        utils.start_qtapp()
 
     def redraw(self):
         self.canvas.draw_idle()
