@@ -168,6 +168,10 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
     -------
     pyramid : list of arrays
 
+    References
+    ----------
+    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+
     """
 
     _check_factor(factor)
@@ -241,6 +245,10 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
     Returns
     -------
     pyramid : list of arrays
+
+    References
+    ----------
+    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
 
