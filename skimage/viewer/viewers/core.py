@@ -144,6 +144,8 @@ class ImageViewer(QMainWindow):
         self._img = image
         self._image_plot.set_array(image)
         clim = dtype_range[image.dtype.type]
+        if clim[0] < 0 and image.min() >= 0:
+            clim = (0, clim[1])
         self._image_plot.set_clim(clim)
         self.redraw()
 
