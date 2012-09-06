@@ -123,20 +123,20 @@ def _setup_log():
     import logging
     import sys
 
-    log = logging.getLogger()
+    formatter = logging.Formatter(
+        '%(name)s: %(levelname)s: %(message)s'
+        )
 
     try:
         handler = logging.StreamHandler(stream=sys.stdout)
     except TypeError:
         handler = logging.StreamHandler(strm=sys.stdout)
-
-    formatter = logging.Formatter(
-        '%(name)s: %(levelname)s: %(message)s'
-        )
     handler.setFormatter(formatter)
 
+    log = get_log()
     log.addHandler(handler)
     log.setLevel(logging.WARNING)
+    log.propagate = False
 
 _setup_log()
 
