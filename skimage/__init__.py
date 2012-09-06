@@ -136,6 +136,7 @@ def _setup_log():
     log = get_log()
     log.addHandler(handler)
     log.setLevel(logging.WARNING)
+    log.propagate = False
 
 _setup_log()
 
