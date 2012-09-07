@@ -121,8 +121,8 @@ def pyramid_expand(image, factor=2, sigma=None, order=1,
 
     rows = image.shape[0]
     cols = image.shape[1]
-    out_rows = 2 * rows
-    out_cols = 2 * cols
+    out_rows = math.ceil(factor * rows)
+    out_cols = math.ceil(factor * cols)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
