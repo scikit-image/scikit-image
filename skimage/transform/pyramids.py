@@ -176,23 +176,24 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
     _check_factor(factor)
 
-    pyramid = []
-    pyramid.append(image)
-
     layer = 0
     rows = image.shape[0]
     cols = image.shape[1]
+
+    prev_layer_image = image
+    yield prev_layer_image
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction
     while layer != max_layer:
         layer += 1
 
-        layer_image = pyramid_reduce(pyramid[-1], factor, sigma, order,
+        layer_image = pyramid_reduce(prev_layer_image, factor, sigma, order,
                                      mode, cval)
 
         prev_rows = rows
         prev_cols = cols
+        prev_layer_image = layer_image
         rows = layer_image.shape[0]
         cols = layer_image.shape[1]
 
@@ -200,9 +201,7 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
         if prev_rows == rows and prev_cols == cols:
             break
 
-        pyramid.append(layer_image)
-
-    return pyramid
+        yield layer_image
 
 
 def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
@@ -251,29 +250,30 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * factor / 6.0
 
-    pyramid = []
-    pyramid.append(image - _smooth(image, sigma, mode, cval))
-
     layer = 0
     rows = image.shape[0]
     cols = image.shape[1]
+
+    prev_layer_image = image - _smooth(image, sigma, mode, cval)
+    yield prev_layer_image
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction
     while layer != max_layer:
         layer += 1
 
-        rows = pyramid[-1].shape[0]
-        cols = pyramid[-1].shape[1]
+        rows = prev_layer_image.shape[0]
+        cols = prev_layer_image.shape[1]
         out_rows = math.ceil(rows / float(factor))
         out_cols = math.ceil(cols / float(factor))
 
-        resized = resize(pyramid[-1], (out_rows, out_cols), order=order,
+        resized = resize(prev_layer_image, (out_rows, out_cols), order=order,
                          mode=mode, cval=cval)
         layer_image = _smooth(resized, sigma, mode, cval)
 
         prev_rows = rows
         prev_cols = cols
+        prev_layer_image = layer_image
         rows = layer_image.shape[0]
         cols = layer_image.shape[1]
 
@@ -281,6 +281,4 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
         if prev_rows == rows and prev_cols == cols:
             break
 
-        pyramid.append(layer_image)
-
-    return pyramid
+        yield layer_image
