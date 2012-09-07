@@ -119,6 +119,8 @@ def pyramid_expand(image, factor=2, sigma=None, order=1,
 
     _check_factor(factor)
 
+    image = img_as_float(image)
+
     rows = image.shape[0]
     cols = image.shape[1]
     out_rows = math.ceil(factor * rows)
@@ -176,12 +178,15 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
     _check_factor(factor)
 
+    image = img_as_float(image)
+
     layer = 0
     rows = image.shape[0]
     cols = image.shape[1]
 
+    # cast to float for consistent data type in pyramid
     prev_layer_image = image
-    yield prev_layer_image
+    yield image
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction
@@ -246,6 +251,8 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
     _check_factor(factor)
 
+    image = img_as_float(image)
+
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
         sigma = 2 * factor / 6.0
@@ -255,7 +262,6 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
     cols = image.shape[1]
 
     prev_layer_image = image - _smooth(image, sigma, mode, cval)
-    yield prev_layer_image
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction

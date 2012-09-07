@@ -33,6 +33,7 @@ def test_build_laplacian_pyramid():
     pyramid = build_laplacian_pyramid(image, factor=2)
 
     for layer, out in enumerate(pyramid):
+        layer += 1
         layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)
         assert_array_equal(out.shape, layer_shape)
 
