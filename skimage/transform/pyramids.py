@@ -185,15 +185,11 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction
-    while True:
+    while layer != max_layer:
         layer += 1
 
         layer_image = pyramid_reduce(pyramid[-1], factor, sigma, order,
                                      mode, cval)
-
-        # image degraded to 1px
-        if layer_image.ndim == 1:
-            break
 
         prev_rows = rows
         prev_cols = cols
@@ -205,9 +201,6 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
             break
 
         pyramid.append(layer_image)
-
-        if layer == max_layer:
-            break
 
     return pyramid
 
@@ -267,7 +260,7 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction
-    while True:
+    while layer != max_layer:
         layer += 1
 
         rows = pyramid[-1].shape[0]
@@ -279,10 +272,6 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
                          mode=mode, cval=cval)
         layer_image = _smooth(resized, sigma, mode, cval)
 
-        # image degraded to 1px
-        if layer_image.ndim == 1:
-            break
-
         prev_rows = rows
         prev_cols = cols
         rows = layer_image.shape[0]
@@ -293,8 +282,5 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
             break
 
         pyramid.append(layer_image)
-
-        if layer == max_layer:
-            break
 
     return pyramid
