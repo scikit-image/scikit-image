@@ -9,19 +9,19 @@ image = data.lena()
 
 def test_pyramid_reduce():
     rows, cols, dim = image.shape
-    out = pyramid_reduce(image, factor=2)
+    out = pyramid_reduce(image, downscale=2)
     assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
 
 
 def test_pyramid_expand():
     rows, cols, dim = image.shape
-    out = pyramid_expand(image, factor=2)
+    out = pyramid_expand(image, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2, dim))
 
 
 def test_build_gaussian_pyramid():
     rows, cols, dim = image.shape
-    pyramid = build_gaussian_pyramid(image, factor=2)
+    pyramid = build_gaussian_pyramid(image, downscale=2)
 
     for layer, out in enumerate(pyramid):
         layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)
@@ -30,7 +30,7 @@ def test_build_gaussian_pyramid():
 
 def test_build_laplacian_pyramid():
     rows, cols, dim = image.shape
-    pyramid = build_laplacian_pyramid(image, factor=2)
+    pyramid = build_laplacian_pyramid(image, downscale=2)
 
     for layer, out in enumerate(pyramid):
         layer += 1

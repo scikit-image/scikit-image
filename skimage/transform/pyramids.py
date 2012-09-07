@@ -27,7 +27,7 @@ def _check_factor(factor):
         raise ValueError('scale factor must be greater than 1')
 
 
-def pyramid_reduce(image, factor=2, sigma=None, order=1,
+def pyramid_reduce(image, downscale=2, sigma=None, order=1,
                    mode='reflect', cval=0):
     """Smooth and then downsample image.
 
@@ -35,10 +35,10 @@ def pyramid_reduce(image, factor=2, sigma=None, order=1,
     ----------
     image : array
         Input image.
-    factor : float, optional
+    downscale : float, optional
         Downscale factor. Default is 2.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * factor / 6.0` which
+        Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
@@ -62,18 +62,18 @@ def pyramid_reduce(image, factor=2, sigma=None, order=1,
 
     """
 
-    _check_factor(factor)
+    _check_factor(downscale)
 
     image = img_as_float(image)
 
     rows = image.shape[0]
     cols = image.shape[1]
-    out_rows = math.ceil(rows / float(factor))
-    out_cols = math.ceil(cols / float(factor))
+    out_rows = math.ceil(rows / float(downscale))
+    out_cols = math.ceil(cols / float(downscale))
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
-        sigma = 2 * factor / 6.0
+        sigma = 2 * downscale / 6.0
 
     smoothed = _smooth(image, sigma, mode, cval)
     out = resize(smoothed, (out_rows, out_cols), order=order,
@@ -82,7 +82,7 @@ def pyramid_reduce(image, factor=2, sigma=None, order=1,
     return out
 
 
-def pyramid_expand(image, factor=2, sigma=None, order=1,
+def pyramid_expand(image, upscale=2, sigma=None, order=1,
                    mode='reflect', cval=0):
     """Upsample and then smooth image.
 
@@ -90,10 +90,10 @@ def pyramid_expand(image, factor=2, sigma=None, order=1,
     ----------
     image : array
         Input image.
-    factor : float, optional
+    upscale : float, optional
         Upscale factor. Default is 2.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * factor / 6.0` which
+        Sigma for gaussian filter. Default is `2 * upscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
@@ -117,18 +117,18 @@ def pyramid_expand(image, factor=2, sigma=None, order=1,
 
     """
 
-    _check_factor(factor)
+    _check_factor(upscale)
 
     image = img_as_float(image)
 
     rows = image.shape[0]
     cols = image.shape[1]
-    out_rows = math.ceil(factor * rows)
-    out_cols = math.ceil(factor * cols)
+    out_rows = math.ceil(upscale * rows)
+    out_cols = math.ceil(upscale * cols)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
-        sigma = 2 * factor / 6.0
+        sigma = 2 * upscale / 6.0
 
     resized = resize(image, (out_rows, out_cols), order=order,
                      mode=mode, cval=cval)
@@ -137,8 +137,8 @@ def pyramid_expand(image, factor=2, sigma=None, order=1,
     return out
 
 
-def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
-                           mode='reflect', cval=0):
+def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
+                           order=1, mode='reflect', cval=0):
     """Build gaussian pyramid.
 
     Recursively applies the `pyramid_reduce` function to the image.
@@ -150,10 +150,10 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
     max_layer : int
         Number of layers for the pyramid. 0th layer is the original image.
         Default is -1 which builds all possible layers.
-    factor : float, optional
+    downscale : float, optional
         Downscale factor. Default is 2.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * factor / 6.0` which
+        Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
@@ -176,7 +176,7 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
     """
 
-    _check_factor(factor)
+    _check_factor(downscale)
 
     image = img_as_float(image)
 
@@ -193,7 +193,7 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
     while layer != max_layer:
         layer += 1
 
-        layer_image = pyramid_reduce(prev_layer_image, factor, sigma, order,
+        layer_image = pyramid_reduce(prev_layer_image, downscale, sigma, order,
                                      mode, cval)
 
         prev_rows = rows
@@ -209,8 +209,8 @@ def build_gaussian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
         yield layer_image
 
 
-def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
-                            mode='reflect', cval=0):
+def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
+                            order=1, mode='reflect', cval=0):
     """Build laplacian pyramid.
 
     Each layer contains the difference between the downsampled and the
@@ -223,10 +223,10 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
     max_layer : int
         Number of layers for the pyramid. 0th layer is the original image.
         Default is -1 which builds all possible layers.
-    factor : float, optional
+    downscale : float, optional
         Downscale factor. Default is 2.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * factor / 6.0` which
+        Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
@@ -249,13 +249,13 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
     """
 
-    _check_factor(factor)
+    _check_factor(downscale)
 
     image = img_as_float(image)
 
     if sigma is None:
         # automatically determine sigma which covers > 99% of distribution
-        sigma = 2 * factor / 6.0
+        sigma = 2 * downscale / 6.0
 
     layer = 0
     rows = image.shape[0]
@@ -270,8 +270,8 @@ def build_laplacian_pyramid(image, max_layer=-1, factor=2, sigma=None, order=1,
 
         rows = prev_layer_image.shape[0]
         cols = prev_layer_image.shape[1]
-        out_rows = math.ceil(rows / float(factor))
-        out_cols = math.ceil(cols / float(factor))
+        out_rows = math.ceil(rows / float(downscale))
+        out_cols = math.ceil(cols / float(downscale))
 
         resized = resize(prev_layer_image, (out_rows, out_cols), order=order,
                          mode=mode, cval=cval)
