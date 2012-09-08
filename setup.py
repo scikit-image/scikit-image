@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-descr   = """Image Processing SciKit
+descr = """Image Processing SciKit
 
 Image processing algorithms for SciPy, including IO, morphology, filtering,
 warping, color manipulation, object detection, etc.
@@ -74,41 +74,43 @@ if __name__ == "__main__":
         download_url=DOWNLOAD_URL,
         version=VERSION,
 
-        classifiers =
-            ['Development Status :: 4 - Beta',
-             'Environment :: Console',
-             'Intended Audience :: Developers',
-             'Intended Audience :: Science/Research',
-             'License :: OSI Approved :: BSD License',
-             'Programming Language :: C',
-             'Programming Language :: Python',
-             'Programming Language :: Python :: 3',
-             'Topic :: Scientific/Engineering',
-             'Operating System :: Microsoft :: Windows',
-             'Operating System :: POSIX',
-             'Operating System :: Unix',
-             'Operating System :: MacOS',
-             ],
+        classifiers=[
+            'Development Status :: 4 - Beta',
+            'Environment :: Console',
+            'Intended Audience :: Developers',
+            'Intended Audience :: Science/Research',
+            'License :: OSI Approved :: BSD License',
+            'Programming Language :: C',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 3',
+            'Topic :: Scientific/Engineering',
+            'Operating System :: Microsoft :: Windows',
+            'Operating System :: POSIX',
+            'Operating System :: Unix',
+            'Operating System :: MacOS',
+        ],
 
         configuration=configuration,
-        install_requires=
-            ['Python >= 2.5',
-             'Numpy >= 1.6',
-             'Cython >= 0.15',
-             'SciPy >= 0.10',
-            ],
-        extras_require=
-            {'Viewer': ['PyQt', 'matplotlib'],
-             'Tests': ['nose'],
-            },
+
+        install_requires=[
+            'Python >= 2.5',
+            'Numpy >= 1.6',
+            'Cython >= 0.15',
+            'SciPy >= 0.10',
+        ],
+
+        extras_require={
+            'Viewer': ['PyQt', 'matplotlib'],
+            'Tests': ['nose'],
+        },
+
         packages=setuptools.find_packages(),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
 
         entry_points={
-            'console_scripts': [
-                'skivi = skimage.scripts.skivi:main']
-            },
+            'console_scripts': ['skivi = skimage.scripts.skivi:main'],
+        },
 
         cmdclass={'build_py': build_py},
         )
