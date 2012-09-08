@@ -262,6 +262,7 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
     cols = image.shape[1]
 
     prev_layer_image = image - _smooth(image, sigma, mode, cval)
+    yield prev_layer_image
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction
