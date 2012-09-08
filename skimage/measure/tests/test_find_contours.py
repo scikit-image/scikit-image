@@ -62,6 +62,14 @@ def test_float():
                      [ 2.,  3.]])
 
 
+def test_memory_order():
+    contours = find_contours(np.ascontiguousarray(r), 0.5)
+    assert len(contours) == 1
+
+    contours = find_contours(np.asfortranarray(r), 0.5)
+    assert len(contours) == 1
+
+
 if __name__ == '__main__':
     from numpy.testing import run_module_suite
     run_module_suite()
