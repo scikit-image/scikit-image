@@ -27,6 +27,7 @@ try:
 except ImportError:
     from distutils.command.build_py import build_py
 
+
 def configuration(parent_package='', top_path=None):
     if os.path.exists('MANIFEST'): os.remove('MANIFEST')
 
@@ -44,6 +45,7 @@ def configuration(parent_package='', top_path=None):
 
     return config
 
+
 def write_version_py(filename='skimage/version.py'):
     template = """# THIS FILE IS GENERATED FROM THE SKIMAGE SETUP.PY
 version='%s'
@@ -56,6 +58,7 @@ version='%s'
         vfile.write(template % VERSION)
     finally:
         vfile.close()
+
 
 if __name__ == "__main__":
     write_version_py()
@@ -72,23 +75,32 @@ if __name__ == "__main__":
         version=VERSION,
 
         classifiers =
-            [ 'Development Status :: 4 - Beta',
-              'Environment :: Console',
-              'Intended Audience :: Developers',
-              'Intended Audience :: Science/Research',
-              'License :: OSI Approved :: BSD License',
-              'Programming Language :: C',
-              'Programming Language :: Python',
-              'Programming Language :: Python :: 3',
-              'Topic :: Scientific/Engineering',
-              'Operating System :: Microsoft :: Windows',
-              'Operating System :: POSIX',
-              'Operating System :: Unix',
-              'Operating System :: MacOS',
-              ],
+            ['Development Status :: 4 - Beta',
+             'Environment :: Console',
+             'Intended Audience :: Developers',
+             'Intended Audience :: Science/Research',
+             'License :: OSI Approved :: BSD License',
+             'Programming Language :: C',
+             'Programming Language :: Python',
+             'Programming Language :: Python :: 3',
+             'Topic :: Scientific/Engineering',
+             'Operating System :: Microsoft :: Windows',
+             'Operating System :: POSIX',
+             'Operating System :: Unix',
+             'Operating System :: MacOS',
+             ],
 
         configuration=configuration,
-        install_requires=[],
+        install_requires=
+            ['Python >= 2.5',
+             'Numpy >= 1.6',
+             'Cython >= 0.15',
+             'SciPy >= 0.10',
+            ],
+        extras_require=
+            {'Viewer': ['PyQt', 'matplotlib'],
+             'Tests': ['nose'],
+            },
         packages=setuptools.find_packages(),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
