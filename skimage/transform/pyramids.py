@@ -168,7 +168,8 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
 
     Returns
     -------
-    pyramid : list of arrays
+    pyramid : generator
+        Generator yielding pyramid layers.
 
     References
     ----------
@@ -241,7 +242,8 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
 
     Returns
     -------
-    pyramid : list of arrays
+    pyramid : generator
+        Generator yielding pyramid layers.
 
     References
     ----------
