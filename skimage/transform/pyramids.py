@@ -188,8 +188,8 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
     prev_layer_image = image
     yield image
 
-    # build downsampled images until max_layer is reached or downsampled image
-    # has size of 1 in one direction
+    # build downsampled images until max_layer is reached or downscale process
+    # does not change image size
     while layer != max_layer:
         layer += 1
 
@@ -264,11 +264,10 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
     smoothed_image = _smooth(image, sigma, mode, cval)
     yield image - smoothed_image
 
-    # build downsampled images until max_layer is reached or downsampled image
-    # has size of 1 in one direction
+    # build downsampled images until max_layer is reached or downscale process
+    # does not change image size
     while layer != max_layer:
         layer += 1
-
 
         out_rows = math.ceil(rows / float(downscale))
         out_cols = math.ceil(cols / float(downscale))
