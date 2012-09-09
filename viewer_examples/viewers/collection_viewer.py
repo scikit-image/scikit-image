@@ -4,7 +4,7 @@ CollectionViewer demo
 =====================
 
 Demo of CollectionViewer for viewing collections of images. This demo uses
-successively darker versions of the same image to fake an image collection.
+the different layers of the gaussian pyramid as image collection.
 
 You can scroll through images with the slider, or you can interact with the
 viewer using your keyboard:
@@ -21,9 +21,11 @@ home/end keys
 import numpy as np
 from skimage import data
 from skimage.viewer import CollectionViewer
+from skimage.transform import build_gaussian_pyramid
+
 
 img = data.lena()
-img_collection = [np.uint8(img * 0.9**i) for i in range(20)]
+img_collection = tuple(build_gaussian_pyramid(img))
 
 view = CollectionViewer(img_collection)
 view.show()
