@@ -6,8 +6,8 @@ from skimage.util import img_as_float
 
 
 def _smooth(image, sigma, mode, cval):
+    """Return image with each channel smoothed by the gaussian filter."""
 
-    # allocate output array
     smoothed = np.empty(image.shape, dtype=np.double)
 
     if image.ndim == 3: # apply gaussian filter to all dimensions independently
