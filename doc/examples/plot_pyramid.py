@@ -13,7 +13,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage import img_as_float
 from skimage.transform import build_gaussian_pyramid
 
 
