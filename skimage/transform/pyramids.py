@@ -178,13 +178,13 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
 
     _check_factor(downscale)
 
+    # cast to float for consistent data type in pyramid
     image = img_as_float(image)
 
     layer = 0
     rows = image.shape[0]
     cols = image.shape[1]
 
-    # cast to float for consistent data type in pyramid
     prev_layer_image = image
     yield image
 
@@ -252,6 +252,7 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
 
     _check_factor(downscale)
 
+    # cast to float for consistent data type in pyramid
     image = img_as_float(image)
 
     if sigma is None:
