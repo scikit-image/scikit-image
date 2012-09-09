@@ -96,7 +96,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
-        Order of splines used in interpolation of downsampling. See
+        Order of splines used in interpolation of upsampling. See
         `scipy.ndimage.map_coordinates` for detail.
     mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
@@ -137,7 +137,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
                            order=1, mode='reflect', cval=0):
-    """Build gaussian pyramid.
+    """Yield images of the gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image.
 
@@ -209,7 +209,7 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
 
 def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
                             order=1, mode='reflect', cval=0):
-    """Build laplacian pyramid.
+    """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
     downsampled plus smoothed image.
