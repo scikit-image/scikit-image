@@ -1016,5 +1016,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if mode == 'constant' and not (0 <= cval <= 1):
         clipped[out == cval] = cval
 
-    # Remove singleton dim introduced by atleast_3d
-    return clipped.squeeze()
+    if clipped.shape[0] == 1 or clipped.shape[1] == 1:
+        return clipped
+    else: # remove singleton dim introduced by atleast_3d
+        return clipped.squeeze()
