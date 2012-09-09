@@ -261,31 +261,29 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
     rows = image.shape[0]
     cols = image.shape[1]
 
-    prev_layer_image = image - _smooth(image, sigma, mode, cval)
-    yield prev_layer_image
+    smoothed_image = _smooth(image, sigma, mode, cval)
+    yield image - smoothed_image
 
     # build downsampled images until max_layer is reached or downsampled image
     # has size of 1 in one direction
     while layer != max_layer:
         layer += 1
 
-        rows = prev_layer_image.shape[0]
-        cols = prev_layer_image.shape[1]
+
         out_rows = math.ceil(rows / float(downscale))
         out_cols = math.ceil(cols / float(downscale))
 
-        resized = resize(prev_layer_image, (out_rows, out_cols), order=order,
-                         mode=mode, cval=cval)
-        layer_image = _smooth(resized, sigma, mode, cval)
+        resized_image = resize(smoothed_image, (out_rows, out_cols),
+                               order=order, mode=mode, cval=cval)
+        smoothed_image = _smooth(resized_image, sigma, mode, cval)
 
         prev_rows = rows
         prev_cols = cols
-        prev_layer_image = layer_image
-        rows = layer_image.shape[0]
-        cols = layer_image.shape[1]
+        rows = resized_image.shape[0]
+        cols = resized_image.shape[1]
 
         # no change to previous pyramid layer
         if prev_rows == rows and prev_cols == cols:
             break
 
-        yield layer_image
+        yield resized_image - smoothed_image
