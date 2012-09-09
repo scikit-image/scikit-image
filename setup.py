@@ -18,8 +18,16 @@ URL                 = 'http://scikits-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikits-image/scikits-image'
 VERSION             = '0.7dev'
+PYTHON_VERSION      = (2, 5)
+DEPENDENCIES        = {
+                        'numpy': (1, 6),
+                        'scipy': (0, 10),
+                        'Cython': (0, 15),
+                      }
+
 
 import os
+import sys
 import setuptools
 from numpy.distutils.core import setup
 try:
@@ -60,7 +68,45 @@ version='%s'
         vfile.close()
 
 
+def get_package_version(package):
+    version = []
+    for version_attr in ('version', 'VERSION', '__version__'):
+        if hasattr(package, version_attr) \
+                and isinstance(getattr(package, version_attr), str):
+            version_info = getattr(package, version_attr)
+            for part in version_info.split('.'):
+                try:
+                    version.append(int(part))
+                except ValueError:
+                    pass
+    return tuple(version)
+
+
+def check_requirements():
+    if sys.version_info < PYTHON_VERSION:
+        raise SystemExit('You need Python version %d.%d or later.' \
+                         % PYTHON_VERSION)
+
+    for package_name, min_version in DEPENDENCIES.items():
+        dep_error = False
+        try:
+            package = __import__(package_name)
+        except ImportError:
+            dep_error = True
+        else:
+            package_version = get_package_version(package)
+            if min_version > package_version:
+                dep_error = True
+
+        if dep_error:
+            raise ImportError('You need `%s` version %d.%d or later.' \
+                              % ((package_name, ) + min_version))
+
+
 if __name__ == "__main__":
+
+    check_requirements()
+
     write_version_py()
 
     setup(
@@ -92,18 +138,6 @@ if __name__ == "__main__":
 
         configuration=configuration,
 
-        install_requires=[
-            'Python >= 2.5',
-            'Numpy >= 1.6',
-            'Cython >= 0.15',
-            'SciPy >= 0.10',
-        ],
-
-        extras_require={
-            'Viewer': ['PyQt', 'matplotlib'],
-            'Tests': ['nose'],
-        },
-
         packages=setuptools.find_packages(),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
@@ -113,4 +147,4 @@ if __name__ == "__main__":
         },
 
         cmdclass={'build_py': build_py},
-        )
+    )
