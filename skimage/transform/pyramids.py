@@ -36,20 +36,19 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     image : array
         Input image.
     downscale : float, optional
-        Downscale factor. Default is 2.
+        Downscale factor.
     sigma : float, optional
         Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of downsampling. See
-        `scipy.ndimage.map_coordinates` for detail. Default is 1.
+        `scipy.ndimage.map_coordinates` for detail.
     mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
-        Default is 'reflect'.
     cval : float, optional
-        Value to fill past edges of input if mode is 'constant'. Default is 0.
+        Value to fill past edges of input if mode is 'constant'.
 
     Returns
     -------
@@ -91,20 +90,19 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     image : array
         Input image.
     upscale : float, optional
-        Upscale factor. Default is 2.
+        Upscale factor.
     sigma : float, optional
         Sigma for gaussian filter. Default is `2 * upscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of downsampling. See
-        `scipy.ndimage.map_coordinates` for detail. Default is 1.
+        `scipy.ndimage.map_coordinates` for detail.
     mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
-        Default is 'reflect'.
     cval : float, optional
-        Value to fill past edges of input if mode is 'constant'. Default is 0.
+        Value to fill past edges of input if mode is 'constant'.
 
     Returns
     -------
@@ -151,20 +149,19 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
         Number of layers for the pyramid. 0th layer is the original image.
         Default is -1 which builds all possible layers.
     downscale : float, optional
-        Downscale factor. Default is 2.
+        Downscale factor.
     sigma : float, optional
         Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of downsampling. See
-        `scipy.ndimage.map_coordinates` for detail. Default is 1.
+        `scipy.ndimage.map_coordinates` for detail.
     mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
-        Default is 'reflect'.
     cval : float, optional
-        Value to fill past edges of input if mode is 'constant'. Default is 0.
+        Value to fill past edges of input if mode is 'constant'.
 
     Returns
     -------
@@ -225,20 +222,19 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
         Number of layers for the pyramid. 0th layer is the original image.
         Default is -1 which builds all possible layers.
     downscale : float, optional
-        Downscale factor. Default is 2.
+        Downscale factor.
     sigma : float, optional
         Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
         covers more than 99% of the gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of downsampling. See
-        `scipy.ndimage.map_coordinates` for detail. Default is 1.
+        `scipy.ndimage.map_coordinates` for detail.
     mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
-        Default is 'reflect'.
     cval : float, optional
-        Value to fill past edges of input if mode is 'constant'. Default is 0.
+        Value to fill past edges of input if mode is 'constant'.
 
     Returns
     -------
