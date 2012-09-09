@@ -246,6 +246,7 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
     References
     ----------
     ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    ..[2] http://sepwww.stanford.edu/~morgan/texturematch/paper_html/node3.html
 
     """
 
