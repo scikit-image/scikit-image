@@ -53,7 +53,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     Returns
     -------
     out : array
-        Smoothed and downsampled image.
+        Smoothed and downsampled float image.
 
     References
     ----------
@@ -107,7 +107,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     Returns
     -------
     out : array
-        Upsampled and smoothed image.
+        Upsampled and smoothed float image.
 
     References
     ----------
@@ -139,7 +139,9 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
                            order=1, mode='reflect', cval=0):
     """Yield images of the gaussian pyramid formed by the input image.
 
-    Recursively applies the `pyramid_reduce` function to the image.
+    Recursively applies the `pyramid_reduce` function to the image, and yields
+    the downscaled images. Note that the first image of the pyramid will be the
+    original, unscaled image.
 
     Parameters
     ----------
@@ -166,7 +168,7 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
     Returns
     -------
     pyramid : generator
-        Generator yielding pyramid layers.
+        Generator yielding pyramid layers as float images.
 
     References
     ----------
@@ -239,7 +241,7 @@ def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
     Returns
     -------
     pyramid : generator
-        Generator yielding pyramid layers.
+        Generator yielding pyramid layers as float images.
 
     References
     ----------
