@@ -3,7 +3,7 @@ from scipy import ndimage
 from . import peak
 
 
-def harris(image, eps=1e-6, gaussian_deviation=1):
+def harris(image, eps=1e-6, sigma=1):
     """Compute Harris response image.
 
     Parameters
@@ -12,7 +12,7 @@ def harris(image, eps=1e-6, gaussian_deviation=1):
         Input image.
     eps : float, optional
         Normalisation factor.
-    gaussian_deviation : integer, optional
+    sigma : float, optional
         Standard deviation used for the Gaussian kernel.
 
     Returns
@@ -48,14 +48,16 @@ def harris(image, eps=1e-6, gaussian_deviation=1):
         image = rgb2grey(image)
 
     # derivatives
-    image = ndimage.gaussian_filter(image, gaussian_deviation, mode='constant',
-                                    cval=0)
+    image = ndimage.gaussian_filter(image, sigma, mode='constant', cval=0)
     imx = ndimage.sobel(image, axis=0, mode='constant', cval=0)
     imy = ndimage.sobel(image, axis=1, mode='constant', cval=0)
 
-    Wxx = ndimage.gaussian_filter(imx * imx, 1.5, mode='constant', cval=0)
-    Wxy = ndimage.gaussian_filter(imx * imy, 1.5, mode='constant', cval=0)
-    Wyy = ndimage.gaussian_filter(imy * imy, 1.5, mode='constant', cval=0)
+    Wxx = ndimage.gaussian_filter(imx * imx, sigma,
+                                  mode='constant', cval=0)
+    Wxy = ndimage.gaussian_filter(imx * imy, sigma,
+                                  mode='constant', cval=0)
+    Wyy = ndimage.gaussian_filter(imy * imy, sigma,
+                                  mode='constant', cval=0)
 
     # determinant and trace
     Wdet = Wxx * Wyy - Wxy**2
