@@ -10,7 +10,7 @@ from skimage.color import rgb2grey
 from skimage.util import img_as_float
 
 
-def moravec(image, int block_size=1):
+def moravec(image, int window_size=1):
     """Compute Moravec response image.
 
     This interest operator is comparatively fast but not rotation invariant.
@@ -19,8 +19,8 @@ def moravec(image, int block_size=1):
     ----------
     image : ndarray
         Input image.
-    block_size : int, optional
-        Block size for mean filtering the squared gradients.
+    window_size : int, optional
+        Window size.
 
     Returns
     -------
@@ -70,15 +70,15 @@ def moravec(image, int block_size=1):
 
     cdef double msum, min_msum
     cdef int r, c, br, bc, mr, mc, a, b
-    for r in range(2 * block_size, rows - 2 * block_size):
-        for c in range(2 * block_size, cols - 2 * block_size):
+    for r in range(2 * window_size, rows - 2 * window_size):
+        for c in range(2 * window_size, cols - 2 * window_size):
             min_msum = DBL_MAX
-            for br in range(r - block_size, r + block_size + 1):
-                for bc in range(c - block_size, c + block_size + 1):
+            for br in range(r - window_size, r + window_size + 1):
+                for bc in range(c - window_size, c + window_size + 1):
                     if br != r and bc != c:
                         msum = 0
-                        for mr in range(- block_size, block_size + 1):
-                            for mc in range(- block_size, block_size + 1):
+                        for mr in range(- window_size, window_size + 1):
+                            for mc in range(- window_size, window_size + 1):
                                 a = (r + mr) * cols + c + mc
                                 b = (br + mr) * cols + bc + mc
                                 msum += (image_data[a] - image_data[b]) ** 2
