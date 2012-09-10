@@ -142,6 +142,24 @@ By default, ``rescale_intensity`` stretches the values of ``in_range`` to match
 the range of the dtype.
 
 
+Note about negative values
+==========================
+
+People very often represent images in signed dtypes, even though they only
+manipulate the positive values of the image (e.g., using only 0-127 in an int8
+image). For this reason, conversion functions *only spread the positive values*
+of a signed dtype over the entire range of an unsigned dtype. In other words,
+negative values are clipped to 0 when converting from signed to unsigned
+dtypes. (Negative values are preserved when converting between signed dtypes.)
+To prevent this clipping behavior, you should rescale your image beforehand::
+
+   >>> image = exposure.rescale_intensity(img_int32, out_range=(0, 2**31 - 1))
+   >>> img_uint8 = img_as_ubyte(image)
+
+This behavior is symmetric: The values in an unsigned dtype are spread over
+just the positive range of a signed dtype.
+
+
 References
 ==========
 
