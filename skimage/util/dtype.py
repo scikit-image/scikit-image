@@ -152,7 +152,8 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     if kind == 'b':
         # to binary image
-        sign_loss()
+        if kind_in in "fi":
+            sign_loss()
         prec_loss()
         return dtype(image)
     
