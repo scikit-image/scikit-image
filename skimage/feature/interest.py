@@ -53,7 +53,7 @@ def moravec(image, block_size=3, mode='constant', cval=0):
 
     image = np.ascontiguousarray(img_as_float(image))
 
-    return _corner._moravec(image, block_size)
+    return _interest._moravec(image, block_size)
 
 
 def harris(image, eps=1e-6, gaussian_deviation=1):
