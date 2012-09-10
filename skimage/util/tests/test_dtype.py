@@ -93,12 +93,14 @@ def test_bool():
     img_[1, 1] = True
     img8[1, 1] = True
     funcs = (img_as_float, img_as_int, img_as_ubyte, img_as_uint, img_as_bool)
-    for func in funcs:
+    for (func, dt) in [(img_as_int, np.int16),
+                    (img_as_float, np.float64),
+                    (img_as_uint, np.uint16),
+                    (img_as_ubyte, np.ubyte)]:
         converted_ = func(img_)
-        assert np.sum(converted_) == 1
+        assert np.sum(converted_) == dtype_range[dt][1]
         converted8 = func(img8)
-        assert np.sum(converted8) == 1
-
+        assert np.sum(converted8) == dtype_range[dt][1]
 
 if __name__ == '__main__':
     np.testing.run_module_suite()

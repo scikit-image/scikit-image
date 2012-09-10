@@ -150,8 +150,16 @@ def convert(image, dtype, force_copy=False, uniform=False):
     itemsize = dtypeobj.itemsize
     itemsize_in = dtypeobj_in.itemsize
 
-    if kind == 'b' or kind_in == 'b':
+    if kind == 'b':
+        # to binary image
+        if kind_in in "fi":
+            sign_loss()
+        prec_loss()
         return dtype(image)
+    
+    if kind_in == 'b':
+        # from binary image, to float and to integer
+        return dtype(image) * dtype(dtype_range[dtype][1])
 
     if kind in 'ui':
         imin = np.iinfo(dtype).min
