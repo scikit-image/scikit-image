@@ -23,6 +23,7 @@ div.header-wrapper {
 
 body {
   font-family: {{ theme_bodyfont }};
+  font-size: 10pt;
   line-height: 1.4em;
   color: black;
   background-color: {{ theme_bgcolor }};
