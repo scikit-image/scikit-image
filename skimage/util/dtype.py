@@ -157,10 +157,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     
     if kind_in == 'b':
         # from binary image, to float and to integer
-        if kind  == 'f':
-            return dtype(image)
-        elif kind in 'ui':
-            return dtype(image) * dtype_range[dtype][1]
+        return dtype(image) * dtype_range[dtype][1]
 
     if kind in 'ui':
         imin = np.iinfo(dtype).min
