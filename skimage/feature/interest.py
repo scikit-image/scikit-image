@@ -8,7 +8,7 @@ def harris(image, eps=1e-6, gaussian_deviation=1):
 
     Parameters
     ----------
-    image : ndarray of floats
+    image : ndarray
         Input image.
     eps : float, optional
         Normalisation factor.
@@ -17,8 +17,8 @@ def harris(image, eps=1e-6, gaussian_deviation=1):
 
     Returns
     -------
-    coordinates : (N, 2) array
-        `(row, column)` coordinates of interest points.
+    response : ndarray
+        Moravec response image.
 
     Examples
     -------

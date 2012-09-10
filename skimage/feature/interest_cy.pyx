@@ -24,8 +24,8 @@ def moravec(image, int block_size=1):
 
     Returns
     -------
-    coordinates : (N, 2) array
-        `(row, column)` coordinates of interest points.
+    response : ndarray
+        Moravec response image.
 
     Examples
     -------
