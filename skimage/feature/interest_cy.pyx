@@ -27,6 +27,10 @@ def moravec(image, int block_size=1):
     response : ndarray
         Moravec response image.
 
+    References
+    ----------
+    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
+
     Examples
     -------
     >>> from skimage.feature import moravec, peak_local_max
