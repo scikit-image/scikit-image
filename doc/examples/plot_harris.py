@@ -13,7 +13,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from skimage import data, img_as_float
-from skimage.feature import harris
+from skimage.feature import harris, peak_local_max
 
 
 def plot_harris_points(image, filtered_coords):
@@ -29,12 +29,12 @@ plt.figure(figsize=(8, 3))
 im_lena = img_as_float(data.lena())
 im_text = img_as_float(data.text())
 
-filtered_coords = harris(im_lena, min_distance=4)
+filtered_coords = peak_local_max(harris(im_lena), min_distance=4)
 
 plt.axes([0, 0, 0.3, 0.95])
 plot_harris_points(im_lena, filtered_coords)
 
-filtered_coords = harris(im_text, min_distance=4)
+filtered_coords = peak_local_max(harris(im_text), min_distance=4)
 
 plt.axes([0.2, 0, 0.77, 1])
 plot_harris_points(im_text, filtered_coords)

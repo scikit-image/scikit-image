@@ -1,24 +1,31 @@
 import numpy as np
 from scipy import ndimage
+from skimage.color import rgb2grey
 from . import peak
 
 
-def harris(image, eps=1e-6, sigma=1):
+def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     """Compute Harris response image.
 
     Parameters
     ----------
     image : ndarray
         Input image.
+    method : {'k', 'eps'}, optional
+        Method to
+    k : float, optional
+        Sensitivity factor to separate corners from edges, typically in range
+        `[0, 0.2]`. Small values of k result in detection of sharp corners.
     eps : float, optional
-        Normalisation factor.
+        Normalisation factor (Noble's corner measure).
     sigma : float, optional
-        Standard deviation used for the Gaussian kernel.
+        Standard deviation used for the Gaussian kernel, which is used as
+        weighting function for the auto-correlation matrix.
 
     Returns
     -------
     response : ndarray
-        Moravec response image.
+        Harris response image.
 
     Examples
     -------
@@ -48,23 +55,24 @@ def harris(image, eps=1e-6, sigma=1):
         image = rgb2grey(image)
 
     # derivatives
-    image = ndimage.gaussian_filter(image, sigma, mode='constant', cval=0)
     imx = ndimage.sobel(image, axis=0, mode='constant', cval=0)
     imy = ndimage.sobel(image, axis=1, mode='constant', cval=0)
 
-    Wxx = ndimage.gaussian_filter(imx * imx, sigma,
+    Axx = ndimage.gaussian_filter(imx * imx, sigma,
                                   mode='constant', cval=0)
-    Wxy = ndimage.gaussian_filter(imx * imy, sigma,
+    Axy = ndimage.gaussian_filter(imx * imy, sigma,
                                   mode='constant', cval=0)
-    Wyy = ndimage.gaussian_filter(imy * imy, sigma,
+    Ayy = ndimage.gaussian_filter(imy * imy, sigma,
                                   mode='constant', cval=0)
 
-    # determinant and trace
-    Wdet = Wxx * Wyy - Wxy**2
-    Wtr = Wxx + Wyy
+    # determinant
+    detA = Axx * Ayy - Axy**2
+    # trace
+    traceA = Axx + Ayy
 
-    # Alternate formula for Harris response.
-    # Alison Noble, "Descriptions of Image Surfaces", PhD thesis (1989)
-    harris = Wdet / (Wtr + eps)
+    if method == 'k':
+        harris = detA - k * traceA**2
+    else:
+        harris = 2 * detA / (traceA + eps)
 
     return harris
