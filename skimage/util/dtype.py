@@ -152,12 +152,13 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     if kind == 'b':
         # to binary image
+        sign_loss()
         prec_loss()
         return dtype(image)
     
     if kind_in == 'b':
         # from binary image, to float and to integer
-        return dtype(image) * dtype_range[dtype][1]
+        return dtype(image) * dtype(dtype_range[dtype][1])
 
     if kind in 'ui':
         imin = np.iinfo(dtype).min
