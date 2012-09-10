@@ -1,59 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from skimage.color import rgb2grey
-from skimage.util import img_as_float
-from . import peak, _interest
-
-
-def moravec(image, block_size=3, mode='constant', cval=0):
-    """Compute Moravec response image.
-
-    This interest operator is comparatively fast but not rotation invariant.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-    block_size : int, optional
-        Block size for mean filtering the squared gradients.
-    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
-        The mode parameter determines how the array borders are handled, where
-        cval is the value when mode is equal to 'constant'.
-    cval : double, optional
-        Constant value to use for constant mode.
-
-    Returns
-    -------
-    coordinates : (N, 2) array
-        `(row, column)` coordinates of interest points.
-
-    Examples
-    -------
-    >>> from skimage.feature import moravec, peak_local_max
-    >>> square = np.zeros([10, 10])
-    >>> square[1:9,1:9] = 1
-    >>> square
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    >>> moravec(square)), square.shape)
-    (2, 6)
-
-    """
-
-    if image.ndim == 3:
-        image =  rgb2grey(image)
-
-    image = np.ascontiguousarray(img_as_float(image))
-
-    return _interest._moravec(image, block_size)
+from . import peak
 
 
 def harris(image, eps=1e-6, gaussian_deviation=1):
