@@ -58,6 +58,7 @@ def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     imx = ndimage.sobel(image, axis=0, mode='constant', cval=0)
     imy = ndimage.sobel(image, axis=1, mode='constant', cval=0)
 
+    # sum of squared differences / structure tensore
     Axx = ndimage.gaussian_filter(imx * imx, sigma,
                                   mode='constant', cval=0)
     Axy = ndimage.gaussian_filter(imx * imy, sigma,
