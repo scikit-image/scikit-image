@@ -5,7 +5,7 @@ from . import peak
 
 
 def _compute_derivatives(image):
-    """Compute derivatives in x and y direction.
+    """Compute derivatives in x and y direction using the Sobel operator.
 
     Parameters
     ----------
@@ -19,11 +19,8 @@ def _compute_derivatives(image):
 
     """
 
-    gradient_weights = np.array([-1, 0, 1])
-    imx = ndimage.convolve1d(image, gradient_weights, axis=0,
-                             mode='constant', cval=0)
-    imy = ndimage.convolve1d(image, gradient_weights, axis=1,
-                             mode='constant', cval=0)
+    imx = ndimage.sobel(image, axis=0, mode='constant', cval=0)
+    imy = ndimage.sobel(image, axis=1, mode='constant', cval=0)
 
     return imx, imy
 
