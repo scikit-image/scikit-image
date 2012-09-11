@@ -33,12 +33,9 @@ def _compute_auto_correlation(image, sigma):
                              mode='constant', cval=0)
 
     # structure tensore
-    Axx = ndimage.gaussian_filter(imx * imx, sigma,
-                                  mode='constant', cval=0)
-    Axy = ndimage.gaussian_filter(imx * imy, sigma,
-                                  mode='constant', cval=0)
-    Ayy = ndimage.gaussian_filter(imy * imy, sigma,
-                                  mode='constant', cval=0)
+    Axx = ndimage.gaussian_filter(imx * imx, sigma, mode='constant', cval=0)
+    Axy = ndimage.gaussian_filter(imx * imy, sigma, mode='constant', cval=0)
+    Ayy = ndimage.gaussian_filter(imy * imy, sigma, mode='constant', cval=0)
 
     return Axx, Axy, Ayy
 
