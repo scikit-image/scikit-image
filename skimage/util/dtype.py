@@ -155,7 +155,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
         if kind_in in "fi":
             sign_loss()
         prec_loss()
-        return image > dtype_in(0)
+        return image > dtype_in(dtype_range[dtype_in][1] / 2)
 
     if kind_in == 'b':
         # from binary image, to float and to integer
