@@ -127,6 +127,28 @@ def shi_tomasi(image, sigma=1):
     response : ndarray
         Shi-Tomasi response image.
 
+    Examples
+    -------
+    >>> from skimage.feature import shi_tomasi, peak_local_max
+    >>> square = np.zeros([10, 10])
+    >>> square[2:8,2:8] = 1
+    >>> square
+    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    >>> peak_local_max(shi_tomasi(square), min_distance=1)
+    array([[3, 3],
+           [3, 6],
+           [6, 3],
+           [6, 6]])
+
     """
 
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
