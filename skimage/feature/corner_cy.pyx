@@ -10,7 +10,7 @@ from skimage.color import rgb2grey
 from skimage.util import img_as_float
 
 
-def moravec(image, int window_size=1):
+def corner_moravec(image, int window_size=1):
     """Compute Moravec response image.
 
     This interest operator is comparatively fast but not rotation invariant.

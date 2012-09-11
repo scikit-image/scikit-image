@@ -12,11 +12,11 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('feature', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['interest_cy.pyx'], working_path=base_path)
+    cython(['corner_cy.pyx'], working_path=base_path)
     cython(['_texture.pyx'], working_path=base_path)
     cython(['_template.pyx'], working_path=base_path)
 
-    config.add_extension('interest_cy', sources=['interest_cy.c'],
+    config.add_extension('corner_cy', sources=['corner_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])

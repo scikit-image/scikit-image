@@ -40,7 +40,7 @@ def _compute_auto_correlation(image, sigma):
     return Axx, Axy, Ayy
 
 
-def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
+def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     """Compute Harris response image.
 
     This corner detector uses information in the auto-correlation matrix
@@ -110,7 +110,7 @@ def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     return response
 
 
-def shi_tomasi(image, sigma=1):
+def corner_shi_tomasi(image, sigma=1):
     """Compute Shi-Tomasi (Kanade-Tomasi) response image.
 
     This corner detector uses information in the auto-correlation matrix
