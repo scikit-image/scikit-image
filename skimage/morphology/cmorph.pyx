@@ -51,7 +51,7 @@ def dilate(np.ndarray[np.uint8_t, ndim=2] image,
                 rr = r + sr[s]
                 cc = c + sc[s]
                 if 0 <= rr < rows and 0 <= cc < cols:
-                    value = image_data[rr * rows + cc]
+                    value = image_data[rr * cols + cc]
                     if value > local_max:
                         local_max = value
 
@@ -85,7 +85,7 @@ def erode(np.ndarray[np.uint8_t, ndim=2] image,
     cdef np.uint8_t* out_data = <np.uint8_t*>out.data
     cdef np.uint8_t* image_data = <np.uint8_t*>image.data
 
-    cdef int r, c, rr, cc, s, value, local_max
+    cdef int r, c, rr, cc, s, value, local_min
 
     cdef int selem_num = np.sum(selem != 0)
     cdef int* sr = <int*>malloc(selem_num * sizeof(int))
@@ -106,7 +106,7 @@ def erode(np.ndarray[np.uint8_t, ndim=2] image,
                 rr = r + sr[s]
                 cc = c + sc[s]
                 if 0 <= rr < rows and 0 <= cc < cols:
-                    value = image_data[rr * rows + cc]
+                    value = image_data[rr * cols + cc]
                     if value < local_min:
                         local_min = value
 
