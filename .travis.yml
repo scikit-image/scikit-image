@@ -23,4 +23,4 @@ script:
     # Change into an innocuous directory and find tests from installation
     - mkdir for_test
     - cd for_test
-    - nosetests `$PYTHON -c "import os; import skimage; print(os.path.dirname(skimage.__file__))"`
+    - $PYTHON -c "import skimage; assert skimage.test();"
