@@ -3,23 +3,45 @@ import numpy as np
 from skimage import data
 from skimage import img_as_float
 
-from skimage.feature import moravec, harris, peak_local_max
+from skimage.feature import moravec, harris, shi_tomasi, peak_local_max
 
 
 def test_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.
+
+    # Moravec
+    results = peak_local_max(moravec(im))
+    # interest points along edge
+    assert len(results) == 57
+
+    # Harris
     results = peak_local_max(harris(im))
-    assert results.any()
+    # interest at corner
+    assert len(results) == 1
+
+    # Shi-Tomasi
+    results = peak_local_max(shi_tomasi(im))
+    # interest at corner
     assert len(results) == 1
 
 
 def test_noisy_square_image():
     im = np.zeros((50, 50)).astype(float)
     im[:25, :25] = 1.
-    im = im + np.random.uniform(size=im.shape) * .5
-    results = peak_local_max(harris(im))
+    im = im + np.random.uniform(size=im.shape) * .2
+
+    # Moravec
+    results = peak_local_max(moravec(im))
+    # undefined number of interest points
     assert results.any()
+
+    # Harris
+    results = peak_local_max(harris(im, sigma=1.5))
+    assert len(results) == 1
+
+    # Shi-Tomasi
+    results = peak_local_max(shi_tomasi(im, sigma=1.5))
     assert len(results) == 1
 
 
@@ -27,7 +49,15 @@ def test_squared_dot():
     im = np.zeros((50, 50))
     im[4:8, 4:8] = 1
     im = img_as_float(im)
+
+    # Moravec fails
+
+    # Harris
     results = peak_local_max(harris(im))
+    assert (results == np.array([[6, 6]])).all()
+
+    # Shi-Tomasi
+    results = peak_local_max(shi_tomasi(im))
     assert (results == np.array([[6, 6]])).all()
 
 
@@ -37,9 +67,23 @@ def test_rotated_lena():
     rotation.
     """
     im = img_as_float(data.lena().mean(axis=2))
-    results = peak_local_max(harris(im))
     im_rotated = im.T
+
+    # Moravec
+    results = peak_local_max(moravec(im))
+    results_rotated = peak_local_max(moravec(im_rotated))
+    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
+    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+
+    # Harris
+    results = peak_local_max(harris(im))
     results_rotated = peak_local_max(harris(im_rotated))
+    assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
+    assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+
+    # Shi-Tomasi
+    results = peak_local_max(shi_tomasi(im))
+    results_rotated = peak_local_max(shi_tomasi(im_rotated))
     assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
     assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
 
