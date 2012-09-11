@@ -4,15 +4,57 @@ from skimage.color import rgb2grey
 from . import peak
 
 
+def _compute_auto_correlation(image, sigma):
+    """Compute auto-correlation matrix using sum of squared differences.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float
+        Standard deviation used for the Gaussian kernel, which is used as
+        weighting function for the auto-correlation matrix.
+
+    Returns
+    -------
+    Axx, Axy, Ayy : arrays
+        Elements of the auto-correlation matrix for each pixel in input image.
+
+    """
+
+    if image.ndim == 3:
+        image = rgb2grey(image)
+
+    # derivatives
+    gradient_weights = np.array([-1, 0, 1])
+    imx = ndimage.convolve1d(image, gradient_weights, axis=0,
+                             mode='constant', cval=0)
+    imy = ndimage.convolve1d(image, gradient_weights, axis=1,
+                             mode='constant', cval=0)
+
+    # structure tensore
+    Axx = ndimage.gaussian_filter(imx * imx, sigma,
+                                  mode='constant', cval=0)
+    Axy = ndimage.gaussian_filter(imx * imy, sigma,
+                                  mode='constant', cval=0)
+    Ayy = ndimage.gaussian_filter(imy * imy, sigma,
+                                  mode='constant', cval=0)
+
+    return Axx, Axy, Ayy
+
+
 def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     """Compute Harris response image.
+
+    This corner detector uses information in the auto-correlation matrix
+    (sum of squared differences) to make assumptions about the type of point.
 
     Parameters
     ----------
     image : ndarray
         Input image.
     method : {'k', 'eps'}, optional
-        Method to
+        Method to compute the response image from the auto-correlation matrix.
     k : float, optional
         Sensitivity factor to separate corners from edges, typically in range
         `[0, 0.2]`. Small values of k result in detection of sharp corners.
@@ -51,20 +93,7 @@ def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     """
 
-    if image.ndim == 3:
-        image = rgb2grey(image)
-
-    # derivatives
-    imx = ndimage.sobel(image, axis=0, mode='constant', cval=0)
-    imy = ndimage.sobel(image, axis=1, mode='constant', cval=0)
-
-    # sum of squared differences / structure tensore
-    Axx = ndimage.gaussian_filter(imx * imx, sigma,
-                                  mode='constant', cval=0)
-    Axy = ndimage.gaussian_filter(imx * imy, sigma,
-                                  mode='constant', cval=0)
-    Ayy = ndimage.gaussian_filter(imy * imy, sigma,
-                                  mode='constant', cval=0)
+    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
 
     # determinant
     detA = Axx * Ayy - Axy**2
@@ -72,8 +101,37 @@ def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     traceA = Axx + Ayy
 
     if method == 'k':
-        harris = detA - k * traceA**2
+        response = detA - k * traceA**2
     else:
-        harris = 2 * detA / (traceA + eps)
+        response = 2 * detA / (traceA + eps)
 
-    return harris
+    return response
+
+
+def shi_tomasi(image, sigma=1):
+    """Compute Shi-Tomasi (Kanade-Tomasi) response image.
+
+    This corner detector uses information in the auto-correlation matrix
+    (sum of squared differences) to make assumptions about the type of point.
+    It is computationally more expensive than the harris corner detector as
+    it directly computes the minimum eigenvalue of the auto-correlation matrix.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float, optional
+        Standard deviation used for the Gaussian kernel, which is used as
+        weighting function for the auto-correlation matrix.
+
+    response : ndarray
+        Shi-Tomasi response image.
+
+    """
+
+    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+
+    # minimum eigenvalue of A
+    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
+
+    return response
