@@ -10,7 +10,7 @@ from skimage.morphology import binary, grey, selem
 
 
 lena = np.load(os.path.join(data_dir, 'lena_GRAY_U8.npy'))
-bw_lena = lena > 0.4
+bw_lena = lena > 100
 
 
 class TestMorphology():

@@ -65,7 +65,7 @@ def binary_dilation(image, selem, out=None):
     """
 
     conv = ndimage.convolve(image > 0, selem, output=out,
-                            mode='constant', cval=1)
+                            mode='constant', cval=0)
     if conv is not None:
         out = conv
     return np.not_equal(out, 0, out=out)
