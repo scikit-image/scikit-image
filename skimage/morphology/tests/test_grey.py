@@ -155,6 +155,13 @@ class TestDTypes():
         self._test_image(image)
 
 
+def test_non_square_image():
+    strel = selem.square(3)
+    binary_res = binary.binary_erosion(bw_lena[:100, :200], strel)
+    grey_res = img_as_bool(grey.erosion(bw_lena[:100, :200], strel))
+    testing.assert_array_equal(binary_res, grey_res)
+
+
 def test_binary_erosion():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_lena, strel)
