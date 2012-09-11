@@ -4,6 +4,7 @@
 # We pretend to be erlang because we need can't use the python support in
 # travis-ci; it uses virtualenvs, they do not have numpy, scipy, matplotlib,
 # and it is impractical to build them
+
 language: erlang
 env:
     - PYTHON=python PYSUF=''
@@ -23,4 +24,5 @@ script:
     # Change into an innocuous directory and find tests from installation
     - mkdir for_test
     - cd for_test
-    - $PYTHON -c "import skimage; assert skimage.test();"
+    - nosetests --exe -v --cover-package=skimage skimage
+
