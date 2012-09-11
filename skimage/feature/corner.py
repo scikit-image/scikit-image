@@ -59,8 +59,13 @@ def _compute_auto_correlation(image, sigma):
 def corner_kitchen_rosenfeld(image):
     """Compute Kitchen and Rosenfeld response image.
 
-    This corner detector uses information in the auto-correlation matrix
-    (sum of squared differences) to make assumptions about the type of point.
+    The corner measure is calculated as follows::
+
+        (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy)
+        ------------------------------------------------------
+                        (imx**2 + imy**2)
+
+    Where imx and imy are the first and imxx, imxy, imyy the second derivatives.
 
     Parameters
     ----------
@@ -87,8 +92,19 @@ def corner_kitchen_rosenfeld(image):
 def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     """Compute Harris response image.
 
-    This corner detector uses information in the auto-correlation matrix
-    (sum of squared differences) to make assumptions about the type of point.
+    This corner detector uses information from the auto-correlation matrix A::
+
+        A = [(imx**2)   (imx*imy)] = [Axx Axy]
+            [(imx*imy)   (imy**2)]   [Axy Ayy]
+
+    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    The corner measure is then defined as::
+
+        det(A) - k * trace(A)**2
+
+    or::
+
+        2 * det(A) / (trace(A) + eps)
 
     Parameters
     ----------
@@ -157,10 +173,15 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 def corner_shi_tomasi(image, sigma=1):
     """Compute Shi-Tomasi (Kanade-Tomasi) response image.
 
-    This corner detector uses information in the auto-correlation matrix
-    (sum of squared differences) to make assumptions about the type of point.
-    It is computationally more expensive than the harris corner detector as
-    it directly computes the minimum eigenvalue of the auto-correlation matrix.
+    This corner detector uses information from the auto-correlation matrix A::
+
+        A = [(imx**2)   (imx*imy)] = [Axx Axy]
+            [(imx*imy)   (imy**2)]   [Axy Ayy]
+
+    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    The corner measure is then defined as the smaller eigenvalue of A::
+
+        ((Axx + Ayy) - sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
 
     Parameters
     ----------
