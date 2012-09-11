@@ -129,6 +129,8 @@ def shi_tomasi(image, sigma=1):
         Standard deviation used for the Gaussian kernel, which is used as
         weighting function for the auto-correlation matrix.
 
+    Returns
+    -------
     response : ndarray
         Shi-Tomasi response image.
 
