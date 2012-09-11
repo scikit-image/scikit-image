@@ -69,6 +69,11 @@ def harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     response : ndarray
         Harris response image.
 
+    References
+    ----------
+    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
+    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+
     Examples
     -------
     >>> from skimage.feature import harris, peak_local_max
@@ -126,6 +131,11 @@ def shi_tomasi(image, sigma=1):
 
     response : ndarray
         Shi-Tomasi response image.
+
+    References
+    ----------
+    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
+    ..[2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     -------

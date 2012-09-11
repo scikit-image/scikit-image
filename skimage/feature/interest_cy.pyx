@@ -30,6 +30,7 @@ def moravec(image, int window_size=1):
     References
     ----------
     ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
+    ..[2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     -------
