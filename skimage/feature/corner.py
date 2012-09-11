@@ -57,7 +57,7 @@ def _compute_auto_correlation(image, sigma):
 
 
 def corner_kitchen_rosenfeld(image):
-    """Compute Kitchen and Rosenfeld response image.
+    """Compute Kitchen and Rosenfeld corner measure response image.
 
     The corner measure is calculated as follows::
 
@@ -90,7 +90,7 @@ def corner_kitchen_rosenfeld(image):
 
 
 def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
-    """Compute Harris response image.
+    """Compute Harris corner measure response image.
 
     This corner detector uses information from the auto-correlation matrix A::
 
@@ -171,7 +171,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
 
 def corner_shi_tomasi(image, sigma=1):
-    """Compute Shi-Tomasi (Kanade-Tomasi) response image.
+    """Compute Shi-Tomasi (Kanade-Tomasi) corner measure response image.
 
     This corner detector uses information from the auto-correlation matrix A::
 
@@ -229,5 +229,56 @@ def corner_shi_tomasi(image, sigma=1):
 
     # minimum eigenvalue of A
     response = ((Axx + Ayy) - np.sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
+
+    return response
+
+
+def corner_foerstner(image, sigma=1):
+    """Compute Foerstner corner measure response image.
+
+    This corner detector uses information from the auto-correlation matrix A::
+
+        A = [(imx**2)   (imx*imy)] = [Axx Axy]
+            [(imx*imy)   (imy**2)]   [Axy Ayy]
+
+    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    The corner measure is then defined as::
+
+        w = det(A) / trace(A)           (size of error ellipse)
+        q = 4 * det(A) / trace(A)**2    (roundness of error ellipse)
+        w * q                           (corner measure)
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float, optional
+        Standard deviation used for the Gaussian kernel, which is used as
+        weighting function for the auto-correlation matrix.
+
+    Returns
+    -------
+    response : ndarray
+        Foerstner response image.
+
+    References
+    ----------
+    ..[1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
+          foerstner87.fast.pdf
+    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+
+    """
+
+    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+
+    # determinant
+    detA = Axx * Ayy - Axy**2
+    # trace
+    traceA = Axx + Ayy
+
+    w = detA / traceA
+    q = 4 * detA / traceA**2
+
+    response = w * q
 
     return response
