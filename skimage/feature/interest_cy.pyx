@@ -63,7 +63,7 @@ def moravec(image, int window_size=1):
         cimage = rgb2grey(image)
     cimage = np.ascontiguousarray(img_as_float(image))
 
-    out = np.zeros_like(image)
+    out = np.zeros(image.shape, dtype=np.double)
 
     cdef double* image_data = <double*>cimage.data
     cdef double* out_data = <double*>out.data
