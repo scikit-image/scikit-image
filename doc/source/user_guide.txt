@@ -8,3 +8,4 @@ User Guide
    user_guide/plugins
    user_guide/tutorials
    user_guide/getting_help
+   user_guide/viewer
