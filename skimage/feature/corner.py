@@ -4,6 +4,30 @@ from skimage.color import rgb2grey
 from . import peak
 
 
+def _compute_derivatives(image):
+    """Compute derivatives in x and y direction.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    Returns
+    -------
+    imx, imy : arrays
+        Derivatives in x and y direction.
+
+    """
+
+    gradient_weights = np.array([-1, 0, 1])
+    imx = ndimage.convolve1d(image, gradient_weights, axis=0,
+                             mode='constant', cval=0)
+    imy = ndimage.convolve1d(image, gradient_weights, axis=1,
+                             mode='constant', cval=0)
+
+    return imx, imy
+
+
 def _compute_auto_correlation(image, sigma):
     """Compute auto-correlation matrix using sum of squared differences.
 
@@ -25,12 +49,7 @@ def _compute_auto_correlation(image, sigma):
     if image.ndim == 3:
         image = rgb2grey(image)
 
-    # derivatives
-    gradient_weights = np.array([-1, 0, 1])
-    imx = ndimage.convolve1d(image, gradient_weights, axis=0,
-                             mode='constant', cval=0)
-    imy = ndimage.convolve1d(image, gradient_weights, axis=1,
-                             mode='constant', cval=0)
+    imx, imy = _compute_derivatives(image)
 
     # structure tensore
     Axx = ndimage.gaussian_filter(imx * imx, sigma, mode='constant', cval=0)
@@ -38,6 +57,34 @@ def _compute_auto_correlation(image, sigma):
     Ayy = ndimage.gaussian_filter(imy * imy, sigma, mode='constant', cval=0)
 
     return Axx, Axy, Ayy
+
+
+def corner_kitchen_rosenfeld(image):
+    """Compute Kitchen and Rosenfeld response image.
+
+    This corner detector uses information in the auto-correlation matrix
+    (sum of squared differences) to make assumptions about the type of point.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    Returns
+    -------
+    response : ndarray
+        Kitchen and Rosenfeld response image.
+
+    """
+
+    imx, imy = _compute_derivatives(image)
+    imxx, imxy = _compute_derivatives(imx)
+    imyx, imyy = _compute_derivatives(imy)
+
+    response = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy) \
+               / (imx**2 + imy**2)
+
+    return response
 
 
 def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
