@@ -11,7 +11,7 @@ from skimage.util import img_as_float
 
 
 def corner_moravec(image, int window_size=1):
-    """Compute Moravec response image.
+    """Compute Moravec corner measure response image.
 
     This is one of the simplest corner detectors and is comparatively fast but
     has several limitations (e.g. not rotation invariant).
