@@ -261,7 +261,7 @@ def is_local_maximum(image, labels=None, footprint=None):
     array([[ True, False, False, False],
            [ True, False,  True, False],
            [ True, False, False, False],
-           [ True,  True, False,  True]], dtype='bool')
+           [ True,  True, False,  True]], dtype=bool)
     >>> image = np.arange(16).reshape((4, 4))
     >>> labels = np.array([[1, 2], [3, 4]])
     >>> labels = np.repeat(np.repeat(labels, 2, axis=0), 2, axis=1)
@@ -279,7 +279,7 @@ def is_local_maximum(image, labels=None, footprint=None):
     array([[False, False, False, False],
            [False,  True, False,  True],
            [False, False, False, False],
-           [False,  True, False,  True]], dtype='bool')
+           [False,  True, False,  True]], dtype=bool)
     """
     if labels is None:
         labels = np.ones(image.shape, dtype=np.uint8)
