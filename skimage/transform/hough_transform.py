@@ -124,7 +124,7 @@ def hough(img, theta=None):
     >>> img[:, 65] = 1
     >>> img[35:45, 35:50] = 1
     >>> for i in range(90):
-    >>>     img[i, i] = 1
+    ...     img[i, i] = 1
     >>> img += np.random.random(img.shape) > 0.95
 
     Apply the Hough transform:
