@@ -137,7 +137,7 @@ def hough(img, theta=None):
     >>> plt.imshow(out, cmap=plt.cm.bone)
     >>> plt.xlabel('Angle (degree)')
     >>> plt.ylabel('Distance %d (pixel)' % d[0])
-    >>> plt.show()
+    >>> # plt.show()
 
     .. plot:: hough_tf.py
 
