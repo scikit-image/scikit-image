@@ -56,9 +56,10 @@ def alphanumeric_key(s):
     --------
     >>> alphanumeric_key('z23a')
     ['z', 23, 'a']
-    >>> filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png']
+    >>> filenames = ['f9.10.png', 'e10.png', 'f9.9.png', 'f10.10.png',
+    ...              'f10.9.png']
     >>> sorted(filenames)
-    ['f10.10.png', 'f10.9.png', 'f9.10.png', 'f9.9.png', 'e10.png']
+    ['e10.png', 'f10.10.png', 'f10.9.png', 'f9.10.png', 'f9.9.png']
     >>> sorted(filenames, key=alphanumeric_key)
     ['e10.png', 'f9.9.png', 'f9.10.png', 'f10.9.png', 'f10.10.png']
     """
@@ -284,7 +285,7 @@ class ImageCollection(object):
     >>> len(coll)
     2
     >>> coll[0].shape
-    (128, 128, 3)
+    (512, 512, 3)
 
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
 

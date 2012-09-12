@@ -52,7 +52,7 @@ def frt2(a):
     >>> plt.imshow(f, interpolation='nearest', cmap=plt.cm.gray)
     >>> plt.xlabel('Angle')
     >>> plt.ylabel('Translation')
-    >>> plt.show()
+    >>> # plt.show()
 
     References
     ----------
