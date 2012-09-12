@@ -54,17 +54,17 @@ class Plugin(QDialog):
 
     Examples
     --------
-    >>> def my_func(image, arg1, arg2, optional_arg=0):
-    >>>     ...
+    >>> from skimage.viewer import ImageViewer
+    >>> from skimage.viewer.widgets import Slider
+    >>> from skimage import data
     >>>
+    >>> plugin = Plugin(image_filter=lambda img, threshold: img > threshold)
+    >>> plugin += Slider('threshold', 0, 255)
+    >>>
+    >>> image = data.coins()
     >>> viewer = ImageViewer(image)
-    >>>
-    >>> plugin = Plugin(image_filter=my_func)
-    >>> plugin += Widget('arg1', ..., ptype='arg')
-    >>> plugin += Widget('arg2', ..., ptype='arg')
-    >>> plugin += Widget('optional_arg', ..., ptype='kwarg')
-    >>>
-    >>> viewer.show()
+    >>> viewer += plugin
+    >>> # viewer.show()
 
     The plugin will automatically delegate parameters to `image_filter` based
     on its parameter type, i.e., `ptype` (widgets for required arguments must
@@ -108,9 +108,9 @@ class Plugin(QDialog):
         """Attach the plugin to an ImageViewer.
 
         Note that the ImageViewer will automatically call this method when the
-        plugin is added to the ImageViewer. For example:
+        plugin is added to the ImageViewer. For example::
 
-        >>> viewer += Plugin(...)
+            viewer += Plugin(...)
 
         Also note that `attach` automatically calls the filter function so that
         the image matches the filtered value specified by attached widgets.
@@ -131,9 +131,9 @@ class Plugin(QDialog):
     def add_widget(self, widget):
         """Add widget to plugin.
 
-        Alternatively, Plugin's `__add__` method is overloaded to add widgets:
+        Alternatively, Plugin's `__add__` method is overloaded to add widgets::
 
-        >>> plugin += Widget(...)
+            plugin += Widget(...)
 
         Widgets can adjust required or optional arguments of filter function or
         parameters for the plugin. This is specified by the Widget's `ptype'.

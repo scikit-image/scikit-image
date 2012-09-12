@@ -7,7 +7,7 @@ __all__ = ['inverse', 'wiener', 'LPIFilter2D']
 __docformat__ = 'restructuredtext en'
 
 import numpy as np
-from scipy.fftpack import fftshift, ifftshift
+from scipy.fftpack import ifftshift
 
 eps = np.finfo(float).eps
 
@@ -50,16 +50,19 @@ class LPIFilter2D(object):
         Parameters
         ----------
         impulse_response : callable `f(r, c, **filter_params)`
-            Function that yields the impulse response.  `r` and
-            `c` are 1-dimensional vectors that represent row and
-            column positions, in other words coordinates are
-            (r[0],c[0]),(r[0],c[1]) etc.  `**filter_params` are
-            passed through.
+            Function that yields the impulse response.  `r` and `c` are
+            1-dimensional vectors that represent row and column positions, in
+            other words coordinates are (r[0],c[0]),(r[0],c[1]) etc.
+            `**filter_params` are passed through.
 
-            In other words, example would be called like this:
+            In other words, `impulse_response` would be called like this:
 
+            >>> def impulse_response(r, c, **filter_params):
+            ...     pass
+            >>>
             >>> r = [0,0,0,1,1,1,2,2,2]
             >>> c = [0,1,2,0,1,2,0,1,2]
+            >>> filter_params = {'kw1': 1, 'kw2': 2, 'kw3': 3}
             >>> impulse_response(r, c, **filter_params)
 
         Examples
@@ -68,8 +71,7 @@ class LPIFilter2D(object):
         Gaussian filter:
 
         >>> def filt_func(r, c):
-                return np.exp(-np.hypot(r, c)/1)
-
+        ...     return np.exp(-np.hypot(r, c)/1)
         >>> filter = LPIFilter2D(filt_func)
 
         """
@@ -113,8 +115,9 @@ class LPIFilter2D(object):
     def __call__(self, data):
         """Apply the filter to the given data.
 
-        *Parameters*:
-            data : (M,N) ndarray
+        Parameters
+        ----------
+        data : (M,N) ndarray
 
         """
         F, G = self._prepare(data)
@@ -139,9 +142,8 @@ def forward(data, impulse_response=None, filter_params={},
     Other Parameters
     ----------------
     predefined_filter : LPIFilter2D
-        If you need to apply the same filter multiple times over
-        different images, construct the LPIFilter2D and specify
-        it here.
+        If you need to apply the same filter multiple times over different
+        images, construct the LPIFilter2D and specify it here.
 
     Examples
     --------
@@ -149,9 +151,10 @@ def forward(data, impulse_response=None, filter_params={},
     Gaussian filter:
 
     >>> def filt_func(r, c):
-            return np.exp(-np.hypot(r, c)/1)
-
-    >>> forward(data, filt_func)
+    ...     return np.exp(-np.hypot(r, c)/1)
+    >>>
+    >>> from skimage import data
+    >>> filtered = forward(data.coins(), filt_func)
 
     """
     if predefined_filter is None:
@@ -172,17 +175,15 @@ def inverse(data, impulse_response=None, filter_params={}, max_gain=2,
     filter_params : dict
         Additional keyword parameters to the impulse_response function.
     max_gain : float
-        Limit the filter gain.  Often, the filter contains
-        zeros, which would cause the inverse filter to have
-        infinite gain.  High gain causes amplification of
-        artefacts, so a conservative limit is recommended.
+        Limit the filter gain.  Often, the filter contains zeros, which would
+        cause the inverse filter to have infinite gain.  High gain causes
+        amplification of artefacts, so a conservative limit is recommended.
 
     Other Parameters
     ----------------
     predefined_filter : LPIFilter2D
-        If you need to apply the same filter multiple times over
-        different images, construct the LPIFilter2D and specify
-        it here.
+        If you need to apply the same filter multiple times over different
+        images, construct the LPIFilter2D and specify it here.
 
     """
     if predefined_filter is None:
@@ -219,9 +220,8 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     Other Parameters
     ----------------
     predefined_filter : LPIFilter2D
-        If you need to apply the same filter multiple times over
-        different images, construct the LPIFilter2D and specify
-        it here.
+        If you need to apply the same filter multiple times over different
+        images, construct the LPIFilter2D and specify it here.
 
     """
     if predefined_filter is None:

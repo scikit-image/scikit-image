@@ -49,9 +49,10 @@ class ImageViewer(QMainWindow):
 
     Examples
     --------
+    >>> from skimage import data
+    >>> image = data.coins()
     >>> viewer = ImageViewer(image)
-    >>> viewer += SomePlugin()
-    >>> viewer.show()
+    >>> # viewer.show()
 
     """
     def __init__(self, image):

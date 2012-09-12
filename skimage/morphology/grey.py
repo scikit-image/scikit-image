@@ -57,7 +57,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
            [0, 0, 0, 0, 0],
            [0, 0, 1, 0, 0],
            [0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0]], dtype='uint8')
+           [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
 
@@ -109,7 +109,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
            [0, 1, 1, 1, 0],
            [0, 1, 1, 1, 0],
            [0, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0]], dtype='uint8')
+           [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
 
@@ -158,7 +158,7 @@ def opening(image, selem, out=None):
            [1, 1, 0, 1, 1],
            [1, 1, 0, 1, 1],
            [1, 1, 0, 1, 1],
-           [0, 0, 0, 0, 0]], dtype='uint8')
+           [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
 
@@ -208,7 +208,7 @@ def closing(image, selem, out=None):
            [0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1],
            [0, 0, 0, 0, 0],
-           [0, 0, 0, 0, 0]], dtype='uint8')
+           [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
 
@@ -257,7 +257,7 @@ def white_tophat(image, selem, out=None):
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
            [0, 0, 1, 0, 0],
-           [0, 0, 0, 0, 0]], dtype='uint8')
+           [0, 0, 0, 0, 0]], dtype=uint8)
 
    """
     if image is out:
@@ -306,7 +306,7 @@ def black_tophat(image, selem, out=None):
            [0, 0, 1, 0, 0],
            [0, 1, 5, 1, 0],
            [0, 0, 1, 0, 0],
-           [0, 0, 0, 0, 0]], dtype='uint8')
+           [0, 0, 0, 0, 0]], dtype=uint8)
 
     """
 
