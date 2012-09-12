@@ -58,8 +58,12 @@ class LPIFilter2D(object):
 
             In other words, example would be called like this:
 
+            >>> def impulse_response(r, c, **filter_params):
+            ...     pass
+            >>>
             >>> r = [0,0,0,1,1,1,2,2,2]
             >>> c = [0,1,2,0,1,2,0,1,2]
+            >>> filter_params = {'kw1': 1, 'kw2': 2, 'kw3': 3}
             >>> impulse_response(r, c, **filter_params)
 
         Examples
@@ -68,8 +72,7 @@ class LPIFilter2D(object):
         Gaussian filter:
 
         >>> def filt_func(r, c):
-                return np.exp(-np.hypot(r, c)/1)
-
+        ...     return np.exp(-np.hypot(r, c)/1)
         >>> filter = LPIFilter2D(filt_func)
 
         """
@@ -149,9 +152,10 @@ def forward(data, impulse_response=None, filter_params={},
     Gaussian filter:
 
     >>> def filt_func(r, c):
-            return np.exp(-np.hypot(r, c)/1)
-
-    >>> forward(data, filt_func)
+    ...     return np.exp(-np.hypot(r, c)/1)
+    >>>
+    >>> from skimage import data
+    >>> filtered = forward(data.coins(), filt_func)
 
     """
     if predefined_filter is None:
