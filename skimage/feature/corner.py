@@ -246,7 +246,6 @@ def corner_foerstner(image, sigma=1):
 
         w = det(A) / trace(A)           (size of error ellipse)
         q = 4 * det(A) / trace(A)**2    (roundness of error ellipse)
-        w * q                           (corner measure)
 
     Parameters
     ----------
@@ -258,8 +257,8 @@ def corner_foerstner(image, sigma=1):
 
     Returns
     -------
-    response : ndarray
-        Foerstner response image.
+    w, q : ndarray
+        Foerstner response images.
 
     References
     ----------
@@ -279,6 +278,4 @@ def corner_foerstner(image, sigma=1):
     w = detA / traceA
     q = 4 * detA / traceA**2
 
-    response = w * q
-
-    return response
+    return w, q
