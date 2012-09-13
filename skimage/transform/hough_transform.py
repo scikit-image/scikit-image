@@ -131,13 +131,13 @@ def hough(img, theta=None):
 
     >>> out, angles, d = hough(img)
 
-    Plot the results:
+    Plot the results::
 
-    >>> import matplotlib.pyplot as plt
-    >>> plt.imshow(out, cmap=plt.cm.bone)
-    >>> plt.xlabel('Angle (degree)')
-    >>> plt.ylabel('Distance %d (pixel)' % d[0])
-    >>> # plt.show()
+        import matplotlib.pyplot as plt
+        plt.imshow(out, cmap=plt.cm.bone)
+        plt.xlabel('Angle (degree)')
+        plt.ylabel('Distance %d (pixel)' % d[0])
+        plt.show()
 
     .. plot:: hough_tf.py
 
