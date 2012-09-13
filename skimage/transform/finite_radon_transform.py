@@ -46,14 +46,6 @@ def frt2(a):
 
     >>> f = frt2(img)
 
-    Plot the results:
-
-    >>> import matplotlib.pyplot as plt
-    >>> plt.imshow(f, interpolation='nearest', cmap=plt.cm.gray)
-    >>> plt.xlabel('Angle')
-    >>> plt.ylabel('Translation')
-    >>> # plt.show()
-
     References
     ----------
     .. [FRT] A. Kingston and I. Svalbe, "Projective transforms on periodic
