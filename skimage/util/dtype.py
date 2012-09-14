@@ -360,7 +360,8 @@ def img_as_bool(image, force_copy=False):
 
     Notes
     -----
-    All non-zero elements are treated as True.
+    The upper half of the input dtype's positive range is True, and the lower
+    half is False. All negative values (if present) are False.
 
     """
     return convert(image, np.bool_, force_copy)
