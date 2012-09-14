@@ -155,11 +155,14 @@ def convert(image, dtype, force_copy=False, uniform=False):
         if kind_in in "fi":
             sign_loss()
         prec_loss()
-        return dtype(image)
-    
+        return image > dtype_in(dtype_range[dtype_in][1] / 2)
+
     if kind_in == 'b':
         # from binary image, to float and to integer
-        return dtype(image) * dtype(dtype_range[dtype][1])
+        result = dtype(image)
+        if kind != 'f':
+            result *= dtype(dtype_range[dtype][1])
+        return result
 
     if kind in 'ui':
         imin = np.iinfo(dtype).min
