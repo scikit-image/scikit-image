@@ -3,10 +3,11 @@
 Build image pyramids
 ====================
 
-The `build_gaussian_pyramid` function takes an image and yields successive
-images shrunk by a constant scale factor. Image pyramids are often used, e.g.,
-to implement algorithms for denoising, texture discrimination, and scale-
-invariant detection.
+The `pyramid_gaussian` function takes an image and yields successive images
+shrunk by a constant scale factor. Image pyramids are often used, e.g., to
+implement algorithms for denoising, texture discrimination, and scale- invariant
+detection.
+
 """
 
 import numpy as np
