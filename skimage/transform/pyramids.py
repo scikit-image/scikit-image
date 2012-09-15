@@ -135,13 +135,17 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     return out
 
 
-def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
-                           order=1, mode='reflect', cval=0):
+def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
+                     mode='reflect', cval=0):
     """Yield images of the gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
-    the downscaled images. Note that the first image of the pyramid will be the
-    original, unscaled image.
+    the downscaled images.
+
+    Note that the first image of the pyramid will be the original, unscaled
+    image. The total number of images is `max_layer + 1`. In case all layers are
+    computed, the last image is either a one-pixel image or the image where the
+    reduction does not change its shape.
 
     Parameters
     ----------
@@ -209,12 +213,20 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
         yield layer_image
 
 
-def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
-                            order=1, mode='reflect', cval=0):
+def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
+                      mode='reflect', cval=0):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the
-    downsampled plus smoothed image.
+    downsampled, smoothed image::
+
+        layer = resize(prev_layer) - smooth(resize(prev_layer))
+
+    Note that the first image of the pyramid will be the difference between the
+    original, unscaled image and its smoothed version. The total number of
+    images is `max_layer + 1`. In case all layers are computed, the last image
+    is either a one-pixel image or the image where the reduction does not change
+    its shape.
 
     Parameters
     ----------

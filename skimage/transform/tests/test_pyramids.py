@@ -1,7 +1,7 @@
 from numpy.testing import assert_array_equal, run_module_suite
 from skimage import data
 from skimage.transform import (pyramid_reduce, pyramid_expand,
-                               build_gaussian_pyramid, build_laplacian_pyramid)
+                               pyramid_gaussian, pyramid_laplacian)
 
 
 image = data.lena()
@@ -21,7 +21,7 @@ def test_pyramid_expand():
 
 def test_build_gaussian_pyramid():
     rows, cols, dim = image.shape
-    pyramid = build_gaussian_pyramid(image, downscale=2)
+    pyramid = pyramid_gaussian(image, downscale=2)
 
     for layer, out in enumerate(pyramid):
         layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)
@@ -30,7 +30,7 @@ def test_build_gaussian_pyramid():
 
 def test_build_laplacian_pyramid():
     rows, cols, dim = image.shape
-    pyramid = build_laplacian_pyramid(image, downscale=2)
+    pyramid = pyramid_laplacian(image, downscale=2)
 
     for layer, out in enumerate(pyramid):
         layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)

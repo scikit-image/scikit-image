@@ -8,4 +8,4 @@ from ._geometric import (warp, warp_coords, estimate_transform,
                          PiecewiseAffineTransform)
 from ._warps import swirl, homography, resize, rotate
 from .pyramids import (pyramid_reduce, pyramid_expand,
-                       build_gaussian_pyramid, build_laplacian_pyramid)
+                       pyramid_gaussian, pyramid_laplacian)
