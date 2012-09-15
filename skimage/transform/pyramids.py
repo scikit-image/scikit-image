@@ -135,8 +135,8 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     return out
 
 
-def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
-                           order=1, mode='reflect', cval=0):
+def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
+                     mode='reflect', cval=0):
     """Yield images of the gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
@@ -209,8 +209,8 @@ def build_gaussian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
         yield layer_image
 
 
-def build_laplacian_pyramid(image, max_layer=-1, downscale=2, sigma=None,
-                            order=1, mode='reflect', cval=0):
+def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
+                      mode='reflect', cval=0):
     """Yield images of the laplacian pyramid formed by the input image.
 
     Each layer contains the difference between the downsampled and the

@@ -13,12 +13,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.transform import build_gaussian_pyramid
+from skimage.transform import pyramid_gaussian
 
 
 image = data.lena()
 rows, cols, dim = image.shape
-pyramid = tuple(build_gaussian_pyramid(image, downscale=2))
+pyramid = tuple(pyramid_gaussian(image, downscale=2))
 
 composite_image = np.zeros((rows, cols + cols / 2, 3), dtype=np.double)
 

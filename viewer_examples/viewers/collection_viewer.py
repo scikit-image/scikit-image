@@ -21,11 +21,11 @@ home/end keys
 import numpy as np
 from skimage import data
 from skimage.viewer import CollectionViewer
-from skimage.transform import build_gaussian_pyramid
+from skimage.transform import pyramid_gaussian
 
 
 img = data.lena()
-img_collection = tuple(build_gaussian_pyramid(img))
+img_collection = tuple(pyramid_gaussian(img))
 
 view = CollectionViewer(img_collection)
 view.show()
