@@ -1,7 +1,5 @@
 """Testing utilities."""
 
-# Copyright (c) 2011 Pietro Berkes
-# License: Simplified BSD
 
 def _assert_less(a, b, msg=None):
     message = "%r is not lower than %r" % (a, b)
