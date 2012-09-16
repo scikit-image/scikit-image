@@ -1,10 +1,11 @@
 import numpy as np
+from numpy.testing import assert_array_equal
 
 from skimage import data
 from skimage import img_as_float
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
-                             peak_local_max)
+                             corner_subpix, peak_local_max)
 
 
 def test_square_image():
@@ -87,6 +88,15 @@ def test_rotated_lena():
     results_rotated = peak_local_max(corner_shi_tomasi(im_rotated))
     assert (np.sort(results[:, 0]) == np.sort(results_rotated[:, 1])).all()
     assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
+
+
+def test_subpix():
+    img = np.zeros((50, 50))
+    img[:25,:25] = 255
+    img[25:,25:] = 255
+    corner = peak_local_max(corner_harris(img), num_peaks=1)
+    subpix = corner_subpix(img, corner)
+    assert_array_equal(subpix[0], (24.5, 24.5))
 
 
 if __name__ == '__main__':
