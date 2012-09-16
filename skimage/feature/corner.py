@@ -361,9 +361,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # coordinates of pixels within window
     y, x = np.mgrid[- wext:wext + 1, - wext:wext + 1]
 
-    # output arrays
     corners_subpix = np.zeros_like(corners, dtype=np.double)
-    corners_class = np.zeros(corners.shape[0], dtype=np.int8)
 
     for i, (y0, x0) in enumerate(corners):
 
