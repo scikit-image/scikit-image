@@ -135,21 +135,21 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Examples
     -------
-    >>> from skimage.feature import harris, peak_local_max
+    >>> from skimage.feature import corner_harris, peak_local_max
     >>> square = np.zeros([10, 10])
-    >>> square[2:8,2:8] = 1
+    >>> square[2:8, 2:8] = 1
     >>> square
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    >>> peak_local_max(harris(square), min_distance=1)
+    array([[ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
+    >>> peak_local_max(corner_harris(square), min_distance=1)
     array([[3, 3],
            [3, 6],
            [6, 3],
@@ -205,21 +205,21 @@ def corner_shi_tomasi(image, sigma=1):
 
     Examples
     -------
-    >>> from skimage.feature import shi_tomasi, peak_local_max
+    >>> from skimage.feature import corner_shi_tomasi, peak_local_max
     >>> square = np.zeros([10, 10])
-    >>> square[2:8,2:8] = 1
+    >>> square[2:8, 2:8] = 1
     >>> square
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    >>> peak_local_max(shi_tomasi(square), min_distance=1)
+    array([[ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
+    >>> peak_local_max(corner_shi_tomasi(square), min_distance=1)
     array([[3, 3],
            [3, 6],
            [6, 3],
@@ -267,6 +267,32 @@ def corner_foerstner(image, sigma=1):
     ..[1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
           foerstner87.fast.pdf
     ..[2] http://en.wikipedia.org/wiki/Corner_detection
+
+    Examples
+    -------
+    >>> from skimage.feature import corner_foerstner, peak_local_max
+    >>> square = np.zeros([10, 10])
+    >>> square[2:8, 2:8] = 1
+    >>> square
+    array([[ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
+           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
+    >>> w, q = corner_foerstner(square)
+    >>> accuracy_thresh = 0.5
+    >>> roundness_thresh = 0.3
+    >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
+    >>> peak_local_max(foerstner, min_distance=1)
+    array([[2, 2],
+           [2, 7],
+           [7, 2],
+           [7, 7]])
 
     """
 
