@@ -325,7 +325,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     image : ndarray
         Input image.
     corners : (N, 2) ndarray
-        Corner coordinates `(row, cols)`.
+        Corner coordinates `(row, col)`.
     window_size : int, optional
         Search window size for subpixel estimation.
     alpha : float, optional
