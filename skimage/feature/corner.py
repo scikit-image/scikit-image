@@ -302,6 +302,12 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     positions : (N, 2) ndarray
         Subpixel corner positions. NaN for "not classified" corners.
 
+    References
+    ----------
+    ..[1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
+          foerstner87.fast.pdf
+    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+
     """
 
     # window extent in one direction
