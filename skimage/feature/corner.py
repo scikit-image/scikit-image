@@ -425,11 +425,13 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
         ryy_edge = ry_edge * ry_edge
 
         # determine corner class (dot or edge)
-        w_dot = np.sum(winx_winx * ryy_dot - 2 * winx_winy * rxy_dot \
-                       + winy_winy * rxx_dot)
-        w_edge = np.sum(winy_winy * ryy_edge + 2 * winx_winy * rxy_edge \
-                        + winx_winx * rxx_edge)
-        t = w_edge / w_dot
+        # variance for different models
+        var_dot = np.sum(winx_winx * ryy_dot - 2 * winx_winy * rxy_dot \
+                         + winy_winy * rxx_dot)
+        var_edge = np.sum(winy_winy * ryy_edge + 2 * winx_winy * rxy_edge \
+                          + winx_winx * rxx_edge)
+        # test value (F-distributed)
+        t = var_edge / var_dot
         # 1 for edge, -1 for dot, 0 for "not classified"
         corner_class = (t < t_crit_edge) - (t > t_crit_dot)
 
