@@ -16,8 +16,10 @@ def _compute_derivatives(image):
 
     Returns
     -------
-    imx, imy : arrays
-        Derivatives in x and y direction.
+    imx : ndarray
+        Derivative in x-direction.
+    imy : ndarray
+        Derivative in y-direction.
 
     """
 
@@ -40,8 +42,12 @@ def _compute_auto_correlation(image, sigma):
 
     Returns
     -------
-    Axx, Axy, Ayy : arrays
-        Elements of the auto-correlation matrix for each pixel in input image.
+    Axx : ndarray
+        Element of the auto-correlation matrix for each pixel in input image.
+    Axy : ndarray
+        Element of the auto-correlation matrix for each pixel in input image.
+    Ayy : ndarray
+        Element of the auto-correlation matrix for each pixel in input image.
 
     """
 
@@ -259,8 +265,10 @@ def corner_foerstner(image, sigma=1):
 
     Returns
     -------
-    w, q : ndarray
-        Foerstner response images.
+    w : ndarray
+        Error ellipse sizes.
+    q : ndarray
+        Roundness of error ellipse.
 
     References
     ----------
