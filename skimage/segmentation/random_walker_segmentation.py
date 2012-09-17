@@ -190,13 +190,15 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         channels. Data spacing is assumed isotropic unless depth keyword
         argument is used.
 
-    labels : array of ints, of same shape as `data`
+    labels : array of ints, of same shape as `data` without channels dimension
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
         Negative labels correspond to inactive pixels that are not taken
         into account (they are removed from the graph). If labels are not
         consecutive integers, the labels array will be transformed so that
-        labels are consecutive.
+        labels are consecutive. In the multichannel case, `labels` should have
+        the same shape as a single channel of `data`, i.e. without the final
+        dimension denoting channels.
 
     beta : float
         Penalization coefficient for the random walker motion
