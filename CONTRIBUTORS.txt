@@ -73,7 +73,7 @@
   From whom we borrowed the example generation tools.
 
 - Andreas Mueller
-  Example data set loader.
+  Example data set loader. Nosetest compatibility functions.
   Quickshift image segmentation, Felzenszwalbs fast graph based segmentation.
 
 - Yaroslav Halchenko

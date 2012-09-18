@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_array_equal
-from nose.tools import assert_greater
+from skimage._shared.testing import assert_greater
 from skimage.segmentation import felzenszwalb
 
 
