@@ -58,8 +58,13 @@ def test_2d_bf():
                                     return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
                         full_prob_bf[0, 25:45, 40:60]).all()
-    return data, labels_bf, full_prob_bf
-
+    # Now test with more than two labels
+    labels[55, 80] = 3
+    full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
+                                    return_full_prob=True)
+    assert (full_prob_bf[1, 25:45, 40:60] >=
+                        full_prob_bf[0, 25:45, 40:60]).all()
+    assert len(full_prob_bf) == 3
 
 def test_2d_cg():
     lx = 70
