@@ -5,7 +5,7 @@ from scipy.ndimage import map_coordinates
 from skimage.transform import (warp, warp_coords, rotate, resize,
                                AffineTransform,
                                ProjectiveTransform,
-                               SimilarityTransform)
+                               SimilarityTransform, homography)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -34,9 +34,13 @@ def test_homography():
                   [0,               0,             1]])
 
     x90 = warp(x,
-            inverse_map=ProjectiveTransform(M).inverse,
-            order=1)
+               inverse_map=ProjectiveTransform(M).inverse,
+               order=1)
     assert_array_almost_equal(x90, np.rot90(x))
+
+
+def test_homography_basic():
+    homography(np.random.random((25, 25)), np.eye(3))
 
 
 def test_fast_homography():
