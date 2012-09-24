@@ -110,3 +110,6 @@
 
 - Pavel Campr
   Fixes and tests for Histograms of Oriented Gradients.
+
+- Joshua Warner
+  Multichannel random walker segmentation.
