@@ -5,7 +5,7 @@ try:
     from PyQt4 import QtGui, QtCore
     from PyQt4.QtGui import QMainWindow
 except ImportError:
-    QMainWindow = object # hack to prevent nosetest and autodoc errors
+    QMainWindow = object  # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
 from skimage.util.dtype import dtype_range
@@ -14,7 +14,6 @@ from ..widgets import Slider
 
 
 __all__ = ['ImageViewer', 'CollectionViewer']
-
 
 
 class ImageCanvas(utils.MatplotlibCanvas):
@@ -233,7 +232,7 @@ class CollectionViewer(ImageViewer):
         first_image = image_collection[0]
         super(CollectionViewer, self).__init__(first_image)
 
-        slider_kws = dict(value=0, low=0, high=self.num_images-1)
+        slider_kws = dict(value=0, low=0, high=self.num_images - 1)
         slider_kws['update_on'] = update_on
         slider_kws['callback'] = self.update_index
         slider_kws['value_type'] = 'int'
@@ -254,7 +253,7 @@ class CollectionViewer(ImageViewer):
 
         # clip index value to collection limits
         index = max(index, 0)
-        index = min(index, self.num_images-1)
+        index = min(index, self.num_images - 1)
 
         self.index = index
         self.slider.val = index

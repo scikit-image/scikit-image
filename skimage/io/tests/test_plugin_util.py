@@ -19,18 +19,18 @@ class TestPrepareForDisplay:
         assert x[3, 2, 0] == 255
 
     def test_colour(self):
-        x = prepare_for_display(np.random.random((10, 10, 3)))
+        prepare_for_display(np.random.random((10, 10, 3)))
 
     def test_alpha(self):
-        x = prepare_for_display(np.random.random((10, 10, 4)))
+        prepare_for_display(np.random.random((10, 10, 4)))
 
     @raises(ValueError)
     def test_wrong_dimensionality(self):
-        x = prepare_for_display(np.random.random((10, 10, 1, 1)))
+        prepare_for_display(np.random.random((10, 10, 1, 1)))
 
     @raises(ValueError)
     def test_wrong_depth(self):
-        x = prepare_for_display(np.random.random((10, 10, 5)))
+        prepare_for_display(np.random.random((10, 10, 5)))
 
 
 class TestWindowManager:
@@ -48,7 +48,6 @@ class TestWindowManager:
         self.callback_called = True
 
     def test_callback(self):
-        cb = lambda x: x
         self.wm.register_callback(self.callback)
         self.wm.add_window('window')
         self.wm.remove_window('window')

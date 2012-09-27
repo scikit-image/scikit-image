@@ -6,7 +6,6 @@
 __docformat__ = 'restructuredtext en'
 
 import warnings
-import numpy as np
 from skimage import img_as_ubyte
 
 from . import cmorph

@@ -1,4 +1,4 @@
-from ._mcp import MCP, MCP_Geometric, make_offsets
+from ._mcp import MCP, MCP_Geometric
 
 
 def route_through_array(array, start, end, fully_connected=True,

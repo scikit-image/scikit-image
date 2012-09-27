@@ -21,7 +21,7 @@ try:
     from PyQt4 import QtCore
     from PyQt4.QtGui import QWidget
 except ImportError:
-    QWidget = object # hack to prevent nosetest and autodoc errors
+    QWidget = object  # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
 from ..utils import RequiredAttr

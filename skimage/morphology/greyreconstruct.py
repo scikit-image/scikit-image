@@ -191,4 +191,3 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     rec_img = value_map[value_rank[:image_stride]]
     rec_img.shape = np.array(seed.shape) + 2 * padding
     return rec_img[inside_slices]
-

@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_equal
 
 from skimage.measure import structural_similarity as ssim
-import scipy.optimize as opt
+
 
 def test_ssim_patch_range():
     N = 51
@@ -11,6 +11,7 @@ def test_ssim_patch_range():
 
     assert(ssim(X, Y, win_size=N) < 0.1)
     assert_equal(ssim(X, X, win_size=N), 1)
+
 
 def test_ssim_image():
     N = 100
@@ -37,6 +38,7 @@ def test_ssim_image():
 ##         return ssim(X, Y, dynamic_range=255, gradient=True)[1]
 
 ##     assert(np.all(opt.check_grad(func, grad, Y) < 0.05))
+
 
 def test_ssim_dtype():
     N = 30
