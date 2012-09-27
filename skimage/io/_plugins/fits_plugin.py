@@ -1,6 +1,5 @@
 __all__ = ['imread', 'imread_collection']
 
-import numpy as np
 import skimage.io as io
 
 try:

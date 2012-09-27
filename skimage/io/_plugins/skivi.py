@@ -14,13 +14,9 @@ The skivi module is not meant to be used directly.
 Use skimage.io.imshow(img, fancy=True)'''
 
 from textwrap import dedent
-import numpy as np
-import sys
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
-                                 QLabel, QWidget, QVBoxLayout, QSlider,
-                                 QPainter, QColor, QFrame, QLayoutItem)
+from PyQt4.QtGui import QMainWindow, QImage, QPixmap, QLabel, QWidget, QFrame
 
 from .q_color_mixer import MixerPanel
 from .q_histogram import QuadHistogram

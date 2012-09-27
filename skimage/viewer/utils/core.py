@@ -7,7 +7,7 @@ try:
     from matplotlib.colors import LinearSegmentedColormap
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 except ImportError:
-    FigureCanvasQTAgg = object # hack to prevent nosetest and autodoc errors
+    FigureCanvasQTAgg = object  # hack to prevent nosetest and autodoc errors
     LinearSegmentedColormap = object
     print("Could not import matplotlib -- skimage.viewer not available.")
 
@@ -32,6 +32,7 @@ def init_qtapp():
     global QApp
     if QApp is None:
         QApp = QtGui.QApplication([])
+
 
 def start_qtapp():
     """Start Qt mainloop"""
@@ -100,8 +101,9 @@ class LinearColormap(LinearSegmentedColormap):
     segmented_data : dict
         Dictionary of 'red', 'green', 'blue', and (optionally) 'alpha' values.
         Each color key contains a list of `x`, `y` tuples. `x` must increase
-        monotonically from 0 to 1 and corresponds to input values for a mappable
-        object (e.g. an image). `y` corresponds to the color intensity.
+        monotonically from 0 to 1 and corresponds to input values for a
+        mappable object (e.g. an image). `y` corresponds to the color
+        intensity.
 
     """
     def __init__(self, name, segmented_data, **kwargs):

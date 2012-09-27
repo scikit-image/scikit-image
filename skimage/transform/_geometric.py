@@ -269,8 +269,8 @@ class AffineTransform(ProjectiveTransform):
                      for param in (scale, rotation, shear, translation))
 
         if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and "
-                             "the implicit parameters at the same time.")
+            raise ValueError("You cannot specify the transformation matrix and"
+                             " the implicit parameters at the same time.")
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
@@ -287,9 +287,9 @@ class AffineTransform(ProjectiveTransform):
 
             sx, sy = scale
             self._matrix = np.array([
-                [sx * math.cos(rotation), - sy * math.sin(rotation + shear), 0],
-                [sx * math.sin(rotation),   sy * math.cos(rotation + shear), 0],
-                [                      0,                                 0, 1]
+                [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
+                [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
+                [                      0,                                0, 1]
             ])
             self._matrix[0:2, 2] = translation
         else:
@@ -365,7 +365,6 @@ class PiecewiseAffineTransform(ProjectiveTransform):
             affine = AffineTransform()
             affine.estimate(dst[tri, :], src[tri, :])
             self.inverse_affines.append(affine)
-
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -992,7 +991,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             if orig_ndim == 2:
                 out = out[..., 0]
 
-    if out is None: # use ndimage.map_coordinates
+    if out is None:  # use ndimage.map_coordinates
 
         if output_shape is None:
             output_shape = ishape
@@ -1018,5 +1017,5 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     if clipped.shape[0] == 1 or clipped.shape[1] == 1:
         return clipped
-    else: # remove singleton dim introduced by atleast_3d
+    else:  # remove singleton dim introduced by atleast_3d
         return clipped.squeeze()

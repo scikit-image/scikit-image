@@ -1,4 +1,3 @@
-import numpy as np
 from numpy.testing import *
 
 import time

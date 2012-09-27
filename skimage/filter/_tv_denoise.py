@@ -170,7 +170,8 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
                 E_previous = E
         i += 1
     return out
-    
+
+
 def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
     """
     Perform total-variation denoising on 2-d and 3-d images
@@ -248,4 +249,4 @@ def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
     else:
         raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
-    return out      
+    return out

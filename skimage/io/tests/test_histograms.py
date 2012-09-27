@@ -1,7 +1,6 @@
 from numpy.testing import *
 import numpy as np
 
-import skimage.io._plugins._colormixer as cm
 from skimage.io._plugins._histograms import histograms
 
 
