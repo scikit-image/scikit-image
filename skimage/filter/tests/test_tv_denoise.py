@@ -2,7 +2,6 @@ import numpy as np
 from numpy.testing import run_module_suite
 
 from skimage import filter, data, color
-from skimage import img_as_uint, img_as_ubyte
 
 
 class TestTvDenoise():
@@ -35,13 +34,13 @@ class TestTvDenoise():
         # lena image
         lena = color.rgb2gray(data.lena())[:256, :256]
         int_lena = np.multiply(lena, 255).astype(np.uint8)
-        assert np.max(int_lena) > 1       
+        assert np.max(int_lena) > 1
         denoised_int_lena = filter.tv_denoise(int_lena, weight=60.0)
         # test if the value range of output float data is within [0.0:1.0]
         assert denoised_int_lena.dtype == np.float
         assert np.max(denoised_int_lena) <= 1.0
-        assert np.min(denoised_int_lena) >= 0.0        
-        
+        assert np.min(denoised_int_lena) >= 0.0
+
     def test_tv_denoise_3d(self):
         """
         Apply the TV denoising algorithm on a 3D image representing
@@ -56,7 +55,7 @@ class TestTvDenoise():
         mask[mask > 255] = 255
         res = filter.tv_denoise(mask.astype(np.uint8), weight=100)
         assert res.dtype == np.float
-        assert res.std() * 255 < mask.std() 
+        assert res.std() * 255 < mask.std()
 
         # test wrong number of dimensions
         a = np.random.random((8, 8, 8, 8))

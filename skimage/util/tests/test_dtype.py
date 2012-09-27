@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from skimage import img_as_int, img_as_float, \
-                    img_as_uint, img_as_ubyte, img_as_bool
+                    img_as_uint, img_as_ubyte
 from skimage.util.dtype import convert
 
 
@@ -92,7 +92,6 @@ def test_bool():
     img8 = np.zeros((10, 10), np.bool8)
     img_[1, 1] = True
     img8[1, 1] = True
-    funcs = (img_as_float, img_as_int, img_as_ubyte, img_as_uint, img_as_bool)
     for (func, dt) in [(img_as_int, np.int16),
                     (img_as_float, np.float64),
                     (img_as_uint, np.uint16),

@@ -1,6 +1,5 @@
-from .util import prepare_for_display, window_manager, GuiLockError
+from .util import prepare_for_display, window_manager
 import numpy as np
-import sys
 
 # We try to aquire the gui lock first or else the gui import might
 # trample another GUI's PyOS_InputHook.

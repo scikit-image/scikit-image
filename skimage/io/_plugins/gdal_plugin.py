@@ -1,7 +1,5 @@
 __all__ = ['imread']
 
-import numpy as np
-
 try:
     import osgeo.gdal as gdal
 except ImportError:

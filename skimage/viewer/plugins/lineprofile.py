@@ -9,6 +9,7 @@ __all__ = ['LineProfile']
 
 #TODO: Extract line tool and add it to a new `canvastools` subpackage.
 
+
 class LineProfile(PlotPlugin):
     """Plugin to compute interpolated intensity under a scan line on an image.
 
@@ -59,7 +60,7 @@ class LineProfile(PlotPlugin):
             self.ax.set_ylim(self.limits)
 
         h, w = image.shape
-        self._init_end_pts = np.array([[w/3, h/2], [2*w/3, h/2]])
+        self._init_end_pts = np.array([[w / 3, h / 2], [2 * w / 3, h / 2]])
         self.end_pts = self._init_end_pts.copy()
 
         x, y = np.transpose(self.end_pts)
@@ -99,14 +100,16 @@ class LineProfile(PlotPlugin):
         return end_pts, profile
 
     def on_scroll(self, event):
-        if not event.inaxes: return
+        if not event.inaxes:
+            return
         if event.button == 'up':
             self._thicken_scan_line()
         elif event.button == 'down':
             self._shrink_scan_line()
 
     def on_key_press(self, event):
-        if not event.inaxes: return
+        if not event.inaxes:
+            return
         elif event.key == '+':
             self._thicken_scan_line()
         elif event.key == '-':
@@ -142,19 +145,25 @@ class LineProfile(PlotPlugin):
         return ind
 
     def on_mouse_press(self, event):
-        if event.button != 1: return
-        if event.inaxes==None: return
+        if event.button != 1:
+            return
+        if event.inaxes == None:
+            return
         self._active_pt = self.get_pt_under_cursor(event)
 
     def on_mouse_release(self, event):
-        if event.button != 1: return
+        if event.button != 1:
+            return
         self._active_pt = None
 
     def on_move(self, event):
-        if event.button != 1: return
-        if self._active_pt is None: return
-        if not self.image_viewer.ax.in_axes(event): return
-        x,y = event.xdata, event.ydata
+        if event.button != 1:
+            return
+        if self._active_pt is None:
+            return
+        if not self.image_viewer.ax.in_axes(event):
+            return
+        x, y = event.xdata, event.ydata
         self.line_changed(x, y)
 
     def reset(self):
@@ -206,33 +215,33 @@ def profile_line(img, end_pts, linewidth=1):
         is the ceil of the computed length of the scan line.
     """
     point1, point2 = end_pts
-    x1, y1 = point1 = np.asarray(point1, dtype = float)
-    x2, y2 = point2 = np.asarray(point2, dtype = float)
+    x1, y1 = point1 = np.asarray(point1, dtype=float)
+    x2, y2 = point2 = np.asarray(point2, dtype=float)
     dx, dy = point2 - point1
 
     # Quick calculation if perfectly horizontal or vertical (remove?)
     if x1 == x2:
-        pixels = img[min(y1, y2) : max(y1, y2)+1,
-                     x1 - linewidth / 2 :  x1 + linewidth / 2 + 1]
-        intensities  = pixels.mean(axis = 1)
+        pixels = img[min(y1, y2): max(y1, y2) + 1,
+                     x1 - linewidth / 2:  x1 + linewidth / 2 + 1]
+        intensities = pixels.mean(axis=1)
         return intensities
     elif y1 == y2:
-        pixels = img[y1 - linewidth / 2 :  y1 + linewidth / 2 + 1,
-                     min(x1, x2) : max(x1, x2)+1]
-        intensities = pixels.mean(axis = 0)
+        pixels = img[y1 - linewidth / 2:  y1 + linewidth / 2 + 1,
+                     min(x1, x2): max(x1, x2) + 1]
+        intensities = pixels.mean(axis=0)
         return intensities
 
-    theta = np.arctan2(dy,dx)
-    a = dy/dx
+    theta = np.arctan2(dy, dx)
+    a = dy / dx
     b = y1 - a * x1
     length = np.hypot(dx, dy)
 
     line_x = np.linspace(min(x1, x2), max(x1, x2), np.ceil(length))
     line_y = line_x * a + b
-    y_width = abs(linewidth * np.cos(theta)/2)
+    y_width = abs(linewidth * np.cos(theta) / 2)
     perp_ys = np.array([np.linspace(yi - y_width,
                                     yi + y_width, linewidth) for yi in line_y])
-    perp_xs = - a * perp_ys + (line_x +  a * line_y)[:, np.newaxis]
+    perp_xs = - a * perp_ys + (line_x + a * line_y)[:, np.newaxis]
 
     perp_lines = np.array([perp_ys, perp_xs])
     pixels = ndi.map_coordinates(img, perp_lines)

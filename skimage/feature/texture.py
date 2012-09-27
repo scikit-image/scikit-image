@@ -2,9 +2,7 @@
 Methods to characterize image textures.
 """
 
-import math
 import numpy as np
-from scipy import ndimage
 
 from ._texture import _glcm_loop, _local_binary_pattern
 
@@ -236,8 +234,8 @@ def local_binary_pattern(image, P, R, method='default'):
     image : (N, M) array
         Graylevel image.
     P : int
-        Number of circularly symmetric neighbour set points (quantization of the
-        angular space).
+        Number of circularly symmetric neighbour set points (quantization of
+        the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
     method : {'default', 'ror', 'uniform', 'var'}

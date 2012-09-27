@@ -53,7 +53,6 @@ def approximate_polygon(coords, tolerance):
         segment_coords = coords[start + 1:end, :]
         segment_dists = dists[start + 1:end]
 
-
         # check whether to take perpendicular or euclidean distance with
         # inner product of vectors
 

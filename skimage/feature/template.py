@@ -3,8 +3,6 @@
 import numpy as np
 from . import _template
 
-from skimage.util.dtype import convert
-
 
 def match_template(image, template, pad_input=False):
     """Match a template to an image using normalized correlation.

@@ -35,7 +35,7 @@ class TestSkeletonize():
 
     def test_skeletonize_all_foreground(self):
         im = np.ones((3, 4))
-        result = skeletonize(im)
+        skeletonize(im)
 
     def test_skeletonize_single_point(self):
         im = np.zeros((5, 5), np.uint8)
@@ -110,6 +110,7 @@ class TestSkeletonize():
                              [0, 0, 0, 0, 0, 0]], dtype=np.uint8)
         assert np.all(result == expected)
 
+
 class TestMedialAxis():
     def test_00_00_zeros(self):
         '''Test skeletonize on an array of all zeros'''
@@ -130,15 +131,16 @@ class TestMedialAxis():
         # The result should be four diagonals from the
         # corners, meeting in a horizontal line
         #
-        expected = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
-                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
-                             [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
-                             [0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],
-                             [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
-                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
-                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
-                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]], bool)
+        expected = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                             [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                             [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                             [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                             [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                             [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+                             bool)
         result = medial_axis(image)
         assert np.all(result == expected)
         result, distance = medial_axis(image, return_distance=True)
@@ -149,15 +151,16 @@ class TestMedialAxis():
         image = np.zeros((9, 15), bool)
         image[1:-1, 1:-1] = True
         image[4, 4:-4] = False
-        expected = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
-                             [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
-                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
-                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
-                             [0,0,1,0,0,0,0,0,0,0,0,0,1,0,0],
-                             [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0],
-                             [0,1,0,0,0,0,0,0,0,0,0,0,0,1,0],
-                             [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],bool)
+        expected = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                             [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                             [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                             [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+                             bool)
         result = medial_axis(image)
         assert np.all(result == expected)
 

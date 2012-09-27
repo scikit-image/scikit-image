@@ -159,15 +159,15 @@ def regionprops(label_image, properties=['Area', 'Centroid'],
             `pi/2` in counter-clockwise direction.
 
         * Perimeter : float
-            Perimeter of object which approximates the contour as a line through
-            the centers of border pixels using a 4-connectivity.
+            Perimeter of object which approximates the contour as a line
+            through the centers of border pixels using a 4-connectivity.
 
         * Solidity : float
             Ratio of pixels in the region to pixels of the convex hull image.
 
         * WeightedCentralMoments : (3, 3) ndarray
-            Central moments (translation invariant) of intensity image up to 3rd
-            order.
+            Central moments (translation invariant) of intensity image up to
+            3rd order.
 
                 wmu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
 

@@ -130,7 +130,7 @@ def test_warp_coords_example():
     assert 3 == image.shape[2]
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
-    warped_image1 = map_coordinates(image[:, :, 0], coords[:2])
+    map_coordinates(image[:, :, 0], coords[:2])
 
 
 if __name__ == "__main__":
