@@ -1,5 +1,5 @@
 function insert_version_links() {
-    var labels = ['dev', '0.7', '0.6', '0.5', '0.4', '0.3'];
+    var labels = ['dev', '0.7.0', '0.6', '0.5', '0.4', '0.3'];
 
     document.write('<ul class="versions">\n');
 
