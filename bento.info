@@ -1,5 +1,5 @@
 Name: scikits-image
-Version: 0.7.0.dev0
+Version: 0.7.0
 Summary: Image processing routines for SciPy
 Url: http://scikits-image.org
 DownloadUrl: http://github.com/scikits-image/scikits-image
