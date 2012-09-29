@@ -85,7 +85,7 @@ def test_repr_png():
     original_img = imread(img_path)
     original_img_str = original_img._repr_png_()
 
-    with NamedTemporaryFile(suffix='.png', mode='r+') as temp_png:
+    with NamedTemporaryFile(suffix='.png') as temp_png:
         temp_png.write(original_img_str)
         temp_png.seek(0)
         round_trip = imread(temp_png)
