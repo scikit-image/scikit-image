@@ -17,7 +17,7 @@ cdef inline double nearest_neighbour_interpolation(double* image, int rows,
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : int
+    r, c : double
         Position at which to interpolate.
     mode : {'C', 'W', 'R', 'N'}
         Wrapping mode. Constant, Wrap, Reflect or Nearest.
@@ -46,7 +46,7 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : int
+    r, c : double
         Position at which to interpolate.
     mode : {'C', 'W', 'R', 'N'}
         Wrapping mode. Constant, Wrap, Reflect or Nearest.
@@ -105,7 +105,7 @@ cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : int
+    r, c : double
         Position at which to interpolate.
     mode : {'C', 'W', 'R', 'N'}
         Wrapping mode. Constant, Wrap, Reflect or Nearest.
@@ -181,7 +181,7 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
         Input image.
     rows, cols : int
         Shape of image.
-    r, c : int
+    r, c : double
         Position at which to interpolate.
     mode : {'C', 'W', 'R', 'N'}
         Wrapping mode. Constant, Wrap, Reflect or Nearest.
