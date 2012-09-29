@@ -55,7 +55,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, int min_size=20):
     # compute edges between pixels:
     height, width = image.shape[:2]
     cdef np.ndarray[np.int_t, ndim=2] segments \
-            = np.arange(width * height).reshape(height, width)
+            = np.arange(width * height, dtype=np.int).reshape(height, width)
     right_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
     down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
     dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
