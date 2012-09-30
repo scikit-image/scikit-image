@@ -2,9 +2,9 @@
   Project coordination
 
 - Nicolas Pinto
-  Colour spaces and filters.
+  Colour spaces and filters, and image resizing.
   Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
-  Montage helpers: ``util.montage``
+  Montage helpers: ``util.montage``.
 
 - Damian Eads
   Morphological operators
@@ -103,6 +103,7 @@
 
 - Nicolas Poilvert
   Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
+  Image resizing.
 
 - Johannes Schönberger
   Drawing functions, adaptive thresholding, regionprops, geometric
@@ -113,3 +114,6 @@
 
 - Joshua Warner
   Multichannel random walker segmentation.
+
+- Petter Strandmark
+  Perimeter calculation in regionprops.
