@@ -11,6 +11,7 @@ from copy import copy
 import numpy as np
 from ._io import imread
 
+
 def concatenate_images(ic):
     """Concatenate all images in the image collection into an array.
 
@@ -65,6 +66,7 @@ def alphanumeric_key(s):
     """
     k = [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)]
     return k
+
 
 class MultiImage(object):
     """A class containing a single multi-frame image.
@@ -216,6 +218,7 @@ class MultiImage(object):
             If images in the `MultiImage` don't have identical shapes.
         """
         return concatenate_images(self)
+
 
 class ImageCollection(object):
     """Load and manage a collection of image files.
@@ -428,4 +431,3 @@ class ImageCollection(object):
             If images in the `ImageCollection` don't have identical shapes.
         """
         return concatenate_images(self)
-
