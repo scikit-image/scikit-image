@@ -2,7 +2,7 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from random import randint
-from libc.math cimport abs, fabs, sqrt, ceil, floor, round
+from libc.math cimport abs, fabs, sqrt, ceil, floor
 from libc.stdlib cimport rand
 
 
@@ -11,6 +11,10 @@ np.import_array()
 
 cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
+
+
+cdef inline int round(double r):
+    return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
 @cython.boundscheck(False)

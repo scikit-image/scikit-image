@@ -2,7 +2,11 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-from libc.math cimport ceil, floor, round
+from libc.math cimport ceil, floor
+
+
+cdef inline int round(double r):
+    return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
 cdef inline double nearest_neighbour_interpolation(double* image, int rows,
