@@ -1,14 +1,12 @@
 __all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
-from skimage.io._plugins import call as call_plugin
-from skimage.color import rgb2grey
+from io import BytesIO
+
 import numpy as np
 
-try:
-    import cStringIO as StringIO
-except ImportError:
-    import StringIO
+from skimage.io._plugins import call as call_plugin
+from skimage.color import rgb2grey
 
 
 # Shared image queue
@@ -49,7 +47,7 @@ class Image(np.ndarray):
         return self._repr_image_format('jpeg')
 
     def _repr_image_format(self, format_str):
-        str_buffer = StringIO.StringIO()
+        str_buffer = BytesIO()
         imsave(str_buffer, self, format_str=format_str)
         return_str = str_buffer.getvalue()
         str_buffer.close()
