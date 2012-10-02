@@ -4,7 +4,7 @@ CellProfiler BSD license announcement
 ::
 
   From: Vebjorn Ljosa
-  To: scikits-image@googlegroups.com
+  To: scikit-image@googlegroups.com
   Date: June 3, 2010
 
   We have changed the license of some parts of CellProfiler from GNU GPL

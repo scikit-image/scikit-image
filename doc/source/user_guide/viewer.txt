@@ -65,7 +65,7 @@ slider:
    denoise_plugin += SaveButtons()
 
 Here, we connect a slider widget to the filter's 'weight' argument.  We also
-added some buttons for saving the image to file or to the ``scikits-image``
+added some buttons for saving the image to file or to the ``scikit-image``
 image stack (see ``skimage.io.push`` and ``skimage.io.pop``).
 
 All that's left is to create an image viewer and add the plugin to that viewer.

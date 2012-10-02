@@ -12,6 +12,6 @@ function insert_version_links() {
         document.write(open_list);
         document.write('<a href="URL">skimage VERSION</a> </li>\n'
                         .replace('VERSION', labels[i])
-                        .replace('URL', 'http://scikits-image.org/docs/' + labels[i]));
+                        .replace('URL', 'http://scikit-image.org/docs/' + labels[i]));
     }
 }
