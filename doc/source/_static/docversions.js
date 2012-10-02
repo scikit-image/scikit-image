@@ -1,7 +1,5 @@
 function insert_version_links() {
-    var labels = ['dev', '0.7.0', '0.6', '0.5', '0.4', '0.3'];
-
-    document.write('<ul class="versions">\n');
+    var labels = ['dev', '0.7', '0.6', '0.5', '0.4', '0.3'];
 
     for (i = 0; i < labels.length; i++){
         open_list = '<li>'
@@ -16,5 +14,4 @@ function insert_version_links() {
                         .replace('VERSION', labels[i])
                         .replace('URL', 'http://scikits-image.org/docs/' + labels[i]));
     }
-    document.write('</ul>\n');
 }
