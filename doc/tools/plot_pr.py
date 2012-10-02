@@ -33,7 +33,7 @@ month_duration = 24
 for r in releases:
     releases[r] = dateutil.parser.parse(releases[r])
 
-def fetch_PRs(user='scikits-image', repo='scikits-image', state='open'):
+def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
     params = {'state': state,
               'per_page': 100,
               'page': 1}
