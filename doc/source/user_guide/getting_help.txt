@@ -44,13 +44,13 @@ functions include one or more examples.
 Mailing-list
 ------------
 
-The scikits-image mailing-list is scikits-image@googlegroups.com (users
+The scikit-image mailing-list is scikit-image@googlegroups.com (users
 should join the `Google Group
-<http://groups.google.com/group/scikits-image>`_ before posting). This
+<http://groups.google.com/group/scikit-image>`_ before posting). This
 mailing-list is shared by users and developers, and it is the right
 place to ask any question about ``skimage``, or in general, image
 processing using Python.  Posting snippets of code with minimal examples
-ensures to get more relevant and focused answers. 
+ensures to get more relevant and focused answers.
 
 We would love to hear from how you use ``skimage`` for your work on the
-mailing-list! 
+mailing-list!

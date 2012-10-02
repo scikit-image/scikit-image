@@ -123,9 +123,9 @@ gh-pages:
 	python gh-pages.py
 
 gitwash:
-	python tools/gitwash/gitwash_dumper.py source scikits-image \
-	--project-url=http://scikits-image.org \
-	--project-ml-url=http://groups.google.com/group/scikits-image \
-	--repo-name=scikits-image \
-	--github-user=scikits-image \
+	python tools/gitwash/gitwash_dumper.py source scikit-image \
+	--project-url=http://scikit-image.org \
+	--project-ml-url=http://groups.google.com/group/scikit-image \
+	--repo-name=scikit-image \
+	--github-user=scikit-image \
 	--source-suffix=.txt

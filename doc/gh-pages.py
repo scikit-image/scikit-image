@@ -30,7 +30,7 @@ from subprocess import Popen, PIPE, CalledProcessError, check_call
 pages_dir = 'gh-pages'
 html_dir = 'build/html'
 pdf_dir = 'build/latex'
-pages_repo = 'git@github.com:scikits-image/docs.git'
+pages_repo = 'git@github.com:scikit-image/docs.git'
 
 #-----------------------------------------------------------------------------
 # Functions

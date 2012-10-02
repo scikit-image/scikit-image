@@ -1,6 +1,6 @@
 .. _using-git:
 
-Working with *scikits-image* source code
+Working with *scikit-image* source code
 ========================================
 
 Contents:
