@@ -381,16 +381,9 @@ class ApiDocWriter(object):
                     modules.append(package_uri)
                 else:
                     dirnames.remove(dirname)
-            # Check filenames for modules
-            for filename in filenames:
-                module_name = filename[:-3]
-                module_uri = '.'.join((root_uri, module_name))
-                if (self._uri2path(module_uri) and
-                    self._survives_exclude(module_uri, 'module')):
-                    modules.append(module_uri)
         return sorted(modules)
 
-    def write_modules_api(self, modules,outdir):
+    def write_modules_api(self, modules, outdir):
         # write the list
         written_modules = []
         for m in modules:
@@ -427,14 +420,6 @@ class ApiDocWriter(object):
             os.mkdir(outdir)
         # compose list of modules
         modules = self.discover_modules()
-        # group modules so we have one less level
-        module_depth = max([len(item.split('.')) for item in modules])
-        # modifying modules in-place, so make a copy
-        for item in modules[:]:
-            # Do not treat the .py files all as separate modules.
-            # Like this, only the objects exported in __all__ get picked up.
-            if not (len(item.split('.')) < module_depth):
-                modules.remove(item)
         self.write_modules_api(modules,outdir)
 
     def write_index(self, outdir, froot='gen', relative_to=None):
