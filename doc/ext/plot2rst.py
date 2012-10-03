@@ -9,7 +9,7 @@ To generate your own examples, add this extension to the list of
 example directory(ies) in `plot2rst_paths` (see below) points to a directory
 with examples named `plot_*.py` and include an `index.rst` file.
 
-This code was adapted from scikits-image, which took it from scikits-learn.
+This code was adapted from scikit-image, which took it from scikit-learn.
 
 Options
 -------
