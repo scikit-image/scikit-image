@@ -14,10 +14,9 @@ pre {
     font-size: 11px;
 }
 
-h1, h2, h3, h4 {
-  clear: left;
+h1, h2, h3, h4, h5, h6 {
+    clear: left;
 }
-
 h1 {
     font-size: 30px;
     line-height: 36px;
