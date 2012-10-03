@@ -13,6 +13,11 @@ textarea {
 pre {
     font-size: 11px;
 }
+
+h1, h2, h3, h4 {
+  clear: left;
+}
+
 h1 {
     font-size: 30px;
     line-height: 36px;
@@ -193,4 +198,28 @@ p.rubric {
 p.admonition-title {
     font-weight: bold;
     text-decoration: underline;
+}
+
+/* example gallery */
+
+.gallery {
+    height: 200px;
+}
+
+.figure {
+    float: left;
+    margin: 1em;
+}
+
+.figure img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 150px;
+    max-width: 200px;
+}
+
+.figure .caption {
+    width: 200px;
+    text-align: center !important;
 }
