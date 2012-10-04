@@ -2,7 +2,8 @@ import unittest
 
 import numpy as np
 
-from skimage.rank import crank,crank16,crank16_bilateral,crank16_percentiles,crank_percentiles
+from skimage.rank import crank8,crank8_percentiles
+from skimage.rank import crank16,crank16_bilateral,crank16_percentiles
 from skimage.morphology import cmorph
 
 class TestSequenceFunctions(unittest.TestCase):
@@ -16,9 +17,9 @@ class TestSequenceFunctions(unittest.TestCase):
         elem = np.asarray([[1,1,1],[1,1,1],[1,1,1]],dtype='uint8')
         for m,n in np.random.random_integers(1,100,size=(10,2)):
             a8 = np.ones((m,n),dtype='uint8')
-            r = crank.mean(image=a8,selem = elem,shift_x=0,shift_y=0)
+            r = crank8.mean(image=a8,selem = elem,shift_x=0,shift_y=0)
             self.assertTrue(a8.shape == r.shape)
-            r = crank.mean(image=a8,selem = elem,shift_x=+1,shift_y=+1)
+            r = crank8.mean(image=a8,selem = elem,shift_x=+1,shift_y=+1)
             self.assertTrue(a8.shape == r.shape)
 
         for m,n in np.random.random_integers(1,100,size=(10,2)):
@@ -42,7 +43,7 @@ class TestSequenceFunctions(unittest.TestCase):
         for r in range(1,20,1):
             elem = np.ones((r,r),dtype='uint8')
             #        elem = (np.random.random((r,r))>.5).astype('uint8')
-            rc = crank.maximum(image=a,selem = elem)
+            rc = crank8.maximum(image=a,selem = elem)
             cm = cmorph.dilate(image=a,selem = elem)
             self.assertTrue((rc==cm).all())
 
@@ -62,7 +63,7 @@ class TestSequenceFunctions(unittest.TestCase):
     def test_population(self):
         a = np.zeros((5,5),dtype='uint8')
         elem = np.ones((3,3),dtype='uint8')
-        p = crank.pop(image=a,selem = elem)
+        p = crank8.pop(image=a,selem = elem)
         r = np.asarray([[4, 6, 6, 6, 4],
             [6, 9, 9, 9, 6],
             [6, 9, 9, 9, 6],
@@ -74,7 +75,7 @@ class TestSequenceFunctions(unittest.TestCase):
         a = np.zeros((6,6),dtype='uint8')
         a[2,2] = 255
         elem = np.asarray([[1,1,0],[1,1,1],[0,0,1]],dtype='uint8')
-        f = crank.maximum(image=a,selem = elem,shift_x=1,shift_y=1)
+        f = crank8.maximum(image=a,selem = elem,shift_x=1,shift_y=1)
         r = np.asarray([[  0,   0,   0,   0,   0,   0],
             [  0,   0,   0,   0,   0,   0],
             [  0,   0, 255,   0,   0,   0],

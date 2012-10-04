@@ -15,7 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from core16b cimport rank16b
+from _core16b cimport _core16b
 
 # -----------------------------------------------------------------
 # kernels uint16 take extra parameter for defining the bitdepth
@@ -257,7 +257,7 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, int s0=1, int s1=1):
     """average gray level (clipped on uint8)
     """
-    return rank16b(kernel_mean,image,selem,mask,out,shift_x,shift_y,bitdepth,s0,s1)
+    return _core16b(kernel_mean,image,selem,mask,out,shift_x,shift_y,bitdepth,s0,s1)
 
 #def meansubstraction(np.ndarray[np.uint16_t, ndim=2] image,
 #            np.ndarray[np.uint8_t, ndim=2] selem,
@@ -311,7 +311,7 @@ def pop(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, int s0=1, int s1=1):
     """returns the number of actual pixels of the structuring element inside the mask
     """
-    return rank16b(kernel_pop,image,selem,mask,out,shift_x,shift_y,bitdepth,s0,s1)
+    return _core16b(kernel_pop,image,selem,mask,out,shift_x,shift_y,bitdepth,s0,s1)
 
 #def threshold(np.ndarray[np.uint16_t, ndim=2] image,
 #            np.ndarray[np.uint8_t, ndim=2] selem,

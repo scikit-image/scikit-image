@@ -2,7 +2,7 @@
 >>> python setup.py build_ext --inplace
 
 to generate html report use:
->>> cython -a core16b.pxd
+>>> cython -a core16.pxd
 """
 
 #cython: cdivision=True
@@ -19,19 +19,18 @@ cdef inline int int_max(int a, int b): return a if a >= b else b
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
 #---------------------------------------------------------------------------
-# 16 bit core kernel receives extra information about data bitdepth and bilateral interval
+# 16 bit core kernel receives extra information about data bitdepth
 #---------------------------------------------------------------------------
 
-cdef inline rank16b(np.uint16_t kernel(int*, float, np.uint16_t, int ,int,int,int,int),
+cdef inline _core16(np.uint16_t kernel(int*, float, np.uint16_t, int ,int,int ),
 np.ndarray[np.uint16_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
 np.ndarray[np.uint8_t, ndim=2] mask,
 np.ndarray[np.uint16_t, ndim=2] out,
-char shift_x, char shift_y,int bitdepth, int s0, int s1):
+char shift_x, char shift_y,int bitdepth):
     """ Main loop, this function computes the histogram for each image point
     - data is uint8
     - result is uint8 casted
-    - only pixel inside [s0,s1] centered on g are taken into account
     """
 
     cdef int rows = image.shape[0]
@@ -168,7 +167,7 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
     c = 0
     # kernel -------------------------------------------
     out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-        bitdepth,maxbin,midbin,s0,s1)
+        bitdepth,maxbin,midbin)
     # kernel -------------------------------------------
 
     # main loop
@@ -193,7 +192,7 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-                bitdepth,maxbin,midbin,s0,s1)
+                bitdepth,maxbin,midbin)
             # kernel -------------------------------------------
 
         r += 1          # pass to the next row
@@ -218,7 +217,7 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-            bitdepth,maxbin,midbin,s0,s1)
+            bitdepth,maxbin,midbin)
         # kernel -------------------------------------------
 
         # ---> east to west
@@ -240,7 +239,7 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-                bitdepth,maxbin,midbin,s0,s1)
+                bitdepth,maxbin,midbin)
             # kernel -------------------------------------------
 
         r += 1           # pass to the next row
@@ -265,7 +264,7 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-            bitdepth,maxbin,midbin,s0,s1)
+            bitdepth,maxbin,midbin)
         # kernel -------------------------------------------
 
     # release memory allocated by malloc

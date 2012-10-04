@@ -15,7 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from core16p cimport rank16_percentile
+from _core16p cimport _core16p
 
 # -----------------------------------------------------------------
 # kernels uint8 (SOFT version using percentiles)
@@ -194,7 +194,7 @@ def autolevel(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """bottom hat
     """
-    return rank16_percentile(kernel_autolevel,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_autolevel,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
 
 
 def gradient(np.ndarray[np.uint16_t, ndim=2] image,
@@ -204,7 +204,7 @@ def gradient(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """return p0,p1 percentile gradient
     """
-    return rank16_percentile(kernel_gradient,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_gradient,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
 
 def mean(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -213,7 +213,7 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """return mean between [p0 and p1] percentiles
     """
-    return rank16_percentile(kernel_mean,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_mean,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
 
 def mean_substraction(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -222,7 +222,7 @@ def mean_substraction(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """return original - mean between [p0 and p1] percentiles *.5 +127
     """
-    return rank16_percentile(kernel_mean_substraction,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_mean_substraction,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
 
 def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -231,7 +231,7 @@ def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """reforce contrast using percentiles
     """
-    return rank16_percentile(kernel_morph_contr_enh,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_morph_contr_enh,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
 
 
 def percentile(np.ndarray[np.uint16_t, ndim=2] image,
@@ -241,7 +241,7 @@ def percentile(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """return p0 percentile
     """
-    return rank16_percentile(kernel_percentile,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_percentile,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
 
 
 def pop(np.ndarray[np.uint16_t, ndim=2] image,
@@ -251,7 +251,7 @@ def pop(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """return nb of pixels between [p0 and p1]
     """
-    return rank16_percentile(kernel_pop,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_pop,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
 
 def threshold(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -260,4 +260,4 @@ def threshold(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8, float p0=0., float p1=0.):
     """return (maxbin-1) if g > percentile p0
     """
-    return rank16_percentile(kernel_threshold,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
+    return _core16p(kernel_threshold,image,selem,mask,out,shift_x,shift_y,bitdepth,p0,p1)
