@@ -1,6 +1,6 @@
 from skimage.util.dtype import dtype_range
+from skimage._shared.mpl import ClearColormap
 from .base import Plugin
-from ..utils import ClearColormap
 
 
 class OverlayPlugin(Plugin):

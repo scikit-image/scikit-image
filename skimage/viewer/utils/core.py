@@ -2,13 +2,12 @@ import warnings
 
 import numpy as np
 
+
 try:
     import matplotlib.pyplot as plt
-    from matplotlib.colors import LinearSegmentedColormap
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 except ImportError:
     FigureCanvasQTAgg = object  # hack to prevent nosetest and autodoc errors
-    LinearSegmentedColormap = object
     print("Could not import matplotlib -- skimage.viewer not available.")
 
 try:
@@ -18,7 +17,7 @@ except ImportError:
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
-           'LinearColormap', 'ClearColormap', 'MatplotlibCanvas']
+           'MatplotlibCanvas']
 
 
 QApp = None
@@ -85,43 +84,6 @@ def figimage(image, scale=1, dpi=None, **kwargs):
     ax.set_axis_off()
     ax.imshow(image, **kwargs)
     return fig, ax
-
-
-class LinearColormap(LinearSegmentedColormap):
-    """LinearSegmentedColormap in which color varies smoothly.
-
-    This class is a simplification of LinearSegmentedColormap, which doesn't
-    support jumps in color intensities.
-
-    Parameters
-    ----------
-    name : str
-        Name of colormap.
-
-    segmented_data : dict
-        Dictionary of 'red', 'green', 'blue', and (optionally) 'alpha' values.
-        Each color key contains a list of `x`, `y` tuples. `x` must increase
-        monotonically from 0 to 1 and corresponds to input values for a
-        mappable object (e.g. an image). `y` corresponds to the color
-        intensity.
-
-    """
-    def __init__(self, name, segmented_data, **kwargs):
-        segmented_data = dict((key, [(x, y, y) for x, y in value])
-                              for key, value in segmented_data.iteritems())
-        LinearSegmentedColormap.__init__(self, name, segmented_data, **kwargs)
-
-
-class ClearColormap(LinearColormap):
-    """Color map that varies linearly from alpha = 0 to 1
-    """
-    def __init__(self, rgb, max_alpha=1, name='clear_color'):
-        r, g, b = rgb
-        cg_speq = {'blue':  [(0.0, b), (1.0, b)],
-                   'green': [(0.0, g), (1.0, g)],
-                   'red':   [(0.0, r), (1.0, r)],
-                   'alpha': [(0.0, 0.0), (1.0, max_alpha)]}
-        LinearColormap.__init__(self, name, cg_speq)
 
 
 class MatplotlibCanvas(FigureCanvasQTAgg):
