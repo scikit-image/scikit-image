@@ -107,7 +107,7 @@
 
 - Johannes Schönberger
   Drawing functions, adaptive thresholding, regionprops, geometric
-  transformations, LBPs, polygon approximations, and more.
+  transformations, LBPs, polygon approximations, web layout, and more.
 
 - Pavel Campr
   Fixes and tests for Histograms of Oriented Gradients.
