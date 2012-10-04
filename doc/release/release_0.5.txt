@@ -1,12 +1,12 @@
-Announcement: scikit-image 0.5
+Announcement: scikits-image 0.5
 ===============================
 
-We're happy to announce the 0.5 release of scikit-image, our image processing
+We're happy to announce the 0.5 release of scikits-image, our image processing
 toolbox for SciPy.
 
 For more information, please visit our website
 
-  http://scikit-image.org
+  http://scikits-image.org
 
 New Features
 ------------
