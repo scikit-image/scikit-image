@@ -32,8 +32,8 @@ gallery_div = '''\
 examples = glob.glob(os.path.join(example_dir, 'plot_*.py'))
 
 images, links = [], []
-image_url = 'http://scikit-image.org/docs/dev/_images/%s.png'
-link_url = 'http://scikit-image.org/docs/dev/auto_examples/%s.html'
+image_url = 'http://skimage.org/docs/dev/_images/%s.png'
+link_url = 'http://skimage.org/docs/dev/auto_examples/%s.html'
 
 for e in examples:
     e = os.path.basename(e)
