@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.rank import crank8_percentiles,crank16_bilateral
+from skimage.rank import crank8_percentiles
+from skimage.rank import crank16_bilateral
 
 if __name__ == '__main__':
     a8 = (data.coins()).astype('uint8')

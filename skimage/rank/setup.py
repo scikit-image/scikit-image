@@ -26,24 +26,33 @@ setup(
 #    from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 #
 #    config = Configuration('rank', parent_package, top_path)
-#    config.add_data_dir('tests')
+##    config.add_data_dir('tests')
 #
-#    cython(['_texture.pyx'], working_path=base_path)
-#    cython(['_template.pyx'], working_path=base_path)
+#    cython(['_crank8.pyx'], working_path=base_path)
+#    cython(['_crank8_percentiles.pyx'], working_path=base_path)
+#    cython(['_crank16.pyx'], working_path=base_path)
+#    cython(['_crank16_percentiles.pyx'], working_path=base_path)
+#    cython(['_crank16_bilateral.pyx'], working_path=base_path)
 #
-#    config.add_extension('_texture', sources=['_texture.c'],
-#        include_dirs=[get_numpy_include_dirs(), '../_shared'])
-#    config.add_extension('_template', sources=['_template.c'],
-#        include_dirs=[get_numpy_include_dirs(), '../_shared'])
+#    config.add_extension('crank8', sources=['_crank8.c'],
+#        include_dirs=[get_numpy_include_dirs()])
+#    config.add_extension('crank8_percentiles', sources=['_crank8_percentiles.c'],
+#        include_dirs=[get_numpy_include_dirs()])
+#    config.add_extension('crank16', sources=['_crank16.c'],
+#        include_dirs=[get_numpy_include_dirs()])
+#    config.add_extension('crank16_percentiles', sources=['_crank16_percentiles.c'],
+#        include_dirs=[get_numpy_include_dirs()])
+#    config.add_extension('crank16_bilateral', sources=['_crank16_bilateral.c'],
+#        include_dirs=[get_numpy_include_dirs()])
 #
 #    return config
 #
 #if __name__ == '__main__':
 #    from numpy.distutils.core import setup
 #    setup(maintainer='scikits-image Developers',
-#        author='scikits-image Developers',
+#        author='Olivier Debeir',
 #        maintainer_email='scikits-image@googlegroups.com',
-#        description='Features',
+#        description='Rank filters',
 #        url='https://github.com/scikits-image/scikits-image',
 #        license='SciPy License (BSD Style)',
 #        **(configuration(top_path='').todict())
