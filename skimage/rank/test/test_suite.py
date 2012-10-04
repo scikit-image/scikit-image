@@ -1,73 +1,10 @@
 import unittest
 
 import numpy as np
-from time import time
-import matplotlib.pyplot as plt
-from skimage import data
 
-from tools import log_timing,init_logger
+from skimage.rank import crank,crank16,crank16_bilateral,crank16_percentiles,crank_percentiles
+from skimage.morphology import cmorph
 
-import crank
-import crank16
-import crank_percentiles
-import crank16_percentiles
-import crank16_bilateral
-from cmorph import dilate
-
-
-@log_timing
-def c_max(image,selem):
-    return crank.maximum(image=image,selem = selem)
-
-@log_timing
-def cm_max(image,selem):
-    return dilate(image=image,selem = selem)
-
-def compare():
-    """comparison between
-    - Cython maximum rankfilter implementation
-    - weaves maximum rankfilter implementation
-    - cmorph.dilate cython implementation
-    on increasing structuring element size and increasing image size
-    """
-    a = (np.random.random((500,500))*256).astype('uint8')
-
-    rec = []
-    for r in range(1,20,1):
-        elem = np.ones((r,r),dtype='uint8')
-        #        elem = (np.random.random((r,r))>.5).astype('uint8')
-        (rc,ms_rc) = c_max(a,elem)
-        (rcm,ms_rcm) = cm_max(a,elem)
-        rec.append((ms_rc,ms_rw,ms_rcm))
-        assert  (rc==rcm).all()
-
-    rec = np.asarray(rec)
-
-    plt.plot(rec)
-    plt.legend(['sliding cython','sliding weaves','cmorph'])
-    plt.figure()
-    plt.imshow(np.hstack((rc,rw,rcm)))
-
-    r = 9
-    elem = np.ones((r,r),dtype='uint8')
-
-    rec = []
-    for s in range(100,1000,100):
-        a = (np.random.random((s,s))*256).astype('uint8')
-        (rc,ms_rc) = c_max(a,elem)
-        (rcm,ms_rcm) = cm_max(a,elem)
-        rec.append((ms_rc,ms_rw,ms_rcm))
-        assert  (rc==rcm).all()
-
-    rec = np.asarray(rec)
-
-    plt.figure()
-    plt.plot(rec)
-    plt.legend(['sliding cython','sliding weaves','cmorph'])
-    plt.figure()
-    plt.imshow(np.hstack((rc,rcm)))
-
-    plt.show()
 class TestSequenceFunctions(unittest.TestCase):
 
     def setUp(self):
@@ -106,7 +43,7 @@ class TestSequenceFunctions(unittest.TestCase):
             elem = np.ones((r,r),dtype='uint8')
             #        elem = (np.random.random((r,r))>.5).astype('uint8')
             rc = crank.maximum(image=a,selem = elem)
-            cm = dilate(image=a,selem = elem)
+            cm = cmorph.dilate(image=a,selem = elem)
             self.assertTrue((rc==cm).all())
 
     def test_bitdepth(self):
@@ -139,11 +76,11 @@ class TestSequenceFunctions(unittest.TestCase):
         elem = np.asarray([[1,1,0],[1,1,1],[0,0,1]],dtype='uint8')
         f = crank.maximum(image=a,selem = elem,shift_x=1,shift_y=1)
         r = np.asarray([[  0,   0,   0,   0,   0,   0],
-        [  0,   0,   0,   0,   0,   0],
-        [  0,   0, 255,   0,   0,   0],
-        [  0,   0, 255, 255, 255,   0],
-        [  0,   0,   0, 255, 255,   0],
-        [  0,   0,   0,   0,   0,   0]])
+            [  0,   0,   0,   0,   0,   0],
+            [  0,   0, 255,   0,   0,   0],
+            [  0,   0, 255, 255, 255,   0],
+            [  0,   0,   0, 255, 255,   0],
+            [  0,   0,   0,   0,   0,   0]])
         np.testing.assert_array_equal(r,f)
 
 
@@ -156,27 +93,5 @@ class TestSequenceFunctions(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    logger = init_logger('app.log')
-
-#    unittest.main()
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSequenceFunctions)
     unittest.TextTestRunner(verbosity=2).run(suite)
-
-
-#    compare()
-
-#    a = (data.coins()).astype('uint8')
-    a8 = (data.coins()).astype('uint8')
-    a = (data.coins()).astype('uint16')*16
-    selem = np.ones((20,20),dtype='uint8')
-#    f1 = filter.soft_gradient(a,struct_elem = selem,bitDepth=8,infSup=[.1,.9])
-#    f2 = crank16.bottomhat(a,selem = selem,bitdepth=12)
-    f1 = crank_percentiles.mean(a8,selem = selem,p0=.1,p1=.9)
-#    f2 = crank16_percentiles.mean(a,selem = selem,bitdepth=12,p0=.1,p1=.9)
-    f2 = crank16_bilateral.mean(a,selem = selem,bitdepth=12,s0=500,s1=500)
-#    plt.imshow(f2)
-    plt.imshow(np.hstack((a,f2)))
-    plt.colorbar()
-    plt.show()
-
-

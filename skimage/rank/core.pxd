@@ -18,7 +18,6 @@ from libc.stdlib cimport malloc, free
 cdef inline int int_max(int a, int b): return a if a >= b else b
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
-
 #---------------------------------------------------------------------------
 # 8 bit core kernel
 #---------------------------------------------------------------------------
