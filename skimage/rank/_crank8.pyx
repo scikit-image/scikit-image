@@ -15,7 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from core8 cimport rank8
+from _core8 cimport _core8
 
 # -----------------------------------------------------------------
 # kernels uint8
@@ -199,7 +199,7 @@ def autolevel(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """bottom hat
     """
-    return rank8(kernel_autolevel,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_autolevel,image,selem,mask,out,shift_x,shift_y)
 
 def bottomhat(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -208,7 +208,7 @@ def bottomhat(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """bottom hat
     """
-    return rank8(kernel_bottomhat,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_bottomhat,image,selem,mask,out,shift_x,shift_y)
 
 def egalise(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -217,7 +217,7 @@ def egalise(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """local egalisation of the gray level
     """
-    return rank8(kernel_egalise,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_egalise,image,selem,mask,out,shift_x,shift_y)
 
 def gradient(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -226,7 +226,7 @@ def gradient(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """local maximum - local minimum gray level
     """
-    return rank8(kernel_gradient,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_gradient,image,selem,mask,out,shift_x,shift_y)
 
 def maximum(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -235,7 +235,7 @@ def maximum(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """local maximum gray level
     """
-    return rank8(kernel_maximum,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_maximum,image,selem,mask,out,shift_x,shift_y)
 
 def mean(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -244,7 +244,7 @@ def mean(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """average gray level (clipped on uint8)
     """
-    return rank8(kernel_mean,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_mean,image,selem,mask,out,shift_x,shift_y)
 
 def meansubstraction(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -253,7 +253,7 @@ def meansubstraction(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """(g - average gray level)/2+127 (clipped on uint8)
     """
-    return rank8(kernel_meansubstraction,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_meansubstraction,image,selem,mask,out,shift_x,shift_y)
 
 def median(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -262,7 +262,7 @@ def median(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """local median
     """
-    return rank8(kernel_median,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_median,image,selem,mask,out,shift_x,shift_y)
 
 def minimum(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -271,7 +271,7 @@ def minimum(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """local minimum gray level
     """
-    return rank8(kernel_minimum,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_minimum,image,selem,mask,out,shift_x,shift_y)
 
 def morph_contr_enh(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -280,7 +280,7 @@ def morph_contr_enh(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """morphological contrast enhancement
     """
-    return rank8(kernel_morph_contr_enh,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_morph_contr_enh,image,selem,mask,out,shift_x,shift_y)
 
 def modal(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -289,7 +289,7 @@ def modal(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """local mode
     """
-    return rank8(kernel_modal,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_modal,image,selem,mask,out,shift_x,shift_y)
 
 def pop(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -298,7 +298,7 @@ def pop(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """returns the number of actual pixels of the structuring element inside the mask
     """
-    return rank8(kernel_pop,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_pop,image,selem,mask,out,shift_x,shift_y)
 
 def threshold(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -307,7 +307,7 @@ def threshold(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """returns 255 if gray level higher than local mean, 0 else
     """
-    return rank8(kernel_threshold,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_threshold,image,selem,mask,out,shift_x,shift_y)
 
 def tophat(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -316,5 +316,5 @@ def tophat(np.ndarray[np.uint8_t, ndim=2] image,
             char shift_x=0, char shift_y=0):
     """top hat
     """
-    return rank8(kernel_tophat,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_tophat,image,selem,mask,out,shift_x,shift_y)
 

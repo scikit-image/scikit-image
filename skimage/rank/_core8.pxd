@@ -2,7 +2,7 @@
 >>> python setup.py build_ext --inplace
 
 to generate html report use:
->>> cython -a core8p.pxd
+>>> cython -a core8.pxd
 """
 
 #cython: cdivision=True
@@ -19,15 +19,15 @@ cdef inline int int_max(int a, int b): return a if a >= b else b
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
 #---------------------------------------------------------------------------
-# 8 bit core kernel receives extra information about data inferior and superior percentiles
+# 8 bit core kernel
 #---------------------------------------------------------------------------
 
-cdef inline rank8_percentile(np.uint8_t kernel(int*, float, np.uint8_t, float, float),
+cdef inline _core8(np.uint8_t kernel(int*, float, np.uint8_t),
 np.ndarray[np.uint8_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
 np.ndarray[np.uint8_t, ndim=2] mask,
 np.ndarray[np.uint8_t, ndim=2] out,
-char shift_x, char shift_y, float p0, float p1):
+char shift_x, char shift_y):
     """ Main loop, this function computes the histogram for each image point
     - data is uint8
     - result is uint8 casted
@@ -156,7 +156,7 @@ char shift_x, char shift_y, float p0, float p1):
     r = 0
     c = 0
     # kernel -------------------------------------------
-    out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
+    out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c])
     # kernel -------------------------------------------
 
     # main loop
@@ -180,14 +180,14 @@ char shift_x, char shift_y, float p0, float p1):
                     pop -= 1.
 
             # kernel -------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
+            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c])
             # kernel -------------------------------------------
 
         r += 1          # pass to the next row
         if r>=rows:
             break
 
-            # ---> north to south
+    # ---> north to south
         for s in range(n_se_s):
             rr = r + se_s_r[s] + centre_r
             cc = c + se_s_c[s] + centre_c
@@ -204,7 +204,7 @@ char shift_x, char shift_y, float p0, float p1):
                 pop -= 1.
 
         # kernel -------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
+        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c])
         # kernel -------------------------------------------
 
         # ---> east to west
@@ -225,7 +225,7 @@ char shift_x, char shift_y, float p0, float p1):
                     pop -= 1.
 
             # kernel -------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
+            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c])
             # kernel -------------------------------------------
 
         r += 1           # pass to the next row
@@ -249,7 +249,7 @@ char shift_x, char shift_y, float p0, float p1):
                 pop -= 1.
 
         # kernel -------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
+        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c])
         # kernel -------------------------------------------
 
     # release memory allocated by malloc

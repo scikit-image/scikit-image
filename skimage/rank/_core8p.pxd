@@ -2,7 +2,7 @@
 >>> python setup.py build_ext --inplace
 
 to generate html report use:
->>> cython -a core16.pxd
+>>> cython -a core8p.pxd
 """
 
 #cython: cdivision=True
@@ -19,15 +19,15 @@ cdef inline int int_max(int a, int b): return a if a >= b else b
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
 #---------------------------------------------------------------------------
-# 16 bit core kernel receives extra information about data bitdepth
+# 8 bit core kernel receives extra information about data inferior and superior percentiles
 #---------------------------------------------------------------------------
 
-cdef inline rank16(np.uint16_t kernel(int*, float, np.uint16_t, int ,int,int ),
-np.ndarray[np.uint16_t, ndim=2] image,
+cdef inline _core8p(np.uint8_t kernel(int*, float, np.uint8_t, float, float),
+np.ndarray[np.uint8_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
 np.ndarray[np.uint8_t, ndim=2] mask,
-np.ndarray[np.uint16_t, ndim=2] out,
-char shift_x, char shift_y,int bitdepth):
+np.ndarray[np.uint8_t, ndim=2] out,
+char shift_x, char shift_y, float p0, float p1):
     """ Main loop, this function computes the histogram for each image point
     - data is uint8
     - result is uint8 casted
@@ -46,16 +46,6 @@ char shift_x, char shift_y,int bitdepth):
     assert centre_c >= 0
     assert centre_r < srows
     assert centre_c < scols
-    assert bitdepth in range(2,13)
-
-    maxbin_list = [0,0,4,8,16,32,64,128,256,512,1024,2048,4096]
-    midbin_list = [0,0,2,4,8,16,32,64,128,256,512,1024,2048]
-
-
-    #set maxbin and midbin
-    cdef int maxbin=maxbin_list[bitdepth],midbin=midbin_list[bitdepth]
-
-    assert (image<maxbin).all()
 
     image = np.ascontiguousarray(image)
 
@@ -65,7 +55,7 @@ char shift_x, char shift_y,int bitdepth):
         mask = np.ascontiguousarray(mask)
 
     if out is None:
-        out = np.zeros((rows, cols), dtype=np.uint16)
+        out = np.zeros((rows, cols), dtype=np.uint8)
     else:
         out = np.ascontiguousarray(out)
 
@@ -74,7 +64,7 @@ char shift_x, char shift_y,int bitdepth):
     cdef int ecols = cols+scols-1
 
     cdef np.ndarray emask = np.zeros((erows, ecols), dtype=np.uint8)
-    cdef np.ndarray eimage = np.zeros((erows, ecols), dtype=np.uint16)
+    cdef np.ndarray eimage = np.zeros((erows, ecols), dtype=np.uint8)
 
     eimage[centre_r:rows+centre_r,centre_c:cols+centre_c] = image
     emask[centre_r:rows+centre_r,centre_c:cols+centre_c] = mask
@@ -83,11 +73,11 @@ char shift_x, char shift_y,int bitdepth):
     mask = np.ascontiguousarray(mask)
 
     # define pointers to the data
-    cdef np.uint16_t* eimage_data = <np.uint16_t*>eimage.data
+    cdef np.uint8_t* eimage_data = <np.uint8_t*>eimage.data
     cdef np.uint8_t* emask_data = <np.uint8_t*>emask.data
 
-    cdef np.uint16_t* out_data = <np.uint16_t*>out.data
-    cdef np.uint16_t* image_data = <np.uint16_t*>image.data
+    cdef np.uint8_t* out_data = <np.uint8_t*>out.data
+    cdef np.uint8_t* image_data = <np.uint8_t*>image.data
     cdef np.uint8_t* mask_data = <np.uint8_t*>mask.data
 
     # define local variable types
@@ -101,7 +91,7 @@ char shift_x, char shift_y,int bitdepth):
     cdef int selem_num = np.sum(selem != 0)
     cdef int* sr = <int*>malloc(selem_num * sizeof(int))
     cdef int* sc = <int*>malloc(selem_num * sizeof(int))
-    cdef int* histo = <int*>malloc(maxbin * sizeof(int))
+    cdef int* histo = <int*>malloc(256 * sizeof(int))
     cdef int* se_e_r = <int*>malloc(max_se * sizeof(int))
     cdef int* se_e_c = <int*>malloc(max_se * sizeof(int))
     cdef int* se_w_r = <int*>malloc(max_se * sizeof(int))
@@ -148,7 +138,7 @@ char shift_x, char shift_y,int bitdepth):
                 n_se_s += 1
 
     # initial population and histogram
-    for i in range(maxbin):
+    for i in range(256):
         histo[i] = 0
 
     pop = 0
@@ -166,8 +156,7 @@ char shift_x, char shift_y,int bitdepth):
     r = 0
     c = 0
     # kernel -------------------------------------------
-    out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-        bitdepth,maxbin,midbin)
+    out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
     # kernel -------------------------------------------
 
     # main loop
@@ -191,8 +180,7 @@ char shift_x, char shift_y,int bitdepth):
                     pop -= 1.
 
             # kernel -------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-                bitdepth,maxbin,midbin)
+            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
             # kernel -------------------------------------------
 
         r += 1          # pass to the next row
@@ -216,8 +204,7 @@ char shift_x, char shift_y,int bitdepth):
                 pop -= 1.
 
         # kernel -------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-            bitdepth,maxbin,midbin)
+        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
         # kernel -------------------------------------------
 
         # ---> east to west
@@ -238,8 +225,7 @@ char shift_x, char shift_y,int bitdepth):
                     pop -= 1.
 
             # kernel -------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-                bitdepth,maxbin,midbin)
+            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
             # kernel -------------------------------------------
 
         r += 1           # pass to the next row
@@ -263,8 +249,7 @@ char shift_x, char shift_y,int bitdepth):
                 pop -= 1.
 
         # kernel -------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-            bitdepth,maxbin,midbin)
+        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],p0,p1)
         # kernel -------------------------------------------
 
     # release memory allocated by malloc
@@ -283,3 +268,4 @@ char shift_x, char shift_y,int bitdepth):
     free(histo)
 
     return out
+

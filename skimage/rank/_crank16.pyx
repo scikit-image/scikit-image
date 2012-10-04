@@ -15,7 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from core16 cimport rank16
+from _core16 cimport _core16
 
 # -----------------------------------------------------------------
 # kernels uint16 take extra parameter for defining the bitdepth
@@ -198,7 +198,7 @@ def autolevel(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """bottom hat
     """
-    return rank16(kernel_autolevel,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_autolevel,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def bottomhat(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -207,7 +207,7 @@ def bottomhat(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """bottom hat
     """
-    return rank16(kernel_bottomhat,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_bottomhat,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def egalise(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -216,7 +216,7 @@ def egalise(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """local egalisation of the gray level
     """
-    return rank16(kernel_egalise,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_egalise,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def gradient(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -225,7 +225,7 @@ def gradient(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """local maximum - local minimum gray level
     """
-    return rank16(kernel_gradient,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_gradient,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def maximum(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -234,7 +234,7 @@ def maximum(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """local maximum gray level
     """
-    return rank16(kernel_maximum,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_maximum,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def mean(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -243,7 +243,7 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """average gray level (clipped on uint8)
     """
-    return rank16(kernel_mean,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_mean,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def meansubstraction(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -252,7 +252,7 @@ def meansubstraction(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """(g - average gray level)/2+midbin (clipped on uint8)
     """
-    return rank16(kernel_meansubstraction,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_meansubstraction,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def median(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -261,7 +261,7 @@ def median(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """local median
     """
-    return rank16(kernel_median,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_median,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def minimum(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -270,7 +270,7 @@ def minimum(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """local minimum gray level
     """
-    return rank16(kernel_minimum,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_minimum,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -279,7 +279,7 @@ def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """morphological contrast enhancement
     """
-    return rank16(kernel_morph_contr_enh,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_morph_contr_enh,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def modal(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -288,7 +288,7 @@ def modal(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """local mode
     """
-    return rank16(kernel_modal,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_modal,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def pop(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -297,7 +297,7 @@ def pop(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """returns the number of actual pixels of the structuring element inside the mask
     """
-    return rank16(kernel_pop,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_pop,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def threshold(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -306,7 +306,7 @@ def threshold(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """returns maxbin-1 if gray level higher than local mean, 0 else
     """
-    return rank16(kernel_threshold,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_threshold,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def tophat(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
@@ -315,4 +315,4 @@ def tophat(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """top hat
     """
-    return rank16(kernel_tophat,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_tophat,image,selem,mask,out,shift_x,shift_y,bitdepth)

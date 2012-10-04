@@ -2,7 +2,7 @@
 >>> python setup.py build_ext --inplace
 
 to generate html report use:
->>> cython -a core16p.pxd
+>>> cython -a core16b.pxd
 """
 
 #cython: cdivision=True
@@ -19,18 +19,19 @@ cdef inline int int_max(int a, int b): return a if a >= b else b
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
 #---------------------------------------------------------------------------
-# 16 bit core kernel receives extra information about data inferior and superior percentiles
+# 16 bit core kernel receives extra information about data bitdepth and bilateral interval
 #---------------------------------------------------------------------------
 
-cdef inline rank16_percentile(np.uint16_t kernel(int*, float, np.uint16_t,int,int,int, float, float),
+cdef inline _core16b(np.uint16_t kernel(int*, float, np.uint16_t, int ,int,int,int,int),
 np.ndarray[np.uint16_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
 np.ndarray[np.uint8_t, ndim=2] mask,
 np.ndarray[np.uint16_t, ndim=2] out,
-char shift_x, char shift_y,int bitdepth, float p0, float p1):
+char shift_x, char shift_y,int bitdepth, int s0, int s1):
     """ Main loop, this function computes the histogram for each image point
-    - data is uint16
-    - result is uint16 casted
+    - data is uint8
+    - result is uint8 casted
+    - only pixel inside [s0,s1] centered on g are taken into account
     """
 
     cdef int rows = image.shape[0]
@@ -46,11 +47,11 @@ char shift_x, char shift_y,int bitdepth, float p0, float p1):
     assert centre_c >= 0
     assert centre_r < srows
     assert centre_c < scols
-
     assert bitdepth in range(2,13)
 
     maxbin_list = [0,0,4,8,16,32,64,128,256,512,1024,2048,4096]
     midbin_list = [0,0,2,4,8,16,32,64,128,256,512,1024,2048]
+
 
     #set maxbin and midbin
     cdef int maxbin=maxbin_list[bitdepth],midbin=midbin_list[bitdepth]
@@ -167,7 +168,7 @@ char shift_x, char shift_y,int bitdepth, float p0, float p1):
     c = 0
     # kernel -------------------------------------------
     out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-        bitdepth,maxbin,midbin,p0,p1)
+        bitdepth,maxbin,midbin,s0,s1)
     # kernel -------------------------------------------
 
     # main loop
@@ -192,7 +193,7 @@ char shift_x, char shift_y,int bitdepth, float p0, float p1):
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-                bitdepth,maxbin,midbin,p0,p1)
+                bitdepth,maxbin,midbin,s0,s1)
             # kernel -------------------------------------------
 
         r += 1          # pass to the next row
@@ -217,7 +218,7 @@ char shift_x, char shift_y,int bitdepth, float p0, float p1):
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-            bitdepth,maxbin,midbin,p0,p1)
+            bitdepth,maxbin,midbin,s0,s1)
         # kernel -------------------------------------------
 
         # ---> east to west
@@ -239,7 +240,7 @@ char shift_x, char shift_y,int bitdepth, float p0, float p1):
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-                bitdepth,maxbin,midbin,p0,p1)
+                bitdepth,maxbin,midbin,s0,s1)
             # kernel -------------------------------------------
 
         r += 1           # pass to the next row
@@ -264,7 +265,7 @@ char shift_x, char shift_y,int bitdepth, float p0, float p1):
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
-            bitdepth,maxbin,midbin,p0,p1)
+            bitdepth,maxbin,midbin,s0,s1)
         # kernel -------------------------------------------
 
     # release memory allocated by malloc
@@ -283,5 +284,3 @@ char shift_x, char shift_y,int bitdepth, float p0, float p1):
     free(histo)
 
     return out
-
-
