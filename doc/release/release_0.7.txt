@@ -1,9 +1,9 @@
-Announcement: scikit-image 0.7.0
+Announcement: scikits-image 0.7.0
 =================================
 
-We're happy to announce the 7th version of scikit-image!
+We're happy to announce the 7th version of scikits-image!
 
-scikit-image is an image processing toolbox for SciPy that includes algorithms
+Scikits-image is an image processing toolbox for SciPy that includes algorithms
 for segmentation, geometric transformations, color space manipulation,
 analysis, filtering, morphology, feature detection, and more.
 
@@ -15,7 +15,7 @@ For more information, examples, and documentation, please visit our website
 New Features
 ------------
 
-It's been only 3 months since scikit-image 0.6 was released, but in that short
+It's been only 3 months since scikits-image 0.6 was released, but in that short
 time, we've managed to add plenty of new features and enhancements, including
 
 - Geometric image transforms
