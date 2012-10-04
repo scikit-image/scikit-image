@@ -2,23 +2,63 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.rank import crank8_percentiles
-from skimage.rank import crank16_bilateral
+from skimage.morphology.selem import disk
+from skimage.rank import crank8,crank8_percentiles
+from skimage.rank import crank16,crank16_percentiles,crank16_bilateral
 
 if __name__ == '__main__':
-    a8 = (data.coins()).astype('uint8')
+    a8 = data.camera()
+    a16 = a8.astype('uint16')*16
+#    selem = np.ones((30,30),dtype='uint8')
+    selem = disk(5)
 
-    a16 = (data.coins()).astype('uint16')*16
-    selem = np.ones((20,20),dtype='uint8')
-    f1 = crank8_percentiles.mean(a8,selem = selem,p0=.1,p1=.9)
-    f2 = crank16_bilateral.mean(a16,selem = selem,bitdepth=12,s0=500,s1=500)
+#    for n in dir(crank16):
+#        method = eval('crank16.%s'%n)
+#        t = type(method)
+#        if t == type(crank8.maximum):
+#            print n,t
+#            f = method(a16,selem = selem,bitdepth=12)
+#
+#            plt.figure()
+#            plt.subplot(1,2,1)
+#            plt.imshow(a16)
+#            plt.colorbar()
+#            plt.subplot(1,2,2)
+#            plt.imshow(f)
+#            plt.colorbar()
+#            plt.title(method)
 
-    plt.figure()
-    plt.imshow(np.hstack((a8,f1)))
-    plt.colorbar()
+#    for n in dir(crank8):
+#        method = eval('crank8.%s'%n)
+#        t = type(method)
+#        if t == type(crank8.maximum):
+#            print n,t
+#            f = method(a8,selem = selem)
+#
+#            plt.figure()
+#            plt.subplot(1,2,1)
+#            plt.imshow(a8)
+#            plt.colorbar()
+#            plt.subplot(1,2,2)
+#            plt.imshow(f)
+#            plt.colorbar()
+#            plt.title(method)
 
-    plt.figure()
-    plt.imshow(np.hstack((a16,f2)))
-    plt.colorbar()
+    for n in dir(crank8_percentiles):
+        method = eval('crank8_percentiles.%s'%n)
+        t = type(method)
+        if t == type(crank8.maximum):
+            print n,t
+            f = method(a8,selem = selem,p0=.1,p1=.9)
 
+            plt.figure()
+            plt.subplot(1,2,1)
+            plt.imshow(a8)
+            plt.colorbar()
+            plt.subplot(1,2,2)
+            plt.imshow(f)
+            plt.colorbar()
+            plt.title(method)
+
+        #
     plt.show()
