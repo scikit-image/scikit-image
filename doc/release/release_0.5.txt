@@ -6,7 +6,7 @@ toolbox for SciPy.
 
 For more information, please visit our website
 
-  http://scikit-image.org
+  http://skimage.org
 
 New Features
 ------------

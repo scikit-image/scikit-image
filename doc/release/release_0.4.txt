@@ -6,7 +6,7 @@ toolbox for SciPy.
 
 Please visit our examples gallery to see what we've been up to:
 
-   http://scikit-image.org/docs/0.4/auto_examples/
+   http://skimage.org/docs/0.4/auto_examples/
 
 Note that, in this release, we renamed the module from ``scikits.image`` to
 ``skimage``, to work around name space conflicts with other scikits (similarly,
@@ -20,7 +20,7 @@ This release runs under all major operating systems where Python (>=2.6 or
 
 For more information, visit our website
 
-  http://scikit-image.org
+  http://skimage.org
 
 New Features
 ------------
