@@ -39,14 +39,4 @@ def log_timing(func):
 
 log_timing.level = 0
 
-def tumbnail_it(data):
-    """display image with its histogram
-    """
-    h = np.histogram(data[:],100)
-    hn = 512*h[0]/np.max(h[0])
 
-    plt.subplot(1,2,1)
-    plt.imshow(ima8,interpolation='nearest',cmap=cm.gray)
-    plt.subplot(1,2,2)
-    plt.plot(hn)
-    plt.colorbar()
