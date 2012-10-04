@@ -1,3 +1,5 @@
+import unittest
+
 import numpy as np
 from time import time
 import matplotlib.pyplot as plt
@@ -9,17 +11,13 @@ import crank
 import crank16
 import crank_percentiles
 import crank16_percentiles
-from pyrankfilter import filter
+import crank16_bilateral
 from cmorph import dilate
 
 
 @log_timing
 def c_max(image,selem):
     return crank.maximum(image=image,selem = selem)
-
-@log_timing
-def w_max(image,selem):
-    return filter.maximum(image,struct_elem = selem)
 
 @log_timing
 def cm_max(image,selem):
@@ -39,10 +37,8 @@ def compare():
         elem = np.ones((r,r),dtype='uint8')
         #        elem = (np.random.random((r,r))>.5).astype('uint8')
         (rc,ms_rc) = c_max(a,elem)
-        (rw, ms_rw) = w_max(a,elem)
         (rcm,ms_rcm) = cm_max(a,elem)
         rec.append((ms_rc,ms_rw,ms_rcm))
-        assert  (rc==rw).all()
         assert  (rc==rcm).all()
 
     rec = np.asarray(rec)
@@ -59,10 +55,8 @@ def compare():
     for s in range(100,1000,100):
         a = (np.random.random((s,s))*256).astype('uint8')
         (rc,ms_rc) = c_max(a,elem)
-        (rw, ms_rw) = w_max(a,elem)
         (rcm,ms_rcm) = cm_max(a,elem)
         rec.append((ms_rc,ms_rw,ms_rcm))
-        assert  (rc==rw).all()
         assert  (rc==rcm).all()
 
     rec = np.asarray(rec)
@@ -71,89 +65,105 @@ def compare():
     plt.plot(rec)
     plt.legend(['sliding cython','sliding weaves','cmorph'])
     plt.figure()
-    plt.imshow(np.hstack((rc,rw,rcm)))
+    plt.imshow(np.hstack((rc,rcm)))
 
     plt.show()
+class TestSequenceFunctions(unittest.TestCase):
 
-def test_image_size():
-    """try several image sizes to check bounds conditions
-    """
-    niter = 10
-    elem = np.asarray([[1,1,1],[1,1,1],[1,1,1]],dtype='uint8')
-    for m,n in np.random.random_integers(1,100,size=(10,2)):
-        a = np.ones((m,n),dtype='uint8')
-        r = crank.mean(image=a,selem = elem,shift_x=0,shift_y=0)
-        assert a.shape == r.shape
-        r = crank.mean(image=a,selem = elem,shift_x=0,shift_y=-1)
-        assert a.shape == r.shape
-        r = crank.mean(image=a,selem = elem,shift_x=0,shift_y=+1)
-        assert a.shape == r.shape
-        r = crank.mean(image=a,selem = elem,shift_x=-1,shift_y=0)
-        assert a.shape == r.shape
-        r = crank.mean(image=a,selem = elem,shift_x=+1,shift_y=0)
-        assert a.shape == r.shape
-        r = crank.mean(image=a,selem = elem,shift_x=-1,shift_y=-1)
-        assert a.shape == r.shape
-        r = crank.mean(image=a,selem = elem,shift_x=+1,shift_y=+1)
-        assert a.shape == r.shape
+    def setUp(self):
+        pass
 
-    return True
+    def test_random_sizes(self):
+        # make sure the size is not a problem
+        niter = 10
+        elem = np.asarray([[1,1,1],[1,1,1],[1,1,1]],dtype='uint8')
+        for m,n in np.random.random_integers(1,100,size=(10,2)):
+            a8 = np.ones((m,n),dtype='uint8')
+            r = crank.mean(image=a8,selem = elem,shift_x=0,shift_y=0)
+            self.assertTrue(a8.shape == r.shape)
+            r = crank.mean(image=a8,selem = elem,shift_x=+1,shift_y=+1)
+            self.assertTrue(a8.shape == r.shape)
 
+        for m,n in np.random.random_integers(1,100,size=(10,2)):
+            a16 = np.ones((m,n),dtype='uint16')
+            r = crank16.mean(image=a16,selem = elem,shift_x=0,shift_y=0)
+            self.assertTrue(a16.shape == r.shape)
+            r = crank16.mean(image=a16,selem = elem,shift_x=+1,shift_y=+1)
+            self.assertTrue(a16.shape == r.shape)
+
+        for m,n in np.random.random_integers(1,100,size=(10,2)):
+            a16 = np.ones((m,n),dtype='uint16')
+            r = crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9)
+            self.assertTrue(a16.shape == r.shape)
+            r = crank16_percentiles.mean(image=a16,selem = elem,shift_x=+1,shift_y=+1,p0=.1,p1=.9)
+            self.assertTrue(a16.shape == r.shape)
+
+    def test_compare_with_cmorph(self):
+        #compare the result of maximum filter with dilate
+        a = (np.random.random((500,500))*256).astype('uint8')
+
+        for r in range(1,20,1):
+            elem = np.ones((r,r),dtype='uint8')
+            #        elem = (np.random.random((r,r))>.5).astype('uint8')
+            rc = crank.maximum(image=a,selem = elem)
+            cm = dilate(image=a,selem = elem)
+            self.assertTrue((rc==cm).all())
+
+    def test_bitdepth(self):
+        elem = np.ones((3,3),dtype='uint8')
+        a16 = np.ones((100,100),dtype='uint16')*255
+        r = crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=8)
+        a16 = np.ones((100,100),dtype='uint16')*255*2
+        r = crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=9)
+        a16 = np.ones((100,100),dtype='uint16')*255*4
+        r = crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=10)
+        a16 = np.ones((100,100),dtype='uint16')*255*8
+        r = crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=11)
+        a16 = np.ones((100,100),dtype='uint16')*255*16
+        r = crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=12)
+
+    def test_population(self):
+        a = np.zeros((5,5),dtype='uint8')
+        elem = np.ones((3,3),dtype='uint8')
+        p = crank.pop(image=a,selem = elem)
+        r = np.asarray([[4, 6, 6, 6, 4],
+            [6, 9, 9, 9, 6],
+            [6, 9, 9, 9, 6],
+            [6, 9, 9, 9, 6],
+            [4, 6, 6, 6, 4]])
+        np.testing.assert_array_equal(r,p)
+
+    def test_structuring_element(self):
+        a = np.zeros((6,6),dtype='uint8')
+        a[2,2] = 255
+        elem = np.asarray([[1,1,0],[1,1,1],[0,0,1]],dtype='uint8')
+        f = crank.maximum(image=a,selem = elem,shift_x=1,shift_y=1)
+        r = np.asarray([[  0,   0,   0,   0,   0,   0],
+        [  0,   0,   0,   0,   0,   0],
+        [  0,   0, 255,   0,   0,   0],
+        [  0,   0, 255, 255, 255,   0],
+        [  0,   0,   0, 255, 255,   0],
+        [  0,   0,   0,   0,   0,   0]])
+        np.testing.assert_array_equal(r,f)
+
+
+    @unittest.expectedFailure
+    def test_fail_on_bitdepth(self):
+        # should fail because data bitdepth is too high for the function
+        a16 = np.ones((100,100),dtype='uint16')*255
+        elem = np.ones((3,3),dtype='uint8')
+        f = crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=4)
 
 if __name__ == '__main__':
 
     logger = init_logger('app.log')
-    a = np.zeros((10,10),dtype='uint8')
-    a[2,2] = 255
-#    a[2,3] = 255
-#    a[2,4] = 255
 
-    print a
+#    unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestSequenceFunctions)
+    unittest.TextTestRunner(verbosity=2).run(suite)
 
-    mask = np.ones_like(a)
-#    mask[:3,:3] = 0
-
-#    elem = np.asarray([[0,1,0],[1,1,1],[0,1,0]],dtype='uint8')
-    elem = np.asarray([[1,1,0],[1,1,1],[0,0,1]],dtype='uint8')
-
-    niter = 1
-    t0 = time()
-
-    for iter in range(niter):
-        r = crank.mean(image=a,selem = elem,shift_x=0,shift_y=0,mask = mask)
-        p = crank.pop(image=a,selem = elem,shift_x=0,shift_y=0,mask = mask)
-    t1 = time()
-    print '%f msec'%(t1-t0)
-
-    print 'cython mean'
-    print r
-    print p
-
-    t0 = time()
-    for iter in range(niter):
-        r = filter.mean(a,struct_elem = elem,struct_elem_center=(1,1),mask = mask)
-    t1 = time()
-    print '%f msec'%(t1-t0)
-
-    print 'filter.mean:'
-    print r
-
-    print a
-    r = crank.maximum(image=a,selem = elem,shift_x=0,shift_y=0,mask = mask)
-    print r
-
-    r = crank.gradient(image=r,selem = elem,shift_x=0,shift_y=0,mask = mask)
-    print r
-    im = np.zeros((10,10),dtype='uint8')
-    im[2:6,2:6] = 255
-    elem = np.asarray([[1,1,1],[1,1,1],[1,1,1]],dtype='uint8')
-    f = crank.gradient(image=im,selem = elem)
-    print f
-    f = crank.egalise(image=im,selem = elem)
-    print f
 
 #    compare()
-#    test_image_size()
 
 #    a = (data.coins()).astype('uint8')
     a8 = (data.coins()).astype('uint8')
@@ -162,9 +172,10 @@ if __name__ == '__main__':
 #    f1 = filter.soft_gradient(a,struct_elem = selem,bitDepth=8,infSup=[.1,.9])
 #    f2 = crank16.bottomhat(a,selem = selem,bitdepth=12)
     f1 = crank_percentiles.mean(a8,selem = selem,p0=.1,p1=.9)
-    f2 = crank16_percentiles.mean(a,selem = selem,bitdepth=12,p0=.1,p1=.9)
+#    f2 = crank16_percentiles.mean(a,selem = selem,bitdepth=12,p0=.1,p1=.9)
+    f2 = crank16_bilateral.mean(a,selem = selem,bitdepth=12,s0=500,s1=500)
 #    plt.imshow(f2)
-    plt.imshow(np.hstack((f1,f2)))
+    plt.imshow(np.hstack((a,f2)))
     plt.colorbar()
     plt.show()
 

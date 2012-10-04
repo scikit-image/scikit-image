@@ -15,12 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from core cimport rank16_percentile
-
-# todo
-# - manage float output,
-# - manage different bit depth input
-# - add auxiliary parameters (spectral_interval, infSup)
+from core16p cimport rank16_percentile
 
 # -----------------------------------------------------------------
 # kernels uint8 (SOFT version using percentiles)

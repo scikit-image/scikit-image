@@ -2,7 +2,7 @@
 >>> python setup.py build_ext --inplace
 
 to generate html report use:
->>> cython -a crank.pxd
+>>> cython -a crank16.pxd
 
 """
 
@@ -15,12 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from core cimport rank16
-
-# todo
-# - manage float output,
-# - manage different bit depth input
-# - add auxiliary parameters (spectral_interval, infSup)
+from core16 cimport rank16
 
 # -----------------------------------------------------------------
 # kernels uint16 take extra parameter for defining the bitdepth

@@ -15,12 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from core cimport rank8
-
-# todo
-# - manage float output,
-# - manage different bit depth input
-# - add auxiliary parameters (spectral_interval, infSup)
+from core8 cimport rank8
 
 # -----------------------------------------------------------------
 # kernels uint8
