@@ -63,8 +63,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage.data import lena
-from skimage.segmentation import felzenszwalb, \
-    visualize_boundaries, slic, quickshift, overlay_boundaries
+from skimage.segmentation import felzenszwalb, slic, quickshift
+from skimage.segmentation import overlay_boundaries
 from skimage.util import img_as_float
 
 img = img_as_float(lena()[::2, ::2])
