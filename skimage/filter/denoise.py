@@ -1,5 +1,6 @@
 import numpy as np
 from skimage import img_as_float
+import _denoise
 
 
 def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
@@ -239,3 +240,59 @@ def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
         raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
     return out
+
+
+def denoise_bilateral(image, win_size=5, sigma_color=1, sigma_range=1, bins=1e4,
+                      mode='constant', cval=0):
+    """Denoise image using bilateral filter.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    win_size : int
+        Window size for filtering.
+    sigma_color : float
+        Standard deviation for color distance. A larger value results in
+        averaging of pixels with larger color differences.
+    sigma_range : float
+        Standard deviation for range distance. A larger value results in
+        averaging of pixels with larger spatial differences.
+    bins : int
+        Number of discrete values for gaussian weights of color filtering.
+        A larger value results in improved accuracy.
+    mode : string
+        How to handle values outside the image borders. See
+        `scipy.ndimage.map_coordinates` for detail.
+    cval : string
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    Returns
+    -------
+    denoised : ndarray
+        Denoised image.
+
+    References
+    ----------
+    .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
+
+    """
+
+    # not using img_as_float to preserve original range of values, which is
+    # necessary so sigma_color is applied as user desires
+    image = np.array(image, dtype=np.double)
+
+    if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
+        raise ValueError("Invalid mode specified.  Please use "
+                         "`constant`, `nearest`, `wrap` or `reflect`.")
+    mode = ord(mode[0].upper())
+
+    if image.ndim == 2 or (image.ndim == 3 and image.shape[2] == 1):
+        if image.ndim == 3 and image.shape[2] == 1:
+            image = np.squeeze(image)
+        func = _denoise._denoise_bilateral2d
+    else:
+        func = _denoise._denoise_bilateral3d
+    image = np.ascontiguousarray(image)
+    return func(image, win_size, sigma_color, sigma_range, bins, mode, cval)
