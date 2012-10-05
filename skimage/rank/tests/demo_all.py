@@ -1,21 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from pprint import pprint
 
 from skimage import data
 from skimage.morphology.selem import disk
-from skimage.rank import crank8,crank8_percentiles
-from skimage.rank import crank16,crank16_percentiles,crank16_bilateral
+from skimage.rank import _crank8,_crank8_percentiles
+from skimage.rank import _crank16,_crank16_percentiles,_crank16_bilateral
 
-if __name__ == '__main__':
+def plot_all():
     a8 = data.camera()
     a16 = a8.astype('uint16')*16
-#    selem = np.ones((30,30),dtype='uint8')
+    #    selem = np.ones((30,30),dtype='uint8')
     selem = disk(5)
 
-    for n in dir(crank16):
-        method = eval('crank16.%s'%n)
+
+    for n in dir(_crank16):
+        method = eval('_crank16.%s'%n)
         t = type(method)
-        if t == type(crank8.maximum):
+        if t == type(_crank8.maximum):
             print n,t
             f = method(a16,selem = selem,bitdepth=12)
 
@@ -28,10 +30,10 @@ if __name__ == '__main__':
             plt.colorbar()
             plt.title(method)
 
-    for n in dir(crank8):
-        method = eval('crank8.%s'%n)
+    for n in dir(_crank8):
+        method = eval('_crank8.%s'%n)
         t = type(method)
-        if t == type(crank8.maximum):
+        if t == type(_crank8.maximum):
             print n,t
             f = method(a8,selem = selem)
 
@@ -44,10 +46,10 @@ if __name__ == '__main__':
             plt.colorbar()
             plt.title(method)
 
-    for n in dir(crank8_percentiles):
-        method = eval('crank8_percentiles.%s'%n)
+    for n in dir(_crank8_percentiles):
+        method = eval('_crank8_percentiles.%s'%n)
         t = type(method)
-        if t == type(crank8.maximum):
+        if t == type(_crank8.maximum):
             print n,t
             f = method(a8,selem = selem,p0=.1,p1=.9)
 
@@ -60,10 +62,10 @@ if __name__ == '__main__':
             plt.colorbar()
             plt.title(method)
 
-    for n in dir(crank16_percentiles):
-        method = eval('crank16_percentiles.%s'%n)
+    for n in dir(_crank16_percentiles):
+        method = eval('_crank16_percentiles.%s'%n)
         t = type(method)
-        if t == type(crank8.maximum):
+        if t == type(_crank8.maximum):
             print n,t
             f = method(a16,selem = selem,bitdepth=12,p0=.1,p1=.9)
 
@@ -77,10 +79,10 @@ if __name__ == '__main__':
             plt.title(method)
 
     selem = disk(50)
-    for n in dir(crank16_bilateral):
-        method = eval('crank16_bilateral.%s'%n)
+    for n in dir(_crank16_bilateral):
+        method = eval('_crank16_bilateral.%s'%n)
         t = type(method)
-        if t == type(crank8.maximum):
+        if t == type(_crank8.maximum):
             print n,t
             f = method(a16,selem = selem,bitdepth=12,s0=300,s1=300)
 
@@ -95,3 +97,7 @@ if __name__ == '__main__':
 
             #
     plt.show()
+
+if __name__ == '__main__':
+#    plot_all()
+    pprint(dir(_crank8))
