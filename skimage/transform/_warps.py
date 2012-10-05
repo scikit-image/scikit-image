@@ -4,7 +4,7 @@ from ._geometric import (warp, SimilarityTransform, AffineTransform,
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
-    """Resize image.
+    """Resize image to match a certain size.
 
     Parameters
     ----------
@@ -53,7 +53,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
 
 def rescale(image, scale, order=1, mode='constant', cval=0.):
-    """Scale image.
+    """Scale image by a certain factor.
 
     Parameters
     ----------
