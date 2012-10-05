@@ -3,13 +3,13 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.morphology import dilation
-from skimage.rank import _crank8
+import skimage.rank as rank
 
 from tools import log_timing
 
 @log_timing
 def cr_max(image,selem):
-    return _crank8.maximum(image=image,selem = selem)
+    return rank.maximum(image=image,selem = selem)
 
 @log_timing
 def cm_dil(image,selem):
