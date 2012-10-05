@@ -13,8 +13,8 @@ from generic import find_bitdepth
 import _crank16_percentiles,_crank8_percentiles
 
 __all__ = ['percentile_autolevel','percentile_gradient',
-           'percentile_mean','percentile_mean_substraction','percentile_median',
-           'percentile_minimum','percentile_modal','percentile_morph_contr_enh','percentile_pop']
+           'percentile_mean','percentile_mean_substraction',
+           'percentile_morph_contr_enh','percentile_pop']
 
 def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local autolevel of an image.
