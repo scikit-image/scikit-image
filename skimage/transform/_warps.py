@@ -52,6 +52,49 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
                 mode=mode, cval=cval)
 
 
+def scale(image, scale, order=1, mode='constant', cval=0.):
+    """Scale image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    scale : {float, tuple of floats}
+        Scale factors. Separate scale factors can be defined as
+        `(row_scale, col_scale)`.
+
+    Returns
+    -------
+    scaled : ndarray
+        Scaled version of the input.
+
+    Other parameters
+    ----------------
+    order : int
+        Order of splines used in interpolation.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    mode : string
+        How to handle values outside the image borders.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    cval : string
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    """
+
+    try:
+        rscale, cscale = scale
+    except TypeError:
+        rscale = cscale = scale
+
+    orig_rows, orig_cols = image.shape[0], image.shape[1]
+    rows = np.round(rscale * orig_rows)
+    cols = np.round(cscale * orig_cols)
+    output_shape = (rows, cols)
+
+    return resize(image, output_shape, order=order, mode=mode, cval=cval)
+
+
 def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     """Rotate image by a certain angle around its center.
 

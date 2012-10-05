@@ -2,7 +2,7 @@ from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform import (warp, warp_coords, rotate, resize,
+from skimage.transform import (warp, warp_coords, rotate, resize, scale,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform, homography)
@@ -92,6 +92,15 @@ def test_resize():
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
     assert_array_almost_equal(resized, ref)
+
+
+def test_scale():
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    scaled = scale(x, 2, order=0)
+    ref = np.zeros((10, 10))
+    ref[2:4, 2:4] = 1
+    assert_array_almost_equal(scaled, ref)
 
 
 def test_swirl():
