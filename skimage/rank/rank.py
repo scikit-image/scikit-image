@@ -13,7 +13,7 @@ from generic import find_bitdepth
 import _crank16,_crank8
 
 __all__ = ['autolevel','bottomhat','egalise','gradient','maximum','mean'
-    ,'meansubstraction','median','minimum','modal','morph_contr_enh','pop']
+    ,'meansubstraction','median','minimum','modal','morph_contr_enh','pop','threshold', 'tophat']
 
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local autolevel of an image.
