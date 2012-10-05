@@ -187,7 +187,7 @@ def autolevel(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] mask=None,
             np.ndarray[np.uint8_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
-    """bottom hat
+    """autolevel
     """
     return _core8p(kernel_autolevel,image,selem,mask,out,shift_x,shift_y,p0,p1)
 

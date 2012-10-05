@@ -12,14 +12,14 @@ import numpy as np
 from generic import find_bitdepth
 import _crank16_percentiles,_crank8_percentiles
 
-__all__ = ['percentile_autolevel','percentile_bottomhat','percentile_egalise','percentile_gradient',
-           'percentile_maximum','percentile_mean','percentile_meansubstraction','percentile_median',
+__all__ = ['percentile_autolevel','percentile_gradient',
+           'percentile_mean','percentile_mean_substraction','percentile_median',
            'percentile_minimum','percentile_modal','percentile_morph_contr_enh','percentile_pop']
 
 def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local autolevel of an image.
 
-    Autolevel is computed on the given structuring element.
+    Autolevel is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
 
     Parameters
     ----------
@@ -38,6 +38,8 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
         Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
 
     Returns
     -------
@@ -54,10 +56,10 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_autolevel(ima8, square(3))
+    >>> percentile_autolevel(ima8, square(3), p0=0.,p1=1.)
     array([[  0,   0,   0,   0,   0],
            [  0, 255, 255, 255,   0],
-           [  0, 255,   0, 255,   0],
+           [  0, 255, 255, 255,   0],
            [  0, 255, 255, 255,   0],
            [  0,   0,   0,   0,   0]], dtype=uint8)
 
@@ -66,11 +68,11 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_eautolevel(ima16, square(3))
+    >>> percentile_autolevel(ima16, square(3), p0=0.,p1=1.)
     array([[   0,    0,    0,    0,    0],
-           [   0, 4096, 4096, 4096,    0],
-           [   0, 4096,    0, 4096,    0],
-           [   0, 4096, 4096, 4096,    0],
+           [   0, 4095, 4095, 4095,    0],
+           [   0, 4095, 4095, 4095,    0],
+           [   0, 4095, 4095, 4095,    0],
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
@@ -87,150 +89,10 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     else:
         raise TypeError("only uint8 and uint16 image supported!")
 
-def percentile_bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local bottomhat of an image.
-
-    Bottomhat is computed on the given structuring element.
-
-    Parameters
-    ----------
-    image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
-    mask : ndarray (uint8)
-        Mask array that defines (>0) area of the image included in the local neighborhood.
-        If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
-
-    Returns
-    -------
-    local bottomhat : uint8 array or uint16 array depending on input image
-        The result of the local bottomhat.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> bottomhat(ima8, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255,   0, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> bottomhat(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095,    0, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
-    """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.bottomhat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.bottomhat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-
-def percentile_egalise(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local egalise of an image.
-
-    egalise is computed on the given structuring element.
-
-    Parameters
-    ----------
-    image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
-    mask : ndarray (uint8)
-        Mask array that defines (>0) area of the image included in the local neighborhood.
-        If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
-
-    Returns
-    -------
-    local egalise : uint8 array or uint16 array depending on input image
-        The result of the local egalise.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> egalise(ima8, square(3))
-    array([[191, 170, 127, 170, 191],
-           [170, 255, 255, 255, 170],
-           [127, 255, 255, 255, 127],
-           [170, 255, 255, 255, 170],
-           [191, 170, 127, 170, 191]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> egalise(ima16, square(3))
-    array([[3072, 2730, 2048, 2730, 3072],
-           [2730, 4096, 4096, 4096, 2730],
-           [2048, 4096, 4096, 4096, 2048],
-           [2730, 4096, 4096, 4096, 2730],
-           [3072, 2730, 2048, 2730, 3072]], dtype=uint16)
-    """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.egalise(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.egalise(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-
 def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local gradient of an image.
+    """Return greyscale local percentile_gradient of an image.
 
-    gradient is computed on the given structuring element.
+    percentile_gradient is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
 
     Parameters
     ----------
@@ -249,11 +111,13 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
         Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
 
     Returns
     -------
-    local gradient : uint8 array or uint16 array depending on input image
-        The result of the local gradient.
+    local percentile_gradient : uint8 array or uint16 array depending on input image
+        The result of the local percentile_gradient.
 
     Examples
     --------
@@ -265,10 +129,10 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> gradient(ima8, square(3))
+    >>> percentile_gradient(ima8, square(3), p0=0.,p1=1.)
     array([[255, 255, 255, 255, 255],
            [255, 255, 255, 255, 255],
-           [255, 255,   0, 255, 255],
+           [255, 255, 255, 255, 255],
            [255, 255, 255, 255, 255],
            [255, 255, 255, 255, 255]], dtype=uint8)
 
@@ -277,10 +141,10 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> gradient(ima16, square(3))
+    >>> percentile_gradient(ima16, square(3), p0=0.,p1=1.)
     array([[4095, 4095, 4095, 4095, 4095],
            [4095, 4095, 4095, 4095, 4095],
-           [4095, 4095,    0, 4095, 4095],
+           [4095, 4095, 4095, 4095, 4095],
            [4095, 4095, 4095, 4095, 4095],
            [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
 
@@ -299,81 +163,10 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
         raise TypeError("only uint8 and uint16 image supported!")
 
 
-def percentile_maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local maximum of an image.
-
-    maximum is computed on the given structuring element.
-
-    Parameters
-    ----------
-    image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
-    mask : ndarray (uint8)
-        Mask array that defines (>0) area of the image included in the local neighborhood.
-        If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
-
-    Returns
-    -------
-    local maximum : uint8 array or uint16 array depending on input image
-        The result of the local maximum.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local maximum
-    >>> from skimage.morphology import square
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 1, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> maximum(ima8, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 1, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> maximum(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
-
-    """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.maximum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.maximum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-
 def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local mean of an image.
 
-    Mean is computed on the given structuring element.
+    Mean is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
 
     Parameters
     ----------
@@ -392,6 +185,8 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
         Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
 
     Returns
     -------
@@ -408,7 +203,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> mean(ima8, square(3))
+    >>> percentile_mean(ima8, square(3),p0=0.,p1=1.)
     array([[ 63,  85, 127,  85,  63],
            [ 85, 113, 170, 113,  85],
            [127, 170, 255, 170, 127],
@@ -420,7 +215,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> mean(ima16, square(3))
+    >>> percentile_mean(ima16, square(3),p0=0.,p1=1.)
     array([[1023, 1365, 2047, 1365, 1023],
            [1365, 1820, 2730, 1820, 1365],
            [2047, 2730, 4095, 2730, 2047],
@@ -441,10 +236,10 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     else:
         raise TypeError("only uint8 and uint16 image supported!")
 
-def percentile_meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local meansubstraction of an image.
+def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
+    """Return greyscale local mean_substraction of an image.
 
-    meansubstraction is computed on the given structuring element.
+    mean_substraction is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
 
     Parameters
     ----------
@@ -463,27 +258,29 @@ def percentile_meansubstraction(image, selem, out=None, mask=None, shift_x=False
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
         Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
 
     Returns
     -------
-    local meansubstraction : uint8 array or uint16 array depending on input image
-        The result of the local meansubstraction.
+    local mean_substraction : uint8 array or uint16 array depending on input image
+        The result of the local mean_substraction.
 
     Examples
     --------
     to be updated
-    >>> # Local meansubstraction
+    >>> # Local mean_substraction
     >>> from skimage.morphology import square
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> meansubstraction(ima8, square(3))
+    >>> percentile_mean_substraction(ima8, square(3), p0=0.,p1=1.)
     array([[ 95,  84,  63,  84,  95],
-           [ 84, 197, 169, 197,  84],
+           [ 84, 198, 169, 198,  84],
            [ 63, 169, 127, 169,  63],
-           [ 84, 197, 169, 197,  84],
+           [ 84, 198, 169, 198,  84],
            [ 95,  84,  63,  84,  95]], dtype=uint8)
 
     >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
@@ -491,7 +288,7 @@ def percentile_meansubstraction(image, selem, out=None, mask=None, shift_x=False
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> meansubstraction(ima16, square(3))
+    >>> percentile_mean_substraction(ima16, square(3), p0=0.,p1=1.)
     array([[1536, 1365, 1024, 1365, 1536],
            [1365, 3185, 2730, 3185, 1365],
            [1024, 2730, 2048, 2730, 1024],
@@ -503,234 +300,20 @@ def percentile_meansubstraction(image, selem, out=None, mask=None, shift_x=False
     if mask is not None:
         mask = img_as_ubyte(mask)
     if image.dtype == np.uint8:
-        return _crank8_percentiles.meansubstraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
+        return _crank8_percentiles.mean_substraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
     elif image.dtype == np.uint16:
         bitdepth = find_bitdepth(image)
         if bitdepth>11:
             raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.meansubstraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
+        return _crank16_percentiles.mean_substraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
     else:
         raise TypeError("only uint8 and uint16 image supported!")
 
-def percentile_median(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local median of an image.
-
-    median is computed on the given structuring element.
-
-    Parameters
-    ----------
-    image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
-    mask : ndarray (uint8)
-        Mask array that defines (>0) area of the image included in the local neighborhood.
-        If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
-
-    Returns
-    -------
-    local median : uint8 array or uint16 array depending on input image
-        The result of the local median.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local median
-    >>> from skimage.morphology import square
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 0, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> median(ima8, square(3))
-    array([[  0,   0, 255,   0,   0],
-           [  0,   0, 255,   0,   0],
-           [255, 255, 255, 255, 255],
-           [  0,   0, 255,   0,   0],
-           [  0,   0, 255,   0,   0]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 0, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> median(ima16, square(3))
-    array([[   0,    0, 4095,    0,    0],
-           [   0,    0, 4095,    0,    0],
-           [4095, 4095, 4095, 4095, 4095],
-           [   0,    0, 4095,    0,    0],
-           [   0,    0, 4095,    0,    0]], dtype=uint16)
-
-    """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.median(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.median(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-
-def percentile_minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local minimum of an image.
-
-    minimum is computed on the given structuring element.
-
-    Parameters
-    ----------
-    image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
-    mask : ndarray (uint8)
-        Mask array that defines (>0) area of the image included in the local neighborhood.
-        If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
-
-    Returns
-    -------
-    local minimum : uint8 array or uint16 array depending on input image
-        The result of the local minimum.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local minimum
-    >>> from skimage.morphology import square
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> minimum(ima8, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0, 255,   0,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
-
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> minimum(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0,    0,    0,    0,    0],
-           [   0,    0, 4095,    0,    0],
-           [   0,    0,    0,    0,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
-
-    """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.minimum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.minimum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-
-def percentile_modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local modal of an image.
-
-    modal is computed on the given structuring element.
-
-    Parameters
-    ----------
-    image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
-    mask : ndarray (uint8)
-        Mask array that defines (>0) area of the image included in the local neighborhood.
-        If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
-
-    Returns
-    -------
-    local modal : uint8 array or uint16 array depending on input image
-        The result of the local modal.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local modal
-    >>> from skimage.morphology import square
-    >>> ima8 = np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 5, 6, 0],
-    ...                           [0, 1, 5, 5, 0],
-    ...                           [0, 0, 0, 5, 0]], dtype=np.uint8)
-    >>> modal(ima8, square(3))
-    array([[0, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0],
-           [0, 1, 1, 0, 0],
-           [0, 0, 5, 0, 0],
-           [0, 0, 5, 0, 0]], dtype=uint8)
-
-
-    >>> ima16 = 100*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 5, 6, 0],
-    ...                           [0, 1, 5, 5, 0],
-    ...                           [0, 0, 0, 5, 0]], dtype=np.uint16)
-    >>> modal(ima16, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0,   0, 100,   0,   0],
-           [  0, 100, 100,   0,   0],
-           [  0,   0, 500,   0,   0],
-           [  0,   0, 500,   0,   0]], dtype=uint16)
-
-    """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.modal(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.modal(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
 
 def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local morph_contr_enh of an image.
 
-    morph_contr_enh is computed on the given structuring element.
+    morph_contr_enh is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
 
     Parameters
     ----------
@@ -749,6 +332,8 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
         Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
 
     Returns
     -------
@@ -760,24 +345,24 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> ima8 = np.array([[0, 0, 0, 0, 0],
+    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> morph_contr_enh(ima8, square(3))
-    array([[0, 0, 0, 0, 0],
-           [0, 1, 1, 1, 0],
-           [0, 1, 1, 1, 0],
-           [0, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0]], dtype=uint8)
+    >>> percentile_morph_contr_enh(ima8, square(3), p0=0.,p1=1.)
+    array([[  0,   0,   0,   0,   0],
+           [  0, 255, 255, 255,   0],
+           [  0, 255, 255, 255,   0],
+           [  0, 255, 255, 255,   0],
+           [  0,   0,   0,   0,   0]], dtype=uint8)
 
     >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> morph_contr_enh(ima16, square(3))
+    >>> percentile_morph_contr_enh(ima16, square(3), p0=0.,p1=1.)
     array([[   0,    0,    0,    0,    0],
            [   0, 4095, 4095, 4095,    0],
            [   0, 4095, 4095, 4095,    0],
@@ -798,10 +383,10 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     else:
         raise TypeError("only uint8 and uint16 image supported!")
 
-def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local pop of an image.
+def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
+    """Return greyscale local percentile of an image.
 
-    pop is computed on the given structuring element.
+    percentile is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
 
     Parameters
     ----------
@@ -820,6 +405,82 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
         Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
+
+    Returns
+    -------
+    local percentile : uint8 array or uint16 array depending on input image
+        The result of the local percentile.
+
+    Examples
+    --------
+    to be updated
+    >>> # Local mean
+    >>> from skimage.morphology import square
+    >>> ima8 = 128*np.array([[0, 0, 0, 0, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> percentile(ima8, square(3), p0=0.,p1=1.)
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint8)
+
+    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 1, 1, 1, 0],
+    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
+    >>> percentile(ima16, square(3), p0=0.,p1=1.)
+    array([[0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0]], dtype=uint16)
+
+
+    """
+    selem = img_as_ubyte(selem)
+    if mask is not None:
+        mask = img_as_ubyte(mask)
+    if image.dtype == np.uint8:
+        return _crank8_percentiles.percentile(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
+    elif image.dtype == np.uint16:
+        bitdepth = find_bitdepth(image)
+        if bitdepth>11:
+            raise ValueError("only uint16 <4096 image (12bit) supported!")
+        return _crank16_percentiles.percentile(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
+    else:
+        raise TypeError("only uint8 and uint16 image supported!")
+
+def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
+    """Return greyscale local pop of an image.
+
+    pop is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        an exception will be raised if image has a value > 4095
+    selem : ndarray
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        The array to store the result of the morphology. If None is
+        passed, a new array will be allocated.
+    mask : ndarray (uint8)
+        Mask array that defines (>0) area of the image included in the local neighborhood.
+        If None, the complete image is used (default).
+    shift_x, shift_y : bool
+        shift structuring element about center point. This only affects
+        eccentric structuring elements (i.e. selem with even numbered sides).
+        Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
 
     Returns
     -------
@@ -836,7 +497,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> pop(ima8, square(3))
+    >>> percentile_pop(ima8, square(3), p0=0.,p1=1.)
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
@@ -848,7 +509,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> pop(ima16, square(3))
+    >>> percentile_pop(ima16, square(3), p0=0.,p1=1.)
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
@@ -872,7 +533,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local threshold of an image.
 
-    threshold is computed on the given structuring element.
+    threshold is computed on the given structuring element. Only levels between percentiles [p0,p1] ,are used.
 
     Parameters
     ----------
@@ -891,6 +552,8 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
         shift structuring element about center point. This only affects
         eccentric structuring elements (i.e. selem with even numbered sides).
         Shift is bounded to the structuring element sizes.
+    p0, p1 : float in [0.,...,1.]
+        define the [p0,p1] percentile interval to be considered for computing the value.
 
     Returns
     -------
@@ -907,24 +570,24 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> threshold(ima8, square(3))
-    array([[0, 0, 0, 0, 0],
-           [0, 1, 1, 1, 0],
-           [0, 1, 0, 1, 0],
-           [0, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0]], dtype=uint8)
+    >>> percentile_threshold(ima8, square(3), p0=0.,p1=1.)
+    array([[255, 255, 255, 255, 255],
+           [255, 255, 255, 255, 255],
+           [255, 255, 255, 255, 255],
+           [255, 255, 255, 255, 255],
+           [255, 255, 255, 255, 255]], dtype=uint8)
 
     >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> threshold(ima16, square(3))
-    array([[0, 0, 0, 0, 0],
-           [0, 1, 1, 1, 0],
-           [0, 1, 0, 1, 0],
-           [0, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0]], dtype=uint16)
+    >>> percentile_threshold(ima16, square(3), p0=0.,p1=1.)
+    array([[4095, 4095, 4095, 4095, 4095],
+           [4095, 4095, 4095, 4095, 4095],
+           [4095, 4095, 4095, 4095, 4095],
+           [4095, 4095, 4095, 4095, 4095],
+           [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
 
 
     """
@@ -941,138 +604,3 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     else:
         raise TypeError("only uint8 and uint16 image supported!")
 
-def percentile_tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local tophat of an image.
-
-    tophat is computed on the given structuring element.
-
-    Parameters
-    ----------
-    image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
-    selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
-    mask : ndarray (uint8)
-        Mask array that defines (>0) area of the image included in the local neighborhood.
-        If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
-
-    Returns
-    -------
-    local tophat : uint8 array or uint16 array depending on input image
-        The result of the local tophat.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> tophat(ima8, square(3))
-    array([[255, 255, 255, 255, 255],
-           [255,   0,   0,   0, 255],
-           [255,   0,   0,   0, 255],
-           [255,   0,   0,   0, 255],
-           [255, 255, 255, 255, 255]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> tophat(ima16, square(3))
-    array([[4095, 4095, 4095, 4095, 4095],
-           [4095,    0,    0,    0, 4095],
-           [4095,    0,    0,    0, 4095],
-           [4095,    0,    0,    0, 4095],
-           [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
-    """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.tophat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.tophat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-
-#__all__ = ['percentile_mean']
-
-#def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
-#    """Return greyscale local mean of an image.
-#
-#    Mean is computed on the given structuring element. Only pixel values contained inside the
-#    percentile interval [p0,p1] are taken into account.
-#
-#    Parameters
-#    ----------
-#    image : ndarray
-#        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
-#        an exception will be raised if image has a value > 4095
-#    selem : ndarray
-#        The neighborhood expressed as a 2-D array of 1's and 0's.
-#    out : ndarray
-#        The array to store the result of the morphology. If None is
-#        passed, a new array will be allocated.
-#    mask : ndarray (uint8)
-#        Mask array that defines (>0) area of the image included in the local neighborhood.
-#        If None, the complete image is used (default).
-#    shift_x, shift_y : bool
-#        shift structuring element about center point. This only affects
-#        eccentric structuring elements (i.e. selem with even numbered sides).
-#        Shift is bounded to the structuring element sizes.
-#    p0, p1 : float in [0.,...,1.]
-#        define the [p0,p1] percentile interval to be considered for computing the value.
-#
-#    Returns
-#    -------
-#    local mean : uint8 array or uint16 array depending on input image
-#        The result of the local mean.
-#
-#    Examples
-#    --------
-#    to be updated
-#    >>> # Erosion shrinks bright regions
-#    >>> from skimage.morphology import square
-#    >>> bright_square = np.array([[0, 0, 0, 0, 0],
-#    ...                           [0, 1, 1, 1, 0],
-#    ...                           [0, 1, 1, 1, 0],
-#    ...                           [0, 1, 1, 1, 0],
-#    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-#    >>> erosion(bright_square, square(3))
-#    array([[0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0],
-#           [0, 0, 1, 0, 0],
-#           [0, 0, 0, 0, 0],
-#           [0, 0, 0, 0, 0]], dtype=uint8)
-#
-#    """
-#    selem = img_as_ubyte(selem)
-#    if mask is not None:
-#        mask = img_as_ubyte(mask)
-#    if image.dtype == np.uint8:
-#        return _crank8_percentiles.mean(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-#    elif image.dtype == np.uint16:
-#        bitdepth = find_bitdepth(image)
-#        if bitdepth>11:
-#            raise ValueError("only uint16 <4096 image (12bit) supported!")
-#        return _crank16_percentiles.mean(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-#    else:
-#        raise TypeError("only uint8 and uint16 image supported!")
-#
-#
