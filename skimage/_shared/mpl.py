@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
 
-__all__ = ['ClearColormap']
+__all__ = ['LinearColormap', 'ClearColormap']
 
 
 class LinearColormap(LinearSegmentedColormap):
