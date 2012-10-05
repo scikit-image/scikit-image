@@ -24,6 +24,17 @@ plt.colorbar()
 plt.figure()
 plt.imshow(np.hstack((a16,f16)))
 plt.colorbar()
+
+f8 = rank.percentile_mean(a8,selem,p0=.1,p1=.9)
+f16 = rank.percentile_mean(a16,selem,p0=.1,p1=.9)
+
+plt.figure()
+plt.imshow(np.hstack((a8,f8)))
+plt.colorbar()
+plt.figure()
+plt.imshow(np.hstack((a16,f16)))
+plt.colorbar()
+
 plt.show()
 
 
