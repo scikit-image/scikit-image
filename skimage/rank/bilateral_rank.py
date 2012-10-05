@@ -14,7 +14,7 @@ from generic import find_bitdepth
 import _crank16_bilateral
 
 
-__all__ = ['bilateral_mean']
+__all__ = ['bilateral_mean','bilateral_pop']
 
 
 def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10):
