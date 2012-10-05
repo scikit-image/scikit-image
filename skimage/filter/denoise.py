@@ -3,35 +3,32 @@ from skimage import img_as_float
 
 
 def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
-    """
-    Perform total-variation denoising on 3-D arrays
+    """Perform total-variation denoising on 3-D arrays.
 
     Parameters
     ----------
     im: ndarray
-        3-D input data to be denoised
-
+        3-D input data to be denoised.
     weight: float, optional
-        denoising weight. The greater ``weight``, the more denoising (at
-        the expense of fidelity to ``input``)
-
+        Denoising weight. The greater ``weight``, the more denoising (at
+        the expense of fidelity to ``input``).
     eps: float, optional
-        relative difference of the value of the cost function that determines
+        Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when:
 
             (E_(n-1) - E_n) < eps * E_0
 
     n_iter_max: int, optional
-        maximal number of iterations used for the optimization.
+        Maximal number of iterations used for the optimization.
 
     Returns
     -------
     out: ndarray
-        denoised array of floats
+        Denoised array of floats.
 
     Notes
     -----
-    Rudin, Osher and Fatemi algorithm
+    Rudin, Osher and Fatemi algorithm.
 
     Examples
     ---------
@@ -86,43 +83,39 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
 
 
 def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
-    """
-    Perform total-variation denoising
+    """Perform total-variation denoising.
 
     Parameters
     ----------
     im: ndarray
-        input data to be denoised
-
+        Input data to be denoised.
     weight: float, optional
-        denoising weight. The greater ``weight``, the more denoising (at
+        Denoising weight. The greater ``weight``, the more denoising (at
         the expense of fidelity to ``input``)
-
     eps: float, optional
-        relative difference of the value of the cost function that determines
+        Relative difference of the value of the cost function that determines
         the stop criterion. The algorithm stops when:
 
             (E_(n-1) - E_n) < eps * E_0
 
     n_iter_max: int, optional
-        maximal number of iterations used for the optimization.
+        Maximal number of iterations used for the optimization.
 
     Returns
     -------
     out: ndarray
-        denoised array of floats
+        Denoised array of floats.
 
     Notes
     -----
     The principle of total variation denoising is explained in
-    http://en.wikipedia.org/wiki/Total_variation_denoising
+    http://en.wikipedia.org/wiki/Total_variation_denoising.
 
     This code is an implementation of the algorithm of Rudin, Fatemi and Osher
     that was proposed by Chambolle in [1]_.
 
     References
     ----------
-
     .. [1] A. Chambolle, An algorithm for total variation minimization and
            applications, Journal of Mathematical Imaging and Vision,
            Springer, 2004, 20, 89-97.
@@ -173,33 +166,30 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
 
 
 def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
-    """
-    Perform total-variation denoising on 2-d and 3-d images
+    """Perform total-variation denoising on 2-d and 3-d images.
 
     Parameters
     ----------
     im: ndarray (2d or 3d) of ints, uints or floats
-        input data to be denoised. `im` can be of any numeric type,
+        Input data to be denoised. `im` can be of any numeric type,
         but it is cast into an ndarray of floats for the computation
         of the denoised image.
-
     weight: float, optional
-        denoising weight. The greater ``weight``, the more denoising (at
-        the expense of fidelity to ``input``)
-
+        Denoising weight. The greater ``weight``, the more denoising (at
+        the expense of fidelity to ``input``).
     eps: float, optional
-        relative difference of the value of the cost function that
+        Relative difference of the value of the cost function that
         determines the stop criterion. The algorithm stops when:
 
             (E_(n-1) - E_n) < eps * E_0
 
     n_iter_max: int, optional
-        maximal number of iterations used for the optimization.
+        Maximal number of iterations used for the optimization.
 
     Returns
     -------
     out: ndarray
-        denoised array of floats
+        Denoised array of floats.
 
     Notes
     -----
@@ -217,7 +207,6 @@ def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
 
     References
     ----------
-
     .. [1] A. Chambolle, An algorithm for total variation minimization and
            applications, Journal of Mathematical Imaging and Vision,
            Springer, 2004, 20, 89-97.
