@@ -95,11 +95,20 @@ def test_resize():
 
 
 def test_scale():
+    # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     scaled = scale(x, 2, order=0)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
+    assert_array_almost_equal(scaled, ref)
+
+    # different scale factors
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    scaled = scale(x, (2, 1), order=0)
+    ref = np.zeros((10, 5))
+    ref[2:4, 1] = 1
     assert_array_almost_equal(scaled, ref)
 
 
