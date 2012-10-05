@@ -6,11 +6,11 @@ from Cython.Distutils import build_ext
 
 setup(
     cmdclass = {'build_ext': build_ext},
-    ext_modules = [Extension("crank8", ["_crank8.pyx"], include_dirs=[np.get_include()]),
-                    Extension("crank8_percentiles", ["_crank8_percentiles.pyx"], include_dirs=[np.get_include()]),
-                    Extension("crank16", ["_crank16.pyx"], include_dirs=[np.get_include()]),
-                    Extension("crank16_bilateral", ["_crank16_bilateral.pyx"], include_dirs=[np.get_include()]),
-                    Extension("crank16_percentiles", ["_crank16_percentiles.pyx"], include_dirs=[np.get_include()])]
+    ext_modules = [Extension("_crank8", ["_crank8.pyx"], include_dirs=[np.get_include()]),
+                    Extension("_crank8_percentiles", ["_crank8_percentiles.pyx"], include_dirs=[np.get_include()]),
+                    Extension("_crank16", ["_crank16.pyx"], include_dirs=[np.get_include()]),
+                    Extension("_crank16_bilateral", ["_crank16_bilateral.pyx"], include_dirs=[np.get_include()]),
+                    Extension("_crank16_percentiles", ["_crank16_percentiles.pyx"], include_dirs=[np.get_include()])]
 )
 
 
@@ -34,15 +34,15 @@ setup(
 #    cython(['_crank16_percentiles.pyx'], working_path=base_path)
 #    cython(['_crank16_bilateral.pyx'], working_path=base_path)
 #
-#    config.add_extension('crank8', sources=['_crank8.c'],
+#    config.add_extension('_crank8', sources=['_crank8.c'],
 #        include_dirs=[get_numpy_include_dirs()])
-#    config.add_extension('crank8_percentiles', sources=['_crank8_percentiles.c'],
+#    config.add_extension('_crank8_percentiles', sources=['_crank8_percentiles.c'],
 #        include_dirs=[get_numpy_include_dirs()])
-#    config.add_extension('crank16', sources=['_crank16.c'],
+#    config.add_extension('_crank16', sources=['_crank16.c'],
 #        include_dirs=[get_numpy_include_dirs()])
-#    config.add_extension('crank16_percentiles', sources=['_crank16_percentiles.c'],
+#    config.add_extension('_crank16_percentiles', sources=['_crank16_percentiles.c'],
 #        include_dirs=[get_numpy_include_dirs()])
-#    config.add_extension('crank16_bilateral', sources=['_crank16_bilateral.c'],
+#    config.add_extension('_crank16_bilateral', sources=['_crank16_bilateral.c'],
 #        include_dirs=[get_numpy_include_dirs()])
 #
 #    return config

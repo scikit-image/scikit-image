@@ -2,18 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.morphology import cmorph
-from skimage.rank import crank8
+from skimage.morphology import dilation
+from skimage.rank import _crank8
 
 from tools import log_timing
 
 @log_timing
 def cr_max(image,selem):
-    return crank8.maximum(image=image,selem = selem)
+    return _crank8.maximum(image=image,selem = selem)
 
 @log_timing
 def cm_dil(image,selem):
-    return cmorph.dilate(image=image,selem = selem)
+    return dilation(image=image,selem = selem)
 
 
 def compare():
