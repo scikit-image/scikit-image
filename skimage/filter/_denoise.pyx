@@ -15,22 +15,30 @@ cdef inline double _gaussian_weight(double sigma, double value):
 
 
 cdef double* _compute_color_lut(int bins, double sigma, double max_value):
-    cdef double* color_lut = <double*>malloc(bins * sizeof(double))
-    cdef Py_ssize_t b
+
+    cdef:
+        double* color_lut = <double*>malloc(bins * sizeof(double))
+        Py_ssize_t b
+
     for b in range(bins):
         color_lut[b] = _gaussian_weight(sigma, b * max_value / bins)
+
     return color_lut
 
 
 cdef double* _compute_range_lut(int win_size, double sigma):
-    cdef double* range_lut = <double*>malloc(win_size**2 * sizeof(double))
-    cdef Py_ssize_t kr, kc
-    cdef Py_ssize_t window_ext = (win_size - 1) / 2
-    cdef double dist
+
+    cdef:
+        double* range_lut = <double*>malloc(win_size**2 * sizeof(double))
+        Py_ssize_t kr, kc
+        Py_ssize_t window_ext = (win_size - 1) / 2
+        double dist
+
     for kr in range(win_size):
         for kc in range(win_size):
             dist = sqrt((kr - window_ext)**2 + (kc - window_ext)**2)
             range_lut[kr * win_size + kc] = _gaussian_weight(sigma, dist)
+
     return range_lut
 
 
@@ -39,24 +47,25 @@ def _denoise_bilateral2d(cnp.ndarray[dtype=cnp.double_t, ndim=2, mode='c'] image
                          double sigma_range, int bins, char mode,
                          double cval):
 
-    cdef Py_ssize_t rows = image.shape[0]
-    cdef Py_ssize_t cols = image.shape[1]
-    cdef Py_ssize_t window_ext = (win_size - 1) / 2
-    cdef double max_value = image.max()
+    cdef:
+        Py_ssize_t rows = image.shape[0]
+        Py_ssize_t cols = image.shape[1]
+        Py_ssize_t window_ext = (win_size - 1) / 2
+        double max_value = image.max()
 
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode='c'] out = \
-         np.zeros((rows, cols), dtype=np.double)
+        cnp.ndarray[dtype=cnp.double_t, ndim=2, mode='c'] out = \
+        np.zeros((rows, cols), dtype=np.double)
 
-    cdef double* image_data = <double*>image.data
-    cdef double* out_data = <double*>out.data
+        double* image_data = <double*>image.data
+        double* out_data = <double*>out.data
 
-    cdef double* color_lut = _compute_color_lut(bins, sigma_color, max_value)
-    cdef double* range_lut = _compute_range_lut(win_size, sigma_range)
+        double* color_lut = _compute_color_lut(bins, sigma_color, max_value)
+        double* range_lut = _compute_range_lut(win_size, sigma_range)
 
-    cdef Py_ssize_t r, c, wr, wc, kr, kc, rr, cc, pixel_addr
-    cdef double centre, value, weight, total_value, total_weight, \
-                color_weight, range_weight, diff
-    cdef double dist_scale = bins / max_value
+        Py_ssize_t r, c, wr, wc, kr, kc, rr, cc, pixel_addr
+        double centre, value, weight, total_value, total_weight, \
+               color_weight, range_weight, diff
+        double dist_scale = bins / max_value
 
     for r in range(rows):
         for c in range(cols):
@@ -95,27 +104,29 @@ def _denoise_bilateral3d(cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] image
                          double sigma_range, int bins, char mode,
                          double cval):
 
-    cdef Py_ssize_t rows = image.shape[0]
-    cdef Py_ssize_t cols = image.shape[1]
-    cdef Py_ssize_t dims = image.shape[2]
-    cdef Py_ssize_t window_ext = (win_size - 1) / 2
-    cdef double max_value = image.max()
+    cdef:
+        Py_ssize_t rows = image.shape[0]
+        Py_ssize_t cols = image.shape[1]
+        Py_ssize_t dims = image.shape[2]
+        Py_ssize_t window_ext = (win_size - 1) / 2
 
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] out = \
-         np.zeros((rows, cols, dims), dtype=np.double)
+        double max_value = image.max()
 
-    cdef double* image_data = <double*>image.data
-    cdef double* out_data = <double*>out.data
+        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] out = \
+            np.zeros((rows, cols, dims), dtype=np.double)
 
-    cdef double* color_lut = _compute_color_lut(bins, sigma_color, max_value)
-    cdef double* range_lut = _compute_range_lut(win_size, sigma_range)
+        double* image_data = <double*>image.data
+        double* out_data = <double*>out.data
 
-    cdef Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr
-    cdef double value, weight, dist, total_weight, color_weight, range_weight
-    cdef double dist_scale = bins / dims / max_value
-    cdef double* values = <double*>malloc(dims * sizeof(double))
-    cdef double* centres = <double*>malloc(dims * sizeof(double))
-    cdef double* total_values = <double*>malloc(dims * sizeof(double))
+        double* color_lut = _compute_color_lut(bins, sigma_color, max_value)
+        double* range_lut = _compute_range_lut(win_size, sigma_range)
+
+        Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr
+        double value, weight, dist, total_weight, color_weight, range_weight
+        double dist_scale = bins / dims / max_value
+        double* values = <double*>malloc(dims * sizeof(double))
+        double* centres = <double*>malloc(dims * sizeof(double))
+        double* total_values = <double*>malloc(dims * sizeof(double))
 
     for r in range(rows):
         for c in range(cols):
