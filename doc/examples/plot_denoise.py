@@ -59,6 +59,7 @@ ax[1, 2].imshow(denoise_bilateral(noisy, sigma_color=0.05, sigma_range=15))
 ax[1, 2].axis('off')
 ax[1, 2].set_title('(more) Bilateral')
 
-fig.subplots_adjust(wspace=0.02, hspace=0.2, top=0.9, bottom=0.05, left=0, right=1)
+fig.subplots_adjust(wspace=0.02, hspace=0.2,
+                    top=0.9, bottom=0.05, left=0, right=1)
 
 plt.show()
