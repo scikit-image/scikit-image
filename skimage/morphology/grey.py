@@ -1,10 +1,3 @@
-"""
-:author: Damian Eads, 2009
-:license: modified BSD
-"""
-
-__docformat__ = 'restructuredtext en'
-
 import warnings
 from skimage import img_as_ubyte
 
