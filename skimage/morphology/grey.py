@@ -254,7 +254,6 @@ def white_tophat(image, selem, out=None):
    """
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
-    image = img_as_ubyte(image)
 
     out = opening(image, selem, out=out)
     out = image - out
@@ -304,7 +303,6 @@ def black_tophat(image, selem, out=None):
 
     if image is out:
         raise NotImplementedError("Cannot perform white top hat in place.")
-    image = img_as_ubyte(image)
 
     out = closing(image, selem, out=out)
     out = out - image
