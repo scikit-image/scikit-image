@@ -1,9 +1,9 @@
 from numpy.testing import assert_array_equal, assert_almost_equal, \
-    assert_array_almost_equal
+    assert_array_almost_equal, assert_raises
 import numpy as np
 import math
 
-from skimage.measure import regionprops
+from skimage.measure._regionprops import regionprops, PROPS, perimeter
 
 
 SAMPLE = np.array(
@@ -20,6 +20,16 @@ SAMPLE = np.array(
 )
 INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
+
+
+def test_unsupported_dtype():
+    assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
+
+
+def test_all_props():
+    props = regionprops(SAMPLE, 'all', INTENSITY_SAMPLE)[0]
+    for prop in PROPS:
+        assert prop in props
 
 
 def test_area():
@@ -90,6 +100,11 @@ def test_eccentricity():
     eps = regionprops(SAMPLE, ['Eccentricity'])[0]['Eccentricity']
     assert_almost_equal(eps, 0.814629313427)
 
+    img = np.zeros((5, 5), dtype=np.int)
+    img[2, 2] = 1
+    eps = regionprops(img, ['Eccentricity'])[0]['Eccentricity']
+    assert_almost_equal(eps, 0)
+
 
 def test_equiv_diameter():
     diameter = regionprops(SAMPLE, ['EquivDiameter'])[0]['EquivDiameter']
@@ -140,6 +155,11 @@ def test_filled_area():
     SAMPLE_mod[7, -3] = 0
     area = regionprops(SAMPLE_mod, ['FilledArea'])[0]['FilledArea']
     assert area == np.sum(SAMPLE)
+
+
+def test_filled_image():
+    img = regionprops(SAMPLE, ['FilledImage'])[0]['FilledImage']
+    assert_array_equal(img, SAMPLE)
 
 
 def test_major_axis_length():
@@ -220,8 +240,11 @@ def test_orientation():
     assert_almost_equal(orientation_diag, -math.pi / 4)
 
 def test_perimeter():
-    perimeter = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
-    assert_almost_equal(perimeter, 59.2132034355964)
+    per = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
+    assert_almost_equal(per, 59.2132034355964)
+
+    per = perimeter(SAMPLE, neighbourhood=8)
+    assert_almost_equal(per, 43.1213203436)
 
 def test_solidity():
     solidity = regionprops(SAMPLE, ['Solidity'])[0]['Solidity']
