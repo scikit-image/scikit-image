@@ -22,6 +22,8 @@ def test_approximate_polygon():
 
     out = approximate_polygon(square, -1)
     np.testing.assert_array_equal(out, square)
+    out = approximate_polygon(square, 0)
+    np.testing.assert_array_equal(out, square)
 
 
 def test_subdivide_polygon():
@@ -50,6 +52,10 @@ def test_subdivide_polygon():
 
             np.testing.assert_equal(new_square3.shape[0],
                                     2 * (square3.shape[0] - mask_len + 2))
+
+    # not supported B-Spline degree
+    np.testing.assert_raises(ValueError, subdivide_polygon, square, 0)
+    np.testing.assert_raises(ValueError, subdivide_polygon, square, 8)
 
 
 if __name__ == "__main__":
