@@ -98,7 +98,7 @@ def find_contours(array, level,
     """
     array = np.asarray(array, dtype=np.double)
     if array.ndim != 2:
-        raise RuntimeError('Only 2D arrays are supported.')
+        raise TypeError('Only 2D arrays are supported.')
     level = float(level)
     if (fully_connected not in _param_options or
        positive_orientation not in _param_options):
