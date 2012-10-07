@@ -13,7 +13,7 @@ def find_boundaries(label_img):
     return boundaries
 
 
-def highlight_boundaries(image, label_img, color=(1, 1, 0), outline_color=None):
+def mark_boundaries(image, label_img, color=(1, 1, 0), outline_color=None):
     """Return image with boundaries between labeled regions highlighted.
 
     Parameters
@@ -40,6 +40,6 @@ def highlight_boundaries(image, label_img, color=(1, 1, 0), outline_color=None):
     return image
 
 
-@deprecated('highlight_boundaries')
+@deprecated('mark_boundaries')
 def visualize_boundaries(*args, **kwargs):
-    return highlight_boundaries(*args, **kwargs)
+    return mark_boundaries(*args, **kwargs)
