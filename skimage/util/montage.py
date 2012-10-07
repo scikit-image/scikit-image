@@ -71,6 +71,8 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
     assert arr_in.ndim == 3
 
     n_images, height, width = arr_in.shape
+    
+    arr_in = arr_in.copy()
 
     # -- rescale intensity if necessary
     if rescale_intensity:
