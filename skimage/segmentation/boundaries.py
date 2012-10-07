@@ -2,6 +2,7 @@ import numpy as np
 from ..morphology import dilation, square
 from ..util import img_as_float
 from ..color import gray2rgb
+from .._shared.utils import deprecated
 
 
 def find_boundaries(label_img):
@@ -12,7 +13,7 @@ def find_boundaries(label_img):
     return boundaries
 
 
-def visualize_boundaries(image, label_img, color=(1, 1, 0), outline_color=None):
+def highlight_boundaries(image, label_img, color=(1, 1, 0), outline_color=None):
     """Return image with boundaries between labeled regions highlighted.
 
     Parameters
@@ -37,3 +38,8 @@ def visualize_boundaries(image, label_img, color=(1, 1, 0), outline_color=None):
         image[outer_boundaries != 0, :] = np.array(outline_color)
     image[boundaries, :] = np.array(color)
     return image
+
+
+@deprecated('highlight_boundaries')
+def visualize_boundaries(*args, **kwargs):
+    return highlight_boundaries(*args, **kwargs)

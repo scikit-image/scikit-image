@@ -63,8 +63,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage.data import lena
-from skimage.segmentation import felzenszwalb, \
-    visualize_boundaries, slic, quickshift
+from skimage.segmentation import felzenszwalb, slic, quickshift
+from skimage.segmentation import highlight_boundaries
 from skimage.util import img_as_float
 
 img = img_as_float(lena()[::2, ::2])
@@ -80,11 +80,11 @@ fig, ax = plt.subplots(1, 3)
 fig.set_size_inches(8, 3, forward=True)
 plt.subplots_adjust(0.05, 0.05, 0.95, 0.95, 0.05, 0.05)
 
-ax[0].imshow(visualize_boundaries(img, segments_fz))
+ax[0].imshow(highlight_boundaries(img, segments_fz))
 ax[0].set_title("Felzenszwalbs's method")
-ax[1].imshow(visualize_boundaries(img, segments_slic))
+ax[1].imshow(highlight_boundaries(img, segments_slic))
 ax[1].set_title("SLIC")
-ax[2].imshow(visualize_boundaries(img, segments_quick))
+ax[2].imshow(highlight_boundaries(img, segments_quick))
 ax[2].set_title("Quickshift")
 for a in ax:
     a.set_xticks(())
