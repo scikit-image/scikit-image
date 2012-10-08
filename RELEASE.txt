@@ -38,7 +38,7 @@ How to make a new release of ``skimage``
   - In ``bento.info``, set to ``0.X.dev0``.
 
 - Update the web frontpage:
-  The webpage is kept in a separate repo: scikits-image-web
+  The webpage is kept in a separate repo: scikit-image-web
 
   - Sync your branch with the remote repo: ``git pull``.
     If you try to ``make gh-pages`` when your branch is out of sync, it

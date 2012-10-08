@@ -3,9 +3,9 @@ Skivi is written/maintained/developed by:
 
 S. Chris Colbert - sccolbert@gmail.com
 
-Skivi is free software and is part of the scikits-image project.
+Skivi is free software and is part of the scikit-image project.
 
-Skivi is governed by the licenses of the scikits-image project.
+Skivi is governed by the licenses of the scikit-image project.
 
 Please report any bugs to the author.
 

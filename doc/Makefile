@@ -77,17 +77,17 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in build/qthelp, like this:"
-	@echo "# qcollectiongenerator build/qthelp/scikitsimage.qhcp"
+	@echo "# qcollectiongenerator build/qthelp/scikitimage.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile build/qthelp/scikitsimage.qhc"
+	@echo "# assistant -collectionFile build/qthelp/scikitimage.qhc"
 
 devhelp:
 	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(DEST)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/scikitsimage"
-	@echo "# ln -s build/devhelp $$HOME/.local/share/devhelp/scikitsimage"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/scikitimage"
+	@echo "# ln -s build/devhelp $$HOME/.local/share/devhelp/scikitimage"
 	@echo "# devhelp"
 
 latex:

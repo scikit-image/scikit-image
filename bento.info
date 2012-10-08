@@ -1,15 +1,15 @@
-Name: scikits-image
+Name: scikit-image
 Version: 0.8.dev0
 Summary: Image processing routines for SciPy
-Url: http://scikits-image.org
-DownloadUrl: http://github.com/scikits-image/scikits-image
+Url: http://scikit-image.org
+DownloadUrl: http://github.com/scikit-image/scikit-image
 Description:     Image Processing SciKit
 
     Image processing algorithms for SciPy, including IO, morphology, filtering,
     warping, color manipulation, object detection, etc.
 
     Please refer to the online documentation at
-    http://scikits-image.org/
+    http://scikit-image.org/
 Maintainer: Stefan van der Walt
 MaintainerEmail: stefan@sun.ac.za
 License: Modified BSD
