@@ -176,7 +176,7 @@ html_sidebars = {
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'scikitsimagedoc'
+htmlhelp_basename = 'scikitimagedoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -190,7 +190,7 @@ htmlhelp_basename = 'scikitsimagedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikitsimage.tex', u'The Image Scikit Documentation',
+  ('contents', 'scikitimage.tex', u'The Image Scikit Documentation',
    u'SciPy Developers', 'manual'),
 ]
 

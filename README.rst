@@ -3,11 +3,11 @@ Image Processing SciKit
 
 Source
 ------
-https://github.com/scikits-image/scikits-image
+https://github.com/scikit-image/scikit-image
 
 Mailing List
 ------------
-http://groups.google.com/group/scikits-image
+http://groups.google.com/group/scikit-image
 
 Installation from source
 ------------------------
