@@ -65,7 +65,7 @@ except ImportError:
 def _setup_test(verbose=False):
     import functools
 
-    args = ['', '--exe', '-w', pkg_dir]
+    args = ['', pkg_dir, '--exe']
     if verbose:
         args.extend(['-v', '-s'])
 
