@@ -75,7 +75,7 @@ def test_memory_order():
 
 def test_invalid_input():
     assert_raises(ValueError, find_contours, r, 0.5, 'foo', 'bar')
-    assert_raises(TypeError, find_contours, r[..., None], 0.5)
+    assert_raises(ValueError, find_contours, r[..., None], 0.5)
 
 
 if __name__ == '__main__':
