@@ -25,6 +25,7 @@ def test_ssim_image():
     assert(S1 < 0.3)
 
 
+# NOTE: This test is known to randomly fail on some systems (Mac OS X 10.6)
 def test_ssim_grad():
     N = 30
     X = np.random.random((N, N)) * 255
