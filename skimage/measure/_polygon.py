@@ -28,7 +28,7 @@ def approximate_polygon(coords, tolerance):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Ramer-Douglas-Peucker_algorithm
     """
-    if tolerance == 0:
+    if tolerance <= 0:
         return coords
 
     chain = np.zeros(coords.shape[0], 'bool')

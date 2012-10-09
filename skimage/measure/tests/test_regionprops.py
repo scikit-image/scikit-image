@@ -1,9 +1,9 @@
 from numpy.testing import assert_array_equal, assert_almost_equal, \
-    assert_array_almost_equal
+    assert_array_almost_equal, assert_raises
 import numpy as np
 import math
 
-from skimage.measure import regionprops
+from skimage.measure._regionprops import regionprops, PROPS, perimeter
 
 
 SAMPLE = np.array(
@@ -22,6 +22,16 @@ INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
 
 
+def test_unsupported_dtype():
+    assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
+
+
+def test_all_props():
+    props = regionprops(SAMPLE, 'all', INTENSITY_SAMPLE)[0]
+    for prop in PROPS:
+        assert prop in props
+
+
 def test_area():
     area = regionprops(SAMPLE, ['Area'])[0]['Area']
     assert area == np.sum(SAMPLE)
@@ -36,6 +46,7 @@ def test_bbox():
     bbox = regionprops(SAMPLE_mod, ['BoundingBox'])[0]['BoundingBox']
     assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]-1))
 
+
 def test_central_moments():
     mu = regionprops(SAMPLE, ['CentralMoments'])[0]['CentralMoments']
     #: determined with OpenCV
@@ -47,6 +58,7 @@ def test_central_moments():
     assert_almost_equal(mu[2,0], 1259.7777777777774)
     assert_almost_equal(mu[2,1], 2000.296296296291)
     assert_almost_equal(mu[3,0], -760.0246913580195)
+
 
 def test_centroid():
     centroid = regionprops(SAMPLE, ['Centroid'])[0]['Centroid']
@@ -89,6 +101,11 @@ def test_coordinates():
 def test_eccentricity():
     eps = regionprops(SAMPLE, ['Eccentricity'])[0]['Eccentricity']
     assert_almost_equal(eps, 0.814629313427)
+
+    img = np.zeros((5, 5), dtype=np.int)
+    img[2, 2] = 1
+    eps = regionprops(img, ['Eccentricity'])[0]['Eccentricity']
+    assert_almost_equal(eps, 0)
 
 
 def test_equiv_diameter():
@@ -142,6 +159,11 @@ def test_filled_area():
     assert area == np.sum(SAMPLE)
 
 
+def test_filled_image():
+    img = regionprops(SAMPLE, ['FilledImage'])[0]['FilledImage']
+    assert_array_equal(img, SAMPLE)
+
+
 def test_major_axis_length():
     length = regionprops(SAMPLE, ['MajorAxisLength'])[0]['MajorAxisLength']
     # MATLAB has different interpretation of ellipse than found in literature,
@@ -188,6 +210,7 @@ def test_moments():
     assert_almost_equal(m[2,1], 43882.0)
     assert_almost_equal(m[3,0], 95588.0)
 
+
 def test_normalized_moments():
     nu = regionprops(SAMPLE, ['NormalizedMoments'])[0]['NormalizedMoments']
     #: determined with OpenCV
@@ -197,6 +220,7 @@ def test_normalized_moments():
     assert_almost_equal(nu[2,0], 0.24301268861454037)
     assert_almost_equal(nu[2,1], 0.045473992910668816)
     assert_almost_equal(nu[3,0], -0.017278118992041805)
+
 
 def test_orientation():
     orientation = regionprops(SAMPLE, ['Orientation'])[0]['Orientation']
@@ -219,14 +243,20 @@ def test_orientation():
                                   )[0]['Orientation']
     assert_almost_equal(orientation_diag, -math.pi / 4)
 
+
 def test_perimeter():
-    perimeter = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
-    assert_almost_equal(perimeter, 59.2132034355964)
+    per = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
+    assert_almost_equal(per, 59.2132034355964)
+
+    per = perimeter(SAMPLE, neighbourhood=8)
+    assert_almost_equal(per, 43.1213203436)
+
 
 def test_solidity():
     solidity = regionprops(SAMPLE, ['Solidity'])[0]['Solidity']
     # determined with MATLAB
     assert_almost_equal(solidity, 0.580645161290323)
+
 
 def test_weighted_central_moments():
     wmu = regionprops(SAMPLE, ['WeightedCentralMoments'], INTENSITY_SAMPLE
@@ -281,6 +311,7 @@ def test_weighted_moments():
     )
     assert_array_almost_equal(wm, ref)
 
+
 def test_weighted_normalized_moments():
     wnu = regionprops(SAMPLE, ['WeightedNormalizedMoments'], INTENSITY_SAMPLE
                      )[0]['WeightedNormalizedMoments']
@@ -291,6 +322,7 @@ def test_weighted_normalized_moments():
          [-0.0162529732, -0.0104598869, -0.0028544152, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

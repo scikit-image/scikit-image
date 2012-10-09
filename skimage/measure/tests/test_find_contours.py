@@ -21,34 +21,37 @@ r = np.sqrt(x**2 + y**2)
 
 
 def test_binary():
-    contours = find_contours(a, 0.5)
+    ref = [[6. ,  1.5],
+           [5. ,  1.5],
+           [4. ,  1.5],
+           [3. ,  1.5],
+           [2. ,  1.5],
+           [1.5,  2. ],
+           [1.5,  3. ],
+           [1.5,  4. ],
+           [1.5,  5. ],
+           [1.5,  6. ],
+           [1. ,  6.5],
+           [0.5,  6. ],
+           [0.5,  5. ],
+           [0.5,  4. ],
+           [0.5,  3. ],
+           [0.5,  2. ],
+           [0.5,  1. ],
+           [1. ,  0.5],
+           [2. ,  0.5],
+           [3. ,  0.5],
+           [4. ,  0.5],
+           [5. ,  0.5],
+           [6. ,  0.5],
+           [6.5,  1. ],
+           [6. ,  1.5]]
+
+    contours = find_contours(a, 0.5, positive_orientation='high')
     assert len(contours) == 1
-    assert_array_equal(contours[0],
-                     [[6. ,  1.5],
-                      [5. ,  1.5],
-                      [4. ,  1.5],
-                      [3. ,  1.5],
-                      [2. ,  1.5],
-                      [1.5,  2. ],
-                      [1.5,  3. ],
-                      [1.5,  4. ],
-                      [1.5,  5. ],
-                      [1.5,  6. ],
-                      [1. ,  6.5],
-                      [0.5,  6. ],
-                      [0.5,  5. ],
-                      [0.5,  4. ],
-                      [0.5,  3. ],
-                      [0.5,  2. ],
-                      [0.5,  1. ],
-                      [1. ,  0.5],
-                      [2. ,  0.5],
-                      [3. ,  0.5],
-                      [4. ,  0.5],
-                      [5. ,  0.5],
-                      [6. ,  0.5],
-                      [6.5,  1. ],
-                      [6. ,  1.5]])
+    assert_array_equal(contours[0][::-1], ref)
+
+
 
 
 def test_float():
@@ -68,6 +71,11 @@ def test_memory_order():
 
     contours = find_contours(np.asfortranarray(r), 0.5)
     assert len(contours) == 1
+
+
+def test_invalid_input():
+    assert_raises(ValueError, find_contours, r, 0.5, 'foo', 'bar')
+    assert_raises(ValueError, find_contours, r[..., None], 0.5)
 
 
 if __name__ == '__main__':
