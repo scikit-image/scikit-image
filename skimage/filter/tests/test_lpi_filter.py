@@ -8,7 +8,8 @@ from skimage.io import *
 from skimage.filter import *
 
 
-class TestLPIFilter2D():
+class TestLPIFilter2D(object):
+
     img = imread(os.path.join(data_dir, 'camera.png'),
                  flatten=True)[:50, :50]
 
@@ -54,6 +55,10 @@ class TestLPIFilter2D():
 
         g1 = wiener(F[::-1, ::-1], self.filt_func)
         assert ((g - g1[::-1, ::-1]).sum() < 1)
+
+    def test_non_callable(self):
+        assert_raises(ValueError, LPIFilter2D, None)
+
 
 if __name__ == "__main__":
     run_module_suite()

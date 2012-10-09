@@ -75,7 +75,7 @@ class LPIFilter2D(object):
         >>> filter = LPIFilter2D(filt_func)
 
         """
-        if impulse_response is None:
+        if not callable(impulse_response):
             raise ValueError("Impulse response must be a callable.")
 
         self.impulse_response = impulse_response
