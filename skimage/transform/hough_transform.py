@@ -151,7 +151,8 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     hspace : (N, M) array
         Hough space returned by the `hough` function.
     angles : (M,) array
-        Angles returned by the `hough` function.
+        Angles returned by the `hough` function. Assumed to be continuous
+        (`angles[-1] - angles[0] == PI`).
     dists : (N, ) array
         Distances returned by the `hough` function.
     min_distance : int
