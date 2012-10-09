@@ -85,16 +85,7 @@ def test_rotate():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
-def test_resize2d():
-    x = np.zeros((5, 5), dtype=np.double)
-    x[1, 1] = 1
-    resized = resize(x, (10, 10), order=0)
-    ref = np.zeros((10, 10))
-    ref[2:4, 2:4] = 1
-    assert_array_almost_equal(resized, ref)
-
-
-def test_scale():
+def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
@@ -112,7 +103,16 @@ def test_scale():
     assert_array_almost_equal(scaled, ref)
 
 
-def test_resize3d():
+def test_resize2d():
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    resized = resize(x, (10, 10), order=0)
+    ref = np.zeros((10, 10))
+    ref[2:4, 2:4] = 1
+    assert_array_almost_equal(resized, ref)
+
+
+def test_resize3d_keep():
     # keep 3rd dimension
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
@@ -123,6 +123,8 @@ def test_resize3d():
     resized = resize(x, (10, 10, 3), order=0)
     assert_array_almost_equal(resized, ref)
 
+
+def test_resize3d_resize():
     # resize 3rd dimension
     x = np.zeros((5, 5, 3), dtype=np.double)
     x[1, 1, :] = 1
@@ -131,6 +133,8 @@ def test_resize3d():
     ref[2:4, 2:4] = 1
     assert_array_almost_equal(resized, ref)
 
+
+def test_resize3d_bilinear():
     # bilinear 3rd dimension
     x = np.zeros((5, 5, 2), dtype=np.double)
     x[1, 1, 0] = 0
