@@ -7,39 +7,39 @@ image = data.lena()
 image_gray = image[..., 0]
 
 
-def test_pyramid_reduce():
-    # RGB image
+def test_pyramid_reduce_rgb():
     rows, cols, dim = image.shape
     out = pyramids.pyramid_reduce(image, downscale=2)
     assert_array_equal(out.shape, (rows / 2, cols / 2, dim))
 
-    # grayscale image
+
+def test_pyramid_reduce_gray():
     rows, cols = image_gray.shape
     out = pyramids.pyramid_reduce(image_gray, downscale=2)
     assert_array_equal(out.shape, (rows / 2, cols / 2))
 
 
-def test_pyramid_expand():
-    # RGB image
+def test_pyramid_expand_rgb():
     rows, cols, dim = image.shape
     out = pyramids.pyramid_expand(image, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2, dim))
 
-    # grayscale image
+
+def test_pyramid_expand_gray():
     rows, cols = image_gray.shape
     out = pyramids.pyramid_expand(image_gray, upscale=2)
     assert_array_equal(out.shape, (rows * 2, cols * 2))
 
 
-def test_build_gaussian_pyramid():
-    # RGB image
+def test_build_gaussian_pyramid_rgb():
     rows, cols, dim = image.shape
     pyramid = pyramids.pyramid_gaussian(image, downscale=2)
     for layer, out in enumerate(pyramid):
         layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)
         assert_array_equal(out.shape, layer_shape)
 
-    # grayscale image
+
+def test_build_gaussian_pyramid_gray():
     rows, cols = image_gray.shape
     pyramid = pyramids.pyramid_gaussian(image_gray, downscale=2)
     for layer, out in enumerate(pyramid):
@@ -47,15 +47,15 @@ def test_build_gaussian_pyramid():
         assert_array_equal(out.shape, layer_shape)
 
 
-def test_build_laplacian_pyramid():
-    # RGB image
+def test_build_laplacian_pyramid_rgb():
     rows, cols, dim = image.shape
     pyramid = pyramids.pyramid_laplacian(image, downscale=2)
     for layer, out in enumerate(pyramid):
         layer_shape = (rows / 2 ** layer, cols / 2 ** layer, dim)
         assert_array_equal(out.shape, layer_shape)
 
-    # grayscale image
+
+def test_build_laplacian_pyramid_gray():
     rows, cols = image_gray.shape
     pyramid = pyramids.pyramid_laplacian(image_gray, downscale=2)
     for layer, out in enumerate(pyramid):
