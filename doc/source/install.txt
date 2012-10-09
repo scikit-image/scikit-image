@@ -1,8 +1,6 @@
 Pre-built installation
 ----------------------
 
-.. !! Also update scikit-image-web !!
-
 `Windows binaries
 <http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image>`__
 are kindly provided by Christoph Gohlke.
@@ -23,7 +21,7 @@ or
 
 ::
 
-  pip -U scikit-image
+  pip install -U scikit-image
 
 Installation from source
 ------------------------
