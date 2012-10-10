@@ -43,8 +43,6 @@ cdef inline np.uint8_t kernel_autolevel(int* histo, float pop, np.uint8_t g, flo
                 break
         delta = imax-imin
         if delta>0:
-#            return <np.uint8_t>(255.)
-#            return <np.uint8_t>(delta)
             return <np.uint8_t>(255*(uint8_min(uint8_max(imin,g),imax)-imin)/delta)
         else:
             return <np.uint8_t>(imax-imin)

@@ -15,10 +15,10 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from _core16p cimport _core16p
+from _core16p cimport _core16p,int_min,int_max
 
 # -----------------------------------------------------------------
-# kernels uint8 (SOFT version using percentiles)
+# kernels uint16 (SOFT version using percentiles)
 # -----------------------------------------------------------------
 
 cdef inline np.uint16_t kernel_autolevel(int* histo, float pop, np.uint16_t g,int bitdepth,int maxbin, int midbin, float p0, float p1):
@@ -29,25 +29,21 @@ cdef inline np.uint16_t kernel_autolevel(int* histo, float pop, np.uint16_t g,in
         p1 = 1.0-p1
         for i in range(maxbin):
             sum += histo[i]
-            if sum>=p0*pop:
+            if sum>p0*pop:
                 imin = i
                 break
         sum = 0
         for i in range(maxbin-1,-1,-1):
             sum += histo[i]
-            if sum>=p1*pop:
+            if sum>p1*pop:
                 imax = i
                 break
 
         delta = imax-imin
-        if g>imax:
-            return <np.uint16_t>(maxbin-1)
-        if g<imin:
-            return <np.uint16_t>(0)
         if delta>0:
-            return <np.uint16_t>((maxbin-1)*1.*(g-imin)/delta)
+            return <np.uint16_t>(255*(int_min(int_max(imin,g),imax)-imin)/delta)
         else:
-            return <np.uint16_t>(0)
+            return <np.uint16_t>(imax-imin)
     else:
         return <np.uint16_t>(0)
 
