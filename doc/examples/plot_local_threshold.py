@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filter import threshold_otsu, threshold_adaptive
 
-from skimage.rank import threshold
+from skimage.rank import threshold,morph_contr_enh
 from skimage.morphology import disk
 
 
@@ -38,9 +38,10 @@ binary_adaptive = threshold_adaptive(image, block_size, offset=10)
 
 selem = disk(10)
 loc_thresh = threshold(image,selem=selem)
+loc_morph_contr_enh = morph_contr_enh(image,selem=selem)
 
-fig, axes = plt.subplots(nrows=4, figsize=(7, 8))
-ax0, ax1, ax2, ax3 = axes
+fig, axes = plt.subplots(nrows=5, figsize=(7, 8))
+ax0, ax1, ax2, ax3, ax4 = axes
 plt.gray()
 
 ax0.imshow(image)
@@ -54,6 +55,9 @@ ax2.set_title('Adaptive thresholding')
 
 ax3.imshow(loc_thresh)
 ax3.set_title('Local thresholding')
+
+ax4.imshow(loc_morph_contr_enh)
+ax4.set_title('Local morphological contrast enhancement')
 
 
 for ax in axes:
