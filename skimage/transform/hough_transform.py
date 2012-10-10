@@ -142,7 +142,7 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     """Return peaks in hough transform.
 
     Identifies most prominent lines separated by a certain angle and distance in
-    a hough transform. Non-maximum suppresion with different sizes is applied
+    a hough transform. Non-maximum suppression with different sizes is applied
     separately in the first (distances) and second (angles) dimension of the
     hough space to identify peaks.
 
@@ -206,14 +206,14 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     dist_peaks = []
     angle_peaks = []
 
-    # relative coordinate grid for local neighbourhood suppresion
+    # relative coordinate grid for local neighbourhood suppression
     dist_ext, angle_ext = np.mgrid[- min_distance:min_distance + 1,
                                    - min_angle:min_angle + 1]
 
     for dist_idx, angle_idx in hspace_max:
         accum = hspace[dist_idx, angle_idx]
         if accum > threshold:
-            # absolute coordinate grid for local neighbourhood suppresion
+            # absolute coordinate grid for local neighbourhood suppression
             dist_nh = dist_idx + dist_ext
             angle_nh = angle_idx + angle_ext
 
