@@ -15,8 +15,8 @@ cimport numpy as np
 from libc.stdlib cimport malloc, free
 
 # generic cdef functions
-cdef inline int int_max(int a, int b): return a if a >= b else b
-cdef inline int int_min(int a, int b): return a if a <= b else b
+cdef inline np.uint8_t uint8_max(np.uint8_t a, np.uint8_t b): return a if a >= b else b
+cdef inline np.uint8_t uint8_min(np.uint8_t a, np.uint8_t b): return a if a <= b else b
 
 #---------------------------------------------------------------------------
 # 8 bit core kernel receives extra information about data inferior and superior percentiles

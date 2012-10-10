@@ -4,7 +4,10 @@ import numpy as np
 
 from skimage.rank import _crank8,_crank8_percentiles
 from skimage.rank import _crank16,_crank16_bilateral,_crank16_percentiles
-from skimage.morphology import cmorph
+from skimage.morphology import cmorph,disk
+from skimage import data
+from skimage import rank
+
 
 class TestSequenceFunctions(unittest.TestCase):
 
@@ -91,6 +94,15 @@ class TestSequenceFunctions(unittest.TestCase):
         a16 = np.ones((100,100),dtype='uint16')*255
         elem = np.ones((3,3),dtype='uint8')
         f = _crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=4)
+
+    def test_compare_autolevels(self):
+        image = data.camera()
+
+        selem = disk(20)
+        loc_autolevel = rank.autolevel(image,selem=selem)
+        loc_perc_autolevel = rank.percentile_autolevel(image,selem=selem,p0=.0,p1=1.)
+
+        assert (loc_autolevel==loc_perc_autolevel).all()
 
 if __name__ == '__main__':
 

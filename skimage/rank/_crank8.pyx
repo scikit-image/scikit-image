@@ -33,11 +33,13 @@ cdef inline np.uint8_t kernel_autolevel(int* histo, float pop, np.uint8_t g):
             if histo[i]:
                 imin = i
                 break
-    delta = imax-imin
-    if delta>0:
-        return <np.uint8_t>(255.*(g-imin)/delta)
+        delta = imax-imin
+        if delta>0:
+            return <np.uint8_t>(255.*(g-imin)/delta)
+        else:
+            return <np.uint8_t>(imax-imin)
     else:
-        return <np.uint8_t>(imax-imin)
+        return <np.uint8_t>(0)
 
 cdef inline np.uint8_t kernel_bottomhat(int* histo, float pop, np.uint8_t g):
     cdef int i
