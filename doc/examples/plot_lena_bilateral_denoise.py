@@ -1,3 +1,4 @@
+
 """
 ====================================================
 Denoising the picture of Lena using bilateral filter
