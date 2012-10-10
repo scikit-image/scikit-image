@@ -19,7 +19,7 @@ to be adjusted...
 from skimage import data
 from skimage.util.dtype import dtype_range
 from skimage import exposure
-from skimage.rank import egalise
+from skimage import rank
 from skimage.morphology import disk
 
 
@@ -63,7 +63,7 @@ img_rescale = exposure.equalize(img)
 
 # Equalization
 selem = disk(30)
-img_eq = egalise(img,selem=selem)
+img_eq = rank.equalize(img,selem=selem)
 
 
 # Display results

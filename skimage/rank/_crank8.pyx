@@ -49,7 +49,7 @@ cdef inline np.uint8_t kernel_bottomhat(int* histo, float pop, np.uint8_t g):
     return <np.uint8_t>(g-i)
 
 
-cdef inline np.uint8_t kernel_egalise(int* histo, float pop, np.uint8_t g):
+cdef inline np.uint8_t kernel_equalize(int* histo, float pop, np.uint8_t g):
     cdef int i
     cdef float sum = 0.
 
@@ -210,14 +210,14 @@ def bottomhat(np.ndarray[np.uint8_t, ndim=2] image,
     """
     return _core8(kernel_bottomhat,image,selem,mask,out,shift_x,shift_y)
 
-def egalise(np.ndarray[np.uint8_t, ndim=2] image,
+def equalize(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
             np.ndarray[np.uint8_t, ndim=2] mask=None,
             np.ndarray[np.uint8_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0):
     """local egalisation of the gray level
     """
-    return _core8(kernel_egalise,image,selem,mask,out,shift_x,shift_y)
+    return _core8(kernel_equalize,image,selem,mask,out,shift_x,shift_y)
 
 def gradient(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
