@@ -25,7 +25,7 @@ def ctmf_med(image,radius):
     return median_filter(image=image,radius=radius)
 
 
-def compare():
+def compare_dilate():
     """comparison between
     - crank.maximum rankfilter implementation
     - cmorph.dilate cython implementation
@@ -88,9 +88,9 @@ def compare_median():
     a = data.camera()
 
     rec = []
-    e_range = range(2,40,2)
+    e_range = range(2,40,4)
     for r in e_range:
-        elem = np.ones((2*r,2*r),dtype='uint8')
+        elem = np.ones((2*r+1,2*r+1),dtype='uint8')
         #        elem = (np.random.random((r,r))>.5).astype('uint8')
         rc,ms_rc = cr_med(a,elem)
         rctmf,ms_rctmf = ctmf_med(a,r)
@@ -106,9 +106,11 @@ def compare_median():
     plt.legend(['rank.median','ctmf.median_filter'])
     plt.figure()
     plt.imshow(np.hstack((rc,rctmf)))
-    plt.show()
+    plt.ylabel('time (ms)')
+    plt.xlabel('element radius')
+
     r = 9
-    elem = np.ones((r,r),dtype='uint8')
+    elem = np.ones((r*2+1,r*2+1),dtype='uint8')
 
     rec = []
     s_range = range(100,1000,100)
@@ -127,7 +129,10 @@ def compare_median():
     plt.legend(['rank.median','ctmf.median_filter'])
     plt.figure()
     plt.imshow(np.hstack((rc,rctmf)))
+    plt.ylabel('time (ms)')
+    plt.xlabel('image size')
 
     plt.show()
 if __name__ == '__main__':
+#    compare_dilate()
     compare_median()

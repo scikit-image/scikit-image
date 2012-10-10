@@ -1,9 +1,14 @@
-"""rank.py - rankfilter for local (custom kernel) maximum, minimum, median, mean, auto-level, egalize, etc
+"""rank.py - rankfilter for local (custom kernel) maximum, minimum, median, mean, auto-level, equalization, etc
 
 The local histogram is computed using a sliding window similar to the method described in
 
 Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median filtering algorithm",
 IEEE Transactions on Acoustics, Speech and Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
+
+input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit),
+for 16 bit input images, the number of histogram bins is determined from the maximum value present in the image
+
+result image is 8 or 16 bit with respect to the input image
 
 :author: Olivier Debeir, 2012
 :license: modified BSD
