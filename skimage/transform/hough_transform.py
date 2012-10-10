@@ -248,4 +248,14 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
             dist_peaks.append(dists[dist_idx])
             angle_peaks.append(angles[angle_idx])
 
-    return np.array(hspace_peaks), np.array(dist_peaks), np.array(angle_peaks)
+    hspace_peaks = np.array(hspace_peaks)
+    dist_peaks = np.array(dist_peaks)
+    angle_peaks = np.array(angle_peaks)
+
+    if num_peaks < len(hspace_peaks):
+        idx_maxsort = np.argsort(hspace_peaks)[::-1][:num_peaks]
+        hspace_peaks = hspace_peaks[idx_maxsort]
+        dist_peaks = dist_peaks[idx_maxsort]
+        angle_peaks = angle_peaks[idx_maxsort]
+
+    return hspace_peaks, dist_peaks, angle_peaks

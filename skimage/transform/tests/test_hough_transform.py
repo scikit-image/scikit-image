@@ -101,5 +101,14 @@ def test_hough_peaks_angle():
     assert len(tf.hough_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
 
 
+def test_hough_peaks_num():
+    img = np.zeros((100, 100), dtype=np.bool_)
+    img[:, 30] = True
+    img[:, 40] = True
+    hspace, angles, dists = tf.hough(img)
+    assert len(tf.hough_peaks(hspace, angles, dists, min_distance=0,
+                              min_angle=0, num_peaks=1)[0]) == 1
+
+
 if __name__ == "__main__":
     run_module_suite()
