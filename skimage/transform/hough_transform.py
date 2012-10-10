@@ -202,9 +202,9 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     distance_size = 2 * min_distance + 1
     angle_size = 2 * min_angle + 1
     hspace_max = ndimage.maximum_filter1d(hspace, size=distance_size, axis=0,
-                                          mode='constant')
+                                          mode='constant', cval=0)
     hspace_max = ndimage.maximum_filter1d(hspace_max, size=angle_size, axis=1,
-                                          mode='constant')
+                                          mode='constant', cval=0)
     mask = (hspace == hspace_max)
     hspace *= mask
     hspace_t = hspace > threshold
