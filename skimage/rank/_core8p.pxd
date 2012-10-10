@@ -1,10 +1,3 @@
-""" to compile this use:
->>> python setup.py build_ext --inplace
-
-to generate html report use:
->>> cython -a core8p.pxd
-"""
-
 #cython: cdivision=True
 #cython: boundscheck=False
 #cython: nonecheck=False
