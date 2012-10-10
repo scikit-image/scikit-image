@@ -3,6 +3,7 @@ __all__ = ['hough', 'hough_peaks', 'probabilistic_hough']
 from itertools import izip as zip
 
 import numpy as np
+from scipy import ndimage
 from ._hough_transform import _probabilistic_hough
 
 
@@ -198,9 +199,17 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
 
     threshold = max(threshold_abs, threshold_rel * np.max(hspace))
 
-    # sort accumulators from large to small
-    hspace_max = np.argsort(hspace.flat)[::-1]
-    hspace_max = np.column_stack(np.unravel_index(hspace_max, hspace.shape))
+    distance_size = 2 * min_distance + 1
+    angle_size = 2 * min_angle + 1
+    hspace_max = ndimage.maximum_filter1d(hspace, size=distance_size, axis=0,
+                                          mode='constant')
+    hspace_max = ndimage.maximum_filter1d(hspace_max, size=angle_size, axis=1,
+                                          mode='constant')
+    mask = (hspace == hspace_max)
+    hspace *= mask
+    hspace_t = hspace > threshold
+
+    coords = np.transpose(hspace_t.nonzero())
 
     hspace_peaks = []
     dist_peaks = []
@@ -210,7 +219,7 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     dist_ext, angle_ext = np.mgrid[- min_distance:min_distance + 1,
                                    - min_angle:min_angle + 1]
 
-    for dist_idx, angle_idx in hspace_max:
+    for dist_idx, angle_idx in coords:
         accum = hspace[dist_idx, angle_idx]
         if accum > threshold:
             # absolute coordinate grid for local neighbourhood suppression
