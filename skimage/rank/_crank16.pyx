@@ -209,7 +209,7 @@ def bottomhat(np.ndarray[np.uint16_t, ndim=2] image,
     """
     return _core16(kernel_bottomhat,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
-def egalise(np.ndarray[np.uint16_t, ndim=2] image,
+def equalize(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
             np.ndarray[np.uint8_t, ndim=2] mask=None,
             np.ndarray[np.uint16_t, ndim=2] out=None,
