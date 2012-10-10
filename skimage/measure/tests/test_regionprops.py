@@ -248,7 +248,7 @@ def test_perimeter():
     per = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
     assert_almost_equal(per, 59.2132034355964)
 
-    per = perimeter(SAMPLE, neighbourhood=8)
+    per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
     assert_almost_equal(per, 43.1213203436)
 
 
