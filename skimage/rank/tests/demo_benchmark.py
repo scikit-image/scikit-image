@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.morphology import dilation
 import skimage.rank as rank
+from skimage.filter import median_filter
 
 from tools import log_timing
 
@@ -12,14 +13,23 @@ def cr_max(image,selem):
     return rank.maximum(image=image,selem = selem)
 
 @log_timing
+def cr_med(image,selem):
+    return rank.median(image=image,selem = selem)
+
+@log_timing
 def cm_dil(image,selem):
     return dilation(image=image,selem = selem)
+
+@log_timing
+def ctmf_med(image,radius):
+    return median_filter(image=image,radius=radius)
 
 
 def compare():
     """comparison between
     - crank.maximum rankfilter implementation
     - cmorph.dilate cython implementation
+
     on increasing structuring element size and increasing image size
     """
 #    a = (np.random.random((500,500))*256).astype('uint8')
@@ -68,5 +78,56 @@ def compare():
 
     plt.show()
 
+def compare_median():
+    """comparison between
+    - crank.median rankfilter implementation
+    - ctmf.median_filter filter
+
+    on increasing structuring element size and increasing image size
+    """
+    a = data.camera()
+
+    rec = []
+    e_range = range(2,40,2)
+    for r in e_range:
+        elem = np.ones((2*r,2*r),dtype='uint8')
+        #        elem = (np.random.random((r,r))>.5).astype('uint8')
+        rc,ms_rc = cr_med(a,elem)
+        rctmf,ms_rctmf = ctmf_med(a,r)
+        rec.append((ms_rc,ms_rctmf))
+        # check if results are identical
+#        assert  (rc==rctmf).all()
+
+    rec = np.asarray(rec)
+
+    plt.figure()
+    plt.title('increasing element size')
+    plt.plot(e_range,rec)
+    plt.legend(['rank.median','ctmf.median_filter'])
+    plt.figure()
+    plt.imshow(np.hstack((rc,rctmf)))
+    plt.show()
+    r = 9
+    elem = np.ones((r,r),dtype='uint8')
+
+    rec = []
+    s_range = range(100,1000,100)
+    for s in s_range:
+        a = (np.random.random((s,s))*256).astype('uint8')
+        (rc,ms_rc) = cr_max(a,elem)
+        rctmf,ms_rctmf = ctmf_med(a,r)
+        rec.append((ms_rc,ms_rctmf))
+#        assert  (rc==rcm).all()
+
+    rec = np.asarray(rec)
+
+    plt.figure()
+    plt.title('increasing image size')
+    plt.plot(s_range,rec)
+    plt.legend(['rank.median','ctmf.median_filter'])
+    plt.figure()
+    plt.imshow(np.hstack((rc,rctmf)))
+
+    plt.show()
 if __name__ == '__main__':
-    compare()
+    compare_median()
