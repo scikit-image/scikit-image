@@ -18,7 +18,7 @@ import numpy as np
 from generic import find_bitdepth
 import _crank16,_crank8
 
-__all__ = ['autolevel','bottomhat','egalise','gradient','maximum','mean'
+__all__ = ['autolevel','bottomhat','equalize','gradient','maximum','mean'
     ,'meansubstraction','median','minimum','modal','morph_contr_enh','pop','threshold', 'tophat']
 
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -162,10 +162,10 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     else:
         raise TypeError("only uint8 and uint16 image supported!")
 
-def egalise(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local egalise of an image.
+def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Return greyscale local equalize of an image.
 
-    egalise is computed on the given structuring element.
+    equalize is computed on the given structuring element.
 
     Parameters
     ----------
@@ -187,8 +187,8 @@ def egalise(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local egalise : uint8 array or uint16 array depending on input image
-        The result of the local egalise.
+    local equalize : uint8 array or uint16 array depending on input image
+        The result of the local equalize.
 
     Examples
     --------
@@ -200,7 +200,7 @@ def egalise(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> egalise(ima8, square(3))
+    >>> equalize(ima8, square(3))
     array([[191, 170, 127, 170, 191],
            [170, 255, 255, 255, 170],
            [127, 255, 255, 255, 127],
@@ -212,7 +212,7 @@ def egalise(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> egalise(ima16, square(3))
+    >>> equalize(ima16, square(3))
     array([[3072, 2730, 2048, 2730, 3072],
            [2730, 4096, 4096, 4096, 2730],
            [2048, 4096, 4096, 4096, 2048],
@@ -223,12 +223,12 @@ def egalise(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     if mask is not None:
         mask = img_as_ubyte(mask)
     if image.dtype == np.uint8:
-        return _crank8.egalise(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
+        return _crank8.equalize(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
     elif image.dtype == np.uint16:
         bitdepth = find_bitdepth(image)
         if bitdepth>11:
             raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.egalise(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
+        return _crank16.equalize(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
     else:
         raise TypeError("only uint8 and uint16 image supported!")
 
