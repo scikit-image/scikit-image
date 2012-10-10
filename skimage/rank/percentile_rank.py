@@ -1,4 +1,17 @@
-"""
+"""percentile_rank.py - inferior and superior ranks, provided by the user, are passed to the kernel function
+to provide a softer version of the rank filters. E.g. percentile_autolevel will stretch image levels between
+percentile [p0,p1] instead of using [min,max]. It means that isolate bright or dark pixels will not produce halos.
+
+The local histogram is computed using a sliding window similar to the method described in
+
+Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median filtering algorithm",
+IEEE Transactions on Acoustics, Speech and Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
+
+input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit),
+for 16 bit input images, the number of histogram bins is determined from the maximum value present in the image
+
+result image is 8 or 16 bit with respect to the input image
+
 :author: Olivier Debeir, 2012
 :license: modified BSD
 """
