@@ -5,13 +5,14 @@ Local Histogram Equalization
 
 This examples enhances an image with low contrast, using a method called
 *local histogram equalization*, which "spreads out the most frequent intensity
-values" in an image . The equalized image has a roughly linear cumulative
-distribution function for each pixel neigborhood.
+values" in an image . The equalized image [1]_ has a roughly linear cumulative
+distribution function for each pixel neighborhood. The local version [2]_ of the histogram
+equalization emphasized every local graylevel variations.
 
 to be adjusted...
 
 .. [1] http://en.wikipedia.org/wiki/Histogram_equalization
-.. [2] http://homepages.inf.ed.ac.uk/rbf/HIPR2/stretch.htm
+.. [2] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 """
 
@@ -58,7 +59,7 @@ img = data.moon()
 # Contrast stretching
 p2 = np.percentile(img, 2)
 p98 = np.percentile(img, 98)
-img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
+img_rescale = exposure.equalize(img)
 
 # Equalization
 selem = disk(30)
@@ -73,10 +74,10 @@ ax_img.set_title('Low contrast image')
 ax_hist.set_ylabel('Number of pixels')
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_rescale, axes[:, 1])
-ax_img.set_title('Contrast stretching')
+ax_img.set_title('Global equalise')
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img_eq, axes[:, 2])
-ax_img.set_title('Local Histogram equalization')
+ax_img.set_title('Local equalize')
 ax_cdf.set_ylabel('Fraction of total intensity')
 
 
