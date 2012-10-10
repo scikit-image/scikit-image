@@ -1,19 +1,3 @@
-#import numpy as np
-#
-#from distutils.core import setup
-#from distutils.extension import Extension
-#from Cython.Distutils import build_ext
-#
-#setup(
-#    cmdclass = {'build_ext': build_ext},
-#    ext_modules = [Extension("_crank8", ["_crank8.pyx"], include_dirs=[np.get_include()]),
-#                    Extension("_crank8_percentiles", ["_crank8_percentiles.pyx"], include_dirs=[np.get_include()]),
-#                    Extension("_crank16", ["_crank16.pyx"], include_dirs=[np.get_include()]),
-#                    Extension("_crank16_bilateral", ["_crank16_bilateral.pyx"], include_dirs=[np.get_include()]),
-#                    Extension("_crank16_percentiles", ["_crank16_percentiles.pyx"], include_dirs=[np.get_include()])]
-#)
-
-
 #!/usr/bin/env python
 
 import os
