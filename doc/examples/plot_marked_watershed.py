@@ -6,6 +6,8 @@ Markers for watershed transform
 The watershed is a classical algorithm used for **segmentation**, that
 is, for separating different objects in an image.
 
+Here a marker image is build from the region of low gradient inside the image.
+
 See Wikipedia_ for more details on the algorithm.
 
 .. _Wikipedia: http://en.wikipedia.org/wiki/Watershed_(image_processing)
