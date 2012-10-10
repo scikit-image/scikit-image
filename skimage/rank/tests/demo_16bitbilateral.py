@@ -14,7 +14,7 @@ if __name__ == '__main__':
     f2 = rank.bilateral_mean(a16,selem = selem,s0=500,s1=500)
 
     selem = disk(50)
-    f3 = rank.egalise(a16,selem = selem)
+    f3 = rank.equalize(a16,selem = selem)
 
     plt.figure()
     plt.imshow(np.hstack((a8,f1)))

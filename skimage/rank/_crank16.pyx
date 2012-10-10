@@ -49,7 +49,7 @@ cdef inline np.uint16_t kernel_bottomhat(int* histo, float pop, np.uint16_t g,in
     return <np.uint16_t>(g-i)
 
 
-cdef inline np.uint16_t kernel_egalise(int* histo, float pop, np.uint16_t g,int bitdepth,int maxbin, int midbin):
+cdef inline np.uint16_t kernel_equalize(int* histo, float pop, np.uint16_t g,int bitdepth,int maxbin, int midbin):
     cdef int i
     cdef float sum = 0.
 
@@ -216,7 +216,7 @@ def equalize(np.ndarray[np.uint16_t, ndim=2] image,
             char shift_x=0, char shift_y=0, int bitdepth=8):
     """local egalisation of the gray level
     """
-    return _core16(kernel_egalise,image,selem,mask,out,shift_x,shift_y,bitdepth)
+    return _core16(kernel_equalize,image,selem,mask,out,shift_x,shift_y,bitdepth)
 
 def gradient(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
