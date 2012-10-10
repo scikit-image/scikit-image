@@ -15,7 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from _core8p cimport _core8p
+from _core8p cimport _core8p,uint8_max,uint8_min
 
 # -----------------------------------------------------------------
 # kernels uint8 (SOFT version using percentiles)
@@ -27,25 +27,29 @@ cdef inline np.uint8_t kernel_autolevel(int* histo, float pop, np.uint8_t g, flo
     if pop:
         sum = 0
         p1 = 1.0-p1
+        imin = 0
+        imax = 255
+
         for i in range(256):
             sum += histo[i]
-            if sum>=p0*pop:
+            if sum>(p0*pop):
                 imin = i
                 break
         sum = 0
         for i in range(255,-1,-1):
             sum += histo[i]
-            if sum>=p1*pop:
+            if sum>(p1*pop):
                 imax = i
                 break
-
         delta = imax-imin
         if delta>0:
-            return <np.uint8_t>(255.*(g-imin)/delta)
+#            return <np.uint8_t>(255.)
+#            return <np.uint8_t>(delta)
+            return <np.uint8_t>(255*(uint8_min(uint8_max(imin,g),imax)-imin)/delta)
         else:
-            return <np.uint8_t>(0)
+            return <np.uint8_t>(imax-imin)
     else:
-        return <np.uint8_t>(0)
+        return <np.uint8_t>(128)
 
 
 cdef inline np.uint8_t kernel_gradient(int* histo, float pop, np.uint8_t g, float p0, float p1):

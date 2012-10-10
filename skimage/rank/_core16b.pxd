@@ -14,10 +14,6 @@ import numpy as np
 cimport numpy as np
 from libc.stdlib cimport malloc, free
 
-# generic cdef functions
-cdef inline int int_max(int a, int b): return a if a >= b else b
-cdef inline int int_min(int a, int b): return a if a <= b else b
-
 #---------------------------------------------------------------------------
 # 16 bit core kernel receives extra information about data bitdepth and bilateral interval
 #---------------------------------------------------------------------------
