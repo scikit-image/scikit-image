@@ -118,13 +118,13 @@ cdef inline np.uint16_t kernel_morph_contr_enh(int* histo, float pop, np.uint16_
         p1 = 1.0-p1
         for i in range(maxbin):
             sum += histo[i]
-            if sum>=p0*pop:
+            if sum>p0*pop:
                 imin = i
                 break
         sum = 0
         for i in range((maxbin-1),-1,-1):
             sum += histo[i]
-            if sum>=p1*pop:
+            if sum>p1*pop:
                 imax = i
                 break
         if g>imax:
