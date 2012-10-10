@@ -22,7 +22,7 @@ from skimage import rank
 from skimage import data
 from scipy import ndimage
 
-# Generate an initial image with two overlapping circles
+# original data
 image = data.camera()
 
 # denoise image
