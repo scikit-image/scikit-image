@@ -1,4 +1,10 @@
-"""
+"""rank.py - rankfilter for local (custom kernel) maximum, minimum, median, mean, auto-level, egalize, etc
+
+The local histogram is computed using a sliding window similar to the method described in 
+
+Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median filtering algorithm",
+IEEE Transactions on Acoustics, Speech and Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
+
 :author: Olivier Debeir, 2012
 :license: modified BSD
 """
