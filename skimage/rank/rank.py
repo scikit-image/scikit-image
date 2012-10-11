@@ -1020,3 +1020,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
         return _crank16.tophat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
     else:
         raise TypeError("only uint8 and uint16 image supported!")
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod(verbose=True)
