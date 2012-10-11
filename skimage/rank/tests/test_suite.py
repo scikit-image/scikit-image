@@ -104,6 +104,25 @@ class TestSequenceFunctions(unittest.TestCase):
 
         assert (loc_autolevel==loc_perc_autolevel).all()
 
+    def test_compare_8bit_vs_16bit(self):
+        # filters applied on 8bit image ore 16bit image (having only real 8bit of dynamic) should be identical
+        i8 = data.camera()
+        i16 = i8.astype(np.uint16)
+        methods = ['autolevel','bottomhat','equalize','gradient','maximum','mean'
+            ,'meansubstraction','median','minimum','modal','morph_contr_enh','pop','threshold', 'tophat']
+        for method in methods:
+            func = eval('rank.%s'%method)
+            print func
+            f8 = func(i8,disk(3))
+            f16 = func(i16,disk(3))
+#            if (f8==f16).all() is False:
+            if not (f8==f16).all():
+                
+                print f8
+                print f16
+
+
+
 if __name__ == '__main__':
 
     suite = unittest.TestLoader().loadTestsFromTestCase(TestSequenceFunctions)
