@@ -35,7 +35,7 @@ cdef inline np.uint16_t kernel_autolevel(int* histo, float pop, np.uint16_t g,in
                 break
     delta = imax-imin
     if delta>0:
-        return <np.uint16_t>(maxbin*1.*(g-imin)/delta)
+        return <np.uint16_t>(1.*(maxbin-1)*(g-imin)/delta)
     else:
         return <np.uint16_t>(imax-imin)
 
@@ -59,7 +59,7 @@ cdef inline np.uint16_t kernel_equalize(int* histo, float pop, np.uint16_t g,int
             if i>=g:
                 break
 
-        return <np.uint16_t>((maxbin*1.*sum)/pop)
+        return <np.uint16_t>(((maxbin-1)*sum)/pop)
     else:
         return <np.uint16_t>(0)
 
@@ -107,7 +107,7 @@ cdef inline np.uint16_t kernel_meansubstraction(int* histo, float pop, np.uint16
     if pop:
         for i in range(maxbin):
             mean += histo[i]*i
-        return <np.uint16_t>((g-mean/pop)/2.+midbin)
+        return <np.uint16_t>((g-mean/pop)/2.+(midbin-1))
     else:
         return <np.uint16_t>(0)
 
