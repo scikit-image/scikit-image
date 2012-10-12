@@ -1,6 +1,7 @@
-"""edges.py - Sobel edge filter
+"""edges.py - Edge filters
 
-Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
+Sobel and Prewitt filters originally part of CellProfiler, code licensed under
+both GPL and BSD licenses.
 Website: http://www.cellprofiler.org
 Copyright (c) 2003-2009 Massachusetts Institute of Technology
 Copyright (c) 2009-2011 Broad Institute
@@ -48,7 +49,7 @@ def sobel(image, mask=None):
     Returns
     -------
     output : ndarray
-      The Sobel edge map.
+        The Sobel edge map.
 
     Notes
     -----
@@ -77,7 +78,7 @@ def hsobel(image, mask=None):
     Returns
     -------
     output : ndarray
-      The Sobel edge map.
+        The Sobel edge map.
 
     Notes
     -----
@@ -112,7 +113,7 @@ def vsobel(image, mask=None):
     Returns
     -------
     output : ndarray
-      The Sobel edge map.
+        The Sobel edge map.
 
     Notes
     -----
@@ -132,6 +133,103 @@ def vsobel(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
+def scharr(image, mask=None):
+    """Calculate the absolute magnitude Scharr to find edges.
+
+    Parameters
+    ----------
+    image : array_like, dtype=float
+        Image to process.
+    mask : array_like, dtype=bool, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Scharr edge map.
+
+    Notes
+    -----
+    Take the square root of the sum of the squares of the horizontal and
+    vertical Scharrs to get a magnitude that's somewhat insensitive to
+    direction.
+
+    """
+    return np.sqrt(hscharr(image, mask)**2 + vscharr(image, mask)**2)
+
+
+def hscharr(image, mask=None):
+    """Find the horizontal edges of an image using the Scharr transform.
+
+    Parameters
+    ----------
+    image : array_like, dtype=float
+        Image to process.
+    mask : array_like, dtype=bool, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Scharr edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      3   10   3
+      0    0   0
+     -3  -10  -3
+
+    """
+    image = img_as_float(image)
+    result = np.abs(convolve(image,
+                             np.array([[ 3,  10,  3],
+                                       [ 0,   0,  0],
+                                       [-3, -10, -3]]).astype(float) / 16.0))
+    return _mask_filter_result(result, mask)
+
+
+def vscharr(image, mask=None):
+    """Find the vertical edges of an image using the Scharr transform.
+
+    Parameters
+    ----------
+    image : array_like, dtype=float
+        Image to process
+    mask : array_like, dtype=bool, optional
+        An optional mask to limit the application to a certain area
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Scharr edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+       3   0   -3
+      10   0  -10
+       3   0   -3
+
+    """
+    image = img_as_float(image)
+    result = np.abs(convolve(image,
+                             np.array([[ 3,  0, -3],
+                                       [10, 0, -10],
+                                       [ 3,  0, -3]]).astype(float) / 16.0))
+    return _mask_filter_result(result, mask)
+
+
 def prewitt(image, mask=None):
     """Find the edge magnitude using the Prewitt transform.
 
@@ -147,7 +245,7 @@ def prewitt(image, mask=None):
     Returns
     -------
     output : ndarray
-      The Prewitt edge map.
+        The Prewitt edge map.
 
     Notes
     -----
@@ -172,7 +270,7 @@ def hprewitt(image, mask=None):
     Returns
     -------
     output : ndarray
-      The Prewitt edge map.
+        The Prewitt edge map.
 
     Notes
     -----
@@ -207,7 +305,7 @@ def vprewitt(image, mask=None):
     Returns
     -------
     output : ndarray
-      The Prewitt edge map.
+        The Prewitt edge map.
 
     Notes
     -----
