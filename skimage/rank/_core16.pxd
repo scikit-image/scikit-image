@@ -75,7 +75,6 @@ char shift_x, char shift_y,int bitdepth):
     eimage[centre_r:rows+centre_r,centre_c:cols+centre_c] = image
     emask[centre_r:rows+centre_r,centre_c:cols+centre_c] = mask
 
-    eimage = np.ascontiguousarray(eimage)
     mask = np.ascontiguousarray(mask)
 
     # define pointers to the data
