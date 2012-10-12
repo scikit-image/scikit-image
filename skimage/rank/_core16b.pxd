@@ -94,7 +94,7 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
     cdef int max_se = srows*scols
 
     # number of element in each attack border
-    cdef int n_se_n, n_se_s, n_se_e, n_se_w
+    cdef int num_se_n, num_se_s, num_se_e, num_se_w
 
     # the current local histogram distribution
     cdef int* histo = <int*>malloc(maxbin * sizeof(int))
@@ -127,26 +127,26 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
     t = np.vstack((np.zeros((1,selem.shape[1])),selem))
     t_n = np.diff(t,axis=0)==1
 
-    n_se_n = n_se_s = n_se_e = n_se_w = 0
+    num_se_n = num_se_s = num_se_e = num_se_w = 0
 
     for r in range(srows):
         for c in range(scols):
             if t_e[r,c]:
-                se_e_r[n_se_e] = r - centre_r
-                se_e_c[n_se_e] = c - centre_c
-                n_se_e += 1
+                se_e_r[num_se_e] = r - centre_r
+                se_e_c[num_se_e] = c - centre_c
+                num_se_e += 1
             if t_w[r,c]:
-                se_w_r[n_se_w] = r - centre_r
-                se_w_c[n_se_w] = c - centre_c
-                n_se_w += 1
+                se_w_r[num_se_w] = r - centre_r
+                se_w_c[num_se_w] = c - centre_c
+                num_se_w += 1
             if t_n[r,c]:
-                se_n_r[n_se_n] = r - centre_r
-                se_n_c[n_se_n] = c - centre_c
-                n_se_n += 1
+                se_n_r[num_se_n] = r - centre_r
+                se_n_c[num_se_n] = c - centre_c
+                num_se_n += 1
             if t_s[r,c]:
-                se_s_r[n_se_s] = r - centre_r
-                se_s_c[n_se_s] = c - centre_c
-                n_se_s += 1
+                se_s_r[num_se_s] = r - centre_r
+                se_s_c[num_se_s] = c - centre_c
+                num_se_s += 1
 
     # initial population and histogram
     for i in range(maxbin):
@@ -176,14 +176,14 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
     for even_row in range(0,rows,2):
         # ---> west to east
         for c in range(1,cols):
-            for s in range(n_se_e):
+            for s in range(num_se_e):
                 rr = r + se_e_r[s] + centre_r
                 cc = c + se_e_c[s] + centre_c
                 if emask_data[rr * ecols + cc]:
                     value = eimage_data[rr * ecols + cc]
                     histo[value] += 1
                     pop += 1.
-            for s in range(n_se_w):
+            for s in range(num_se_w):
                 rr = r + se_w_r[s] + centre_r
                 cc = c + se_w_c[s] + centre_c - 1
                 if emask_data[rr * ecols + cc]:
@@ -201,14 +201,14 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
             break
 
             # ---> north to south
-        for s in range(n_se_s):
+        for s in range(num_se_s):
             rr = r + se_s_r[s] + centre_r
             cc = c + se_s_c[s] + centre_c
             if emask_data[rr * ecols + cc]:
                 value = eimage_data[rr * ecols + cc]
                 histo[value] += 1
                 pop += 1.
-        for s in range(n_se_n):
+        for s in range(num_se_n):
             rr = r + se_n_r[s] + centre_r - 1
             cc = c + se_n_c[s] + centre_c
             if emask_data[rr * ecols + cc]:
@@ -223,14 +223,14 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
 
         # ---> east to west
         for c in range(cols-2,-1,-1):
-            for s in range(n_se_w):
+            for s in range(num_se_w):
                 rr = r + se_w_r[s] + centre_r
                 cc = c + se_w_c[s] + centre_c
                 if emask_data[rr * ecols + cc]:
                     value = eimage_data[rr * ecols + cc]
                     histo[value] += 1
                     pop += 1.
-            for s in range(n_se_e):
+            for s in range(num_se_e):
                 rr = r + se_e_r[s] + centre_r
                 cc = c + se_e_c[s] + centre_c + 1
                 if emask_data[rr * ecols + cc]:
@@ -248,14 +248,14 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
             break
 
         # ---> north to south
-        for s in range(n_se_s):
+        for s in range(num_se_s):
             rr = r + se_s_r[s] + centre_r
             cc = c + se_s_c[s] + centre_c
             if emask_data[rr * ecols + cc]:
                 value = eimage_data[rr * ecols + cc]
                 histo[value] += 1
                 pop += 1.
-        for s in range(n_se_n):
+        for s in range(num_se_n):
             rr = r + se_n_r[s] + centre_r - 1
             cc = c + se_n_c[s] + centre_c
             if emask_data[rr * ecols + cc]:
