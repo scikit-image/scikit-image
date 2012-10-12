@@ -95,8 +95,6 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
     cdef int n_se_n, n_se_s, n_se_e, n_se_w
 
     cdef int selem_num = np.sum(selem != 0)
-    cdef int* sr = <int*>malloc(selem_num * sizeof(int))
-    cdef int* sc = <int*>malloc(selem_num * sizeof(int))
     cdef int* histo = <int*>malloc(maxbin * sizeof(int))
     cdef int* se_e_r = <int*>malloc(max_se * sizeof(int))
     cdef int* se_e_c = <int*>malloc(max_se * sizeof(int))
@@ -264,8 +262,6 @@ char shift_x, char shift_y,int bitdepth, int s0, int s1):
         # kernel -------------------------------------------
 
     # release memory allocated by malloc
-    free(sr)
-    free(sc)
 
     free(se_e_r)
     free(se_e_c)
