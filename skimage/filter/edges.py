@@ -39,9 +39,9 @@ def sobel(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -68,9 +68,9 @@ def hsobel(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -103,9 +103,9 @@ def vsobel(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -138,9 +138,9 @@ def scharr(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -165,9 +165,9 @@ def hscharr(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -200,9 +200,9 @@ def vscharr(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -235,9 +235,9 @@ def prewitt(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -260,9 +260,9 @@ def hprewitt(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
@@ -295,9 +295,9 @@ def vprewitt(image, mask=None):
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
         Note that pixels surrounding masked regions are also masked to
         prevent masked regions from affecting the result.
