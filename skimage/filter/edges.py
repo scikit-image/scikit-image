@@ -239,9 +239,9 @@ def vscharr(image, mask=None):
     """
     image = img_as_float(image)
     result = np.abs(convolve(image,
-                             np.array([[ 3,  0, -3],
+                             np.array([[ 3, 0,  -3],
                                        [10, 0, -10],
-                                       [ 3,  0, -3]]).astype(float) / 16.0))
+                                       [ 3, 0,  -3]]).astype(float) / 16.0))
     return _mask_filter_result(result, mask)
 
 
