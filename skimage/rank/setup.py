@@ -5,9 +5,6 @@ from skimage._build import cython
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
-import sys
-sys.path.append('.')
-
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
