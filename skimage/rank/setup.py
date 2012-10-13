@@ -5,6 +5,8 @@ from skimage._build import cython
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
+import sys
+sys.path.append('.')
 
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
@@ -12,12 +14,28 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('rank', parent_package, top_path)
 #    config.add_data_dir('tests')
 
+
+    cython(['_core8.pyx'], working_path=base_path)
+    cython(['_core8p.pyx'], working_path=base_path)
+    cython(['_core16.pyx'], working_path=base_path)
+    cython(['_core16p.pyx'], working_path=base_path)
+    cython(['_core16b.pyx'], working_path=base_path)
     cython(['_crank8.pyx'], working_path=base_path)
     cython(['_crank8_percentiles.pyx'], working_path=base_path)
     cython(['_crank16.pyx'], working_path=base_path)
     cython(['_crank16_percentiles.pyx'], working_path=base_path)
     cython(['_crank16_bilateral.pyx'], working_path=base_path)
 
+    config.add_extension('_core8', sources=['_core8.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_core8p', sources=['_core8p.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_core16', sources=['_core16.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_core16p', sources=['_core16p.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_core16b', sources=['_core16b.c'],
+        include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_crank8', sources=['_crank8.c'],
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_crank8_percentiles', sources=['_crank8_percentiles.c'],
