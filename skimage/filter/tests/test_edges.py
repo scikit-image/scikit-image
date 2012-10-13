@@ -329,7 +329,7 @@ def test_horizontal_mask_line():
     expected[1:-1, 1:-1] = 0.2          # constant gradient for most of image,
     expected[4:7, 1:-1] = 0             # but line and neighbors masked
 
-    for grad_func in (F.hprewitt, F.hsobel):
+    for grad_func in (F.hprewitt, F.hsobel, F.hscharr):
         result = grad_func(vgrad, mask)
         yield assert_close, result, expected
 
@@ -346,7 +346,7 @@ def test_vertical_mask_line():
     expected[1:-1, 1:-1] = 0.2          # constant gradient for most of image,
     expected[1:-1, 4:7] = 0             # but line and neighbors masked
 
-    for grad_func in (F.vprewitt, F.vsobel):
+    for grad_func in (F.vprewitt, F.vsobel, F.vscharr):
         result = grad_func(hgrad, mask)
         yield assert_close, result, expected
 
