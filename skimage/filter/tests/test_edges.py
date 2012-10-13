@@ -107,13 +107,13 @@ def test_vsobel_horizontal():
 
 
 def test_scharr_zeros():
-    """Sobel on an array of all zeros"""
+    """Scharr on an array of all zeros"""
     result = F.scharr(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_scharr_mask():
-    """Sobel on a masked array should be zero"""
+    """Scharr on a masked array should be zero"""
     np.random.seed(0)
     result = F.scharr(np.random.uniform(size=(10, 10)),
                      np.zeros((10, 10), bool))
@@ -121,7 +121,7 @@ def test_scharr_mask():
 
 
 def test_scharr_horizontal():
-    """Sobel on an edge should be a horizontal line"""
+    """Scharr on an edge should be a horizontal line"""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.scharr(image)
@@ -132,7 +132,7 @@ def test_scharr_horizontal():
 
 
 def test_scharr_vertical():
-    """Sobel on a vertical edge should be a vertical line"""
+    """Scharr on a vertical edge should be a vertical line"""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.scharr(image)
@@ -142,13 +142,13 @@ def test_scharr_vertical():
 
 
 def test_hscharr_zeros():
-    """Horizontal sobel on an array of all zeros"""
+    """Horizontal Scharr on an array of all zeros"""
     result = F.hscharr(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_hscharr_mask():
-    """Horizontal Sobel on a masked array should be zero"""
+    """Horizontal Scharr on a masked array should be zero"""
     np.random.seed(0)
     result = F.hscharr(np.random.uniform(size=(10, 10)),
                       np.zeros((10, 10), bool))
@@ -156,7 +156,7 @@ def test_hscharr_mask():
 
 
 def test_hscharr_horizontal():
-    """Horizontal Sobel on an edge should be a horizontal line"""
+    """Horizontal Scharr on an edge should be a horizontal line"""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.hscharr(image)
@@ -167,7 +167,7 @@ def test_hscharr_horizontal():
 
 
 def test_hscharr_vertical():
-    """Horizontal Sobel on a vertical edge should be zero"""
+    """Horizontal Scharr on a vertical edge should be zero"""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.hscharr(image)
@@ -175,13 +175,13 @@ def test_hscharr_vertical():
 
 
 def test_vscharr_zeros():
-    """Vertical sobel on an array of all zeros"""
+    """Vertical Scharr on an array of all zeros"""
     result = F.vscharr(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_vscharr_mask():
-    """Vertical Sobel on a masked array should be zero"""
+    """Vertical Scharr on a masked array should be zero"""
     np.random.seed(0)
     result = F.vscharr(np.random.uniform(size=(10, 10)),
                       np.zeros((10, 10), bool))
@@ -189,7 +189,7 @@ def test_vscharr_mask():
 
 
 def test_vscharr_vertical():
-    """Vertical Sobel on an edge should be a vertical line"""
+    """Vertical Scharr on an edge should be a vertical line"""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.vscharr(image)
@@ -200,7 +200,7 @@ def test_vscharr_vertical():
 
 
 def test_vscharr_horizontal():
-    """vertical Sobel on a horizontal edge should be zero"""
+    """vertical Scharr on a horizontal edge should be zero"""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.vscharr(image)
