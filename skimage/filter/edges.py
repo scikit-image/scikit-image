@@ -156,6 +156,11 @@ def scharr(image, mask=None):
     vertical Scharrs to get a magnitude that's somewhat insensitive to
     direction.
 
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
+           of Kernel Based Image Derivatives.
+
     """
     return np.sqrt(hscharr(image, mask)**2 + vscharr(image, mask)**2)
 
@@ -185,6 +190,11 @@ def hscharr(image, mask=None):
       3   10   3
       0    0   0
      -3  -10  -3
+
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
+           of Kernel Based Image Derivatives.
 
     """
     image = img_as_float(image)
@@ -220,6 +230,11 @@ def vscharr(image, mask=None):
        3   0   -3
       10   0  -10
        3   0   -3
+
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
+           of Kernel Based Image Derivatives.
 
     """
     image = img_as_float(image)
