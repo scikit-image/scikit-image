@@ -17,7 +17,7 @@ MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
 URL                 = 'http://scikit-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
-VERSION             = '0.8dev'
+VERSION             = '0.7.2'
 PYTHON_VERSION      = (2, 5)
 DEPENDENCIES        = {
                         'numpy': (1, 6),
