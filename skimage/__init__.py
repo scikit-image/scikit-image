@@ -1,6 +1,6 @@
 """Image Processing SciKit (Toolbox for SciPy)
 
-``scikits-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
+``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
 
 The main package of ``skimage`` only provides a few utilities for converting
@@ -65,7 +65,7 @@ except ImportError:
 def _setup_test(verbose=False):
     import functools
 
-    args = ['', '--exe', '-w', pkg_dir]
+    args = ['', pkg_dir, '--exe']
     if verbose:
         args.extend(['-v', '-s'])
 

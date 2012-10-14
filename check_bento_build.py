@@ -69,7 +69,8 @@ def print_results(cy_bento, cy_setup):
         print(text)
         print('-' * len(text))
 
-    print # blank line; just for aesthetics
+    print "Bento errors:"
+    print "-------------"
 
     if cy_bento:
         info("The following extensions in 'bento.info' were not found:")

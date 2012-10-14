@@ -6,18 +6,18 @@ Image processing algorithms for SciPy, including IO, morphology, filtering,
 warping, color manipulation, object detection, etc.
 
 Please refer to the online documentation at
-http://scikits-image.org/
+http://scikit-image.org/
 """
 
-DISTNAME            = 'scikits-image'
+DISTNAME            = 'scikit-image'
 DESCRIPTION         = 'Image processing routines for SciPy'
 LONG_DESCRIPTION    = descr
 MAINTAINER          = 'Stefan van der Walt'
 MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
-URL                 = 'http://scikits-image.org'
+URL                 = 'http://scikit-image.org'
 LICENSE             = 'Modified BSD'
-DOWNLOAD_URL        = 'http://github.com/scikits-image/scikits-image'
-VERSION             = '0.7.1'
+DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
+VERSION             = '0.7.2'
 PYTHON_VERSION      = (2, 5)
 DEPENDENCIES        = {
                         'numpy': (1, 6),

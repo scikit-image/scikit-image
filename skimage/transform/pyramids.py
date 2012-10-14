@@ -57,7 +57,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
 
@@ -111,7 +111,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
 
@@ -143,9 +143,9 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     the downscaled images.
 
     Note that the first image of the pyramid will be the original, unscaled
-    image. The total number of images is `max_layer + 1`. In case all layers are
-    computed, the last image is either a one-pixel image or the image where the
-    reduction does not change its shape.
+    image. The total number of images is `max_layer + 1`. In case all layers
+    are computed, the last image is either a one-pixel image or the image where
+    the reduction does not change its shape.
 
     Parameters
     ----------
@@ -176,7 +176,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
 
@@ -225,8 +225,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     Note that the first image of the pyramid will be the difference between the
     original, unscaled image and its smoothed version. The total number of
     images is `max_layer + 1`. In case all layers are computed, the last image
-    is either a one-pixel image or the image where the reduction does not change
-    its shape.
+    is either a one-pixel image or the image where the reduction does not
+    change its shape.
 
     Parameters
     ----------
@@ -257,8 +257,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
-    ..[2] http://sepwww.stanford.edu/~morgan/texturematch/paper_html/node3.html
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [2] http://sepwww.stanford.edu/~morgan/texturematch/paper_html/node3.html
 
     """
 

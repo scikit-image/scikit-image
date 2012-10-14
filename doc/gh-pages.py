@@ -30,7 +30,7 @@ from subprocess import Popen, PIPE, CalledProcessError, check_call
 pages_dir = 'gh-pages'
 html_dir = 'build/html'
 pdf_dir = 'build/latex'
-pages_repo = 'git@github.com:scikits-image/docs.git'
+pages_repo = 'git@github.com:scikit-image/docs.git'
 
 #-----------------------------------------------------------------------------
 # Functions
@@ -108,7 +108,7 @@ if __name__ == '__main__':
     shutil.copytree(html_dir, dest)
     # copy pdf file into tree
     #shutil.copy(pjoin(pdf_dir, 'scikits.image.pdf'), pjoin(dest, 'scikits.image.pdf'))
-    
+
     try:
         cd(pages_dir)
         status = sh2('git status | head -1')
@@ -117,7 +117,7 @@ if __name__ == '__main__':
             e = 'On %r, git branch is %r, MUST be "gh-pages"' % (pages_dir,
                                                                  branch)
             raise RuntimeError(e)
-        sh("touch .nojekyll")        
+        sh("touch .nojekyll")
         sh('git add .nojekyll')
         sh('git add index.html')
         sh('git add %s' % tag)
@@ -131,4 +131,4 @@ if __name__ == '__main__':
 
     print
     print 'Now verify the build in: %r' % dest
-    print "If everything looks good, 'git push'"
+    print "If everything looks good, run 'git push' inside doc/gh-pages."

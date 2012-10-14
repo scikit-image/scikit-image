@@ -4,8 +4,8 @@ Development process
 :doc:`Read this overview <gitwash/index>` of how to use Git with
 ``skimage``.  Here's the long and short of it:
 
- * Go to `https://github.com/scikits-image/scikits-image
-   <http://github.com/scikits-image/scikits-image>`_ and follow the
+ * Go to `https://github.com/scikit-image/scikit-image
+   <http://github.com/scikit-image/scikit-image>`_ and follow the
    instructions on making your own fork.
  * Create a new branch for the feature you want to work on.  Since the
    branch name will appear in the merge message, use a sensible name
@@ -42,7 +42,7 @@ Guidelines
  * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
    where possible.
  * No major changes should be committed without review.  Ask on the
-   `mailing list <http://groups.google.com/group/scikits-image>`_ if
+   `mailing list <http://groups.google.com/group/scikit-image>`_ if
    you get no response to your pull request.
  * Examples in the gallery should have a maximum figure width of 8 inches.
 
@@ -99,4 +99,4 @@ detailing the test coverage::
 
 Bugs
 ````
-Please `report bugs on Github <https://github.com/scikits-image/scikits-image/issues>`_.
+Please `report bugs on Github <https://github.com/scikit-image/scikit-image/issues>`_.
