@@ -18,24 +18,24 @@ from libc.stdlib cimport malloc, free
 # 16 bit core kernel receives extra information about data bitdepth
 #---------------------------------------------------------------------------
 
-cdef inline _core16(np.uint16_t kernel(int*, float, np.uint16_t, int ,int,int ),
+cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t, Py_ssize_t ,Py_ssize_t,Py_ssize_t ),
 np.ndarray[np.uint16_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
 np.ndarray[np.uint8_t, ndim=2] mask,
 np.ndarray[np.uint16_t, ndim=2] out,
-char shift_x, char shift_y,int bitdepth):
+char shift_x, char shift_y,Py_ssize_t bitdepth):
     """ Main loop, this function computes the histogram for each image point
     - data is uint8
     - result is uint8 casted
     """
 
-    cdef int rows = image.shape[0]
-    cdef int cols = image.shape[1]
-    cdef int srows = selem.shape[0]
-    cdef int scols = selem.shape[1]
+    cdef Py_ssize_t rows = image.shape[0]
+    cdef Py_ssize_t cols = image.shape[1]
+    cdef Py_ssize_t srows = selem.shape[0]
+    cdef Py_ssize_t scols = selem.shape[1]
 
-    cdef int centre_r = int(selem.shape[0] / 2) + shift_y
-    cdef int centre_c = int(selem.shape[1] / 2) + shift_x
+    cdef Py_ssize_t centre_r = int(selem.shape[0] / 2) + shift_y
+    cdef Py_ssize_t centre_c = int(selem.shape[1] / 2) + shift_x
 
     # check that structuring element center is inside the element bounding box
     assert centre_r >= 0
@@ -49,7 +49,7 @@ char shift_x, char shift_y,int bitdepth):
 
 
     #set maxbin and midbin
-    cdef int maxbin=maxbin_list[bitdepth],midbin=midbin_list[bitdepth]
+    cdef Py_ssize_t maxbin=maxbin_list[bitdepth],midbin=midbin_list[bitdepth]
 
     assert (image<maxbin).all()
 
@@ -66,8 +66,8 @@ char shift_x, char shift_y,int bitdepth):
         out = np.ascontiguousarray(out)
 
     # create extended image and mask
-    cdef int erows = rows+srows-1
-    cdef int ecols = cols+scols-1
+    cdef Py_ssize_t erows = rows+srows-1
+    cdef Py_ssize_t ecols = cols+scols-1
 
     cdef np.ndarray emask = np.zeros((erows, ecols), dtype=np.uint8)
     cdef np.ndarray eimage = np.zeros((erows, ecols), dtype=np.uint16)
@@ -86,30 +86,30 @@ char shift_x, char shift_y,int bitdepth):
     cdef np.uint8_t* mask_data = <np.uint8_t*>mask.data
 
     # define local variable types
-    cdef int r, c, rr, cc, s, value, local_max, i, even_row
+    cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
     cdef float pop                                 # number of pixels actually inside the neighborhood (float)
 
     # allocate memory with malloc
-    cdef int max_se = srows*scols
+    cdef Py_ssize_t max_se = srows*scols
 
     # number of element in each attack border
-    cdef int num_se_n, num_se_s, num_se_e, num_se_w
+    cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w
 
     # the current local histogram distribution
-    cdef int* histo = <int*>malloc(maxbin * sizeof(int))
+    cdef Py_ssize_t* histo = <Py_ssize_t*>malloc(maxbin * sizeof(Py_ssize_t))
 
     # these lists contain the relative pixel row and column for each of the 4 attack borders
     # east, west, north and south
     # e.g. se_e_r lists the rows of the east structuring element border
 
-    cdef int* se_e_r = <int*>malloc(max_se * sizeof(int))
-    cdef int* se_e_c = <int*>malloc(max_se * sizeof(int))
-    cdef int* se_w_r = <int*>malloc(max_se * sizeof(int))
-    cdef int* se_w_c = <int*>malloc(max_se * sizeof(int))
-    cdef int* se_n_r = <int*>malloc(max_se * sizeof(int))
-    cdef int* se_n_c = <int*>malloc(max_se * sizeof(int))
-    cdef int* se_s_r = <int*>malloc(max_se * sizeof(int))
-    cdef int* se_s_c = <int*>malloc(max_se * sizeof(int))
+    cdef Py_ssize_t* se_e_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* se_e_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* se_w_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* se_w_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* se_n_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* se_n_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* se_s_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* se_s_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
 
     # build attack and release borders
     # by using difference along axis
