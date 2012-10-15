@@ -12,8 +12,8 @@ if __name__ == '__main__':
     a16 = data.camera().astype(np.uint16)
     selem = disk(10)
 
-    f8= rank.mean(a8,selem)
-    f16= rank.mean(a16,selem)
+    f8= rank.percentile_autolevel(a8,selem,p0=.0,p1=1.)
+    f16= rank.autolevel(a16,selem)
 
     print f8==f16
 
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     plt.subplot(1,2,1)
     plt.imshow(f16)
     plt.subplot(1,2,2)
-    plt.imshow(f8-f16)
+    plt.imshow(f8)
     plt.show()
 
 
