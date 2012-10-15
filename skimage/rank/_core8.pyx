@@ -18,7 +18,11 @@ from libc.stdlib cimport malloc, free
 # 8 bit core kernel
 #---------------------------------------------------------------------------
 
-cdef inline Py_ssize_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,Py_ssize_t r, Py_ssize_t c,np.uint8_t* mask):
+cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,Py_ssize_t r, Py_ssize_t c,np.uint8_t* mask):
+    """ returns 1 if given(r,c) coordinate are within the image frame ([0-rows],[0-cols]) and
+        inside the given mask
+        returns 0 otherwise
+    """
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
         return 0
     else:
@@ -134,7 +138,7 @@ char shift_x, char shift_y):
                 se_s_c[num_se_s] = c - centre_c
                 num_se_s += 1
 
-    # initial population and histogram
+    # initial population and histogram (kernel is centered on the first row and column)
     for i in range(256):
         histo[i] = 0
 
@@ -152,9 +156,9 @@ char shift_x, char shift_y):
 
     r = 0
     c = 0
-    # kernel -------------------------------------------
+    # kernel --------------------------------------------------------------------
     out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
-    # kernel -------------------------------------------
+    # kernel --------------------------------------------------------------------
 
     # main loop
     r = 0
@@ -176,9 +180,9 @@ char shift_x, char shift_y):
                     histo[value] -= 1
                     pop -= 1.
 
-            # kernel -------------------------------------------
+            # kernel --------------------------------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
-            # kernel -------------------------------------------
+            # kernel --------------------------------------------------------------------
 
         r += 1          # pass to the next row
         if r>=rows:
@@ -200,9 +204,9 @@ char shift_x, char shift_y):
                 histo[value] -= 1
                 pop -= 1.
 
-        # kernel -------------------------------------------
+        # kernel --------------------------------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
-        # kernel -------------------------------------------
+        # kernel --------------------------------------------------------------------
 
         # ---> east to west
         for c in range(cols-2,-1,-1):
@@ -221,9 +225,9 @@ char shift_x, char shift_y):
                     histo[value] -= 1
                     pop -= 1.
 
-            # kernel -------------------------------------------
+            # kernel --------------------------------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
-            # kernel -------------------------------------------
+            # kernel --------------------------------------------------------------------
 
         r += 1           # pass to the next row
         if r>=rows:
@@ -245,9 +249,9 @@ char shift_x, char shift_y):
                 histo[value] -= 1
                 pop -= 1.
 
-        # kernel -------------------------------------------
+        # kernel --------------------------------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
-        # kernel -------------------------------------------
+        # kernel --------------------------------------------------------------------
 
     # release memory allocated by malloc
 
