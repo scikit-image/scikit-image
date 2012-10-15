@@ -105,7 +105,7 @@ class TestSequenceFunctions(unittest.TestCase):
         assert (loc_autolevel==loc_perc_autolevel).all()
 
     def test_compare_autolevels_16bit(self):
-        image = data.camera().astype(np.uint16)
+        image = data.camera().astype(np.uint16)*4
 
         selem = disk(20)
         loc_autolevel = rank.autolevel(image,selem=selem)
