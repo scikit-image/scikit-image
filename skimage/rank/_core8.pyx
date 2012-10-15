@@ -18,7 +18,7 @@ from libc.stdlib cimport malloc, free
 # 8 bit core kernel
 #---------------------------------------------------------------------------
 
-cdef inline _core8(np.uint8_t kernel(int*, float, np.uint8_t),
+cdef inline _core8(np.uint8_t kernel(Py_ssize_t*, float, np.uint8_t),
 np.ndarray[np.uint8_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
 np.ndarray[np.uint8_t, ndim=2] mask,
@@ -86,7 +86,7 @@ char shift_x, char shift_y):
     cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w
 
     # the current local histogram distribution
-    cdef int* histo = <int*>malloc(256 * sizeof(int))
+    cdef Py_ssize_t* histo = <Py_ssize_t*>malloc(256 * sizeof(Py_ssize_t))
 
     # these lists contain the relative pixel row and column for each of the 4 attack borders
     # east, west, north and south
