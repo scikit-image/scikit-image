@@ -18,6 +18,20 @@ from libc.stdlib cimport malloc, free
 # 16 bit core kernel receives extra information about data bitdepth
 #---------------------------------------------------------------------------
 
+cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,Py_ssize_t r, Py_ssize_t c,np.uint8_t* mask):
+    """ returns 1 if given(r,c) coordinate are within the image frame ([0-rows],[0-cols]) and
+        inside the given mask
+        returns 0 otherwise
+    """
+    if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
+        return 0
+    else:
+        if mask[r*cols+c]:
+            return 1
+        else:
+            return 0
+
+
 cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t, Py_ssize_t ,Py_ssize_t,Py_ssize_t ),
 np.ndarray[np.uint16_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
@@ -65,22 +79,9 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
     else:
         out = np.ascontiguousarray(out)
 
-    # create extended image and mask
-    cdef Py_ssize_t erows = rows+srows-1
-    cdef Py_ssize_t ecols = cols+scols-1
-
-    cdef np.ndarray emask = np.zeros((erows, ecols), dtype=np.uint8)
-    cdef np.ndarray eimage = np.zeros((erows, ecols), dtype=np.uint16)
-
-    eimage[centre_r:rows+centre_r,centre_c:cols+centre_c] = image
-    emask[centre_r:rows+centre_r,centre_c:cols+centre_c] = mask
-
     mask = np.ascontiguousarray(mask)
 
     # define pointers to the data
-    cdef np.uint16_t* eimage_data = <np.uint16_t*>eimage.data
-    cdef np.uint8_t* emask_data = <np.uint8_t*>emask.data
-
     cdef np.uint16_t* out_data = <np.uint16_t*>out.data
     cdef np.uint16_t* image_data = <np.uint16_t*>image.data
     cdef np.uint8_t* mask_data = <np.uint8_t*>mask.data
@@ -155,18 +156,18 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
 
     for r in range(srows):
         for c in range(scols):
-            rr = r
-            cc = c
+            rr = r - centre_r
+            cc = c - centre_c
             if selem[r, c]:
-                if emask_data[rr * ecols + cc]:
-                    value = eimage_data[rr * ecols + cc]
+                if is_in_mask(rows,cols,rr,cc,mask_data):
+                    value = image_data[rr * cols + cc]
                     histo[value] += 1
                     pop += 1.
 
     r = 0
     c = 0
     # kernel -------------------------------------------
-    out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
+    out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],
         bitdepth,maxbin,midbin)
     # kernel -------------------------------------------
 
@@ -176,22 +177,22 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
         # ---> west to east
         for c in range(1,cols):
             for s in range(num_se_e):
-                rr = r + se_e_r[s] + centre_r
-                cc = c + se_e_c[s] + centre_c
-                if emask_data[rr * ecols + cc]:
-                    value = eimage_data[rr * ecols + cc]
+                rr = r + se_e_r[s]
+                cc = c + se_e_c[s]
+                if is_in_mask(rows,cols,rr,cc,mask_data):
+                    value = image_data[rr * cols + cc]
                     histo[value] += 1
                     pop += 1.
             for s in range(num_se_w):
-                rr = r + se_w_r[s] + centre_r
-                cc = c + se_w_c[s] + centre_c - 1
-                if emask_data[rr * ecols + cc]:
-                    value = eimage_data[rr * ecols + cc]
+                rr = r + se_w_r[s]
+                cc = c + se_w_c[s] - 1
+                if is_in_mask(rows,cols,rr,cc,mask_data):
+                    value = image_data[rr * cols + cc]
                     histo[value] -= 1
                     pop -= 1.
 
             # kernel -------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
+            out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
                 bitdepth,maxbin,midbin)
             # kernel -------------------------------------------
 
@@ -201,44 +202,44 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
 
             # ---> north to south
         for s in range(num_se_s):
-            rr = r + se_s_r[s] + centre_r
-            cc = c + se_s_c[s] + centre_c
-            if emask_data[rr * ecols + cc]:
-                value = eimage_data[rr * ecols + cc]
+            rr = r + se_s_r[s]
+            cc = c + se_s_c[s]
+            if is_in_mask(rows,cols,rr,cc,mask_data):
+                value = image_data[rr * cols + cc]
                 histo[value] += 1
                 pop += 1.
         for s in range(num_se_n):
-            rr = r + se_n_r[s] + centre_r - 1
-            cc = c + se_n_c[s] + centre_c
-            if emask_data[rr * ecols + cc]:
-                value = eimage_data[rr * ecols + cc]
+            rr = r + se_n_r[s] - 1
+            cc = c + se_n_c[s]
+            if is_in_mask(rows,cols,rr,cc,mask_data):
+                value = image_data[rr * cols + cc]
                 histo[value] -= 1
                 pop -= 1.
 
         # kernel -------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
+        out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],
             bitdepth,maxbin,midbin)
         # kernel -------------------------------------------
 
         # ---> east to west
         for c in range(cols-2,-1,-1):
             for s in range(num_se_w):
-                rr = r + se_w_r[s] + centre_r
-                cc = c + se_w_c[s] + centre_c
-                if emask_data[rr * ecols + cc]:
-                    value = eimage_data[rr * ecols + cc]
+                rr = r + se_w_r[s]
+                cc = c + se_w_c[s]
+                if is_in_mask(rows,cols,rr,cc,mask_data):
+                    value = image_data[rr * cols + cc]
                     histo[value] += 1
                     pop += 1.
             for s in range(num_se_e):
-                rr = r + se_e_r[s] + centre_r
-                cc = c + se_e_c[s] + centre_c + 1
-                if emask_data[rr * ecols + cc]:
-                    value = eimage_data[rr * ecols + cc]
+                rr = r + se_e_r[s]
+                cc = c + se_e_c[s] + 1
+                if is_in_mask(rows,cols,rr,cc,mask_data):
+                    value = image_data[rr * cols + cc]
                     histo[value] -= 1
                     pop -= 1.
 
             # kernel -------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
+            out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
                 bitdepth,maxbin,midbin)
             # kernel -------------------------------------------
 
@@ -248,22 +249,22 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
 
         # ---> north to south
         for s in range(num_se_s):
-            rr = r + se_s_r[s] + centre_r
-            cc = c + se_s_c[s] + centre_c
-            if emask_data[rr * ecols + cc]:
-                value = eimage_data[rr * ecols + cc]
+            rr = r + se_s_r[s]
+            cc = c + se_s_c[s]
+            if is_in_mask(rows,cols,rr,cc,mask_data):
+                value = image_data[rr * cols + cc]
                 histo[value] += 1
                 pop += 1.
         for s in range(num_se_n):
-            rr = r + se_n_r[s] + centre_r - 1
-            cc = c + se_n_c[s] + centre_c
-            if emask_data[rr * ecols + cc]:
-                value = eimage_data[rr * ecols + cc]
+            rr = r + se_n_r[s] - 1
+            cc = c + se_n_c[s]
+            if is_in_mask(rows,cols,rr,cc,mask_data):
+                value = image_data[rr * cols + cc]
                 histo[value] -= 1
                 pop -= 1.
 
         # kernel -------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,eimage_data[(r+centre_r) * ecols + c + centre_c],
+        out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
             bitdepth,maxbin,midbin)
         # kernel -------------------------------------------
 
