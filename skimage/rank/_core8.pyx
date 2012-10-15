@@ -14,6 +14,11 @@ import numpy as np
 cimport numpy as np
 from libc.stdlib cimport malloc, free
 
+# generic cdef functions
+cdef inline np.uint8_t uint8_max(np.uint8_t a, np.uint8_t b): return a if a >= b else b
+cdef inline np.uint8_t uint8_min(np.uint8_t a, np.uint8_t b): return a if a <= b else b
+
+
 #---------------------------------------------------------------------------
 # 8 bit core kernel
 #---------------------------------------------------------------------------
@@ -31,12 +36,12 @@ cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,Py_ssize_t r,
         else:
             return 0
 
-cdef inline _core8(np.uint8_t kernel(Py_ssize_t*, float, np.uint8_t),
+cdef inline _core8(np.uint8_t kernel(Py_ssize_t*, float, np.uint8_t, float, float, Py_ssize_t, Py_ssize_t),
 np.ndarray[np.uint8_t, ndim=2] image,
 np.ndarray[np.uint8_t, ndim=2] selem,
 np.ndarray[np.uint8_t, ndim=2] mask,
 np.ndarray[np.uint8_t, ndim=2] out,
-char shift_x, char shift_y):
+char shift_x, char shift_y, float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     """ Main loop, this function computes the histogram for each image point
     - data is uint8
     - result is uint8 casted
@@ -78,7 +83,9 @@ char shift_x, char shift_y):
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
-    cdef float pop                                 # number of pixels actually inside the neighborhood (float)
+
+    # number of pixels actually inside the neighborhood (float)
+    cdef float pop
 
     # allocate memory with malloc
     cdef Py_ssize_t max_se = srows*scols
@@ -157,7 +164,7 @@ char shift_x, char shift_y):
     r = 0
     c = 0
     # kernel --------------------------------------------------------------------
-    out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
+    out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],p0,p1,s0,s1)
     # kernel --------------------------------------------------------------------
 
     # main loop
@@ -181,14 +188,14 @@ char shift_x, char shift_y):
                     pop -= 1.
 
             # kernel --------------------------------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
+            out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],p0,p1,s0,s1)
             # kernel --------------------------------------------------------------------
 
         r += 1          # pass to the next row
         if r>=rows:
             break
 
-    # ---> north to south
+            # ---> north to south
         for s in range(num_se_s):
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
@@ -205,7 +212,7 @@ char shift_x, char shift_y):
                 pop -= 1.
 
         # kernel --------------------------------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
+        out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],p0,p1,s0,s1)
         # kernel --------------------------------------------------------------------
 
         # ---> east to west
@@ -226,7 +233,7 @@ char shift_x, char shift_y):
                     pop -= 1.
 
             # kernel --------------------------------------------------------------------
-            out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
+            out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],p0,p1,s0,s1)
             # kernel --------------------------------------------------------------------
 
         r += 1           # pass to the next row
@@ -250,7 +257,7 @@ char shift_x, char shift_y):
                 pop -= 1.
 
         # kernel --------------------------------------------------------------------
-        out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c])
+        out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],p0,p1,s0,s1)
         # kernel --------------------------------------------------------------------
 
     # release memory allocated by malloc
