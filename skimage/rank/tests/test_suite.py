@@ -104,6 +104,15 @@ class TestSequenceFunctions(unittest.TestCase):
 
         assert (loc_autolevel==loc_perc_autolevel).all()
 
+    def test_compare_autolevels_16bit(self):
+        image = data.camera().astype(np.uint16)
+
+        selem = disk(20)
+        loc_autolevel = rank.autolevel(image,selem=selem)
+        loc_perc_autolevel = rank.percentile_autolevel(image,selem=selem,p0=.0,p1=1.)
+
+        assert (loc_autolevel==loc_perc_autolevel).all()
+
     def test_compare_8bit_vs_16bit(self):
         # filters applied on 8bit image ore 16bit image (having only real 8bit of dynamic) should be identical
         i8 = data.camera()
