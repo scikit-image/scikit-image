@@ -21,8 +21,8 @@ from _core8 cimport _core8
 # kernels uint8
 # -----------------------------------------------------------------
 
-cdef inline np.uint8_t kernel_autolevel(int* histo, float pop, np.uint8_t g):
-    cdef int i,imin,imax,delta
+cdef inline np.uint8_t kernel_autolevel(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i,imin,imax,delta
 
     if pop:
         for i in range(255,-1,-1):
@@ -41,8 +41,8 @@ cdef inline np.uint8_t kernel_autolevel(int* histo, float pop, np.uint8_t g):
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_bottomhat(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_bottomhat(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
 
     for i in range(256):
         if histo[i]:
@@ -51,8 +51,8 @@ cdef inline np.uint8_t kernel_bottomhat(int* histo, float pop, np.uint8_t g):
     return <np.uint8_t>(g-i)
 
 
-cdef inline np.uint8_t kernel_equalize(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_equalize(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
     cdef float sum = 0.
 
     if pop:
@@ -65,8 +65,8 @@ cdef inline np.uint8_t kernel_equalize(int* histo, float pop, np.uint8_t g):
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_gradient(int* histo, float pop, np.uint8_t g):
-    cdef int i,imin,imax
+cdef inline np.uint8_t kernel_gradient(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i,imin,imax
 
 
     if pop:
@@ -82,8 +82,8 @@ cdef inline np.uint8_t kernel_gradient(int* histo, float pop, np.uint8_t g):
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_maximum(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_maximum(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
 
     if pop:
         for i in range(255,-1,-1):
@@ -92,8 +92,8 @@ cdef inline np.uint8_t kernel_maximum(int* histo, float pop, np.uint8_t g):
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_mean(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_mean(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
     cdef float mean = 0.
 
     if pop:
@@ -103,8 +103,8 @@ cdef inline np.uint8_t kernel_mean(int* histo, float pop, np.uint8_t g):
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_meansubstraction(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_meansubstraction(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
     cdef float mean = 0.
 
     if pop:
@@ -114,8 +114,8 @@ cdef inline np.uint8_t kernel_meansubstraction(int* histo, float pop, np.uint8_t
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_median(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_median(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
     cdef float sum = pop/2.0
 
     if pop:
@@ -127,8 +127,8 @@ cdef inline np.uint8_t kernel_median(int* histo, float pop, np.uint8_t g):
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_minimum(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_minimum(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
 
     if pop:
         for i in range(256):
@@ -137,8 +137,8 @@ cdef inline np.uint8_t kernel_minimum(int* histo, float pop, np.uint8_t g):
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_modal(int* histo, float pop, np.uint8_t g):
-    cdef int hmax=0,imax=0
+cdef inline np.uint8_t kernel_modal(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t hmax=0,imax=0
 
     if pop:
         for i in range(256):
@@ -149,8 +149,8 @@ cdef inline np.uint8_t kernel_modal(int* histo, float pop, np.uint8_t g):
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_morph_contr_enh(int* histo, float pop, np.uint8_t g):
-    cdef int i,imin,imax
+cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i,imin,imax
 
     if pop:
         for i in range(255,-1,-1):
@@ -168,11 +168,11 @@ cdef inline np.uint8_t kernel_morph_contr_enh(int* histo, float pop, np.uint8_t 
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_pop(int* histo, float pop, np.uint8_t g):
+cdef inline np.uint8_t kernel_pop(Py_ssize_t* histo, float pop, np.uint8_t g):
     return <np.uint8_t>(pop)
 
-cdef inline np.uint8_t kernel_threshold(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_threshold(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
     cdef float mean = 0.
 
     if pop:
@@ -182,8 +182,8 @@ cdef inline np.uint8_t kernel_threshold(int* histo, float pop, np.uint8_t g):
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_tophat(int* histo, float pop, np.uint8_t g):
-    cdef int i
+cdef inline np.uint8_t kernel_tophat(Py_ssize_t* histo, float pop, np.uint8_t g):
+    cdef Py_ssize_t i
 
     for i in range(255,-1,-1):
         if histo[i]:
