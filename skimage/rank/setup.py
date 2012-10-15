@@ -14,7 +14,6 @@ def configuration(parent_package='', top_path=None):
 
     cython(['_core8.pyx'], working_path=base_path)
     cython(['_core16.pyx'], working_path=base_path)
-    cython(['_core16b.pyx'], working_path=base_path)
     cython(['_crank8.pyx'], working_path=base_path)
     cython(['_crank8_percentiles.pyx'], working_path=base_path)
     cython(['_crank16.pyx'], working_path=base_path)
@@ -24,8 +23,6 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_core8', sources=['_core8.c'],
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_core16', sources=['_core16.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_core16b', sources=['_core16b.c'],
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_crank8', sources=['_crank8.c'],
         include_dirs=[get_numpy_include_dirs()])
