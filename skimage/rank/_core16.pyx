@@ -18,6 +18,10 @@ from libc.stdlib cimport malloc, free
 # 16 bit core kernel receives extra information about data bitdepth
 #---------------------------------------------------------------------------
 
+# generic cdef functions
+cdef inline int int_max(int a, int b): return a if a >= b else b
+cdef inline int int_min(int a, int b): return a if a <= b else b
+
 cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,Py_ssize_t r, Py_ssize_t c,np.uint8_t* mask):
     """ returns 1 if given(r,c) coordinate are within the image frame ([0-rows],[0-cols]) and
         inside the given mask
@@ -32,12 +36,13 @@ cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,Py_ssize_t r,
             return 0
 
 
-cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t, Py_ssize_t ,Py_ssize_t,Py_ssize_t ),
-np.ndarray[np.uint16_t, ndim=2] image,
-np.ndarray[np.uint8_t, ndim=2] selem,
-np.ndarray[np.uint8_t, ndim=2] mask,
-np.ndarray[np.uint16_t, ndim=2] out,
-char shift_x, char shift_y,Py_ssize_t bitdepth):
+cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t,Py_ssize_t,Py_ssize_t,Py_ssize_t, float, float, Py_ssize_t, Py_ssize_t),
+    np.ndarray[np.uint16_t, ndim=2] image,
+    np.ndarray[np.uint8_t, ndim=2] selem,
+    np.ndarray[np.uint8_t, ndim=2] mask,
+    np.ndarray[np.uint16_t, ndim=2] out,
+    char shift_x, char shift_y,Py_ssize_t bitdepth,
+    float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     """ Main loop, this function computes the histogram for each image point
     - data is uint8
     - result is uint8 casted
@@ -168,7 +173,7 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
     c = 0
     # kernel -------------------------------------------
     out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],
-        bitdepth,maxbin,midbin)
+        bitdepth,maxbin,midbin,p0,p1,s0,s1)
     # kernel -------------------------------------------
 
     # main loop
@@ -193,7 +198,7 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
-                bitdepth,maxbin,midbin)
+                bitdepth,maxbin,midbin,p0,p1,s0,s1)
             # kernel -------------------------------------------
 
         r += 1          # pass to the next row
@@ -218,7 +223,7 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],
-            bitdepth,maxbin,midbin)
+            bitdepth,maxbin,midbin,p0,p1,s0,s1)
         # kernel -------------------------------------------
 
         # ---> east to west
@@ -240,7 +245,7 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
-                bitdepth,maxbin,midbin)
+                bitdepth,maxbin,midbin,p0,p1,s0,s1)
             # kernel -------------------------------------------
 
         r += 1           # pass to the next row
@@ -265,7 +270,7 @@ char shift_x, char shift_y,Py_ssize_t bitdepth):
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
-            bitdepth,maxbin,midbin)
+            bitdepth,maxbin,midbin,p0,p1,s0,s1)
         # kernel -------------------------------------------
 
     # release memory allocated by malloc
