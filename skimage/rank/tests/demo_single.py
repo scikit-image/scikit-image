@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     plt.figure()
     plt.subplot(1,2,1)
-    plt.imshow(a8)
+    plt.imshow(f16)
     plt.subplot(1,2,2)
     plt.imshow(f8-f16)
     plt.show()
