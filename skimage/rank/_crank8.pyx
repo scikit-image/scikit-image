@@ -21,7 +21,8 @@ from _core8 cimport _core8
 # kernels uint8
 # -----------------------------------------------------------------
 
-cdef inline np.uint8_t kernel_autolevel(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_autolevel(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i,imin,imax,delta
 
     if pop:
@@ -41,7 +42,8 @@ cdef inline np.uint8_t kernel_autolevel(Py_ssize_t* histo, float pop, np.uint8_t
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_bottomhat(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_bottomhat(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
 
     for i in range(256):
@@ -51,7 +53,8 @@ cdef inline np.uint8_t kernel_bottomhat(Py_ssize_t* histo, float pop, np.uint8_t
     return <np.uint8_t>(g-i)
 
 
-cdef inline np.uint8_t kernel_equalize(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_equalize(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
     cdef float sum = 0.
 
@@ -65,7 +68,8 @@ cdef inline np.uint8_t kernel_equalize(Py_ssize_t* histo, float pop, np.uint8_t 
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_gradient(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_gradient(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i,imin,imax
 
 
@@ -82,7 +86,8 @@ cdef inline np.uint8_t kernel_gradient(Py_ssize_t* histo, float pop, np.uint8_t 
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_maximum(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_maximum(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
 
     if pop:
@@ -92,7 +97,8 @@ cdef inline np.uint8_t kernel_maximum(Py_ssize_t* histo, float pop, np.uint8_t g
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_mean(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_mean(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
     cdef float mean = 0.
 
@@ -103,7 +109,8 @@ cdef inline np.uint8_t kernel_mean(Py_ssize_t* histo, float pop, np.uint8_t g,fl
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_meansubstraction(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_meansubstraction(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
     cdef float mean = 0.
 
@@ -114,7 +121,8 @@ cdef inline np.uint8_t kernel_meansubstraction(Py_ssize_t* histo, float pop, np.
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_median(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_median(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
     cdef float sum = pop/2.0
 
@@ -127,7 +135,8 @@ cdef inline np.uint8_t kernel_median(Py_ssize_t* histo, float pop, np.uint8_t g,
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_minimum(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_minimum(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
 
     if pop:
@@ -137,7 +146,8 @@ cdef inline np.uint8_t kernel_minimum(Py_ssize_t* histo, float pop, np.uint8_t g
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_modal(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_modal(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t hmax=0,imax=0
 
     if pop:
@@ -149,7 +159,8 @@ cdef inline np.uint8_t kernel_modal(Py_ssize_t* histo, float pop, np.uint8_t g,f
 
     return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i,imin,imax
 
     if pop:
@@ -168,10 +179,12 @@ cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t* histo, float pop, np.u
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_pop(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_pop(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     return <np.uint8_t>(pop)
 
-cdef inline np.uint8_t kernel_threshold(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_threshold(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
     cdef float mean = 0.
 
@@ -182,7 +195,8 @@ cdef inline np.uint8_t kernel_threshold(Py_ssize_t* histo, float pop, np.uint8_t
     else:
         return <np.uint8_t>(0)
 
-cdef inline np.uint8_t kernel_tophat(Py_ssize_t* histo, float pop, np.uint8_t g,float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_tophat(Py_ssize_t* histo, float pop, np.uint8_t g,
+float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
 
     for i in range(255,-1,-1):
