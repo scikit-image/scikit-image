@@ -66,7 +66,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_bitdepth(self):
         # test the different bit depth for rank16
-        
+
         elem = np.ones((3,3),dtype='uint8')
         a16 = np.ones((100,100),dtype='uint16')*255
         r = _crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=8)

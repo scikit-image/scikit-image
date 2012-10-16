@@ -6,7 +6,7 @@ from skimage.morphology import dilation
 import skimage.rank as rank
 from skimage.filter import median_filter
 
-from tools import log_timing
+from skimage.rank.local.tools import log_timing
 
 @log_timing
 def cr_max(image,selem):
