@@ -16,12 +16,13 @@ Total variation filter
 
 The result of this filter is an image that has a minimal total variation norm,
 while being as close to the initial image as possible. The total variation is
-the L1 norm of the gradient of the image, and minimizing the total variation.
+the L1 norm of the gradient of the image.
 
 Bilateral filter
 ----------------
-A bilateral filter is an edge-preserving and noise reducing denoising filter.
-It averages pixel based on their spatial closeness and radiometric similarity.
+
+A bilateral filter is an edge-preserving and noise reducing filter. It averages
+pixels based on their spatial closeness and radiometric similarity.
 
 """
 
