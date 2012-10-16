@@ -76,6 +76,9 @@ cdef inline _core8(np.uint8_t kernel(Py_ssize_t*, float, np.uint8_t, float, floa
     else:
         mask = np.ascontiguousarray(mask)
 
+    if image is out:
+        raise NotImplementedError("Cannot perform rank operation in place.")
+
     if out is None:
         out = np.zeros((rows, cols), dtype=np.uint8)
     else:
@@ -183,7 +186,7 @@ cdef inline _core8(np.uint8_t kernel(Py_ssize_t*, float, np.uint8_t, float, floa
                 cc = c + se_e_c[s]
                 if is_in_mask(rows,cols,rr,cc,mask_data):
                     histogram_increment(histo,&pop,image_data[rr * cols + cc])
-                    
+
             for s in range(num_se_w):
                 rr = r + se_w_r[s]
                 cc = c + se_w_c[s] - 1

@@ -22,6 +22,14 @@ from libc.stdlib cimport malloc, free
 cdef inline int int_max(int a, int b): return a if a >= b else b
 cdef inline int int_min(int a, int b): return a if a <= b else b
 
+cdef inline void histogram_increment(Py_ssize_t* histo,float *pop,np.uint16_t value):
+    histo[value] += 1
+    pop[0] += 1.
+
+cdef inline void histogram_decrement(Py_ssize_t* histo,float *pop,np.uint16_t value):
+    histo[value] -= 1
+    pop[0] -= 1.
+
 cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,Py_ssize_t r, Py_ssize_t c,np.uint8_t* mask):
     """ returns 1 if given(r,c) coordinate are within the image frame ([0-rows],[0-cols]) and
         inside the given mask
@@ -78,6 +86,9 @@ cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t,Py_ssize_
         mask = np.ones((rows, cols), dtype=np.uint8)
     else:
         mask = np.ascontiguousarray(mask)
+
+    if image is out:
+        raise NotImplementedError("Cannot perform rank operation in place.")
 
     if out is None:
         out = np.zeros((rows, cols), dtype=np.uint16)
@@ -165,9 +176,7 @@ cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t,Py_ssize_
             cc = c - centre_c
             if selem[r, c]:
                 if is_in_mask(rows,cols,rr,cc,mask_data):
-                    value = image_data[rr * cols + cc]
-                    histo[value] += 1
-                    pop += 1.
+                    histogram_increment(histo,&pop,image_data[rr * cols + cc])
 
     r = 0
     c = 0
@@ -185,16 +194,13 @@ cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t,Py_ssize_
                 rr = r + se_e_r[s]
                 cc = c + se_e_c[s]
                 if is_in_mask(rows,cols,rr,cc,mask_data):
-                    value = image_data[rr * cols + cc]
-                    histo[value] += 1
-                    pop += 1.
+                    histogram_increment(histo,&pop,image_data[rr * cols + cc])
+
             for s in range(num_se_w):
                 rr = r + se_w_r[s]
                 cc = c + se_w_c[s] - 1
                 if is_in_mask(rows,cols,rr,cc,mask_data):
-                    value = image_data[rr * cols + cc]
-                    histo[value] -= 1
-                    pop -= 1.
+                    histogram_decrement(histo,&pop,image_data[rr * cols + cc])
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
@@ -210,16 +216,13 @@ cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t,Py_ssize_
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
             if is_in_mask(rows,cols,rr,cc,mask_data):
-                value = image_data[rr * cols + cc]
-                histo[value] += 1
-                pop += 1.
+                histogram_increment(histo,&pop,image_data[rr * cols + cc])
+
         for s in range(num_se_n):
             rr = r + se_n_r[s] - 1
             cc = c + se_n_c[s]
             if is_in_mask(rows,cols,rr,cc,mask_data):
-                value = image_data[rr * cols + cc]
-                histo[value] -= 1
-                pop -= 1.
+                histogram_decrement(histo,&pop,image_data[rr * cols + cc])
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c],
@@ -232,16 +235,13 @@ cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t,Py_ssize_
                 rr = r + se_w_r[s]
                 cc = c + se_w_c[s]
                 if is_in_mask(rows,cols,rr,cc,mask_data):
-                    value = image_data[rr * cols + cc]
-                    histo[value] += 1
-                    pop += 1.
+                    histogram_increment(histo,&pop,image_data[rr * cols + cc])
+
             for s in range(num_se_e):
                 rr = r + se_e_r[s]
                 cc = c + se_e_c[s] + 1
                 if is_in_mask(rows,cols,rr,cc,mask_data):
-                    value = image_data[rr * cols + cc]
-                    histo[value] -= 1
-                    pop -= 1.
+                    histogram_decrement(histo,&pop,image_data[rr * cols + cc])
 
             # kernel -------------------------------------------
             out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
@@ -257,16 +257,13 @@ cdef inline _core16(np.uint16_t kernel(Py_ssize_t*, float, np.uint16_t,Py_ssize_
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
             if is_in_mask(rows,cols,rr,cc,mask_data):
-                value = image_data[rr * cols + cc]
-                histo[value] += 1
-                pop += 1.
+                histogram_increment(histo,&pop,image_data[rr * cols + cc])
+
         for s in range(num_se_n):
             rr = r + se_n_r[s] - 1
             cc = c + se_n_c[s]
             if is_in_mask(rows,cols,rr,cc,mask_data):
-                value = image_data[rr * cols + cc]
-                histo[value] -= 1
-                pop -= 1.
+                histogram_decrement(histo,&pop,image_data[rr * cols + cc])
 
         # kernel -------------------------------------------
         out_data[r * cols + c] = kernel(histo,pop,image_data[r * cols + c ],
