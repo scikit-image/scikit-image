@@ -525,11 +525,14 @@ def gray2rgb(image):
         If the input is not 2-dimensional.
 
     """
-    if image.ndim != 2:
-        raise ValueError('Gray-level image should be two-dimensional.')
-
-    M, N = image.shape
-    return np.dstack((image, image, image))
+    if image.ndim > 2:
+        return image
+    elif image.ndim == 2:
+        M, N = image.shape
+        return np.dstack((image, image, image))
+    else:
+        raise ValueError('Gray-level image should be two-dimensional, '
+                         'RGB or RGBA.')
 
 
 def xyz2lab(xyz):

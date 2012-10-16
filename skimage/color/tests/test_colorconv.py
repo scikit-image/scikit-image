@@ -196,5 +196,12 @@ def test_gray2rgb():
     assert_equal(z[..., 0], x)
     assert_equal(z[0, 1, :], [128, 128, 128])
 
+
+def test_gray2rgb_rgb():
+    x = np.random.random((5, 5, 4))
+    y = gray2rgb(x)
+    assert_equal(x, y)
+
+
 if __name__ == "__main__":
     run_module_suite()
