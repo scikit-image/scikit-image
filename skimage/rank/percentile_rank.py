@@ -29,6 +29,20 @@ __all__ = ['percentile_autolevel','percentile_gradient',
            'percentile_mean','percentile_mean_substraction',
            'percentile_morph_contr_enh','percentile_pop']
 
+def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, p0, p1):
+    selem = img_as_ubyte(selem)
+    if mask is not None:
+        mask = img_as_ubyte(mask)
+    if image.dtype == np.uint8:
+        return func8(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
+    elif image.dtype == np.uint16:
+        bitdepth = find_bitdepth(image)
+        if bitdepth>11:
+            raise ValueError("only uint16 <4096 image (12bit) supported!")
+        return func16(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
+    else:
+        raise TypeError("only uint8 and uint16 image supported!")
+
 def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local autolevel of an image.
 
@@ -88,18 +102,8 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.autolevel(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.autolevel(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8_percentiles.autolevel, _crank16_percentiles.autolevel, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local percentile_gradient of an image.
@@ -160,19 +164,8 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
            [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.gradient(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.gradient(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
 
+    return _apply(_crank8_percentiles.gradient, _crank16_percentiles.gradient, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local mean of an image.
@@ -233,18 +226,8 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
            [1023, 1365, 2047, 1365, 1023]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.mean(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.mean(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8_percentiles.mean, _crank16_percentiles.mean, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local mean_substraction of an image.
@@ -305,19 +288,8 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
            [1536, 1365, 1024, 1365, 1536]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.mean_substraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.mean_substraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
 
+    return _apply(_crank8_percentiles.mean_substraction, _crank16_percentiles.mean_substraction, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local morph_contr_enh of an image.
@@ -378,18 +350,8 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.morph_contr_enh(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.morph_contr_enh(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8_percentiles.morph_contr_enh, _crank16_percentiles.morph_contr_enh, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local percentile of an image.
@@ -451,18 +413,8 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
 
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.percentile(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.percentile(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8_percentiles.percentile, _crank16_percentiles.percentile, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local pop of an image.
@@ -523,18 +475,8 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
            [4, 6, 6, 6, 4]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.pop(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.pop(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8_percentiles.pop, _crank16_percentiles.pop, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local threshold of an image.
@@ -596,16 +538,5 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
 
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8_percentiles.threshold(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16_percentiles.threshold(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
 
+    return _apply(_crank8_percentiles.threshold, _crank16_percentiles.threshold, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)

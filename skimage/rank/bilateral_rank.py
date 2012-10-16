@@ -1,4 +1,7 @@
 """
+
+note: 8 bit images are casted into 16 bit image here
+
 :author: Olivier Debeir, 2012
 :license: modified BSD
 """
@@ -15,6 +18,21 @@ import _crank16_bilateral
 
 
 __all__ = ['bilateral_mean','bilateral_pop']
+
+def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, s0, s1):
+    selem = img_as_ubyte(selem)
+    if mask is not None:
+        mask = img_as_ubyte(mask)
+    if image.dtype == np.uint8:
+        image = image.astype(np.uint16)
+    elif image.dtype == np.uint16:
+        pass
+    else:
+        raise TypeError("only uint8 and uint16 image supported!")
+    bitdepth = find_bitdepth(image)
+    if bitdepth>11:
+        raise ValueError("only uint16 <4096 image (12bit) supported!")
+    return func16(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,s0=s0,s1=s1)
 
 
 def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10):
@@ -76,19 +94,8 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        image = image.astype(np.uint16)
-    elif image.dtype == np.uint16:
-        pass
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-    bitdepth = find_bitdepth(image)
-    if bitdepth>11:
-        raise ValueError("only uint16 <4096 image (12bit) supported!")
-    return _crank16_bilateral.mean(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,s0=s0,s1=s1)
+
+    return _apply(None, _crank16_bilateral.mean, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
 def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10):
@@ -150,18 +157,6 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
            [3, 4, 3, 4, 3]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        image = image.astype(np.uint16)
-    elif image.dtype == np.uint16:
-        pass
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
-    bitdepth = find_bitdepth(image)
-    if bitdepth>11:
-        raise ValueError("only uint16 <4096 image (12bit) supported!")
-    return _crank16_bilateral.pop(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,s0=s0,s1=s1)
 
+    return _apply(None, _crank16_bilateral.pop, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 

@@ -26,6 +26,20 @@ import _crank16,_crank8
 __all__ = ['autolevel','bottomhat','equalize','gradient','maximum','mean'
     ,'meansubstraction','median','minimum','modal','morph_contr_enh','pop','threshold', 'tophat']
 
+def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
+    selem = img_as_ubyte(selem)
+    if mask is not None:
+        mask = img_as_ubyte(mask)
+    if image.dtype == np.uint8:
+        return func8(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
+    elif image.dtype == np.uint16:
+        bitdepth = find_bitdepth(image)
+        if bitdepth>11:
+            raise ValueError("only uint16 <4096 image (12bit) supported!")
+        return func16(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
+    else:
+        raise TypeError("only uint8 and uint16 image supported!")
+
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local autolevel of an image.
 
@@ -84,18 +98,8 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.autolevel(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.autolevel(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.autolevel, _crank16.autolevel, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local bottomhat of an image.
@@ -154,18 +158,8 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [   0, 4095, 4095, 4095,    0],
            [   0,    0,    0,    0,    0]], dtype=uint16)
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.bottomhat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.bottomhat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.bottomhat, _crank16.bottomhat, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local equalize of an image.
@@ -224,18 +218,8 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [2730, 4095, 4095, 4095, 2730],
            [3071, 2730, 2047, 2730, 3071]], dtype=uint16)
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.equalize(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.equalize(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.equalize, _crank16.equalize, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local gradient of an image.
@@ -295,19 +279,8 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.gradient(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.gradient(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
 
+    return _apply(_crank8.gradient, _crank16.gradient, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local maximum of an image.
@@ -367,18 +340,8 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.maximum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.maximum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.maximum, _crank16.maximum, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local mean of an image.
@@ -438,18 +401,8 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [1023, 1365, 2047, 1365, 1023]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.mean(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.mean(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.mean, _crank16.mean, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local meansubstraction of an image.
@@ -509,18 +462,8 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
            [1535, 1364, 1023, 1364, 1535]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.meansubstraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.meansubstraction(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.meansubstraction, _crank16.meansubstraction, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local median of an image.
@@ -580,18 +523,8 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [   0,    0, 4095,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.median(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.median(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.median, _crank16.median, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local minimum of an image.
@@ -652,18 +585,8 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.minimum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.minimum(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.minimum, _crank16.minimum, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local modal of an image.
@@ -724,18 +647,8 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [  0,   0, 500,   0,   0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.modal(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.modal(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.modal, _crank16.modal, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local morph_contr_enh of an image.
@@ -795,18 +708,8 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.morph_contr_enh(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.morph_contr_enh(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.morph_contr_enh, _crank16.morph_contr_enh, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local pop of an image.
@@ -866,18 +769,8 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [4, 6, 6, 6, 4]], dtype=uint16)
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.pop(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.pop(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.pop, _crank16.pop, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local threshold of an image.
@@ -938,18 +831,8 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.threshold(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.threshold(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.threshold, _crank16.threshold, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local tophat of an image.
@@ -1008,18 +891,8 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [4095,    0,    0,    0, 4095],
            [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
     """
-    selem = img_as_ubyte(selem)
-    if mask is not None:
-        mask = img_as_ubyte(mask)
-    if image.dtype == np.uint8:
-        return _crank8.tophat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out)
-    elif image.dtype == np.uint16:
-        bitdepth = find_bitdepth(image)
-        if bitdepth>11:
-            raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return _crank16.tophat(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out)
-    else:
-        raise TypeError("only uint8 and uint16 image supported!")
+
+    return _apply(_crank8.tophat, _crank16.tophat, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 if __name__ == "__main__":
     import sys
