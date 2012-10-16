@@ -14,9 +14,12 @@ calculates thresholds in regions of size `block_size` surrounding each pixel
 (i.e. local neighborhoods). Each threshold value is the weighted mean of the
 local neighborhood minus an offset value.
 
-Added local threshold using rank filter
+An other approach is to binarize locally the image using local histogram distribution.
 
-to be adjusted ...
+rank.threshold function set pixels higher than the local mean to 1, to 0 otherwize
+rank.morph_contr_enh replaces each pixel by the local minimum (or local maximum) if the
+pixel gray level is more close to the local minimum (resp. by the local maximum
+if the pixel gray level is more close to the local maximum).
 
 """
 import matplotlib.pyplot as plt
@@ -36,7 +39,7 @@ binary_global = image > global_thresh
 block_size = 40
 binary_adaptive = threshold_adaptive(image, block_size, offset=10)
 
-selem = disk(10)
+selem = disk(20)
 loc_thresh = threshold(image,selem=selem)
 loc_morph_contr_enh = morph_contr_enh(image,selem=selem)
 

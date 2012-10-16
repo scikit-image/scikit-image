@@ -5,11 +5,9 @@ Local Histogram Equalization
 
 This examples enhances an image with low contrast, using a method called
 *local histogram equalization*, which "spreads out the most frequent intensity
-values" in an image . The equalized image [1]_ has a roughly linear cumulative
-distribution function for each pixel neighborhood. The local version [2]_ of the histogram
-equalization emphasized every local graylevel variations.
-
-to be adjusted...
+values" in an image .
+The equalized image [1]_ has a roughly linear cumulative distribution function for each pixel neighborhood.
+The local version [2]_ of the histogram equalization emphasized every local graylevel variations.
 
 .. [1] http://en.wikipedia.org/wiki/Histogram_equalization
 .. [2] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
@@ -21,7 +19,6 @@ from skimage.util.dtype import dtype_range
 from skimage import exposure
 from skimage import rank
 from skimage.morphology import disk
-
 
 import matplotlib.pyplot as plt
 

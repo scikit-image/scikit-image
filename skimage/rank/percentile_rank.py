@@ -47,10 +47,9 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 
@@ -120,10 +119,9 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 
@@ -194,10 +192,9 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 
@@ -267,10 +264,9 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 
@@ -341,10 +337,9 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 
@@ -414,10 +409,9 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 
@@ -488,10 +482,9 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 
@@ -561,10 +554,9 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     p0, p1 : float in [0.,...,1.]
         define the [p0,p1] percentile interval to be considered for computing the value.
 

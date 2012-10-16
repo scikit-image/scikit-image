@@ -44,10 +44,9 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -116,10 +115,9 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -187,10 +185,9 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -258,10 +255,9 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -331,10 +327,9 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -403,10 +398,9 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -475,10 +469,9 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -547,10 +540,9 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -619,10 +611,9 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -692,10 +683,9 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -765,10 +755,9 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -837,10 +826,9 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -909,10 +897,9 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
@@ -982,10 +969,9 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
     Returns
     -------
