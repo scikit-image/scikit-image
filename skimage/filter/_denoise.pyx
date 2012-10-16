@@ -11,7 +11,7 @@ from skimage._shared.interpolation cimport get_pixel2d, get_pixel3d
 
 
 cdef inline double _gaussian_weight(double sigma, double value):
-    return exp(- 0.5 * (value / sigma)**2)
+    return exp(-0.5 * (value / sigma)**2)
 
 
 cdef double* _compute_color_lut(int bins, double sigma, double max_value):
@@ -73,10 +73,10 @@ def _denoise_bilateral2d(cnp.ndarray[dtype=cnp.double_t, ndim=2, mode='c'] image
             total_value = 0
             total_weight = 0
             centre = image_data[pixel_addr]
-            for wr in range(- window_ext, window_ext + 1):
+            for wr in range(-window_ext, window_ext + 1):
                 rr = wr + r
                 kr = wr + window_ext
-                for wc in range(- window_ext, window_ext + 1):
+                for wc in range(-window_ext, window_ext + 1):
                     cc = wc + c
                     kc = wc + window_ext
 
@@ -135,10 +135,10 @@ def _denoise_bilateral3d(cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] image
             for d in range(dims):
                 total_values[d] = 0
                 centres[d] = image_data[pixel_addr + d]
-            for wr in range(- window_ext, window_ext + 1):
+            for wr in range(-window_ext, window_ext + 1):
                 rr = wr + r
                 kr = wr + window_ext
-                for wc in range(- window_ext, window_ext + 1):
+                for wc in range(-window_ext, window_ext + 1):
                     cc = wc + c
                     kc = wc + window_ext
 
