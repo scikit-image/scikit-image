@@ -35,10 +35,9 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     s0, s1 : int
         define the [s0,s1] interval to be considered for computing the value.
 
@@ -110,10 +109,9 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
-    shift_x, shift_y : bool
-        shift structuring element about center point. This only affects
-        eccentric structuring elements (i.e. selem with even numbered sides).
-        Shift is bounded to the structuring element sizes.
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
     s0, s1 : int
         define the [s0,s1] interval to be considered for computing the value.
 

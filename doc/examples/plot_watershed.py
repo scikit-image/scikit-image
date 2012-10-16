@@ -26,7 +26,7 @@ See Wikipedia_ for more details on the algorithm.
 """
 
 import numpy as np
-e
+
 import matplotlib.pyplot as plt
 from skimage.morphology import watershed, is_local_maximum
 
