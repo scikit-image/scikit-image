@@ -16,6 +16,7 @@ class TestSequenceFunctions(unittest.TestCase):
 
     def test_random_sizes(self):
         # make sure the size is not a problem
+
         niter = 10
         elem = np.asarray([[1,1,1],[1,1,1],[1,1,1]],dtype='uint8')
         for m,n in np.random.random_integers(1,100,size=(10,2)):
@@ -39,8 +40,9 @@ class TestSequenceFunctions(unittest.TestCase):
             r = _crank16_percentiles.mean(image=a16,selem = elem,shift_x=+1,shift_y=+1,p0=.1,p1=.9)
             self.assertTrue(a16.shape == r.shape)
 
-    def test_compare_with_cmorph(self):
+    def test_compare_with_cmorph_dilate(self):
         #compare the result of maximum filter with dilate
+
         a = (np.random.random((500,500))*256).astype('uint8')
 
         for r in range(1,20,1):
@@ -50,7 +52,21 @@ class TestSequenceFunctions(unittest.TestCase):
             cm = cmorph.dilate(image=a,selem = elem)
             self.assertTrue((rc==cm).all())
 
+    def test_compare_with_cmorph_erode(self):
+        #compare the result of maximum filter with erode
+
+        a = (np.random.random((500,500))*256).astype('uint8')
+
+        for r in range(1,20,1):
+            elem = np.ones((r,r),dtype='uint8')
+            #        elem = (np.random.random((r,r))>.5).astype('uint8')
+            rc = _crank8.minimum(image=a,selem = elem)
+            cm = cmorph.erode(image=a,selem = elem)
+            self.assertTrue((rc==cm).all())
+
     def test_bitdepth(self):
+        # test the different bit depth for rank16
+        
         elem = np.ones((3,3),dtype='uint8')
         a16 = np.ones((100,100),dtype='uint16')*255
         r = _crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=8)
@@ -64,6 +80,8 @@ class TestSequenceFunctions(unittest.TestCase):
         r = _crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=12)
 
     def test_population(self):
+        # check the number of valid pixels in the neighborhood
+
         a = np.zeros((5,5),dtype='uint8')
         elem = np.ones((3,3),dtype='uint8')
         p = _crank8.pop(image=a,selem = elem)
@@ -75,6 +93,8 @@ class TestSequenceFunctions(unittest.TestCase):
         np.testing.assert_array_equal(r,p)
 
     def test_structuring_element(self):
+        # check the output for a custom structuring element
+
         a = np.zeros((6,6),dtype='uint8')
         a[2,2] = 255
         elem = np.asarray([[1,1,0],[1,1,1],[0,0,1]],dtype='uint8')
@@ -91,11 +111,37 @@ class TestSequenceFunctions(unittest.TestCase):
     @unittest.expectedFailure
     def test_fail_on_bitdepth(self):
         # should fail because data bitdepth is too high for the function
+
         a16 = np.ones((100,100),dtype='uint16')*255
         elem = np.ones((3,3),dtype='uint8')
         f = _crank16_percentiles.mean(image=a16,selem = elem,shift_x=0,shift_y=0,p0=.1,p1=.9,bitdepth=4)
 
+    def test_output(self):
+        #check rank function with external OUT output array
+
+        selem = disk(20)
+        a = (np.random.random((500,500))*256).astype('uint8')
+        out = np.zeros_like(a)
+        f1 = rank.mean(a,selem,out=out)
+        f2 = rank.mean(a,selem)
+        np.testing.assert_array_equal(f1,f2)
+        np.testing.assert_array_equal(out,f2)
+
+    @unittest.expectedFailure
+    def test_inplace_output(self):
+        #rank filters are not supposed to filter inplace
+
+        selem = disk(20)
+        a = (np.random.random((500,500))*256).astype('uint8')
+        out = a
+        f = rank.mean(a,selem,out=out)
+        np.testing.assert_array_equal(f,out)
+
+
     def test_compare_autolevels(self):
+        # compare autolevel and percentile autolevel with p0=0.0 and p1=1.0
+        # should returns the same arrays
+
         image = data.camera()
 
         selem = disk(20)
@@ -105,6 +151,9 @@ class TestSequenceFunctions(unittest.TestCase):
         assert (loc_autolevel==loc_perc_autolevel).all()
 
     def test_compare_autolevels_16bit(self):
+        # compare autolevel(16bit) and percentile autolevel(16bit) with p0=0.0 and p1=1.0
+        # should returns the same arrays
+
         image = data.camera().astype(np.uint16)*4
 
         selem = disk(20)
@@ -114,7 +163,9 @@ class TestSequenceFunctions(unittest.TestCase):
         assert (loc_autolevel==loc_perc_autolevel).all()
 
     def test_compare_8bit_vs_16bit(self):
-        # filters applied on 8bit image ore 16bit image (having only real 8bit of dynamic) should be identical
+        # filters applied on 8bit image ore 16bit image (having only real 8bit of dynamic)
+        # should be identical
+
         i8 = data.camera()
         i16 = i8.astype(np.uint16)
         assert (i8==i16).all()
