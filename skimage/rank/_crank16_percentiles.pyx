@@ -33,7 +33,7 @@ cdef inline np.uint16_t kernel_autolevel(Py_ssize_t* histo, float pop, np.uint16
 
         delta = imax-imin
         if delta>0:
-            return <np.uint16_t>(255*(int_min(int_max(imin,g),imax)-imin)/delta)
+            return <np.uint16_t>(1.0*(maxbin-1)*(int_min(int_max(imin,g),imax)-imin)/delta)
         else:
             return <np.uint16_t>(imax-imin)
     else:
