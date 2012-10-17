@@ -1,7 +1,6 @@
 import numpy as np
 from skimage import img_as_float
 from skimage._shared.utils import deprecated
-import _denoise
 
 
 def _denoise_tv_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
