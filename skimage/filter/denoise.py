@@ -1,9 +1,10 @@
 import numpy as np
 from skimage import img_as_float
+from skimage._shared.utils import deprecated
 import _denoise
 
 
-def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising on 3-D arrays.
 
     Parameters
@@ -38,7 +39,7 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     >>> mask = (x -22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
     >>> mask = mask.astype(np.float)
     >>> mask += 0.2*np.random.randn(*mask.shape)
-    >>> res = tv_denoise_3d(mask, weight=100)
+    >>> res = denoise_tv_3d(mask, weight=100)
     """
     px = np.zeros_like(im)
     py = np.zeros_like(im)
@@ -83,7 +84,7 @@ def _tv_denoise_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
+def _denoise_tv_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising.
 
     Parameters
@@ -128,7 +129,7 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
     >>> import scipy
     >>> lena = scipy.lena().astype(np.float)
     >>> lena += 0.5 * lena.std()*np.random.randn(*lena.shape)
-    >>> denoised_lena = tv_denoise(lena, weight=60.0)
+    >>> denoised_lena = denoise_tv(lena, weight=60.0)
     """
     px = np.zeros_like(im)
     py = np.zeros_like(im)
@@ -166,7 +167,7 @@ def _tv_denoise_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
     return out
 
 
-def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
+def denoise_tv(im, weight=50, eps=2.e-4, n_iter_max=200):
     """Perform total-variation denoising on 2-d and 3-d images.
 
     Parameters
@@ -220,26 +221,29 @@ def tv_denoise(im, weight=50, eps=2.e-4, n_iter_max=200):
     >>> import scipy
     >>> lena = scipy.lena().astype(np.float)
     >>> lena += 0.5 * lena.std()*np.random.randn(*lena.shape)
-    >>> denoised_lena = tv_denoise(lena, weight=60)
+    >>> denoised_lena = denoise_tv(lena, weight=60)
     >>> # 3D example on synthetic data
     >>> x, y, z = np.ogrid[0:40, 0:40, 0:40]
     >>> mask = (x -22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
     >>> mask = mask.astype(np.float)
     >>> mask += 0.2*np.random.randn(*mask.shape)
-    >>> res = tv_denoise_3d(mask, weight=100)
+    >>> res = denoise_tv_3d(mask, weight=100)
     """
     im_type = im.dtype
     if not im_type.kind == 'f':
         im = img_as_float(im)
 
     if im.ndim == 2:
-        out = _tv_denoise_2d(im, weight, eps, n_iter_max)
+        out = _denoise_tv_2d(im, weight, eps, n_iter_max)
     elif im.ndim == 3:
-        out = _tv_denoise_3d(im, weight, eps, n_iter_max)
+        out = _denoise_tv_3d(im, weight, eps, n_iter_max)
     else:
         raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
     return out
+
+
+tv_denoise = deprecated('skimage.filter.denoise_tv')(denoise_tv)
 
 
 def denoise_bilateral(image, win_size=5, sigma_color=1, sigma_range=1, bins=1e4,
