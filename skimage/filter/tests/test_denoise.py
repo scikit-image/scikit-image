@@ -64,8 +64,8 @@ def test_denoise_bilateral_2d():
     img += 0.5 * img.std() * np.random.random(img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = filter.denoise_bilateral(img, sigma_color=0.1, sigma_range=20)
-    out2 = filter.denoise_bilateral(img, sigma_color=0.2, sigma_range=30)
+    out1 = filter.denoise_bilateral(img, sigma_range=0.1, sigma_spatial=20)
+    out2 = filter.denoise_bilateral(img, sigma_range=0.2, sigma_spatial=30)
 
     # make sure noise is reduced
     assert img.std() > out1.std()
@@ -78,8 +78,8 @@ def test_denoise_bilateral_3d():
     img += 0.5 * img.std() * np.random.random(img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = filter.denoise_bilateral(img, sigma_color=0.1, sigma_range=20)
-    out2 = filter.denoise_bilateral(img, sigma_color=0.2, sigma_range=30)
+    out1 = filter.denoise_bilateral(img, sigma_range=0.1, sigma_spatial=20)
+    out2 = filter.denoise_bilateral(img, sigma_range=0.2, sigma_spatial=30)
 
     # make sure noise is reduced
     assert img.std() > out1.std()
