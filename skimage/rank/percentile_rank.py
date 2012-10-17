@@ -23,25 +23,28 @@ from skimage import img_as_ubyte
 import numpy as np
 
 from generic import find_bitdepth
-import _crank16_percentiles,_crank8_percentiles
+import _crank16_percentiles
+import _crank8_percentiles
 
-__all__ = ['percentile_autolevel','percentile_gradient',
-           'percentile_mean','percentile_mean_substraction',
-           'percentile_morph_contr_enh','percentile_pop']
+__all__ = ['percentile_autolevel', 'percentile_gradient',
+           'percentile_mean', 'percentile_mean_substraction',
+           'percentile_morph_contr_enh', 'percentile', 'percentile_pop', 'percentile_threshold']
+
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, p0, p1):
     selem = img_as_ubyte(selem)
     if mask is not None:
         mask = img_as_ubyte(mask)
     if image.dtype == np.uint8:
-        return func8(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,out=out,p0=p0,p1=p1)
+        return func8(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, out=out, p0=p0, p1=p1)
     elif image.dtype == np.uint16:
         bitdepth = find_bitdepth(image)
-        if bitdepth>11:
+        if bitdepth > 11:
             raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return func16(image,selem,shift_x=shift_x,shift_y=shift_y,mask=mask,bitdepth=bitdepth+1,out=out,p0=p0,p1=p1)
+        return func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, bitdepth=bitdepth + 1, out=out, p0=p0, p1=p1)
     else:
         raise TypeError("only uint8 and uint16 image supported!")
+
 
 def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local autolevel of an image.
@@ -77,15 +80,16 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_autolevel(ima8, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_autolevel(ima8, square(3), p0=0.,p1=1.)
     array([[  0,   0,   0,   0,   0],
            [  0, 255, 255, 255,   0],
-           [  0, 255, 255, 255,   0],
+           [  0, 255,   0, 255,   0],
            [  0, 255, 255, 255,   0],
            [  0,   0,   0,   0,   0]], dtype=uint8)
 
@@ -94,16 +98,17 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_autolevel(ima16, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_autolevel(ima16, square(3), p0=0.,p1=1.)
     array([[   0,    0,    0,    0,    0],
            [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
+           [   0, 4095,    0, 4095,    0],
            [   0, 4095, 4095, 4095,    0],
            [   0,    0,    0,    0,    0]], dtype=uint16)
 
     """
 
     return _apply(_crank8_percentiles.autolevel, _crank16_percentiles.autolevel, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
 
 def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local percentile_gradient of an image.
@@ -139,12 +144,13 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     to be updated
     >>> # Local gradient
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_gradient(ima8, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_gradient(ima8, square(3), p0=0.,p1=1.)
     array([[255, 255, 255, 255, 255],
            [255, 255, 255, 255, 255],
            [255, 255, 255, 255, 255],
@@ -156,7 +162,7 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_gradient(ima16, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_gradient(ima16, square(3), p0=0.,p1=1.)
     array([[4095, 4095, 4095, 4095, 4095],
            [4095, 4095, 4095, 4095, 4095],
            [4095, 4095, 4095, 4095, 4095],
@@ -166,6 +172,7 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     """
 
     return _apply(_crank8_percentiles.gradient, _crank16_percentiles.gradient, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
 
 def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local mean of an image.
@@ -201,12 +208,13 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_mean(ima8, square(3),p0=0.,p1=1.)
+    >>> rank.percentile_mean(ima8, square(3),p0=0.,p1=1.)
     array([[ 63,  85, 127,  85,  63],
            [ 85, 113, 170, 113,  85],
            [127, 170, 255, 170, 127],
@@ -218,7 +226,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_mean(ima16, square(3),p0=0.,p1=1.)
+    >>> rank.percentile_mean(ima16, square(3),p0=0.,p1=1.)
     array([[1023, 1365, 2047, 1365, 1023],
            [1365, 1820, 2730, 1820, 1365],
            [2047, 2730, 4095, 2730, 2047],
@@ -228,6 +236,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     """
 
     return _apply(_crank8_percentiles.mean, _crank16_percentiles.mean, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
 
 def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local mean_substraction of an image.
@@ -263,12 +272,13 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
     to be updated
     >>> # Local mean_substraction
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_mean_substraction(ima8, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_mean_substraction(ima8, square(3), p0=0.,p1=1.)
     array([[ 95,  84,  63,  84,  95],
            [ 84, 198, 169, 198,  84],
            [ 63, 169, 127, 169,  63],
@@ -280,7 +290,7 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_mean_substraction(ima16, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_mean_substraction(ima16, square(3), p0=0.,p1=1.)
     array([[1536, 1365, 1024, 1365, 1536],
            [1365, 3185, 2730, 3185, 1365],
            [1024, 2730, 2048, 2730, 1024],
@@ -290,6 +300,7 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
     """
 
     return _apply(_crank8_percentiles.mean_substraction, _crank16_percentiles.mean_substraction, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
 
 def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local morph_contr_enh of an image.
@@ -325,12 +336,13 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_morph_contr_enh(ima8, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_morph_contr_enh(ima8, square(3), p0=0.,p1=1.)
     array([[  0,   0,   0,   0,   0],
            [  0, 255, 255, 255,   0],
            [  0, 255, 255, 255,   0],
@@ -342,7 +354,7 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_morph_contr_enh(ima16, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_morph_contr_enh(ima16, square(3), p0=0.,p1=1.)
     array([[   0,    0,    0,    0,    0],
            [   0, 4095, 4095, 4095,    0],
            [   0, 4095, 4095, 4095,    0],
@@ -352,6 +364,7 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(_crank8_percentiles.morph_contr_enh, _crank16_percentiles.morph_contr_enh, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
 
 def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local percentile of an image.
@@ -387,12 +400,13 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 128*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile(ima8, square(3), p0=0.,p1=1.)
+    >>> rank.percentile(ima8, square(3), p0=0.,p1=1.)
     array([[0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
@@ -404,7 +418,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile(ima16, square(3), p0=0.,p1=1.)
+    >>> rank.percentile(ima16, square(3), p0=0.,p1=1.)
     array([[0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0],
@@ -415,6 +429,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
     """
 
     return _apply(_crank8_percentiles.percentile, _crank16_percentiles.percentile, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
 
 def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local pop of an image.
@@ -450,12 +465,13 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_pop(ima8, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_pop(ima8, square(3), p0=0.,p1=1.)
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
@@ -467,7 +483,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_pop(ima16, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_pop(ima16, square(3), p0=0.,p1=1.)
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
@@ -477,6 +493,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     """
 
     return _apply(_crank8_percentiles.pop, _crank16_percentiles.pop, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
 
 def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False, p0=.0, p1=1.):
     """Return greyscale local threshold of an image.
@@ -512,12 +529,13 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
+    >>> import skimage.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> percentile_threshold(ima8, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_threshold(ima8, square(3), p0=0.,p1=1.)
     array([[255, 255, 255, 255, 255],
            [255, 255, 255, 255, 255],
            [255, 255, 255, 255, 255],
@@ -529,7 +547,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> percentile_threshold(ima16, square(3), p0=0.,p1=1.)
+    >>> rank.percentile_threshold(ima16, square(3), p0=0.,p1=1.)
     array([[4095, 4095, 4095, 4095, 4095],
            [4095, 4095, 4095, 4095, 4095],
            [4095, 4095, 4095, 4095, 4095],
@@ -540,3 +558,11 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     """
 
     return _apply(_crank8_percentiles.threshold, _crank16_percentiles.threshold, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
+
+
+if __name__ == "__main__":
+    import sys
+    sys.path.append('.')
+
+    import doctest
+    doctest.testmod(verbose=True)
