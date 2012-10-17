@@ -35,7 +35,7 @@ def _mask_filter_result(result, mask):
 
 
 def sobel(image, mask=None):
-    """Calculate the absolute magnitude Sobel to find edges.
+    """Find the edge magnitude using the Sobel transform.
 
     Parameters
     ----------
@@ -134,7 +134,7 @@ def vsobel(image, mask=None):
 
 
 def scharr(image, mask=None):
-    """Calculate the absolute magnitude Scharr to find edges.
+    """Find the edge magnitude using the Scharr transform.
 
     Parameters
     ----------
