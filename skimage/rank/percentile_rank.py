@@ -14,7 +14,6 @@ result image is 8 or 16 bit with respect to the input image
 
 """
 
-__docformat__ = 'restructuredtext en'
 
 import warnings
 from skimage import img_as_ubyte
