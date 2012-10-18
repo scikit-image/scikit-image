@@ -2,11 +2,8 @@
 
 note: 8 bit images are casted into 16 bit image here
 
-:author: Olivier Debeir, 2012
-:license: modified BSD
 """
 
-__docformat__ = 'restructuredtext en'
 
 import warnings
 from skimage import img_as_ubyte

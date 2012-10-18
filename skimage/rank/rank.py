@@ -10,8 +10,6 @@ for 16 bit input images, the number of histogram bins is determined from the max
 
 result image is 8 or 16 bit with respect to the input image
 
-:author: Olivier Debeir, 2012
-:license: modified BSD
 """
 
 __docformat__ = 'restructuredtext en'
