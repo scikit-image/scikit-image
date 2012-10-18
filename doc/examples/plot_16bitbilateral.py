@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.morphology import disk
-import skimage.rank as rank
+import skimage.filter.rank as rank
 
 a8 = (data.coins()).astype('uint8')
 
@@ -23,11 +23,13 @@ selem = disk(50)
 f3 = rank.equalize(a16,selem = selem)
 
 # display results
-fig, axes = plt.subplots(nrows=3, figsize=(15,5))
+fig, axes = plt.subplots(nrows=3, figsize=(15,15))
 ax0, ax1, ax2 = axes
 
 ax0.imshow(np.hstack((a8,f1)))
+ax0.set_title('percentile mean')
 ax1.imshow(np.hstack((a16,f2)))
+ax1.set_title('bilateral mean')
 ax2.imshow(np.hstack((a16,f3)))
-
+ax2.set_title('local equalization')
 plt.show()

@@ -1,10 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from pprint import pprint
 
 from skimage import data
 from skimage.morphology.selem import disk
-import skimage.rank as rank
+import skimage.filter.rank as rank
 
 def plot_all():
     a8 = data.camera()

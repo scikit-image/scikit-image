@@ -13,7 +13,7 @@ import numpy as np
 
 from skimage import data
 
-from skimage.rank import percentile_autolevel,autolevel
+from skimage.filter.rank import percentile_autolevel,autolevel
 from skimage.morphology import disk
 
 

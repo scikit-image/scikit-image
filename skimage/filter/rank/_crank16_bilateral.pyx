@@ -15,7 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from _core16 cimport _core16
+from skimage.filter.rank._core16 cimport _core16
 
 # -----------------------------------------------------------------
 # kernels uint16 take extra parameter for defining the bitdepth

@@ -27,7 +27,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filter import threshold_otsu, threshold_adaptive
 
-from skimage.rank import threshold,morph_contr_enh
+from skimage.filter.rank import threshold,morph_contr_enh
 from skimage.morphology import disk
 
 

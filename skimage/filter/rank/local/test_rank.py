@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.morphology.selem import disk
-import skimage.rank as rank
+import skimage.filter.rank as rank
 
 print dir(rank)
 
