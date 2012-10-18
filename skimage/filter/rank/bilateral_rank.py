@@ -45,7 +45,8 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, s0, s1):
     bitdepth = find_bitdepth(image)
     if bitdepth > 11:
         raise ValueError("only uint16 <4096 image (12bit) supported!")
-    return func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, bitdepth=bitdepth + 1, out=out, s0=s0, s1=s1)
+    return func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, bitdepth=bitdepth + 1, out=out,
+        s0=s0, s1=s1)
 
 
 def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10):
@@ -109,7 +110,8 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
     """
 
-    return _apply(None, _crank16_bilateral.mean, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
+    return _apply(None, _crank16_bilateral.mean, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y,
+        s0=s0, s1=s1)
 
 
 def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10):
@@ -173,7 +175,8 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
 
     """
 
-    return _apply(None, _crank16_bilateral.pop, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
+    return _apply(None, _crank16_bilateral.pop, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y,
+        s0=s0, s1=s1)
 
 if __name__ == "__main__":
     import sys
