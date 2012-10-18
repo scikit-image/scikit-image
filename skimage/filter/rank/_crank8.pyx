@@ -22,8 +22,9 @@ from skimage.filter.rank._core8 cimport _core8
 # -----------------------------------------------------------------
 
 cdef inline np.uint8_t kernel_autolevel(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1,
+        Py_ssize_t s0, Py_ssize_t s1):
+
     cdef Py_ssize_t i, imin, imax, delta
 
     if pop:
@@ -44,8 +45,9 @@ cdef inline np.uint8_t kernel_autolevel(
         return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_bottomhat(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1,
+        Py_ssize_t s0, Py_ssize_t s1):
+
     cdef Py_ssize_t i
 
     for i in range(256):
@@ -56,8 +58,9 @@ cdef inline np.uint8_t kernel_bottomhat(
 
 
 cdef inline np.uint8_t kernel_equalize(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1,
+        Py_ssize_t s0, Py_ssize_t s1):
+
     cdef Py_ssize_t i
     cdef float sum = 0.
 
@@ -72,8 +75,9 @@ cdef inline np.uint8_t kernel_equalize(
         return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_gradient(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     cdef Py_ssize_t i, imin, imax
 
     if pop:
@@ -90,8 +94,9 @@ cdef inline np.uint8_t kernel_gradient(
         return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_maximum(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     cdef Py_ssize_t i
 
     if pop:
@@ -101,8 +106,10 @@ cdef inline np.uint8_t kernel_maximum(
 
     return < np.uint8_t > (0)
 
-cdef inline np.uint8_t kernel_mean(Py_ssize_t * histo, float pop, np.uint8_t g,
-                                   float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_mean(
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     cdef Py_ssize_t i
     cdef float mean = 0.
 
@@ -114,8 +121,9 @@ cdef inline np.uint8_t kernel_mean(Py_ssize_t * histo, float pop, np.uint8_t g,
         return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_meansubstraction(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1,
+        Py_ssize_t s0, Py_ssize_t s1):
+
     cdef Py_ssize_t i
     cdef float mean = 0.
 
@@ -127,8 +135,9 @@ cdef inline np.uint8_t kernel_meansubstraction(
         return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_median(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     cdef Py_ssize_t i
     cdef float sum = pop / 2.0
 
@@ -142,8 +151,9 @@ cdef inline np.uint8_t kernel_median(
     return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_minimum(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     cdef Py_ssize_t i
 
     if pop:
@@ -154,8 +164,8 @@ cdef inline np.uint8_t kernel_minimum(
     return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_modal(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+        Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+
     cdef Py_ssize_t hmax = 0, imax = 0
 
     if pop:
@@ -168,8 +178,9 @@ cdef inline np.uint8_t kernel_modal(
     return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_morph_contr_enh(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1,
+        Py_ssize_t s0, Py_ssize_t s1):
+
     cdef Py_ssize_t i, imin, imax
 
     if pop:
@@ -188,13 +199,16 @@ cdef inline np.uint8_t kernel_morph_contr_enh(
     else:
         return < np.uint8_t > (0)
 
-cdef inline np.uint8_t kernel_pop(Py_ssize_t * histo, float pop, np.uint8_t g,
-                                  float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint8_t kernel_pop(
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     return < np.uint8_t > (pop)
 
 cdef inline np.uint8_t kernel_threshold(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     cdef Py_ssize_t i
     cdef float mean = 0.
 
@@ -206,8 +220,9 @@ cdef inline np.uint8_t kernel_threshold(
         return < np.uint8_t > (0)
 
 cdef inline np.uint8_t kernel_tophat(
-    Py_ssize_t * histo, float pop, np.uint8_t g,
-        float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+    Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
     cdef Py_ssize_t i
 
     for i in range(255, -1, -1):
@@ -228,7 +243,9 @@ def autolevel(np.ndarray[np.uint8_t, ndim=2] image,
               char shift_x=0, char shift_y=0):
     """bottom hat
     """
-    return _core8(kernel_autolevel, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+    return _core8(
+        kernel_autolevel, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
+        < Py_ssize_t > 0)
 
 
 def bottomhat(np.ndarray[np.uint8_t, ndim=2] image,
@@ -238,7 +255,9 @@ def bottomhat(np.ndarray[np.uint8_t, ndim=2] image,
               char shift_x=0, char shift_y=0):
     """bottom hat
     """
-    return _core8(kernel_bottomhat, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+    return _core8(
+        kernel_bottomhat, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
+        < Py_ssize_t > 0)
 
 
 def equalize(np.ndarray[np.uint8_t, ndim=2] image,
@@ -248,7 +267,9 @@ def equalize(np.ndarray[np.uint8_t, ndim=2] image,
              char shift_x=0, char shift_y=0):
     """local egalisation of the gray level
     """
-    return _core8(kernel_equalize, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+    return _core8(
+        kernel_equalize, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
+        < Py_ssize_t > 0)
 
 
 def gradient(np.ndarray[np.uint8_t, ndim=2] image,
@@ -258,7 +279,9 @@ def gradient(np.ndarray[np.uint8_t, ndim=2] image,
              char shift_x=0, char shift_y=0):
     """local maximum - local minimum gray level
     """
-    return _core8(kernel_gradient, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+    return _core8(
+        kernel_gradient, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
+        < Py_ssize_t > 0)
 
 
 def maximum(np.ndarray[np.uint8_t, ndim=2] image,
@@ -288,7 +311,9 @@ def meansubstraction(np.ndarray[np.uint8_t, ndim=2] image,
                      char shift_x=0, char shift_y=0):
     """(g - average gray level)/2+127 (clipped on uint8)
     """
-    return _core8(kernel_meansubstraction, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+    return _core8(
+        kernel_meansubstraction, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
+        < Py_ssize_t > 0)
 
 
 def median(np.ndarray[np.uint8_t, ndim=2] image,
@@ -318,7 +343,9 @@ def morph_contr_enh(np.ndarray[np.uint8_t, ndim=2] image,
                     char shift_x=0, char shift_y=0):
     """morphological contrast enhancement
     """
-    return _core8(kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+    return _core8(
+        kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
+        < Py_ssize_t > 0)
 
 
 def modal(np.ndarray[np.uint8_t, ndim=2] image,
@@ -348,7 +375,9 @@ def threshold(np.ndarray[np.uint8_t, ndim=2] image,
               char shift_x=0, char shift_y=0):
     """returns 255 if gray level higher than local mean, 0 else
     """
-    return _core8(kernel_threshold, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+    return _core8(
+        kernel_threshold, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
+        < Py_ssize_t > 0)
 
 
 def tophat(np.ndarray[np.uint8_t, ndim=2] image,

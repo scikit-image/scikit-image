@@ -22,7 +22,10 @@ from skimage.filter.rank._core16 cimport _core16
 # -----------------------------------------------------------------
 
 
-cdef inline np.uint16_t kernel_mean(Py_ssize_t * histo, float pop, np.uint16_t g, Py_ssize_t bitdepth, Py_ssize_t maxbin, Py_ssize_t midbin, float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint16_t kernel_mean(
+    Py_ssize_t * histo, float pop, np.uint16_t g, Py_ssize_t bitdepth,
+        Py_ssize_t maxbin, Py_ssize_t midbin, float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+
     cdef int i, bilat_pop = 0
     cdef float mean = 0.
 
@@ -39,7 +42,10 @@ cdef inline np.uint16_t kernel_mean(Py_ssize_t * histo, float pop, np.uint16_t g
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_pop(Py_ssize_t * histo, float pop, np.uint16_t g, Py_ssize_t bitdepth, Py_ssize_t maxbin, Py_ssize_t midbin, float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+cdef inline np.uint16_t kernel_pop(
+    Py_ssize_t * histo, float pop, np.uint16_t g, Py_ssize_t bitdepth, Py_ssize_t maxbin,
+        Py_ssize_t midbin, float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+
     cdef int i, bilat_pop = 0
 
     if pop:
