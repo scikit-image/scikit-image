@@ -14,14 +14,11 @@ result image is 8 or 16 bit with respect to the input image
 
 """
 
-
-import warnings
 from skimage import img_as_ubyte
 import numpy as np
 
-from generic import find_bitdepth
-import _crank16_percentiles
-import _crank8_percentiles
+from skimage.filter.rank.generic import find_bitdepth
+from skimage.filter.rank import _crank16_percentiles, _crank8_percentiles
 
 __all__ = ['percentile_autolevel', 'percentile_gradient',
            'percentile_mean', 'percentile_mean_substraction',
@@ -77,7 +74,7 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -141,7 +138,7 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     to be updated
     >>> # Local gradient
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -205,7 +202,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -269,7 +266,7 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
     to be updated
     >>> # Local mean_substraction
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -333,7 +330,7 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -397,7 +394,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 128*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -462,7 +459,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -526,7 +523,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],

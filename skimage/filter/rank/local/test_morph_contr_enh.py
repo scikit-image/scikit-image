@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import gdal
 
 from skimage.morphology import disk
-import skimage.rank as rank
+import skimage.filter.rank as rank
 
 filename = 'iko_pan_Ja1.tif'
 im16 = gdal.Open(filename).ReadAsArray().astype(np.uint16)

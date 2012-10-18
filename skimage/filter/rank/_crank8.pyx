@@ -15,7 +15,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from _core8 cimport _core8
+from skimage.filter.rank._core8 cimport _core8
 
 # -----------------------------------------------------------------
 # kernels uint8

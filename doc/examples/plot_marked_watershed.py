@@ -14,15 +14,14 @@ See Wikipedia_ for more details on the algorithm.
 
 """
 
-import numpy as np
 from scipy import ndimage
 import matplotlib.pyplot as plt
 from skimage.morphology import watershed,disk
-from skimage import rank
 from skimage import data
-from scipy import ndimage
 
 # original data
+from skimage.filter import rank
+
 image = data.camera()
 
 # denoise image

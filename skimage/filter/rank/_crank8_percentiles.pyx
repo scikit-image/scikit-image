@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as np
 
 # import main loop
-from _core8 cimport _core8, uint8_max, uint8_min
+from skimage.filter.rank._core8 cimport _core8, uint8_max, uint8_min
 
 # -----------------------------------------------------------------
 # kernels uint8 (SOFT version using percentiles)

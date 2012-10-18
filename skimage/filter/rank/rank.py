@@ -12,14 +12,11 @@ result image is 8 or 16 bit with respect to the input image
 
 """
 
-
-import warnings
 from skimage import img_as_ubyte
 import numpy as np
+from skimage.filter.rank import _crank8, _crank16
 
-from generic import find_bitdepth
-import _crank16
-import _crank8
+from skimage.filter.rank.generic import find_bitdepth
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean', 'meansubstraction', 'median', 'minimum', 'modal', 'morph_contr_enh', 'pop', 'threshold', 'tophat']
 
@@ -71,7 +68,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -133,7 +130,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -194,7 +191,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -255,7 +252,7 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local gradient
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -317,7 +314,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local maximum
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 0, 0, 0, 0],
     ...                           [0, 0, 1, 0, 0],
@@ -379,7 +376,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -441,7 +438,7 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
     to be updated
     >>> # Local meansubstraction
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -503,7 +500,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local median
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 0, 1, 0],
@@ -565,7 +562,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local minimum
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -628,7 +625,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local modal
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 5, 6, 0],
@@ -691,7 +688,7 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -753,7 +750,7 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -815,7 +812,7 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -878,7 +875,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],

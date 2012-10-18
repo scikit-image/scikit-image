@@ -17,12 +17,12 @@ The local version [2]_ of the histogram equalization emphasized every local gray
 from skimage import data
 from skimage.util.dtype import dtype_range
 from skimage import exposure
-from skimage import rank
 from skimage.morphology import disk
 
 import matplotlib.pyplot as plt
 
 import numpy as np
+from skimage.filter import rank
 
 def plot_img_and_hist(img, axes, bins=256):
     """Plot an image along with its histogram and cumulative histogram.

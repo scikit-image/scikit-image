@@ -1,17 +1,32 @@
+"""bilateral_rank.py - approximate bilateral rankfilter for local (custom kernel) mean
+
+The local histogram is computed using a sliding window similar to the method described in
+
+Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median filtering algorithm",
+IEEE Transactions on Acoustics, Speech and Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
+
+input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit),
+8 bit images are casted in 16 bit
+the number of histogram bins is determined from the maximum value present in the image
+
+The pixel neighborhood is defined by:
+
+* the given structuring element
+
+* an interval [g-s0,g+s1] in gray level around g the processed pixel gray level
+
+The kernel is flat (i.e. each pixel belonging to the neighborhood contributes equally)
+
+result image is 16 bit with respect to the input image
+
 """
 
-note: 8 bit images are casted into 16 bit image here
-
-"""
-
-
-import warnings
 from skimage import img_as_ubyte
 
 import numpy as np
+from skimage.filter.rank import _crank16_bilateral
 
-from generic import find_bitdepth
-import _crank16_bilateral
+from skimage.filter.rank.generic import find_bitdepth
 
 
 __all__ = ['bilateral_mean', 'bilateral_pop']
@@ -67,7 +82,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -131,7 +146,7 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
     to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
-    >>> import skimage.rank as rank
+    >>> import skimage.filter.rank as rank
     >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],

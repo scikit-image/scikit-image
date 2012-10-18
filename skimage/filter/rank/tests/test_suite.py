@@ -1,12 +1,12 @@
 import unittest
 
 import numpy as np
+from skimage.filter import rank
 
-from skimage.rank import _crank8,_crank8_percentiles
-from skimage.rank import _crank16,_crank16_bilateral,_crank16_percentiles
-from skimage.morphology import cmorph,disk
 from skimage import data
-from skimage import rank
+from skimage.morphology import cmorph,disk
+from skimage.filter.rank import _crank8, _crank16
+from skimage.filter.rank import _crank16_percentiles
 
 
 class TestSequenceFunctions(unittest.TestCase):

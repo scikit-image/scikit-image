@@ -19,13 +19,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 
+from scipy.ndimage.filters import percentile_filter
+
 from skimage import data
 from skimage.morphology import dilation,disk
 from skimage.filter import median_filter
-from scipy.ndimage.filters import percentile_filter
-import skimage.rank as rank
+import skimage.filter.rank as rank
 
-def log_timing(func):
+def exec_and_timeit(func):
     """ Decorator that returns both function results and execution time
     (result, ms)
     """
@@ -38,23 +39,23 @@ def log_timing(func):
     return wrapper
 
 
-@log_timing
+@exec_and_timeit
 def cr_med(image,selem):
     return rank.median(image=image,selem = selem)
 
-@log_timing
+@exec_and_timeit
 def cr_max(image,selem):
     return rank.maximum(image=image,selem = selem)
 
-@log_timing
+@exec_and_timeit
 def cm_dil(image,selem):
     return dilation(image=image,selem = selem)
 
-@log_timing
+@exec_and_timeit
 def ctmf_med(image,radius):
     return median_filter(image=image,radius=radius)
 
-@log_timing
+@exec_and_timeit
 def ndi_med(image,n):
     return percentile_filter(image,50,size=n*2-1)
 
@@ -84,8 +85,6 @@ def compare_dilate():
     plt.title('increasing element size')
     plt.plot(e_range,rec)
     plt.legend(['crank.maximum','cmorph.dilate'])
-    plt.figure()
-    plt.imshow(np.hstack((rc,rcm)))
 
     r = 9
     elem = disk(r+1)

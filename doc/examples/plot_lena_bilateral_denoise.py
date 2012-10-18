@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data, color, img_as_ubyte
-from skimage.rank import bilateral_mean
+from skimage.filter.rank import bilateral_mean
 from skimage.morphology import disk
 
 l = img_as_ubyte(color.rgb2gray(data.lena()))
