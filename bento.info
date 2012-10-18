@@ -64,7 +64,10 @@ Library:
     Extension: skimage.filter._ctmf
         Sources:
             skimage/filter/_ctmf.pyx
-    Extension: skimage.morphology.ccomp
+    Extension: skimage.filter._denoise
+        Sources:
+            skimage/filter/_ctmf.pyx
+    Extension: skimage.morphology.denoise
         Sources:
             skimage/morphology/ccomp.pyx
     Extension: skimage.morphology._watershed

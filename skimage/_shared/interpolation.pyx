@@ -35,8 +35,8 @@ cdef inline double nearest_neighbour_interpolation(double* image, int rows,
 
     """
 
-    return get_pixel(image, rows, cols, <int>round(r), <int>round(c),
-                     mode, cval)
+    return get_pixel2d(image, rows, cols, <int>round(r), <int>round(c),
+                       mode, cval)
 
 
 cdef inline double bilinear_interpolation(double* image, int rows, int cols,
@@ -72,10 +72,10 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
     maxc = <int>ceil(c)
     dr = r - minr
     dc = c - minc
-    top = (1 - dc) * get_pixel(image, rows, cols, minr, minc, mode, cval) \
-          + dc * get_pixel(image, rows, cols, minr, maxc, mode, cval)
-    bottom = (1 - dc) * get_pixel(image, rows, cols, maxr, minc, mode, cval) \
-             + dc * get_pixel(image, rows, cols, maxr, maxc, mode, cval)
+    top = (1 - dc) * get_pixel2d(image, rows, cols, minr, minc, mode, cval) \
+          + dc * get_pixel2d(image, rows, cols, minr, maxc, mode, cval)
+    bottom = (1 - dc) * get_pixel2d(image, rows, cols, maxr, minc, mode, cval) \
+             + dc * get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
     return (1 - dr) * top + dr * bottom
 
 
@@ -144,7 +144,7 @@ cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 3):
         for pc in range(c0, c0 + 3):
-            fc[pc - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
+            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
         fr[pr - r0] = quadratic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
@@ -216,15 +216,15 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 4):
         for pc in range(c0, c0 + 4):
-            fc[pc - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
+            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
         fr[pr - r0] = cubic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
     return cubic_interpolation(xr, fr)
 
 
-cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
-                             char mode, double cval):
+cdef inline double get_pixel2d(double* image, int rows, int cols, int r, int c,
+                               char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -253,6 +253,40 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
             return image[r * cols + c]
     else:
         return image[coord_map(rows, r, mode) * cols + coord_map(cols, c, mode)]
+
+
+cdef inline double get_pixel3d(double* image, int rows, int cols, int dims, int r,
+                               int c, int d, char mode, double cval):
+    """Get a pixel from the image, taking wrapping mode into consideration.
+
+    Parameters
+    ----------
+    image : double array
+        Input image.
+    rows, cols, dims : int
+        Shape of image.
+    r, c, d : int
+        Position at which to get the pixel.
+    mode : {'C', 'W', 'R', 'N'}
+        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    cval : double
+        Constant value to use for constant mode.
+
+    Returns
+    -------
+    value : double
+        Pixel value at given position.
+
+    """
+    if mode == 'C':
+        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
+            return cval
+        else:
+            return image[r * cols * dims + c * dims + d]
+    else:
+        return image[coord_map(rows, r, mode) * cols * dims
+                     + coord_map(cols, c, mode) * dims
+                     + d]
 
 
 cdef inline int coord_map(int dim, int coord, char mode):
