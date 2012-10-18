@@ -35,7 +35,8 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, p0, p1):
         bitdepth = find_bitdepth(image)
         if bitdepth > 11:
             raise ValueError("only uint16 <4096 image (12bit) supported!")
-        return func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, bitdepth=bitdepth + 1, out=out,
+        return func16(
+            image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, bitdepth=bitdepth + 1, out=out,
             p0=p0, p1=p1)
     else:
         raise TypeError("only uint8 and uint16 image supported!")
@@ -102,7 +103,8 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
 
     """
 
-    return _apply(_crank8_percentiles.autolevel, _crank16_percentiles.autolevel, image, selem, out=out, mask=mask,
+    return _apply(
+        _crank8_percentiles.autolevel, _crank16_percentiles.autolevel, image, selem, out=out, mask=mask,
         shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 
@@ -167,7 +169,8 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
 
     """
 
-    return _apply(_crank8_percentiles.gradient, _crank16_percentiles.gradient, image, selem, out=out, mask=mask,
+    return _apply(
+        _crank8_percentiles.gradient, _crank16_percentiles.gradient, image, selem, out=out, mask=mask,
         shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 
@@ -232,7 +235,8 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
 
     """
 
-    return _apply(_crank8_percentiles.mean, _crank16_percentiles.mean, image, selem, out=out, mask=mask,
+    return _apply(
+        _crank8_percentiles.mean, _crank16_percentiles.mean, image, selem, out=out, mask=mask,
         shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 
@@ -297,7 +301,8 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
 
     """
 
-    return _apply(_crank8_percentiles.mean_substraction, _crank16_percentiles.mean_substraction, image, selem, out=out,
+    return _apply(
+        _crank8_percentiles.mean_substraction, _crank16_percentiles.mean_substraction, image, selem, out=out,
         mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 
@@ -362,7 +367,8 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(_crank8_percentiles.morph_contr_enh, _crank16_percentiles.morph_contr_enh, image, selem, out=out,
+    return _apply(
+        _crank8_percentiles.morph_contr_enh, _crank16_percentiles.morph_contr_enh, image, selem, out=out,
         mask=mask, shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 
@@ -428,7 +434,8 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
 
     """
 
-    return _apply(_crank8_percentiles.percentile, _crank16_percentiles.percentile, image, selem, out=out, mask=mask,
+    return _apply(
+        _crank8_percentiles.percentile, _crank16_percentiles.percentile, image, selem, out=out, mask=mask,
         shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 
@@ -493,7 +500,8 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
     """
 
-    return _apply(_crank8_percentiles.pop, _crank16_percentiles.pop, image, selem, out=out, mask=mask, shift_x=shift_x,
+    return _apply(
+        _crank8_percentiles.pop, _crank16_percentiles.pop, image, selem, out=out, mask=mask, shift_x=shift_x,
         shift_y=shift_y, p0=p0, p1=p1)
 
 
@@ -559,7 +567,8 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
 
     """
 
-    return _apply(_crank8_percentiles.threshold, _crank16_percentiles.threshold, image, selem, out=out, mask=mask,
+    return _apply(
+        _crank8_percentiles.threshold, _crank16_percentiles.threshold, image, selem, out=out, mask=mask,
         shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 

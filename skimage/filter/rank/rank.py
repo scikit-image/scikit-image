@@ -96,7 +96,8 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(_crank8.autolevel, _crank16.autolevel, image, selem, out=out, mask=mask, shift_x=shift_x,
+    return _apply(
+        _crank8.autolevel, _crank16.autolevel, image, selem, out=out, mask=mask, shift_x=shift_x,
         shift_y=shift_y)
 
 
@@ -158,7 +159,8 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [   0,    0,    0,    0,    0]], dtype=uint16)
     """
 
-    return _apply(_crank8.bottomhat, _crank16.bottomhat, image, selem, out=out, mask=mask, shift_x=shift_x,
+    return _apply(
+        _crank8.bottomhat, _crank16.bottomhat, image, selem, out=out, mask=mask, shift_x=shift_x,
         shift_y=shift_y)
 
 
@@ -220,7 +222,8 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
            [3071, 2730, 2047, 2730, 3071]], dtype=uint16)
     """
 
-    return _apply(_crank8.equalize, _crank16.equalize, image, selem, out=out, mask=mask, shift_x=shift_x,
+    return _apply(
+        _crank8.equalize, _crank16.equalize, image, selem, out=out, mask=mask, shift_x=shift_x,
         shift_y=shift_y)
 
 
@@ -283,7 +286,8 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(_crank8.gradient, _crank16.gradient, image, selem, out=out, mask=mask, shift_x=shift_x,
+    return _apply(
+        _crank8.gradient, _crank16.gradient, image, selem, out=out, mask=mask, shift_x=shift_x,
         shift_y=shift_y)
 
 
@@ -470,7 +474,8 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
 
     """
 
-    return _apply(_crank8.meansubstraction, _crank16.meansubstraction, image, selem, out=out, mask=mask,
+    return _apply(
+        _crank8.meansubstraction, _crank16.meansubstraction, image, selem, out=out, mask=mask,
         shift_x=shift_x, shift_y=shift_y)
 
 
@@ -721,7 +726,8 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
 
     """
 
-    return _apply(_crank8.morph_contr_enh, _crank16.morph_contr_enh, image, selem, out=out, mask=mask, shift_x=shift_x,
+    return _apply(
+        _crank8.morph_contr_enh, _crank16.morph_contr_enh, image, selem, out=out, mask=mask, shift_x=shift_x,
         shift_y=shift_y)
 
 
@@ -847,7 +853,8 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(_crank8.threshold, _crank16.threshold, image, selem, out=out, mask=mask, shift_x=shift_x,
+    return _apply(
+        _crank8.threshold, _crank16.threshold, image, selem, out=out, mask=mask, shift_x=shift_x,
         shift_y=shift_y)
 
 
