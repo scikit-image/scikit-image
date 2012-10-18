@@ -1,3 +1,20 @@
+"""
+==============================
+Compare execution time for
+    - skimage.rank.median,
+    - skimage.filter import median_filter
+    - scipy.ndimage.filters import percentile_filter,
+
+    and
+
+    - skimage.cmorph.dilate
+    - skimage.rank.maximum
+
+==============================
+
+to complete
+
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -17,7 +34,6 @@ def log_timing(func):
         res = func(*arg)
         t2 = time.time()
         ms = (t2-t1)*1000.0
-        print '%s took %0.3f ms' % (func.func_name, ms)
         return (res,ms)
     return wrapper
 
@@ -25,6 +41,14 @@ def log_timing(func):
 @log_timing
 def cr_med(image,selem):
     return rank.median(image=image,selem = selem)
+
+@log_timing
+def cr_max(image,selem):
+    return rank.maximum(image=image,selem = selem)
+
+@log_timing
+def cm_dil(image,selem):
+    return dilation(image=image,selem = selem)
 
 @log_timing
 def ctmf_med(image,radius):
@@ -46,13 +70,12 @@ def compare_dilate():
     rec = []
     e_range = range(1,20,1)
     for r in e_range:
-#        elem = np.ones((r,r),dtype='uint8')
         elem = disk(r+1)
         #        elem = (np.random.random((r,r))>.5).astype('uint8')
         rc,ms_rc = cr_max(a,elem)
         rcm,ms_rcm = cm_dil(a,elem)
         rec.append((ms_rc,ms_rcm))
-        # check if results are identical
+        # same structuring element, the results must match
         assert  (rc==rcm).all()
 
     rec = np.asarray(rec)
@@ -65,7 +88,6 @@ def compare_dilate():
     plt.imshow(np.hstack((rc,rcm)))
 
     r = 9
-#    elem = np.ones((r,r),dtype='uint8')
     elem = disk(r+1)
 
     rec = []
@@ -75,6 +97,7 @@ def compare_dilate():
         (rc,ms_rc) = cr_max(a,elem)
         (rcm,ms_rcm) = cm_dil(a,elem)
         rec.append((ms_rc,ms_rcm))
+        # same structuring element, the results must match
         assert  (rc==rcm).all()
 
     rec = np.asarray(rec)
@@ -86,7 +109,6 @@ def compare_dilate():
     plt.figure()
     plt.imshow(np.hstack((rc,rcm)))
 
-    plt.show()
 
 def compare_median():
     """ Comparison between
@@ -145,7 +167,8 @@ def compare_median():
     plt.ylabel('time (ms)')
     plt.xlabel('image size')
 
-    plt.show()
-if __name__ == '__main__':
-#    compare_dilate()
-    compare_median()
+
+
+compare_dilate()
+compare_median()
+plt.show()
