@@ -47,7 +47,7 @@ cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols, Py_ssize_t r
 
 
 cdef inline _core16(
-    np.uint16_t kernel(Py_ssize_t *, float, np.uint16_t, Py_ssize_t, Py_ssize_t, Py_ssize_t, float, float, Py_ssize_t, Py_ssize_t),
+    np.uint16_t kernel(Py_ssize_t * , float, np.uint16_t, Py_ssize_t, Py_ssize_t, Py_ssize_t, float, float, Py_ssize_t, Py_ssize_t),
     np.ndarray[np.uint16_t, ndim=2] image,
     np.ndarray[np.uint8_t, ndim=2] selem,
     np.ndarray[np.uint8_t, ndim=2] mask,
