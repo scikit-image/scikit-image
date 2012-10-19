@@ -133,9 +133,8 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         with tempfile.NamedTemporaryFile(delete=False) as f:
             u = urllib2.urlopen(fname)
             f.write(u.read())
-            f.close()
-            img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)
-            os.remove(f.name)
+        img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)
+        os.remove(f.name)
     else:
         img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
 
