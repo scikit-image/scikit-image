@@ -1,6 +1,9 @@
 __all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
+import re
+import urllib2
+import tempfile
 from io import BytesIO
 
 import numpy as np
@@ -11,6 +14,14 @@ from skimage.color import rgb2grey
 
 # Shared image queue
 _image_stack = []
+
+URL_REGEX = re.compile(r'http://|https://|ftp://')
+
+
+def is_url(filename):
+    """Return True if string is an http or ftp path."""
+    return (isinstance(filename, basestring) and
+            URL_REGEX.match(filename) is not None)
 
 
 class Image(np.ndarray):
@@ -88,7 +99,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     Parameters
     ----------
     fname : string
-        Image file name, e.g. ``test.jpg``.
+        Image file name, e.g. ``test.jpg`` or URL.
     as_grey : bool
         If True, convert color images to grey-scale (32-bit floats).
         Images that are already in grey-scale format are not converted.
@@ -117,7 +128,15 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+    if is_url(fname):
+        with tempfile.NamedTemporaryFile() as f:
+            u = urllib2.urlopen(fname)
+            f.write(u.read())
+            f.seek(0)
+            # Note: the temporary file must be used inside the with-block.
+            img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)
+    else:
+        img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
 
     if as_grey and getattr(img, 'ndim', 0) >= 3:
         img = rgb2grey(img)
