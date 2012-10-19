@@ -1,6 +1,7 @@
 __all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
+import os
 import re
 import urllib2
 import tempfile
@@ -129,12 +130,12 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         as_grey = flatten
 
     if is_url(fname):
-        with tempfile.NamedTemporaryFile() as f:
+        with tempfile.NamedTemporaryFile(delete=False) as f:
             u = urllib2.urlopen(fname)
             f.write(u.read())
-            f.seek(0)
-            # Note: the temporary file must be used inside the with-block.
+            f.close()
             img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)
+            os.remove(f.name)
     else:
         img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
 
