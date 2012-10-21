@@ -1,7 +1,5 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-import sys
-sys.path.insert(0, '../..')
 import skimage
 from skimage import data
 from skimage import exposure

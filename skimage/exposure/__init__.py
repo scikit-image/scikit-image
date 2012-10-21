@@ -1,3 +1,3 @@
 from .exposure import histogram, equalize, cumulative_distribution
 from .exposure import rescale_intensity
-from ._adaphist import adapthist
+from ._adapthist import adapthist
