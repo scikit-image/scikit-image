@@ -5,10 +5,9 @@ from skimage.util.dtype import dtype_range
 import skimage.color as color
 from skimage.util.dtype import convert
 
-from _adapthist import _adapthist
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
-           'rescale_intensity', 'adapthist']
+           'rescale_intensity']
 
 
 def histogram(image, nbins=256):
@@ -186,90 +185,3 @@ def rescale_intensity(image, in_range=None, out_range=None):
 
     image = (image - imin) / float(imax - imin)
     return dtype(image * (omax - omin) + omin)
-
-
-def adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01, nbins=256,
-               out_range='full'):
-    '''Contrast Limited Adaptive Histogram Equalization
-
-    Parameters
-    ----------
-    image : array-like
-        original image
-    ntiles_x : int, optional
-        Tile regions in the X direction (2, 16)
-    ntiles_y : int, optional
-        Tile regions in the Y direction (2, 16)
-    clip_limit : float: optional
-        Normalized cliplimit (higher values give more contrast)
-    nbins : int, optional
-        Greybins for histogram ("dynamic range")
-    out_range : str, optional
-        Range of the output image data.
-           - 'original' - Use original image limits
-           - 'full' - Use full range of image data type
-
-    Returns
-    -------
-    out : np.ndarray
-        equalized image - may be a different shape than the original
-
-    Notes
-    -----
-    * The underlying algorithm relies on an image whose rows and columns are even multiples of
-    the number of tiles, so the extra rows and columns are left at their original values, thus
-    preserving the input image shape.
-    * For grayscale images, CLAHE is performed on one channel, and a grayscale is returned
-    * For color images, the following steps are performed:
-       - The image is converted to LAB color space
-       - The CLAHE algorithm is run on the L channel
-       - The image is converted back to RGB space and returned
-    * For RGBA images, the original alpha channel is removed.
-
-    References
-    ----------
-    .. [1] http://tog.acm.org/resources/GraphicsGems/
-    .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
-    '''
-    in_type = image.dtype.type
-    if out_range == 'full':
-        out_range = None
-    else:
-        out_range = (image.min(), image.max())
-    # must be converted to 12 bit for CLAHE
-    int_image = skimage.img_as_uint(image)
-    max_val = 2 ** 12 - 1
-    int_image = rescale_intensity(int_image, out_range=(0, max_val))
-    # handle color images - CLAHE accepts scalar images only
-    args = [int_image.copy(), 0, max_val, ntiles_x, ntiles_y, nbins,
-            clip_limit]
-    if image.ndim == 3:
-        # check for grayscale
-        if (np.allclose(image[:, :, 0], image[:, :, 1]) and
-            np.allclose(image[:, :, 1], image[:, :, 2])):
-            args[0] = int_image[:, :, 0]
-            out = _adapthist(*args)
-            image = int_image[:, :, :3]
-            for channel in range(3):
-                image[:out.shape[0], :out.shape[1], channel] = out
-        # for color images, convert to LAB space for processing
-        else:
-            lab_img = color.rgb2lab(skimage.img_as_float(image))
-            l_chan = lab_img[:, :, 0]
-            l_chan /= np.max(np.abs(l_chan))
-            l_chan = skimage.img_as_uint(l_chan)
-            args[0] = rescale_intensity(l_chan, out_range=(0, max_val))
-            new_l = _adapthist(*args).astype(float)
-            new_l = rescale_intensity(new_l, out_range=(0, 100))
-            lab_img[:new_l.shape[0], :new_l.shape[1], 0] = new_l
-            image = color.lab2rgb(lab_img)
-            image = rescale_intensity(image, out_range=(0, 1))
-    else:
-        out = _adapthist(*args)
-        image = int_image
-        image[:out.shape[0], :out.shape[1]] = out
-    # restore to desired output type and output limits
-    image = rescale_intensity(image)
-    image = convert(image, in_type)
-    image = rescale_intensity(image, out_range=out_range)
-    return image
