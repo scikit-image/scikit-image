@@ -123,3 +123,10 @@
 
 - Luis Pedro Coelho
   imread plugin
+=======
+  Polygon, circle and ellipse drawing functions
+  Adaptive thresholding
+  Implementation of Matlab's `regionprops`
+
+- Steven Silvester, Karel Zuiderveld
+  Adaptive Histogram Equalization
