@@ -6,4 +6,5 @@ from .edges import (sobel, hsobel, vsobel, scharr, hscharr, vscharr, prewitt,
 from .denoise import tv_denoise, denoise_tv
 from ._denoise import denoise_bilateral
 from ._rank_order import rank_order
+from ._gabor import gabor_kernel, gabor_filter
 from .thresholding import threshold_otsu, threshold_adaptive
