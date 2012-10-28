@@ -36,7 +36,7 @@ def gabor_kernel(sigmax, sigmay, frequency, theta, offset=0):
 
     x0 = np.ceil(max(3 * sigmax, 1))
     y0 = np.ceil(max(3 * sigmay, 1))
-    y, x = np.mgrid[-x0:x0+1, -y0:y0+1]
+    y, x = np.mgrid[-y0:y0+1, -x0:x0+1]
 
     rotx = x * np.cos(theta) + y * np.sin(theta)
     roty = -x * np.sin(theta) + y * np.cos(theta)
@@ -86,7 +86,7 @@ def gabor_filter(image, sigmax, sigmay, frequency, theta, offset=0,
 
     """
 
-    g = gabor_kernel(sigmax, sigmay, frequency, theta, offset=0)
+    g = gabor_kernel(sigmax, sigmay, frequency, theta, offset)
 
     filtered_real = ndimage.convolve(image, np.real(g), mode=mode, cval=cval)
     filtered_imag = ndimage.convolve(image, np.imag(g), mode=mode, cval=cval)
