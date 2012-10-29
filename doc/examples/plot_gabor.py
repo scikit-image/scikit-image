@@ -47,16 +47,12 @@ def match(feats, ref_feats):
 
 # prepare filter bank kernels
 kernels = []
-kernel_params = []
 for theta in range(4):
     theta = theta / 4. * np.pi
     for sigma in (1, 3):
         for frequency in (0.05, 0.25):
             kernel = np.real(gabor_kernel(sigma, sigma, frequency, theta))
             kernels.append(kernel)
-            params = 'theta=%d, sigma=%d,\nfrequency=%.2f' % (
-                      theta * 180 / np.pi, sigma, frequency)
-            kernel_params.append(params)
 
 
 brick = img_as_float(data.load('brick.png'))
