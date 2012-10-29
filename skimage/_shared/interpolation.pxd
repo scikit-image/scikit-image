@@ -18,7 +18,10 @@ cdef double bicubic_interpolation(double* image, int rows, int cols,
                                   double r, double c, char mode,
                                   double cval)
 
-cdef double get_pixel(double* image, int rows, int cols, int r, int c,
-                      char mode, double cval)
+cdef double get_pixel2d(double* image, int rows, int cols, int r, int c,
+                        char mode, double cval)
+
+cdef double get_pixel3d(double* image, int rows, int cols, int dims, int r,
+                        int c, int d, char mode, double cval)
 
 cdef int coord_map(int dim, int coord, char mode)

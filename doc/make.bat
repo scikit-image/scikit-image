@@ -74,9 +74,9 @@ if "%1" == "qthelp" (
 	echo.
 	echo.Build finished; now you can run "qcollectiongenerator" with the ^
 .qhcp project file in build/qthelp, like this:
-	echo.^> qcollectiongenerator build\qthelp\scikitsimage.qhcp
+	echo.^> qcollectiongenerator build\qthelp\scikitimage.qhcp
 	echo.To view the help file:
-	echo.^> assistant -collectionFile build\qthelp\scikitsimage.ghc
+	echo.^> assistant -collectionFile build\qthelp\scikitimage.ghc
 	goto end
 )
 

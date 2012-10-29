@@ -20,19 +20,17 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
 
     config.add_extension('_warps_cy', sources=['_warps_cy.c'],
-                         include_dirs=[get_numpy_include_dirs(), '../_shared'],
-                         extra_compile_args=['-fopenmp'],
-                         extra_link_args=['-fopenmp'])
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
 
     return config
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
-    setup(maintainer='Scikits-image Developers',
-          author='Scikits-image Developers',
-          maintainer_email='scikits-image@googlegroups.com',
+    setup(maintainer='scikit-image Developers',
+          author='scikit-image Developers',
+          maintainer_email='scikit-image@googlegroups.com',
           description='Transforms',
-          url='https://github.com/scikits-image/scikits-image',
+          url='https://github.com/scikit-image/scikit-image',
           license='SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )

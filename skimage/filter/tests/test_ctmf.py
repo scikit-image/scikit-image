@@ -117,5 +117,11 @@ def test_insufficient_size():
     median_filter(img, radius=1)
 
 
+@raises(TypeError)
+def test_wrong_shape():
+    img = np.empty((10, 10, 3))
+    median_filter(img)
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

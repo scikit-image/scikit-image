@@ -2,7 +2,7 @@ from numpy.testing import assert_array_almost_equal, run_module_suite
 import numpy as np
 from scipy.ndimage import map_coordinates
 
-from skimage.transform import (warp, warp_coords, rotate, resize,
+from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
                                SimilarityTransform, homography)
@@ -85,12 +85,66 @@ def test_rotate():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
-def test_resize():
+def test_rescale():
+    # same scale factor
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    scaled = rescale(x, 2, order=0)
+    ref = np.zeros((10, 10))
+    ref[2:4, 2:4] = 1
+    assert_array_almost_equal(scaled, ref)
+
+    # different scale factors
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
+    scaled = rescale(x, (2, 1), order=0)
+    ref = np.zeros((10, 5))
+    ref[2:4, 1] = 1
+    assert_array_almost_equal(scaled, ref)
+
+
+def test_resize2d():
     x = np.zeros((5, 5), dtype=np.double)
     x[1, 1] = 1
     resized = resize(x, (10, 10), order=0)
     ref = np.zeros((10, 10))
     ref[2:4, 2:4] = 1
+    assert_array_almost_equal(resized, ref)
+
+
+def test_resize3d_keep():
+    # keep 3rd dimension
+    x = np.zeros((5, 5, 3), dtype=np.double)
+    x[1, 1, :] = 1
+    resized = resize(x, (10, 10), order=0)
+    ref = np.zeros((10, 10, 3))
+    ref[2:4, 2:4, :] = 1
+    assert_array_almost_equal(resized, ref)
+    resized = resize(x, (10, 10, 3), order=0)
+    assert_array_almost_equal(resized, ref)
+
+
+def test_resize3d_resize():
+    # resize 3rd dimension
+    x = np.zeros((5, 5, 3), dtype=np.double)
+    x[1, 1, :] = 1
+    resized = resize(x, (10, 10, 1), order=0)
+    ref = np.zeros((10, 10, 1))
+    ref[2:4, 2:4] = 1
+    assert_array_almost_equal(resized, ref)
+
+
+def test_resize3d_bilinear():
+    # bilinear 3rd dimension
+    x = np.zeros((5, 5, 2), dtype=np.double)
+    x[1, 1, 0] = 0
+    x[1, 1, 1] = 1
+    resized = resize(x, (10, 10, 1), order=1)
+    ref = np.zeros((10, 10, 1))
+    ref[1:5, 1:5, :] = 0.03125
+    ref[1:5, 2:4, :] = 0.09375
+    ref[2:4, 1:5, :] = 0.09375
+    ref[2:4, 2:4, :] = 0.28125
     assert_array_almost_equal(resized, ref)
 
 

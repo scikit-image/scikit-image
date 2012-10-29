@@ -57,7 +57,7 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
 
@@ -111,7 +111,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
 
@@ -176,7 +176,7 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
 
     """
 
@@ -257,8 +257,8 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
 
     References
     ----------
-    ..[1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
-    ..[2] http://sepwww.stanford.edu/~morgan/texturematch/paper_html/node3.html
+    .. [1] http://web.mit.edu/persci/people/adelson/pub_pdfs/pyramid83.pdf
+    .. [2] http://sepwww.stanford.edu/~morgan/texturematch/paper_html/node3.html
 
     """
 
