@@ -918,9 +918,3 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     return _apply(_crank8.tophat, _crank16.tophat, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
-if __name__ == "__main__":
-    import sys
-    sys.path.append('.')
-
-    import doctest
-    doctest.testmod(verbose=True)
