@@ -81,7 +81,6 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
     Examples
     --------
-    to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -147,7 +146,6 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
 
     Examples
     --------
-    to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
