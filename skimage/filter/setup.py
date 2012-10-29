@@ -13,9 +13,34 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['_ctmf.pyx'], working_path=base_path)
+    cython(['rank/_core8.pyx'], working_path=base_path)
+    cython(['rank/_core16.pyx'], working_path=base_path)
+    cython(['rank/_crank8.pyx'], working_path=base_path)
+    cython(['rank/_crank8_percentiles.pyx'], working_path=base_path)
+    cython(['rank/_crank16.pyx'], working_path=base_path)
+    cython(['rank/_crank16_percentiles.pyx'], working_path=base_path)
+    cython(['rank/_crank16_bilateral.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('rank/_core8', sources=['rank/_core8.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('rank/_core16', sources=['rank/_core16.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('rank/_crank8', sources=['rank/_crank8.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank/_crank8_percentiles', sources=['rank/_crank8_percentiles.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('rank/_crank16', sources=['rank/_crank16.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank/_crank16_percentiles', sources=['rank/_crank16_percentiles.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank/_crank16_bilateral', sources=['rank/_crank16_bilateral.c'],
+        include_dirs=[get_numpy_include_dirs()])
+
 
     return config
 
