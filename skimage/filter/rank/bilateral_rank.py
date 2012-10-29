@@ -179,9 +179,3 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
         None, _crank16_bilateral.pop, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y,
         s0=s0, s1=s1)
 
-if __name__ == "__main__":
-    import sys
-    sys.path.append('.')
-
-    import doctest
-    doctest.testmod(verbose=True)
