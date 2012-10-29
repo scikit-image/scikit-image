@@ -73,7 +73,6 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
 
     Examples
     --------
-    to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -139,7 +138,7 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
 
     Examples
     --------
-    to be updated
+    
     >>> # Local gradient
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -205,7 +204,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
 
     Examples
     --------
-    to be updated
+    
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -271,7 +270,7 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
 
     Examples
     --------
-    to be updated
+    
     >>> # Local mean_substraction
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -337,7 +336,7 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
 
     Examples
     --------
-    to be updated
+    
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -403,7 +402,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
 
     Examples
     --------
-    to be updated
+    
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -470,7 +469,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
     Examples
     --------
-    to be updated
+    
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -536,7 +535,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
 
     Examples
     --------
-    to be updated
+    
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
@@ -572,9 +571,3 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
         shift_x=shift_x, shift_y=shift_y, p0=p0, p1=p1)
 
 
-if __name__ == "__main__":
-    import sys
-    sys.path.append('.')
-
-    import doctest
-    doctest.testmod(verbose=True)
