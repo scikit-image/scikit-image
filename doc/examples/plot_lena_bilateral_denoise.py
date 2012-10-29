@@ -1,4 +1,3 @@
-
 """
 ====================================================
 Denoising the picture of Lena using bilateral filter
@@ -27,7 +26,7 @@ l = l[230:290, 220:320]
 noisy = l + 0.4 * l.std() * np.random.random(l.shape)
 
 selem = disk(30)
-bilateral_denoised = bilateral_mean(noisy.astype(np.uint8), selem=selem,s0=10,s1=10)
+approx_bilateral_denoised = bilateral_mean(noisy.astype(np.uint8), selem=selem,s0=10,s1=10)
 
 plt.figure(figsize=(8, 2))
 
@@ -36,14 +35,14 @@ plt.imshow(noisy, cmap=plt.cm.gray, vmin=40, vmax=220)
 plt.axis('off')
 plt.title('noisy', fontsize=20)
 plt.subplot(132)
-plt.imshow(bilateral_denoised, cmap=plt.cm.gray, vmin=40, vmax=220)
+plt.imshow(approx_bilateral_denoised, cmap=plt.cm.gray, vmin=40, vmax=220)
 plt.axis('off')
 plt.title('bilateral denoising', fontsize=20)
 
 selem = disk(30)
-bilateral_denoised = bilateral_mean(noisy.astype(np.uint8), selem=selem,s0=40,s1=40)
+approx_bilateral_denoised = bilateral_mean(noisy.astype(np.uint8), selem=selem,s0=40,s1=40)
 plt.subplot(133)
-plt.imshow(bilateral_denoised, cmap=plt.cm.gray, vmin=40, vmax=220)
+plt.imshow(approx_bilateral_denoised, cmap=plt.cm.gray, vmin=40, vmax=220)
 plt.axis('off')
 plt.title('(more) bilateral denoising', fontsize=20)
 
