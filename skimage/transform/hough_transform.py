@@ -216,8 +216,8 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     angle_peaks = []
 
     # relative coordinate grid for local neighbourhood suppression
-    dist_ext, angle_ext = np.mgrid[- min_distance:min_distance + 1,
-                                   - min_angle:min_angle + 1]
+    dist_ext, angle_ext = np.mgrid[-min_distance:min_distance + 1,
+                                   -min_angle:min_angle + 1]
 
     for dist_idx, angle_idx in coords:
         accum = hspace[dist_idx, angle_idx]
@@ -258,4 +258,4 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
         dist_peaks = dist_peaks[idx_maxsort]
         angle_peaks = angle_peaks[idx_maxsort]
 
-    return hspace_peaks, dist_peaks, angle_peaks
+    return hspace_peaks, angle_peaks, dist_peaks
