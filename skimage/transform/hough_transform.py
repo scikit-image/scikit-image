@@ -111,10 +111,10 @@ def hough(img, theta=None):
     -------
     H : 2-D ndarray of uint64
         Hough transform accumulator.
-    distances : ndarray
-        Distance values.
     theta : ndarray
         Angles at which the transform was computed.
+    distances : ndarray
+        Distance values.
 
     Examples
     --------
