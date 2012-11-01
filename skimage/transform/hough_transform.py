@@ -139,7 +139,7 @@ def hough(img, theta=None):
 
 
 def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
-                threshold_abs=0, threshold_rel=0.5, num_peaks=np.inf):
+                threshold=None, num_peaks=np.inf):
     """Return peaks in hough transform.
 
     Identifies most prominent lines separated by a certain angle and distance in
@@ -162,10 +162,8 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     min_angle : int
         Minimum angle separating lines (maximum filter size for second
         dimension of hough space).
-    threshold_abs : float
-        Minimum intensity of peaks in hough space.
-    threshold_rel : float
-        Minimum intensity of peaks calculated as `max(hspace) * threshold_rel`.
+    threshold : float
+        Minimum intensity of peaks calculated as `0.5 * max(hspace)`.
     num_peaks : int
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` coordinates based on peak intensity.
@@ -197,7 +195,8 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     hspace = hspace.copy()
     rows, cols = hspace.shape
 
-    threshold = max(threshold_abs, threshold_rel * np.max(hspace))
+    if threshold is None:
+        threshold = 0.5 * np.max(hspace)
 
     distance_size = 2 * min_distance + 1
     angle_size = 2 * min_angle + 1
