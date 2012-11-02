@@ -10,6 +10,7 @@ from libc.stdlib cimport malloc, free
 from libc.float cimport DBL_MAX
 from skimage._shared.interpolation cimport get_pixel3d
 from skimage.util import img_as_float
+from skimage._shared.utils import deprecated
 
 
 cdef inline double _gaussian_weight(double sigma, double value):
@@ -342,3 +343,5 @@ def denoise_tv(image, double weight, int max_iter=100, double eps=1e-3):
         i += 1
 
     return np.squeeze(u[1:-1, 1:-1])
+
+tv_denoise = deprecated('skimage.filter.denoise_tv')(denoise_tv)
