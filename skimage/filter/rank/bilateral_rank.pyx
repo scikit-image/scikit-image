@@ -81,33 +81,14 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
     Examples
     --------
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.bilateral_mean(ima8, square(3), s0=10,s1=10)
-    array([[  0,   0,   0,   0,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint16)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.bilateral_mean(ima16, square(3), s0=10,s1=10)
-    array([[   0,    0,    0,    0,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
-
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import bilateral_mean
+    >>> # bilateral filtering of cameraman image using a flat kernel
+    >>> # Load test image
+    >>> a8 = data.camera()
+    >>> # Apply bilateral filter
+    >>> bl8 = bilateral_mean(a8, disk(20), s0=10,s1=10)
     """
 
     return _apply(
@@ -155,18 +136,6 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
     >>> rank.bilateral_pop(ima8, square(3), s0=10,s1=10)
-    array([[3, 4, 3, 4, 3],
-           [4, 4, 6, 4, 4],
-           [3, 6, 9, 6, 3],
-           [4, 4, 6, 4, 4],
-           [3, 4, 3, 4, 3]], dtype=uint16)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.bilateral_pop(ima16, square(3), s0=10,s1=10)
     array([[3, 4, 3, 4, 3],
            [4, 4, 6, 4, 4],
            [3, 6, 9, 6, 3],
