@@ -21,6 +21,9 @@ def configuration(parent_package='', top_path=None):
     cython(['rank/_crank16.pyx'], working_path=base_path)
     cython(['rank/_crank16_percentiles.pyx'], working_path=base_path)
     cython(['rank/_crank16_bilateral.pyx'], working_path=base_path)
+    cython(['rank/rank.pyx'], working_path=base_path)
+    cython(['rank/percentile_rank.pyx'], working_path=base_path)
+    cython(['rank/bilateral_rank.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
         include_dirs=[get_numpy_include_dirs()])
@@ -42,6 +45,15 @@ def configuration(parent_package='', top_path=None):
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
         'rank/_crank16_bilateral', sources=['rank/_crank16_bilateral.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank/rank', sources=['rank/rank.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank/percentile_rank', sources=['rank/percentile_rank.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank/bilateral_rank', sources=['rank/bilateral_rank.c'],
         include_dirs=[get_numpy_include_dirs()])
 
     return config
