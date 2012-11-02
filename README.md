@@ -29,8 +29,3 @@ this path to your PYTHONPATH variable and compiling the extensions:
 License
 -------
 Please read LICENSE.txt in this directory.
-
-Contact
--------
-Stefan van der Walt <stefan at sun.ac.za>
-
