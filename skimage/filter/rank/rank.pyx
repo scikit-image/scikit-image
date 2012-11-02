@@ -38,9 +38,7 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
 
 
 def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local autolevel of an image.
-
-    Autolevel is computed on the given structuring element.
+    """Autolevel image using local histogram.
 
     Parameters
     ----------
@@ -61,38 +59,18 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local autolevel : uint8 array or uint16 array depending on input image
+    out : uint8 array or uint16 array (same as input image)
         The result of the local autolevel.
 
     Examples
     --------
-    to be updated
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.autolevel(ima8, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255,   0, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.autolevel(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095,    0, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import autolevel
+    >>> # Load test image
+    >>> ima = data.camera()
+    >>> # Stretch image contrast locally
+    >>> auto = autolevel(ima, disk(20))
 
     """
 
@@ -102,9 +80,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local bottomhat of an image.
-
-    Bottomhat is computed on the given structuring element.
+    """Returns greyscale local bottomhat of an image.
 
     Parameters
     ----------
@@ -128,35 +104,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     local bottomhat : uint8 array or uint16 array depending on input image
         The result of the local bottomhat.
 
-    Examples
-    --------
-    to be updated
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.bottomhat(ima8, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255,   0, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
 
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.bottomhat(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095,    0, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
     """
 
     return _apply(
@@ -165,9 +113,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local equalize of an image.
-
-    equalize is computed on the given structuring element.
+    """Equalize image using local histogram.
 
     Parameters
     ----------
@@ -188,38 +134,18 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local equalize : uint8 array or uint16 array depending on input image
+    out : uint8 array or uint16 array (same as input image)
         The result of the local equalize.
 
     Examples
     --------
-    to be updated
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.equalize(ima8, square(3))
-    array([[191, 170, 127, 170, 191],
-           [170, 255, 255, 255, 170],
-           [127, 255, 255, 255, 127],
-           [170, 255, 255, 255, 170],
-           [191, 170, 127, 170, 191]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.equalize(ima16, square(3))
-    array([[3071, 2730, 2047, 2730, 3071],
-           [2730, 4095, 4095, 4095, 2730],
-           [2047, 4095, 4095, 4095, 2047],
-           [2730, 4095, 4095, 4095, 2730],
-           [3071, 2730, 2047, 2730, 3071]], dtype=uint16)
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import equalize
+    >>> # Load test image
+    >>> ima = data.camera()
+    >>> # Local equalization
+    >>> equ = equalize(ima, disk(20))
     """
 
     return _apply(
@@ -228,9 +154,8 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local gradient of an image.
+    """Return greyscale local gradient of an image (i.e. local maximum - local minimum).
 
-    gradient is computed on the given structuring element.
 
     Parameters
     ----------
@@ -251,38 +176,8 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local gradient : uint8 array or uint16 array depending on input image
-        The result of the local gradient.
-
-    Examples
-    --------
-    to be updated
-    >>> # Local gradient
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.gradient(ima8, square(3))
-    array([[255, 255, 255, 255, 255],
-           [255, 255, 255, 255, 255],
-           [255, 255,   0, 255, 255],
-           [255, 255, 255, 255, 255],
-           [255, 255, 255, 255, 255]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.gradient(ima16, square(3))
-    array([[4095, 4095, 4095, 4095, 4095],
-           [4095, 4095, 4095, 4095, 4095],
-           [4095, 4095,    0, 4095, 4095],
-           [4095, 4095, 4095, 4095, 4095],
-           [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
+    out : uint8 array or uint16 array (same as input image)
+        The local gradient.
 
     """
 
@@ -294,7 +189,6 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local maximum of an image.
 
-    maximum is computed on the given structuring element.
 
     Parameters
     ----------
@@ -315,38 +209,18 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local maximum : uint8 array or uint16 array depending on input image
-        The result of the local maximum.
+    out : uint8 array or uint16 array (same as input image)
+        The local maximum.
 
-    Examples
+    See also
     --------
-    to be updated
-    >>> # Local maximum
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 1, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.maximum(ima8, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0, 255, 255, 255,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
+    skimage.morphology.dilation()
 
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 1, 0, 0],
-    ...                           [0, 0, 0, 0, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.maximum(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
+    Note
+    ----
+    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+
+    * the lower algorithm complexity makes the rank.maximum() more efficient for larger images and structuring elements
 
     """
 
@@ -356,8 +230,6 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local mean of an image.
 
-    Mean is computed on the given structuring element.
-
     Parameters
     ----------
     image : ndarray
@@ -377,48 +249,25 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local mean : uint8 array or uint16 array depending on input image
-        The result of the local mean.
+    out : uint8 array or uint16 array (same as input image)
+        The local mean.
 
     Examples
     --------
-    to be updated
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import mean
+    >>> # Load test image
+    >>> ima = data.camera()
     >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.mean(ima8, square(3))
-    array([[ 63,  85, 127,  85,  63],
-           [ 85, 113, 170, 113,  85],
-           [127, 170, 255, 170, 127],
-           [ 85, 113, 170, 113,  85],
-           [ 63,  85, 127,  85,  63]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.mean(ima16, square(3))
-    array([[1023, 1365, 2047, 1365, 1023],
-           [1365, 1820, 2730, 1820, 1365],
-           [2047, 2730, 4095, 2730, 2047],
-           [1365, 1820, 2730, 1820, 1365],
-           [1023, 1365, 2047, 1365, 1023]], dtype=uint16)
-
+    >>> avg = mean(ima, disk(20))
     """
 
     return _apply(_crank8.mean, _crank16.mean, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
 def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local meansubstraction of an image.
-
-    meansubstraction is computed on the given structuring element.
+    """Return image substracted from its local mean.
 
     Parameters
     ----------
@@ -439,38 +288,10 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
 
     Returns
     -------
-    local meansubstraction : uint8 array or uint16 array depending on input image
+    out : uint8 array or uint16 array (same as input image)
         The result of the local meansubstraction.
 
-    Examples
-    --------
-    to be updated
-    >>> # Local meansubstraction
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.meansubstraction(ima8, square(3))
-    array([[ 95,  84,  63,  84,  95],
-           [ 84, 197, 169, 197,  84],
-           [ 63, 169, 127, 169,  63],
-           [ 84, 197, 169, 197,  84],
-           [ 95,  84,  63,  84,  95]], dtype=uint8)
 
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.meansubstraction(ima16, square(3))
-    array([[1535, 1364, 1023, 1364, 1535],
-           [1364, 3184, 2729, 3184, 1364],
-           [1023, 2729, 2047, 2729, 1023],
-           [1364, 3184, 2729, 3184, 1364],
-           [1535, 1364, 1023, 1364, 1535]], dtype=uint16)
 
     """
 
@@ -482,7 +303,6 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
 def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local median of an image.
 
-    median is computed on the given structuring element.
 
     Parameters
     ----------
@@ -503,39 +323,18 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local median : uint8 array or uint16 array depending on input image
-        The result of the local median.
+    out : uint8 array or uint16 array (same as input image)
+        The local median.
 
     Examples
     --------
-    to be updated
-    >>> # Local median
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 0, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.median(ima8, square(3))
-    array([[  0,   0, 255,   0,   0],
-           [  0,   0, 255,   0,   0],
-           [255, 255, 255, 255, 255],
-           [  0,   0, 255,   0,   0],
-           [  0,   0, 255,   0,   0]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 0, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.median(ima16, square(3))
-    array([[   0,    0, 4095,    0,    0],
-           [   0,    0, 4095,    0,    0],
-           [4095, 4095, 4095, 4095, 4095],
-           [   0,    0, 4095,    0,    0],
-           [   0,    0, 4095,    0,    0]], dtype=uint16)
-
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import median
+    >>> # Load test image
+    >>> ima = data.camera()
+    >>> # Local mean
+    >>> avg = median(ima, disk(20))
     """
 
     return _apply(_crank8.median, _crank16.median, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
@@ -544,8 +343,6 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local minimum of an image.
 
-    minimum is computed on the given structuring element.
-
     Parameters
     ----------
     image : ndarray
@@ -565,39 +362,18 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local minimum : uint8 array or uint16 array depending on input image
-        The result of the local minimum.
+    out : uint8 array or uint16 array (same as input image)
+        The local minimum.
 
-    Examples
+    See also
     --------
-    to be updated
-    >>> # Local minimum
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.minimum(ima8, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0, 255,   0,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
+    skimage.morphology.erosion()
 
+    Note
+    ----
+    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
 
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.minimum(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0,    0,    0,    0,    0],
-           [   0,    0, 4095,    0,    0],
-           [   0,    0,    0,    0,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
+    * the lower algorithm complexity makes the rank.minimum() more efficient for larger images and structuring elements
 
     """
 
@@ -605,9 +381,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local modal of an image.
-
-    modal is computed on the given structuring element.
+    """Return greyscale local mode of an image.
 
     Parameters
     ----------
@@ -628,39 +402,9 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local modal : uint8 array or uint16 array depending on input image
-        The result of the local modal.
+    out : uint8 array or uint16 array (same as input image)
+        The local modal.
 
-    Examples
-    --------
-    to be updated
-    >>> # Local modal
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 5, 6, 0],
-    ...                           [0, 1, 5, 5, 0],
-    ...                           [0, 0, 0, 5, 0]], dtype=np.uint8)
-    >>> rank.modal(ima8, square(3))
-    array([[0, 0, 0, 0, 0],
-           [0, 0, 1, 0, 0],
-           [0, 1, 1, 0, 0],
-           [0, 0, 5, 0, 0],
-           [0, 0, 5, 0, 0]], dtype=uint8)
-
-
-    >>> ima16 = 100*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 5, 6, 0],
-    ...                           [0, 1, 5, 5, 0],
-    ...                           [0, 0, 0, 5, 0]], dtype=np.uint16)
-    >>> rank.modal(ima16, square(3))
-    array([[  0,   0,   0,   0,   0],
-           [  0,   0, 100,   0,   0],
-           [  0, 100, 100,   0,   0],
-           [  0,   0, 500,   0,   0],
-           [  0,   0, 500,   0,   0]], dtype=uint16)
 
     """
 
@@ -668,9 +412,8 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local morph_contr_enh of an image.
-
-    morph_contr_enh is computed on the given structuring element.
+    """Enhance an image replacing each pixel by the local maximum if pixel graylevel is closest to maximimum
+     than local minimum OR local minimum otherwise.
 
     Parameters
     ----------
@@ -691,39 +434,18 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
 
     Returns
     -------
-    local morph_contr_enh : uint8 array or uint16 array depending on input image
+    out : uint8 array or uint16 array (same as input image)
         The result of the local morph_contr_enh.
 
     Examples
     --------
-    to be updated
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import morph_contr_enh
+    >>> # Load test image
+    >>> ima = data.camera()
     >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.morph_contr_enh(ima8, square(3))
-    array([[0, 0, 0, 0, 0],
-           [0, 1, 1, 1, 0],
-           [0, 1, 1, 1, 0],
-           [0, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.morph_contr_enh(ima16, square(3))
-    array([[   0,    0,    0,    0,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0, 4095, 4095, 4095,    0],
-           [   0,    0,    0,    0,    0]], dtype=uint16)
-
+    >>> avg = morph_contr_enh(ima, disk(20))
     """
 
     return _apply(
@@ -732,9 +454,7 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
 
 
 def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return greyscale local pop of an image.
-
-    pop is computed on the given structuring element.
+    """Return the number (population) of pixels actually inside the neighborhood.
 
     Parameters
     ----------
@@ -755,38 +475,26 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local pop : uint8 array or uint16 array depending on input image
-        The result of the local pop.
+    out : uint8 array or uint16 array (same as input image)
+        The number of pixels belonging to the neighborhood.
 
     Examples
     --------
-    to be updated
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
+    >>> ima = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.pop(ima8, square(3))
+    >>> rank.pop(ima, square(3))
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
            [6, 9, 9, 9, 6],
            [4, 6, 6, 6, 4]], dtype=uint8)
 
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.pop(ima16, square(3))
-    array([[4, 6, 6, 6, 4],
-           [6, 9, 9, 9, 6],
-           [6, 9, 9, 9, 6],
-           [6, 9, 9, 9, 6],
-           [4, 6, 6, 6, 4]], dtype=uint16)
 
     """
 
@@ -796,8 +504,6 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local threshold of an image.
 
-    threshold is computed on the given structuring element.
-
     Parameters
     ----------
     image : ndarray
@@ -817,38 +523,25 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local threshold : uint8 array or uint16 array depending on input image
+    out : uint8 array or uint16 array (same as input image)
         The result of the local threshold.
 
     Examples
     --------
-    to be updated
-    >>> # Local mean
+    >>> # Local threshold
     >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
+    >>> from skimage.filter.rank import threshold
+    >>> ima = 255*np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 1, 1, 1, 0],
     ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.threshold(ima8, square(3))
+    >>> threshold(ima, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 1, 0],
            [0, 1, 0, 1, 0],
            [0, 1, 1, 1, 0],
            [0, 0, 0, 0, 0]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.threshold(ima16, square(3))
-    array([[0, 0, 0, 0, 0],
-           [0, 1, 1, 1, 0],
-           [0, 1, 0, 1, 0],
-           [0, 1, 1, 1, 0],
-           [0, 0, 0, 0, 0]], dtype=uint16)
 
 
     """
@@ -861,8 +554,6 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local tophat of an image.
 
-    tophat is computed on the given structuring element.
-
     Parameters
     ----------
     image : ndarray
@@ -882,38 +573,9 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local tophat : uint8 array or uint16 array depending on input image
-        The result of the local tophat.
+    out : uint8 array or uint16 array (same as input image)
+        The image tophat.
 
-    Examples
-    --------
-    to be updated
-    >>> # Local mean
-    >>> from skimage.morphology import square
-    >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.tophat(ima8, square(3))
-    array([[255, 255, 255, 255, 255],
-           [255,   0,   0,   0, 255],
-           [255,   0,   0,   0, 255],
-           [255,   0,   0,   0, 255],
-           [255, 255, 255, 255, 255]], dtype=uint8)
-
-    >>> ima16 = 4095*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.tophat(ima16, square(3))
-    array([[4095, 4095, 4095, 4095, 4095],
-           [4095,    0,    0,    0, 4095],
-           [4095,    0,    0,    0, 4095],
-           [4095,    0,    0,    0, 4095],
-           [4095, 4095, 4095, 4095, 4095]], dtype=uint16)
     """
 
     return _apply(_crank8.tophat, _crank16.tophat, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)

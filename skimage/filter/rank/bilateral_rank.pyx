@@ -51,9 +51,17 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, s0, s1):
 
 
 def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10):
-    """Return greyscale local bilateral_mean of an image.
+    """Apply a flat kernel bilateral filter.
 
-    bilateral mean is computed on the given structuring element. Only levels between [g-s0,g+s1] ,are used.
+    This is an edge-preserving and noise reducing denoising filter. It averages
+    pixels based on their spatial closeness and radiometric similarity.
+
+    Spatial closeness is measured by considering only the local pixel neighborhood given by a
+    structuring element (selem).
+
+    Radiometric similarity is defined by the gray level interval [g-s0,g+s1] where g is the current pixel gray level.
+    Only pixels belonging to the structuring element AND having a gray level inside this interval are averaged.
+    Return greyscale local bilateral_mean of an image.
 
     Parameters
     ----------
@@ -76,19 +84,29 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
     Returns
     -------
-    local bilateral mean : uint16 array (uint8 image are casted to uint16)
+    out : uint16 array (uint8 image are casted to uint16)
         The result of the local bilateral mean.
+
+    See also
+    --------
+    skimage.filter.denoise_bilateral() for a gaussian bilateral filter.
+
+    Notes
+    -----
+
+    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+
+    * 8 bit images are casted in 16 bit
 
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filter.rank import bilateral_mean
-    >>> # bilateral filtering of cameraman image using a flat kernel
     >>> # Load test image
-    >>> a8 = data.camera()
-    >>> # Apply bilateral filter
-    >>> bl8 = bilateral_mean(a8, disk(20), s0=10,s1=10)
+    >>> ima = data.camera()
+    >>> # bilateral filtering of cameraman image using a flat kernel
+    >>> bilat_ima = bilateral_mean(ima, disk(20), s0=10,s1=10)
     """
 
     return _apply(
@@ -97,9 +115,8 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
 
 
 def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False, s0=10, s1=10):
-    """Return greyscale local bilateral_pop of an image.
-
-    bilateral pop is computed on the given structuring element. Only levels between [g-s0,g+s1] ,are used.
+    """Return the number (population) of pixels actually inside the bilateral neighborhood,
+    i.e. being inside the structuring element AND having a gray level inside the interval [g-s0,g+s1].
 
     Parameters
     ----------
@@ -122,8 +139,8 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
 
     Returns
     -------
-    local bilateral pop : uint16 array (uint8 image are casted to uint16)
-        The result of the local bilateral pop.
+    out : uint16 array (uint8 image are casted to uint16)
+        the local number of pixels inside the bilateral neighborhood
 
     Examples
     --------
