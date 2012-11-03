@@ -1,3 +1,8 @@
+import sys
+print sys.path
+import skimage
+print skimage
+
 import unittest
 
 import numpy as np
