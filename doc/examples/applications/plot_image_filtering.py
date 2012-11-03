@@ -70,6 +70,8 @@ Noise removal
 some noise is added to the image, 1% of pixels are randomly set to 255, %1% are randomly set to 0.
 The **median** filter is applied to remove the noise.
 
+.. note:: there is different implementations of median filter : ``skimage.filter.median_filter``and
+`skimage.filter.rank.median``
 """
 
 noise = np.random.random(ima.shape)
@@ -130,7 +132,7 @@ One may be interested in smoothing an image while preserving important borders (
 here we use the **bilateral** filter that restrict the local neighborhood to pixel having a grey level similar to the
 central one.
 
-rem: a different implementations is available for color images in ``skimage.filter.denoise_bilateral``.
+.. note:: a different implementations is available for color images in ``skimage.filter.denoise_bilateral``.
 
 """
 
@@ -144,13 +146,15 @@ bilat = bilateral_mean(ima.astype(np.uint16),disk(20),s0=10,s1=10)
 # display results
 fig = plt.figure(figsize=[10,7])
 plt.subplot(1,2,1)
-plt.imshow(ima)
+plt.imshow(ima,cmap=plt.cm.gray)
 plt.xlabel('original')
 plt.subplot(1,2,2)
-plt.imshow(bilat)
+plt.imshow(bilat,cmap=plt.cm.gray)
 plt.xlabel('bilateral mean')
 
 """
+.. image:: PLOT2RST.current_figure
+
 One can see that the large continuous part of the image (e.g.sky) are smoothed whereas other details are preserved.
 
 
@@ -167,13 +171,13 @@ The local version [3]_ of the histogram equalization emphasized every local gray
 
 """
 
-from skimage.exposure import equalize as global_equalize
-from skimage.filter.rank import equalize as local_equalize
+from skimage import exposure
+from skimage.filter import rank
 
 ima = data.camera()
 # equalize globally and locally
-loc = local_equalize(ima,disk(20))
-glob = global_equalize(ima)
+glob = exposure.equalize(ima)*255
+loc = rank.equalize(ima,disk(20))
 
 # extract histogram for each image
 hist = np.histogram(ima, bins=np.arange(0, 256))
@@ -199,12 +203,47 @@ plt.axis('off')
 plt.subplot(326)
 plt.plot(loc_hist[1][:-1], loc_hist[0], lw=2)
 plt.title('histogram of grey values')
+"""
+.. image:: PLOT2RST.current_figure
+
+an other way to maximize the number of grey level used for an image is to apply a local auto-leveling,
+i.e. here a pixel grey level is proportionally remapped between local minimum and local maximum.
+
+The following example show how local autolevel enhance the camaraman picture.
+"""
+from skimage.filter.rank import autolevel
+
+ima = data.camera()
+selem = disk(10)
+
+auto = autolevel(ima.astype(np.uint16),disk(20))
+
+# display results
+fig = plt.figure(figsize=[10,7])
+plt.subplot(1,2,1)
+plt.imshow(ima,cmap=plt.cm.gray)
+plt.xlabel('original')
+plt.subplot(1,2,2)
+plt.imshow(auto,cmap=plt.cm.gray)
+plt.xlabel('local autolevel')
+"""
+.. image:: PLOT2RST.current_figure
+
+This filter is very sensitive to local outlayers, see the little white spot in the sky left part. This is due
+to a local maximum which is very high comparing to the rest of the neighborhood. One can moderate this
+using the percentile version of the autolevel filter which uses to given percentiles (one inferior, one superior)
+in place of local minimum and maximim. The example bellow illustrate how the percentile parameters influence the
+local autolevel result.
+
+"""
 
 """
 .. image:: PLOT2RST.current_figure
 
 Image morphology
 ================
+
+
 
 """
 plt.show()
