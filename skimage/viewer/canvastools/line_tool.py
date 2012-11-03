@@ -53,6 +53,7 @@ class LineTool(CanvasToolBase):
         self.connect_event('button_press_event', self.on_mouse_press)
         self.connect_event('button_release_event', self.on_mouse_release)
         self.connect_event('motion_notify_event', self.on_move)
+        self.connect_event('key_press_event', self.on_key_press)
 
     def on_mouse_press(self, event):
         if event.button != 1:
@@ -119,7 +120,6 @@ class ThickLineTool(LineTool):
                                             on_enter=on_enter, maxdist=maxdist,
                                             lineprops=lineprops)
 
-        self.connect_event('key_press_event', self.on_key_press)
         self.connect_event('scroll_event', self.on_scroll)
 
     def on_scroll(self, event):
