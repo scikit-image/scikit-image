@@ -335,7 +335,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     local threshold : uint8 array or uint16 array depending on input image
         The result of the local threshold.
 
-    
+
     """
 
     return _apply(
