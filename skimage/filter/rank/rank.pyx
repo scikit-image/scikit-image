@@ -43,7 +43,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -85,7 +85,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -118,7 +118,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -160,7 +160,7 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -193,7 +193,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -233,7 +233,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -272,7 +272,7 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -307,7 +307,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -346,7 +346,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -386,7 +386,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -418,7 +418,7 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -459,7 +459,7 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -507,7 +507,7 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
@@ -557,7 +557,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the algorithm uses max. 12bit histogram,
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.

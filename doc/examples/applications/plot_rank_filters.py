@@ -120,7 +120,7 @@ One may be interested in smoothing an image while preserving important borders (
 here we use the **bilateral** filter that restrict the local neighborhood to pixel having a grey level similar to the
 central one.
 
-.. note:: a different implementations is available for color images in ``skimage.filter.denoise_bilateral``.
+.. note:: a different implementation is available for color images in ``skimage.filter.denoise_bilateral``.
 
 """
 
@@ -133,12 +133,16 @@ bilat = bilateral_mean(ima.astype(np.uint16),disk(20),s0=10,s1=10)
 
 # display results
 fig = plt.figure(figsize=[10,7])
-plt.subplot(1,2,1)
+plt.subplot(2,2,1)
 plt.imshow(ima,cmap=plt.cm.gray)
 plt.xlabel('original')
-plt.subplot(1,2,2)
+plt.subplot(2,2,3)
 plt.imshow(bilat,cmap=plt.cm.gray)
 plt.xlabel('bilateral mean')
+plt.subplot(2,2,2)
+plt.imshow(ima[200:350,350:450],cmap=plt.cm.gray)
+plt.subplot(2,2,4)
+plt.imshow(bilat[200:350,350:450],cmap=plt.cm.gray)
 
 """
 .. image:: PLOT2RST.current_figure
@@ -266,17 +270,21 @@ enh = morph_contr_enh(ima,disk(5))
 
 # display results
 fig = plt.figure(figsize=[10,7])
-plt.subplot(1,2,1)
+plt.subplot(2,2,1)
 plt.imshow(ima,cmap=plt.cm.gray)
 plt.xlabel('original')
-plt.subplot(1,2,2)
+plt.subplot(2,2,3)
 plt.imshow(enh,cmap=plt.cm.gray)
 plt.xlabel('local morphlogical contrast enhancement')
+plt.subplot(2,2,2)
+plt.imshow(ima[200:350,350:450],cmap=plt.cm.gray)
+plt.subplot(2,2,4)
+plt.imshow(enh[200:350,350:450],cmap=plt.cm.gray)
 
 """
 .. image:: PLOT2RST.current_figure
 
-The percentile version of the local morphological contrast enhancement, uses percentile p0 and p1 instead of local
+The percentile version of the local morphological contrast enhancement, uses percentile *p0* and *p1* instead of local
 minimum and local maximum.
 
 """
@@ -289,12 +297,16 @@ penh = percentile_morph_contr_enh(ima,disk(5),p0=.1,p1=.9)
 
 # display results
 fig = plt.figure(figsize=[10,7])
-plt.subplot(1,2,1)
+plt.subplot(2,2,1)
 plt.imshow(ima,cmap=plt.cm.gray)
 plt.xlabel('original')
-plt.subplot(1,2,2)
+plt.subplot(2,2,3)
 plt.imshow(penh,cmap=plt.cm.gray)
-plt.xlabel('local morphlogical contrast enhancement')
+plt.xlabel('local percentile morphlogical\n contrast enhancement')
+plt.subplot(2,2,2)
+plt.imshow(ima[200:350,350:450],cmap=plt.cm.gray)
+plt.subplot(2,2,4)
+plt.imshow(penh[200:350,350:450],cmap=plt.cm.gray)
 
 """
 .. image:: PLOT2RST.current_figure
@@ -304,7 +316,34 @@ Image morphology
 
 Local maximum and local minimum are the base operators for grey level morphology.
 
+.. note:: ``skimage.dilate`` and ``skimage.erode`` are equivalent filters (see below for comparison).
+
+Here is an example of classical morphological grey level filters : opening, closing and morphological gradient.
+
 """
+
+from skimage.filter.rank import maximum,minimum,gradient
+
+ima = data.camera()
+
+closing = maximum(minimum(ima,disk(5)),disk(5))
+opening = minimum(maximum(ima,disk(5)),disk(5))
+grad = gradient(ima,disk(5))
+
+# display results
+fig = plt.figure(figsize=[10,7])
+plt.subplot(2,2,1)
+plt.imshow(ima,cmap=plt.cm.gray)
+plt.xlabel('original')
+plt.subplot(2,2,2)
+plt.imshow(closing,cmap=plt.cm.gray)
+plt.xlabel('grey level closing')
+plt.subplot(2,2,3)
+plt.imshow(opening,cmap=plt.cm.gray)
+plt.xlabel('grey level opening')
+plt.subplot(2,2,4)
+plt.imshow(grad,cmap=plt.cm.gray)
+plt.xlabel('morphological gradient')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -312,7 +351,157 @@ Local maximum and local minimum are the base operators for grey level morphology
 Implementation
 ================
 
-Implementation comparison w.r.t. image size and structuring element size.
+The central part of the ``skimage.rank``filters is build on a sliding window that update local grey level histogram.
+This approach limits the algorithm complexity to O(n) where n is the number of image pixels. The complexity is also
+limited with respect to the structuring element size.
 
 """
+from time import time
+
+from scipy.ndimage.filters import percentile_filter
+from skimage.morphology import dilation
+from skimage.filter import median_filter
+from skimage.filter.rank import median,maximum
+
+def exec_and_timeit(func):
+    """ Decorator that returns both function results and execution time
+    (result, ms)
+    """
+    def wrapper(*arg):
+        t1 = time()
+        res = func(*arg)
+        t2 = time()
+        ms = (t2-t1)*1000.0
+        return (res,ms)
+    return wrapper
+
+
+@exec_and_timeit
+def cr_med(image,selem):
+    return median(image=image,selem = selem)
+
+@exec_and_timeit
+def cr_max(image,selem):
+    return maximum(image=image,selem = selem)
+
+@exec_and_timeit
+def cm_dil(image,selem):
+    return dilation(image=image,selem = selem)
+
+@exec_and_timeit
+def ctmf_med(image,radius):
+    return median_filter(image=image,radius=radius)
+
+@exec_and_timeit
+def ndi_med(image,n):
+    return percentile_filter(image,50,size=n*2-1)
+
+"""
+.. image:: PLOT2RST.current_figure
+
+Comparison between
+
+* rank.maximum
+* cmorph.dilate
+
+on increasing structuring element size and increasing image size
+"""
+
+a = data.camera()
+
+rec = []
+e_range = range(1,20,1)
+for r in e_range:
+    elem = disk(r+1)
+    rc,ms_rc = cr_max(a,elem)
+    rcm,ms_rcm = cm_dil(a,elem)
+    rec.append((ms_rc,ms_rcm))
+    # same structuring element, the results must match
+    assert  (rc==rcm).all()
+
+rec = np.asarray(rec)
+
+plt.figure()
+plt.title('increasing element size')
+plt.plot(e_range,rec)
+plt.legend(['crank.maximum','cmorph.dilate'])
+
+r = 9
+elem = disk(r+1)
+
+rec = []
+s_range = range(100,1000,100)
+for s in s_range:
+    a = (np.random.random((s,s))*256).astype('uint8')
+    (rc,ms_rc) = cr_max(a,elem)
+    (rcm,ms_rcm) = cm_dil(a,elem)
+    rec.append((ms_rc,ms_rcm))
+    # same structuring element, the results must match
+    assert  (rc==rcm).all()
+
+rec = np.asarray(rec)
+
+plt.figure()
+plt.title('increasing image size')
+plt.plot(s_range,rec)
+plt.legend(['crank.maximum','cmorph.dilate'])
+
+
+"""
+.. image:: PLOT2RST.current_figure
+
+Comparison between:
+
+* rank.median
+* ctmf.median_filter
+* ndimage.percentile
+
+on increasing structuring element size and increasing image size
+"""
+
+
+a = data.camera()
+
+rec = []
+e_range = range(2,30,4)
+for r in e_range:
+    elem = disk(r+1)
+    rc,ms_rc = cr_med(a,elem)
+    rctmf,ms_rctmf = ctmf_med(a,r)
+    rndi,ms_ndi = ndi_med(a,r)
+    rec.append((ms_rc,ms_rctmf,ms_ndi))
+
+rec = np.asarray(rec)
+
+plt.figure()
+plt.title('increasing element size')
+plt.plot(e_range,rec)
+plt.legend(['rank.median','ctmf.median_filter','ndimage.percentile'])
+plt.ylabel('time (ms)')
+plt.xlabel('element radius')
+plt.figure()
+plt.imshow(np.hstack((rc,rctmf,rndi)))
+plt.xlabel('rank.median vs ctmf.median_filter vs ndimage.percentile')
+
+r = 9
+elem = disk(r+1)
+
+rec = []
+s_range = [100,200,500,1000]
+for s in s_range:
+    a = (np.random.random((s,s))*256).astype('uint8')
+    (rc,ms_rc) = cr_med(a,elem)
+    rctmf,ms_rctmf = ctmf_med(a,r)
+    rndi,ms_ndi = ndi_med(a,r)
+    rec.append((ms_rc,ms_rctmf,ms_ndi))
+
+rec = np.asarray(rec)
+
+plt.figure()
+plt.title('increasing image size')
+plt.plot(s_range,rec)
+plt.legend(['rank.median','ctmf.median_filter','ndimage.percentile'])
+plt.ylabel('time (ms)')
+plt.xlabel('image size')
+
 plt.show()
