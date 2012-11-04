@@ -351,7 +351,7 @@ plt.xlabel('morphological gradient')
 Implementation
 ================
 
-The central part of the ``skimage.rank``filters is build on a sliding window that update local grey level histogram.
+The central part of the ``skimage.rank`` filters is build on a sliding window that update local grey level histogram.
 This approach limits the algorithm complexity to O(n) where n is the number of image pixels. The complexity is also
 limited with respect to the structuring element size.
 
@@ -397,34 +397,38 @@ def ndi_med(image,n):
     return percentile_filter(image,50,size=n*2-1)
 
 """
-.. image:: PLOT2RST.current_figure
-
 Comparison between
 
-* rank.maximum
-* cmorph.dilate
+* ``rank.maximum``
+* ``cmorph.dilate``
 
-on increasing structuring element size and increasing image size
+on increasing structuring element size
 """
 
 a = data.camera()
 
 rec = []
-e_range = range(1,20,1)
+e_range = range(1,20,2)
 for r in e_range:
     elem = disk(r+1)
     rc,ms_rc = cr_max(a,elem)
     rcm,ms_rcm = cm_dil(a,elem)
     rec.append((ms_rc,ms_rcm))
-    # same structuring element, the results must match
-    assert  (rc==rcm).all()
 
 rec = np.asarray(rec)
 
 plt.figure()
 plt.title('increasing element size')
+plt.ylabel('time (ms)')
+plt.xlabel('element radius')
 plt.plot(e_range,rec)
 plt.legend(['crank.maximum','cmorph.dilate'])
+
+"""
+and increasing image size
+
+.. image:: PLOT2RST.current_figure
+"""
 
 r = 9
 elem = disk(r+1)
@@ -436,13 +440,13 @@ for s in s_range:
     (rc,ms_rc) = cr_max(a,elem)
     (rcm,ms_rcm) = cm_dil(a,elem)
     rec.append((ms_rc,ms_rcm))
-    # same structuring element, the results must match
-    assert  (rc==rcm).all()
 
 rec = np.asarray(rec)
 
 plt.figure()
 plt.title('increasing image size')
+plt.ylabel('time (ms)')
+plt.xlabel('image size')
 plt.plot(s_range,rec)
 plt.legend(['crank.maximum','cmorph.dilate'])
 
@@ -452,11 +456,11 @@ plt.legend(['crank.maximum','cmorph.dilate'])
 
 Comparison between:
 
-* rank.median
-* ctmf.median_filter
-* ndimage.percentile
+* ``rank.median``
+* ``ctmf.median_filter``
+* ``ndimage.percentile``
 
-on increasing structuring element size and increasing image size
+on increasing structuring element size
 """
 
 
@@ -479,9 +483,22 @@ plt.plot(e_range,rec)
 plt.legend(['rank.median','ctmf.median_filter','ndimage.percentile'])
 plt.ylabel('time (ms)')
 plt.xlabel('element radius')
+"""
+.. image:: PLOT2RST.current_figure
+
+comparison of outcome of the three methods
+
+"""
 plt.figure()
 plt.imshow(np.hstack((rc,rctmf,rndi)))
 plt.xlabel('rank.median vs ctmf.median_filter vs ndimage.percentile')
+
+"""
+.. image:: PLOT2RST.current_figure
+
+and increasing image size
+
+"""
 
 r = 9
 elem = disk(r+1)
@@ -503,5 +520,9 @@ plt.plot(s_range,rec)
 plt.legend(['rank.median','ctmf.median_filter','ndimage.percentile'])
 plt.ylabel('time (ms)')
 plt.xlabel('image size')
+
+"""
+.. image:: PLOT2RST.current_figure
+"""
 
 plt.show()
