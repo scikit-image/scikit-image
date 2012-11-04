@@ -179,24 +179,6 @@ def denoise_bilateral(image, int win_size=5, sigma_range=None,
     return np.squeeze(out)
 
 
-cdef inline double _get_elem(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                             Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c,
-                             Py_ssize_t k):
-    return image[r * cols * dims + c * dims + k]
-
-
-cdef inline void _set_elem(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                             Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c,
-                             Py_ssize_t k, double value):
-    image[r * cols * dims + c * dims + k] = value
-
-
-cdef inline void _incr_elem(double* image, Py_ssize_t rows, Py_ssize_t cols,
-                              Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c,
-                              Py_ssize_t k, double value):
-    image[r * cols * dims + c * dims + k] += value
-
-
 def denoise_tv(image, double weight, int max_iter=100, double eps=1e-3):
     """Perform total-variation denoising using split-Bregman optimization.
 
@@ -263,14 +245,6 @@ def denoise_tv(image, double weight, int max_iter=100, double eps=1e-3):
         cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] by = \
             np.zeros(shape_ext, dtype=np.double)
 
-        double* image_data = <double*>cimage.data
-        double* u_data = <double*>u.data
-
-        double* dx_data = <double*>dx.data
-        double* dy_data = <double*>dy.data
-        double* bx_data = <double*>bx.data
-        double* by_data = <double*>by.data
-
         double ux, uy, uprev, unew, bxx, byy, dxx, dyy, s
         int i = 0
         double lam = 2 * weight
@@ -293,51 +267,48 @@ def denoise_tv(image, double weight, int max_iter=100, double eps=1e-3):
             for r in range(1, rows + 1):
                 for c in range(1, cols + 1):
 
-                    uprev = _get_elem(u_data, rows2, cols2, dims, r, c, k)
+                    uprev = u[r, c, k]
 
                     # forward derivatives
-                    ux = _get_elem(u_data, rows2, cols2, dims,
-                                   r, c+1, k) - uprev
-                    uy = _get_elem(u_data, rows2, cols2, dims,
-                                   r+1, c, k) - uprev
+                    ux = u[r, c + 1, k] - uprev
+                    uy = u[r + 1, c, k] - uprev
 
                     # Gauss-Seidel method
                     unew = (
                         lam * (
-                            + _get_elem(u_data, rows2, cols2, dims, r+1, c, k)
-                            + _get_elem(u_data, rows2, cols2, dims, r-1, c, k)
-                            + _get_elem(u_data, rows2, cols2, dims, r, c+1, k)
-                            + _get_elem(u_data, rows2, cols2, dims, r, c-1, k)
+                            + u[r + 1, c, k]
+                            + u[r - 1, c, k]
+                            + u[r, c + 1, k]
+                            + u[r, c - 1, k]
 
-                            + _get_elem(dx_data, rows2, cols2, dims, r, c-1, k)
-                            - _get_elem(dx_data, rows2, cols2, dims, r, c, k)
-                            + _get_elem(dy_data, rows2, cols2, dims, r-1, c, k)
-                            - _get_elem(dy_data, rows2, cols2, dims, r, c, k)
+                            + dx[r, c - 1, k]
+                            - dx[r, c, k]
+                            + dy[r - 1, c, k]
+                            - dy[r, c, k]
 
-                            - _get_elem(bx_data, rows2, cols2, dims, r, c-1, k)
-                            + _get_elem(bx_data, rows2, cols2, dims, r, c, k)
-                            - _get_elem(by_data, rows2, cols2, dims, r-1, c, k)
-                            + _get_elem(by_data, rows2, cols2, dims, r, c, k)
-                        ) + weight * _get_elem(image_data, rows, cols, dims,
-                                               r-1, c-1, k)
+                            - bx[r, c - 1, k]
+                            + bx[r, c, k]
+                            - by[r - 1, c, k]
+                            + by[r, c, k]
+                        ) + weight * cimage[r - 1, c - 1, k]
                     ) / norm
-                    _set_elem(u_data, rows2, cols2, dims, r, c, k, unew)
+                    u[r, c, k] = unew
 
                     # update root mean square error
                     rmse += (unew - uprev)**2
 
-                    bxx = _get_elem(bx_data, rows2, cols2, dims, r, c, k)
-                    byy = _get_elem(by_data, rows2, cols2, dims, r, c, k)
+                    bxx = bx[r, c, k]
+                    byy = by[r, c, k]
 
                     s = sqrt((ux + bxx)**2 + (uy + byy)**2)
                     dxx = s * lam * (ux + bxx) / (s * lam + 1)
                     dyy = s * lam * (uy + byy) / (s * lam + 1)
 
-                    _set_elem(dx_data, rows2, cols2, dims, r, c, k, dxx)
-                    _set_elem(dy_data, rows2, cols2, dims, r, c, k, dyy)
+                    dx[r, c, k] = dxx
+                    dy[r, c, k] = dyy
 
-                    _incr_elem(bx_data, rows2, cols2, dims, r, c, k, ux - dxx)
-                    _incr_elem(by_data, rows2, cols2, dims, r, c, k, uy - dyy)
+                    bx[r, c, k] += ux - dxx
+                    by[r, c, k] += uy - dyy
 
         rmse = sqrt(rmse / total)
         i += 1
