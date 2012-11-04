@@ -1,9 +1,14 @@
 """
 ===============================================================
-Image filtering
+Rank filters
 ===============================================================
 
-Filtering is a common operation on images, it serves several purposes such as:
+Rank filters are non-linear filters using the local grey levels ordering to compute the filtered value.
+This ensemble of filters share a common base: the local grey-level histogram extraction computed on
+the neighborhood of a pixel (defined by a 2D structuring element).
+If the filtered value is taken as the middle value of the histogram, we get the classical median filter.
+
+Rank filters can be used for several purposes such as:
 
 * image quality enhancement
   e.g. image smoothing, sharpening
@@ -17,32 +22,15 @@ Filtering is a common operation on images, it serves several purposes such as:
 * post-processing
   e.g. small object removal, object grouping, contour smoothing
 
+Some well known filters are specific cases of rank filters [1]_ e.g. morphological dilation, morphological erosion,
+median filters.
 
-Filters usually operate on image using a neighborhood situated around the pixel current pixel being treated.
-
-Depending on the type of operation traditionally filters fall into one of the following (not exclusive) types:
-
-* linear filter
-    where filtered pixel grey value results in a linear function of its neighborhood, linear filters are in fact
-    convolution and may be implemented using the Fourier transform (not discussed here).
-
-* non-linear
-    where relation may involve non-linear function such as logical test or grey level rank.
-
-* morphological filter
-    these filters belong to Mathematical morphology (MM) which "is a theory and technique for the analysis and processing
-    of geometrical structures" [1]_
-
-.. [1] http://en.wikipedia.org/wiki/Mathematical_morphology
-
-Skimage implement several filters in ``skimage.filter``, ``skimage.filter.rank``, ``skimage.morphology``, some of
-these filters are redundant for historical reasons, since there implementation are not identical, there respective
-algorithm complexity may differ and therefore the choice may be function of image size or bitdepth
-and filter parameters.
+The different implementation availables in ``skimage`` are compared compare.
 
 In this example, we will see how to filter a grey level image using some of the linear and non-linear filters
 availables in skimage.  We use the ``camera`` image from ``skimage.data``.
 
+.. [1] Pierre Soille, On morphological operators based on rank filters, Pattern Recognition 35 (2002) 527-535.
 """
 
 import numpy as np
@@ -206,7 +194,7 @@ plt.title('histogram of grey values')
 """
 .. image:: PLOT2RST.current_figure
 
-an other way to maximize the number of grey level used for an image is to apply a local auto-leveling,
+an other way to maximize the number of grey level used for an image is to apply a local autoleveling,
 i.e. here a pixel grey level is proportionally remapped between local minimum and local maximum.
 
 The following example show how local autolevel enhance the camaraman picture.
@@ -232,10 +220,81 @@ plt.xlabel('local autolevel')
 This filter is very sensitive to local outlayers, see the little white spot in the sky left part. This is due
 to a local maximum which is very high comparing to the rest of the neighborhood. One can moderate this
 using the percentile version of the autolevel filter which uses to given percentiles (one inferior, one superior)
-in place of local minimum and maximim. The example bellow illustrate how the percentile parameters influence the
+in place of local minimum and maximum. The example bellow illustrate how the percentile parameters influence the
 local autolevel result.
 
 """
+from skimage.filter.rank import percentile_autolevel
+
+image = data.camera()
+
+selem = disk(20)
+loc_autolevel = autolevel(image,selem=selem)
+loc_perc_autolevel0 = percentile_autolevel(image,selem=selem,p0=.00,p1=1.0)
+loc_perc_autolevel1 = percentile_autolevel(image,selem=selem,p0=.01,p1=.99)
+loc_perc_autolevel2 = percentile_autolevel(image,selem=selem,p0=.05,p1=.95)
+loc_perc_autolevel3 = percentile_autolevel(image,selem=selem,p0=.1,p1=.9)
+
+fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
+ax0, ax1, ax2 = axes
+plt.gray()
+
+ax0.imshow(np.hstack((image,loc_autolevel)))
+ax0.set_title('original / autolevel')
+
+ax1.imshow(np.hstack((loc_perc_autolevel0,loc_perc_autolevel1)),vmin=0,vmax=255)
+ax1.set_title('percentile autolevel 0%,1%')
+ax2.imshow(np.hstack((loc_perc_autolevel2,loc_perc_autolevel3)),vmin=0,vmax=255)
+ax2.set_title('percentile autolevel 5% and 10%')
+
+for ax in axes:
+    ax.axis('off')
+
+"""
+.. image:: PLOT2RST.current_figure
+
+Morphological contrast enhancement filter replaces the central pixel by local maximum
+if the original grey level value if closest to local maximum, by the minimum local otherwise.
+
+"""
+
+from skimage.filter.rank import morph_contr_enh
+
+ima = data.camera()
+
+enh = morph_contr_enh(ima,disk(5))
+
+# display results
+fig = plt.figure(figsize=[10,7])
+plt.subplot(1,2,1)
+plt.imshow(ima,cmap=plt.cm.gray)
+plt.xlabel('original')
+plt.subplot(1,2,2)
+plt.imshow(enh,cmap=plt.cm.gray)
+plt.xlabel('local morphlogical contrast enhancement')
+
+"""
+.. image:: PLOT2RST.current_figure
+
+The percentile version of the local morphological contrast enhancement, uses percentile p0 and p1 instead of local
+minimum and local maximum.
+
+"""
+
+from skimage.filter.rank import percentile_morph_contr_enh
+
+ima = data.camera()
+
+penh = percentile_morph_contr_enh(ima,disk(5),p0=.1,p1=.9)
+
+# display results
+fig = plt.figure(figsize=[10,7])
+plt.subplot(1,2,1)
+plt.imshow(ima,cmap=plt.cm.gray)
+plt.xlabel('original')
+plt.subplot(1,2,2)
+plt.imshow(penh,cmap=plt.cm.gray)
+plt.xlabel('local morphlogical contrast enhancement')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -243,7 +302,17 @@ local autolevel result.
 Image morphology
 ================
 
+Local maximum and local minimum are the base operators for grey level morphology.
 
+"""
+
+"""
+.. image:: PLOT2RST.current_figure
+
+Implementation
+================
+
+Implementation comparison w.r.t. image size and structuring element size.
 
 """
 plt.show()
