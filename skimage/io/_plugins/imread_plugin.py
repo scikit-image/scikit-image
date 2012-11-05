@@ -1,6 +1,7 @@
 __all__ = ['imread', 'imsave']
 
 import numpy as np
+from skimage.utils.dtype import convert
 
 try:
     import imread as _imread
@@ -20,7 +21,7 @@ def imread(fname, dtype=None):
     """
     im = _imread.imread(fname)
     if dtype is not None:
-        im = im.asdtype(dtype)
+        im = convert(im, dtype)
     return im
 
 def imsave(fname, arr, format_str=None):
