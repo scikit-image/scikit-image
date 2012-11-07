@@ -19,6 +19,27 @@ if __name__ == '__main__':
     den = denoise_bilateral(a8,win_size=10,sigma_range=10,sigma_spatial=2)[:,:,0]
     f16b= rank.bilateral_mean(a8.astype(np.uint16),disk(10),s0=10,s1=10)
 
+
+    selem = np.ones((3,3))
+    selem[1,1] = 0
+    radius = 3
+    selem = disk(radius)
+    selem[radius,radius] = 0
+    print selem
+    noise = rank.noise_filter(a8,selem)
+    plt.imsave('noise.png',noise,cmap=plt.cm.gray)
+    plt.imsave('cam.png',a8,cmap=plt.cm.gray)
+    print noise
+
+    plt.figure()
+    plt.subplot(1,2,1)
+    plt.imshow(a8)
+    plt.subplot(1,2,2)
+    plt.imshow(noise)
+    plt.colorbar()
+    plt.show()
+
+
     plt.figure()
     plt.subplot(1,2,1)
     plt.imshow(den)

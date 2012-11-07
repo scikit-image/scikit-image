@@ -19,7 +19,7 @@ from skimage.filter.rank import _crank8, _crank16
 from skimage.filter.rank.generic import find_bitdepth
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean', 'meansubstraction', 'median', 'minimum',
-           'modal', 'morph_contr_enh', 'pop', 'threshold', 'tophat']
+           'modal', 'morph_contr_enh', 'pop', 'threshold', 'tophat','noise_filter']
 
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
@@ -580,3 +580,31 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     return _apply(_crank8.tophat, _crank16.tophat, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
+def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Return minimum absolute diffirence between a pixel and its neighborhood
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
+        an exception will be raised if image has a value > 4095
+    selem : ndarray
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        The array to store the result of the morphology. If None is
+        passed, a new array will be allocated.
+    mask : ndarray (uint8)
+        Mask array that defines (>0) area of the image included in the local neighborhood.
+        If None, the complete image is used (default).
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
+
+    Returns
+    -------
+    out : uint8 array or uint16 array (same as input image)
+        The image noise .
+
+    """
+
+    return _apply(_crank8.noise_filter, None, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
