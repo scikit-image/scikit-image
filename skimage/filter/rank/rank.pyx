@@ -27,8 +27,12 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
     if mask is not None:
         mask = img_as_ubyte(mask)
     if image.dtype == np.uint8:
+        if func8 is None:
+            raise TypeError("uint8 image not supported for this filter")
         return func8(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, out=out)
     elif image.dtype == np.uint16:
+        if func16 is None:
+            raise TypeError("uint16 image not supported for this filter")
         bitdepth = find_bitdepth(image)
         if bitdepth > 11:
             raise ValueError("only uint16 <4096 image (12bit) supported!")
@@ -581,7 +585,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     return _apply(_crank8.tophat, _crank16.tophat, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return minimum absolute diffirence between a pixel and its neighborhood
+    """Returns the noise feature as described in [1]_
 
     Parameters
     ----------
@@ -600,11 +604,23 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False
         Offset added to the structuring element center point.
         Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
+    Reference
+    ----------
+
+    .. [1] N. Hashimoto et al. Referenceless image quality evaluation for whole slide imaging. J Pathol Inform 2012;3:9.
+
+
     Returns
     -------
     out : uint8 array or uint16 array (same as input image)
         The image noise .
 
     """
+    # ensure that the central pixel in the structuring element is empty
+    centre_r = int(selem.shape[0] / 2) + shift_y
+    centre_c = int(selem.shape[1] / 2) + shift_x
+    # make a local copy
+    selem_cpy = selem.copy()
+    selem_cpy[centre_r,centre_c] = 0
 
-    return _apply(_crank8.noise_filter, None, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply(_crank8.noise_filter, None, image, selem_cpy, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)

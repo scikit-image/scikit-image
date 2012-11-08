@@ -230,21 +230,26 @@ cdef inline np.uint8_t kernel_noise_filter(
     cdef Py_ssize_t i
     cdef Py_ssize_t min_i
 
-    for i in range(255, g, -1):
+    # early stop if at least one pixel of the neighborhood has the same g
+    if histo[g]>0:
+        return < np.uint8_t > 0
+
+    for i in range(g, -1, -1):
         if histo[i]:
             break
-    min_i = i-g
-    for i in range(0, g):
+    min_i = g-i
+    for i in range(g, 256):
         if histo[i]:
             break
-    if g-i < min_i:
-        return < np.uint8_t > (g-i)
+    if i-g < min_i:
+        return < np.uint8_t > (i-g)
     else:
         return < np.uint8_t > min_i
 
 
 # -----------------------------------------------------------------
 # python wrappers
+# used only internally
 # -----------------------------------------------------------------
 
 
@@ -253,8 +258,6 @@ def autolevel(np.ndarray[np.uint8_t, ndim=2] image,
               np.ndarray[np.uint8_t, ndim=2] mask=None,
               np.ndarray[np.uint8_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0):
-    """bottom hat
-    """
     return _core8(
         kernel_autolevel, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
         < Py_ssize_t > 0)
@@ -265,8 +268,6 @@ def bottomhat(np.ndarray[np.uint8_t, ndim=2] image,
               np.ndarray[np.uint8_t, ndim=2] mask=None,
               np.ndarray[np.uint8_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0):
-    """bottom hat
-    """
     return _core8(
         kernel_bottomhat, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
         < Py_ssize_t > 0)
@@ -277,8 +278,6 @@ def equalize(np.ndarray[np.uint8_t, ndim=2] image,
              np.ndarray[np.uint8_t, ndim=2] mask=None,
              np.ndarray[np.uint8_t, ndim=2] out=None,
              char shift_x=0, char shift_y=0):
-    """local egalisation of the gray level
-    """
     return _core8(
         kernel_equalize, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
         < Py_ssize_t > 0)
@@ -289,8 +288,6 @@ def gradient(np.ndarray[np.uint8_t, ndim=2] image,
              np.ndarray[np.uint8_t, ndim=2] mask=None,
              np.ndarray[np.uint8_t, ndim=2] out=None,
              char shift_x=0, char shift_y=0):
-    """local maximum - local minimum gray level
-    """
     return _core8(
         kernel_gradient, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
         < Py_ssize_t > 0)
@@ -301,8 +298,6 @@ def maximum(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] mask=None,
             np.ndarray[np.uint8_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0):
-    """local maximum gray level
-    """
     return _core8(kernel_maximum, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
 
 
@@ -311,8 +306,6 @@ def mean(np.ndarray[np.uint8_t, ndim=2] image,
          np.ndarray[np.uint8_t, ndim=2] mask=None,
          np.ndarray[np.uint8_t, ndim=2] out=None,
          char shift_x=0, char shift_y=0):
-    """average gray level (clipped on uint8)
-    """
     return _core8(kernel_mean, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
 
 
@@ -321,8 +314,6 @@ def meansubstraction(np.ndarray[np.uint8_t, ndim=2] image,
                      np.ndarray[np.uint8_t, ndim=2] mask=None,
                      np.ndarray[np.uint8_t, ndim=2] out=None,
                      char shift_x=0, char shift_y=0):
-    """(g - average gray level)/2+127 (clipped on uint8)
-    """
     return _core8(
         kernel_meansubstraction, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
         < Py_ssize_t > 0)
@@ -333,8 +324,6 @@ def median(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] mask=None,
            np.ndarray[np.uint8_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0):
-    """local median
-    """
     return _core8(kernel_median, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
 
 
@@ -343,8 +332,6 @@ def minimum(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] mask=None,
             np.ndarray[np.uint8_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0):
-    """local minimum gray level
-    """
     return _core8(kernel_minimum, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
 
 
@@ -353,8 +340,6 @@ def morph_contr_enh(np.ndarray[np.uint8_t, ndim=2] image,
                     np.ndarray[np.uint8_t, ndim=2] mask=None,
                     np.ndarray[np.uint8_t, ndim=2] out=None,
                     char shift_x=0, char shift_y=0):
-    """morphological contrast enhancement
-    """
     return _core8(
         kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
         < Py_ssize_t > 0)
@@ -365,8 +350,6 @@ def modal(np.ndarray[np.uint8_t, ndim=2] image,
           np.ndarray[np.uint8_t, ndim=2] mask=None,
           np.ndarray[np.uint8_t, ndim=2] out=None,
           char shift_x=0, char shift_y=0):
-    """local mode
-    """
     return _core8(kernel_modal, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
 
 
@@ -375,8 +358,6 @@ def pop(np.ndarray[np.uint8_t, ndim=2] image,
         np.ndarray[np.uint8_t, ndim=2] mask=None,
         np.ndarray[np.uint8_t, ndim=2] out=None,
         char shift_x=0, char shift_y=0):
-    """returns the number of actual pixels of the structuring element inside the mask
-    """
     return _core8(kernel_pop, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
 
 
@@ -385,8 +366,6 @@ def threshold(np.ndarray[np.uint8_t, ndim=2] image,
               np.ndarray[np.uint8_t, ndim=2] mask=None,
               np.ndarray[np.uint8_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0):
-    """returns 255 if gray level higher than local mean, 0 else
-    """
     return _core8(
         kernel_threshold, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0,
         < Py_ssize_t > 0)
@@ -397,15 +376,12 @@ def tophat(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] mask=None,
            np.ndarray[np.uint8_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0):
-    """top hat
-    """
     return _core8(kernel_tophat, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+
 
 def noise_filter(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] selem,
            np.ndarray[np.uint8_t, ndim=2] mask=None,
            np.ndarray[np.uint8_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0):
-    """top hat
-    """
     return _core8(kernel_noise_filter, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)

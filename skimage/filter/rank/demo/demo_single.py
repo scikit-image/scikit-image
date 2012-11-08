@@ -20,16 +20,11 @@ if __name__ == '__main__':
     f16b= rank.bilateral_mean(a8.astype(np.uint16),disk(10),s0=10,s1=10)
 
 
-    selem = np.ones((3,3))
-    selem[1,1] = 0
-    radius = 3
-    selem = disk(radius)
-    selem[radius,radius] = 0
-    print selem
+#    selem = np.ones((3,3),dtype=np.uint8)
     noise = rank.noise_filter(a8,selem)
     plt.imsave('noise.png',noise,cmap=plt.cm.gray)
     plt.imsave('cam.png',a8,cmap=plt.cm.gray)
-    print noise
+
 
     plt.figure()
     plt.subplot(1,2,1)
