@@ -5,6 +5,7 @@ from itertools import izip as zip
 import numpy as np
 from scipy import ndimage
 from ._hough_transform import _probabilistic_hough
+from skimage import measure, morphology
 
 
 def _hough(img, theta=None):
@@ -208,7 +209,9 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     hspace *= mask
     hspace_t = hspace > threshold
 
-    coords = np.transpose(hspace_t.nonzero())
+    label_hspace = morphology.label(hspace_t)
+    props = measure.regionprops(label_hspace, ['Centroid'])
+    coords = np.array([np.round(p['Centroid']) for p in props], dtype=int)
 
     hspace_peaks = []
     dist_peaks = []
