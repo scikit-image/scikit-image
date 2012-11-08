@@ -164,7 +164,7 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
         Minimum angle separating lines (maximum filter size for second
         dimension of hough space).
     threshold : float
-        Minimum intensity of peaks calculated as `0.5 * max(hspace)`.
+        Minimum intensity of peaks. Default is `0.5 * max(hspace)`.
     num_peaks : int
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` coordinates based on peak intensity.
