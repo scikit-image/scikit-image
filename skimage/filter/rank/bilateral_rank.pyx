@@ -71,8 +71,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -126,8 +125,7 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fals
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).

@@ -19,7 +19,7 @@ from skimage.filter.rank import _crank8, _crank16
 from skimage.filter.rank.generic import find_bitdepth
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean', 'meansubstraction', 'median', 'minimum',
-           'modal', 'morph_contr_enh', 'pop', 'threshold', 'tophat','noise_filter']
+           'modal', 'morph_contr_enh', 'pop', 'threshold', 'tophat','noise_filter','entropy']
 
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
@@ -52,8 +52,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -94,8 +93,7 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -127,8 +125,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -169,8 +166,7 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -202,8 +198,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -242,8 +237,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -281,8 +275,7 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False, shift_y=F
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -316,8 +309,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -355,8 +347,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -395,8 +386,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -427,8 +417,7 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -468,8 +457,7 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -516,8 +504,7 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -566,8 +553,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -595,8 +581,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -626,7 +611,12 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False
     return _apply(_crank8.noise_filter, None, image, selem_cpy, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns the entropy (in bit) computed locally (precision is limited due to image type used 8- or 16-bit)
+    """Returns the entropy [wiki_entropy]_ computed locally. Entropy is computed using base 2 logarithm i.e.
+    the filter returns the minimum number of bits needed to encode local greylevel distribution.
+
+    References
+    ----------
+    .. [wiki_entropy] http://en.wikipedia.org/wiki/Entropy_(information_theory)
 
     Parameters
     ----------
@@ -636,8 +626,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -645,12 +634,25 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
         Offset added to the structuring element center point.
         Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
 
-
     Returns
     -------
     out : uint8 array or uint16 array (same as input image)
-        local entropy (in bit)
+        entropy x10 (uint8 images) and entropy x1000 (uint16 images)
+
+
+    Examples
+    --------
+
+    >>> # Local entropy
+    >>> from skimage import data
+    >>> from skimage.filter.rank import entropy
+    >>> from skimage.morphology import disk
+    >>> # defining a 8- and a 16-bit test images
+    >>> a8 = data.camera()
+    >>> a16 = data.camera().astype(np.uint16)*4
+    >>> ent8 = entropy(a8,disk(5)) # pixel value contain 10x the local entropy
+    >>> ent16 = entropy(a16,disk(5)) # pixel value contain 1000x the local entropy
 
     """
 
-    return _apply(_crank8.entropy, None, image, selem_cpy, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+    return _apply(_crank8.entropy, _crank16.entropy, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)

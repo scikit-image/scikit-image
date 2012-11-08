@@ -6,6 +6,8 @@
 import numpy as np
 cimport numpy as np
 
+from libc.math cimport log2
+
 # import main loop
 from skimage.filter.rank._core8 cimport _core8
 
@@ -251,17 +253,16 @@ cdef inline np.uint8_t kernel_entropy(
         Py_ssize_t s1):
 
     cdef Py_ssize_t i
-    cdef Py_ssize_t min_i
     cdef float e,p
 
-    e = 0
+    e = 0.
 
     for i in range(256):
-        p = <float>histo[i]/pop
+        p = histo[i]/pop
         if p>0:
-            e -= p*np.log2(p)
+            e -= p*log2(p)
 
-    return < np.uint8_t > e
+    return < np.uint8_t > e*10
 
 # -----------------------------------------------------------------
 # python wrappers

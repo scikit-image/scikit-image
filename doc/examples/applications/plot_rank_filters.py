@@ -348,6 +348,61 @@ plt.xlabel('morphological gradient')
 """
 .. image:: PLOT2RST.current_figure
 
+Feature extraction
+===================
+
+Local histogram can be exploited to compute local entropy, which is related to the local image complexity.
+Entropy is computed using base 2 logarithm i.e. the filter returns the minimum number of bits needed to encode local
+greylevel distribution.
+
+``skimage.rank.entropy`` returns local entropy on a given structuring element.
+The following example shows this filter applied on 8- and 16- bit images.
+
+.. note:: to better use the available image bit, the function returns 10x entropy for 8-bit images and 1000x entropy
+   for 16-bit images.
+
+"""
+
+from skimage import data
+from skimage.filter.rank import entropy
+from skimage.morphology import disk
+import numpy as np
+import matplotlib.pyplot as plt
+
+# defining a 8- and a 16-bit test images
+a8 = data.camera()
+a16 = data.camera().astype(np.uint16)*4
+
+ent8 = entropy(a8,disk(5)) # pixel value contain 10x the local entropy
+ent16 = entropy(a16,disk(5)) # pixel value contain 1000x the local entropy
+
+# display results
+plt.figure(figsize=(10, 10))
+
+plt.subplot(2,2,1)
+plt.imshow(a8, cmap=plt.cm.gray)
+plt.xlabel('8-bit image')
+plt.colorbar()
+
+plt.subplot(2,2,2)
+plt.imshow(ent8, cmap=plt.cm.jet)
+plt.xlabel('entropy*10')
+plt.colorbar()
+
+plt.subplot(2,2,3)
+plt.imshow(a16, cmap=plt.cm.gray)
+plt.xlabel('16-bit image')
+plt.colorbar()
+
+plt.subplot(2,2,4)
+plt.imshow(ent16, cmap=plt.cm.jet)
+plt.xlabel('entropy*1000')
+plt.colorbar()
+plt.show()
+
+"""
+.. image:: PLOT2RST.current_figure
+
 Implementation
 ================
 

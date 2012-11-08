@@ -25,12 +25,15 @@ if __name__ == '__main__':
     plt.imsave('noise.png',noise,cmap=plt.cm.gray)
     plt.imsave('cam.png',a8,cmap=plt.cm.gray)
 
+    selem = disk(3)
+    ent = rank.entropy(a16,selem)
+
 
     plt.figure()
     plt.subplot(1,2,1)
     plt.imshow(a8)
     plt.subplot(1,2,2)
-    plt.imshow(noise)
+    plt.imshow(ent)
     plt.colorbar()
     plt.show()
 

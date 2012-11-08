@@ -55,8 +55,7 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False, shift
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -92,8 +91,7 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False, shift_
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -130,8 +128,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False, shift_y=Fa
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -167,8 +164,7 @@ def percentile_mean_substraction(image, selem, out=None, mask=None, shift_x=Fals
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -205,8 +201,7 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -243,8 +238,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False, 
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -281,8 +275,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False, shift_y=Fal
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
@@ -319,8 +312,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False, shift
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
-        passed, a new array will be allocated.
+        If None, a new array will be allocated.
     mask : ndarray (uint8)
         Mask array that defines (>0) area of the image included in the local neighborhood.
         If None, the complete image is used (default).
