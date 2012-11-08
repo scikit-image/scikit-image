@@ -28,11 +28,11 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
         mask = img_as_ubyte(mask)
     if image.dtype == np.uint8:
         if func8 is None:
-            raise TypeError("uint8 image not supported for this filter")
+            raise TypeError("not implemented for uint8 image")
         return func8(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask, out=out)
     elif image.dtype == np.uint16:
         if func16 is None:
-            raise TypeError("uint16 image not supported for this filter")
+            raise TypeError("not implemented for uint16 image")
         bitdepth = find_bitdepth(image)
         if bitdepth > 11:
             raise ValueError("only uint16 <4096 image (12bit) supported!")
@@ -624,3 +624,33 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False
     selem_cpy[centre_r,centre_c] = 0
 
     return _apply(_crank8.noise_filter, None, image, selem_cpy, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+
+def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Returns the entropy (in bit) computed locally (precision is limited due to image type used 8- or 16-bit)
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
+        an exception will be raised if image has a value > 4095
+    selem : ndarray
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        The array to store the result of the morphology. If None is
+        passed, a new array will be allocated.
+    mask : ndarray (uint8)
+        Mask array that defines (>0) area of the image included in the local neighborhood.
+        If None, the complete image is used (default).
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
+
+
+    Returns
+    -------
+    out : uint8 array or uint16 array (same as input image)
+        local entropy (in bit)
+
+    """
+
+    return _apply(_crank8.entropy, None, image, selem_cpy, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)

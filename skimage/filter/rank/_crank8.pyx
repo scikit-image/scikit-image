@@ -246,6 +246,22 @@ cdef inline np.uint8_t kernel_noise_filter(
     else:
         return < np.uint8_t > min_i
 
+cdef inline np.uint8_t kernel_entropy(
+        Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
+    cdef Py_ssize_t i
+    cdef Py_ssize_t min_i
+    cdef float e,p
+
+    e = 0
+
+    for i in range(256):
+        p = <float>histo[i]/pop
+        if p>0:
+            e -= p*np.log2(p)
+
+    return < np.uint8_t > e
 
 # -----------------------------------------------------------------
 # python wrappers
@@ -385,3 +401,10 @@ def noise_filter(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0):
     return _core8(kernel_noise_filter, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+
+def entropy(np.ndarray[np.uint8_t, ndim=2] image,
+                 np.ndarray[np.uint8_t, ndim=2] selem,
+                 np.ndarray[np.uint8_t, ndim=2] mask=None,
+                 np.ndarray[np.uint8_t, ndim=2] out=None,
+                 char shift_x=0, char shift_y=0):
+    return _core8(kernel_entropy, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
