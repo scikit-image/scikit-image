@@ -25,7 +25,7 @@ Rank filters can be used for several purposes such as:
 Some well known filters are specific cases of rank filters [1]_ e.g. morphological dilation, morphological erosion,
 median filters.
 
-The different implementation availables in ``skimage`` are compared compare.
+The different implementation availables in ``skimage`` are compared.
 
 In this example, we will see how to filter a grey level image using some of the linear and non-linear filters
 availables in skimage.  We use the ``camera`` image from ``skimage.data``.
@@ -362,6 +362,8 @@ The following example shows this filter applied on 8- and 16- bit images.
    for 16-bit images.
 
 """
+
+
 
 from skimage import data
 from skimage.filter.rank import entropy
