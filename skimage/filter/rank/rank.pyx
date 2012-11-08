@@ -571,7 +571,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     return _apply(_crank8.tophat, _crank16.tophat, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns the noise feature as described in [1]_
+    """Returns the noise feature as described in [Hashimoto12]_
 
     Parameters
     ----------
@@ -579,7 +579,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False
         Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
         an exception will be raised if image has a value > 4095
     selem : ndarray
-        The neighborhood expressed as a 2-D array of 1's and 0's.
+        The neighborhood expressed as a 2-D array of 1's and 0's. Central element is removed during the filtering.
     out : ndarray
         If None, a new array will be allocated.
     mask : ndarray (uint8)
@@ -592,7 +592,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False, shift_y=False
     Reference
     ----------
 
-    .. [1] N. Hashimoto et al. Referenceless image quality evaluation for whole slide imaging. J Pathol Inform 2012;3:9.
+    .. [Hashimoto12] N. Hashimoto et al. Referenceless image quality evaluation for whole slide imaging. J Pathol Inform 2012;3:9.
 
 
     Returns
