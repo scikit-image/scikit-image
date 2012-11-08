@@ -264,6 +264,46 @@ cdef inline np.uint8_t kernel_entropy(
 
     return < np.uint8_t > e*10
 
+cdef inline np.uint8_t kernel_otsu(
+        Py_ssize_t * histo, float pop, np.uint8_t g, float p0, float p1, Py_ssize_t s0,
+        Py_ssize_t s1):
+
+    cdef Py_ssize_t i
+    cdef Py_ssize_t max_i
+    cdef float P, mu1, mu2, q1,new_q1, sigma_b, max_sigma_b
+    cdef float mu = 0.
+
+    # compute local mean
+
+    if pop:
+        for i in range(256):
+            mu += histo[i] * i
+        mu = (mu / pop)
+    else:
+        return < np.uint8_t > (0)
+
+    # maximizing the between class variance
+    max_i = 0
+    q1 = histo[0]/pop
+    m1 = 0.
+    max_sigma_b = 0.
+
+    for i in range(1,256):
+        P = histo[i]/pop
+        new_q1 = q1 + P
+        if new_q1>0:
+            mu1 = (q1*mu1 + i*P)/new_q1
+            mu2 = (mu-new_q1*mu1)/(1.-new_q1)
+            sigma_b = new_q1*(1.-new_q1)*(mu1-mu2)**2
+            if sigma_b>max_sigma_b:
+                max_sigma_b = sigma_b
+                max_i = i
+            q1 = new_q1
+
+    if g>max_i:
+        return < np.uint8_t > 255
+    else:
+        return < np.uint8_t > 0
 # -----------------------------------------------------------------
 # python wrappers
 # used only internally
@@ -409,3 +449,10 @@ def entropy(np.ndarray[np.uint8_t, ndim=2] image,
                  np.ndarray[np.uint8_t, ndim=2] out=None,
                  char shift_x=0, char shift_y=0):
     return _core8(kernel_entropy, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+
+def otsu(np.ndarray[np.uint8_t, ndim=2] image,
+            np.ndarray[np.uint8_t, ndim=2] selem,
+            np.ndarray[np.uint8_t, ndim=2] mask=None,
+            np.ndarray[np.uint8_t, ndim=2] out=None,
+            char shift_x=0, char shift_y=0):
+    return _core8(kernel_otsu, image, selem, mask, out, shift_x, shift_y, .0, .0, < Py_ssize_t > 0, < Py_ssize_t > 0)

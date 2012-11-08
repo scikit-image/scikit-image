@@ -19,7 +19,7 @@ from skimage.filter.rank import _crank8, _crank16
 from skimage.filter.rank.generic import find_bitdepth
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean', 'meansubstraction', 'median', 'minimum',
-           'modal', 'morph_contr_enh', 'pop', 'threshold', 'tophat','noise_filter','entropy']
+           'modal', 'morph_contr_enh', 'pop', 'threshold', 'tophat','noise_filter','entropy','otsu']
 
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
@@ -656,3 +656,48 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """
 
     return _apply(_crank8.entropy, _crank16.entropy, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+
+def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Returns the image threshold using a the Otsu [otsu]_ locally .
+
+    References
+    ----------
+
+    .. [otsu] http://en.wikipedia.org/wiki/Otsu's_method
+
+    Parameters
+    ----------
+    image : ndarray
+        Image array (uint8 array or uint16). If image is uint16, the algorithm uses max. 12bit histogram,
+        an exception will be raised if image has a value > 4095
+    selem : ndarray
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray
+        If None, a new array will be allocated.
+    mask : ndarray (uint8)
+        Mask array that defines (>0) area of the image included in the local neighborhood.
+        If None, the complete image is used (default).
+    shift_x, shift_y : (int)
+        Offset added to the structuring element center point.
+        Shift is bounded to the structuring element sizes (center must be inside the given structuring element).
+
+    Returns
+    -------
+    out : uint8 array or uint16 array (same as input image)
+        threshold image
+
+
+    Examples
+    --------
+
+    >>> # Local entropy
+    >>> from skimage import data
+    >>> from skimage.filter.rank import otsu
+    >>> from skimage.morphology import disk
+    >>> # defining a 8- and a 16-bit test images
+    >>> a8 = data.camera()
+    >>> loc_otsu = otsu(a8,disk(5))
+
+    """
+
+    return _apply(_crank8.otsu, None, image, selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)

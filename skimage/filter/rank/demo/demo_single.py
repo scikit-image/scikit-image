@@ -10,57 +10,23 @@ from skimage.filter import denoise_bilateral
 if __name__ == '__main__':
     a8 = data.camera()
     a16 = data.camera().astype(np.uint16)*4
-    selem = disk(10)
 
-    f8= rank.percentile_autolevel(a8,selem,p0=.0,p1=1.)
-    f16= rank.autolevel(a16,selem)
-    f16p= rank.percentile_autolevel(a16,selem,p0=.0,p1=1.)
+    p8 = data.page()
 
-    den = denoise_bilateral(a8,win_size=10,sigma_range=10,sigma_spatial=2)[:,:,0]
-    f16b= rank.bilateral_mean(a8.astype(np.uint16),disk(10),s0=10,s1=10)
+    selem = disk(20)
 
-
-#    selem = np.ones((3,3),dtype=np.uint8)
-    noise = rank.noise_filter(a8,selem)
-    plt.imsave('noise.png',noise,cmap=plt.cm.gray)
-    plt.imsave('cam.png',a8,cmap=plt.cm.gray)
-
-    selem = disk(3)
-    ent = rank.entropy(a16,selem)
+    otsu = rank.otsu(p8,selem)
 
 
     plt.figure()
     plt.subplot(1,2,1)
-    plt.imshow(a8)
+    plt.imshow(p8)
+    plt.colorbar()
     plt.subplot(1,2,2)
-    plt.imshow(ent)
+    plt.imshow(otsu)
     plt.colorbar()
     plt.show()
 
-
-    plt.figure()
-    plt.subplot(1,2,1)
-    plt.imshow(den)
-    plt.subplot(1,2,2)
-    plt.imshow(f16b)
-    plt.show()
-
-    print f16==f16p
-
-    plt.figure()
-    plt.subplot(1,3,1)
-    plt.imshow(f16)
-    plt.colorbar()
-    plt.subplot(1,3,2)
-    plt.imshow(f16p)
-    plt.colorbar()
-    plt.subplot(1,3,3)
-    plt.imshow(f16p-f16)
-    plt.colorbar()
-    plt.show()
-
-    print f16
-    print f16p
 
 
 
