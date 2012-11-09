@@ -59,7 +59,8 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
          char shift_x=0, char shift_y=0, int bitdepth=8, int s0=1, int s1=1):
     """average gray level (clipped on uint8)
     """
-    return _core16(kernel_mean, image, selem, mask, out, shift_x, shift_y, bitdepth, 0., 0., s0, s1)
+    _core16(kernel_mean, image, selem, mask, out, shift_x, shift_y,
+            bitdepth, 0., 0., s0, s1)
 
 
 def pop(np.ndarray[np.uint16_t, ndim=2] image,
@@ -69,4 +70,5 @@ def pop(np.ndarray[np.uint16_t, ndim=2] image,
         char shift_x=0, char shift_y=0, int bitdepth=8, int s0=1, int s1=1):
     """returns the number of actual pixels of the structuring element inside the mask
     """
-    return _core16(kernel_pop, image, selem, mask, out, shift_x, shift_y, bitdepth, .0, .0, s0, s1)
+    _core16(kernel_pop, image, selem, mask, out, shift_x, shift_y,
+            bitdepth, .0, .0, s0, s1)
