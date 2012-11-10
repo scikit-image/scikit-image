@@ -19,4 +19,4 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, Py_ssize_t, np.uint8_t, float,
                  np.ndarray[np.uint8_t, ndim=2] mask,
                  np.ndarray[np.uint8_t, ndim=2] out,
                  char shift_x, char shift_y, float p0, float p1,
-                 Py_ssize_t s0, Py_ssize_t s1)
+                 Py_ssize_t s0, Py_ssize_t s1) except *

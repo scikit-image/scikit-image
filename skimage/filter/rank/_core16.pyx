@@ -37,7 +37,7 @@ cdef void _core16(np.uint16_t kernel(Py_ssize_t *, Py_ssize_t, np.uint16_t,
                   np.ndarray[np.uint8_t, ndim=2] mask,
                   np.ndarray[np.uint16_t, ndim=2] out,
                   char shift_x, char shift_y, Py_ssize_t bitdepth,
-                  float p0, float p1, Py_ssize_t s0, Py_ssize_t s1):
+                  float p0, float p1, Py_ssize_t s0, Py_ssize_t s1) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
     use kernel function return value for output image.
     """
@@ -60,7 +60,7 @@ cdef void _core16(np.uint16_t kernel(Py_ssize_t *, Py_ssize_t, np.uint16_t,
     maxbin_list = [0, 0, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
     midbin_list = [0, 0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
 
-    #set maxbin and midbin
+    # set maxbin and midbin
     cdef Py_ssize_t maxbin = maxbin_list[bitdepth]
     cdef Py_ssize_t midbin = midbin_list[bitdepth]
 

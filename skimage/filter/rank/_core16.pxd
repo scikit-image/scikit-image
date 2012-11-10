@@ -14,4 +14,4 @@ cdef void _core16(np.uint16_t kernel(Py_ssize_t *, Py_ssize_t, np.uint16_t,
                   np.ndarray[np.uint8_t, ndim=2] mask,
                   np.ndarray[np.uint16_t, ndim=2] out,
                   char shift_x, char shift_y, Py_ssize_t bitdepth,
-                  float p0, float p1, Py_ssize_t s0, Py_ssize_t s1)
+                  float p0, float p1, Py_ssize_t s0, Py_ssize_t s1) except *
