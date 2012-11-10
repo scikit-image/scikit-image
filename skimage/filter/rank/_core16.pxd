@@ -6,7 +6,7 @@ cdef int int_min(int a, int b)
 
 
 # 16 bit core kernel receives extra information about data bitdepth
-cdef void _core16(np.uint16_t kernel(Py_ssize_t *, Py_ssize_t, np.uint16_t,
+cdef void _core16(np.uint16_t kernel(Py_ssize_t *, float, np.uint16_t,
                                      Py_ssize_t, Py_ssize_t, Py_ssize_t, float,
                                      float, Py_ssize_t, Py_ssize_t),
                   np.ndarray[np.uint16_t, ndim=2] image,
