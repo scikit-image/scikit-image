@@ -122,9 +122,12 @@ cdef inline np.uint16_t kernel_mean(Py_ssize_t * histo, Py_ssize_t pop,
         return <np.uint16_t>(0)
 
 
-cdef inline np.uint16_t kernel_meansubstraction(Py_ssize_t * histo, Py_ssize_t pop,
-                                                np.uint16_t g, Py_ssize_t bitdepth,
-                                                Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_meansubstraction(Py_ssize_t * histo,
+                                                Py_ssize_t pop,
+                                                np.uint16_t g,
+                                                Py_ssize_t bitdepth,
+                                                Py_ssize_t maxbin,
+                                                Py_ssize_t midbin,
                                                 float p0, float p1,
                                                 Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
@@ -188,9 +191,12 @@ cdef inline np.uint16_t kernel_modal(Py_ssize_t * histo, Py_ssize_t pop,
     return <np.uint16_t>(0)
 
 
-cdef inline np.uint16_t kernel_morph_contr_enh(Py_ssize_t * histo, Py_ssize_t pop,
-                                               np.uint16_t g, Py_ssize_t bitdepth,
-                                               Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_morph_contr_enh(Py_ssize_t * histo,
+                                               Py_ssize_t pop,
+                                               np.uint16_t g,
+                                               Py_ssize_t bitdepth,
+                                               Py_ssize_t maxbin,
+                                               Py_ssize_t midbin,
                                                float p0, float p1,
                                                Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i, imin, imax
