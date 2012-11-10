@@ -13,7 +13,7 @@ from skimage.filter.rank._core8 cimport _core8, uint8_max, uint8_min
 # -----------------------------------------------------------------
 
 
-cdef inline np.uint8_t kernel_autolevel(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_autolevel(Py_ssize_t * histo, Py_ssize_t pop,
                                         np.uint8_t g, float p0, float p1,
                                         Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, imin, imax, sum, delta
@@ -45,7 +45,7 @@ cdef inline np.uint8_t kernel_autolevel(Py_ssize_t * histo, float pop,
         return <np.uint8_t>(128)
 
 
-cdef inline np.uint8_t kernel_gradient(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_gradient(Py_ssize_t * histo, Py_ssize_t pop,
                                        np.uint8_t g, float p0, float p1,
                                        Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, imin, imax, sum, delta
@@ -70,7 +70,7 @@ cdef inline np.uint8_t kernel_gradient(Py_ssize_t * histo, float pop,
         return <np.uint8_t>(0)
 
 
-cdef inline np.uint8_t kernel_mean(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_mean(Py_ssize_t * histo, Py_ssize_t pop,
                                    np.uint8_t g, float p0, float p1,
                                    Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, sum, mean, n
@@ -92,7 +92,7 @@ cdef inline np.uint8_t kernel_mean(Py_ssize_t * histo, float pop,
         return <np.uint8_t>(0)
 
 
-cdef inline np.uint8_t kernel_mean_substraction(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_mean_substraction(Py_ssize_t * histo, Py_ssize_t pop,
                                                 np.uint8_t g, float p0, float p1,
                                                 Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, sum, mean, n
@@ -114,7 +114,7 @@ cdef inline np.uint8_t kernel_mean_substraction(Py_ssize_t * histo, float pop,
         return <np.uint8_t>(0)
 
 
-cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t * histo, Py_ssize_t pop,
                                               np.uint8_t g, float p0, float p1,
                                               Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, imin, imax, sum, delta
@@ -145,7 +145,7 @@ cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t * histo, float pop,
         return <np.uint8_t>(0)
 
 
-cdef inline np.uint8_t kernel_percentile(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_percentile(Py_ssize_t * histo, Py_ssize_t pop,
                                          np.uint8_t g, float p0, float p1,
                                          Py_ssize_t s0, Py_ssize_t s1):
     cdef int i
@@ -162,7 +162,7 @@ cdef inline np.uint8_t kernel_percentile(Py_ssize_t * histo, float pop,
         return <np.uint8_t>(0)
 
 
-cdef inline np.uint8_t kernel_pop(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_pop(Py_ssize_t * histo, Py_ssize_t pop,
                                   np.uint8_t g, float p0, float p1,
                                   Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, sum, n
@@ -179,7 +179,7 @@ cdef inline np.uint8_t kernel_pop(Py_ssize_t * histo, float pop,
         return <np.uint8_t>(0)
 
 
-cdef inline np.uint8_t kernel_threshold(Py_ssize_t * histo, float pop,
+cdef inline np.uint8_t kernel_threshold(Py_ssize_t * histo, Py_ssize_t pop,
                                         np.uint8_t g, float p0, float p1,
                                         Py_ssize_t s0, Py_ssize_t s1):
     cdef int i

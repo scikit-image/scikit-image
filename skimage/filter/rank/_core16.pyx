@@ -17,19 +17,19 @@ cdef inline int int_min(int a, int b):
     return a if a <= b else b
 
 
-cdef inline void histogram_increment(Py_ssize_t * histo, float * pop,
+cdef inline void histogram_increment(Py_ssize_t * histo, Py_ssize_t * pop,
                                      np.uint16_t value):
     histo[value] += 1
-    pop[0] += 1.
+    pop[0] += 1
 
 
-cdef inline void histogram_decrement(Py_ssize_t * histo, float * pop,
+cdef inline void histogram_decrement(Py_ssize_t * histo, Py_ssize_t * pop,
                                      np.uint16_t value):
     histo[value] -= 1
-    pop[0] -= 1.
+    pop[0] -= 1
 
 
-cdef void _core16(np.uint16_t kernel(Py_ssize_t *, float, np.uint16_t,
+cdef void _core16(np.uint16_t kernel(Py_ssize_t *, Py_ssize_t, np.uint16_t,
                                      Py_ssize_t, Py_ssize_t, Py_ssize_t, float,
                                      float, Py_ssize_t, Py_ssize_t),
                   np.ndarray[np.uint16_t, ndim=2] image,
@@ -74,7 +74,7 @@ cdef void _core16(np.uint16_t kernel(Py_ssize_t *, float, np.uint16_t,
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
     # number of pixels actually inside the neighborhood (float)
-    cdef float pop
+    cdef Py_ssize_t pop
 
     # allocate memory with malloc
     cdef Py_ssize_t max_se = srows * scols
