@@ -40,10 +40,10 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, p0, p1):
     else:
         mask = np.ascontiguousarray(mask)
         mask = img_as_ubyte(mask)
+
     if image is out:
         raise NotImplementedError("Cannot perform rank operation in place.")
 
-    mask = np.ascontiguousarray(mask)
     if image.dtype == np.uint8:
         if func8 is None:
             raise TypeError("Not implemented for uint8 image.")
