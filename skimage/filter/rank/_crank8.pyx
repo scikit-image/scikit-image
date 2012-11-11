@@ -312,11 +312,7 @@ cdef inline np.uint8_t kernel_otsu(Py_ssize_t * histo, float pop, np.uint8_t g,
                 max_i = i
             q1 = new_q1
 
-    if g > max_i:
-        return <np.uint8_t>255
-    else:
-        return <np.uint8_t>0
-
+    return <np.uint8_t> max_i
 
 
 # -----------------------------------------------------------------

@@ -715,7 +715,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns the image threshold using a the Otsu [otsu]_ locally .
+    """Returns the Otsu's threshold value for each pixel.
 
     Parameters
     ----------
@@ -738,7 +738,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : uint8 array or uint16 array (same as input image)
-        threshold image
+        Otsu's threshold values
 
     References
     ----------
@@ -753,6 +753,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> # defining a 8- and a 16-bit test images
     >>> a8 = data.camera()
     >>> loc_otsu = otsu(a8,disk(5))
+    >>> thresh_image = a8 >= loc_otsu
 
     """
 
