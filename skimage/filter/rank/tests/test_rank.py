@@ -318,5 +318,43 @@ def test_empty_selem():
         shift_x=0, shift_y=0)
     assert_array_equal(res, out)
 
+def test_otsu():
+    #
+    pass
+
+def test_entropy():
+    #  verify that entropy is coherent with bitdepth of the input data
+
+    selem = np.ones((16,16), dtype=np.uint8)
+    # 1 bit per pixel
+    data = np.tile(np.asarray([0,1]),(100,100)).astype(np.uint8)
+    assert(np.max(rank.entropy(data,selem))==10)
+
+    # 2 bit per pixel
+    data = np.tile(np.asarray([[0,1],[2,3]]),(10,10)).astype(np.uint8)
+    assert(np.max(rank.entropy(data,selem))==20)
+
+    # 3 bit per pixel
+    data = np.tile(np.asarray([[0,1,2,3],[4,5,6,7]]),(10,10)).astype(np.uint8)
+    assert(np.max(rank.entropy(data,selem))==30)
+
+    # 4 bit per pixel
+    data = np.tile(np.reshape(np.arange(16),(4,4)),(10,10)).astype(np.uint8)
+    assert(np.max(rank.entropy(data,selem))==40)
+
+    # 6 bit per pixel
+    data = np.tile(np.reshape(np.arange(64),(8,8)),(10,10)).astype(np.uint8)
+    assert(np.max(rank.entropy(data,selem))==60)
+
+    # 8 bit per pixel
+    data = np.tile(np.reshape(np.arange(256),(16,16)),(10,10)).astype(np.uint8)
+    assert(np.max(rank.entropy(data,selem))==80)
+
+    # 12 bit per pixel
+    selem = np.ones((64,64), dtype=np.uint8)
+    data = np.tile(np.reshape(np.arange(4096),(64,64)),(2,2)).astype(np.uint16)
+    assert(np.max(rank.entropy(data,selem))==12000)
+
+
 if __name__ == "__main__":
     run_module_suite()
