@@ -356,6 +356,27 @@ plt.subplot(2,2,4)
 plt.imshow(glob_otsu,cmap=plt.cm.gray)
 plt.xlabel('global Otsu ($t=%d$)'%t_glob_otsu)
 
+"""
+.. image:: PLOT2RST.current_figure
+
+The following example, shows on a synthetic image how local Otsu's threshold handle a global level shift.
+ """
+
+n = 100
+theta = np.linspace(0,10*np.pi,n)
+x = np.sin(theta)
+m = (np.tile(x,(n,1))* np.linspace(0.1,1,n)*128+128).astype(np.uint8)
+
+radius = 10
+t = rank.otsu(m,disk(radius))
+plt.figure()
+plt.subplot(1,2,1)
+plt.imshow(m)
+plt.xlabel('original')
+plt.subplot(1,2,2)
+plt.imshow(m>=t,interpolation='nearest')
+plt.xlabel('local Otsu ($radius=%d$)'%radius)
+
 
 """
 .. image:: PLOT2RST.current_figure
