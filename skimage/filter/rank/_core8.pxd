@@ -10,7 +10,7 @@ cdef np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
                            np.uint8_t * mask)
 
 
-# 8 bit core kernel receives extra information about data inferior and superior
+# 8-bit core kernel receives extra information about data inferior and superior
 # percentiles
 cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
                                    float, Py_ssize_t, Py_ssize_t),

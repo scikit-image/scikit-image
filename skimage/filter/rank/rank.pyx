@@ -5,11 +5,11 @@ Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median
 filtering algorithm", IEEE Transactions on Acoustics, Speech and Signal
 Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
 
-Input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit), for 16 bit
+Input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit), for 16-bit
 input images, the number of histogram bins is determined from the maximum value
 present in the image.
 
-Result image is 8 or 16 bit with respect to the input image.
+Result image is 8 or 16-bit with respect to the input image.
 
 """
 
@@ -243,7 +243,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Note
     ----
-    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
     * the lower algorithm complexity makes the rank.maximum() more efficient for
       larger images and structuring elements
 
@@ -402,7 +402,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Note
     ----
-    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
     * the lower algorithm complexity makes the rank.minimum() more efficient
       for larger images and structuring elements
 

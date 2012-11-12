@@ -108,7 +108,7 @@ def test_structuring_element8():
                   [  0,   0,   0, 255, 255,   0],
                   [  0,   0,   0,   0,   0,   0]])
 
-    # 8bit
+    # 8-bit
     image = np.zeros((6, 6), dtype=np.uint8)
     image[2, 2] = 255
     elem = np.asarray([[1, 1, 0], [1, 1, 1], [0, 0, 1]], dtype=np.uint8)
@@ -119,7 +119,7 @@ def test_structuring_element8():
         shift_x=1, shift_y=1)
     assert_array_equal(r, out)
 
-    # 16bit
+    # 16-bit
     image = np.zeros((6, 6), dtype=np.uint16)
     image[2, 2] = 255
     out = np.empty_like(image)
@@ -171,8 +171,8 @@ def test_compare_autolevels():
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
-def test_compare_autolevels_16bit():
-    # compare autolevel(16bit) and percentile autolevel(16bit) with p0=0.0 and
+def test_compare_autolevels_16-bit():
+    # compare autolevel(16-bit) and percentile autolevel(16-bit) with p0=0.0 and
     # p1=1.0 should returns the same arrays
 
     image = data.camera().astype(np.uint16) * 4
@@ -185,8 +185,8 @@ def test_compare_autolevels_16bit():
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
-def test_compare_8bit_vs_16bit():
-    # filters applied on 8bit image ore 16bit image (having only real 8bit of
+def test_compare_8-bit_vs_16-bit():
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
     # dynamic) should be identical
 
     image8 = data.camera()
@@ -352,7 +352,7 @@ def test_entropy():
     data = np.tile(np.reshape(np.arange(64),(8,8)),(10,10)).astype(np.uint8)
     assert(np.max(rank.entropy(data,selem))==60)
 
-    # 8 bit per pixel
+    # 8-bit per pixel
     data = np.tile(np.reshape(np.arange(256),(16,16)),(10,10)).astype(np.uint8)
     assert(np.max(rank.entropy(data,selem))==80)
 

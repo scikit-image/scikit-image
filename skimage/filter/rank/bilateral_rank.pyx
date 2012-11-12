@@ -7,8 +7,8 @@ Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median
 filtering algorithm", IEEE Transactions on Acoustics, Speech and Signal
 Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
 
-Input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit), 8 bit
-images are casted in 16 bit the number of histogram bins is determined from the
+Input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit), 8-bit
+images are casted in 16-bit the number of histogram bins is determined from the
 maximum value present in the image.
 
 The pixel neighborhood is defined by:
@@ -19,7 +19,7 @@ The pixel neighborhood is defined by:
 The kernel is flat (i.e. each pixel belonging to the neighborhood contributes
 equally).
 
-Result image is 16 bit with respect to the input image.
+Result image is 16-bit with respect to the input image.
 
 """
 
@@ -115,9 +115,9 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     Notes
     -----
 
-    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
 
-    * 8 bit images are casted in 16 bit
+    * 8-bit images are casted in 16-bit
 
     Examples
     --------
