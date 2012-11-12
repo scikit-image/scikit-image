@@ -320,7 +320,13 @@ def test_empty_selem():
 
 def test_otsu():
     #
-    pass
+    test = np.tile([128, 145, 103, 127, 165,  83, 127, 185,  63, 127, 205,  43, 127, 225,  23, 127],(16,1))
+    test = test.astype(np.uint8)
+    res = np.tile([1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],(16,1))
+    selem = np.ones((6,6), dtype=np.uint8)
+    th = 1*(test>=rank.otsu(test,selem))
+    assert_array_equal(th,res)
+
 
 def test_entropy():
     #  verify that entropy is coherent with bitdepth of the input data
@@ -358,3 +364,4 @@ def test_entropy():
 
 if __name__ == "__main__":
     run_module_suite()
+    
