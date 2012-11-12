@@ -355,7 +355,6 @@ plt.xlabel('original>=local Otsu'%t_glob_otsu)
 plt.subplot(2,2,4)
 plt.imshow(glob_otsu,cmap=plt.cm.gray)
 plt.xlabel('global Otsu ($t=%d$)'%t_glob_otsu)
-plt.show()
 
 
 """
@@ -450,7 +449,6 @@ plt.subplot(2,2,4)
 plt.imshow(ent16, cmap=plt.cm.jet)
 plt.xlabel('entropy*1000')
 plt.colorbar()
-plt.show()
 
 """
 .. image:: PLOT2RST.current_figure
