@@ -295,6 +295,28 @@ def test_smallest_selem16():
                      shift_x=0, shift_y=0)
     assert_array_equal(image, out)
 
+def test_empty_selem():
+    # check that min, max and mean returns zeros if structuring element is empty
+
+    image = np.zeros((5, 5), dtype=np.uint16)
+    out = np.zeros_like(image)
+    mask = np.ones_like(image, dtype=np.uint8)
+    res = np.zeros_like(image)
+    image[2,2] = 255
+    image[2,3] = 128
+    image[1,2] = 16
+
+    elem = np.array([[0,0,0],[0,0,0]], dtype=np.uint8)
+
+    rank.mean(image=image, selem=elem, out=out, mask=mask,
+        shift_x=0, shift_y=0)
+    assert_array_equal(res, out)
+    rank.minimum(image=image, selem=elem, out=out, mask=mask,
+        shift_x=0, shift_y=0)
+    assert_array_equal(res, out)
+    rank.maximum(image=image, selem=elem, out=out, mask=mask,
+        shift_x=0, shift_y=0)
+    assert_array_equal(res, out)
 
 if __name__ == "__main__":
     run_module_suite()

@@ -44,11 +44,14 @@ cdef inline np.uint8_t kernel_bottomhat(Py_ssize_t * histo, float pop,
 
     cdef Py_ssize_t i
 
-    for i in range(256):
-        if histo[i]:
-            break
+    if pop:
+        for i in range(256):
+            if histo[i]:
+                break
 
-    return <np.uint8_t>(g - i)
+        return <np.uint8_t>(g - i)
+    else:
+        return <np.uint8_t>(0)
 
 
 cdef inline np.uint8_t kernel_equalize(Py_ssize_t * histo, float pop,
@@ -99,8 +102,8 @@ cdef inline np.uint8_t kernel_maximum(Py_ssize_t * histo, float pop,
         for i in range(255, -1, -1):
             if histo[i]:
                 return <np.uint8_t>(i)
-
-    return <np.uint8_t>(0)
+    else:
+        return <np.uint8_t>(0)
 
 
 cdef inline np.uint8_t kernel_mean(Py_ssize_t * histo, float pop,
@@ -146,8 +149,8 @@ cdef inline np.uint8_t kernel_median(Py_ssize_t * histo, float pop,
                 sum -= histo[i]
                 if sum < 0:
                     return <np.uint8_t>(i)
-
-    return <np.uint8_t>(0)
+    else:
+        return <np.uint8_t>(0)
 
 
 cdef inline np.uint8_t kernel_minimum(Py_ssize_t * histo, float pop,
@@ -160,8 +163,8 @@ cdef inline np.uint8_t kernel_minimum(Py_ssize_t * histo, float pop,
         for i in range(256):
             if histo[i]:
                 return <np.uint8_t>(i)
-
-    return <np.uint8_t>(0)
+    else:
+        return <np.uint8_t>(0)
 
 
 cdef inline np.uint8_t kernel_modal(Py_ssize_t * histo, float pop,
@@ -176,8 +179,8 @@ cdef inline np.uint8_t kernel_modal(Py_ssize_t * histo, float pop,
                 hmax = histo[i]
                 imax = i
         return <np.uint8_t>(imax)
-
-    return <np.uint8_t>(0)
+    else:
+        return <np.uint8_t>(0)
 
 
 cdef inline np.uint8_t kernel_morph_contr_enh(Py_ssize_t * histo, float pop,
@@ -231,12 +234,14 @@ cdef inline np.uint8_t kernel_tophat(Py_ssize_t * histo, float pop,
 
     cdef Py_ssize_t i
 
-    for i in range(255, -1, -1):
-        if histo[i]:
-            break
+    if pop:
+        for i in range(255, -1, -1):
+            if histo[i]:
+                break
 
-    return <np.uint8_t>(i - g)
-
+        return <np.uint8_t>(i - g)
+    else:
+        return <np.uint8_t>(0)
 
 cdef inline np.uint8_t kernel_noise_filter(Py_ssize_t * histo, float pop,
                                            np.uint8_t g, float p0, float p1,
@@ -268,15 +273,17 @@ cdef inline np.uint8_t kernel_entropy(Py_ssize_t * histo, float pop,
     cdef Py_ssize_t i
     cdef float e,p
 
-    e = 0.
+    if pop:
+        e = 0.
 
-    for i in range(256):
-        p = histo[i] / pop
-        if p > 0:
-            e -= p * log2(p)
+        for i in range(256):
+            p = histo[i] / pop
+            if p > 0:
+                e -= p * log2(p)
 
-    return <np.uint8_t>e*10
-
+        return <np.uint8_t>e*10
+    else:
+        return <np.uint8_t>(0)
 
 cdef inline np.uint8_t kernel_otsu(Py_ssize_t * histo, float pop, np.uint8_t g,
                                    float p0, float p1, Py_ssize_t s0,
