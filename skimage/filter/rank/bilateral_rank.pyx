@@ -170,11 +170,11 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> ima8 = 255 * np.array([[0, 0, 0, 0, 0],
+    ...                        [0, 1, 1, 1, 0],
+    ...                        [0, 1, 1, 1, 0],
+    ...                        [0, 1, 1, 1, 0],
+    ...                        [0, 0, 0, 0, 0]], dtype=np.uint8)
     >>> rank.bilateral_pop(ima8, square(3), s0=10,s1=10)
     array([[3, 4, 3, 4, 3],
            [4, 4, 6, 4, 4],
