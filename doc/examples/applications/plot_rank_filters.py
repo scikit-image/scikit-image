@@ -3,7 +3,7 @@
 Rank filters
 ============
 
-Rank filters are non-linear filters using the local grey levels ordering to
+Rank filters are non-linear filters using the local greylevels ordering to
 compute the filtered value. This ensemble of filters share a common base: the
 local grey-level histogram extraction computed on the neighborhood of a pixel
 (defined by a 2D structuring element). If the filtered value is taken as the
@@ -28,7 +28,7 @@ morphological dilation, morphological erosion, median filters.
 
 The different implementation availables in `skimage` are compared.
 
-In this example, we will see how to filter a grey level image using some of the
+In this example, we will see how to filter a greylevel image using some of the
 linear and non-linear filters availables in skimage.  We use the `camera`
 image from `skimage.data`.
 
@@ -129,7 +129,7 @@ plt.xlabel('local mean $r=10$')
 
 One may be interested in smoothing an image while preserving important borders
 (median filters already achieved this), here we use the **bilateral** filter
-that restricts the local neighborhood to pixel having a grey level similar to
+that restricts the local neighborhood to pixel having a greylevel similar to
 the central one.
 
 .. note::
@@ -174,7 +174,7 @@ We compare here how the global histogram equalization is applied locally.
 
 The equalized image [2]_ has a roughly linear cumulative distribution function
 for each pixel neighborhood. The local version [3]_ of the histogram
-equalization emphasizes every local graylevel variations.
+equalization emphasizes every local greylevel variations.
 
 .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 .. [3] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
@@ -218,8 +218,8 @@ plt.title('histogram of grey values')
 
 .. image:: PLOT2RST.current_figure
 
-another way to maximize the number of grey levels used for an image is to apply
-a local autoleveling, i.e. here a pixel grey level is proportionally remapped
+another way to maximize the number of greylevels used for an image is to apply
+a local autoleveling, i.e. here a pixel greylevel is proportionally remapped
 between local minimum and local maximum.
 
 The following example shows how local autolevel enhances the camara man picture.
@@ -425,7 +425,7 @@ plt.xlabel('local Otsu ($radius=%d$)'%radius)
 Image morphology
 ================
 
-Local maximum and local minimum are the base operators for grey level
+Local maximum and local minimum are the base operators for greylevel
 morphology.
 
 .. note::
@@ -433,7 +433,7 @@ morphology.
     `skimage.dilate` and `skimage.erode` are equivalent filters (see below for
     comparison).
 
-Here is an example of the classical morphological grey level filters: opening,
+Here is an example of the classical morphological greylevel filters: opening,
 closing and morphological gradient.
 
 """
@@ -453,10 +453,10 @@ plt.imshow(ima,cmap=plt.cm.gray)
 plt.xlabel('original')
 plt.subplot(2,2,2)
 plt.imshow(closing,cmap=plt.cm.gray)
-plt.xlabel('grey level closing')
+plt.xlabel('greylevel closing')
 plt.subplot(2,2,3)
 plt.imshow(opening,cmap=plt.cm.gray)
-plt.xlabel('grey level opening')
+plt.xlabel('greylevel opening')
 plt.subplot(2,2,4)
 plt.imshow(grad,cmap=plt.cm.gray)
 plt.xlabel('morphological gradient')
@@ -527,7 +527,7 @@ Implementation
 ================
 
 The central part of the `skimage.rank` filters is build on a sliding window that
-update local grey level histogram. This approach limits the algorithm complexity
+update local greylevel histogram. This approach limits the algorithm complexity
 to O(n) where n is the number of image pixels. The complexity is also limited
 with respect to the structuring element size.
 

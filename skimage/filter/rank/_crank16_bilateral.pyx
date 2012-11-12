@@ -62,7 +62,7 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
          np.ndarray[np.uint8_t, ndim=2] mask=None,
          np.ndarray[np.uint16_t, ndim=2] out=None,
          char shift_x=0, char shift_y=0, int bitdepth=8, int s0=1, int s1=1):
-    """average gray level (clipped on uint8)
+    """average greylevel (clipped on uint8)
     """
     _core16(kernel_mean, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0., 0., s0, s1)

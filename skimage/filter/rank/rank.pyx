@@ -447,7 +447,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
                     shift_y=False):
     """Enhance an image replacing each pixel by the local maximum if pixel
-    graylevel is closest to maximimum than local minimum OR local minimum
+    greylevel is closest to maximimum than local minimum OR local minimum
     otherwise.
 
     Parameters
