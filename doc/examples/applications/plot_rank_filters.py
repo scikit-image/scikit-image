@@ -1,12 +1,13 @@
 """
-===============================================================
+============
 Rank filters
-===============================================================
+============
 
-Rank filters are non-linear filters using the local grey levels ordering to compute the filtered value.
-This ensemble of filters share a common base: the local grey-level histogram extraction computed on
-the neighborhood of a pixel (defined by a 2D structuring element).
-If the filtered value is taken as the middle value of the histogram, we get the classical median filter.
+Rank filters are non-linear filters using the local grey levels ordering to
+compute the filtered value. This ensemble of filters share a common base: the
+local grey-level histogram extraction computed on the neighborhood of a pixel
+(defined by a 2D structuring element). If the filtered value is taken as the
+middle value of the histogram, we get the classical median filter.
 
 Rank filters can be used for several purposes such as:
 
@@ -22,15 +23,18 @@ Rank filters can be used for several purposes such as:
 * post-processing
   e.g. small object removal, object grouping, contour smoothing
 
-Some well known filters are specific cases of rank filters [1]_ e.g. morphological dilation, morphological erosion,
-median filters.
+Some well known filters are specific cases of rank filters [1]_ e.g.
+morphological dilation, morphological erosion, median filters.
 
-The different implementation availables in ``skimage`` are compared.
+The different implementation availables in `skimage` are compared.
 
-In this example, we will see how to filter a grey level image using some of the linear and non-linear filters
-availables in skimage.  We use the ``camera`` image from ``skimage.data``.
+In this example, we will see how to filter a grey level image using some of the
+linear and non-linear filters availables in skimage.  We use the `camera`
+image from `skimage.data`.
 
-.. [1] Pierre Soille, On morphological operators based on rank filters, Pattern Recognition 35 (2002) 527-535.
+.. [1] Pierre Soille, On morphological operators based on rank filters, Pattern
+       Recognition 35 (2002) 527-535.
+
 """
 
 import numpy as np
@@ -50,16 +54,20 @@ plt.plot(hist[1][:-1], hist[0], lw=2)
 plt.title('histogram of grey values')
 
 """
+
 .. image:: PLOT2RST.current_figure
 
 Noise removal
-==============
+=============
 
-some noise is added to the image, 1% of pixels are randomly set to 255, %1% are randomly set to 0.
-The **median** filter is applied to remove the noise.
+Some noise is added to the image, 1% of pixels are randomly set to 255, 1% are
+randomly set to 0. The **median** filter is applied to remove the noise.
 
-.. note:: there is different implementations of median filter : ``skimage.filter.median_filter``and
-`skimage.filter.rank.median``
+.. note::
+
+    there are different implementations of median filter :
+    `skimage.filter.median_filter` and `skimage.filter.rank.median`
+
 """
 
 noise = np.random.random(ima.shape)
@@ -91,16 +99,18 @@ plt.xlabel('median $r=20$')
 """
 .. image:: PLOT2RST.current_figure
 
-The added noise is efficiently removed, as the image defaults are small (1 pixel wide), a small filter radius is
-sufficient. As the radius is increasing, objects with a bigger size are filtered too such as the camera tripod.
-Median filter is commonly used for noise removal because borders are preserved.
+The added noise is efficiently removed, as the image defaults are small (1 pixel
+wide), a small filter radius is sufficient. As the radius is increasing, objects
+with a bigger size are filtered as well, such as the camera tripod. The median
+filter is commonly used for noise removal because borders are preserved.
 
 Image smoothing
 ================
 
-The example hereunder shows how a local **mean** smooth the cameraman image.
+The example hereunder shows how a local **mean** smoothes the camera man image.
 
 """
+
 from skimage.filter.rank import mean
 
 fig = plt.figure(figsize=[10,7])
@@ -114,13 +124,18 @@ plt.imshow(loc_mean,cmap=plt.cm.gray,vmin=0,vmax=255)
 plt.xlabel('local mean $r=10$')
 
 """
+
 .. image:: PLOT2RST.current_figure
 
-One may be interested in smoothing an image while preserving important borders (median filters already achieved this),
-here we use the **bilateral** filter that restrict the local neighborhood to pixel having a grey level similar to the
-central one.
+One may be interested in smoothing an image while preserving important borders
+(median filters already achieved this), here we use the **bilateral** filter
+that restricts the local neighborhood to pixel having a grey level similar to
+the central one.
 
-.. note:: a different implementation is available for color images in ``skimage.filter.denoise_bilateral``.
+.. note::
+
+    a different implementation is available for color images in
+    `skimage.filter.denoise_bilateral`.
 
 """
 
@@ -145,9 +160,11 @@ plt.subplot(2,2,4)
 plt.imshow(bilat[200:350,350:450],cmap=plt.cm.gray)
 
 """
+
 .. image:: PLOT2RST.current_figure
 
-One can see that the large continuous part of the image (e.g.sky) are smoothed whereas other details are preserved.
+One can see that the large continuous part of the image (e.g. sky) is smoothed
+whereas other details are preserved.
 
 
 Contrast enhancement
@@ -155,8 +172,9 @@ Contrast enhancement
 
 We compare here how the global histogram equalization is applied locally.
 
-The equalized image [2]_ has a roughly linear cumulative distribution function for each pixel neighborhood.
-The local version [3]_ of the histogram equalization emphasized every local graylevel variations.
+The equalized image [2]_ has a roughly linear cumulative distribution function
+for each pixel neighborhood. The local version [3]_ of the histogram
+equalization emphasizes every local graylevel variations.
 
 .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 .. [3] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
@@ -195,14 +213,19 @@ plt.axis('off')
 plt.subplot(326)
 plt.plot(loc_hist[1][:-1], loc_hist[0], lw=2)
 plt.title('histogram of grey values')
+
 """
+
 .. image:: PLOT2RST.current_figure
 
-an other way to maximize the number of grey level used for an image is to apply a local autoleveling,
-i.e. here a pixel grey level is proportionally remapped between local minimum and local maximum.
+another way to maximize the number of grey levels used for an image is to apply
+a local autoleveling, i.e. here a pixel grey level is proportionally remapped
+between local minimum and local maximum.
 
-The following example show how local autolevel enhance the camaraman picture.
+The following example shows how local autolevel enhances the camara man picture.
+
 """
+
 from skimage.filter.rank import autolevel
 
 ima = data.camera()
@@ -218,16 +241,20 @@ plt.xlabel('original')
 plt.subplot(1,2,2)
 plt.imshow(auto,cmap=plt.cm.gray)
 plt.xlabel('local autolevel')
+
 """
+
 .. image:: PLOT2RST.current_figure
 
-This filter is very sensitive to local outlayers, see the little white spot in the sky left part. This is due
-to a local maximum which is very high comparing to the rest of the neighborhood. One can moderate this
-using the percentile version of the autolevel filter which uses to given percentiles (one inferior, one superior)
-in place of local minimum and maximum. The example bellow illustrate how the percentile parameters influence the
-local autolevel result.
+This filter is very sensitive to local outlayers, see the little white spot in
+the sky left part. This is due to a local maximum which is very high comparing
+to the rest of the neighborhood. One can moderate this using the percentile
+version of the autolevel filter which uses given percentiles (one inferior,
+one superior) in place of local minimum and maximum. The example below
+illustrates how the percentile parameters influence the local autolevel result.
 
 """
+
 from skimage.filter.rank import percentile_autolevel
 
 image = data.camera()
@@ -255,10 +282,12 @@ for ax in axes:
     ax.axis('off')
 
 """
+
 .. image:: PLOT2RST.current_figure
 
-Morphological contrast enhancement filter replaces the central pixel by local maximum
-if the original grey level value if closest to local maximum, by the minimum local otherwise.
+The morphological contrast enhancement filter replaces the central pixel by the
+local maximum if the original pixel value is closest to local maximum, otherwise
+by the minimum local.
 
 """
 
@@ -282,10 +311,11 @@ plt.subplot(2,2,4)
 plt.imshow(enh[200:350,350:450],cmap=plt.cm.gray)
 
 """
+
 .. image:: PLOT2RST.current_figure
 
-The percentile version of the local morphological contrast enhancement, uses percentile *p0* and *p1* instead of local
-minimum and local maximum.
+The percentile version of the local morphological contrast enhancement uses
+percentile *p0* and *p1* instead of the local minimum and maximum.
 
 """
 
@@ -309,21 +339,29 @@ plt.subplot(2,2,4)
 plt.imshow(penh[200:350,350:450],cmap=plt.cm.gray)
 
 """
+
 .. image:: PLOT2RST.current_figure
 
 Image threshold
 ===============
-The Otsu's threshold [1]_ method can be applied locally using local greylevel distribution.
-In the example below, for each pixel, an "optimal" threshold is determined by maximizing
-the variance between two classes of pixels of the local neighborhood defined by a structuring element.
 
-The example compares the local threshold with the global threshold `skimage.filter.threshold_otsu``.
+The Otsu's threshold [1]_ method can be applied locally using the local
+greylevel distribution. In the example below, for each pixel, an "optimal"
+threshold is determined by maximizing the variance between two classes of pixels
+of the local neighborhood defined by a structuring element.
 
-.. note: local threshold is much slower than global one.
+The example compares the local threshold with the global threshold
+`skimage.filter.threshold_otsu`.
+
+.. note::
+
+    Local thresholding is much slower than global one. There exists a function
+    for global Otsu thresholding: `skimage.filter.threshold_otsu`.
 
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
 """
+
 from skimage.filter.rank import otsu
 from skimage.filter import threshold_otsu
 
@@ -357,10 +395,13 @@ plt.imshow(glob_otsu,cmap=plt.cm.gray)
 plt.xlabel('global Otsu ($t=%d$)'%t_glob_otsu)
 
 """
+
 .. image:: PLOT2RST.current_figure
 
-The following example, shows on a synthetic image how local Otsu's threshold handle a global level shift.
- """
+The following example shows how local Otsu's threshold handles a global level
+shift applied to a synthetic image .
+
+"""
 
 n = 100
 theta = np.linspace(0,10*np.pi,n)
@@ -377,18 +418,23 @@ plt.subplot(1,2,2)
 plt.imshow(m>=t,interpolation='nearest')
 plt.xlabel('local Otsu ($radius=%d$)'%radius)
 
-
 """
+
 .. image:: PLOT2RST.current_figure
 
 Image morphology
 ================
 
-Local maximum and local minimum are the base operators for grey level morphology.
+Local maximum and local minimum are the base operators for grey level
+morphology.
 
-.. note:: ``skimage.dilate`` and ``skimage.erode`` are equivalent filters (see below for comparison).
+.. note::
 
-Here is an example of classical morphological grey level filters : opening, closing and morphological gradient.
+    `skimage.dilate` and `skimage.erode` are equivalent filters (see below for
+    comparison).
+
+Here is an example of the classical morphological grey level filters: opening,
+closing and morphological gradient.
 
 """
 
@@ -416,24 +462,26 @@ plt.imshow(grad,cmap=plt.cm.gray)
 plt.xlabel('morphological gradient')
 
 """
+
 .. image:: PLOT2RST.current_figure
 
 Feature extraction
 ===================
 
-Local histogram can be exploited to compute local entropy, which is related to the local image complexity.
-Entropy is computed using base 2 logarithm i.e. the filter returns the minimum number of bits needed to encode local
-greylevel distribution.
+Local histogram can be exploited to compute local entropy, which is related to
+the local image complexity. Entropy is computed using base 2 logarithm i.e. the
+filter returns the minimum number of bits needed to encode local greylevel
+distribution.
 
-``skimage.rank.entropy`` returns local entropy on a given structuring element.
+`skimage.rank.entropy` returns local entropy on a given structuring element.
 The following example shows this filter applied on 8- and 16- bit images.
 
-.. note:: to better use the available image bit, the function returns 10x entropy for 8-bit images and 1000x entropy
-   for 16-bit images.
+.. note::
+
+    to better use the available image bit, the function returns 10x entropy for
+    8-bit images and 1000x entropy for 16-bit images.
 
 """
-
-
 
 from skimage import data
 from skimage.filter.rank import entropy
@@ -472,16 +520,19 @@ plt.xlabel('entropy*1000')
 plt.colorbar()
 
 """
+
 .. image:: PLOT2RST.current_figure
 
 Implementation
 ================
 
-The central part of the ``skimage.rank`` filters is build on a sliding window that update local grey level histogram.
-This approach limits the algorithm complexity to O(n) where n is the number of image pixels. The complexity is also
-limited with respect to the structuring element size.
+The central part of the `skimage.rank` filters is build on a sliding window that
+update local grey level histogram. This approach limits the algorithm complexity
+to O(n) where n is the number of image pixels. The complexity is also limited
+with respect to the structuring element size.
 
 """
+
 from time import time
 
 from scipy.ndimage.filters import percentile_filter
@@ -490,9 +541,7 @@ from skimage.filter import median_filter
 from skimage.filter.rank import median,maximum
 
 def exec_and_timeit(func):
-    """ Decorator that returns both function results and execution time
-    (result, ms)
-    """
+    """Decorator that returns both function results and execution time."""
     def wrapper(*arg):
         t1 = time()
         res = func(*arg)
@@ -523,12 +572,14 @@ def ndi_med(image,n):
     return percentile_filter(image,50,size=n*2-1)
 
 """
+
 Comparison between
 
-* ``rank.maximum``
-* ``cmorph.dilate``
+* `rank.maximum`
+* `cmorph.dilate`
 
 on increasing structuring element size
+
 """
 
 a = data.camera()
@@ -551,9 +602,11 @@ plt.plot(e_range,rec)
 plt.legend(['crank.maximum','cmorph.dilate'])
 
 """
+
 and increasing image size
 
 .. image:: PLOT2RST.current_figure
+
 """
 
 r = 9
@@ -578,17 +631,18 @@ plt.legend(['crank.maximum','cmorph.dilate'])
 
 
 """
+
 .. image:: PLOT2RST.current_figure
 
 Comparison between:
 
-* ``rank.median``
-* ``ctmf.median_filter``
-* ``ndimage.percentile``
+* `rank.median`
+* `ctmf.median_filter`
+* `ndimage.percentile`
 
 on increasing structuring element size
-"""
 
+"""
 
 a = data.camera()
 
@@ -609,12 +663,14 @@ plt.plot(e_range,rec)
 plt.legend(['rank.median','ctmf.median_filter','ndimage.percentile'])
 plt.ylabel('time (ms)')
 plt.xlabel('element radius')
+
 """
 .. image:: PLOT2RST.current_figure
 
 comparison of outcome of the three methods
 
 """
+
 plt.figure()
 plt.imshow(np.hstack((rc,rctmf,rndi)))
 plt.xlabel('rank.median vs ctmf.median_filter vs ndimage.percentile')
@@ -649,6 +705,7 @@ plt.xlabel('image size')
 
 """
 .. image:: PLOT2RST.current_figure
+
 """
 
 plt.show()
