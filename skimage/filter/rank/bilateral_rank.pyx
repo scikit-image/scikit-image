@@ -1,11 +1,11 @@
-"""Approximate bilateral rankfilter for local (custom kernel) mean.
+"""Approximate bilateral rank filter for local (custom kernel) mean.
 
 The local histogram is computed using a sliding window similar to the method
 described in:
 
-Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median
-filtering algorithm", IEEE Transactions on Acoustics, Speech and Signal
-Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
+.. [1] Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional
+       median filtering algorithm", IEEE Transactions on Acoustics, Speech and
+       Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
 
 Input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit), 8-bit
 images are casted in 16-bit the number of histogram bins is determined from the
