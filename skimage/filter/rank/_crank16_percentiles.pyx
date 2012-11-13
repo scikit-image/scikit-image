@@ -239,7 +239,7 @@ def autolevel(np.ndarray[np.uint16_t, ndim=2] image,
     """bottom hat
     """
     _core16(kernel_autolevel, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def gradient(np.ndarray[np.uint16_t, ndim=2] image,
@@ -251,7 +251,7 @@ def gradient(np.ndarray[np.uint16_t, ndim=2] image,
     """return p0,p1 percentile gradient
     """
     _core16(kernel_gradient, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def mean(np.ndarray[np.uint16_t, ndim=2] image,
@@ -263,7 +263,7 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
     """return mean between [p0 and p1] percentiles
     """
     _core16(kernel_mean, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def mean_substraction(np.ndarray[np.uint16_t, ndim=2] image,
@@ -276,7 +276,7 @@ def mean_substraction(np.ndarray[np.uint16_t, ndim=2] image,
     """
     _core16(
         kernel_mean_substraction, image, selem, mask, out, shift_x, shift_y,
-        bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+        bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
@@ -288,7 +288,7 @@ def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
     """reforce contrast using percentiles
     """
     _core16(kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def percentile(np.ndarray[np.uint16_t, ndim=2] image,
@@ -300,7 +300,7 @@ def percentile(np.ndarray[np.uint16_t, ndim=2] image,
     """return p0 percentile
     """
     _core16(kernel_percentile, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def pop(np.ndarray[np.uint16_t, ndim=2] image,
@@ -312,7 +312,7 @@ def pop(np.ndarray[np.uint16_t, ndim=2] image,
     """return nb of pixels between [p0 and p1]
     """
     _core16(kernel_pop, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def threshold(np.ndarray[np.uint16_t, ndim=2] image,
@@ -324,4 +324,4 @@ def threshold(np.ndarray[np.uint16_t, ndim=2] image,
     """return (maxbin-1) if g > percentile p0
     """
     _core16(kernel_threshold, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)

@@ -148,7 +148,7 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
             cc = c - centre_c
             if selem[r, c]:
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_increment(histo, & pop, image_data[rr * cols + cc])
+                    histogram_increment(histo, &pop, image_data[rr * cols + cc])
 
     r = 0
     c = 0
@@ -166,13 +166,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
                 rr = r + se_e_r[s]
                 cc = c + se_e_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_increment(histo, & pop, image_data[rr * cols + cc])
+                    histogram_increment(histo, &pop, image_data[rr * cols + cc])
 
             for s in range(num_se_w):
                 rr = r + se_w_r[s]
                 cc = c + se_w_c[s] - 1
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_decrement(histo, & pop, image_data[rr * cols + cc])
+                    histogram_decrement(histo, &pop, image_data[rr * cols + cc])
 
             # kernel -----------------------------------------------------------
             out_data[r * cols + c] = \
@@ -188,13 +188,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_increment(histo, & pop, image_data[rr * cols + cc])
+                histogram_increment(histo, &pop, image_data[rr * cols + cc])
 
         for s in range(num_se_n):
             rr = r + se_n_r[s] - 1
             cc = c + se_n_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_decrement(histo, & pop, image_data[rr * cols + cc])
+                histogram_decrement(histo, &pop, image_data[rr * cols + cc])
 
         # kernel ---------------------------------------------------------------
         out_data[r * cols + c] = kernel(histo, pop, image_data[r * cols + c],
@@ -207,13 +207,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
                 rr = r + se_w_r[s]
                 cc = c + se_w_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_increment(histo, & pop, image_data[rr * cols + cc])
+                    histogram_increment(histo, &pop, image_data[rr * cols + cc])
 
             for s in range(num_se_e):
                 rr = r + se_e_r[s]
                 cc = c + se_e_c[s] + 1
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_decrement(histo, & pop, image_data[rr * cols + cc])
+                    histogram_decrement(histo, &pop, image_data[rr * cols + cc])
 
             # kernel -----------------------------------------------------------
             out_data[r * cols + c] = kernel(
@@ -229,13 +229,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_increment(histo, & pop, image_data[rr * cols + cc])
+                histogram_increment(histo, &pop, image_data[rr * cols + cc])
 
         for s in range(num_se_n):
             rr = r + se_n_r[s] - 1
             cc = c + se_n_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_decrement(histo, & pop, image_data[rr * cols + cc])
+                histogram_decrement(histo, &pop, image_data[rr * cols + cc])
 
         # kernel ---------------------------------------------------------------
         out_data[r * cols + c] = kernel(histo, pop, image_data[r * cols + c],

@@ -212,7 +212,7 @@ def autolevel(np.ndarray[np.uint8_t, ndim=2] image,
     """autolevel
     """
     _core8(kernel_autolevel, image, selem, mask, out, shift_x, shift_y, p0, p1,
-           < Py_ssize_t > 0, < Py_ssize_t > 0)
+           <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def gradient(np.ndarray[np.uint8_t, ndim=2] image,
@@ -223,7 +223,7 @@ def gradient(np.ndarray[np.uint8_t, ndim=2] image,
     """return p0,p1 percentile gradient
     """
     _core8(kernel_gradient, image, selem, mask, out, shift_x, shift_y, p0, p1,
-           < Py_ssize_t > 0, < Py_ssize_t > 0)
+           <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def mean(np.ndarray[np.uint8_t, ndim=2] image,
@@ -234,7 +234,7 @@ def mean(np.ndarray[np.uint8_t, ndim=2] image,
     """return mean between [p0 and p1] percentiles
     """
     _core8(kernel_mean, image, selem, mask, out, shift_x, shift_y, p0, p1,
-           < Py_ssize_t > 0, < Py_ssize_t > 0)
+           <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def mean_substraction(np.ndarray[np.uint8_t, ndim=2] image,
@@ -245,7 +245,7 @@ def mean_substraction(np.ndarray[np.uint8_t, ndim=2] image,
     """return original - mean between [p0 and p1] percentiles *.5 +127
     """
     _core8(kernel_mean_substraction, image, selem, mask, out, shift_x, shift_y,
-           p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+           p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def morph_contr_enh(np.ndarray[np.uint8_t, ndim=2] image,
@@ -256,7 +256,7 @@ def morph_contr_enh(np.ndarray[np.uint8_t, ndim=2] image,
     """reforce contrast using percentiles
     """
     _core8(kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y,
-           p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+           p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def percentile(np.ndarray[np.uint8_t, ndim=2] image,
@@ -267,7 +267,7 @@ def percentile(np.ndarray[np.uint8_t, ndim=2] image,
     """return p0 percentile
     """
     _core8(kernel_percentile, image, selem, mask, out, shift_x, shift_y,
-           p0, p1, < Py_ssize_t > 0, < Py_ssize_t > 0)
+           p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def pop(np.ndarray[np.uint8_t, ndim=2] image,
@@ -278,7 +278,7 @@ def pop(np.ndarray[np.uint8_t, ndim=2] image,
     """return nb of pixels between [p0 and p1]
     """
     _core8(kernel_pop, image, selem, mask, out, shift_x, shift_y, p0, p1,
-           < Py_ssize_t > 0, < Py_ssize_t > 0)
+           <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def threshold(np.ndarray[np.uint8_t, ndim=2] image,
@@ -289,4 +289,4 @@ def threshold(np.ndarray[np.uint8_t, ndim=2] image,
     """return 255 if g > percentile p0
     """
     _core8(kernel_threshold, image, selem, mask, out, shift_x, shift_y, p0, p1,
-           < Py_ssize_t > 0, < Py_ssize_t > 0)
+           <Py_ssize_t>0, <Py_ssize_t>0)

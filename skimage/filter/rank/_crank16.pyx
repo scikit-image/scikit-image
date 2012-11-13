@@ -291,7 +291,7 @@ def autolevel(np.ndarray[np.uint16_t, ndim=2] image,
               np.ndarray[np.uint16_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_autolevel, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def bottomhat(np.ndarray[np.uint16_t, ndim=2] image,
@@ -300,7 +300,7 @@ def bottomhat(np.ndarray[np.uint16_t, ndim=2] image,
               np.ndarray[np.uint16_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_bottomhat, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def equalize(np.ndarray[np.uint16_t, ndim=2] image,
@@ -309,7 +309,7 @@ def equalize(np.ndarray[np.uint16_t, ndim=2] image,
              np.ndarray[np.uint16_t, ndim=2] out=None,
              char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_equalize, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def gradient(np.ndarray[np.uint16_t, ndim=2] image,
@@ -318,7 +318,7 @@ def gradient(np.ndarray[np.uint16_t, ndim=2] image,
              np.ndarray[np.uint16_t, ndim=2] out=None,
              char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_gradient, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def maximum(np.ndarray[np.uint16_t, ndim=2] image,
@@ -327,7 +327,7 @@ def maximum(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint16_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_maximum, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def mean(np.ndarray[np.uint16_t, ndim=2] image,
@@ -336,7 +336,7 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
          np.ndarray[np.uint16_t, ndim=2] out=None,
          char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_mean, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def meansubstraction(np.ndarray[np.uint16_t, ndim=2] image,
@@ -345,7 +345,7 @@ def meansubstraction(np.ndarray[np.uint16_t, ndim=2] image,
                      np.ndarray[np.uint16_t, ndim=2] out=None,
                      char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_meansubstraction, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def median(np.ndarray[np.uint16_t, ndim=2] image,
@@ -354,7 +354,7 @@ def median(np.ndarray[np.uint16_t, ndim=2] image,
            np.ndarray[np.uint16_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_median, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def minimum(np.ndarray[np.uint16_t, ndim=2] image,
@@ -363,7 +363,7 @@ def minimum(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint16_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_minimum, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
@@ -372,7 +372,7 @@ def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
                     np.ndarray[np.uint16_t, ndim=2] out=None,
                     char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def modal(np.ndarray[np.uint16_t, ndim=2] image,
@@ -381,7 +381,7 @@ def modal(np.ndarray[np.uint16_t, ndim=2] image,
           np.ndarray[np.uint16_t, ndim=2] out=None,
           char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_modal, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def pop(np.ndarray[np.uint16_t, ndim=2] image,
@@ -390,7 +390,7 @@ def pop(np.ndarray[np.uint16_t, ndim=2] image,
         np.ndarray[np.uint16_t, ndim=2] out=None,
         char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_pop, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def threshold(np.ndarray[np.uint16_t, ndim=2] image,
@@ -399,7 +399,7 @@ def threshold(np.ndarray[np.uint16_t, ndim=2] image,
               np.ndarray[np.uint16_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_threshold, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def tophat(np.ndarray[np.uint16_t, ndim=2] image,
@@ -408,7 +408,7 @@ def tophat(np.ndarray[np.uint16_t, ndim=2] image,
            np.ndarray[np.uint16_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_tophat, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def entropy(np.ndarray[np.uint16_t, ndim=2] image,
@@ -417,4 +417,4 @@ def entropy(np.ndarray[np.uint16_t, ndim=2] image,
             np.ndarray[np.uint16_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_entropy, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, 0, 0, < Py_ssize_t > 0, < Py_ssize_t > 0)
+            bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
