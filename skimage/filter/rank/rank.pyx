@@ -1,15 +1,15 @@
 """The local histogram is computed using a sliding window similar to the method
 described in:
 
-Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median
-filtering algorithm", IEEE Transactions on Acoustics, Speech and Signal
-Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
+.. [1] Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional
+       median filtering algorithm", IEEE Transactions on Acoustics, Speech and
+       Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
 
-Input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit), for 16 bit
+Input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit), for 16-bit
 input images, the number of histogram bins is determined from the maximum value
 present in the image.
 
-Result image is 8 or 16 bit with respect to the input image.
+Result image is 8 or 16-bit with respect to the input image.
 
 """
 
@@ -243,7 +243,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Note
     ----
-    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
     * the lower algorithm complexity makes the rank.maximum() more efficient for
       larger images and structuring elements
 
@@ -402,7 +402,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Note
     ----
-    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
     * the lower algorithm complexity makes the rank.minimum() more efficient
       for larger images and structuring elements
 
@@ -447,7 +447,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
                     shift_y=False):
     """Enhance an image replacing each pixel by the local maximum if pixel
-    graylevel is closest to maximimum than local minimum OR local minimum
+    greylevel is closest to maximimum than local minimum OR local minimum
     otherwise.
 
     Parameters
@@ -521,11 +521,11 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
-    >>> ima = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> ima = 255 * np.array([[0, 0, 0, 0, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
     >>> rank.pop(ima, square(3))
     array([[4, 6, 6, 6, 4],
            [6, 9, 9, 9, 6],
@@ -570,11 +570,11 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> # Local threshold
     >>> from skimage.morphology import square
     >>> from skimage.filter.rank import threshold
-    >>> ima = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> ima = 255 * np.array([[0, 0, 0, 0, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
     >>> threshold(ima, square(3))
     array([[0, 0, 0, 0, 0],
            [0, 1, 1, 1, 0],
@@ -703,11 +703,11 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage.morphology import disk
     >>> # defining a 8- and a 16-bit test images
     >>> a8 = data.camera()
-    >>> a16 = data.camera().astype(np.uint16)*4
+    >>> a16 = data.camera().astype(np.uint16) * 4
     >>> # pixel values contain 10x the local entropy
-    >>> ent8 = entropy(a8,disk(5))
+    >>> ent8 = entropy(a8, disk(5))
     >>> # pixel values contain 1000x the local entropy
-    >>> ent16 = entropy(a16,disk(5))
+    >>> ent16 = entropy(a16, disk(5))
 
     """
 
@@ -752,7 +752,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage.morphology import disk
     >>> # defining a 8- and a 16-bit test images
     >>> a8 = data.camera()
-    >>> loc_otsu = otsu(a8,disk(5))
+    >>> loc_otsu = otsu(a8, disk(5))
     >>> thresh_image = a8 >= loc_otsu
 
     """

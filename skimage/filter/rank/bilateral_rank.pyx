@@ -1,25 +1,25 @@
-"""Approximate bilateral rankfilter for local (custom kernel) mean.
+"""Approximate bilateral rank filter for local (custom kernel) mean.
 
 The local histogram is computed using a sliding window similar to the method
 described in:
 
-Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional median
-filtering algorithm", IEEE Transactions on Acoustics, Speech and Signal
-Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
+.. [1] Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional
+       median filtering algorithm", IEEE Transactions on Acoustics, Speech and
+       Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
 
-Input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit), 8 bit
-images are casted in 16 bit the number of histogram bins is determined from the
+Input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit), 8-bit
+images are casted in 16-bit the number of histogram bins is determined from the
 maximum value present in the image.
 
 The pixel neighborhood is defined by:
 
 * the given structuring element
-* an interval [g-s0,g+s1] in gray level around g the processed pixel gray level
+* an interval [g-s0,g+s1] in greylevel around g the processed pixel greylevel
 
 The kernel is flat (i.e. each pixel belonging to the neighborhood contributes
 equally).
 
-Result image is 16 bit with respect to the input image.
+Result image is 16-bit with respect to the input image.
 
 """
 
@@ -78,9 +78,9 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     Spatial closeness is measured by considering only the local pixel
     neighborhood given by a structuring element (selem).
 
-    Radiometric similarity is defined by the gray level interval [g-s0,g+s1]
-    where g is the current pixel gray level. Only pixels belonging to the
-    structuring element AND having a gray level inside this interval are
+    Radiometric similarity is defined by the greylevel interval [g-s0,g+s1]
+    where g is the current pixel greylevel. Only pixels belonging to the
+    structuring element AND having a greylevel inside this interval are
     averaged. Return greyscale local bilateral_mean of an image.
 
     Parameters
@@ -115,9 +115,9 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     Notes
     -----
 
-    * input image can be 8 bit or 16 bit with a value < 4096 (i.e. 12 bit)
+    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
 
-    * 8 bit images are casted in 16 bit
+    * 8-bit images are casted in 16-bit
 
     Examples
     --------
@@ -170,11 +170,11 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
-    >>> ima8 = 255*np.array([[0, 0, 0, 0, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 1, 1, 1, 0],
-    ...                           [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> ima8 = 255 * np.array([[0, 0, 0, 0, 0],
+    ...                        [0, 1, 1, 1, 0],
+    ...                        [0, 1, 1, 1, 0],
+    ...                        [0, 1, 1, 1, 0],
+    ...                        [0, 0, 0, 0, 0]], dtype=np.uint8)
     >>> rank.bilateral_pop(ima8, square(3), s0=10,s1=10)
     array([[3, 4, 3, 4, 3],
            [4, 4, 6, 4, 4],
