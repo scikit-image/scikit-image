@@ -21,7 +21,7 @@ from skimage.filter.rank.generic import find_bitdepth
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'meansubstraction', 'median', 'minimum', 'modal', 'morph_contr_enh',
-           'pop', 'threshold', 'tophat','noise_filter','entropy','otsu']
+           'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
 
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
@@ -619,6 +619,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     return _apply(_crank8.tophat, _crank16.tophat, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
+
 def noise_filter(image, selem, out=None, mask=None, shift_x=False,
                  shift_y=False):
     """Returns the noise feature as described in [Hashimoto12]_
@@ -658,10 +659,11 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     centre_c = int(selem.shape[1] / 2) + shift_x
     # make a local copy
     selem_cpy = selem.copy()
-    selem_cpy[centre_r,centre_c] = 0
+    selem_cpy[centre_r, centre_c] = 0
 
     return _apply(_crank8.noise_filter, None, image, selem_cpy, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
+
 
 def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Returns the entropy [wiki_entropy]_ computed locally. Entropy is computed
@@ -713,6 +715,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     return _apply(_crank8.entropy, _crank16.entropy, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
+
 
 def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Returns the Otsu's threshold value for each pixel.

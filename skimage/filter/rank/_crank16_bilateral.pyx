@@ -28,11 +28,11 @@ cdef inline np.uint16_t kernel_mean(Py_ssize_t * histo, float pop,
                 bilat_pop += histo[i]
                 mean += histo[i] * i
         if bilat_pop:
-            return <np.uint16_t>(mean / bilat_pop)
+            return < np.uint16_t > (mean / bilat_pop)
         else:
-            return <np.uint16_t>(0)
+            return < np.uint16_t > (0)
     else:
-        return <np.uint16_t>(0)
+        return < np.uint16_t > (0)
 
 
 cdef inline np.uint16_t kernel_pop(Py_ssize_t * histo, float pop,
@@ -47,9 +47,9 @@ cdef inline np.uint16_t kernel_pop(Py_ssize_t * histo, float pop,
         for i in range(maxbin):
             if (g > (i - s0)) and (g < (i + s1)):
                 bilat_pop += histo[i]
-        return <np.uint16_t>(bilat_pop)
+        return < np.uint16_t > (bilat_pop)
     else:
-        return <np.uint16_t>(0)
+        return < np.uint16_t > (0)
 
 
 # -----------------------------------------------------------------

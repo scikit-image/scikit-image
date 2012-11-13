@@ -16,7 +16,7 @@ See Wikipedia_ for more details on the algorithm.
 
 from scipy import ndimage
 import matplotlib.pyplot as plt
-from skimage.morphology import watershed,disk
+from skimage.morphology import watershed, disk
 from skimage import data
 
 # original data
@@ -25,14 +25,14 @@ from skimage.filter import rank
 image = data.camera()
 
 # denoise image
-denoised = rank.median(image,disk(2))
+denoised = rank.median(image, disk(2))
 
 # find continuous region (low gradient) --> markers
-markers = rank.gradient(denoised,disk(5))<10
+markers = rank.gradient(denoised, disk(5)) < 10
 markers = ndimage.label(markers)[0]
 
 #local gradient
-gradient = rank.gradient(denoised,disk(2))
+gradient = rank.gradient(denoised, disk(2))
 
 # process the watershed
 labels = watershed(gradient, markers)
@@ -45,7 +45,7 @@ ax0.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
 ax1.imshow(gradient, cmap=plt.cm.spectral, interpolation='nearest')
 ax2.imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
 ax3.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
-ax3.imshow(labels, cmap=plt.cm.spectral, interpolation='nearest',alpha=.7)
+ax3.imshow(labels, cmap=plt.cm.spectral, interpolation='nearest', alpha=.7)
 
 for ax in axes:
     ax.axis('off')

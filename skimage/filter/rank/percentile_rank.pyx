@@ -102,9 +102,10 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(_crank8_percentiles.autolevel, _crank16_percentiles.autolevel,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
-                  shift_y=shift_y, p0=p0, p1=p1)
+    return _apply(
+        _crank8_percentiles.autolevel, _crank16_percentiles.autolevel,
+        image, selem, out=out, mask=mask, shift_x=shift_x,
+        shift_y=shift_y, p0=p0, p1=p1)
 
 
 def percentile_gradient(image, selem, out=None, mask=None, shift_x=False,
@@ -228,8 +229,9 @@ def percentile_mean_substraction(image, selem, out=None, mask=None,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
-                               shift_y=False, p0=.0, p1=1.):
+def percentile_morph_contr_enh(
+    image, selem, out=None, mask=None, shift_x=False,
+        shift_y=False, p0=.0, p1=1.):
     """Return greyscale local morph_contr_enh of an image.
 
     morph_contr_enh is computed on the given structuring element. Only levels
@@ -385,6 +387,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(_crank8_percentiles.threshold, _crank16_percentiles.threshold,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
-                  shift_y=shift_y, p0=p0, p1=p1)
+    return _apply(
+        _crank8_percentiles.threshold, _crank16_percentiles.threshold,
+        image, selem, out=out, mask=mask, shift_x=shift_x,
+        shift_y=shift_y, p0=p0, p1=p1)

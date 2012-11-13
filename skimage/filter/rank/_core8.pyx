@@ -69,9 +69,9 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
 
     # define pointers to the data
 
-    cdef np.uint8_t * out_data = <np.uint8_t*>out.data
-    cdef np.uint8_t * image_data = <np.uint8_t*>image.data
-    cdef np.uint8_t * mask_data = <np.uint8_t*>mask.data
+    cdef np.uint8_t * out_data = <np.uint8_t * >out.data
+    cdef np.uint8_t * image_data = <np.uint8_t * >image.data
+    cdef np.uint8_t * mask_data = <np.uint8_t * >mask.data
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
@@ -86,19 +86,19 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
     cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w
 
     # the current local histogram distribution
-    cdef Py_ssize_t * histo = <Py_ssize_t*>malloc(256 * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * histo = <Py_ssize_t * >malloc(256 * sizeof(Py_ssize_t))
 
     # these lists contain the relative pixel row and column for each of the 4
     # attack borders east, west, north and south e.g. se_e_r lists the rows of
     # the east structuring element border
-    cdef Py_ssize_t * se_e_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_e_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_w_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_w_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_n_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_n_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_s_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_s_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_e_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_e_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_w_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_w_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_n_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_n_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_s_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef Py_ssize_t * se_s_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
 
     # build attack and release borders
     # by using difference along axis
@@ -148,7 +148,7 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
             cc = c - centre_c
             if selem[r, c]:
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_increment(histo, &pop, image_data[rr * cols + cc])
+                    histogram_increment(histo, & pop, image_data[rr * cols + cc])
 
     r = 0
     c = 0
@@ -166,13 +166,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
                 rr = r + se_e_r[s]
                 cc = c + se_e_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_increment(histo, &pop, image_data[rr * cols + cc])
+                    histogram_increment(histo, & pop, image_data[rr * cols + cc])
 
             for s in range(num_se_w):
                 rr = r + se_w_r[s]
                 cc = c + se_w_c[s] - 1
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_decrement(histo, &pop, image_data[rr * cols + cc])
+                    histogram_decrement(histo, & pop, image_data[rr * cols + cc])
 
             # kernel -----------------------------------------------------------
             out_data[r * cols + c] = \
@@ -188,13 +188,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_increment(histo, &pop, image_data[rr * cols + cc])
+                histogram_increment(histo, & pop, image_data[rr * cols + cc])
 
         for s in range(num_se_n):
             rr = r + se_n_r[s] - 1
             cc = c + se_n_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_decrement(histo, &pop, image_data[rr * cols + cc])
+                histogram_decrement(histo, & pop, image_data[rr * cols + cc])
 
         # kernel ---------------------------------------------------------------
         out_data[r * cols + c] = kernel(histo, pop, image_data[r * cols + c],
@@ -207,13 +207,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
                 rr = r + se_w_r[s]
                 cc = c + se_w_c[s]
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_increment(histo, &pop, image_data[rr * cols + cc])
+                    histogram_increment(histo, & pop, image_data[rr * cols + cc])
 
             for s in range(num_se_e):
                 rr = r + se_e_r[s]
                 cc = c + se_e_c[s] + 1
                 if is_in_mask(rows, cols, rr, cc, mask_data):
-                    histogram_decrement(histo, &pop, image_data[rr * cols + cc])
+                    histogram_decrement(histo, & pop, image_data[rr * cols + cc])
 
             # kernel -----------------------------------------------------------
             out_data[r * cols + c] = kernel(
@@ -229,13 +229,13 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_increment(histo, &pop, image_data[rr * cols + cc])
+                histogram_increment(histo, & pop, image_data[rr * cols + cc])
 
         for s in range(num_se_n):
             rr = r + se_n_r[s] - 1
             cc = c + se_n_c[s]
             if is_in_mask(rows, cols, rr, cc, mask_data):
-                histogram_decrement(histo, &pop, image_data[rr * cols + cc])
+                histogram_decrement(histo, & pop, image_data[rr * cols + cc])
 
         # kernel ---------------------------------------------------------------
         out_data[r * cols + c] = kernel(histo, pop, image_data[r * cols + c],

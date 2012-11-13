@@ -27,21 +27,21 @@ from skimage import data
 from skimage.morphology import disk
 import skimage.filter.rank as rank
 
-a16 = (data.coins()).astype('uint16')*16
+a16 = (data.coins()).astype('uint16') * 16
 selem = disk(20)
 
-f1 = rank.percentile_mean(a16,selem = selem,p0=.1,p1=.9)
-f2 = rank.bilateral_mean(a16,selem = selem,s0=500,s1=500)
-f3 = rank.mean(a16,selem = selem)
+f1 = rank.percentile_mean(a16, selem=selem, p0=.1, p1=.9)
+f2 = rank.bilateral_mean(a16, selem=selem, s0=500, s1=500)
+f3 = rank.mean(a16, selem=selem)
 
 # display results
-fig, axes = plt.subplots(nrows=3, figsize=(15,10))
+fig, axes = plt.subplots(nrows=3, figsize=(15, 10))
 ax0, ax1, ax2 = axes
 
-ax0.imshow(np.hstack((a16,f1)))
+ax0.imshow(np.hstack((a16, f1)))
 ax0.set_title('percentile mean')
-ax1.imshow(np.hstack((a16,f2)))
+ax1.imshow(np.hstack((a16, f2)))
 ax1.set_title('bilateral mean')
-ax2.imshow(np.hstack((a16,f3)))
+ax2.imshow(np.hstack((a16, f3)))
 ax2.set_title('local mean')
 plt.show()

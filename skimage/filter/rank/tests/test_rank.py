@@ -171,7 +171,7 @@ def test_compare_autolevels():
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
-def test_compare_autolevels_16-bit():
+def test_compare_autolevels_16bit():
     # compare autolevel(16-bit) and percentile autolevel(16-bit) with p0=0.0 and
     # p1=1.0 should returns the same arrays
 
@@ -185,7 +185,7 @@ def test_compare_autolevels_16-bit():
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
-def test_compare_8-bit_vs_16-bit():
+def test_compare_8bit_vs_16bit():
     # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
     # dynamic) should be identical
 
