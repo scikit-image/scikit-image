@@ -5,9 +5,12 @@ instead of using [min, max]. It means that isolated bright or dark pixels will
 not produce halos.
 
 The local histogram is computed using a sliding window similar to the method
-described in:
+described in [1].
 
-.. [1] Reference: Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional
+References
+==========
+
+.. [1] Huang, T. ,Yang, G. ;  Tang, G.. "A fast two-dimensional
        median filtering algorithm", IEEE Transactions on Acoustics, Speech and
        Signal Processing, Feb 1979. Volume: 27 , Issue: 1, Page(s): 13 - 18.
 

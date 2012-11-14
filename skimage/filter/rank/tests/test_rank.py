@@ -322,7 +322,9 @@ def test_empty_selem():
 
 
 def test_otsu():
-    #
+    # test the local Otsu segmentation on a synthetic image
+    # (left to right ramp * sinus)
+
     test = np.tile(
         [128, 145, 103, 127, 165, 83, 127, 185, 63, 127, 205, 43,
             127, 225, 23, 127],
