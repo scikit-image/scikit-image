@@ -5,7 +5,7 @@ import os
 import re
 
 
-RE_CYTHON = re.compile("config.add_extension\(['\"]([\S]+)['\"]")
+RE_CYTHON = re.compile("config.add_extension\(\s*['\"]([\S]+)['\"]")
 
 BENTO_TEMPLATE = """
     Extension: {module_path}
