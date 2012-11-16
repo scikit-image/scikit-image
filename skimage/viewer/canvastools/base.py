@@ -12,7 +12,7 @@ class CanvasToolBase(object):
     Parameters
     ----------
     """
-    def __init__(self, ax, useblit=None):
+    def __init__(self, ax, useblit=None, on_update=None, on_enter=None):
         self.ax = ax
         self.canvas = ax.figure.canvas
         self.cids = []
@@ -25,6 +25,14 @@ class CanvasToolBase(object):
         if useblit:
             self.canvas.draw()
             self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
+
+        if on_update is None:
+            on_update = lambda *args: None
+        self.on_update = on_update
+
+        if on_enter is None:
+            on_enter = lambda *args: None
+        self.on_enter = on_enter
 
     def connect_event(self, event, callback):
         """Connect callback with an event.
@@ -51,6 +59,15 @@ class CanvasToolBase(object):
     def set_visible(self, val):
         for a in self._artists:
             a.set_visible(val)
+
+    def redraw(self):
+        if self.useblit:
+            self.canvas.restore_region(self.img_background)
+            for artist in self._artists:
+                self.ax.draw_artist(artist)
+            self.canvas.blit(self.ax.bbox)
+        else:
+            self.canvas.draw_idle()
 
 
 class ToolHandles(object):

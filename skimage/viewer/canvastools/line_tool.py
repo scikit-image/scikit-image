@@ -21,21 +21,14 @@ class LineTool(CanvasToolBase):
     """
     def __init__(self, ax, x, y, on_update=None, on_enter=None, maxdist=10,
                  lineprops=None):
-        super(LineTool, self).__init__(ax)
+        super(LineTool, self).__init__(ax, on_update=on_update,
+                                       on_enter=on_enter)
 
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
         props.update(lineprops if lineprops is not None else {})
         self.linewidth = props['linewidth']
         self.maxdist = maxdist
         self._active_pt = None
-
-        if on_update is None:
-            on_update = lambda *args: None
-        self.on_update = on_update
-
-        if on_enter is None:
-            on_enter = lambda *args: None
-        self.on_enter = on_enter
 
         self._init_end_pts = np.transpose([x, y])
         self.end_pts = self._init_end_pts.copy()
@@ -99,15 +92,6 @@ class LineTool(CanvasToolBase):
         self.redraw()
 
         self.on_update(self.end_pts)
-
-    def redraw(self):
-        if self.useblit:
-            self.canvas.restore_region(self.img_background)
-            for artist in self._artists:
-                self.ax.draw_artist(artist)
-            self.canvas.blit(self.ax.bbox)
-        else:
-            self.canvas.draw_idle()
 
 
 class ThickLineTool(LineTool):
