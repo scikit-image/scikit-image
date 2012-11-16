@@ -1,5 +1,9 @@
 import numpy as np
-from matplotlib import lines
+
+try:
+    from matplotlib import lines
+except ImportError:
+    print("Could not import matplotlib -- skimage.viewer not available.")
 
 from base import CanvasToolBase, ToolHandles
 

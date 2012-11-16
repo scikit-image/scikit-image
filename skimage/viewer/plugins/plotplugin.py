@@ -1,7 +1,14 @@
 import numpy as np
-from PyQt4 import QtGui
 
-import matplotlib.pyplot as plt
+try:
+    from PyQt4 import QtGui
+except ImportError:
+    print("Could not import PyQt4 -- skimage.viewer not available.")
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    print("Could not import matplotlib -- skimage.viewer not available.")
 
 from ..utils import MatplotlibCanvas
 from .base import Plugin
@@ -17,6 +24,7 @@ class PlotCanvas(MatplotlibCanvas):
         self.fig, self.ax = plt.subplots(figsize=(height, width), **kwargs)
         super(PlotCanvas, self).__init__(parent, self.fig, **kwargs)
         self.setMinimumHeight(150)
+
 
 class PlotPlugin(Plugin):
     """Plugin for ImageViewer that contains a plot canvas.
