@@ -23,9 +23,6 @@ class LineTool(CanvasToolBase):
                  lineprops=None):
         super(LineTool, self).__init__(ax)
 
-        #TODO: Figure out how to cleanly restore image background for useblit
-        self.useblit = False
-
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
         props.update(lineprops if lineprops is not None else {})
         self.linewidth = props['linewidth']
@@ -105,8 +102,9 @@ class LineTool(CanvasToolBase):
 
     def redraw(self):
         if self.useblit:
-            # self.canvas.restore_region(self.img_background)
-            self.ax.draw_artist(self._line)
+            self.canvas.restore_region(self.img_background)
+            for artist in self._artists:
+                self.ax.draw_artist(artist)
             self.canvas.blit(self.ax.bbox)
         else:
             self.canvas.draw_idle()

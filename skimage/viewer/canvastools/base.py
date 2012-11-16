@@ -23,8 +23,8 @@ class CanvasToolBase(object):
             useblit = True if mpl.backends.backend.endswith('Agg') else False
         self.useblit = useblit
         if useblit:
-            bbox = self.ax.bbox
-            self.img_background = self.canvas.copy_from_bbox(bbox)
+            self.canvas.draw()
+            self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
 
     def connect_event(self, event, callback):
         """Connect callback with an event.
