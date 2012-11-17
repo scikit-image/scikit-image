@@ -72,5 +72,43 @@ def test_probabilistic_hough():
     assert([(25, 25), (74, 74)] in sorted_lines)
 
 
+def test_hough_peaks_dist():
+    img = np.zeros((100, 100), dtype=np.bool_)
+    img[:, 30] = True
+    img[:, 40] = True
+    hspace, angles, dists = tf.hough(img)
+    assert len(tf.hough_peaks(hspace, angles, dists, min_distance=5)[0]) == 2
+    assert len(tf.hough_peaks(hspace, angles, dists, min_distance=15)[0]) == 1
+
+
+def test_hough_peaks_angle():
+    img = np.zeros((100, 100), dtype=np.bool_)
+    img[:, 0] = True
+    img[0, :] = True
+
+    hspace, angles, dists = tf.hough(img)
+    assert len(tf.hough_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
+    assert len(tf.hough_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+
+    theta = np.linspace(0, np.pi, 100)
+    hspace, angles, dists = tf.hough(img, theta)
+    assert len(tf.hough_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
+    assert len(tf.hough_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+
+    theta = np.linspace(np.pi / 3, 4. / 3 * np.pi, 100)
+    hspace, angles, dists = tf.hough(img, theta)
+    assert len(tf.hough_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
+    assert len(tf.hough_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+
+
+def test_hough_peaks_num():
+    img = np.zeros((100, 100), dtype=np.bool_)
+    img[:, 30] = True
+    img[:, 40] = True
+    hspace, angles, dists = tf.hough(img)
+    assert len(tf.hough_peaks(hspace, angles, dists, min_distance=0,
+                              min_angle=0, num_peaks=1)[0]) == 1
+
+
 if __name__ == "__main__":
     run_module_suite()
