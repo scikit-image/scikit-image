@@ -294,8 +294,8 @@ def is_local_maximum(image, labels=None, footprint=None):
 
     """
     return peak_local_max(image, labels=labels, min_distance=1,
-                          footprint=footprint, indices=False,
-                          exclude_border=False)
+                          threshold_rel=0, footprint=footprint,
+                          indices=False, exclude_border=False)
 
 
 # ---------------------- deprecated ------------------------------

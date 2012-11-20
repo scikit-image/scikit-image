@@ -106,8 +106,10 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
             labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
         labels = labels.astype(np.int32)
 
+        # New values for new ordering
+        label_values = np.unique(labels)
         out = np.zeros_like(image)
-        for label in labels:
+        for label in label_values[label_values != 0]:
             maskim = (labels == label)
             out += peak_local_max(image * maskim, min_distance=min_distance,
                                   threshold_abs=threshold_abs,
