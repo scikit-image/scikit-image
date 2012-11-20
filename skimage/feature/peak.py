@@ -129,7 +129,7 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         if indices is True:
             return []
         else:
-            return np.zeros_like(image)
+            return np.zeros_like(image, dtype=bool)
 
     image = image.copy()
     # Non maximum filter
