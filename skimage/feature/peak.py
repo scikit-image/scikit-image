@@ -119,7 +119,7 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         if indices is True:
             return np.transpose(out.nonzero())
         else:
-            return out
+            return out.astype(bool)
 
 
     if np.all(image == image.flat[0]):
@@ -164,6 +164,6 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     if indices is True:
         return coordinates
     else:
-        out = np.zeros_like(image)
-        out[coordinates[:, 0], coordinates[:, 1]] = 1
+        out = np.zeros_like(image, dtype=bool)
+        out[coordinates[:, 0], coordinates[:, 1]] = True
         return out
