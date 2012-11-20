@@ -4,10 +4,10 @@ import scipy.ndimage as ndi
 def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
                    exclude_border=True, indices=True, num_peaks=np.inf,
                    footprint=None, labels=None, **kwargs):
-    """Return coordinates of peaks in an image.
+    """
+    Find peaks in an image, and return them as coordinates or a boolean array.
 
-    Peaks are the local maxima in a region of `2 * min_distance + 1`
-    (i.e. peaks are separated by at least `min_distance`).
+    Peaks are the local maxima
 
     NOTE: If peaks are flat (i.e. multiple pixels have exact same intensity),
     the coordinates of all pixels are returned.
@@ -16,22 +16,54 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     ----------
     image : ndarray of floats
         Input image.
-    min_distance : int
-        Minimum number of pixels separating peaks and image boundary.
-    threshold : float
-        Deprecated. See `threshold_rel`.
-    threshold_abs : float
+
+    min_distance : int, default 10.
+        Minimum number of pixels separating peaks in a region of `2 *
+        min_distance + 1` (i.e. peaks are separated by at least
+        `min_distance`).
+        If `exclude_border` is True, this value also excludes a border
+        `min_distance` from the image boundary.
+        To find the maximum number of points, use `min_distance=1`.
+
+    threshold_abs : float, default 0.
         Minimum intensity of peaks.
-    threshold_rel : float
+
+    threshold_rel : float, default 0.1
         Minimum intensity of peaks calculated as `max(image) * threshold_rel`.
-    num_peaks : int
+
+    exclude_border : bool, default True
+        If True, `min_distance` excludes peaks from the border of the image as
+        well as from each other.
+
+    indices : bool, default True
+        If True, the output will be a matrix representing peak coordinates.
+        If False, the output will be a boolean matrix shaped as `image.shape`
+            with peaks present at True elements.
+
+    num_peaks : int, default np.inf
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
-        return `num_peaks` coordinates based on peak intensity.
+        return `num_peaks` peaks based on highest peak intensity.
+
+    footprint : ndarray of bools, optional
+        If provided, `footprint == 1` represents the local region within which
+        to search for peaks at every point in `image`.
+        Overrides `min_distance`, except for border exclusion if
+            `exclude_border` is True.
+
+    labels : ndarray of ints, optional
+        If provided, each unique region `labels == value` represents a unique
+        region to search for peaks. Zero is reserved for background.
+
+    threshold : float, optional
+        Deprecated. If provided as a kwarg, will override `threshold_rel`.
+        See `threshold_rel`.
 
     Returns
     -------
-    coordinates : (N, 2) array
-        (row, column) coordinates of peaks.
+    output : (N, 2) array or ndarray of bools
+        If `exclude_border = True`  : (row, column) coordinates of peaks.
+        If `exclude_border = False` : Boolean array shaped like `image`,
+            with peaks represented by True values.
 
     Notes
     -----

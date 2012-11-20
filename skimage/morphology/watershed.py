@@ -248,6 +248,16 @@ def is_local_maximum(image, labels=None, footprint=None):
     result: ndarray of bools
         mask that is True for pixels that are local maxima of `image`
 
+    See also
+    --------
+    skimage.feature.peak_local_max: Unified peak finding backend.
+        The more capable backend for finding local maxima.
+
+    Notes
+    -----
+    This function is now a wrapper for skimage.feature.peak_local_max() and is
+    retained only for convenience and backward compatibility.
+
     Examples
     --------
     >>> image = np.zeros((4, 4))
@@ -281,63 +291,8 @@ def is_local_maximum(image, labels=None, footprint=None):
            [False,  True, False,  True],
            [False, False, False, False],
            [False,  True, False,  True]], dtype=bool)
+
     """
-    # if labels is None:
-    #     labels = np.ones(image.shape, dtype=np.uint8)
-    # if footprint is None:
-    #     footprint = np.ones([3] * image.ndim, dtype=np.uint8)
-    # assert((np.all(footprint.shape) & 1) == 1)
-    # footprint = (footprint != 0)
-    # footprint_extent = (np.array(footprint.shape) - 1) // 2
-    # if np.all(footprint_extent == 0):
-    #     return labels > 0
-    # result = (labels > 0).copy()
-    # #
-    # # Create a labels matrix with zeros at the borders that might be
-    # # hit by the footprint.
-    # #
-    # big_labels = np.zeros(np.array(labels.shape) + footprint_extent * 2,
-    #                       labels.dtype)
-    # big_labels[[slice(fe, -fe) for fe in footprint_extent]] = labels
-    # #
-    # # Find the relative indexes of each footprint element
-    # #
-    # image_strides = np.array(image.strides) // image.dtype.itemsize
-    # big_strides = np.array(big_labels.strides) // big_labels.dtype.itemsize
-    # result_strides = np.array(result.strides) // result.dtype.itemsize
-    # footprint_offsets = np.mgrid[[slice(-fe, fe + 1) for fe in footprint_extent]]
-
-    # fp_image_offsets = np.sum(image_strides[:, np.newaxis] *
-    #                           footprint_offsets[:, footprint], 0)
-    # fp_big_offsets = np.sum(big_strides[:, np.newaxis] *
-    #                         footprint_offsets[:, footprint], 0)
-    # #
-    # # Get the index of each labeled pixel in the image and big_labels arrays
-    # #
-    # indexes = np.mgrid[[slice(0, x) for x in labels.shape]][:, labels > 0]
-    # image_indexes = np.sum(image_strides[:, np.newaxis] * indexes, 0)
-    # big_indexes = np.sum(big_strides[:, np.newaxis] *
-    #                      (indexes + footprint_extent[:, np.newaxis]), 0)
-    # result_indexes = np.sum(result_strides[:, np.newaxis] * indexes, 0)
-    # #
-    # # Now operate on the raveled images
-    # #
-    # big_labels_raveled = big_labels.ravel()
-    # image_raveled = image.ravel()
-    # result_raveled = result.ravel()
-    # #
-    # # A hit is a hit if the label at the offset matches the label at the pixel
-    # # and if the intensity at the pixel is greater or equal to the intensity
-    # # at the offset.
-    # #
-    # for fp_image_offset, fp_big_offset in zip(fp_image_offsets, fp_big_offsets):
-    #     same_label = (big_labels_raveled[big_indexes + fp_big_offset] ==
-    #                   big_labels_raveled[big_indexes])
-    #     less_than = (image_raveled[image_indexes[same_label]] <
-    #                  image_raveled[image_indexes[same_label] + fp_image_offset])
-    #     result_raveled[result_indexes[same_label][less_than]] = False
-
-    # return result
     return peak_local_max(image, labels=labels, min_distance=1,
                           footprint=footprint, indices=False,
                           exclude_border=False)
