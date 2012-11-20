@@ -1,10 +1,9 @@
-import warnings
 import numpy as np
-from scipy import ndimage
+import scipy.ndimage as ndi
 
-
-def peak_local_max(image, min_distance=10, threshold='deprecated',
-                   threshold_abs=0, threshold_rel=0.1, num_peaks=np.inf):
+def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
+                   exclude_border=True, indices=True, num_peaks=np.inf,
+                   footprint=None, labels=None, **kwargs):
     """Return coordinates of peaks in an image.
 
     Peaks are the local maxima in a region of `2 * min_distance + 1`
@@ -36,11 +35,11 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
 
     Notes
     -----
-    The peak local maximum function returns the coordinates of local peaks (maxima)
-    in a image. A maximum filter is used for finding local maxima. This operation
-    dilates the original image. After comparison between dilated and original image,
-    peak_local_max function returns the coordinates of peaks where
-    dilated image = original.
+    The peak local maximum function returns the coordinates of local peaks
+    (maxima) in a image. A maximum filter is used for finding local maxima.
+    This operation dilates the original image. After comparison between
+    dilated and original image, peak_local_max function returns the
+    coordinates of peaks where dilated image = original.
 
     Examples
     --------
@@ -64,25 +63,60 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
     array([[3, 2]])
 
     """
+    # In the case of labels, recursively build and return an output
+    # operating on each label separately; for API compatibility with
+    # ..watershed.is_local_maximum()
+    if labels is not None:
+        label_values = np.unique(labels)
+        # Reorder label values to have consecutive integers (no gaps)
+        if np.any(np.diff(label_values) != 1):
+            mask = labels >= 0
+            labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
+        labels = labels.astype(np.int32)
+
+        out = np.zeros_like(image)
+        for label in labels:
+            out += peak_local_max(image, min_distance=min_distance,
+                                   threshold_abs=threshold_abs,
+                                   threshold_rel=threshold_rel,
+                                   exclude_border=exclude_border,
+                                   indices=False, num_peaks=np.inf,
+                                   footprint=footprint, labels=None,
+                                   **kwargs)
+
+        if indices is True:
+            return np.transpose(out.nonzero())
+        else:
+            return out
+
+
     if np.all(image == image.flat[0]):
-        return []
+        if indices is True:
+            return []
+        else:
+            return np.zeros_like(image)
+
     image = image.copy()
     # Non maximum filter
-    size = 2 * min_distance + 1
-    image_max = ndimage.maximum_filter(image, size=size, mode='constant')
+    if footprint is not None:
+        image_max = ndi.maximum_filter(image, footprint=footprint,
+                                       mode='constant')
+    else:
+        size = 2 * min_distance + 1
+        image_max = ndi.maximum_filter(image, size=size, mode='constant')
     mask = (image == image_max)
     image *= mask
 
-    # Remove the image borders
-    image[:min_distance] = 0
-    image[-min_distance:] = 0
-    image[:, :min_distance] = 0
-    image[:, -min_distance:] = 0
+    if exclude_border:
+        # Remove the image borders
+        image[:min_distance] = 0
+        image[-min_distance:] = 0
+        image[:, :min_distance] = 0
+        image[:, -min_distance:] = 0
 
-    if not threshold == 'deprecated':
-        msg = "`threshold` parameter deprecated; use `threshold_rel instead."
-        warnings.warn(msg, DeprecationWarning)
-        threshold_rel = threshold
+    if kwargs.has_key('threshold'):
+        threshold_rel = kwargs['threshold']
+
     # find top peak candidates above a threshold
     peak_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
     image_t = (image > peak_threshold) * 1
@@ -95,4 +129,9 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
         idx_maxsort = np.argsort(intensities)[::-1]
         coordinates = coordinates[idx_maxsort][:num_peaks]
 
-    return coordinates
+    if indices is True:
+        return coordinates
+    else:
+        out = np.zeros_like(image)
+        out[coordinates[:, 0], coordinates[:, 1]] = 1
+        return out
