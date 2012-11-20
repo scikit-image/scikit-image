@@ -108,13 +108,14 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
         out = np.zeros_like(image)
         for label in labels:
-            out += peak_local_max(image, min_distance=min_distance,
-                                   threshold_abs=threshold_abs,
-                                   threshold_rel=threshold_rel,
-                                   exclude_border=exclude_border,
-                                   indices=False, num_peaks=np.inf,
-                                   footprint=footprint, labels=None,
-                                   **kwargs)
+            maskim = (labels == label)
+            out += peak_local_max(image * maskim, min_distance=min_distance,
+                                  threshold_abs=threshold_abs,
+                                  threshold_rel=threshold_rel,
+                                  exclude_border=exclude_border,
+                                  indices=False, num_peaks=np.inf,
+                                  footprint=footprint, labels=None,
+                                  **kwargs)
 
         if indices is True:
             return np.transpose(out.nonzero())
