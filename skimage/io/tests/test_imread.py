@@ -21,18 +21,6 @@ def teardown():
     reset_plugins()
 
 
-def setup_module(self):
-    """The effect of the `plugin.use` call may be overridden by later imports.
-    Call `use_plugin` directly before the tests to ensure that imread is used.
-
-    """
-    try:
-        use_plugin('imread')
-    except ImportError:
-        pass
-
-
-
 @skipif(not imread_available)
 def test_imread_flatten():
     # a color image is flattened
