@@ -29,6 +29,7 @@ import numpy as np
 import scipy.ndimage
 from ..filter import rank_order
 from ..feature import peak_local_max
+from .._shared.utils import deprecated
 
 from . import _watershed
 
@@ -226,6 +227,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         return c_output
 
 
+@deprecated('filter.peak_local_max')
 def is_local_maximum(image, labels=None, footprint=None):
     """
     Return a boolean array of points that are local maxima
