@@ -120,3 +120,6 @@
 
 - Olivier Debeir
   Rank filters (8- and 16-bits) using sliding window.
+
+- Luis Pedro Coelho
+  imread plugin
