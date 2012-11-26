@@ -83,9 +83,9 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     array([[3, 2]])
 
     """
+    out = np.zeros_like(image, dtype=np.bool)
     # In the case of labels, recursively build and return an output
-    # operating on each label separately; for API compatibility with
-    # ..watershed.is_local_maximum()
+    # operating on each label separately
     if labels is not None:
         label_values = np.unique(labels)
         # Reorder label values to have consecutive integers (no gaps)
@@ -96,7 +96,6 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
         # New values for new ordering
         label_values = np.unique(labels)
-        out = np.zeros_like(image)
         for label in label_values[label_values != 0]:
             maskim = (labels == label)
             out += peak_local_max(image * maskim, min_distance=min_distance,
@@ -105,18 +104,17 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
                                   exclude_border=exclude_border,
                                   indices=False, num_peaks=np.inf,
                                   footprint=footprint, labels=None)
-            del maskim
 
         if indices is True:
             return np.transpose(out.nonzero())
         else:
-            return out.astype(bool)
+            return out.astype(np.bool)
 
     if np.all(image == image.flat[0]):
         if indices is True:
             return []
         else:
-            return np.zeros_like(image, dtype=bool)
+            return out
 
     image = image.copy()
     # Non maximum filter
@@ -150,6 +148,5 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     if indices is True:
         return coordinates
     else:
-        out = np.zeros_like(image, dtype=bool)
         out[coordinates[:, 0], coordinates[:, 1]] = True
         return out
