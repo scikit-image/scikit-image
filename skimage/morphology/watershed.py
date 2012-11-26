@@ -227,7 +227,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         return c_output
 
 
-@deprecated('filter.peak_local_max')
+@deprecated('feature.peak_local_max')
 def is_local_maximum(image, labels=None, footprint=None):
     """
     Return a boolean array of points that are local maxima
@@ -236,10 +236,8 @@ def is_local_maximum(image, labels=None, footprint=None):
     ----------
     image: ndarray (2-D, 3-D, ...)
         intensity image
-
     labels: ndarray, optional
         find maxima only within labels. Zero is reserved for background.
-
     footprint: ndarray of bools, optional
         binary mask indicating the neighborhood to be examined
         `footprint` must be a matrix with odd dimensions, the center is taken
