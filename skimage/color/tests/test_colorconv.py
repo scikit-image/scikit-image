@@ -113,9 +113,13 @@ class TestColorconv(TestCase):
 
     # XYZ to RGB
     def test_xyz2rgb_conversion(self):
-        # only roundtrip test, we checked rgb2xyz above already
         assert_almost_equal(xyz2rgb(rgb2xyz(self.colbars_array)),
                             self.colbars_array)
+
+    # RGB<->XYZ roundtrip on another image
+    def test_xyz_rgb_roundtrip(self):
+        img_rgb = img_as_float(self.img_rgb)
+        assert_array_almost_equal(xyz2rgb(rgb2xyz(img_rgb)), img_rgb)
 
     # RGB to RGB CIE
     def test_rgb2rgbcie_conversion(self):
