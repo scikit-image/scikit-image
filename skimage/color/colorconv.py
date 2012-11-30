@@ -79,7 +79,6 @@ def is_gray(image):
     return image.ndim == 2
 
 
-
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 
@@ -288,8 +287,8 @@ sb_primaries = np.array([1. / 155, 1. / 190, 1. / 225]) * 1e5
 
 # From sRGB specification
 xyz_from_rgb = np.array([[0.412453, 0.357580, 0.180423],
-                          [0.212671, 0.715160, 0.072169],
-                          [0.019334, 0.119193, 0.950227]])
+                        [0.212671, 0.715160, 0.072169],
+                        [0.019334, 0.119193, 0.950227]])
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
@@ -379,14 +378,14 @@ def xyz2rgb(xyz):
     >>> lena_xyz = rgb2xyz(lena)
     >>> lena_rgb = xyz2rgb(lena_xyz)
     """
-    # Follow the algorithm from http://www.easyrgb.com/index.php?X=MATH&H=01#text1
+    # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
-    arr = _prepare_colorarray(xyz)
-    arr = _convert(rgb_from_xyz, arr)
-    mask = arr>0.0031308
-    arr[mask] = 1.055 * np.power(arr[mask], 1/2.4) - 0.055
+    arr = _convert(rgb_from_xyz, xyz)
+    mask = arr > 0.0031308
+    arr[mask] = 1.055 * np.power(arr[mask], 1 / 2.4) - 0.055
     arr[~mask] *= 12.92
     return arr
+
 
 def rgb2xyz(rgb):
     """RGB to XYZ color space conversion.
@@ -421,11 +420,11 @@ def rgb2xyz(rgb):
     >>> lena = data.lena()
     >>> lena_xyz = rgb2xyz(lena)
     """
-    # Follow the algorithm from http://www.easyrgb.com/index.php?X=MATH&H=02#text2
+    # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
     arr = _prepare_colorarray(rgb).copy()
-    mask = arr>0.04045
-    arr[mask] = np.power((arr[mask]+0.055)/1.055, 2.4)
+    mask = arr > 0.04045
+    arr[mask] = np.power((arr[mask] + 0.055) / 1.055, 2.4)
     arr[~mask] /= 12.92
     return _convert(xyz_from_rgb, arr)
 
@@ -606,7 +605,7 @@ def xyz2lab(xyz):
     >>> lena_xyz = rgb2xyz(lena)
     >>> lena_lab = xyz2lab(lena_xyz)
     """
-    arr = _prepare_colorarray(xyz).copy()
+    arr = _prepare_colorarray(xyz)
 
     # scale by CIE XYZ tristimulus values of the reference white point
     arr = arr / lab_ref_white
