@@ -1,3 +1,9 @@
+skimage (0.7.2-1) unstable; urgency=low
+
+  * Recent upstream release
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 01 Dec 2012 22:06:51 -0500
+
 skimage (0.6-1) unstable; urgency=low
 
   * New upstream release
