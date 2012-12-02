@@ -2,27 +2,24 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from random import randint
+from libc.math cimport abs, fabs, sqrt, ceil, floor
+from libc.stdlib cimport rand
+
+
 np.import_array()
 
-cdef extern from "stdlib.h":
-    int rand()
-        
-cdef extern from "math.h":
-    int abs(int)
-    double fabs(double)
-    double sqrt(double)
-    double ceil(double)
-    double floor(double)
-
-cdef double round(double val):
-    return floor(val + 0.5);
 
 cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
 
+
+cdef inline int round(double r):
+    return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
+
+
 @cython.boundscheck(False)
 def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
-    
+
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
 
@@ -31,7 +28,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     cdef np.ndarray[ndim=1, dtype=np.double_t] stheta
 
     if theta is None:
-        theta = np.linspace(PI_2, NEG_PI_2, 180) 
+        theta = np.linspace(PI_2, NEG_PI_2, 180)
 
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
@@ -39,14 +36,14 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     # compute the bins and allocate the accumulator array
     cdef np.ndarray[ndim=2, dtype=np.uint64_t] accum
     cdef np.ndarray[ndim=1, dtype=np.double_t] bins
-    cdef int max_distance, offset 
+    cdef int max_distance, offset
 
-    max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] + 
+    max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] +
                                        img.shape[1] * img.shape[1])))
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
     bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
     offset = max_distance / 2
-    
+
     # compute the nonzero indexes
     cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
     y_idxs, x_idxs = np.PyArray_Nonzero(img)
@@ -58,7 +55,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     nthetas = theta.shape[0]
     for i in range(nidxs):
         x = x_idxs[i]
-        y = y_idxs[i]   
+        y = y_idxs[i]
         for j in range(nthetas):
             accum_idx = <int>round((ctheta[j] * x + stheta[j] * y)) + offset
             accum[accum_idx, j] += 1
@@ -94,7 +91,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
     # maximum line number cutoff
     cdef int lines_max = 2 ** 15
     cdef int xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, good_line, count
-    max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] + 
+    max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] +
                                        img.shape[1] * img.shape[1])))
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
     offset = max_distance / 2
@@ -114,11 +111,11 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
         # select random non-zero point
         count = len(points)
         if count == 0:
-            break        
+            break
         index = rand() % (count)
         x = points[index][0]
         y = points[index][1]
-        del points[index]        
+        del points[index]
         # if previously eliminated, skip
         if not mask[y, x]:
             continue
@@ -147,7 +144,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
                 dx0 = 1
             else:
                 dx0 = -1
-            dy0 = <int>round(b * (1 << shift) / fabs(a)) 
+            dy0 = <int>round(b * (1 << shift) / fabs(a))
             y0 = (y0 << shift) + (1 << (shift - 1))
         else:
             if b > 0:
@@ -156,7 +153,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
                 dy0 = -1
             dx0 = <int>round(a * (1 << shift) / fabs(b))
             x0 = (x0 << shift) + (1 << (shift - 1))
-  
+
         # pass 1: walk the line, merging lines less than specified gap length
         for k in range(2):
             gap = 0
@@ -208,9 +205,9 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
                     x1 = px >> shift
                     y1 = py
                 # if non-zero point found, continue the line
-                if mask[y1, x1]:  
-                    if good_line:                  
-                        accum_idx = <int>round((ctheta[j] * x1 + stheta[j] * y1)) + offset                    
+                if mask[y1, x1]:
+                    if good_line:
+                        accum_idx = <int>round((ctheta[j] * x1 + stheta[j] * y1)) + offset
                         accum[accum_idx, max_theta] -= 1
                         mask[y1, x1] = 0
                 # exit when the point is the line end

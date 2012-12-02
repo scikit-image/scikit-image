@@ -1,12 +1,15 @@
 from __future__ import division
 import numpy as np
 
-__all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte']
+__all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
+           'img_as_bool']
 
 from .. import get_log
 log = get_log('dtype_converter')
 
-dtype_range = {np.uint8: (0, 255),
+dtype_range = {np.bool_: (False, True),
+               np.bool8: (False, True),
+               np.uint8: (0, 255),
                np.uint16: (0, 65535),
                np.int8: (-128, 127),
                np.int16: (-32768, 32767),
@@ -15,7 +18,8 @@ dtype_range = {np.uint8: (0, 255),
 
 integer_types = (np.uint8, np.uint16, np.int8, np.int16)
 
-_supported_types = (np.uint8, np.uint16, np.uint32,
+_supported_types = (np.bool_, np.bool8,
+                    np.uint8, np.uint16, np.uint32,
                     np.int8, np.int16, np.int32,
                     np.float32, np.float64)
 
@@ -94,7 +98,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     def _dtype2(kind, bits, itemsize=1):
         # Return dtype of `kind` that can store a `bits` wide unsigned int
         c = lambda x, y: x <= y if kind == 'u' else x < y
-        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i*8))
+        s = next(i for i in (itemsize, ) + (2, 4, 8) if c(bits, i * 8))
         return np.dtype(kind + str(s))
 
     def _scale(a, n, m, copy=True):
@@ -145,6 +149,21 @@ def convert(image, dtype, force_copy=False, uniform=False):
     kind_in = dtypeobj_in.kind
     itemsize = dtypeobj.itemsize
     itemsize_in = dtypeobj_in.itemsize
+
+    if kind == 'b':
+        # to binary image
+        if kind_in in "fi":
+            sign_loss()
+        prec_loss()
+        return image > dtype_in(dtype_range[dtype_in][1] / 2)
+
+    if kind_in == 'b':
+        # from binary image, to float and to integer
+        result = dtype(image)
+        if kind != 'f':
+            result *= dtype(dtype_range[dtype][1])
+        return result
+
     if kind in 'ui':
         imin = np.iinfo(dtype).min
         imax = np.iinfo(dtype).max
@@ -205,26 +224,26 @@ def convert(image, dtype, force_copy=False, uniform=False):
     if kind_in == 'u':
         if kind == 'i':
             # unsigned integer -> signed integer
-            image = _scale(image, 8*itemsize_in, 8*itemsize-1)
+            image = _scale(image, 8 * itemsize_in, 8 * itemsize - 1)
             return image.view(dtype)
         else:
             # unsigned integer -> unsigned integer
-            return _scale(image, 8*itemsize_in, 8*itemsize)
+            return _scale(image, 8 * itemsize_in, 8 * itemsize)
 
     if kind == 'u':
         # signed integer -> unsigned integer
         sign_loss()
-        image = _scale(image, 8*itemsize_in-1, 8*itemsize)
+        image = _scale(image, 8 * itemsize_in - 1, 8 * itemsize)
         result = np.empty(image.shape, dtype)
         np.maximum(image, 0, out=result, dtype=image.dtype, casting='unsafe')
         return result
 
     # signed integer -> signed integer
     if itemsize_in > itemsize:
-        return _scale(image, 8*itemsize_in-1, 8*itemsize-1)
-    image = image.astype(_dtype2('i', itemsize*8))
+        return _scale(image, 8 * itemsize_in - 1, 8 * itemsize - 1)
+    image = image.astype(_dtype2('i', itemsize * 8))
     image -= imin_in
-    image = _scale(image, 8*itemsize_in, 8*itemsize, copy=False)
+    image = _scale(image, 8 * itemsize_in, 8 * itemsize, copy=False)
     image += imin
     return dtype(image)
 
@@ -246,8 +265,8 @@ def img_as_float(image, force_copy=False):
 
     Notes
     -----
-    The range of a floating point image is [0, 1].
-    Negative input values will be shifted to the positive domain.
+    The range of a floating point image is [0.0, 1.0] or [-1.0, 1.0] when
+    converting from unsigned or signed datatypes, respectively.
 
     """
     return convert(image, np.float64, force_copy)
@@ -322,3 +341,27 @@ def img_as_ubyte(image, force_copy=False):
 
     """
     return convert(image, np.uint8, force_copy)
+
+
+def img_as_bool(image, force_copy=False):
+    """Convert an image to boolean format.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    force_copy : bool
+        Force a copy of the data, irrespective of its current dtype.
+
+    Returns
+    -------
+    out : ndarray of bool (`bool_`)
+        Output image.
+
+    Notes
+    -----
+    The upper half of the input dtype's positive range is True, and the lower
+    half is False. All negative values (if present) are False.
+
+    """
+    return convert(image, np.bool_, force_copy)

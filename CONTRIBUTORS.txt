@@ -2,9 +2,9 @@
   Project coordination
 
 - Nicolas Pinto
-  Colour spaces and filters.
+  Colour spaces and filters, and image resizing.
   Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
-  Montage helpers: ``util.montage``
+  Montage helpers: ``util.montage``.
 
 - Damian Eads
   Morphological operators
@@ -73,7 +73,8 @@
   From whom we borrowed the example generation tools.
 
 - Andreas Mueller
-  Example data set loader.
+  Example data set loader. Nosetest compatibility functions.
+  Quickshift image segmentation, Felzenszwalbs fast graph based segmentation.
 
 - Yaroslav Halchenko
   For sharing his expert advice on Debian packaging.
@@ -102,8 +103,17 @@
 
 - Nicolas Poilvert
   Shape views: ``util.shape.view_as_windows`` and ``util.shape.view_as_blocks``
+  Image resizing.
 
 - Johannes Schönberger
-  Polygon, circle and ellipse drawing functions
-  Adaptive thresholding
-  Implementation of Matlab's `regionprops`
+  Drawing functions, adaptive thresholding, regionprops, geometric
+  transformations, LBPs, polygon approximations, web layout, and more.
+
+- Pavel Campr
+  Fixes and tests for Histograms of Oriented Gradients.
+
+- Joshua Warner
+  Multichannel random walker segmentation.
+
+- Petter Strandmark
+  Perimeter calculation in regionprops.

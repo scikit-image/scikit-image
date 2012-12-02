@@ -5,6 +5,7 @@ from skimage._build import cython
 
 base_path = os.path.abspath(os.path.dirname(__file__))
 
+
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
 
@@ -14,17 +15,17 @@ def configuration(parent_package='', top_path=None):
     cython(['_draw.pyx'], working_path=base_path)
 
     config.add_extension('_draw', sources=['_draw.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+                         include_dirs=[get_numpy_include_dirs(), '../shared'])
 
     return config
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup
-    setup(maintainer = 'scikits-image developers',
-          author = 'scikits-image developers',
-          maintainer_email = 'scikits-image@googlegroups.com',
-          description = 'Drawing',
-          url = 'https://github.com/scikits-image/scikits-image',
-          license = 'SciPy License (BSD Style)',
+    setup(maintainer='scikit-image developers',
+          author='scikit-image developers',
+          maintainer_email='scikit-image@googlegroups.com',
+          description='Drawing',
+          url='https://github.com/scikit-image/scikit-image',
+          license='SciPy License (BSD Style)',
           **(configuration(top_path='').todict())
           )

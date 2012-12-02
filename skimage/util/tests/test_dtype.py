@@ -12,10 +12,12 @@ dtype_range = {np.uint8: (0, 255),
                np.float32: (-1.0, 1.0),
                np.float64: (-1.0, 1.0)}
 
+
 def _verify_range(msg, x, vmin, vmax, dtype):
     assert_equal(x[0], vmin)
     assert_equal(x[-1], vmax)
     assert x.dtype == dtype
+
 
 def test_range():
     for dtype in dtype_range:
@@ -83,6 +85,21 @@ def test_copy():
 
     assert y is x
     assert z is not x
+
+
+def test_bool():
+    img_ = np.zeros((10, 10), np.bool_)
+    img8 = np.zeros((10, 10), np.bool8)
+    img_[1, 1] = True
+    img8[1, 1] = True
+    for (func, dt) in [(img_as_int, np.int16),
+                    (img_as_float, np.float64),
+                    (img_as_uint, np.uint16),
+                    (img_as_ubyte, np.ubyte)]:
+        converted_ = func(img_)
+        assert np.sum(converted_) == dtype_range[dt][1]
+        converted8 = func(img8)
+        assert np.sum(converted8) == dtype_range[dt][1]
 
 if __name__ == '__main__':
     np.testing.run_module_suite()

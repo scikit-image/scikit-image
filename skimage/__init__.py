@@ -1,6 +1,6 @@
 """Image Processing SciKit (Toolbox for SciPy)
 
-``scikits-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
+``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
 
 The main package of ``skimage`` only provides a few utilities for converting
@@ -61,37 +61,32 @@ try:
 except ImportError:
     __version__ = "unbuilt-dev"
 
+
 def _setup_test(verbose=False):
-    import gzip
     import functools
 
-    args = ['', '--exe', '-w', pkg_dir]
+    args = ['', pkg_dir, '--exe']
     if verbose:
         args.extend(['-v', '-s'])
 
     try:
         import nose as _nose
     except ImportError:
-        print("Could not load nose.  Unit tests not available.")
-        return None
+        def broken_test_func():
+            """This would invoke the skimage test suite, but nose couldn't be
+            imported so the test suite can not run.
+            """
+            raise ImportError("Could not load nose.  Unit tests not available.")
+        return broken_test_func
     else:
         f = functools.partial(_nose.run, 'skimage', argv=args)
         f.__doc__ = 'Invoke the skimage test suite.'
         return f
 
-test = _setup_test()
-if test is None:
-    try:
-        del test
-    except NameError:
-        pass
 
+test = _setup_test()
 test_verbose = _setup_test(verbose=True)
-if test_verbose is None:
-    try:
-        del test
-    except NameError:
-        pass
+
 
 def get_log(name=None):
     """Return a console logger.
@@ -120,26 +115,28 @@ def get_log(name=None):
     log = logging.getLogger(name)
     return log
 
+
 def _setup_log():
     """Configure root logger.
 
     """
-    import logging, sys
+    import logging
+    import sys
 
-    log = logging.getLogger()
+    formatter = logging.Formatter(
+        '%(name)s: %(levelname)s: %(message)s'
+        )
 
     try:
         handler = logging.StreamHandler(stream=sys.stdout)
     except TypeError:
         handler = logging.StreamHandler(strm=sys.stdout)
-
-    formatter = logging.Formatter(
-        '%(name)s: %(levelname)s: %(message)s'
-        )
     handler.setFormatter(formatter)
 
+    log = get_log()
     log.addHandler(handler)
     log.setLevel(logging.WARNING)
+    log.propagate = False
 
 _setup_log()
 

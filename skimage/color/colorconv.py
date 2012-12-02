@@ -44,7 +44,9 @@ References
 from __future__ import division
 
 __all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
-           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb']
+           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb',
+           'xyz2lab', 'lab2xyz', 'lab2rgb', 'rgb2lab'
+           ]
 
 __docformat__ = "restructuredtext en"
 
@@ -81,11 +83,8 @@ def convert_colorspace(arr, fromspace, tospace):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_hsv = convert_colorspace(lena, 'RGB', 'HSV')
     """
     fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
@@ -149,11 +148,9 @@ def rgb2hsv(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import color
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_hsv = color.rgb2hsv(lena)
     """
     arr = _prepare_colorarray(rgb)
@@ -164,8 +161,10 @@ def rgb2hsv(rgb):
 
     # -- S channel
     delta = arr.ptp(-1)
+    # Ignore warning for zero divided by zero
+    old_settings = np.seterr(invalid='ignore')
     out_s = delta / out_v
-    out_s[delta == 0] = 0
+    out_s[delta == 0.] = 0.
 
     # -- H channel
     # red is max
@@ -180,6 +179,9 @@ def rgb2hsv(rgb):
     idx = (arr[:, :, 2] == out_v)
     out[idx, 0] = 4. + (arr[idx, 0] - arr[idx, 1]) / delta[idx]
     out_h = (out[:, :, 0] / 6.) % 1.
+    out_h[delta == 0.] = 0.
+
+    np.seterr(**old_settings)
 
     # -- output
     out[:, :, 0] = out_h
@@ -224,11 +226,8 @@ def hsv2rgb(hsv):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_hsv = rgb2hsv(lena)
     >>> lena_rgb = hsv2rgb(lena_hsv)
     """
@@ -285,6 +284,9 @@ rgb_from_rgbcie = np.dot(rgb_from_xyz, xyz_from_rgbcie)
 grey_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
                           [0, 0, 0],
                           [0, 0, 0]])
+
+# CIE LAB constants for Observer= 2A, Illuminant= D65
+lab_ref_white = np.array([0.95047, 1., 1.08883])
 
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
@@ -346,14 +348,11 @@ def xyz2rgb(xyz):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
+    >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2rgb
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena = data.lena()
     >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_rgb = xyz2rgb(lena_hsv)
+    >>> lena_rgb = xyz2rgb(lena_xyz)
     """
     return _convert(rgb_from_xyz, xyz)
 
@@ -387,11 +386,8 @@ def rgb2xyz(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_xyz = rgb2xyz(lena)
     """
     return _convert(xyz_from_rgb, rgb)
@@ -421,12 +417,9 @@ def rgb2rgbcie(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
+    >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena = data.lena()
     >>> lena_rgbcie = rgb2rgbcie(lena)
     """
     return _convert(rgbcie_from_rgb, rgb)
@@ -456,14 +449,11 @@ def rgbcie2rgb(rgbcie):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
+    >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie, rgbcie2rgb
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> lena = data.lena()
     >>> lena_rgbcie = rgb2rgbcie(lena)
-    >>> lena_rgb = rgbcie2rgb(lena_hsv)
+    >>> lena_rgb = rgbcie2rgb(lena_rgbcie)
     """
     return _convert(rgb_from_rgbcie, rgbcie)
 
@@ -485,7 +475,7 @@ def rgb2grey(rgb):
     Raises
     ------
     ValueError
-        If `rgb2grey` is not a 3-D array of shape (.., .., 3) or 
+        If `rgb2grey` is not a 3-D array of shape (.., .., 3) or
         (.., .., 4).
 
     References
@@ -503,14 +493,14 @@ def rgb2grey(rgb):
 
     Examples
     --------
-    >>> import os
-    >>> from skimage import data_dir
-    >>> from skimage.io import imread
     >>> from skimage.color import rgb2grey
-
-    >>> lena = imread(os.path.join(data_dir, 'lena.png'))
+    >>> from skimage import data
+    >>> lena = data.lena()
     >>> lena_grey = rgb2grey(lena)
     """
+    if rgb.ndim == 2:
+        return rgb
+
     return _convert(grey_from_rgb, rgb[:, :, :3])[..., 0]
 
 rgb2gray = rgb2grey
@@ -540,3 +530,157 @@ def gray2rgb(image):
 
     M, N = image.shape
     return np.dstack((image, image, image))
+
+
+def xyz2lab(xyz):
+    """XYZ to CIE-LAB color space conversion.
+
+    Parameters
+    ----------
+    xyz : array_like
+        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in CIE-LAB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `xyz` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Observer= 2A, Illuminant= D65
+    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
+    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2xyz, xyz2lab
+    >>> lena = data.lena()
+    >>> lena_xyz = rgb2xyz(lena)
+    >>> lena_lab = xyz2lab(lena_xyz)
+    """
+    arr = _prepare_colorarray(xyz)
+
+    # scale by CIE XYZ tristimulus values of the reference white point
+    arr = arr / lab_ref_white
+
+    # Nonlinear distortion and linear transformation
+    mask = arr > 0.008856
+    arr[mask] = np.power(arr[mask], 1. / 3.)
+    arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
+
+    x, y, z = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+
+    # Vector scaling
+    L = (116. * y) - 16.
+    a = 500.0 * (x - y)
+    b = 200.0 * (y - z)
+
+    return np.dstack([L, a, b])
+
+
+def lab2xyz(lab):
+    """CIE-LAB to XYZcolor space conversion.
+
+    Parameters
+    ----------
+    lab : array_like
+        The image in lab format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `lab` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Observer= 2A, Illuminant= D65
+    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=07#text7
+    .. [2] http://en.wikipedia.org/wiki/Lab_color_space
+
+    """
+
+    arr = _prepare_colorarray(lab).copy()
+
+    L, a, b = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    y = (L + 16.) / 116.
+    x = (a / 500.) + y
+    z = y - (b / 200.)
+
+    out = np.dstack([x, y, z])
+
+    mask = out > 0.2068966
+    out[mask] = np.power(out[mask], 3.)
+    out[~mask] = (out[~mask] - 16.0 / 116.) / 7.787
+
+    # rescale Observer= 2 deg, Illuminant= D65
+    out *= lab_ref_white
+    return out
+
+
+def rgb2lab(rgb):
+    """RGB to lab color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in Lab format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    This function uses rgb2xyz and xyz2lab.
+    """
+    return xyz2lab(rgb2xyz(rgb))
+
+
+def lab2rgb(lab):
+    """Lab to RGB color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in Lab format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `lab` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    This function uses lab2xyz and xyz2rgb.
+    """
+    return xyz2rgb(lab2xyz(lab))

@@ -10,6 +10,7 @@ __all__ = ['load_sift', 'load_surf']
 
 import numpy as np
 
+
 def _sift_read(f, mode='SIFT'):
     """Read SIFT or SURF features from a file.
 
@@ -56,8 +57,10 @@ def _sift_read(f, mode='SIFT'):
 
     return data.view(datatype)
 
+
 def load_sift(f):
     return _sift_read(f, mode='SIFT')
+
 
 def load_surf(f):
     return _sift_read(f, mode='SURF')

@@ -1,6 +1,5 @@
 __all__ = ['imread', 'imread_collection']
 
-import numpy as np
 import skimage.io as io
 
 try:
@@ -49,9 +48,9 @@ def imread(fname, dtype=None):
     for hdu in hdulist:
         if isinstance(hdu, pyfits.ImageHDU) or \
            isinstance(hdu, pyfits.PrimaryHDU):
-           if hdu.data is not None:
-               img_array = hdu.data
-               break
+            if hdu.data is not None:
+                img_array = hdu.data
+                break
     hdulist.close()
 
     return img_array
@@ -109,7 +108,7 @@ def imread_collection(load_pattern, conserve_memory=True):
 
 def FITSFactory(image_ext):
     """Load an image extension from a FITS file and return a NumPy array
-    
+
     Parameters
     ----------
 
@@ -136,7 +135,7 @@ def FITSFactory(image_ext):
         raise ValueError("Expected a (filename, extension) tuple")
 
     hdulist = pyfits.open(filename)
-        
+
     data = hdulist[extnum].data
 
     hdulist.close()
@@ -146,4 +145,3 @@ def FITSFactory(image_ext):
                   (extnum, filename))
 
     return data
-

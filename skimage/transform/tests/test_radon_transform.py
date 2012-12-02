@@ -4,11 +4,13 @@ import numpy as np
 from numpy.testing import *
 from skimage.transform import *
 
+
 def rescale(x):
     x = x.astype(float)
     x -= x.min()
     x /= x.max()
     return x
+
 
 def test_radon_iradon():
     size = 100
@@ -38,6 +40,7 @@ def test_radon_iradon():
     image = np.tri(size) + np.tri(size)[::-1]
     reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
 
+
 def test_iradon_angles():
     """
     Test with different number of projections
@@ -60,9 +63,11 @@ def test_iradon_angles():
     s = radon_image_80.sum(axis=0)
     assert np.allclose(s, s[0], rtol=0.01)
     reconstructed = iradon(radon_image_80)
-    delta_80 = np.mean(abs(image/np.max(image) - reconstructed/np.max(reconstructed)))
+    delta_80 = np.mean(abs(image / np.max(image) -
+                           reconstructed / np.max(reconstructed)))
     # Loss of quality when the number of projections is reduced
     assert delta_80 > delta_200
+
 
 def test_radon_minimal():
     """
@@ -90,6 +95,13 @@ def test_radon_minimal():
         reconstructed = iradon(p, theta)
         reconstructed /= np.max(reconstructed)
         assert np.all(abs(c - reconstructed) < 0.4)
+
+
+def test_reconstruct_with_wrong_angles():
+    a = np.zeros((3, 3))
+    p = radon(a, theta=[0, 1, 2])
+    iradon(p, theta=[0, 1, 2])
+    assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
 
 
 if __name__ == "__main__":

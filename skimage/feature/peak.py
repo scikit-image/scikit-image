@@ -15,21 +15,16 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
 
     Parameters
     ----------
-    image: ndarray of floats
+    image : ndarray of floats
         Input image.
-
-    min_distance: int
+    min_distance : int
         Minimum number of pixels separating peaks and image boundary.
-
     threshold : float
         Deprecated. See `threshold_rel`.
-
-    threshold_abs: float
+    threshold_abs : float
         Minimum intensity of peaks.
-
-    threshold_rel: float
+    threshold_rel : float
         Minimum intensity of peaks calculated as `max(image) * threshold_rel`.
-
     num_peaks : int
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
         return `num_peaks` coordinates based on peak intensity.
@@ -38,15 +33,15 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
     -------
     coordinates : (N, 2) array
         (row, column) coordinates of peaks.
-    
+
     Notes
     -----
     The peak local maximum function returns the coordinates of local peaks (maxima)
     in a image. A maximum filter is used for finding local maxima. This operation
-    dilates the original image. After comparison between dilated and original image, 
+    dilates the original image. After comparison between dilated and original image,
     peak_local_max function returns the coordinates of peaks where
     dilated image = original.
-    
+
     Examples
     --------
     >>> im = np.zeros((7, 7))
@@ -60,14 +55,14 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ]])
-        
+
     >>> peak_local_max(im, min_distance=1)
     array([[3, 2],
            [3, 4]])
-           
+
     >>> peak_local_max(im, min_distance=2)
     array([[3, 2]])
-    
+
     """
     if np.all(image == image.flat[0]):
         return []
@@ -95,10 +90,9 @@ def peak_local_max(image, min_distance=10, threshold='deprecated',
     # get coordinates of peaks
     coordinates = np.transpose(image_t.nonzero())
 
-    if len(coordinates) > num_peaks:
-        intensities = image[tuple(coordinates.T)]
+    if coordinates.shape[0] > num_peaks:
+        intensities = image[coordinates[:, 0], coordinates[:, 1]]
         idx_maxsort = np.argsort(intensities)[::-1]
-        coordinates = coordinates[idx_maxsort][:2]
+        coordinates = coordinates[idx_maxsort][:num_peaks]
 
     return coordinates
-

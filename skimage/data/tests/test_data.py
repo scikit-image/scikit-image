@@ -1,22 +1,39 @@
 import skimage.data as data
-from numpy.testing import assert_equal, assert_array_equal
-import numpy as np
+from numpy.testing import assert_equal
+
 
 def test_lena():
     """ Test that "Lena" image can be loaded. """
     lena = data.lena()
     assert_equal(lena.shape, (512, 512, 3))
 
+
 def test_camera():
     """ Test that "camera" image can be loaded. """
     cameraman = data.camera()
     assert_equal(cameraman.ndim, 2)
 
+
 def test_checkerboard():
-    """ Test that checkerboard image can be loaded. """
-    checkerboard = data.checkerboard()
+    """ Test that "checkerboard" image can be loaded. """
+    data.checkerboard()
+
+
+def test_text():
+    """ Test that "text" image can be loaded. """
+    data.text()
+
+
+def test_moon():
+    """ Test that "moon" image can be loaded. """
+    data.moon()
+
+
+def test_page():
+    """ Test that "page" image can be loaded. """
+    data.page()
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
-

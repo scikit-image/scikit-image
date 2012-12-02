@@ -13,7 +13,7 @@ Original author: Lee Kamentsky
 
 import numpy as np
 from . import _ctmf
-from .rank_order import rank_order
+from ._rank_order import rank_order
 
 
 def median_filter(image, radius=2, mask=None, percent=50):

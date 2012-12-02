@@ -3,4 +3,3 @@
 if __name__ == "__main__":
     from skimage.scripts import skivi
     skivi.main()
-

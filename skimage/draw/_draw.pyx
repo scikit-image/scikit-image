@@ -3,11 +3,7 @@ import math
 from libc.math cimport sqrt
 cimport numpy as np
 cimport cython
-
-
-cdef extern from "../morphology/_pnpoly.h":
-     int pnpoly(int nr_verts, double *xp, double *yp,
-                double x, double y)
+from skimage._shared.geometry cimport point_in_polygon
 
 
 @cython.boundscheck(False)
@@ -69,6 +65,7 @@ def line(int y, int x, int y2, int x2):
 
     return rr, cc
 
+
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.nonecheck(False)
@@ -78,9 +75,9 @@ def polygon(y, x, shape=None):
     Parameters
     ----------
     y : (N,) ndarray
-        y coordinates of vertices of polygon
+        Y-coordinates of vertices of polygon.
     x : (N,) ndarray
-        x coordinates of vertices of polygon
+        X-coordinates of vertices of polygon.
     shape : tuple, optional
         image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for polygons which exceed the image size.
@@ -119,11 +116,12 @@ def polygon(y, x, shape=None):
 
     for r in range(minr, maxr+1):
         for c in range(minc, maxc+1):
-            if pnpoly(nr_verts, cptr, rptr, c, r):
+            if point_in_polygon(nr_verts, cptr, rptr, c, r):
                 rr.append(r)
                 cc.append(c)
 
     return np.array(rr), np.array(cc)
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
@@ -135,9 +133,9 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
     Parameters
     ----------
     cy, cx : double
-        centre coordinate of ellipse
+        Centre coordinate of ellipse.
     b, a: double
-        minor and major semi-axes. (x/a)**2 + (y/b)**2 = 1
+        Minor and major semi-axes. ``(x/a)**2 + (y/b)**2 = 1``.
 
     Returns
     -------
@@ -170,20 +168,21 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
 
     return np.array(rr), np.array(cc)
 
+
 def circle(double cy, double cx, double radius, shape=None):
     """Generate coordinates of pixels within circle.
 
     Parameters
     ----------
     cy, cx : double
-        centre coordinate of circle
+        Centre coordinate of circle.
     radius: double
-        radius of circle
+        Radius of circle.
 
     Returns
     -------
     rr, cc : ndarray of int
-        Pixel coordinates of ellipse.
+        Pixel coordinates of circle.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """

@@ -11,6 +11,7 @@ except ImportError:
 
 from skimage.util import img_as_ubyte
 
+
 def imread(fname, dtype=None):
     """Load an image from file.
 
@@ -32,6 +33,7 @@ def imread(fname, dtype=None):
         im = im.convert('RGBA')
 
     return np.array(im, dtype=dtype)
+
 
 def _palette_is_grayscale(pil_image):
     """Return True if PIL image in palette mode is grayscale.
@@ -56,17 +58,22 @@ def _palette_is_grayscale(pil_image):
     # are all zero.
     return np.allclose(np.diff(valid_palette), 0)
 
-def imsave(fname, arr):
+
+def imsave(fname, arr, format_str=None):
     """Save an image to disk.
 
     Parameters
     ----------
-    fname : str
+    fname : str or file-like object
         Name of destination file.
     arr : ndarray of uint8 or float
         Array (image) to save.  Arrays of data-type uint8 should have
         values in [0, 255], whereas floating-point arrays must be
         in [0, 1].
+    format_str: str
+        Format to save as, this is required if using a file-like object;
+        this is optional if fname is a string and the format can be
+        derived from the extension.
 
     Notes
     -----
@@ -98,7 +105,8 @@ def imsave(fname, arr):
         arr = arr.astype(np.uint8)
 
     img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
-    img.save(fname)
+    img.save(fname, format=format_str)
+
 
 def imshow(arr):
     """Display an image, using PIL's default display command.
@@ -111,6 +119,7 @@ def imshow(arr):
 
     """
     Image.fromarray(img_as_ubyte(arr)).show()
+
 
 def _app_show():
     pass

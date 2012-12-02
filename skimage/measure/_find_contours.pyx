@@ -6,14 +6,14 @@ cimport numpy as np
 
 np.import_array()
 
-cdef inline double _get_fraction(double from_value, double to_value, 
+cdef inline double _get_fraction(double from_value, double to_value,
                                  double level):
     if (to_value == from_value):
         return 0
     return ((level - from_value) / (to_value - from_value))
 
 
-def iterate_and_store(np.ndarray[double, ndim=2, mode='c'] array,
+def iterate_and_store(np.ndarray[double, ndim=2] array,
                       double level, int vertex_connect_high):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
@@ -92,7 +92,7 @@ def iterate_and_store(np.ndarray[double, ndim=2, mode='c'] array,
         else:
             coords[0] += 1
             coords[1] = 0
-        
+
 
         square_case = 0
         if (ul > level): square_case += 1
@@ -103,7 +103,7 @@ def iterate_and_store(np.ndarray[double, ndim=2, mode='c'] array,
         if (square_case != 0 and square_case != 15):
             # only do anything if there's a line passing through the
             # square. Cases 0 and 15 are entirely below/above the contour.
-            
+
             top = r0, c0 + _get_fraction(ul, ur, level)
             bottom = r1, c0 + _get_fraction(ll, lr, level)
             left = r0 + _get_fraction(ul, ll, level), c0

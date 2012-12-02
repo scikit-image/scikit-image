@@ -2,12 +2,70 @@
 
 from __future__ import with_statement
 
-__all__ = ['MultiImage', 'ImageCollection', 'imread']
+__all__ = ['MultiImage', 'ImageCollection', 'imread', 'concatenate_images']
 
 from glob import glob
+import re
+from copy import copy
 
 import numpy as np
 from ._io import imread
+
+
+def concatenate_images(ic):
+    """Concatenate all images in the image collection into an array.
+
+    Parameters
+    ----------
+    ic: an iterable of images (including ImageCollection and MultiImage)
+        The images to be concatenated.
+
+    Returns
+    -------
+    ar : np.ndarray
+        An array having one more dimension than the images in `ic`.
+
+    See Also
+    --------
+    ImageCollection.concatenate, MultiImage.concatenate
+
+    Raises
+    ------
+    ValueError
+        If images in `ic` don't have identical shapes.
+    """
+    all_images = [img[np.newaxis, ...] for img in ic]
+    try:
+        ar = np.concatenate(all_images)
+    except ValueError:
+        raise ValueError('Image dimensions must agree.')
+    return ar
+
+
+def alphanumeric_key(s):
+    """Convert string to list of strings and ints that gives intuitive sorting.
+
+    Parameters
+    ----------
+    s: string
+
+    Returns
+    -------
+    k: a list of strings and ints
+
+    Examples
+    --------
+    >>> alphanumeric_key('z23a')
+    ['z', 23, 'a']
+    >>> filenames = ['f9.10.png', 'e10.png', 'f9.9.png', 'f10.10.png',
+    ...              'f10.9.png']
+    >>> sorted(filenames)
+    ['e10.png', 'f10.10.png', 'f10.9.png', 'f9.10.png', 'f9.9.png']
+    >>> sorted(filenames, key=alphanumeric_key)
+    ['e10.png', 'f9.9.png', 'f9.10.png', 'f10.9.png', 'f10.10.png']
+    """
+    k = [int(c) if c.isdigit() else c for c in re.split('([0-9]+)', s)]
+    return k
 
 
 class MultiImage(object):
@@ -118,7 +176,8 @@ class MultiImage(object):
         if -numframes <= n < numframes:
             n = n % numframes
         else:
-            raise IndexError("There are only %s frames in the image"%numframes)
+            raise IndexError("There are only %s frames in the image"
+                             % numframes)
 
         if self.conserve_memory:
             if not self._cached == n:
@@ -141,11 +200,31 @@ class MultiImage(object):
     def __str__(self):
         return str(self.filename) + ' [%s frames]' % self._numframes
 
+    def concatenate(self):
+        """Concatenate all images in the multi-image into an array.
+
+        Returns
+        -------
+        ar : np.ndarray
+            An array having one more dimension than the images in `self`.
+
+        See Also
+        --------
+        concatenate_images
+
+        Raises
+        ------
+        ValueError
+            If images in the `MultiImage` don't have identical shapes.
+        """
+        return concatenate_images(self)
+
 
 class ImageCollection(object):
     """Load and manage a collection of image files.
 
-    Note that files are always stored in alphabetical order.
+    Note that files are always stored in alphabetical order. Also note that
+    slicing returns a new ImageCollection, *not* a view into the data.
 
     Parameters
     ----------
@@ -209,7 +288,7 @@ class ImageCollection(object):
     >>> len(coll)
     2
     >>> coll[0].shape
-    (128, 128, 3)
+    (512, 512, 3)
 
     >>> ic = io.ImageCollection('/tmp/work/*.png:/tmp/other/*.jpg')
 
@@ -221,7 +300,7 @@ class ImageCollection(object):
             self._files = []
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
-            self._files.sort()
+            self._files = sorted(self._files, key=alphanumeric_key)
         else:
             self._files = load_pattern
 
@@ -249,29 +328,56 @@ class ImageCollection(object):
         return self._conserve_memory
 
     def __getitem__(self, n):
-        """Return image n in the collection.
+        """Return selected image(s) in the collection.
 
         Loading is done on demand.
 
         Parameters
         ----------
-        n : int
-            The image number to be returned.
+        n : int or slice
+            The image number to be returned, or a slice selecting the images
+            and ordering to be returned in a new ImageCollection.
 
         Returns
         -------
-        img : ndarray
-           The `n`-th image in the collection.
+        img : ndarray or ImageCollection.
+            The `n`-th image in the collection, or a new ImageCollection with
+            the selected images.
+
         """
-        n = self._check_imgnum(n)
-        idx = n % len(self.data)
+        if hasattr(n, '__index__'):
+            n = n.__index__()
 
-        if (self.conserve_memory and n != self._cached) or \
-               (self.data[idx] is None):
-            self.data[idx] = self.load_func(self.files[n])
-            self._cached = n
+        if type(n) not in [int, slice]:
+            raise TypeError('slicing must be with an int or slice object')
 
-        return self.data[idx]
+        if type(n) is int:
+            n = self._check_imgnum(n)
+            idx = n % len(self.data)
+
+            if (self.conserve_memory and n != self._cached) or \
+                (self.data[idx] is None):
+                self.data[idx] = self.load_func(self.files[n])
+                self._cached = n
+
+            return self.data[idx]
+        else:
+            # A slice object was provided, so create a new ImageCollection
+            # object. Any loaded image data in the original ImageCollection
+            # will be copied by reference to the new object.  Image data
+            # loaded after this creation is not linked.
+            fidx = range(len(self.files))[n]
+            new_ic = copy(self)
+            new_ic._files = [self.files[i] for i in fidx]
+            if self.conserve_memory:
+                if self._cached in fidx:
+                    new_ic._cached = fidx.index(self._cached)
+                    new_ic.data = np.copy(self.data)
+                else:
+                    new_ic.data = np.empty(1, dtype=object)
+            else:
+                new_ic.data = self.data[fidx]
+            return new_ic
 
     def _check_imgnum(self, n):
         """Check that the given image number is valid."""
@@ -279,7 +385,8 @@ class ImageCollection(object):
         if -num <= n < num:
             n = n % num
         else:
-            raise IndexError("There are only %s images in the collection"%num)
+            raise IndexError("There are only %s images in the collection"
+                             % num)
         return n
 
     def __iter__(self):
@@ -305,3 +412,22 @@ class ImageCollection(object):
 
         """
         self.data = np.empty_like(self.data)
+
+    def concatenate(self):
+        """Concatenate all images in the collection into an array.
+
+        Returns
+        -------
+        ar : np.ndarray
+            An array having one more dimension than the images in `self`.
+
+        See Also
+        --------
+        concatenate_images
+
+        Raises
+        ------
+        ValueError
+            If images in the `ImageCollection` don't have identical shapes.
+        """
+        return concatenate_images(self)

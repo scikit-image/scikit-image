@@ -15,6 +15,7 @@ except ImportError:
 else:
     import skimage.io._plugins.fits_plugin as fplug
 
+
 def test_fits_plugin_import():
     # Make sure we get an import exception if PyFITS isn't there
     # (not sure how useful this is, but it ensures there isn't some other
@@ -36,14 +37,16 @@ def test_imread_MEF():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'multi.fits')
     img = io.imread(testfile)
-    assert np.all(img==pyfits.getdata(testfile, 1))
+    assert np.all(img == pyfits.getdata(testfile, 1))
+
 
 @skipif(not pyfits_available)
 def test_imread_simple():
     io.use_plugin('fits')
     testfile = os.path.join(data_dir, 'simple.fits')
     img = io.imread(testfile)
-    assert np.all(img==pyfits.getdata(testfile, 0))
+    assert np.all(img == pyfits.getdata(testfile, 0))
+
 
 @skipif(not pyfits_available)
 def test_imread_collection_single_MEF():
@@ -53,6 +56,7 @@ def test_imread_collection_single_MEF():
     ic2 = io.ImageCollection([(testfile, 1), (testfile, 2), (testfile, 3)],
               load_func=fplug.FITSFactory)
     assert _same_ImageCollection(ic1, ic2)
+
 
 @skipif(not pyfits_available)
 def test_imread_collection_MEF_and_simple():
@@ -64,6 +68,7 @@ def test_imread_collection_MEF_and_simple():
                              (testfile1, 3), (testfile2, 0)],
                              load_func=fplug.FITSFactory)
     assert _same_ImageCollection(ic1, ic2)
+
 
 def _same_ImageCollection(collection1, collection2):
     """Ancillary function to compare two ImageCollection objects, checking
@@ -79,4 +84,3 @@ def _same_ImageCollection(collection1, collection2):
 
 if __name__ == '__main__':
     run_module_suite()
-

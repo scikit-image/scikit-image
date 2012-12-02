@@ -16,7 +16,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
 
     Parameters
     ----------
-    image : NxM ndarray
+    image : (N, M) ndarray
         Input image.
     block_size : int
         Uneven size of pixel neighborhood which is used to calculate the
@@ -24,11 +24,13 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     method : {'generic', 'gaussian', 'mean', 'median'}, optional
         Method used to determine adaptive threshold for local neighbourhood in
         weighted mean image.
-         * 'generic': use custom function (see `param` parameter)
-         * 'gaussian': apply gaussian filter (see `param` parameter for custom
-                       sigma value)
-         * 'mean': apply arithmetic mean filter
-         * 'median' apply median rank filter
+
+        * 'generic': use custom function (see `param` parameter)
+        * 'gaussian': apply gaussian filter (see `param` parameter for custom
+                      sigma value)
+        * 'mean': apply arithmetic mean filter
+        * 'median' apply median rank filter
+
         By default the 'gaussian' method is used.
     offset : float, optional
         Constant subtracted from weighted mean of neighborhood to calculate
@@ -45,7 +47,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
 
     Returns
     -------
-    threshold : NxM ndarray
+    threshold : (N, M) ndarray
         Thresholded binary image
 
     References
@@ -85,6 +87,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
             mode=mode)
 
     return image > (thresh_image - offset)
+
 
 def threshold_otsu(image, nbins=256):
     """Return threshold value based on Otsu's method.

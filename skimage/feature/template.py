@@ -3,8 +3,6 @@
 import numpy as np
 from . import _template
 
-from skimage.util.dtype import convert
-
 
 def match_template(image, template, pad_input=False):
     """Match a template to an image using normalized correlation.
@@ -67,8 +65,8 @@ def match_template(image, template, pad_input=False):
     """
     if np.any(np.less(image.shape, template.shape)):
         raise ValueError("Image must be larger than template.")
-    image = convert(image, np.float32)
-    template = convert(template, np.float32)
+    image = np.ascontiguousarray(image, dtype=np.float32)
+    template = np.ascontiguousarray(template, dtype=np.float32)
 
     if pad_input:
         pad_size = tuple(np.array(image.shape) + np.array(template.shape) - 1)
@@ -77,8 +75,7 @@ def match_template(image, template, pad_input=False):
         i0, j0 = template.shape
         i0 /= 2
         j0 /= 2
-        pad_image[i0:i0+h, j0:j0+w] = image
+        pad_image[i0:i0 + h, j0:j0 + w] = image
         image = pad_image
     result = _template.match_template(image, template)
     return result
-

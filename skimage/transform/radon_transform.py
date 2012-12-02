@@ -15,7 +15,7 @@ References:
 from __future__ import division
 import numpy as np
 from scipy.fftpack import fftshift, fft, ifft
-from ._project import homography
+from ._warps_cy import _warp_fast
 
 __all__ = ["radon", "iradon"]
 
@@ -40,10 +40,11 @@ def radon(image, theta=None):
     """
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
-    if theta == None:
+    if theta is None:
         theta = np.arange(180)
+
     height, width = image.shape
-    diagonal = np.sqrt(height ** 2 + width ** 2)
+    diagonal = np.sqrt(height**2 + width**2)
     heightpad = np.ceil(diagonal - height)
     widthpad = np.ceil(diagonal - width)
     padded_image = np.zeros((int(height + heightpad),
@@ -66,7 +67,6 @@ def radon(image, theta=None):
                        [0, 1, dh],
                        [0, 0, 1]])
 
-
     def build_rotation(theta):
         T = -np.deg2rad(theta)
 
@@ -77,10 +77,10 @@ def radon(image, theta=None):
         return shift1.dot(R).dot(shift0)
 
     for i in range(len(theta)):
-        rotated = homography(padded_image,
-                             build_rotation(-theta[i]))
+        rotated = _warp_fast(padded_image,
+                             np.linalg.inv(build_rotation(-theta[i])))
 
-        out[:,i] = rotated.sum(0)[::-1]
+        out[:, i] = rotated.sum(0)[::-1]
 
     return out
 
@@ -100,7 +100,7 @@ def iradon(radon_image, theta=None, output_size=None,
         the image corresponds to a projection along a different angle.
     theta : array_like, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
-        between 0 and 180 (if the shape of `radon_image` is nxm)
+        between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int
         Number of rows and columns in the reconstruction.
     filter : str, optional (default ramp)
@@ -125,23 +125,30 @@ def iradon(radon_image, theta=None, output_size=None,
     """
     if radon_image.ndim != 2:
         raise ValueError('The input image must be 2-D')
-    if theta == None:
+
+    if theta is None:
         m, n = radon_image.shape
         theta = np.linspace(0, 180, n, endpoint=False)
+    else:
+        theta = np.asarray(theta)
+
+    if len(theta) != radon_image.shape[1]:
+        raise ValueError("The given ``theta`` does not match the number of "
+                         "projections in ``radon_image``.")
+
     th = (np.pi / 180.0) * theta
     # if output size not specified, estimate from input radon image
     if not output_size:
-        output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2 / 2.0)))
+        output_size = int(np.floor(np.sqrt((radon_image.shape[0])**2 / 2.0)))
     n = radon_image.shape[0]
 
     img = radon_image.copy()
     # resize image to next power of two for fourier analysis
     # speeds up fourier and lessens artifacts
-    order = max(64., 2 ** np.ceil(np.log(2 * n) / np.log(2)))
+    order = max(64., 2**np.ceil(np.log(2 * n) / np.log(2)))
     # zero pad input image
     img.resize((order, img.shape[1]))
     # construct the fourier filter
-    freqs = np.zeros((order, 1))
 
     f = fftshift(abs(np.mgrid[-1:1:2 / order])).reshape(-1, 1)
     w = 2 * np.pi * f
@@ -151,20 +158,22 @@ def iradon(radon_image, theta=None, output_size=None,
     elif filter == "shepp-logan":
         f[1:] = f[1:] * np.sin(w[1:] / 2) / (w[1:] / 2)
     elif filter == "cosine":
-       f[1:] = f[1:] * np.cos(w[1:] / 2)
+        f[1:] = f[1:] * np.cos(w[1:] / 2)
     elif filter == "hamming":
-       f[1:] = f[1:] * (0.54 + 0.46 * np.cos(w[1:]))
+        f[1:] = f[1:] * (0.54 + 0.46 * np.cos(w[1:]))
     elif filter == "hann":
-       f[1:] = f[1:] * (1 + np.cos(w[1:])) / 2
+        f[1:] = f[1:] * (1 + np.cos(w[1:])) / 2
     elif filter == None:
         f[1:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
 
     filter_ft = np.tile(f, (1, len(theta)))
+
     # apply filter in fourier domain
     projection = fft(img, axis=0) * filter_ft
     radon_filtered = np.real(ifft(projection, axis=0))
+
     # resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
@@ -182,15 +191,17 @@ def iradon(radon_image, theta=None, output_size=None,
             k = np.round(mid_index + xpr * np.sin(th[i]) - ypr * np.cos(th[i]))
             reconstructed += radon_filtered[
                 ((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]
+
     elif interpolation == "linear":
         for i in range(len(theta)):
-          t = xpr*np.sin(th[i]) - ypr*np.cos(th[i])
-          a = np.floor(t)
-          b = mid_index + a
-          b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
-          b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
-          reconstructed += (t - a) * radon_filtered[b0, i] + \
-                           (a - t + 1) * radon_filtered[b1, i]
+            t = xpr * np.sin(th[i]) - ypr * np.cos(th[i])
+            a = np.floor(t)
+            b = mid_index + a
+            b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
+            b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
+            reconstructed += (t - a) * radon_filtered[b0, i] + \
+                             (a - t + 1) * radon_filtered[b1, i]
+
     else:
         raise ValueError("Unknown interpolation: %s" % interpolation)
 

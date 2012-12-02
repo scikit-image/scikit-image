@@ -10,6 +10,7 @@ try:
 except ImportError:
     scipy_spatial = False
 
+
 @skipif(not scipy_spatial)
 def test_basic():
     image = np.array(
@@ -29,6 +30,7 @@ def test_basic():
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
     assert_array_equal(convex_hull_image(image), expected)
+
 
 @skipif(not scipy_spatial)
 def test_possible_hull():
