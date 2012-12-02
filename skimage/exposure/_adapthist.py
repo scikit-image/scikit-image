@@ -71,37 +71,26 @@ def adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01, nbins=256):
     .. [1] http://tog.acm.org/resources/GraphicsGems/
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     '''
-    # convert to uint image
-    int_image = skimage.img_as_uint(image)
-    int_image = rescale_intensity(int_image, out_range=(0, NR_OF_GREY - 1))
     # handle color images - CLAHE accepts scalar images only
-    args = [int_image.copy(), ntiles_x, ntiles_y, clip_limit * nbins, nbins]
-    if image.ndim == 3:
-        # check for grayscale
-        if (np.allclose(image[:, :, 0], image[:, :, 1]) and
-            np.allclose(image[:, :, 1], image[:, :, 2])):
-            args[0] = int_image[:, :, 0]
-            out = _clahe(*args)
-            image = int_image[:, :, :3]
-            for channel in range(3):
-                image[:out.shape[0], :out.shape[1], channel] = out
-        # for color images, convert to LAB space for processing
-        else:
-            lab_img = color.rgb2lab(skimage.img_as_float(image))
-            l_chan = lab_img[:, :, 0]
-            l_chan /= np.max(np.abs(l_chan))
-            l_chan = skimage.img_as_uint(l_chan)
-            args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
-            new_l = _clahe(*args).astype(float)
-            new_l = rescale_intensity(new_l, out_range=(0, 100))
-            lab_img[:new_l.shape[0], :new_l.shape[1], 0] = new_l
-            image = color.lab2rgb(lab_img)
-            image = rescale_intensity(image, out_range=(0, 1))
+    args = [None, ntiles_x, ntiles_y, clip_limit * nbins, nbins]
+    if image.ndim > 2:
+        lab_img = color.rgb2lab(skimage.img_as_float(image))
+        l_chan = lab_img[:, :, 0]
+        l_chan /= np.max(np.abs(l_chan))
+        l_chan = skimage.img_as_uint(l_chan)
+        args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
+        new_l = _clahe(*args).astype(float)
+        new_l = rescale_intensity(new_l, out_range=(0, 100))
+        lab_img[:new_l.shape[0], :new_l.shape[1], 0] = new_l
+        image = color.lab2rgb(lab_img)
+        image = rescale_intensity(image, out_range=(0, 1))
     else:
+        image = skimage.img_as_uint(image)
+        args[0] = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
         out = _clahe(*args)
-        image = int_image
         image[:out.shape[0], :out.shape[1]] = out
-    return rescale_intensity(image)
+        image = rescale_intensity(image)
+    return image
 
 
 def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
