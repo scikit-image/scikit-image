@@ -163,7 +163,7 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     tform = tform1 + tform2 + tform3
 
     output_shape = None
-    if not resize:
+    if resize:
         # determine shape of output image
         corners = np.array([[1, 1], [1, rows], [cols, rows], [cols, 1]])
         corners = tform(corners - 1)
