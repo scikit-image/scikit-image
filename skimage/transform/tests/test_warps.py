@@ -85,6 +85,17 @@ def test_rotate():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
+def test_rotate_resize():
+    x = np.zeros((10, 10), dtype=np.double)
+    
+    x45 = rotate(x, 45, resize=False)
+    assert x45.shape == (10, 10)
+    
+    x45 = rotate(x, 45, resize=True)
+    # new dimension should be d = sqrt(2 * (10/2)^2)
+    assert x45.shape == (14, 14)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
