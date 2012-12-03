@@ -102,6 +102,7 @@ for _, angle, dist in zip(*hough_peaks(h, theta, d)):
     y1 = (dist - cols * np.cos(angle)) / np.sin(angle)
     plt.plot((0, cols), (y0, y1), '-r')
 plt.axis((0, cols, rows, 0))
+plt.title('Detected lines')
 
 # Line finding, using the Probabilistic Hough Transform
 
@@ -126,6 +127,6 @@ for line in lines:
     p0, p1 = line
     plt.plot((p0[0], p1[0]), (p0[1], p1[1]))
 
-plt.title('Lines found with PHT')
+plt.title('Probabilistic Hough')
 plt.axis('image')
 plt.show()
