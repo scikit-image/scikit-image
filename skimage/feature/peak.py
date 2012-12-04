@@ -9,10 +9,11 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     """
     Find peaks in an image, and return them as coordinates or a boolean array.
 
-    Peaks are the local maxima
+    Peaks are the local maxima in a region of `2 * min_distance + 1`
+    (i.e. peaks are separated by at least `min_distance`).
 
-    NOTE: If peaks are flat (i.e. multiple pixels have exact same intensity),
-    the coordinates of all pixels are returned.
+    NOTE: If peaks are flat (i.e. multiple adjacent pixels have identical
+    intensities), the coordinates of all such pixels are returned.
 
     Parameters
     ----------
@@ -23,7 +24,7 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         min_distance + 1` (i.e. peaks are separated by at least
         `min_distance`). If `exclude_border` is True, this value also excludes
         a border `min_distance` from the image boundary.
-        To find the maximum number of points, use `min_distance=1`.
+        To find the maximum number of peaks, use `min_distance=1`.
     threshold_abs : float
         Minimum intensity of peaks.
     threshold_rel : float
