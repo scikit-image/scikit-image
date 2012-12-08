@@ -82,7 +82,7 @@ def test_adapthist_scalar():
     '''
     img = skimage.img_as_ubyte(data.moon())
     adapted = exposure.adapthist(img, clip_limit=0.02)
-    assert adapted.min() == 0
+    assert adapted.min() == 0=
     assert adapted.max() == (1 << 16) - 1
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))

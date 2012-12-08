@@ -59,6 +59,11 @@ def adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01, nbins=256):
     * The algorithm relies on an image whose rows and columns are even
       multiples of the number of tiles, so the extra rows and columns are left
       at their original values, thus  preserving the input image shape.
+<<<<<<< HEAD
+=======
+    * For grayscale images, CLAHE is performed on one channel,
+      and a grayscale is returned
+>>>>>>> 2e1729a9fbbc21fc0b04df8e68efbab9cfd6dada
     * For color images, the following steps are performed:
        - The image is converted to LAB color space
        - The CLAHE algorithm is run on the L channel
@@ -319,3 +324,4 @@ def interpolate(image, xslice, yslice,
            / norm)
     view[:, :] = new
     return image
+
