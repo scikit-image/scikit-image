@@ -25,6 +25,7 @@ import numpy as np
 import skimage
 from skimage import color
 from skimage.exposure import rescale_intensity
+from skimage.util import view_as_blocks
 
 
 MAX_REG_X = 16  # max. # contextual regions in x-direction */
@@ -58,8 +59,6 @@ def adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01, nbins=256):
     * The algorithm relies on an image whose rows and columns are even
       multiples of the number of tiles, so the extra rows and columns are left
       at their original values, thus  preserving the input image shape.
-    * For grayscale images, CLAHE is performed on one channel,
-      and a grayscale is returned
     * For color images, the following steps are performed:
        - The image is converted to LAB color space
        - The CLAHE algorithm is run on the L channel
@@ -127,7 +126,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
 
-    map_array = np.zeros((ntiles_x * ntiles_y, nbins), dtype=int)
+    map_array = np.zeros((ntiles_y, ntiles_x, nbins), dtype=int)
 
     y_res = image.shape[0] - image.shape[0] % ntiles_y
     x_res = image.shape[1] - image.shape[1] % ntiles_x
@@ -146,21 +145,17 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     bin_size = 1 + NR_OF_GREY / nbins
     aLUT = np.arange(NR_OF_GREY)
     aLUT /= bin_size
+    img_blocks = view_as_blocks(image, (y_size, x_size))
     # Calculate greylevel mappings for each contextual region
-    ystart = 0
     for y in range(ntiles_y):
-        xstart = 0
         for x in range(ntiles_x):
-            sub_img = image[ystart: ystart + y_size,
-                            xstart: xstart + x_size]
+            sub_img = img_blocks[y, x]
             hist = aLUT[sub_img.ravel()]
             hist = np.bincount(hist)
             hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
             hist = clip_histogram(hist, clip_limit)
             hist = map_histogram(hist, 0, NR_OF_GREY, n_pixels)
-            map_array[y * ntiles_x + x] = hist
-            xstart += x_size
-        ystart += y_size
+            map_array[y, x] = hist
     # Interpolate greylevel mappings to get CLAHE image
     ystart = 0
     for y in range(ntiles_y + 1):
@@ -190,11 +185,13 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
                 xstep = x_size
                 xL = x - 1
                 xR = xL + 1
-            mapLU = map_array[yU * ntiles_x + xL]
-            mapRU = map_array[yU * ntiles_x + xR]
-            mapLB = map_array[yB * ntiles_x + xL]
-            mapRB = map_array[yB * ntiles_x + xR]
-            interpolate(image, xstart, xstep, ystart, ystep,
+            mapLU = map_array[yU, xL]
+            mapRU = map_array[yU, xR]
+            mapLB = map_array[yB, xL]
+            mapRB = map_array[yB, xR]
+            xslice = np.arange(xstart, xstart + xstep)
+            yslice = np.arange(ystart, ystart + ystep)
+            interpolate(image, xslice, yslice,
                         mapLU, mapRU, mapLB, mapRB, aLUT)
             xstart += xstep  # set pointer on next matrix */
         ystart += ystep
@@ -280,7 +277,7 @@ def map_histogram(hist, min_val, max_val, n_pixels):
     return out.astype(int)
 
 
-def interpolate(image, xstart, xstep, ystart, ystep,
+def interpolate(image, xslice, yslice,
                 mapLU, mapRU, mapLB, mapRB, aLUT):
     '''Find the new grayscale level for a region using bilinear interpolation
 
@@ -288,10 +285,8 @@ def interpolate(image, xstart, xstep, ystart, ystep,
     ----------
     image : np.ndarray
         full image
-    xstart, xstop : int
-       indices of xslice
-    ystart, ystop : int
-        indices of yslice
+    xslice, yslice : array-like
+       indices of the region
     map* : np.ndarray
         mappings of greylevels from histograms
     aLUT : np.ndarray
@@ -309,18 +304,18 @@ def interpolate(image, xstart, xstep, ystart, ystep,
     This is done by a bilinear interpolation between four different
     mappings in order to eliminate boundary artifacts.
     '''
-    norm = xstep * ystep  # Normalization factor
-
+    norm = xslice.size * yslice.size  # Normalization factor
     # interpolation weight matrices
-    x_coef, y_coef = np.meshgrid(np.arange(xstep),
-                                 np.arange(ystep))
+    x_coef, y_coef = np.meshgrid(np.arange(xslice.size),
+                                 np.arange(yslice.size))
     x_inv_coef, y_inv_coef = x_coef[:, ::-1] + 1, y_coef[::-1] + 1
 
-    im_slice = image[ystart: ystart + ystep, xstart: xstart + xstep]
-    im_slice = aLUT[im_slice]
+    view = image[yslice[0]: yslice[-1] + 1, xslice[0]: xslice[-1] + 1]
+    im_slice = aLUT[view]
     new = ((y_inv_coef * (x_inv_coef * mapLU[im_slice]
                           + x_coef * mapRU[im_slice])
             + y_coef * (x_inv_coef * mapLB[im_slice]
                         + x_coef * mapRB[im_slice]))
            / norm)
-    image[ystart: ystart + ystep, xstart: xstart + xstep] = new
+    view[:, :] = new
+    return image

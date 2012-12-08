@@ -18,7 +18,7 @@ that fall within the 2nd and 98th percentiles [2]_.
 
 """
 
-from skimage import data
+from skimage import data, img_as_ubyte
 from skimage.util.dtype import dtype_range
 from skimage import exposure
 
@@ -39,7 +39,7 @@ def plot_img_and_hist(img, axes, bins=256):
     ax_img.set_axis_off()
 
     # Display histogram
-    ax_hist.hist(img.ravel(), bins=bins)
+    ax_hist.hist(img.ravel(), bins=bins, histtype='stepfilled')
     ax_hist.ticklabel_format(axis='y', style='scientific', scilimits=(0, 0))
     ax_hist.set_xlabel('Pixel intensity')
 
@@ -63,10 +63,11 @@ img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
 
 # Equalization
 img_eq = exposure.equalize(img)
+img_eq = img_as_ubyte(img_eq)
 
 # Adaptive Equalization
 img_adapteq = exposure.adapthist(img, clip_limit=0.03)
-
+img_adapteq = img_as_ubyte(img_adapteq)
 
 # Display results
 f, axes = plt.subplots(2, 4, figsize=(8, 4))

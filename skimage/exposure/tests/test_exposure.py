@@ -1,11 +1,13 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
 import skimage
+from skimage import io
 from skimage import data
 from skimage import exposure
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
+io.use_plugin('qt')
 
 # Test histogram equalization
 # ===========================
@@ -81,7 +83,7 @@ def test_adapthist_scalar():
     img = skimage.img_as_ubyte(data.moon())
     adapted = exposure.adapthist(img, clip_limit=0.02)
     assert adapted.min() == 0
-    assert adapted.max() == (1<<16) - 1
+    assert adapted.max() == (1 << 16) - 1
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
     assert_almost_equal = np.testing.assert_almost_equal
@@ -89,6 +91,7 @@ def test_adapthist_scalar():
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
                         0.0410010)
     return img, adapted
+
 
 def test_adapthist_grayscale():
     '''Test a grayscale float image
