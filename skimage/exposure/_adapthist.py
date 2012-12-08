@@ -33,7 +33,8 @@ MAX_REG_Y = 16  # max. # contextual regions in y-direction */
 NR_OF_GREY = 1 << 14  # number of grayscale levels to use in CLAHE algorithm
 
 
-def adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01, nbins=256):
+def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
+                       nbins=256):
     '''Contrast Limited Adaptive Histogram Equalization
 
     Parameters
