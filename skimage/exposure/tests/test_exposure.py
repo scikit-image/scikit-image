@@ -1,13 +1,11 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
 import skimage
-from skimage import io
 from skimage import data
 from skimage import exposure
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
-io.use_plugin('qt')
 
 # Test histogram equalization
 # ===========================
@@ -18,7 +16,7 @@ test_img = exposure.rescale_intensity(data.camera() / 5. + 100)
 
 def test_equalize_ubyte():
     img = skimage.img_as_ubyte(test_img)
-    img_eq = exposure.equalize(img)
+    img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
     check_cdf_slope(cdf)
@@ -26,7 +24,7 @@ def test_equalize_ubyte():
 
 def test_equalize_float():
     img = skimage.img_as_float(test_img)
-    img_eq = exposure.equalize(img)
+    img_eq = exposure.equalize_hist(img)
 
     cdf, bin_edges = exposure.cumulative_distribution(img_eq)
     check_cdf_slope(cdf)
@@ -81,8 +79,8 @@ def test_adapthist_scalar():
     '''Test a scalar uint8 image
     '''
     img = skimage.img_as_ubyte(data.moon())
-    adapted = exposure.adapthist(img, clip_limit=0.02)
-    assert adapted.min() == 0=
+    adapted = exposure.equalize_adapthist(img, clip_limit=0.02)
+    assert adapted.min() == 0
     assert adapted.max() == (1 << 16) - 1
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
@@ -99,7 +97,7 @@ def test_adapthist_grayscale():
     img = skimage.img_as_float(data.lena())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
-    adapted = exposure.adapthist(img, 10, 9, clip_limit=0.01,
+    adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
                         nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
@@ -112,7 +110,7 @@ def test_adapthist_color():
     '''Test a color uint16 image
     '''
     img = skimage.img_as_uint(data.lena())
-    adapted = exposure.adapthist(img, clip_limit=0.01)
+    adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
     assert_almost_equal = np.testing.assert_almost_equal
     assert adapted.min() == 0
     assert adapted.max() == 1.0

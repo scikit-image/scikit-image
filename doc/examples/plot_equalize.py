@@ -23,7 +23,6 @@ from skimage.util.dtype import dtype_range
 from skimage import exposure
 
 import matplotlib.pyplot as plt
-
 import numpy as np
 
 
@@ -62,11 +61,11 @@ p98 = np.percentile(img, 98)
 img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
 
 # Equalization
-img_eq = exposure.equalize(img)
+img_eq = exposure.equalize_hist(img)
 img_eq = img_as_ubyte(img_eq)
 
 # Adaptive Equalization
-img_adapteq = exposure.adapthist(img, clip_limit=0.03)
+img_adapteq = exposure.equalize_adapthist(img, clip_limit=0.03)
 img_adapteq = img_as_ubyte(img_adapteq)
 
 # Display results
