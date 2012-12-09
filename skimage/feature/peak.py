@@ -91,8 +91,8 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         label_values = np.unique(labels)
         # Reorder label values to have consecutive integers (no gaps)
         if np.any(np.diff(label_values) != 1):
-            mask = labels >= 0
-            labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
+            mask = labels >= 1
+            labels[mask] = 1 + rank_order(labels[mask])[0].astype(labels.dtype)
         labels = labels.astype(np.int32)
 
         # New values for new ordering

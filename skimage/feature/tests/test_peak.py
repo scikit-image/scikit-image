@@ -1,7 +1,15 @@
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-
+import scipy.ndimage
 from skimage.feature import peak
+
+
+def test_trivial_case():
+    trivial = np.zeros((25, 25))
+    peak_indices = peak.peak_local_max(trivial, min_distance=1, indices=True)
+    assert not peak_indices     # inherent boolean-ness of empty list
+    peaks = peak.peak_local_max(trivial, min_distance=1, indices=False)
+    assert (peaks.astype(np.bool) == trivial).all()
 
 
 def test_noisy_peaks():
@@ -68,6 +76,45 @@ def test_num_peaks():
     assert (1, 5) in peaks_limited
     assert (1, 1) in peaks_limited
     assert (3, 5) in peaks_limited
+
+
+def test_reorder_labels():
+    np.random.seed(21)
+    image = np.random.uniform(size=(40, 60))
+    i, j = np.mgrid[0:40, 0:60]
+    labels = 1 + (i >= 20) + (j >= 30) * 2
+    labels[labels == 4] = 5
+    i, j = np.mgrid[-3:4, -3:4]
+    footprint = (i * i + j * j <= 9)
+    expected = np.zeros(image.shape, float)
+    for imin, imax in ((0, 20), (20, 40)):
+        for jmin, jmax in ((0, 30), (30, 60)):
+            expected[imin:imax, jmin:jmax] = scipy.ndimage.maximum_filter(
+                image[imin:imax, jmin:jmax], footprint=footprint)
+    expected = (expected == image)
+    result = peak.peak_local_max(image, labels=labels, min_distance=1,
+                                 threshold_rel=0, footprint=footprint,
+                                 indices=False, exclude_border=False)
+    assert (result == expected).all()
+
+
+def test_indices_with_labels():
+    np.random.seed(21)
+    image = np.random.uniform(size=(40, 60))
+    i, j = np.mgrid[0:40, 0:60]
+    labels = 1 + (i >= 20) + (j >= 30) * 2
+    i, j = np.mgrid[-3:4, -3:4]
+    footprint = (i * i + j * j <= 9)
+    expected = np.zeros(image.shape, float)
+    for imin, imax in ((0, 20), (20, 40)):
+        for jmin, jmax in ((0, 30), (30, 60)):
+            expected[imin:imax, jmin:jmax] = scipy.ndimage.maximum_filter(
+                image[imin:imax, jmin:jmax], footprint=footprint)
+    expected = (expected == image)
+    result = peak.peak_local_max(image, labels=labels, min_distance=1,
+                                 threshold_rel=0, footprint=footprint,
+                                 indices=True, exclude_border=False)
+    assert (result == np.transpose(expected.nonzero())).all()
 
 
 if __name__ == '__main__':
