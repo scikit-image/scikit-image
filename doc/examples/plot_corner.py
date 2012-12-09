@@ -15,7 +15,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from skimage import data
-from skimage.feature import corner_harris, corner_subpix, peak_local_max
+from skimage.feature import corner_harris, corner_subpix, corner_peaks
 from skimage.transform import warp, AffineTransform
 from skimage.draw import ellipse
 
@@ -27,7 +27,7 @@ image[rr, cc] = 1
 image[180:230, 10:60] = 1
 image[230:280, 60:110] = 1
 
-coords = peak_local_max(corner_harris(image), min_distance=5)
+coords = corner_peaks(corner_harris(image), min_distance=5)
 coords_subpix = corner_subpix(image, coords, window_size=13)
 
 plt.gray()

@@ -3,7 +3,7 @@ from scipy import ndimage
 from scipy import stats
 from skimage.color import rgb2grey
 from skimage.util import img_as_float
-from . import peak
+from skimage.feature import peak_local_max
 
 
 def _compute_derivatives(image):
@@ -141,7 +141,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Examples
     -------
-    >>> from skimage.feature import corner_harris, peak_local_max
+    >>> from skimage.feature import corner_harris, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square
@@ -155,11 +155,11 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
            [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
            [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
            [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
-    >>> peak_local_max(corner_harris(square), min_distance=1)
-    array([[3, 3],
-           [3, 6],
-           [6, 3],
-           [6, 6]])
+    >>> corner_peaks(corner_harris(square), min_distance=1)
+    array([[2, 2],
+           [2, 7],
+           [7, 2],
+           [7, 7]])
 
     """
 
@@ -211,7 +211,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     Examples
     -------
-    >>> from skimage.feature import corner_shi_tomasi, peak_local_max
+    >>> from skimage.feature import corner_shi_tomasi, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square
@@ -225,11 +225,11 @@ def corner_shi_tomasi(image, sigma=1):
            [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
            [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
            [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
-    >>> peak_local_max(corner_shi_tomasi(square), min_distance=1)
-    array([[3, 3],
-           [3, 6],
-           [6, 3],
-           [6, 6]])
+    >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
+    array([[2, 2],
+           [2, 7],
+           [7, 2],
+           [7, 7]])
 
     """
 
@@ -278,7 +278,7 @@ def corner_foerstner(image, sigma=1):
 
     Examples
     -------
-    >>> from skimage.feature import corner_foerstner, peak_local_max
+    >>> from skimage.feature import corner_foerstner, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
     >>> square
@@ -296,7 +296,7 @@ def corner_foerstner(image, sigma=1):
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
-    >>> peak_local_max(foerstner, min_distance=1)
+    >>> corner_peaks(foerstner, min_distance=1)
     array([[2, 2],
            [2, 7],
            [7, 2],
@@ -441,3 +441,60 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
             corners_subpix[i, :] = y0 + est_edge[0], x0 + est_edge[1]
 
     return corners_subpix
+
+
+def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
+                 exclude_border=True, indices=True, num_peaks=np.inf,
+                 footprint=None, labels=None):
+    """Find corners in corner measure response image.
+
+    This differs from `skimage.feature.peak_local_max` in that it suppresses
+    multiple connected peaks with the same accumulator value.
+
+    Parameters
+    ----------
+    See `skimage.feature.peak_local_max`.
+
+    Returns
+    -------
+    See `skimage.feature.peak_local_max`.
+
+    Examples
+    --------
+    >>> from skimage.feature import peak_local_max, corner_peaks
+    >>> response = np.zeros((5, 5))
+    >>> response[2:4, 2:4] = 1
+    >>> response
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  0.],
+           [ 0.,  0.,  1.,  1.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
+    >>> peak_local_max(response, exclude_border=False)
+    array([[2, 2],
+           [2, 3],
+           [3, 2],
+           [3, 3]])
+    >>> corner_peaks(response, exclude_border=False)
+    array([[2, 2]])
+
+    """
+
+    peaks = peak_local_max(image, min_distance=min_distance,
+                           threshold_abs=threshold_abs,
+                           threshold_rel=threshold_rel,
+                           exclude_border=exclude_border,
+                           indices=False, num_peaks=np.inf,
+                           footprint=footprint, labels=labels)
+    if min_distance > 0:
+        coords = np.transpose(peaks.nonzero())
+        for r, c in coords:
+            if peaks[r, c]:
+                peaks[r - min_distance:r + min_distance + 1,
+                      c - min_distance:c + min_distance + 1] = False
+                peaks[r, c] = True
+
+    if indices is True:
+        return np.transpose(peaks.nonzero())
+    else:
+        return peaks
