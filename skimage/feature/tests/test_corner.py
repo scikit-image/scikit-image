@@ -5,7 +5,7 @@ from skimage import data
 from skimage import img_as_float
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
-                             corner_subpix, peak_local_max)
+                             corner_subpix, peak_local_max, corner_peaks)
 
 
 def test_square_image():
@@ -97,6 +97,17 @@ def test_subpix():
     corner = peak_local_max(corner_harris(img), num_peaks=1)
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (24.5, 24.5))
+
+
+def test_corner_peaks():
+    response = np.zeros((5, 5))
+    response[2:4, 2:4] = 1
+
+    corners = corner_peaks(response, exclude_border=False)
+    assert len(corners) == 1
+
+    corners = corner_peaks(response, exclude_border=False, min_distance=0)
+    assert len(corners) == 4
 
 
 if __name__ == '__main__':
