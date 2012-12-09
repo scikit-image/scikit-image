@@ -50,8 +50,8 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     Returns
     -------
     output : (N, 2) array or ndarray of bools
-        If `exclude_border = True`  : (row, column) coordinates of peaks.
-        If `exclude_border = False` : Boolean array shaped like `image`,
+        If `indices = True`  : (row, column) coordinates of peaks.
+        If `indices = False` : Boolean array shaped like `image`,
             with peaks represented by True values.
 
     Notes
