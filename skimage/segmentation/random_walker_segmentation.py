@@ -14,13 +14,9 @@ import numpy as np
 from scipy import sparse, ndimage
 try:
     from scipy.sparse.linalg.dsolve import umfpack
-    u = umfpack.UmfpackContext()
+    UmfpackContext = umfpack.UmfpackContext()
 except:
-    warnings.warn("""Scipy was built without UMFPACK. Consider rebuilding
-    Scipy with UMFPACK, this will greatly speed up the random walker
-    functions. You may also install pyamg and run the random walker function
-    in cg_mg mode (see the docstrings)
-    """)
+    UmfpackContext = None
 try:
     from pyamg import ruge_stuben_solver
     amg_loaded = True
@@ -338,6 +334,14 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=int32)
 
     """
+
+    if UmfpackContext is None:
+        warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
+                      'SciPy with UMFPACK, this will greatly speed up the '
+                      'random walker functions. You may also install pyamg '
+                      'and run the random walker function in cg_mg mode '
+                      '(see the docstrings)')
+
     # Parse input data
     if not multichannel:
         # We work with 4-D arrays of floats
