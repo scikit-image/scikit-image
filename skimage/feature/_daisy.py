@@ -2,6 +2,7 @@ import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin, exp
 from scipy.ndimage import gaussian_filter
 from scipy.special import iv
+from skimage import img_as_float
 
 
 def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
@@ -12,15 +13,16 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     allows for fast dense extraction. Typically, this is practical for
     bag-of-features image representations.
 
-    The implementation follows Tola et al. [1] but deviate on the following
+    The implementation follows Tola et al. [1]_ but deviate on the following
     points:
-        * Histogram bin contribution are smoothed with a circular Gaussian
-          window over the tonal range (the angular range).
-        * The sigma values of the spatial Gaussian smoothing in this code do
-          not match the sigma values in the original code by Tola et al. [2].
-          In their code, spatial smoothing is applied to both the input image
-          and the center histogram. However, this smoothing is not documented
-          in [1] and, therefore, it is omitted.
+
+      * Histogram bin contribution are smoothed with a circular Gaussian
+        window over the tonal range (the angular range).
+      * The sigma values of the spatial Gaussian smoothing in this code do not
+        match the sigma values in the original code by Tola et al. [2]_. In
+        their code, spatial smoothing is applied to both the input image and
+        the center histogram. However, this smoothing is not documented in [1]_
+        and, therefore, it is omitted.
 
     Parameters
     ----------
@@ -36,52 +38,57 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
         Number of histograms sampled per ring.
     orientations : int, optional
         Number of orientations (bins) per histogram.
-    normalization : {'l1', 'l2', 'daisy', 'off'}, optional
-        How to normalize the descriptors:
-            * 'l1': L1-normalization of each descriptor.
-            * 'l2': L2-normalization of each descriptor.
-            * 'daisy': L2-normalization of individual histograms.
-            * 'off': Disable normalization.
+    normalization : [ 'l1' | 'l2' | 'daisy' | 'off' ], optional
+        How to normalize the descriptors
+
+          * 'l1': L1-normalization of each descriptor.
+          * 'l2': L2-normalization of each descriptor.
+          * 'daisy': L2-normalization of individual histograms.
+          * 'off': Disable normalization.
+
     sigmas : 1D array of float, optional
         Standard deviation of spatial Gaussian smoothing for the center
         histogram and for each ring of histograms. The array of sigmas should
         be sorted from the center and out. I.e. the first sigma value defines
         the spatial smoothing of the center histogram and the last sigma value
         defines the spatial smoothing of the outermost ring. Specifying sigmas
-        overrides the following parameter:
-            rings = len(sigmas)-1
+        overrides the following parameter.
+           ``rings = len(sigmas)-1``
+
     ring_radii : 1D array of int, optional
         Radius (in pixels) for each ring. Specifying ring_radii overrides the
-        following two parameters:
-            rings = len(ring_radii)
-            radius = ring_radii[-1]
-        If both sigmas and ring_radii are given, they must satisfy
-            len(ring_radii) == len(sigmas)+1
-        since no radius is needed for the center histogram.
+        following two parameters.
+          | ``rings = len(ring_radii)``
+          | ``radius = ring_radii[-1]``
+
+        If both sigmas and ring_radii are given, they must satisfy the
+        following predicate since no radius is needed for the center
+        histogram.
+            ``len(ring_radii) == len(sigmas)+1``
+
 
     Returns
     -------
     descs : array
         Grid of DAISY descriptors for the given image as an array
         dimensionality  (P, Q, R) where
-            P = ceil((M-radius*2)/step)
-            Q = ceil((N-radius*2)/step)
-            R = (rings*histograms + 1)*orientations
+          | ``P = ceil((M-radius*2)/step)``
+          | ``Q = ceil((N-radius*2)/step)``
+          | ``R = (rings*histograms + 1)*orientations``
 
     References
     ----------
-    [1]: Tola et al. "Daisy: An efficient dense descriptor applied to
-         wide-baseline stereo." Pattern Analysis and Machine Intelligence,
-         IEEE Transactions on 32.5 (2010): 815-830.
-    [2]: http://cvlab.epfl.ch/alumni/tola/daisy.html
+    .. [1] Tola et al. "Daisy\: An efficient dense descriptor applied to wide-
+           baseline stereo." Pattern Analysis and Machine Intelligence, IEEE
+           Transactions on 32.5 (2010): 815-830.
+    .. [2] http://cvlab.epfl.ch/alumni/tola/daisy.html
     '''
 
     # Validate image format.
     if img.ndim > 2:
         raise ValueError('Only grey-level images are supported.')
     if img.dtype.kind == 'u':
-        img = img.astype(float)
-        img = img / 255.
+        img = img_as_float(img)
 
     # Validate parameters.
     if sigmas is not None and ring_radii is not None \
