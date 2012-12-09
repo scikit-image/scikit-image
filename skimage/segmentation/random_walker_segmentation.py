@@ -172,20 +172,19 @@ def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                   multichannel=False, return_full_prob=False, depth=1.):
-    """
-    Random walker algorithm for segmentation from markers, for gray-level or
-    multichannel images.
+    """Random walker algorithm for segmentation from markers.
+
+    Random walker algorithm is implemented for gray-level or multichannel
+    images.
 
     Parameters
     ----------
-
     data : array_like
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
         dimensional (multichannel=True) with the highest dimension denoting
         channels. Data spacing is assumed isotropic unless depth keyword
         argument is used.
-
     labels : array of ints, of same shape as `data` without channels dimension
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
@@ -195,49 +194,39 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels are consecutive. In the multichannel case, `labels` should have
         the same shape as a single channel of `data`, i.e. without the final
         dimension denoting channels.
-
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-
     mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
         Mode for solving the linear system in the random walker
         algorithm.
-
         - 'bf' (brute force, default): an LU factorization of the Laplacian is
           computed. This is fast for small images (<1024x1024), but very slow
           (due to the memory cost) and memory-consuming for big images (in 3-D
           for example).
-
         - 'cg' (conjugate gradient): the linear system is solved iteratively
           using the Conjugate Gradient method from scipy.sparse.linalg. This is
           less memory-consuming than the brute force method for large images,
           but it is quite slow.
-
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method.  This mode
           requires that the pyamg module (http://code.google.com/p/pyamg/) is
           installed. For images of size > 512x512, this is the recommended
           (fastest) mode.
-
     tol : float
         tolerance to achieve when solving the linear system, in
         cg' and 'cg_mg' modes.
-
     copy : bool
         If copy is False, the `labels` array will be overwritten with
         the result of the segmentation. Use copy=False if you want to
         save on memory.
-
     multichannel : bool, default False
         If True, input data is parsed as multichannel data (see 'data' above
         for proper input format in this case)
-
     return_full_prob : bool, default False
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
-
     depth : float, default 1.
         Correction for non-isotropic voxel depths in 3D volumes.
         Default (1.) implies isotropy.  This factor is derived as follows:
@@ -247,7 +236,6 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Returns
     -------
-
     output : ndarray
         If `return_full_prob` is False, array of ints of same shape as `data`,
         in which each pixel has been labeled according to the marker that
@@ -258,14 +246,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     See also
     --------
-
     skimage.morphology.watershed: watershed segmentation
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 
     Notes
     -----
-
     Multichannel inputs are scaled with all channel data combined. Ensure all
     channels are separately normalized prior to running this algorithm.
 
@@ -315,7 +301,6 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Examples
     --------
-
     >>> a = np.zeros((10, 10)) + 0.2*np.random.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a)
