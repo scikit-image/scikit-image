@@ -27,6 +27,7 @@ DEPENDENCIES        = {
 
 import os
 import sys
+import re
 import setuptools
 from numpy.distutils.core import setup
 try:
@@ -72,8 +73,8 @@ def get_package_version(package):
     for version_attr in ('version', 'VERSION', '__version__'):
         if hasattr(package, version_attr) \
                 and isinstance(getattr(package, version_attr), str):
-            version_info = getattr(package, version_attr)
-            for part in version_info.split('.'):
+            version_info = getattr(package, version_attr, '')
+            for part in re.split('\D+', version_info):
                 try:
                     version.append(int(part))
                 except ValueError:
