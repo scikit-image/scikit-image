@@ -477,6 +477,11 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
            [3, 3]])
     >>> corner_peaks(response, exclude_border=False)
     array([[2, 2]])
+    >>> corner_peaks(response, exclude_border=False, min_distance=0)
+    array([[2, 2],
+           [2, 3],
+           [3, 2],
+           [3, 3]])
 
     """
 
