@@ -16,13 +16,6 @@ from ..widgets import Slider
 __all__ = ['ImageViewer', 'CollectionViewer']
 
 
-class ImageCanvas(utils.MatplotlibCanvas):
-    """Canvas for displaying images."""
-    def __init__(self, parent, image, **kwargs):
-        self.fig, self.ax = utils.figimage(image, **kwargs)
-        super(ImageCanvas, self).__init__(parent, self.fig, **kwargs)
-
-
 class ImageViewer(QMainWindow):
     """Viewer for displaying images.
 
@@ -72,9 +65,10 @@ class ImageViewer(QMainWindow):
         self.main_widget = QtGui.QWidget()
         self.setCentralWidget(self.main_widget)
 
-        self.canvas = ImageCanvas(self.main_widget, image)
-        self.fig = self.canvas.fig
-        self.ax = self.canvas.ax
+        self.fig, self.ax = utils.figimage(image)
+        self.canvas = self.fig.canvas
+        self.canvas.setParent(self)
+
         self.ax.autoscale(enable=False)
 
         self._image_plot = self.ax.images[0]
@@ -274,6 +268,8 @@ class CollectionViewer(ImageViewer):
             if 48 <= key < 58:
                 index = 0.1 * int(key - 48) * self.num_images
                 self.update_index('', index)
-            event.accept()
+                event.accept()
+            else:
+                event.ignore()
         else:
             event.ignore()

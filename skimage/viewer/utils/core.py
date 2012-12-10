@@ -3,8 +3,11 @@ import warnings
 import numpy as np
 
 try:
-    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+    from matplotlib.figure import Figure
+    from matplotlib import _pylab_helpers
     from matplotlib.colors import LinearSegmentedColormap
+    from matplotlib.backends.backend_qt4 import FigureManagerQT
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 except ImportError:
     FigureCanvasQTAgg = object  # hack to prevent nosetest and autodoc errors
@@ -18,7 +21,7 @@ except ImportError:
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
-           'LinearColormap', 'ClearColormap', 'MatplotlibCanvas']
+           'LinearColormap', 'ClearColormap', 'FigureCanvas', 'new_plot']
 
 
 QApp = None
@@ -53,38 +56,6 @@ class RequiredAttr(object):
 
     def __set__(self, obj, val):
         self.val = val
-
-
-def figimage(image, scale=1, dpi=None, **kwargs):
-    """Return figure and axes with figure tightly surrounding image.
-
-    Unlike pyplot.figimage, this actually plots onto an axes object, which
-    fills the figure. Plotting the image onto an axes allows for subsequent
-    overlays of axes artists.
-
-    Parameters
-    ----------
-    image : array
-        image to plot
-    scale : float
-        If scale is 1, the figure and axes have the same dimension as the
-        image.  Smaller values of `scale` will shrink the figure.
-    dpi : int
-        Dots per inch for figure. If None, use the default rcParam.
-    """
-    dpi = dpi if dpi is not None else plt.rcParams['figure.dpi']
-    kwargs.setdefault('interpolation', 'nearest')
-    kwargs.setdefault('cmap', 'gray')
-
-    h, w, d = np.atleast_3d(image).shape
-    figsize = np.array((w, h), dtype=float) / dpi * scale
-
-    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
-    fig.subplots_adjust(left=0, bottom=0, right=1, top=1)
-
-    ax.set_axis_off()
-    ax.imshow(image, **kwargs)
-    return fig, ax
 
 
 class LinearColormap(LinearSegmentedColormap):
@@ -124,14 +95,88 @@ class ClearColormap(LinearColormap):
         LinearColormap.__init__(self, name, cg_speq)
 
 
-class MatplotlibCanvas(FigureCanvasQTAgg):
+class FigureCanvas(FigureCanvasQTAgg):
     """Canvas for displaying images."""
-    def __init__(self, parent, figure, **kwargs):
+    def __init__(self, figure, **kwargs):
         self.fig = figure
         FigureCanvasQTAgg.__init__(self, self.fig)
         FigureCanvasQTAgg.setSizePolicy(self,
                                         QtGui.QSizePolicy.Expanding,
                                         QtGui.QSizePolicy.Expanding)
         FigureCanvasQTAgg.updateGeometry(self)
-        # Note: `setParent` must be called after `FigureCanvasQTAgg.__init__`.
-        self.setParent(parent)
+
+    #TODO: Consider overriding Matplotlib key-event handling
+    # def keyPressEvent(self, event):
+        # # Override key events defined by Matplotlib
+        # event.ignore()
+
+    # def keyReleaseEvent(self, event):
+        # # Override key events defined by Matplotlib
+        # event.ignore()
+
+
+def new_canvas(*args, **kwargs):
+    """Return a new figure canvas."""
+    allnums = _pylab_helpers.Gcf.figs.keys()
+    num = max(allnums) + 1 if allnums else 1
+
+    FigureClass = kwargs.pop('FigureClass', Figure)
+    figure = FigureClass(*args, **kwargs)
+    canvas = FigureCanvas(figure)
+    fig_manager = FigureManagerQT(canvas, num)
+    return fig_manager.canvas
+
+
+def new_plot(parent=None, subplot_kw=None, **fig_kw):
+    """Return new figure and axes.
+
+    Parameters
+    ----------
+    parent : QtWidget
+        Qt widget that displays the plot objects. If None, you must manually
+        call ``canvas.setParent`` and pass the parent widget.
+    subplot_kw : dict
+        Keyword arguments passed ``matplotlib.figure.Figure.add_subplot``.
+    fig_kw : dict
+        Keyword arguments passed ``matplotlib.figure.Figure``.
+    """
+    if subplot_kw is None:
+        subplot_kw = {}
+    canvas = new_canvas(**fig_kw)
+    canvas.setParent(parent)
+
+    fig = canvas.figure
+    ax = fig.add_subplot(1, 1, 1, **subplot_kw)
+    return fig, ax
+
+
+def figimage(image, scale=1, dpi=None, **kwargs):
+    """Return figure and axes with figure tightly surrounding image.
+
+    Unlike pyplot.figimage, this actually plots onto an axes object, which
+    fills the figure. Plotting the image onto an axes allows for subsequent
+    overlays of axes artists.
+
+    Parameters
+    ----------
+    image : array
+        image to plot
+    scale : float
+        If scale is 1, the figure and axes have the same dimension as the
+        image.  Smaller values of `scale` will shrink the figure.
+    dpi : int
+        Dots per inch for figure. If None, use the default rcParam.
+    """
+    dpi = dpi if dpi is not None else mpl.rcParams['figure.dpi']
+    kwargs.setdefault('interpolation', 'nearest')
+    kwargs.setdefault('cmap', 'gray')
+
+    h, w, d = np.atleast_3d(image).shape
+    figsize = np.array((w, h), dtype=float) / dpi * scale
+
+    fig, ax = new_plot(figsize=figsize, dpi=dpi)
+    fig.subplots_adjust(left=0, bottom=0, right=1, top=1)
+
+    ax.set_axis_off()
+    ax.imshow(image, **kwargs)
+    return fig, ax

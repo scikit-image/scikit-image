@@ -5,25 +5,11 @@ try:
 except ImportError:
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    print("Could not import matplotlib -- skimage.viewer not available.")
-
-from ..utils import MatplotlibCanvas
+from ..utils import new_plot
 from .base import Plugin
 
 
-class PlotCanvas(MatplotlibCanvas):
-    """Canvas for displaying images.
-
-    This canvas derives from Matplotlib, and has attributes `fig` and `ax`,
-    which point to Matplotlib figure and axes.
-    """
-    def __init__(self, parent, height, width, **kwargs):
-        self.fig, self.ax = plt.subplots(figsize=(height, width), **kwargs)
-        super(PlotCanvas, self).__init__(parent, self.fig, **kwargs)
-        self.setMinimumHeight(150)
+__all__ = ['PlotPlugin']
 
 
 class PlotPlugin(Plugin):
@@ -45,8 +31,9 @@ class PlotPlugin(Plugin):
         self.canvas.draw_idle()
 
     def add_plot(self, height=4, width=4):
-        self.canvas = PlotCanvas(self, height, width)
-        self.fig = self.canvas.fig
+        self.fig, self.ax = new_plot(figsize=(height, width))
+        self.canvas = self.fig.canvas
+        self.canvas.setMinimumHeight(150)
         #TODO: Converted color is slightly different than Qt background.
         qpalette = QtGui.QPalette()
         qcolor = qpalette.color(QtGui.QPalette.Window)
@@ -54,5 +41,4 @@ class PlotPlugin(Plugin):
         if np.isscalar(bgcolor):
             bgcolor = str(bgcolor / 255.)
         self.fig.patch.set_facecolor(bgcolor)
-        self.ax = self.canvas.ax
         self.layout.addWidget(self.canvas, self.row, 0)
