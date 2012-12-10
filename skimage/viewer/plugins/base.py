@@ -9,11 +9,6 @@ except ImportError:
     QDialog = object # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
-try:
-    import matplotlib as mpl
-except ImportError:
-    print("Could not import matplotlib -- skimage.viewer not available.")
-
 from ..utils import RequiredAttr, init_qtapp
 
 
@@ -81,7 +76,7 @@ class Plugin(QDialog):
     image_viewer = RequiredAttr("%s is not attached to ImageViewer" % name)
     draws_on_image = False
 
-    def __init__(self, image_filter=None, height=0, width=400, useblit=None):
+    def __init__(self, image_filter=None, height=0, width=400, useblit=True):
         init_qtapp()
         super(Plugin, self).__init__()
 
@@ -98,8 +93,6 @@ class Plugin(QDialog):
         self.arguments = []
         self.keyword_arguments= {}
 
-        if useblit is None:
-            useblit = True if mpl.backends.backend.endswith('Agg') else False
         self.useblit = useblit
         self.cids = []
         self.artists = []

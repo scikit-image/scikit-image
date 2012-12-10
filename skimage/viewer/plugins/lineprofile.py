@@ -103,7 +103,6 @@ class LineProfile(PlotPlugin):
 
     def line_changed(self, end_pts):
         x, y = np.transpose(end_pts)
-
         self.end_pts = end_pts
         scan = profile_line(self.image_viewer.original_image, end_pts,
                             linewidth=self.line_tool.linewidth)

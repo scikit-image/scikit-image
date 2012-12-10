@@ -1,7 +1,6 @@
 import numpy as np
 
 try:
-    import matplotlib as mpl
     from matplotlib import lines
 except ImportError:
     print("Could not import matplotlib -- skimage.viewer not available.")
@@ -16,19 +15,17 @@ class CanvasToolBase(object):
     Parameters
     ----------
     """
-    def __init__(self, ax, useblit=None, on_update=None, on_enter=None):
+    def __init__(self, ax, useblit=True, on_update=None, on_enter=None):
         self.ax = ax
         self.canvas = ax.figure.canvas
         self.cids = []
         self._artists = []
         self.active = True
 
-        if useblit is None:
-            useblit = True if mpl.backends.backend.endswith('Agg') else False
-        self.useblit = useblit
         if useblit:
             self.canvas.draw()
             self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
+        self.useblit = useblit
 
         if on_update is None:
             on_update = lambda *args: None
