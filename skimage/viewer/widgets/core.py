@@ -131,6 +131,7 @@ class Slider(BaseWidget):
             self.slider.sliderReleased.connect(self._on_slider_changed)
         else:
             raise ValueError("Unexpected value %s for 'update_on'" % update_on)
+        self.slider.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self.name_label = QtGui.QLabel()
         self.name_label.setText(self.name)
