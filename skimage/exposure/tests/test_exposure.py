@@ -5,7 +5,9 @@ from skimage import data
 from skimage import exposure
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
+from skimage.io import use_plugin
 
+use_plugin('matplotlib')
 
 # Test histogram equalization
 # ===========================
@@ -101,7 +103,7 @@ def test_adapthist_grayscale():
                         nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 77.5841845)
+    assert_almost_equal(peak_snr(img, adapted), 77.58419, 5)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.0376632)
     return data, adapted
 
