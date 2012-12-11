@@ -111,15 +111,6 @@ class FigureCanvas(FigureCanvasQTAgg):
         # See https://github.com/matplotlib/matplotlib/pull/1585
         self.resize_event()
 
-    #TODO: Consider overriding Matplotlib key-event handling
-    # def keyPressEvent(self, event):
-        # # Override key events defined by Matplotlib
-        # event.ignore()
-
-    # def keyReleaseEvent(self, event):
-        # # Override key events defined by Matplotlib
-        # event.ignore()
-
 
 def new_canvas(*args, **kwargs):
     """Return a new figure canvas."""
