@@ -72,8 +72,8 @@ def test_rescale_out_range():
     assert_close(out, [0, 63, 127])
 
 
-# Test rescale intensity
-# ======================
+# Test adaptive histogram equalization
+# ====================================
 
 def test_adapthist_scalar():
     '''Test a scalar uint8 image
