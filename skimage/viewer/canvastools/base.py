@@ -25,6 +25,7 @@ class CanvasToolBase(object):
         if useblit:
             self.canvas.draw()
             self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
+            self.connect_event('resize_event', self._update_saved_image)
         self.useblit = useblit
 
         if on_update is None:
@@ -58,17 +59,29 @@ class CanvasToolBase(object):
         return not self.active
 
     def set_visible(self, val):
-        for a in self._artists:
-            a.set_visible(val)
+        for artist in self._artists:
+            artist.set_visible(val)
 
     def redraw(self):
         if self.useblit:
             self.canvas.restore_region(self.img_background)
-            for artist in self._artists:
-                self.ax.draw_artist(artist)
+            self._draw_artists()
             self.canvas.blit(self.ax.bbox)
         else:
             self.canvas.draw_idle()
+
+    def _draw_artists(self):
+        for artist in self._artists:
+            self.ax.draw_artist(artist)
+
+    def _update_saved_image(self, event):
+        # Hide canvas artists and save background image
+        self.set_visible(False)
+        self.canvas.draw()
+        self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
+        # Redraw canvas artists
+        self.set_visible(True)
+        self._draw_artists()
 
 
 class ToolHandles(object):

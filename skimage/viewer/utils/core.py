@@ -105,6 +105,12 @@ class FigureCanvas(FigureCanvasQTAgg):
                                         QtGui.QSizePolicy.Expanding)
         FigureCanvasQTAgg.updateGeometry(self)
 
+    def resizeEvent(self, event):
+        FigureCanvasQTAgg.resizeEvent(self, event)
+        # Call to `resize_event` missing in FigureManagerQT.
+        # See https://github.com/matplotlib/matplotlib/pull/1585
+        self.resize_event()
+
     #TODO: Consider overriding Matplotlib key-event handling
     # def keyPressEvent(self, event):
         # # Override key events defined by Matplotlib
