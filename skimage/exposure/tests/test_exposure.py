@@ -5,9 +5,7 @@ from skimage import data
 from skimage import exposure
 from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
-from skimage.io import use_plugin
 
-use_plugin('matplotlib')
 
 # Test histogram equalization
 # ===========================
