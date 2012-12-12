@@ -85,9 +85,9 @@ def test_adapthist_scalar():
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(peak_snr(full_scale, adapted), 28.6262034)
+    assert_almost_equal(peak_snr(full_scale, adapted), 28.626, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.0410010)
+                        0.041, 3)
     return img, adapted
 
 
@@ -101,8 +101,8 @@ def test_adapthist_grayscale():
                         nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 77.58419, 5)
-    assert_almost_equal(norm_brightness_err(img, adapted), 0.0376632)
+    assert_almost_equal(peak_snr(img, adapted), 77.584, 5)
+    assert_almost_equal(norm_brightness_err(img, adapted), 0.038, 3)
     return data, adapted
 
 
@@ -116,9 +116,9 @@ def test_adapthist_color():
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(img)
-    assert_almost_equal(peak_snr(full_scale, adapted), 64.7167515)
+    assert_almost_equal(peak_snr(full_scale, adapted), 64.717, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.17922429)
+                        0.179, 3)
     return data, adapted
 
 
