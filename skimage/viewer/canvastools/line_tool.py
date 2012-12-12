@@ -55,6 +55,10 @@ class LineTool(CanvasToolBase):
         idx, px_dist = self._handles.closest(event.x, event.y)
         if px_dist < self.maxdist:
             self._active_pt = idx
+        else:
+            self._active_pt = 0
+            x, y = event.xdata, event.ydata
+            self.end_pts = np.array([[x, y], [x, y]])
 
     def on_mouse_release(self, event):
         if event.button != 1:
