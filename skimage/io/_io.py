@@ -16,7 +16,7 @@ from skimage.color import rgb2grey
 # Shared image queue
 _image_stack = []
 
-URL_REGEX = re.compile(r'http://|https://|ftp://|file://')
+URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
 
 
 def is_url(filename):

@@ -1,3 +1,5 @@
+import os
+
 from numpy.testing import *
 import numpy as np
 
@@ -18,7 +20,7 @@ def test_stack_non_array():
 
 
 def test_imread_url():
-    image_url = 'file://%s/camera.png' % data_dir
+    image_url = 'file:{0}{0}{1}{0}camera.png'.format(os.path.sep, data_dir)
     image = io.imread(image_url)
     assert image.shape == (512, 512)
 
