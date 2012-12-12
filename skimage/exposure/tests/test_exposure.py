@@ -101,7 +101,7 @@ def test_adapthist_grayscale():
                         nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 77.584, 5)
+    assert_almost_equal(peak_snr(img, adapted), 77.584, 3)
     assert_almost_equal(norm_brightness_err(img, adapted), 0.038, 3)
     return data, adapted
 
