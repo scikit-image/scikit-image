@@ -37,7 +37,8 @@ seg1 = nd.label(ws == foreground)[0]
 
 # make the RGB equivalent of `coins`
 coins_colour = np.tile(coins[..., np.newaxis], (1, 1, 3))
-seg2 = slic(coins_colour, max_iter=20, sigma=0, convert2lab=False)
+seg2 = slic(coins_colour, n_segments=30, max_iter=160, sigma=1, ratio=9,
+            convert2lab=False)
 
 # combine the two
 segj = join_segmentations(seg1, seg2)
