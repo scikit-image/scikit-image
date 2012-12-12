@@ -33,7 +33,6 @@ class LineProfile(PlotPlugin):
             'dtype' : fixed scale based on min/max intensity of image dtype.
     """
     name = 'Line Profile'
-    draws_on_image = True
 
     def __init__(self, linewidth=1, maxdist=5, epsilon='deprecated',
                  limits='image', **kwargs):

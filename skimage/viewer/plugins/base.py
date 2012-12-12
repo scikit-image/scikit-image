@@ -74,7 +74,6 @@ class Plugin(QDialog):
     """
     name = 'Plugin'
     image_viewer = RequiredAttr("%s is not attached to ImageViewer" % name)
-    draws_on_image = False
 
     def __init__(self, image_filter=None, height=0, width=400, useblit=True):
         init_qtapp()
@@ -116,8 +115,6 @@ class Plugin(QDialog):
         #TODO: Always passing image as first argument may be bad assumption.
         self.arguments.append(self.image_viewer.original_image)
 
-        if self.draws_on_image:
-            self.connect_image_event('draw_event', self.on_draw)
         # Call filter so that filtered image matches widget values
         self.filter_image()
 
@@ -147,15 +144,6 @@ class Plugin(QDialog):
     def __add__(self, widget):
         self.add_widget(widget)
         return self
-
-    def on_draw(self, event):
-        """Save image background when blitting.
-
-        The saved image is used to "clear" the figure before redrawing artists.
-        """
-        if self.useblit:
-            bbox = self.image_viewer.ax.bbox
-            self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
 
     def filter_image(self, *widget_arg):
         """Call `image_filter` with widget args and kwargs
