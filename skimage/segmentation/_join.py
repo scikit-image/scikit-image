@@ -54,7 +54,7 @@ def relabel_from_one(ar):
 
     Returns
     -------
-    ar_relabeled : numpy array of same shape as ar
+    relabeled : numpy array of same shape as ar
     forward_map : 1d numpy array of length np.unique(ar) + 1
     inverse_map : 1d numpy array of length len(np.unique(ar))
         The length is len(np.unique(ar)) + 1 if 0 is not in np.unique(ar)
@@ -64,8 +64,8 @@ def relabel_from_one(ar):
     >>> import numpy as np
     >>> from skimage.segmentation import relabel_from_one
     >>> ar = array([1, 1, 5, 5, 8, 99, 42])
-    >>> ar_relab, fw, inv = relabel_from_one(ar)
-    >>> ar_relab
+    >>> relab, fw, inv = relabel_from_one(ar)
+    >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
     >>> fw
     array([0, 1, 0, 0, 0, 2, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -75,9 +75,9 @@ def relabel_from_one(ar):
            0, 0, 0, 0, 0, 0, 0, 5])
     >>> inv
     array([ 0,  1,  5,  8, 42, 99])
-    >>> (fw[ar] == ar_relab).all()
+    >>> (fw[ar] == relab).all()
     True
-    >>> (inv[ar_relab] == ar).all()
+    >>> (inv[relab] == ar).all()
     True
     """
     labels = np.unique(ar)
