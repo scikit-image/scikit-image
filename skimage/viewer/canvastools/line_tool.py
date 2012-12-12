@@ -50,9 +50,7 @@ class LineTool(CanvasToolBase):
         self.connect_event('key_press_event', self.on_key_press)
 
     def on_mouse_press(self, event):
-        if event.button != 1:
-            return
-        if event.inaxes == None:
+        if event.button != 1 and event.inaxes == None:
             return
         idx, px_dist = self._handles.closest(event.x, event.y)
         if px_dist < self.maxdist:
@@ -64,14 +62,11 @@ class LineTool(CanvasToolBase):
         self._active_pt = None
 
     def on_move(self, event):
-        if event.button != 1:
-            return
-        if self._active_pt is None:
+        if event.button != 1 or self._active_pt is None:
             return
         if not self.ax.in_axes(event):
             return
-        x, y = event.xdata, event.ydata
-        self.update(x, y)
+        self.update(event.xdata, event.ydata)
 
     def on_key_press(self, event):
         if event.key == 'enter':
@@ -92,9 +87,7 @@ class LineTool(CanvasToolBase):
         self._handles.set_data(np.transpose(self.end_pts))
         self._line.set_linewidth(self.linewidth)
 
-        self.ax.relim()
         self.redraw()
-
         self.on_update(self.end_pts)
 
 

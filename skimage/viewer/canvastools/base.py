@@ -69,6 +69,10 @@ class CanvasToolBase(object):
             self.ax.draw_artist(artist)
 
     def redraw(self):
+        """Redraw image and canvas artists.
+
+        This method should be called by subclasses when artists are updated.
+        """
         if self.useblit:
             self.canvas.restore_region(self.img_background)
             self._draw_artists()
