@@ -34,8 +34,7 @@ class LineTool(CanvasToolBase):
         self.maxdist = maxdist
         self._active_pt = None
 
-        self._init_end_pts = np.transpose([x, y])
-        self.end_pts = self._init_end_pts.copy()
+        self.end_pts = np.transpose([x, y])
 
         self._line = lines.Line2D(x, y, animated=True, **props)
         ax.add_line(self._line)
@@ -78,12 +77,6 @@ class LineTool(CanvasToolBase):
             self.set_visible(False)
             self.redraw()
 
-    def reset(self):
-        self.end_pts = self._init_end_pts.copy()
-        self._line.set_data(np.transpose(self.end_pts))
-        self._handles.set_data(np.transpose(self.end_pts))
-        self.update(None, None)
-
     def update(self, x, y):
         if x is not None:
             self.end_pts[self._active_pt, :] = x, y
@@ -120,8 +113,6 @@ class ThickLineTool(LineTool):
             self._thicken_scan_line()
         elif event.key == '-':
             self._shrink_scan_line()
-        elif event.key == 'r':
-            self.reset()
 
     def _thicken_scan_line(self):
         self.linewidth += 1
