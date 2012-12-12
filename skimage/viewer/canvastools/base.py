@@ -23,9 +23,7 @@ class CanvasToolBase(object):
         self.active = True
 
         if useblit:
-            self.canvas.draw()
-            self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
-            self.connect_event('resize_event', self._update_saved_image)
+            self.connect_event('draw_event', self._blit_on_draw_event)
         self.useblit = useblit
 
         if on_update is None:
@@ -62,6 +60,14 @@ class CanvasToolBase(object):
         for artist in self._artists:
             artist.set_visible(val)
 
+    def _blit_on_draw_event(self, event=None):
+        self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
+        self._draw_artists()
+
+    def _draw_artists(self):
+        for artist in self._artists:
+            self.ax.draw_artist(artist)
+
     def redraw(self):
         if self.useblit:
             self.canvas.restore_region(self.img_background)
@@ -69,19 +75,6 @@ class CanvasToolBase(object):
             self.canvas.blit(self.ax.bbox)
         else:
             self.canvas.draw_idle()
-
-    def _draw_artists(self):
-        for artist in self._artists:
-            self.ax.draw_artist(artist)
-
-    def _update_saved_image(self, event):
-        # Hide canvas artists and save background image
-        self.set_visible(False)
-        self.canvas.draw()
-        self.img_background = self.canvas.copy_from_bbox(self.ax.bbox)
-        # Redraw canvas artists
-        self.set_visible(True)
-        self._draw_artists()
 
 
 class ToolHandles(object):
@@ -95,14 +88,16 @@ class ToolHandles(object):
         Coordinates of control handles.
     marker : str
         Shape of marker used to display handle. See `matplotlib.pyplot.plot`.
-    marker_props : see :class:`matplotlib.lines.Line2D`.
+    marker_props : dict
+        Additional marker properties. See :class:`matplotlib.lines.Line2D`.
     """
-    def __init__(self, ax, x, y, marker='o', markerprops=None):
+    def __init__(self, ax, x, y, marker='o', marker_props=None):
         self.ax = ax
 
-        props = dict(mfc='w', ls='none', alpha=0.5, visible=False)
-        props.update(markerprops if markerprops is not None else {})
-        self._markers = lines.Line2D(x, y, marker=marker, **props)
+        props = dict(marker=marker, markersize=7, mfc='w', ls='none',
+                     alpha=0.5, visible=False)
+        props.update(marker_props if marker_props is not None else {})
+        self._markers = lines.Line2D(x, y, animated=True, **props)
         self.ax.add_line(self._markers)
         self.artist = self._markers
 

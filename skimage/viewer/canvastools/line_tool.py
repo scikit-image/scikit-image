@@ -37,7 +37,7 @@ class LineTool(CanvasToolBase):
         self._init_end_pts = np.transpose([x, y])
         self.end_pts = self._init_end_pts.copy()
 
-        self._line = lines.Line2D(x, y, **props)
+        self._line = lines.Line2D(x, y, animated=True, **props)
         ax.add_line(self._line)
 
         self._handles = ToolHandles(ax, x, y)
