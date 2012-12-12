@@ -1,1 +1,1 @@
-from line_tool import LineTool, ThickLineTool
+from linetool import LineTool, ThickLineTool
