@@ -1,26 +1,18 @@
-'''
-Adapted code from the article
- * "Contrast Limited Adaptive Histogram Equalization"
- * by Karel Zuiderveld, karel@cv.ruu.nl
- * in "Graphics Gems IV", Academic Press, 1994
-=============
+"""
+Adapted code from "Contrast Limited Adaptive Histogram Equalization" by Karel
+Zuiderveld <karel@cv.ruu.nl>, Graphics Gems IV, Academic Press, 1994.
 
-http://tog.acm.org/resources/GraphicsGems/
+http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
 
-EULA: The Graphics Gems code is copyright-protected.
-In other words, you cannot claim the text of the code as your
-own and resell it. Using the code is permitted in any program,
-product, or library, non-commercial or commercial.
-Giving credit is not required, though is a nice gesture.
-The code comes as-is, and if there are any flaws or problems
-with any Gems code, nobody involved with Gems - authors, editors,
-publishers, or webmasters - are to be held responsible.
-Basically, don't be a jerk, and remember that anything free
+The Graphics Gems code is copyright-protected.  In other words, you cannot
+claim the text of the code as your own and resell it. Using the code is
+permitted in any program, product, or library, non-commercial or commercial.
+Giving credit is not required, though is a nice gesture.  The code comes as-is,
+and if there are any flaws or problems with any Gems code, nobody involved with
+Gems - authors, editors, publishers, or webmasters - are to be held
+responsible.  Basically, don't be a jerk, and remember that anything free
 comes with no guarantee.
- *
- *  Author: Karel Zuiderveld, Computer Vision Research Group,
- *	     Utrecht, The Netherlands (karel@cv.ruu.nl)
-'''
+"""
 import numpy as np
 import skimage
 from skimage import color
@@ -30,41 +22,37 @@ from skimage.util import view_as_blocks
 
 MAX_REG_X = 16  # max. # contextual regions in x-direction */
 MAX_REG_Y = 16  # max. # contextual regions in y-direction */
-NR_OF_GREY = 1 << 14  # number of grayscale levels to use in CLAHE algorithm
+NR_OF_GREY = 16384  # number of grayscale levels to use in CLAHE algorithm
 
 
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
                        nbins=256):
-    '''Contrast Limited Adaptive Histogram Equalization
+    """Contrast Limited Adaptive Histogram Equalization.
 
     Parameters
     ----------
     image : array-like
-        original image
+        Input image.
     ntiles_x : int, optional
-        Tile regions in the X direction (2, 16)
+        Number of tile regions in the X direction.  Ranges between 2 and 16.
     ntiles_y : int, optional
-        Tile regions in the Y direction (2, 16)
+        Number of tile regions in the Y direction.  Ranges between 2 and 16.
     clip_limit : float: optional
-        Normalized cliplimit (higher values give more contrast)
+        Clipping limit, normalized between 0 and 1 (higher values give more
+        contrast).
     nbins : int, optional
-        Greybins for histogram ("dynamic range")
+        Number of gray bins for histogram ("dynamic range").
 
     Returns
     -------
-    out : np.ndarray
-        equalized image - grayscale images are uint16, color images are float
+    out : ndarray
+        Equalized image.
 
     Notes
     -----
     * The algorithm relies on an image whose rows and columns are even
       multiples of the number of tiles, so the extra rows and columns are left
       at their original values, thus  preserving the input image shape.
-<<<<<<< HEAD
-=======
-    * For grayscale images, CLAHE is performed on one channel,
-      and a grayscale is returned
->>>>>>> 2e1729a9fbbc21fc0b04df8e68efbab9cfd6dada
     * For color images, the following steps are performed:
        - The image is converted to LAB color space
        - The CLAHE algorithm is run on the L channel
@@ -73,10 +61,9 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
 
     References
     ----------
-    .. [1] http://tog.acm.org/resources/GraphicsGems/
+    .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
-    '''
-    # handle color images - CLAHE accepts scalar images only
+    """
     args = [None, ntiles_x, ntiles_y, clip_limit * nbins, nbins]
     if image.ndim > 2:
         lab_img = color.rgb2lab(skimage.img_as_float(image))
@@ -99,31 +86,32 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
 
 
 def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
-    '''Contrast Limited Adaptive Histogram Equalization
+    """Contrast Limited Adaptive Histogram Equalization.
 
     Parameters
     ----------
     image : array-like
-        original image
+        Input image.
     ntiles_x : int, optional
-        Tile regions in the X direction (2, 16)
+        Number of tile regions in the X direction.  Ranges between 2 and 16.
     ntiles_y : int, optional
-        Tile regions in the Y direction (2, 16)
-    clip_limit : float: optional
-        Normalized cliplimit (higher values give more contrast)
+        Number of tile regions in the Y direction.  Ranges between 2 and 16.
+    clip_limit : float, optional
+        Normalized clipping limit (higher values give more contrast).
     nbins : int, optional
-        Greybins for histogram ("dynamic range")
+        Number of gray bins for histogram ("dynamic range").
 
     Returns
     -------
-    out : np.ndarray
+    out : ndarray
+        Equalized image.
 
-    The number of "effective" greylevels in the output image is set by nbins;
+    The number of "effective" greylevels in the output image is set by `nbins`;
     selecting a small value (eg. 128) speeds up processing and still produce
     an output image of good quality. The output image will have the same
     minimum and maximum value as the input image. A clip limit smaller than 1
     results in standard (non-contrast limited) AHE.
-    '''
+    """
     ntiles_x = min(ntiles_x, MAX_REG_X)
     ntiles_y = min(ntiles_y, MAX_REG_Y)
     ntiles_y = max(ntiles_x, 2)
@@ -148,10 +136,12 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             clip_limit = 1
     else:
         clip_limit = NR_OF_GREY  # Large value, do not clip (AHE)
+
     bin_size = 1 + NR_OF_GREY / nbins
     aLUT = np.arange(NR_OF_GREY)
     aLUT /= bin_size
     img_blocks = view_as_blocks(image, (y_size, x_size))
+
     # Calculate greylevel mappings for each contextual region
     for y in range(ntiles_y):
         for x in range(ntiles_x):
@@ -162,6 +152,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             hist = clip_histogram(hist, clip_limit)
             hist = map_histogram(hist, 0, NR_OF_GREY, n_pixels)
             map_array[y, x] = hist
+
     # Interpolate greylevel mappings to get CLAHE image
     ystart = 0
     for y in range(ntiles_y + 1):
@@ -178,6 +169,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             ystep = y_size
             yU = y - 1
             yB = yB + 1
+
         for x in range(ntiles_x + 1):
             if x == 0:  # special case: left column
                 xstep = x_size / 2
@@ -191,21 +183,26 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
                 xstep = x_size
                 xL = x - 1
                 xR = xL + 1
+
             mapLU = map_array[yU, xL]
             mapRU = map_array[yU, xR]
             mapLB = map_array[yB, xL]
             mapRB = map_array[yB, xR]
+
             xslice = np.arange(xstart, xstart + xstep)
             yslice = np.arange(ystart, ystart + ystep)
             interpolate(image, xslice, yslice,
                         mapLU, mapRU, mapLB, mapRB, aLUT)
+
             xstart += xstep  # set pointer on next matrix */
+
         ystart += ystep
+
     return image
 
 
 def clip_histogram(hist, clip_limit):
-    '''Perform clipping of the histogram and redistribution of bins.
+    """Perform clipping of the histogram and redistribution of bins.
 
     The histogram is clipped and the number of excess pixels is counted.
     Afterwards the excess pixels are equally redistributed across the
@@ -213,16 +210,16 @@ def clip_histogram(hist, clip_limit):
 
     Parameters
     ----------
-    hist : np.ndarray
-        histogram array
+    hist : ndarray
+        Histogram array.
     clip_limit : int
-        maximum allowed bin count
+        Maximum allowed bin count.
 
     Returns
     -------
-    hist : np.ndarray
-        clipped histogram
-    '''
+    hist : ndarray
+        Clipped histogram.
+    """
     # calculate total number of excess pixels
     excess_mask = hist > clip_limit
     excess = hist[excess_mask]
@@ -253,28 +250,29 @@ def clip_histogram(hist, clip_limit):
             hist[under] += 1
             n_excess -= hist[under].size
             index += 1
+
     return hist
 
 
 def map_histogram(hist, min_val, max_val, n_pixels):
-    '''Calculates the equalized lookup table (mapping)
+    """Calculate the equalized lookup table (mapping).
 
     It does so by cumulating the input histogram.
 
-    hist : np.ndarray
-        clipped histogram
+    hist : ndarray
+        Clipped histogram.
     min_val : int
-        min value for mapping
+        Minimum value for mapping.
     max_val : int
-        max value for mapping
+        Maximum value for mapping.
     n_pixels : int
-        number of pixels in the region
+        Number of pixels in the region.
 
     Returns
     -------
-    out : np.ndarray
-       mapped intensity LUT
-    '''
+    out : ndarray
+       Mapped intensity LUT.
+    """
     out = np.cumsum(hist).astype(float)
     scale = ((float)(max_val - min_val)) / n_pixels
     out *= scale
@@ -285,23 +283,23 @@ def map_histogram(hist, min_val, max_val, n_pixels):
 
 def interpolate(image, xslice, yslice,
                 mapLU, mapRU, mapLB, mapRB, aLUT):
-    '''Find the new grayscale level for a region using bilinear interpolation
+    """Find the new grayscale level for a region using bilinear interpolation.
 
     Parameters
     ----------
-    image : np.ndarray
-        full image
+    image : ndarray
+        Full image.
     xslice, yslice : array-like
-       indices of the region
-    map* : np.ndarray
-        mappings of greylevels from histograms
-    aLUT : np.ndarray
-        maps grayscale levels in image to histogram levels
+       Indices of the region.
+    map* : ndarray
+        Mappings of greylevels from histograms.
+    aLUT : ndarray
+        Maps grayscale levels in image to histogram levels.
 
     Returns
     -------
-    out : np.ndarray
-        original image with the subregion replaced
+    out : ndarray
+        Original image with the subregion replaced.
 
     Note
     ----
@@ -309,7 +307,7 @@ def interpolate(image, xslice, yslice,
     within a submatrix of the image.
     This is done by a bilinear interpolation between four different
     mappings in order to eliminate boundary artifacts.
-    '''
+    """
     norm = xslice.size * yslice.size  # Normalization factor
     # interpolation weight matrices
     x_coef, y_coef = np.meshgrid(np.arange(xslice.size),
@@ -325,4 +323,3 @@ def interpolate(image, xslice, yslice,
            / norm)
     view[:, :] = new
     return image
-
