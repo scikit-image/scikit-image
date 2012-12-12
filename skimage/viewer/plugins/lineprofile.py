@@ -34,7 +34,7 @@ class LineProfile(PlotPlugin):
     """
     name = 'Line Profile'
 
-    def __init__(self, linewidth=1, maxdist=5, epsilon='deprecated',
+    def __init__(self, linewidth=1, maxdist=10, epsilon='deprecated',
                  limits='image', **kwargs):
         super(LineProfile, self).__init__(**kwargs)
 
