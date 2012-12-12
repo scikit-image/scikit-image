@@ -85,7 +85,7 @@ def test_adapthist_scalar():
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(peak_snr(full_scale, adapted), 28.626, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 101.231, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
                         0.041, 3)
     return img, adapted
@@ -137,8 +137,11 @@ def peak_snr(img1, img2):
     '''
     if img1.ndim == 3:
         img1, img2 = rgb2gray(img1.copy()), rgb2gray(img2.copy())
+    img1 = skimage.img_as_float(img1)
+    img2 = skimage.img_as_float(img2)
     mse = 1. / img1.size * np.square(img1 - img2).sum()
     _, max_ = dtype_range[img1.dtype.type]
+    print mse, max_
     return 20 * np.log(max_ / mse)
 
 
