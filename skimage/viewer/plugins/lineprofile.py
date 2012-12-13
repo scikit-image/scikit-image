@@ -69,7 +69,7 @@ class LineProfile(PlotPlugin):
 
         self.line_tool = ThickLineTool(self.image_viewer.ax, x, y,
                                        maxdist=self.maxdist,
-                                       on_update=self.line_changed)
+                                       on_move=self.line_changed)
 
         scan_data = profile_line(image, self.end_pts)
         self.profile = self.ax.plot(scan_data, 'k-')[0]

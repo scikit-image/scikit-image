@@ -36,7 +36,7 @@ class Measure(Plugin):
         y = [h / 2] * 2
         self.line_tool = LineTool(self.image_viewer.ax, x, y,
                                   maxdist=self.maxdist,
-                                  on_update=self.line_changed)
+                                  on_move=self.line_changed)
         # initialize displayed values
         self.line_changed(np.transpose((x, y)))
 
