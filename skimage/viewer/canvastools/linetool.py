@@ -62,6 +62,7 @@ class LineTool(CanvasToolBase):
     def on_mouse_press(self, event):
         if event.button != 1 and event.inaxes == None:
             return
+        self.set_visible(True)
         idx, px_dist = self._handles.closest(event.x, event.y)
         if px_dist < self.maxdist:
             self._active_pt = idx
