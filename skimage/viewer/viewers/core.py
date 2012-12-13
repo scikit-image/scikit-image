@@ -139,7 +139,7 @@ class ImageViewer(QMainWindow):
         self._image_plot.set_array(image)
 
         # Adjust size if new image shape doesn't match the original
-        h, w = image.shape
+        h, w = image.shape[:2]
         # update data coordinates (otherwise pixel coordinates are off)
         self._image_plot.set_extent((0, w, h, 0))
         # update display (otherwise image doesn't fill the canvas)
