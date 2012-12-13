@@ -20,7 +20,10 @@ def test_stack_non_array():
 
 
 def test_imread_url():
-    image_url = 'file:{0}{0}{1}{0}camera.png'.format(os.path.sep, data_dir)
+    # tweak data path so that file URI works on both unix and windows.
+    data_path = data_dir.lstrip(os.path.sep)
+    data_path = data_path.replace(os.path.sep, '/')
+    image_url = 'file:///{0}/camera.png'.format(data_path)
     image = io.imread(image_url)
     assert image.shape == (512, 512)
 
