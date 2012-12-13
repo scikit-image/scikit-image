@@ -15,7 +15,7 @@ class LineTool(CanvasToolBase):
     """
     Parameters
     ----------
-    on_update : function
+    on_move : function
         Function accepting end points of line as the only argument.
 
     Attributes
@@ -23,10 +23,10 @@ class LineTool(CanvasToolBase):
     end_pts : 2D array
         End points of line ((x1, y1), (x2, y2)).
     """
-    def __init__(self, ax, x, y, on_update=None, on_enter=None, maxdist=10,
-                 lineprops=None):
-        super(LineTool, self).__init__(ax, on_update=on_update,
-                                       on_enter=on_enter)
+    def __init__(self, ax, x, y, on_move=None, on_enter=None, on_release=None,
+                 maxdist=10, lineprops=None):
+        super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
+                                       on_release=on_release)
 
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
         props.update(lineprops if lineprops is not None else {})
@@ -47,7 +47,7 @@ class LineTool(CanvasToolBase):
             def on_enter(pts):
                 x, y = np.transpose(pts)
                 print "length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2)
-        self.on_enter = on_enter
+        self.callback_on_enter = on_enter
 
         self.connect_event('button_press_event', self.on_mouse_press)
         self.connect_event('button_release_event', self.on_mouse_release)
@@ -68,6 +68,7 @@ class LineTool(CanvasToolBase):
         if event.button != 1:
             return
         self._active_pt = None
+        self.callback_on_release(self.geometry)
 
     def on_move(self, event):
         if event.button != 1 or self._active_pt is None:
@@ -75,6 +76,7 @@ class LineTool(CanvasToolBase):
         if not self.ax.in_axes(event):
             return
         self.update(event.xdata, event.ydata)
+        self.callback_on_move(self.geometry)
 
     def update(self, x, y):
         if x is not None:
@@ -92,10 +94,13 @@ class LineTool(CanvasToolBase):
 
 class ThickLineTool(LineTool):
 
-    def __init__(self, ax, x, y, on_update=None, on_enter=None, maxdist=10,
-                 lineprops=None):
-        super(ThickLineTool, self).__init__(ax, x, y, on_update=on_update,
-                                            on_enter=on_enter, maxdist=maxdist,
+    def __init__(self, ax, x, y, on_move=None, on_enter=None, on_release=None,
+                 maxdist=10, lineprops=None):
+        super(ThickLineTool, self).__init__(ax, x, y,
+                                            on_move=on_move,
+                                            on_enter=on_enter,
+                                            on_release=on_release,
+                                            maxdist=maxdist,
                                             lineprops=lineprops)
 
         self.connect_event('scroll_event', self.on_scroll)

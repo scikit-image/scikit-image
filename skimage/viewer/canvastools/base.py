@@ -9,13 +9,18 @@ except ImportError:
 __all__ = ['CanvasToolBase', 'ToolHandles']
 
 
+def _pass(*args):
+    pass
+
+
 class CanvasToolBase(object):
     """Base canvas tool for matplotlib axes.
 
     Parameters
     ----------
     """
-    def __init__(self, ax, useblit=True, on_update=None, on_enter=None):
+    def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
+                 useblit=True):
         self.ax = ax
         self.canvas = ax.figure.canvas
         self.cids = []
@@ -26,13 +31,9 @@ class CanvasToolBase(object):
             self.connect_event('draw_event', self._blit_on_draw_event)
         self.useblit = useblit
 
-        if on_update is None:
-            on_update = lambda *args: None
-        self.on_update = on_update
-
-        if on_enter is None:
-            on_enter = lambda *args: None
-        self.on_enter = on_enter
+        self.callback_on_move = _pass if on_move is None else on_move
+        self.callback_on_enter = _pass if on_enter is None else on_enter
+        self.callback_on_release = _pass if on_release is None else on_release
 
         self.connect_event('key_press_event', self._on_key_press)
 
@@ -81,11 +82,10 @@ class CanvasToolBase(object):
             self.canvas.blit(self.ax.bbox)
         else:
             self.canvas.draw_idle()
-        self.on_update(self.geometry)
 
     def _on_key_press(self, event):
         if event.key == 'enter':
-            self.on_enter(self.geometry)
+            self.callback_on_enter(self.geometry)
             self.set_visible(False)
             self.redraw()
 

@@ -25,7 +25,6 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
     rectprops : dict
         Properties for :class:`matplotlib.patches.Rectangle`. This class
         redefines defaults in :class:`matplotlib.widgets.RectangleSelector`.
-    kwargs : see :class:`matplotlib.widgets.RectangleSelector`.
 
     Attributes
     ----------
@@ -33,10 +32,10 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         Rectangle extents: (xmin, xmax, ymin, ymax).
     """
 
-    def __init__(self, ax, on_update=None, on_enter=None, rectprops=None,
-                 maxdist=10, **kwargs):
-        CanvasToolBase.__init__(self, ax, on_update=on_update,
-                                on_enter=on_enter)
+    def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
+                 maxdist=10, rectprops=None):
+        CanvasToolBase.__init__(self, ax, on_move=on_move,
+                                on_enter=on_enter, on_release=on_release)
 
         props = dict(edgecolor=None, facecolor='r', alpha=0.15)
         props.update(rectprops if rectprops is not None else {})
@@ -56,7 +55,7 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         if on_enter is None:
             def on_enter(extents):
                 print "(xmin=%.3g, xmax=%.3g, ymin=%.3g, ymax=%.3g)" % extents
-        self.on_enter = on_enter
+        self.callback_on_enter = on_enter
 
         props = dict(mec=props['edgecolor'])
         self._corner_order = ['NW', 'NE', 'SE', 'SW']
@@ -112,6 +111,7 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         # Undo hiding of rectangle and redraw.
         self.set_visible(True)
         self.redraw()
+        self.callback_on_release(self.geometry)
 
     def press(self, event):
         self._set_active_handle(event)
@@ -176,6 +176,7 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         self._edge_handles.set_data(*self.edge_centers)
 
         self.redraw()
+        self.callback_on_move(self.geometry)
 
     @property
     def geometry(self):
@@ -192,4 +193,4 @@ if __name__ == '__main__':
     rect_tool = RectangleTool(ax)
     plt.show()
     print "Final selection:",
-    rect_tool.on_enter(rect_tool.extents)
+    rect_tool.callback_on_enter(rect_tool.extents)
