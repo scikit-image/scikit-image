@@ -27,7 +27,7 @@ except ImportError:
 from ..utils import RequiredAttr
 
 
-__all__ = ['BaseWidget', 'Slider', 'ComboBox']
+__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'Text']
 
 
 class BaseWidget(QWidget):
@@ -48,6 +48,29 @@ class BaseWidget(QWidget):
 
     def _value_changed(self, value):
         self.callback(self.name, value)
+
+
+class Text(BaseWidget):
+
+    def __init__(self, name=None, text=''):
+        super(Text, self).__init__(name)
+        self._label = QtGui.QLabel()
+        self.text = text
+        self.layout = QtGui.QHBoxLayout(self)
+        if name is not None:
+            name_label = QtGui.QLabel()
+            name_label.setText(name)
+            self.layout.addWidget(name_label)
+        self.layout.addWidget(self._label)
+
+
+    @property
+    def text(self):
+        return self._label.text()
+
+    @text.setter
+    def text(self, text_str):
+        self._label.setText(text_str)
 
 
 class Slider(BaseWidget):
