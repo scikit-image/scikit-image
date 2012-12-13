@@ -41,7 +41,7 @@ class Measure(Plugin):
         self.line_changed(np.transpose((x, y)))
 
     def help(self):
-        helpstr = ("Line profile tool",
+        helpstr = ("Measure tool",
                    "Select line to measure distance and angle.")
         return '\n'.join(helpstr)
 
