@@ -137,10 +137,21 @@ class ImageViewer(QMainWindow):
     def image(self, image):
         self._img = image
         self._image_plot.set_array(image)
+
+        # Adjust size if new image shape doesn't match the original
+        h, w = image.shape
+        # update data coordinates (otherwise pixel coordinates are off)
+        self._image_plot.set_extent((0, w, h, 0))
+        # update display (otherwise image doesn't fill the canvas)
+        self.ax.set_xlim(0, w)
+        self.ax.set_ylim(h, 0)
+
+        # update color range
         clim = dtype_range[image.dtype.type]
         if clim[0] < 0 and image.min() >= 0:
             clim = (0, clim[1])
         self._image_plot.set_clim(clim)
+
         self.redraw()
 
     def reset_image(self):
