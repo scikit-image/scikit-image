@@ -27,9 +27,8 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
     on_enter : function
         Function called whenever the "enter" key is pressed.
     maxdist : float
-        Maximum distance in pixels for selection of a control handle
-        (i.e. corner or edge) handle.
-    rectprops : dict
+        Maximum pixel distance allowed when selecting control handle.
+    rect_props : dict
         Properties for :class:`matplotlib.patches.Rectangle`. This class
         redefines defaults in :class:`matplotlib.widgets.RectangleSelector`.
 
@@ -40,12 +39,12 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
     """
 
     def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
-                 maxdist=10, rectprops=None):
+                 maxdist=10, rect_props=None):
         CanvasToolBase.__init__(self, ax, on_move=on_move,
                                 on_enter=on_enter, on_release=on_release)
 
         props = dict(edgecolor=None, facecolor='r', alpha=0.15)
-        props.update(rectprops if rectprops is not None else {})
+        props.update(rect_props if rect_props is not None else {})
         if props['edgecolor'] is None:
             props['edgecolor'] = props['facecolor']
         mwidgets.RectangleSelector.__init__(self, ax, lambda *args: None,

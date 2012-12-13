@@ -23,6 +23,11 @@ class LineTool(CanvasToolBase):
         Function called whenever the control handle is released.
     on_enter : function
         Function called whenever the "enter" key is pressed.
+    maxdist : float
+        Maximum pixel distance allowed when selecting control handle.
+    line_props : dict
+        Properties for :class:`matplotlib.patches.Rectangle`. This class
+        redefines defaults in :class:`matplotlib.widgets.RectangleSelector`.
 
     Attributes
     ----------
@@ -30,12 +35,12 @@ class LineTool(CanvasToolBase):
         End points of line ((x1, y1), (x2, y2)).
     """
     def __init__(self, ax, x, y, on_move=None, on_release=None, on_enter=None,
-                 maxdist=10, lineprops=None):
+                 maxdist=10, line_props=None):
         super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
                                        on_release=on_release)
 
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
-        props.update(lineprops if lineprops is not None else {})
+        props.update(line_props if line_props is not None else {})
         self.linewidth = props['linewidth']
         self.maxdist = maxdist
         self._active_pt = None
@@ -102,13 +107,13 @@ class LineTool(CanvasToolBase):
 class ThickLineTool(LineTool):
 
     def __init__(self, ax, x, y, on_move=None, on_enter=None, on_release=None,
-                 maxdist=10, lineprops=None):
+                 maxdist=10, line_props=None):
         super(ThickLineTool, self).__init__(ax, x, y,
                                             on_move=on_move,
                                             on_enter=on_enter,
                                             on_release=on_release,
                                             maxdist=maxdist,
-                                            lineprops=lineprops)
+                                            line_props=line_props)
 
         self.connect_event('scroll_event', self.on_scroll)
         self.connect_event('key_press_event', self.on_key_press)
