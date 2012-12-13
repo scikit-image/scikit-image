@@ -19,9 +19,13 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
     Parameters
     ----------
     ax : :class:`matplotlib.axes.Axes
+    on_move : function
+        Function called whenever a control handle is moved.
+        This function must accept the rectangle extents as the only argument.
+    on_release : function
+        Function called whenever the control handle is released.
     on_enter : function
-        Function accepting rectangle extents as the only argument; called
-        whenever "Enter" key is pressed. If None, print extents of rectangle.
+        Function called whenever the "enter" key is pressed.
     maxdist : float
         Maximum distance in pixels for selection of a control handle
         (i.e. corner or edge) handle.
@@ -35,7 +39,7 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         Rectangle extents: (xmin, xmax, ymin, ymax).
     """
 
-    def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
+    def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, rectprops=None):
         CanvasToolBase.__init__(self, ax, on_move=on_move,
                                 on_enter=on_enter, on_release=on_release)

@@ -12,18 +12,24 @@ __all__ = ['LineTool', 'ThickLineTool']
 
 
 class LineTool(CanvasToolBase):
-    """
+    """Widget for line selection in a plot.
+
     Parameters
     ----------
     on_move : function
-        Function accepting end points of line as the only argument.
+        Function called whenever a control handle is moved.
+        This function must accept the end points of line as the only argument.
+    on_release : function
+        Function called whenever the control handle is released.
+    on_enter : function
+        Function called whenever the "enter" key is pressed.
 
     Attributes
     ----------
     end_pts : 2D array
         End points of line ((x1, y1), (x2, y2)).
     """
-    def __init__(self, ax, x, y, on_move=None, on_enter=None, on_release=None,
+    def __init__(self, ax, x, y, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, lineprops=None):
         super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
                                        on_release=on_release)
