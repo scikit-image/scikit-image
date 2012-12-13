@@ -43,10 +43,15 @@ class LineTool(CanvasToolBase):
         self._handles.set_visible(True)
         self._artists = [self._line, self._handles.artist]
 
+        if on_enter is None:
+            def on_enter(pts):
+                x, y = np.transpose(pts)
+                print "length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2)
+        self.on_enter = on_enter
+
         self.connect_event('button_press_event', self.on_mouse_press)
         self.connect_event('button_release_event', self.on_mouse_release)
         self.connect_event('motion_notify_event', self.on_move)
-        self.connect_event('key_press_event', self.on_key_press)
 
     def on_mouse_press(self, event):
         if event.button != 1 and event.inaxes == None:
@@ -71,12 +76,6 @@ class LineTool(CanvasToolBase):
             return
         self.update(event.xdata, event.ydata)
 
-    def on_key_press(self, event):
-        if event.key == 'enter':
-            self.on_enter(self.end_pts)
-            self.set_visible(False)
-            self.redraw()
-
     def update(self, x, y):
         if x is not None:
             self.end_pts[self._active_pt, :] = x, y
@@ -85,7 +84,10 @@ class LineTool(CanvasToolBase):
         self._line.set_linewidth(self.linewidth)
 
         self.redraw()
-        self.on_update(self.end_pts)
+
+    @property
+    def geometry(self):
+        return self.end_pts
 
 
 class ThickLineTool(LineTool):
@@ -97,6 +99,7 @@ class ThickLineTool(LineTool):
                                             lineprops=lineprops)
 
         self.connect_event('scroll_event', self.on_scroll)
+        self.connect_event('key_press_event', self.on_key_press)
 
     def on_scroll(self, event):
         if not event.inaxes:
@@ -107,8 +110,6 @@ class ThickLineTool(LineTool):
             self._shrink_scan_line()
 
     def on_key_press(self, event):
-        super(ThickLineTool, self).on_key_press(event)
-
         if event.key == '+':
             self._thicken_scan_line()
         elif event.key == '-':
@@ -134,10 +135,6 @@ if __name__ == '__main__':
     ax.imshow(image, interpolation='nearest')
     h, w = image.shape
 
-    def printer(pts):
-        x, y = np.transpose(pts)
-        print "length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2)
-
     # line_tool = LineTool(ax, [w/3, 2*w/3], [h/2, h/2])
-    line_tool = ThickLineTool(ax, [w/3, 2*w/3], [h/2, h/2], on_enter=printer)
+    line_tool = ThickLineTool(ax, [w/3, 2*w/3], [h/2, h/2])
     plt.show()

@@ -14,7 +14,6 @@ rad2deg = 180 / np.pi
 
 class Measure(Plugin):
     name = 'Measure'
-    draws_on_image = True
 
     def __init__(self, maxdist=10, **kwargs):
         super(Measure, self).__init__(**kwargs)

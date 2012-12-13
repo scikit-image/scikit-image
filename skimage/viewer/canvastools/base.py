@@ -34,6 +34,8 @@ class CanvasToolBase(object):
             on_enter = lambda *args: None
         self.on_enter = on_enter
 
+        self.connect_event('key_press_event', self._on_key_press)
+
     def connect_event(self, event, callback):
         """Connect callback with an event.
 
@@ -79,6 +81,18 @@ class CanvasToolBase(object):
             self.canvas.blit(self.ax.bbox)
         else:
             self.canvas.draw_idle()
+        self.on_update(self.geometry)
+
+    def _on_key_press(self, event):
+        if event.key == 'enter':
+            self.on_enter(self.geometry)
+            self.set_visible(False)
+            self.redraw()
+
+    @property
+    def geometry(self):
+        """Geometry information that gets passed to callback functions."""
+        raise NotImplementedError
 
 
 class ToolHandles(object):
