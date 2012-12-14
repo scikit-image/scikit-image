@@ -112,6 +112,23 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         ymin, ymax = sorted([y0, y0 + height])
         return xmin, xmax, ymin, ymax
 
+    @extents.setter
+    def extents(self, extents):
+        x1, x2, y1, y2 = extents
+        xmin, xmax = sorted([x1, x2])
+        ymin, ymax = sorted([y1, y2])
+        # Update displayed rectangle
+        self._rect.set_x(xmin)
+        self._rect.set_y(ymin)
+        self._rect.set_width(xmax - xmin)
+        self._rect.set_height(ymax - ymin)
+        # Update displayed handles
+        self._corner_handles.set_data(*self.corners)
+        self._edge_handles.set_data(*self.edge_centers)
+
+        self.set_visible(True)
+        self.redraw()
+
     def release(self, event):
         mwidgets.RectangleSelector.release(self, event)
         self._extents_on_press = None
@@ -169,20 +186,7 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
                 x2 = event.xdata
             if self.active_handle in ['N', 'S'] + self._corner_order:
                 y2 = event.ydata
-        xmin, xmax = sorted([x1, x2])
-        ymin, ymax = sorted([y1, y2])
-
-        # Update displayed rectangle
-        self._rect.set_x(xmin)
-        self._rect.set_y(ymin)
-        self._rect.set_width(xmax - xmin)
-        self._rect.set_height(ymax - ymin)
-
-        # Update displayed handles
-        self._corner_handles.set_data(*self.corners)
-        self._edge_handles.set_data(*self.edge_centers)
-
-        self.redraw()
+        self.extents = (x1, x2, y1, y2)
         self.callback_on_move(self.geometry)
 
     @property
