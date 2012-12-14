@@ -18,8 +18,6 @@ class LineProfile(PlotPlugin):
 
     Parameters
     ----------
-    linewidth : float
-        Line width for interpolation. Wider lines average over more pixels.
     maxdist : float
         Maximum pixel distance allowed when selecting end point of scan line.
     epsilon : float
@@ -34,7 +32,7 @@ class LineProfile(PlotPlugin):
     """
     name = 'Line Profile'
 
-    def __init__(self, linewidth=1, maxdist=10, epsilon='deprecated',
+    def __init__(self, maxdist=10, epsilon='deprecated',
                  limits='image', **kwargs):
         super(LineProfile, self).__init__(**kwargs)
 
