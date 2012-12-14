@@ -18,7 +18,8 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
 
     Parameters
     ----------
-    ax : :class:`matplotlib.axes.Axes
+    ax : :class:`matplotlib.axes.Axes`
+        Matplotlib axes where tool is displayed.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the rectangle extents as the only argument.

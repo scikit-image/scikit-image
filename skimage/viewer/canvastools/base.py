@@ -18,6 +18,18 @@ class CanvasToolBase(object):
 
     Parameters
     ----------
+    ax : :class:`matplotlib.axes.Axes`
+        Matplotlib axes where tool is displayed.
+    on_move : function
+        Function called whenever a control handle is moved.
+        This function must accept the end points of line as the only argument.
+    on_release : function
+        Function called whenever the control handle is released.
+    on_enter : function
+        Function called whenever the "enter" key is pressed.
+    useblit : bool
+        If True, update canvas by blitting, which is much faster than normal
+        redrawing (turn off for debugging purposes).
     """
     def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
                  useblit=True):

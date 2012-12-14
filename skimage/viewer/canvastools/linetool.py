@@ -16,6 +16,8 @@ class LineTool(CanvasToolBase):
 
     Parameters
     ----------
+    ax : :class:`matplotlib.axes.Axes`
+        Matplotlib axes where tool is displayed.
     on_move : function
         Function called whenever a control handle is moved.
         This function must accept the end points of line as the only argument.
@@ -26,8 +28,7 @@ class LineTool(CanvasToolBase):
     maxdist : float
         Maximum pixel distance allowed when selecting control handle.
     line_props : dict
-        Properties for :class:`matplotlib.patches.Rectangle`. This class
-        redefines defaults in :class:`matplotlib.widgets.RectangleSelector`.
+        Properties for :class:`matplotlib.lines.Line2D`.
 
     Attributes
     ----------
@@ -117,6 +118,32 @@ class LineTool(CanvasToolBase):
 
 
 class ThickLineTool(LineTool):
+    """Widget for line selection in a plot.
+
+    The thickness of the line can be varied using the mouse scroll wheel, or
+    with the '+' and '-' keys.
+
+    Parameters
+    ----------
+    ax : :class:`matplotlib.axes.Axes`
+        Matplotlib axes where tool is displayed.
+    on_move : function
+        Function called whenever a control handle is moved.
+        This function must accept the end points of line as the only argument.
+    on_release : function
+        Function called whenever the control handle is released.
+    on_enter : function
+        Function called whenever the "enter" key is pressed.
+    maxdist : float
+        Maximum pixel distance allowed when selecting control handle.
+    line_props : dict
+        Properties for :class:`matplotlib.lines.Line2D`.
+
+    Attributes
+    ----------
+    end_points : 2D array
+        End points of line ((x1, y1), (x2, y2)).
+    """
 
     def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
                  maxdist=10, line_props=None):
