@@ -67,6 +67,21 @@ class LineTool(CanvasToolBase):
         self.connect_event('button_release_event', self.on_mouse_release)
         self.connect_event('motion_notify_event', self.on_move)
 
+    @property
+    def end_points(self):
+        return self._end_pts
+
+    @end_points.setter
+    def end_points(self, pts):
+        self._end_pts = pts
+
+        self._line.set_data(np.transpose(pts))
+        self._handles.set_data(np.transpose(pts))
+        self._line.set_linewidth(self.linewidth)
+
+        self.set_visible(True)
+        self.redraw()
+
     def on_mouse_press(self, event):
         if event.button != 1 and event.inaxes == None:
             return
@@ -93,28 +108,14 @@ class LineTool(CanvasToolBase):
         self.update(event.xdata, event.ydata)
         self.callback_on_move(self.geometry)
 
-    def update(self, x, y):
+    def update(self, x=None, y=None):
         if x is not None:
             self._end_pts[self._active_pt, :] = x, y
-        self._line.set_data(np.transpose(self._end_pts))
-        self._handles.set_data(np.transpose(self._end_pts))
-        self._line.set_linewidth(self.linewidth)
-
-        self.redraw()
+        self.end_points = self._end_pts
 
     @property
     def geometry(self):
         return self.end_points
-
-    @property
-    def end_points(self):
-        return self._end_pts
-
-    @end_points.setter
-    def end_points(self, pts):
-        self._end_pts = pts
-        self.set_visible(True)
-        self.update(None, None)
 
 
 class ThickLineTool(LineTool):
@@ -180,13 +181,13 @@ class ThickLineTool(LineTool):
 
     def _thicken_scan_line(self):
         self.linewidth += 1
-        self.update(None, None)
+        self.update()
         self.callback_on_change(self.geometry)
 
     def _shrink_scan_line(self):
         if self.linewidth > 1:
             self.linewidth -= 1
-            self.update(None, None)
+            self.update()
             self.callback_on_change(self.geometry)
 
 
