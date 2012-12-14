@@ -23,6 +23,7 @@ class CanvasToolBase(object):
                  useblit=True):
         self.ax = ax
         self.canvas = ax.figure.canvas
+        self.img_background = None
         self.cids = []
         self._artists = []
         self.active = True
@@ -76,7 +77,7 @@ class CanvasToolBase(object):
 
         This method should be called by subclasses when artists are updated.
         """
-        if self.useblit:
+        if self.useblit and self.img_background is not None:
             self.canvas.restore_region(self.img_background)
             self._draw_artists()
             self.canvas.blit(self.ax.bbox)
