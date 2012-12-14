@@ -65,15 +65,13 @@ class LineProfile(PlotPlugin):
         h, w = image.shape
         x = [w / 3, 2 * w / 3]
         y = [h / 2] * 2
-        self.end_pts = np.transpose([x, y])
 
         self.line_tool = ThickLineTool(self.image_viewer.ax,
                                        maxdist=self.maxdist,
                                        on_move=self.line_changed)
-        self.line_tool.end_points = self.end_pts
-        self.line_tool.update(None, None)
+        self.line_tool.end_points = np.transpose([x, y])
 
-        scan_data = profile_line(image, self.end_pts)
+        scan_data = profile_line(image, self.line_tool.end_points)
         self.profile = self.ax.plot(scan_data, 'k-')[0]
         self._autoscale_view()
 
@@ -88,13 +86,13 @@ class LineProfile(PlotPlugin):
 
         Returns
         -------
-        end_pts: (2, 2) array
+        end_points: (2, 2) array
             The positions ((x1, y1), (x2, y2)) of the line ends.
         profile: 1d array
             Profile of intensity values.
         """
         profile = self.profile.get_ydata()
-        return self.end_pts, profile
+        return self.line_tool.end_points, profile
 
     def _autoscale_view(self):
         if self.limits is None:
@@ -102,10 +100,10 @@ class LineProfile(PlotPlugin):
         else:
             self.ax.autoscale_view(scaley=False, tight=True)
 
-    def line_changed(self, end_pts):
-        x, y = np.transpose(end_pts)
-        self.end_pts = end_pts
-        scan = profile_line(self.image_viewer.original_image, end_pts,
+    def line_changed(self, end_points):
+        x, y = np.transpose(end_points)
+        self.line_tool.end_points = end_points
+        scan = profile_line(self.image_viewer.original_image, end_points,
                             linewidth=self.line_tool.linewidth)
 
         self.profile.set_xdata(np.arange(scan.shape[0]))
@@ -120,14 +118,14 @@ class LineProfile(PlotPlugin):
         self.redraw()
 
 
-def profile_line(img, end_pts, linewidth=1):
+def profile_line(img, end_points, linewidth=1):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
     img : 2d array
         The image.
-    end_pts: (2, 2) list
+    end_points: (2, 2) list
         End points ((x1, y1), (x2, y2)) of scan line.
     linewidth: int
         Width of the scan, perpendicular to the line
@@ -138,7 +136,7 @@ def profile_line(img, end_pts, linewidth=1):
         The intensity profile along the scan line. The length of the profile
         is the ceil of the computed length of the scan line.
     """
-    point1, point2 = end_pts
+    point1, point2 = end_points
     x1, y1 = point1 = np.asarray(point1, dtype=float)
     x2, y2 = point2 = np.asarray(point2, dtype=float)
     dx, dy = point2 - point1

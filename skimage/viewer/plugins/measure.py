@@ -45,8 +45,8 @@ class Measure(Plugin):
                    "Select line to measure distance and angle.")
         return '\n'.join(helpstr)
 
-    def line_changed(self, end_pts):
-        x, y = np.transpose(end_pts)
+    def line_changed(self, end_points):
+        x, y = np.transpose(end_points)
         dx = np.diff(x)[0]
         dy = np.diff(y)[0]
         self._length.text = '%.1f' % np.hypot(dx, dy)
