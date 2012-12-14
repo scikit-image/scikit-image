@@ -134,6 +134,8 @@ class ThickLineTool(LineTool):
         Function called whenever the control handle is released.
     on_enter : function
         Function called whenever the "enter" key is pressed.
+    on_change : function
+        Function called whenever the line thickness is changed.
     maxdist : float
         Maximum pixel distance allowed when selecting control handle.
     line_props : dict
@@ -146,13 +148,18 @@ class ThickLineTool(LineTool):
     """
 
     def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
-                 maxdist=10, line_props=None):
+                 on_change=None, maxdist=10, line_props=None):
         super(ThickLineTool, self).__init__(ax,
                                             on_move=on_move,
                                             on_enter=on_enter,
                                             on_release=on_release,
                                             maxdist=maxdist,
                                             line_props=line_props)
+
+        if on_change is None:
+            def on_change(*args):
+                pass
+        self.callback_on_change = on_change
 
         self.connect_event('scroll_event', self.on_scroll)
         self.connect_event('key_press_event', self.on_key_press)
@@ -174,11 +181,13 @@ class ThickLineTool(LineTool):
     def _thicken_scan_line(self):
         self.linewidth += 1
         self.update(None, None)
+        self.callback_on_change(self.geometry)
 
     def _shrink_scan_line(self):
         if self.linewidth > 1:
             self.linewidth -= 1
             self.update(None, None)
+            self.callback_on_change(self.geometry)
 
 
 if __name__ == '__main__':

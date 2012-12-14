@@ -66,7 +66,8 @@ class LineProfile(PlotPlugin):
 
         self.line_tool = ThickLineTool(self.image_viewer.ax,
                                        maxdist=self.maxdist,
-                                       on_move=self.line_changed)
+                                       on_move=self.line_changed,
+                                       on_change=self.line_changed)
         self.line_tool.end_points = np.transpose([x, y])
 
         scan_data = profile_line(image, self.line_tool.end_points)
