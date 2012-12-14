@@ -191,6 +191,7 @@ if __name__ == '__main__':
     ax.imshow(image, interpolation='nearest')
     h, w = image.shape
 
-    # line_tool = LineTool(ax, [w/3, 2*w/3], [h/2, h/2])
-    line_tool = ThickLineTool(ax, [w/3, 2*w/3], [h/2, h/2])
+    # line_tool = LineTool(ax)
+    line_tool = ThickLineTool(ax)
+    line_tool.end_points = ([w/3, h/2], [2*w/3, h/2])
     plt.show()
