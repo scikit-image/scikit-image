@@ -32,13 +32,9 @@ class Measure(Plugin):
 
         image = image_viewer.original_image
         h, w = image.shape
-        x = [w / 3, 2 * w / 3]
-        y = [h / 2] * 2
-        self.line_tool = LineTool(self.image_viewer.ax, x, y,
+        self.line_tool = LineTool(self.image_viewer.ax,
                                   maxdist=self.maxdist,
                                   on_move=self.line_changed)
-        # initialize displayed values
-        self.line_changed(np.transpose((x, y)))
 
     def help(self):
         helpstr = ("Measure tool",
