@@ -1,6 +1,6 @@
 """Image Processing SciKit (Toolbox for SciPy)
 
-``scikits-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
+``scikit-image`` (a.k.a. ``skimage``) is a collection of algorithms for image
 processing and computer vision.
 
 The main package of ``skimage`` only provides a few utilities for converting
@@ -52,6 +52,8 @@ img_as_ubyte
 """
 
 import os.path as _osp
+import imp
+import functools
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
@@ -62,30 +64,23 @@ except ImportError:
     __version__ = "unbuilt-dev"
 
 
-def _setup_test(verbose=False):
-    import functools
-
-    args = ['', '--exe', '-w', pkg_dir]
-    if verbose:
-        args.extend(['-v', '-s'])
-
-    try:
-        import nose as _nose
-    except ImportError:
-        def broken_test_func():
-            """This would invoke the skimage test suite, but nose couldn't be
-            imported so the test suite can not run.
-            """
-            raise ImportError("Could not load nose.  Unit tests not available.")
-        return broken_test_func
-    else:
-        f = functools.partial(_nose.run, 'skimage', argv=args)
-        f.__doc__ = 'Invoke the skimage test suite.'
-        return f
-
-
-test = _setup_test()
-test_verbose = _setup_test(verbose=True)
+try:
+    imp.find_module('nose')
+except ImportError:
+    def test(verbose=False):
+        """This would invoke the skimage test suite, but nose couldn't be
+        imported so the test suite can not run.
+        """
+        raise ImportError("Could not load nose.  Unit tests not available.")
+else:
+    def test(verbose=False):
+        """Invoke the skimage test suite."""
+        import nose
+        args = ['', pkg_dir, '--exe']
+        if verbose:
+            args.extend(['-v', '-s'])
+        nose.run('skimage', argv=args)
+test_verbose = functools.partial(test, verbose=True)
 
 
 def get_log(name=None):
@@ -123,20 +118,20 @@ def _setup_log():
     import logging
     import sys
 
-    log = logging.getLogger()
+    formatter = logging.Formatter(
+        '%(name)s: %(levelname)s: %(message)s'
+        )
 
     try:
         handler = logging.StreamHandler(stream=sys.stdout)
     except TypeError:
         handler = logging.StreamHandler(strm=sys.stdout)
-
-    formatter = logging.Formatter(
-        '%(name)s: %(levelname)s: %(message)s'
-        )
     handler.setFormatter(formatter)
 
+    log = get_log()
     log.addHandler(handler)
     log.setLevel(logging.WARNING)
+    log.propagate = False
 
 _setup_log()
 
