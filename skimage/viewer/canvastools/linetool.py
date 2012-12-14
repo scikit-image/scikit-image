@@ -31,10 +31,10 @@ class LineTool(CanvasToolBase):
 
     Attributes
     ----------
-    end_pts : 2D array
+    end_points : 2D array
         End points of line ((x1, y1), (x2, y2)).
     """
-    def __init__(self, ax, x, y, on_move=None, on_release=None, on_enter=None,
+    def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
                  maxdist=10, line_props=None):
         super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
                                        on_release=on_release)
@@ -45,13 +45,15 @@ class LineTool(CanvasToolBase):
         self.maxdist = maxdist
         self._active_pt = None
 
-        self.end_pts = np.transpose([x, y])
+        x = (0, 0)
+        y = (0, 0)
+        self._end_pts = np.transpose([x, y])
 
-        self._line = lines.Line2D(x, y, animated=True, **props)
+        self._line = lines.Line2D(x, y, visible=False, animated=True, **props)
         ax.add_line(self._line)
 
         self._handles = ToolHandles(ax, x, y)
-        self._handles.set_visible(True)
+        self._handles.set_visible(False)
         self._artists = [self._line, self._handles.artist]
 
         if on_enter is None:
@@ -74,7 +76,7 @@ class LineTool(CanvasToolBase):
         else:
             self._active_pt = 0
             x, y = event.xdata, event.ydata
-            self.end_pts = np.array([[x, y], [x, y]])
+            self._end_pts = np.array([[x, y], [x, y]])
 
     def on_mouse_release(self, event):
         if event.button != 1:
@@ -92,23 +94,33 @@ class LineTool(CanvasToolBase):
 
     def update(self, x, y):
         if x is not None:
-            self.end_pts[self._active_pt, :] = x, y
-        self._line.set_data(np.transpose(self.end_pts))
-        self._handles.set_data(np.transpose(self.end_pts))
+            self._end_pts[self._active_pt, :] = x, y
+        self._line.set_data(np.transpose(self._end_pts))
+        self._handles.set_data(np.transpose(self._end_pts))
         self._line.set_linewidth(self.linewidth)
 
         self.redraw()
 
     @property
     def geometry(self):
-        return self.end_pts
+        return self.end_points
+
+    @property
+    def end_points(self):
+        return self._end_pts
+
+    @end_points.setter
+    def end_points(self, pts):
+        self._end_pts = pts
+        self.set_visible(True)
+        self.update(None, None)
 
 
 class ThickLineTool(LineTool):
 
-    def __init__(self, ax, x, y, on_move=None, on_enter=None, on_release=None,
+    def __init__(self, ax, on_move=None, on_enter=None, on_release=None,
                  maxdist=10, line_props=None):
-        super(ThickLineTool, self).__init__(ax, x, y,
+        super(ThickLineTool, self).__init__(ax,
                                             on_move=on_move,
                                             on_enter=on_enter,
                                             on_release=on_release,

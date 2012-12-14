@@ -67,9 +67,11 @@ class LineProfile(PlotPlugin):
         y = [h / 2] * 2
         self.end_pts = np.transpose([x, y])
 
-        self.line_tool = ThickLineTool(self.image_viewer.ax, x, y,
+        self.line_tool = ThickLineTool(self.image_viewer.ax,
                                        maxdist=self.maxdist,
                                        on_move=self.line_changed)
+        self.line_tool.end_points = self.end_pts
+        self.line_tool.update(None, None)
 
         scan_data = profile_line(image, self.end_pts)
         self.profile = self.ax.plot(scan_data, 'k-')[0]
