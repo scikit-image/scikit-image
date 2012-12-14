@@ -1,6 +1,7 @@
 try:
-    import matplotlib.widgets as mwidgets
+    from matplotlib.widgets import RectangleSelector
 except ImportError:
+    RectangleSelector = object
     print("Could not import matplotlib -- skimage.viewer not available.")
 
 from skimage.viewer.canvastools.base import CanvasToolBase
@@ -10,7 +11,7 @@ from skimage.viewer.canvastools.base import ToolHandles
 __all__ = ['RectangleTool']
 
 
-class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
+class RectangleTool(RectangleSelector, CanvasToolBase):
     """Widget for selecting a rectangular region in a plot.
 
     After making the desired selection, press "Enter" to accept the selection
@@ -48,9 +49,9 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         props.update(rect_props if rect_props is not None else {})
         if props['edgecolor'] is None:
             props['edgecolor'] = props['facecolor']
-        mwidgets.RectangleSelector.__init__(self, ax, lambda *args: None,
-                                            rectprops=props,
-                                            useblit=self.useblit)
+        RectangleSelector.__init__(self, ax, lambda *args: None,
+                                   rectprops=props,
+                                   useblit=self.useblit)
         # Alias rectangle attribute, which is initialized in RectangleSelector.
         self._rect = self.to_draw
         self._rect.set_animated(True)
@@ -130,7 +131,7 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
         self.redraw()
 
     def release(self, event):
-        mwidgets.RectangleSelector.release(self, event)
+        RectangleSelector.release(self, event)
         self._extents_on_press = None
         # Undo hiding of rectangle and redraw.
         self.set_visible(True)
@@ -144,7 +145,7 @@ class RectangleTool(mwidgets.RectangleSelector, CanvasToolBase):
             self.set_visible(False)
             self.redraw()
             self.set_visible(True)
-        mwidgets.RectangleSelector.press(self, event)
+        RectangleSelector.press(self, event)
 
     def _set_active_handle(self, event):
         """Set active handle based on the location of the mouse event"""
