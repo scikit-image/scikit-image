@@ -73,7 +73,7 @@ class LineTool(CanvasToolBase):
 
     @end_points.setter
     def end_points(self, pts):
-        self._end_pts = pts
+        self._end_pts = np.asarray(pts)
 
         self._line.set_data(np.transpose(pts))
         self._handles.set_data(np.transpose(pts))
