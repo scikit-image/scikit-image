@@ -83,7 +83,7 @@ class LineTool(CanvasToolBase):
         self.redraw()
 
     def on_mouse_press(self, event):
-        if event.button != 1 and event.inaxes == None:
+        if event.button != 1 or not self.ax.in_axes(event):
             return
         self.set_visible(True)
         idx, px_dist = self._handles.closest(event.x, event.y)

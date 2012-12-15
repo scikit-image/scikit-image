@@ -131,6 +131,11 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self.redraw()
 
     def release(self, event):
+        if event.button != 1:
+            return
+        if not self.ax.in_axes(event):
+            self.eventpress = None
+            return
         RectangleSelector.release(self, event)
         self._extents_on_press = None
         # Undo hiding of rectangle and redraw.
@@ -139,12 +144,14 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self.callback_on_release(self.geometry)
 
     def press(self, event):
+        if event.button != 1 or not self.ax.in_axes(event):
+            return
         self._set_active_handle(event)
         if self.active_handle is None:
             # Clear previous rectangle before drawing new rectangle.
             self.set_visible(False)
             self.redraw()
-            self.set_visible(True)
+        self.set_visible(True)
         RectangleSelector.press(self, event)
 
     def _set_active_handle(self, event):
@@ -172,8 +179,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
         self._extents_on_press = x1, x2, y1, y2
 
     def onmove(self, event):
-
-        if self.eventpress is None or self.ignore(event):
+        if self.eventpress is None or not self.ax.in_axes(event):
             return
 
         if self.active_handle is None:
