@@ -71,7 +71,7 @@ except ImportError:
         """This would invoke the skimage test suite, but nose couldn't be
         imported so the test suite can not run.
         """
-        raise ImportError("Could not load nose.  Unit tests not available.")
+        raise ImportError("Could not load nose. Unit tests not available.")
 else:
     def test(verbose=False):
         """Invoke the skimage test suite."""
