@@ -52,6 +52,8 @@ img_as_ubyte
 """
 
 import os.path as _osp
+import imp
+import functools
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
@@ -62,30 +64,25 @@ except ImportError:
     __version__ = "unbuilt-dev"
 
 
-def _setup_test(verbose=False):
-    import functools
+try:
+    imp.find_module('nose')
+except ImportError:
+    def test(verbose=False):
+        """This would invoke the skimage test suite, but nose couldn't be
+        imported so the test suite can not run.
+        """
+        raise ImportError("Could not load nose.  Unit tests not available.")
+else:
+    def test(verbose=False):
+        """Invoke the skimage test suite."""
+        import nose
+        args = ['', pkg_dir, '--exe']
+        if verbose:
+            args.extend(['-v', '-s'])
+        nose.run('skimage', argv=args)
 
-    args = ['', pkg_dir, '--exe']
-    if verbose:
-        args.extend(['-v', '-s'])
-
-    try:
-        import nose as _nose
-    except ImportError:
-        def broken_test_func():
-            """This would invoke the skimage test suite, but nose couldn't be
-            imported so the test suite can not run.
-            """
-            raise ImportError("Could not load nose.  Unit tests not available.")
-        return broken_test_func
-    else:
-        f = functools.partial(_nose.run, 'skimage', argv=args)
-        f.__doc__ = 'Invoke the skimage test suite.'
-        return f
-
-
-test = _setup_test()
-test_verbose = _setup_test(verbose=True)
+test_verbose = functools.partial(test, verbose=True)
+test_verbose.__doc__ = test.__doc__
 
 
 def get_log(name=None):
