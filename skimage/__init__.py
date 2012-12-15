@@ -79,7 +79,7 @@ else:
         args = ['', pkg_dir, '--exe']
         if verbose:
             args.extend(['-v', '-s'])
-            nose.run('skimage', argv=args)
+        nose.run('skimage', argv=args)
 
 test_verbose = functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
