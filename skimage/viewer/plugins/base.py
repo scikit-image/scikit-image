@@ -165,6 +165,11 @@ class Plugin(QDialog):
         # If param is a widget, return its `val` attribute.
         return param if not hasattr(param, 'val') else param.val
 
+    @property
+    def filtered_image(self):
+        """Return filtered image."""
+        return self.image_viewer.image
+
     def display_filtered_image(self, image):
         """Display the filtered image on image viewer.
 

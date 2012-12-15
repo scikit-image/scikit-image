@@ -74,6 +74,14 @@ class OverlayPlugin(Plugin):
             self._overlay_plot.set_cmap(self.cmap)
         self.image_viewer.redraw()
 
+    @property
+    def filtered_image(self):
+        """Return filtered image.
+
+        This "filtered image" is used when saving from the plugin.
+        """
+        return self.overlay
+
     def display_filtered_image(self, image):
         """Display filtered image as an overlay on top of image in viewer."""
         self.overlay = image

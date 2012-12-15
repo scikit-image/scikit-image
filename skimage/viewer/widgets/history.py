@@ -6,6 +6,9 @@ try:
 except ImportError:
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
+import numpy as np
+
+import skimage
 from skimage import io
 from .core import BaseWidget
 
@@ -84,7 +87,11 @@ class SaveButtons(BaseWidget):
         basename, ext = os.path.splitext(filename)
         if not ext:
             filename = '%s.%s' % (filename, self.default_format)
-        io.imsave(filename, self.plugin.image_viewer.image)
+        image = self.plugin.filtered_image
+        if image.dtype == np.bool:
+            #TODO: This check/conversion should probably be in `imsave`.
+            image = skimage.img_as_ubyte(image)
+        io.imsave(filename, image)
 
 
 def notify(msg):
