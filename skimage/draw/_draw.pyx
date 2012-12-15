@@ -187,3 +187,42 @@ def circle(double cy, double cx, double radius, shape=None):
         ``img[rr, cc] = 1``.
     """
     return ellipse(cy, cx, radius, radius, shape)
+
+
+def circle_perimeter(int cy, int cx, int radius):
+    """Generate circle perimeter coordinates.
+
+    Parameters
+    ----------
+    cy, cx : int
+        Centre coordinate of circle.
+    radius: int
+        Radius of circle.
+
+    Returns
+    -------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels that belong to the circle perimeter.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+
+    """
+
+    cdef list rr = list()
+    cdef list cc = list()
+
+    cdef int x = 0
+    cdef int y = radius
+    cdef int d = 3 - 2 * radius
+
+    while y >= x:
+        rr.extend([y, -y, y, -y, x, -x, x, -x])
+        cc.extend([x, x, -x, -x, y, y, -y, -y])
+        if d < 0:
+            d += 4 * x + 6
+        else:
+            d += 4 * (x - y) + 10
+            y -= 1
+        x += 1
+
+    return np.array(rr) + cy, np.array(cc) + cx
