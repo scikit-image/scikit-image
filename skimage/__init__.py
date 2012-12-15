@@ -68,18 +68,18 @@ try:
     imp.find_module('nose')
 except ImportError:
     def test(verbose=False):
-	"""This would invoke the skimage test suite, but nose couldn't be
-	imported so the test suite can not run.
-	"""
-	raise ImportError("Could not load nose.  Unit tests not available.")
+        """This would invoke the skimage test suite, but nose couldn't be
+        imported so the test suite can not run.
+        """
+        raise ImportError("Could not load nose.  Unit tests not available.")
 else:
     def test(verbose=False):
-	"""Invoke the skimage test suite."""
-	import nose
-	args = ['', pkg_dir, '--exe']
-	if verbose:
-	    args.extend(['-v', '-s'])
-	    nose.run('skimage', argv=args)
+        """Invoke the skimage test suite."""
+        import nose
+        args = ['', pkg_dir, '--exe']
+        if verbose:
+            args.extend(['-v', '-s'])
+            nose.run('skimage', argv=args)
 
 test_verbose = functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
@@ -122,7 +122,7 @@ def _setup_log():
 
     formatter = logging.Formatter(
         '%(name)s: %(levelname)s: %(message)s'
-        )
+    )
 
     try:
         handler = logging.StreamHandler(stream=sys.stdout)
