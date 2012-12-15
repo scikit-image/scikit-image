@@ -67,13 +67,13 @@ except ImportError:
 try:
     _imp.find_module('nose')
 except ImportError:
-    def test(verbose=False):
+    def _test(verbose=False):
         """This would invoke the skimage test suite, but nose couldn't be
         imported so the test suite can not run.
         """
         raise ImportError("Could not load nose. Unit tests not available.")
 else:
-    def test(verbose=False):
+    def _test(verbose=False):
         """Invoke the skimage test suite."""
         import nose
         args = ['', pkg_dir, '--exe']
@@ -81,6 +81,9 @@ else:
             args.extend(['-v', '-s'])
         nose.run('skimage', argv=args)
 
+# do not use `test` as function name as this leads to a recursion problem with
+# the nose test suite
+test = _test
 test_verbose = _functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
 
