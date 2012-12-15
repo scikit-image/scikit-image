@@ -52,8 +52,8 @@ img_as_ubyte
 """
 
 import os.path as _osp
-import imp
-import functools
+import imp as _imp
+import functools as _functools
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
@@ -65,7 +65,7 @@ except ImportError:
 
 
 try:
-    imp.find_module('nose')
+    _imp.find_module('nose')
 except ImportError:
     def test(verbose=False):
         """This would invoke the skimage test suite, but nose couldn't be
@@ -81,7 +81,7 @@ else:
             args.extend(['-v', '-s'])
         nose.run('skimage', argv=args)
 
-test_verbose = functools.partial(test, verbose=True)
+test_verbose = _functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
 
 
