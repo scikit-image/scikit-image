@@ -28,7 +28,6 @@ from _heapq import heappush, heappop
 import numpy as np
 import scipy.ndimage
 from ..filter import rank_order
-from ..feature import peak_local_max
 from .._shared.utils import deprecated
 
 from . import _watershed
@@ -293,6 +292,8 @@ def is_local_maximum(image, labels=None, footprint=None):
            [False,  True, False,  True]], dtype=bool)
 
     """
+    # call import here to prevent circular imports
+    from ..feature import peak_local_max
     return peak_local_max(image, labels=labels, min_distance=1,
                           threshold_rel=0, footprint=footprint,
                           indices=False, exclude_border=False)
