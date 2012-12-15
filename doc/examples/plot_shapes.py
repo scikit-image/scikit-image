@@ -13,7 +13,7 @@ This example shows how to fill several different shapes:
 
 import matplotlib.pyplot as plt
 
-from skimage.draw import line, polygon, circle, ellipse
+from skimage.draw import line, polygon, circle, circle_perimeter, ellipse
 import numpy as np
 
 
@@ -41,6 +41,10 @@ img[rr,cc,:] = (255, 255, 0)
 # fill ellipse
 rr, cc = ellipse(300, 300, 100, 200, img.shape)
 img[rr,cc,2] = 255
+
+# circle
+rr, cc = circle_perimeter(120, 400, 50)
+img[rr, cc, :] = (255, 0, 255)
 
 plt.imshow(img)
 plt.show()

@@ -6,7 +6,7 @@ from skimage import img_as_float
 
 
 def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
-          normalization='l1', sigmas=None, ring_radii=None):
+          normalization='l1', sigmas=None, ring_radii=None, visualize=False):
     '''Extract DAISY feature descriptors densely for the given image.
 
     DAISY is a feature descriptor similar to SIFT formulated in a way that
@@ -65,6 +65,8 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
         following predicate since no radius is needed for the center
         histogram.
             ``len(ring_radii) == len(sigmas)+1``
+    visualize : bool, optional
+        Generate a visualization of the DAISY descriptors
 
 
     Returns
@@ -75,10 +77,12 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
           | ``P = ceil((M-radius*2)/step)``
           | ``Q = ceil((N-radius*2)/step)``
           | ``R = (rings*histograms + 1)*orientations``
+    descs_img : (M, N, 3) array (only if visualize==True)
+        Visualization of the DAISY descriptors.
 
     References
     ----------
-    .. [1] Tola et al. "Daisy\: An efficient dense descriptor applied to wide-
+    .. [1] Tola et al. "Daisy: An efficient dense descriptor applied to wide-
            baseline stereo." Pattern Analysis and Machine Intelligence, IEEE
            Transactions on 32.5 (2010): 815-830.
     .. [2] http://cvlab.epfl.ch/alumni/tola/daisy.html
@@ -120,10 +124,11 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     kappa = 1. / hist_sigma
     bessel = iv(0, kappa)
     hist = np.empty((orientations,) + img.shape, dtype=float)
-    for i in range(orientations):
-        mu = 2 * i * pi / orientations - pi
+    orientation_angles = [2 * o * pi / orientations - pi
+                          for o in range(orientations)]
+    for i, o in enumerate(orientation_angles):
         # Weigh bin contribution by the circular normal distribution
-        hist[i, :, :] = exp(kappa * cos(grad_ori - mu)) / (2 * pi * bessel)
+        hist[i, :, :] = exp(kappa * cos(grad_ori - o)) / (2 * pi * bessel)
         # Weigh bin contribution by the gradient magnitude
         hist[i, :, :] = np.multiply(hist[i, :, :], grad_mag)
 
@@ -169,4 +174,57 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                                     axis=2))
                 descs[:, :, i:i + orientations] /= norms[:, :, np.newaxis]
 
-    return descs
+    if visualize:
+        from skimage import draw
+        from skimage import color
+        descs_img = color.gray2rgb(img)
+        for i in range(descs.shape[0]):
+            for j in range(descs.shape[1]):
+                # Draw center histogram sigma
+                color = (1, 0, 0)
+                desc_y = i * step + radius
+                desc_x = j * step + radius
+                coords = draw.circle_perimeter(desc_y, desc_x, sigmas[0])
+                set_color(descs_img, coords, color)
+                max_bin = np.max(descs[i, j, :])
+                for o_num, o in enumerate(orientation_angles):
+                    # Draw center histogram bins
+                    bin_size = descs[i, j, o_num] / max_bin
+                    dy = sigmas[0] * bin_size * sin(o)
+                    dx = sigmas[0] * bin_size * cos(o)
+                    coords = draw.line(desc_y, desc_x, desc_y + dy,
+                                       desc_x + dx)
+                    set_color(descs_img, coords, color)
+                for r_num, r in enumerate(ring_radii):
+                    color_offset = float(1 + r_num) / rings
+                    color = (1 - color_offset, 1, color_offset)
+                    for t_num, t in enumerate(theta):
+                        # Draw ring histogram sigmas
+                        hist_y = desc_y + int(round(r * sin(t)))
+                        hist_x = desc_x + int(round(r * cos(t)))
+                        coords = draw.circle_perimeter(hist_y, hist_x,
+                                                       sigmas[r_num + 1])
+                        set_color(descs_img, coords, color)
+                        for o_num, o in enumerate(orientation_angles):
+                            # Draw histogram bins
+                            bin_size = descs[i, j, orientations + r_num *
+                                             histograms * orientations +
+                                             t_num * orientations + o_num]
+                            bin_size /= max_bin
+                            dy = sigmas[r_num + 1] * bin_size * sin(o)
+                            dx = sigmas[r_num + 1] * bin_size * cos(o)
+                            coords = draw.line(hist_y, hist_x, hist_y + dy,
+                                               hist_x + dx)
+                            set_color(descs_img, coords, color)
+        return descs, descs_img
+    else:
+        return descs
+
+
+def set_color(img, coords, color):
+    ''' Set pixel color at the given coordiantes in the image.'''
+    coords = filter(lambda (y, x): y >= 0 and y < img.shape[0] and x >= 0
+                    and x < img.shape[1], zip(*coords))
+    if coords:
+        rr, cc = zip(*coords)
+        img[rr, cc, :] = color
