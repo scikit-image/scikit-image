@@ -85,6 +85,11 @@ def test_daisy_normalization():
     assert_raises(ValueError, daisy, img, normalization='does_not_exist')
 
 
+def test_daisy_visualization():
+    img = img_as_float(data.lena()[:128, :128].mean(axis=2))
+    descs, descs_img = daisy(img, visualize=True)
+    assert(descs_img.shape == (128, 128, 3))
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
