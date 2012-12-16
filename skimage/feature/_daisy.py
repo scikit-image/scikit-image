@@ -2,7 +2,8 @@ import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin, exp
 from scipy.ndimage import gaussian_filter
 from scipy.special import iv
-from skimage import img_as_float
+import skimage
+from skimage import img_as_float, draw
 
 
 def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
@@ -175,9 +176,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                 descs[:, :, i:i + orientations] /= norms[:, :, np.newaxis]
 
     if visualize:
-        from skimage import draw
-        from skimage import color
-        descs_img = color.gray2rgb(img)
+        descs_img = skimage.color.gray2rgb(img)
         for i in range(descs.shape[0]):
             for j in range(descs.shape[1]):
                 # Draw center histogram sigma
@@ -185,7 +184,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                 desc_y = i * step + radius
                 desc_x = j * step + radius
                 coords = draw.circle_perimeter(desc_y, desc_x, sigmas[0])
-                set_color(descs_img, coords, color)
+                draw.set_color(descs_img, coords, color)
                 max_bin = np.max(descs[i, j, :])
                 for o_num, o in enumerate(orientation_angles):
                     # Draw center histogram bins
@@ -194,7 +193,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                     dx = sigmas[0] * bin_size * cos(o)
                     coords = draw.line(desc_y, desc_x, desc_y + dy,
                                        desc_x + dx)
-                    set_color(descs_img, coords, color)
+                    draw.set_color(descs_img, coords, color)
                 for r_num, r in enumerate(ring_radii):
                     color_offset = float(1 + r_num) / rings
                     color = (1 - color_offset, 1, color_offset)
@@ -204,7 +203,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                         hist_x = desc_x + int(round(r * cos(t)))
                         coords = draw.circle_perimeter(hist_y, hist_x,
                                                        sigmas[r_num + 1])
-                        set_color(descs_img, coords, color)
+                        draw.set_color(descs_img, coords, color)
                         for o_num, o in enumerate(orientation_angles):
                             # Draw histogram bins
                             bin_size = descs[i, j, orientations + r_num *
@@ -215,16 +214,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                             dx = sigmas[r_num + 1] * bin_size * cos(o)
                             coords = draw.line(hist_y, hist_x, hist_y + dy,
                                                hist_x + dx)
-                            set_color(descs_img, coords, color)
+                            draw.set_color(descs_img, coords, color)
         return descs, descs_img
     else:
         return descs
-
-
-def set_color(img, coords, color):
-    ''' Set pixel color at the given coordiantes in the image.'''
-    coords = filter(lambda (y, x): y >= 0 and y < img.shape[0] and x >= 0
-                    and x < img.shape[1], zip(*coords))
-    if coords:
-        rr, cc = zip(*coords)
-        img[rr, cc, :] = color
