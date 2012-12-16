@@ -91,7 +91,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     # Validate image format.
     if img.ndim > 2:
         raise ValueError('Only grey-level images are supported.')
-    if img.dtype.kind == 'u':
+    if img.dtype.kind != 'f':
         img = img_as_float(img)
 
     # Validate parameters.
