@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin, exp
 from scipy.ndimage import gaussian_filter
-from scipy.special import iv
 import skimage
 from skimage import img_as_float, draw
 
@@ -121,15 +120,13 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     # to the histograms.
     grad_mag = sqrt(dx ** 2 + dy ** 2)
     grad_ori = arctan2(dy, dx)
-    hist_sigma = pi / orientations
-    kappa = 1. / hist_sigma
-    bessel = iv(0, kappa)
-    hist = np.empty((orientations,) + img.shape, dtype=float)
+    orientation_kappa = orientations / pi
     orientation_angles = [2 * o * pi / orientations - pi
                           for o in range(orientations)]
+    hist = np.empty((orientations,) + img.shape, dtype=float)
     for i, o in enumerate(orientation_angles):
         # Weigh bin contribution by the circular normal distribution
-        hist[i, :, :] = exp(kappa * cos(grad_ori - o)) / (2 * pi * bessel)
+        hist[i, :, :] = exp(orientation_kappa * cos(grad_ori - o))
         # Weigh bin contribution by the gradient magnitude
         hist[i, :, :] = np.multiply(hist[i, :, :], grad_mag)
 
