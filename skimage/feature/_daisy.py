@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin, exp
 from scipy.ndimage import gaussian_filter
-import skimage
+import skimage.color
 from skimage import img_as_float, draw
 
 
