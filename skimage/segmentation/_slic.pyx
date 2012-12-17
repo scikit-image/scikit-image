@@ -3,7 +3,7 @@ cimport numpy as np
 from time import time
 from scipy import ndimage
 from ..util import img_as_float
-from ..color import rgb2lab
+from ..color import rgb2lab, gray2rgb
 
 
 def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
@@ -12,7 +12,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
 
     Parameters
     ----------
-    image : (width, height, 3) ndarray
+    image : (width, height [, 3]) ndarray
         Input image.
     n_segments : int
         The (approximate) number of labels in the segmented output image.
@@ -53,9 +53,10 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     >>> # Increasing the ratio parameter yields more square regions
     >>> segments = slic(img, n_segments=100, ratio=20)
     """
-    image = np.atleast_3d(image)
-    if image.shape[2] != 3:
-        ValueError("Only 3-channel 2D images are supported.")
+    if image.ndim == 2:
+        image = gray2rgb(image)
+    if image.ndim != 3 or image.shape[2] != 3:
+        ValueError("Only 1- or 3-channel 2D images are supported.")
     image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
     if convert2lab:
         image = rgb2lab(image)
