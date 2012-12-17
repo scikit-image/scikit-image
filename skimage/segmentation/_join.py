@@ -41,8 +41,8 @@ def join_segmentations(s1, s2):
     j = relabel_from_one(j)[0]
     return j
 
-def relabel_from_one(ar):
-    """Convert array ar of arbitrary labels to labels 1...len(np.unique(ar))+1
+def relabel_from_one(label_field):
+    """Convert labels in an arbitrary label field to {1, ... number_of_labels}.
 
     This function also returns the forward map (mapping the original labels to
     the reduced labels) and the inverse map (mapping the reduced labels back
@@ -50,7 +50,7 @@ def relabel_from_one(ar):
 
     Parameters
     ----------
-    ar : numpy ndarray (integer type)
+    label_field : numpy ndarray (integer type)
 
     Returns
     -------
@@ -63,8 +63,8 @@ def relabel_from_one(ar):
     --------
     >>> import numpy as np
     >>> from skimage.segmentation import relabel_from_one
-    >>> ar = array([1, 1, 5, 5, 8, 99, 42])
-    >>> relab, fw, inv = relabel_from_one(ar)
+    >>> label_field = array([1, 1, 5, 5, 8, 99, 42])
+    >>> relab, fw, inv = relabel_from_one(label_field)
     >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
     >>> fw
@@ -75,19 +75,19 @@ def relabel_from_one(ar):
            0, 0, 0, 0, 0, 0, 0, 5])
     >>> inv
     array([ 0,  1,  5,  8, 42, 99])
-    >>> (fw[ar] == relab).all()
+    >>> (fw[label_field] == relab).all()
     True
-    >>> (inv[relab] == ar).all()
+    >>> (inv[relab] == label_field).all()
     True
     """
-    labels = np.unique(ar)
+    labels = np.unique(label_field)
     labels0 = labels[labels != 0]
     m = labels.max()
     if m == len(labels0): # nothing to do, already 1...n labels
-        return ar, labels, labels
+        return label_field, labels, labels
     forward_map = np.zeros(m+1, int)
     forward_map[labels0] = np.arange(1, len(labels0) + 1)
     if not (labels == 0).any():
         labels = np.concatenate(([0], labels))
     inverse_map = labels
-    return forward_map[ar], forward_map, inverse_map
+    return forward_map[label_field], forward_map, inverse_map
