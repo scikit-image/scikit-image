@@ -2,7 +2,7 @@ import os
 from textwrap import dedent
 
 try:
-    from PyQt4 import QtGui
+    from PyQt4 import QtGui, QtCore
 except ImportError:
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
