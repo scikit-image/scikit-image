@@ -29,9 +29,11 @@ class OKCancelButtons(BaseWidget):
         self.ok = QtGui.QPushButton('OK')
         self.ok.clicked.connect(self.update_original_image)
         self.ok.setMaximumWidth(button_width)
+        self.ok.setFocusPolicy(QtCore.Qt.NoFocus)
         self.cancel = QtGui.QPushButton('Cancel')
         self.cancel.clicked.connect(self.close_plugin)
         self.cancel.setMaximumWidth(button_width)
+        self.cancel.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.layout = QtGui.QHBoxLayout(self)
         self.layout.addStretch()
@@ -61,8 +63,10 @@ class SaveButtons(BaseWidget):
 
         self.save_file = QtGui.QPushButton('File')
         self.save_file.clicked.connect(self.save_to_file)
+        self.save_file.setFocusPolicy(QtCore.Qt.NoFocus)
         self.save_stack = QtGui.QPushButton('Stack')
         self.save_stack.clicked.connect(self.save_to_stack)
+        self.save_stack.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.layout = QtGui.QHBoxLayout(self)
         self.layout.addWidget(self.name_label)
