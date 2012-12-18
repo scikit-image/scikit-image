@@ -113,9 +113,13 @@ class TestColorconv(TestCase):
 
     # XYZ to RGB
     def test_xyz2rgb_conversion(self):
-        # only roundtrip test, we checked rgb2xyz above already
         assert_almost_equal(xyz2rgb(rgb2xyz(self.colbars_array)),
                             self.colbars_array)
+
+    # RGB<->XYZ roundtrip on another image
+    def test_xyz_rgb_roundtrip(self):
+        img_rgb = img_as_float(self.img_rgb)
+        assert_array_almost_equal(xyz2rgb(rgb2xyz(img_rgb)), img_rgb)
 
     # RGB to RGB CIE
     def test_rgb2rgbcie_conversion(self):
@@ -175,10 +179,28 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(lab2xyz(self.lab_array),
                                   self.xyz_array, decimal=3)
 
+    def test_rgb2lab_brucelindbloom(self):
+        """
+        Test the RGB->Lab conversion by comparing to the calculator on the
+        authoritative Bruce Lindbloom
+        [website](http://brucelindbloom.com/index.html?ColorCalculator.html).
+        """
+        # Obtained with D65 white point, sRGB model and gamma
+        gt_for_colbars = np.array([
+            [100,0,0],
+            [97.1393, -21.5537, 94.4780],
+            [91.1132, -48.0875, -14.1312],
+            [87.7347, -86.1827, 83.1793],
+            [60.3242, 98.2343, -60.8249],
+            [53.2408, 80.0925, 67.2032],
+            [32.2970, 79.1875, -107.8602],
+            [0,0,0]]).T
+        gt_array = np.swapaxes(gt_for_colbars.reshape(3, 4, 2), 0, 2)
+        assert_array_almost_equal(rgb2lab(self.colbars_array), gt_array, decimal=2)
+
     def test_lab_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
-
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
