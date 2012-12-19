@@ -74,7 +74,7 @@ class SaveButtons(BaseWidget):
         self.layout.addWidget(self.save_file)
 
     def save_to_stack(self):
-        image = self.plugin.image_viewer.image.copy()
+        image = self.plugin.filtered_image.copy()
         io.push(image)
 
         msg = dedent('''\
