@@ -59,6 +59,24 @@ def _graph_laplacian_sparse(graph, normed=False, return_diag=False):
         return lap, w
     return lap
 
+def _graph_laplacian_dense(graph, normed=False, return_diag=False):
+    n_nodes = graph.shape[0]
+    lap = -graph.copy()
+    lap.flat[::n_nodes + 1] = 0
+    w = -lap.sum(axis=0)
+    if normed:
+        w = np.sqrt(w)
+        w_zeros = w == 0
+        w[w_zeros] = 1
+        lap /= w
+        lap /= w[:, np.newaxis]
+        lap.flat[::n_nodes + 1] = 1 - w_zeros
+    else:
+        lap.flat[::n_nodes + 1] = w
+    if return_diag:
+        return lap, w
+    return lap
+
 
 def graph_laplacian(graph, normed=False, return_diag=False):
     """ Return the Laplacian of the given graph.
@@ -531,5 +549,55 @@ def _normalized_cut_segmentation(image, n_cluster = 8):
     label = _normalized_cut(graph, n_cluster = n_cluster)
     return label.reshape(image.shape)
 
-def _with_slic_init(n_init_cluster = 100):
+def _with_mask(image, mask, n_cluster = 8):
+    """
+    with mask
+    """
+    # will using the mask
+    label, inverse = np.unique(mask, return_inverse = True);
+    # the init graph
+    init_graph = img_to_graph(image).tocoo()
+    beta = 8
+    eps = 1e-6
+    init_graph.data = np.exp(-beta * init_graph.data / image.std()) + eps
+
+    # calculate the distances between patches, here we use the
+    graph = np.zeros((label.shape[0], label.shape[0]), dtype=np.uint)
+    mask = mask.ravel()
+    # for i in range(label.shape[0]):
+    #     for j in range(label.shape[0]):
+    #         # the graph is calculated
+    #         # print init_graph.shape, mask.shape
+    #         print i,j
+    #         graph[i,j] = init_graph[mask == label[i]][:,mask == label[j]].mean()
+    graph = sparse.coo_matrix((init_graph.data, (inverse[init_graph.row], inverse[init_graph.col])),
+                      shape=(label.shape[0], label.shape[0]))
+    # gradients on each node, the diagnal should be the most useful. Those zeros, the affinity should be zero
+    #
+    graph = graph.tocsr()
+    # apply the spectral clustering to the graph
+    la = _normalized_cut(graph, n_cluster = n_cluster)
+    # masknew = np.zeros(mask.shape)
+    # merge the clusters with the same using the mask
+    # traslate mask to new labels
+    # inverse : indexes to the
+    la, inversela = np.unique(la, return_inverse = True)
+    masknew = np.array([inversela[inverse[i]] for i in range(mask.shape[0])], dtype=np.uint)
+    print masknew
+    # for i, ll in enumerate(np.unique(la)):
+    #     # find where it is in the orginal mask, the label corresponds to the
+    #     # original label
+    #     print label[la == ll]
+    #     # print [x in label[la == ll] for x in mask]
+    #     print i
+    #     masknew[[x in label[la == ll] for x in mask]] = i
+    return masknew.reshape(image.shape)
+
+
+def _with_slic_init(image, n_init_cluster = 100):
+    """
+    with slic init to compute the 
+    """
+    segments_slic = slic(image, ratio=10, n_segments=n_init_cluster, sigma=1)
+    _with_mask(image, segments_slic)
     
