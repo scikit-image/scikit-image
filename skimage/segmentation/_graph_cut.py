@@ -516,12 +516,20 @@ def _spectral_embedding(adjacency, n_components=8, eigen_solver=None,
         return embedding[1:n_components].T
     else:
         return embedding[:n_components].T
+
     
 def _normalized_cut(affinity, n_cluster = 8):
     embedding = _spectral_embedding(affinity, n_components = n_cluster, drop_first = False)
-    return discretize(embedding, copy=True, max_svd_restarts=30, n_iter_max=20,
-               random_state=None)
+    return discretize(embedding)
+
 
 def _normalized_cut_segmentation(image, n_cluster = 8):
-    label = _normalized_cut(img_to_graph(image))
+    graph = img_to_graph(image)
+    beta = 8
+    eps = 1e-6
+    graph.data = np.exp(-beta * graph.data / image.std()) + eps
+    label = _normalized_cut(graph, n_cluster = n_cluster)
     return label.reshape(image.shape)
+
+def _with_slic_init(n_init_cluster = 100):
+    
