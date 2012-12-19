@@ -1,8 +1,7 @@
 Development process
 -------------------
 
-:doc:`Read this overview <gitwash/index>` of how to use Git with
-``skimage``.  Here's the long and short of it:
+Here's the long and short of it:
 
  * Go to `https://github.com/scikit-image/scikit-image
    <http://github.com/scikit-image/scikit-image>`_ and follow the
@@ -11,9 +10,12 @@ Development process
    branch name will appear in the merge message, use a sensible name
    such as 'transform-speedups'.
  * Commit locally as you progress.
- * Push your changes back to github and create a pull request by
-   clicking "request pull" in GitHub.
- * Optionally, mail the mailing list, explaining your changes.
+ * Push your changes back to GitHub and create a Pull Request by
+   clicking 'Pull Request' in GitHub.
+ * Optionally, post on the `mailing list <http://groups.google.com/group/scikit-image>`_ to explain your changes.
+
+Read these :doc:`detailed documents <gitwash/index>` on how to use Git with
+``scikit-image`` (`<http://scikit-image.org/docs/dev/gitwash/index.html>`_).
 
 .. note::
 
@@ -33,8 +35,9 @@ project on how they manage to keep review overhead to a minimum:
 http://mail.scipy.org/pipermail/ipython-dev/2010-October/006746.html
 
 Guidelines
-``````````
- * All code should have tests (see "Test coverage" below for more details).
+----------
+
+ * All code should have tests (see `test coverage`_ below for more details).
  * All code should be documented, to the same
    `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
    as NumPy and SciPy.  For new functionality, always add an example to the
@@ -47,7 +50,8 @@ Guidelines
  * Examples in the gallery should have a maximum figure width of 8 inches.
 
 Stylistic Guidelines
-````````````````````
+--------------------
+
  * Use numpy data types instead of strings (``np.uint8`` instead of
    ``"uint8"``).
 
@@ -78,9 +82,10 @@ Stylistic Guidelines
      hough(canny(my_image))
 
 Test coverage
-`````````````
+-------------
+
 Tests for a module should ideally cover all code in that module,
-i.e. statement coverage should be at 100%.
+i.e., statement coverage should be at 100%.
 
 To measure the test coverage, install
 `coverage.py <http://nedbatchelder.com/code/coverage/>`__
@@ -98,5 +103,6 @@ detailing the test coverage::
   ...
 
 Bugs
-````
-Please `report bugs on Github <https://github.com/scikit-image/scikit-image/issues>`_.
+----
+
+Please `report bugs on GitHub <https://github.com/scikit-image/scikit-image/issues>`_.
