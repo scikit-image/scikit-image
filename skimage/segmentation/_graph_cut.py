@@ -4,7 +4,7 @@ Normalized cut segmentation algorithm
 from *Normalized Cuts and Image Segmentation", Jianbo Shi and Jitendra Malik
 Pattern Anal Mach Intell. 2000 Aug;22(8):888-905
 
-Spectral Clustering codes from scikit-learn
+Normalized cuts codes adapted from scikit-learn spectral clustering
 """
 
 import warnings
@@ -15,9 +15,12 @@ from scipy.sparse.linalg.eigen.lobpcg.lobpcg import symeig
 from scipy.sparse.linalg import eigsh
 from scipy import linalg
 
-from random_walker_segmentation import _make_graph_edges_3d, _mask_edges_weights, _compute_gradients_3d, _build_laplacian, _compute_weights_3d
+from random_walker_segmentation import _make_graph_edges_3d,\
+    _mask_edges_weights, _compute_gradients_3d, \
+    _build_laplacian, _compute_weights_3d
 from ..util import img_as_float
 from . import felzenszwalb, slic, quickshift
+
 
 def norm(v):
     v = np.asarray(v)
@@ -40,7 +43,7 @@ def _graph_laplacian_sparse(graph, normed=False, return_diag=False):
         lap = lap.tolil()
 
         diagonal_holes = list(set(range(n_nodes)).difference(
-                                diag_idx))
+                              diag_idx))
         lap[diagonal_holes, diagonal_holes] = 1
         lap = lap.tocoo()
         diag_mask = (lap.row == lap.col)
@@ -83,7 +86,7 @@ def graph_laplacian(graph, normed=False, return_diag=False):
     """ Return the Laplacian of the given graph.
     """
     if normed and (np.issubdtype(graph.dtype, np.int)
-                    or np.issubdtype(graph.dtype, np.uint)):
+                   or np.issubdtype(graph.dtype, np.uint)):
         graph = graph.astype(np.float)
     if sparse.isspmatrix(graph):
         return _graph_laplacian_sparse(graph, normed=normed,
@@ -91,11 +94,12 @@ def graph_laplacian(graph, normed=False, return_diag=False):
     else:
         # We have a numpy array
         return _graph_laplacian_dense(graph, normed=normed,
-                                       return_diag=return_diag)
+                                      return_diag=return_diag)
 
 
 def _to_graph(mask=None, data=None,
-              return_as=sparse.coo_matrix, dtype=None, multichannel=True, beta=250, depth=1., eps=1e-6):
+              return_as=sparse.coo_matrix, dtype=None,
+              multichannel=True, beta=250, depth=1., eps=1e-6):
     """Auxiliary function for img_to_graph and grid_to_graph
     """
     l_x, l_y, l_z = data.shape[:3]
@@ -104,54 +108,63 @@ def _to_graph(mask=None, data=None,
                                   multichannel=multichannel)
     if mask is not None:
         edges, weights = _mask_edges_weights(edges, weights, mask)
-        
+
     pixel_nb = edges.max() + 1
     i_indices = np.hstack((edges[0], edges[1]))
     j_indices = np.hstack((edges[1], edges[0]))
     data = np.hstack((weights, weights))
     graph = sparse.coo_matrix((data, (i_indices, j_indices)),
-                            shape=(pixel_nb, pixel_nb))
+                              shape=(pixel_nb, pixel_nb))
     if return_as is np.ndarray:
         return graph.todense()
     return return_as(graph)
 
 
-def _normalized_cut_segmentation(image, mask = "slic", n_cluster = 8, multichannel = True, eigen_solver = None,
-               eigen_tol = 0.0, beta = 250, eps= 1., random_state=None, depth=1.):
+def _normalized_cut_segmentation(image, mask="slic", n_segments=8,
+                                 multichannel=True, eigen_solver=None,
+                                 eigen_tol=0.0, beta=250, eps=1e-6,
+                                 random_state=None, depth=1.):
     # will using the mask
     # the initial graph
-    init_graph = _to_graph(data = image, beta = beta, eps=eps, depth=depth)
+    init_graph = _to_graph(data=image, beta=beta, eps=eps, depth=depth)
     # calculate the distances between original segments
     if mask is None:
-        graph = init_graph
+        graph = sparse.csr_matrix(init_graph.todense() + eps)
     else:
         mask = mask.ravel()
-        label, inverse = np.unique(mask, return_inverse = True);
+        label, inverse = np.unique(mask, return_inverse=True)
         graph = sparse.coo_matrix((init_graph.data,
                                    (inverse[init_graph.row],
                                     inverse[init_graph.col])),
-                                    shape=(label.shape[0], label.shape[0]))
+                                  shape=(label.shape[0], label.shape[0]))
         # normalize the graph using the mean
-        graph = graph/ sparse.coo_matrix((np.ones(init_graph.data.shape),
-                                   (inverse[init_graph.row],
-                                    inverse[init_graph.col])),
-                                    shape=(label.shape[0], label.shape[0]))
+        graph = graph / sparse.coo_matrix((np.ones(init_graph.data.shape),
+                                           (inverse[init_graph.row],
+                                            inverse[init_graph.col])),
+                                          shape=(label.shape[0],
+                                                 label.shape[0]))
         graph = graph.tocsr()
     # apply the spectral clustering to the new graph
-    embedding = _spectral_embedding(graph, n_components = n_cluster, eigen_solver = eigen_solver,
-                                    eigen_tol = eigen_tol, random_state=random_state)
+    embedding = _spectral_embedding(graph, n_components=n_segments,
+                                    eigen_solver=eigen_solver,
+                                    eigen_tol=eigen_tol,
+                                    random_state=random_state)
     label_new = _discretize(embedding, random_state=random_state)
-    _, inverse_new = np.unique(label_new, return_inverse = True)
-    mask_new = np.array([inverse_new[inverse[i]] for i in range(mask.shape[0])],
-                       dtype=np.uint)
-    return mask_new.reshape(image.shape[0:2])
+    if mask is None:
+        return label_new.reshape(image.shape[0:2])
+    else:
+        _, inverse_new = np.unique(label_new, return_inverse=True)
+        mask_new = np.array([inverse_new[inverse[i]] for i
+                             in range(mask.shape[0])],
+                            dtype=np.uint)
+        return mask_new.reshape(image.shape[0:2])
 
 
-def normalized_cut(data, n_cluster = 8, mask='slic',
-                                n_init_cluster = 100,
-                                multichannel = True,
-                                beta = 500, eigen_solver=None, depth=1.0,
-                                random_state=None):
+def normalized_cut(data, n_segments=8, mask='slic',
+                   n_init_cluster=100,
+                   multichannel=True,
+                   beta=500, eigen_solver=None, depth=1.0,
+                   random_state=None):
     """Normalized Cut Segmentation
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -165,6 +178,8 @@ def normalized_cut(data, n_cluster = 8, mask='slic',
         dimensional (multichannel=True) with the highest dimension denoting
         channels. Data spacing is assumed isotropic unless depth keyword
         argument is used.
+    n_segments : int
+        Number of segments to return
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
@@ -211,8 +226,9 @@ def normalized_cut(data, n_cluster = 8, mask='slic',
     -----
     """
     if mask is None:
-        if np.prod(data.shape) > 1000:
-            warnings.warn("Large image without preprocessing should be extememly slow")
+        if np.prod(data.shape[::2]) > 1000:
+            warnings.warn(
+                "Large image without preprocessing should be extememly slow")
         _mask = None
     elif mask == "slic":
         _mask = slic(data, ratio=10,
@@ -221,20 +237,23 @@ def normalized_cut(data, n_cluster = 8, mask='slic',
     elif callable(mask):
         _mask = mask(data)
         if _mask.shape != data.shape[:2]:
-            raise ValueError("Callable mask does not generate the proper size of the mask"
-                             "Mask size: %s, Required size: %s" %(_mask.shape, image.shape[:2]))
-    elif mask is np.ndarray:
+            raise ValueError("Callable mask does not generate proper size "
+                             "Mask size: %s, Required size: %s"
+                             % (_mask.shape, image.shape[:2]))
+    elif mask is not None:
         _mask = mask
         if _mask.shape != data.shape[:2]:
-            raise ValueError("Provided mask does not generate the proper size of the mask"
-                             "Mask size: %s, Required size: %s" %(_mask.shape, image.shape[:2]))
-    data = preprocessing(data.copy(), multichannel = multichannel)
-    return _normalized_cut_segmentation(data, n_cluster = n_cluster,
-                      mask = _mask, multichannel = multichannel, eigen_solver = eigen_solver,
-                      random_state=random_state, depth=depth)
+            raise ValueError("Provided mask is not of proper size "
+                             "Mask size: %s, Required size: %s"
+                             % (_mask.shape, image.shape[:2]))
+    data = preprocessing(data.copy(), multichannel=multichannel)
+    return _normalized_cut_segmentation(data, n_segments=n_segments,
+                                        mask=_mask, multichannel=multichannel,
+                                        eigen_solver=eigen_solver,
+                                        random_state=random_state, depth=depth)
 
-    
-def preprocessing(data, multichannel = True):
+
+def preprocessing(data, multichannel=True):
     # Parse input data
     if not multichannel:
         # We work with 4-D arrays of floats
@@ -253,7 +272,7 @@ def preprocessing(data, multichannel = True):
 
 
 def _discretize(vectors, copy=True, max_svd_restarts=30, n_iter_max=20,
-               random_state=None):
+                random_state=None):
     """Search for a partition matrix (clustering) which is closest to the
     eigenvector embedding.
 
@@ -429,9 +448,8 @@ def _set_diag(laplacian, value):
 
 
 def _spectral_embedding(adjacency, n_components=8, eigen_solver=None,
-                       random_state=None, eigen_tol=0.0,
-                       norm_laplacian=True,
-                       mode=None, laplacian=None, dd = None):
+                        random_state=None, eigen_tol=0.0,
+                        norm_laplacian=True):
     """Project the sample on the first eigen vectors of the graph Laplacian
 
     The adjacency matrix is used to compute a normalized graph Laplacian
@@ -497,23 +515,8 @@ def _spectral_embedding(adjacency, n_components=8, eigen_solver=None,
         if eigen_solver == "amg":
             raise ValueError("The eigen_solver was set to 'amg', but pyamg is "
                              "not available.")
-
-    if not mode is None:
-        warnings.warn("'mode' was renamed to eigen_solver "
-                      "and will be removed in 0.15.",
-                      DeprecationWarning)
-        eigen_solver = mode
-
     random_state = np.random.RandomState(random_state)
     n_nodes = adjacency.shape[0]
-    # Check that the matrices given is symmetric
-    if ((not sparse.isspmatrix(adjacency) and
-         not np.all((adjacency - adjacency.T) < 1e-10)) or
-        (sparse.isspmatrix(adjacency) and
-         (adjacency - adjacency.T).nnz > 0)):
-        warnings.warn("Graph adjacency matrix should be symmetric. "
-                      "Converted to be symmetric by average with its "
-                      "transpose.")
     adjacency = .5 * (adjacency + adjacency.T)
 
     if eigen_solver is None:
@@ -522,9 +525,9 @@ def _spectral_embedding(adjacency, n_components=8, eigen_solver=None,
         raise ValueError("Unknown value for eigen_solver: '%s'."
                          "Should be 'amg', 'arpack', or 'lobpcg'"
                          % eigen_solver)
-    if laplacian is None:
-        laplacian, dd = graph_laplacian(adjacency,
-                                    normed=norm_laplacian, return_diag=True)
+    laplacian, dd = graph_laplacian(adjacency,
+                                    normed=norm_laplacian,
+                                    return_diag=True)
     if (eigen_solver == 'arpack'
         or eigen_solver != 'lobpcg' and
             (not sparse.isspmatrix(laplacian)
@@ -602,5 +605,3 @@ def _spectral_embedding(adjacency, n_components=8, eigen_solver=None,
             if embedding.shape[0] == 1:
                 raise ValueError
     return embedding[:n_components].T
-
-    

@@ -65,8 +65,8 @@ import numpy as np
 from skimage.data import lena
 from skimage.segmentation import felzenszwalb, slic, quickshift
 from skimage.segmentation import mark_boundaries
+from skimage.segmentation import normalized_cut
 from skimage.util import img_as_float
-import skimage.segmentation import normalized_cut
 
 img = img_as_float(lena()[::2, ::2])
 segments_fz = felzenszwalb(img, scale=100, sigma=0.5, min_size=50)
