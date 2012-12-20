@@ -63,40 +63,6 @@ def _graph_laplacian_sparse(graph, normed=False, return_diag=False):
     return lap
 
 
-def _graph_laplacian_dense(graph, normed=False, return_diag=False):
-    n_nodes = graph.shape[0]
-    lap = -graph.copy()
-    lap.flat[::n_nodes + 1] = 0
-    w = -lap.sum(axis=0)
-    if normed:
-        w = np.sqrt(w)
-        w_zeros = w == 0
-        w[w_zeros] = 1
-        lap /= w
-        lap /= w[:, np.newaxis]
-        lap.flat[::n_nodes + 1] = 1 - w_zeros
-    else:
-        lap.flat[::n_nodes + 1] = w
-    if return_diag:
-        return lap, w
-    return lap
-
-
-def graph_laplacian(graph, normed=False, return_diag=False):
-    """ Return the Laplacian of the given graph.
-    """
-    if normed and (np.issubdtype(graph.dtype, np.int)
-                   or np.issubdtype(graph.dtype, np.uint)):
-        graph = graph.astype(np.float)
-    if sparse.isspmatrix(graph):
-        return _graph_laplacian_sparse(graph, normed=normed,
-                                       return_diag=return_diag)
-    else:
-        # We have a numpy array
-        return _graph_laplacian_dense(graph, normed=normed,
-                                      return_diag=return_diag)
-
-
 def _to_graph(mask=None, data=None,
               return_as=sparse.coo_matrix, dtype=None,
               multichannel=True, beta=250, depth=1., eps=1e-6):
@@ -525,7 +491,7 @@ def _spectral_embedding(adjacency, n_components=8, eigen_solver=None,
         raise ValueError("Unknown value for eigen_solver: '%s'."
                          "Should be 'amg', 'arpack', or 'lobpcg'"
                          % eigen_solver)
-    laplacian, dd = graph_laplacian(adjacency,
+    laplacian, dd = _graph_laplacian_sparse(adjacency,
                                     normed=norm_laplacian,
                                     return_diag=True)
     if (eigen_solver == 'arpack'
