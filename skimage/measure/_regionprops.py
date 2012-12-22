@@ -440,14 +440,14 @@ def perimeter(image, neighbourhood=4):
         strel = STREL_4
     else:
         strel = STREL_8
-    eroded_image = ndimage.binary_erosion(image, strel)
+    eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
     # perimeter contribution: corresponding values in convolved image
     perimeter_weights = {
-        1:               (5, 7, 15, 17, 25, 27),
-        sqrt(2):         (21, 33),
-        1 + sqrt(2) / 2: (13, 23)
+        1:                 (5, 7, 15, 17, 25, 27),
+        sqrt(2):           (21, 33),
+        (1 + sqrt(2)) / 2: (13, 23)
     }
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
                                                                [ 2, 1,  2],
