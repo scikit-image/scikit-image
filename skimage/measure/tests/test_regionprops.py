@@ -246,10 +246,10 @@ def test_orientation():
 
 def test_perimeter():
     per = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
-    assert_almost_equal(per, 59.2132034355964)
+    assert_almost_equal(per, 55.2487373415)
 
     per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
-    assert_almost_equal(per, 43.1213203436)
+    assert_almost_equal(per, 46.8284271247)
 
 
 def test_solidity():
