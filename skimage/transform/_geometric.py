@@ -604,7 +604,7 @@ class PolynomialTransform(GeometricTransform):
             raise ValueError("invalid shape of transformation parameters")
         self._params = params
 
-    def estimate(self, src, dst, order):
+    def estimate(self, src, dst, order=2):
         """Set the transformation matrix with the explicit transformation
         parameters.
 
@@ -645,7 +645,7 @@ class PolynomialTransform(GeometricTransform):
             Source coordinates.
         dst : (N, 2) array
             Destination coordinates.
-        order : int
+        order : int, optional
             Polynomial order (number of coefficients is order + 1).
 
         """
@@ -750,7 +750,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
             'affine'            `src, `dst`
             'piecewise-affine'  `src, `dst`
             'projective'        `src, `dst`
-            'polynomial'        `src, `dst`, `order` (polynomial order)
+            'polynomial'        `src, `dst`, `order` (polynomial order,
+                                                      default order is 2)
 
         Also see examples below.
 
