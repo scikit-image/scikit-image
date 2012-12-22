@@ -451,7 +451,8 @@ def perimeter(image, neighbourhood=4):
     }
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
                                                                [ 2, 1,  2],
-                                                               [10, 2, 10]]))
+                                                               [10, 2, 10]]),
+                                       mode='constant', cval=0)
     total_perimeter = 0
     for weight, values in perimeter_weights.items():
         num_values = 0
