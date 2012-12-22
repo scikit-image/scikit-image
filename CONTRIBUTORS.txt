@@ -123,3 +123,6 @@
 
 - Luis Pedro Coelho
   imread plugin
+
+- Steven Silvester, Karel Zuiderveld
+  Adaptive Histogram Equalization

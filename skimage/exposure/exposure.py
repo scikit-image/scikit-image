@@ -2,6 +2,9 @@ import numpy as np
 
 from skimage import img_as_float
 from skimage.util.dtype import dtype_range
+import skimage.color as color
+from skimage.util.dtype import convert
+from skimage._shared.utils import deprecated
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
@@ -76,7 +79,12 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
+@deprecated('equalize_hist')
 def equalize(image, nbins=256):
+    equalize_hist(image, nbins)
+
+
+def equalize_hist(image, nbins=256):
     """Return image after histogram equalization.
 
     Parameters
