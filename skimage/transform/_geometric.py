@@ -750,7 +750,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
             'affine'            `src, `dst`
             'piecewise-affine'  `src, `dst`
             'projective'        `src, `dst`
-            'polynomial'        `src, `dst`, `order` (polynomial order)
+            'polynomial'        `src, `dst`, `order` (polynomial order,
+                                                      default order is 2)
 
         Also see examples below.
 
