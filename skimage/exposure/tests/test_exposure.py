@@ -11,8 +11,8 @@ from skimage.util.dtype import dtype_range
 # ===========================
 
 # squeeze image intensities to lower image contrast
-test_img = exposure.rescale_intensity(data.camera() / 5. + 100)
-test_img = skimage.img_as_float(test_img)
+test_img = skimage.img_as_float(data.camera())
+test_img = exposure.rescale_intensity(test_img / 5. + 100)
 
 
 def test_equalize_ubyte():
