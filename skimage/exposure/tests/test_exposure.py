@@ -12,6 +12,7 @@ from skimage.util.dtype import dtype_range
 
 # squeeze image intensities to lower image contrast
 test_img = exposure.rescale_intensity(data.camera() / 5. + 100)
+test_img = skimage.img_as_float(test_img)
 
 
 def test_equalize_ubyte():
@@ -101,8 +102,8 @@ def test_adapthist_grayscale():
                         nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 77.584, 3)
-    assert_almost_equal(norm_brightness_err(img, adapted), 0.038, 3)
+    assert_almost_equal(peak_snr(img, adapted), 97.949, 3)
+    assert_almost_equal(norm_brightness_err(img, adapted), 0.03077, 3)
     return data, adapted
 
 
@@ -116,9 +117,9 @@ def test_adapthist_color():
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(img)
-    assert_almost_equal(peak_snr(full_scale, adapted), 64.717, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 102.940, 3)
     assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.179, 3)
+                        0.0110, 3)
     return data, adapted
 
 
