@@ -1,4 +1,3 @@
-import os
 from textwrap import dedent
 
 try:
@@ -11,6 +10,7 @@ import numpy as np
 import skimage
 from skimage import io
 from .core import BaseWidget
+from ..utils import dialogs
 
 
 __all__ = ['OKCancelButtons', 'SaveButtons']
@@ -84,13 +84,9 @@ class SaveButtons(BaseWidget):
         notify(msg)
 
     def save_to_file(self):
-        filename = str(QtGui.QFileDialog.getSaveFileName())
-        if len(filename) == 0:
+        filename = dialogs.save_file_dialog()
+        if filename is None:
             return
-        #TODO: io plugins should assign default image formats
-        basename, ext = os.path.splitext(filename)
-        if not ext:
-            filename = '%s.%s' % (filename, self.default_format)
         image = self.plugin.filtered_image
         if image.dtype == np.bool:
             #TODO: This check/conversion should probably be in `imsave`.

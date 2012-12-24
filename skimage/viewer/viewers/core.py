@@ -8,9 +8,11 @@ except ImportError:
     QMainWindow = object  # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
+from skimage import io
 from skimage.util.dtype import dtype_range
 from .. import utils
 from ..widgets import Slider
+from ..utils import dialogs
 
 
 __all__ = ['ImageViewer', 'CollectionViewer']
@@ -58,7 +60,11 @@ class ImageViewer(QMainWindow):
         self.setWindowTitle("Image Viewer")
 
         self.file_menu = QtGui.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.close,
+        self.file_menu.addAction('Open file', self.open_file,
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_O)
+        self.file_menu.addAction('Save to file', self.save_to_file,
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_S)
+        self.file_menu.addAction('Quit', self.close,
                                  QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
 
@@ -100,6 +106,30 @@ class ImageViewer(QMainWindow):
         """Add plugin to ImageViewer"""
         plugin.attach(self)
         return self
+
+    def open_file(self):
+        """Open image file and display in viewer."""
+        filename = dialogs.open_file_dialog()
+        if filename is None:
+            return
+        image = io.imread(filename)
+        self.original_image = image     # update saved image
+        self.image = image              # update displayed image
+
+    def save_to_file(self):
+        """Save current image to file.
+
+        The current behavior is not ideal: It saves the image displayed on
+        screen, so all images will be converted to RGB, and the image size is
+        not preserved (resizing the viewer window will alter the size of the
+        saved image).
+        """
+        filename = dialogs.save_file_dialog()
+        if filename is None:
+            return
+        extent = self.ax.get_window_extent()
+        extent = extent.transformed(self.fig.dpi_scale_trans.inverted())
+        self.fig.savefig(filename, bbox_inches=extent)
 
     def closeEvent(self, event):
         self.close()
