@@ -874,18 +874,18 @@ def warp_coords(coord_map, shape, dtype=np.float64):
 
     Examples
     --------
-    Produce a coordinate map that Shifts an image to the right:
+    Produce a coordinate map that Shifts an image up and to the right:
 
     >>> from skimage import data
     >>> from scipy.ndimage import map_coordinates
     >>>
-    >>> def shift_right(xy):
-    ...     xy[:, 0] -= 10
-    ...     return xy
+    >>> def shift_up1_left2(xy):
+    ...     return xy-np.array([-2,1])[:,None]
     >>>
     >>> image = data.lena().astype(np.float32)
     >>> coords = warp_coords(shift_right, image.shape)
     >>> warped_image = map_coordinates(image, coords)
+    >>>
 
     """
     rows, cols = shape[0], shape[1]
