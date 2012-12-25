@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import run_module_suite, assert_raises
+from numpy.testing import run_module_suite, assert_raises, assert_equal
 
 from skimage import filter, data, color, img_as_float
 
@@ -27,6 +27,12 @@ def test_denoise_tv_chambolle_2d():
     assert grad_denoised.dtype == np.float
     assert (np.sqrt((grad_denoised**2).sum())
             < np.sqrt((grad**2).sum()) / 2)
+
+
+def test_denoise_tv_chambolle_multichannel():
+    denoised0 = filter.denoise_tv_chambolle(lena[..., 0], weight=60.0)
+    denoised = filter.denoise_tv_chambolle(lena, weight=60.0, multichannel=True)
+    assert_equal(denoised[..., 0], denoised0)
 
 
 def test_denoise_tv_chambolle_float_result_range():
