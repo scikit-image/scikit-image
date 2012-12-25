@@ -242,15 +242,15 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
         im = img_as_float(im)
 
     if im.ndim == 2:
-        out = _denoise_tv_2d(im, weight, eps, n_iter_max)
+        out = _denoise_tv_chambolle_2d(im, weight, eps, n_iter_max)
     elif im.ndim == 3:
         if multichannel:
             out = np.zeros_like(im)
             for c in range(im.shape[2]):
-                out[..., c] = _denoise_tv_2d(im[..., c], weight, eps,
+                out[..., c] = _denoise_tv_chambolle_2d(im[..., c], weight, eps,
                                              n_iter_max)
         else:
-            out = _denoise_tv_3d(im, weight, eps, n_iter_max)
+            out = _denoise_tv_chambolle_3d(im, weight, eps, n_iter_max)
     else:
         raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
