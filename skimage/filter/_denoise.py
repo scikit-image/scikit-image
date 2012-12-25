@@ -200,6 +200,8 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
 
     Notes
     -----
+    Make sure to set the multichannel parameter appropriately for color images.
+
     The principle of total variation denoising is explained in
     http://en.wikipedia.org/wiki/Total_variation_denoising
 
