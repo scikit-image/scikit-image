@@ -8,7 +8,7 @@ lena = img_as_float(data.lena()[:256, :256])
 lena_gray = color.rgb2gray(lena)
 
 
-def test_denoise_tv_2d():
+def test_denoise_tv_bregman_2d():
     img = lena_gray
     # add some random noise
     img += 0.5 * img.std() * np.random.random(img.shape)
@@ -22,7 +22,7 @@ def test_denoise_tv_2d():
     assert out1.std() > out2.std()
 
 
-def test_denoise_tv_float_result_range():
+def test_denoise_tv_bregman_float_result_range():
     # lena image
     img = lena_gray
     int_lena = np.multiply(img, 255).astype(np.uint8)
@@ -34,7 +34,7 @@ def test_denoise_tv_float_result_range():
     assert np.min(denoised_int_lena) >= 0.0
 
 
-def test_denoise_tv_3d():
+def test_denoise_tv_bregman_3d():
     img = lena
     # add some random noise
     img += 0.5 * img.std() * np.random.random(img.shape)
