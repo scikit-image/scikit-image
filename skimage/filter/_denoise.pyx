@@ -179,7 +179,7 @@ def denoise_bilateral(image, int win_size=5, sigma_range=None,
     return np.squeeze(out)
 
 
-def denoise_tv(image, double weight, int max_iter=100, double eps=1e-3):
+def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -314,5 +314,3 @@ def denoise_tv(image, double weight, int max_iter=100, double eps=1e-3):
         i += 1
 
     return np.squeeze(u[1:-1, 1:-1])
-
-tv_denoise = deprecated('skimage.filter.denoise_tv')(denoise_tv)

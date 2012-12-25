@@ -14,8 +14,8 @@ def test_denoise_tv_2d():
     img += 0.5 * img.std() * np.random.random(img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = filter.denoise_tv(img, weight=10)
-    out2 = filter.denoise_tv(img, weight=5)
+    out1 = filter.denoise_tv_bregman(img, weight=10)
+    out2 = filter.denoise_tv_bregman(img, weight=5)
 
     # make sure noise is reduced
     assert img.std() > out1.std()
@@ -27,7 +27,7 @@ def test_denoise_tv_float_result_range():
     img = lena_gray
     int_lena = np.multiply(img, 255).astype(np.uint8)
     assert np.max(int_lena) > 1
-    denoised_int_lena = filter.denoise_tv(int_lena, weight=60.0)
+    denoised_int_lena = filter.denoise_tv_bregman(int_lena, weight=60.0)
     # test if the value range of output float data is within [0.0:1.0]
     assert denoised_int_lena.dtype == np.float
     assert np.max(denoised_int_lena) <= 1.0
@@ -40,8 +40,8 @@ def test_denoise_tv_3d():
     img += 0.5 * img.std() * np.random.random(img.shape)
     img = np.clip(img, 0, 1)
 
-    out1 = filter.denoise_tv(img, weight=10)
-    out2 = filter.denoise_tv(img, weight=5)
+    out1 = filter.denoise_tv_bregman(img, weight=10)
+    out2 = filter.denoise_tv_bregman(img, weight=5)
 
     # make sure noise is reduced
     assert img.std() > out1.std()
