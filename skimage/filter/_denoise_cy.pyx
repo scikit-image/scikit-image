@@ -183,7 +183,7 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
-    tries to find an image with less total total-variation under the constraint
+    tries to find an image with less total-variation under the constraint
     of being similar to the input image, which is controlled by the
     regularization parameter.
 
