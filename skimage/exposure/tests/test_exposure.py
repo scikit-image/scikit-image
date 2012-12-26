@@ -142,7 +142,6 @@ def peak_snr(img1, img2):
     img2 = skimage.img_as_float(img2)
     mse = 1. / img1.size * np.square(img1 - img2).sum()
     _, max_ = dtype_range[img1.dtype.type]
-    print mse, max_
     return 20 * np.log(max_ / mse)
 
 
