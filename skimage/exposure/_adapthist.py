@@ -150,7 +150,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
             hist = np.bincount(hist)
             hist = np.append(hist, np.zeros(nbins - hist.size, dtype=int))
             hist = clip_histogram(hist, clip_limit)
-            hist = map_histogram(hist, 0, NR_OF_GREY, n_pixels)
+            hist = map_histogram(hist, 0, NR_OF_GREY - 1, n_pixels)
             map_array[y, x] = hist
 
     # Interpolate greylevel mappings to get CLAHE image
