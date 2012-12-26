@@ -849,8 +849,8 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     ----------
     coord_map : callable like GeometricTransform.inverse
         Return input coordinates for given output coordinates.
-        Coordinates are in the shape (P,2), where P is the number
-        of coordinates and each element is an x,y pair
+        Coordinates are in the shape (P, 2), where P is the number
+        of coordinates and each element is a ``(x, y)`` pair.
     shape : tuple
         Shape of output image ``(rows, cols[, bands])``.
     dtype : np.dtype or string
@@ -883,12 +883,11 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     >>> from scipy.ndimage import map_coordinates
     >>>
     >>> def shift_up10_left20(xy):
-    ...     return xy-np.array([-20,10])[None,:]
+    ...     return xy - np.array([-20, 10])[None, :]
     >>>
     >>> image = data.lena().astype(np.float32)
     >>> coords = warp_coords(shift_up10_left20, image.shape)
     >>> warped_image = map_coordinates(image, coords)
-    >>>
 
     """
     rows, cols = shape[0], shape[1]
