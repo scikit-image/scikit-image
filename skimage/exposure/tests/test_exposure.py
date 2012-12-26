@@ -108,7 +108,7 @@ def test_adapthist_grayscale():
 
 
 def test_adapthist_color():
-    '''Test a color uint16 image
+    '''Test an RGB color uint16 image
     '''
     img = skimage.img_as_uint(data.lena())
     adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
