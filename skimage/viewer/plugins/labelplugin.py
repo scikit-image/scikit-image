@@ -25,7 +25,7 @@ class LabelPainter(Plugin):
         self.add_widget(self._radius_widget)
         self.add_widget(self._label_widget)
 
-        print self.help()
+        print(self.help())
 
     def help(self):
         helpstr = ("Label painter",

@@ -13,7 +13,7 @@ class ColorHistogram(PlotPlugin):
     def __init__(self, **kwargs):
         super(ColorHistogram, self).__init__(height=400, **kwargs)
 
-        print self.help()
+        print(self.help())
 
     def attach(self, image_viewer):
         super(ColorHistogram, self).attach(image_viewer)

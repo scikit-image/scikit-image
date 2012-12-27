@@ -62,7 +62,7 @@ class RectangleTool(CanvasToolBase, RectangleSelector):
 
         if on_enter is None:
             def on_enter(extents):
-                print "(xmin=%.3g, xmax=%.3g, ymin=%.3g, ymax=%.3g)" % extents
+                print("(xmin=%.3g, xmax=%.3g, ymin=%.3g, ymax=%.3g)" % extents)
         self.callback_on_enter = on_enter
 
         props = dict(mec=props['edgecolor'])
@@ -210,5 +210,5 @@ if __name__ == '__main__':
 
     rect_tool = RectangleTool(ax)
     plt.show()
-    print "Final selection:",
+    print("Final selection:")
     rect_tool.callback_on_enter(rect_tool.extents)

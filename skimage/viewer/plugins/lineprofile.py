@@ -41,7 +41,7 @@ class LineProfile(PlotPlugin):
             maxdist = epsilon
         self.maxdist = maxdist
         self._limit_type = limits
-        print self.help()
+        print(self.help())
 
     def attach(self, image_viewer):
         super(LineProfile, self).attach(image_viewer)

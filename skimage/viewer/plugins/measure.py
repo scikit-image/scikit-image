@@ -25,7 +25,7 @@ class Measure(Plugin):
         self.add_widget(self._length)
         self.add_widget(self._angle)
 
-        print self.help()
+        print(self.help())
 
     def attach(self, image_viewer):
         super(Measure, self).attach(image_viewer)

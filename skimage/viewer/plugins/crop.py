@@ -13,7 +13,7 @@ class Crop(Plugin):
         super(Crop, self).__init__(**kwargs)
         self.maxdist = maxdist
         self.add_widget(SaveButtons())
-        print self.help()
+        print(self.help())
 
     def attach(self, image_viewer):
         super(Crop, self).attach(image_viewer)
