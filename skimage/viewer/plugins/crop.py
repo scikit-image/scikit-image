@@ -21,6 +21,7 @@ class Crop(Plugin):
         self.rect_tool = RectangleTool(self.image_viewer.ax,
                                        maxdist=self.maxdist,
                                        on_enter=self.crop)
+        self.artists.append(self.rect_tool)
 
     def help(self):
         helpstr = ("Crop tool",

@@ -35,6 +35,7 @@ class Measure(Plugin):
         self.line_tool = LineTool(self.image_viewer.ax,
                                   maxdist=self.maxdist,
                                   on_move=self.line_changed)
+        self.artists.append(self.line_tool)
 
     def help(self):
         helpstr = ("Measure tool",

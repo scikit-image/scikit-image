@@ -83,14 +83,6 @@ class ImageViewer(QMainWindow):
         self.image = image.copy()
         self.plugins = []
 
-        # List of axes artists to check for removal.
-        self._axes_artists = [self.ax.artists,
-                              self.ax.collections,
-                              self.ax.images,
-                              self.ax.lines,
-                              self.ax.patches,
-                              self.ax.texts]
-
         self.layout = QtGui.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
 
@@ -195,25 +187,6 @@ class ImageViewer(QMainWindow):
     def disconnect_event(self, callback_id):
         """Disconnect callback by its id (returned by `connect_event`)."""
         self.canvas.mpl_disconnect(callback_id)
-
-    def remove_artist(self, artist):
-        """Disconnect matplotlib artist from image viewer.
-
-        The `closeEvent` method of a Plugin should remove artists (Matplotlib
-        lines, markers, etc.) from the viewer so that they aren't stranded.
-
-        Parameters
-        ----------
-        artist : Matplotlib Artist
-            Artists created by Matplotlib functions (e.g., `plot` returns list
-            of `Line2D` artists) should be saved by the plugin for removal.
-        """
-        # Note: an `add_artist` method is unnecessary since Matplotlib
-
-        # There's probably a smarter way to find where the artist is stored.
-        for artist_list in self._axes_artists:
-            if artist in artist_list:
-                artist_list.remove(artist)
 
     def _update_status_bar(self, event):
         if event.inaxes and event.inaxes.get_navigate():

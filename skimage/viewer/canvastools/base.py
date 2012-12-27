@@ -84,6 +84,16 @@ class CanvasToolBase(object):
         for artist in self._artists:
             self.ax.draw_artist(artist)
 
+    def remove(self):
+        """Remove artists and events from axes.
+
+        Note that the naming here mimics the interface of Matplotlib artists.
+        """
+        #TODO: For some reason, RectangleTool doesn't get properly removed
+        self.disconnect_events()
+        for a in self._artists:
+            a.remove()
+
     def redraw(self):
         """Redraw image and canvas artists.
 

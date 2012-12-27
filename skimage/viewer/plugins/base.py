@@ -44,8 +44,9 @@ class Plugin(QDialog):
     name : str
         Name of plugin. This is displayed as the window title.
     artist : list
-        List of Matplotlib artists. Any artists created by the plugin should
-        be added to this list so that it gets cleaned up on close.
+        List of Matplotlib artists and canvastools. Any artists created by the
+        plugin should be added to this list so that it gets cleaned up on
+        close.
 
     Examples
     --------
@@ -190,8 +191,7 @@ class Plugin(QDialog):
     def closeEvent(self, event):
         """On close disconnect all artists and events from ImageViewer.
 
-        Note that events must be connected using `self.connect_image_event` and
-        artists must be appended to `self.artists`.
+        Note that artists must be appended to `self.artists`.
         """
         self.disconnect_image_events()
         self.remove_image_artists()
@@ -222,6 +222,6 @@ class Plugin(QDialog):
             self.image_viewer.disconnect_event(c)
 
     def remove_image_artists(self):
-        """Disconnect artists that are connected to the image viewer."""
+        """Remove artists that are connected to the image viewer."""
         for a in self.artists:
-            self.image_viewer.remove_artist(a)
+            a.remove()
