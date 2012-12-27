@@ -193,33 +193,14 @@ class Plugin(QDialog):
 
         Note that artists must be appended to `self.artists`.
         """
-        self.disconnect_image_events()
+        self.clean_up()
+        self.close()
+
+    def clean_up(self):
         self.remove_image_artists()
         self.image_viewer.plugins.remove(self)
         self.image_viewer.reset_image()
         self.image_viewer.redraw()
-        self.close()
-
-    def connect_image_event(self, event, callback):
-        """Connect callback with an event in the image viewer.
-
-        This should be used in lieu of `figure.canvas.mpl_connect` since this
-        function stores call back ids for later clean up.
-
-        Parameters
-        ----------
-        event : str
-            Matplotlib event.
-        callback : function
-            Callback function with a matplotlib Event object as its argument.
-        """
-        cid = self.image_viewer.connect_event(event, callback)
-        self.cids.append(cid)
-
-    def disconnect_image_events(self):
-        """Disconnect all events created by this widget."""
-        for c in self.cids:
-            self.image_viewer.disconnect_event(c)
 
     def remove_image_artists(self):
         """Remove artists that are connected to the image viewer."""
