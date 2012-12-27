@@ -63,7 +63,6 @@ class Text(BaseWidget):
             self.layout.addWidget(name_label)
         self.layout.addWidget(self._label)
 
-
     @property
     def text(self):
         return self._label.text()
@@ -251,3 +250,11 @@ class ComboBox(BaseWidget):
     @property
     def val(self):
         return self._combo_box.value()
+
+    @property
+    def index(self):
+        return self._combo_box.currentIndex()
+
+    @index.setter
+    def index(self, i):
+        self._combo_box.setCurrentIndex(i)
