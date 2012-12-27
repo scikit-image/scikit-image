@@ -123,3 +123,6 @@
 
 - Luis Pedro Coelho
   imread plugin
+
+- Anders Boesen Lindbo Larsen
+  Dense DAISY feature description, circle perimeter drawing.
