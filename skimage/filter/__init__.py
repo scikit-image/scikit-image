@@ -3,7 +3,7 @@ from .ctmf import median_filter
 from ._canny import canny
 from .edges import (sobel, hsobel, vsobel, scharr, hscharr, vscharr, prewitt,
                     hprewitt, vprewitt)
-from .denoise import tv_denoise, denoise_tv
-from ._denoise import denoise_bilateral
+from ._denoise import denoise_tv_chambolle, tv_denoise
+from ._denoise_cy import denoise_bilateral, denoise_tv_bregman
 from ._rank_order import rank_order
 from .thresholding import threshold_otsu, threshold_adaptive
