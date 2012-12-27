@@ -212,8 +212,12 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Total_variation_denoising
-    .. [2] ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
-    .. [3] http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
+    .. [2] Tom Goldstein and Stanley Osher, "The Split Bregman Method For L1
+           Regularized Problems",
+           ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
+    .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
+           using Split Bregman" in Image Processing On Line on 2012–05–19,
+           http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
 
     """
 
