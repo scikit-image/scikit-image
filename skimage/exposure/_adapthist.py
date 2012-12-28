@@ -158,11 +158,11 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     for y in range(ntiles_y + 1):
         xstart = 0
         if y == 0:  # special case: top row
-            ystep = y_size / 2
+            ystep = int(y_size / 2)
             yU = 0
             yB = 0
         elif y == ntiles_y:  # special case: bottom row
-            ystep = y_size / 2
+            ystep = int(y_size / 2)
             yU = ntiles_y - 1
             yB = yU
         else:  # default values
@@ -172,11 +172,11 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
 
         for x in range(ntiles_x + 1):
             if x == 0:  # special case: left column
-                xstep = x_size / 2
+                xstep = int(x_size / 2)
                 xL = 0
                 xR = 0
             elif x == ntiles_x:  # special case: right column
-                xstep = x_size / 2
+                xstep = int(x_size / 2)
                 xL = ntiles_x - 1
                 xR = xL
             else:  # default values
