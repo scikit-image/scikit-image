@@ -226,7 +226,7 @@ def clip_histogram(hist, clip_limit):
     n_excess = excess.sum() - excess.size * clip_limit
 
     # Second part: clip histogram and redistribute excess pixels in each bin
-    bin_incr = n_excess / hist.size  # average binincrement
+    bin_incr = int(n_excess / hist.size)  # average binincrement
     upper = clip_limit - bin_incr  # Bins larger than upper set to cliplimit
 
     hist[excess_mask] = clip_limit
