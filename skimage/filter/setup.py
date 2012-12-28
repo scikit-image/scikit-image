@@ -13,7 +13,7 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['_ctmf.pyx'], working_path=base_path)
-    cython(['_denoise.pyx'], working_path=base_path)
+    cython(['_denoise_cy.pyx'], working_path=base_path)
     cython(['rank/_core8.pyx'], working_path=base_path)
     cython(['rank/_core16.pyx'], working_path=base_path)
     cython(['rank/_crank8.pyx'], working_path=base_path)
@@ -27,7 +27,7 @@ def configuration(parent_package='', top_path=None):
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
         include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_denoise', sources=['_denoise.c'],
+    config.add_extension('_denoise_cy', sources=['_denoise_cy.c'],
         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('rank/_core8', sources=['rank/_core8.c'],
         include_dirs=[get_numpy_include_dirs()])

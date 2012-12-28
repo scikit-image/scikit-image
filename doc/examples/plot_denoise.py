@@ -30,30 +30,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage import data, color, img_as_float
-from skimage.filter import denoise_tv, denoise_bilateral
+from skimage.filter import denoise_tv_chambolle, denoise_bilateral
 
 lena = img_as_float(data.lena())
 lena = lena[220:300, 220:320]
 
-noisy = lena + 0.5 * lena.std() * np.random.random(lena.shape)
+noisy = lena + 0.6 * lena.std() * np.random.random(lena.shape)
 noisy = np.clip(noisy, 0, 1)
 
 fig, ax = plt.subplots(nrows=2, ncols=3, figsize=(8, 5))
 
+plt.gray()
+
 ax[0, 0].imshow(noisy)
 ax[0, 0].axis('off')
 ax[0, 0].set_title('noisy')
-ax[0, 1].imshow(denoise_tv(noisy, weight=0.1))
+ax[0, 1].imshow(denoise_tv_chambolle(noisy, weight=0.1, multichannel=True))
 ax[0, 1].axis('off')
 ax[0, 1].set_title('TV')
-ax[0, 2].imshow(denoise_bilateral(noisy, sigma_range=0.03, sigma_spatial=15))
+ax[0, 2].imshow(denoise_bilateral(noisy, sigma_range=0.05, sigma_spatial=15))
 ax[0, 2].axis('off')
 ax[0, 2].set_title('Bilateral')
 
-ax[1, 0].imshow(denoise_tv(noisy, weight=0.2))
+ax[1, 0].imshow(denoise_tv_chambolle(noisy, weight=0.2, multichannel=True))
 ax[1, 0].axis('off')
 ax[1, 0].set_title('(more) TV')
-ax[1, 1].imshow(denoise_bilateral(noisy, sigma_range=0.06, sigma_spatial=15))
+ax[1, 1].imshow(denoise_bilateral(noisy, sigma_range=0.1, sigma_spatial=15))
 ax[1, 1].axis('off')
 ax[1, 1].set_title('(more) Bilateral')
 ax[1, 2].imshow(lena)
