@@ -124,16 +124,16 @@ class ImageViewer(QMainWindow):
             io.imsave(self.image, filename)
         else:
             im1 = self.ax.images[1]
-            overlay = im1.cmap(im1.get_array())
+            overlay = im1.cmap(img_as_float(im1.get_array()))
             overlay = img_as_float(overlay)
             im0 = self.ax.images[0]
-            underlay = im0.cmap(im0.get_array())
+            underlay = im0.cmap(img_as_float(im0.get_array()))
             underlay = img_as_float(underlay)
             alpha = overlay[:, :, 3]
             alpha = np.dstack((alpha, alpha, alpha))
             alpha /= alpha.max()
             composite = (overlay[:, :, :3] * alpha +
-                          underlay[:, :, :3] * (1 - alpha))
+                         underlay[:, :, :3] * (1 - alpha))
             io.imsave(filename, composite)
 
     def closeEvent(self, event):
