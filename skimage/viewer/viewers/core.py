@@ -8,8 +8,9 @@ except ImportError:
     QMainWindow = object  # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
-from skimage import io
+from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
+import numpy as np
 from .. import utils
 from ..widgets import Slider
 from ..utils import dialogs
@@ -119,9 +120,21 @@ class ImageViewer(QMainWindow):
         filename = dialogs.save_file_dialog()
         if filename is None:
             return
-        extent = self.ax.get_window_extent()
-        extent = extent.transformed(self.fig.dpi_scale_trans.inverted())
-        self.fig.savefig(filename, bbox_inches=extent)
+        if len(self.ax.images) == 1:
+            io.imsave(self.image, filename)
+        else:
+            im1 = self.ax.images[1]
+            overlay = im1.cmap(im1.get_array())
+            overlay = img_as_float(overlay)
+            im0 = self.ax.images[0]
+            underlay = im0.cmap(im0.get_array())
+            underlay = img_as_float(underlay)
+            alpha = overlay[:, :, 3]
+            alpha = np.dstack((alpha, alpha, alpha))
+            alpha /= alpha.max()
+            composite = (overlay[:, :, :3] * alpha +
+                          underlay[:, :, :3] * (1 - alpha))
+            io.imsave(filename, composite)
 
     def closeEvent(self, event):
         self.close()
