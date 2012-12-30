@@ -187,3 +187,69 @@ def circle(double cy, double cx, double radius, shape=None):
         ``img[rr, cc] = 1``.
     """
     return ellipse(cy, cx, radius, radius, shape)
+
+
+def circle_perimeter(int cy, int cx, int radius):
+    """Generate circle perimeter coordinates.
+
+    Parameters
+    ----------
+    cy, cx : int
+        Centre coordinate of circle.
+    radius: int
+        Radius of circle.
+
+    Returns
+    -------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels that belong to the circle perimeter.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+
+    """
+
+    cdef list rr = list()
+    cdef list cc = list()
+
+    cdef int x = 0
+    cdef int y = radius
+    cdef int d = 3 - 2 * radius
+
+    while y >= x:
+        rr.extend([y, -y, y, -y, x, -x, x, -x])
+        cc.extend([x, x, -x, -x, y, y, -y, -y])
+        if d < 0:
+            d += 4 * x + 6
+        else:
+            d += 4 * (x - y) + 10
+            y -= 1
+        x += 1
+
+    return np.array(rr) + cy, np.array(cc) + cx
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def set_color(img, coords, color):
+    """Set pixel color in the image at the given coordiantes. Coordinates that
+    exceeed the shape of the image will be ignored.
+
+    Parameters
+    ----------
+    img : (M, N, D) ndarray
+        Image
+    coords : ((P,) ndarray, (P,) ndarray)
+        Coordinates of pixels to be colored.
+    color : (D,) ndarray
+        Color to be assigned to coordinates in the image.
+
+    Returns
+    -------
+    img : (M, N, D) ndarray
+        The updated image.
+    """
+    rr, cc = coords
+    rr_inside = np.logical_and(rr >= 0, rr < img.shape[0])
+    cc_inside = np.logical_and(cc >= 0, cc < img.shape[1])
+    inside = np.logical_and(rr_inside, cc_inside)
+    img[rr[inside], cc[inside]] = color
