@@ -126,3 +126,6 @@
 
 - Steven Silvester, Karel Zuiderveld
   Adaptive Histogram Equalization
+
+- Anders Boesen Lindbo Larsen
+  Dense DAISY feature description, circle perimeter drawing.
