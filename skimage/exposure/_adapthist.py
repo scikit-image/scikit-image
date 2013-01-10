@@ -158,11 +158,11 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     for y in range(ntiles_y + 1):
         xstart = 0
         if y == 0:  # special case: top row
-            ystep = y_size / 2
+            ystep = y_size / 2.0
             yU = 0
             yB = 0
         elif y == ntiles_y:  # special case: bottom row
-            ystep = y_size / 2
+            ystep = y_size / 2.0
             yU = ntiles_y - 1
             yB = yU
         else:  # default values
@@ -172,11 +172,11 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
 
         for x in range(ntiles_x + 1):
             if x == 0:  # special case: left column
-                xstep = x_size / 2
+                xstep = x_size / 2.0
                 xL = 0
                 xR = 0
             elif x == ntiles_x:  # special case: right column
-                xstep = x_size / 2
+                xstep = x_size / 2.0
                 xL = ntiles_x - 1
                 xR = xL
             else:  # default values
@@ -226,7 +226,7 @@ def clip_histogram(hist, clip_limit):
     n_excess = excess.sum() - excess.size * clip_limit
 
     # Second part: clip histogram and redistribute excess pixels in each bin
-    bin_incr = n_excess / hist.size  # average binincrement
+    bin_incr = int(n_excess / hist.size)  # average binincrement
     upper = clip_limit - bin_incr  # Bins larger than upper set to cliplimit
 
     hist[excess_mask] = clip_limit
