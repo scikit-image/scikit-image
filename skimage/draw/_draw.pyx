@@ -217,6 +217,12 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     is also less distortions when Andres circles are rotated.
     Bresenham method is also known as midpoint circle algorithm.
 
+    References
+    ----------
+    .. [1] J.E. Bresenham, "Algorithm for computer control of a digital
+        plotter", 4 (1965) 25-30.
+    .. [2] E. Andres, "Discrete circles, rings and spheres", 18 (1994) 695-706.
+
     """
 
     cdef list rr = list()
