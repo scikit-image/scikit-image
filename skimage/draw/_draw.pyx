@@ -189,7 +189,7 @@ def circle(double cy, double cx, double radius, shape=None):
     return ellipse(cy, cx, radius, radius, shape)
 
 
-def circle_perimeter(int cy, int cx, int radius):
+def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     """Generate circle perimeter coordinates.
 
     Parameters
@@ -198,6 +198,10 @@ def circle_perimeter(int cy, int cx, int radius):
         Centre coordinate of circle.
     radius: int
         Radius of circle.
+    method : string
+        bresenham : Bresenham method
+        andres : Andres method
+
 
     Returns
     -------
@@ -206,6 +210,13 @@ def circle_perimeter(int cy, int cx, int radius):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
+    Notes
+    -----
+    Andres method presents the advantage that concentric
+    circles create a disc whereas Bresenham can make holes. There
+    is also less distortions when Andres circles are rotated.
+    Bresenham method is also known as midpoint circle algorithm.
+
     """
 
     cdef list rr = list()
@@ -213,17 +224,36 @@ def circle_perimeter(int cy, int cx, int radius):
 
     cdef int x = 0
     cdef int y = radius
-    cdef int d = 3 - 2 * radius
+    cdef int d = 0
+    if method == 'bresenham':
+        d = 3 - 2 * radius
+    elif method == 'andres':
+        d = radius - 1
+    else:
+        raise ValueError('Wrong method')
 
     while y >= x:
         rr.extend([y, -y, y, -y, x, -x, x, -x])
         cc.extend([x, x, -x, -x, y, y, -y, -y])
-        if d < 0:
-            d += 4 * x + 6
-        else:
-            d += 4 * (x - y) + 10
-            y -= 1
-        x += 1
+
+        if method == 'bresenham':
+            if d < 0:
+                d += 4 * x + 6
+            else:
+                d += 4 * (x - y) + 10
+                y -= 1
+            x += 1
+        elif method == 'andres':
+            if err >= 2 * (x - 1):
+                err = err - 2*x
+                x = x + 1
+            elif err <= 2*(radius - y):
+                err = err + 2 * y - 1
+                y = y - 1
+            else:
+                err = err + 2*(y - x - 1)
+                y = y - 1
+                x = x + 1
 
     return np.array(rr) + cy, np.array(cc) + cx
 

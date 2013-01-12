@@ -150,14 +150,14 @@ def test_circle():
     assert_array_equal(img, img_)
 
 
-def test_circle_perimeter():
+def test_circle_perimeter_bresenham():
     img = np.zeros((15, 15), 'uint8')
-    rr, cc = circle_perimeter(7, 7, 0)
+    rr, cc = circle_perimeter(7, 7, 0, method='bresenham')
     img[rr, cc] = 1
     assert(np.sum(img) == 1)
 
     img = np.zeros((17, 15), 'uint8')
-    rr, cc = circle_perimeter(7, 7, 7)
+    rr, cc = circle_perimeter(7, 7, 7, method='bresenham')
     img[rr, cc] = 1
     img_ = np.array(
         [[0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
@@ -175,6 +175,36 @@ def test_circle_perimeter():
          [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
          [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
          [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    )
+    assert_array_equal(img, img_)
+
+def test_circle_perimeter_andres():
+    img = np.zeros((15, 15), 'uint8')
+    rr, cc = circle_perimeter(7, 7, 0, method='andres')
+    img[rr, cc] = 1
+    assert(np.sum(img) == 1)
+
+    img = np.zeros((17, 15), 'uint8')
+    rr, cc = circle_perimeter(7, 7, 7, method='andres')
+    img[rr, cc] = 1
+    img_ = np.array(
+        [[0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+         [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
+         [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+         [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+         [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+         [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+         [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+         [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+         [0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
+         [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
     )
