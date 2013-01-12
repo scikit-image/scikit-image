@@ -198,7 +198,7 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
         Centre coordinate of circle.
     radius: int
         Radius of circle.
-    method : string
+    method : {'bresenham', 'andres'}, optional
         bresenham : Bresenham method
         andres : Andres method
 
@@ -245,13 +245,13 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
             x += 1
         elif method == 'andres':
             if d >= 2 * (x - 1):
-                d = d - 2*x
+                d = d - 2 * x
                 x = x + 1
-            elif d <= 2*(radius - y):
+            elif d <= 2 * (radius - y):
                 d = d + 2 * y - 1
                 y = y - 1
             else:
-                d = d + 2*(y - x - 1)
+                d = d + 2 * (y - x - 1)
                 y = y - 1
                 x = x + 1
 
