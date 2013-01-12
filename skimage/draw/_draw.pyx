@@ -244,14 +244,14 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
                 y -= 1
             x += 1
         elif method == 'andres':
-            if err >= 2 * (x - 1):
-                err = err - 2*x
+            if d >= 2 * (x - 1):
+                d = d - 2*x
                 x = x + 1
-            elif err <= 2*(radius - y):
-                err = err + 2 * y - 1
+            elif d <= 2*(radius - y):
+                d = d + 2 * y - 1
                 y = y - 1
             else:
-                err = err + 2*(y - x - 1)
+                d = d + 2*(y - x - 1)
                 y = y - 1
                 x = x + 1
 
