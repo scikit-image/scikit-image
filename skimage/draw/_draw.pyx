@@ -267,8 +267,8 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def set_color(img, coords, color):
-    """Set pixel color in the image at the given coordiantes. Coordinates that
-    exceeed the shape of the image will be ignored.
+    """Set pixel color in the image at the given coordinates. Coordinates that
+    exceed the shape of the image will be ignored.
 
     Parameters
     ----------
