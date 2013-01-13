@@ -245,7 +245,6 @@ def test_ellipse_perimeter():
     img = np.zeros((30, 15), 'uint8')
     rr, cc = ellipse_perimeter(15, 7, 14, 6)
     img[rr, cc] = 1
-    print(img)
     img_ = np.array(
       [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
