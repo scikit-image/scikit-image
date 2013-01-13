@@ -231,10 +231,13 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     cdef int x = 0
     cdef int y = radius
     cdef int d = 0
+    cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
+        cmethod = 'b'
     elif method == 'andres':
         d = radius - 1
+        cmethod = 'a'
     else:
         raise ValueError('Wrong method')
 
@@ -242,14 +245,14 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
         rr.extend([y, -y, y, -y, x, -x, x, -x])
         cc.extend([x, x, -x, -x, y, y, -y, -y])
 
-        if method == 'bresenham':
+        if cmethod == 'b':
             if d < 0:
                 d += 4 * x + 6
             else:
                 d += 4 * (x - y) + 10
                 y -= 1
             x += 1
-        elif method == 'andres':
+        elif cmethod == 'a':
             if d >= 2 * (x - 1):
                 d = d - 2 * x
                 x = x + 1
