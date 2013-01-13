@@ -1,3 +1,7 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
 import math
 from libc.math cimport sqrt
@@ -6,8 +10,6 @@ cimport cython
 from skimage._shared.geometry cimport point_in_polygon
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def line(int y, int x, int y2, int x2):
     """Generate line pixel coordinates.
 
@@ -66,9 +68,6 @@ def line(int y, int x, int y2, int x2):
     return rr, cc
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
 def polygon(y, x, shape=None):
     """Generate coordinates of pixels within polygon.
 
@@ -123,10 +122,6 @@ def polygon(y, x, shape=None):
     return np.array(rr), np.array(cc)
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
-@cython.cdivision(True)
 def ellipse(double cy, double cx, double b, double a, shape=None):
     """Generate coordinates of pixels within ellipse.
 
@@ -267,8 +262,6 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     return np.array(rr) + cy, np.array(cc) + cx
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def set_color(img, coords, color):
     """Set pixel color in the image at the given coordinates. Coordinates that
     exceed the shape of the image will be ignored.
