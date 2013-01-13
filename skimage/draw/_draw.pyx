@@ -263,6 +263,90 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
 
     return np.array(rr) + cy, np.array(cc) + cx
 
+def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
+    """Generate ellipse perimeter coordinates.
+
+    Parameters
+    ----------
+    cy, cx : int
+        Centre coordinate of ellipse.
+    yradius, xradius: int
+        Main radial values.
+
+    Returns
+    -------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels that belong to the circle perimeter.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+
+    References
+    ----------
+    .. [1] J. Kennedy "A fast Bresenham type algorithm for
+        drawing ellipses".
+    """
+    # If both radii == 0, return the center
+    # to avoid infinite loop in 2nd set
+    if (xradius == 0 and yradius == 0):
+        return np.array(cy), np.array(cx)
+
+    # a and b are xradius an yradius
+    # compute 2a^2 and 2b^2
+    cdef int twoasquared = 2 * xradius * xradius
+    cdef int twobsquared = 2 * yradius * yradius
+
+    # Pixels
+    cdef list px = list()
+    cdef list py = list()
+
+    # First set of points:
+    # start at the top
+    cdef int x = xradius
+    cdef int y = 0
+
+    cdef int err = 0
+    cdef int xstop = twobsquared * xradius
+    cdef int ystop = 0
+    cdef int xchange = yradius * yradius * (1 - 2 * xradius)
+    cdef int ychange = xradius * xradius
+
+    while(xstop > ystop):
+        px.extend([x, -x, -x, x])
+        py.extend([y, y, -y, -y])
+        y += 1
+        ystop += twoasquared
+        err += ychange
+        ychange += twoasquared
+        if ((2 * err + xchange) > 0):
+            x -= 1
+            xstop -= twobsquared
+            err += xchange
+            xchange += twobsquared
+
+    # Second set of points:
+    x = 0
+    y = yradius
+
+    err = 0
+    xstop = 0
+    ystop = twoasquared * yradius
+    xchange = yradius * yradius
+    ychange = xradius * xradius * (1 - 2 * yradius)
+
+    while(xstop <= ystop):
+        px.extend([x, -x, -x, x])
+        py.extend([y, y, -y, -y])
+        x += 1
+        xstop += twobsquared
+        err += xchange
+        xchange += twobsquared
+        if ((2 * err + ychange) > 0):
+            y -= 1
+            ystop -= twoasquared
+            err += ychange
+            ychange += twobsquared
+
+    return np.array(py) + cy, np.array(px) + cx
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
