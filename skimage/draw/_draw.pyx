@@ -35,15 +35,19 @@ def line(int y, int x, int y2, int x2):
     cdef int dy = abs(y2 - y)
     cdef int sx, sy, d, i
 
-    if (x2 - x) > 0: sx = 1
-    else: sx = -1
-    if (y2 - y) > 0: sy = 1
-    else: sy = -1
+    if (x2 - x) > 0:
+        sx = 1
+    else:
+        sx = -1
+    if (y2 - y) > 0:
+        sy = 1
+    else:
+        sy = -1
     if dy > dx:
         steep = 1
-        x,y = y,x
-        dx,dy = dy,dx
-        sx,sy = sy,sx
+        x, y = y, x
+        dx, dy = dy, dx
+        sx, sy = sy, sx
     d = (2 * dy) - dx
 
     rr = np.zeros(int(dx) + 1, dtype=np.int32)
@@ -97,8 +101,8 @@ def polygon(y, x, shape=None):
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
-        maxr = min(shape[0]-1, maxr)
-        maxc = min(shape[1]-1, maxc)
+        maxr = min(shape[0] - 1, maxr)
+        maxc = min(shape[1] - 1, maxc)
 
     cdef int r, c
 
@@ -139,15 +143,15 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    cdef int minr = <int>max(0, cy-b)
-    cdef int maxr = <int>math.ceil(cy+b)
-    cdef int minc = <int>max(0, cx-a)
-    cdef int maxc = <int>math.ceil(cx+a)
+    cdef int minr = <int>max(0, cy - b)
+    cdef int maxr = <int>math.ceil(cy + b)
+    cdef int minc = <int>max(0, cx - a)
+    cdef int maxc = <int>math.ceil(cx + a)
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
-        maxr = min(shape[0]-1, maxr)
-        maxc = min(shape[1]-1, maxc)
+        maxr = min(shape[0] - 1, maxr)
+        maxc = min(shape[1] - 1, maxc)
 
     cdef int r, c
 
@@ -155,9 +159,9 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
     cdef list rr = list()
     cdef list cc = list()
 
-    for r in range(minr, maxr+1):
-        for c in range(minc, maxc+1):
-            if sqrt(((r - cy)/b)**2 + ((c - cx)/a)**2) < 1:
+    for r in range(minr, maxr + 1):
+        for c in range(minc, maxc + 1):
+            if sqrt(((r - cy) / b)**2 + ((c - cx) / a)**2) < 1:
                 rr.append(r)
                 cc.append(c)
 
