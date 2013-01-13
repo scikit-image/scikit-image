@@ -289,7 +289,7 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
     """
     # If both radii == 0, return the center
     # to avoid infinite loop in 2nd set
-    if (xradius == 0 and yradius == 0):
+    if xradius == 0 and yradius == 0:
         return np.array(cy), np.array(cx)
 
     # a and b are xradius an yradius
@@ -312,14 +312,14 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
     cdef int xchange = yradius * yradius * (1 - 2 * xradius)
     cdef int ychange = xradius * xradius
 
-    while(xstop > ystop):
+    while xstop > ystop:
         px.extend([x, -x, -x, x])
         py.extend([y, y, -y, -y])
         y += 1
         ystop += twoasquared
         err += ychange
         ychange += twoasquared
-        if ((2 * err + xchange) > 0):
+        if (2 * err + xchange) > 0:
             x -= 1
             xstop -= twobsquared
             err += xchange
@@ -335,14 +335,14 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
     xchange = yradius * yradius
     ychange = xradius * xradius * (1 - 2 * yradius)
 
-    while(xstop <= ystop):
+    while xstop <= ystop:
         px.extend([x, -x, -x, x])
         py.extend([y, y, -y, -y])
         x += 1
         xstop += twobsquared
         err += xchange
         xchange += twobsquared
-        if ((2 * err + ychange) > 0):
+        if  (2 * err + ychange) > 0:
             y -= 1
             ystop -= twoasquared
             err += ychange
