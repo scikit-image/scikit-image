@@ -1,3 +1,7 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
 import math
 from libc.math cimport sqrt
@@ -6,8 +10,6 @@ cimport cython
 from skimage._shared.geometry cimport point_in_polygon
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def line(int y, int x, int y2, int x2):
     """Generate line pixel coordinates.
 
@@ -33,15 +35,19 @@ def line(int y, int x, int y2, int x2):
     cdef int dy = abs(y2 - y)
     cdef int sx, sy, d, i
 
-    if (x2 - x) > 0: sx = 1
-    else: sx = -1
-    if (y2 - y) > 0: sy = 1
-    else: sy = -1
+    if (x2 - x) > 0:
+        sx = 1
+    else:
+        sx = -1
+    if (y2 - y) > 0:
+        sy = 1
+    else:
+        sy = -1
     if dy > dx:
         steep = 1
-        x,y = y,x
-        dx,dy = dy,dx
-        sx,sy = sy,sx
+        x, y = y, x
+        dx, dy = dy, dx
+        sx, sy = sy, sx
     d = (2 * dy) - dx
 
     rr = np.zeros(int(dx) + 1, dtype=np.int32)
@@ -66,9 +72,6 @@ def line(int y, int x, int y2, int x2):
     return rr, cc
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
 def polygon(y, x, shape=None):
     """Generate coordinates of pixels within polygon.
 
@@ -98,8 +101,8 @@ def polygon(y, x, shape=None):
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
-        maxr = min(shape[0]-1, maxr)
-        maxc = min(shape[1]-1, maxc)
+        maxr = min(shape[0] - 1, maxr)
+        maxc = min(shape[1] - 1, maxc)
 
     cdef int r, c
 
@@ -123,10 +126,6 @@ def polygon(y, x, shape=None):
     return np.array(rr), np.array(cc)
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.nonecheck(False)
-@cython.cdivision(True)
 def ellipse(double cy, double cx, double b, double a, shape=None):
     """Generate coordinates of pixels within ellipse.
 
@@ -144,15 +143,15 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    cdef int minr = <int>max(0, cy-b)
-    cdef int maxr = <int>math.ceil(cy+b)
-    cdef int minc = <int>max(0, cx-a)
-    cdef int maxc = <int>math.ceil(cx+a)
+    cdef int minr = <int>max(0, cy - b)
+    cdef int maxr = <int>math.ceil(cy + b)
+    cdef int minc = <int>max(0, cx - a)
+    cdef int maxc = <int>math.ceil(cx + a)
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
-        maxr = min(shape[0]-1, maxr)
-        maxc = min(shape[1]-1, maxc)
+        maxr = min(shape[0] - 1, maxr)
+        maxc = min(shape[1] - 1, maxc)
 
     cdef int r, c
 
@@ -160,9 +159,9 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
     cdef list rr = list()
     cdef list cc = list()
 
-    for r in range(minr, maxr+1):
-        for c in range(minc, maxc+1):
-            if sqrt(((r - cy)/b)**2 + ((c - cx)/a)**2) < 1:
+    for r in range(minr, maxr + 1):
+        for c in range(minc, maxc + 1):
+            if sqrt(((r - cy) / b)**2 + ((c - cx) / a)**2) < 1:
                 rr.append(r)
                 cc.append(c)
 
@@ -231,10 +230,13 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     cdef int x = 0
     cdef int y = radius
     cdef int d = 0
+    cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
+        cmethod = 'b'
     elif method == 'andres':
         d = radius - 1
+        cmethod = 'a'
     else:
         raise ValueError('Wrong method')
 
@@ -242,14 +244,14 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
         rr.extend([y, -y, y, -y, x, -x, x, -x])
         cc.extend([x, x, -x, -x, y, y, -y, -y])
 
-        if method == 'bresenham':
+        if cmethod == 'b':
             if d < 0:
                 d += 4 * x + 6
             else:
                 d += 4 * (x - y) + 10
                 y -= 1
             x += 1
-        elif method == 'andres':
+        elif cmethod == 'a':
             if d >= 2 * (x - 1):
                 d = d - 2 * x
                 x = x + 1
@@ -264,8 +266,6 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     return np.array(rr) + cy, np.array(cc) + cx
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def set_color(img, coords, color):
     """Set pixel color in the image at the given coordinates. Coordinates that
     exceed the shape of the image will be ignored.
