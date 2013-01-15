@@ -133,7 +133,7 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
     ----------
     cy, cx : double
         Centre coordinate of ellipse.
-    yradius, xradius: double
+    yradius, xradius : double
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
 
     Returns
