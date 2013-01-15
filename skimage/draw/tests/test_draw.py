@@ -155,6 +155,7 @@ def test_circle_perimeter_bresenham():
     rr, cc = circle_perimeter(7, 7, 0, method='bresenham')
     img[rr, cc] = 1
     assert(np.sum(img) == 1)
+    assert(img[7][7] == 1)
 
     img = np.zeros((17, 15), 'uint8')
     rr, cc = circle_perimeter(7, 7, 7, method='bresenham')
@@ -185,6 +186,7 @@ def test_circle_perimeter_andres():
     rr, cc = circle_perimeter(7, 7, 0, method='andres')
     img[rr, cc] = 1
     assert(np.sum(img) == 1)
+    assert(img[7][7] == 1)
 
     img = np.zeros((17, 15), 'uint8')
     rr, cc = circle_perimeter(7, 7, 7, method='andres')
@@ -241,6 +243,7 @@ def test_ellipse_perimeter():
     rr, cc = ellipse_perimeter(15, 7, 0, 0)
     img[rr, cc] = 1
     assert(np.sum(img) == 1)
+    assert(img[15][7] == 1)
 
     img = np.zeros((30, 15), 'uint8')
     rr, cc = ellipse_perimeter(15, 7, 14, 6)
