@@ -126,15 +126,15 @@ def polygon(y, x, shape=None):
     return np.array(rr), np.array(cc)
 
 
-def ellipse(double cy, double cx, double b, double a, shape=None):
+def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
     """Generate coordinates of pixels within ellipse.
 
     Parameters
     ----------
     cy, cx : double
         Centre coordinate of ellipse.
-    b, a: double
-        Minor and major semi-axes. ``(x/a)**2 + (y/b)**2 = 1``.
+    yradius, xradius: double
+        Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
 
     Returns
     -------
@@ -143,10 +143,10 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    cdef int minr = <int>max(0, cy - b)
-    cdef int maxr = <int>math.ceil(cy + b)
-    cdef int minc = <int>max(0, cx - a)
-    cdef int maxc = <int>math.ceil(cx + a)
+    cdef int minr = <int>max(0, cy-yradius)
+    cdef int maxr = <int>math.ceil(cy+yradius)
+    cdef int minc = <int>max(0, cx-xradius)
+    cdef int maxc = <int>math.ceil(cx+xradius)
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
@@ -159,9 +159,9 @@ def ellipse(double cy, double cx, double b, double a, shape=None):
     cdef list rr = list()
     cdef list cc = list()
 
-    for r in range(minr, maxr + 1):
-        for c in range(minc, maxc + 1):
-            if sqrt(((r - cy) / b)**2 + ((c - cx) / a)**2) < 1:
+    for r in range(minr, maxr+1):
+        for c in range(minc, maxc+1):
+            if sqrt(((r - cy)/yradius)**2 + ((c - cx)/xradius)**2) < 1:
                 rr.append(r)
                 cc.append(c)
 
