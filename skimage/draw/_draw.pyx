@@ -272,7 +272,7 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
     ----------
     cy, cx : int
         Centre coordinate of ellipse.
-    yradius, xradius: int
+    yradius, xradius : int
         Main radial values.
 
     Returns
