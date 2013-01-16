@@ -143,10 +143,10 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
     """
-    cdef int minr = <int>max(0, cy-yradius)
-    cdef int maxr = <int>math.ceil(cy+yradius)
-    cdef int minc = <int>max(0, cx-xradius)
-    cdef int maxc = <int>math.ceil(cx+xradius)
+    cdef int minr = <int>max(0, cy - yradius)
+    cdef int maxr = <int>math.ceil(cy + yradius)
+    cdef int minc = <int>max(0, cx - xradius)
+    cdef int maxc = <int>math.ceil(cx + xradius)
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
@@ -161,7 +161,7 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
 
     for r in range(minr, maxr+1):
         for c in range(minc, maxc+1):
-            if sqrt(((r - cy)/yradius)**2 + ((c - cx)/xradius)**2) < 1:
+            if sqrt(((r - cy) / yradius)**2 + ((c - cx) / xradius)**2) < 1:
                 rr.append(r)
                 cc.append(c)
 
