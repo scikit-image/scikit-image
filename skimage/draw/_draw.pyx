@@ -265,6 +265,7 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
 
     return np.array(rr) + cy, np.array(cc) + cx
 
+
 def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
     """Generate ellipse perimeter coordinates.
 
@@ -349,6 +350,7 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
             ychange += twobsquared
 
     return np.array(py) + cy, np.array(px) + cx
+
 
 def set_color(img, coords, color):
     """Set pixel color in the image at the given coordinates. Coordinates that
