@@ -276,7 +276,7 @@ cdef inline dtype_t kernel_entropy(Py_ssize_t * histo, float pop,
         for i in range(maxbin):
             p = histo[i] / pop
             if p > 0:
-                e -= p * log2(p)
+                e -= p * log(p) / 0.30102999566398119521373889472449
 
         return <dtype_t>e * 1000
     else:
