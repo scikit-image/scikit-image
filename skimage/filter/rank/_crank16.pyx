@@ -5,7 +5,7 @@
 
 import numpy as np
 cimport numpy as np
-from libc.math cimport log2
+from libc.math cimport log
 from skimage.filter.rank._core16 cimport _core16
 
 
@@ -274,7 +274,7 @@ cdef inline np.uint16_t kernel_entropy(Py_ssize_t * histo, float pop,
         for i in range(maxbin):
             p = histo[i] / pop
             if p > 0:
-                e -= p * log2(p)
+                e -= p * log(p) / 0.30102999566398119521373889472449
 
         return < np.uint16_t > e * 1000
     else:
