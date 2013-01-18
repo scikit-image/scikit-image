@@ -4,6 +4,9 @@ from numpy.testing import assert_equal, assert_raises
 from skimage.measure import structural_similarity as ssim
 
 
+np.random.seed(1234)
+
+
 def test_ssim_patch_range():
     N = 51
     X = (np.random.random((N, N)) * 255).astype(np.uint8)
