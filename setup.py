@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
         configuration=configuration,
 
-        packages=setuptools.find_packages(),
+        packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
 
