@@ -1,3 +1,4 @@
+#cython: boundscheck=False
 import numpy as np
 cimport numpy as np
 from time import time
@@ -7,7 +8,7 @@ from ..color import rgb2lab, gray2rgb
 
 
 def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
-        convert2lab=True):
+         convert2lab=True):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -62,10 +63,10 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         image = rgb2lab(image)
 
     # initialize on grid:
-    cdef int height, width
+    cdef ssize_t height, width
     height, width = image.shape[:2]
     # approximate grid size for desired n_segments
-    cdef int step = np.ceil(np.sqrt(height * width / n_segments))
+    cdef ssize_t step = np.ceil(np.sqrt(height * width / n_segments))
     grid_y, grid_x = np.mgrid[:height, :width]
     means_y = grid_y[::step, ::step]
     means_x = grid_x[::step, ::step]
@@ -81,11 +82,11 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     ratio = (ratio / float(step)) ** 2
     cdef np.ndarray[dtype=np.float_t, ndim=3] image_yx \
             = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
-    cdef int i, k, x, y, x_min, x_max, y_min, y_max, changes
+    cdef ssize_t i, k, x, y, x_min, x_max, y_min, y_max, changes
     cdef double dist_mean
 
-    cdef np.ndarray[dtype=np.int_t, ndim=2] nearest_mean \
-            = np.zeros((height, width), dtype=np.int)
+    cdef np.ndarray[dtype=np.intp_t, ndim=2] nearest_mean \
+            = np.zeros((height, width), dtype=np.intp)
     cdef np.ndarray[dtype=np.float_t, ndim=2] distance \
             = np.empty((height, width))
     cdef np.float_t* image_p = <np.float_t*> image_yx.data

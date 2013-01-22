@@ -85,18 +85,19 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
         raise ValueError("Sigma should be >= 1")
     cdef int w = int(3 * kernel_size)
 
-    cdef int height = image_c.shape[0]
-    cdef int width = image_c.shape[1]
-    cdef int channels = image_c.shape[2]
+    cdef ssize_t height = image_c.shape[0]
+    cdef ssize_t width = image_c.shape[1]
+    cdef ssize_t channels = image_c.shape[2]
     cdef double current_density, closest, dist
 
-    cdef int r, c, r_, c_, channel
+    cdef ssize_t r, c, r_, c_, channel, r_min, c_min
 
     cdef np.float_t* image_p = <np.float_t*> image_c.data
     cdef np.float_t* current_pixel_p = image_p
 
     cdef np.ndarray[dtype=np.float_t, ndim=2] densities \
             = np.zeros((height, width))
+
     # compute densities
     for r in range(height):
         for c in range(width):
@@ -120,6 +121,7 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
             = np.arange(width * height).reshape(height, width)
     cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent \
             = np.zeros((height, width))
+
     # find nearest node with higher density
     current_pixel_p = image_p
     for r in range(height):
