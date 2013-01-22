@@ -13,11 +13,11 @@ from skimage.filter.rank._core16 cimport _core16, int_min, int_max
 # -----------------------------------------------------------------
 
 
-cdef inline np.uint16_t kernel_autolevel(Py_ssize_t * histo, float pop,
-                                         np.uint16_t g, Py_ssize_t bitdepth,
-                                         Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_autolevel(ssize_t * histo, float pop,
+                                         np.uint16_t g, ssize_t bitdepth,
+                                         ssize_t maxbin, ssize_t midbin,
                                          float p0, float p1,
-                                         Py_ssize_t s0, Py_ssize_t s1):
+                                         ssize_t s0, ssize_t s1):
 
     cdef int i, imin, imax, sum, delta
 
@@ -46,11 +46,11 @@ cdef inline np.uint16_t kernel_autolevel(Py_ssize_t * histo, float pop,
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_gradient(Py_ssize_t * histo, float pop,
-                                        np.uint16_t g, Py_ssize_t bitdepth,
-                                        Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_gradient(ssize_t * histo, float pop,
+                                        np.uint16_t g, ssize_t bitdepth,
+                                        ssize_t maxbin, ssize_t midbin,
                                         float p0, float p1,
-                                        Py_ssize_t s0, Py_ssize_t s1):
+                                        ssize_t s0, ssize_t s1):
 
     cdef int i, imin, imax, sum, delta
 
@@ -74,11 +74,11 @@ cdef inline np.uint16_t kernel_gradient(Py_ssize_t * histo, float pop,
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_mean(Py_ssize_t * histo, float pop,
-                                    np.uint16_t g, Py_ssize_t bitdepth,
-                                    Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_mean(ssize_t * histo, float pop,
+                                    np.uint16_t g, ssize_t bitdepth,
+                                    ssize_t maxbin, ssize_t midbin,
                                     float p0, float p1,
-                                    Py_ssize_t s0, Py_ssize_t s1):
+                                    ssize_t s0, ssize_t s1):
 
     cdef int i, sum, mean, n
 
@@ -100,14 +100,14 @@ cdef inline np.uint16_t kernel_mean(Py_ssize_t * histo, float pop,
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_mean_substraction(Py_ssize_t * histo,
+cdef inline np.uint16_t kernel_mean_substraction(ssize_t * histo,
                                                  float pop,
                                                  np.uint16_t g,
-                                                 Py_ssize_t bitdepth,
-                                                 Py_ssize_t maxbin,
-                                                 Py_ssize_t midbin,
+                                                 ssize_t bitdepth,
+                                                 ssize_t maxbin,
+                                                 ssize_t midbin,
                                                  float p0, float p1,
-                                                 Py_ssize_t s0, Py_ssize_t s1):
+                                                 ssize_t s0, ssize_t s1):
 
     cdef int i, sum, mean, n
 
@@ -128,14 +128,14 @@ cdef inline np.uint16_t kernel_mean_substraction(Py_ssize_t * histo,
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_morph_contr_enh(Py_ssize_t * histo,
+cdef inline np.uint16_t kernel_morph_contr_enh(ssize_t * histo,
                                                float pop,
                                                np.uint16_t g,
-                                               Py_ssize_t bitdepth,
-                                               Py_ssize_t maxbin,
-                                               Py_ssize_t midbin,
+                                               ssize_t bitdepth,
+                                               ssize_t maxbin,
+                                               ssize_t midbin,
                                                float p0, float p1,
-                                               Py_ssize_t s0, Py_ssize_t s1):
+                                               ssize_t s0, ssize_t s1):
 
     cdef int i, imin, imax, sum, delta
 
@@ -165,11 +165,11 @@ cdef inline np.uint16_t kernel_morph_contr_enh(Py_ssize_t * histo,
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_percentile(Py_ssize_t * histo, float pop,
-                                          np.uint16_t g, Py_ssize_t bitdepth,
-                                          Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_percentile(ssize_t * histo, float pop,
+                                          np.uint16_t g, ssize_t bitdepth,
+                                          ssize_t maxbin, ssize_t midbin,
                                           float p0, float p1,
-                                          Py_ssize_t s0, Py_ssize_t s1):
+                                          ssize_t s0, ssize_t s1):
 
     cdef int i
     cdef float sum = 0.
@@ -185,11 +185,11 @@ cdef inline np.uint16_t kernel_percentile(Py_ssize_t * histo, float pop,
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_pop(Py_ssize_t * histo, float pop,
-                                   np.uint16_t g, Py_ssize_t bitdepth,
-                                   Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_pop(ssize_t * histo, float pop,
+                                   np.uint16_t g, ssize_t bitdepth,
+                                   ssize_t maxbin, ssize_t midbin,
                                    float p0, float p1,
-                                   Py_ssize_t s0, Py_ssize_t s1):
+                                   ssize_t s0, ssize_t s1):
 
     cdef int i, sum, n
 
@@ -205,11 +205,11 @@ cdef inline np.uint16_t kernel_pop(Py_ssize_t * histo, float pop,
         return < np.uint16_t > (0)
 
 
-cdef inline np.uint16_t kernel_threshold(Py_ssize_t * histo, float pop,
-                                         np.uint16_t g, Py_ssize_t bitdepth,
-                                         Py_ssize_t maxbin, Py_ssize_t midbin,
+cdef inline np.uint16_t kernel_threshold(ssize_t * histo, float pop,
+                                         np.uint16_t g, ssize_t bitdepth,
+                                         ssize_t maxbin, ssize_t midbin,
                                          float p0, float p1,
-                                         Py_ssize_t s0, Py_ssize_t s1):
+                                         ssize_t s0, ssize_t s1):
 
     cdef int i
     cdef float sum = 0.
@@ -239,7 +239,7 @@ def autolevel(np.ndarray[np.uint16_t, ndim=2] image,
     """bottom hat
     """
     _core16(kernel_autolevel, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)
 
 
 def gradient(np.ndarray[np.uint16_t, ndim=2] image,
@@ -251,7 +251,7 @@ def gradient(np.ndarray[np.uint16_t, ndim=2] image,
     """return p0,p1 percentile gradient
     """
     _core16(kernel_gradient, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)
 
 
 def mean(np.ndarray[np.uint16_t, ndim=2] image,
@@ -263,7 +263,7 @@ def mean(np.ndarray[np.uint16_t, ndim=2] image,
     """return mean between [p0 and p1] percentiles
     """
     _core16(kernel_mean, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)
 
 
 def mean_substraction(np.ndarray[np.uint16_t, ndim=2] image,
@@ -276,7 +276,7 @@ def mean_substraction(np.ndarray[np.uint16_t, ndim=2] image,
     """
     _core16(
         kernel_mean_substraction, image, selem, mask, out, shift_x, shift_y,
-        bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+        bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)
 
 
 def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
@@ -288,7 +288,7 @@ def morph_contr_enh(np.ndarray[np.uint16_t, ndim=2] image,
     """reforce contrast using percentiles
     """
     _core16(kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)
 
 
 def percentile(np.ndarray[np.uint16_t, ndim=2] image,
@@ -300,7 +300,7 @@ def percentile(np.ndarray[np.uint16_t, ndim=2] image,
     """return p0 percentile
     """
     _core16(kernel_percentile, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)
 
 
 def pop(np.ndarray[np.uint16_t, ndim=2] image,
@@ -312,7 +312,7 @@ def pop(np.ndarray[np.uint16_t, ndim=2] image,
     """return nb of pixels between [p0 and p1]
     """
     _core16(kernel_pop, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)
 
 
 def threshold(np.ndarray[np.uint16_t, ndim=2] image,
@@ -324,4 +324,4 @@ def threshold(np.ndarray[np.uint16_t, ndim=2] image,
     """return (maxbin-1) if g > percentile p0
     """
     _core16(kernel_threshold, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, p1, <ssize_t>0, <ssize_t>0)

@@ -16,20 +16,20 @@ cdef inline np.uint8_t uint8_min(np.uint8_t a, np.uint8_t b):
     return a if a <= b else b
 
 
-cdef inline void histogram_increment(Py_ssize_t * histo, float * pop,
+cdef inline void histogram_increment(ssize_t * histo, float * pop,
                                      np.uint8_t value):
     histo[value] += 1
     pop[0] += 1
 
 
-cdef inline void histogram_decrement(Py_ssize_t * histo, float * pop,
+cdef inline void histogram_decrement(ssize_t * histo, float * pop,
                                      np.uint8_t value):
     histo[value] -= 1
     pop[0] -= 1
 
 
-cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
-                                  Py_ssize_t r, Py_ssize_t c,
+cdef inline np.uint8_t is_in_mask(ssize_t rows, ssize_t cols,
+                                  ssize_t r, ssize_t c,
                                   np.uint8_t * mask):
     """Check whether given coordinate is within image and mask is true."""
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
@@ -41,25 +41,25 @@ cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
             return 0
 
 
-cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
-                                   float, Py_ssize_t, Py_ssize_t),
+cdef void _core8(np.uint8_t kernel(ssize_t *, float, np.uint8_t, float,
+                                   float, ssize_t, ssize_t),
                  np.ndarray[np.uint8_t, ndim=2] image,
                  np.ndarray[np.uint8_t, ndim=2] selem,
                  np.ndarray[np.uint8_t, ndim=2] mask,
                  np.ndarray[np.uint8_t, ndim=2] out,
                  char shift_x, char shift_y, float p0, float p1,
-                 Py_ssize_t s0, Py_ssize_t s1) except *:
+                 ssize_t s0, ssize_t s1) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
     use kernel function return value for output image.
     """
 
-    cdef Py_ssize_t rows = image.shape[0]
-    cdef Py_ssize_t cols = image.shape[1]
-    cdef Py_ssize_t srows = selem.shape[0]
-    cdef Py_ssize_t scols = selem.shape[1]
+    cdef ssize_t rows = image.shape[0]
+    cdef ssize_t cols = image.shape[1]
+    cdef ssize_t srows = selem.shape[0]
+    cdef ssize_t scols = selem.shape[1]
 
-    cdef Py_ssize_t centre_r = int(selem.shape[0] / 2) + shift_y
-    cdef Py_ssize_t centre_c = int(selem.shape[1] / 2) + shift_x
+    cdef ssize_t centre_r = int(selem.shape[0] / 2) + shift_y
+    cdef ssize_t centre_c = int(selem.shape[1] / 2) + shift_x
 
     # check that structuring element center is inside the element bounding box
     assert centre_r >= 0
@@ -74,31 +74,31 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
     cdef np.uint8_t * mask_data = <np.uint8_t * >mask.data
 
     # define local variable types
-    cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
+    cdef ssize_t r, c, rr, cc, s, value, local_max, i, even_row
 
     # number of pixels actually inside the neighborhood (float)
     cdef float pop
 
     # allocate memory with malloc
-    cdef Py_ssize_t max_se = srows * scols
+    cdef ssize_t max_se = srows * scols
 
     # number of element in each attack border
-    cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w
+    cdef ssize_t num_se_n, num_se_s, num_se_e, num_se_w
 
     # the current local histogram distribution
-    cdef Py_ssize_t * histo = <Py_ssize_t * >malloc(256 * sizeof(Py_ssize_t))
+    cdef ssize_t * histo = <ssize_t * >malloc(256 * sizeof(ssize_t))
 
     # these lists contain the relative pixel row and column for each of the 4
     # attack borders east, west, north and south e.g. se_e_r lists the rows of
     # the east structuring element border
-    cdef Py_ssize_t * se_e_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_e_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_w_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_w_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_n_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_n_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_s_r = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
-    cdef Py_ssize_t * se_s_c = <Py_ssize_t * >malloc(max_se * sizeof(Py_ssize_t))
+    cdef ssize_t * se_e_r = <ssize_t * >malloc(max_se * sizeof(ssize_t))
+    cdef ssize_t * se_e_c = <ssize_t * >malloc(max_se * sizeof(ssize_t))
+    cdef ssize_t * se_w_r = <ssize_t * >malloc(max_se * sizeof(ssize_t))
+    cdef ssize_t * se_w_c = <ssize_t * >malloc(max_se * sizeof(ssize_t))
+    cdef ssize_t * se_n_r = <ssize_t * >malloc(max_se * sizeof(ssize_t))
+    cdef ssize_t * se_n_c = <ssize_t * >malloc(max_se * sizeof(ssize_t))
+    cdef ssize_t * se_s_r = <ssize_t * >malloc(max_se * sizeof(ssize_t))
+    cdef ssize_t * se_s_c = <ssize_t * >malloc(max_se * sizeof(ssize_t))
 
     # build attack and release borders
     # by using difference along axis
