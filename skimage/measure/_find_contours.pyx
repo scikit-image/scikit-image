@@ -1,10 +1,7 @@
-# -*- python -*-
 # cython: cdivision=True
-
 import numpy as np
 cimport numpy as np
 
-np.import_array()
 
 cdef inline double _get_fraction(double from_value, double to_value,
                                  double level):
@@ -14,7 +11,7 @@ cdef inline double _get_fraction(double from_value, double to_value,
 
 
 def iterate_and_store(np.ndarray[double, ndim=2] array,
-                      double level, int vertex_connect_high):
+                      double level, ssize_t vertex_connect_high):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
     found, its coordinates are added to a growing list of segments,
@@ -27,7 +24,7 @@ def iterate_and_store(np.ndarray[double, ndim=2] array,
         raise ValueError("Input array must be at least 2x2.")
 
     cdef list arc_list = []
-    cdef int n
+    cdef ssize_t n
 
     # The plan is to iterate a 2x2 square across the input array. This means
     # that the upper-left corner of the square needs to iterate across a
@@ -39,17 +36,17 @@ def iterate_and_store(np.ndarray[double, ndim=2] array,
     # index varies the fastest).
 
     # Current coords start at 0,0.
-    cdef int[2] coords
+    cdef ssize_t[2] coords
     coords[0] = 0
     coords[1] = 0
 
     # Calculate the number of iterations we'll need
-    cdef int num_square_steps = (array.shape[0] - 1) * (array.shape[1] - 1)
+    cdef ssize_t num_square_steps = (array.shape[0] - 1) * (array.shape[1] - 1)
 
     cdef unsigned char square_case = 0
     cdef tuple top, bottom, left, right
     cdef double ul, ur, ll, lr
-    cdef int r0, r1, c0, c1
+    cdef ssize_t r0, r1, c0, c1
 
     for n in range(num_square_steps):
         # There are sixteen different possible square types, diagramed below.
