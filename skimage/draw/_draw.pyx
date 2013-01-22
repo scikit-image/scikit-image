@@ -29,7 +29,7 @@ def line(ssize_t y, ssize_t x, ssize_t y2, ssize_t x2):
 
     """
 
-    cdef np.ndarray[ssize_t, ndim=1, mode="c"] rr, cc
+    cdef np.ndarray[np.intp_t, ndim=1, mode="c"] rr, cc
 
     cdef char steep = 0
     cdef ssize_t dx = abs(x2 - x)

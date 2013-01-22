@@ -26,7 +26,7 @@ def possible_hull(np.ndarray[dtype=np.uint8_t, ndim=2, mode="c"] img):
     #         cols storage slots for top boundary pixels
     #         rows storage slots for right boundary pixels
     #         cols storage slots for bottom boundary pixels
-    cdef np.ndarray[dtype=ssize_t, ndim=2] nonzero = \
+    cdef np.ndarray[dtype=np.intp_t, ndim=2] nonzero = \
          np.ones((2 * (rows + cols), 2), dtype=np.int)
     nonzero *= -1
 
