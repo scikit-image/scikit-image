@@ -2,15 +2,15 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import numpy as np
-import math
-from libc.math cimport sqrt
-cimport numpy as np
 cimport cython
+cimport numpy as np
+from libc.math cimport sqrt
+import math
+import numpy as np
 from skimage._shared.geometry cimport point_in_polygon
 
 
-def line(int y, int x, int y2, int x2):
+def line(ssize_t y, ssize_t x, ssize_t y2, ssize_t x2):
     """Generate line pixel coordinates.
 
     Parameters
@@ -29,12 +29,12 @@ def line(int y, int x, int y2, int x2):
 
     """
 
-    cdef np.ndarray[np.int32_t, ndim=1, mode="c"] rr, cc
+    cdef np.ndarray[ssize_t, ndim=1, mode="c"] rr, cc
 
-    cdef int steep = 0
-    cdef int dx = abs(x2 - x)
-    cdef int dy = abs(y2 - y)
-    cdef int sx, sy, d, i
+    cdef char steep = 0
+    cdef ssize_t dx = abs(x2 - x)
+    cdef ssize_t dy = abs(y2 - y)
+    cdef ssize_t sx, sy, d, i
 
     if (x2 - x) > 0:
         sx = 1
@@ -51,8 +51,8 @@ def line(int y, int x, int y2, int x2):
         sx, sy = sy, sx
     d = (2 * dy) - dx
 
-    rr = np.zeros(int(dx) + 1, dtype=np.int32)
-    cc = np.zeros(int(dx) + 1, dtype=np.int32)
+    rr = np.zeros(int(dx) + 1, dtype=np.intp)
+    cc = np.zeros(int(dx) + 1, dtype=np.intp)
 
     for i in range(dx):
         if steep:
@@ -96,18 +96,18 @@ def polygon(y, x, shape=None):
 
     """
 
-    cdef int nr_verts = x.shape[0]
-    cdef int minr = <int>max(0, y.min())
-    cdef int maxr = <int>math.ceil(y.max())
-    cdef int minc = <int>max(0, x.min())
-    cdef int maxc = <int>math.ceil(x.max())
+    cdef ssize_t nr_verts = x.shape[0]
+    cdef ssize_t minr = <ssize_t>max(0, y.min())
+    cdef ssize_t maxr = <ssize_t>math.ceil(y.max())
+    cdef ssize_t minc = <ssize_t>max(0, x.min())
+    cdef ssize_t maxc = <ssize_t>math.ceil(x.max())
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
         maxr = min(shape[0] - 1, maxr)
         maxc = min(shape[1] - 1, maxc)
 
-    cdef int r, c
+    cdef ssize_t r, c
 
     #: make contigous arrays for r, c coordinates
     cdef np.ndarray contiguous_rdata, contiguous_cdata
@@ -148,17 +148,17 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
 
     """
 
-    cdef int minr = <int>max(0, cy - yradius)
-    cdef int maxr = <int>math.ceil(cy + yradius)
-    cdef int minc = <int>max(0, cx - xradius)
-    cdef int maxc = <int>math.ceil(cx + xradius)
+    cdef ssize_t minr = <ssize_t>max(0, cy - yradius)
+    cdef ssize_t maxr = <ssize_t>math.ceil(cy + yradius)
+    cdef ssize_t minc = <ssize_t>max(0, cx - xradius)
+    cdef ssize_t maxc = <ssize_t>math.ceil(cx + xradius)
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
         maxr = min(shape[0] - 1, maxr)
         maxc = min(shape[1] - 1, maxc)
 
-    cdef int r, c
+    cdef ssize_t r, c
 
     #: output coordinate arrays
     cdef list rr = list()
@@ -195,7 +195,8 @@ def circle(double cy, double cx, double radius, shape=None):
     return ellipse(cy, cx, radius, radius, shape)
 
 
-def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
+def circle_perimeter(ssize_t cy, ssize_t cx, ssize_t radius,
+                     method='bresenham'):
     """Generate circle perimeter coordinates.
 
     Parameters
@@ -234,9 +235,9 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     cdef list rr = list()
     cdef list cc = list()
 
-    cdef int x = 0
-    cdef int y = radius
-    cdef int d = 0
+    cdef ssize_t x = 0
+    cdef ssize_t y = radius
+    cdef ssize_t d = 0
     cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
@@ -302,8 +303,8 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
         return np.array(cy), np.array(cx)
 
     # a and b are xradius an yradius compute 2a^2 and 2b^2
-    cdef int twoasquared = 2 * xradius**2
-    cdef int twobsquared = 2 * yradius**2
+    cdef ssize_t twoasquared = 2 * xradius**2
+    cdef ssize_t twobsquared = 2 * yradius**2
 
     # Pixels
     cdef list px = list()
@@ -311,14 +312,14 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
 
     # First set of points:
     # start at the top
-    cdef int x = xradius
-    cdef int y = 0
+    cdef ssize_t x = xradius
+    cdef ssize_t y = 0
 
-    cdef int err = 0
-    cdef int xstop = twobsquared * xradius
-    cdef int ystop = 0
-    cdef int xchange = yradius * yradius * (1 - 2 * xradius)
-    cdef int ychange = xradius * xradius
+    cdef ssize_t err = 0
+    cdef ssize_t xstop = twobsquared * xradius
+    cdef ssize_t ystop = 0
+    cdef ssize_t xchange = yradius * yradius * (1 - 2 * xradius)
+    cdef ssize_t ychange = xradius * xradius
 
     while xstop > ystop:
         px.extend([x, -x, -x, x])
