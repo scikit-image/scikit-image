@@ -13,13 +13,13 @@ def dilate(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0):
 
-    cdef int rows = image.shape[0]
-    cdef int cols = image.shape[1]
-    cdef int srows = selem.shape[0]
-    cdef int scols = selem.shape[1]
+    cdef ssize_t rows = image.shape[0]
+    cdef ssize_t cols = image.shape[1]
+    cdef ssize_t srows = selem.shape[0]
+    cdef ssize_t scols = selem.shape[1]
 
-    cdef int centre_r = int(selem.shape[0] / 2) - shift_y
-    cdef int centre_c = int(selem.shape[1] / 2) - shift_x
+    cdef ssize_t centre_r = int(selem.shape[0] / 2) - shift_y
+    cdef ssize_t centre_c = int(selem.shape[1] / 2) - shift_x
 
     image = np.ascontiguousarray(image)
     if out is None:
@@ -30,11 +30,11 @@ def dilate(np.ndarray[np.uint8_t, ndim=2] image,
     cdef np.uint8_t* out_data = <np.uint8_t*>out.data
     cdef np.uint8_t* image_data = <np.uint8_t*>image.data
 
-    cdef int r, c, rr, cc, s, value, local_max
+    cdef ssize_t r, c, rr, cc, s, value, local_max
 
-    cdef int selem_num = np.sum(selem != 0)
-    cdef int* sr = <int*>malloc(selem_num * sizeof(int))
-    cdef int* sc = <int*>malloc(selem_num * sizeof(int))
+    cdef ssize_t selem_num = np.sum(selem != 0)
+    cdef ssize_t* sr = <ssize_t*>malloc(selem_num * sizeof(ssize_t))
+    cdef ssize_t* sc = <ssize_t*>malloc(selem_num * sizeof(ssize_t))
 
     s = 0
     for r in range(srows):
@@ -68,13 +68,13 @@ def erode(np.ndarray[np.uint8_t, ndim=2] image,
           np.ndarray[np.uint8_t, ndim=2] out=None,
           char shift_x=0, char shift_y=0):
 
-    cdef int rows = image.shape[0]
-    cdef int cols = image.shape[1]
-    cdef int srows = selem.shape[0]
-    cdef int scols = selem.shape[1]
+    cdef ssize_t rows = image.shape[0]
+    cdef ssize_t cols = image.shape[1]
+    cdef ssize_t srows = selem.shape[0]
+    cdef ssize_t scols = selem.shape[1]
 
-    cdef int centre_r = int(selem.shape[0] / 2) - shift_y
-    cdef int centre_c = int(selem.shape[1] / 2) - shift_x
+    cdef ssize_t centre_r = int(selem.shape[0] / 2) - shift_y
+    cdef ssize_t centre_c = int(selem.shape[1] / 2) - shift_x
 
     image = np.ascontiguousarray(image)
     if out is None:
@@ -87,9 +87,9 @@ def erode(np.ndarray[np.uint8_t, ndim=2] image,
 
     cdef int r, c, rr, cc, s, value, local_min
 
-    cdef int selem_num = np.sum(selem != 0)
-    cdef int* sr = <int*>malloc(selem_num * sizeof(int))
-    cdef int* sc = <int*>malloc(selem_num * sizeof(int))
+    cdef ssize_t selem_num = np.sum(selem != 0)
+    cdef ssize_t* sr = <ssize_t*>malloc(selem_num * sizeof(ssize_t))
+    cdef ssize_t* sc = <ssize_t*>malloc(selem_num * sizeof(ssize_t))
 
     s = 0
     for r in range(srows):

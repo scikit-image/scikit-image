@@ -31,18 +31,19 @@ def grid_points_inside_poly(shape, verts):
 
     vx = verts[:, 0].astype(np.double)
     vy = verts[:, 1].astype(np.double)
-    cdef int V = vx.shape[0]
+    cdef ssize_t V = vx.shape[0]
 
-    cdef int M = shape[0]
-    cdef int N = shape[1]
-    cdef int m, n
+    cdef ssize_t M = shape[0]
+    cdef ssize_t N = shape[1]
+    cdef ssize_t m, n
 
     cdef np.ndarray[dtype=np.uint8_t, ndim=2, mode="c"] out = \
          np.zeros((M, N), dtype=np.uint8)
 
     for m in range(M):
         for n in range(N):
-            out[m, n] = point_in_polygon(V, <double*>vx.data, <double*>vy.data, m, n)
+            out[m, n] = point_in_polygon(V, <double*>vx.data, <double*>vy.data,
+                                         m, n)
 
     return out.view(bool)
 
@@ -76,7 +77,7 @@ def points_inside_poly(points, verts):
     vy = verts[:, 1].astype(np.double)
 
     cdef np.ndarray[np.uint8_t, ndim=1] out = \
-      np.zeros(x.shape[0], dtype=np.uint8)
+         np.zeros(x.shape[0], dtype=np.uint8)
 
     points_in_polygon(vx.shape[0], <double*>vx.data, <double*>vy.data,
          x.shape[0], <double*>x.data, <double*>y.data,

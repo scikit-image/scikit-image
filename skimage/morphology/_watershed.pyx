@@ -9,39 +9,33 @@ All rights reserved.
 
 Original author: Lee Kamentsky
 """
-
-cdef extern from "numpy/arrayobject.h":
-        cdef void import_array()
-import_array()
-
 import numpy as np
 cimport numpy as np
 cimport cython
 
-DTYPE_INT32 = np.int32
+
 ctypedef np.int32_t DTYPE_INT32_t
 DTYPE_BOOL = np.bool
 ctypedef np.int8_t DTYPE_BOOL_t
 
+
 include "heap_watershed.pxi"
 
+
 @cython.boundscheck(False)
-def watershed(np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False, 
-              mode='c'] image,
-              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False, 
-              mode='c'] pq,
-              DTYPE_INT32_t age,
-              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False, 
-              mode='c'] structure,
-              DTYPE_INT32_t ndim,
-              np.ndarray[DTYPE_BOOL_t, ndim=1, negative_indices=False, 
-              mode='c'] mask,
-              np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False, 
-              mode='c'] image_shape,
-              np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False, 
-              mode='c'] output):
+def watershed(np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False,
+                         mode='c'] image,
+              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False,
+                         mode='c'] pq,
+              ssize_t age,
+              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False,
+                         mode='c'] structure,
+              np.ndarray[DTYPE_BOOL_t, ndim=1, negative_indices=False,
+                         mode='c'] mask,
+              np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False,
+                         mode='c'] output):
     """Do heavy lifting of watershed algorithm
-   
+
     Parameters
     ----------
 
@@ -58,20 +52,17 @@ def watershed(np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False,
                 in a flattened array. The remaining elements are the
                 offsets from the point to its neighbor in the various
                 dimensions
-    ndim - # of dimensions in the image
     mask  - numpy boolean (char) array indicating which pixels to consider
             and which to ignore. Also flattened.
-    image_shape - the dimensions of the image, for boundary checking,
-                  a numpy array of np.int32
     output - put the image labels in here
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
-    cdef DTYPE_INT32_t nneighbors = structure.shape[0] 
-    cdef DTYPE_INT32_t i = 0
-    cdef DTYPE_INT32_t index = 0
-    cdef DTYPE_INT32_t old_index = 0
-    cdef DTYPE_INT32_t max_index = image.shape[0]
+    cdef ssize_t nneighbors = structure.shape[0]
+    cdef ssize_t i = 0
+    cdef ssize_t index = 0
+    cdef ssize_t old_index = 0
+    cdef ssize_t max_index = image.shape[0]
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 

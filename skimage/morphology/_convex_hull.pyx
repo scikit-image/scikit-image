@@ -13,47 +13,44 @@ def possible_hull(np.ndarray[dtype=np.uint8_t, ndim=2, mode="c"] img):
 
     Returns
     -------
-    coords : ndarray (N, 2)
+    coords : ndarray (cols, 2)
        The ``(row, column)`` coordinates of all pixels that possibly belong to
        the convex hull.
 
     """
-    cdef int i, j, k
-    cdef unsigned int M, N
-    
-    M = img.shape[0]
-    N = img.shape[1]
+    cdef ssize_t r, c
+    cdef ssize_t rows = img.shape[0]
+    cdef ssize_t cols = img.shape[1]
 
-    # Output: M storage slots for left boundary pixels
-    #         N storage slots for top boundary pixels
-    #         M storage slots for right boundary pixels
-    #         N storage slots for bottom boundary pixels
-    cdef np.ndarray[dtype=np.int_t, ndim=2] nonzero = \
-         np.ones((2 * (M + N), 2), dtype=np.int)
-    nonzero *= -1 
+    # Output: rows storage slots for left boundary pixels
+    #         cols storage slots for top boundary pixels
+    #         rows storage slots for right boundary pixels
+    #         cols storage slots for bottom boundary pixels
+    cdef np.ndarray[dtype=ssize_t, ndim=2] nonzero = \
+         np.ones((2 * (rows + cols), 2), dtype=np.int)
+    nonzero *= -1
 
-    k = 0
-    for i in range(M):
-        for j in range(N):
-            if img[i, j] != 0:
+    for r in range(rows):
+        for c in range(cols):
+            if img[r, c] != 0:
                 # Left check
-                if nonzero[i, 1] == -1:
-                    nonzero[i, 0] = i
-                    nonzero[i, 1] = j
+                if nonzero[r, 1] == -1:
+                    nonzero[r, 0] = r
+                    nonzero[r, 1] = c
 
                 # Right check
-                elif nonzero[M + N + i, 1] < j:
-                    nonzero[M + N + i, 0] = i
-                    nonzero[M + N + i, 1] = j
+                elif nonzero[rows + cols + r, 1] < c:
+                    nonzero[rows + cols + r, 0] = r
+                    nonzero[rows + cols + r, 1] = c
 
                 # Top check
-                if nonzero[M + j, 1] == -1:
-                    nonzero[M + j, 0] = i
-                    nonzero[M + j, 1] = j
+                if nonzero[rows + c, 1] == -1:
+                    nonzero[rows + c, 0] = r
+                    nonzero[rows + c, 1] = c
 
                 # Bottom check
-                elif nonzero[2 * M + N + j, 0] < i:
-                    nonzero[2 * M + N + j, 0] = i
-                    nonzero[2 * M + N + j, 1] = j
-    
+                elif nonzero[2 * rows + cols + c, 0] < r:
+                    nonzero[2 * rows + cols + c, 0] = r
+                    nonzero[2 * rows + cols + c, 1] = c
+
     return nonzero[nonzero[:, 0] != -1]
