@@ -93,7 +93,7 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
                          "`constant`, `nearest`, `wrap` or `reflect`.")
     cdef char mode_c = ord(mode[0].upper())
 
-    cdef int out_r, out_c
+    cdef ssize_t out_r, out_c
     if output_shape is None:
         out_r = img.shape[0]
         out_c = img.shape[1]
@@ -104,10 +104,10 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef np.ndarray[dtype=np.double_t, ndim=2] out = \
          np.zeros((out_r, out_c), dtype=np.double)
 
-    cdef int tfr, tfc
+    cdef ssize_t tfr, tfc
     cdef double r, c
-    cdef int rows = img.shape[0]
-    cdef int cols = img.shape[1]
+    cdef ssize_t rows = img.shape[0]
+    cdef ssize_t cols = img.shape[1]
 
     cdef double (*interp_func)(double*, ssize_t, ssize_t, double, double,
                                char, double)

@@ -13,8 +13,8 @@ cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
 
 
-cdef inline int round(double r):
-    return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
+cdef inline ssize_t round(double r):
+    return <ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
 @cython.boundscheck(False)
@@ -36,21 +36,20 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     # compute the bins and allocate the accumulator array
     cdef np.ndarray[ndim=2, dtype=np.uint64_t] accum
     cdef np.ndarray[ndim=1, dtype=np.double_t] bins
-    cdef int max_distance, offset
+    cdef ssize_t max_distance, offset
 
-    max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] +
-                                       img.shape[1] * img.shape[1])))
+    max_distance = 2 * <ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
+                                     img.shape[1] * img.shape[1]))
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
     bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
     offset = max_distance / 2
 
     # compute the nonzero indexes
     cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
-    y_idxs, x_idxs = np.PyArray_Nonzero(img)
-
+    y_idxs, x_idxs = np.nonzero(img)
 
     # finally, run the transform
-    cdef int nidxs, nthetas, i, j, x, y, accum_idx
+    cdef ssize_t nidxs, nthetas, i, j, x, y, accum_idx
     nidxs = y_idxs.shape[0] # x and y are the same shape
     nthetas = theta.shape[0]
     for i in range(nidxs):
@@ -78,26 +77,27 @@ def _probabilistic_hough(np.ndarray img, int value_threshold, int line_length, \
         theta =  math.pi/2-np.arange(180)/180.0* math.pi
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
+    cdef ssize_t height = img.shape[0]
+    cdef ssize_t width = img.shape[1]
     # compute the bins and allocate the accumulator array
     cdef np.ndarray[ndim=2, dtype=np.int64_t] accum
     cdef np.ndarray[ndim=2, dtype=np.uint8_t] mask = np.zeros((height, width), dtype=np.uint8)
     cdef np.ndarray[ndim=2, dtype=np.int32_t] line_end = np.zeros((2, 2), dtype=np.int32)
-    cdef int max_distance, offset, num_indexes, index
+    cdef ssize_t max_distance, offset, num_indexes, index
     cdef double a, b
-    cdef int nidxs, nthetas, i, j, x, y, px, py, accum_idx, value, max_value, max_theta
+    cdef ssize_t nidxs, nthetas, i, j, x, y, px, py, accum_idx
+    cdef int value, max_value, max_theta
     cdef int shift = 16
     # maximum line number cutoff
-    cdef int lines_max = 2 ** 15
-    cdef int xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, good_line, count
+    cdef ssize_t lines_max = 2 ** 15
+    cdef ssize_t xflag, x0, y0, dx0, dy0, dx, dy, gap, x1, y1, good_line, count
     max_distance = 2 * <int>ceil((sqrt(img.shape[0] * img.shape[0] +
                                        img.shape[1] * img.shape[1])))
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.int64)
     offset = max_distance / 2
     # find the nonzero indexes
     cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
-    y_idxs, x_idxs =  np.nonzero(img)
+    y_idxs, x_idxs = np.nonzero(img)
     num_indexes = y_idxs.shape[0] # x and y are the same shape
     nthetas = theta.shape[0]
     points = []
