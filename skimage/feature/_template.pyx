@@ -42,12 +42,17 @@ from skimage._shared.transform cimport integrate
 @cython.boundscheck(False)
 def match_template(np.ndarray[float, ndim=2, mode="c"] image,
                    np.ndarray[float, ndim=2, mode="c"] template):
+
     cdef np.ndarray[float, ndim=2, mode="c"] corr
     cdef np.ndarray[float, ndim=2, mode="c"] image_sat
     cdef np.ndarray[float, ndim=2, mode="c"] image_sqr_sat
     cdef float template_mean = np.mean(template)
     cdef float template_ssd
     cdef float inv_area
+    cdef ssize_t r, c, r_end, c_end
+    cdef ssize_t template_rows = template.shape[0]
+    cdef ssize_t template_cols = template.shape[1]
+    cdef float den, window_sqr_sum, window_mean_sqr, window_sum
 
     image_sat = integral.integral_image(image)
     image_sqr_sat = integral.integral_image(image**2)
@@ -63,24 +68,24 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
                                             mode="valid"),
                                 dtype=np.float32)
 
-    cdef int i, j
-    cdef float den, window_sqr_sum, window_mean_sqr, window_sum,
-    # move window through convolution results, normalizing in the process
-    for i in range(corr.shape[0]):
-        for j in range(corr.shape[1]):
-            # subtract 1 because `i_end` and `j_end` are used for indexing into
-            # summed-area table, instead of slicing windows of the image.
-            i_end = i + template.shape[0] - 1
-            j_end = j + template.shape[1] - 1
 
-            window_sum = integrate(image_sat, i, j, i_end, j_end)
+    # move window through convolution results, normalizing in the process
+    for r in range(corr.shape[0]):
+        for c in range(corr.shape[1]):
+            # subtract 1 because `i_end` and `c_end` are used for indexing into
+            # summed-area table, instead of slicing windows of the image.
+            r_end = r + template_rows - 1
+            c_end = c + template_cols - 1
+
+            window_sum = integrate(image_sat, r, c, r_end, c_end)
             window_mean_sqr = window_sum * window_sum * inv_area
-            window_sqr_sum = integrate(image_sqr_sat, i, j, i_end, j_end)
+            window_sqr_sum = integrate(image_sqr_sat, r, c, r_end, c_end)
             if window_sqr_sum <= window_mean_sqr:
-                corr[i, j] = 0
+                corr[r, c] = 0
                 continue
 
             den = sqrt((window_sqr_sum - window_mean_sqr) * template_ssd)
-            corr[i, j] /= den
+            corr[r, c] /= den
+
     return corr
 

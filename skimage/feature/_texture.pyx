@@ -39,7 +39,7 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
     """
     cdef:
         np.int32_t a_inx, d_idx
-        np.int32_t r, c, rows, cols, row, col
+        ssize_t r, c, rows, cols, row, col
         np.int32_t i, j
 
     rows = image.shape[0]
@@ -52,8 +52,8 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
                     i = image[r, c]
 
                     # compute the location of the offset pixel
-                    row = r + <int>(sin(angle) * distance + 0.5)
-                    col = c + <int>(cos(angle) * distance + 0.5);
+                    row = r + <ssize_t>(sin(angle) * distance + 0.5)
+                    col = c + <ssize_t>(cos(angle) * distance + 0.5);
 
                     # make sure the offset is within bounds
                     if row >= 0 and row < rows and \
@@ -123,11 +123,11 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
     output_shape = (image.shape[0], image.shape[1])
     cdef np.ndarray[double, ndim=2] output = np.zeros(output_shape, np.double)
 
-    cdef int rows = image.shape[0]
-    cdef int cols = image.shape[1]
+    cdef ssize_t rows = image.shape[0]
+    cdef ssize_t cols = image.shape[1]
 
     cdef double lbp
-    cdef int r, c, changes, i
+    cdef ssize_t r, c, changes, i
     for r in range(image.shape[0]):
         for c in range(image.shape[1]):
             for i in range(P):
