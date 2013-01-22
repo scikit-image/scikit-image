@@ -5,12 +5,12 @@
 from libc.math cimport ceil, floor
 
 
-cdef inline int round(double r):
-    return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
+cdef inline ssize_t round(double r):
+    return <ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-cdef inline double nearest_neighbour_interpolation(double* image, int rows,
-                                                   int cols, double r,
+cdef inline double nearest_neighbour_interpolation(double* image, ssize_t rows,
+                                                   ssize_t cols, double r,
                                                    double c, char mode,
                                                    double cval):
     """Nearest neighbour interpolation at a given position in the image.
@@ -35,13 +35,12 @@ cdef inline double nearest_neighbour_interpolation(double* image, int rows,
 
     """
 
-    return get_pixel2d(image, rows, cols, <int>round(r), <int>round(c),
-                       mode, cval)
+    return get_pixel2d(image, rows, cols, round(r), round(c), mode, cval)
 
 
-cdef inline double bilinear_interpolation(double* image, int rows, int cols,
-                                          double r, double c, char mode,
-                                          double cval):
+cdef inline double bilinear_interpolation(double* image, ssize_t rows,
+                                          ssize_t cols, double r, double c,
+                                          char mode, double cval):
     """Bilinear interpolation at a given position in the image.
 
     Parameters
@@ -64,12 +63,12 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
 
     """
     cdef double dr, dc
-    cdef int minr, minc, maxr, maxc
+    cdef ssize_t minr, minc, maxr, maxc
 
-    minr = <int>floor(r)
-    minc = <int>floor(c)
-    maxr = <int>ceil(r)
-    maxc = <int>ceil(c)
+    minr = <ssize_t>floor(r)
+    minc = <ssize_t>floor(c)
+    maxr = <ssize_t>ceil(r)
+    maxc = <ssize_t>ceil(c)
     dr = r - minr
     dc = c - minc
     top = (1 - dc) * get_pixel2d(image, rows, cols, minr, minc, mode, cval) \
@@ -98,9 +97,9 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
     return f[1] - 0.25 * (f[0] - f[2]) * x
 
 
-cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
-                                             double r, double c, char mode,
-                                             double cval):
+cdef inline double biquadratic_interpolation(double* image, ssize_t rows,
+                                             ssize_t cols, double r, double c,
+                                             char mode, double cval):
     """Biquadratic interpolation at a given position in the image.
 
     Parameters
@@ -123,8 +122,8 @@ cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
 
     """
 
-    cdef int r0 = <int>round(r)
-    cdef int c0 = <int>round(c)
+    cdef ssize_t r0 = round(r)
+    cdef ssize_t c0 = round(c)
     if r < 0:
         r0 -= 1
     if c < 0:
@@ -139,7 +138,7 @@ cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
 
     cdef double fc[3], fr[3]
 
-    cdef int pr, pc
+    cdef ssize_t pr, pc
 
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 3):
@@ -174,9 +173,9 @@ cdef inline double cubic_interpolation(double x, double[4] f):
                     (3.0 * (f[1] - f[2]) + f[3] - f[0])))
 
 
-cdef inline double bicubic_interpolation(double* image, int rows, int cols,
-                                         double r, double c, char mode,
-                                         double cval):
+cdef inline double bicubic_interpolation(double* image, ssize_t rows,
+                                         ssize_t cols, double r, double c,
+                                         char mode, double cval):
     """Bicubic interpolation at a given position in the image.
 
     Parameters
@@ -199,8 +198,8 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
 
     """
 
-    cdef int r0 = <int>r - 1
-    cdef int c0 = <int>c - 1
+    cdef ssize_t r0 = <ssize_t>r - 1
+    cdef ssize_t c0 = <ssize_t>c - 1
     if r < 0:
         r0 -= 1
     if c < 0:
@@ -211,7 +210,7 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
 
     cdef double fc[4], fr[4]
 
-    cdef int pr, pc
+    cdef ssize_t pr, pc
 
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 4):
@@ -223,8 +222,8 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
     return cubic_interpolation(xr, fr)
 
 
-cdef inline double get_pixel2d(double* image, int rows, int cols, int r, int c,
-                               char mode, double cval):
+cdef inline double get_pixel2d(double* image, ssize_t rows, ssize_t cols,
+                               ssize_t r, ssize_t c, char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -255,8 +254,9 @@ cdef inline double get_pixel2d(double* image, int rows, int cols, int r, int c,
         return image[coord_map(rows, r, mode) * cols + coord_map(cols, c, mode)]
 
 
-cdef inline double get_pixel3d(double* image, int rows, int cols, int dims, int r,
-                               int c, int d, char mode, double cval):
+cdef inline double get_pixel3d(double* image, ssize_t rows, ssize_t cols,
+                               ssize_t dims, ssize_t r, ssize_t c, ssize_t d,
+                               char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -289,7 +289,7 @@ cdef inline double get_pixel3d(double* image, int rows, int cols, int dims, int 
                      + d]
 
 
-cdef inline int coord_map(int dim, int coord, char mode):
+cdef inline ssize_t coord_map(ssize_t dim, ssize_t coord, char mode):
     """
     Wrap a coordinate, according to a given mode.
 
@@ -308,20 +308,20 @@ cdef inline int coord_map(int dim, int coord, char mode):
     if mode == 'R': # reflect
         if coord < 0:
             # How many times times does the coordinate wrap?
-            if <int>(-coord / dim) % 2 != 0:
-                return dim - <int>(-coord % dim)
+            if <ssize_t>(-coord / dim) % 2 != 0:
+                return dim - <ssize_t>(-coord % dim)
             else:
-                return <int>(-coord % dim)
+                return <ssize_t>(-coord % dim)
         elif coord > dim:
-            if <int>(coord / dim) % 2 != 0:
-                return <int>(dim - (coord % dim))
+            if <ssize_t>(coord / dim) % 2 != 0:
+                return <ssize_t>(dim - (coord % dim))
             else:
-                return <int>(coord % dim)
+                return <ssize_t>(coord % dim)
     elif mode == 'W': # wrap
         if coord < 0:
-            return <int>(dim - (-coord % dim))
+            return <ssize_t>(dim - (-coord % dim))
         elif coord > dim:
-            return <int>(coord % dim)
+            return <ssize_t>(coord % dim)
     elif mode == 'N': # nearest
         if coord < 0:
             return 0

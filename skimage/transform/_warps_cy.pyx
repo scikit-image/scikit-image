@@ -109,7 +109,7 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
     cdef int rows = img.shape[0]
     cdef int cols = img.shape[1]
 
-    cdef double (*interp_func)(double*, int, int, double, double,
+    cdef double (*interp_func)(double*, ssize_t, ssize_t, double, double,
                                char, double)
     if order == 0:
         interp_func = nearest_neighbour_interpolation
