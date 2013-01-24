@@ -14,10 +14,7 @@ except ImportError:
     LinearSegmentedColormap = object
     print("Could not import matplotlib -- skimage.viewer not available.")
 
-try:
-    from PyQt4 import QtGui
-except ImportError:
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',

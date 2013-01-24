@@ -15,14 +15,9 @@ parameter type specified by its `ptype` attribute, which can be:
         property of the same name that updates the display.
 
 """
-try:
-    from PyQt4.QtCore import Qt
-    from PyQt4 import QtGui
-    from PyQt4 import QtCore
-    from PyQt4.QtGui import QWidget
-except ImportError:
-    QWidget = object  # hack to prevent nosetest and autodoc errors
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
+from ..qt import QtCore
+from ..qt.QtCore import Qt
 
 from ..utils import RequiredAttr
 
@@ -30,7 +25,7 @@ from ..utils import RequiredAttr
 __all__ = ['BaseWidget', 'Slider', 'ComboBox', 'Text']
 
 
-class BaseWidget(QWidget):
+class BaseWidget(QtGui.QWidget):
 
     plugin = RequiredAttr("Widget is not attached to a Plugin.")
 
