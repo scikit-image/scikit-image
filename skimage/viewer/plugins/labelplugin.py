@@ -21,6 +21,7 @@ class LabelPainter(Plugin):
         self._radius_widget = Slider('radius', low=1, high=max_radius,
                                      value=5, value_type='int', ptype='plugin')
         labels = [str(i) for i in range(6)]
+        labels[0] = 'Erase'
         self._label_widget = ComboBox('label', labels, ptype='plugin')
         self.add_widget(self._radius_widget)
         self.add_widget(self._label_widget)
