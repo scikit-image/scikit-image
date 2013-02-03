@@ -161,13 +161,6 @@ class pixelgroup(object):
 # ================================================== 
 
 class picture(object):
-    @staticmethod
-    def open(path):
-        """
-        Creates a new picture object from the given image path
-        """
-        return picture(os.path.abspath(path))
-
     def __init__(self, path):
         self.__path = path
         image = Image.open(path)
