@@ -4,7 +4,7 @@ A special Python image submodule for beginners.
 
 Description
 -----------
-skimage.novice is a simple wrapper around the Python Image Library (PIL) for beginners.
+skimage.novice provides a simple image manipulation interface for beginners.
 It allows for easy loading, manipulating, and saving of image files.
 
 **NOTE: This module uses the Cartesian coordinate system!**
