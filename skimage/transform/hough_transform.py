@@ -103,6 +103,7 @@ def hough(img, theta=None):
     return hough_line(img, theta)
 
 from ._hough_transform import _hough_circle
+
 def hough_line(img, theta=None):
     """Perform a straight line Hough transform.
 
