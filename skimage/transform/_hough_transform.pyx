@@ -59,7 +59,6 @@ def _hough_circle(np.ndarray img, \
                                     img.shape[1] + 2 * max_radius))
 
     for i, rad in enumerate(radius):
-
         # Store in memory the circle of given radius
         # centered at (0,0)
         circle_x, circle_y = circle_perimeter(0, 0, rad)
