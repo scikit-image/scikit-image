@@ -16,8 +16,11 @@ cdef double NEG_PI_2 = -PI_2
 cdef inline int round(double r):
     return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
+
 @cython.boundscheck(False)
-def _hough_circle(np.ndarray img, np.ndarray[ndim=1, dtype=np.npy_intp] radius, normalize=True):
+def _hough_circle(np.ndarray img, \
+                  np.ndarray[ndim=1, dtype=np.npy_intp] radius, \
+                  normalize=True):
 
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
@@ -55,6 +58,7 @@ def _hough_circle(np.ndarray img, np.ndarray[ndim=1, dtype=np.npy_intp] radius, 
         H.append(out)
     return np.array(H)
 
+
 @cython.boundscheck(False)
 def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
 
@@ -86,7 +90,6 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
     y_idxs, x_idxs = np.PyArray_Nonzero(img)
 
-
     # finally, run the transform
     cdef int nidxs, nthetas, i, j, x, y, accum_idx
     nidxs = y_idxs.shape[0] # x and y are the same shape
@@ -100,6 +103,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     return accum, theta, bins
 
 import math
+
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
