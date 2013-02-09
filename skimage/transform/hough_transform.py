@@ -1,4 +1,4 @@
-__all__ = ['hough', 'hough_peaks', 'probabilistic_hough']
+__all__ = ['hough', 'hough_line', 'hough_circle', 'hough_peaks', 'probabilistic_hough']
 
 from itertools import izip as zip
 
@@ -102,6 +102,7 @@ from skimage._shared.utils import deprecated
 def hough(img, theta=None):
     return hough_line(img, theta)
 
+from ._hough_transform import _hough_circle
 def hough_line(img, theta=None):
     """Perform a straight line Hough transform.
 
@@ -143,6 +144,29 @@ def hough_line(img, theta=None):
     """
     return _hough(img, theta)
 
+def hough_circle(img, radius, normalize=True):
+    """Perform a circle Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    radius : ndarray
+        Radii at which to compute the Hough transform.
+    normalize : boolean
+        Normalize the accumulator with the number
+        of pixels used to draw the radius
+
+    Returns
+    -------
+    H : 3D ndarray (radius index, (M, N) ndarray)
+        Hough transform accumulator for each radius
+
+    Examples
+    --------
+
+    """
+    return _hough_circle(img, radius, normalize)
 
 def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
                 threshold=None, num_peaks=np.inf):
