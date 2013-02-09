@@ -15,8 +15,6 @@ def append_desc(func, description):
 
     return func
 
-from skimage.transform import *
-
 
 def test_hough():
     # Generate a test image
