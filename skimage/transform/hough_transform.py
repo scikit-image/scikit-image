@@ -96,8 +96,13 @@ def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10,
     """
     return _probabilistic_hough(img, threshold, line_length, line_gap, theta)
 
+from skimage._shared.utils import deprecated
 
+@deprecated('hough_line')
 def hough(img, theta=None):
+    return hough_line(img, theta)
+
+def hough_line(img, theta=None):
     """Perform a straight line Hough transform.
 
     Parameters
