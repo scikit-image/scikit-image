@@ -4,6 +4,9 @@ from numpy.testing import run_module_suite, assert_raises, assert_equal
 from skimage import filter, data, color, img_as_float
 
 
+np.random.seed(1234)
+
+
 lena = img_as_float(data.lena()[:256, :256])
 lena_gray = color.rgb2gray(lena)
 

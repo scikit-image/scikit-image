@@ -28,6 +28,7 @@ def line(int y, int x, int y2, int x2):
         ``img[rr, cc] = 1``.
 
     """
+
     cdef np.ndarray[np.int32_t, ndim=1, mode="c"] rr, cc
 
     cdef int steep = 0
@@ -92,7 +93,9 @@ def polygon(y, x, shape=None):
         Pixel coordinates of polygon.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
     """
+
     cdef int nr_verts = x.shape[0]
     cdef int minr = <int>max(0, y.min())
     cdef int maxr = <int>math.ceil(y.max())
@@ -142,7 +145,9 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
         Pixel coordinates of ellipse.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
     """
+
     cdef int minr = <int>max(0, cy - yradius)
     cdef int maxr = <int>math.ceil(cy + yradius)
     cdef int minc = <int>max(0, cx - xradius)
@@ -184,7 +189,9 @@ def circle(double cy, double cx, double radius, shape=None):
         Pixel coordinates of circle.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
     """
+
     return ellipse(cy, cx, radius, radius, shape)
 
 
@@ -287,16 +294,16 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
     ----------
     .. [1] J. Kennedy "A fast Bresenham type algorithm for
         drawing ellipses".
+
     """
-    # If both radii == 0, return the center
-    # to avoid infinite loop in 2nd set
+
+    # If both radii == 0, return the center to avoid infinite loop in 2nd set
     if xradius == 0 and yradius == 0:
         return np.array(cy), np.array(cx)
 
-    # a and b are xradius an yradius
-    # compute 2a^2 and 2b^2
-    cdef int twoasquared = 2 * xradius * xradius
-    cdef int twobsquared = 2 * yradius * yradius
+    # a and b are xradius an yradius compute 2a^2 and 2b^2
+    cdef int twoasquared = 2 * xradius**2
+    cdef int twobsquared = 2 * yradius**2
 
     # Pixels
     cdef list px = list()
@@ -353,8 +360,9 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
 
 
 def set_color(img, coords, color):
-    """Set pixel color in the image at the given coordinates. Coordinates that
-    exceed the shape of the image will be ignored.
+    """Set pixel color in the image at the given coordinates.
+
+    Coordinates that exceed the shape of the image will be ignored.
 
     Parameters
     ----------
@@ -369,7 +377,9 @@ def set_color(img, coords, color):
     -------
     img : (M, N, D) ndarray
         The updated image.
+
     """
+
     rr, cc = coords
     rr_inside = np.logical_and(rr >= 0, rr < img.shape[0])
     cc_inside = np.logical_and(cc >= 0, cc < img.shape[1])
