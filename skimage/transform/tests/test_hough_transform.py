@@ -4,6 +4,7 @@ from numpy.testing import *
 import skimage.transform as tf
 import skimage.transform.hough_transform as ht
 from skimage.transform import probabilistic_hough
+from skimage.draw import circle_perimeter
 
 
 def append_desc(func, description):
@@ -109,6 +110,21 @@ def test_hough_peaks_num():
     assert len(tf.hough_peaks(hspace, angles, dists, min_distance=0,
                               min_angle=0, num_peaks=1)[0]) == 1
 
+
+def test_houghcircle():
+    # Prepare picture
+    img = np.zeros((100, 100), dtype=int)
+    radius = 20
+    x_0, y_0 = (50, 50)
+    x, y = circle_perimeter(y_0, x_0, radius)
+    img[y, x] = 1
+
+    out = tf.hough_circle(img, np.array([radius]))
+
+    y, x = np.where(out[0] == out[0].max())
+    # Offset for x_0, y_0
+    assert_equal(x[0], x_0 + radius)
+    assert_equal(y[0], y_0 + radius)
 
 if __name__ == "__main__":
     run_module_suite()
