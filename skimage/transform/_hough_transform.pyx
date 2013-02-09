@@ -16,8 +16,11 @@ cdef double NEG_PI_2 = -PI_2
 cdef inline int round(double r):
     return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
+
 @cython.boundscheck(False)
-def _hough_circle(np.ndarray img, np.ndarray[ndim=1, dtype=np.npy_intp] radius, normalize=True):
+def _hough_circle(np.ndarray img, \
+                  np.ndarray[ndim=1, dtype=np.npy_intp] radius, \
+                  normalize=True):
 
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
@@ -54,6 +57,7 @@ def _hough_circle(np.ndarray img, np.ndarray[ndim=1, dtype=np.npy_intp] radius, 
 
         H.append(out)
     return np.array(H)
+
 
 @cython.boundscheck(False)
 def _hough_circle(np.ndarray img, \
