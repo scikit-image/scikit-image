@@ -4,7 +4,7 @@ cimport numpy as np
 from random import randint
 from libc.math cimport abs, fabs, sqrt, ceil, floor
 from libc.stdlib cimport rand
-
+from skimage.draw import circle_perimeter
 
 np.import_array()
 
@@ -15,6 +15,90 @@ cdef double NEG_PI_2 = -PI_2
 
 cdef inline int round(double r):
     return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
+
+
+@cython.boundscheck(False)
+def _hough_circle(np.ndarray img, \
+                  np.ndarray[ndim=1, dtype=np.npy_intp] radius, \
+                  normalize=True):
+
+    if img.ndim != 2:
+        raise ValueError('The input image must be 2D.')
+
+    # compute the nonzero indexes
+    cdef np.ndarray[ndim=1, dtype=np.npy_intp] x, y
+    y, x = np.PyArray_Nonzero(img)
+
+    # Offset the image
+    max_radius = radius.max()
+    x = x + max_radius
+    y = y + max_radius
+
+    cdef list H = list()
+
+    for rad in radius:
+        # Accumulator
+        out = np.zeros((img.shape[0] + 2 * max_radius, img.shape[1] + 2 * max_radius))
+
+        # Store in memory the circle of given radius
+        # centered at (0,0)
+        circle_x, circle_y = circle_perimeter(0, 0, rad)
+
+        # For each non zero pixel
+        for (px, py) in zip(x, y):
+            # Plug the circle at (px, py),
+            # its coordinates are (tx, ty)
+            tx = circle_x + px
+            ty = circle_y + py
+            out[tx, ty] += 1
+
+        if normalize:
+            out = out / len(circle_x)
+
+        H.append(out)
+    return np.array(H)
+
+
+@cython.boundscheck(False)
+def _hough_circle(np.ndarray img, \
+                  np.ndarray[ndim=1, dtype=np.npy_intp] radius, \
+                  normalize=True):
+
+    if img.ndim != 2:
+        raise ValueError('The input image must be 2D.')
+
+    # compute the nonzero indexes
+    cdef np.ndarray[ndim=1, dtype=np.npy_intp] x, y
+    y, x = np.PyArray_Nonzero(img)
+
+    # Offset the image
+    max_radius = radius.max()
+    x = x + max_radius
+    y = y + max_radius
+
+    cdef list H = list()
+
+    for rad in radius:
+        # Accumulator
+        out = np.zeros((img.shape[0] + 2 * max_radius, img.shape[1] + 2 * max_radius))
+
+        # Store in memory the circle of given radius
+        # centered at (0,0)
+        circle_x, circle_y = circle_perimeter(0, 0, rad)
+
+        # For each non zero pixel
+        for (px, py) in zip(x, y):
+            # Plug the circle at (px, py),
+            # its coordinates are (tx, ty)
+            tx = circle_x + px
+            ty = circle_y + py
+            out[tx, ty] += 1
+
+        if normalize:
+            out = out / len(circle_x)
+
+        H.append(out)
+    return np.array(H)
 
 
 @cython.boundscheck(False)
@@ -48,7 +132,6 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
     y_idxs, x_idxs = np.PyArray_Nonzero(img)
 
-
     # finally, run the transform
     cdef int nidxs, nthetas, i, j, x, y, accum_idx
     nidxs = y_idxs.shape[0] # x and y are the same shape
@@ -62,6 +145,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     return accum, theta, bins
 
 import math
+
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
