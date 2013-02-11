@@ -7,6 +7,7 @@ import numpy as np
 cimport numpy as np
 from libc.math cimport abs, fabs, sqrt, ceil
 from libc.stdlib cimport rand
+
 from skimage.draw import circle_perimeter
 
 cdef double PI_2 = 1.5707963267948966
