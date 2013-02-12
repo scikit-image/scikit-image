@@ -17,6 +17,13 @@ cimport cython
 from libc.stdlib cimport malloc, free
 from libc.string cimport memset
 
+cdef extern from "emmintrin.h":
+    ctypedef long __m128i
+    __m128i _mm_load_si128 (__m128i *p)
+    __m128i _mm_adds_epu16 (__m128i a, __m128i b)
+    __m128i _mm_subs_epu16 (__m128i a, __m128i b)
+    void _mm_store_si128 (__m128i *p, __m128i a)
+
 np.import_array()
 
 ##############################################################################
@@ -342,14 +349,30 @@ cdef inline np.int32_t trailing_edge_colidx(Histograms *ph, np.int32_t colidx):
 # TO_DO - optimize using SIMD instructions
 #
 cdef inline void add16(np.uint16_t *dest, np.uint16_t *src):
-    cdef int i
-    for i in range(16):
-        dest[i] += src[i]
+    cdef __m128i d, s, *pd, *ps
+    pd = <__m128i *> dest
+    ps = <__m128i *> src
+    d = _mm_load_si128(pd)
+    s = _mm_load_si128(ps)
+    d = _mm_adds_epu16 (d, s)
+    _mm_store_si128(pd, d)
+    d = _mm_load_si128(pd + 1)
+    s = _mm_load_si128(ps + 1)
+    d = _mm_adds_epu16 (d, s)
+    _mm_store_si128(pd + 1, d)
 
 cdef inline void sub16(np.uint16_t *dest, np.uint16_t *src):
-    cdef int i
-    for i in range(16):
-        dest[i] -= src[i]
+    cdef __m128i d, s, *pd, *ps
+    pd = <__m128i *> dest
+    ps = <__m128i *> src
+    d = _mm_load_si128(pd)
+    s = _mm_load_si128(ps)
+    d = _mm_subs_epu16 (d, s)
+    _mm_store_si128(pd, d)
+    d = _mm_load_si128(pd + 1)
+    s = _mm_load_si128(ps + 1)
+    d = _mm_subs_epu16 (d, s)
+    _mm_store_si128(pd + 1, d)
 
 ############################################################################
 #
