@@ -17,12 +17,10 @@ cimport cython
 from libc.stdlib cimport malloc, free
 from libc.string cimport memset
 
-cdef extern from "emmintrin.h":
-    ctypedef long __m128i
-    __m128i _mm_load_si128 (__m128i *p)
-    __m128i _mm_adds_epu16 (__m128i a, __m128i b)
-    __m128i _mm_subs_epu16 (__m128i a, __m128i b)
-    void _mm_store_si128 (__m128i *p, __m128i a)
+cdef extern from "_histogram.h":
+    ctypedef unsigned short int uint16_t
+    void add16(uint16_t *dest, uint16_t *src)
+    void sub16(uint16_t *dest, uint16_t *src) 
 
 np.import_array()
 
@@ -341,38 +339,6 @@ cdef inline np.int32_t leading_edge_colidx(Histograms *ph, np.int32_t colidx):
 
 cdef inline np.int32_t trailing_edge_colidx(Histograms *ph, np.int32_t colidx):
     return (colidx + 3*ph.radius - 1) % ph.stripe_length
-#
-# add16 - add 16 consecutive integers
-#
-# Add an array of 16 16-bit integers to an accumulator of 16 16-bit integers
-#
-# TO_DO - optimize using SIMD instructions
-#
-cdef inline void add16(np.uint16_t *dest, np.uint16_t *src):
-    cdef __m128i d, s, *pd, *ps
-    pd = <__m128i *> dest
-    ps = <__m128i *> src
-    d = _mm_load_si128(pd)
-    s = _mm_load_si128(ps)
-    d = _mm_adds_epu16 (d, s)
-    _mm_store_si128(pd, d)
-    d = _mm_load_si128(pd + 1)
-    s = _mm_load_si128(ps + 1)
-    d = _mm_adds_epu16 (d, s)
-    _mm_store_si128(pd + 1, d)
-
-cdef inline void sub16(np.uint16_t *dest, np.uint16_t *src):
-    cdef __m128i d, s, *pd, *ps
-    pd = <__m128i *> dest
-    ps = <__m128i *> src
-    d = _mm_load_si128(pd)
-    s = _mm_load_si128(ps)
-    d = _mm_subs_epu16 (d, s)
-    _mm_store_si128(pd, d)
-    d = _mm_load_si128(pd + 1)
-    s = _mm_load_si128(ps + 1)
-    d = _mm_subs_epu16 (d, s)
-    _mm_store_si128(pd + 1, d)
 
 ############################################################################
 #

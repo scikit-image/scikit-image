@@ -25,7 +25,7 @@ def configuration(parent_package='', top_path=None):
     cython(['rank/percentile_rank.pyx'], working_path=base_path)
     cython(['rank/bilateral_rank.pyx'], working_path=base_path)
 
-    config.add_extension('_ctmf', sources=['_ctmf.c'],
+    config.add_extension('_ctmf', sources=['_ctmf.c', '_histogram.h'],
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_denoise_cy', sources=['_denoise_cy.c'],
         include_dirs=[get_numpy_include_dirs(), '../_shared'])
