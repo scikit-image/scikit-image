@@ -274,7 +274,8 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     return np.array(rr) + cy, np.array(cc) + cx
 
 
-def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
+def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
+                      Py_ssize_t xradius):
     """Generate ellipse perimeter coordinates.
 
     Parameters
