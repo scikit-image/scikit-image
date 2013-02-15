@@ -52,8 +52,8 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
                     i = image[r, c]
 
                     # compute the location of the offset pixel
-                    row = r + <Py_ssize_t>(sin(angle) * distance + 0.5)
-                    col = c + <Py_ssize_t>(cos(angle) * distance + 0.5);
+                    row = r + <int>(sin(angle) * distance + 0.5)
+                    col = c + <int>(cos(angle) * distance + 0.5)
 
                     # make sure the offset is within bounds
                     if row >= 0 and row < rows and \
