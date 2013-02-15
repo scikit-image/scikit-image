@@ -16,8 +16,7 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
                           negative_indices=False, mode='c'] angles,
                int levels,
                np.ndarray[dtype=np.uint32_t, ndim=4,
-                          negative_indices=False, mode='c'] out
-               ):
+                          negative_indices=False, mode='c'] out):
     """Perform co-occurrence matrix accumulation.
 
     Parameters
@@ -37,16 +36,19 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
         the results of the GLCM computation.
 
     """
+
     cdef:
-        np.int32_t a_inx, d_idx
-        Py_ssize_t r, c, rows, cols, row, col
-        np.int32_t i, j
+        Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
+        np.uint8_t i, j
+        np.float64_t angle, distance
 
     rows = image.shape[0]
     cols = image.shape[1]
 
-    for a_idx, angle in enumerate(angles):
-        for d_idx, distance in enumerate(distances):
+    for a_idx in range(len(angles)):
+        angle = angles[a_idx]
+        for d_idx in range(len(distances)):
+            distance = distances[d_idx]
             for r in range(rows):
                 for c in range(cols):
                     i = image[r, c]
