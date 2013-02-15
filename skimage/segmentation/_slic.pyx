@@ -66,7 +66,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     cdef Py_ssize_t height, width
     height, width = image.shape[:2]
     # approximate grid size for desired n_segments
-    cdef Py_ssize_t step = np.ceil(np.sqrt(height * width / n_segments))
+    cdef Py_ssize_t step = int(np.ceil(np.sqrt(height * width / n_segments)))
     grid_y, grid_x = np.mgrid[:height, :width]
     means_y = grid_y[::step, ::step]
     means_x = grid_x[::step, ::step]
