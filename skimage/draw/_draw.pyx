@@ -97,10 +97,10 @@ def polygon(y, x, shape=None):
     """
 
     cdef Py_ssize_t nr_verts = x.shape[0]
-    cdef Py_ssize_t minr = <Py_ssize_t>max(0, y.min())
-    cdef Py_ssize_t maxr = <Py_ssize_t>math.ceil(y.max())
-    cdef Py_ssize_t minc = <Py_ssize_t>max(0, x.min())
-    cdef Py_ssize_t maxc = <Py_ssize_t>math.ceil(x.max())
+    cdef Py_ssize_t minr = int(max(0, y.min()))
+    cdef Py_ssize_t maxr = int(math.ceil(y.max()))
+    cdef Py_ssize_t minc = int(max(0, x.min()))
+    cdef Py_ssize_t maxc = int(math.ceil(x.max()))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
@@ -148,10 +148,10 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
 
     """
 
-    cdef Py_ssize_t minr = <Py_ssize_t>max(0, cy - yradius)
-    cdef Py_ssize_t maxr = <Py_ssize_t>math.ceil(cy + yradius)
-    cdef Py_ssize_t minc = <Py_ssize_t>max(0, cx - xradius)
-    cdef Py_ssize_t maxc = <Py_ssize_t>math.ceil(cx + xradius)
+    cdef Py_ssize_t minr = int(max(0, cy - yradius))
+    cdef Py_ssize_t maxr = int(math.ceil(cy + yradius))
+    cdef Py_ssize_t minc = int(max(0, cx - xradius))
+    cdef Py_ssize_t maxc = int(math.ceil(cx + xradius))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
