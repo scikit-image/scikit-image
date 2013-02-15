@@ -17,7 +17,7 @@ cimport cython
 cdef struct Heapitem:
     np.int32_t value
     np.int32_t age
-    ssize_t index
+    Py_ssize_t index
 
 
 cdef inline int smaller(Heapitem *a, Heapitem *b):

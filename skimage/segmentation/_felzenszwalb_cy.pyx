@@ -10,7 +10,7 @@ from ..util import img_as_float
 @cython.boundscheck(False)
 @cython.wraparound(False)
 @cython.cdivision(True)
-def _felzenszwalb_grey(image, double scale=1, sigma=0.8, ssize_t min_size=20):
+def _felzenszwalb_grey(image, double scale=1, sigma=0.8, Py_ssize_t min_size=20):
     """Felzenszwalb's efficient graph based segmentation for a single channel.
 
     Produces an oversegmentation of a 2d image using a fast, minimum spanning

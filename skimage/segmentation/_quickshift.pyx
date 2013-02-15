@@ -85,12 +85,12 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
         raise ValueError("Sigma should be >= 1")
     cdef int w = int(3 * kernel_size)
 
-    cdef ssize_t height = image_c.shape[0]
-    cdef ssize_t width = image_c.shape[1]
-    cdef ssize_t channels = image_c.shape[2]
+    cdef Py_ssize_t height = image_c.shape[0]
+    cdef Py_ssize_t width = image_c.shape[1]
+    cdef Py_ssize_t channels = image_c.shape[2]
     cdef double current_density, closest, dist
 
-    cdef ssize_t r, c, r_, c_, channel, r_min, c_min
+    cdef Py_ssize_t r, c, r_, c_, channel, r_min, c_min
 
     cdef np.float_t* image_p = <np.float_t*> image_c.data
     cdef np.float_t* current_pixel_p = image_p

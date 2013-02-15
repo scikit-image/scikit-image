@@ -14,13 +14,13 @@ from libc.stdlib cimport free, malloc, realloc
 
 
 cdef struct Heap:
-    ssize_t items
-    ssize_t space
+    Py_ssize_t items
+    Py_ssize_t space
     Heapitem *data
     Heapitem **ptrs
 
 cdef inline Heap *heap_from_numpy2():
-    cdef ssize_t k
+    cdef Py_ssize_t k
     cdef Heap *heap
     heap = <Heap *> malloc(sizeof (Heap))
     heap.items = 0
@@ -36,7 +36,7 @@ cdef inline void heap_done(Heap *heap):
    free(heap.ptrs)
    free(heap)
 
-cdef inline void swap(ssize_t a, ssize_t b, Heap *h):
+cdef inline void swap(Py_ssize_t a, Py_ssize_t b, Heap *h):
     h.ptrs[a], h.ptrs[b] = h.ptrs[b], h.ptrs[a]
 
 
@@ -49,7 +49,7 @@ cdef inline void swap(ssize_t a, ssize_t b, Heap *h):
 ######################################################
 cdef inline void heappop(Heap *heap, Heapitem *dest):
 
-    cdef ssize_t i, smallest, l, r # heap indices
+    cdef Py_ssize_t i, smallest, l, r # heap indices
 
     #
     # Start by copying the first element to the destination
@@ -102,18 +102,18 @@ cdef inline void heappop(Heap *heap, Heapitem *dest):
 ##################################################
 cdef inline void heappush(Heap *heap, Heapitem *new_elem):
 
-    cdef ssize_t child = heap.items
-    cdef ssize_t parent
-    cdef ssize_t k
+    cdef Py_ssize_t child = heap.items
+    cdef Py_ssize_t parent
+    cdef Py_ssize_t k
     cdef Heapitem *new_data
 
     # grow if necessary
     if heap.items == heap.space:
       heap.space = heap.space * 2
       new_data = <Heapitem*>realloc(<void*>heap.data,
-                    <ssize_t>(heap.space * sizeof(Heapitem)))
+                    <Py_ssize_t>(heap.space * sizeof(Heapitem)))
       heap.ptrs = <Heapitem**>realloc(<void*>heap.ptrs,
-                    <ssize_t>(heap.space * sizeof(Heapitem *)))
+                    <Py_ssize_t>(heap.space * sizeof(Heapitem *)))
       for k in range(heap.items):
           heap.ptrs[k] = new_data + (heap.ptrs[k] - heap.data)
       for k in range(heap.items, heap.space):

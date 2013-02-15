@@ -49,9 +49,9 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
     cdef float template_mean = np.mean(template)
     cdef float template_ssd
     cdef float inv_area
-    cdef ssize_t r, c, r_end, c_end
-    cdef ssize_t template_rows = template.shape[0]
-    cdef ssize_t template_cols = template.shape[1]
+    cdef Py_ssize_t r, c, r_end, c_end
+    cdef Py_ssize_t template_rows = template.shape[0]
+    cdef Py_ssize_t template_cols = template.shape[1]
     cdef float den, window_sqr_sum, window_mean_sqr, window_sum
 
     image_sat = integral.integral_image(image)

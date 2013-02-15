@@ -84,9 +84,9 @@ cdef struct PixelCount:
 # relative offsets from the octagon center
 #
 cdef struct SCoord:
-    ssize_t stride   # add the stride to the memory location
-    ssize_t x
-    ssize_t y
+    Py_ssize_t stride   # add the stride to the memory location
+    Py_ssize_t x
+    Py_ssize_t y
 
 cdef struct Histograms:
     void *memory                # pointer to the allocated memory
@@ -95,16 +95,16 @@ cdef struct Histograms:
     np.uint8_t *data            # pointer to the image data
     np.uint8_t *mask            # pointer to the image mask
     np.uint8_t *output          # pointer to the output array
-    ssize_t column_count     # number of columns represented by this
+    Py_ssize_t column_count     # number of columns represented by this
                                 # structure
-    ssize_t stripe_length    # number of columns including "radius" before
+    Py_ssize_t stripe_length    # number of columns including "radius" before
                                 # and after
-    ssize_t row_count        # number of rows available in image
-    ssize_t current_column   # the column being processed
-    ssize_t current_row      # the row being processed
-    ssize_t current_stride   # offset in data and mask to current location
-    ssize_t radius           # the "radius" of the octagon
-    ssize_t a_2              # 1/2 of the length of a side of the octagon
+    Py_ssize_t row_count        # number of rows available in image
+    Py_ssize_t current_column   # the column being processed
+    Py_ssize_t current_row      # the row being processed
+    Py_ssize_t current_stride   # offset in data and mask to current location
+    Py_ssize_t radius           # the "radius" of the octagon
+    Py_ssize_t a_2              # 1/2 of the length of a side of the octagon
     #
     #
     # The strides are the offsets in the array to the points that need to
@@ -138,50 +138,50 @@ cdef struct Histograms:
     SCoord last_bottom_left   # (-) trailing edge bottom - 1 col
     SCoord bottom_left        # (+) left side of octagon's bottom - 1 col
 
-    ssize_t row_stride          # stride between one row and the next
-    ssize_t col_stride          # stride between one column and the next
+    Py_ssize_t row_stride          # stride between one row and the next
+    Py_ssize_t col_stride          # stride between one column and the next
     # The accumulator holds the running histogram
     #
     HistogramPiece accumulator
     #
     # The running count of pixels in the accumulator
     #
-    ssize_t accumulator_count
+    Py_ssize_t accumulator_count
     #
     # The percent of pixels within the octagon whose value is
     # less than or equal to the median-filtered value (e.g. for
     # median, this is 50, for lower quartile it's 25)
     #
-    ssize_t percent
+    Py_ssize_t percent
     #
     # last_update_column keeps track of the column # of the last update
     # to the fine histogram accumulator. Short-term, the median
     # stays in one coarse block so only one fine histogram might
     # need to be updated
     #
-    ssize_t last_update_column[16]
+    Py_ssize_t last_update_column[16]
 
 ############################################################################
 #
 # allocate_histograms - allocates the Histograms structure for the run
 #
 ############################################################################
-cdef Histograms *allocate_histograms(ssize_t rows,
-                                     ssize_t columns,
-                                     ssize_t row_stride,
-                                     ssize_t col_stride,
-                                     ssize_t radius,
-                                     ssize_t percent,
+cdef Histograms *allocate_histograms(Py_ssize_t rows,
+                                     Py_ssize_t columns,
+                                     Py_ssize_t row_stride,
+                                     Py_ssize_t col_stride,
+                                     Py_ssize_t radius,
+                                     Py_ssize_t percent,
                                      np.uint8_t *data,
                                      np.uint8_t *mask,
                                      np.uint8_t *output):
     cdef:
-        ssize_t adjusted_stripe_length = columns + 2*radius + 1
-        ssize_t memory_size
+        Py_ssize_t adjusted_stripe_length = columns + 2*radius + 1
+        Py_ssize_t memory_size
         void *ptr
         Histograms *ph
         size_t roundoff
-        ssize_t a
+        Py_ssize_t a
         SCoord *psc
 
     memory_size = (adjusted_stripe_length *
@@ -199,7 +199,7 @@ cdef Histograms *allocate_histograms(ssize_t rows,
     #
     # Align histogram memory to a 32-byte boundary
     #
-    roundoff = <ssize_t>ptr
+    roundoff = <Py_ssize_t>ptr
     roundoff += 31
     roundoff -= roundoff % 32
     ptr = <void *> roundoff
@@ -232,7 +232,7 @@ cdef Histograms *allocate_histograms(ssize_t rows,
     # a_2 is the offset from the center to each of the octagon
     # corners
     #
-    a = <ssize_t>(<np.float64_t>radius * 2.0 / 2.414213)
+    a = <Py_ssize_t>(<np.float64_t>radius * 2.0 / 2.414213)
     a_2 = a / 2
     if a_2 == 0:
         a_2 = 1
@@ -326,17 +326,17 @@ cdef void set_stride(Histograms *ph, SCoord *psc):
 # a column that is "radius" to the left.
 #
 ############################################################################
-cdef inline ssize_t tl_br_colidx(Histograms *ph, ssize_t colidx):
+cdef inline Py_ssize_t tl_br_colidx(Histograms *ph, Py_ssize_t colidx):
     return (colidx + 3*ph.radius + ph.current_row) % ph.stripe_length
 
-cdef inline ssize_t tr_bl_colidx(Histograms *ph, ssize_t colidx):
+cdef inline Py_ssize_t tr_bl_colidx(Histograms *ph, Py_ssize_t colidx):
     return (colidx + 3*ph.radius + ph.row_count-ph.current_row) % \
            ph.stripe_length
 
-cdef inline ssize_t leading_edge_colidx(Histograms *ph, ssize_t colidx):
+cdef inline Py_ssize_t leading_edge_colidx(Histograms *ph, Py_ssize_t colidx):
     return (colidx + 5*ph.radius) % ph.stripe_length
 
-cdef inline ssize_t trailing_edge_colidx(Histograms *ph, ssize_t colidx):
+cdef inline Py_ssize_t trailing_edge_colidx(Histograms *ph, Py_ssize_t colidx):
     return (colidx + 3*ph.radius - 1) % ph.stripe_length
 
 ############################################################################
@@ -348,8 +348,8 @@ cdef inline ssize_t trailing_edge_colidx(Histograms *ph, ssize_t colidx):
 # colidx - the index of the column to add
 #
 ############################################################################
-cdef inline void accumulate_coarse_histogram(Histograms *ph, ssize_t colidx):
-    cdef ssize_t offset
+cdef inline void accumulate_coarse_histogram(Histograms *ph, Py_ssize_t colidx):
+    cdef Py_ssize_t offset
 
     offset = tr_bl_colidx(ph, colidx)
     if ph.pixel_count[offset].top_right > 0:
@@ -370,8 +370,8 @@ cdef inline void accumulate_coarse_histogram(Histograms *ph, ssize_t colidx):
 #                                 for a given column
 #
 ############################################################################
-cdef inline void deaccumulate_coarse_histogram(Histograms *ph, ssize_t colidx):
-    cdef ssize_t offset
+cdef inline void deaccumulate_coarse_histogram(Histograms *ph, Py_ssize_t colidx):
+    cdef Py_ssize_t offset
     #
     # The trailing diagonals don't appear until here
     #
@@ -400,11 +400,11 @@ cdef inline void deaccumulate_coarse_histogram(Histograms *ph, ssize_t colidx):
 #
 ############################################################################
 cdef inline void accumulate_fine_histogram(Histograms *ph,
-                                           ssize_t colidx,
-                                           ssize_t fineidx):
+                                           Py_ssize_t colidx,
+                                           Py_ssize_t fineidx):
     cdef:
-        ssize_t fineoffset = fineidx * 16
-        ssize_t offset
+        Py_ssize_t fineoffset = fineidx * 16
+        Py_ssize_t offset
 
     offset = tr_bl_colidx(ph, colidx)
     add16(ph.accumulator.fine + fineoffset,
@@ -424,11 +424,11 @@ cdef inline void accumulate_fine_histogram(Histograms *ph,
 #
 ############################################################################
 cdef inline void deaccumulate_fine_histogram(Histograms *ph,
-                                             ssize_t colidx,
-                                             ssize_t fineidx):
+                                             Py_ssize_t colidx,
+                                             Py_ssize_t fineidx):
     cdef:
-        ssize_t fineoffset = fineidx * 16
-        ssize_t offset
+        Py_ssize_t fineoffset = fineidx * 16
+        Py_ssize_t offset
 
     #
     # The trailing diagonals don't appear until here
@@ -480,11 +480,11 @@ cdef inline void accumulate(Histograms *ph):
 #    to choose remains to be done.
 ############################################################################
 
-cdef inline void update_fine(Histograms *ph, ssize_t fineidx):
+cdef inline void update_fine(Histograms *ph, Py_ssize_t fineidx):
     cdef:
-        ssize_t first_update_column = ph.last_update_column[fineidx]+1
-        ssize_t update_limit = ph.current_column+1
-        ssize_t i
+        Py_ssize_t first_update_column = ph.last_update_column[fineidx]+1
+        Py_ssize_t update_limit = ph.current_column+1
+        Py_ssize_t i
 
     for i in range(first_update_column, update_limit):
         accumulate_fine_histogram(ph, i, fineidx)
@@ -509,15 +509,15 @@ cdef inline void update_histogram(Histograms *ph,
                                   SCoord *last_coord,
                                   SCoord *coord):
     cdef:
-        ssize_t current_column = ph.current_column
-        ssize_t current_row    = ph.current_row
-        ssize_t current_stride = ph.current_stride
-        ssize_t column_count   = ph.column_count
-        ssize_t row_count      = ph.row_count
+        Py_ssize_t current_column = ph.current_column
+        Py_ssize_t current_row    = ph.current_row
+        Py_ssize_t current_stride = ph.current_stride
+        Py_ssize_t column_count   = ph.column_count
+        Py_ssize_t row_count      = ph.row_count
         np.uint8_t value
-        ssize_t stride
-        ssize_t x
-        ssize_t y
+        Py_ssize_t stride
+        Py_ssize_t x
+        Py_ssize_t y
 
     x = last_coord.x + current_column
     y = last_coord.y + current_row
@@ -550,21 +550,21 @@ cdef inline void update_histogram(Histograms *ph,
 ############################################################################
 cdef inline void update_current_location(Histograms *ph):
     cdef:
-        ssize_t current_column = ph.current_column
-        ssize_t radius = ph.radius
-        ssize_t top_left_off = tl_br_colidx(ph, current_column)
-        ssize_t top_right_off = tr_bl_colidx(ph, current_column)
-        ssize_t bottom_left_off = tr_bl_colidx(ph, current_column)
-        ssize_t bottom_right_off = tl_br_colidx(ph, current_column)
-        ssize_t leading_edge_off = leading_edge_colidx(ph, current_column)
+        Py_ssize_t current_column = ph.current_column
+        Py_ssize_t radius = ph.radius
+        Py_ssize_t top_left_off = tl_br_colidx(ph, current_column)
+        Py_ssize_t top_right_off = tr_bl_colidx(ph, current_column)
+        Py_ssize_t bottom_left_off = tr_bl_colidx(ph, current_column)
+        Py_ssize_t bottom_right_off = tl_br_colidx(ph, current_column)
+        Py_ssize_t leading_edge_off = leading_edge_colidx(ph, current_column)
         np.int32_t *coarse_histogram
         np.int32_t *fine_histogram
-        ssize_t last_xoff
-        ssize_t last_yoff
-        ssize_t last_stride
-        ssize_t xoff
-        ssize_t yoff
-        ssize_t stride
+        Py_ssize_t last_xoff
+        Py_ssize_t last_yoff
+        Py_ssize_t last_stride
+        Py_ssize_t xoff
+        Py_ssize_t yoff
+        Py_ssize_t stride
 
     update_histogram(ph, &ph.histogram[top_left_off].top_left,
                      &ph.pixel_count[top_left_off].top_left,
@@ -599,10 +599,10 @@ cdef inline void update_current_location(Histograms *ph):
 
 cdef inline np.uint8_t find_median(Histograms *ph):
     cdef:
-        ssize_t pixels_below      # of pixels below the median
-        ssize_t i
-        ssize_t j
-        ssize_t k
+        Py_ssize_t pixels_below      # of pixels below the median
+        Py_ssize_t i
+        Py_ssize_t j
+        Py_ssize_t k
         np.uint32_t accumulator
 
     if ph.accumulator_count == 0:
@@ -644,25 +644,25 @@ cdef inline np.uint8_t find_median(Histograms *ph):
 # output - array to be filled with filtered pixels
 #
 ############################################################################
-cdef int c_median_filter(ssize_t rows,
-                         ssize_t columns,
-                         ssize_t row_stride,
-                         ssize_t col_stride,
-                         ssize_t radius,
-                         ssize_t percent,
+cdef int c_median_filter(Py_ssize_t rows,
+                         Py_ssize_t columns,
+                         Py_ssize_t row_stride,
+                         Py_ssize_t col_stride,
+                         Py_ssize_t radius,
+                         Py_ssize_t percent,
                          np.uint8_t *data,
                          np.uint8_t *mask,
                          np.uint8_t *output):
     cdef:
         Histograms *ph
         Histogram  *phistogram
-        ssize_t row
-        ssize_t col
-        ssize_t i
-        ssize_t top_left_off
-        ssize_t top_right_off
-        ssize_t bottom_left_off
-        ssize_t bottom_right_off
+        Py_ssize_t row
+        Py_ssize_t col
+        Py_ssize_t i
+        Py_ssize_t top_left_off
+        Py_ssize_t top_right_off
+        Py_ssize_t bottom_left_off
+        Py_ssize_t bottom_right_off
 
     ph = allocate_histograms(rows, columns, row_stride, col_stride,
                              radius, percent, data, mask, output)

@@ -18,9 +18,9 @@ def possible_hull(np.ndarray[dtype=np.uint8_t, ndim=2, mode="c"] img):
        the convex hull.
 
     """
-    cdef ssize_t r, c
-    cdef ssize_t rows = img.shape[0]
-    cdef ssize_t cols = img.shape[1]
+    cdef Py_ssize_t r, c
+    cdef Py_ssize_t rows = img.shape[0]
+    cdef Py_ssize_t cols = img.shape[1]
 
     # Output: rows storage slots for left boundary pixels
     #         cols storage slots for top boundary pixels

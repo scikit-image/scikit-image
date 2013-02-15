@@ -17,7 +17,7 @@ cdef inline double _gaussian_weight(double sigma, double value):
     return exp(-0.5 * (value / sigma)**2)
 
 
-cdef double* _compute_color_lut(ssize_t bins, double sigma, double max_value):
+cdef double* _compute_color_lut(Py_ssize_t bins, double sigma, double max_value):
 
     cdef:
         double* color_lut = <double*>malloc(bins * sizeof(double))
@@ -29,7 +29,7 @@ cdef double* _compute_color_lut(ssize_t bins, double sigma, double max_value):
     return color_lut
 
 
-cdef double* _compute_range_lut(ssize_t win_size, double sigma):
+cdef double* _compute_range_lut(Py_ssize_t win_size, double sigma):
 
     cdef:
         double* range_lut = <double*>malloc(win_size**2 * sizeof(double))
@@ -45,8 +45,8 @@ cdef double* _compute_range_lut(ssize_t win_size, double sigma):
     return range_lut
 
 
-def denoise_bilateral(image, ssize_t win_size=5, sigma_range=None,
-                      double sigma_spatial=1, ssize_t bins=10000,
+def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
+                      double sigma_spatial=1, Py_ssize_t bins=10000,
                       mode='constant', double cval=0):
     """Denoise image using bilateral filter.
 
@@ -100,10 +100,10 @@ def denoise_bilateral(image, ssize_t win_size=5, sigma_range=None,
     image = np.atleast_3d(img_as_float(image))
 
     cdef:
-        ssize_t rows = image.shape[0]
-        ssize_t cols = image.shape[1]
-        ssize_t dims = image.shape[2]
-        ssize_t window_ext = (win_size - 1) / 2
+        Py_ssize_t rows = image.shape[0]
+        Py_ssize_t cols = image.shape[1]
+        Py_ssize_t dims = image.shape[2]
+        Py_ssize_t window_ext = (win_size - 1) / 2
 
         double max_value = image.max()
 
@@ -224,14 +224,14 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
     image = np.atleast_3d(img_as_float(image))
 
     cdef:
-        ssize_t rows = image.shape[0]
-        ssize_t cols = image.shape[1]
-        ssize_t dims = image.shape[2]
-        ssize_t rows2 = rows + 2
-        ssize_t cols2 = cols + 2
-        ssize_t r, c, k
+        Py_ssize_t rows = image.shape[0]
+        Py_ssize_t cols = image.shape[1]
+        Py_ssize_t dims = image.shape[2]
+        Py_ssize_t rows2 = rows + 2
+        Py_ssize_t cols2 = cols + 2
+        Py_ssize_t r, c, k
 
-        ssize_t total = rows * cols * dims
+        Py_ssize_t total = rows * cols * dims
 
         shape_ext = (rows2, cols2, dims)
 

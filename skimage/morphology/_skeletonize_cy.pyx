@@ -62,8 +62,8 @@ def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
     """
     cdef:
         np.int32_t accumulator
-        ssize_t index, order_index
-        ssize_t ii, jj
+        Py_ssize_t index, order_index
+        Py_ssize_t ii, jj
 
     for index in range(order.shape[0]):
         accumulator = 16
@@ -119,12 +119,12 @@ def _table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
                    negative_indices=False, mode='c'] indexer
         np.int32_t *p_indexer
         np.uint8_t *p_image
-        ssize_t i_stride
-        ssize_t i_shape
-        ssize_t j_shape
-        ssize_t i
-        ssize_t j
-        ssize_t offset
+        Py_ssize_t i_stride
+        Py_ssize_t i_shape
+        Py_ssize_t j_shape
+        Py_ssize_t i
+        Py_ssize_t j
+        Py_ssize_t offset
 
     i_shape   = image.shape[0]
     j_shape   = image.shape[1]

@@ -4,7 +4,7 @@
 #cython: wraparound=False
 
 
-cdef inline unsigned char point_in_polygon(ssize_t nr_verts, double *xp,
+cdef inline unsigned char point_in_polygon(Py_ssize_t nr_verts, double *xp,
                                            double *yp, double x, double y):
     """Test whether point lies inside a polygon.
 
@@ -17,9 +17,9 @@ cdef inline unsigned char point_in_polygon(ssize_t nr_verts, double *xp,
     x, y : double
         Coordinates of point.
     """
-    cdef ssize_t i
+    cdef Py_ssize_t i
     cdef unsigned char c = 0
-    cdef ssize_t j = nr_verts - 1
+    cdef Py_ssize_t j = nr_verts - 1
     for i in range(nr_verts):
         if (
             (((yp[i] <= y) and (y < yp[j])) or
@@ -31,8 +31,8 @@ cdef inline unsigned char point_in_polygon(ssize_t nr_verts, double *xp,
     return c
 
 
-cdef void points_in_polygon(ssize_t nr_verts, double *xp, double *yp,
-                            ssize_t nr_points, double *x, double *y,
+cdef void points_in_polygon(Py_ssize_t nr_verts, double *xp, double *yp,
+                            Py_ssize_t nr_points, double *x, double *y,
                             unsigned char *result):
     """Test whether points lie inside a polygon.
 
@@ -49,6 +49,6 @@ cdef void points_in_polygon(ssize_t nr_verts, double *xp, double *yp,
     result : unsigned char array
         Test results for each point.
     """
-    cdef ssize_t n
+    cdef Py_ssize_t n
     for n in range(nr_points):
         result[n] = point_in_polygon(nr_verts, xp, yp, x[n], y[n])

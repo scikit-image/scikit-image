@@ -31,11 +31,11 @@ def grid_points_inside_poly(shape, verts):
 
     vx = verts[:, 0].astype(np.double)
     vy = verts[:, 1].astype(np.double)
-    cdef ssize_t V = vx.shape[0]
+    cdef Py_ssize_t V = vx.shape[0]
 
-    cdef ssize_t M = shape[0]
-    cdef ssize_t N = shape[1]
-    cdef ssize_t m, n
+    cdef Py_ssize_t M = shape[0]
+    cdef Py_ssize_t N = shape[1]
+    cdef Py_ssize_t m, n
 
     cdef np.ndarray[dtype=np.uint8_t, ndim=2, mode="c"] out = \
          np.zeros((M, N), dtype=np.uint8)

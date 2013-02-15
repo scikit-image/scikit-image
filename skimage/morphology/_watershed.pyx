@@ -27,7 +27,7 @@ def watershed(np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False,
                          mode='c'] image,
               np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False,
                          mode='c'] pq,
-              ssize_t age,
+              Py_ssize_t age,
               np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False,
                          mode='c'] structure,
               np.ndarray[DTYPE_BOOL_t, ndim=1, negative_indices=False,
@@ -58,11 +58,11 @@ def watershed(np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False,
     """
     cdef Heapitem elem
     cdef Heapitem new_elem
-    cdef ssize_t nneighbors = structure.shape[0]
-    cdef ssize_t i = 0
-    cdef ssize_t index = 0
-    cdef ssize_t old_index = 0
-    cdef ssize_t max_index = image.shape[0]
+    cdef Py_ssize_t nneighbors = structure.shape[0]
+    cdef Py_ssize_t i = 0
+    cdef Py_ssize_t index = 0
+    cdef Py_ssize_t old_index = 0
+    cdef Py_ssize_t max_index = image.shape[0]
 
     cdef Heap *hp = <Heap *> heap_from_numpy2()
 

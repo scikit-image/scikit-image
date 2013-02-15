@@ -63,10 +63,10 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         image = rgb2lab(image)
 
     # initialize on grid:
-    cdef ssize_t height, width
+    cdef Py_ssize_t height, width
     height, width = image.shape[:2]
     # approximate grid size for desired n_segments
-    cdef ssize_t step = np.ceil(np.sqrt(height * width / n_segments))
+    cdef Py_ssize_t step = np.ceil(np.sqrt(height * width / n_segments))
     grid_y, grid_x = np.mgrid[:height, :width]
     means_y = grid_y[::step, ::step]
     means_x = grid_x[::step, ::step]
@@ -82,7 +82,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     ratio = (ratio / float(step)) ** 2
     cdef np.ndarray[dtype=np.float_t, ndim=3] image_yx \
             = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
-    cdef ssize_t i, k, x, y, x_min, x_max, y_min, y_max, changes
+    cdef Py_ssize_t i, k, x, y, x_min, x_max, y_min, y_max, changes
     cdef double dist_mean
 
     cdef np.ndarray[dtype=np.intp_t, ndim=2] nearest_mean \
