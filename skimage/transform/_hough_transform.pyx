@@ -1,3 +1,7 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 cimport cython
 import math
 import numpy as np
@@ -5,9 +9,6 @@ cimport numpy as np
 from random import randint
 from libc.math cimport abs, fabs, sqrt, ceil, floor
 from libc.stdlib cimport rand
-
-
-np.import_array()
 
 
 cdef double PI_2 = 1.5707963267948966
@@ -18,7 +19,6 @@ cdef inline Py_ssize_t round(double r):
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-@cython.boundscheck(False)
 def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
 
     if img.ndim != 2:
@@ -62,8 +62,6 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     return accum, theta, bins
 
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
 def _probabilistic_hough(np.ndarray img, int value_threshold,
                          int line_length, int line_gap,
                          np.ndarray[ndim=1, dtype=np.double_t] theta=None):
