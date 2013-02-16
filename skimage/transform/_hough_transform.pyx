@@ -103,7 +103,7 @@ def _probabilistic_hough(np.ndarray img, int value_threshold,
 
     # find the nonzero indexes
     y_idxs, x_idxs = np.nonzero(img)
-    points = zip(x_idxs, y_idxs)
+    points = list(zip(x_idxs, y_idxs))
     # mask all non-zero indexes
     mask[y_idxs, x_idxs] = 1
 
