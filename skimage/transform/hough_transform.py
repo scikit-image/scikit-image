@@ -146,7 +146,7 @@ def hough_line(img, theta=None):
     return _hough(img, theta)
 
 def hough_circle(img, radius, normalize=True):
-    """Perform a circle Hough transform.
+    """Perform a circular Hough transform.
 
     Parameters
     ----------
@@ -154,7 +154,7 @@ def hough_circle(img, radius, normalize=True):
         Input image with nonzero values representing edges.
     radius : ndarray
         Radii at which to compute the Hough transform.
-    normalize : boolean
+    normalize : boolean, optional
         Normalize the accumulator with the number
         of pixels used to draw the radius
 
@@ -162,9 +162,6 @@ def hough_circle(img, radius, normalize=True):
     -------
     H : 3D ndarray (radius index, (M, N) ndarray)
         Hough transform accumulator for each radius
-
-    Examples
-    --------
 
     """
     return _hough_circle(img, radius, normalize)
