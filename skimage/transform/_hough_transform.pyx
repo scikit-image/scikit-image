@@ -216,7 +216,8 @@ def _probabilistic_hough(np.ndarray img, int value_threshold,
                 # if non-zero point found, continue the line
                 if mask[y1, x1]:
                     if good_line:
-                        accum_idx = <int>round((ctheta[j] * x1 + stheta[j] * y1)) + offset
+                        accum_idx = <int>round((ctheta[j] * x1 \
+                                                + stheta[j] * y1)) + offset
                         accum[accum_idx, max_theta] -= 1
                         mask[y1, x1] = 0
                 # exit when the point is the line end
@@ -227,7 +228,8 @@ def _probabilistic_hough(np.ndarray img, int value_threshold,
 
         # add line to the result
         if good_line:
-            lines.append(((line_end[0, 0], line_end[0, 1]), (line_end[1, 0], line_end[1, 1])))
+            lines.append(((line_end[0, 0], line_end[0, 1]),
+                          (line_end[1, 0], line_end[1, 1])))
             if len(lines) > lines_max:
                 return lines
 
