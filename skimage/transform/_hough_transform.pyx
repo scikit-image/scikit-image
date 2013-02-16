@@ -52,13 +52,13 @@ def _hough_circle(np.ndarray img, \
     x = x + max_radius
     y = y + max_radius
 
-    cdef list H = list()
     cdef int px, py
     cdef np.ndarray[ndim=1, dtype=np.npy_intp] tx, ty
+    cdef np.ndarray acc = np.zeros((radius.size,
+                                    img.shape[0] + 2 * max_radius,
+                                    img.shape[1] + 2 * max_radius))
 
-    for rad in radius:
-        # Accumulator
-        out = np.zeros((img.shape[0] + 2 * max_radius, img.shape[1] + 2 * max_radius))
+    for i, rad in enumerate(radius):
 
         # Store in memory the circle of given radius
         # centered at (0,0)
@@ -70,13 +70,12 @@ def _hough_circle(np.ndarray img, \
             # its coordinates are (tx, ty)
             tx = circle_x + px
             ty = circle_y + py
-            out[tx, ty] += 1
+            acc[i, tx, ty] += 1
 
         if normalize:
-            out = out / len(circle_x)
+            acc[i] = acc[i] / len(circle_x)
 
-        H.append(out)
-    return np.array(H)
+    return acc
 
 
 def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
