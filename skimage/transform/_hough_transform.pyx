@@ -3,11 +3,9 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 cimport cython
-import math
 import numpy as np
 cimport numpy as np
-from random import randint
-from libc.math cimport abs, fabs, sqrt, ceil, floor
+from libc.math cimport abs, fabs, sqrt, ceil
 from libc.stdlib cimport rand
 
 
@@ -40,7 +38,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     cdef Py_ssize_t max_distance, offset
 
     max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
-                                     img.shape[1] * img.shape[1]))
+                                             img.shape[1] * img.shape[1]))
     accum = np.zeros((max_distance, theta.shape[0]), dtype=np.uint64)
     bins = np.linspace(-max_distance / 2.0, max_distance / 2.0, max_distance)
     offset = max_distance / 2
