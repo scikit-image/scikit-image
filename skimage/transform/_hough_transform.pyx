@@ -48,11 +48,13 @@ def _hough_circle(np.ndarray img, \
     y, x = np.nonzero(img)
 
     # Offset the image
-    max_radius = radius.max()
+    cdef int max_radius = radius.max()
     x = x + max_radius
     y = y + max_radius
 
     cdef list H = list()
+    cdef int px, py
+    cdef np.ndarray[ndim=1, dtype=np.npy_intp] tx, ty
 
     for rad in radius:
         # Accumulator
