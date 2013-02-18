@@ -53,7 +53,7 @@ def _hough_circle(np.ndarray img, \
     y = y + max_radius
 
     cdef int px, py
-    cdef np.ndarray[ndim=1, dtype=np.npy_intp] tx, ty
+    cdef np.ndarray[ndim=1, dtype=np.npy_intp] tx, ty, circle_x, circle_y
     cdef np.ndarray acc = np.zeros((radius.size,
                                     img.shape[0] + 2 * max_radius,
                                     img.shape[1] + 2 * max_radius))
