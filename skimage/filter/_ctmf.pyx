@@ -327,17 +327,17 @@ cdef void set_stride(Histograms *ph, SCoord *psc):
 #
 ############################################################################
 cdef inline np.int32_t tl_br_colidx(Histograms *ph, np.int32_t colidx):
-    return (colidx + 3*ph.radius + ph.current_row) % ph.stripe_length
+    return <np.int32_t> (colidx + 3*ph.radius + ph.current_row) % ph.stripe_length
 
 cdef inline np.int32_t tr_bl_colidx(Histograms *ph, np.int32_t colidx):
-    return (colidx + 3*ph.radius + ph.row_count-ph.current_row) % \
+    return <np.int32_t> (colidx + 3*ph.radius + ph.row_count-ph.current_row) % \
            ph.stripe_length
 
 cdef inline np.int32_t leading_edge_colidx(Histograms *ph, np.int32_t colidx):
-    return (colidx + 5*ph.radius) % ph.stripe_length
+    return <np.int32_t> (colidx + 5*ph.radius) % ph.stripe_length
 
 cdef inline np.int32_t trailing_edge_colidx(Histograms *ph, np.int32_t colidx):
-    return (colidx + 3*ph.radius - 1) % ph.stripe_length
+    return <np.int32_t> (colidx + 3*ph.radius - 1) % ph.stripe_length
 
 ############################################################################
 #
@@ -612,7 +612,7 @@ cdef inline np.uint8_t find_median(Histograms *ph):
 
     if ph.accumulator_count == 0:
         return 0
-    pixels_below = ((ph.accumulator_count * ph.percent + 50)
+    pixels_below = <np.uint32_t> ((ph.accumulator_count * ph.percent + 50)
                     / 100) # +50 for roundoff
     if pixels_below > 0:
         pixels_below -= 1
@@ -774,8 +774,8 @@ def median_filter(
         raise ValueError('Data shape (%d, %d) is not output shape (%d, %d)' %
                          (data.shape[0], data.shape[1],
                           output.shape[0], output.shape[1]))
-    if c_median_filter(data.shape[0], data.shape[1],
-                       data.strides[0], data.strides[1],
+    if c_median_filter(<np.int32_t> data.shape[0], <np.int32_t> data.shape[1],
+                       <np.int32_t> data.strides[0], <np.int32_t> data.strides[1],
                        radius, percent,
                        <np.uint8_t *>data.data,
                        <np.uint8_t *>mask.data,
