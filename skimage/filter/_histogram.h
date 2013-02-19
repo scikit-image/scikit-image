@@ -3,7 +3,7 @@
  * Modified from code
  * Copyright (C) 2006  Simon Perreault
  *
- * Reference: S. Perreault and P. HÃ©bert, "Median Filtering in Constant Time",
+ * Reference: S. Perreault and P. Hébert, "Median Filtering in Constant Time",
  * IEEE Transactions on Image Processing, September 2007.
  *
  */
