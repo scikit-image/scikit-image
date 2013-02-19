@@ -18,9 +18,8 @@ from libc.stdlib cimport malloc, free
 from libc.string cimport memset
 
 cdef extern from "_histogram.h":
-    ctypedef unsigned short int uint16_t
-    void add16(uint16_t *dest, uint16_t *src)
-    void sub16(uint16_t *dest, uint16_t *src) 
+    void add16(np.uint16_t *dest, np.uint16_t *src)
+    void sub16(np.uint16_t *dest, np.uint16_t *src)
 
 np.import_array()
 
