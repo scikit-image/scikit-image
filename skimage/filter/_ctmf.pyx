@@ -17,7 +17,7 @@ cimport cython
 from libc.stdlib cimport malloc, free
 from libc.string cimport memset
 
-cdef extern from "_histogram.h":
+cdef extern from "../_shared/vectorized_ops.h":
     void add16(np.uint16_t *dest, np.uint16_t *src)
     void sub16(np.uint16_t *dest, np.uint16_t *src)
 
