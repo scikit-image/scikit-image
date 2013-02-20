@@ -62,11 +62,11 @@ cdef struct HistogramPiece:
     np.uint16_t fine[256]
 
 cdef struct Histogram:
-    HistogramPiece top_left     # top-left corner
-    HistogramPiece top_right    # top-right corner
-    HistogramPiece edge         # leading/trailing edge
-    HistogramPiece bottom_left  # bottom-left corner
-    HistogramPiece bottom_right # bottom-right corner
+    HistogramPiece top_left      # top-left corner
+    HistogramPiece top_right     # top-right corner
+    HistogramPiece edge          # leading/trailing edge
+    HistogramPiece bottom_left   # bottom-left corner
+    HistogramPiece bottom_right  # bottom-right corner
 
 # The pixel count has the number of pixels histogrammed in
 # each of the five compartments for this position. This changes
@@ -127,16 +127,16 @@ cdef struct Histograms:
     #
     #          x -->
     #
-    SCoord last_top_left     # (-) left side of octagon's top - 1 row
-    SCoord top_left          # (+) -1 row from trailing edge top
-    SCoord last_top_right    # (-) right side of octagon's top - 1 col - 1 row
-    SCoord top_right         # (+) -1 col -1 row from leading edge top
-    SCoord last_leading_edge # (-) leading edge (right) top stride - 1 row
-    SCoord leading_edge      # (+) leading edge bottom stride
-    SCoord last_bottom_right # (-) leading edge bottom - 1 col
-    SCoord bottom_right      # (+) right side of octagon's bottom - 1 col
-    SCoord last_bottom_left  # (-) trailing edge bottom - 1 col
-    SCoord bottom_left       # (+) left side of octagon's bottom - 1 col
+    SCoord last_top_left      # (-) left side of octagon's top - 1 row
+    SCoord top_left           # (+) -1 row from trailing edge top
+    SCoord last_top_right     # (-) right side of octagon's top - 1 col - 1 row
+    SCoord top_right          # (+) -1 col -1 row from leading edge top
+    SCoord last_leading_edge  # (-) leading edge (right) top stride - 1 row
+    SCoord leading_edge       # (+) leading edge bottom stride
+    SCoord last_bottom_right  # (-) leading edge bottom - 1 col
+    SCoord bottom_right       # (+) right side of octagon's bottom - 1 col
+    SCoord last_bottom_left   # (-) trailing edge bottom - 1 col
+    SCoord bottom_left        # (+) left side of octagon's bottom - 1 col
 
     np.int32_t row_stride          # stride between one row and the next
     np.int32_t col_stride          # stride between one column and the next
@@ -185,25 +185,25 @@ cdef Histograms *allocate_histograms(np.int32_t rows,
         SCoord *psc
 
     memory_size = (adjusted_stripe_length *
-                   (sizeof(Histogram) + sizeof(PixelCount))+
-                   sizeof(Histograms)+32)
+                   (sizeof(Histogram) + sizeof(PixelCount)) +
+                   sizeof(Histograms) + 32)
     ptr = malloc(memory_size)
     memset(ptr, 0, memory_size)
-    ph  = <Histograms *>ptr
+    ph = <Histograms *> ptr
     if not ptr:
         return ph
     ph.memory = ptr
-    ptr = <void *>(ph+1)
-    ph.pixel_count = <PixelCount *>ptr
-    ptr = <void *>(ph.pixel_count + adjusted_stripe_length)
+    ptr = <void *> (ph + 1)
+    ph.pixel_count = <PixelCount *> ptr
+    ptr = <void *> (ph.pixel_count + adjusted_stripe_length)
     #
     # Align histogram memory to a 32-byte boundary
     #
-    roundoff = <size_t>ptr
+    roundoff = <size_t> ptr
     roundoff += 31
     roundoff -= roundoff % 32
-    ptr = <void *>roundoff
-    ph.histogram = <Histogram *>ptr
+    ptr = <void *> roundoff
+    ph.histogram = <Histogram *> ptr
     #
     # Fill in the statistical things we keep around
     #
@@ -232,7 +232,7 @@ cdef Histograms *allocate_histograms(np.int32_t rows,
     # a_2 is the offset from the center to each of the octagon
     # corners
     #
-    a = <int>(<np.float64_t>radius * 2.0 / 2.414213)
+    a = <int> (<np.float64_t> radius * 2.0 / 2.414213)
     a_2 = a / 2
     if a_2 == 0:
         a_2 = 1
@@ -327,17 +327,18 @@ cdef void set_stride(Histograms *ph, SCoord *psc):
 #
 ############################################################################
 cdef inline np.int32_t tl_br_colidx(Histograms *ph, np.int32_t colidx):
-    return <np.int32_t> (colidx + 3*ph.radius + ph.current_row) % ph.stripe_length
+    return <np.int32_t> (colidx + 3 * ph.radius + ph.current_row) % \
+        ph.stripe_length
 
 cdef inline np.int32_t tr_bl_colidx(Histograms *ph, np.int32_t colidx):
-    return <np.int32_t> (colidx + 3*ph.radius + ph.row_count-ph.current_row) % \
-           ph.stripe_length
+    return <np.int32_t> (colidx + 3 * ph.radius + ph.row_count - ph.current_row) % \
+        ph.stripe_length
 
 cdef inline np.int32_t leading_edge_colidx(Histograms *ph, np.int32_t colidx):
-    return <np.int32_t> (colidx + 5*ph.radius) % ph.stripe_length
+    return <np.int32_t> (colidx + 5 * ph.radius) % ph.stripe_length
 
 cdef inline np.int32_t trailing_edge_colidx(Histograms *ph, np.int32_t colidx):
-    return <np.int32_t> (colidx + 3*ph.radius - 1) % ph.stripe_length
+    return <np.int32_t> (colidx + 3 * ph.radius - 1) % ph.stripe_length
 
 ############################################################################
 #
@@ -528,9 +529,9 @@ cdef inline void update_histogram(Histograms *ph,
     y = last_coord.y + current_row
     stride = current_stride+last_coord.stride
 
-    if (x >= 0 and x < column_count and
-        y >= 0 and y < row_count and
-        ph.mask[stride]):
+    if (x >= 0 and x < column_count and \
+            y >= 0 and y < row_count and \
+            ph.mask[stride]):
         value = ph.data[stride]
         pixel_count[0] -= 1
         hist_piece.fine[value] -= 1
@@ -540,9 +541,9 @@ cdef inline void update_histogram(Histograms *ph,
     y = coord.y + current_row
     stride = current_stride + coord.stride
 
-    if (x >= 0 and x < column_count and
-        y >= 0 and y < row_count and
-        ph.mask[stride]):
+    if (x >= 0 and x < column_count and \
+            y >= 0 and y < row_count and \
+            ph.mask[stride]):
         value = ph.data[stride]
         pixel_count[0] += 1
         hist_piece.fine[value] += 1
@@ -613,7 +614,7 @@ cdef inline np.uint8_t find_median(Histograms *ph):
     if ph.accumulator_count == 0:
         return 0
     pixels_below = <np.uint32_t> ((ph.accumulator_count * ph.percent + 50)
-                    / 100) # +50 for roundoff
+                                  / 100)  # +50 for roundoff
     if pixels_below > 0:
         pixels_below -= 1
 
@@ -625,7 +626,7 @@ cdef inline np.uint8_t find_median(Histograms *ph):
 
     accumulator -= ph.accumulator.coarse[i]
     update_fine(ph, i)
-    for j in range(i*16,(i+1)*16):
+    for j in range(i * 16, (i + 1) * 16):
         accumulator += ph.accumulator.fine[j]
         if accumulator > pixels_below:
             return <np.uint8_t> j
@@ -659,9 +660,7 @@ cdef int c_median_filter(np.int32_t rows,
     cdef:
         Histograms *ph
         Histogram  *phistogram
-        int row
-        int col
-        int i
+        int        row, col, i
         np.int32_t top_left_off
         np.int32_t top_right_off
         np.int32_t bottom_left_off
@@ -670,7 +669,7 @@ cdef int c_median_filter(np.int32_t rows,
     ph = allocate_histograms(rows, columns, row_stride, col_stride,
                              radius, percent, data, mask, output)
     if not ph:
-       return 1
+        return 1
 
     for row in range(-radius, rows):
         #
@@ -709,7 +708,7 @@ cdef int c_median_filter(np.int32_t rows,
         # Update locations and coarse accumulator for the octagon
         # for points before 0
         #
-        for col in range(-radius, 0 if row >=0 else columns+radius):
+        for col in range(-radius, 0 if row >= 0 else columns+radius):
             ph.current_column = col
             ph.current_stride = row * row_stride + col * col_stride
             update_current_location(ph)
@@ -730,16 +729,15 @@ cdef int c_median_filter(np.int32_t rows,
                 ph.current_stride = row * row_stride + col * col_stride
                 update_current_location(ph)
 
-
     free_histograms(ph)
     return 0
 
-def median_filter(
-    np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] data,
-    np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] mask,
-    np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] output,
-    int radius,
-    np.int32_t percent):
+
+def median_filter(np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] data,
+                  np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] mask,
+                  np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] output,
+                  int radius,
+                  np.int32_t percent):
     """Median filter with octagon shape and masking.
 
     Parameters
@@ -761,10 +759,10 @@ def median_filter(
 
     """
     if percent < 0:
-        raise ValueError('Median filter percent = %d is less than zero' % \
+        raise ValueError('Median filter percent = %d is less than zero' %
                          percent)
     if percent > 100:
-        raise ValueError('Median filter percent = %d is greater than 100' % \
+        raise ValueError('Median filter percent = %d is greater than 100' %
                          percent)
     if data.shape[0] != mask.shape[0] or data.shape[1] != mask.shape[1]:
         raise ValueError('Data shape (%d, %d) is not mask shape (%d, %d)' %
@@ -777,7 +775,7 @@ def median_filter(
     if c_median_filter(<np.int32_t> data.shape[0], <np.int32_t> data.shape[1],
                        <np.int32_t> data.strides[0], <np.int32_t> data.strides[1],
                        radius, percent,
-                       <np.uint8_t *>data.data,
-                       <np.uint8_t *>mask.data,
-                       <np.uint8_t *>output.data):
+                       <np.uint8_t *> data.data,
+                       <np.uint8_t *> mask.data,
+                       <np.uint8_t *> output.data):
         raise MemoryError('Failed to allocate scratchpad memory')
