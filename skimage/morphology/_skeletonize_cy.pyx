@@ -15,11 +15,11 @@ cimport cython
 
 
 @cython.boundscheck(False)
-def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2, 
+def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
                                 negative_indices=False, mode='c'] result,
-                     np.ndarray[dtype=np.int32_t, ndim=1,
+                     np.ndarray[dtype=np.intp_t, ndim=1,
                                 negative_indices=False, mode='c'] i,
-                     np.ndarray[dtype=np.int32_t, ndim=1,
+                     np.ndarray[dtype=np.intp_t, ndim=1,
                                 negative_indices=False, mode='c'] j,
                      np.ndarray[dtype=np.int32_t, ndim=1,
                                 negative_indices=False, mode='c'] order,
@@ -37,13 +37,13 @@ def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
 
     i, j : ndarrays
         The coordinates of each foreground pixel in the image
-   
+
     order : ndarray
         The index of each pixel, in the order of processing (order[0] is
         the first pixel to process, etc.)
-   
+
     table : ndarray
-        The 512-element lookup table of values after transformation 
+        The 512-element lookup table of values after transformation
         (whether to keep or not each configuration in a binary 3x3 array)
 
     Notes
@@ -55,15 +55,15 @@ def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
     the quench-line of the brushfire will be evaluated later than a
     point closer to the edge.
 
-    Note that the neighbourhood of a pixel may evolve before the loop 
-    arrives at this pixel. This is why it is possible to compute the 
+    Note that the neighbourhood of a pixel may evolve before the loop
+    arrives at this pixel. This is why it is possible to compute the
     skeleton in only one pass, thanks to an adapted ordering of the
     pixels.
     """
     cdef:
         np.int32_t accumulator
-        np.int32_t index, order_index
-        np.int32_t ii, jj
+        Py_ssize_t index, order_index
+        Py_ssize_t ii, jj
 
     for index in range(order.shape[0]):
         accumulator = 16
@@ -110,21 +110,21 @@ def _table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
       256 128 64
        32  16  8
         4   2  1
-    
+
     but this runs about twice as fast because of inlining and the
     hardwired kernel.
     """
     cdef:
-        np.ndarray[dtype=np.int32_t, ndim=2, 
+        np.ndarray[dtype=np.int32_t, ndim=2,
                    negative_indices=False, mode='c'] indexer
         np.int32_t *p_indexer
         np.uint8_t *p_image
-        np.int32_t i_stride
-        np.int32_t i_shape
-        np.int32_t j_shape
-        np.int32_t i
-        np.int32_t j
-        np.int32_t offset
+        Py_ssize_t i_stride
+        Py_ssize_t i_shape
+        Py_ssize_t j_shape
+        Py_ssize_t i
+        Py_ssize_t j
+        Py_ssize_t offset
 
     i_shape   = image.shape[0]
     j_shape   = image.shape[1]

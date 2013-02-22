@@ -180,7 +180,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                 color = (1, 0, 0)
                 desc_y = i * step + radius
                 desc_x = j * step + radius
-                coords = draw.circle_perimeter(desc_y, desc_x, sigmas[0])
+                coords = draw.circle_perimeter(desc_y, desc_x, int(sigmas[0]))
                 draw.set_color(descs_img, coords, color)
                 max_bin = np.max(descs[i, j, :])
                 for o_num, o in enumerate(orientation_angles):
@@ -188,8 +188,8 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                     bin_size = descs[i, j, o_num] / max_bin
                     dy = sigmas[0] * bin_size * sin(o)
                     dx = sigmas[0] * bin_size * cos(o)
-                    coords = draw.line(desc_y, desc_x, desc_y + dy,
-                                       desc_x + dx)
+                    coords = draw.line(desc_y, desc_x, int(desc_y + dy),
+                                       int(desc_x + dx))
                     draw.set_color(descs_img, coords, color)
                 for r_num, r in enumerate(ring_radii):
                     color_offset = float(1 + r_num) / rings
@@ -199,7 +199,7 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                         hist_y = desc_y + int(round(r * sin(t)))
                         hist_x = desc_x + int(round(r * cos(t)))
                         coords = draw.circle_perimeter(hist_y, hist_x,
-                                                       sigmas[r_num + 1])
+                                                       int(sigmas[r_num + 1]))
                         draw.set_color(descs_img, coords, color)
                         for o_num, o in enumerate(orientation_angles):
                             # Draw histogram bins
@@ -209,8 +209,9 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
                             bin_size /= max_bin
                             dy = sigmas[r_num + 1] * bin_size * sin(o)
                             dx = sigmas[r_num + 1] * bin_size * cos(o)
-                            coords = draw.line(hist_y, hist_x, hist_y + dy,
-                                               hist_x + dx)
+                            coords = draw.line(hist_y, hist_x,
+                                               int(hist_y + dy),
+                                               int(hist_x + dx))
                             draw.set_color(descs_img, coords, color)
         return descs, descs_img
     else:

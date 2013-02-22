@@ -17,7 +17,7 @@ cdef inline double _gaussian_weight(double sigma, double value):
     return exp(-0.5 * (value / sigma)**2)
 
 
-cdef double* _compute_color_lut(int bins, double sigma, double max_value):
+cdef double* _compute_color_lut(Py_ssize_t bins, double sigma, double max_value):
 
     cdef:
         double* color_lut = <double*>malloc(bins * sizeof(double))
@@ -29,7 +29,7 @@ cdef double* _compute_color_lut(int bins, double sigma, double max_value):
     return color_lut
 
 
-cdef double* _compute_range_lut(int win_size, double sigma):
+cdef double* _compute_range_lut(Py_ssize_t win_size, double sigma):
 
     cdef:
         double* range_lut = <double*>malloc(win_size**2 * sizeof(double))
@@ -45,9 +45,9 @@ cdef double* _compute_range_lut(int win_size, double sigma):
     return range_lut
 
 
-def denoise_bilateral(image, int win_size=5, sigma_range=None,
-                      double sigma_spatial=1, int bins=10000, mode='constant',
-                      double cval=0):
+def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
+                      double sigma_spatial=1, Py_ssize_t bins=10000,
+                      mode='constant', double cval=0):
     """Denoise image using bilateral filter.
 
     This is an edge-preserving and noise reducing denoising filter. It averages
