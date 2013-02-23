@@ -111,15 +111,15 @@ def test_hough_peaks_num():
 
 def test_houghcircle():
     # Prepare picture
-    img = np.zeros((100, 100), dtype=int)
+    img = np.zeros((120, 100), dtype=int)
     radius = 20
-    x_0, y_0 = (50, 50)
+    x_0, y_0 = (99, 50)
     x, y = circle_perimeter(y_0, x_0, radius)
     img[y, x] = 1
 
     out = tf.hough_circle(img, np.array([radius]))
 
-    y, x = np.where(out[0] == out[0].max())
+    x, y = np.where(out[0] == out[0].max())
     # Offset for x_0, y_0
     assert_equal(x[0], x_0 + radius)
     assert_equal(y[0], y_0 + radius)
