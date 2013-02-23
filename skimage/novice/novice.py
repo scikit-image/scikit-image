@@ -1,6 +1,7 @@
 import os, skimage, numpy as np
 import skimage.io, skimage.transform
 from itertools import islice, product
+from PIL import Image
 
 # ================================================== 
 
@@ -102,24 +103,36 @@ class PixelGroup(object):
     def __init__(self, pic, key):
         self._pic = pic
 
+        if isinstance(key[0], int):
+            # Use a slice so that the _getdim and _setdim # functions can index
+            # consistently.
+            key = (slice(key[0], key[0] + 1), key[1])
+
         # Flip y axis
         if isinstance(key[1], int):
-            key = (key[0], pic.height - key[1] - 1)
+            y = pic.height - key[1] - 1
+            # Use a slice so that the _getdim and _setdim # functions can index
+            # consistently.
+            key = (key[0], slice(y, y + 1))
         elif isinstance(key[1], slice):
             y_slice = key[1]
             start = y_slice.start
             stop = y_slice.stop
 
-            if isinstance(start, int):
-                start = pic.height - start - 1 if start >= 0 else abs(start)
-
-            if isinstance(stop, int):
-                stop = pic.height - stop - 1 if stop >= 0 else abs(stop)
-
-            if start > stop:
-                temp = start
-                start = stop
-                stop = temp
+            # Re-base slicing in Cartesian coordinates.
+            # There's probably a much simpler way to do this.
+            if isinstance(start, int) and isinstance(stop, int):
+                start = pic.height - stop if stop >= 0 else abs(stop)
+                stop = pic.height - y_slice.start if y_slice.start >= 0 else abs(y_slice.start)
+            elif isinstance(start, int):
+                stop = pic.height - start if start >= 0 else abs(start)
+                start = 0
+            elif isinstance(stop, int):
+                start = pic.height - stop if stop >= 0 else abs(stop)
+                stop = pic.height
+            else:
+                start = 0
+                stop = pic.height
 
             key = (key[0], slice(start, stop, y_slice.step))
 
@@ -127,7 +140,7 @@ class PixelGroup(object):
         self._key = (key[1], key[0])
         self._image = pic._image
 
-        # Save slice for getting operations.
+        # Save slice for _getdim operations.
         # This allows you to swap parts of an image.
         self._slice = self._image[self._key[0], self._key[1]]
 
@@ -176,6 +189,8 @@ class PixelGroup(object):
         """Gets or sets the color with an (r, g, b) tuple"""
         self._setdim(None, value)
 
+    #TODO: add __iter__ with pixels
+
     def __repr__(self):
         return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
 
@@ -202,7 +217,7 @@ class Picture(object):
         elif path is not None:
             self._image = skimage.img_as_ubyte(skimage.io.imread(path))
             self._path = path
-            self._format = None
+            self._format = Image.open(path).format
 
         # Creating a particular size of image.
         elif size is not None:
@@ -228,10 +243,7 @@ class Picture(object):
         skimage.io.imsave(path, self._inflate(self._image))
         self._modified = False
         self._path = os.path.abspath(path)
-
-        # Need to re-open the image to get the format
-        # for some reason (likely because we converted to RGB).
-        #self._format = Image.open(path).format
+        self._format = Image.open(path).format
 
     @property
     def path(self):
@@ -302,8 +314,12 @@ class Picture(object):
             raise ValueError("Expected inflation factor to be an integer greater than zero")
 
     def show(self):
-        """Returns an IPython image of the picture for display in an IPython notebook"""
-        return skimage.io.Image(self._image)
+        """Returns an Image for display in an IPython notebook"""
+        return skimage.io.Image(self._inflate(self._image))
+
+    def show_console(self):
+        """Displays the image in a separate window"""
+        skimage.io.imshow(self._inflate(self._image))
 
     def _makepixel(self, xy):
         """
@@ -317,17 +333,13 @@ class Picture(object):
 
     def _inflate(self, img):
         """Returns resized image using inflation factor (nearest neighbor)"""
+        if self._inflation == 1:
+            return img
+
         # skimage dimensions are flipped: y, x
         return skimage.img_as_ubyte(skimage.transform.resize(self._image, 
                 (self.height * self._inflation,
                  self.width * self._inflation), order=0))
-
-    def _negidx(self, idx, bound):
-        """Handles negative indices by wrapping around bound"""
-        if (idx is None) or idx >= 0:
-            return idx
-        else:
-            return idx % bound
 
     def __iter__(self):
         """Iterates over all pixels in the image"""

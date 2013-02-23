@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+# Imports color names from a CSV file (colors.csv) and outputs a Python file
+# with color name definitions (colors.py).
+
 import sys, csv
 
 if __name__ == "__main__":
