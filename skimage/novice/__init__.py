@@ -44,7 +44,7 @@ Example
     False
 """
 
-import os as _os
+import os as _os, colors
 from .novice import Picture
 
 def open(path):

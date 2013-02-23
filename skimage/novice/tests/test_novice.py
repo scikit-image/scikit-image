@@ -32,7 +32,7 @@ class TestNovice(TestCase):
         assert_equal(num_pixels, pic.width * pic.height)
 
     def test_modify(self):
-        pic = novice.open(self.small_sample_path)
+        pic = novice.open(self.sample_path)
         assert_equal(pic.modified, False)
 
         for p in pic:
@@ -63,7 +63,7 @@ class TestNovice(TestCase):
         os.unlink(mod_path)
 
     def test_indexing(self):
-        pic = novice.open(self.small_sample_path)
+        pic = novice.open(self.sample_path)
 
         # Slicing
         pic[0:5, 0:5] = (0, 0, 0)
@@ -90,3 +90,12 @@ class TestNovice(TestCase):
                 assert_equal(p.rgb, (255, 255, 255))
             else:
                 assert_equal(p.rgb, (0, 0, 0))
+
+    def test_slicing(self):
+        cut = 40
+        pic = novice.open(self.sample_path)
+        rest = pic.width - cut
+        temp = pic[:cut, :]
+        pic[:rest, :] = pic[cut:, :]
+        pic[rest:, :] = temp
+        pic.save("test.png")
