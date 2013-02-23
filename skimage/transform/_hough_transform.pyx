@@ -45,7 +45,7 @@ def _hough_circle(np.ndarray img, \
 
     # compute the nonzero indexes
     cdef np.ndarray[ndim=1, dtype=np.npy_intp] x, y
-    y, x = np.nonzero(img)
+    x, y = np.nonzero(img)
 
     # Offset the image
     cdef int max_radius = radius.max()
