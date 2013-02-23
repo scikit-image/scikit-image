@@ -32,7 +32,7 @@ class TestNovice(TestCase):
         assert_equal(num_pixels, pic.width * pic.height)
 
     def test_modify(self):
-        pic = novice.open(self.sample_path)
+        pic = novice.open(self.small_sample_path)
         assert_equal(pic.modified, False)
 
         for p in pic:
@@ -63,7 +63,7 @@ class TestNovice(TestCase):
         os.unlink(mod_path)
 
     def test_indexing(self):
-        pic = novice.open(self.sample_path)
+        pic = novice.open(self.small_sample_path)
 
         # Slicing
         pic[0:5, 0:5] = (0, 0, 0)
@@ -74,12 +74,36 @@ class TestNovice(TestCase):
                 assert_equal(p.green, 0)
                 assert_equal(p.blue, 0)
 
+        pic[:5, :5] = (255, 255, 255)
+        for p in pic:
+            if (p.x < 5) and (p.y < 5):
+                assert_equal(p.rgb, (255, 255, 255))
+                assert_equal(p.red, 255)
+                assert_equal(p.green, 255)
+                assert_equal(p.blue, 255)
+
+        pic[5:pic.width, 5:pic.height] = (255, 0, 255)
+        for p in pic:
+            if (p.x >= 5) and (p.y >= 5):
+                assert_equal(p.rgb, (255, 0, 255))
+                assert_equal(p.red, 255)
+                assert_equal(p.green, 0)
+                assert_equal(p.blue, 255)
+
+        pic[5:, 5:] = (0, 0, 255)
+        for p in pic:
+            if (p.x >= 5) and (p.y >= 5):
+                assert_equal(p.rgb, (0, 0, 255))
+                assert_equal(p.red, 0)
+                assert_equal(p.green, 0)
+                assert_equal(p.blue, 255)
+
         # Outside bounds
         assert_raises(IndexError, lambda: pic[pic.width, pic.height])
 
         # Negative indexing
-        pic[-1, -1] = (0, 0, 0)
-        assert_equal(pic[pic.width - 1, pic.height - 1].rgb, (0, 0, 0))
+        #pic[-1, -1] = (0, 0, 0)
+        #assert_equal(pic[pic.width - 1, pic.height - 1].rgb, (0, 0, 0))
 
         # Stepping (checkerboard)
         pic[:, :] = (0, 0, 0)
@@ -98,4 +122,3 @@ class TestNovice(TestCase):
         temp = pic[:cut, :]
         pic[:rest, :] = pic[cut:, :]
         pic[rest:, :] = temp
-        pic.save("test.png")
