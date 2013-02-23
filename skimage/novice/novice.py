@@ -85,7 +85,8 @@ class Pixel(object):
         Sets the actual pixel value in the picture.
         NOTE: Using Cartesian coordinate system!
         """
-        self._image[self._x, self._picture.height - self._y - 1] = \
+        # skimage dimensions are flipped: y, x
+        self._image[self._picture.height - self._y - 1, self._x] = \
                 (self.red, self.green, self.blue)
 
         # Modified pictures lose their paths
@@ -98,64 +99,85 @@ class Pixel(object):
 # ================================================== 
 
 class PixelGroup(object):
-    def __init__(self, pixels):
-        self._pixels = pixels
+    def __init__(self, pic, key):
+        self._pic = pic
 
-    @property
-    def x(self):
-        """Gets the horizontal locations (left = 0)"""
-        return [p.x for p in self]
+        # Flip y axis
+        if isinstance(key[1], int):
+            key = (key[0], pic.height - key[1] - 1)
+        elif isinstance(key[1], slice):
+            y_slice = key[1]
+            start = y_slice.start
+            stop = y_slice.stop
 
-    @property
-    def y(self):
-        """Gets the vertical locations (bottom = 0)"""
-        return [p.y for p in self]
+            if isinstance(start, int):
+                start = pic.height - start - 1 if start >= 0 else abs(start)
+
+            if isinstance(stop, int):
+                stop = pic.height - stop - 1 if stop >= 0 else abs(stop)
+
+            if start > stop:
+                temp = start
+                start = stop
+                stop = temp
+
+            key = (key[0], slice(start, stop, y_slice.step))
+
+        # skimage dimensions are flipped: y, x
+        self._key = (key[1], key[0])
+        self._image = pic._image
+
+        # Save slice for getting operations.
+        # This allows you to swap parts of an image.
+        self._slice = self._image[self._key[0], self._key[1]]
+
+        shape = self._getdim(0).shape
+        self.size = (shape[1], shape[0])
+
+    def _getdim(self, dim):
+        return self._slice[:, :, dim]
+
+    def _setdim(self, dim, value):
+        self._image[self._key[0], self._key[1], dim] = value
 
     @property
     def red(self):
         """Gets or sets the red component"""
-        return [p.red for p in self]
+        return self._getdim(0).ravel()
 
     @red.setter
     def red(self, value):
-        for p in self:
-            p.red = value
+        self._setdim(0, value)
 
     @property
     def green(self):
         """Gets or sets the green component"""
-        return [p.green for p in self]
+        return self._getdim(1).ravel()
 
     @green.setter
     def green(self, value):
-        for p in self:
-            p.green = value
+        self._setdim(1, value)
 
     @property
     def blue(self):
         """Gets or sets the blue component"""
-        return [p.blue for p in self]
+        return self._getdim(2).ravel()
 
     @blue.setter
     def blue(self, value):
-        for p in self:
-            p.blue = value
+        self._setdim(2, value)
 
     @property
     def rgb(self):
-        return [p.rgb for p in self]
+        return self._getdim(None)
 
     @rgb.setter
     def rgb(self, value):
         """Gets or sets the color with an (r, g, b) tuple"""
-        for p in self:
-            p.rgb = value
-
-    def __iter__(self):
-        return iter(self._pixels)
+        self._setdim(None, value)
 
     def __repr__(self):
-        return "PixelGroup ({0} pixels)".format(len(self._pixels))
+        return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
 
 # ================================================== 
 
@@ -186,7 +208,9 @@ class Picture(object):
         elif size is not None:
             if color is None:
                 color = (0, 0, 0)
-            self._image = np.zeros((size[0], size[1], 3), "uint8")
+
+            # skimage dimensions are flipped: y, x
+            self._image = np.zeros((size[1], size[0], 3), "uint8")
             self._image[:, :] = color
             self._path = None
             self._format = None
@@ -227,14 +251,18 @@ class Picture(object):
     @property
     def size(self):
         """Gets or sets the size of the picture with a (width, height) tuple"""
-        return self._image.shape[:2]
+        # skimage dimensions are flipped: y, x
+        return (self._image.shape[1], self._image.shape[0])
 
     @size.setter
     def size(self, value):
         try:
             # Don't resize if no change in size
             if (value[0] != self.width) or (value[1] != self.height):
-                self._image = skimage.img_as_ubyte(skimage.transform.resize(self._image, value, order=0))
+                # skimage dimensions are flipped: y, x
+                self._image = skimage.img_as_ubyte(skimage.transform.resize(self._image,
+                    (value[1], value[0]), order=0))
+
                 self._modified = True
                 self._path = None
         except TypeError:
@@ -283,73 +311,29 @@ class Picture(object):
         NOTE: Using Cartesian coordinate system!
         """
         (x,y) = xy
-        rgb = self._image[x, self.height - y - 1]
+        # skimage dimensions are flipped: y, x
+        rgb = self._image[self.height - y - 1, x]
         return Pixel(self, self._image, x, y, rgb)
 
     def _inflate(self, img):
         """Returns resized image using inflation factor (nearest neighbor)"""
+        # skimage dimensions are flipped: y, x
         return skimage.img_as_ubyte(skimage.transform.resize(self._image, 
-                (self.width * self._inflation,
-                 self.height * self._inflation), order=0))
+                (self.height * self._inflation,
+                 self.width * self._inflation), order=0))
 
     def _negidx(self, idx, bound):
         """Handles negative indices by wrapping around bound"""
         if (idx is None) or idx >= 0:
             return idx
         else:
-            return bound + idx
+            return idx % bound
 
     def __iter__(self):
         """Iterates over all pixels in the image"""
         for x in xrange(self.width):
             for y in xrange(self.height):
                 yield self._makepixel((x, y))
-
-    def _keys(self, key):
-        """
-        Takes a key for __getitem__ or __setitem__ and
-        validates it.  If valid, returns either a pair of ints
-        or an iterator of pairs of ints.
-        """
-        if isinstance(key, tuple) and len(key) == 2:
-            slx = key[0]
-            sly = key[1]
-
-            if ((isinstance(slx, int) or isinstance(slx, slice)) and
-                (isinstance(sly, int) or isinstance(sly, slice))):
-                if isinstance(slx, int):
-                    slx = self._negidx(slx, self.width)
-                    if (slx < 0) or (slx >= self.width):
-                        raise IndexError("Index out of range")
-
-                if isinstance(sly, int):
-                    sly = self._negidx(sly, self.height)
-                    if (sly < 0) or (sly >= self.height):
-                        raise IndexError("Index out of range")
-
-                # self[x, y]
-                if isinstance(slx, int) and isinstance(sly, int):
-                    return (slx, sly)
-                
-                if isinstance(slx, int):
-                    slx = [slx]
-                else: # slice (allow negative indices)
-                    start = self._negidx(slx.start, self.width)
-                    stop  = self._negidx(slx.stop,  self.width)
-                    slx = islice(xrange(self.width), start, stop, slx.step)
-                    
-                if isinstance(sly, int):
-                    sly = [sly]
-                else: # slice (allow negative indices)
-                    start = self._negidx(sly.start, self.height)
-                    stop  = self._negidx(sly.stop,  self.height)
-                    sly = islice(xrange(self.height), start, stop, sly.step)
-
-                return product(slx, sly)
-
-        # if either left or right is not an int or a slice, or
-        # if the key is not a pair, fall through
-        raise TypeError("Invalid key type")
 
     def __getitem__(self, key):
         """
@@ -359,11 +343,13 @@ class Picture(object):
             pic[:, -1]     # Top row
             pic[::2, ::2]  # Every other pixel
         """
-        keys = self._keys(key)
-        if isinstance(keys, tuple):
-            return self._makepixel(keys)
+        if isinstance(key, tuple) and len(key) == 2:
+            if isinstance(key[0], int) and isinstance(key[1], int):
+                return self._makepixel((key[0], key[1]))
+            else:
+                return PixelGroup(self, key)
         else:
-            return PixelGroup(map(self._makepixel, keys))
+            raise TypeError("Invalid key type")
 
     def __setitem__(self, key, value):
         """
@@ -373,14 +359,16 @@ class Picture(object):
             pic[:, -1] = (255, 0, 0)         # Make top row red
             pic[::2, ::2] = (255, 255, 255)  # Make every other pixel white
         """
-        keys = self._keys(key)
-        if isinstance(keys, tuple):
-            pixel = self[keys[0], keys[1]]
-            pixel.rgb = value
+        if isinstance(key, tuple) and len(key) == 2:
+            if isinstance(value, tuple):
+                self[key[0], key[1]].rgb = value
+            elif isinstance(value, PixelGroup):
+                src_key = self[key[0], key[1]]._key
+                self._image[src_key] = value._image[value._key]
+            else:
+                raise TypeError("Invalid value type")
         else:
-            for (x,y) in keys:
-                pixel = self[x,y]
-                pixel.rgb = value
+            raise TypeError("Invalid key type")
 
     def __repr__(self):
         return "Picture (format: {0}, path: {1}, modified: {2})".format(self.format, self.path, self.modified)
