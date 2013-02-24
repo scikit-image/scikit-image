@@ -103,38 +103,35 @@ class PixelGroup(object):
     def __init__(self, pic, key):
         self._pic = pic
 
+        # Use a slice so that the _getdim and _setdim functions can index
+        # consistently.
         if isinstance(key[0], int):
-            # Use a slice so that the _getdim and _setdim # functions can index
-            # consistently.
             key = (slice(key[0], key[0] + 1), key[1])
 
-        # Flip y axis
         if isinstance(key[1], int):
-            y = pic.height - key[1] - 1
-            # Use a slice so that the _getdim and _setdim # functions can index
-            # consistently.
-            key = (key[0], slice(y, y + 1))
-        elif isinstance(key[1], slice):
-            y_slice = key[1]
-            start = y_slice.start
-            stop = y_slice.stop
+            key = (key[0], slice(key[1], key[1] + 1))
 
-            # Re-base slicing in Cartesian coordinates.
-            # There's probably a much simpler way to do this.
-            if isinstance(start, int) and isinstance(stop, int):
-                start = pic.height - stop if stop >= 0 else abs(stop)
-                stop = pic.height - y_slice.start if y_slice.start >= 0 else abs(y_slice.start)
-            elif isinstance(start, int):
-                stop = pic.height - start if start >= 0 else abs(start)
-                start = 0
-            elif isinstance(stop, int):
-                start = pic.height - stop if stop >= 0 else abs(stop)
-                stop = pic.height
-            else:
-                start = 0
-                stop = pic.height
+        for dim_slice in key:
+            if dim_slice.start is not None and dim_slice.start < 0:
+                raise IndexError("Negative slicing not supported")
 
-            key = (key[0], slice(start, stop, y_slice.step))
+            if dim_slice.stop is not None and dim_slice.stop < 0:
+                raise IndexError("Negative slicing not supported")
+
+            if dim_slice.step is not None and dim_slice.step != 1:
+                raise IndexError("Only a step size of 1 is supported")
+
+        # ===========
+        # Flip y axis
+        # ===========
+        y_slice = key[1]
+        start = y_slice.start if y_slice.start is not None else 0
+        stop = y_slice.stop if y_slice.stop is not None else pic.height
+
+        start = pic.height - start - 1
+        stop = pic.height - stop
+
+        key = (key[0], slice(stop, start + 1, y_slice.step))
 
         # skimage dimensions are flipped: y, x
         self._key = (key[1], key[0])
@@ -189,7 +186,13 @@ class PixelGroup(object):
         """Gets or sets the color with an (r, g, b) tuple"""
         self._setdim(None, value)
 
-    #TODO: add __iter__ with pixels
+    def __iter__(self):
+        x_idx = range(self._pic.width)[self._key[0]]
+        y_idx = range(self._pic.height)[self._key[1]]
+
+        for x in x_idx:
+            for y in y_idx:
+                yield self._pic._makepixel((x, y))
 
     def __repr__(self):
         return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
@@ -326,10 +329,9 @@ class Picture(object):
         Creates a Pixel object for a given x, y location.
         NOTE: Using Cartesian coordinate system!
         """
-        (x,y) = xy
         # skimage dimensions are flipped: y, x
-        rgb = self._image[self.height - y - 1, x]
-        return Pixel(self, self._image, x, y, rgb)
+        rgb = self._image[self.height - xy[1] - 1, xy[0]]
+        return Pixel(self, self._image, xy[0], xy[1], rgb)
 
     def _inflate(self, img):
         """Returns resized image using inflation factor (nearest neighbor)"""
@@ -351,12 +353,15 @@ class Picture(object):
         """
         Gets pixels using 2D int or slice notations.
         Examples:
-            pic[0, 0]      # Bottom-left pixel
-            pic[:, -1]     # Top row
-            pic[::2, ::2]  # Every other pixel
+            pic[0, 0]              # Bottom-left pixel
+            pic[:, pic.height-1]   # Top row
+            pic[::2, ::2]          # Every other pixel
         """
         if isinstance(key, tuple) and len(key) == 2:
             if isinstance(key[0], int) and isinstance(key[1], int):
+                if key[0] < 0 or key[1] < 0:
+                    raise IndexError("Negative indices not supported")
+
                 return self._makepixel((key[0], key[1]))
             else:
                 return PixelGroup(self, key)
@@ -367,9 +372,9 @@ class Picture(object):
         """
         Sets pixel values using 2D int or slice notations.
         Examples:
-            pic[0, 0] = (0, 0, 0)            # Make bottom-left pixel black
-            pic[:, -1] = (255, 0, 0)         # Make top row red
-            pic[::2, ::2] = (255, 255, 255)  # Make every other pixel white
+            pic[0, 0] = (0, 0, 0)               # Make bottom-left pixel black
+            pic[:, pic.height-1] = (255, 0, 0)  # Make top row red
+            pic[::2, ::2] = (255, 255, 255)     # Make every other pixel white
         """
         if isinstance(key, tuple) and len(key) == 2:
             if isinstance(value, tuple):

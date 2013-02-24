@@ -136,3 +136,6 @@
 
 - Thouis Jones
   Vectorized operators for arrays of 16-bit ints.
+
+- Michael Hansen
+  novice submodule.
