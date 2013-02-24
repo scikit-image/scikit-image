@@ -1,3 +1,8 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
+
 """
 Template matching using normalized cross-correlation.
 
@@ -30,22 +35,24 @@ the image window *before* squaring.)
 .. [2] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light and
        Magic.
 """
-import cython
-cimport numpy as np
+
 import numpy as np
 from scipy.signal import fftconvolve
-from skimage.transform import integral
+
+cimport numpy as cnp
 from libc.math cimport sqrt, fabs
 from skimage._shared.transform cimport integrate
 
 
-@cython.boundscheck(False)
-def match_template(np.ndarray[float, ndim=2, mode="c"] image,
-                   np.ndarray[float, ndim=2, mode="c"] template):
+from skimage.transform import integral
 
-    cdef np.ndarray[float, ndim=2, mode="c"] corr
-    cdef np.ndarray[float, ndim=2, mode="c"] image_sat
-    cdef np.ndarray[float, ndim=2, mode="c"] image_sqr_sat
+
+def match_template(cnp.ndarray[float, ndim=2, mode="c"] image,
+                   cnp.ndarray[float, ndim=2, mode="c"] template):
+
+    cdef cnp.ndarray[float, ndim=2, mode="c"] corr
+    cdef cnp.ndarray[float, ndim=2, mode="c"] image_sat
+    cdef cnp.ndarray[float, ndim=2, mode="c"] image_sqr_sat
     cdef float template_mean = np.mean(template)
     cdef float template_ssd
     cdef float inv_area
@@ -88,4 +95,3 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
             corr[r, c] /= den
 
     return corr
-

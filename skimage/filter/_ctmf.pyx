@@ -10,18 +10,20 @@ Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 Original author: Lee Kamentsky
 '''
+
 import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 cimport cython
 
 from libc.stdlib cimport malloc, free
 from libc.string cimport memset
 
-cdef extern from "../_shared/vectorized_ops.h":
-    void add16(np.uint16_t *dest, np.uint16_t *src)
-    void sub16(np.uint16_t *dest, np.uint16_t *src)
 
-np.import_array()
+cdef extern from "../_shared/vectorized_ops.h":
+    void add16(cnp.uint16_t *dest, cnp.uint16_t *src)
+    void sub16(cnp.uint16_t *dest, cnp.uint16_t *src)
+
 
 ##############################################################################
 #
@@ -43,7 +45,7 @@ np.import_array()
 
 DTYPE_UINT32 = np.uint32
 DTYPE_BOOL = np.bool
-ctypedef np.uint16_t pixel_count_t
+ctypedef cnp.uint16_t pixel_count_t
 
 ###########
 #
@@ -58,8 +60,8 @@ ctypedef np.uint16_t pixel_count_t
 ###########
 
 cdef struct HistogramPiece:
-    np.uint16_t coarse[16]
-    np.uint16_t fine[256]
+    cnp.uint16_t coarse[16]
+    cnp.uint16_t fine[256]
 
 cdef struct Histogram:
     HistogramPiece top_left      # top-left corner
@@ -92,9 +94,9 @@ cdef struct Histograms:
     void *memory                # pointer to the allocated memory
     Histogram *histogram        # pointer to the histogram memory
     PixelCount *pixel_count     # pointer to the pixel count memory
-    np.uint8_t *data            # pointer to the image data
-    np.uint8_t *mask            # pointer to the image mask
-    np.uint8_t *output          # pointer to the output array
+    cnp.uint8_t *data           # pointer to the image data
+    cnp.uint8_t *mask           # pointer to the image mask
+    cnp.uint8_t *output         # pointer to the output array
     Py_ssize_t column_count     # number of columns represented by this
                                 # structure
     Py_ssize_t stripe_length    # number of columns including "radius" before
@@ -172,15 +174,15 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
                                      Py_ssize_t col_stride,
                                      Py_ssize_t radius,
                                      Py_ssize_t percent,
-                                     np.uint8_t *data,
-                                     np.uint8_t *mask,
-                                     np.uint8_t *output):
+                                     cnp.uint8_t *data,
+                                     cnp.uint8_t *mask,
+                                     cnp.uint8_t *output):
     cdef:
         Py_ssize_t adjusted_stripe_length = columns + 2*radius + 1
         Py_ssize_t memory_size
         void *ptr
         Histograms *ph
-        size_t roundoff
+        Py_ssize_t roundoff
         Py_ssize_t a
         SCoord *psc
 
@@ -232,7 +234,7 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
     # a_2 is the offset from the center to each of the octagon
     # corners
     #
-    a = <Py_ssize_t>(<np.float64_t>radius * 2.0 / 2.414213)
+    a = <Py_ssize_t>(<cnp.float64_t>radius * 2.0 / 2.414213)
     a_2 = a / 2
     if a_2 == 0:
         a_2 = 1
@@ -456,7 +458,7 @@ cdef inline void deaccumulate_fine_histogram(Histograms *ph,
 ############################################################################
 
 cdef inline void accumulate(Histograms *ph):
-    cdef np.int32_t accumulator
+    cdef cnp.int32_t accumulator
     accumulate_coarse_histogram(ph, ph.current_column)
     deaccumulate_coarse_histogram(ph, ph.current_column)
 
@@ -514,7 +516,7 @@ cdef inline void update_histogram(Histograms *ph,
         Py_ssize_t current_stride = ph.current_stride
         Py_ssize_t column_count   = ph.column_count
         Py_ssize_t row_count      = ph.row_count
-        np.uint8_t value
+        cnp.uint8_t value
         Py_ssize_t stride
         Py_ssize_t x
         Py_ssize_t y
@@ -557,8 +559,8 @@ cdef inline void update_current_location(Histograms *ph):
         Py_ssize_t bottom_left_off = tr_bl_colidx(ph, current_column)
         Py_ssize_t bottom_right_off = tl_br_colidx(ph, current_column)
         Py_ssize_t leading_edge_off = leading_edge_colidx(ph, current_column)
-        np.int32_t *coarse_histogram
-        np.int32_t *fine_histogram
+        cnp.int32_t *coarse_histogram
+        cnp.int32_t *fine_histogram
         Py_ssize_t last_xoff
         Py_ssize_t last_yoff
         Py_ssize_t last_stride
@@ -597,13 +599,13 @@ cdef inline void update_current_location(Histograms *ph):
 #
 ############################################################################
 
-cdef inline np.uint8_t find_median(Histograms *ph):
+cdef inline cnp.uint8_t find_median(Histograms *ph):
     cdef:
         Py_ssize_t pixels_below      # of pixels below the median
         Py_ssize_t i
         Py_ssize_t j
         Py_ssize_t k
-        np.uint32_t accumulator
+        cnp.uint32_t accumulator
 
     if ph.accumulator_count == 0:
         return 0
@@ -625,7 +627,7 @@ cdef inline np.uint8_t find_median(Histograms *ph):
     for j in range(i*16, (i + 1)*16):
         accumulator += ph.accumulator.fine[j]
         if accumulator > pixels_below:
-            return <np.uint8_t>j
+            return <cnp.uint8_t>j
 
     return 0
 
@@ -650,9 +652,9 @@ cdef int c_median_filter(Py_ssize_t rows,
                          Py_ssize_t col_stride,
                          Py_ssize_t radius,
                          Py_ssize_t percent,
-                         np.uint8_t *data,
-                         np.uint8_t *mask,
-                         np.uint8_t *output):
+                         cnp.uint8_t *data,
+                         cnp.uint8_t *mask,
+                         cnp.uint8_t *output):
     cdef:
         Histograms *ph
         Histogram  *phistogram
@@ -731,11 +733,14 @@ cdef int c_median_filter(Py_ssize_t rows,
     return 0
 
 
-def median_filter(np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] data,
-                  np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] mask,
-                  np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, mode='c'] output,
+def median_filter(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
+                              negative_indices=False, mode='c'] data,
+                  cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
+                              negative_indices=False, mode='c'] mask,
+                  cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
+                              negative_indices=False, mode='c'] output,
                   int radius,
-                  np.int32_t percent):
+                  cnp.int32_t percent):
     """Median filter with octagon shape and masking.
 
     Parameters
@@ -770,10 +775,12 @@ def median_filter(np.ndarray[dtype=np.uint8_t, ndim=2, negative_indices=False, m
         raise ValueError('Data shape (%d, %d) is not output shape (%d, %d)' %
                          (data.shape[0], data.shape[1],
                           output.shape[0], output.shape[1]))
-    if c_median_filter(<np.int32_t> data.shape[0], <np.int32_t> data.shape[1],
-                       <np.int32_t> data.strides[0], <np.int32_t> data.strides[1],
+    if c_median_filter(<cnp.int32_t>data.shape[0],
+                       <cnp.int32_t>data.shape[1],
+                       <cnp.int32_t>data.strides[0],
+                       <cnp.int32_t>data.strides[1],
                        radius, percent,
-                       <np.uint8_t *> data.data,
-                       <np.uint8_t *> mask.data,
-                       <np.uint8_t *> output.data):
+                       <cnp.uint8_t*>data.data,
+                       <cnp.uint8_t*>mask.data,
+                       <cnp.uint8_t*>output.data):
         raise MemoryError('Failed to allocate scratchpad memory')

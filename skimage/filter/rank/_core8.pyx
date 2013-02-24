@@ -4,33 +4,34 @@
 #cython: wraparound=False
 
 import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 from libc.stdlib cimport malloc, free
 
 
-cdef inline np.uint8_t uint8_max(np.uint8_t a, np.uint8_t b):
+cdef inline dtype_t uint8_max(dtype_t a, dtype_t b):
     return a if a >= b else b
 
 
-cdef inline np.uint8_t uint8_min(np.uint8_t a, np.uint8_t b):
+cdef inline dtype_t uint8_min(dtype_t a, dtype_t b):
     return a if a <= b else b
 
 
 cdef inline void histogram_increment(Py_ssize_t * histo, float * pop,
-                                     np.uint8_t value):
+                                     dtype_t value):
     histo[value] += 1
     pop[0] += 1
 
 
 cdef inline void histogram_decrement(Py_ssize_t * histo, float * pop,
-                                     np.uint8_t value):
+                                     dtype_t value):
     histo[value] -= 1
     pop[0] -= 1
 
 
-cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
-                                  Py_ssize_t r, Py_ssize_t c,
-                                  np.uint8_t * mask):
+cdef inline dtype_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
+                               Py_ssize_t r, Py_ssize_t c,
+                               dtype_t * mask):
     """Check whether given coordinate is within image and mask is true."""
     if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
         return 0
@@ -41,12 +42,12 @@ cdef inline np.uint8_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
             return 0
 
 
-cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
-                                   float, Py_ssize_t, Py_ssize_t),
-                 np.ndarray[np.uint8_t, ndim=2] image,
-                 np.ndarray[np.uint8_t, ndim=2] selem,
-                 np.ndarray[np.uint8_t, ndim=2] mask,
-                 np.ndarray[np.uint8_t, ndim=2] out,
+cdef void _core8(dtype_t kernel(Py_ssize_t *, float, dtype_t, float,
+                                 float, Py_ssize_t, Py_ssize_t),
+                 cnp.ndarray[dtype_t, ndim=2] image,
+                 cnp.ndarray[dtype_t, ndim=2] selem,
+                 cnp.ndarray[dtype_t, ndim=2] mask,
+                 cnp.ndarray[dtype_t, ndim=2] out,
                  char shift_x, char shift_y, float p0, float p1,
                  Py_ssize_t s0, Py_ssize_t s1) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
@@ -69,9 +70,9 @@ cdef void _core8(np.uint8_t kernel(Py_ssize_t *, float, np.uint8_t, float,
 
     # define pointers to the data
 
-    cdef np.uint8_t * out_data = <np.uint8_t * >out.data
-    cdef np.uint8_t * image_data = <np.uint8_t * >image.data
-    cdef np.uint8_t * mask_data = <np.uint8_t * >mask.data
+    cdef dtype_t * out_data = <dtype_t * >out.data
+    cdef dtype_t * image_data = <dtype_t * >image.data
+    cdef dtype_t * mask_data = <dtype_t * >mask.data
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row

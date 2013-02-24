@@ -4,7 +4,8 @@
 #cython: wraparound=False
 
 import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 from libc.stdlib cimport malloc, free
 from _core8 cimport is_in_mask
 
@@ -18,24 +19,24 @@ cdef inline int int_min(int a, int b):
 
 
 cdef inline void histogram_increment(Py_ssize_t * histo, float * pop,
-                                     np.uint16_t value):
+                                     dtype_t value):
     histo[value] += 1
     pop[0] += 1
 
 
 cdef inline void histogram_decrement(Py_ssize_t * histo, float * pop,
-                                     np.uint16_t value):
+                                     dtype_t value):
     histo[value] -= 1
     pop[0] -= 1
 
 
-cdef void _core16(np.uint16_t kernel(Py_ssize_t *, float, np.uint16_t,
-                                     Py_ssize_t, Py_ssize_t, Py_ssize_t, float,
-                                     float, Py_ssize_t, Py_ssize_t),
-                  np.ndarray[np.uint16_t, ndim=2] image,
-                  np.ndarray[np.uint8_t, ndim=2] selem,
-                  np.ndarray[np.uint8_t, ndim=2] mask,
-                  np.ndarray[np.uint16_t, ndim=2] out,
+cdef void _core16(dtype_t kernel(Py_ssize_t *, float, dtype_t,
+                                 Py_ssize_t, Py_ssize_t, Py_ssize_t, float,
+                                 float, Py_ssize_t, Py_ssize_t),
+                  cnp.ndarray[dtype_t, ndim=2] image,
+                  cnp.ndarray[cnp.uint8_t, ndim=2] selem,
+                  cnp.ndarray[cnp.uint8_t, ndim=2] mask,
+                  cnp.ndarray[dtype_t, ndim=2] out,
                   char shift_x, char shift_y, Py_ssize_t bitdepth,
                   float p0, float p1, Py_ssize_t s0, Py_ssize_t s1) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
@@ -67,9 +68,9 @@ cdef void _core16(np.uint16_t kernel(Py_ssize_t *, float, np.uint16_t,
     assert (image < maxbin).all()
 
     # define pointers to the data
-    cdef np.uint16_t * out_data = <np.uint16_t * >out.data
-    cdef np.uint16_t * image_data = <np.uint16_t * >image.data
-    cdef np.uint8_t * mask_data = <np.uint8_t * >mask.data
+    cdef dtype_t * out_data = <dtype_t * >out.data
+    cdef dtype_t * image_data = <dtype_t * >image.data
+    cdef cnp.uint8_t * mask_data = <cnp.uint8_t * >mask.data
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row

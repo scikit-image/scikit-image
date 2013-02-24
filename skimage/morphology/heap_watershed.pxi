@@ -9,14 +9,12 @@ All rights reserved.
 
 Original author: Lee Kamentsky
 """
-import numpy as np
-cimport numpy as np
-cimport cython
+cimport numpy as cnp
 
 
 cdef struct Heapitem:
-    np.int32_t value
-    np.int32_t age
+    cnp.int32_t value
+    cnp.int32_t age
     Py_ssize_t index
 
 

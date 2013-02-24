@@ -1,8 +1,8 @@
 """Export fast union find in Cython"""
-cimport numpy as np
+cimport numpy as cnp
 
-DTYPE = np.intp
-ctypedef np.intp_t DTYPE_t
+DTYPE = cnp.intp
+ctypedef cnp.intp_t DTYPE_t
 
 cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n)
 cdef set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root)
