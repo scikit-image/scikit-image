@@ -3,20 +3,20 @@
 #cython: nonecheck=False
 #cython: wraparound=False
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 from libc.math cimport sin, cos, abs
 from skimage._shared.interpolation cimport bilinear_interpolation
 
 
-def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
-                          negative_indices=False, mode='c'] image,
-               np.ndarray[dtype=np.float64_t, ndim=1,
-                          negative_indices=False, mode='c'] distances,
-               np.ndarray[dtype=np.float64_t, ndim=1,
-                          negative_indices=False, mode='c'] angles,
+def _glcm_loop(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
+                           negative_indices=False, mode='c'] image,
+               cnp.ndarray[dtype=cnp.float64_t, ndim=1,
+                           negative_indices=False, mode='c'] distances,
+               cnp.ndarray[dtype=cnp.float64_t, ndim=1,
+                           negative_indices=False, mode='c'] angles,
                int levels,
-               np.ndarray[dtype=np.uint32_t, ndim=4,
-                          negative_indices=False, mode='c'] out):
+               cnp.ndarray[dtype=cnp.uint32_t, ndim=4,
+                           negative_indices=False, mode='c'] out):
     """Perform co-occurrence matrix accumulation.
 
     Parameters
@@ -39,8 +39,8 @@ def _glcm_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
 
     cdef:
         Py_ssize_t a_idx, d_idx, r, c, rows, cols, row, col
-        np.uint8_t i, j
-        np.float64_t angle, distance
+        cnp.uint8_t i, j
+        cnp.float64_t angle, distance
 
     rows = image.shape[0]
     cols = image.shape[1]
@@ -81,7 +81,7 @@ cdef inline int _bit_rotate_right(int value, int length):
     return (value >> 1) | ((value & 1) << (length - 1))
 
 
-def _local_binary_pattern(np.ndarray[double, ndim=2] image,
+def _local_binary_pattern(cnp.ndarray[double, ndim=2] image,
                           int P, float R, char method='D'):
     """Gray scale and rotation invariant LBP (Local Binary Patterns).
 
@@ -111,19 +111,19 @@ def _local_binary_pattern(np.ndarray[double, ndim=2] image,
     """
 
     # texture weights
-    cdef np.ndarray[int, ndim=1] weights = 2 ** np.arange(P, dtype=np.int32)
+    cdef cnp.ndarray[int, ndim=1] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
     rp = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.double) / P)
     cp = R * np.cos(2 * np.pi * np.arange(P, dtype=np.double) / P)
-    cdef np.ndarray[double, ndim=2] coords = np.round(np.vstack([rp, cp]).T, 5)
+    cdef cnp.ndarray[double, ndim=2] coords = np.round(np.vstack([rp, cp]).T, 5)
 
     # pre allocate arrays for computation
-    cdef np.ndarray[double, ndim=1] texture = np.zeros(P, np.double)
-    cdef np.ndarray[char, ndim=1] signed_texture = np.zeros(P, np.int8)
-    cdef np.ndarray[int, ndim=1] rotation_chain = np.zeros(P, np.int32)
+    cdef cnp.ndarray[double, ndim=1] texture = np.zeros(P, np.double)
+    cdef cnp.ndarray[char, ndim=1] signed_texture = np.zeros(P, np.int8)
+    cdef cnp.ndarray[int, ndim=1] rotation_chain = np.zeros(P, np.int32)
 
     output_shape = (image.shape[0], image.shape[1])
-    cdef np.ndarray[double, ndim=2] output = np.zeros(output_shape, np.double)
+    cdef cnp.ndarray[double, ndim=2] output = np.zeros(output_shape, np.double)
 
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]

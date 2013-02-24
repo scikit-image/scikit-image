@@ -1,14 +1,16 @@
-#cython: boundscheck=False
-#cython: wraparound=False
 #cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 
 
-def central_moments(np.ndarray[np.double_t, ndim=2] array, double cr, double cc,
-                     int order):
+def central_moments(cnp.ndarray[cnp.double_t, ndim=2] array, double cr,
+                    double cc, int order):
     cdef Py_ssize_t p, q, r, c
-    cdef np.ndarray[np.double_t, ndim=2] mu
+    cdef cnp.ndarray[cnp.double_t, ndim=2] mu
     mu = np.zeros((order + 1, order + 1), 'double')
     for p in range(order + 1):
         for q in range(order + 1):
@@ -17,9 +19,10 @@ def central_moments(np.ndarray[np.double_t, ndim=2] array, double cr, double cc,
                     mu[p,q] += array[r,c] * (r - cr) ** q * (c - cc) ** p
     return mu
 
-def normalized_moments(np.ndarray[np.double_t, ndim=2] mu, int order):
+
+def normalized_moments(cnp.ndarray[cnp.double_t, ndim=2] mu, int order):
     cdef Py_ssize_t p, q
-    cdef np.ndarray[np.double_t, ndim=2] nu
+    cdef cnp.ndarray[cnp.double_t, ndim=2] nu
     nu = np.zeros((order + 1, order + 1), 'double')
     for p in range(order + 1):
         for q in range(order + 1):
@@ -29,8 +32,9 @@ def normalized_moments(np.ndarray[np.double_t, ndim=2] mu, int order):
                 nu[p,q] = np.nan
     return nu
 
-def hu_moments(np.ndarray[np.double_t, ndim=2] nu):
-    cdef np.ndarray[np.double_t, ndim=1] hu = np.zeros((7,), 'double')
+
+def hu_moments(cnp.ndarray[cnp.double_t, ndim=2] nu):
+    cdef cnp.ndarray[cnp.double_t, ndim=1] hu = np.zeros((7,), 'double')
     cdef double t0 = nu[3,0] + nu[1,2]
     cdef double t1 = nu[2,1] + nu[0,3]
     cdef double q0 = t0 * t0
