@@ -101,19 +101,12 @@ class TestNovice(TestCase):
         # Outside bounds
         assert_raises(IndexError, lambda: pic[pic.width, pic.height])
 
-        # Negative indexing
-        #pic[-1, -1] = (0, 0, 0)
-        #assert_equal(pic[pic.width - 1, pic.height - 1].rgb, (0, 0, 0))
+        # Negative indexing not supported
+        assert_raises(IndexError, lambda: pic[-1, -1])
+        assert_raises(IndexError, lambda: pic[-1:, -1:])
 
-        # Stepping (checkerboard)
-        pic[:, :] = (0, 0, 0)
-        pic[::2, ::2] = (255, 255, 255)
-
-        for p in pic:
-            if (p.x % 2 == 0) and (p.y % 2 == 0):
-                assert_equal(p.rgb, (255, 255, 255))
-            else:
-                assert_equal(p.rgb, (0, 0, 0))
+        # Step sizes > 1 not supported
+        assert_raises(IndexError, lambda: pic[::2, ::2])
 
     def test_slicing(self):
         cut = 40
@@ -122,3 +115,14 @@ class TestNovice(TestCase):
         temp = pic[:cut, :]
         pic[:rest, :] = pic[cut:, :]
         pic[rest:, :] = temp
+
+        pic_orig = novice.open(self.sample_path)
+
+        # Check center line
+        for p1 in pic_orig[rest:, pic.height/2]:
+            for p2 in pic[:cut, pic.height/2]:
+                assert p1.rgb == p2.rgb
+
+        for p1 in pic_orig[:cut, pic.height/2]:
+            for p2 in pic[rest:, pic.height/2]:
+                assert p1.rgb == p2.rgb

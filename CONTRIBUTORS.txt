@@ -132,3 +132,6 @@
 
 - François Boulogne
   Andres Method for circle perimeter, ellipse perimeter drawing.
+
+- Michael Hansen
+  novice submodule.
