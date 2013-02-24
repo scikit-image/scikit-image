@@ -274,7 +274,7 @@ cdef inline np.uint16_t kernel_entropy(Py_ssize_t * histo, float pop,
         for i in range(maxbin):
             p = histo[i] / pop
             if p > 0:
-                e -= p * log(p) / 0.30102999566398119521373889472449
+                e -= p * log(p) / 0.6931471805599453
 
         return < np.uint16_t > e * 1000
     else:
