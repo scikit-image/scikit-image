@@ -132,7 +132,7 @@
 
 - François Boulogne
   Andres Method for circle perimeter, ellipse perimeter drawing.
-  Hough transform for circles
+  Circular Hough Transform
 
 - Thouis Jones
   Vectorized operators for arrays of 16-bit ints.
