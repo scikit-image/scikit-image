@@ -138,6 +138,10 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
         Centre coordinate of ellipse.
     yradius, xradius : double
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
+    shape : tuple, optional
+        image shape which is used to determine maximum extents of output pixel
+        coordinates. This is useful for ellipses which exceed the image size.
+        By default the full extents of the ellipse are used.
 
     Returns
     -------
@@ -182,6 +186,10 @@ def circle(double cy, double cx, double radius, shape=None):
         Centre coordinate of circle.
     radius: double
         Radius of circle.
+    shape : tuple, optional
+        image shape which is used to determine maximum extents of output pixel
+        coordinates. This is useful for circles which exceed the image size.
+        By default the full extents of the circle are used.
 
     Returns
     -------
@@ -189,7 +197,9 @@ def circle(double cy, double cx, double radius, shape=None):
         Pixel coordinates of circle.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
-
+    Notes
+    -----
+        This function is a wrapper for skimage.draw.ellipse()
     """
 
     return ellipse(cy, cx, radius, radius, shape)
