@@ -28,7 +28,7 @@ def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     img : (M, N, 3) ndarray of uint8
         Output image.
     stateimg : (M, N, 3) ndarray of uint8
-        Icnput image.
+        Input image.
     channel : int
         Channel (0 for "red", 1 for "green", 2 for "blue").
     amount : int
@@ -74,7 +74,7 @@ def multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     img : (M, N, 3) ndarray of uint8
         Output image.
     stateimg : (M, N, 3) ndarray of uint8
-        Icnput image.
+        Input image.
     channel : int
         Channel (0 for "red", 1 for "green", 2 for "blue").
     amount : float
@@ -121,7 +121,7 @@ def brightness(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     img : (M, N, 3) ndarray of uint8
         Output image.
     stateimg : (M, N, 3) ndarray of uint8
-        Icnput image.
+        Input image.
     factor : float
         Multiplication factor.
     offset : int
@@ -438,7 +438,7 @@ def hsv_add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     img : (M, N, 3) ndarray of uint8
         Output image.
     stateimg : (M, N, 3) ndarray of uint8
-        Icnput image.
+        Input image.
     h_amt : float
         Ammount to add to H channel.
     s_amt : float
@@ -507,7 +507,7 @@ def hsv_multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
     img : (M, N, 3) ndarray of uint8
         Output image.
     stateimg : (M, N, 3) ndarray of uint8
-        Icnput image.
+        Input image.
     h_amt : float
         Ammount to add to H channel.
     s_amt : float
