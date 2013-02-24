@@ -38,13 +38,13 @@ import matplotlib.patches as mpatches
 from skimage import data, filter
 from skimage.transform import hough_circle
 from skimage.feature import peak_local_max
+from skimage.draw import circle_perimeter
 
 # Load picture and detect edges
 image = data.coins()[0:95, 70:370]
 edges = filter.canny(image, sigma=3, low_threshold=10, high_threshold=50)
 
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
-ax.imshow(image, cmap=plt.cm.gray)
 
 # Detect two radii
 hough_radii = np.arange(15, 30, 2)
@@ -65,8 +65,8 @@ for radius, h in zip(hough_radii, hough_res):
 for idx in np.argsort(accums)[::-1][:5]:
     center_x, center_y = centers[idx]
     radius = radii[idx]
-    circ = mpatches.Circle((center_y, center_x), radius,
-                           fill=False, edgecolor='red', linewidth=2)
-    ax.add_patch(circ)
+    cx, cy = circle_perimeter(center_y, center_x, radius)
+    image[cy, cx] = 0
 
+ax.imshow(image, cmap=plt.cm.gray)
 plt.show()
