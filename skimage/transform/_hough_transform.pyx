@@ -2,9 +2,9 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-cimport cython
 import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 from libc.math cimport abs, fabs, sqrt, ceil
 from libc.stdlib cimport rand
 
@@ -17,14 +17,14 @@ cdef inline Py_ssize_t round(double r):
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
+def _hough(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
 
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
 
     # Compute the array of angles and their sine and cosine
-    cdef np.ndarray[ndim=1, dtype=np.double_t] ctheta
-    cdef np.ndarray[ndim=1, dtype=np.double_t] stheta
+    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] ctheta
+    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] stheta
 
     if theta is None:
         theta = np.linspace(PI_2, NEG_PI_2, 180)
@@ -33,8 +33,8 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     stheta = np.sin(theta)
 
     # compute the bins and allocate the accumulator array
-    cdef np.ndarray[ndim=2, dtype=np.uint64_t] accum
-    cdef np.ndarray[ndim=1, dtype=np.double_t] bins
+    cdef cnp.ndarray[ndim=2, dtype=cnp.uint64_t] accum
+    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] bins
     cdef Py_ssize_t max_distance, offset
 
     max_distance = 2 * <Py_ssize_t>ceil(sqrt(img.shape[0] * img.shape[0] +
@@ -44,7 +44,7 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     offset = max_distance / 2
 
     # compute the nonzero indexes
-    cdef np.ndarray[ndim=1, dtype=np.npy_intp] x_idxs, y_idxs
+    cdef cnp.ndarray[ndim=1, dtype=cnp.npy_intp] x_idxs, y_idxs
     y_idxs, x_idxs = np.nonzero(img)
 
     # finally, run the transform
@@ -60,9 +60,9 @@ def _hough(np.ndarray img, np.ndarray[ndim=1, dtype=np.double_t] theta=None):
     return accum, theta, bins
 
 
-def _probabilistic_hough(np.ndarray img, int value_threshold,
+def _probabilistic_hough(cnp.ndarray img, int value_threshold,
                          int line_length, int line_gap,
-                         np.ndarray[ndim=1, dtype=np.double_t] theta=None):
+                         cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
 
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
@@ -74,11 +74,11 @@ def _probabilistic_hough(np.ndarray img, int value_threshold,
     cdef Py_ssize_t width = img.shape[1]
 
     # compute the bins and allocate the accumulator array
-    cdef np.ndarray[ndim=2, dtype=np.int64_t] accum
-    cdef np.ndarray[ndim=1, dtype=np.double_t] ctheta, stheta
-    cdef np.ndarray[ndim=2, dtype=np.uint8_t] mask = \
+    cdef cnp.ndarray[ndim=2, dtype=cnp.int64_t] accum
+    cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] ctheta, stheta
+    cdef cnp.ndarray[ndim=2, dtype=cnp.uint8_t] mask = \
          np.zeros((height, width), dtype=np.uint8)
-    cdef np.ndarray[ndim=2, dtype=np.int32_t] line_end = \
+    cdef cnp.ndarray[ndim=2, dtype=cnp.int32_t] line_end = \
          np.zeros((2, 2), dtype=np.int32)
     cdef Py_ssize_t max_distance, offset, num_indexes, index
     cdef double a, b

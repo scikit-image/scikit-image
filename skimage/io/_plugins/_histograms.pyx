@@ -1,7 +1,10 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
-cimport numpy as np
 
-import cython
+cimport numpy as cnp
 
 
 cdef inline float tri_max(float a, float b, float c):
@@ -18,8 +21,7 @@ cdef inline float tri_max(float a, float b, float c):
         return c
 
 
-@cython.boundscheck(False)
-def histograms(np.ndarray[np.uint8_t, ndim=3] img, int nbins):
+def histograms(cnp.ndarray[cnp.uint8_t, ndim=3] img, int nbins):
     '''Calculate the channel histograms of the current image.
 
     Parameters
@@ -39,10 +41,7 @@ def histograms(np.ndarray[np.uint8_t, ndim=3] img, int nbins):
     '''
     cdef int width = img.shape[1]
     cdef int height = img.shape[0]
-    cdef np.ndarray[np.int32_t, ndim=1] r
-    cdef np.ndarray[np.int32_t, ndim=1] g
-    cdef np.ndarray[np.int32_t, ndim=1] b
-    cdef np.ndarray[np.int32_t, ndim=1] v
+    cdef cnp.ndarray[cnp.int32_t, ndim=1] r, g, b, v
 
     r = np.zeros((nbins,), dtype=np.int32)
     g = np.zeros((nbins,), dtype=np.int32)

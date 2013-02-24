@@ -2,11 +2,11 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-cimport cython
-cimport numpy as np
-from libc.math cimport sqrt
 import math
 import numpy as np
+
+cimport numpy as cnp
+from libc.math cimport sqrt
 from skimage._shared.geometry cimport point_in_polygon
 
 
@@ -29,7 +29,7 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
 
     """
 
-    cdef np.ndarray[np.intp_t, ndim=1, mode="c"] rr, cc
+    cdef cnp.ndarray[cnp.intp_t, ndim=1, mode="c"] rr, cc
 
     cdef char steep = 0
     cdef Py_ssize_t dx = abs(x2 - x)
@@ -110,11 +110,11 @@ def polygon(y, x, shape=None):
     cdef Py_ssize_t r, c
 
     #: make contigous arrays for r, c coordinates
-    cdef np.ndarray contiguous_rdata, contiguous_cdata
+    cdef cnp.ndarray contiguous_rdata, contiguous_cdata
     contiguous_rdata = np.ascontiguousarray(y, 'double')
     contiguous_cdata = np.ascontiguousarray(x, 'double')
-    cdef np.double_t* rptr = <np.double_t*>contiguous_rdata.data
-    cdef np.double_t* cptr = <np.double_t*>contiguous_cdata.data
+    cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
+    cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
 
     #: output coordinate arrays
     cdef list rr = list()

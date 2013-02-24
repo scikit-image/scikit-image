@@ -1,8 +1,11 @@
-# -*- python -*-
 #cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 
 import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 
 """
 See also:
@@ -140,9 +143,9 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
     cdef DTYPE_t rows = input.shape[0]
     cdef DTYPE_t cols = input.shape[1]
 
-    cdef np.ndarray[DTYPE_t, ndim=2] data = np.array(input, copy=True,
-                                                     dtype=DTYPE)
-    cdef np.ndarray[DTYPE_t, ndim=2] forest
+    cdef cnp.ndarray[DTYPE_t, ndim=2] data = np.array(input, copy=True,
+                                                      dtype=DTYPE)
+    cdef cnp.ndarray[DTYPE_t, ndim=2] forest
 
     forest = np.arange(data.size, dtype=DTYPE).reshape((rows, cols))
 
