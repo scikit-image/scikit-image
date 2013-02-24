@@ -132,4 +132,4 @@
 
 - François Boulogne
   Andres Method for circle perimeter, ellipse perimeter drawing.
-  Hough transform for circles
+  Circular Hough Transform
