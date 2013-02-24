@@ -7,7 +7,7 @@ cimport numpy as np
 
 def central_moments(np.ndarray[np.double_t, ndim=2] array, double cr, double cc,
                      int order):
-    cdef int p, q, r, c
+    cdef Py_ssize_t p, q, r, c
     cdef np.ndarray[np.double_t, ndim=2] mu
     mu = np.zeros((order + 1, order + 1), 'double')
     for p in range(order + 1):
@@ -18,7 +18,7 @@ def central_moments(np.ndarray[np.double_t, ndim=2] array, double cr, double cc,
     return mu
 
 def normalized_moments(np.ndarray[np.double_t, ndim=2] mu, int order):
-    cdef int p, q
+    cdef Py_ssize_t p, q
     cdef np.ndarray[np.double_t, ndim=2] nu
     nu = np.zeros((order + 1, order + 1), 'double')
     for p in range(order + 1):

@@ -10,7 +10,7 @@ from skimage.color import rgb2grey
 from skimage.util import img_as_float
 
 
-def corner_moravec(image, int window_size=1):
+def corner_moravec(image, Py_ssize_t window_size=1):
     """Compute Moravec corner measure response image.
 
     This is one of the simplest corner detectors and is comparatively fast but
@@ -56,8 +56,8 @@ def corner_moravec(image, int window_size=1):
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.]])
     """
 
-    cdef int rows = image.shape[0]
-    cdef int cols = image.shape[1]
+    cdef Py_ssize_t rows = image.shape[0]
+    cdef Py_ssize_t cols = image.shape[1]
 
     cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode='c'] cimage, out
 
@@ -71,7 +71,7 @@ def corner_moravec(image, int window_size=1):
     cdef double* out_data = <double*>out.data
 
     cdef double msum, min_msum
-    cdef int r, c, br, bc, mr, mc, a, b
+    cdef Py_ssize_t r, c, br, bc, mr, mc, a, b
     for r in range(2 * window_size, rows - 2 * window_size):
         for c in range(2 * window_size, cols - 2 * window_size):
             min_msum = DBL_MAX
