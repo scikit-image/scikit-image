@@ -33,7 +33,6 @@ Its size is extended by two times the larger radius.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 from skimage import data, filter
 from skimage.transform import hough_circle
