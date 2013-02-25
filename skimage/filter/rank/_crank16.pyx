@@ -4,7 +4,7 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
-from libc.math cimport log2
+from libc.math cimport log
 from skimage.filter.rank._core16 cimport _core16
 
 
@@ -276,7 +276,7 @@ cdef inline dtype_t kernel_entropy(Py_ssize_t * histo, float pop,
         for i in range(maxbin):
             p = histo[i] / pop
             if p > 0:
-                e -= p * log2(p)
+                e -= p * log(p) / 0.6931471805599453
 
         return <dtype_t>e * 1000
     else:
