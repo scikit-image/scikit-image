@@ -127,3 +127,21 @@ def clock():
 
     """
     return load("clock_motion.png")
+
+
+def ihc():
+    """Immunohistochemical staining with Haematoxylin-Eosin counterstaining.
+
+    This picture is an example of immunohistochemical staining with 
+    Haematoxylin-Eosin counterstaining.
+
+    Notes
+    -----
+    This image was downloaded from the
+    `Laboratory of Image Synthesis and Analysis (LISA) of the ULB
+    <http://lisa.ulb.ac.be/images/Rp042826d.jpg>`__.
+
+    No known copyright restrictions.
+
+    """
+    return load("http://lisa.ulb.ac.be/images/Rp042826d.jpg")
