@@ -348,6 +348,3 @@ def homography(image, H, output_shape=None, order=1,
     tform = ProjectiveTransform(H)
     return warp(image, inverse_map=tform.inverse, output_shape=output_shape,
                 order=order, mode=mode, cval=cval)
-
-    return warp(image, inverse_map=tform.inverse, output_shape=output_shape,
-                order=order, mode=mode, cval=cval)
