@@ -312,6 +312,17 @@ gray_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
 # CIE LAB constants for Observer= 2A, Illuminant= D65
 lab_ref_white = np.array([0.95047, 1., 1.08883])
 
+
+# Haematoxylin-Eosin-DAB colorspace
+# From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
+# “Quantification of histochemical staining by color deconvolution.,”
+# Analytical and quantitative cytology and histology / the International
+# Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
+# pp. 291–9, Aug. 2001.
+hed_from_rgb =  np.asarray([[0.65, 0.70, 0.29],
+                            [0.07, 0.99, 0.11],
+                            [0.27, 0.57, 0.78]])
+
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
 #-------------------------------------------------------------
@@ -721,3 +732,43 @@ def lab2rgb(lab):
     This function uses lab2xyz and xyz2rgb.
     """
     return xyz2rgb(lab2xyz(lab))
+
+
+def rgb2hed(rgb):
+    """RGB to Haematoxylin-Eosin-DAB (HED) color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in HED format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
+           staining by color deconvolution.,” Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291–9, Aug. 2001.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2xyz, xyz2lab
+    >>> ihc = data.ihc()
+    >>> ihc_hed = rgb2hed(ihc)
+    """
+    arr = _prepare_colorarray(rgb)
+
+    # convert to optical densities
+    arr = -np.log(arr)
+
+    return _convert(hed_from_rgb, arr)
