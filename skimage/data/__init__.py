@@ -135,13 +135,10 @@ def ihc():
     This picture is an example of immunohistochemical staining with 
     Haematoxylin-Eosin counterstaining.
 
-    Notes
-    -----
-    This image was downloaded from the
-    `Laboratory of Image Synthesis and Analysis (LISA) of the ULB
-    <http://lisa.ulb.ac.be/images/Rp042826d.jpg>`__.
+    This image was acquired at the Center for Microscopy And Molecular Imaging
+    (CMMI).
 
     No known copyright restrictions.
 
     """
-    return load("http://lisa.ulb.ac.be/images/Rp042826d.jpg")
+    return load("ihc.jpg")

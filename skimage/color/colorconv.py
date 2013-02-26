@@ -53,7 +53,7 @@ __docformat__ = "restructuredtext en"
 import numpy as np
 from scipy import linalg
 from ..util import dtype
-
+from deconvolution import deconvolveHDAB as deconvolve
 
 def is_rgb(image):
     """Test whether the image is RGB or RGBA.
@@ -319,9 +319,10 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 # Analytical and quantitative cytology and histology / the International
 # Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
 # pp. 291–9, Aug. 2001.
-hed_from_rgb =  np.asarray([[0.65, 0.70, 0.29],
-                            [0.07, 0.99, 0.11],
-                            [0.27, 0.57, 0.78]])
+rgb_from_hed =  np.array([[0.65, 0.70, 0.29],
+                          [0.07, 0.99, 0.11],
+                          [0.27, 0.57, 0.78]])
+hed_from_rgb = linalg.inv(rgb_from_hed)
 
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
@@ -752,6 +753,7 @@ def rgb2hed(rgb):
     ValueError
         If `rgb` is not a 3-D array of shape (.., .., 3).
 
+
     References
     ----------
     .. [1] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
@@ -762,13 +764,52 @@ def rgb2hed(rgb):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import rgb2xyz, xyz2lab
+    >>> from skimage.color import rgb2hed
     >>> ihc = data.ihc()
     >>> ihc_hed = rgb2hed(ihc)
     """
-    arr = _prepare_colorarray(rgb)
+    rgb = dtype.img_as_ubyte(rgb)
+    arr = [1, 1, 1] - (np.log(rgb + [1, 1, 1]) / np.log(255))
+    row = np.reshape(arr, (-1,3))
+    scaled = np.dot(row, hed_from_rgb)
+    scaled[scaled < 0] = 0
+    scaled[scaled > 1] = 1
+    return  np.reshape(scaled, rgb.shape)
 
-    # convert to optical densities
-    arr = -np.log(arr)
 
-    return _convert(hed_from_rgb, arr)
+def hed2rgb(hed):
+    """Haematoxylin-Eosin-DAB (HED) to RGB color space conversion.
+
+    Parameters
+    ----------
+    hed : array_like
+        The image in HED format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in HED format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `hed` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
+           staining by color deconvolution.,” Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291–9, Aug. 2001.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2hed, hed2rgb
+    >>> ihc = data.ihc()
+    >>> ihc_hed = rgb2hed(ihc)
+    >>> ihc_rgb = hed2rgb(ihc_hed)
+    """
+    hed = dtype.img_as_float(hed)
+    rgb = np.exp(-np.dot(np.reshape(hed * np.log(255), (-1,3)) , rgb_from_hed))
+    return np.reshape(rgb, hed.shape)
