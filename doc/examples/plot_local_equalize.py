@@ -57,7 +57,7 @@ img = data.moon()
 # Contrast stretching
 p2 = np.percentile(img, 2)
 p98 = np.percentile(img, 98)
-img_rescale = exposure.equalize(img)
+img_rescale = exposure.equalize_hist(img)
 
 # Equalization
 selem = disk(30)
