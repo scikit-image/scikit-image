@@ -123,3 +123,71 @@ class LineModel(BaseModel):
 
         dist, theta = self._params
         return (dist - x * np.cos(theta)) / np.sin(theta)
+
+
+def ransac(data, model_class, min_samples, residual_threshold,
+           max_trials=1000):
+    '''
+    Fits a model to data with the RANSAC (random sample consensus) algorithm.
+
+    Parameters
+    ----------
+    data : (N, D) array
+        Data set to which the model is fitted, where N is the number of data
+        points and D the dimensionality of the data.
+    model_class : object
+        Object with the following methods implemented:
+
+         * `estimate(data)`
+         * `residuals(data)`
+
+    min_samples : int
+        The minimum number of data points to fit a model.
+    residual_threshold : float
+        Maximum distance for a data point to be classified as an inlier.
+    max_trials : int, optional
+        Maximum number of iterations for random sample selection.
+
+    Returns
+    -------
+    model : object
+        Best model with largest consensus set.
+    inliers : (N,) array
+        Indices of inliers.
+
+    '''
+
+    best_model = None
+    best_inlier_num = 0
+    best_inliers = None
+    data_idxs = np.arange(data.shape[0])
+
+    for _ in range(max_trials):
+
+        # choose random sample
+        sample = data[np.random.randint(0, data.shape[0], 2)]
+
+        # check if random sample is degenerate
+        if model_class.is_degenerate(sample):
+            continue
+
+        # create new instance of model class for current sample
+        sample_model = model_class()
+        sample_model.estimate(sample)
+        sample_model_residuals = sample_model.residuals(data)
+        # consensus set / inliers
+        sample_model_inliers = data_idxs[sample_model_residuals
+                                         < residual_threshold]
+
+        # choose as new best model if number of inliers is maximal
+        sample_inlier_num = sample_model_inliers.shape[0]
+        if sample_inlier_num > best_inlier_num:
+            best_model = sample_model
+            best_inlier_num = sample_inlier_num
+            best_inliers = sample_model_inliers
+
+    # estimate final model using all inliers
+    if best_inliers is not None:
+        best_model.estimate(data[best_inliers])
+
+    return best_model, best_inliers
