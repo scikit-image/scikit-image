@@ -5,7 +5,7 @@ from scipy.ndimage import map_coordinates
 from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
-                               SimilarityTransform, homography)
+                               SimilarityTransform)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -37,10 +37,6 @@ def test_homography():
                inverse_map=ProjectiveTransform(M).inverse,
                order=1)
     assert_array_almost_equal(x90, np.rot90(x))
-
-
-def test_homography_basic():
-    homography(np.random.random((25, 25)), np.eye(3))
 
 
 def test_fast_homography():
@@ -87,10 +83,10 @@ def test_rotate():
 
 def test_rotate_resize():
     x = np.zeros((10, 10), dtype=np.double)
-    
+
     x45 = rotate(x, 45, resize=False)
     assert x45.shape == (10, 10)
-    
+
     x45 = rotate(x, 45, resize=True)
     # new dimension should be d = sqrt(2 * (10/2)^2)
     assert x45.shape == (14, 14)
