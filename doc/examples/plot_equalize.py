@@ -19,7 +19,6 @@ that fall within the 2nd and 98th percentiles [2]_.
 """
 
 from skimage import data, img_as_float
-from skimage.util.dtype import dtype_range
 from skimage import exposure
 
 import matplotlib.pyplot as plt
