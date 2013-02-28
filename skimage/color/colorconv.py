@@ -320,9 +320,9 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 # Analytical and quantitative cytology and histology / the International
 # Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
 # pp. 291–9, Aug. 2001.
-rgb_from_hed =  np.array([[0.65, 0.70, 0.29],
-                          [0.07, 0.99, 0.11],
-                          [0.27, 0.57, 0.78]])
+rgb_from_hed = np.array([[0.65, 0.70, 0.29],
+                         [0.07, 0.99, 0.11],
+                         [0.27, 0.57, 0.78]])
 hed_from_rgb = linalg.inv(rgb_from_hed)
 
 #-------------------------------------------------------------
@@ -769,13 +769,9 @@ def rgb2hed(rgb):
     >>> ihc = data.ihc()
     >>> ihc_hed = rgb2hed(ihc)
     """
-    rgb = dtype.img_as_ubyte(rgb)
-    arr = [1, 1, 1] - (np.log(rgb + [1, 1, 1]) / np.log(255))
-    row = np.reshape(arr, (-1,3))
-    scaled = np.dot(row, hed_from_rgb)
-    scaled[scaled < 0] = 0
-    scaled[scaled > 1] = 1
-    return  np.reshape(scaled, rgb.shape)
+    rgb = rgb.astype(float) + 1
+    hed = np.dot(np.reshape(-np.log(rgb), (-1,3)), hed_from_rgb)
+    return np.reshape(hed, rgb.shape)
 
 
 def hed2rgb(hed):
@@ -811,6 +807,6 @@ def hed2rgb(hed):
     >>> ihc_hed = rgb2hed(ihc)
     >>> ihc_rgb = hed2rgb(ihc_hed)
     """
-    hed = dtype.img_as_float(hed)
-    rgb = np.exp(-np.dot(np.reshape(hed * np.log(255), (-1,3)) , rgb_from_hed))
-    return np.reshape(rgb, hed.shape)
+    logrgb1 = np.dot(-np.reshape(hed, (-1,3)) , rgb_from_hed)
+    rgb1 = np.exp(logrgb1)
+    return np.reshape(rgb1 - 1, hed.shape)
