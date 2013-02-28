@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import optimize
 
 
 class BaseModel(object):
@@ -11,12 +12,20 @@ class LineModel(BaseModel):
 
     '''Total least squares estimator for 2D lines.
 
-    Lines are parameterized using polar coordinates:
+    Lines are parameterized using polar coordinates as functional model:
 
         dist = x * cos(theta) + y * sin(theta)
 
     This parameterization is able to model vertical lines in contrast to the
     standard line model `y = a*x + b`.
+
+    This estimator minimizes the squared distances from all points to the line:
+
+        min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
+
+    The `_params` attribute contains the parameters in the following order:
+
+        dist, theta
 
     '''
 
@@ -33,7 +42,7 @@ class LineModel(BaseModel):
         X0 = data.mean(axis=0)
 
         if data.shape[0] == 2: # well determined
-            theta = np.arctan2(data[1,1] - data[0,1], data[1,0] - data[0,0])
+            theta = np.arctan2(data[1, 1] - data[0, 1], data[1, 0] - data[0, 0])
         elif data.shape[0] > 2: # over-determined
             data = data - X0
             # first principal component
@@ -47,7 +56,7 @@ class LineModel(BaseModel):
         # line always passes through mean
         dist = X0[0] * np.cos(theta) + X0[1] * np.sin(theta)
 
-        self._params = np.array([dist, theta])
+        self._params = (dist, theta)
 
     def residuals(self, data):
         '''Determine residuals of data to model.
@@ -67,8 +76,11 @@ class LineModel(BaseModel):
         '''
 
         dist, theta = self._params
-        data_dists = (data[:, 0] * np.cos(theta) + data[:, 1] * np.sin(theta))
-        return np.abs(dist - data_dists)
+
+        x = data[:, 0]
+        y = data[:, 1]
+
+        return dist - (x * np.cos(theta) + y * np.sin(theta))
 
     @classmethod
     def is_degenerate(cls, data):
@@ -125,6 +137,133 @@ class LineModel(BaseModel):
         return (dist - x * np.cos(theta)) / np.sin(theta)
 
 
+class CircleModel(BaseModel):
+
+    '''Total least squares estimator for 2D circles.
+
+    The functional model of the circle is:
+
+        r**2 = (x - xc)**2 + (y - yc)**2
+
+    This estimator minimizes the squared distances from all points to the
+    circle:
+
+        min{ sum((r - sqrt((x_i - xc)**2 + (y_i - yc)**2))**2) }
+
+    The `_params` attribute contains the parameters in the following order:
+
+        xc, yc, r
+
+    '''
+
+    def estimate(self, data):
+        '''Estimate line model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with `(x, y)` coordinates, respectively.
+
+        '''
+
+        x = data[:, 0]
+        y = data[:, 1]
+        # pre-allocate for all iterations
+        A = np.empty((3, data.shape[0]), dtype=np.double)
+        # same for all iterations
+        A[2, :] = -1
+
+        def dist(xc, yc):
+            return np.sqrt((x - xc)**2 + (y - yc)**2)
+
+        def fun(params):
+            xc, yc, r = params
+            return dist(xc, yc) - r
+
+        def Dfun(params):
+            xc, yc, r = params
+            d = dist(xc, yc)
+            A[0, :] = -(x - xc) / d
+            A[1, :] = -(y - yc) / d
+            #A[2, :] = -1
+            return A
+
+        xc0 = x.mean()
+        yc0 = y.mean()
+        r0 = dist(xc0, yc0).mean()
+        params0 = (xc0, yc0, r0)
+        params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
+
+        self._params = params
+
+    def residuals(self, data):
+        '''Determine residuals of data to model.
+
+        For each point the shortest distance to the line is returned.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with `(x, y)` coordinates, respectively.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Residual for each data point.
+
+        '''
+
+        xc, yc, r = self._params
+
+        x = data[:, 0]
+        y = data[:, 1]
+
+        return r - np.sqrt((x - xc)**2 + (y - yc)**2)
+
+    @classmethod
+    def is_degenerate(cls, data):
+        '''Check whether set of points is degenerate.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with `(x, y)` coordinates, respectively.
+
+        Returns
+        -------
+        flag : bool
+            Flag indicating if data is degenerate.
+
+        '''
+
+        return data.shape[0] < 2
+
+    def predict_xy(self, theta):
+        '''Predict x- and y-coordinates using the estimated model.
+
+        Parameters
+        ----------
+        theta : array
+            Angles in circle in radians. Angles start to count from positive
+            x-axis to positive y-axis in a right-handed system.
+
+        Returns
+        -------
+        x : array
+            Predicted x-coordinates.
+        y : array
+            Predicted y-coordinates.
+
+        '''
+
+        xc, yc, r = self._params
+
+        x = xc + r * np.cos(theta)
+        y = yc + r * np.sin(theta)
+
+        return x, y
+
+
 def ransac(data, model_class, min_samples, residual_threshold,
            max_trials=1000):
     '''
@@ -165,7 +304,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     for _ in range(max_trials):
 
         # choose random sample
-        sample = data[np.random.randint(0, data.shape[0], 2)]
+        sample = data[np.random.randint(0, data.shape[0], min_samples)]
 
         # check if random sample is degenerate
         if model_class.is_degenerate(sample):
@@ -176,7 +315,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         sample_model.estimate(sample)
         sample_model_residuals = sample_model.residuals(data)
         # consensus set / inliers
-        sample_model_inliers = data_idxs[sample_model_residuals
+        sample_model_inliers = data_idxs[np.abs(sample_model_residuals)
                                          < residual_threshold]
 
         # choose as new best model if number of inliers is maximal
