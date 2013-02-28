@@ -180,9 +180,9 @@ class CircleModel(BaseModel):
 
         x = data[:, 0]
         y = data[:, 1]
-        # pre-allocate for all iterations
-        A = np.empty((3, data.shape[0]), dtype=np.double)
-        # same for all iterations
+        # pre-allocate jacobian for all iterations
+        A = np.zeros((3, data.shape[0]), dtype=np.double)
+        # same for all iterations: r
         A[2, :] = -1
 
         def dist(xc, yc):
@@ -323,13 +323,44 @@ class EllipseModel(BaseModel):
 
         N = data.shape[0]
 
-        A = np.empty((5, 2 * N), dtype=np.double)
+        # pre-allocate jacobian for all iterations
+        A = np.zeros((N + 5, 2 * N), dtype=np.double)
+        # same for all iterations: xc, yc
+        A[0, :N] = -1
+        A[1, N:] = -1
+
+        diag_idxs = np.diag_indices(N)
 
         def fun(params):
             xt, yt = self.predict_xy(params[5:], params[:5])
             fx = x - xt
             fy = y - yt
             return np.append(fx, fy)
+
+        def Dfun(params):
+            xc, yc, a, b, theta = params[:5]
+            t = params[5:]
+
+            ct = np.cos(t)
+            st = np.sin(t)
+
+            # derivatives for fx, fy in the following order:
+            #       xc, yc, a, b, theta, t_i
+
+            # fx
+            A[2, :N] = - np.cos(theta) * ct
+            A[3, :N] = np.sin(theta) * st
+            A[4, :N] = a * np.sin(theta) * ct + b * np.cos(theta) * st
+            A[5:, :N][diag_idxs] = a * np.cos(theta) * st \
+                                   + b * np.sin(theta) * ct
+            # fy
+            A[2, N:] = - np.sin(theta) * ct
+            A[3, N:] = - np.cos(theta) * st
+            A[4, N:] = - a * np.cos(theta) * ct + b * np.sin(theta) * st
+            A[5:, N:][diag_idxs] = a * np.sin(theta) * st \
+                                   - b * np.cos(theta) * ct
+
+            return A
 
         # initial guess of parameters using a circle model
         params0 = np.empty((N + 5, ), dtype=np.double)
@@ -339,9 +370,7 @@ class EllipseModel(BaseModel):
         params0[:5] = (xc0, yc0, r0, 0, 0)
         params0[5:] = np.arctan2(y - yc0, x - xc0)
 
-        # TODO: add function to analytically build jacobian using Dfun for
-        #       faster computation
-        params, _ = optimize.leastsq(fun, params0)
+        params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
         self._params = params[:5]
 
