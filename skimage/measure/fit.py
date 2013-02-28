@@ -339,7 +339,9 @@ class EllipseModel(BaseModel):
         params0[:5] = (xc0, yc0, r0, 0, 0)
         params0[5:] = np.arctan2(y - yc0, x - xc0)
 
-        params, _ = optimize.leastsq(fun, params0)#, Dfun=Dfun, col_deriv=True)
+        # TODO: add function to analytically build jacobian using Dfun for
+        #       faster computation
+        params, _ = optimize.leastsq(fun, params0)
 
         self._params = params[:5]
 
