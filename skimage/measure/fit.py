@@ -27,6 +27,8 @@ class LineModel(BaseModel):
 
         dist, theta
 
+    A minimum number of 2 points is required to solve for the parameters.
+
     '''
 
     def estimate(self, data):
@@ -100,13 +102,15 @@ class LineModel(BaseModel):
 
         return data.shape[0] < 2
 
-    def predict_x(self, y):
+    def predict_x(self, y, params=None):
         '''Predict x-coordinates using the estimated model.
 
         Parameters
         ----------
         y : array
             y-coordinates.
+        params : (2, ) array, optional
+            Optional custom parameter set.
 
         Returns
         -------
@@ -115,16 +119,20 @@ class LineModel(BaseModel):
 
         '''
 
-        dist, theta = self._params
+        if params is None:
+            params = self._params
+        dist, theta = params
         return (dist - y * np.cos(theta)) / np.cos(theta)
 
-    def predict_y(self, x):
+    def predict_y(self, x, params=None):
         '''Predict y-coordinates using the estimated model.
 
         Parameters
         ----------
         x : array
             x-coordinates.
+        params : (2, ) array, optional
+            Optional custom parameter set.
 
         Returns
         -------
@@ -133,7 +141,9 @@ class LineModel(BaseModel):
 
         '''
 
-        dist, theta = self._params
+        if params is None:
+            params = self._params
+        dist, theta = params
         return (dist - x * np.cos(theta)) / np.sin(theta)
 
 
@@ -153,6 +163,8 @@ class CircleModel(BaseModel):
     The `_params` attribute contains the parameters in the following order:
 
         xc, yc, r
+
+    A minimum number of 3 points is required to solve for the parameters.
 
     '''
 
@@ -199,7 +211,7 @@ class CircleModel(BaseModel):
     def residuals(self, data):
         '''Determine residuals of data to model.
 
-        For each point the shortest distance to the line is returned.
+        For each point the shortest distance to the circle is returned.
 
         Parameters
         ----------
@@ -236,16 +248,176 @@ class CircleModel(BaseModel):
 
         '''
 
-        return data.shape[0] < 2
+        return data.shape[0] < 3
 
-    def predict_xy(self, theta):
+    def predict_xy(self, t, params=None):
         '''Predict x- and y-coordinates using the estimated model.
 
         Parameters
         ----------
-        theta : array
+        t : array
             Angles in circle in radians. Angles start to count from positive
             x-axis to positive y-axis in a right-handed system.
+        params : (3, ) array, optional
+            Optional custom parameter set.
+
+        Returns
+        -------
+        x : array
+            Predicted x-coordinates.
+        y : array
+            Predicted y-coordinates.
+
+        '''
+        if params is None:
+            params = self._params
+        xc, yc, r = params
+
+        x = xc + r * np.cos(t)
+        y = yc + r * np.sin(t)
+
+        return x, y
+
+
+class EllipseModel(BaseModel):
+
+    '''Total least squares estimator for 2D ellipses.
+
+    The functional model of the ellipse is:
+
+        xt = xc + a*cos(theta)*cos(t) - b*sin(theta)*sin(t)
+        yt = yc + a*sin(theta)*cos(t) + b*cos(theta)*sin(t)
+        d = sqrt((x - xt)**2 + (y - yt)**2)
+
+    where xt, yt is the closest point on the ellipse to x, y. Thus d is the
+    shortest distance from the point to the ellipse.
+
+    This estimator minimizes the squared distances from all points to the
+    ellipse:
+
+        min{ sum(d_i**2) } = min{ sum((x_i - xt)**2 + (y_i - yt)**2) }
+
+    Thus you have `2 * N` equations (x_i, y_i) for `N + 5` unknowns (t_i, xc,
+    yc, a, b, theta), which gives you an effective redundancy of `N - 5`.
+
+    The `_params` attribute contains the parameters in the following order:
+
+        xc, yc, a, b, theta
+
+    A minimum number of 5 points is required to solve for the parameters.
+
+    '''
+
+    def estimate(self, data):
+        '''Estimate line model from data using total least squares.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with `(x, y)` coordinates, respectively.
+
+        '''
+
+        x = data[:, 0]
+        y = data[:, 1]
+
+        N = data.shape[0]
+
+        A = np.empty((5, 2 * N), dtype=np.double)
+
+        def fun(params):
+            xt, yt = self.predict_xy(params[5:], params[:5])
+            fx = x - xt
+            fy = y - yt
+            return np.append(fx, fy)
+
+        # initial guess of parameters using a circle model
+        params0 = np.empty((N + 5, ), dtype=np.double)
+        xc0 = x.mean()
+        yc0 = y.mean()
+        r0 = np.sqrt((x - xc0)**2 + (y - yc0)**2).mean()
+        params0[:5] = (xc0, yc0, r0, 0, 0)
+        params0[5:] = np.arctan2(y - yc0, x - xc0)
+
+        params, _ = optimize.leastsq(fun, params0)#, Dfun=Dfun, col_deriv=True)
+
+        self._params = params[:5]
+
+    def residuals(self, data):
+        '''Determine residuals of data to model.
+
+        For each point the shortest distance to the ellipse is returned.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with `(x, y)` coordinates, respectively.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Residual for each data point.
+
+        '''
+
+        xc, yc, a, b, theta = self._params
+
+        x = data[:, 0]
+        y = data[:, 1]
+
+        N = data.shape[0]
+
+        def fun(t, xi, yi):
+            xt, yt = self.predict_xy(t)
+            return (xi - xt)**2 + (yi - yt)**2
+
+        def Dfun(t, xi, yi):
+            xt, yt = self.predict_xy(t)
+            dfx = - 2 * (xi - xt) * (- a * np.cos(theta) * np.sin(t)
+                                     - b * np.sin(theta) * np.cos(t))
+            dfy = - 2 * (yi - yt) * (- a * np.sin(theta) * np.sin(t)
+                                     + b * np.cos(theta) * np.cos(t))
+            return dfx + dfy
+
+        residuals = np.empty((N, ), dtype=np.double)
+
+        for i in range(N):
+            xi = x[i]
+            yi = y[i]
+            t, _ = optimize.leastsq(fun, 0, args=(xi, yi), Dfun=Dfun,
+                                    col_deriv=True)
+            residuals[i] = np.sqrt(fun(t, xi, yi))
+
+        return residuals
+
+    @classmethod
+    def is_degenerate(cls, data):
+        '''Check whether set of points is degenerate.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with `(x, y)` coordinates, respectively.
+
+        Returns
+        -------
+        flag : bool
+            Flag indicating if data is degenerate.
+
+        '''
+
+        return data.shape[0] < 5
+
+    def predict_xy(self, t, params=None):
+        '''Predict x- and y-coordinates using the estimated model.
+
+        Parameters
+        ----------
+        t : array
+            Angles in circle in radians. Angles start to count from positive
+            x-axis to positive y-axis in a right-handed system.
+        params : (5, ) array, optional
+            Optional custom parameter set.
 
         Returns
         -------
@@ -256,10 +428,15 @@ class CircleModel(BaseModel):
 
         '''
 
-        xc, yc, r = self._params
+        if params is None:
+            params = self._params
+        xc, yc, a, b, theta = params
 
-        x = xc + r * np.cos(theta)
-        y = yc + r * np.sin(theta)
+        ct = np.cos(t)
+        st = np.sin(t)
+
+        x = xc + a * np.cos(theta) * ct - b * np.sin(theta) * st
+        y = yc + a * np.sin(theta) * ct + b * np.cos(theta) * st
 
         return x, y
 
