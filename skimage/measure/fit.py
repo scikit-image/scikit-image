@@ -444,7 +444,7 @@ class EllipseModel(BaseModel):
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
-           max_trials=1000):
+           max_trials=100):
     '''Fits a model to data with the RANSAC (random sample consensus) algorithm.
 
     Parameters
