@@ -266,8 +266,7 @@ class CircleModel(BaseModel):
 
 def ransac(data, model_class, min_samples, residual_threshold,
            max_trials=1000):
-    '''
-    Fits a model to data with the RANSAC (random sample consensus) algorithm.
+    '''Fits a model to data with the RANSAC (random sample consensus) algorithm.
 
     Parameters
     ----------
@@ -279,6 +278,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
          * `estimate(data)`
          * `residuals(data)`
+         * `is_degenerate(data)`
 
     min_samples : int
         The minimum number of data points to fit a model.
