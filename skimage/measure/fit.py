@@ -416,10 +416,14 @@ class EllipseModel(BaseModel):
 
         residuals = np.empty((N, ), dtype=np.double)
 
+        # initial guess for parameter t of closest point on ellipse
+        t0 = np.arctan2(y - yc, x - xc) - theta
+
+        # determine shortest distance to ellipse for each point
         for i in range(N):
             xi = x[i]
             yi = y[i]
-            t, _ = optimize.leastsq(fun, 0, args=(xi, yi), Dfun=Dfun,
+            t, _ = optimize.leastsq(fun, t0[i], args=(xi, yi), Dfun=Dfun,
                                     col_deriv=True)
             residuals[i] = np.sqrt(fun(t, xi, yi))
 
