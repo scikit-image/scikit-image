@@ -343,22 +343,22 @@ class EllipseModel(BaseModel):
 
             ct = np.cos(t)
             st = np.sin(t)
+            ctheta = np.cos(theta)
+            stheta = np.sin(theta)
 
             # derivatives for fx, fy in the following order:
             #       xc, yc, a, b, theta, t_i
 
             # fx
-            A[2, :N] = - np.cos(theta) * ct
-            A[3, :N] = np.sin(theta) * st
-            A[4, :N] = a * np.sin(theta) * ct + b * np.cos(theta) * st
-            A[5:, :N][diag_idxs] = a * np.cos(theta) * st \
-                                   + b * np.sin(theta) * ct
+            A[2, :N] = - ctheta * ct
+            A[3, :N] = stheta * st
+            A[4, :N] = a * stheta * ct + b * ctheta * st
+            A[5:, :N][diag_idxs] = a * ctheta * st + b * stheta * ct
             # fy
-            A[2, N:] = - np.sin(theta) * ct
-            A[3, N:] = - np.cos(theta) * st
-            A[4, N:] = - a * np.cos(theta) * ct + b * np.sin(theta) * st
-            A[5:, N:][diag_idxs] = a * np.sin(theta) * st \
-                                   - b * np.cos(theta) * ct
+            A[2, N:] = - stheta * ct
+            A[3, N:] = - ctheta * st
+            A[4, N:] = - a * ctheta * ct + b * stheta * st
+            A[5:, N:][diag_idxs] = a * stheta * st - b * ctheta * ct
 
             return A
 
@@ -404,10 +404,14 @@ class EllipseModel(BaseModel):
 
         def Dfun(t, xi, yi):
             xt, yt = self.predict_xy(t)
-            dfx_t = - 2 * (xi - xt) * (- a * np.cos(theta) * np.sin(t)
-                                       - b * np.sin(theta) * np.cos(t))
-            dfy_t = - 2 * (yi - yt) * (- a * np.sin(theta) * np.sin(t)
-                                       + b * np.cos(theta) * np.cos(t))
+            ct = np.cos(t)
+            st = np.sin(t)
+            ctheta = np.cos(theta)
+            stheta = np.sin(theta)
+            dfx_t = - 2 * (xi - xt) * (- a * ctheta * st
+                                       - b * stheta * ct)
+            dfy_t = - 2 * (yi - yt) * (- a * stheta * st
+                                       + b * ctheta * ct)
             return dfx_t + dfy_t
 
         residuals = np.empty((N, ), dtype=np.double)
@@ -465,9 +469,11 @@ class EllipseModel(BaseModel):
 
         ct = np.cos(t)
         st = np.sin(t)
+        ctheta = np.cos(theta)
+        stheta = np.sin(theta)
 
-        x = xc + a * np.cos(theta) * ct - b * np.sin(theta) * st
-        y = yc + a * np.sin(theta) * ct + b * np.cos(theta) * st
+        x = xc + a * ctheta * ct - b * stheta * st
+        y = yc + a * stheta * ct + b * ctheta * st
 
         return x, y
 
