@@ -379,7 +379,7 @@ class EllipseModel(BaseModel):
                                        - b * np.sin(theta) * np.cos(t))
             dfy_t = - 2 * (yi - yt) * (- a * np.sin(theta) * np.sin(t)
                                        + b * np.cos(theta) * np.cos(t))
-            return dfx + dfy
+            return dfx_t + dfy_t
 
         residuals = np.empty((N, ), dtype=np.double)
 
@@ -484,7 +484,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> xc = 20
     >>> yc = 30
     >>> x = xc + a * np.cos(t)
-    >>> y = yc + b * np.cos(t)
+    >>> y = yc + b * np.sin(t)
     >>> data = np.column_stack([x, y])
     >>> np.random.seed(seed=1234)
     >>> data += np.random.normal(size=data.shape)
@@ -500,12 +500,21 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> model = EllipseModel()
     >>> model.estimate(data)
-    >>> print model._params
+    >>> model._params
+    array([  4.85808595e+02,   4.51492793e+02,   1.15018491e+03,
+             5.52428289e+00,   7.32420126e-01])
 
     Estimate ellipse model using RANSAC:
 
-    >>> ransac_model, _ = ransac(data, EllipseModel, 10, 3, max_trials=50)
-    >>> print ransac_model._params
+    >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
+    >>> # ransac_model._params, inliers
+
+    Should give the correct result estimated without the fauly data:
+
+        [ 20.12762373, 29.73563061, 4.81499637, 10.4743584, 0.05217117])
+        [ 4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+         21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
+         38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49])
 
     '''
 
