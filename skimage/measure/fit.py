@@ -473,6 +473,40 @@ def ransac(data, model_class, min_samples, residual_threshold,
     inliers : (N,) array
         Indices of inliers.
 
+    Examples
+    --------
+
+    Generate ellipse data without tilt and add noise:
+
+    >>> t = np.linspace(0, 2 * np.pi, 50)
+    >>> a = 5
+    >>> b = 10
+    >>> xc = 20
+    >>> yc = 30
+    >>> x = xc + a * np.cos(t)
+    >>> y = yc + b * np.cos(t)
+    >>> data = np.column_stack([x, y])
+    >>> np.random.seed(seed=1234)
+    >>> data += np.random.normal(size=data.shape)
+
+    Add some faulty data:
+
+    >>> data[0] = (100, 100)
+    >>> data[1] = (110, 120)
+    >>> data[2] = (120, 130)
+    >>> data[3] = (140, 130)
+
+    Estimate ellipse model using all available data:
+
+    >>> model = EllipseModel()
+    >>> model.estimate(data)
+    >>> print model._params
+
+    Estimate ellipse model using RANSAC:
+
+    >>> ransac_model, _ = ransac(data, EllipseModel, 10, 3, max_trials=50)
+    >>> print ransac_model._params
+
     '''
 
     best_model = None
