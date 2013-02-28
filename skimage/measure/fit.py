@@ -373,10 +373,10 @@ class EllipseModel(BaseModel):
 
         def Dfun(t, xi, yi):
             xt, yt = self.predict_xy(t)
-            dfx = - 2 * (xi - xt) * (- a * np.cos(theta) * np.sin(t)
-                                     - b * np.sin(theta) * np.cos(t))
-            dfy = - 2 * (yi - yt) * (- a * np.sin(theta) * np.sin(t)
-                                     + b * np.cos(theta) * np.cos(t))
+            dfx_t = - 2 * (xi - xt) * (- a * np.cos(theta) * np.sin(t)
+                                       - b * np.sin(theta) * np.cos(t))
+            dfy_t = - 2 * (yi - yt) * (- a * np.sin(theta) * np.sin(t)
+                                       + b * np.cos(theta) * np.cos(t))
             return dfx + dfy
 
         residuals = np.empty((N, ), dtype=np.double)
