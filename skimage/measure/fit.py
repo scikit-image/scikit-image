@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from scipy import optimize
 
@@ -56,7 +57,7 @@ class LineModel(BaseModel):
         # angle perpendicular to line angle
         theta = (theta + np.pi / 2) % np.pi
         # line always passes through mean
-        dist = X0[0] * np.cos(theta) + X0[1] * np.sin(theta)
+        dist = X0[0] * math.cos(theta) + X0[1] * math.sin(theta)
 
         self._params = (dist, theta)
 
@@ -82,7 +83,7 @@ class LineModel(BaseModel):
         x = data[:, 0]
         y = data[:, 1]
 
-        return dist - (x * np.cos(theta) + y * np.sin(theta))
+        return dist - (x * math.cos(theta) + y * math.sin(theta))
 
     @classmethod
     def is_degenerate(cls, data):
@@ -122,7 +123,7 @@ class LineModel(BaseModel):
         if params is None:
             params = self._params
         dist, theta = params
-        return (dist - y * np.cos(theta)) / np.cos(theta)
+        return (dist - y * math.cos(theta)) / math.cos(theta)
 
     def predict_y(self, x, params=None):
         '''Predict y-coordinates using the estimated model.
@@ -144,7 +145,7 @@ class LineModel(BaseModel):
         if params is None:
             params = self._params
         dist, theta = params
-        return (dist - x * np.cos(theta)) / np.sin(theta)
+        return (dist - x * math.cos(theta)) / math.sin(theta)
 
 
 class CircleModel(BaseModel):
@@ -343,8 +344,8 @@ class EllipseModel(BaseModel):
 
             ct = np.cos(t)
             st = np.sin(t)
-            ctheta = np.cos(theta)
-            stheta = np.sin(theta)
+            ctheta = math.cos(theta)
+            stheta = math.sin(theta)
 
             # derivatives for fx, fy in the following order:
             #       xc, yc, a, b, theta, t_i
@@ -393,26 +394,31 @@ class EllipseModel(BaseModel):
 
         xc, yc, a, b, theta = self._params
 
+        ctheta = math.cos(theta)
+        stheta = math.sin(theta)
+
         x = data[:, 0]
         y = data[:, 1]
 
         N = data.shape[0]
 
         def fun(t, xi, yi):
-            xt, yt = self.predict_xy(t)
+            ct = math.cos(t)
+            st = math.sin(t)
+            xt = xc + a * ctheta * ct - b * stheta * st
+            yt = yc + a * stheta * ct + b * ctheta * st
             return (xi - xt)**2 + (yi - yt)**2
 
-        def Dfun(t, xi, yi):
-            xt, yt = self.predict_xy(t)
-            ct = np.cos(t)
-            st = np.sin(t)
-            ctheta = np.cos(theta)
-            stheta = np.sin(theta)
-            dfx_t = - 2 * (xi - xt) * (- a * ctheta * st
-                                       - b * stheta * ct)
-            dfy_t = - 2 * (yi - yt) * (- a * stheta * st
-                                       + b * ctheta * ct)
-            return dfx_t + dfy_t
+        # def Dfun(t, xi, yi):
+        #     ct = math.cos(t)
+        #     st = math.sin(t)
+        #     xt = xc + a * ctheta * ct - b * stheta * st
+        #     yt = yc + a * stheta * ct + b * ctheta * st
+        #     dfx_t = - 2 * (xi - xt) * (- a * ctheta * st
+        #                                - b * stheta * ct)
+        #     dfy_t = - 2 * (yi - yt) * (- a * stheta * st
+        #                                + b * ctheta * ct)
+        #     return [dfx_t + dfy_t]
 
         residuals = np.empty((N, ), dtype=np.double)
 
@@ -423,8 +429,8 @@ class EllipseModel(BaseModel):
         for i in range(N):
             xi = x[i]
             yi = y[i]
-            t, _ = optimize.leastsq(fun, t0[i], args=(xi, yi), Dfun=Dfun,
-                                    col_deriv=True)
+            # faster without Dfun, because of the python overhead
+            t, _ = optimize.leastsq(fun, t0[i], args=(xi, yi))
             residuals[i] = np.sqrt(fun(t, xi, yi))
 
         return residuals
@@ -473,8 +479,8 @@ class EllipseModel(BaseModel):
 
         ct = np.cos(t)
         st = np.sin(t)
-        ctheta = np.cos(theta)
-        stheta = np.sin(theta)
+        ctheta = math.cos(theta)
+        stheta = math.sin(theta)
 
         x = xc + a * ctheta * ct - b * stheta * st
         y = yc + a * stheta * ct + b * ctheta * st
