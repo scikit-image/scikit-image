@@ -214,4 +214,8 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
             else:
                 data[i, j] = data_p[forest[i, j]]
 
-    return data
+    # Work around a bug in ndimage's type checking on 32-bit platforms
+    if data.dtype == np.int32:
+        return data.view(np.int32)
+    else:
+        return data
