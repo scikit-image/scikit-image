@@ -170,7 +170,7 @@ class CircleModel(BaseModel):
     '''
 
     def estimate(self, data):
-        '''Estimate line model from data using total least squares.
+        '''Estimate circle model from data using total least squares.
 
         Parameters
         ----------
@@ -310,7 +310,7 @@ class EllipseModel(BaseModel):
     '''
 
     def estimate(self, data):
-        '''Estimate line model from data using total least squares.
+        '''Estimate circle model from data using total least squares.
 
         Parameters
         ----------
@@ -554,7 +554,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
     >>> # ransac_model._params, inliers
 
-    Should give the correct result estimated without the fauly data:
+    Should give the correct result estimated without the faulty data:
 
         [ 20.12762373, 29.73563061, 4.81499637, 10.4743584, 0.05217117])
         [ 4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
