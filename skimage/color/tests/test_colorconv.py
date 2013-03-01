@@ -121,6 +121,19 @@ class TestColorconv(TestCase):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(xyz2rgb(rgb2xyz(img_rgb)), img_rgb)
 
+    # RGB<->HED roundtrip
+    def test_hed_rgb_roundtrip(self):
+        test = np.array([[[97, 105, 152],
+                          [217, 187, 225],
+                          [117, 107, 168]],
+                         [[217, 187, 225],
+                          [176, 135, 83],
+                          [234, 144, 205]],
+                         [[97, 105, 152],
+                          [117, 107, 168], 
+                          [217, 187, 225]]], dtype=np.uint8)
+        assert_array_almost_equal(hed2rgb(rgb2hed(img_rgb)), img_rgb)
+
     # RGB to RGB CIE
     def test_rgb2rgbcie_conversion(self):
         gt = np.array([[[ 0.1488856 ,  0.18288098,  0.19277574],
