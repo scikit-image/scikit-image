@@ -5,9 +5,12 @@
 import numpy as np
 
 cimport numpy as cnp
+cimport cython
+
 from libc.math cimport abs, fabs, sqrt, ceil
 from libc.stdlib cimport rand
 
+from skimage.draw import circle_perimeter
 
 cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
@@ -15,6 +18,65 @@ cdef double NEG_PI_2 = -PI_2
 
 cdef inline Py_ssize_t round(double r):
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
+
+
+@cython.boundscheck(False)
+def _hough_circle(cnp.ndarray img, \
+                  cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius, \
+                  normalize=True):
+    """Perform a circular Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    radius : ndarray
+        Radii at which to compute the Hough transform.
+    normalize : boolean, optional
+        Normalize the accumulator with the number
+        of pixels used to draw the radius
+
+    Returns
+    -------
+    H : 3D ndarray (radius index, (M, N) ndarray)
+        Hough transform accumulator for each radius
+
+    """
+    if img.ndim != 2:
+        raise ValueError('The input image must be 2D.')
+
+    # compute the nonzero indexes
+    cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] x, y
+    x, y = np.nonzero(img)
+
+    # Offset the image
+    cdef int max_radius = radius.max()
+    x = x + max_radius
+    y = y + max_radius
+
+    cdef int px, py
+    cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] tx, ty, circle_x, circle_y
+    cdef cnp.ndarray acc = np.zeros((radius.size,
+                                     img.shape[0] + 2 * max_radius,
+                                     img.shape[1] + 2 * max_radius))
+
+    for i, rad in enumerate(radius):
+        # Store in memory the circle of given radius
+        # centered at (0,0)
+        circle_x, circle_y = circle_perimeter(0, 0, rad)
+
+        # For each non zero pixel
+        for (px, py) in zip(x, y):
+            # Plug the circle at (px, py),
+            # its coordinates are (tx, ty)
+            tx = circle_x + px
+            ty = circle_y + py
+            acc[i, tx, ty] += 1
+
+        if normalize:
+            acc[i] = acc[i] / len(circle_x)
+
+    return acc
 
 
 def _hough(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
