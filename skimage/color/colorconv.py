@@ -54,7 +54,6 @@ __docformat__ = "restructuredtext en"
 import numpy as np
 from scipy import linalg
 from ..util import dtype
-from deconvolution import deconvolveHDAB as deconvolve
 
 def is_rgb(image):
     """Test whether the image is RGB or RGBA.
