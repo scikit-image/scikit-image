@@ -34,7 +34,7 @@ Its size is extended by two times the larger radius.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data, filter
+from skimage import data, filter, color
 from skimage.transform import hough_circle
 from skimage.feature import peak_local_max
 from skimage.draw import circle_perimeter
@@ -61,11 +61,12 @@ for radius, h in zip(hough_radii, hough_res):
     radii.extend([radius, radius])
 
 # Draw the most prominent 5 circles
+image = color.gray2rgb(image)
 for idx in np.argsort(accums)[::-1][:5]:
     center_x, center_y = centers[idx]
     radius = radii[idx]
     cx, cy = circle_perimeter(center_y, center_x, radius)
-    image[cy, cx] = 0
+    image[cy, cx] = (220, 250, 150)
 
 ax.imshow(image, cmap=plt.cm.gray)
 plt.show()
