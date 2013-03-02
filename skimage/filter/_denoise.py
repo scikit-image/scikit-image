@@ -32,7 +32,7 @@ def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     Rudin, Osher and Fatemi algorithm.
 
     Examples
-    ---------
+    --------
     >>> x, y, z = np.ogrid[0:40, 0:40, 0:40]
     >>> mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
     >>> mask = mask.astype(np.float)
@@ -123,7 +123,7 @@ def _denoise_tv_chambolle_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
            Springer, 2004, 20, 89-97.
 
     Examples
-    ---------
+    --------
     >>> from skimage import color, data
     >>> lena = color.rgb2gray(data.lena())
     >>> lena += 0.5 * lena.std() * np.random.randn(*lena.shape)
@@ -221,7 +221,7 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
            Springer, 2004, 20, 89-97.
 
     Examples
-    ---------
+    --------
     2D example on Lena image:
 
     >>> from skimage import color, data
