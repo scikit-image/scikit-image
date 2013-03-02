@@ -30,8 +30,7 @@ from ..filter import rank_order
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
-    """
-    Returns a list of edges for a 3D image.
+    """Returns a list of edges for a 3D image.
 
     Parameters
     ----------
@@ -45,9 +44,12 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
     Returns
     -------
     edges : (2, N) ndarray
-        with the total number of edges N = n_x * n_y * (nz - 1) +
-                                           n_x * (n_y - 1) * nz +
-                                           (n_x - 1) * n_y * nz
+        with the total number of edges::
+
+            N = n_x * n_y * (nz - 1) +
+                n_x * (n_y - 1) * nz +
+                (n_x - 1) * n_y * nz
+
         Graph edges with each column describing a node-id pair.
     """
     vertices = np.arange(n_x * n_y * n_z).reshape((n_x, n_y, n_z))
@@ -200,6 +202,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
         Mode for solving the linear system in the random walker
         algorithm.
+
         - 'bf' (brute force, default): an LU factorization of the Laplacian is
           computed. This is fast for small images (<1024x1024), but very slow
           (due to the memory cost) and memory-consuming for big images (in 3-D
@@ -214,6 +217,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
           requires that the pyamg module (http://code.google.com/p/pyamg/) is
           installed. For images of size > 512x512, this is the recommended
           (fastest) mode.
+
     tol : float
         tolerance to achieve when solving the linear system, in
         cg' and 'cg_mg' modes.
@@ -237,12 +241,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     Returns
     -------
     output : ndarray
-        If `return_full_prob` is False, array of ints of same shape as `data`,
-        in which each pixel has been labeled according to the marker that
-        reached the pixel first by anisotropic diffusion.
-        If `return_full_prob` is True, array of floats of shape
-        `(nlabels, data.shape)`. `output[label_nb, i, j]` is the probability
-        that label `label_nb` reaches the pixel `(i, j)` first.
+        * If `return_full_prob` is False, array of ints of same shape as
+          `data`, in which each pixel has been labeled according to the marker
+          that reached the pixel first by anisotropic diffusion.
+        * If `return_full_prob` is True, array of floats of shape
+          `(nlabels, data.shape)`. `output[label_nb, i, j]` is the probability
+          that label `label_nb` reaches the pixel `(i, j)` first.
 
     See also
     --------

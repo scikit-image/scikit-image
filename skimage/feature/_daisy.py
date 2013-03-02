@@ -53,30 +53,35 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
         the spatial smoothing of the center histogram and the last sigma value
         defines the spatial smoothing of the outermost ring. Specifying sigmas
         overrides the following parameter.
-           ``rings = len(sigmas)-1``
+
+            ``rings = len(sigmas) - 1``
 
     ring_radii : 1D array of int, optional
         Radius (in pixels) for each ring. Specifying ring_radii overrides the
         following two parameters.
-          | ``rings = len(ring_radii)``
-          | ``radius = ring_radii[-1]``
+
+            ``rings = len(ring_radii)``
+            ``radius = ring_radii[-1]``
 
         If both sigmas and ring_radii are given, they must satisfy the
         following predicate since no radius is needed for the center
         histogram.
-            ``len(ring_radii) == len(sigmas)+1``
+
+            ``len(ring_radii) == len(sigmas) + 1``
+
     visualize : bool, optional
         Generate a visualization of the DAISY descriptors
-
 
     Returns
     -------
     descs : array
         Grid of DAISY descriptors for the given image as an array
         dimensionality  (P, Q, R) where
-          | ``P = ceil((M-radius*2)/step)``
-          | ``Q = ceil((N-radius*2)/step)``
-          | ``R = (rings*histograms + 1)*orientations``
+
+            ``P = ceil((M - radius*2) / step)``
+            ``Q = ceil((N - radius*2) / step)``
+            ``R = (rings * histograms + 1) * orientations``
+
     descs_img : (M, N, 3) array (only if visualize==True)
         Visualization of the DAISY descriptors.
 

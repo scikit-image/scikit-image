@@ -140,7 +140,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     ..[2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
-    -------
+    --------
     >>> from skimage.feature import corner_harris, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
@@ -210,7 +210,7 @@ def corner_shi_tomasi(image, sigma=1):
     ..[2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
-    -------
+    --------
     >>> from skimage.feature import corner_shi_tomasi, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
@@ -277,7 +277,7 @@ def corner_foerstner(image, sigma=1):
     ..[2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
-    -------
+    --------
     >>> from skimage.feature import corner_foerstner, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
