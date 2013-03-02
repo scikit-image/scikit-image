@@ -28,19 +28,19 @@ if np.__version__ >= "1.6.0":
     _supported_types += (np.float16, )
 
 
-def dtype_limits(image, auto_clip=True):
+def dtype_limits(image, clip_negative=True):
     """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-    auto_clip : bool
+    clip_negative : bool
         If True, clip the negative range (i.e. return 0 for min intensity)
-        if the input image has no negative values.
+        even if the image dtype allows negative values.
     """
     imin, imax = dtype_range[image.dtype.type]
-    if auto_clip and imin < 0 and image.min() >= 0:
+    if clip_negative:
         imin = 0
     return imin, imax
 
