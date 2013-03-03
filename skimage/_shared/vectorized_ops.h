@@ -12,6 +12,7 @@
 #include <stdint.h>
 #elif defined(_MSC_VER)
 #define inline __inline
+typedef unsigned __int16 uint16_t;
 #endif
 
 /**
