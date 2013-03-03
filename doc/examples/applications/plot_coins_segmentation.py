@@ -91,7 +91,7 @@ Small spurious objects are easily removed by setting a minimum size for valid
 objects.
 """
 from skimage import morphology
-coins_cleaned = morphology.remove_small_connected_components(fill_coins, 21)
+coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
 
 plt.figure(figsize=(4, 3))
 plt.imshow(coins_cleaned, cmap=plt.cm.gray, interpolation='nearest')
