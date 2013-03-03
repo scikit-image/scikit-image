@@ -1,8 +1,7 @@
 import numpy as np
 import scipy.ndimage as nd
 
-def remove_small_connected_components(ar, min_size=64, 
-                                      connectivity=1, in_place=False):
+def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     """Remove connected components smaller than the specified size.
 
     Parameters
