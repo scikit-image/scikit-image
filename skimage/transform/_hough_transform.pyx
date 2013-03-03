@@ -50,11 +50,11 @@ def _hough_circle(cnp.ndarray img, \
     x, y = np.nonzero(img)
 
     # Offset the image
-    cdef int max_radius = radius.max()
+    cdef Py_ssize_t max_radius = radius.max()
     x = x + max_radius
     y = y + max_radius
 
-    cdef int px, py
+    cdef Py_ssize_t px, py
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] tx, ty, circle_x, circle_y
     cdef cnp.ndarray acc = np.zeros((radius.size,
                                      img.shape[0] + 2 * max_radius,
