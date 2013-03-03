@@ -2,13 +2,15 @@ import numpy as np
 import scipy.ndimage as nd
 
 def remove_small_connected_components(ar, min_size=64, 
-                                            connectivity=1, in_place=False):
+                                      connectivity=1, in_place=False):
     """Remove connected components smaller than the specified size.
 
     Parameters
     ----------
     ar : ndarray (arbitrary shape, int or bool type)
-        The array containing the connected components of interest.
+        The array containing the connected components of interest. If the array
+        type is int, it is assumed that it contains already-labeled objects.
+        The ints must be non-negative.
     min_size : int, optional (default: 64)
         The smallest allowable connected component size.
     connectivity : int, {1, 2, ..., ar.ndim}, optional (default: 1)
@@ -17,6 +19,13 @@ def remove_small_connected_components(ar, min_size=64,
         If `True`, remove the connected components in the input array itself.
         Otherwise, make a copy.
 
+    Raises
+    ------
+    ValueError
+        If the input array is of int type but contains negative values.
+    TypeError
+        If the input array is of an invalid type, such as float or string.
+
     Returns
     -------
     out : ndarray, same shape and type as input `ar`
@@ -24,7 +33,6 @@ def remove_small_connected_components(ar, min_size=64,
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage import morphology
     >>> from scipy import ndimage as nd
     >>> a = np.array([[0, 0, 0, 1, 0],
