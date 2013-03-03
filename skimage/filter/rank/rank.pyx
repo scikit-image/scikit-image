@@ -648,12 +648,12 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     References
     ----------
     .. [Hashimoto12] N. Hashimoto et al. Referenceless image quality evaluation
-    for whole slide imaging. J Pathol Inform 2012;3:9.
+                     for whole slide imaging. J Pathol Inform 2012;3:9.
 
     Returns
     -------
     out : uint8 array or uint16 array (same as input image)
-        The image noise .
+        The image noise.
 
     """
 

@@ -11,7 +11,6 @@ position of corners.
 
 """
 
-import numpy as np
 from matplotlib import pyplot as plt
 
 from skimage import data
