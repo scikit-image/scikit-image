@@ -55,6 +55,7 @@ import numpy as np
 from scipy import linalg
 from ..util import dtype
 
+
 def is_rgb(image):
     """Test whether the image is RGB or RGBA.
 
@@ -769,7 +770,7 @@ def rgb2hed(rgb):
     >>> ihc_hed = rgb2hed(ihc)
     """
     rgb = rgb.astype(float) + 1
-    hed = np.dot(np.reshape(-np.log(rgb), (-1,3)), hed_from_rgb)
+    hed = np.dot(np.reshape(-np.log(rgb), (-1, 3)), hed_from_rgb)
     return np.reshape(hed, rgb.shape)
 
 
@@ -806,6 +807,6 @@ def hed2rgb(hed):
     >>> ihc_hed = rgb2hed(ihc)
     >>> ihc_rgb = hed2rgb(ihc_hed)
     """
-    logrgb1 = np.dot(-np.reshape(hed, (-1,3)) , rgb_from_hed)
+    logrgb1 = np.dot(-np.reshape(hed, (-1, 3)), rgb_from_hed)
     rgb1 = np.exp(logrgb1)
     return np.reshape(rgb1 - 1, hed.shape)
