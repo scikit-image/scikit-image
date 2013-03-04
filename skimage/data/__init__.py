@@ -129,11 +129,12 @@ def clock():
     return load("clock_motion.png")
 
 
-def ihc():
-    """Immunohistochemical staining with Haematoxylin-Eosin counterstaining.
+def immunohistochemistry():
+    """Immunohistochemical (IHC) staining with hematoxylin counterstaining.
 
-    This picture is an example of immunohistochemical staining with 
-    Haematoxylin-Eosin counterstaining.
+    This picture shows colonic glands where the IHC expression of FHL2 protein
+    is revealed with DAB. Hematoxylin counterstaining is applied to enhance the
+    negative parts of the tissue.
 
     This image was acquired at the Center for Microscopy And Molecular Imaging
     (CMMI).
