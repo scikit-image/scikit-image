@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.ndimage as nd
 
+
 def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     """Remove connected components smaller than the specified size.
 
@@ -51,28 +52,34 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     """
-    errmsg = "Only numpy.ndarrays of bool or integer type are supported. "
-    if type(ar) != np.ndarray:
-        raise TypeError(errmsg + "Got a %s." % type(ar))
-    elif ar.dtype != bool and not np.issubdtype(ar.dtype, np.integer):
-        raise TypeError(errmsg + "Got a numpy.ndarray of type %s" % ar.dtype)
+    # Should use `issubdtype` below, but there's a bug in numpy 1.7
+    if not (ar.dtype == bool or np.issubdtype(ar.dtype, int)):
+        raise ValueError("Only bool or integer image types are supported. "
+                         "Got %s." % ar.dtype)
+
     if in_place:
         out = ar
     else:
         out = ar.copy()
-    if min_size == 0: # shortcut for efficiency
+
+    if min_size == 0:  # shortcut for efficiency
         return out
+
     if out.dtype == bool:
         selem = nd.generate_binary_structure(ar.ndim, connectivity)
         ccs = nd.label(ar, selem)[0]
     else:
         ccs = out
+
     try:
         component_sizes = np.bincount(ccs.ravel())
     except ValueError:
         raise ValueError("Negative value labels are not supported. Try "
-                         "relabeling the input with `scipy.ndimage.label`.")
+                         "relabeling the input with `scipy.ndimage.label` or "
+                         "`skimage.morphology.label`.")
+
     too_small = component_sizes < min_size
     too_small_mask = too_small[ccs]
     out[too_small_mask] = 0
+
     return out
