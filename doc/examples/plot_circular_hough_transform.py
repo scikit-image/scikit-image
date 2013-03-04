@@ -66,7 +66,7 @@ for idx in np.argsort(accums)[::-1][:5]:
     center_x, center_y = centers[idx]
     radius = radii[idx]
     cx, cy = circle_perimeter(center_y, center_x, radius)
-    image[cy, cx] = (220, 250, 150)
+    image[cy, cx] = (220, 20, 20)
 
 ax.imshow(image, cmap=plt.cm.gray)
 plt.show()
