@@ -203,7 +203,6 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.transform import hough, hough_peaks
     >>> from skimage.draw import line
     >>> img = np.zeros((15, 15), dtype=np.bool_)

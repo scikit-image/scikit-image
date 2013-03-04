@@ -57,7 +57,6 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.morphology import reconstruction
 
     First, we create a sinusoidal mask image w/ peaks at middle and ends.

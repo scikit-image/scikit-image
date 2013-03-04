@@ -38,7 +38,6 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     Examples
     --------
     >>> # Erosion shrinks bright regions
-    >>> import numpy as np
     >>> from skimage.morphology import square
     >>> bright_square = np.array([[0, 0, 0, 0, 0],
     ...                           [0, 1, 1, 1, 0],
@@ -91,7 +90,6 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     Examples
     --------
     >>> # Dilation enlarges bright regions
-    >>> import numpy as np
     >>> from skimage.morphology import square
     >>> bright_pixel = np.array([[0, 0, 0, 0, 0],
     ...                          [0, 0, 0, 0, 0],
@@ -141,7 +139,6 @@ def opening(image, selem, out=None):
     Examples
     --------
     >>> # Open up gap between two bright regions (but also shrink regions)
-    >>> import numpy as np
     >>> from skimage.morphology import square
     >>> bad_connection = np.array([[1, 0, 0, 0, 1],
     ...                            [1, 1, 0, 1, 1],
@@ -192,7 +189,6 @@ def closing(image, selem, out=None):
     Examples
     --------
     >>> # Close a gap between two bright lines
-    >>> import numpy as np
     >>> from skimage.morphology import square
     >>> broken_line = np.array([[0, 0, 0, 0, 0],
     ...                         [0, 0, 0, 0, 0],
@@ -242,7 +238,6 @@ def white_tophat(image, selem, out=None):
     Examples
     --------
     >>> # Subtract grey background from bright peak
-    >>> import numpy as np
     >>> from skimage.morphology import square
     >>> bright_on_grey = np.array([[2, 3, 3, 3, 2],
     ...                            [3, 4, 5, 4, 3],
@@ -291,7 +286,6 @@ def black_tophat(image, selem, out=None):
     Examples
     --------
     >>> # Change dark peak to bright peak and subtract background
-    >>> import numpy as np
     >>> from skimage.morphology import square
     >>> dark_on_grey = np.array([[7, 6, 6, 6, 7],
     ...                          [6, 5, 4, 5, 6],
