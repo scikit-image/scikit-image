@@ -25,7 +25,6 @@ def view_as_blocks(arr_in, block_shape):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.util.shape import view_as_blocks
     >>> A = np.arange(4*4).reshape(4,4)
     >>> A
@@ -140,7 +139,6 @@ def view_as_windows(arr_in, window_shape):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.util.shape import view_as_windows
     >>> A = np.arange(4*4).reshape(4,4)
     >>> A

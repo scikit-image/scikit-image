@@ -19,7 +19,6 @@ def join_segmentations(s1, s2):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.segmentation import join_segmentations
     >>> s1 = np.array([[0, 0, 1, 1],
     ...                [0, 2, 1, 1],
@@ -61,7 +60,6 @@ def relabel_from_one(label_field):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.segmentation import relabel_from_one
     >>> label_field = array([1, 1, 5, 5, 8, 99, 42])
     >>> relab, fw, inv = relabel_from_one(label_field)

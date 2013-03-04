@@ -23,7 +23,6 @@ def clear_border(image, buffer_size=0, bgval=0):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.segmentation import clear_border
     >>> image = np.array([[0, 0, 0, 0, 0, 0, 0, 1, 0],
     ...                   [0, 0, 0, 0, 1, 0, 0, 0, 0],

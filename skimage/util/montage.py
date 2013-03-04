@@ -47,7 +47,6 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.util.montage import montage2d
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
     >>> print arr_in  # doctest: +NORMALIZE_WHITESPACE
@@ -71,7 +70,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
     assert arr_in.ndim == 3
 
     n_images, height, width = arr_in.shape
-    
+
     arr_in = arr_in.copy()
 
     # -- rescale intensity if necessary

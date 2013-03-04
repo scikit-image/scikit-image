@@ -763,7 +763,6 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage import transform as tf
 
     >>> # estimate transformation parameters
