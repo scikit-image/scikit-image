@@ -20,10 +20,9 @@ cdef inline Py_ssize_t round(double r):
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-@cython.boundscheck(False)
 def _hough_circle(cnp.ndarray img, \
                   cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius, \
-                  normalize=True):
+                  char normalize=True):
     """Perform a circular Hough transform.
 
     Parameters
@@ -49,32 +48,39 @@ def _hough_circle(cnp.ndarray img, \
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] x, y
     x, y = np.nonzero(img)
 
+    cdef Py_ssize_t num_pixels = x.size
+
     # Offset the image
     cdef Py_ssize_t max_radius = radius.max()
     x = x + max_radius
     y = y + max_radius
 
-    cdef Py_ssize_t px, py
-    cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] tx, ty, circle_x, circle_y
-    cdef cnp.ndarray acc = np.zeros((radius.size,
-                                     img.shape[0] + 2 * max_radius,
-                                     img.shape[1] + 2 * max_radius))
+    cdef Py_ssize_t i, p, c, num_circle_pixels, tx, ty
+    cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] circle_x, circle_y
+
+    cdef cnp.ndarray[ndim=3, dtype=cnp.double_t] acc = \
+         np.zeros((radius.size,
+                   img.shape[0] + 2 * max_radius,
+                   img.shape[1] + 2 * max_radius), dtype=np.double)
 
     for i, rad in enumerate(radius):
         # Store in memory the circle of given radius
         # centered at (0,0)
         circle_x, circle_y = circle_perimeter(0, 0, rad)
 
+        num_circle_pixels = circle_x.size
+
         # For each non zero pixel
-        for (px, py) in zip(x, y):
+        for p in range(num_pixels):
             # Plug the circle at (px, py),
             # its coordinates are (tx, ty)
-            tx = circle_x + px
-            ty = circle_y + py
-            acc[i, tx, ty] += 1
+            for c in range(num_circle_pixels):
+                tx = circle_x[c] + x[p]
+                ty = circle_y[c] + y[p]
+                acc[i, tx, ty] += 1
 
         if normalize:
-            acc[i] = acc[i] / len(circle_x)
+            acc[i, :, :] /= num_circle_pixels
 
     return acc
 
