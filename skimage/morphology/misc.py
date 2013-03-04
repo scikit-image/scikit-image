@@ -22,8 +22,6 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     Raises
     ------
     ValueError
-        If the input array is of int type but contains negative values.
-    TypeError
         If the input array is of an invalid type, such as float or string.
 
     Returns
