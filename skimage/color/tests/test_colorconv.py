@@ -124,15 +124,15 @@ class TestColorconv(TestCase):
 
     # RGB<->HED roundtrip
     def test_hed_rgb_roundtrip(self):
-        test = np.array([[[97, 105, 152],
-                          [217, 187, 225],
-                          [117, 107, 168]],
-                         [[217, 187, 225],
-                          [176, 135, 83],
-                          [234, 144, 205]],
-                         [[97, 105, 152],
-                          [117, 107, 168], 
-                          [217, 187, 225]]], dtype=np.uint8)
+        img_rgb = np.array([[[97, 105, 152],
+                             [217, 187, 225],
+                             [117, 107, 168]],
+                            [[217, 187, 225],
+                             [176, 135, 83],
+                             [234, 144, 205]],
+                            [[97, 105, 152],
+                             [117, 107, 168], 
+                             [217, 187, 225]]], dtype=np.uint8)
         assert_array_almost_equal(hed2rgb(rgb2hed(img_rgb)), img_rgb)
 
     # RGB to RGB CIE
