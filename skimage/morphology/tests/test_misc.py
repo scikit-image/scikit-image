@@ -25,7 +25,7 @@ def test_two_connectivity():
 
 def test_in_place():
     observed = remove_small_objects(test_image, min_size=6, in_place=True)
-    assert_equal(observed is test_image, True, 
+    assert_equal(observed is test_image, True,
         "remove_small_objects in_place argument failed.")
 
 
@@ -44,7 +44,7 @@ def test_labeled_image():
 
 def test_float_input():
     float_test = np.random.rand(5, 5)
-    assert_raises(TypeError, remove_small_objects, float_test)
+    assert_raises(ValueError, remove_small_objects, float_test)
 
 
 def test_negative_input():
