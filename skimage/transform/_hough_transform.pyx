@@ -56,6 +56,7 @@ def _hough_circle(cnp.ndarray img,
     y = y + max_radius
 
     cdef Py_ssize_t i, p, c, num_circle_pixels, tx, ty
+    cdef double incr
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] circle_x, circle_y
 
     cdef cnp.ndarray[ndim=3, dtype=cnp.double_t] acc = \
@@ -70,6 +71,11 @@ def _hough_circle(cnp.ndarray img,
 
         num_circle_pixels = circle_x.size
 
+        if normalize:
+            incr = 1.0 / num_circle_pixels
+        else:
+            incr = 1
+
         # For each non zero pixel
         for p in range(num_pixels):
             # Plug the circle at (px, py),
@@ -77,10 +83,7 @@ def _hough_circle(cnp.ndarray img,
             for c in range(num_circle_pixels):
                 tx = circle_x[c] + x[p]
                 ty = circle_y[c] + y[p]
-                acc[i, tx, ty] += 1
-
-        if normalize:
-            acc[i, :, :] /= num_circle_pixels
+                acc[i, tx, ty] += incr
 
     return acc
 
