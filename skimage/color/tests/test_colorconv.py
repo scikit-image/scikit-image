@@ -21,6 +21,7 @@ from skimage.io import imread
 from skimage.color import (
     rgb2hsv, hsv2rgb,
     rgb2xyz, xyz2rgb,
+    rgb2hed, hed2rgb,
     rgb2rgbcie, rgbcie2rgb,
     convert_colorspace,
     rgb2grey, gray2rgb,
