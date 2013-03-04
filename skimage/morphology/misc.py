@@ -51,7 +51,11 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     """
-    structuring_element = nd.generate_binary_structure(ar.ndim, connectivity)
+    errmsg = "Only numpy.ndarrays of bool or integer type are supported. "
+    if type(ar) != np.ndarray:
+        raise TypeError(errmsg + "Got a %s." % type(ar))
+    elif ar.dtype != bool and not np.issubdtype(ar.dtype, np.integer):
+        raise TypeError(errmsg + "Got a numpy.ndarray of type %s" % ar.dtype)
     if in_place:
         out = ar
     else:
@@ -59,10 +63,15 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     if min_size == 0: # shortcut for efficiency
         return out
     if out.dtype == bool:
-        ccs = nd.label(ar, structuring_element)[0]
+        selem = nd.generate_binary_structure(ar.ndim, connectivity)
+        ccs = nd.label(ar, selem)[0]
     else:
         ccs = out
-    component_sizes = np.bincount(ccs.ravel())
+    try:
+        component_sizes = np.bincount(ccs.ravel())
+    except ValueError:
+        raise ValueError("Negative value labels are not supported. Try "
+                         "relabeling the input with `scipy.ndimage.label`.")
     too_small = component_sizes < min_size
     too_small_mask = too_small[ccs]
     out[too_small_mask] = 0
