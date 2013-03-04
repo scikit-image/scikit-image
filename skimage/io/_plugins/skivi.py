@@ -3,9 +3,9 @@ Skivi is written/maintained/developed by:
 
 S. Chris Colbert - sccolbert@gmail.com
 
-Skivi is free software and is part of the scikits-image project.
+Skivi is free software and is part of the scikit-image project.
 
-Skivi is governed by the licenses of the scikits-image project.
+Skivi is governed by the licenses of the scikit-image project.
 
 Please report any bugs to the author.
 
@@ -14,13 +14,9 @@ The skivi module is not meant to be used directly.
 Use skimage.io.imshow(img, fancy=True)'''
 
 from textwrap import dedent
-import numpy as np
-import sys
 
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import (QApplication, QMainWindow, QImage, QPixmap,
-                                 QLabel, QWidget, QVBoxLayout, QSlider,
-                                 QPainter, QColor, QFrame, QLayoutItem)
+from PyQt4.QtGui import QMainWindow, QImage, QPixmap, QLabel, QWidget, QFrame
 
 from .q_color_mixer import MixerPanel
 from .q_histogram import QuadHistogram
@@ -69,7 +65,7 @@ class ImageLabel(QLabel):
 class RGBHSVDisplay(QFrame):
     def __init__(self):
         QFrame.__init__(self)
-        self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Sunken)
+        self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Sunken)
 
         self.posx_label = QLabel('X-pos:')
         self.posx_value = QLabel()
@@ -118,7 +114,6 @@ class RGBHSVDisplay(QFrame):
         self.v_value.setText(str(v)[:5])
 
 
-
 class SkiviImageWindow(QMainWindow):
     def __init__(self, arr, mgr):
         QMainWindow.__init__(self)
@@ -132,7 +127,8 @@ class SkiviImageWindow(QMainWindow):
 
         self.label = ImageLabel(self, arr)
         self.label_container = QFrame()
-        self.label_container.setFrameShape(QtGui.QFrame.StyledPanel|QtGui.QFrame.Sunken)
+        self.label_container.setFrameShape(
+            QtGui.QFrame.StyledPanel | QtGui.QFrame.Sunken)
         self.label_container.setLineWidth(1)
 
         self.label_container.layout = QtGui.QGridLayout(self.label_container)
@@ -171,7 +167,6 @@ class SkiviImageWindow(QMainWindow):
         self.layout.addWidget(self.save_stack, 1, 1)
         self.layout.addWidget(self.save_file, 1, 2)
 
-
     def closeEvent(self, event):
         # Allow window to be destroyed by removing any
         # references to it
@@ -206,13 +201,12 @@ class SkiviImageWindow(QMainWindow):
         if x >= maxw or y >= maxh or x < 0 or y < 0:
             r = g = b = h = s = v = ''
         else:
-            r = self.arr[y,x,0]
-            g = self.arr[y,x,1]
-            b = self.arr[y,x,2]
+            r = self.arr[y, x, 0]
+            g = self.arr[y, x, 1]
+            b = self.arr[y, x, 2]
             h, s, v = self.mixer_panel.mixer.rgb_2_hsv_pixel(r, g, b)
 
         self.rgb_hsv_disp.update_vals((x, y, r, g, b, h, s, v))
-
 
     def save_to_stack(self):
         from skimage import io
@@ -238,5 +232,3 @@ class SkiviImageWindow(QMainWindow):
         if len(filename) == 0:
             return
         io.imsave(filename, self.arr)
-
-

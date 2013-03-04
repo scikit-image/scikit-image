@@ -1,5 +1,7 @@
-# -*- python -*-
-
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 """Cython implementation of Dijkstra's minimum cost path algorithm,
 for use with data on a n-dimensional lattice.
 
@@ -32,19 +34,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
-import cython
-cimport numpy as np
 import numpy as np
-cimport heap
 import heap
 
-ctypedef np.int8_t OFFSET_T
+cimport numpy as cnp
+cimport heap
+
+ctypedef cnp.int8_t OFFSET_T
 OFFSET_D = np.int8
-ctypedef np.int16_t OFFSETS_INDEX_T
+ctypedef cnp.int16_t OFFSETS_INDEX_T
 OFFSETS_INDEX_D = np.int16
-ctypedef np.int8_t EDGE_T
+ctypedef cnp.int8_t EDGE_T
 EDGE_D = np.int8
-ctypedef np.intp_t INDEX_T
+ctypedef cnp.intp_t INDEX_T
 INDEX_D = np.intp
 FLOAT_D = np.float64
 
@@ -102,7 +104,7 @@ def _offset_edge_map(shape, offsets):
 
     """
     indices = np.indices(shape) # indices.shape = (n,)+shape
-    
+
     #get the distance from each index to the upper or lower edge in each dim
     pos_edges = (shape - indices.T).T
     neg_edges = -1 - indices
@@ -112,7 +114,7 @@ def _offset_edge_map(shape, offsets):
     mins = offsets.min(axis=0)
     for pos, neg, mx, mn in zip(pos_edges, neg_edges, maxes, mins):
         pos[pos > mx] = 0
-        neg[neg < mn] = 0    
+        neg[neg < mn] = 0
     return pos_edges.astype(EDGE_D), neg_edges.astype(EDGE_D)
 
 def make_offsets(d, fully_connected):
@@ -130,8 +132,8 @@ def make_offsets(d, fully_connected):
     -------
     offsets : list of tuples of length `d`
 
-    Example
-    -------
+    Examples
+    --------
 
     The singly-connected 2-d neighborhood is four offsets:
 
@@ -216,7 +218,7 @@ cdef class MCP:
     `costs` array at each point on the path. The class MCP_Geometric, on the
     other hand, accounts for the fact that diagonal vs. axial moves are of
     different lengths, and weights the path cost accordingly.
-    
+
     Array elements with infinite or negative costs will simply be ignored, as
     will paths whose cumulative cost overflows to infinite.
 
@@ -295,7 +297,7 @@ cdef class MCP:
         pos, neg = _offset_edge_map(costs.shape, self.offsets)
         self.flat_pos_edge_map = pos.reshape((self.dim, size), order='F')
         self.flat_neg_edge_map = neg.reshape((self.dim, size), order='F')
-            
+
 
         # The offset lengths are the distances traveled along each offset
         self.offset_lengths = np.sqrt(
@@ -317,7 +319,6 @@ cdef class MCP:
                               FLOAT_T new_cost, FLOAT_T offset_length):
         return new_cost
 
-    @cython.boundscheck(False)
     def find_costs(self, starts, ends=None, find_all_ends=True):
         """
         Find the minimum-cost path from the given starting points.
@@ -366,7 +367,7 @@ cdef class MCP:
         cdef BOOL_T use_ends = 0
         cdef INDEX_T num_ends
         cdef BOOL_T all_ends = find_all_ends
-        cdef np.ndarray[INDEX_T, ndim=1] flat_ends
+        cdef cnp.ndarray[INDEX_T, ndim=1] flat_ends
         starts = _normalize_indices(starts, self.costs_shape)
         if starts is None:
             raise ValueError('start points must all be within the costs array')
@@ -385,18 +386,18 @@ cdef class MCP:
 
         # lookup and array-ify object attributes for fast use
         cdef heap.FastUpdateBinaryHeap costs_heap = self.costs_heap
-        cdef np.ndarray[FLOAT_T, ndim=1] flat_costs = self.flat_costs
-        cdef np.ndarray[FLOAT_T, ndim=1] flat_cumulative_costs = \
+        cdef cnp.ndarray[FLOAT_T, ndim=1] flat_costs = self.flat_costs
+        cdef cnp.ndarray[FLOAT_T, ndim=1] flat_cumulative_costs = \
              self.flat_cumulative_costs
-        cdef np.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
+        cdef cnp.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
              self.traceback_offsets
-        cdef np.ndarray[EDGE_T, ndim=2] flat_pos_edge_map = \
+        cdef cnp.ndarray[EDGE_T, ndim=2] flat_pos_edge_map = \
              self.flat_pos_edge_map
-        cdef np.ndarray[EDGE_T, ndim=2] flat_neg_edge_map = \
+        cdef cnp.ndarray[EDGE_T, ndim=2] flat_neg_edge_map = \
              self.flat_neg_edge_map
-        cdef np.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
-        cdef np.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
-        cdef np.ndarray[FLOAT_T, ndim=1] offset_lengths = self.offset_lengths
+        cdef cnp.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
+        cdef cnp.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
+        cdef cnp.ndarray[FLOAT_T, ndim=1] offset_lengths = self.offset_lengths
 
         cdef DIM_T dim = self.dim
         cdef int num_offsets = len(flat_offsets)
@@ -449,7 +450,7 @@ cdef class MCP:
             # edge along any axis
             is_at_edge = 0
             for d in range(dim):
-                if (flat_pos_edge_map[d, index] != 0 or 
+                if (flat_pos_edge_map[d, index] != 0 or
                     flat_neg_edge_map[d, index] != 0):
                     is_at_edge = 1
                     break
@@ -490,7 +491,7 @@ cdef class MCP:
                 new_cost = flat_costs[new_index]
                 if new_cost < 0 or new_cost == inf:
                     continue
-                
+
                 # Now we ask the heap to append or update the cost to
                 # this new point, but only if that point isn't already
                 # in the heap, or it is but the new cost is lower.
@@ -514,7 +515,6 @@ cdef class MCP:
         self.dirty = 1
         return cumulative_costs, traceback
 
-    @cython.boundscheck(False)
     def traceback(self, end):
         """traceback(end)
 
@@ -555,12 +555,12 @@ cdef class MCP:
             raise ValueError('no minimum-cost path was found '
                              'to the specified end point')
 
-        cdef np.ndarray[INDEX_T, ndim=1] position = \
+        cdef cnp.ndarray[INDEX_T, ndim=1] position = \
              np.array(ends[0], dtype=INDEX_D)
-        cdef np.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
+        cdef cnp.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
              self.traceback_offsets
-        cdef np.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
-        cdef np.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
+        cdef cnp.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
+        cdef cnp.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
 
         cdef OFFSETS_INDEX_T offset
         cdef DIM_T d

@@ -2,30 +2,89 @@ How to make a new release of ``skimage``
 ========================================
 
 - Update release notes.
-- Update the version number in setup.py and bento.info and commit
+
+  - To show a list contributors, run ``doc/release/contributors.sh <commit>``,
+    where ``<commit>`` is the first commit since the previous release.
+
+- Update the version number in ``setup.py`` and ``bento.info`` and commit
+
 - Update the docs:
+
   - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
-  - Build a clean version of the docs.  Run "make" in the root dir, then
-    ``rm build -rf; make html`` in the docs.
-  - Push upstream using "make gh-pages"
+  - Build a clean version of the docs.  Run ``make`` in the root dir, then
+    ``rm -rf build; make html`` in the docs.
+  - Run ``make html`` again to copy the newly generated ``random.js`` into
+    place.  Double check ``random.js``, otherwise the skimage.org front
+    page gets broken!
+  - Build using ``make gh-pages``.
+  - Push upstream: ``git push`` in ``doc/gh-pages``.
+
 - Add the version number as a tag in git::
 
-  git tag v0.6
+   git tag v0.X.0
 
 - Push the new meta-data to github::
 
-  git push --tags origin master
+   git push --tags origin master
 
-- Publish on PyPi:
+- Publish on PyPi::
 
-  python setup.py register
-  python setup.py sdist upload
+   python setup.py register
+   python setup.py sdist upload
 
-- Increase the version number in the setup.py file to ``0.Xdev``.
+- Increase the version number
+
+  - In ``setup.py``, set to ``0.Xdev``.
+  - In ``bento.info``, set to ``0.X.dev0``.
 
 - Update the web frontpage:
-  The webpage is kept in a separate repo: scikits-image-web
-  - ``_templates/sidebar_versions.html``
-  - ``index.rst``
+  The webpage is kept in a separate repo: scikit-image-web
+
+  - Sync your branch with the remote repo: ``git pull``.
+    If you try to ``make gh-pages`` when your branch is out of sync, it
+    creates headaches.
+  - Update stable and development version numbers in
+    ``_templates/sidebar_versions.html``.
+  - Add release date to ``index.rst`` under "Announcements".
+  - Build using ``make gh-pages``.
+  - Push upstream: ``git push`` in ``gh-pages``.
 
 - Post release notes on mailing lists, blog, G+, etc.
+
+Debian
+------
+
+- Tag the release as per instructions above.
+- git checkout debian
+- git merge v0.x.x
+- uscan <- not sure if this step is necessary
+- Update changelog (emacs has a good mode, requires package dpkg-dev-el)
+  - C-C C-v add new version, C-c C-c timestamp / save
+- git commit -m 'Changelog entry for 0.x.x'
+- git-buildpackage -uc -us -rfakeroot
+- Sign the changes: debsign skimage_0.x.x-x_amd64.changes
+- cd ../build-area && dput mentors skimage_0.x.x-x_amd64.changes
+- The package should now be available at:
+
+  http://mentors.debian.net/package/skimage
+
+For the last lines above to work, you need ``~/.gbp.conf``::
+
+  [DEFAULT]
+  upstream-tag = %(version)s
+
+  [git-buildpackage]
+  sign-tags = True
+  export-dir = ../build-area/
+  tarball-dir = ../tarballs/
+
+As well as ``~/dput.cf``::
+
+  [mentors]
+  fqdn = mentors.debian.net
+  incoming = /upload
+  method = http
+  allow_unsigned_uploads = 0
+  progress_indicator = 2
+  # Allow uploads for UNRELEASED packages
+  allowed_distributions = .*

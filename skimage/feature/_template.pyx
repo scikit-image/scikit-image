@@ -1,3 +1,8 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
+
 """
 Template matching using normalized cross-correlation.
 
@@ -30,67 +35,31 @@ the image window *before* squaring.)
 .. [2] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light and
        Magic.
 """
-import cython
-cimport numpy as np
+
 import numpy as np
 from scipy.signal import fftconvolve
+
+cimport numpy as cnp
+from libc.math cimport sqrt, fabs
+from skimage._shared.transform cimport integrate
+
+
 from skimage.transform import integral
 
 
-cdef extern from "math.h":
-    float sqrt(float x)
-    float fabs(float x)
+def match_template(cnp.ndarray[float, ndim=2, mode="c"] image,
+                   cnp.ndarray[float, ndim=2, mode="c"] template):
 
-
-@cython.boundscheck(False)
-cdef float integrate(np.ndarray[float, ndim=2,  mode="c"] sat,
-        int r0, int c0, int r1, int c1):
-    """
-    Using a summed area table / integral image, calculate the sum
-    over a given window.
-
-    This function is the same as the `integrate` function in
-    `skimage.transform.integrate`, but this Cython version significantly
-    speeds up the code.
-
-    Parameters
-    ----------
-    sat : ndarray of float
-        Summed area table / integral image.
-    r0, c0 : int
-        Top-left corner of block to be summed.
-    r1, c1 : int
-        Bottom-right corner of block to be summed.
-
-    Returns
-    -------
-    S : int
-        Sum over the given window.
-    """
-    cdef float S = 0
-
-    S += sat[r1, c1]
-
-    if (r0 - 1 >= 0) and (c0 - 1 >= 0):
-        S += sat[r0 - 1, c0 - 1]
-
-    if (r0 - 1 >= 0):
-        S -= sat[r0 - 1, c1]
-
-    if (c0 - 1 >= 0):
-        S -= sat[r1, c0 - 1]
-    return S
-
-
-@cython.boundscheck(False)
-def match_template(np.ndarray[float, ndim=2, mode="c"] image,
-                   np.ndarray[float, ndim=2, mode="c"] template):
-    cdef np.ndarray[float, ndim=2, mode="c"] corr
-    cdef np.ndarray[float, ndim=2, mode="c"] image_sat
-    cdef np.ndarray[float, ndim=2, mode="c"] image_sqr_sat
+    cdef cnp.ndarray[float, ndim=2, mode="c"] corr
+    cdef cnp.ndarray[float, ndim=2, mode="c"] image_sat
+    cdef cnp.ndarray[float, ndim=2, mode="c"] image_sqr_sat
     cdef float template_mean = np.mean(template)
     cdef float template_ssd
     cdef float inv_area
+    cdef Py_ssize_t r, c, r_end, c_end
+    cdef Py_ssize_t template_rows = template.shape[0]
+    cdef Py_ssize_t template_cols = template.shape[1]
+    cdef float den, window_sqr_sum, window_mean_sqr, window_sum
 
     image_sat = integral.integral_image(image)
     image_sqr_sat = integral.integral_image(image**2)
@@ -106,24 +75,23 @@ def match_template(np.ndarray[float, ndim=2, mode="c"] image,
                                             mode="valid"),
                                 dtype=np.float32)
 
-    cdef int i, j
-    cdef float den, window_sqr_sum, window_mean_sqr, window_sum,
-    # move window through convolution results, normalizing in the process
-    for i in range(corr.shape[0]):
-        for j in range(corr.shape[1]):
-            # subtract 1 because `i_end` and `j_end` are used for indexing into
-            # summed-area table, instead of slicing windows of the image.
-            i_end = i + template.shape[0] - 1
-            j_end = j + template.shape[1] - 1
 
-            window_sum = integrate(image_sat, i, j, i_end, j_end)
+    # move window through convolution results, normalizing in the process
+    for r in range(corr.shape[0]):
+        for c in range(corr.shape[1]):
+            # subtract 1 because `i_end` and `c_end` are used for indexing into
+            # summed-area table, instead of slicing windows of the image.
+            r_end = r + template_rows - 1
+            c_end = c + template_cols - 1
+
+            window_sum = integrate(image_sat, r, c, r_end, c_end)
             window_mean_sqr = window_sum * window_sum * inv_area
-            window_sqr_sum = integrate(image_sqr_sat, i, j, i_end, j_end)
+            window_sqr_sum = integrate(image_sqr_sat, r, c, r_end, c_end)
             if window_sqr_sum <= window_mean_sqr:
-                corr[i, j] = 0
+                corr[r, c] = 0
                 continue
 
             den = sqrt((window_sqr_sum - window_mean_sqr) * template_ssd)
-            corr[i, j] /= den
-    return corr
+            corr[r, c] /= den
 
+    return corr

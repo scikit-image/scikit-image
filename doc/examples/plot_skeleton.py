@@ -16,7 +16,7 @@ In the case of boolean, 'True' indicates foreground, and for integer arrays,
 the foreground is 1's.
 """
 from skimage.morphology import skeletonize
-from skimage.draw import draw
+from skimage import draw
 import numpy as np
 import matplotlib.pyplot as plt
 

@@ -26,7 +26,8 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.pngmath', 'numpydoc',
-              'sphinx.ext.autosummary', 'plot_directive', 'plot2rst']
+              'sphinx.ext.autosummary', 'plot_directive', 'plot2rst',
+              'sphinx.ext.intersphinx']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -42,7 +43,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'skimage'
-copyright = u'2011, the scikits-image team'
+copyright = u'2011, the scikit-image team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -102,8 +103,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'agogo'
-html_style = 'agogo.css'
+html_theme = 'scikit-image'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -119,10 +119,6 @@ html_title = 'skimage v%s docs' % version
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
-
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-html_logo = "scikits_image_logo_small.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -146,9 +142,7 @@ html_static_path = ['_static']
 html_sidebars = {
    '**': ['navigation.html',
           'localtoc.html',
-          'relations.html',
-          'versions.html',
-          'searchbox.html'],
+          'versions.html'],
 }
 
 # Additional templates that should be rendered to pages, maps page names to
@@ -182,7 +176,7 @@ html_sidebars = {
 #html_file_suffix = ''
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'scikitsimagedoc'
+htmlhelp_basename = 'scikitimagedoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -196,7 +190,7 @@ htmlhelp_basename = 'scikitsimagedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikitsimage.tex', u'The Image Scikit Documentation',
+  ('contents', 'scikitimage.tex', u'The Image Scikit Documentation',
    u'SciPy Developers', 'manual'),
 ]
 
@@ -220,8 +214,7 @@ latex_documents = [
 # -----------------------------------------------------------------------------
 # Numpy extensions
 # -----------------------------------------------------------------------------
-# Make numpydoc to generate plots for example sections
-#numpydoc_use_plots = True
+numpydoc_show_class_members = False
 
 # -----------------------------------------------------------------------------
 # Plots
@@ -256,3 +249,13 @@ plot2rst_index_name = 'README'
 plot2rst_rcparams = {'image.cmap' : 'gray',
                      'image.interpolation' : 'none'}
 
+# -----------------------------------------------------------------------------
+# intersphinx
+# -----------------------------------------------------------------------------
+_python_doc_base = 'http://docs.python.org/2.7'
+intersphinx_mapping = {
+    _python_doc_base: None,
+    'http://docs.scipy.org/doc/numpy': None,
+    'http://docs.scipy.org/doc/scipy/reference': None,
+    'http://scikit-learn.org/stable': None
+}

@@ -11,6 +11,7 @@ import os as _os
 from ..io import imread
 from skimage import data_dir
 
+
 def load(f):
     """Load an image file located in the data directory.
 
@@ -26,12 +27,15 @@ def load(f):
     """
     return imread(_os.path.join(data_dir, f))
 
+
 def camera():
-    """Gray-level "camera" image, often used for segmentation
-    and denoising examples.
+    """Gray-level "camera" image.
+
+    Often used for segmentation and denoising examples.
 
     """
     return load("camera.png")
+
 
 def lena():
     """Colour "Lena" image.
@@ -44,8 +48,9 @@ def lena():
     """
     return load("lena.png")
 
+
 def text():
-	""" Gray-level "text" image used for corner detection.
+    """Gray-level "text" image used for corner detection.
 
     Notes
     -----
@@ -56,7 +61,8 @@ def text():
 
     """
 
-	return load("text.png")
+    return load("text.png")
+
 
 def checkerboard():
     """Checkerboard image.
@@ -67,6 +73,7 @@ def checkerboard():
 
     """
     return load("chessboard_GRAY.png")
+
 
 def coins():
     """Greek coins from Pompeii.
@@ -88,6 +95,7 @@ def coins():
     """
     return load("coins.png")
 
+
 def moon():
     """Surface of the moon.
 
@@ -97,6 +105,7 @@ def moon():
     """
     return load("moon.png")
 
+
 def page():
     """Scanned page.
 
@@ -105,3 +114,16 @@ def page():
 
     """
     return load("page.png")
+
+
+def clock():
+    """Motion blurred clock.
+
+    This photograph of a wall clock was taken while moving the camera in an
+    aproximately horizontal direction.  It may be used to illustrate
+    inverse filters and deconvolution.
+
+    Released into the public domain by the photographer (Stefan van der Walt).
+
+    """
+    return load("clock_motion.png")

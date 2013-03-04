@@ -12,12 +12,14 @@ try:
 except:
     CPU_COUNT = 2
 
+
 class GuiLockError(Exception):
     def __init__(self, msg):
         self.msg = msg
 
     def __str__(self):
         return self.msg
+
 
 class WindowManager(object):
     ''' A class to keep track of spawned windows,
@@ -62,7 +64,8 @@ class WindowManager(object):
             self._gui_lock = False
             self._guikit = ''
         else:
-            raise RuntimeError('Only the toolkit that owns the lock may release it')
+            raise RuntimeError('Only the toolkit that owns the lock may '
+                               'release it')
 
     def add_window(self, win):
         self._check_locked()
@@ -138,13 +141,13 @@ def prepare_for_display(npy_img):
     if npy_img.ndim == 2 or \
        (npy_img.ndim == 3 and npy_img.shape[2] == 1):
         npy_plane = npy_img.reshape((height, width))
-        out[:,:,0] = npy_plane
-        out[:,:,1] = npy_plane
-        out[:,:,2] = npy_plane
+        out[:, :, 0] = npy_plane
+        out[:, :, 1] = npy_plane
+        out[:, :, 2] = npy_plane
 
     elif npy_img.ndim == 3:
         if npy_img.shape[2] == 3 or npy_img.shape[2] == 4:
-            out[:,:,:3] = npy_img[:,:,:3]
+            out[:, :, :3] = npy_img[:, :, :3]
         else:
             raise ValueError('Image must have 1, 3, or 4 channels')
 
@@ -184,10 +187,10 @@ class ImgThread(threading.Thread):
     def run(self):
         self.func(*self.args)
 
+
 class ThreadDispatch(object):
     def __init__(self, img, stateimg, func, *args):
 
-        width = img.shape[1]
         height = img.shape[0]
         self.cores = CPU_COUNT
         self.threads = []
@@ -197,21 +200,21 @@ class ThreadDispatch(object):
             self.chunks.append((img, stateimg))
 
         elif self.cores >= 4:
-            self.chunks.append((img[:(height/4), :, :],
-                                stateimg[:(height/4), :, :]))
-            self.chunks.append((img[(height/4):(height/2), :, :],
-                                stateimg[(height/4):(height/2), :, :]))
-            self.chunks.append((img[(height/2):(3*height/4), :, :],
-                                stateimg[(height/2):(3*height/4), :, :]))
-            self.chunks.append((img[(3*height/4):, :, :],
-                                stateimg[(3*height/4):, :, :]))
+            self.chunks.append((img[:(height / 4), :, :],
+                                stateimg[:(height / 4), :, :]))
+            self.chunks.append((img[(height / 4):(height / 2), :, :],
+                                stateimg[(height / 4):(height / 2), :, :]))
+            self.chunks.append((img[(height / 2):(3 * height / 4), :, :],
+                                stateimg[(height / 2):(3 * height / 4), :, :]))
+            self.chunks.append((img[(3 * height / 4):, :, :],
+                                stateimg[(3 * height / 4):, :, :]))
 
         # if they dont have 1, or 4 or more, 2 is good.
         else:
-            self.chunks.append((img[:(height/2), :, :],
-                                stateimg[:(height/2), :, :]))
-            self.chunks.append((img[(height/2):, :, :],
-                               stateimg[(height/2):, :, :]))
+            self.chunks.append((img[:(height / 2), :, :],
+                                stateimg[:(height / 2), :, :]))
+            self.chunks.append((img[(height / 2):, :, :],
+                               stateimg[(height / 2):, :, :]))
 
         for i in range(len(self.chunks)):
             self.threads.append(ImgThread(func, self.chunks[i][0],
@@ -222,7 +225,6 @@ class ThreadDispatch(object):
             t.start()
         for t in self.threads:
             t.join()
-
 
 
 class ColorMixer(object):
@@ -300,8 +302,6 @@ class ColorMixer(object):
                               _colormixer.add, channel, ammount)
         pool.run()
 
-
-
     def multiply(self, channel, ammount):
         '''Mutliply the indicated channel by the specified value.
 
@@ -320,7 +320,6 @@ class ColorMixer(object):
                               _colormixer.multiply, channel, ammount)
         pool.run()
 
-
     def brightness(self, factor, offset):
         '''Adjust the brightness off an image with an offset and factor.
 
@@ -338,12 +337,10 @@ class ColorMixer(object):
                               _colormixer.brightness, factor, offset)
         pool.run()
 
-
     def sigmoid_gamma(self, alpha, beta):
         pool = ThreadDispatch(self.img, self.stateimg,
                               _colormixer.sigmoid_gamma, alpha, beta)
         pool.run()
-
 
     def gamma(self, gamma):
         pool = ThreadDispatch(self.img, self.stateimg,
@@ -435,4 +432,3 @@ class ColorMixer(object):
         '''
         R, G, B = _colormixer.py_hsv_2_rgb(H, S, V)
         return (R, G, B)
-

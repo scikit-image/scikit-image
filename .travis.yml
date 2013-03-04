@@ -1,0 +1,29 @@
+# vim ft=yaml
+# travis-ci.org definition for skimage build
+#
+# We pretend to be erlang because we need can't use the python support in
+# travis-ci; it uses virtualenvs, they do not have numpy, scipy, matplotlib,
+# and it is impractical to build them
+
+language: erlang
+env:
+    - PYTHON=python PYSUF='' PYVER=2.7
+    - PYTHON=python3 PYSUF='3' PYVER=3.2
+install:
+    - sudo apt-get update  # needed for python3-numpy
+    - sudo apt-get install $PYTHON-dev
+    - sudo apt-get install $PYTHON-numpy
+    - sudo apt-get install $PYTHON-scipy
+    - sudo apt-get install $PYTHON-setuptools
+    - sudo apt-get install $PYTHON-nose
+    - sudo easy_install$PYSUF pip
+    - sudo pip-$PYVER install cython
+    - sudo apt-get install libfreeimage3
+    - $PYTHON setup.py build
+    - sudo $PYTHON setup.py install
+script:
+    # Change into an innocuous directory and find tests from installation
+    - mkdir for_test
+    - cd for_test
+    - nosetests-$PYVER --exe -v --cover-package=skimage skimage
+

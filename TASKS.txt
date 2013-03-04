@@ -1,5 +1,6 @@
  ..  role:: strike
 
+
 .. _howto_contribute:
 
 How to contribute to ``skimage``
@@ -14,112 +15,15 @@ How to contribute to ``skimage``
    cell_profiler
 
 
-Developing Open Source is great fun!  Join us on the `skimage mailing
-list <http://groups.google.com/group/scikits-image>`_ and tell us which of the
+Developing Open Source is great fun!  Join us on the `scikit-image mailing
+list <http://groups.google.com/group/scikit-image>`_ and tell us which of the
 following challenges you'd like to solve.
 
 * Mentoring is available for those new to scientific programming in Python.
-* The technical detail of the `development process`_ is given below.
-* :doc:`How to use GitHub <gitwash/index>` when developing skimage
+* If you're looking for something to implement, you can find a list of `requested features on GitHub <https://github.com/scikit-image/scikit-image/wiki/Requested-features>`__. In addition, you can browse the `open issues on GitHub <https://github.com/scikit-image/scikit-image/issues?state=open>`__.
+* The technical detail of the `development process`_ is summed up below.
+  Refer to the :doc:`gitwash <gitwash/index>` for a step-by-step tutorial.
 
 .. contents::
    :local:
 
-Tasks
------
-
-.. :doc:`gsoc2011`
-.. :doc:`coverage_table`
-
-Implement Algorithms
-````````````````````
-- Graph cut segmentation
-- `Image colorization <http://www.cs.huji.ac.il/~yweiss/Colorization/>`__
-- Fast 2D convex hull (consider using CellProfiler version)
-  `Algorithm overview <http://www.tcs.fudan.edu.cn/rudolf/Courses/Algorithms/Alg_cs_07w/Webprojects/Zhaobo_hull/index.html#section26>`__.
-  `One free implementation
-  <http://cm.bell-labs.com/cm/cs/who/clarkson/2dch.c>`_.
-  [Compare against current implementation]
-- Convex hulls of objects in a labels matrix (simply adapt current convex hull 
-  image code--this one's low hanging fruit).  Generalise this solution to also
-  skeletonize objects in a labels matrix.
-
-Drawing (directly on an ndarray)
-````````````````````````````````
-- Wu's algorithm for circles
-- Text rendering
-
-Infrastructure
---------------
-- :strike:`Implement a new backend system so that we may start including
-  PyOpenCL-based algorithms`
-
-Adapt existing code for use
-```````````````````````````
-These snippets and packages have already been written.  Some need to be
-modified to work as part of the scikit, others may be lacking in documentation
-or tests.
-
-   * :strike:`Connected components`
-   * Nadav's bilateral filtering (first compare against CellProfiler's
-     code, based on http://groups.csail.mit.edu/graphics/bilagrid/bilagrid_web.pdf)
-     Also see https://github.com/stefanv/scikits-image/tree/bilateral
-   * 2D image warping via thin-plate splines [ask Zach Pincus]
-
-Merge code provided by `CellProfiler <http://www.cellprofiler.org>`_ team
-`````````````````````````````````````````````````````````````````````````
-* Roberts filter - convolution with diagonal and anti-diagonal
-  kernels to detect edges
-* Minimum enclosing circles of objects in a labels matrix
-* spur removal, thinning, thickening, and other morphological operations on
-  binary images, framework for creating arbitrary morphological operations
-  using a 3x3 grid.
-
-Their SVN repository is read-accessible at
-
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler
-
-The files for the above algorithms are
-
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/cpmorphology.py
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/filter.py
-
-There are test suites for the files at
-
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/tests/test_cpmorphology.py
-- https://svn.broadinstitute.org/CellProfiler/trunk/CellProfiler/cellprofiler/cpmath/tests/test_filter.py
-
-Quoting a message from Lee Kamentsky to Stefan van der Walt sent on
-5 August 2009::
-
-  We're part of the Broad Institute which is non-profit. We would be happy
-  to include our algorithm code in SciPy under the BSD license since that is
-  more appropriate for a library that might be integrated into a
-  commercial product whereas CellProfiler needs the more stringent
-  protection of GPL as an application.
-
-In 2010, Vebjorn Ljosa officially released parts of the code under a
-BSD license (:doc:`cell_profiler` | `original message
-<http://groups.google.com/group/scikits-image/browse_thread/thread/c4f8fc584bfd839d>`_).
-
-Thanks to Lee Kamentsky, Thouis Jones and Anne Carpenter and their colleagues
-who contributed.
-
-Rework linear filters
-`````````````````````
-* Fast, SSE2 convolution (high priority) (see prototype in pull requests)
-* Should take kernel or function for parameter (currently only takes function)
-* Kernel shape should be specifiable (currently defaults to image shape)
-
-io
-``
-* Update ``qt_plugin.py`` and other plugins to view collections.
-* Rewrite GTK backend using GObject Introspection for Py3K compatibility.
-* Add DICOM plugin for `GDCM <http://sourceforge.net/apps/mediawiki/gdcm>`__.
-
-docs
-````
-* Add examples to the gallery
-* Write topics for the `user guide
-  <http://scikits-image.org/docs/dev/user_guide.html>`_
-* Integrate BiBTeX plugin into Sphinx build

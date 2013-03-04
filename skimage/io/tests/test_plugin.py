@@ -15,15 +15,17 @@ try:
     io.use_plugin('freeimage')
     FI_available = True
     priority_plugin = 'freeimage'
-except OSError:
+except RuntimeError:
     FI_available = False
 
 
 def setup_module(self):
-    plugin.use('test') # see ../_plugins/test_plugin.py
+    plugin.use('test')  # see ../_plugins/test_plugin.py
+
 
 def teardown_module(self):
     io.reset_plugins()
+
 
 class TestPlugin:
     def test_read(self):

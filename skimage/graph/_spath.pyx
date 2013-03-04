@@ -2,9 +2,8 @@
 
 import _mcp
 cimport _mcp
+from libc.math cimport fabs
 
-cdef extern from "math.h":
-    double fabs(double f)
 
 cdef class MCP_Diff(_mcp.MCP):
     """MCP_Diff(costs, offsets=None, fully_connected=True)

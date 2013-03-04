@@ -1,6 +1,7 @@
-"""edges.py - Sobel edge filter
+"""edges.py - Edge filters
 
-Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
+Sobel and Prewitt filters originally part of CellProfiler, code licensed under
+both GPL and BSD licenses.
 Website: http://www.cellprofiler.org
 Copyright (c) 2003-2009 Massachusetts Institute of Technology
 Copyright (c) 2009-2011 Broad Institute
@@ -12,20 +13,43 @@ import numpy as np
 from skimage import img_as_float
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
+
+EROSION_SELEM = generate_binary_structure(2, 2)
+
+
+def _mask_filter_result(result, mask):
+    """Return result after masking.
+
+    Input masks are eroded so that mask areas in the original image don't
+    affect values in the result.
+    """
+    if mask is None:
+        result[0, :] = 0
+        result[-1, :] = 0
+        result[:, 0] = 0
+        result[:, -1] = 0
+        return result
+    else:
+        mask = binary_erosion(mask, EROSION_SELEM, border_value=0)
+        return result * mask
+
+
 def sobel(image, mask=None):
-    """Calculate the absolute magnitude Sobel to find edges.
+    """Find the edge magnitude using the Sobel transform.
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
     output : ndarray
-      The Sobel edge map.
+        The Sobel edge map.
 
     Notes
     -----
@@ -38,20 +62,23 @@ def sobel(image, mask=None):
     """
     return np.sqrt(hsobel(image, mask)**2 + vsobel(image, mask)**2)
 
+
 def hsobel(image, mask=None):
     """Find the horizontal edges of an image using the Sobel transform.
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
     output : ndarray
-      The Sobel edge map.
+        The Sobel edge map.
 
     Notes
     -----
@@ -64,32 +91,29 @@ def hsobel(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value = 0)
     result = np.abs(convolve(image,
                              np.array([[ 1, 2, 1],
                                        [ 0, 0, 0],
                                        [-1,-2,-1]]).astype(float) / 4.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)
+
 
 def vsobel(image, mask=None):
     """Find the vertical edges of an image using the Sobel transform.
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
     output : ndarray
-      The Sobel edge map.
+        The Sobel edge map.
 
     Notes
     -----
@@ -102,54 +126,166 @@ def vsobel(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
                                        [2, 0, -2],
                                        [1, 0, -1]]).astype(float) / 4.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)
+
+
+def scharr(image, mask=None):
+    """Find the edge magnitude using the Scharr transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Scharr edge map.
+
+    Notes
+    -----
+    Take the square root of the sum of the squares of the horizontal and
+    vertical Scharrs to get a magnitude that's somewhat insensitive to
+    direction.
+
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
+           of Kernel Based Image Derivatives.
+
+    """
+    return np.sqrt(hscharr(image, mask)**2 + vscharr(image, mask)**2)
+
+
+def hscharr(image, mask=None):
+    """Find the horizontal edges of an image using the Scharr transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Scharr edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      3   10   3
+      0    0   0
+     -3  -10  -3
+
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
+           of Kernel Based Image Derivatives.
+
+    """
+    image = img_as_float(image)
+    result = np.abs(convolve(image,
+                             np.array([[ 3,  10,  3],
+                                       [ 0,   0,  0],
+                                       [-3, -10, -3]]).astype(float) / 16.0))
+    return _mask_filter_result(result, mask)
+
+
+def vscharr(image, mask=None):
+    """Find the vertical edges of an image using the Scharr transform.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Scharr edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+       3   0   -3
+      10   0  -10
+       3   0   -3
+
+    References
+    ----------
+    .. [1] D. Kroon, 2009, Short Paper University Twente, Numerical Optimization
+           of Kernel Based Image Derivatives.
+
+    """
+    image = img_as_float(image)
+    result = np.abs(convolve(image,
+                             np.array([[ 3, 0,  -3],
+                                       [10, 0, -10],
+                                       [ 3, 0,  -3]]).astype(float) / 16.0))
+    return _mask_filter_result(result, mask)
+
 
 def prewitt(image, mask=None):
     """Find the edge magnitude using the Prewitt transform.
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
     output : ndarray
-      The Prewitt edge map.
+        The Prewitt edge map.
 
     Notes
     -----
     Return the square root of the sum of squares of the horizontal
     and vertical Prewitt transforms.
     """
-    return np.sqrt(hprewitt(image, mask) ** 2 + vprewitt(image, mask) ** 2)
+    return np.sqrt(hprewitt(image, mask)**2 + vprewitt(image, mask)**2)
+
 
 def hprewitt(image, mask=None):
     """Find the horizontal edges of an image using the Prewitt transform.
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
     output : ndarray
-      The Prewitt edge map.
+        The Prewitt edge map.
 
     Notes
     -----
@@ -162,32 +298,29 @@ def hprewitt(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[ 1, 1, 1],
                                        [ 0, 0, 0],
                                        [-1,-1,-1]]).astype(float) / 3.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)
+
 
 def vprewitt(image, mask=None):
     """Find the vertical edges of an image using the Prewitt transform.
 
     Parameters
     ----------
-    image : array_like, dtype=float
+    image : 2-D array
         Image to process.
-    mask : array_like, dtype=bool, optional
+    mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
 
     Returns
     -------
     output : ndarray
-      The Prewitt edge map.
+        The Prewitt edge map.
 
     Notes
     -----
@@ -200,14 +333,8 @@ def vprewitt(image, mask=None):
 
     """
     image = img_as_float(image)
-    if mask is None:
-        mask = np.ones(image.shape, bool)
-    big_mask = binary_erosion(mask,
-                              generate_binary_structure(2, 2),
-                              border_value=0)
     result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
                                        [1, 0, -1],
                                        [1, 0, -1]]).astype(float) / 3.0))
-    result[big_mask == False] = 0
-    return result
+    return _mask_filter_result(result, mask)

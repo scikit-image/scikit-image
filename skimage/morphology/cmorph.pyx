@@ -1,116 +1,118 @@
-"""
-:author: Damian Eads, 2009
-:license: modified BSD
-"""
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 
-from __future__ import division
 import numpy as np
-
 cimport numpy as np
-cimport cython
-from cpython cimport bool
+from libc.stdlib cimport malloc, free
 
-STREL_DTYPE = np.uint8
-ctypedef np.uint8_t STREL_DTYPE_t
 
-IMAGE_DTYPE = np.uint8
-ctypedef np.uint8_t IMAGE_DTYPE_t
+def dilate(np.ndarray[np.uint8_t, ndim=2] image,
+           np.ndarray[np.uint8_t, ndim=2] selem,
+           np.ndarray[np.uint8_t, ndim=2] out=None,
+           char shift_x=0, char shift_y=0):
 
-cdef inline int int_max(int a, int b): return a if a >= b else b
-cdef inline int int_min(int a, int b): return a if a <= b else b
+    cdef Py_ssize_t rows = image.shape[0]
+    cdef Py_ssize_t cols = image.shape[1]
+    cdef Py_ssize_t srows = selem.shape[0]
+    cdef Py_ssize_t scols = selem.shape[1]
 
-@cython.boundscheck(False)
-def dilate(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
-           np.ndarray[IMAGE_DTYPE_t, ndim=2] selem not None,
-           np.ndarray[IMAGE_DTYPE_t, ndim=2] out,
-           bool shift_x, bool shift_y):
-    cdef int hw = selem.shape[0] // 2
-    cdef int hh = selem.shape[1] // 2
-    if shift_x:
-        hh -= 1
-    if shift_y:
-        hw -= 1
+    cdef Py_ssize_t centre_r = int(selem.shape[0] / 2) - shift_y
+    cdef Py_ssize_t centre_c = int(selem.shape[1] / 2) - shift_x
 
-    cdef int width = image.shape[0], height = image.shape[1]
+    image = np.ascontiguousarray(image)
     if out is None:
-        out = np.zeros([width, height], dtype=IMAGE_DTYPE)
+        out = np.zeros((rows, cols), dtype=np.uint8)
+    else:
+        out = np.ascontiguousarray(out)
 
-    assert out.shape[0] == image.shape[0]
-    assert out.shape[1] == image.shape[1]
+    cdef np.uint8_t* out_data = <np.uint8_t*>out.data
+    cdef np.uint8_t* image_data = <np.uint8_t*>image.data
 
-    cdef int x, y, ix, iy, cx, cy
-    cdef IMAGE_DTYPE_t max_so_far
+    cdef Py_ssize_t r, c, rr, cc, s, value, local_max
 
-    cdef int sw = selem.shape[0], sh = selem.shape[1]
+    cdef Py_ssize_t selem_num = np.sum(selem != 0)
+    cdef Py_ssize_t* sr = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* sc = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
 
-    cdef np.ndarray[np.int_t, ndim=2] xinc = np.zeros([sw, sh], dtype=np.int)
-    cdef np.ndarray[np.int_t, ndim=2] yinc = np.zeros([sw, sh], dtype=np.int)
+    s = 0
+    for r in range(srows):
+        for c in range(scols):
+            if selem[r, c] != 0:
+                sr[s] = r - centre_r
+                sc[s] = c - centre_c
+                s += 1
 
-    for x in range(sw):
-        for y in range(sh):
-            xinc[x, y] = (x - hw)
-            yinc[x, y] = (y - hh)
+    for r in range(rows):
+        for c in range(cols):
+            local_max = 0
+            for s in range(selem_num):
+                rr = r + sr[s]
+                cc = c + sc[s]
+                if 0 <= rr < rows and 0 <= cc < cols:
+                    value = image_data[rr * cols + cc]
+                    if value > local_max:
+                        local_max = value
 
+            out_data[r * cols + c] = local_max
 
-    for x in range(width):
-        for y in range(height):
-            max_so_far = 0
-            for cx in range(0, sw):
-                for cy in range(0, sh):
-                    ix = x + xinc[cx,cy]
-                    iy = y + yinc[cx,cy]
-                    if ix>=0 and iy>=0 and ix < width and iy < height \
-                           and selem[cx, cy] == 1 \
-                           and image[ix,iy] > max_so_far:
-                        max_so_far = image[ix,iy]
-            out[x,y] = max_so_far
+    free(sr)
+    free(sc)
 
     return out
 
 
-@cython.boundscheck(False)
-def erode(np.ndarray[IMAGE_DTYPE_t, ndim=2] image not None,
-          np.ndarray[IMAGE_DTYPE_t, ndim=2] selem not None,
-          np.ndarray[IMAGE_DTYPE_t, ndim=2] out,
-          bool shift_x, bool shift_y):
-    cdef int hw = selem.shape[0] // 2
-    cdef int hh = selem.shape[1] // 2
-    if shift_x:
-        hh -= 1
-    if shift_y:
-        hw -= 1
+def erode(np.ndarray[np.uint8_t, ndim=2] image,
+          np.ndarray[np.uint8_t, ndim=2] selem,
+          np.ndarray[np.uint8_t, ndim=2] out=None,
+          char shift_x=0, char shift_y=0):
 
-    cdef int width = image.shape[0], height = image.shape[1]
+    cdef Py_ssize_t rows = image.shape[0]
+    cdef Py_ssize_t cols = image.shape[1]
+    cdef Py_ssize_t srows = selem.shape[0]
+    cdef Py_ssize_t scols = selem.shape[1]
+
+    cdef Py_ssize_t centre_r = int(selem.shape[0] / 2) - shift_y
+    cdef Py_ssize_t centre_c = int(selem.shape[1] / 2) - shift_x
+
+    image = np.ascontiguousarray(image)
     if out is None:
-        out = np.zeros([width, height], dtype=IMAGE_DTYPE)
+        out = np.zeros((rows, cols), dtype=np.uint8)
+    else:
+        out = np.ascontiguousarray(out)
 
-    assert out.shape[0] == image.shape[0]
-    assert out.shape[1] == image.shape[1]
+    cdef np.uint8_t* out_data = <np.uint8_t*>out.data
+    cdef np.uint8_t* image_data = <np.uint8_t*>image.data
 
-    cdef int x, y, ix, iy, cx, cy
-    cdef IMAGE_DTYPE_t min_so_far
+    cdef int r, c, rr, cc, s, value, local_min
 
-    cdef int sw = selem.shape[0], sh = selem.shape[1]
+    cdef Py_ssize_t selem_num = np.sum(selem != 0)
+    cdef Py_ssize_t* sr = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* sc = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
 
-    cdef np.ndarray[np.int_t, ndim=2] xinc = np.zeros([sw, sh], dtype=np.int)
-    cdef np.ndarray[np.int_t, ndim=2] yinc = np.zeros([sw, sh], dtype=np.int)
+    s = 0
+    for r in range(srows):
+        for c in range(scols):
+            if selem[r, c] != 0:
+                sr[s] = r - centre_r
+                sc[s] = c - centre_c
+                s += 1
 
-    for x in range(sw):
-        for y in range(sh):
-            xinc[x, y] = (x - hw)
-            yinc[x, y] = (y - hh)
+    for r in range(rows):
+        for c in range(cols):
+            local_min = 255
+            for s in range(selem_num):
+                rr = r + sr[s]
+                cc = c + sc[s]
+                if 0 <= rr < rows and 0 <= cc < cols:
+                    value = image_data[rr * cols + cc]
+                    if value < local_min:
+                        local_min = value
 
-    for x in range(width):
-        for y in range(height):
-            min_so_far = 255
-            for cx in range(0, sw):
-                for cy in range(0, sh):
-                    ix = x + xinc[cx,cy]
-                    iy = y + yinc[cx,cy]
-                    if ix>=0 and iy>=0 and ix < width \
-                           and iy < height and selem[cx, cy] == 1 \
-                           and image[ix,iy] < min_so_far:
-                        min_so_far = image[ix,iy]
-            out[x,y] = min_so_far
+            out_data[r * cols + c] = local_min
+
+    free(sr)
+    free(sc)
 
     return out

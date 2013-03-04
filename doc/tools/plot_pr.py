@@ -23,14 +23,17 @@ releases = OrderedDict([
     #('0.1', u'2009-10-07 13:52:19 +0200'),
     #('0.2', u'2009-11-12 14:48:45 +0200'),
     ('0.3', u'2011-10-10 03:28:47 -0700'),
-    ('0.4', u'2011-12-03 14:31:32 -0800')])
+    ('0.4', u'2011-12-03 14:31:32 -0800'),
+    ('0.5', u'2012-02-26 21:00:51 -0800'),
+    ('0.6', u'2012-06-24 21:37:05 -0700')])
 
-month_duration = 16
+
+month_duration = 24
 
 for r in releases:
     releases[r] = dateutil.parser.parse(releases[r])
 
-def fetch_PRs(user='scikits-image', repo='scikits-image', state='open'):
+def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
     params = {'state': state,
               'per_page': 100,
               'page': 1}
