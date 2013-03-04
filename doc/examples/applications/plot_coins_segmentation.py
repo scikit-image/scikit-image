@@ -90,12 +90,8 @@ plt.title('Filling the holes')
 Small spurious objects are easily removed by setting a minimum size for valid
 objects.
 """
-
-label_objects, nb_labels = ndimage.label(fill_coins)
-sizes = np.bincount(label_objects.ravel())
-mask_sizes = sizes > 20
-mask_sizes[0] = 0
-coins_cleaned = mask_sizes[label_objects]
+from skimage import morphology
+coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
 
 plt.figure(figsize=(4, 3))
 plt.imshow(coins_cleaned, cmap=plt.cm.gray, interpolation='nearest')
@@ -149,8 +145,7 @@ plt.title('markers')
 Finally, we use the watershed transform to fill regions of the elevation map starting from the markers determined above:
 
 """
-from skimage.morphology import watershed
-segmentation = watershed(elevation_map, markers)
+segmentation = morphology.watershed(elevation_map, markers)
 
 plt.figure(figsize=(4, 3))
 plt.imshow(segmentation, cmap=plt.cm.gray, interpolation='nearest')
