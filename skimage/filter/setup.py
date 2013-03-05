@@ -26,7 +26,8 @@ def configuration(parent_package='', top_path=None):
     cython(['rank/bilateral_rank.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
-        include_dirs=[get_numpy_include_dirs()])
+                         depends=['../_shared/vectorized_ops.h'],
+                         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('_denoise_cy', sources=['_denoise_cy.c'],
         include_dirs=[get_numpy_include_dirs(), '../_shared'])
     config.add_extension('rank._core8', sources=['rank/_core8.c'],
