@@ -281,7 +281,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                 y = y - 1
                 x = x + 1
 
-    return np.array(rr) + cy, np.array(cc) + cx
+    return np.array(rr, dtype=np.intp) + cy, np.array(cc, dtype=np.intp) + cx
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
