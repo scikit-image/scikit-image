@@ -126,7 +126,7 @@ def polygon(y, x, shape=None):
                 rr.append(r)
                 cc.append(c)
 
-    return np.array(rr), np.array(cc)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
 def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
@@ -174,7 +174,7 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
                 rr.append(r)
                 cc.append(c)
 
-    return np.array(rr), np.array(cc)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
 def circle(double cy, double cx, double radius, shape=None):
@@ -368,7 +368,7 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
             err += ychange
             ychange += twobsquared
 
-    return np.array(py) + cy, np.array(px) + cx
+    return np.array(py, dtype=np.intp) + cy, np.array(px, dtype=np.intp) + cx
 
 
 def set_color(img, coords, color):
