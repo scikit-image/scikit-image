@@ -191,7 +191,7 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
     memset(ptr, 0, memory_size)
     # align ph.accumulator to 32-byte boundary
     roundoff = (<Py_ssize_t> ptr + 31) % 32
-    ph = <Histograms *> (ptr + 31 - roundoff)
+    ph = <Histograms *> (<Py_ssize_t> ptr + 31 - roundoff)
     if not ptr:
         return ph
     ph.memory = ptr
@@ -202,7 +202,7 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
     # Align histogram memory to a 32-byte boundary
     #
     roundoff = (<Py_ssize_t> ptr + 31) % 32
-    ptr += 31 - roundoff
+    ptr = <void *> (<Py_ssize_t> ptr + 31 - roundoff)
     ph.histogram = <Histogram *> ptr
     #
     # Fill in the statistical things we keep around
