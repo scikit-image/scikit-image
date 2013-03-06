@@ -109,14 +109,14 @@ def polygon(y, x, shape=None):
 
     cdef Py_ssize_t r, c
 
-    #: make contigous arrays for r, c coordinates
+    # make contigous arrays for r, c coordinates
     cdef cnp.ndarray contiguous_rdata, contiguous_cdata
     contiguous_rdata = np.ascontiguousarray(y, 'double')
     contiguous_cdata = np.ascontiguousarray(x, 'double')
     cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
     cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
 
-    #: output coordinate arrays
+    # output coordinate arrays
     cdef list rr = list()
     cdef list cc = list()
 
@@ -164,7 +164,7 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
 
     cdef Py_ssize_t r, c
 
-    #: output coordinate arrays
+    # output coordinate arrays
     cdef list rr = list()
     cdef list cc = list()
 
