@@ -20,7 +20,7 @@ from libc.stdlib cimport malloc, free
 from libc.string cimport memset
 
 
-cdef extern from "../_shared/vectorized_ops.h":
+cdef extern from "vectorized_ops.h":
     void add16(cnp.uint16_t *dest, cnp.uint16_t *src)
     void sub16(cnp.uint16_t *dest, cnp.uint16_t *src)
 
@@ -91,8 +91,9 @@ cdef struct SCoord:
     Py_ssize_t y
 
 cdef struct Histograms:
-    void *memory                # pointer to the allocated memory
-    Histogram *histogram        # pointer to the histogram memory
+    HistogramPiece accumulator  # running histogram (32-byte aligned)
+    void *memory                # pointer to the unaligned allocated memory
+    Histogram *histogram        # pointer to the histogram memory (aligned)
     PixelCount *pixel_count     # pointer to the pixel count memory
     cnp.uint8_t *data           # pointer to the image data
     cnp.uint8_t *mask           # pointer to the image mask
@@ -142,9 +143,6 @@ cdef struct Histograms:
 
     Py_ssize_t row_stride          # stride between one row and the next
     Py_ssize_t col_stride          # stride between one column and the next
-    # The accumulator holds the running histogram
-    #
-    HistogramPiece accumulator
     #
     # The running count of pixels in the accumulator
     #
@@ -188,10 +186,12 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
 
     memory_size = (adjusted_stripe_length *
                    (sizeof(Histogram) + sizeof(PixelCount)) +
-                   sizeof(Histograms) + 32)
+                   sizeof(Histograms) + 64)
     ptr = malloc(memory_size)
     memset(ptr, 0, memory_size)
-    ph = <Histograms *> ptr
+    # align ph.accumulator to 32-byte boundary
+    roundoff = (<Py_ssize_t> ptr + 31) % 32
+    ph = <Histograms *> (ptr + 31 - roundoff)
     if not ptr:
         return ph
     ph.memory = ptr
@@ -201,10 +201,8 @@ cdef Histograms *allocate_histograms(Py_ssize_t rows,
     #
     # Align histogram memory to a 32-byte boundary
     #
-    roundoff = <Py_ssize_t>ptr
-    roundoff += 31
-    roundoff -= roundoff % 32
-    ptr = <void *> roundoff
+    roundoff = (<Py_ssize_t> ptr + 31) % 32
+    ptr += 31 - roundoff
     ph.histogram = <Histogram *> ptr
     #
     # Fill in the statistical things we keep around
@@ -696,7 +694,7 @@ cdef int c_median_filter(Py_ssize_t rows,
         #
         # Initialize the accumulator (octagon histogram) to zero
         #
-        memset(&ph.accumulator, 0, sizeof(ph.accumulator))
+        memset(&(ph.accumulator), 0, sizeof(ph.accumulator))
         ph.accumulator_count = 0
         for i in range(16):
             ph.last_update_column[i] = -radius-1
