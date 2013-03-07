@@ -27,7 +27,7 @@ except ImportError:
 from ..utils import RequiredAttr
 
 
-__all__ = ['BaseWidget', 'Slider', 'ComboBox']
+__all__ = ['BaseWidget', 'Slider', 'ComboBox', 'Text']
 
 
 class BaseWidget(QWidget):
@@ -48,6 +48,28 @@ class BaseWidget(QWidget):
 
     def _value_changed(self, value):
         self.callback(self.name, value)
+
+
+class Text(BaseWidget):
+
+    def __init__(self, name=None, text=''):
+        super(Text, self).__init__(name)
+        self._label = QtGui.QLabel()
+        self.text = text
+        self.layout = QtGui.QHBoxLayout(self)
+        if name is not None:
+            name_label = QtGui.QLabel()
+            name_label.setText(name)
+            self.layout.addWidget(name_label)
+        self.layout.addWidget(self._label)
+
+    @property
+    def text(self):
+        return self._label.text()
+
+    @text.setter
+    def text(self, text_str):
+        self._label.setText(text_str)
 
 
 class Slider(BaseWidget):
@@ -131,6 +153,7 @@ class Slider(BaseWidget):
             self.slider.sliderReleased.connect(self._on_slider_changed)
         else:
             raise ValueError("Unexpected value %s for 'update_on'" % update_on)
+        self.slider.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self.name_label = QtGui.QLabel()
         self.name_label.setText(self.name)
@@ -227,3 +250,11 @@ class ComboBox(BaseWidget):
     @property
     def val(self):
         return self._combo_box.value()
+
+    @property
+    def index(self):
+        return self._combo_box.currentIndex()
+
+    @index.setter
+    def index(self, i):
+        self._combo_box.setCurrentIndex(i)

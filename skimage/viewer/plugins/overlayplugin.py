@@ -1,6 +1,17 @@
+from warnings import warn
+
 from skimage.util.dtype import dtype_range
 from .base import Plugin
 from ..utils import ClearColormap
+
+
+__all__ = ['OverlayPlugin']
+
+
+def recent_mpl_version():
+    import matplotlib
+    version = matplotlib.__version__.split('.')
+    return int(version[0]) == 1 and int(version[1]) >= 2
 
 
 class OverlayPlugin(Plugin):
@@ -25,6 +36,9 @@ class OverlayPlugin(Plugin):
               'cyan': (0, 1, 1)}
 
     def __init__(self, **kwargs):
+        if not recent_mpl_version():
+            msg = "Matplotlib >= 1.2 required for OverlayPlugin."
+            warn(RuntimeWarning(msg))
         super(OverlayPlugin, self).__init__(**kwargs)
         self._overlay_plot = None
         self._overlay = None
@@ -73,6 +87,14 @@ class OverlayPlugin(Plugin):
         if self._overlay_plot is not None:
             self._overlay_plot.set_cmap(self.cmap)
         self.image_viewer.redraw()
+
+    @property
+    def filtered_image(self):
+        """Return filtered image.
+
+        This "filtered image" is used when saving from the plugin.
+        """
+        return self.overlay
 
     def display_filtered_image(self, image):
         """Display filtered image as an overlay on top of image in viewer."""

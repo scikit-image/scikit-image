@@ -9,11 +9,6 @@ except ImportError:
     QDialog = object # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
-try:
-    import matplotlib as mpl
-except ImportError:
-    print("Could not import matplotlib -- skimage.viewer not available.")
-
 from ..utils import RequiredAttr, init_qtapp
 
 
@@ -49,8 +44,9 @@ class Plugin(QDialog):
     name : str
         Name of plugin. This is displayed as the window title.
     artist : list
-        List of Matplotlib artists. Any artists created by the plugin should
-        be added to this list so that it gets cleaned up on close.
+        List of Matplotlib artists and canvastools. Any artists created by the
+        plugin should be added to this list so that it gets cleaned up on
+        close.
 
     Examples
     --------
@@ -79,9 +75,8 @@ class Plugin(QDialog):
     """
     name = 'Plugin'
     image_viewer = RequiredAttr("%s is not attached to ImageViewer" % name)
-    draws_on_image = False
 
-    def __init__(self, image_filter=None, height=0, width=400, useblit=None):
+    def __init__(self, image_filter=None, height=0, width=400, useblit=True):
         init_qtapp()
         super(Plugin, self).__init__()
 
@@ -98,8 +93,6 @@ class Plugin(QDialog):
         self.arguments = []
         self.keyword_arguments= {}
 
-        if useblit is None:
-            useblit = True if mpl.backends.backend.endswith('Agg') else False
         self.useblit = useblit
         self.cids = []
         self.artists = []
@@ -123,8 +116,6 @@ class Plugin(QDialog):
         #TODO: Always passing image as first argument may be bad assumption.
         self.arguments.append(self.image_viewer.original_image)
 
-        if self.draws_on_image:
-            self.connect_image_event('draw_event', self.on_draw)
         # Call filter so that filtered image matches widget values
         self.filter_image()
 
@@ -155,15 +146,6 @@ class Plugin(QDialog):
         self.add_widget(widget)
         return self
 
-    def on_draw(self, event):
-        """Save image background when blitting.
-
-        The saved image is used to "clear" the figure before redrawing artists.
-        """
-        if self.useblit:
-            bbox = self.image_viewer.ax.bbox
-            self.img_background = self.image_viewer.canvas.copy_from_bbox(bbox)
-
     def filter_image(self, *widget_arg):
         """Call `image_filter` with widget args and kwargs
 
@@ -183,6 +165,11 @@ class Plugin(QDialog):
     def _get_value(self, param):
         # If param is a widget, return its `val` attribute.
         return param if not hasattr(param, 'val') else param.val
+
+    @property
+    def filtered_image(self):
+        """Return filtered image."""
+        return self.image_viewer.image
 
     def display_filtered_image(self, image):
         """Display the filtered image on image viewer.
@@ -204,38 +191,18 @@ class Plugin(QDialog):
     def closeEvent(self, event):
         """On close disconnect all artists and events from ImageViewer.
 
-        Note that events must be connected using `self.connect_image_event` and
-        artists must be appended to `self.artists`.
+        Note that artists must be appended to `self.artists`.
         """
-        self.disconnect_image_events()
+        self.clean_up()
+        self.close()
+
+    def clean_up(self):
         self.remove_image_artists()
         self.image_viewer.plugins.remove(self)
         self.image_viewer.reset_image()
         self.image_viewer.redraw()
-        self.close()
-
-    def connect_image_event(self, event, callback):
-        """Connect callback with an event in the image viewer.
-
-        This should be used in lieu of `figure.canvas.mpl_connect` since this
-        function stores call back ids for later clean up.
-
-        Parameters
-        ----------
-        event : str
-            Matplotlib event.
-        callback : function
-            Callback function with a matplotlib Event object as its argument.
-        """
-        cid = self.image_viewer.connect_event(event, callback)
-        self.cids.append(cid)
-
-    def disconnect_image_events(self):
-        """Disconnect all events created by this widget."""
-        for c in self.cids:
-            self.image_viewer.disconnect_event(c)
 
     def remove_image_artists(self):
-        """Disconnect artists that are connected to the image viewer."""
+        """Remove artists that are connected to the image viewer."""
         for a in self.artists:
-            self.image_viewer.remove_artist(a)
+            a.remove()
