@@ -70,7 +70,7 @@ class LogoBase(object):
     def _crop_image(self, image):
         w = 2 * self.radius
         x, y = self.origin
-        return image[y:y+w, x:x+w]
+        return image[y:y + w, x:x + w]
 
     def plot_curve(self, **kwargs):
         self.logo.plot_snake_curve(**kwargs)
@@ -116,9 +116,9 @@ def plot_colorized_logo(logo, color, edges='light', whiten=False):
         If True, a color value less than 1 increases the image intensity.
     """
     if not hasattr(color[0], '__iter__'):
-        color = [color] * 2 # use same color for upper-left and lower-right
+        color = [color] * 2  # use same color for upper-left & lower-right
     if not hasattr(whiten, '__iter__'):
-        whiten = [whiten] * 2 # use same setting for upper-left and lower-right
+        whiten = [whiten] * 2  # use same setting for upper-left & lower-right
 
     image = gray2rgb(np.ones_like(logo.image))
     mask_img = gray2rgb(logo.mask_2)
@@ -133,7 +133,7 @@ def plot_colorized_logo(logo, color, edges='light', whiten=False):
     image[mask_img] = logo_img[mask_img]
     image[mask_edge] = logo_edge[mask_edge]
 
-    logo.plot_curve(lw=5, color='w') # plot snake curve on current axes
+    logo.plot_curve(lw=5, color='w')  # plot snake curve on current axes
     plt.imshow(image)
 
 
