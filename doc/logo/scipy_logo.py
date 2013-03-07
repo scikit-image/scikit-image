@@ -3,9 +3,10 @@ Code used to trace Scipy logo.
 """
 import numpy as np
 import matplotlib.pyplot as plt
-import skimage.io as imgio
-from scipy.misc import lena
 import matplotlib.nxutils as nx
+
+from skimage import io
+from skimage import data
 
 
 class SymmetricAnchorPoint(object):
@@ -185,7 +186,7 @@ class ScipyLogo(object):
 
     def plot_image(self, **kwargs):
         ax = kwargs.pop('ax', plt.gca())
-        img = imgio.imread('data/scipy.png')
+        img = io.imread('data/scipy.png')
         ax.imshow(img, **kwargs)
 
     def get_mask(self, shape, region):
@@ -236,9 +237,7 @@ def plot_snake_overlay():
     logo = ScipyLogo((670, 250), 250)
     logo.plot_snake_curve()
     logo.plot_circle()
-    img = imgio.imread('data/snake_pixabay.jpg')
-    #mask = logo.get_mask(img.shape, 'upper left')
-    #img[mask] = 255
+    img = io.imread('data/snake_pixabay.jpg')
     plt.imshow(img)
 
 
@@ -247,9 +246,7 @@ def plot_lena_overlay():
     logo = ScipyLogo((300, 300), 180)
     logo.plot_snake_curve()
     logo.plot_circle()
-    img = lena()
-    #mask = logo.get_mask(img.shape, 'upper left')
-    #img[mask] = 255
+    img = data.lena()
     plt.imshow(img)
 
 
@@ -259,4 +256,3 @@ if __name__ == '__main__':
     plot_lena_overlay()
 
     plt.show()
-
