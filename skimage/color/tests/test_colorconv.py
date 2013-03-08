@@ -16,7 +16,7 @@ import os.path
 import numpy as np
 from numpy.testing import *
 
-from skimage import img_as_float
+from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
 from skimage.color import (
     rgb2hsv, hsv2rgb,
@@ -125,7 +125,7 @@ class TestColorconv(TestCase):
     # RGB<->HED roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
         img_rgb = self.img_rgb
-        assert_array_almost_equal(hed2rgb(rgb2hed(img_rgb)), img_as_float(img_rgb))
+        assert_equal(img_as_ubyte(hed2rgb(rgb2hed(img_rgb))), img_rgb)
 
     # RGB<->HED roundtrip with float image
     def test_hed_rgb_float_roundtrip(self):

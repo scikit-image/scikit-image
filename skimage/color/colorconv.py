@@ -807,7 +807,9 @@ def hed2rgb(hed):
     >>> ihc_hed = rgb2hed(ihc)
     >>> ihc_rgb = hed2rgb(ihc_hed)
     """
+    from ..exposure import rescale_intensity
+
     hed = dtype.img_as_float(hed)
     logrgb1 = np.dot(-np.reshape(hed, (-1, 3)), rgb_from_hed)
     rgb1 = np.exp(logrgb1)
-    return np.reshape(rgb1 - 1, hed.shape)
+    return rescale_intensity(np.reshape(rgb1 - 1, hed.shape), in_range=(0, 1))
