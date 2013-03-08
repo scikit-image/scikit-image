@@ -18,7 +18,6 @@ home/end keys
     First/last image in collection.
 
 """
-import numpy as np
 from skimage import data
 from skimage.viewer import CollectionViewer
 from skimage.transform import pyramid_gaussian

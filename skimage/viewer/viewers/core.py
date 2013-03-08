@@ -8,19 +8,28 @@ except ImportError:
     QMainWindow = object  # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
+from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
+from skimage.exposure import rescale_intensity
+import numpy as np
 from .. import utils
 from ..widgets import Slider
+from ..utils import dialogs
 
 
 __all__ = ['ImageViewer', 'CollectionViewer']
 
 
-class ImageCanvas(utils.MatplotlibCanvas):
-    """Canvas for displaying images."""
-    def __init__(self, parent, image, **kwargs):
-        self.fig, self.ax = utils.figimage(image, **kwargs)
-        super(ImageCanvas, self).__init__(parent, self.fig, **kwargs)
+def mpl_image_to_rgba(mpl_image):
+    """Return RGB image from the given matplotlib image object.
+
+    Each image in a matplotlib figure has it's own colormap and normalization
+    function. Return RGBA (RGB + alpha channel) image with float dtype.
+    """
+    input_range = (mpl_image.norm.vmin, mpl_image.norm.vmax)
+    image = rescale_intensity(mpl_image.get_array(), in_range=input_range)
+    image = mpl_image.cmap(img_as_float(image)) # cmap complains on bool arrays
+    return img_as_float(image)
 
 
 class ImageViewer(QMainWindow):
@@ -65,16 +74,21 @@ class ImageViewer(QMainWindow):
         self.setWindowTitle("Image Viewer")
 
         self.file_menu = QtGui.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.close,
+        self.file_menu.addAction('Open file', self.open_file,
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_O)
+        self.file_menu.addAction('Save to file', self.save_to_file,
+                                 QtCore.Qt.CTRL + QtCore.Qt.Key_S)
+        self.file_menu.addAction('Quit', self.close,
                                  QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
 
         self.main_widget = QtGui.QWidget()
         self.setCentralWidget(self.main_widget)
 
-        self.canvas = ImageCanvas(self.main_widget, image)
-        self.fig = self.canvas.fig
-        self.ax = self.canvas.ax
+        self.fig, self.ax = utils.figimage(image)
+        self.canvas = self.fig.canvas
+        self.canvas.setParent(self)
+
         self.ax.autoscale(enable=False)
 
         self._image_plot = self.ax.images[0]
@@ -82,14 +96,6 @@ class ImageViewer(QMainWindow):
         self.original_image = image
         self.image = image.copy()
         self.plugins = []
-
-        # List of axes artists to check for removal.
-        self._axes_artists = [self.ax.artists,
-                              self.ax.collections,
-                              self.ax.images,
-                              self.ax.lines,
-                              self.ax.patches,
-                              self.ax.texts]
 
         self.layout = QtGui.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
@@ -106,6 +112,43 @@ class ImageViewer(QMainWindow):
         """Add plugin to ImageViewer"""
         plugin.attach(self)
         return self
+
+    def open_file(self):
+        """Open image file and display in viewer."""
+        filename = dialogs.open_file_dialog()
+        if filename is None:
+            return
+        image = io.imread(filename)
+        self.original_image = image     # update saved image
+        self.image = image              # update displayed image
+
+    def save_to_file(self):
+        """Save current image to file.
+
+        The current behavior is not ideal: It saves the image displayed on
+        screen, so all images will be converted to RGB, and the image size is
+        not preserved (resizing the viewer window will alter the size of the
+        saved image).
+        """
+        filename = dialogs.save_file_dialog()
+        if filename is None:
+            return
+        if len(self.ax.images) == 1:
+            io.imsave(filename, self.image)
+        else:
+            underlay = mpl_image_to_rgba(self.ax.images[0])
+            overlay = mpl_image_to_rgba(self.ax.images[1])
+            alpha = overlay[:, :, 3]
+
+            # alpha can be set by channel of array or by a scalar value.
+            # Prefer the alpha channel, but fall back to scalar value.
+            if np.all(alpha == 1):
+                alpha = np.ones_like(alpha) * self.ax.images[1].get_alpha()
+
+            alpha = alpha[:, :, np.newaxis]
+            composite = (overlay[:, :, :3] * alpha +
+                         underlay[:, :, :3] * (1 - alpha))
+            io.imsave(filename, composite)
 
     def closeEvent(self, event):
         self.close()
@@ -143,10 +186,21 @@ class ImageViewer(QMainWindow):
     def image(self, image):
         self._img = image
         self._image_plot.set_array(image)
+
+        # Adjust size if new image shape doesn't match the original
+        h, w = image.shape[:2]
+        # update data coordinates (otherwise pixel coordinates are off)
+        self._image_plot.set_extent((0, w, h, 0))
+        # update display (otherwise image doesn't fill the canvas)
+        self.ax.set_xlim(0, w)
+        self.ax.set_ylim(h, 0)
+
+        # update color range
         clim = dtype_range[image.dtype.type]
         if clim[0] < 0 and image.min() >= 0:
             clim = (0, clim[1])
         self._image_plot.set_clim(clim)
+
         self.redraw()
 
     def reset_image(self):
@@ -160,25 +214,6 @@ class ImageViewer(QMainWindow):
     def disconnect_event(self, callback_id):
         """Disconnect callback by its id (returned by `connect_event`)."""
         self.canvas.mpl_disconnect(callback_id)
-
-    def remove_artist(self, artist):
-        """Disconnect matplotlib artist from image viewer.
-
-        The `closeEvent` method of a Plugin should remove artists (Matplotlib
-        lines, markers, etc.) from the viewer so that they aren't stranded.
-
-        Parameters
-        ----------
-        artist : Matplotlib Artist
-            Artists created by Matplotlib functions (e.g., `plot` returns list
-            of `Line2D` artists) should be saved by the plugin for removal.
-        """
-        # Note: an `add_artist` method is unnecessary since Matplotlib
-
-        # There's probably a smarter way to find where the artist is stored.
-        for artist_list in self._axes_artists:
-            if artist in artist_list:
-                artist_list.remove(artist)
 
     def _update_status_bar(self, event):
         if event.inaxes and event.inaxes.get_navigate():
@@ -274,6 +309,8 @@ class CollectionViewer(ImageViewer):
             if 48 <= key < 58:
                 index = 0.1 * int(key - 48) * self.num_images
                 self.update_index('', index)
-            event.accept()
+                event.accept()
+            else:
+                event.ignore()
         else:
             event.ignore()
