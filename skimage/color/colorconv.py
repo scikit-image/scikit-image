@@ -316,7 +316,7 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 
 # Haematoxylin-Eosin-DAB colorspace
 # From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
-# “Quantification of histochemical staining by color deconvolution.,”
+# "Quantification of histochemical staining by color deconvolution.,"
 # Analytical and quantitative cytology and histology / the International
 # Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
 # pp. 291–9, Aug. 2001.
@@ -757,8 +757,8 @@ def rgb2hed(rgb):
 
     References
     ----------
-    .. [1] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
-           staining by color deconvolution.,” Analytical and quantitative
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
            cytology and histology / the International Academy of Cytology [and]
            American Society of Cytology, vol. 23, no. 4, pp. 291–9, Aug. 2001.
 
@@ -794,8 +794,8 @@ def hed2rgb(hed):
 
     References
     ----------
-    .. [1] A. C. Ruifrok and D. A. Johnston, “Quantification of histochemical
-           staining by color deconvolution.,” Analytical and quantitative
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
            cytology and histology / the International Academy of Cytology [and]
            American Society of Cytology, vol. 23, no. 4, pp. 291–9, Aug. 2001.
 
