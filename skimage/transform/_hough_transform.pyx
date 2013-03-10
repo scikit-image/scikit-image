@@ -88,6 +88,108 @@ def _hough_circle(cnp.ndarray img,
     return acc
 
 
+def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1e-2, int min_size=4, max_size=None):
+    """Perform an elliptical Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    threshold: int, optional
+        Accumulator threshold value.
+    accuracy : double, optional
+        Accumulator bin size.
+    min_size : int, optional
+        minimal major axis length.
+    max_size : int, optional
+        maximal minor axis length.
+        If None, the value is set to the half of the smaller
+        image dimension.
+
+    Returns
+    -------
+    res : list of tuples [(x0, y0, a, b, angle, accumulator)]
+          where (x0, y0) is the center, (a, b) major and minor axis.
+
+    Examples
+    --------
+    >>> img = np.zeros((25, 25), dtype=int)
+    >>> rr, cc = draw.ellipse_perimeter(10, 10, 6, 8)
+    >>> img[rr, cc] = 1
+    >>> result = hough_ellipse(img, threshold=6)
+    [(10.0, 10.0, 8.0, 6.0474292058692187, 0.0, 8)]
+
+    References
+    ----------
+    .. [1] Xie, Yonghong, and Qiang Ji. "A new efficient ellipse detection
+           method." Pattern Recognition, 2002. Proceedings. 16th International
+           Conference on. Vol. 2. IEEE, 2002
+    """
+    if img.ndim != 2:
+            raise ValueError('The input image must be 2D.')
+
+    #cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] pixels = np.transpose(np.nonzero(img))
+    pixels = np.transpose(np.nonzero(img))
+    cdef list acc = list()
+    cdef list results = list()
+
+    cdef int max_b_squared
+    if max_size is None:
+        print(img.shape[0])
+        print(img.shape[1])
+        if img.shape[0] < img.shape[1]:
+            max_b_squared = (np.round(0.5 * img.shape[0]))**2
+        else:
+            max_b_squared = (np.round(0.5 * img.shape[1]))**2
+    else:
+        max_b_squared = max_size**2
+
+    cdef int i, j
+    cdef double x0, y0, a, d, cos_tau_squared, b_squared, f_squared, angle
+    #cdef cnp.ndarray[ndim=2, dtype=cnp.intp_t] pixel1, pixel2, pixel3
+
+    for i, pixel1 in enumerate(pixels):
+        for j, pixel2 in enumerate(pixels):
+            # We consider unique couples (pixel1, pixel2)
+            # with pixel1 != pixel2
+            if not (pixel1 == pixel2).all() and i < j:
+                if np.sqrt(np.dot(pixel1-pixel2, pixel1-pixel2)) > min_size:
+                    # Candidate: center and main axis
+                    x0 = 0.5 * (pixel1[0] + pixel2[0])
+                    y0 = 0.5 * (pixel1[1] + pixel2[1])
+                    a = 0.5 * np.sqrt((pixel1[0] - pixel2[0])**2 + (pixel1[1] - pixel2[1])**2)
+
+                    for pixel3 in pixels:
+                        d = np.sqrt(np.dot(pixel3 - (x0, y0), pixel3 - (x0, y0)))
+                        if d > min_size:
+                            f_squared = np.dot(pixel3 - pixel2, pixel3 - pixel2)
+                            cos_tau_squared = ((a**2 + d**2 - f_squared) / (2 * a * d))**2
+                            # Consider b2 > 0 and avoid division by zero
+                            if a**2 - d**2 * cos_tau_squared > 0 and cos_tau_squared < 1:
+                                b_squared = a**2 * d**2 * (1 - cos_tau_squared) / (a**2 - d**2 * cos_tau_squared)
+                                # b2 range is limited to avoid histogram memory overflow
+                                if b_squared <= max_b_squared:
+                                    acc.append(b_squared)
+
+                    if len(acc) > 0:
+                        hist, bin_edges = np.histogram(acc, bins=np.arange(0, np.max(acc) + accuracy, accuracy))
+                        if np.max(hist) > threshold:
+                            if pixel1[0] == pixel2[0]:
+                                angle = 0
+                            else:
+                                angle = np.arctan((pixel1[1] - pixel2[1]) / (pixel1[0] - pixel2[0]))
+                            results.append((x0,
+                                            y0,
+                                            a,
+                                            np.sqrt(bin_edges[hist.argmax()]), # b
+                                            angle,
+                                            np.max(hist), # Accumulator
+                                            ))
+                        acc = []
+
+    return results
+
+
 def _hough(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
 
     if img.ndim != 2:
