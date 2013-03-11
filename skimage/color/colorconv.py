@@ -769,7 +769,7 @@ def rgb2hed(rgb):
     >>> ihc = data.ihc()
     >>> ihc_hed = rgb2hed(ihc)
     """
-    rgb = dtype.img_as_float(rgb) + 1
+    rgb = dtype.img_as_float(rgb) + 2
     hed = np.dot(np.reshape(-np.log(rgb), (-1, 3)), hed_from_rgb)
     return np.reshape(hed, rgb.shape)
 
@@ -812,4 +812,4 @@ def hed2rgb(hed):
     hed = dtype.img_as_float(hed)
     logrgb1 = np.dot(-np.reshape(hed, (-1, 3)), rgb_from_hed)
     rgb1 = np.exp(logrgb1)
-    return rescale_intensity(np.reshape(rgb1 - 1, hed.shape), in_range=(0, 1))
+    return rescale_intensity(np.reshape(rgb1 - 2, hed.shape), in_range=(-1, 1))
