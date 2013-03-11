@@ -129,8 +129,8 @@ def _prepare_colorarray(arr):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim != 3 or arr.shape[2] != 3:
-        msg = "the input array must be have a shape == (.,.,3))"
+    if arr.ndim not in [3, 4] or arr.shape[-1] != 3:
+        msg = "the input array must be have a shape == (.., ..,[ ..,] 3))"
         raise ValueError(msg)
 
     return dtype.img_as_float(arr)
@@ -413,12 +413,12 @@ def _convert(matrix, arr):
         The converted array.
     """
     arr = _prepare_colorarray(arr)
-    arr = np.swapaxes(arr, 0, 2)
+    arr = np.swapaxes(arr, 0, -1)
     oldshape = arr.shape
     arr = np.reshape(arr, (3, -1))
     out = np.dot(matrix, arr)
     out.shape = oldshape
-    out = np.swapaxes(out, 2, 0)
+    out = np.swapaxes(out, -1, 0)
 
     return np.ascontiguousarray(out)
 
@@ -473,17 +473,19 @@ def rgb2xyz(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -656,17 +658,19 @@ def xyz2lab(xyz):
     Parameters
     ----------
     xyz : array_like
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in CIE-LAB format, in a 3-D array of shape (.., .., 3).
+        The image in CIE-LAB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape (.., .., 3).
+        If `xyz` is not a 3-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -696,14 +700,14 @@ def xyz2lab(xyz):
     arr[mask] = np.power(arr[mask], 1. / 3.)
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
-    x, y, z = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
     # Vector scaling
     L = (116. * y) - 16.
     a = 500.0 * (x - y)
     b = 200.0 * (y - z)
 
-    return np.dstack([L, a, b])
+    return np.concatenate(map(lambda x: x[..., np.newaxis], [L, a, b]), -1)
 
 
 def lab2xyz(lab):
@@ -760,17 +764,19 @@ def rgb2lab(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in Lab format, in a 3-D array of shape (.., .., 3).
+        The image in Lab format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
