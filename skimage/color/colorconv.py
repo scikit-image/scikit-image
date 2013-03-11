@@ -59,7 +59,7 @@ def is_rgb(image):
         Input image.
 
     """
-    return (image.ndim == 3 and image.shape[2] in (3, 4))
+    return (image.ndim in (3, 4) and image.shape[-1] in (3, 4))
 
 
 @deprecated()
@@ -72,7 +72,7 @@ def is_gray(image):
         Input image.
 
     """
-    return np.squeeze(image).ndim == 2
+    return image.ndim in (2, 3) and not is_rgb(image)
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -628,23 +628,24 @@ def gray2rgb(image):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M, N)``.
+        Input image of shape ``(M, N [, P])``.
 
     Returns
     -------
     rgb : ndarray
-        RGB image of shape ``(M, N, 3)``.
+        RGB image of shape ``(M, N, [, P], 3)``.
 
     Raises
     ------
     ValueError
-        If the input is not 2-dimensional.
+        If the input is not a 2- or 3-dimensional image.
 
     """
     if np.squeeze(image).ndim == 3 and image.shape[2] in (3, 4):
         return image
-    elif image.ndim == 2 or np.squeeze(image).ndim == 2:
-        return np.dstack((image, image, image))
+    elif is_gray(image):
+        image = image[..., np.newaxis]
+        return np.concatenate((image,)*3, axis=-1)
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
