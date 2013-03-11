@@ -6,7 +6,7 @@ __all__ = ['deprecated']
 
 
 class deprecated(object):
-    """Decorator to mark deprecated functions with warning.
+    '''Decorator to mark deprecated functions with warning.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
 
@@ -17,7 +17,7 @@ class deprecated(object):
     behavior : {'warn', 'raise'}
         Behavior during call to deprecated function: 'warn' = warn user that
         function is deprecated; 'raise' = raise error.
-    """
+    '''
 
     def __init__(self, alt_func=None, behavior='warn'):
         self.alt_func = alt_func
@@ -25,9 +25,9 @@ class deprecated(object):
 
     def __call__(self, func):
 
-        msg = "Call to deprecated function `%s`." % func.__name__
+        msg = 'Call to deprecated function `%s`.' % func.__name__
         if self.alt_func is not None:
-            msg = msg + " Use `%s` instead." % self.alt_func
+            msg += ' Use `%s` instead.' % self.alt_func
 
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
@@ -39,5 +39,15 @@ class deprecated(object):
             elif self.behavior == 'raise':
                 raise DeprecationWarning(msg)
             return func(*args, **kwargs)
+
+        # modify doc string to display deprecation warning
+        doc = 'Deprecated function.'
+        if self.alt_func is not None:
+            doc += ' Use `%s` instead.' % self.alt_func
+
+        if wrapped.__doc__ is None:
+            wrapped.__doc__ = doc
+        else:
+            wrapped.__doc__ = doc + '\n\n' + wrapped.__doc__
 
         return wrapped
