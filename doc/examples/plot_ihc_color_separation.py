@@ -5,7 +5,7 @@ Immunohistochemical staining colors separation
 
 In this example we separate the immunohistochemical (IHC) staining
 from the hematoxylin counterstaining. The separation is achieved with the
-method described in [1], known as "color deconvolution".
+method described in [1]_, known as "color deconvolution".
 
 The IHC staining expression of the FHL2 protein is here revealed with
 Diaminobenzidine (DAB) which gives a brown color.
