@@ -320,7 +320,7 @@ lab_ref_white = np.array([0.95047, 1., 1.08883])
 # "Quantification of histochemical staining by color deconvolution.,"
 # Analytical and quantitative cytology and histology / the International
 # Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
-# pp. 291–9, Aug. 2001.
+# pp. 291-9, Aug. 2001.
 rgb_from_hed = np.array([[0.65, 0.70, 0.29],
                          [0.07, 0.99, 0.11],
                          [0.27, 0.57, 0.78]])
@@ -833,7 +833,7 @@ def rgb2hed(rgb):
     .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
            staining by color deconvolution.," Analytical and quantitative
            cytology and histology / the International Academy of Cytology [and]
-           American Society of Cytology, vol. 23, no. 4, pp. 291–9, Aug. 2001.
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
 
     Examples
     --------
@@ -868,7 +868,7 @@ def hed2rgb(hed):
     .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
            staining by color deconvolution.," Analytical and quantitative
            cytology and histology / the International Academy of Cytology [and]
-           American Society of Cytology, vol. 23, no. 4, pp. 291–9, Aug. 2001.
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
 
     Examples
     --------

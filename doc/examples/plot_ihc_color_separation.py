@@ -14,7 +14,7 @@ Diaminobenzidine (DAB) which gives a brown color.
 .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
        staining by color deconvolution.," Analytical and quantitative
        cytology and histology / the International Academy of Cytology [and]
-       American Society of Cytology, vol. 23, no. 4, pp. 291–9, Aug. 2001.
+       American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
 """
 import matplotlib.pyplot as plt
 
