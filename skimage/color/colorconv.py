@@ -842,9 +842,7 @@ def rgb2hed(rgb):
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hed = rgb2hed(ihc)
     """
-    rgb = dtype.img_as_float(rgb) + 2
-    hed = np.dot(np.reshape(-np.log(rgb), (-1, 3)), hed_from_rgb)
-    return np.reshape(hed, rgb.shape)
+    return separate_stains(rgb, hed_from_rgb)
 
 
 def hed2rgb(hed):
@@ -880,12 +878,7 @@ def hed2rgb(hed):
     >>> ihc_hed = rgb2hed(ihc)
     >>> ihc_rgb = hed2rgb(ihc_hed)
     """
-    from ..exposure import rescale_intensity
-
-    hed = dtype.img_as_float(hed)
-    logrgb1 = np.dot(-np.reshape(hed, (-1, 3)), rgb_from_hed)
-    rgb1 = np.exp(logrgb1)
-    return rescale_intensity(np.reshape(rgb1 - 2, hed.shape), in_range=(-1, 1))
+    return combine_stains(hed, rgb_from_hed)
 
 
 def separate_stains(rgb, conv_matrix):
