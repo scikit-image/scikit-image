@@ -1,7 +1,5 @@
-import os, skimage, numpy as np
+import os, skimage, numpy as np, imghdr
 import skimage.io, skimage.transform
-from itertools import islice, product
-from PIL import Image
 
 # ================================================== 
 
@@ -220,7 +218,7 @@ class Picture(object):
         elif path is not None:
             self._image = skimage.img_as_ubyte(skimage.io.imread(path))
             self._path = path
-            self._format = Image.open(path).format
+            self._format = imghdr.what(path)
 
         # Creating a particular size of image.
         elif size is not None:
@@ -246,7 +244,7 @@ class Picture(object):
         skimage.io.imsave(path, self._inflate(self._image))
         self._modified = False
         self._path = os.path.abspath(path)
-        self._format = Image.open(path).format
+        self._format = imghdr.what(path)
 
     @property
     def path(self):
