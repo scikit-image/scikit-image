@@ -90,7 +90,7 @@ devhelp:
 	@echo "# ln -s build/devhelp $$HOME/.local/share/devhelp/scikitimage"
 	@echo "# devhelp"
 
-latex:
+latex: api
 	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(DEST)/latex
 	@echo
 	@echo "Build finished; the LaTeX files are in $(DEST)/latex."
