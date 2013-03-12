@@ -325,6 +325,78 @@ rgb_from_hed = np.array([[0.65, 0.70, 0.29],
                          [0.27, 0.57, 0.78]])
 hed_from_rgb = linalg.inv(rgb_from_hed)
 
+# Following matrices are adapted form the Java code written by G.Landini.
+# The original code is available at:
+# http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+
+# Hematoxylin + DAB
+rgb_from_hdx = np.array([[0.650, 0.704, 0.286],
+                         [0.268, 0.570, 0.776],
+                         [0.0, 0.0, 0.0]])
+rgb_from_hdx[2, :] = np.cross(rgb_from_hdx[0, :], rgb_from_hdx[1, :])
+hdx_from_rgb = linalg.inv(rgb_from_hdx)
+
+# Feulgen + Light Green
+rgb_from_fgx = np.array([[0.46420921, 0.83008335, 0.30827187],
+                         [0.94705542, 0.25373821, 0.19650764],
+                         [0.0, 0.0, 0.0]])
+rgb_from_fgx[2, :] = np.cross(rgb_from_fgx[0, :], rgb_from_fgx[1, :])
+fgx_from_rgb = linalg.inv(rgb_from_fgx)
+
+# Giemsa: Methyl Blue + Eosin
+rgb_from_bex = np.array([[0.834750233, 0.513556283, 0.196330403],
+                         [0.092789, 0.954111, 0.283111],
+                         [0.0, 0.0, 0.0]])
+rgb_from_bex[2, :] = np.cross(rgb_from_bex[0, :], rgb_from_bex[1, :])
+bex_from_rgb = linalg.inv(rgb_from_bex)
+
+# FastRed + FastBlue +  DAB
+rgb_from_rbd = np.array([[0.21393921, 0.85112669, 0.47794022],
+                         [0.74890292, 0.60624161, 0.26731082],
+                         [0.268, 0.570, 0.776]])
+rbd_from_rgb = linalg.inv(rgb_from_rbd)
+
+# Methyl Green + DAB
+rgb_from_gdx = np.array([[0.98003, 0.144316, 0.133146],
+                         [0.268, 0.570, 0.776],
+                         [0.0, 0.0, 0.0]])
+rgb_from_gdx[2, :] = np.cross(rgb_from_gdx[0, :], rgb_from_gdx[1, :])
+gdx_from_rgb = linalg.inv(rgb_from_gdx)
+
+# Hematoxylin + AEC
+rgb_from_hax = np.array([[0.650, 0.704, 0.286],
+                         [0.2743, 0.6796, 0.6803],
+                         [0.0, 0.0, 0.0]])
+rgb_from_hax[2, :] = np.cross(rgb_from_hax[0, :], rgb_from_hax[1, :])
+hax_from_rgb = linalg.inv(rgb_from_hax)
+
+# Blue matrix Anilline Blue + Red matrix Azocarmine + Orange matrix Orange-G
+rgb_from_bro = np.array([[0.853033, 0.508733, 0.112656],
+                         [0.09289875, 0.8662008, 0.49098468],
+                         [0.10732849, 0.36765403, 0.9237484]])
+bro_from_rgb = linalg.inv(rgb_from_bro)
+
+# Methyl Blue + Ponceau Fuchsin
+rgb_from_bpx = np.array([[0.7995107, 0.5913521, 0.10528667],
+                         [0.09997159, 0.73738605, 0.6680326],
+                         [0.0, 0.0, 0.0]])
+rgb_from_bpx[2, :] = np.cross(rgb_from_bpx[0, :], rgb_from_bpx[1, :])
+bpx_from_rgb = linalg.inv(rgb_from_bpx)
+
+# Alcian Blue + Hematoxylin
+rgb_from_ahx = np.array([[0.874622, 0.457711, 0.158256],
+                         [0.552556, 0.7544, 0.353744],
+                         [0.0, 0.0, 0.0]])
+rgb_from_ahx[2, :] = np.cross(rgb_from_ahx[0, :], rgb_from_ahx[1, :])
+ahx_from_rgb = linalg.inv(rgb_from_ahx)
+
+# Hematoxylin + PAS
+rgb_from_hpx = np.array([[0.644211, 0.716556, 0.266844],
+                         [0.175411, 0.972178, 0.154589],
+                         [0.0, 0.0, 0.0]])
+rgb_from_hpx[2, :] = np.cross(rgb_from_hpx[0, :], rgb_from_hpx[1, :])
+hpx_from_rgb = linalg.inv(rgb_from_hpx)
+
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
 #-------------------------------------------------------------
@@ -766,7 +838,7 @@ def rgb2hed(rgb):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2hed
-    >>> ihc = data.ihc()
+    >>> ihc = data.immunohistochemistry()
     >>> ihc_hed = rgb2hed(ihc)
     """
     rgb = dtype.img_as_float(rgb) + 2
@@ -780,12 +852,12 @@ def hed2rgb(hed):
     Parameters
     ----------
     hed : array_like
-        The image in HED format, in a 3-D array of shape (.., .., 3).
+        The image in the HED color space, in a 3-D array of shape (.., .., 3).
 
     Returns
     -------
     out : ndarray
-        The image in HED format, in a 3-D array of shape (.., .., 3).
+        The image in RGB, in a 3-D array of shape (.., .., 3).
 
     Raises
     ------
@@ -803,7 +875,7 @@ def hed2rgb(hed):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2hed, hed2rgb
-    >>> ihc = data.ihc()
+    >>> ihc = data.immunohistochemistry()
     >>> ihc_hed = rgb2hed(ihc)
     >>> ihc_rgb = hed2rgb(ihc_hed)
     """
@@ -813,3 +885,83 @@ def hed2rgb(hed):
     logrgb1 = np.dot(-np.reshape(hed, (-1, 3)), rgb_from_hed)
     rgb1 = np.exp(logrgb1)
     return rescale_intensity(np.reshape(rgb1 - 2, hed.shape), in_range=(-1, 1))
+
+
+def separate_stains(rgb, conv_matrix):
+    """RGB to stain color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+    conv_matrix: ndarray
+        The stain separation matrix as described by G. Landini [1]_.
+
+    Returns
+    -------
+    out : ndarray
+        The image in stain color space, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+
+    References
+    ----------
+    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import separate_stains
+    >>> from skimage.color.colorconv import hdx_from_rgb
+    >>> ihc = data.immunohistochemistry()
+    >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
+    """
+    rgb = dtype.img_as_float(rgb) + 2
+    stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
+    return np.reshape(stains, rgb.shape)
+
+
+def combine_stains(stains, conv_matrix):
+    """Haematoxylin-Eosin-DAB (HED) to RGB color space conversion.
+
+    Parameters
+    ----------
+    stains : array_like
+        The image in stain color space, in a 3-D array of shape (.., .., 3).
+    conv_matrix: ndarray
+        The stain separation matrix as described by G. Landini [1]_.
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `stains` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import separate_stains, combine_stains
+    >>> from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
+    >>> ihc = data.immunohistochemistry()
+    >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
+    >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
+    """
+    from ..exposure import rescale_intensity
+
+    stains = dtype.img_as_float(stains)
+    logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
+    rgb2 = np.exp(logrgb2)
+    return rescale_intensity(np.reshape(rgb2 - 2, stains.shape), in_range=(-1, 1))
