@@ -42,8 +42,8 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'skimage'
-copyright = u'2011, the scikit-image team'
+project = 'skimage'
+copyright = '2013, the scikit-image team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -190,8 +190,8 @@ htmlhelp_basename = 'scikitimagedoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikitimage.tex', u'The Image Scikit Documentation',
-   u'SciPy Developers', 'manual'),
+  ('contents', 'scikit-image.tex', u'The scikit-image Documentation',
+   u'scikit-image development team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
