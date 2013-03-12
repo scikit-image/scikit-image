@@ -920,7 +920,7 @@ def separate_stains(rgb, conv_matrix):
 
 
 def combine_stains(stains, conv_matrix):
-    """Haematoxylin-Eosin-DAB (HED) to RGB color space conversion.
+    """Stain to RGB color space conversion.
 
     Parameters
     ----------
