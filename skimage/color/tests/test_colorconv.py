@@ -22,6 +22,8 @@ from skimage.color import (
     rgb2hsv, hsv2rgb,
     rgb2xyz, xyz2rgb,
     rgb2hed, hed2rgb,
+    separate_stains,
+    combine_stains,
     rgb2rgbcie, rgbcie2rgb,
     convert_colorspace,
     rgb2grey, gray2rgb,
@@ -131,6 +133,22 @@ class TestColorconv(TestCase):
     def test_hed_rgb_float_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(hed2rgb(rgb2hed(img_rgb)), img_rgb)
+
+    # RGB<->HDX roundtrip with ubyte image
+    def test_hdx_rgb_roundtrip(self):
+        from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
+        img_rgb = self.img_rgb
+        conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
+                              rgb_from_hdx)
+        assert_equal(img_as_ubyte(conv), img_rgb)
+
+    # RGB<->HDX roundtrip with ubyte image
+    def test_hdx_rgb_roundtrip(self):
+        from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
+        img_rgb = img_as_float(self.img_rgb)
+        conv = combine_stains(separate_stains(img_rgb, hdx_from_rgb),
+                              rgb_from_hdx)
+        assert_array_almost_equal(conv, img_rgb)
 
     # RGB to RGB CIE
     def test_rgb2rgbcie_conversion(self):
