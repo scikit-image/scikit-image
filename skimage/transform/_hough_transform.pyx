@@ -134,8 +134,6 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1e-2, int m
 
     cdef int max_b_squared
     if max_size is None:
-        print(img.shape[0])
-        print(img.shape[1])
         if img.shape[0] < img.shape[1]:
             max_b_squared = (np.round(0.5 * img.shape[0]))**2
         else:
@@ -173,10 +171,7 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1e-2, int m
                     if len(acc) > 0:
                         hist, bin_edges = np.histogram(acc, bins=np.arange(0, np.max(acc) + accuracy, accuracy))
                         if np.max(hist) > threshold:
-                            if pixel1[0] == pixel2[0]:
-                                angle = 0
-                            else:
-                                angle = np.arctan((pixel1[1] - pixel2[1]) / (pixel1[0] - pixel2[0]))
+                            angle = np.arctan2(pixel2[1] - pixel1[1], pixel2[0] - pixel1[0])
                             results.append((x0,
                                             y0,
                                             a,

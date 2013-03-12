@@ -131,7 +131,7 @@ def test_houghellipse():
     b = 6
     x0 = 10
     y0 = 10
-    angle = 0
+    angle = np.pi/2.
     rr, cc = ellipse_perimeter(x0, x0, b, a)
     img[rr, cc] = 1
     result = ht.hough_ellipse(img, threshold=6)
