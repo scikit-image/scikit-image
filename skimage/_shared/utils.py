@@ -44,7 +44,7 @@ class deprecated(object):
             return func(*args, **kwargs)
 
         # modify doc string to display deprecation warning
-        doc = 'Deprecated function.' + alt_msg
+        doc = '**Deprecated function**.' + alt_msg
         if wrapped.__doc__ is None:
             wrapped.__doc__ = doc
         else:
