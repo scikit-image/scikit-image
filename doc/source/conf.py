@@ -203,7 +203,10 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = '''
+\usepackage{enumitem}
+\setlistdepth{100}
+'''
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
