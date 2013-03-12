@@ -16,7 +16,7 @@ Example
 
     >>> picture = novice.open('sample.png')   # create a picture object from a file
     >>> print picture.format                  # pictures know their format...
-    'PNG'
+    'png'
     >>> print picture.path                    # ...and where they came from...
     '/Users/example/sample.png'
     >>> print picture.size                    # ...and their size
@@ -38,6 +38,6 @@ Example
     >>> print picture.path                    # picture now corresponds to file
     '/Users/example/sample-bluegreen.jpg'
     >>> print picture.format                  # ...has a different format
-    JPEG
+    jpeg
     >>> print picture.modified                # and is now in sync
     False

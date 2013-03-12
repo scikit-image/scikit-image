@@ -15,12 +15,12 @@ from numpy.testing import TestCase, assert_equal, assert_raises
 from skimage import novice, data_dir
 
 class TestNovice(TestCase):
-    sample_path = os.path.join(data_dir, 'elephant.png')
-    small_sample_path = os.path.join(data_dir, 'block.png')
+    sample_path = os.path.join(data_dir, "elephant.png")
+    small_sample_path = os.path.join(data_dir, "block.png")
 
     def test_pic_info(self):
         pic = novice.open(self.sample_path)
-        assert_equal(pic.format, 'PNG')
+        assert_equal(pic.format, "png")
         assert_equal(pic.path, os.path.abspath(self.sample_path))
         assert_equal(pic.size, (665, 500))
         assert_equal(pic.width, 665)
@@ -59,7 +59,7 @@ class TestNovice(TestCase):
 
         assert_equal(pic.modified, False)
         assert_equal(pic.path, os.path.abspath(mod_path))
-        assert_equal(pic.format, "JPEG")
+        assert_equal(pic.format, "jpeg")
         os.unlink(mod_path)
 
     def test_indexing(self):
