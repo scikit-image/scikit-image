@@ -6,7 +6,7 @@ __all__ = ['deprecated']
 
 
 class deprecated(object):
-    '''Decorator to mark deprecated functions with warning.
+    """Decorator to mark deprecated functions with warning.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
 
@@ -17,7 +17,7 @@ class deprecated(object):
     behavior : {'warn', 'raise'}
         Behavior during call to deprecated function: 'warn' = warn user that
         function is deprecated; 'raise' = raise error.
-    '''
+    """
 
     def __init__(self, alt_func=None, behavior='warn'):
         self.alt_func = alt_func
