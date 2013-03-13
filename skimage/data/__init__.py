@@ -128,6 +128,7 @@ def clock():
     """
     return load("clock_motion.png")
 
+<<<<<<< HEAD
 def immunohistochemistry():
     """Immunohistochemical (IHC) staining with hematoxylin counterstaining.
 
@@ -143,6 +144,8 @@ def immunohistochemistry():
     """
     return load("ihc.jpg")
 
+=======
+>>>>>>> Added novice.copy method so existing skimage.data images could be used. Added elephant to skimage.data. Renamed show methods
 def elephant():
     """Cartoon elephant and computer terminal.
 
