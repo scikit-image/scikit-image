@@ -46,7 +46,12 @@ from __future__ import division
 __all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
            'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb',
            'xyz2lab', 'lab2xyz', 'lab2rgb', 'rgb2lab', 'rgb2hed', 'hed2rgb',
-           'separate_stains', 'combine_stains',
+           'separate_stains', 'combine_stains', 'rgb_from_hed', 'hed_from_rgb',
+           'rgb_from_hdx', 'hdx_from_rgb', 'rgb_from_fgx', 'fgx_from_rgb',
+           'rgb_from_bex', 'bex_from_rgb', 'rgb_from_rbd', 'rbd_from_rgb',
+           'rgb_from_gdx', 'gdx_from_rgb', 'rgb_from_hax', 'hax_from_rgb',
+           'rgb_from_bro', 'bro_from_rgb', 'rgb_from_bpx', 'bpx_from_rgb',
+           'rgb_from_ahx', 'ahx_from_rgb', 'rgb_from_hpx', 'hpx_from_rgb',
            'is_rgb', 'is_gray'
            ]
 
@@ -901,6 +906,23 @@ def separate_stains(rgb, conv_matrix):
     ValueError
         If `rgb` is not a 3-D array of shape (.., .., 3).
 
+    Notes
+    -----
+    Stain separation matrices available in the ``color`` module and their
+    respective colorspace:
+
+    * ``hed_from_rgb``: Hematoxylin + Eosin + DAB
+    * ``hdx_from_rgb``: Hematoxylin + DAB
+    * ``fgx_from_rgb``: Feulgen + Light Green
+    * ``bex_from_rgb``: Giemsa stain : Methyl Blue + Eosin
+    * ``rbd_from_rgb``: FastRed + FastBlue +  DAB
+    * ``gdx_from_rgb``: Methyl Green + DAB
+    * ``hax_from_rgb``: Hematoxylin + AEC
+    * ``bro_from_rgb``: Blue matrix Anilline Blue + Red matrix Azocarmine\
+                        + Orange matrix Orange-G
+    * ``bpx_from_rgb``: Methyl Blue + Ponceau Fuchsin
+    * ``ahx_from_rgb``: Alcian Blue + Hematoxylin
+    * ``hpx_from_rgb``: Hematoxylin + PAS
 
     References
     ----------
@@ -909,8 +931,7 @@ def separate_stains(rgb, conv_matrix):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import separate_stains
-    >>> from skimage.color.colorconv import hdx_from_rgb
+    >>> from skimage.color import separate_stains, hdx_from_rgb
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     """
@@ -939,6 +960,24 @@ def combine_stains(stains, conv_matrix):
     ValueError
         If `stains` is not a 3-D array of shape (.., .., 3).
 
+    Notes
+    -----
+    Stain combination matrices available in the ``color`` module and their
+    respective colorspace:
+
+    * ``rgb_from_hed``: Hematoxylin + Eosin + DAB
+    * ``rgb_from_hdx``: Hematoxylin + DAB
+    * ``rgb_from_fgx``: Feulgen + Light Green
+    * ``rgb_from_bex``: Giemsa stain : Methyl Blue + Eosin
+    * ``rgb_from_rbd``: FastRed + FastBlue +  DAB
+    * ``rgb_from_gdx``: Methyl Green + DAB
+    * ``rgb_from_hax``: Hematoxylin + AEC
+    * ``rgb_from_bro``: Blue matrix Anilline Blue + Red matrix Azocarmine\
+                        + Orange matrix Orange-G
+    * ``rgb_from_bpx``: Methyl Blue + Ponceau Fuchsin
+    * ``rgb_from_ahx``: Alcian Blue + Hematoxylin
+    * ``rgb_from_hpx``: Hematoxylin + PAS
+
     References
     ----------
     .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
@@ -947,8 +986,8 @@ def combine_stains(stains, conv_matrix):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import separate_stains, combine_stains
-    >>> from skimage.color.colorconv import hdx_from_rgb, rgb_from_hdx
+    >>> from skimage.color import separate_stains, combine_stains, \
+hdx_from_rgb, rgb_from_hdx
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
