@@ -182,10 +182,10 @@ htmlhelp_basename = 'scikitimagedoc'
 # -- Options for LaTeX output --------------------------------------------------
 
 # The paper size ('letter' or 'a4').
-#latex_paper_size = 'letter'
+latex_paper_size = 'a4'
 
 # The font size ('10pt', '11pt' or '12pt').
-#latex_font_size = '10pt'
+latex_font_size = '10pt'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
