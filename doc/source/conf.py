@@ -245,7 +245,7 @@ latex_preamble = r'''
 #latex_appendices = []
 
 # If false, no module index is generated.
-#latex_use_modindex = True
+latex_use_modindex = False
 
 # -----------------------------------------------------------------------------
 # Numpy extensions
