@@ -220,9 +220,25 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-latex_preamble = '''
+latex_preamble = r'''
 \usepackage{enumitem}
 \setlistdepth{100}
+
+\usepackage{amsmath}
+\DeclareUnicodeCharacter{00A0}{\nobreakspace}
+
+% In the parameters section, place a newline after the Parameters header
+\usepackage{expdlist}
+\let\latexdescription=\description
+\def\description{\latexdescription{}{} \breaklabel}
+
+% Make Examples/etc section headers smaller and more compact
+\makeatletter
+\titleformat{\paragraph}{\normalsize\py@HeaderFamily}%
+            {\py@TitleColor}{0em}{\py@TitleColor}{\py@NormalColor}
+\titlespacing*{\paragraph}{0pt}{1ex}{0pt}
+\makeatother
+
 '''
 
 # Documents to append as an appendix to all manuals.
