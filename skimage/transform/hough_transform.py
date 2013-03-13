@@ -140,6 +140,8 @@ def hough_line(img, theta=None):
 
     >>> out, angles, d = hough(img)
 
+    .. plot:: hough_tf.py
+
     """
     return _hough(img, theta)
 

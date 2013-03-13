@@ -246,7 +246,7 @@ matplotlib.rcParams.update({
 
 """
 plot_include_source = True
-plot_formats = [('png', 100)]
+plot_formats = [('png', 100), ('pdf', 100)]
 
 plot2rst_index_name = 'README'
 plot2rst_rcparams = {'image.cmap' : 'gray',
