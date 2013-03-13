@@ -669,7 +669,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
 
 def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns the entropy [wiki_entropy]_ computed locally. Entropy is computed
+    """Returns the entropy [1]_ computed locally. Entropy is computed
     using base 2 logarithm i.e. the filter returns the minimum number of
     bits needed to encode local greylevel distribution.
 
@@ -698,7 +698,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [wiki_entropy] http://en.wikipedia.org/wiki/Entropy_(information_theory)
+    .. [1] http://en.wikipedia.org/wiki/Entropy_(information_theory)
 
     Examples
     --------
