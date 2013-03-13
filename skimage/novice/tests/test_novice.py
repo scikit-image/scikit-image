@@ -2,11 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """Tests for novice submodule.
-
-Authors
--------
-- tests were written by Michael Hansen, 2013
-
 :license: modified BSD
 """
 
