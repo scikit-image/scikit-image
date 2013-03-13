@@ -986,8 +986,8 @@ def combine_stains(stains, conv_matrix):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.color import separate_stains, combine_stains, \
-hdx_from_rgb, rgb_from_hdx
+    >>> from skimage.color import (separate_stains, combine_stains,
+    ...                            hdx_from_rgb, rgb_from_hdx)
     >>> ihc = data.immunohistochemistry()
     >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
     >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
