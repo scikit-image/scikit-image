@@ -128,7 +128,6 @@ def clock():
     """
     return load("clock_motion.png")
 
-
 def immunohistochemistry():
     """Immunohistochemical (IHC) staining with hematoxylin counterstaining.
 
@@ -143,3 +142,13 @@ def immunohistochemistry():
 
     """
     return load("ihc.jpg")
+
+def elephant():
+    """Cartoon elephant and computer terminal.
+
+    This image is used for demonstration in the novice module.
+
+    Released into the public domain by the artist (Michael Hansen).
+
+    """
+    return load("elephant.png")

@@ -1,4 +1,5 @@
-import os, skimage, numpy as np, imghdr
+import os, numpy as np, imghdr
+from skimage.util import img_as_ubyte
 import skimage.io, skimage.transform
 
 # ================================================== 
@@ -198,19 +199,20 @@ class PixelGroup(object):
 # ================================================== 
 
 class Picture(object):
-    def __init__(self, path=None, size=None, color=None):
+    def __init__(self, path=None, size=None, color=None, image=None):
         """
         If 'path' is provided, open that file (the normal case).
         If 'size' is provided instead, create an image of that size.
         If 'color' is provided as well as 'size', initialize the
         created image to that color; otherwise, initialize to black.
-        Cannot provide both 'path' and 'size'.
+        If 'image' is provided, use it as the underlying image data.
+        Cannot provide more than one of 'path' and 'size' and 'image'.
         Can only provide 'color' if 'size' provided.
         """
 
         # Can only provide either path or size, but not both.
-        if path and size:
-            assert False, "Can only provide either path or size, not both."
+        if (path and size) or (path and image) or (size and image):
+            assert False, "Can only provide path, size, or image."
 
         # Opening a particular file.  Convert the image to RGB
         # automatically so (r, g, b) tuples can be used
@@ -230,14 +232,30 @@ class Picture(object):
             self._image[:, :] = color
             self._path = None
             self._format = None
+        elif image is not None:
+            self._image = image
+            self._path = None
+            self._format = None
 
-        # Must have provided either 'path' or 'size'.
+        # Must have provided 'path', 'size', or 'image'.
         else:
-            assert False, "Must provide one of path or size."
+            assert False, "Must provide one of path, size, or image."
 
         # Common setup.
         self._modified = False
         self._inflation = 1
+
+    @staticmethod
+    def from_path(path):
+        return Picture(path=path)
+
+    @staticmethod
+    def from_color(color, size):
+        return Picture(color=color, size=size)
+
+    @staticmethod
+    def from_image(image):
+        return Picture(image=image)
 
     def save(self, path):
         """Saves the picture to the given path."""
@@ -314,11 +332,15 @@ class Picture(object):
         except ValueError:
             raise ValueError("Expected inflation factor to be an integer greater than zero")
 
-    def show(self):
+    def _repr_html_(self):
         """Returns an Image for display in an IPython notebook"""
         return skimage.io.Image(self._inflate(self._image))
 
-    def show_console(self):
+    def _repr_png_(self):
+        """Returns an Image for display in an IPython console"""
+        return skimage.io.Image(self._inflate(self._image))
+
+    def show(self):
         """Displays the image in a separate window"""
         skimage.io.imshow(self._inflate(self._image))
 
@@ -337,9 +359,9 @@ class Picture(object):
             return img
 
         # skimage dimensions are flipped: y, x
-        return skimage.img_as_ubyte(skimage.transform.resize(self._image, 
-                (self.height * self._inflation,
-                 self.width * self._inflation), order=0))
+        return img_as_ubyte(skimage.transform.resize(self._image, 
+            (self.height * self._inflation,
+             self.width * self._inflation), order=0))
 
     def __iter__(self):
         """Iterates over all pixels in the image"""
