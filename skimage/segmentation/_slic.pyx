@@ -9,7 +9,7 @@ from scipy import ndimage
 
 cimport numpy as cnp
 
-from ..util import img_as_float
+from ..util import img_as_float, regular_grid
 from ..color import rgb2lab, gray2rgb
 
 
@@ -94,13 +94,13 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     cdef Py_ssize_t depth, height, width
     depth, height, width = image.shape[:3]
     # approximate grid size for desired n_segments
-    cdef Py_ssize_t step = int(np.ceil(
-                              (depth * height * width / n_segments) **
-                              (1.0/3)))
+    cdef Py_ssize_t step_z, step_y, step_x
     grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
-    means_z = grid_z[::step, ::step, ::step]
-    means_y = grid_y[::step, ::step, ::step]
-    means_x = grid_x[::step, ::step, ::step]
+    slices = regular_grid(image.shape, n_segments)
+    step_z, step_y, step_x = [int(s.step) for s in slices]
+    means_z = grid_z[slices]
+    means_y = grid_y[slices]
+    means_x = grid_x[slices]
 
     means_color = np.zeros(means_z.shape + (3,))
     cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] means = \
@@ -115,7 +115,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     n_means = means.shape[0]
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    ratio = (ratio / float(step)) ** 2
+    ratio = (ratio / float(max((step_z, step_y, step_x)))) ** 2
     cdef cnp.ndarray[dtype=cnp.float_t, ndim=4] image_zyx \
             = np.concatenate([
                               grid_y[..., np.newaxis],
@@ -143,12 +143,12 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         # assign pixels to means
         for k in range(n_means):
             # compute windows:
-            z_min = int(max(current_mean[0] - 2 * step, 0))
-            z_max = int(min(current_mean[0] + 2 * step, depth))
-            y_min = int(max(current_mean[1] - 2 * step, 0))
-            y_max = int(min(current_mean[1] + 2 * step, height))
-            x_min = int(max(current_mean[2] - 2 * step, 0))
-            x_max = int(min(current_mean[2] + 2 * step, width))
+            z_min = int(max(current_mean[0] - 2 * step_z, 0))
+            z_max = int(min(current_mean[0] + 2 * step_z, depth))
+            y_min = int(max(current_mean[1] - 2 * step_y, 0))
+            y_max = int(min(current_mean[1] + 2 * step_y, height))
+            x_min = int(max(current_mean[2] - 2 * step_x, 0))
+            x_max = int(min(current_mean[2] + 2 * step_x, width))
             for z in range(z_min, z_max):
                 for y in range(y_min, y_max):
                     current_pixel = \
