@@ -10,7 +10,6 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
-from skimage.util import img_as_ubyte
 from skimage.draw import ellipse
 from skimage.morphology import label
 from skimage.measure import regionprops
