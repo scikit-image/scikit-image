@@ -150,11 +150,11 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1e-2, int m
             # We consider unique couples (pixel1, pixel2)
             # with pixel1 != pixel2
             if not (pixel1 == pixel2).all() and i < j:
-                if np.sqrt(np.dot(pixel1-pixel2, pixel1-pixel2)) > min_size:
-                    # Candidate: center and main axis
+                # Candidate: center (x0,y0) and main axis a
+                a = 0.5 * np.sqrt(np.dot(pixel1-pixel2, pixel1-pixel2))
+                if a > 0.5 * min_size:
                     x0 = 0.5 * (pixel1[0] + pixel2[0])
                     y0 = 0.5 * (pixel1[1] + pixel2[1])
-                    a = 0.5 * np.sqrt((pixel1[0] - pixel2[0])**2 + (pixel1[1] - pixel2[1])**2)
 
                     for pixel3 in pixels:
                         d = np.sqrt(np.dot(pixel3 - (x0, y0), pixel3 - (x0, y0)))
