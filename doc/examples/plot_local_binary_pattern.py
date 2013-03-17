@@ -12,7 +12,7 @@ each other using the Kullback-Leibler-Divergence.
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-import scipy.ndimage as nd
+from skimage.transform import rotate
 import skimage.feature as ft
 from skimage import data
 
@@ -59,11 +59,11 @@ refs = {
 # classify rotated textures
 print 'Rotated images matched against references using LBP:'
 print 'original: brick, rotated: 30deg, match result:',
-print match(refs, nd.rotate(brick, angle=30, reshape=False))
+print match(refs, rotate(brick, angle=30, resize=False))
 print 'original: brick, rotated: 70deg, match result:',
-print match(refs, nd.rotate(brick, angle=70, reshape=False))
+print match(refs, rotate(brick, angle=70, resize=False))
 print 'original: grass, rotated: 145deg, match result:',
-print match(refs, nd.rotate(grass, angle=145, reshape=False))
+print match(refs, rotate(grass, angle=145, resize=False))
 
 # plot histograms of LBP of textures
 fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3,
