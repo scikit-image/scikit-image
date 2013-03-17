@@ -20,6 +20,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_moments', sources=['_moments.c'],
                          include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_marching_cubes', sources=['_marching_cubes.c'],
+                         include_dirs=[get_numpy_include_dirs()])
 
     return config
 
