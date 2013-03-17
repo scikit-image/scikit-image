@@ -1,5 +1,5 @@
 import numpy as np
-from . import _marching_cubes
+from . import _marching_cubes_cy
 
 
 def marching_cubes(volume, level, sampling=(1., 1., 1.)):
@@ -111,8 +111,8 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
     # Note: this algorithm is fast, but returns degenerate "triangles" which
     #   have repeated vertices - and equivalent vertices are redundantly
     #   placed in every triangle they connect with.
-    raw_tris = _marching_cubes.iterate_and_store_3d(volume, float(level),
-                                                    sampling)
+    raw_tris = _marching_cubes_cy.iterate_and_store_3d(volume, float(level),
+                                                       sampling)
 
     # Find and collect unique vertices, storing triangle verts as indices.
     # Removes much redundancy and eliminates degenerate "triangles".
@@ -169,7 +169,6 @@ def mesh_surface_area(verts, tris):
     verts : list
         List of length-3 NumPy arrays containing vertex coordinates.
         Units in each dimension should be consistent.
-
     tris : list
         List of length-3 lists of integers, referencing vertex coordinates as
         provided in `verts`

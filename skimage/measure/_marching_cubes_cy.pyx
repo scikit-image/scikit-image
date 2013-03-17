@@ -166,7 +166,7 @@ def iterate_and_store_3d(cnp.ndarray[double, ndim=3] arr,
                     e3 = r0 + _get_fraction(v4, v3, level), c1, d0
                     e4 = r0, c0 + _get_fraction(v1, v4, level), d0
 
-            # These must be calculated at each point uunless we implemented a
+            # These must be calculated at each point unless we implemented a
             # large, growing lookup table for all adjacent values; could save
             # ~30% in terms of runtime at the expense of memory usage and
             # much greater complexity.

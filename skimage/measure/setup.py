@@ -14,13 +14,13 @@ def configuration(parent_package='', top_path=None):
 
     cython(['_find_contours.pyx'], working_path=base_path)
     cython(['_moments.pyx'], working_path=base_path)
-    cython(['_marching_cubes.pyx'], working_path=base_path)
+    cython(['_marching_cubes_cy.pyx'], working_path=base_path)
 
     config.add_extension('_find_contours', sources=['_find_contours.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_moments', sources=['_moments.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_marching_cubes', sources=['_marching_cubes.c'],
+    config.add_extension('_marching_cubes_cy', sources=['_marching_cubes.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
