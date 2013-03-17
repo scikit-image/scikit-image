@@ -14,6 +14,7 @@ def configuration(parent_package='', top_path=None):
 
     cython(['_find_contours.pyx'], working_path=base_path)
     cython(['_moments.pyx'], working_path=base_path)
+    cython(['_marching_cubes.pyx'], working_path=base_path)
 
     config.add_extension('_find_contours', sources=['_find_contours.c'],
                          include_dirs=[get_numpy_include_dirs()])
