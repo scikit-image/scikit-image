@@ -10,26 +10,19 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
+from skimage.util import img_as_ubyte
 from skimage.draw import ellipse
 from skimage.morphology import label
 from skimage.measure import regionprops
-from scipy.ndimage import geometric_transform
+from skimage.transform import rotate
 
 
-ANGLE = 0.2
-
-def rotate(xy):
-    x, y = xy
-    out_x = math.cos(ANGLE) * x - math.sin(ANGLE) * y
-    out_y = math.sin(ANGLE) * x + math.cos(ANGLE) * y
-    return (out_x, out_y)
-
-image = np.zeros((600, 600), 'int')
+image = np.zeros((600, 600))
 
 rr, cc = ellipse(300, 350, 100, 220)
 image[rr,cc] = 1
 
-image = geometric_transform(image, rotate)
+image = rotate(image, angle=15) > 0
 
 label_img = label(image)
 props = regionprops(label_img, [
