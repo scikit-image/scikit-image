@@ -910,7 +910,8 @@ def _append_tris(list tri_list, unsigned char case, tuple e1, tuple e2,
         # Isolated corners v2, v8
         _append_tris(tri_list, 2, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
                      e11, e12)
-        _append_tris(tri_list, 127)
+        _append_tris(tri_list, 127, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+                     e11, e12)
     elif (case == 126):
         # Isolated corners v1, v8
         _append_tris(tri_list, 1, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
