@@ -109,7 +109,7 @@ def test_hough_peaks_num():
                               min_angle=0, num_peaks=1)[0]) == 1
 
 
-def test_houghcircle():
+def test_hough_circle():
     # Prepare picture
     img = np.zeros((120, 100), dtype=int)
     radius = 20
@@ -125,7 +125,7 @@ def test_houghcircle():
     assert_equal(y[0], y_0 + radius)
 
 
-def test_houghellipse():
+def test_hough_ellipse():
     img = np.zeros((25, 25), dtype=int)
     a = 8
     b = 6
