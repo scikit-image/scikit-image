@@ -107,7 +107,7 @@ def test_num_peaks():
 
     lena_corners = corner_harris(data.lena())
 
-    for i in xrange(20):
+    for i in range(20):
         n = np.random.random_integers(20)
         results = peak_local_max(lena_corners, num_peaks=n)
         assert (results.shape[0] == n)
