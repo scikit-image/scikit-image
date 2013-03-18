@@ -101,16 +101,16 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1e-2,
     accuracy : double, optional
         Accumulator bin size.
     min_size : int, optional
-        minimal major axis length.
+        Minimal major axis length.
     max_size : int, optional
-        maximal minor axis length.
+        Maximal minor axis length.
         If None, the value is set to the half of the smaller
         image dimension.
 
     Returns
     -------
     res : list of tuples [(x0, y0, a, b, angle, accumulator)]
-          where (x0, y0) is the center, (a, b) major and minor axis.
+          Where (x0, y0) is the center, (a, b) major and minor axis.
 
     Examples
     --------
