@@ -4,7 +4,7 @@ from numpy.testing import *
 import skimage.transform as tf
 import skimage.transform.hough_transform as ht
 from skimage.transform import probabilistic_hough
-from skimage.draw import circle_perimeter
+from skimage.draw import circle_perimeter, ellipse_perimeter
 
 
 def append_desc(func, description):
@@ -123,6 +123,24 @@ def test_houghcircle():
     # Offset for x_0, y_0
     assert_equal(x[0], x_0 + radius)
     assert_equal(y[0], y_0 + radius)
+
+
+def test_houghellipse():
+    img = np.zeros((25, 25), dtype=int)
+    a = 8
+    b = 6
+    x0 = 10
+    y0 = 10
+    angle = np.pi/2.
+    rr, cc = ellipse_perimeter(x0, x0, b, a)
+    img[rr, cc] = 1
+    result = ht.hough_ellipse(img, threshold=6)
+    assert_equal(result[0][0], x0)
+    assert_equal(result[0][1], y0)
+    assert_almost_equal(result[0][2], a, decimal=1)
+    assert_almost_equal(result[0][3], b, decimal=1)
+    assert_equal(result[0][4], angle)
+
 
 if __name__ == "__main__":
     run_module_suite()
