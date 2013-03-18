@@ -129,6 +129,7 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1e-2, int m
             raise ValueError('The input image must be 2D.')
 
     cdef cnp.ndarray[ndim=2, dtype=cnp.intp_t] pixels = np.transpose(np.nonzero(img))
+    cdef Py_ssize_t num_pixels = pixels.shape[0]
     cdef list acc = list()
     cdef list results = list()
 
@@ -141,45 +142,52 @@ def _hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1e-2, int m
     else:
         max_b_squared = max_size**2
 
-    cdef int i, j
+    cdef Py_ssize_t p1, p2, p3, p1x, p1y, p2x, p2y, p3x, p3y
     cdef double x0, y0, a, d, cos_tau_squared, b_squared, f_squared, angle
-    cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] pixel1, pixel2, pixel3
 
-    for i, pixel1 in enumerate(pixels):
-        for j, pixel2 in enumerate(pixels):
-            # We consider unique couples (pixel1, pixel2)
-            # with pixel1 != pixel2
-            if not (pixel1 == pixel2).all() and i < j:
-                # Candidate: center (x0,y0) and main axis a
-                a = 0.5 * np.sqrt(np.dot(pixel1-pixel2, pixel1-pixel2))
-                if a > 0.5 * min_size:
-                    x0 = 0.5 * (pixel1[0] + pixel2[0])
-                    y0 = 0.5 * (pixel1[1] + pixel2[1])
+    for p1 in range(num_pixels):
+        p1x = pixels[p1, 0]
+        p1y = pixels[p1, 1]
 
-                    for pixel3 in pixels:
-                        d = np.sqrt(np.dot(pixel3 - (x0, y0), pixel3 - (x0, y0)))
-                        if d > min_size:
-                            f_squared = np.dot(pixel3 - pixel2, pixel3 - pixel2)
-                            cos_tau_squared = ((a**2 + d**2 - f_squared) / (2 * a * d))**2
-                            # Consider b2 > 0 and avoid division by zero
-                            if a**2 - d**2 * cos_tau_squared > 0 and cos_tau_squared < 1:
-                                b_squared = a**2 * d**2 * (1 - cos_tau_squared) / (a**2 - d**2 * cos_tau_squared)
-                                # b2 range is limited to avoid histogram memory overflow
-                                if b_squared <= max_b_squared:
-                                    acc.append(b_squared)
+        for p2 in range(p1):
+            p2x = pixels[p2, 0]
+            p2y = pixels[p2, 1]
 
-                    if len(acc) > 0:
-                        hist, bin_edges = np.histogram(acc, bins=np.arange(0, np.max(acc) + accuracy, accuracy))
-                        if np.max(hist) > threshold:
-                            angle = np.arctan2(pixel2[1] - pixel1[1], pixel2[0] - pixel1[0])
-                            results.append((x0,
-                                            y0,
-                                            a,
-                                            np.sqrt(bin_edges[hist.argmax()]), # b
-                                            angle,
-                                            np.max(hist), # Accumulator
-                                            ))
-                        acc = []
+            # Candidate: center (x0, y0) and main axis a
+            a = 0.5 * sqrt((p1x - p2x)**2 + (p1y - p2y)**2)
+
+            if a > 0.5 * min_size:
+                x0 = 0.5 * (p1x + p2x)
+                y0 = 0.5 * (p1y + p2y)
+
+                for p3 in range(num_pixels):
+                    p3x = pixels[p3, 0]
+                    p3y = pixels[p3, 1]
+
+                    d = sqrt((p3x - x0)**2 + (p3y - y0)**2)
+                    if d > min_size:
+                        f_squared = (p3x - p1x)**2 + (p3y - p1y)**2
+                        cos_tau_squared = ((a**2 + d**2 - f_squared) / (2 * a * d))**2
+                        # Consider b2 > 0 and avoid division by zero
+                        if a**2 - d**2 * cos_tau_squared > 0 and cos_tau_squared < 1:
+                            b_squared = a**2 * d**2 * (1 - cos_tau_squared) / (a**2 - d**2 * cos_tau_squared)
+                            # b2 range is limited to avoid histogram memory overflow
+                            if b_squared <= max_b_squared:
+                                acc.append(b_squared)
+
+                if len(acc) > 0:
+                    hist, bin_edges = np.histogram(acc, bins=np.arange(0, np.max(acc) + accuracy, accuracy))
+                    hist_max = np.max(hist)
+                    if hist_max > threshold:
+                        angle = np.arctan2(p1y - p2y, p1x - p2x)
+                        results.append((x0,
+                                        y0,
+                                        a,
+                                        sqrt(bin_edges[hist.argmax()]), # b
+                                        angle,
+                                        hist_max, # Accumulator
+                                        ))
+                    acc = []
 
     return results
 
