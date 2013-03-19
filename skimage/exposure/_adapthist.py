@@ -259,6 +259,8 @@ def map_histogram(hist, min_val, max_val, n_pixels):
 
     It does so by cumulating the input histogram.
 
+    Parameters
+    ----------
     hist : ndarray
         Clipped histogram.
     min_val : int
@@ -301,12 +303,11 @@ def interpolate(image, xslice, yslice,
     out : ndarray
         Original image with the subregion replaced.
 
-    Note
-    ----
-    This function calculates the new greylevel assignments of pixels
-    within a submatrix of the image.
-    This is done by a bilinear interpolation between four different
-    mappings in order to eliminate boundary artifacts.
+    Notes
+    -----
+    This function calculates the new greylevel assignments of pixels within
+    a submatrix of the image. This is done by a bilinear interpolation between
+    four different mappings in order to eliminate boundary artifacts.
     """
     norm = xslice.size * yslice.size  # Normalization factor
     # interpolation weight matrices

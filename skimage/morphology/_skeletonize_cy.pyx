@@ -1,3 +1,8 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
+
 '''
 Originally part of CellProfiler, code licensed under both GPL and BSD licenses.
 Website: http://www.cellprofiler.org
@@ -10,21 +15,20 @@ Original author: Lee Kamentsky
 '''
 
 import numpy as np
-cimport numpy as np
-cimport cython
+
+cimport numpy as cnp
 
 
-@cython.boundscheck(False)
-def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2, 
-                                negative_indices=False, mode='c'] result,
-                     np.ndarray[dtype=np.int32_t, ndim=1,
-                                negative_indices=False, mode='c'] i,
-                     np.ndarray[dtype=np.int32_t, ndim=1,
-                                negative_indices=False, mode='c'] j,
-                     np.ndarray[dtype=np.int32_t, ndim=1,
-                                negative_indices=False, mode='c'] order,
-                     np.ndarray[dtype=np.uint8_t, ndim=1,
-                                negative_indices=False, mode='c'] table):
+def _skeletonize_loop(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
+                                  negative_indices=False, mode='c'] result,
+                      cnp.ndarray[dtype=cnp.intp_t, ndim=1,
+                                  negative_indices=False, mode='c'] i,
+                      cnp.ndarray[dtype=cnp.intp_t, ndim=1,
+                                  negative_indices=False, mode='c'] j,
+                      cnp.ndarray[dtype=cnp.int32_t, ndim=1,
+                                  negative_indices=False, mode='c'] order,
+                      cnp.ndarray[dtype=cnp.uint8_t, ndim=1,
+                                  negative_indices=False, mode='c'] table):
     """
     Inner loop of skeletonize function
 
@@ -37,13 +41,13 @@ def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
 
     i, j : ndarrays
         The coordinates of each foreground pixel in the image
-   
+
     order : ndarray
         The index of each pixel, in the order of processing (order[0] is
         the first pixel to process, etc.)
-   
+
     table : ndarray
-        The 512-element lookup table of values after transformation 
+        The 512-element lookup table of values after transformation
         (whether to keep or not each configuration in a binary 3x3 array)
 
     Notes
@@ -55,15 +59,15 @@ def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
     the quench-line of the brushfire will be evaluated later than a
     point closer to the edge.
 
-    Note that the neighbourhood of a pixel may evolve before the loop 
-    arrives at this pixel. This is why it is possible to compute the 
+    Note that the neighbourhood of a pixel may evolve before the loop
+    arrives at this pixel. This is why it is possible to compute the
     skeleton in only one pass, thanks to an adapted ordering of the
     pixels.
     """
     cdef:
-        np.int32_t accumulator
-        np.int32_t index, order_index
-        np.int32_t ii, jj
+        cnp.int32_t accumulator
+        Py_ssize_t index, order_index
+        Py_ssize_t ii, jj
 
     for index in range(order.shape[0]):
         accumulator = 16
@@ -92,9 +96,10 @@ def _skeletonize_loop(np.ndarray[dtype=np.uint8_t, ndim=2,
             # Assign the value of table corresponding to the configuration
             result[ii, jj] = table[accumulator]
 
-@cython.boundscheck(False)
-def _table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
-                                  negative_indices=False, mode='c'] image):
+
+
+def _table_lookup_index(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
+                                    negative_indices=False, mode='c'] image):
     """
     Return an index into a table per pixel of a binary image
 
@@ -110,27 +115,27 @@ def _table_lookup_index(np.ndarray[dtype=np.uint8_t, ndim=2,
       256 128 64
        32  16  8
         4   2  1
-    
+
     but this runs about twice as fast because of inlining and the
     hardwired kernel.
     """
     cdef:
-        np.ndarray[dtype=np.int32_t, ndim=2, 
-                   negative_indices=False, mode='c'] indexer
-        np.int32_t *p_indexer
-        np.uint8_t *p_image
-        np.int32_t i_stride
-        np.int32_t i_shape
-        np.int32_t j_shape
-        np.int32_t i
-        np.int32_t j
-        np.int32_t offset
+        cnp.ndarray[dtype=cnp.int32_t, ndim=2,
+                    negative_indices=False, mode='c'] indexer
+        cnp.int32_t *p_indexer
+        cnp.uint8_t *p_image
+        Py_ssize_t i_stride
+        Py_ssize_t i_shape
+        Py_ssize_t j_shape
+        Py_ssize_t i
+        Py_ssize_t j
+        Py_ssize_t offset
 
     i_shape   = image.shape[0]
     j_shape   = image.shape[1]
     indexer = np.zeros((i_shape, j_shape), np.int32)
-    p_indexer = <np.int32_t *>indexer.data
-    p_image   = <np.uint8_t *>image.data
+    p_indexer = <cnp.int32_t *>indexer.data
+    p_image   = <cnp.uint8_t *>image.data
     i_stride  = image.strides[0]
     assert i_shape >= 3 and j_shape >= 3, \
         "Please use the slow method for arrays < 3x3"

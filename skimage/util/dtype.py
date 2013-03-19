@@ -2,7 +2,7 @@ from __future__ import division
 import numpy as np
 
 __all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
-           'img_as_bool']
+           'img_as_bool', 'dtype_limits']
 
 from .. import get_log
 log = get_log('dtype_converter')
@@ -26,6 +26,23 @@ _supported_types = (np.bool_, np.bool8,
 if np.__version__ >= "1.6.0":
     dtype_range[np.float16] = (-1, 1)
     _supported_types += (np.float16, )
+
+
+def dtype_limits(image, clip_negative=True):
+    """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    clip_negative : bool
+        If True, clip the negative range (i.e. return 0 for min intensity)
+        even if the image dtype allows negative values.
+    """
+    imin, imax = dtype_range[image.dtype.type]
+    if clip_negative:
+        imin = 0
+    return imin, imax
 
 
 def convert(image, dtype, force_copy=False, uniform=False):

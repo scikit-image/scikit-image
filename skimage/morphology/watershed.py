@@ -214,9 +214,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
             c_mask = c_mask.astype(np.int8).flatten()
         _watershed.watershed(c_image.flatten(),
                              pq, age, c,
-                             c_image.ndim,
                              c_mask,
-                             np.array(c_image.shape, np.int32),
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
                                                 image.ndim]

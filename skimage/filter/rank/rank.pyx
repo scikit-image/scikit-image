@@ -648,12 +648,12 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     References
     ----------
     .. [Hashimoto12] N. Hashimoto et al. Referenceless image quality evaluation
-    for whole slide imaging. J Pathol Inform 2012;3:9.
+                     for whole slide imaging. J Pathol Inform 2012;3:9.
 
     Returns
     -------
     out : uint8 array or uint16 array (same as input image)
-        The image noise .
+        The image noise.
 
     """
 
@@ -669,7 +669,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
 
 def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Returns the entropy [wiki_entropy]_ computed locally. Entropy is computed
+    """Returns the entropy [1]_ computed locally. Entropy is computed
     using base 2 logarithm i.e. the filter returns the minimum number of
     bits needed to encode local greylevel distribution.
 
@@ -698,7 +698,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     References
     ----------
-    .. [wiki_entropy] http://en.wikipedia.org/wiki/Entropy_(information_theory)
+    .. [1] http://en.wikipedia.org/wiki/Entropy_(information_theory)
 
     Examples
     --------
@@ -726,9 +726,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, the algorithm
-        uses max. 12bit histogram, an exception will be raised if image has a
-        value > 4095.
+        Image array (uint8 array).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -743,12 +741,16 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : uint8 array
         Otsu's threshold values
 
     References
     ----------
     .. [otsu] http://en.wikipedia.org/wiki/Otsu's_method
+
+    Notes
+    -----
+    * input image are 8-bit only
 
     Examples
     --------
@@ -756,7 +758,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage import data
     >>> from skimage.filter.rank import otsu
     >>> from skimage.morphology import disk
-    >>> # defining a 8- and a 16-bit test images
+    >>> # defining a 8-bit test images
     >>> a8 = data.camera()
     >>> loc_otsu = otsu(a8, disk(5))
     >>> thresh_image = a8 >= loc_otsu

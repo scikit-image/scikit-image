@@ -1,13 +1,19 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
-cimport numpy as np
 from time import time
 from scipy import ndimage
+
+cimport numpy as cnp
+
 from ..util import img_as_float
 from ..color import rgb2lab, gray2rgb
 
 
 def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
-        convert2lab=True):
+         convert2lab=True):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -62,41 +68,41 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         image = rgb2lab(image)
 
     # initialize on grid:
-    cdef int height, width
+    cdef Py_ssize_t height, width
     height, width = image.shape[:2]
     # approximate grid size for desired n_segments
-    cdef int step = np.ceil(np.sqrt(height * width / n_segments))
+    cdef Py_ssize_t step = int(np.ceil(np.sqrt(height * width / n_segments)))
     grid_y, grid_x = np.mgrid[:height, :width]
     means_y = grid_y[::step, ::step]
     means_x = grid_x[::step, ::step]
 
     means_color = np.zeros((means_y.shape[0], means_y.shape[1], 3))
-    cdef np.ndarray[dtype=np.float_t, ndim=2] means \
+    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] means \
             = np.dstack([means_y, means_x, means_color]).reshape(-1, 5)
-    cdef np.float_t* current_mean
-    cdef np.float_t* mean_entry
+    cdef cnp.float_t* current_mean
+    cdef cnp.float_t* mean_entry
     n_means = means.shape[0]
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
     ratio = (ratio / float(step)) ** 2
-    cdef np.ndarray[dtype=np.float_t, ndim=3] image_yx \
+    cdef cnp.ndarray[dtype=cnp.float_t, ndim=3] image_yx \
             = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
-    cdef int i, k, x, y, x_min, x_max, y_min, y_max, changes
+    cdef Py_ssize_t i, k, x, y, x_min, x_max, y_min, y_max, changes
     cdef double dist_mean
 
-    cdef np.ndarray[dtype=np.int_t, ndim=2] nearest_mean \
-            = np.zeros((height, width), dtype=np.int)
-    cdef np.ndarray[dtype=np.float_t, ndim=2] distance \
+    cdef cnp.ndarray[dtype=cnp.intp_t, ndim=2] nearest_mean \
+            = np.zeros((height, width), dtype=np.intp)
+    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] distance \
             = np.empty((height, width))
-    cdef np.float_t* image_p = <np.float_t*> image_yx.data
-    cdef np.float_t* distance_p = <np.float_t*> distance.data
-    cdef np.float_t* current_distance
-    cdef np.float_t* current_pixel
+    cdef cnp.float_t* image_p = <cnp.float_t*> image_yx.data
+    cdef cnp.float_t* distance_p = <cnp.float_t*> distance.data
+    cdef cnp.float_t* current_distance
+    cdef cnp.float_t* current_pixel
     cdef double tmp
     for i in range(max_iter):
         distance.fill(np.inf)
         changes = 0
-        current_mean = <np.float_t*> means.data
+        current_mean = <cnp.float_t*> means.data
         # assign pixels to means
         for k in range(n_means):
             # compute windows:

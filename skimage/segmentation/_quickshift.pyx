@@ -1,18 +1,18 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
-cimport numpy as np
-cimport cython
-from libc.math cimport exp, sqrt
-
-from itertools import product
 from scipy import ndimage
+from itertools import product
+
+cimport numpy as cnp
+from libc.math cimport exp, sqrt
 
 from ..util import img_as_float
 from ..color import rgb2lab
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.cdivision(True)
 def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
                return_tree=False, sigma=0, convert2lab=True, random_seed=None):
     """Segments image using quickshift clustering in Color-(x,y) space.
@@ -69,7 +69,7 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
         image = rgb2lab(image)
 
     image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
-    cdef np.ndarray[dtype=np.float_t, ndim=3, mode="c"] image_c \
+    cdef cnp.ndarray[dtype=cnp.float_t, ndim=3, mode="c"] image_c \
             = np.ascontiguousarray(image) * ratio
 
     random_state = np.random.RandomState(random_seed)
@@ -85,18 +85,19 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
         raise ValueError("Sigma should be >= 1")
     cdef int w = int(3 * kernel_size)
 
-    cdef int height = image_c.shape[0]
-    cdef int width = image_c.shape[1]
-    cdef int channels = image_c.shape[2]
+    cdef Py_ssize_t height = image_c.shape[0]
+    cdef Py_ssize_t width = image_c.shape[1]
+    cdef Py_ssize_t channels = image_c.shape[2]
     cdef double current_density, closest, dist
 
-    cdef int r, c, r_, c_, channel
+    cdef Py_ssize_t r, c, r_, c_, channel, r_min, c_min
 
-    cdef np.float_t* image_p = <np.float_t*> image_c.data
-    cdef np.float_t* current_pixel_p = image_p
+    cdef cnp.float_t* image_p = <cnp.float_t*> image_c.data
+    cdef cnp.float_t* current_pixel_p = image_p
 
-    cdef np.ndarray[dtype=np.float_t, ndim=2] densities \
+    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] densities \
             = np.zeros((height, width))
+
     # compute densities
     for r in range(height):
         for c in range(width):
@@ -116,10 +117,11 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
     densities += random_state.normal(scale=0.00001, size=(height, width))
 
     # default parent to self:
-    cdef np.ndarray[dtype=np.int_t, ndim=2] parent \
+    cdef cnp.ndarray[dtype=cnp.int_t, ndim=2] parent \
             = np.arange(width * height).reshape(height, width)
-    cdef np.ndarray[dtype=np.float_t, ndim=2] dist_parent \
+    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] dist_parent \
             = np.zeros((height, width))
+
     # find nearest node with higher density
     current_pixel_p = image_p
     for r in range(height):

@@ -136,11 +136,11 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     References
     ----------
-    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
-    -------
+    --------
     >>> from skimage.feature import corner_harris, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
@@ -206,11 +206,11 @@ def corner_shi_tomasi(image, sigma=1):
 
     References
     ----------
-    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
-    -------
+    --------
     >>> from skimage.feature import corner_shi_tomasi, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
@@ -272,12 +272,12 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    ..[1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-          foerstner87.fast.pdf
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
+           foerstner87.fast.pdf
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
-    -------
+    --------
     >>> from skimage.feature import corner_foerstner, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
@@ -338,9 +338,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    ..[1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-          foerstner87.fast.pdf
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
+           foerstner87.fast.pdf
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     """
 
@@ -489,7 +489,7 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
                            threshold_abs=threshold_abs,
                            threshold_rel=threshold_rel,
                            exclude_border=exclude_border,
-                           indices=False, num_peaks=np.inf,
+                           indices=False, num_peaks=num_peaks,
                            footprint=footprint, labels=labels)
     if min_distance > 0:
         coords = np.transpose(peaks.nonzero())

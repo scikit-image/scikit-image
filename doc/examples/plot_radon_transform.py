@@ -22,11 +22,11 @@ import matplotlib.pyplot as plt
 
 from skimage.io import imread
 from skimage import data_dir
-from skimage.transform import radon, iradon
-from scipy.ndimage import zoom
+from skimage.transform import radon, iradon, rescale
+
 
 image = imread(data_dir + "/phantom.png", as_grey=True)
-image = zoom(image, 0.4)
+image = rescale(image, scale=0.4)
 
 plt.figure(figsize=(8, 8.5))
 

@@ -2,15 +2,15 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import numpy as np
 import math
+import numpy as np
+
+cimport numpy as cnp
 from libc.math cimport sqrt
-cimport numpy as np
-cimport cython
 from skimage._shared.geometry cimport point_in_polygon
 
 
-def line(int y, int x, int y2, int x2):
+def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     """Generate line pixel coordinates.
 
     Parameters
@@ -29,12 +29,12 @@ def line(int y, int x, int y2, int x2):
 
     """
 
-    cdef np.ndarray[np.int32_t, ndim=1, mode="c"] rr, cc
+    cdef cnp.ndarray[cnp.intp_t, ndim=1, mode="c"] rr, cc
 
-    cdef int steep = 0
-    cdef int dx = abs(x2 - x)
-    cdef int dy = abs(y2 - y)
-    cdef int sx, sy, d, i
+    cdef char steep = 0
+    cdef Py_ssize_t dx = abs(x2 - x)
+    cdef Py_ssize_t dy = abs(y2 - y)
+    cdef Py_ssize_t sx, sy, d, i
 
     if (x2 - x) > 0:
         sx = 1
@@ -51,8 +51,8 @@ def line(int y, int x, int y2, int x2):
         sx, sy = sy, sx
     d = (2 * dy) - dx
 
-    rr = np.zeros(int(dx) + 1, dtype=np.int32)
-    cc = np.zeros(int(dx) + 1, dtype=np.int32)
+    rr = np.zeros(int(dx) + 1, dtype=np.intp)
+    cc = np.zeros(int(dx) + 1, dtype=np.intp)
 
     for i in range(dx):
         if steep:
@@ -96,27 +96,27 @@ def polygon(y, x, shape=None):
 
     """
 
-    cdef int nr_verts = x.shape[0]
-    cdef int minr = <int>max(0, y.min())
-    cdef int maxr = <int>math.ceil(y.max())
-    cdef int minc = <int>max(0, x.min())
-    cdef int maxc = <int>math.ceil(x.max())
+    cdef Py_ssize_t nr_verts = x.shape[0]
+    cdef Py_ssize_t minr = int(max(0, y.min()))
+    cdef Py_ssize_t maxr = int(math.ceil(y.max()))
+    cdef Py_ssize_t minc = int(max(0, x.min()))
+    cdef Py_ssize_t maxc = int(math.ceil(x.max()))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
         maxr = min(shape[0] - 1, maxr)
         maxc = min(shape[1] - 1, maxc)
 
-    cdef int r, c
+    cdef Py_ssize_t r, c
 
-    #: make contigous arrays for r, c coordinates
-    cdef np.ndarray contiguous_rdata, contiguous_cdata
+    # make contigous arrays for r, c coordinates
+    cdef cnp.ndarray contiguous_rdata, contiguous_cdata
     contiguous_rdata = np.ascontiguousarray(y, 'double')
     contiguous_cdata = np.ascontiguousarray(x, 'double')
-    cdef np.double_t* rptr = <np.double_t*>contiguous_rdata.data
-    cdef np.double_t* cptr = <np.double_t*>contiguous_cdata.data
+    cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
+    cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
 
-    #: output coordinate arrays
+    # output coordinate arrays
     cdef list rr = list()
     cdef list cc = list()
 
@@ -126,7 +126,7 @@ def polygon(y, x, shape=None):
                 rr.append(r)
                 cc.append(c)
 
-    return np.array(rr), np.array(cc)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
 def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
@@ -138,6 +138,10 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
         Centre coordinate of ellipse.
     yradius, xradius : double
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
+    shape : tuple, optional
+        image shape which is used to determine maximum extents of output pixel
+        coordinates. This is useful for ellipses which exceed the image size.
+        By default the full extents of the ellipse are used.
 
     Returns
     -------
@@ -148,19 +152,19 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
 
     """
 
-    cdef int minr = <int>max(0, cy - yradius)
-    cdef int maxr = <int>math.ceil(cy + yradius)
-    cdef int minc = <int>max(0, cx - xradius)
-    cdef int maxc = <int>math.ceil(cx + xradius)
+    cdef Py_ssize_t minr = int(max(0, cy - yradius))
+    cdef Py_ssize_t maxr = int(math.ceil(cy + yradius))
+    cdef Py_ssize_t minc = int(max(0, cx - xradius))
+    cdef Py_ssize_t maxc = int(math.ceil(cx + xradius))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
         maxr = min(shape[0] - 1, maxr)
         maxc = min(shape[1] - 1, maxc)
 
-    cdef int r, c
+    cdef Py_ssize_t r, c
 
-    #: output coordinate arrays
+    # output coordinate arrays
     cdef list rr = list()
     cdef list cc = list()
 
@@ -170,7 +174,7 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
                 rr.append(r)
                 cc.append(c)
 
-    return np.array(rr), np.array(cc)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
 def circle(double cy, double cx, double radius, shape=None):
@@ -182,6 +186,10 @@ def circle(double cy, double cx, double radius, shape=None):
         Centre coordinate of circle.
     radius: double
         Radius of circle.
+    shape : tuple, optional
+        image shape which is used to determine maximum extents of output pixel
+        coordinates. This is useful for circles which exceed the image size.
+        By default the full extents of the circle are used.
 
     Returns
     -------
@@ -189,13 +197,16 @@ def circle(double cy, double cx, double radius, shape=None):
         Pixel coordinates of circle.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
-
+    Notes
+    -----
+        This function is a wrapper for skimage.draw.ellipse()
     """
 
     return ellipse(cy, cx, radius, radius, shape)
 
 
-def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
+def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
+                     method='bresenham'):
     """Generate circle perimeter coordinates.
 
     Parameters
@@ -234,9 +245,9 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
     cdef list rr = list()
     cdef list cc = list()
 
-    cdef int x = 0
-    cdef int y = radius
-    cdef int d = 0
+    cdef Py_ssize_t x = 0
+    cdef Py_ssize_t y = radius
+    cdef Py_ssize_t d = 0
     cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
@@ -270,10 +281,11 @@ def circle_perimeter(int cy, int cx, int radius, method='bresenham'):
                 y = y - 1
                 x = x + 1
 
-    return np.array(rr) + cy, np.array(cc) + cx
+    return np.array(rr, dtype=np.intp) + cy, np.array(cc, dtype=np.intp) + cx
 
 
-def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
+def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
+                      Py_ssize_t xradius):
     """Generate ellipse perimeter coordinates.
 
     Parameters
@@ -302,8 +314,8 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
         return np.array(cy), np.array(cx)
 
     # a and b are xradius an yradius compute 2a^2 and 2b^2
-    cdef int twoasquared = 2 * xradius**2
-    cdef int twobsquared = 2 * yradius**2
+    cdef Py_ssize_t twoasquared = 2 * xradius**2
+    cdef Py_ssize_t twobsquared = 2 * yradius**2
 
     # Pixels
     cdef list px = list()
@@ -311,14 +323,14 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
 
     # First set of points:
     # start at the top
-    cdef int x = xradius
-    cdef int y = 0
+    cdef Py_ssize_t x = xradius
+    cdef Py_ssize_t y = 0
 
-    cdef int err = 0
-    cdef int xstop = twobsquared * xradius
-    cdef int ystop = 0
-    cdef int xchange = yradius * yradius * (1 - 2 * xradius)
-    cdef int ychange = xradius * xradius
+    cdef Py_ssize_t err = 0
+    cdef Py_ssize_t xstop = twobsquared * xradius
+    cdef Py_ssize_t ystop = 0
+    cdef Py_ssize_t xchange = yradius * yradius * (1 - 2 * xradius)
+    cdef Py_ssize_t ychange = xradius * xradius
 
     while xstop > ystop:
         px.extend([x, -x, -x, x])
@@ -356,7 +368,7 @@ def ellipse_perimeter(int cy, int cx, int yradius, int xradius):
             err += ychange
             ychange += twobsquared
 
-    return np.array(py) + cy, np.array(px) + cx
+    return np.array(py, dtype=np.intp) + cy, np.array(px, dtype=np.intp) + cx
 
 
 def set_color(img, coords, color):

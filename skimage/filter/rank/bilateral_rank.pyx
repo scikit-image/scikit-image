@@ -3,8 +3,8 @@
 The local histogram is computed using a sliding window similar to the method
 described in [1]_.
 
-Input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit), 8-bit
-images are casted in 16-bit the number of histogram bins is determined from the
+Input image must be 16-bit with a value < 4096 (i.e. 12 bit),
+the number of histogram bins is determined from the
 maximum value present in the image.
 
 The pixel neighborhood is defined by:
@@ -89,9 +89,8 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095
+        Image array (uint16). As the algorithm uses max. 12bit histogram,
+        an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -108,7 +107,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : uint16 array (uint8 image are casted to uint16)
+    out : uint16 array
         The result of the local bilateral mean.
 
     See also
@@ -118,17 +117,15 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     Notes
     -----
 
-    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
-
-    * 8-bit images are casted in 16-bit
+    * input image are 16-bit only
 
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
     >>> from skimage.filter.rank import bilateral_mean
-    >>> # Load test image
-    >>> ima = data.camera()
+    >>> # Load test image / cast to uint16
+    >>> ima = data.camera().astype(np.uint16)
     >>> # bilateral filtering of cameraman image using a flat kernel
     >>> bilat_ima = bilateral_mean(ima, disk(20), s0=10,s1=10)
     """
@@ -146,9 +143,8 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095
+        Image array (uint16). As the algorithm uses max. 12bit histogram,
+        an exception will be raised if image has a value > 4095
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -165,20 +161,25 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : uint16 array (uint8 image are casted to uint16)
+    out : uint16 array
         the local number of pixels inside the bilateral neighborhood
+
+    Notes
+    -----
+
+    * input image are 16-bit only
 
     Examples
     --------
     >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
-    >>> ima8 = 255 * np.array([[0, 0, 0, 0, 0],
+    >>> ima16 = 255 * np.array([[0, 0, 0, 0, 0],
     ...                        [0, 1, 1, 1, 0],
     ...                        [0, 1, 1, 1, 0],
     ...                        [0, 1, 1, 1, 0],
-    ...                        [0, 0, 0, 0, 0]], dtype=np.uint8)
-    >>> rank.bilateral_pop(ima8, square(3), s0=10,s1=10)
+    ...                        [0, 0, 0, 0, 0]], dtype=np.uint16)
+    >>> rank.bilateral_pop(ima16, square(3), s0=10,s1=10)
     array([[3, 4, 3, 4, 3],
            [4, 4, 6, 4, 4],
            [3, 6, 9, 6, 3],

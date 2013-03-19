@@ -1,8 +1,11 @@
-# -*- python -*-
 #cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 
 import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 
 """
 See also:
@@ -23,23 +26,25 @@ See also:
 # Tree operations implemented by an array as described in Wu et al.
 # The term "forest" is used to indicate an array that stores one or more trees
 
-DTYPE = np.int
+DTYPE = np.intp
 
-cdef DTYPE_t find_root(np.int_t *forest, np.int_t n):
+
+cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n):
     """Find the root of node n.
 
     """
-    cdef np.int_t root = n
+    cdef DTYPE_t root = n
     while (forest[root] < root):
         root = forest[root]
     return root
 
-cdef set_root(np.int_t *forest, np.int_t n, np.int_t root):
+
+cdef set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root):
     """
     Set all nodes on a path to point to new_root.
 
     """
-    cdef np.int_t j
+    cdef DTYPE_t j
     while (forest[n] < n):
         j = forest[n]
         forest[n] = root
@@ -48,12 +53,12 @@ cdef set_root(np.int_t *forest, np.int_t n, np.int_t root):
     forest[n] = root
 
 
-cdef join_trees(np.int_t *forest, np.int_t n, np.int_t m):
+cdef join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
     """Join two trees containing nodes n and m.
 
     """
-    cdef np.int_t root = find_root(forest, n)
-    cdef np.int_t root_m
+    cdef DTYPE_t root = find_root(forest, n)
+    cdef DTYPE_t root_m
 
     if (n != m):
         root_m = find_root(forest, m)
@@ -64,7 +69,8 @@ cdef join_trees(np.int_t *forest, np.int_t n, np.int_t m):
         set_root(forest, n, root)
         set_root(forest, m, root)
 
-cdef link_bg(np.int_t *forest, np.int_t n, np.int_t *background_node):
+
+cdef link_bg(DTYPE_t *forest, DTYPE_t n, DTYPE_t *background_node):
     """
     Link a node to the background node.
 
@@ -76,7 +82,7 @@ cdef link_bg(np.int_t *forest, np.int_t n, np.int_t *background_node):
 
 # Connected components search as described in Fiorio et al.
 
-def label(input, np.int_t neighbors=8, np.int_t background=-1):
+def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -134,21 +140,21 @@ def label(input, np.int_t neighbors=8, np.int_t background=-1):
      [-1 -1 -1]]
 
     """
-    cdef np.int_t rows = input.shape[0]
-    cdef np.int_t cols = input.shape[1]
+    cdef DTYPE_t rows = input.shape[0]
+    cdef DTYPE_t cols = input.shape[1]
 
-    cdef np.ndarray[DTYPE_t, ndim=2] data = np.array(input, copy=True,
-                                                     dtype=DTYPE)
-    cdef np.ndarray[DTYPE_t, ndim=2] forest
+    cdef cnp.ndarray[DTYPE_t, ndim=2] data = np.array(input, copy=True,
+                                                      dtype=DTYPE)
+    cdef cnp.ndarray[DTYPE_t, ndim=2] forest
 
     forest = np.arange(data.size, dtype=DTYPE).reshape((rows, cols))
 
-    cdef np.int_t *forest_p = <np.int_t*>forest.data
-    cdef np.int_t *data_p = <np.int_t*>data.data
+    cdef DTYPE_t *forest_p = <DTYPE_t*>forest.data
+    cdef DTYPE_t *data_p = <DTYPE_t*>data.data
 
-    cdef np.int_t i, j
+    cdef DTYPE_t i, j
 
-    cdef np.int_t background_node = -999
+    cdef DTYPE_t background_node = -999
 
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
@@ -197,7 +203,7 @@ def label(input, np.int_t neighbors=8, np.int_t background=-1):
 
     # Label output
 
-    cdef np.int_t ctr = 0
+    cdef DTYPE_t ctr = 0
     for i in range(rows):
         for j in range(cols):
             if (i*cols + j) == background_node:
@@ -208,4 +214,8 @@ def label(input, np.int_t neighbors=8, np.int_t background=-1):
             else:
                 data[i, j] = data_p[forest[i, j]]
 
-    return data
+    # Work around a bug in ndimage's type checking on 32-bit platforms
+    if data.dtype == np.int32:
+        return data.view(np.int32)
+    else:
+        return data

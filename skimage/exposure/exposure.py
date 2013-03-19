@@ -81,7 +81,7 @@ def cumulative_distribution(image, nbins=256):
 
 @deprecated('equalize_hist')
 def equalize(image, nbins=256):
-    equalize_hist(image, nbins)
+    return equalize_hist(image, nbins)
 
 
 def equalize_hist(image, nbins=256):

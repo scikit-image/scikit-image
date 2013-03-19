@@ -1,16 +1,18 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 import numpy as np
-cimport numpy as np
 import scipy
-cimport cython
 
+cimport cython
+cimport numpy as cnp
 from skimage.morphology.ccomp cimport find_root, join_trees
 
 from ..util import img_as_float
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
-@cython.cdivision(True)
-def _felzenszwalb_grey(image, double scale=1, sigma=0.8, int min_size=20):
+
+def _felzenszwalb_grey(image, double scale=1, sigma=0.8, Py_ssize_t min_size=20):
     """Felzenszwalb's efficient graph based segmentation for a single channel.
 
     Produces an oversegmentation of a 2d image using a fast, minimum spanning
@@ -49,31 +51,31 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, int min_size=20):
     down_cost = np.abs((image[:, 1:] - image[:, :-1]))
     dright_cost = np.abs((image[1:, 1:] - image[:-1, :-1]))
     uright_cost = np.abs((image[1:, :-1] - image[:-1, 1:]))
-    cdef np.ndarray[np.float_t, ndim=1] costs = np.hstack([right_cost.ravel(),
+    cdef cnp.ndarray[cnp.float_t, ndim=1] costs = np.hstack([right_cost.ravel(),
         down_cost.ravel(), dright_cost.ravel(),
         uright_cost.ravel()]).astype(np.float)
     # compute edges between pixels:
     height, width = image.shape[:2]
-    cdef np.ndarray[np.int_t, ndim=2] segments \
-            = np.arange(width * height, dtype=np.int).reshape(height, width)
+    cdef cnp.ndarray[cnp.intp_t, ndim=2] segments \
+            = np.arange(width * height, dtype=np.intp).reshape(height, width)
     right_edges = np.c_[segments[1:, :].ravel(), segments[:-1, :].ravel()]
     down_edges = np.c_[segments[:, 1:].ravel(), segments[:, :-1].ravel()]
     dright_edges = np.c_[segments[1:, 1:].ravel(), segments[:-1, :-1].ravel()]
     uright_edges = np.c_[segments[:-1, 1:].ravel(), segments[1:, :-1].ravel()]
-    cdef np.ndarray[np.int_t, ndim=2] edges \
+    cdef cnp.ndarray[cnp.intp_t, ndim=2] edges \
             = np.vstack([right_edges, down_edges, dright_edges, uright_edges])
     # initialize data structures for segment size
     # and inner cost, then start greedy iteration over edges.
     edge_queue = np.argsort(costs)
     edges = np.ascontiguousarray(edges[edge_queue])
     costs = np.ascontiguousarray(costs[edge_queue])
-    cdef np.int_t *segments_p = <np.int_t*>segments.data
-    cdef np.int_t *edges_p = <np.int_t*>edges.data
-    cdef np.float_t *costs_p = <np.float_t*>costs.data
-    cdef np.ndarray[np.int_t, ndim=1] segment_size \
-            = np.ones(width * height, dtype=np.int)
+    cdef cnp.intp_t *segments_p = <cnp.intp_t*>segments.data
+    cdef cnp.intp_t *edges_p = <cnp.intp_t*>edges.data
+    cdef cnp.float_t *costs_p = <cnp.float_t*>costs.data
+    cdef cnp.ndarray[cnp.intp_t, ndim=1] segment_size \
+            = np.ones(width * height, dtype=np.intp)
     # inner cost of segments
-    cdef np.ndarray[np.float_t, ndim=1] cint = np.zeros(width * height)
+    cdef cnp.ndarray[cnp.float_t, ndim=1] cint = np.zeros(width * height)
     cdef int seg0, seg1, seg_new, e
     cdef float cost, inner_cost0, inner_cost1
     # set costs_p back one. we increase it before we use it
@@ -96,7 +98,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, int min_size=20):
             cint[seg_new] = costs_p[0]
 
     # postprocessing to remove small segments
-    edges_p = <np.int_t*>edges.data
+    edges_p = <cnp.intp_t*>edges.data
     for e in range(costs.size):
         seg0 = find_root(segments_p, edges_p[0])
         seg1 = find_root(segments_p, edges_p[1])

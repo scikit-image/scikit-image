@@ -27,6 +27,14 @@ if "%1" == "help" (
 	goto end
 )
 
+for %%x in (html htmlhelp latex qthelp) do (
+	if "%1" == "%%x" (
+		md source\api 2>NUL
+		python tools/build_modref_templates.py
+	)
+)
+
+
 if "%1" == "clean" (
 	for /d %%i in (build\*) do rmdir /q /s %%i
 	del /q /s build\*
@@ -34,6 +42,7 @@ if "%1" == "clean" (
 )
 
 if "%1" == "html" (
+	cd source && python random_gallery.py && python coverage_generator.py && cd ..
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% build/html
 	echo.
 	echo.Build finished. The HTML pages are in build/html.
