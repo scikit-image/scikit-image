@@ -5,6 +5,7 @@ from skimage import data
 from skimage import img_as_float
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
+                             corner_kitchen_rosenfeld, corner_foerstner,
                              corner_subpix, peak_local_max, corner_peaks)
 
 
@@ -111,6 +112,21 @@ def test_num_peaks():
         n = np.random.random_integers(20)
         results = peak_local_max(lena_corners, num_peaks=n)
         assert (results.shape[0] == n)
+
+
+def test_blank_image_nans():
+    """Some of the corner detectors had a weakness in terms of returning
+    NaN when presented with regions of constant intensity. This should
+    be fixed by now. We test whether each detector returns something
+    finite in the case of constant input"""
+
+    detectors = [corner_moravec, corner_harris, corner_shi_tomasi,
+                 corner_kitchen_rosenfeld, corner_foerstner]
+    constant_image = np.zeros((20, 20))
+
+    for det in detectors:
+        response = det(constant_image)
+        assert np.isnan(response).sum() == 0
 
 
 def test_corner_peaks():
