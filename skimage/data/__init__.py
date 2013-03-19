@@ -127,3 +127,19 @@ def clock():
 
     """
     return load("clock_motion.png")
+
+
+def immunohistochemistry():
+    """Immunohistochemical (IHC) staining with hematoxylin counterstaining.
+
+    This picture shows colonic glands where the IHC expression of FHL2 protein
+    is revealed with DAB. Hematoxylin counterstaining is applied to enhance the
+    negative parts of the tissue.
+
+    This image was acquired at the Center for Microscopy And Molecular Imaging
+    (CMMI).
+
+    No known copyright restrictions.
+
+    """
+    return load("ihc.jpg")

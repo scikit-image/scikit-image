@@ -44,7 +44,7 @@ def test_labeled_image():
 
 def test_float_input():
     float_test = np.random.rand(5, 5)
-    assert_raises(ValueError, remove_small_objects, float_test)
+    assert_raises(TypeError, remove_small_objects, float_test)
 
 
 def test_negative_input():

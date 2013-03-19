@@ -21,8 +21,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
     Raises
     ------
-    ValueError
+    TypeError
         If the input array is of an invalid type, such as float or string.
+    ValueError
+        If the input array contains negative values.
 
     Returns
     -------
@@ -50,9 +52,9 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     """
-    # Should use `issubdtype` below, but there's a bug in numpy 1.7
+    # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
     if not (ar.dtype == bool or np.issubdtype(ar.dtype, int)):
-        raise ValueError("Only bool or integer image types are supported. "
+        raise TypeError("Only bool or integer image types are supported. "
                          "Got %s." % ar.dtype)
 
     if in_place:

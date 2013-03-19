@@ -489,7 +489,7 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
                            threshold_abs=threshold_abs,
                            threshold_rel=threshold_rel,
                            exclude_border=exclude_border,
-                           indices=False, num_peaks=np.inf,
+                           indices=False, num_peaks=num_peaks,
                            footprint=footprint, labels=labels)
     if min_distance > 0:
         coords = np.transpose(peaks.nonzero())
