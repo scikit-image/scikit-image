@@ -59,7 +59,7 @@ References
 
 '''
 
-from skimage.transform import hough, hough_peaks, probabilistic_hough
+from skimage.transform import hough_line, hough_peaks, probabilistic_hough
 from skimage.filter import canny
 from skimage import data
 
@@ -77,7 +77,7 @@ idx = np.arange(25, 75)
 image[idx[::-1], idx] = 255
 image[idx, idx] = 255
 
-h, theta, d = hough(image)
+h, theta, d = hough_line(image)
 
 plt.figure(figsize=(8, 4))
 
