@@ -116,46 +116,7 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
 
     # Find and collect unique vertices, storing triangle verts as indices.
     # Removes much redundancy and eliminates degenerate "triangles".
-    vert_list, tri_list = _unpack_unique_verts(raw_tris)
-
-    return vert_list, tri_list
-
-
-def _unpack_unique_verts(trilist):
-    """
-    Converts a list of lists of tuples corresponding to triangle vertices into
-    a unique vertex list, and a list of triangle faces w/indices corresponding
-    to entries of the vertex list.
-
-    """
-    idx = 0
-    vert_index = {}
-    vert_list = []
-    tri_list = []
-
-    # Iterate over triangles
-    for i in range(len(trilist)):
-        templist = []
-
-        # Only parse vertices from non-degenerate triangles
-        if not ((trilist[i][0] == trilist[i][1]) or
-                (trilist[i][0] == trilist[i][2]) or
-                (trilist[i][1] == trilist[i][2])):
-
-            # Iterate over vertices within each triangle
-            for j in range(3):
-                vert = trilist[i][j]
-
-                # Check if a new unique vertex found
-                if vert not in vert_index:
-                    vert_index[vert] = idx
-                    templist.append(idx)
-                    vert_list.append(vert)
-                    idx += 1
-                else:
-                    templist.append(vert_index[vert])
-
-            tri_list.append(templist)
+    vert_list, tri_list = _marching_cubes_cy.unpack_unique_verts(raw_tris)
 
     return vert_list, tri_list
 

@@ -13,6 +13,48 @@ cdef inline double _get_fraction(double from_value, double to_value,
     return ((level - from_value) / (to_value - from_value))
 
 
+def unpack_unique_verts(list trilist):
+    """
+    Converts a list of lists of tuples corresponding to triangle vertices into
+    a unique vertex list, and a list of triangle faces w/indices corresponding
+    to entries of the vertex list.
+
+    """
+    cdef Py_ssize_t idx = 0
+    cdef Py_ssize_t n_tris = len(trilist)
+    cdef Py_ssize_t i, j
+    cdef dict vert_index = {}
+    cdef list vert_list = []
+    cdef list tri_list = []
+    cdef list templist
+
+    # Iterate over triangles
+    for i in range(n_tris):
+        templist = []
+
+        # Only parse vertices from non-degenerate triangles
+        if not ((trilist[i][0] == trilist[i][1]) or
+                (trilist[i][0] == trilist[i][2]) or
+                (trilist[i][1] == trilist[i][2])):
+
+            # Iterate over vertices within each triangle
+            for j in range(3):
+                vert = trilist[i][j]
+
+                # Check if a new unique vertex found
+                if vert not in vert_index:
+                    vert_index[vert] = idx
+                    templist.append(idx)
+                    vert_list.append(vert)
+                    idx += 1
+                else:
+                    templist.append(vert_index[vert])
+
+            tri_list.append(templist)
+
+    return vert_list, tri_list
+
+
 def iterate_and_store_3d(cnp.ndarray[double, ndim=3] arr,
                          double level, tuple sampling=(1., 1., 1.)):
     """Iterate across the given array in a marching-cubes fashion,
