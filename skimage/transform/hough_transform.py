@@ -100,9 +100,6 @@ from skimage._shared.utils import deprecated
 
 @deprecated('hough_line')
 def hough(img, theta=None):
-    """
-    This function is deprecated. Use `hough_line` instead.
-    """
     return hough_line(img, theta)
 
 from ._hough_transform import _hough_circle
