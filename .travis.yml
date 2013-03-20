@@ -1,7 +1,7 @@
 # vim ft=yaml
 # travis-ci.org definition for skimage build
 #
-# We pretend to be erlang because we need can't use the python support in
+# We pretend to be erlang because we can't use the python support in
 # travis-ci; it uses virtualenvs, they do not have numpy, scipy, matplotlib,
 # and it is impractical to build them
 
