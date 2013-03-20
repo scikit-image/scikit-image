@@ -126,8 +126,7 @@ def test_blank_image_nans():
 
     for det in detectors:
         response = det(constant_image)
-        assert (~np.isfinite(response)).sum() == 0
-
+        assert np.all(np.isfinite(response))
 
 
 def test_corner_peaks():
