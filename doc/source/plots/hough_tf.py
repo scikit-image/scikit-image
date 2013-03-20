@@ -20,8 +20,8 @@ plt.title('Input image')
 
 plt.subplot(1, 2, 2)
 plt.imshow(out, cmap=plt.cm.bone,
-           extent=(d[0], d[-1],
-                   np.rad2deg(angles[0]), np.rad2deg(angles[-1])))
+           extent=(np.rad2deg(angles[0]), np.rad2deg(angles[-1]),
+                   d[0], d[-1]))
 plt.title('Hough transform')
 plt.xlabel('Angle (degree)')
 plt.ylabel('Distance (pixel)')

@@ -293,12 +293,12 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     cy, cx : int
         Centre coordinate of ellipse.
     yradius, xradius: int
-        Main radial values.
+        Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
 
     Returns
     -------
     rr, cc : (N,) ndarray of int
-        Indices of pixels that belong to the circle perimeter.
+        Indices of pixels that belong to the ellipse perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
