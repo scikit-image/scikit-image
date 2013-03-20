@@ -124,6 +124,12 @@ def hough_line(img, theta=None):
     distances : ndarray
         Distance values.
 
+    Notes
+    -----
+    The origin is the top left corner of the original image.
+    The angle is counted clockwise from 9 o'clock.
+    The distance is the minimal algebraic distance from this origin to the line.
+
     Examples
     --------
     Generate a test image:
@@ -138,7 +144,7 @@ def hough_line(img, theta=None):
 
     Apply the Hough transform:
 
-    >>> out, angles, d = hough(img)
+    >>> out, angles, d = hough_line(img)
 
     .. plot:: hough_tf.py
 
@@ -178,12 +184,12 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     Parameters
     ----------
     hspace : (N, M) array
-        Hough space returned by the `hough` function.
+        Hough space returned by the `hough_line` function.
     angles : (M,) array
-        Angles returned by the `hough` function. Assumed to be continuous
+        Angles returned by the `hough_line` function. Assumed to be continuous
         (`angles[-1] - angles[0] == PI`).
     dists : (N, ) array
-        Distances returned by the `hough` function.
+        Distances returned by the `hough_line` function.
     min_distance : int
         Minimum distance separating lines (maximum filter size for first
         dimension of hough space).
@@ -204,14 +210,14 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.transform import hough, hough_peaks
+    >>> from skimage.transform import hough_line, hough_peaks
     >>> from skimage.draw import line
     >>> img = np.zeros((15, 15), dtype=np.bool_)
     >>> rr, cc = line(0, 0, 14, 14)
     >>> img[rr, cc] = 1
     >>> rr, cc = line(0, 14, 14, 0)
     >>> img[cc, rr] = 1
-    >>> hspace, angles, dists = hough(img)
+    >>> hspace, angles, dists = hough_line(img)
     >>> hspace, angles, dists = hough_peaks(hspace, angles, dists)
     >>> angles
     array([  0.74590887,  -0.79856126])
