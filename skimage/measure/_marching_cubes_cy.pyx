@@ -184,7 +184,10 @@ def iterate_and_store_3d(cnp.ndarray[double, ndim=3] arr,
             # Cases 0 and 255 are entirely below/above the contour.
 
             if cube_case > 127:
-                cube_case = 255 - cube_case
+                if ((cube_case != 150) and
+                     (cube_case != 170) and
+                     (cube_case != 195)):
+                    cube_case = 255 - cube_case
 
             # Calculate cube edges, to become triangulation vertices.
             # If we moved in a convenient direction, save 1/3 of the effort by
@@ -963,5 +966,29 @@ def _append_tris(list tri_list, unsigned char case, tuple e1, tuple e2,
     elif (case == 127):
         # Isolated corner v8
         tri_list.append([e11, e7, e8])
+    elif (case == 150):
+        # AMBIGUOUS CASE: back right and front left planes
+        # In these cube_case > 127 cases, the vertices are identical BUT
+        # they are connected in the opposite fashion.
+        _append_tris(tri_list, 6, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+                     e11, e12)
+        _append_tris(tri_list, 111, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+                     e11, e12)
+    elif (case == 170):
+        # AMBIGUOUS CASE: upper left and lower right planes
+        # In these cube_case > 127 cases, the vertices are identical BUT
+        # they are connected in the opposite fashion.
+        _append_tris(tri_list, 119, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+                     e11, e12)
+        _append_tris(tri_list, 34, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+                     e11, e12)
+    elif (case == 195):
+        # AMBIGUOUS CASE: back upper and front lower planes
+        # In these cube_case > 127 cases, the vertices are identical BUT
+        # they are connected in the opposite fashion.
+        _append_tris(tri_list, 63, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+                     e11, e12)
+        _append_tris(tri_list, 3, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+                     e11, e12)
 
     return
