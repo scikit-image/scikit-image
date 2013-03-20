@@ -127,6 +127,12 @@ def hough_line(img, theta=None):
     distances : ndarray
         Distance values.
 
+    Notes
+    -----
+    The origin is the top left corner of the original image.
+    The angle is counted clockwise from 9 o'clock.
+    The distance is the minimal algebraic distance from this origin to the line.
+
     Examples
     --------
     Generate a test image:
