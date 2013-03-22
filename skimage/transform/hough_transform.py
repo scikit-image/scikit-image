@@ -120,7 +120,7 @@ def hough_line(img, theta=None):
     H : 2-D ndarray of uint64
         Hough transform accumulator.
     theta : ndarray
-        Angles at which the transform was computed.
+        Angles at which the transform was computed, in radians.
     distances : ndarray
         Distance values.
 
@@ -186,8 +186,7 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     hspace : (N, M) array
         Hough space returned by the `hough_line` function.
     angles : (M,) array
-        Angles returned by the `hough_line` function. Assumed to be continuous
-        (`angles[-1] - angles[0] == PI`).
+        Angles returned by the `hough_line` function. Assumed to be continuous.
     dists : (N, ) array
         Distances returned by the `hough_line` function.
     min_distance : int
