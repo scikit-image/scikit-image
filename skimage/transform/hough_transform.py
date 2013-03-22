@@ -128,7 +128,7 @@ def hough_line(img, theta=None):
     -----
     The origin is the top left corner of the original image.
     X and Y axis are horizontal and vertical edges respectively.
-    The distance is the minimal algebraic distance from this origin to the line.
+    The distance is the minimal algebraic distance from the origin to the detected line.
 
     Examples
     --------
