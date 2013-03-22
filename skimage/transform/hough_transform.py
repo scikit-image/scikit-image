@@ -127,7 +127,7 @@ def hough_line(img, theta=None):
     Notes
     -----
     The origin is the top left corner of the original image.
-    The angle is counted clockwise from 9 o'clock.
+    X and Y axis are horizontal and vertical edges respectively.
     The distance is the minimal algebraic distance from this origin to the line.
 
     Examples
