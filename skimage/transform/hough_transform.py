@@ -209,7 +209,7 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
 
     Examples
     --------
-    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt, numpy as np
     >>> from skimage.transform import hough_line, hough_peaks
     >>> from skimage.draw import line
     >>> img = np.zeros((15, 15), dtype=np.bool_)
@@ -218,11 +218,14 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
     >>> rr, cc = line(0, 14, 14, 0)
     >>> img[cc, rr] = 1
     >>> hspace, angles, dists = hough_line(img)
+    >>> plt.imshow(hspace, aspect='auto', cmap=plt.cm.jet, extent=
+    (angles[0], angles[-1], dists[0], dists[-1]))
     >>> hspace, angles, dists = hough_peaks(hspace, angles, dists)
     >>> angles
     array([  0.74590887,  -0.79856126])
     >>> dists
-    array([  10.74418605,  0.51162791])
+    array([ -10.74418605,  0.51162791])
+    >>> plt.show()
 
     """
 
@@ -280,7 +283,7 @@ def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
 
             # add current line to peaks
             hspace_peaks.append(accum)
-            dist_peaks.append(dists[dist_idx])
+            dist_peaks.append(-dists[dist_idx])
             angle_peaks.append(angles[angle_idx])
 
     hspace_peaks = np.array(hspace_peaks)
