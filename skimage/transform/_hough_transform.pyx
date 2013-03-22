@@ -98,7 +98,7 @@ def _hough(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
     cdef cnp.ndarray[ndim=1, dtype=cnp.double_t] stheta
 
     if theta is None:
-        theta = np.linspace(PI_2, NEG_PI_2, 180)
+        theta = np.linspace(NEG_PI_2, PI_2, 180)
 
     ctheta = np.cos(theta)
     stheta = np.sin(theta)
