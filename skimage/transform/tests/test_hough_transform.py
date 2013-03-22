@@ -4,7 +4,7 @@ from numpy.testing import *
 import skimage.transform as tf
 import skimage.transform.hough_transform as ht
 from skimage.transform import probabilistic_hough
-from skimage.draw import circle_perimeter
+from skimage.draw import circle_perimeter, line
 
 
 def append_desc(func, description):
@@ -16,11 +16,11 @@ def append_desc(func, description):
     return func
 
 
-def test_hough():
+def test_hough_line():
     # Generate a test image
-    img = np.zeros((100, 100), dtype=int)
-    for i in range(25, 75):
-        img[100 - i, i] = 1
+    img = np.zeros((100, 150), dtype=int)
+    rr, cc = line(60, 130, 80, 10)
+    img[rr, cc] = 1
 
     out, angles, d = tf.hough_line(img)
 
@@ -28,11 +28,11 @@ def test_hough():
     dist = d[y[0]]
     theta = angles[x[0]]
 
-    assert_equal(dist > 70, dist < 72)
-    assert_equal(theta > 0.78, theta < 0.79)
+    assert_almost_equal(dist, 80.723, 1)
+    assert_almost_equal(theta, 1.41, 1)
 
 
-def test_hough_angles():
+def test_hough_line_angles():
     img = np.zeros((10, 10))
     img[0, 0] = 1
 
@@ -44,8 +44,8 @@ def test_hough_angles():
 def test_py_hough():
     ht._hough, fast_hough = ht._py_hough, ht._hough
 
-    yield append_desc(test_hough, '_python')
-    yield append_desc(test_hough_angles, '_python')
+    yield append_desc(test_hough_line, '_python')
+    yield append_desc(test_hough_line_angles, '_python')
 
     tf._hough = fast_hough
 
@@ -69,6 +69,20 @@ def test_probabilistic_hough():
         sorted_lines.append(line)
     assert([(25, 75), (74, 26)] in sorted_lines)
     assert([(25, 25), (74, 74)] in sorted_lines)
+
+
+def test_hough_peaks():
+    img = np.zeros((100, 150), dtype=int)
+    rr, cc = line(60, 130, 80, 10)
+    img[rr, cc] = 1
+
+    out, angles, d = tf.hough_line(img)
+
+    out, theta, dist = tf.hough_peaks(out, angles, d)
+
+    assert_equal(len(dist), 1)
+    assert_almost_equal(dist[0], 80.723, 1)
+    assert_almost_equal(theta[0], 1.41, 1)
 
 
 def test_hough_peaks_dist():
