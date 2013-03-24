@@ -1,10 +1,10 @@
-__all__ = ['hough', 'hough_line', 'hough_circle', 'hough_peaks', 'probabilistic_hough']
+__all__ = ['hough', 'hough_line', 'hough_circle', 'hough_ellipse', 'hough_peaks', 'probabilistic_hough']
 
 from itertools import izip as zip
 
 import numpy as np
 from scipy import ndimage
-from ._hough_transform import _probabilistic_hough
+from ._hough_transform import _probabilistic_hough, _hough_circle, _hough_ellipse
 from skimage import measure, morphology
 
 
@@ -102,7 +102,6 @@ from skimage._shared.utils import deprecated
 def hough(img, theta=None):
     return hough_line(img, theta)
 
-from ._hough_transform import _hough_circle
 
 def hough_line(img, theta=None):
     """Perform a straight line Hough transform.
@@ -171,6 +170,47 @@ def hough_circle(img, radius, normalize=True):
 
     """
     return _hough_circle(img, radius.astype(np.intp), normalize)
+
+
+def hough_ellipse(img, threshold=4, accuracy=1e-2, min_size=4, max_size=None):
+    """Perform an elliptical Hough transform.
+
+    Parameters
+    ----------
+    img : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    threshold: int, optional
+        Accumulator threshold value.
+    accuracy : double, optional
+        Accumulator bin size
+    min_size : int, optional
+        minimal major axis length.
+    max_size : int, optional
+        maximal minor axis length.
+        If None, the value is set to the half of the smaller
+        image dimension.
+
+    Returns
+    -------
+    res : list of tuples [(x0, y0, a, b, angle, accumulator)]
+          where (x0, y0) is the center, (a, b) major and minor axis.
+
+    Examples
+    --------
+    >>> img = np.zeros((25, 25), dtype=int)
+    >>> rr, cc = draw.ellipse_perimeter(10, 10, 6, 8)
+    >>> img[rr, cc] = 1
+    >>> result = hough_ellipse(img, threshold=6)
+    [(10.0, 10.0, 8.0, 6.0474292058692187, 0.0, 8)]
+
+    References
+    ----------
+    .. [1] Xie, Yonghong, and Qiang Ji. "A new efficient ellipse detection
+           method." Pattern Recognition, 2002. Proceedings. 16th International
+           Conference on. Vol. 2. IEEE, 2002
+    """
+    return _hough_ellipse(img, threshold, accuracy, min_size, max_size)
+
 
 def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
                 threshold=None, num_peaks=np.inf):
