@@ -41,15 +41,6 @@ def test_hough_line_angles():
     assert_equal(len(angles), 10)
 
 
-def test_py_hough():
-    ht._hough, fast_hough = ht._py_hough, ht._hough
-
-    yield append_desc(test_hough_line, '_python')
-    yield append_desc(test_hough_line_angles, '_python')
-
-    tf._hough = fast_hough
-
-
 def test_probabilistic_hough():
     # Generate a test image
     img = np.zeros((100, 100), dtype=int)
