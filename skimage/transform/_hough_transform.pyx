@@ -21,8 +21,8 @@ cdef inline Py_ssize_t round(double r):
 
 
 def hough_circle(cnp.ndarray img,
-                  cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
-                  char normalize=True):
+                 cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
+                 char normalize=True):
     """Perform a circular Hough transform.
 
     Parameters
@@ -112,7 +112,8 @@ def hough_line(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=No
     -----
     The origin is the top left corner of the original image.
     X and Y axis are horizontal and vertical edges respectively.
-    The distance is the minimal algebraic distance from the origin to the detected line.
+    The distance is the minimal algebraic distance from the origin
+    to the detected line.
 
     Examples
     --------
@@ -163,7 +164,7 @@ def hough_line(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=No
 
     # finally, run the transform
     cdef Py_ssize_t nidxs, nthetas, i, j, x, y, accum_idx
-    nidxs = y_idxs.shape[0] # x and y are the same shape
+    nidxs = y_idxs.shape[0]  # x and y are the same shape
     nthetas = theta.shape[0]
     for i in range(nidxs):
         x = x_idxs[i]
@@ -175,8 +176,8 @@ def hough_line(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=No
 
 
 def probabilistic_hough_line(cnp.ndarray img, int threshold=10,
-                         int line_length=50, int line_gap=10,
-                         cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
+                             int line_length=50, int line_gap=10,
+                             cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
     Parameters

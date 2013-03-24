@@ -2,7 +2,6 @@ import numpy as np
 from numpy.testing import *
 
 import skimage.transform as tf
-import skimage.transform.hough_transform as ht
 from skimage.draw import circle_perimeter, line
 
 
@@ -50,7 +49,7 @@ def test_probabilistic_hough():
     # as mentioned in article of Galambos et al
     theta = np.linspace(0, np.pi, 45)
     lines = tf.probabilistic_hough_line(img, threshold=10, line_length=10,
-                                line_gap=1, theta=theta)
+                                        line_gap=1, theta=theta)
     # sort the lines according to the x-axis
     sorted_lines = []
     for line in lines:
@@ -110,7 +109,7 @@ def test_hough_line_peaks_num():
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
     assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=0,
-                              min_angle=0, num_peaks=1)[0]) == 1
+                                   min_angle=0, num_peaks=1)[0]) == 1
 
 
 def test_hough_circle():
