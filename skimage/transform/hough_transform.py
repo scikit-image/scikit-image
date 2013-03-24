@@ -1,4 +1,4 @@
-__all__ = ['hough_peaks']
+__all__ = ['hough_line_peaks']
 
 from itertools import izip as zip
 
