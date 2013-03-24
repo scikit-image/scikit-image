@@ -17,7 +17,8 @@ def hough(img, theta=None):
 @deprecated('probabilistic_hough')
 def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10,
                         theta=None):
-    return probabilistic_hough_line(img, threshold, line_length, line_gap, theta)
+    return probabilistic_hough_line(img, threshold=threshold,
+                                    line_length=line_length, line_gap=line_gap, theta=theta)
 
 @deprecated('hough_peaks')
 def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,

@@ -174,8 +174,8 @@ def hough_line(cnp.ndarray img, cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=No
     return accum, theta, bins
 
 
-def probabilistic_hough_line(cnp.ndarray img, int value_threshold,
-                         int line_length, int line_gap,
+def probabilistic_hough_line(cnp.ndarray img, int threshold=10,
+                         int line_length=50, int line_gap=10,
                          cnp.ndarray[ndim=1, dtype=cnp.double_t] theta=None):
     """Return lines from a progressive probabilistic line Hough transform.
 
@@ -183,7 +183,7 @@ def probabilistic_hough_line(cnp.ndarray img, int value_threshold,
     ----------
     img : (M, N) ndarray
         Input image with nonzero values representing edges.
-    threshold : int
+    threshold : int, optional (default 10)
         Threshold
     line_length : int, optional (default 50)
         Minimum accepted length of detected lines.
@@ -267,7 +267,7 @@ def probabilistic_hough_line(cnp.ndarray img, int value_threshold,
             continue
 
         value = 0
-        max_value = value_threshold - 1
+        max_value = threshold - 1
         max_theta = -1
 
         # apply hough transform on point
@@ -278,7 +278,7 @@ def probabilistic_hough_line(cnp.ndarray img, int value_threshold,
             if value > max_value:
                 max_value = value
                 max_theta = j
-        if max_value < value_threshold:
+        if max_value < threshold:
             continue
 
         # from the random point walk in opposite directions and find line
