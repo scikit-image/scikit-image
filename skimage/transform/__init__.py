@@ -1,3 +1,6 @@
+from ._hough_transform import (hough_circle,
+                              hough_line,
+                              probabilistic_hough_line)
 from .hough_transform import *
 from .radon_transform import *
 from .finite_radon_transform import *
