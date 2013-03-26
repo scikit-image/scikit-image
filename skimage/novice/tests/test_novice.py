@@ -5,7 +5,7 @@
 :license: modified BSD
 """
 
-import os
+import os, tempfile
 from numpy.testing import TestCase, assert_equal, assert_raises
 from skimage import novice, data_dir
 
@@ -49,13 +49,12 @@ class TestNovice(TestCase):
         assert_equal(pic.modified, True)
         assert_equal(pic.path, None)
 
-        mod_path = "{0}.jpg".format(os.path.splitext(self.sample_path)[0])
-        pic.save(mod_path)
+        with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
+            pic.save(tmp.name)
 
-        assert_equal(pic.modified, False)
-        assert_equal(pic.path, os.path.abspath(mod_path))
-        assert_equal(pic.format, "jpeg")
-        os.unlink(mod_path)
+            assert_equal(pic.modified, False)
+            assert_equal(pic.path, os.path.abspath(tmp.name))
+            assert_equal(pic.format, "jpeg")
 
     def test_indexing(self):
         pic = novice.open(self.small_sample_path)
