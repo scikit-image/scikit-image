@@ -93,7 +93,7 @@ def disk(radius, dtype=np.uint8):
     """
     Generates a flat, disk-shaped structuring element of a given radius.
     A pixel is within the neighborhood if the euclidean distance between
-    it and the origin is no greater than a radius.
+    it and the origin is no greater than radius.
 
     Parameters
     ----------
