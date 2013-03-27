@@ -114,3 +114,29 @@ def disk(radius, dtype=np.uint8):
     s = X**2
     s += Y**2
     return np.array(s <= radius * radius, dtype=dtype)
+
+
+def cube(width, dtype=np.uint8):
+    """
+    Generates a cube-shaped structuring element (the 3D equivalent of
+    a square). Every pixel along the perimeter has a chessboard distance
+    no greater than radius (radius=floor(width/2)) pixels.
+
+    Parameters
+    ----------
+    width : int
+       The width, height and depth of the cube
+
+    Other Parameters
+    ----------------
+    dtype : data-type
+       The data type of the structuring element.
+
+    Returns
+    -------
+    selem : ndarray
+       A structuring element consisting only of ones, i.e. every
+       pixel belongs to the neighborhood.
+
+    """
+    return np.ones((width, width, width), dtype=dtype)
