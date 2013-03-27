@@ -140,3 +140,34 @@ def cube(width, dtype=np.uint8):
 
     """
     return np.ones((width, width, width), dtype=dtype)
+
+
+def ball(radius, dtype=np.uint8):
+    """
+    Generates a ball-shaped structuring element of a given radius (the
+    3D equivalent of a disk). A pixel is within the neighborhood if the
+    euclidean distance between it and the origin is no greater than
+    radius.
+
+    Parameters
+    ----------
+    radius : int
+       The radius of the ball-shaped structuring element.
+
+    dtype : data-type
+       The data type of the structuring element.
+
+    Returns
+    -------
+    selem : ndarray
+       The structuring element where elements of the neighborhood
+       are 1 and 0 otherwise.
+    """
+    n = 2 * radius + 1
+    Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
+                        -radius:radius:n*1j, 
+                        -radius:radius:n*1j]
+    s = X**2
+    s += Y**2
+    s += Z**2
+    return np.array(s <= radius * radius, dtype=dtype)
