@@ -142,6 +142,38 @@ def cube(width, dtype=np.uint8):
     return np.ones((width, width, width), dtype=dtype)
 
 
+def octahedron(radius, dtype=np.uint8):
+    """
+    Generates a octahedron-shaped structuring element of a given radius
+    (the 3D equivalent of a diamond).  A pixel is part of the
+    neighborhood (i.e. labeled 1) if the city block/manhattan distance
+    between it and the center of the neighborhood is no greater than
+    radius.
+
+    Parameters
+    ----------
+    radius : int
+       The radius of the octahedron-shaped structuring element.
+
+    dtype : data-type
+       The data type of the structuring element.
+
+    Returns
+    -------
+
+    selem : ndarray
+       The structuring element where elements of the neighborhood
+       are 1 and 0 otherwise.
+    """
+    # note that in contrast to diamond(), this method allows non-integer radii
+    n = 2 * radius + 1
+    Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
+                        -radius:radius:n*1j,
+                        -radius:radius:n*1j]
+    s = np.abs(X) + np.abs(Y) + np.abs(Z) 
+    return np.array(s <= radius, dtype=dtype)
+
+
 def ball(radius, dtype=np.uint8):
     """
     Generates a ball-shaped structuring element of a given radius (the
@@ -167,7 +199,5 @@ def ball(radius, dtype=np.uint8):
     Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
                         -radius:radius:n*1j, 
                         -radius:radius:n*1j]
-    s = X**2
-    s += Y**2
-    s += Z**2
+    s = X**2 + Y**2 + Z**2
     return np.array(s <= radius * radius, dtype=dtype)
