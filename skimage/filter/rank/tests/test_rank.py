@@ -376,5 +376,25 @@ def test_entropy():
     assert(np.max(rank.entropy(data, selem)) == 12000)
 
 
+def test_selem_dtypes():
+
+    image = np.zeros((5, 5), dtype=np.uint8)
+    out = np.zeros_like(image)
+    mask = np.ones_like(image, dtype=np.uint8)
+    image[2, 2] = 255
+    image[2, 3] = 128
+    image[1, 2] = 16
+
+    for dtype in (np.uint8, np.uint16, np.int32, np.int64,
+                  np.float32, np.float64):
+        elem = np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]], dtype=dtype)
+        rank.mean(image=image, selem=elem, out=out, mask=mask,
+                  shift_x=0, shift_y=0)
+        assert_array_equal(image, out)
+        rank.percentile_mean(image=image, selem=elem, out=out, mask=mask,
+                             shift_x=0, shift_y=0)
+        assert_array_equal(image, out)
+
+
 if __name__ == "__main__":
     run_module_suite()
