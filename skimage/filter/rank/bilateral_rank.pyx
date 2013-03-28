@@ -36,7 +36,7 @@ __all__ = ['bilateral_mean', 'bilateral_pop']
 
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, s0, s1):
-    selem = img_as_ubyte(selem)
+    selem = img_as_ubyte(selem > 0)
     image = np.ascontiguousarray(image)
 
     if mask is None:
