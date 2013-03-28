@@ -920,10 +920,10 @@ def _append_tris(list tri_list, unsigned char case, tuple e1, tuple e2,
         tri_list.append([e4, e3, e7])
         tri_list.append([e4, e8, e7])
     elif (case == 120):
-        # Shelf: (v1, v2, v3) + isolated corner v8
-        _append_tris(tri_list, 7, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+        # Shelf: (v5, v6, v7) + isolated corner v4
+        _append_tris(tri_list, 112, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
                      e11, e12)
-        _append_tris(tri_list, 127, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
+        _append_tris(tri_list, 8, e1, e2, e3, e4, e5, e6, e7, e8, e9, e10,
                      e11, e12)
     elif (case == 121):
         # Front right plane + isolated corner v8
