@@ -150,5 +150,6 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     if indices is True:
         return coordinates
     else:
-        out[coordinates[:, 0], coordinates[:, 1]] = True
+        nd_indices = tuple(coordinates.T.tolist())
+        out[nd_indices] = True
         return out
