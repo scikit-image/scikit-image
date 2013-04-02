@@ -33,8 +33,8 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         If True, `min_distance` excludes peaks from the border of the image as
         well as from each other.
     indices : bool
-        If True, the output will be a matrix representing peak coordinates.
-        If False, the output will be a boolean matrix shaped as `image.shape`
+        If True, the output will be an array representing peak coordinates.
+        If False, the output will be a boolean array shaped as `image.shape`
         with peaks present at True elements.
     num_peaks : int
         Maximum number of peaks. When the number of peaks exceeds `num_peaks`,
@@ -150,6 +150,6 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     if indices is True:
         return coordinates
     else:
-        nd_indices = tuple(coordinates.T.tolist())
+        nd_indices = tuple(coordinates.T)
         out[nd_indices] = True
         return out

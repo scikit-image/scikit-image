@@ -116,12 +116,13 @@ def test_indices_with_labels():
                                  indices=True, exclude_border=False)
     assert (result == np.transpose(expected.nonzero())).all()
 
+
 def test_ndarray_indices_false():
     nd_image = np.zeros((5,5,5))
     nd_image[2,2,2] = 1
     peaks = peak.peak_local_max(nd_image, min_distance=1, indices=False)
     assert (peaks == nd_image.astype(np.bool)).all()
-    
+
 
 if __name__ == '__main__':
     from numpy import testing
