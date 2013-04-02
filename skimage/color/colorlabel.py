@@ -1,5 +1,6 @@
 import os
 import ast
+import warnings
 import itertools
 import ConfigParser
 
@@ -68,6 +69,12 @@ def image_label2rgb(image, label, colors=None, alpha=0.3,
     image_alpha : float [0, 1]
         Opacity of the image.
     """
+    if not image.shape[:2] == label.shape:
+        raise ValueError("`image` and `label` must be the same shape")
+
+    if image.min() < 0:
+        warnings.warn("Negative intensities in `image` are not supported")
+
     if colors is None:
         colors = DEFAULT_COLORS
     colors = [_rgb_vector(c) for c in colors]
