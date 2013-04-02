@@ -37,9 +37,9 @@ def hough_circle(cnp.ndarray img,
 
     Returns
     -------
-    H : 3D ndarray (radius index, (M, N) ndarray)
-        Hough transform accumulator for each radius
-
+    H : 3D ndarray (radius index, (M + 2R, N + 2R) ndarray)
+        Hough transform accumulator for each radius.
+        R designates the larger radius.
     """
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
