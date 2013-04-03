@@ -131,7 +131,7 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
     if exclude_border:
         # zero out the image borders
-        for i in xrange(image.ndim):
+        for i in range(image.ndim):
             image = image.swapaxes(0, i)
             image[:min_distance] = 0
             image[-min_distance:] = 0
