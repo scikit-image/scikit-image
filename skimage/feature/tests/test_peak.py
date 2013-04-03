@@ -124,6 +124,17 @@ def test_ndarray_indices_false():
     assert (peaks == nd_image.astype(np.bool)).all()
 
 
+def test_ndarray_exclude_border():
+    nd_image = np.zeros((5,5,5))
+    nd_image[[1,0,0],[0,1,0],[0,0,1]] = 1
+    nd_image[3,0,0] = 1
+    nd_image[2,2,2] = 1
+    expected = np.zeros_like(nd_image, dtype=np.bool)
+    expected[2,2,2] = True
+    result = peak.peak_local_max(nd_image, min_distance=2, indices=False)
+    assert (result == expected).all()
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
