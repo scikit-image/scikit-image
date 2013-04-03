@@ -12,7 +12,7 @@ def test_color():
     img += 0.01 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=4)
+    seg = slic(img, sigma=0, n_segments=4)[0]
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
@@ -30,7 +30,7 @@ def test_gray():
     img += 0.0033 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=4, ratio=50.0, multichannel=False)
+    seg = slic(img, sigma=0, n_segments=4, ratio=50.0, multichannel=False)[0]
 
     assert_equal(len(np.unique(seg)), 4)
     assert_array_equal(seg[:10, :10], 0)
