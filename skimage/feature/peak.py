@@ -130,11 +130,12 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
     image *= mask
 
     if exclude_border:
-        # Remove the image borders
-        image[:min_distance] = 0
-        image[-min_distance:] = 0
-        image[:, :min_distance] = 0
-        image[:, -min_distance:] = 0
+        # zero out the image borders
+        for i in xrange(image.ndim):
+            image = image.swapaxes(0, i)
+            image[:min_distance] = 0
+            image[-min_distance:] = 0
+            image = image.swapaxes(0, i)
 
     # find top peak candidates above a threshold
     peak_threshold = max(np.max(image.ravel()) * threshold_rel, threshold_abs)
