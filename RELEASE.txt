@@ -46,6 +46,8 @@ How to make a new release of ``skimage``
   - Update stable and development version numbers in
     ``_templates/sidebar_versions.html``.
   - Add release date to ``index.rst`` under "Announcements".
+  - Add previous stable version documentation path to disallowed paths
+    in `robots.txt`
   - Build using ``make gh-pages``.
   - Push upstream: ``git push`` in ``gh-pages``.
 
