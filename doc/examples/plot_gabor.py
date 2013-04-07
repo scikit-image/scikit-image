@@ -51,21 +51,23 @@ for theta in range(4):
     theta = theta / 4. * np.pi
     for sigma in (1, 3):
         for frequency in (0.05, 0.25):
-            kernel = np.real(gabor_kernel(sigma, sigma, frequency, theta))
+            kernel = np.real(gabor_kernel(frequency, theta=theta,
+                                          sigma_x=sigma, sigma_y=sigma))
             kernels.append(kernel)
 
 
-brick = img_as_float(data.load('brick.png'))
-grass = img_as_float(data.load('grass.png'))
-wall = img_as_float(data.load('rough-wall.png'))
+shrink = (slice(0, None, 3), slice(0, None, 3))
+brick = img_as_float(data.load('brick.png'))[shrink]
+grass = img_as_float(data.load('grass.png'))[shrink]
+wall = img_as_float(data.load('rough-wall.png'))[shrink]
 image_names = ('brick', 'grass', 'wall')
+images = (brick, grass, wall)
 
-# prepare refernce features
+# prepare reference features
 ref_feats = np.zeros((3, len(kernels), 2), dtype=np.double)
 ref_feats[0, :, :] = compute_feats(brick, kernels)
 ref_feats[1, :, :] = compute_feats(grass, kernels)
 ref_feats[2, :, :] = compute_feats(wall, kernels)
-
 
 print 'Rotated images matched against references using Gabor filter banks:'
 
@@ -82,29 +84,50 @@ feats = compute_feats(nd.rotate(grass, angle=145, reshape=False), kernels)
 print image_names[match(feats, ref_feats)]
 
 
-# plot a selection of the filter bank kernels
+def power(image, kernel):
+    # Normalize images for better comparison.
+    image = (image - image.mean()) / image.std()
+    return np.sqrt(nd.convolve(image, np.real(kernel), mode='wrap')**2 +
+                   nd.convolve(image, np.imag(kernel), mode='wrap')**2)
 
-kernels = []
+# Plot a selection of the filter bank kernels and their responses.
+results = []
 kernel_params = []
-for theta in (0, 1, 3):
+for theta in (0, 1):
     theta = theta / 4. * np.pi
-    for frequency in (0.05, 0.1, 0.25):
-        kernel = np.real(gabor_kernel(10, 10, frequency, theta))
-        kernels.append(kernel)
-        params = 'theta=%d, frequency=%.2f' % (theta * 180 / np.pi, frequency)
+    for frequency in (0.1, 0.4):
+        kernel = gabor_kernel(frequency, theta=theta)
+        params = 'theta=%d,\nfrequency=%.2f' % (theta * 180 / np.pi, frequency)
         kernel_params.append(params)
+        # Save kernel and the power image for each image
+        results.append((kernel, [power(img, kernel) for img in images]))
 
-
-fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3,
-                                                       figsize=(9, 6))
+fig, axes = plt.subplots(nrows=5, ncols=4, figsize=(9, 6))
 plt.gray()
 
-fig.text(.5, .95, 'Gabor filter bank kernels',
-         horizontalalignment='center', fontsize=15)
+fig.suptitle('Image responses for Gabor filter kernels', fontsize=15)
 
-for i, ax in enumerate((ax1, ax2, ax3, ax4, ax5, ax6)):
-    ax.imshow(kernels[i], interpolation='nearest')
+axes[0][0].axis('off')
+
+# Plot original images
+for label, img, ax in zip(image_names, images, axes[0][1:]):
+    ax.imshow(img)
+    ax.set_title(label)
     ax.axis('off')
-    ax.set_title(kernel_params[i])
+
+for label, (kernel, powers), ax_row in zip(kernel_params, results, axes[1:]):
+    # Plot Gabor kernel
+    ax = ax_row[0]
+    ax.imshow(np.real(kernel), interpolation='nearest')
+    ax.set_ylabel(label)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    # Plot Gabor responses with the contrast normalized for each filter
+    vmin = np.min(powers)
+    vmax = np.max(powers)
+    for patch, ax in zip(powers, ax_row[1:]):
+        ax.imshow(patch, vmin=vmin, vmax=vmax)
+        ax.axis('off')
 
 plt.show()
