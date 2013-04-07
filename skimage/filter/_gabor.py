@@ -2,7 +2,17 @@ import numpy as np
 from scipy import ndimage
 
 
-def gabor_kernel(sigma_x, sigma_y, frequency, theta, offset=0):
+__all__ = ['gabor_kernel', 'gabor_filter']
+
+
+def _sigma_prefactor(bandwidth):
+    b = bandwidth
+    # See http://www.cs.rug.nl/~imaging/simplecell.html
+    return 1.0 / np.pi * np.sqrt(np.log(2)/2.0) * (2.0**b + 1) / (2.0**b - 1)
+
+
+def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
+                 offset=0):
     """Build complex 2D Gabor filter kernel.
 
     Frequency and orientation representations of the Gabor filter are similar
@@ -11,14 +21,18 @@ def gabor_kernel(sigma_x, sigma_y, frequency, theta, offset=0):
 
     Parameters
     ----------
+    frequency : float
+        Frequency of the harmonic function.
+    theta : float
+        Orientation in radians. If 0, the harmonic is in the x-direction.
+    bandwidth : float
+        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
+        and `sigma_y` will decrease with increasing frequency. This value is
+        ignored if `sigma_x` and `sigma_y` are set by the user.
     sigma_x, sigma_y : float
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
         rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
-    frequency : float
-        Frequency of the harmonic function.
-    theta : float
-        Orientation in radians.
     offset : float, optional
         Phase offset of harmonic function in radians.
 
@@ -33,6 +47,10 @@ def gabor_kernel(sigma_x, sigma_y, frequency, theta, offset=0):
     .. [2] http://mplab.ucsd.edu/tutorials/gabor.pdf
 
     """
+    if sigma_x is None:
+        sigma_x = _sigma_prefactor(bandwidth) / frequency
+    if sigma_y is None:
+        sigma_y = _sigma_prefactor(bandwidth) / frequency
 
     n_stds = 3
     x0 = np.ceil(max(np.abs(n_stds * sigma_x * np.cos(theta)),
@@ -52,8 +70,8 @@ def gabor_kernel(sigma_x, sigma_y, frequency, theta, offset=0):
     return g
 
 
-def gabor_filter(image, sigma_x, sigma_y, frequency, theta, offset=0,
-                 mode='reflect', cval=0):
+def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
+                 sigma_y=None, offset=0, mode='reflect', cval=0):
     """Perform Gabor filtering.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
@@ -65,14 +83,18 @@ def gabor_filter(image, sigma_x, sigma_y, frequency, theta, offset=0,
 
     Parameters
     ----------
+    frequency : float
+        Frequency of the harmonic function.
+    theta : float
+        Orientation in radians. If 0, the harmonic is in the x-direction.
+    bandwidth : float
+        The bandwidth captured by the filter. For fixed bandwidth, `sigma_x`
+        and `sigma_y` will decrease with increasing frequency. This value is
+        ignored if `sigma_x` and `sigma_y` are set by the user.
     sigma_x, sigma_y : float
         Standard deviation in x- and y-directions. These directions apply to
         the kernel *before* rotation. If `theta = pi/2`, then the kernel is
         rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
-    frequency : float
-        Frequency of the harmonic function.
-    theta : float
-        Orientation in radians.
     offset : float, optional
         Phase offset of harmonic function in radians.
 
@@ -89,7 +111,7 @@ def gabor_filter(image, sigma_x, sigma_y, frequency, theta, offset=0,
 
     """
 
-    g = gabor_kernel(sigma_x, sigma_y, frequency, theta, offset)
+    g = gabor_kernel(frequency, theta, bandwidth, sigma_x, sigma_y, offset)
 
     filtered_real = ndimage.convolve(image, np.real(g), mode=mode, cval=cval)
     filtered_imag = ndimage.convolve(image, np.imag(g), mode=mode, cval=cval)
