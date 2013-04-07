@@ -60,7 +60,21 @@ def test_gabor_kernel_theta():
 
 
 def test_gabor_filter():
-    real, imag = gabor_filter(np.random.random((100, 100)), 1)
+    Y, X = np.mgrid[:40, :40]
+    frequencies = (0.1, 0.3)
+    wave_images = [np.sin(2 * np.pi * X * f) for f in frequencies]
+
+    def match_score(image, frequency):
+        gabor_responses = gabor_filter(image, frequency)
+        return np.mean(np.hypot(*gabor_responses))
+
+    # Gabor scores: diagonals are frequency-matched, off-diagonals are not.
+    responses = np.array([[match_score(image, f) for f in frequencies]
+                          for image in wave_images])
+    assert responses[0, 0] > responses[0, 1]
+    assert responses[1, 1] > responses[0, 1]
+    assert responses[0, 0] > responses[1, 0]
+    assert responses[1, 1] > responses[1, 0]
 
 
 if __name__ == "__main__":
