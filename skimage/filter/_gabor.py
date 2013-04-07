@@ -13,7 +13,7 @@ def _sigma_prefactor(bandwidth):
 
 def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
                  offset=0):
-    """Build complex 2D Gabor filter kernel.
+    """Return complex 2D Gabor filter kernel.
 
     Frequency and orientation representations of the Gabor filter are similar
     to those of the human visual system. It is especially suitable for texture
@@ -72,10 +72,10 @@ def gabor_kernel(frequency, theta=0, bandwidth=1, sigma_x=None, sigma_y=None,
 
 def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
                  sigma_y=None, offset=0, mode='reflect', cval=0):
-    """Perform Gabor filtering.
+    """Return real and imaginary responses to Gabor filter.
 
     The real and imaginary parts of the Gabor filter kernel are applied to the
-    image.
+    image and the response is returned as a pair of arrays.
 
     Frequency and orientation representations of the Gabor filter are similar
     to those of the human visual system. It is especially suitable for texture
@@ -83,6 +83,8 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
 
     Parameters
     ----------
+    image : array
+        Input image.
     frequency : float
         Frequency of the harmonic function.
     theta : float
@@ -100,7 +102,7 @@ def gabor_filter(image, frequency, theta=0, bandwidth=1, sigma_x=None,
 
     Returns
     -------
-    real, imag : complex arrays
+    real, imag : arrays
         Filtered images using the real and imaginary parts of the Gabor filter
         kernel.
 
