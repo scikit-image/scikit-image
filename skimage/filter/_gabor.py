@@ -5,16 +5,16 @@ from scipy import ndimage
 def gabor_kernel(sigma_x, sigma_y, frequency, theta, offset=0):
     """Build complex 2D Gabor filter kernel.
 
-    Frequency and orientation representations of the Gabor filter are similar to
-    those of the human visual system. It is especially suitable for texture
+    Frequency and orientation representations of the Gabor filter are similar
+    to those of the human visual system. It is especially suitable for texture
     classification using Gabor filter banks.
 
     Parameters
     ----------
-    sigma_x : float
-        Standard deviation in x-direction.
-    sigma_y : float
-        Standard deviation in y-direction.
+    sigma_x, sigma_y : float
+        Standard deviation in x- and y-directions. These directions apply to
+        the kernel *before* rotation. If `theta = pi/2`, then the kernel is
+        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
     frequency : float
         Frequency of the harmonic function.
     theta : float
@@ -34,8 +34,11 @@ def gabor_kernel(sigma_x, sigma_y, frequency, theta, offset=0):
 
     """
 
-    x0 = np.ceil(max(3 * sigma_x, 1))
-    y0 = np.ceil(max(3 * sigma_y, 1))
+    n_stds = 3
+    x0 = np.ceil(max(np.abs(n_stds * sigma_x * np.cos(theta)),
+                     np.abs(n_stds * sigma_y * np.sin(theta)), 1))
+    y0 = np.ceil(max(np.abs(n_stds * sigma_y * np.cos(theta)),
+                     np.abs(n_stds * sigma_x * np.sin(theta)), 1))
     y, x = np.mgrid[-y0:y0+1, -x0:x0+1]
 
     rotx = x * np.cos(theta) + y * np.sin(theta)
@@ -56,16 +59,16 @@ def gabor_filter(image, sigma_x, sigma_y, frequency, theta, offset=0,
     The real and imaginary parts of the Gabor filter kernel are applied to the
     image.
 
-    Frequency and orientation representations of the Gabor filter are similar to
-    those of the human visual system. It is especially suitable for texture
+    Frequency and orientation representations of the Gabor filter are similar
+    to those of the human visual system. It is especially suitable for texture
     classification using Gabor filter banks.
 
     Parameters
     ----------
-    sigma_x : float
-        Standard deviation in x-direction.
-    sigma_y : float
-        Standard deviation in y-direction.
+    sigma_x, sigma_y : float
+        Standard deviation in x- and y-directions. These directions apply to
+        the kernel *before* rotation. If `theta = pi/2`, then the kernel is
+        rotated 90 degrees so that `sigma_x` controls the *vertical* direction.
     frequency : float
         Frequency of the harmonic function.
     theta : float
