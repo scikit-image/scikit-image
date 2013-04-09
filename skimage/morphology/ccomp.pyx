@@ -82,7 +82,7 @@ cdef inline void link_bg(DTYPE_t *forest, DTYPE_t n, DTYPE_t *background_node):
 
 
 # Connected components search as described in Fiorio et al.
-def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
+def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -111,6 +111,9 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
     labels : ndarray of dtype int
         Labeled array, where all connected regions are assigned the
         same integer value.
+    num : int, optional
+        Number of labels, which equals the maximum label index and is only
+        returned if return_num is `True`.
 
     Examples
     --------
@@ -215,6 +218,9 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
 
     # Work around a bug in ndimage's type checking on 32-bit platforms
     if data.dtype == np.int32:
-        return data.view(np.int32)
+        data = data.view(np.int32)
+
+    if return_num:
+        return data, ctr
     else:
         return data
