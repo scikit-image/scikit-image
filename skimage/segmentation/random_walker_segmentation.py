@@ -69,7 +69,7 @@ def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.,
     gradients = 0
     for channel in range(0, data.shape[-1]):
         gradients += _compute_gradients_3d(data[..., channel],
-                                               depth=depth) ** 2
+                                           depth=depth) ** 2
     # All channels considered together in this standard deviation
     beta /= 10 * data.std()
     if multichannel:
@@ -338,12 +338,13 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                                                  data must be of dimension 2 \
                                                  or 3.'
         dims = data.shape
-        data = np.atleast_3d(img_as_float(data.copy()))[..., np.newaxis]
+        data = np.atleast_3d(img_as_float(data,
+                                          force_copy=True))[..., np.newaxis]
     else:
         dims = data[..., 0].shape
         assert multichannel and data.ndim > 2, 'For multichannel input, data \
                                                 must have >= 3 dimensions.'
-        data = img_as_float(data.copy())
+        data = img_as_float(data, force_copy=True)
         if data.ndim == 3:
             data = data[..., np.newaxis].transpose((0, 1, 3, 2))
 
@@ -379,9 +380,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if mode == 'cg_mg':
         if not amg_loaded:
             warnings.warn(
-            """pyamg (http://code.google.com/p/pyamg/)) is needed to use
-            this mode, but is not installed. The 'cg' mode will be used
-            instead.""")
+                """pyamg (http://code.google.com/p/pyamg/)) is needed to use
+                this mode, but is not installed. The 'cg' mode will be used
+                instead.""")
             X = _solve_cg(lap_sparse, B, tol=tol,
                           return_full_prob=return_full_prob)
         else:
@@ -412,7 +413,7 @@ def _solve_bf(lap_sparse, B, return_full_prob=False):
     """
     lap_sparse = lap_sparse.tocsc()
     solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
-    X = np.array([solver(np.array((-B[i]).todense()).ravel())\
+    X = np.array([solver(np.array((-B[i]).todense()).ravel())
                   for i in range(len(B))])
     if not return_full_prob:
         X = np.argmax(X, axis=0)
