@@ -146,7 +146,7 @@ def skeletonize(image):
             pixelRemoved = True
             skeleton[code_mask] = 0
 
-    return skeleton
+    return skeleton.astype(bool)
 
 # --------- Skeletonization by medial axis transform --------
 
