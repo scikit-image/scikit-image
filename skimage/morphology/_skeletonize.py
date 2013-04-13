@@ -94,7 +94,7 @@ def skeletonize(image):
            2,3,0,1,0,0,0,1,0,0,0,0,0,0,0,0,3,3,0,1,0,0,0,0,2,2,0,0,2,0,0,0]
 
     # convert to unsigned int (this should work for boolean values)
-    skeleton = np.array(image).astype(np.uint8)
+    skeleton = image.astype(np.uint8)
 
     # check some properties of the input image:
     #  - 2D
