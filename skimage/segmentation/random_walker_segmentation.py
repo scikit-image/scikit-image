@@ -338,13 +338,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                                                  data must be of dimension 2 \
                                                  or 3.'
         dims = data.shape
-        data = np.atleast_3d(img_as_float(data,
-                                          force_copy=True))[..., np.newaxis]
+        data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
     else:
         dims = data[..., 0].shape
         assert multichannel and data.ndim > 2, 'For multichannel input, data \
                                                 must have >= 3 dimensions.'
-        data = img_as_float(data, force_copy=True)
+        data = img_as_float(data)
         if data.ndim == 3:
             data = data[..., np.newaxis].transpose((0, 1, 3, 2))
 
