@@ -51,10 +51,12 @@ def test_2d_bf():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
     full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
                                  return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
+    assert data.shape == labels.shape
     # Now test with more than two labels
     labels[55, 80] = 3
     full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
@@ -62,6 +64,7 @@ def test_2d_bf():
     assert (full_prob_bf[1, 25:45, 40:60] >=
             full_prob_bf[0, 25:45, 40:60]).all()
     assert len(full_prob_bf) == 3
+    assert data.shape == labels.shape
 
 
 def test_2d_cg():
@@ -70,10 +73,12 @@ def test_2d_cg():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels_cg = random_walker(data, labels, beta=90, mode='cg')
     assert (labels_cg[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
     full_prob = random_walker(data, labels, beta=90, mode='cg',
                               return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
+    assert data.shape == labels.shape
     return data, labels_cg
 
 
@@ -83,10 +88,12 @@ def test_2d_cg_mg():
     data, labels = make_2d_syntheticdata(lx, ly)
     labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
     full_prob = random_walker(data, labels, beta=90, mode='cg_mg',
                               return_full_prob=True)
     assert (full_prob[1, 25:45, 40:60] >=
             full_prob[0, 25:45, 40:60]).all()
+    assert data.shape == labels.shape
     return data, labels_cg_mg
 
 
@@ -98,6 +105,7 @@ def test_types():
     data = data.astype(np.uint8)
     labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
     return data, labels_cg_mg
 
 
@@ -108,6 +116,7 @@ def test_reorder_labels():
     labels[labels == 2] = 4
     labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
     return data, labels_bf
 
 
@@ -119,6 +128,7 @@ def test_2d_inactive():
     labels[46:50, 33:38] = -2
     labels = random_walker(data, labels, beta=90)
     assert (labels.reshape((lx, ly))[25:45, 40:60] == 2).all()
+    assert data.shape == labels.shape
     return data, labels
 
 
@@ -128,6 +138,7 @@ def test_3d():
     data, labels = make_3d_syntheticdata(lx, ly, lz)
     labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
+    assert data.shape == labels.shape
     return data, labels
 
 
@@ -140,6 +151,7 @@ def test_3d_inactive():
     after_labels = np.copy(labels)
     labels = random_walker(data, labels, mode='cg')
     assert (labels.reshape(data.shape)[13:17, 13:17, 13:17] == 2).all()
+    assert data.shape == labels.shape
     return data, labels, old_labels, after_labels
 
 
@@ -151,6 +163,7 @@ def test_multispectral_2d():
     assert data[..., 0].shape == labels.shape
     single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[25:45, 40:60] == 2).all()
+    assert data[..., 0].shape == labels.shape
     return data, multi_labels, single_labels, labels
 
 
@@ -164,6 +177,7 @@ def test_multispectral_3d():
     single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
     assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
+    assert data[..., 0].shape == labels.shape
     return data, multi_labels, single_labels, labels
 
 
