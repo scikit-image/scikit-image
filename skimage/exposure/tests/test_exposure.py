@@ -175,3 +175,33 @@ def norm_brightness_err(img1, img2):
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
+
+
+# Test Gamma Correction
+# =====================
+
+def test_gammaCorrect_one():
+    """Same image should be returned for gamma equal to one"""
+    image = skimage.data.camera()
+    result = exposure.gammaCorrect(image, 1)
+    assert result.mean() == image.mean()
+    assert result.std() == image.std()
+
+def test_gammaCorrect_zero():
+    """White image should be returned for gamma less than zero"""
+    image = skimage.img_as_float(data.camera())
+    result = exposure.gammaCorrect(image, 0)
+    assert result.mean() == 255
+    assert result.std() == 0
+
+def test_gammaCorrect_less_one():
+    """Output's mean should be greater than input's mean for gamma less than one"""
+    image = skimage.data.camera()
+    result = exposure.gammaCorrect(image, 0.5)
+    assert result.mean() > image.mean()
+
+def test_gammaCorrect_greater_one():
+    """Output's mean should be less than input's mean for gamma greater than one"""
+    image = skimage.data.camera()
+    result = exposure.gammaCorrect(image, 2)
+    assert result.mean() < image.mean()
