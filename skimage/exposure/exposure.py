@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 
-from skimage import img_as_float
+from skimage import img_as_float, img_as_ubyte
 from skimage.util.dtype import dtype_range
 import skimage.color as color
 from skimage.util.dtype import convert
@@ -216,3 +216,42 @@ def rescale_intensity(image, in_range=None, out_range=None):
 
     image = (image - imin) / float(imax - imin)
     return dtype(image * (omax - omin) + omin)
+
+
+def gammaCorrect(image, gamma = 1):
+    """Transform an image according to Gamma Correction also known as the
+    Power Law Transform.
+
+    Ref :: http://en.wikipedia.org/wiki/Gamma_correction
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    gamma : float
+        Non-negative real number
+
+    Returns
+    -------
+    out : ndarray
+        Image with Gamma Correction on the input image.
+
+    Notes
+    -----
+    This function transforms the input image pixelwise according to the
+    equation O = I**gamma after scaling each pixel in the range 0 to 1.
+
+    For gamma greater than 1, the histogram will shift towards left and
+    the output image will be darker than the input image.
+
+    For gamma less than 1, the histogram will shift towards right and
+    the output image will be brighter than the input image.
+
+    """
+
+    if gamma < 0:
+        return "Gamma should be a non-negative real number"
+    scale = 255.0
+    temp = img_as_ubyte(image)
+    out = ((temp/scale)**gamma)*scale
+    return out
