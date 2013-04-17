@@ -218,40 +218,106 @@ def rescale_intensity(image, in_range=None, out_range=None):
     return dtype(image * (omax - omin) + omin)
 
 
-def gammaCorrect(image, gamma = 1):
-    """Transform an image according to Gamma Correction also known as the
-    Power Law Transform.
+def correct(image, type = None, param1 = None, param2 = None ):
+    """Performs pixelwise image correction based on the type passed.
 
-    Ref :: http://en.wikipedia.org/wiki/Gamma_correction
+    Types of correction : gamma, logarithmic, sigmoid
 
     Parameters
     ----------
-    image : ndarray
+    image : ndarray, type, param1, param2
         Input image.
-    gamma : float
-        Non-negative real number
+
+    type : {'gamma', 'logarithmic', 'sigmoid'}
+        Type of correction.
+        'gamma'
+        Gamma Correction or Power Law Transform.
+
+        'logarithmic'
+        Logarithmic and Inverse Logarithmic transform.
+
+        'sigmoid'
+        Sigmoidal Transform or Contrast Adjustment
+
+    param1 : float
+        For type 'gamma', gamma varying from zero to infinity. Default value 1.
+        For type 'logarithmic', param1 should be -1 for inverse logarithmic,
+        else correction will be logarithmic. Default to logarithmic.
+        For type 'sigmoid', gain. Default value 10.
+
+    param2 : float
+        For type 'gamma', positive constatnt multiplier. Default value 1.
+        For type 'logarithmic', positive constatnt multiplier. Default value 1.
+        For type 'sigmoid', cutoff between 0 and 1. Default value 0.5.
 
     Returns
     -------
     out : ndarray
-        Image with Gamma Correction on the input image.
+        Corrected input image according to the type used.
 
-    Notes
-    -----
-    This function transforms the input image pixelwise according to the
-    equation O = I**gamma after scaling each pixel in the range 0 to 1.
-
-    For gamma greater than 1, the histogram will shift towards left and
-    the output image will be darker than the input image.
-
-    For gamma less than 1, the histogram will shift towards right and
-    the output image will be brighter than the input image.
+    References
+    ----------
+    ..[1] http://en.wikipedia.org/wiki/Gamma_correction
+    ..[2] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
+    ..[3] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
 
     """
+    if type == None:
+        return image
 
-    if gamma < 0:
-        return "Gamma should be a non-negative real number"
-    scale = 255.0
-    temp = img_as_ubyte(image)
-    out = ((temp/scale)**gamma)*scale
-    return out
+    if type == 'gamma':
+
+        if param1 == None:
+            param1 = 1
+        if param2 == None:
+            param2 = 1
+
+
+        gamma = param1
+        dtype = image.dtype.type
+
+        if gamma < 0:
+            return "Gamma should be a non-negative real number"
+
+        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+        out = ((image/scale)**gamma)*scale*param2
+        return dtype(out)
+
+    if type == 'logarithmic':
+
+        dtype = image.dtype.type
+        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+
+        if param2 == None:
+            param2 = 1
+        if param1 == -1:
+            out = (2**(image/scale) - 1)*scale*param2
+            return dtype(out)
+
+        dtype = image.dtype.type
+        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+        out = np.log2(1 + image/scale)*scale*param2
+        return dtype(out)
+
+    if type == 'sigmoid':
+
+        if param1 == None:
+            param1 = 10
+        if param2 == None:
+            param2 = 0.5
+
+        gain = param1
+        cutoff = param2
+
+        dtype = image.dtype.type
+        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+        out = (1/(1 + np.exp(gain*(cutoff - image/scale))))*scale
+        return dtype(out)
+
+
+
+
+
+
+
+
