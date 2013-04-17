@@ -129,7 +129,7 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
         Input image.
     angle : float
         Rotation angle in degrees in counter-clockwise direction.
-    resize : bool, optional
+    resize: bool, optional
         Determine whether the shape of the output image will be automatically
         calculated, so the complete rotated image exactly fits. Default is
         False.

@@ -8,8 +8,7 @@ import subprocess
 try:
     WindowsError
 except NameError:
-    class WindowsError(Exception):
-        pass
+    WindowsError = None
 
 
 def cython(pyx_files, working_path=''):

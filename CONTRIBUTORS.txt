@@ -139,6 +139,3 @@
 
 - Michael Hansen
   novice submodule.
-
-- Xavier Moles Lopez
-  Color separation (color deconvolution) for several stainings.

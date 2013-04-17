@@ -28,7 +28,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
 
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
-    selem = img_as_ubyte(selem > 0)
+    selem = img_as_ubyte(selem)
     image = np.ascontiguousarray(image)
 
     if mask is None:
