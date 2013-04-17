@@ -176,7 +176,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     if kind_in == 'b':
         # from binary image, to float and to integer
-        result = image.astype(dtype)
+        result = dtype(image)
         if kind != 'f':
             result *= dtype(dtype_range[dtype][1])
         return result
@@ -195,7 +195,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             # floating point -> floating point
             if itemsize_in > itemsize:
                 prec_loss()
-            return image.astype(dtype)
+            return dtype(image)
 
         # floating point -> integer
         prec_loss()
@@ -218,7 +218,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             image *= (imax - imin + 1.0) / 2.0
             np.floor(image, out=image)
             np.clip(image, imin, imax, out=image)
-        return image.astype(dtype)
+        return dtype(image)
 
     if kind == 'f':
         # integer -> floating point
@@ -236,7 +236,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             image *= 2.0
             image += 1.0
             image /= imax_in - imin_in
-        return image.astype(dtype)
+        return dtype(image)
 
     if kind_in == 'u':
         if kind == 'i':
@@ -262,7 +262,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     image -= imin_in
     image = _scale(image, 8 * itemsize_in, 8 * itemsize, copy=False)
     image += imin
-    return image.astype(dtype)
+    return dtype(image)
 
 
 def img_as_float(image, force_copy=False):

@@ -35,7 +35,7 @@ __all__ = ['percentile_autolevel', 'percentile_gradient',
 
 
 def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, p0, p1):
-    selem = img_as_ubyte(selem > 0)
+    selem = img_as_ubyte(selem)
     image = np.ascontiguousarray(image)
 
     if mask is None:
