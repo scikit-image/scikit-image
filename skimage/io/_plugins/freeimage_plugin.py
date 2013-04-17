@@ -593,6 +593,7 @@ def write_multipage(arrays, filename, flags=0):
     multibitmap = _FI.FreeImage_OpenMultiBitmap(ftype, filename,
                                                 create_new, read_only,
                                                 keep_cache_in_memory, 0)
+    multibitmap = ctypes.c_void_p(multibitmap)
     if not multibitmap:
         raise ValueError('Could not open %s for writing multi-page image.' %
                          filename)
