@@ -180,28 +180,72 @@ if __name__ == '__main__':
 # Test Gamma Correction
 # =====================
 
-def test_gammaCorrect_one():
+def test_gamma_correct_one():
     """Same image should be returned for gamma equal to one"""
-    image = skimage.data.camera()
-    result = exposure.gammaCorrect(image, 1)
+    image = data.camera()
+    result = exposure.correct(image, 'gamma', 1)
     assert result.mean() == image.mean()
     assert result.std() == image.std()
 
-def test_gammaCorrect_zero():
-    """White image should be returned for gamma less than zero"""
-    image = skimage.img_as_float(data.camera())
-    result = exposure.gammaCorrect(image, 0)
-    assert result.mean() == 255
+
+def test_gamma_correct_zero():
+    """White image should be returned for gamma equal to zero"""
+    image = data.camera()
+    result = exposure.correct(image, 'gamma', 0)
+    dtype = image.dtype.type
+    assert result.mean() == dtype_range[dtype][1]
     assert result.std() == 0
 
-def test_gammaCorrect_less_one():
-    """Output's mean should be greater than input's mean for gamma less than one"""
-    image = skimage.data.camera()
-    result = exposure.gammaCorrect(image, 0.5)
+
+def test_gamma_correct_less_one():
+    """Output's mean should be greater than input's mean for gamma less than
+    one"""
+    image = data.camera()
+    result = exposure.correct(image, 'gamma', 0.5)
     assert result.mean() > image.mean()
 
-def test_gammaCorrect_greater_one():
-    """Output's mean should be less than input's mean for gamma greater than one"""
-    image = skimage.data.camera()
-    result = exposure.gammaCorrect(image, 2)
+
+def test_gamma_correct_greater_one():
+    """Output's mean should be less than input's mean for gamma greater than
+    one"""
+    image = data.camera()
+    result = exposure.correct(image,'gamma', 2)
     assert result.mean() < image.mean()
+
+
+# Test Logarithmic Correction
+# ===========================
+
+def test_logarithmic_correct():
+    """Output's mean should be greater than input's mean for logarithmic
+    correction with multiplier constant equal to unity"""
+    image = data.camera()
+    result = exposure.correct(image, 'logarithmic')
+    assert result.mean() > image.mean()
+
+
+def test_inv_logarithmic_correct():
+    """Output's mean should be less than input's mean for inverse logarithmic
+    correction with multiplier constant equal to unity"""
+    image = data.camera()
+    result = exposure.correct(image, 'logarithmic', -1)
+    assert result.mean() < image.mean()
+
+
+# Test Sigmoid Correction
+# =======================
+
+def test_sigmoid_correct_cutoff_one():
+    """Output's mean should be less than input's mean for sigmoid
+    correction with cutoff equal to one and gain of 10"""
+    image = data.camera()
+    result = exposure.correct(image, 'sigmoid', 10, 1)
+    assert result.mean() < image.mean()
+
+
+def test_sigmoid_correct_cutoff_zero():
+    """Output's mean should be greater than input's mean for sigmoid
+    correction with cutoff equal to zero and gain of 10"""
+    image = data.camera()
+    result = exposure.correct(image, 'sigmoid', 10, 0)
+    assert result.mean() > image.mean()
