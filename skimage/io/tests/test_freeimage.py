@@ -53,7 +53,18 @@ def test_imread_uint16_big_endian():
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
-
+@skipif(not FI_available)
+def test_write_multipage():
+    shape = (64,64,64)
+    x = np.ones(shape, dtype=np.uint8) * np.random.random(shape) * 255
+    x = x.astype(np.uint8)
+    f = NamedTemporaryFile(suffix='.tif')
+    fname = f.name
+    f.close()
+    fi.write_multipage(x, fname)
+    y = fi.read_multipage(fname)
+    assert_array_equal(x, y)
+    
 class TestSave:
     def roundtrip(self, dtype, x, suffix):
         f = NamedTemporaryFile(suffix='.' + suffix)
