@@ -22,7 +22,7 @@ cdef inline Py_ssize_t round(double r):
 
 def hough_circle(cnp.ndarray img,
                  cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
-                 char normalize=True):
+                 char normalize=True, char full_output=False):
     """Perform a circular Hough transform.
 
     Parameters
@@ -34,12 +34,17 @@ def hough_circle(cnp.ndarray img,
     normalize : boolean, optional
         Normalize the accumulator with the number
         of pixels used to draw the radius
+    full_output : boolean, optional
+        Extend the output size by twice the largest
+        radius in order to detect centers outside the
+        input picture.
 
     Returns
     -------
-    H : 3D ndarray (radius index, (M, N) ndarray)
-        Hough transform accumulator for each radius
-
+    H : 3D ndarray (radius index, (M + 2R, N + 2R) ndarray)
+        Hough transform accumulator for each radius.
+        R designates the larger radius if full_output is True.
+        Otherwise, R = 0.
     """
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
@@ -50,10 +55,12 @@ def hough_circle(cnp.ndarray img,
 
     cdef Py_ssize_t num_pixels = x.size
 
-    # Offset the image
-    cdef Py_ssize_t max_radius = radius.max()
-    x = x + max_radius
-    y = y + max_radius
+    cdef Py_ssize_t offset = 0
+    if full_output:
+        # Offset the image
+        offset = radius.max()
+        x = x + offset
+        y = y + offset
 
     cdef Py_ssize_t i, p, c, num_circle_pixels, tx, ty
     cdef double incr
@@ -61,8 +68,8 @@ def hough_circle(cnp.ndarray img,
 
     cdef cnp.ndarray[ndim=3, dtype=cnp.double_t] acc = \
          np.zeros((radius.size,
-                   img.shape[0] + 2 * max_radius,
-                   img.shape[1] + 2 * max_radius), dtype=np.double)
+                   img.shape[0] + 2 * offset,
+                   img.shape[1] + 2 * offset), dtype=np.double)
 
     for i, rad in enumerate(radius):
         # Store in memory the circle of given radius
