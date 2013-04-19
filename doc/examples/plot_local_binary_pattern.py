@@ -12,8 +12,8 @@ each other using the Kullback-Leibler-Divergence.
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from skimage.transform import rotate
-from skimage.feature import local_binary_pattern
+import scipy.ndimage as nd
+import skimage.feature as ft
 from skimage import data
 
 
@@ -34,7 +34,7 @@ def kullback_leibler_divergence(p, q):
 def match(refs, img):
     best_score = 10
     best_name = None
-    lbp = local_binary_pattern(img, P, R, METHOD)
+    lbp = ft.local_binary_pattern(img, P, R, METHOD)
     hist, _ = np.histogram(lbp, normed=True, bins=P + 2, range=(0, P + 2))
     for name, ref in refs.items():
         ref_hist, _ = np.histogram(ref, normed=True, bins=P + 2,
@@ -51,19 +51,19 @@ grass = data.load('grass.png')
 wall = data.load('rough-wall.png')
 
 refs = {
-    'brick': local_binary_pattern(brick, P, R, METHOD),
-    'grass': local_binary_pattern(grass, P, R, METHOD),
-    'wall': local_binary_pattern(wall, P, R, METHOD)
+    'brick': ft.local_binary_pattern(brick, P, R, METHOD),
+    'grass': ft.local_binary_pattern(grass, P, R, METHOD),
+    'wall': ft.local_binary_pattern(wall, P, R, METHOD)
 }
 
 # classify rotated textures
 print 'Rotated images matched against references using LBP:'
 print 'original: brick, rotated: 30deg, match result:',
-print match(refs, rotate(brick, angle=30, resize=False))
+print match(refs, nd.rotate(brick, angle=30, reshape=False))
 print 'original: brick, rotated: 70deg, match result:',
-print match(refs, rotate(brick, angle=70, resize=False))
+print match(refs, nd.rotate(brick, angle=70, reshape=False))
 print 'original: grass, rotated: 145deg, match result:',
-print match(refs, rotate(grass, angle=145, resize=False))
+print match(refs, nd.rotate(grass, angle=145, reshape=False))
 
 # plot histograms of LBP of textures
 fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3,

@@ -100,19 +100,6 @@ def test_subpix():
     assert_array_equal(subpix[0], (24.5, 24.5))
 
 
-def test_num_peaks():
-    """For a bunch of different values of num_peaks, check that
-    peak_local_max returns exactly the right amount of peaks. Test
-    is run on Lena in order to produce a sufficient number of corners"""
-
-    lena_corners = corner_harris(data.lena())
-
-    for i in range(20):
-        n = np.random.random_integers(20)
-        results = peak_local_max(lena_corners, num_peaks=n)
-        assert (results.shape[0] == n)
-
-
 def test_corner_peaks():
     response = np.zeros((5, 5))
     response[2:4, 2:4] = 1
