@@ -7,22 +7,30 @@ Here's the long and short of it:
 
  * Go to `https://github.com/scikit-image/scikit-image
    <http://github.com/scikit-image/scikit-image>`_ and click the
-   "fork" button to creat your own copy of the project.
+   "fork" button to create your own copy of the project.
  * Clone the project to your local computer:
-   ``git clone git@github.com:my_github_username/scikit-image.git``
+   ``git clone git@github.com:john_doe/scikit-image.git``
+ * Add origin and user branches:
+   ``git remote rm origin``
+   ``git remote add origin git@github.com:scikit-image/scikit-image.git``
+   ``git remote add john_doe git@github.com:john_doe/scikit-image.git``
+   Now, ``origin`` refers to the ``scikit-image`` repository and
+   ``john_doe`` (your username) to yours.
 
 2. Develop your contribution:
 
+ * Pull the latest changes from upstream
+   (``git checkout master ; git pull origin master``)
  * Create a branch for the feature you want to work on.  Since the
    branch name will appear in the merge message, use a sensible name
    such as 'transform-speedups':
    ``git checkout -b transform-speedups``
- * Commit locally as you progress (``git add`` and ``git commit``).
+ * Commit locally as you progress (``git add`` and ``git commit``)
 
 3. To submit your contribution:
 
  * Push your changes back to GitHub:
-   ``git push origin transform-speedups``.
+   ``git push john_doe transform-speedups``.
  * Go to GitHub.  The new branch will show up with a Pull Request button--click
    it.
  * If you want, post on the `mailing list
@@ -36,7 +44,10 @@ For a more detailed discussion, read these :doc:`detailed documents
 .. note::
 
    Do *not* ever merge the main branch into yours.  If GitHub indicates that
-   the Pull Request can no longer be merged automatically, rebase onto master.
+   the Pull Request can no longer be merged automatically, rebase onto master::
+
+     git fetch origin/master
+     git rebase origin/master
 
    (If you are curious, here's a further discussion on
    the `dangers of rebasing <http://tinyurl.com/lll385>`__.  Also
