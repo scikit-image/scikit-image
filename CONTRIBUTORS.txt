@@ -48,7 +48,7 @@
   Incorporating CellProfiler's Sobel edge detector, build and bug fixes.
   Radon transform, template matching.
 
-- Emmanuelle Guillart
+- Emmanuelle Gouillart
   Total variation noise filtering, integration of CellProfiler's
   mathematical morphology tools, random walker segmentation,
   tutorials, and more.

@@ -82,6 +82,14 @@ class TestConnectedComponents:
                             [-1,  0, -1],
                             [-1, -1, -1]])
 
+    def test_return_num(self):
+        x = np.array([[1, 0, 6],
+                      [0, 0, 6],
+                      [5, 5, 5]])
+
+        assert_array_equal(label(x, return_num=True)[1], 4)
+        assert_array_equal(label(x, background=0, return_num=True)[1], 3)
+
 
 if __name__ == "__main__":
     run_module_suite()

@@ -39,7 +39,7 @@ cdef DTYPE_t find_root(DTYPE_t *forest, DTYPE_t n):
     return root
 
 
-cdef set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root):
+cdef inline void set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root):
     """
     Set all nodes on a path to point to new_root.
 
@@ -53,7 +53,7 @@ cdef set_root(DTYPE_t *forest, DTYPE_t n, DTYPE_t root):
     forest[n] = root
 
 
-cdef join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
+cdef inline void join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
     """Join two trees containing nodes n and m.
 
     """
@@ -70,7 +70,7 @@ cdef join_trees(DTYPE_t *forest, DTYPE_t n, DTYPE_t m):
         set_root(forest, m, root)
 
 
-cdef link_bg(DTYPE_t *forest, DTYPE_t n, DTYPE_t *background_node):
+cdef inline void link_bg(DTYPE_t *forest, DTYPE_t n, DTYPE_t *background_node):
     """
     Link a node to the background node.
 
@@ -80,9 +80,9 @@ cdef link_bg(DTYPE_t *forest, DTYPE_t n, DTYPE_t *background_node):
 
     join_trees(forest, n, background_node[0])
 
-# Connected components search as described in Fiorio et al.
 
-def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
+# Connected components search as described in Fiorio et al.
+def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -111,6 +111,9 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
     labels : ndarray of dtype int
         Labeled array, where all connected regions are assigned the
         same integer value.
+    num : int, optional
+        Number of labels, which equals the maximum label index and is only
+        returned if return_num is `True`.
 
     Examples
     --------
@@ -202,7 +205,6 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
                 join_trees(forest_p, i*cols + j, i*cols + j - 1)
 
     # Label output
-
     cdef DTYPE_t ctr = 0
     for i in range(rows):
         for j in range(cols):
@@ -216,6 +218,9 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1):
 
     # Work around a bug in ndimage's type checking on 32-bit platforms
     if data.dtype == np.int32:
-        return data.view(np.int32)
+        data = data.view(np.int32)
+
+    if return_num:
+        return data, ctr
     else:
         return data
