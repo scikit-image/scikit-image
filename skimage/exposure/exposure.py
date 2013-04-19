@@ -1,7 +1,7 @@
 import warnings
 import numpy as np
 
-from skimage import img_as_float, img_as_ubyte
+from skimage import img_as_float
 from skimage.util.dtype import dtype_range
 import skimage.color as color
 from skimage.util.dtype import convert
@@ -218,26 +218,16 @@ def rescale_intensity(image, in_range=None, out_range=None):
     return dtype(image * (omax - omin) + omin)
 
 
-def correct(image, type = None, param1 = None, param2 = None ):
-    """Performs pixelwise image correction based on the type passed.
-
-    Types of correction : gamma, logarithmic, sigmoid
+def rescale_intensity_gamma(image, gamma = 1):
+    """Performs Gamma Correction also known as Power Law Transform.
 
     Parameters
     ----------
-    image : ndarray, type, param1, param2
+    image : ndarray
         Input image.
 
-    type : {'gamma', 'logarithmic', 'sigmoid'}
-        Type of correction.
-        'gamma'
-        Gamma Correction or Power Law Transform.
-
-        'logarithmic'
-        Logarithmic and Inverse Logarithmic transform.
-
-        'sigmoid'
-        Sigmoidal Transform or Contrast Adjustment
+    gamma : float
+        Non negative real number
 
     param1 : float
         For type 'gamma', gamma varying from zero to infinity. Default value 1.
@@ -258,66 +248,38 @@ def correct(image, type = None, param1 = None, param2 = None ):
     References
     ----------
     ..[1] http://en.wikipedia.org/wiki/Gamma_correction
-    ..[2] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
-    ..[3] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
-
     """
-    if type == None:
-        return image
 
-    if type == 'gamma':
+    dtype = image.dtype.type
 
-        if param1 == None:
-            param1 = 1
-        if param2 == None:
-            param2 = 1
+    if gamma < 0:
+        return "Gamma should be a non-negative real number"
+
+    scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+    out = ((image / scale)**gamma) * scale * param2
+    return dtype(out)
 
 
-        gamma = param1
-        dtype = image.dtype.type
+def rescale_intensity_logarithmic(image, gain = 1, inv = 1):
 
-        if gamma < 0:
-            return "Gamma should be a non-negative real number"
+    dtype = image.dtype.type
+    scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
 
-        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
-        out = ((image/scale)**gamma)*scale*param2
+    if inv == -1:
+        out = (2**(image / scale) - 1) * scale * param2
         return dtype(out)
 
-    if type == 'logarithmic':
-
-        dtype = image.dtype.type
-        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
-
-        if param2 == None:
-            param2 = 1
-        if param1 == -1:
-            out = (2**(image/scale) - 1)*scale*param2
-            return dtype(out)
-
-        dtype = image.dtype.type
-        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
-        out = np.log2(1 + image/scale)*scale*param2
-        return dtype(out)
-
-    if type == 'sigmoid':
-
-        if param1 == None:
-            param1 = 10
-        if param2 == None:
-            param2 = 0.5
-
-        gain = param1
-        cutoff = param2
-
-        dtype = image.dtype.type
-        scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
-        out = (1/(1 + np.exp(gain*(cutoff - image/scale))))*scale
-        return dtype(out)
+    out = np.log2(1 + image / scale) * scale * param2
+    return dtype(out)
 
 
+def rescale_intensity_sigmoid(image, cutoff = 0.5, gain = 1):
+
+    dtype = image.dtype.type
+    scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+    out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+    return dtype(out)
 
 
-
-
-
-
+..[2] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
+    ..[3] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
