@@ -1,7 +1,7 @@
 from numpy.testing import assert_array_equal
 import numpy as np
 
-from skimage.draw import line, polygon, circle, circle_perimeter, ellipse, ellipse_perimeter
+from skimage.draw import line, polygon, circle, circle_perimeter, ellipse, ellipse_perimeter, bezier_curve
 
 
 def test_line_horizontal():
@@ -239,14 +239,32 @@ def test_ellipse():
     assert_array_equal(img, img_)
 
 def test_ellipse_perimeter():
+    # dot, angle == 0
     img = np.zeros((30, 15), 'uint8')
-    rr, cc = ellipse_perimeter(15, 7, 0, 0)
+    rr, cc = ellipse_perimeter(15, 7, 0, 0, 0)
     img[rr, cc] = 1
     assert(np.sum(img) == 1)
     assert(img[15][7] == 1)
 
+    # dot, angle != 0
     img = np.zeros((30, 15), 'uint8')
-    rr, cc = ellipse_perimeter(15, 7, 14, 6)
+    rr, cc = ellipse_perimeter(15, 7, 0, 0, 1)
+    img[rr, cc] = 1
+    assert(np.sum(img) == 1)
+    assert(img[15][7] == 1)
+
+    # flat ellipse
+    img = np.zeros((20, 18), 'uint8')
+    img_ = np.zeros((20, 18), 'uint8')
+    rr, cc = ellipse_perimeter(6, 7, 0, 5, 0)
+    img[rr, cc] = 1
+    rr, cc = line(6, 2, 6, 12)
+    img_[rr, cc] = 1
+    assert_array_equal(img, img_)
+
+    # angle == 0
+    img = np.zeros((30, 15), 'uint8')
+    rr, cc = ellipse_perimeter(15, 7, 14, 6, 0)
     img[rr, cc] = 1
     img_ = np.array(
       [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -282,6 +300,62 @@ def test_ellipse_perimeter():
     )
 
     assert_array_equal(img, img_)
+
+    # angle != 0
+    img = np.zeros((30, 25), 'uint8')
+    rr, cc = ellipse_perimeter(15, 11, 12, 6, 1.1)
+    img[rr, cc] = 1
+    print(img)
+    img_ = np.array(
+       [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    )
+    assert_array_equal(img, img_)
+
+
+def test_bezier_curve():
+    image = np.zeros((200, 200), dtype=int)
+    x0 = 50
+    y0 = 50
+    x1 = 150
+    y1 = 50
+    x2 = 150
+    y2 = 150
+    rr, cc = bezier_curve(x0, y0, x1, y1, x2, y2, 0)
+    image [rr, cc] = 1
+
+    image2 = np.zeros((200, 200), dtype=int)
+    rr, cc = line(x0, y0, x2, y2)
+    image2 [rr, cc] = 1
+    assert_array_equal(image, image2)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

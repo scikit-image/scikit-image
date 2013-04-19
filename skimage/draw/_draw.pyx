@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 cimport numpy as cnp
-from libc.math cimport sqrt
+from libc.math cimport sqrt, sin, cos, floor
 from skimage._shared.geometry cimport point_in_polygon
 
 
@@ -265,7 +265,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
-                      Py_ssize_t xradius):
+                      Py_ssize_t xradius, double angle=0):
     """Generate ellipse perimeter coordinates.
 
     Parameters
@@ -274,6 +274,8 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         Centre coordinate of ellipse.
     yradius, xradius: int
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
+    angle: double, optional
+        Major axis angle (in radian).
 
     Returns
     -------
@@ -284,8 +286,8 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
 
     References
     ----------
-    .. [1] J. Kennedy "A fast Bresenham type algorithm for
-        drawing ellipses".
+    .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
+           http://members.chello.at/easyfilter/Bresenham.pdf
 
     Examples
     --------
@@ -311,59 +313,235 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     if xradius == 0 and yradius == 0:
         return np.array(cy), np.array(cx)
 
-    # a and b are xradius an yradius compute 2a^2 and 2b^2
-    cdef Py_ssize_t twoasquared = 2 * xradius**2
-    cdef Py_ssize_t twobsquared = 2 * yradius**2
-
     # Pixels
     cdef list px = list()
     cdef list py = list()
 
-    # First set of points:
-    # start at the top
-    cdef Py_ssize_t x = xradius
-    cdef Py_ssize_t y = 0
+    # Compute useful values
+    cdef  Py_ssize_t xd = xradius**2
+    cdef  Py_ssize_t yd = yradius**2
 
-    cdef Py_ssize_t err = 0
-    cdef Py_ssize_t xstop = twobsquared * xradius
-    cdef Py_ssize_t ystop = 0
-    cdef Py_ssize_t xchange = yradius * yradius * (1 - 2 * xradius)
-    cdef Py_ssize_t ychange = xradius * xradius
+    cdef Py_ssize_t x, y, e2, err
 
-    while xstop > ystop:
-        px.extend([x, -x, -x, x])
-        py.extend([y, y, -y, -y])
-        y += 1
-        ystop += twoasquared
-        err += ychange
-        ychange += twoasquared
-        if (2 * err + xchange) > 0:
-            x -= 1
-            xstop -= twobsquared
-            err += xchange
-            xchange += twobsquared
+    #cdef double  x0, y0, x1, y1, a, b, zd, sin_angle
+    cdef int ix0, ix1, iy0, iy1, ixd, iyd
+    cdef double sin_angle, xa, ya, za, a, b
 
-    # Second set of points:
-    x = 0
-    y = yradius
+    if angle == 0:
+        x = -xradius
+        y = 0
+        e2 = yd
+        err = x*(2 * e2 + x) + e2
+        while x <= 0:
+            # Quadrant 1
+            px.append(cx - x)
+            py.append(cy + y)
+            # Quadrant 2
+            px.append(cx + x)
+            py.append(cy + y)
+            # Quadrant 3
+            px.append(cx + x)
+            py.append(cy - y)
+            # Quadrant 4
+            px.append(cx - x)
+            py.append(cy - y)
+            # Adjust x and y
+            e2 = 2 * err
+            if e2 >= (2 * x + 1) * yd:
+                x += 1
+                err += (2 * x + 1) * yd
+            if e2 <= (2 * y + 1) * xd:
+                y += 1
+                err += (2 * y + 1) * xd
+        while y < yradius:
+            y += 1
+            px.append(cx)
+            py.append(cy + y)
+            px.append(cx)
+            py.append(cy - y)
 
-    err = 0
-    xstop = 0
-    ystop = twoasquared * yradius
-    xchange = yradius * yradius
-    ychange = xradius * xradius * (1 - 2 * yradius)
+    else:
+        sin_angle = sin(angle)
+        za = (xd - yd) * sin_angle
+        xa = sqrt(xd - za * sin_angle)
+        ya = sqrt(yd + za * sin_angle)
 
-    while xstop <= ystop:
-        px.extend([x, -x, -x, x])
-        py.extend([y, y, -y, -y])
-        x += 1
-        xstop += twobsquared
-        err += xchange
-        xchange += twobsquared
-        if  (2 * err + ychange) > 0:
-            y -= 1
-            ystop -= twoasquared
-            err += ychange
-            ychange += twobsquared
+        a = xa + 0.5
+        b = ya + 0.5
+        za = za * a * b / (xa * ya)
 
-    return np.array(py, dtype=np.intp) + cy, np.array(px, dtype=np.intp) + cx
+        ix0 = int(cx - a)
+        iy0 = int(cy - b)
+        ix1 = int(cx + a)
+        iy1 = int(cy + b)
+
+        xa = ix1 - ix0
+        ya = iy1 - iy0
+        za = 4 * za * cos(angle)
+        w = xa * ya
+        if w != 0:
+            w = (w - za) / (w + w)
+        ixd = int(floor(xa * w + 0.5))
+        iyd = int(floor(ya * w + 0.5))
+
+        # Draw the 4 quadrants
+        rr, cc = bezier_curve(ix0, iy0+iyd, ix0, iy0, ix0+ixd, iy0, 1-w)
+        py.extend(rr)
+        px.extend(cc)
+        rr, cc = bezier_curve(ix0, iy0+iyd, ix0, iy1, ix1-ixd, iy1, w)
+        py.extend(rr)
+        px.extend(cc)
+        rr, cc = bezier_curve(ix1, iy1-iyd, ix1, iy1, ix1-ixd, iy1, 1-w)
+        py.extend(rr)
+        px.extend(cc)
+        rr, cc = bezier_curve(ix1, iy1-iyd, ix1, iy0, ix0+ixd, iy0, w)
+        py.extend(rr)
+        px.extend(cc)
+
+    return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
+
+
+def bezier_curve(Py_ssize_t x0, Py_ssize_t y0,
+                 Py_ssize_t x1, Py_ssize_t y1,
+                 Py_ssize_t x2, Py_ssize_t y2,
+                 double weight):
+    """Generate a Bezier curve coordinates.
+
+    Parameters
+    ----------
+    x0, y0 : int
+        Coordinates of the first point
+    x1, y1 : int
+        Coordinates of the middle point
+    x2, y2 : int
+        Coordinates of the last point
+
+    Returns
+    -------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels that belong to the Bezier curve.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+
+    References
+    ----------
+    .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
+           http://members.chello.at/easyfilter/Bresenham.pdf
+    """
+    # Pixels
+    cdef list px = list()
+    cdef list py = list()
+
+    # Steps
+    cdef double sx = x2 - x1
+    cdef double sy = y2 - y1
+
+    cdef double dx = x0 - x2
+    cdef double dy = y0 - y2
+    cdef double xx = x0 - x1
+    cdef double yy = y0 - y1
+    cdef double xy = xx * sy + yy * sx
+    cdef double cur = xx * sy - yy * sx
+    cdef double err
+
+    # if it's not a straight line
+    if cur != 0 and weight > 0:
+        if (sx * sx + sy * sy > xx * xx + yy * yy):
+            # Swap point 0 and point 2
+            # to start from the longer part
+            x2 = x0
+            x0 -= int(dx)
+            y2 = y0
+            y0 -= int(dy)
+            cur = -cur
+        xx = 2 * (4 * weight * sx * xx + dx * dx)
+        yy = 2 * (4 * weight * sy * yy + dy * dy)
+        # Set steps
+        if x0 < x2:
+            sx = 1
+        else:
+            sx = -1
+        if y0 < y2:
+            sy = 1
+        else:
+            sy = -1
+        xy = -2 * sx * sy * (2 * weight * xy + dx * dy)
+
+        if cur * sx * sy < 0:
+            xx = -xx
+            yy = -yy
+            xy = -xy
+            cur = -cur
+
+        dx = 4 * weight * (x1 - x0) * sy * cur + xx / 2 + xy
+        dy = 4 * weight * (y0 - y1) * sx * cur + yy / 2 + xy
+
+        # Flat ellipse, algo fails
+        if (weight < 0.5 and (dy > xy or dx < xy)):
+            cur = (weight + 1) / 2
+            weight = sqrt(weight)
+            xy = 1. / (weight + 1)
+            # subdivide curve in half
+            sx = floor((x0 + 2 * weight * x1 + x2) * xy * 0.5 + 0.5)
+            sy = floor((y0 + 2 * weight * y1 + y2) * xy * 0.5 + 0.5)
+            dx = floor((weight * x1 + x0) * xy + 0.5)
+            dy = floor((y1 * weight + y0) * xy + 0.5)
+            return bezier_curve(x0, y0, int(dx), int(dy), int(sx), int(sy), cur)
+
+        err = dx + dy - xy
+        while dy <= xy and dx >= xy:
+            px.append(x0)
+            py.append(y0)
+            if x0 == x2 and y0 == y2:
+                # The job is done!
+                return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
+
+            # Save boolean values
+            test1 = 2 * err > dy
+            test2 = 2 * (err + yy) < -dy
+            # Move (x0,y0) to the next position
+            if 2 * err < dx or test2:
+                y0 += int(sy)
+                dy += xy
+                dx += xx
+                err += dx
+            if 2 * err > dx or test1:
+                x0 += int(sx)
+                dx += xy
+                dy += yy
+                err += dy
+
+    # Plot line
+    rr, cc = line(x0, y0, x2, y2)
+    px.extend(rr)
+    py.extend(cc)
+
+    return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
+
+
+def set_color(img, coords, color):
+    """Set pixel color in the image at the given coordinates.
+
+    Coordinates that exceed the shape of the image will be ignored.
+
+    Parameters
+    ----------
+    img : (M, N, D) ndarray
+        Image
+    coords : ((P,) ndarray, (P,) ndarray)
+        Coordinates of pixels to be colored.
+    color : (D,) ndarray
+        Color to be assigned to coordinates in the image.
+
+    Returns
+    -------
+    img : (M, N, D) ndarray
+        The updated image.
+
+    """
+
+    rr, cc = coords
+    rr_inside = np.logical_and(rr >= 0, rr < img.shape[0])
+    cc_inside = np.logical_and(cc >= 0, cc < img.shape[1])
+    inside = np.logical_and(rr_inside, cc_inside)
+    img[rr[inside], cc[inside]] = color
