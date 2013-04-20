@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*- # <nbformat>3.0</nbformat>
-
 """ 
 ======================= 
 Morphological Filtering 
@@ -17,7 +15,7 @@ structuring element is positioned at all  possible locations in the image and it
 is compared  with the corresponding  neighbourhood of pixels. Neighborhood  of a
 pixel is defined  as all the pixels  with a value 1 in  the structuring element.
 
-In this document we outline the following basic morphological operations :
+In this document we outline the following basic morphological operations:
 
 1. Erosion 
 2. Dilation 
@@ -31,49 +29,51 @@ In this document we outline the following basic morphological operations :
 Additional Resources : 
 ----------------------
 
-1. Provides a nice understanding of the most basic operations involved in
-morphological processing, i.e. erosion and dilation : http://goo.gl/Cs4n6
-2. Auckland university : http://goo.gl/Ylf19
-3. For an insight into the mathematical algorithms for each function :
-http://en.wikipedia.org/wiki/Mathematical_morphology
+.. [1] Provides a nice understanding of the most basic operations involved in
+       morphological processing, i.e. erosion and dilation
+       `Link text <http://goo.gl/Cs4n6>`_
+.. [2] Auckland university: `Link text <http://goo.gl/Ylf19>`_
+.. [3] For an insight into the mathematical algorithms for each function:
+       `Link text <http://en.wikipedia.org/wiki/Mathematical_morphology>`_
 
 Importing images 
 ================ 
 There are essentially 2 ways for importing images for use with skimage. They are
 as  follows  :  
 
-1. Using the plt.imread()  to read the images as a  *numpy.ndarray* data type 
-2. Using  the  skimage modules  like  'imread',  'imshow'  etc provided  under  
-the '/skimage/io/_io.py'
+* Using the plt.imread()  to read the images as a  *numpy.ndarray* data type 
+* Using  the  skimage modules  like  'imread',  'imshow'  etc provided  under  
+  the '/skimage/io/_io.py'
 
 .. Note:: 
-plt.imread() will read the image, a grey-scale image as a 3D array, whereas 
-with io.imread() there is a parameter 'as_grey=True' for reading it as a2D array
-and using 'img_as_ubyte()', can be converted to type : *numpy.ndarray* with 
-*uint8* element. This is the input array for the morphological functions.
+   plt.imread() will read the image, a grey-scale image as a 3D array, whereas 
+   with io.imread() there is a parameter 'as_grey=True' for reading it as a2D 
+   array and using 'img_as_ubyte()', can be converted to type : *numpy.ndarray* 
+   with *uint8* element. This is the input array for the morphological function
 
-The following checks should be made for running the morphological functions :
+The following checks should be made for running the morphological functions:
 
-**Image** :
+**Image**:
 
-1. Type : numpy.ndarray 
-2. Data type : uint8 
-3. 2D
+* Type : numpy.ndarray 
+* Data type : uint8 
+* 2D
 
-**Structuring Element** : 
+**Structuring Element**: 
 
-1. Type : Binary or boolean
+* Type: Binary or boolean
 
 .. note::
-Skimage supports NumPy data types and takes in images as type 'ndarray'.
-matplotlib.pyplot is a python library for providing MATLAB-like functionality,
-hence the same function names. E.g: imshow 
+   Skimage supports NumPy data types and takes in images as type 'ndarray'.
+   matplotlib.pyplot is a python library for providing MATLAB-like 
+   functionality, hence the same function names. E.g: imshow 
 
 Some quick functions to check the dimensions or type or the shape(size) of the 
-image :
-type(image)
-ndim(image)
-image.shape
+image:
+
+* type(image)
+* ndim(image)
+* image.shape
 
 Importing & displaying using plt.imread() and plt.imshow()
 -----------------
@@ -116,7 +116,7 @@ Morphological erosion sets a pixel at (i,j) to the **minimum over all pixels
 in the neighborhood centered at (i,j)**. For defining the structuring element,
 we use disk(radius) function.
  
-**Comments** : See how the white boundary of the image disappers or gets eroded
+**Comments**: See how the white boundary of the image disappers or gets eroded
 as we increse the size of the disk. # Also notice the increase in size of the 
 two black ellipses in the center and the disappearance of the 3-4 light grey
 patches in the lower part of the image.
@@ -151,7 +151,7 @@ Morphological dilation sets a pixel at (i,j) to the **maximum over all pixels
 in the neighborhood centered at (i,j)**. Dilation enlarges bright regions and 
 shrinks dark regions.
 
-**Comments** : # # See how the white boundary of the image thickens or gets
+**Comments**: See how the white boundary of the image thickens or gets
 dialted as we increse the size of the disk. # Also notice the decrease in size
 of the two black ellipses in the centre, with the thickening of the light grey
 circle in the center and the 3-4 patches in the lower part of the image.
@@ -186,7 +186,7 @@ Morphological opening on an image is defined as an **erosion followed by a
 dilation**. Opening can remove small bright spots (i.e. "salt") and connect 
 small dark cracks. 
 
-**Comments** : Since 'opening' an image is equivalent to *erosion followed
+**Comments**: Since 'opening' an image is equivalent to *erosion followed
 by dilation*, white or lighter portions in the image which are smaller than the
 structuring element tend to be removed, just as in erosion along with the
 increase in thickness of black portions and thinning of larger (than structing
@@ -225,7 +225,7 @@ Morphological closing on an image is defined as a **dilation followed by an
 erosion**. Closing can remove small dark spots (i.e. "pepper") and connect 
 small bright cracks. 
 
-**Comments** : # # Since 'closing' an image is equivalent to *dilation
+**Comments** : Since 'closing' an image is equivalent to *dilation
 followed by erosion*, the small black 10X10 pixel wide square introduced has
 been removed and the -34 white ellipses at the bottom get connected, just as is
 expected after dilation along with the thinning of larger (than structing
@@ -264,7 +264,7 @@ The white top hat of an image is defined as the **image minus its morphological
 opening**. This operation returns the bright spots of the image that are smaller
 than the structuring element. 
 
-**Comments** : # # This technique is used to locate the bright spots in an
+**Comments**: This technique is used to locate the bright spots in an
 image which are smaller than the size of the structuring element. As can be
 seen below, the 10X10 pixel wide white square and a part of the white boundary 
 are highlighted since they are smaller in size as compared to the disk which 
@@ -302,7 +302,7 @@ The black top hat of an image is defined as its morphological **closing minus
 the original image**. This operation returns the *dark spots of the image that
 are smaller than the structuring element*. 
 
-**Comments** : # # This technique is used to locate the dark spots in an image
+**Comments**: This technique is used to locate the dark spots in an image
 which are smaller than the size of the structuring element. As can be seen 
 below, the
 10X10 pixel wide black square is highlighted since it is smaller or equal in
@@ -346,7 +346,7 @@ Thinning is used to reduce each connected component in a binary image to a
 **single-pixel wide skeleton**. It is important to note that this is performed
 on binary images only.
 
-**Comments** : As the name suggests, this technique is used to thin the
+**Comments**: As the name suggests, this technique is used to thin the
 image to 1-pixel wide skeleton by applying thinning successively.
 """
 from skimage.morphology import skeletonize
@@ -378,7 +378,7 @@ The convex hull is the **set of pixels included in the smallest convex polygon
 that surround all white pixels in the input image**. Again note that this is 
 also performed on binary images.
 
-**Comments** : # # As the figure illustrates, convex_hull_image() gives the
+**Comments**: As the figure illustrates, convex_hull_image() gives the
 smallestpolygon which covers the white or True completely in the image.
 """
 from skimage.morphology import convex_hull_image
