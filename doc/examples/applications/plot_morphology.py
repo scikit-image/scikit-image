@@ -38,8 +38,8 @@ Additional Resources :
 
 Importing images 
 ================ 
-There are essentially 2 ways for importing images for use with skimage. They are
-as  follows  :  
+There are essentially 2 ways for importing images for use with skimage. They 
+are as follows:  
 
 * Using the plt.imread()  to read the images as a  *numpy.ndarray* data type 
 * Using  the  skimage modules  like  'imread',  'imshow'  etc provided  under  
@@ -71,122 +71,118 @@ The following checks should be made for running the morphological functions:
 Some quick functions to check the dimensions or type or the shape(size) of the 
 image:
 
-* type(image)
-* ndim(image)
-* image.shape
+* ``type(image)``
+* ``ndim(image)``
+* ``image.shape``
 
-Importing & displaying using plt.imread() and plt.imshow()
+Importing & displaying using ``plt.imread()`` and ``plt.imshow()``
 -----------------
 """
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
+from skimage.util import img_as_ubyte
+
+plt.gray()
 
 i_f = plt.imread(data_dir+'/phantom.png')
 i_f2 = i_f[:,:,0] 
-i = convert(i_f2, np.uint8)
-plt.imshow(i, cmap=plt.cm.gray, vmin=0, vmax=255)
+i = img_as_ubyte(i_f2)
+plt.imshow(i, vmin=0, vmax=255)
 plt.show()
 
 """
 .. image:: PLOT2RST.current_figure
 
-Importing & displaying using io.imread() and io.imshow()
+Importing & displaying using ``io.imread()`` and ``io.imshow()``
 -------------------
 The advantage of using 'as_grey=True' is that it ensures that the image is 
 taken as a 2D rather than a 3D array with equal R,G,B values for a point, hence
 no need of slicing.
 """
-import matplotlib.pyplot as plt
-import numpy as np
 import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
 
-phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
+plt.imshow(phantom)
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
 EROSION
 =======
-Morphological erosion sets a pixel at (i,j) to the **minimum over all pixels 
-in the neighborhood centered at (i,j)**. For defining the structuring element,
-we use disk(radius) function.
- 
-**Comments**: See how the white boundary of the image disappers or gets eroded
-as we increse the size of the disk. # Also notice the increase in size of the 
-two black ellipses in the center and the disappearance of the 3-4 light grey
-patches in the lower part of the image.
+Morphological ``erosion`` sets a pixel at (i,j) to the **minimum over all 
+pixels in the neighborhood centered at (i,j)**. For defining the structuring 
+element, we use disk(radius) function.
 """
-from skimage.morphology import erosion, disk
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
+from skimage.morphology import erosion, dilation, opening, closing, white_tophat
+from skimage.morphology import black_tophat, skeletonize, convex_hull_image
+from skimage.morphology import disk
 
-phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 
 selem = disk(6); 
 eroded = erosion(phantom, selem)
 
-plt.figure(figsize=[10, 30]) 
-plt.subplot(121)
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('Original')
-plt.subplot(122)
-plt.imshow(eroded, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('After Erosion')
+fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+ax1.imshow(phantom)
+ax1.set_title('Original')
+ax2.imshow(eroded)
+ax2.set_title('After Erosion')
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
+Comments: See how the white boundary of the image disappers or gets eroded
+as we increse the size of the disk. Also notice the increase in size of the 
+two black ellipses in the center and the disappearance of the 3-4 light grey
+patches in the lower part of the image.
+
 DILATION
 ========
-Morphological dilation sets a pixel at (i,j) to the **maximum over all pixels 
-in the neighborhood centered at (i,j)**. Dilation enlarges bright regions and 
-shrinks dark regions.
-
-**Comments**: See how the white boundary of the image thickens or gets
-dialted as we increse the size of the disk. # Also notice the decrease in size
-of the two black ellipses in the centre, with the thickening of the light grey
-circle in the center and the 3-4 patches in the lower part of the image.
+Morphological ``dilation`` sets a pixel at (i,j) to the **maximum over all 
+pixels in the neighborhood centered at (i,j)**. Dilation enlarges bright 
+regions and shrinks dark regions.
 """
-from skimage.morphology import dilation, disk
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
-
-phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 
 selem = disk(6); 
 dilate = dilation(phantom, selem)
 
-plt.figure(figsize=[10, 30]) 
-plt.subplot(121)
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('Original')
-plt.subplot(122)
-plt.imshow(dilate, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('After Dilation')
+fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+ax1.imshow(phantom)
+ax1.set_title('Original')
+ax2.imshow(dilate)
+ax2.set_title('After Dilation')
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
+Comments: See how the white boundary of the image thickens or gets
+dialted as we increse the size of the disk. Also notice the decrease in size
+of the two black ellipses in the centre, with the thickening of the light grey
+circle in the center and the 3-4 patches in the lower part of the image.
+
 OPENING
 =======
-Morphological opening on an image is defined as an **erosion followed by a 
+Morphological ``opening`` on an image is defined as an **erosion followed by a 
 dilation**. Opening can remove small bright spots (i.e. "salt") and connect 
 small dark cracks. 
+"""
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 
-**Comments**: Since 'opening' an image is equivalent to *erosion followed
+selem = disk(6); 
+opened = opening(phantom, selem)
+
+fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+ax1.imshow(phantom)
+ax1.set_title('Original')
+ax2.imshow(opened)
+ax2.set_title('After Opening')
+plt.show()
+"""
+.. image:: PLOT2RST.current_figure
+
+Comments: Since ``opening`` an image is equivalent to *erosion followed
 by dilation*, white or lighter portions in the image which are smaller than the
 structuring element tend to be removed, just as in erosion along with the
 increase in thickness of black portions and thinning of larger (than structing
@@ -194,38 +190,28 @@ elements) white portions. But dilation reverses this effect and hence as we can
 see in the image, the central 2 dark ellipses and the circular lighter portion
 retain their thickness but the lighter patchs in the bottom get completely
 eroded.
-"""
-from skimage.morphology import opening, disk
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
 
-phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
+CLOSING
+=======
+Morphological ``closing`` on an image is defined as a **dilation followed by an 
+erosion**. Closing can remove small dark spots (i.e. "pepper") and connect 
+small bright cracks. 
+"""
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True)) 
 
 selem = disk(6); 
-opened = opening(phantom, selem)
+closed = closing(phantom, selem)
 
-plt.figure(figsize=[10, 30]) 
-plt.subplot(121)
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('Original')
-plt.subplot(122)
-plt.imshow(opened, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('After Opening')
+fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+ax1.imshow(phantom)
+ax1.set_title('Original')
+ax2.imshow(closed)
+ax2.set_title('After Closing')
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-CLOSING
-=======
-Morphological closing on an image is defined as a **dilation followed by an 
-erosion**. Closing can remove small dark spots (i.e. "pepper") and connect 
-small bright cracks. 
-
-**Comments** : Since 'closing' an image is equivalent to *dilation
+Comments : Since ``closing`` an image is equivalent to *dilation
 followed by erosion*, the small black 10X10 pixel wide square introduced has
 been removed and the -34 white ellipses at the bottom get connected, just as is
 expected after dilation along with the thinning of larger (than structing
@@ -233,109 +219,70 @@ elements) black portions. But erosion reverses this effect and hence as we can
 see in the image, the central 2 dark ellipses and the circular lighter portion
 retain their thickness but the all black square is completely removed. But note
 that the white patches at the bottom remain connected even after erosion.
-"""
-from skimage.morphology import closing, disk
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
-
-phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
-
-selem = disk(6); 
-closed = closing(phantom, selem)
-
-plt.figure(figsize=[10, 30]) 
-plt.subplot(121)
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('Original')
-plt.subplot(122)
-plt.imshow(closed, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('After Closing')
-plt.show()
-"""
-.. image:: PLOT2RST.current_figure
 
 WHITE TOPHAT
 ============
-The white top hat of an image is defined as the **image minus its morphological 
-opening**. This operation returns the bright spots of the image that are smaller
-than the structuring element. 
-
-**Comments**: This technique is used to locate the bright spots in an
-image which are smaller than the size of the structuring element. As can be
-seen below, the 10X10 pixel wide white square and a part of the white boundary 
-are highlighted since they are smaller in size as compared to the disk which 
-is of radius 5, i.e. 10 pixels wide. If the radius is decreased to 4, we can see
-that a center of the square is removed and only the corners are visible, since
-diagonals are longer than sides.
+The ``white_tophat`` of an image is defined as the **image minus its 
+morphological opening**. This operation returns the bright spots of the image 
+that are smaller than the structuring element. 
 """
-from skimage.morphology import white_tophat, disk
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
-
-phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True)) 
 
 selem = disk(6); 
 w_tophat = white_tophat(phantom, selem)
 
-plt.figure(figsize=[10, 30]) 
-plt.subplot(121)
-plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('Original')
-plt.subplot(122)
-plt.imshow(w_tophat, cmap=plt.cm.gray, vmin=0, vmax=255)
-plt.title('After White Tophat')
+fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+ax1.imshow(phantom)
+ax1.set_title('Original')
+ax2.imshow(w_tophat)
+ax2.set_title('After performing white_tophat')
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
+Comments: This technique is used to locate the bright spots in an
+image which are smaller than the size of the structuring element. As can be
+seen below, the 10X10 pixel wide white square and a part of the white boundary 
+are highlighted since they are smaller in size as compared to the disk which 
+is of radius 5, i.e. 10 pixels wide. If the radius is decreased to 4, we can 
+see that a center of the square is removed and only the corners are visible, 
+since diagonals are longer than sides.
+
 BLACK TOPHAT
 ============
-The black top hat of an image is defined as its morphological **closing minus 
+The ``black_tophat`` of an image is defined as its morphological **closing minus 
 the original image**. This operation returns the *dark spots of the image that
 are smaller than the structuring element*. 
-
-**Comments**: This technique is used to locate the dark spots in an image
-which are smaller than the size of the structuring element. As can be seen 
-below, the
-10X10 pixel wide black square is highlighted since it is smaller or equal in
-size as compared to the disk which is of radius 5, i.e. 10 pixels wide. If the
-radius is decreased to 4, we can see that a center of the square is removed and
-only the corners are visible, since diagonals are longer than sides.
 """
-from skimage.morphology import black_tophat, disk
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
-
-phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True)) 
 phantom[340:360, 200:220], phantom[100:110, 200:210] = 0, 0
 
 selem = disk(6); 
 b_tophat = black_tophat(phantom, selem)
 
-plt.figure(figsize=[10, 30]) 
-plt.subplot(121)
-plt.imshow(phantom, cmap=plt.cm.gray)
-plt.title('Original')
-plt.subplot(122)
-plt.imshow(b_tophat, cmap=plt.cm.gray)
-plt.title('After Black Tophat')
+fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+ax1.imshow(phantom)
+ax1.set_title('Original')
+ax2.imshow(b_tophat)
+ax2.set_title('After Black Tophat')
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
+Comments: This technique is used to locate the dark spots in an image which are 
+smaller than the size of the structuring element. As can be seen  below, the 
+10X10 pixel wide black square is highlighted since it is smaller or equal in 
+size as compared to the disk which is of radius 5, i.e. 10 pixels wide. If the 
+radius is decreased to 4, we can see that a center of the square is removed and 
+only the corners are visible, since diagonals are longer than sides.
+
 Duality 
 -------
+In the sense that erosion tends to shrink the size of white objects while 
+increasing the size of black objects. Conversely, dilation does just the 
+opposite. Similarly, opening tends to eliminate black objects smaller than the
+structuring element, wheres closing eliminates white objects.
+
 1. Erosion <-> Dilation 
 2. Opening <-> Closing 
 3. White Tophat <-> Black Tophat
@@ -346,70 +293,53 @@ Thinning is used to reduce each connected component in a binary image to a
 **single-pixel wide skeleton**. It is important to note that this is performed
 on binary images only.
 
-**Comments**: As the name suggests, this technique is used to thin the
-image to 1-pixel wide skeleton by applying thinning successively.
 """
-from skimage.morphology import skeletonize
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
-
-text = convert(io.imread(data_dir+'/ip_text.gif', as_grey=True), np.uint8) 
-
+text = img_as_ubyte(io.imread(data_dir+'/ip_text.gif', as_grey=True)) 
 text = text.astype(bool)
+
 sk = skeletonize(text)
 
-plt.figure(figsize=[10, 30]) 
-plt.subplot(121)
-plt.imshow(text, cmap=plt.cm.gray, vmin=0, vmax=1)
-plt.title('Original')
-plt.subplot(122)
-plt.imshow(sk, cmap=plt.cm.gray, vmin=0, vmax=1)
-plt.title('After Skeletonize')
+fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+ax1.imshow(text, vmin=0, vmax=1)
+ax1.set_title('Original')
+ax2.imshow(sk, vmin=0, vmax=1)
+ax2.set_title('After Skeletonization')
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
+Comments: As the name suggests, this technique is used to thin the
+image to 1-pixel wide skeleton by applying thinning successively.
+
 CONVEX HULL
 ===========
-The convex hull is the **set of pixels included in the smallest convex polygon 
-that surround all white pixels in the input image**. Again note that this is 
-also performed on binary images.
+The ``convex_hull_image`` is the **set of pixels included in the smallest 
+convex polygon that surround all white pixels in the input image**. Again note 
+that this is also performed on binary images.
 
-**Comments**: As the figure illustrates, convex_hull_image() gives the
-smallestpolygon which covers the white or True completely in the image.
 """
-from skimage.morphology import convex_hull_image
-import matplotlib.pyplot as plt
-import numpy as np
-import skimage.io._io as io
-from skimage.data import data_dir
-from skimage.util.dtype import dtype_range, convert
+rooster = img_as_ubyte(io.imread(data_dir+'/rooster.png', as_grey=True))
+rooster = rooster.astype(bool)
 
-rooster = convert(io.imread(data_dir+'/rooster.png', as_grey=True), np.uint8)
-rooster = rooster.astype(bool) 
 hull1 = convex_hull_image(rooster)
 rooster1 = np.copy(rooster)
 rooster1[350:355, 90:95] = 1
 hull2 = convex_hull_image(rooster1)
 
-plt.figure(figsize=[10, 30]) 
-plt.subplot(221)
-plt.imshow(rooster, cmap=plt.cm.gray, vmin=0, vmax=1)
-plt.title('Original')
-plt.subplot(222)
-plt.imshow(rooster1, cmap=plt.cm.gray, vmin=0, vmax=1)
-plt.title('After adding a small "grain"')
-plt.subplot(223)
-plt.imshow(hull1, cmap=plt.cm.gray, vmin=0, vmax=1)
-plt.title('After applying Convex Hull to Original')
-plt.subplot(224)
-plt.imshow(hull2, cmap=plt.cm.gray, vmin=0, vmax=1)
-plt.title('After applying Convex Hull to modified image')
+fg, ax = plt.subplots(2, 2, sharex='all', sharey='all')
+ax[0, 0].imshow(rooster)
+ax1.set_title('Original')
+ax[0, 1].imshow(rooster1)
+ax2.set_title('After adding a small grain')
+ax[1, 0].imshow(hull1)
+ax1.set_title('Convex Hull for Original')
+ax[1, 1].imshow(hull2)
+ax2.set_title('Convex Hull after adding the small grain')
 plt.show()
 """
 .. image:: PLOT2RST.current_figure
+
+Comments: As the figure illustrates, convex_hull_image() gives the
+smallestpolygon which covers the white or True completely in the image.
 
 """
