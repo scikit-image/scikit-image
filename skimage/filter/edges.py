@@ -11,6 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from skimage import img_as_float
+from skimage.color import rgb2grey
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 
@@ -39,7 +40,7 @@ def sobel(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process.
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
@@ -68,7 +69,7 @@ def hsobel(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process.
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
@@ -90,6 +91,8 @@ def hsobel(image, mask=None):
      -1  -2  -1
 
     """
+    if image.ndim == 3:
+        image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[ 1, 2, 1],
@@ -103,7 +106,7 @@ def vsobel(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area
@@ -125,6 +128,8 @@ def vsobel(image, mask=None):
       1   0  -1
 
     """
+    if image.ndim == 3:
+        image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
@@ -138,7 +143,7 @@ def scharr(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process.
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
@@ -170,7 +175,7 @@ def hscharr(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process.
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
@@ -197,6 +202,8 @@ def hscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
+    if image.ndim == 3:
+        image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[ 3,  10,  3],
@@ -210,7 +217,7 @@ def vscharr(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area
@@ -237,6 +244,8 @@ def vscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
+    if image.ndim == 3:
+        image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[ 3, 0,  -3],
@@ -250,7 +259,7 @@ def prewitt(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process.
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
@@ -275,7 +284,7 @@ def hprewitt(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process.
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
@@ -297,6 +306,8 @@ def hprewitt(image, mask=None):
      -1  -1  -1
 
     """
+    if image.ndim == 3:
+        image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[ 1, 1, 1],
@@ -310,7 +321,7 @@ def vprewitt(image, mask=None):
 
     Parameters
     ----------
-    image : 2-D array
+    image : ndarray
         Image to process.
     mask : 2-D array, optional
         An optional mask to limit the application to a certain area.
@@ -332,6 +343,8 @@ def vprewitt(image, mask=None):
       1   0  -1
 
     """
+    if image.ndim == 3:
+        image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[1, 0, -1],
