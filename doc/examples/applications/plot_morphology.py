@@ -87,6 +87,7 @@ i_f = plt.imread(data_dir+'/phantom.png')
 i_f2 = i_f[:,:,0] 
 i = convert(i_f2, np.uint8)
 plt.imshow(i, cmap=plt.cm.gray, vmin=0, vmax=255)
+plt.show()
 
 """
 .. image:: PLOT2RST.current_figure
@@ -105,7 +106,7 @@ from skimage.util.dtype import dtype_range, convert
 
 phantom = convert(io.imread(data_dir+'/phantom.png', as_grey=True), np.uint8) 
 plt.imshow(phantom, cmap=plt.cm.gray, vmin=0, vmax=255)
-
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -140,7 +141,7 @@ plt.title('Original')
 plt.subplot(122)
 plt.imshow(eroded, cmap=plt.cm.gray, vmin=0, vmax=255)
 plt.title('After Erosion')
-
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -175,7 +176,7 @@ plt.title('Original')
 plt.subplot(122)
 plt.imshow(dilate, cmap=plt.cm.gray, vmin=0, vmax=255)
 plt.title('After Dilation')
-
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -214,6 +215,7 @@ plt.title('Original')
 plt.subplot(122)
 plt.imshow(opened, cmap=plt.cm.gray, vmin=0, vmax=255)
 plt.title('After Opening')
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -252,6 +254,7 @@ plt.title('Original')
 plt.subplot(122)
 plt.imshow(closed, cmap=plt.cm.gray, vmin=0, vmax=255)
 plt.title('After Closing')
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -289,6 +292,7 @@ plt.title('Original')
 plt.subplot(122)
 plt.imshow(w_tophat, cmap=plt.cm.gray, vmin=0, vmax=255)
 plt.title('After White Tophat')
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -326,6 +330,7 @@ plt.title('Original')
 plt.subplot(122)
 plt.imshow(b_tophat, cmap=plt.cm.gray)
 plt.title('After Black Tophat')
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -363,6 +368,7 @@ plt.title('Original')
 plt.subplot(122)
 plt.imshow(sk, cmap=plt.cm.gray, vmin=0, vmax=1)
 plt.title('After Skeletonize')
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
@@ -402,6 +408,7 @@ plt.title('After applying Convex Hull to Original')
 plt.subplot(224)
 plt.imshow(hull2, cmap=plt.cm.gray, vmin=0, vmax=1)
 plt.title('After applying Convex Hull to modified image')
+plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
