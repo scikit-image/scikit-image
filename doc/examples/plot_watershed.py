@@ -28,7 +28,8 @@ See Wikipedia_ for more details on the algorithm.
 import numpy as np
 
 import matplotlib.pyplot as plt
-from skimage.morphology import watershed, is_local_maximum
+from skimage.morphology import watershed
+from skimage.feature import peak_local_max
 
 # Generate an initial image with two overlapping circles
 x, y = np.indices((80, 80))
@@ -42,7 +43,8 @@ image = np.logical_or(mask_circle1, mask_circle2)
 # Generate the markers as local maxima of the distance to the background
 from scipy import ndimage
 distance = ndimage.distance_transform_edt(image)
-local_maxi = is_local_maximum(distance, image, np.ones((3, 3)))
+local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
+                            labels=image)
 markers = ndimage.label(local_maxi)[0]
 labels = watershed(-distance, markers, mask=image)
 
