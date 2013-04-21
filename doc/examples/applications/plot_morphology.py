@@ -233,8 +233,7 @@ convex polygon that surround all white pixels in the input image*. Again note
 that this is also performed on binary images.
 
 """
-rooster = img_as_ubyte(io.imread(data_dir+'/rooster.png'))
-rooster = rooster.astype(bool)
+rooster = img_as_bool(io.imread(data_dir+'/rooster.png'))
 
 hull1 = convex_hull_image(rooster)
 plot_comparison(rooster, hull1, 'convex hull')
