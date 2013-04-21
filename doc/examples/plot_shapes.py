@@ -56,9 +56,5 @@ img[rr, cc, :] = (0, 0, 255)
 rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi/2.)
 img[rr, cc, :] = (255, 255, 255)
 
-# bezier curve
-rr, cc = bezier_curve(120, 400, 150, 480, 160, 400, weight=2)
-img[rr, cc, :] = (255, 255, 255)
-
 plt.imshow(img)
 plt.show()

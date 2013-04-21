@@ -404,7 +404,7 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
                  Py_ssize_t y1, Py_ssize_t x1,
                  Py_ssize_t y2, Py_ssize_t x2,
                  double weight):
-    """Generate a Bezier curve coordinates.
+    """Generate Bezier curve coordinates.
 
     Parameters
     ----------
@@ -423,6 +423,11 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
         Indices of pixels that belong to the Bezier curve.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
+    Notes
+    -----
+    The algorithm is the rational quadratic algorithm presented in
+    reference [1].
 
     References
     ----------
