@@ -57,6 +57,10 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0, int end_
         Type-1 DTW uses 27-, 45- and 63-degree local path constraint.
         Type-2 DTW uses 0-, 45- and 90-degree local path constraint.
         Type-3 DTW uses a combination of Type-1 and Type-2
+    start_anchor_slack : int
+        Maximum deviation allowed from start boundary condition
+    end_anchor_slack : int
+        Maximum deviation allowed from end boundary condition
 
     References
     ----------
