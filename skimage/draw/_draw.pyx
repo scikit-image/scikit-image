@@ -265,7 +265,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
-                      Py_ssize_t xradius, double angle=0):
+                      Py_ssize_t xradius, double orientation=0):
     """Generate ellipse perimeter coordinates.
 
     Parameters
@@ -274,8 +274,8 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         Centre coordinate of ellipse.
     yradius, xradius: int
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
-    angle: double, optional
-        Major axis angle (in radian).
+    orientation: double, optional
+        Major axis orientation in clockwise direction as radians.
 
     Returns
     -------
@@ -326,7 +326,7 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     cdef int ix0, ix1, iy0, iy1, ixd, iyd
     cdef double sin_angle, xa, ya, za, a, b
 
-    if angle == 0:
+    if orientation == 0:
         x = -xradius
         y = 0
         e2 = yd
@@ -360,7 +360,7 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
             py.append(cy - y)
 
     else:
-        sin_angle = sin(angle)
+        sin_angle = sin(orientation)
         za = (xd - yd) * sin_angle
         xa = sqrt(xd - za * sin_angle)
         ya = sqrt(yd + za * sin_angle)
@@ -376,7 +376,7 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
 
         xa = ix1 - ix0
         ya = iy1 - iy0
-        za = 4 * za * cos(angle)
+        za = 4 * za * cos(orientation)
         w = xa * ya
         if w != 0:
             w = (w - za) / (w + w)
@@ -414,6 +414,8 @@ def bezier_curve(Py_ssize_t x0, Py_ssize_t y0,
         Coordinates of the middle point
     x2, y2 : int
         Coordinates of the last point
+    weight : double
+        Middle point weight, it describes the line tension.
 
     Returns
     -------

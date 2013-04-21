@@ -1,7 +1,8 @@
 from numpy.testing import assert_array_equal
 import numpy as np
 
-from skimage.draw import line, polygon, circle, circle_perimeter, ellipse, ellipse_perimeter, bezier_curve
+from skimage.draw import line, polygon, circle, circle_perimeter, \
+                         ellipse, ellipse_perimeter, bezier_curve
 
 
 def test_line_horizontal():
