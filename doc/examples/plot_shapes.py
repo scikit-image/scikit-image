@@ -15,7 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.draw import line, polygon, circle, circle_perimeter, \
-                         ellipse, ellipse_perimeter, bezier_curve
+                         ellipse, ellipse_perimeter
 import numpy as np
 import math
 

@@ -2,7 +2,7 @@ from numpy.testing import assert_array_equal
 import numpy as np
 
 from skimage.draw import line, polygon, circle, circle_perimeter, \
-                         ellipse, ellipse_perimeter, bezier_curve
+                         ellipse, ellipse_perimeter, bezier_segment
 
 
 def test_line_horizontal():
@@ -345,7 +345,7 @@ def test_ellipse_perimeter_nzeroangle():
     assert_array_equal(img, img_)
 
 
-def test_bezier_curve():
+def test_bezier_segment():
     image = np.zeros((200, 200), dtype=int)
     x0 = 50
     y0 = 50
@@ -353,7 +353,7 @@ def test_bezier_curve():
     y1 = 50
     x2 = 150
     y2 = 150
-    rr, cc = bezier_curve(x0, y0, x1, y1, x2, y2, 0)
+    rr, cc = bezier_segment(x0, y0, x1, y1, x2, y2, 0)
     image [rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
