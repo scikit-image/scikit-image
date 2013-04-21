@@ -6,7 +6,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.float cimport DBL_MAX
 
-from skimage.color import rgb2grey
+from skimage.color import rgb2grey, is_rgb
 from skimage.util import img_as_float
 
 
@@ -61,7 +61,7 @@ def corner_moravec(image, Py_ssize_t window_size=1):
 
     cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode='c'] cimage, out
 
-    if image.ndim == 3:
+    if is_rgb(image):
         cimage = rgb2grey(image)
     cimage = np.ascontiguousarray(img_as_float(image))
 

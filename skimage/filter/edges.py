@@ -11,7 +11,7 @@ Original author: Lee Kamentsky
 """
 import numpy as np
 from skimage import img_as_float
-from skimage.color import rgb2grey
+from skimage.color import rgb2grey, is_rgb
 from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 
@@ -91,7 +91,7 @@ def hsobel(image, mask=None):
      -1  -2  -1
 
     """
-    if image.ndim == 3:
+    if is_rgb(image):
         image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
@@ -128,7 +128,7 @@ def vsobel(image, mask=None):
       1   0  -1
 
     """
-    if image.ndim == 3:
+    if is_rgb(image):
         image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
@@ -202,7 +202,7 @@ def hscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
-    if image.ndim == 3:
+    if is_rgb(image):
         image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
@@ -244,7 +244,7 @@ def vscharr(image, mask=None):
            of Kernel Based Image Derivatives.
 
     """
-    if image.ndim == 3:
+    if is_rgb(image):
         image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
@@ -306,7 +306,7 @@ def hprewitt(image, mask=None):
      -1  -1  -1
 
     """
-    if image.ndim == 3:
+    if is_rgb(image):
         image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
@@ -343,7 +343,7 @@ def vprewitt(image, mask=None):
       1   0  -1
 
     """
-    if image.ndim == 3:
+    if is_rgb(image):
         image = rgb2grey(image)
     image = img_as_float(image)
     result = np.abs(convolve(image,
