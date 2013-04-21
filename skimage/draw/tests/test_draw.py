@@ -239,7 +239,7 @@ def test_ellipse():
 
     assert_array_equal(img, img_)
 
-def test_ellipse_perimeter():
+def test_ellipse_perimeter_dot_zeroangle():
     # dot, angle == 0
     img = np.zeros((30, 15), 'uint8')
     rr, cc = ellipse_perimeter(15, 7, 0, 0, 0)
@@ -247,6 +247,7 @@ def test_ellipse_perimeter():
     assert(np.sum(img) == 1)
     assert(img[15][7] == 1)
 
+def test_ellipse_perimeter_dot_nzeroangle():
     # dot, angle != 0
     img = np.zeros((30, 15), 'uint8')
     rr, cc = ellipse_perimeter(15, 7, 0, 0, 1)
@@ -254,6 +255,7 @@ def test_ellipse_perimeter():
     assert(np.sum(img) == 1)
     assert(img[15][7] == 1)
 
+def test_ellipse_perimeter_flat_zeroangle():
     # flat ellipse
     img = np.zeros((20, 18), 'uint8')
     img_ = np.zeros((20, 18), 'uint8')
@@ -263,6 +265,7 @@ def test_ellipse_perimeter():
     img_[rr, cc] = 1
     assert_array_equal(img, img_)
 
+def test_ellipse_perimeter_zeroangle():
     # angle == 0
     img = np.zeros((30, 15), 'uint8')
     rr, cc = ellipse_perimeter(15, 7, 14, 6, 0)
@@ -302,11 +305,11 @@ def test_ellipse_perimeter():
 
     assert_array_equal(img, img_)
 
+def test_ellipse_perimeter_nzeroangle():
     # angle != 0
     img = np.zeros((30, 25), 'uint8')
     rr, cc = ellipse_perimeter(15, 11, 12, 6, 1.1)
     img[rr, cc] = 1
-    print(img)
     img_ = np.array(
        [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
