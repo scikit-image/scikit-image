@@ -5,15 +5,12 @@ Morphological Filtering
 
 Morphological image processing is a  collection of non-linear operations related
 to  the  shape or  morphology  of  features in  an  image,  such as  boundaries,
-skeletons, etc. Morphological  operations rely only on the  relative ordering of
-pixel values, not on their numerical values, and therefore are especially suited
-to the processing of  binary images. It is based on set theory  and makes use of
-logical  operations  to   carry  out  the  functionality  and   hence  are  less
-computationally  intensive and  easy to  implement. In  any given  technique, we
-probe an image with a small shape  or template called a structuring element. The
-structuring element is positioned at all  possible locations in the image and it
-is compared  with the corresponding  neighbourhood of pixels. Neighborhood  of a
-pixel is defined  as all the pixels  with a value 1 in  the structuring element.
+skeletons, etc. In  any given  technique, we probe an image with a small shape  
+or template called structuring element. This helps to define the region of 
+interest or neighborhood. Neighborhood of a pixel is defined as all the pixels 
+with a value 1 in the structuring element. The structuring element is positioned
+at all possible locations in the image and it is compared  with the 
+corresponding neighbourhood of pixels. 
 
 In this document we outline the following basic morphological operations:
 
@@ -29,28 +26,12 @@ In this document we outline the following basic morphological operations:
 Additional Resources : 
 ----------------------
 
-.. [1] Provides a nice understanding of the most basic operations involved in
-       morphological processing, i.e. erosion and dilation
-       `Link text <http://goo.gl/Cs4n6>`_
-.. [2] Auckland university: `Link text <http://goo.gl/Ylf19>`_
-.. [3] For an insight into the mathematical algorithms for each function:
-       `Link text <http://en.wikipedia.org/wiki/Mathematical_morphology>`_
+1. Morphological processing, i.e. erosion and dilation: http://goo.gl/Cs4n6
+2. Auckland university: http://goo.gl/Ylf19
+3. http://en.wikipedia.org/wiki/Mathematical_morphology
 
-Importing images 
-================ 
-There are essentially 2 ways for importing images for use with skimage. They 
-are as follows:  
-
-* Using the plt.imread()  to read the images as a  *numpy.ndarray* data type 
-* Using  the  skimage modules  like  'imread',  'imshow'  etc provided  under  
-  the '/skimage/io/_io.py'
-
-.. Note:: 
-   plt.imread() will read the image, a grey-scale image as a 3D array, whereas 
-   with io.imread() there is a parameter 'as_grey=True' for reading it as a2D 
-   array and using 'img_as_ubyte()', can be converted to type : *numpy.ndarray* 
-   with *uint8* element. This is the input array for the morphological function
-
+General Instructions
+====================
 The following checks should be made for running the morphological functions:
 
 **Image**:
@@ -75,31 +56,18 @@ image:
 * ``ndim(image)``
 * ``image.shape``
 
-Importing & displaying using ``plt.imread()`` and ``plt.imshow()``
------------------
+Lets Get Started
+================
+Importing & displaying using ``io.imread()`` and ``io.imshow()``
+-------------------
+``io.imread() has a the parameter 'as_grey=True' which ensures that the image is 
+taken as a 2D rather than a 3D array with equal R,G,B values for a point, hence
+no need of slicing.
 """
 import matplotlib.pyplot as plt
 import numpy as np
 from skimage.data import data_dir
 from skimage.util import img_as_ubyte
-
-plt.gray()
-
-i_f = plt.imread(data_dir+'/phantom.png')
-i_f2 = i_f[:,:,0] 
-i = img_as_ubyte(i_f2)
-plt.imshow(i, vmin=0, vmax=255)
-plt.show()
-
-"""
-.. image:: PLOT2RST.current_figure
-
-Importing & displaying using ``io.imread()`` and ``io.imshow()``
--------------------
-The advantage of using 'as_grey=True' is that it ensures that the image is 
-taken as a 2D rather than a 3D array with equal R,G,B values for a point, hence
-no need of slicing.
-"""
 import skimage.io._io as io
 
 phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
@@ -123,7 +91,7 @@ phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 selem = disk(6); 
 eroded = erosion(phantom, selem)
 
-fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+fg, (ax1, ax2) = plt.subplots(ncols=2)
 ax1.imshow(phantom)
 ax1.set_title('Original')
 ax2.imshow(eroded)
@@ -132,7 +100,7 @@ plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments: See how the white boundary of the image disappers or gets eroded
+See how the white boundary of the image disappers or gets eroded
 as we increse the size of the disk. Also notice the increase in size of the 
 two black ellipses in the center and the disappearance of the 3-4 light grey
 patches in the lower part of the image.
@@ -148,7 +116,7 @@ phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 selem = disk(6); 
 dilate = dilation(phantom, selem)
 
-fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+fg, (ax1, ax2) = plt.subplots(ncols=2)
 ax1.imshow(phantom)
 ax1.set_title('Original')
 ax2.imshow(dilate)
@@ -157,7 +125,7 @@ plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments: See how the white boundary of the image thickens or gets
+See how the white boundary of the image thickens or gets
 dialted as we increse the size of the disk. Also notice the decrease in size
 of the two black ellipses in the centre, with the thickening of the light grey
 circle in the center and the 3-4 patches in the lower part of the image.
@@ -173,7 +141,7 @@ phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 selem = disk(6); 
 opened = opening(phantom, selem)
 
-fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+fg, (ax1, ax2) = plt.subplots(ncols=2)
 ax1.imshow(phantom)
 ax1.set_title('Original')
 ax2.imshow(opened)
@@ -182,7 +150,7 @@ plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments: Since ``opening`` an image is equivalent to *erosion followed
+Since ``opening`` an image is equivalent to *erosion followed
 by dilation*, white or lighter portions in the image which are smaller than the
 structuring element tend to be removed, just as in erosion along with the
 increase in thickness of black portions and thinning of larger (than structing
@@ -202,7 +170,7 @@ phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 selem = disk(6); 
 closed = closing(phantom, selem)
 
-fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+fg, (ax1, ax2) = plt.subplots(ncols=2)
 ax1.imshow(phantom)
 ax1.set_title('Original')
 ax2.imshow(closed)
@@ -231,7 +199,7 @@ phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 selem = disk(6); 
 w_tophat = white_tophat(phantom, selem)
 
-fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+fg, (ax1, ax2) = plt.subplots(ncols=2)
 ax1.imshow(phantom)
 ax1.set_title('Original')
 ax2.imshow(w_tophat)
@@ -240,7 +208,7 @@ plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments: This technique is used to locate the bright spots in an
+This technique is used to locate the bright spots in an
 image which are smaller than the size of the structuring element. As can be
 seen below, the 10X10 pixel wide white square and a part of the white boundary 
 are highlighted since they are smaller in size as compared to the disk which 
@@ -260,7 +228,7 @@ phantom[340:360, 200:220], phantom[100:110, 200:210] = 0, 0
 selem = disk(6); 
 b_tophat = black_tophat(phantom, selem)
 
-fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+fg, (ax1, ax2) = plt.subplots(ncols=2)
 ax1.imshow(phantom)
 ax1.set_title('Original')
 ax2.imshow(b_tophat)
@@ -269,7 +237,7 @@ plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments: This technique is used to locate the dark spots in an image which are 
+This technique is used to locate the dark spots in an image which are 
 smaller than the size of the structuring element. As can be seen  below, the 
 10X10 pixel wide black square is highlighted since it is smaller or equal in 
 size as compared to the disk which is of radius 5, i.e. 10 pixels wide. If the 
@@ -299,7 +267,7 @@ text = text.astype(bool)
 
 sk = skeletonize(text)
 
-fg, (ax1, ax2) = plt.subplots(1, 2, sharex='all', sharey='all')
+fg, (ax1, ax2) = plt.subplots(ncols=2)
 ax1.imshow(text, vmin=0, vmax=1)
 ax1.set_title('Original')
 ax2.imshow(sk, vmin=0, vmax=1)
@@ -308,7 +276,7 @@ plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments: As the name suggests, this technique is used to thin the
+As the name suggests, this technique is used to thin the
 image to 1-pixel wide skeleton by applying thinning successively.
 
 CONVEX HULL
@@ -326,7 +294,7 @@ rooster1 = np.copy(rooster)
 rooster1[350:355, 90:95] = 1
 hull2 = convex_hull_image(rooster1)
 
-fg, ax = plt.subplots(2, 2, sharex='all', sharey='all')
+fg, ax = plt.subplots(nrows=2, ncols=2)
 ax[0, 0].imshow(rooster)
 ax1.set_title('Original')
 ax[0, 1].imshow(rooster1)
@@ -339,7 +307,7 @@ plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments: As the figure illustrates, convex_hull_image() gives the
+As the figure illustrates, convex_hull_image() gives the
 smallestpolygon which covers the white or True completely in the image.
 
 """
