@@ -384,35 +384,35 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         iyd = int(floor(ya * w + 0.5))
 
         # Draw the 4 quadrants
-        rr, cc = bezier_curve(ix0, iy0+iyd, ix0, iy0, ix0+ixd, iy0, 1-w)
+        rr, cc = bezier_curve(iy0+iyd, ix0, iy0, ix0, iy0, ix0+ixd, 1-w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_curve(ix0, iy0+iyd, ix0, iy1, ix1-ixd, iy1, w)
+        rr, cc = bezier_curve(iy0+iyd, ix0, iy1, ix0, iy1, ix1-ixd, w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_curve(ix1, iy1-iyd, ix1, iy1, ix1-ixd, iy1, 1-w)
+        rr, cc = bezier_curve(iy1-iyd, ix1, iy1, ix1, iy1, ix1-ixd, 1-w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_curve(ix1, iy1-iyd, ix1, iy0, ix0+ixd, iy0, w)
+        rr, cc = bezier_curve(iy1-iyd, ix1, iy0, ix1, iy0, ix0+ixd,  w)
         py.extend(rr)
         px.extend(cc)
 
     return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
 
 
-def bezier_curve(Py_ssize_t x0, Py_ssize_t y0,
-                 Py_ssize_t x1, Py_ssize_t y1,
-                 Py_ssize_t x2, Py_ssize_t y2,
+def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
+                 Py_ssize_t y1, Py_ssize_t x1,
+                 Py_ssize_t y2, Py_ssize_t x2,
                  double weight):
     """Generate a Bezier curve coordinates.
 
     Parameters
     ----------
-    x0, y0 : int
+    y0, x0 : int
         Coordinates of the first point
-    x1, y1 : int
+    y1, x1 : int
         Coordinates of the middle point
-    x2, y2 : int
+    y2, x2 : int
         Coordinates of the last point
     weight : double
         Middle point weight, it describes the line tension.
@@ -487,7 +487,7 @@ def bezier_curve(Py_ssize_t x0, Py_ssize_t y0,
             sy = floor((y0 + 2 * weight * y1 + y2) * xy * 0.5 + 0.5)
             dx = floor((weight * x1 + x0) * xy + 0.5)
             dy = floor((y1 * weight + y0) * xy + 0.5)
-            return bezier_curve(x0, y0, int(dx), int(dy), int(sx), int(sy), cur)
+            return bezier_curve(y0, x0, int(dy), int(dx), int(sy), int(sx), cur)
 
         err = dx + dy - xy
         while dy <= xy and dx >= xy:
