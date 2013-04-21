@@ -240,6 +240,7 @@ hull1 = convex_hull_image(rooster)
 plot_comparison(rooster, hull1, 'convex hull')
 
 """
+.. image:: PLOT2RST.current_figure
 
 As the figure illustrates, ``convex_hull_image`` gives the smallest polygon
 which covers the white or True completely in the image.
