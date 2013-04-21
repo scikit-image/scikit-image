@@ -323,7 +323,6 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
 
     cdef Py_ssize_t x, y, e2, err
 
-    #cdef double  x0, y0, x1, y1, a, b, zd, sin_angle
     cdef int ix0, ix1, iy0, iy1, ixd, iyd
     cdef double sin_angle, xa, ya, za, a, b
 
