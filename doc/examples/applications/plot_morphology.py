@@ -26,8 +26,8 @@ In this document we outline the following basic morphological operations:
 Additional Resources : 
 ----------------------
 
-1. Morphological processing, i.e. erosion and dilation: http://goo.gl/Cs4n6
-2. Auckland university: http://goo.gl/Ylf19
+1. http://www.mathworks.in/help/images/morphology-fundamentals-dilation-and-erosion.html#f18-14379
+2. http://www.cs.auckland.ac.nz/courses/compsci773s1c/lectures/ImageProcessing-html/topic4.htm
 3. http://en.wikipedia.org/wiki/Mathematical_morphology
 
 General Instructions
@@ -59,7 +59,7 @@ image:
 Lets Get Started
 ================
 Importing & displaying using ``io.imread()`` and ``io.imshow()``
--------------------
+----------------------------------------------------------------
 ``io.imread() has a the parameter 'as_grey=True' which ensures that the image is 
 taken as a 2D rather than a 3D array with equal R,G,B values for a point, hence
 no need of slicing.
