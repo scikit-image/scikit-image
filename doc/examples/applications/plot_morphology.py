@@ -1,313 +1,272 @@
-""" 
-======================= 
-Morphological Filtering 
+"""
+=======================
+Morphological Filtering
 =======================
 
-Morphological image processing is a  collection of non-linear operations related
-to  the  shape or  morphology  of  features in  an  image,  such as  boundaries,
-skeletons, etc. In  any given  technique, we probe an image with a small shape  
-or template called structuring element. This helps to define the region of 
-interest or neighborhood. Neighborhood of a pixel is defined as all the pixels 
-with a value 1 in the structuring element. The structuring element is positioned
-at all possible locations in the image and it is compared  with the 
-corresponding neighbourhood of pixels. 
+Morphological image processing is a collection of non-linear operations related
+to the shape or morphology of features in an image, such as boundaries,
+skeletons, etc. In any given technique, we probe an image with a small shape or
+template called a structuring element, which defines the region of interest or
+neighborhood around a pixel.
 
 In this document we outline the following basic morphological operations:
 
-1. Erosion 
-2. Dilation 
-3. Opening 
-4. Closing 
-5. White Tophat 
-6. Black Tophat 
-7. Skeletonize 
+1. Erosion
+2. Dilation
+3. Opening
+4. Closing
+5. White Tophat
+6. Black Tophat
+7. Skeletonize
 8. Convex Hull
 
-Additional Resources : 
-----------------------
 
-1. Morphological processing, i.e. erosion and dilation: http://goo.gl/Cs4n6
-2. Auckland university: http://goo.gl/Ylf19
-3. http://en.wikipedia.org/wiki/Mathematical_morphology
-
-General Instructions
-====================
-The following checks should be made for running the morphological functions:
-
-**Image**:
-
-* Type : numpy.ndarray 
-* Data type : uint8 
-* 2D
-
-**Structuring Element**: 
-
-* Type: Binary or boolean
-
-.. note::
-   Skimage supports NumPy data types and takes in images as type 'ndarray'.
-   matplotlib.pyplot is a python library for providing MATLAB-like 
-   functionality, hence the same function names. E.g: imshow 
-
-Some quick functions to check the dimensions or type or the shape(size) of the 
-image:
-
-* ``type(image)``
-* ``ndim(image)``
-* ``image.shape``
-
-Lets Get Started
-================
-Importing & displaying using ``io.imread()`` and ``io.imshow()``
--------------------
-``io.imread() has a the parameter 'as_grey=True' which ensures that the image is 
-taken as a 2D rather than a 3D array with equal R,G,B values for a point, hence
-no need of slicing.
+To get started, let's load an image using ``io.imread``. Note that morphology
+functions only work on gray-scale or binary images, so we set ``as_grey=True``.
 """
+
 import matplotlib.pyplot as plt
-import numpy as np
 from skimage.data import data_dir
 from skimage.util import img_as_ubyte
-import skimage.io._io as io
+from skimage import io
 
 phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 plt.imshow(phantom)
-plt.show()
+
 """
 .. image:: PLOT2RST.current_figure
 
-EROSION
-=======
-Morphological ``erosion`` sets a pixel at (i,j) to the **minimum over all 
-pixels in the neighborhood centered at (i,j)**. For defining the structuring 
-element, we use disk(radius) function.
+Let's also define a convenience function for plotting comparisons:
 """
+
+def plot_comparison(original, filtered, filter_name):
+
+    fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
+    ax1.imshow(original)
+    ax1.set_title('original')
+    ax1.axis('off')
+    ax2.imshow(filtered)
+    ax2.set_title(filter_name)
+    ax2.axis('off')
+
+"""
+Erosion
+=======
+
+Morphological ``erosion`` sets a pixel at (i, j) to the *minimum over all
+pixels in the neighborhood centered at (i, j)*. The structuring element,
+``selem``, passed to ``erosion`` is a boolean array that describes this
+neighborhood. Below, we use ``disk`` to create a circular structuring element,
+which we use for most of the following examples.
+"""
+
 from skimage.morphology import erosion, dilation, opening, closing, white_tophat
 from skimage.morphology import black_tophat, skeletonize, convex_hull_image
 from skimage.morphology import disk
 
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
-
-selem = disk(6); 
+selem = disk(6)
 eroded = erosion(phantom, selem)
+plot_comparison(phantom, eroded, 'erosion')
 
-fg, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.imshow(phantom)
-ax1.set_title('Original')
-ax2.imshow(eroded)
-ax2.set_title('After Erosion')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-See how the white boundary of the image disappers or gets eroded
-as we increse the size of the disk. Also notice the increase in size of the 
-two black ellipses in the center and the disappearance of the 3-4 light grey
+Notice how the white boundary of the image disappears or gets eroded as we
+increase the size of the disk. Also notice the increase in size of the two
+black ellipses in the center and the disappearance of the 3 light grey
 patches in the lower part of the image.
 
-DILATION
+
+Dilation
 ========
-Morphological ``dilation`` sets a pixel at (i,j) to the **maximum over all 
-pixels in the neighborhood centered at (i,j)**. Dilation enlarges bright 
+
+Morphological ``dilation`` sets a pixel at (i, j) to the *maximum over all
+pixels in the neighborhood centered at (i, j)*. Dilation enlarges bright
 regions and shrinks dark regions.
 """
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 
-selem = disk(6); 
-dilate = dilation(phantom, selem)
+dilated = dilation(phantom, selem)
+plot_comparison(phantom, dilated, 'dilation')
 
-fg, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.imshow(phantom)
-ax1.set_title('Original')
-ax2.imshow(dilate)
-ax2.set_title('After Dilation')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-See how the white boundary of the image thickens or gets
-dialted as we increse the size of the disk. Also notice the decrease in size
-of the two black ellipses in the centre, with the thickening of the light grey
-circle in the center and the 3-4 patches in the lower part of the image.
+Notice how the white boundary of the image thickens, or gets dilated, as we
+increase the size of the disk. Also notice the decrease in size of the two
+black ellipses in the centre, and the thickening of the light grey circle in
+the center and the 3 patches in the lower part of the image.
 
-OPENING
+
+Opening
 =======
-Morphological ``opening`` on an image is defined as an **erosion followed by a 
-dilation**. Opening can remove small bright spots (i.e. "salt") and connect 
-small dark cracks. 
-"""
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
 
-selem = disk(6); 
+Morphological ``opening`` on an image is defined as an *erosion followed by a
+dilation*. Opening can remove small bright spots (i.e. "salt") and connect
+small dark cracks.
+"""
+
 opened = opening(phantom, selem)
+plot_comparison(phantom, opened, 'opening')
 
-fg, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.imshow(phantom)
-ax1.set_title('Original')
-ax2.imshow(opened)
-ax2.set_title('After Opening')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Since ``opening`` an image is equivalent to *erosion followed
-by dilation*, white or lighter portions in the image which are smaller than the
-structuring element tend to be removed, just as in erosion along with the
-increase in thickness of black portions and thinning of larger (than structing
-elements) white portions. But dilation reverses this effect and hence as we can
-see in the image, the central 2 dark ellipses and the circular lighter portion
-retain their thickness but the lighter patchs in the bottom get completely
-eroded.
+Since ``opening`` an image starts with an erosion operation, light regions that
+are *smaller* than the structuring element are removed. The dilation operation
+that follows ensures that light regions that are *larger* than the structuring
+element retain their original size. Notice how the light and dark shapes in the
+center their original thickness but the 3 lighter patches in the bottom get
+completely eroded. The size dependence is highlighted by the outer white ring:
+The parts of the ring thinner than the structuring element were completely
+erased, while the thicker region at the top retains its original thickness.
 
-CLOSING
+
+Closing
 =======
-Morphological ``closing`` on an image is defined as a **dilation followed by an 
-erosion**. Closing can remove small dark spots (i.e. "pepper") and connect 
-small bright cracks. 
-"""
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True)) 
 
-selem = disk(6); 
+Morphological ``closing`` on an image is defined as a *dilation followed by an
+erosion*. Closing can remove small dark spots (i.e. "pepper") and connect
+small bright cracks.
+
+To illustrate this more clearly, let's add a small crack to the white border:
+"""
+
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
+phantom[10:30, 200:210] = 0
+
 closed = closing(phantom, selem)
+plot_comparison(phantom, closed, 'closing')
 
-fg, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.imshow(phantom)
-ax1.set_title('Original')
-ax2.imshow(closed)
-ax2.set_title('After Closing')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-Comments : Since ``closing`` an image is equivalent to *dilation
-followed by erosion*, the small black 10X10 pixel wide square introduced has
-been removed and the -34 white ellipses at the bottom get connected, just as is
-expected after dilation along with the thinning of larger (than structing
-elements) black portions. But erosion reverses this effect and hence as we can
-see in the image, the central 2 dark ellipses and the circular lighter portion
-retain their thickness but the all black square is completely removed. But note
-that the white patches at the bottom remain connected even after erosion.
+Since ``closing`` an image starts with an dilation operation, dark regions
+that are *smaller* than the structuring element are removed. The dilation
+operation that follows ensures that dark regions that are *larger* than the
+structuring element retain their original size. Notice how the white ellipses
+at the bottom get connected because of dilation, but other dark region retain
+their original sizes. Also notice how the crack we added is mostly removed.
 
-WHITE TOPHAT
+
+White tophat
 ============
-The ``white_tophat`` of an image is defined as the **image minus its 
-morphological opening**. This operation returns the bright spots of the image 
-that are smaller than the structuring element. 
-"""
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True)) 
 
-selem = disk(6); 
+The ``white_tophat`` of an image is defined as the *image minus its
+morphological opening*. This operation returns the bright spots of the image
+that are smaller than the structuring element.
+
+To make things interesting, we'll add bright and dark spots to the image:
+"""
+
+phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
+phantom[340:350, 200:210] = 255
+phantom[100:110, 200:210] = 0
+
 w_tophat = white_tophat(phantom, selem)
+plot_comparison(phantom, w_tophat, 'white tophat')
 
-fg, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.imshow(phantom)
-ax1.set_title('Original')
-ax2.imshow(w_tophat)
-ax2.set_title('After performing white_tophat')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-This technique is used to locate the bright spots in an
-image which are smaller than the size of the structuring element. As can be
-seen below, the 10X10 pixel wide white square and a part of the white boundary 
-are highlighted since they are smaller in size as compared to the disk which 
-is of radius 5, i.e. 10 pixels wide. If the radius is decreased to 4, we can 
-see that a center of the square is removed and only the corners are visible, 
-since diagonals are longer than sides.
+As you can see, the 10-pixel wide white square is highlighted since it is
+smaller than the structuring element. Also, the thin, white edges around most
+of the ellipse are retained because they're smaller than the structuring
+element, but the thicker region at the top disappears.
 
-BLACK TOPHAT
+
+Black tophat
 ============
-The ``black_tophat`` of an image is defined as its morphological **closing minus 
+
+The ``black_tophat`` of an image is defined as its morphological **closing minus
 the original image**. This operation returns the *dark spots of the image that
-are smaller than the structuring element*. 
+are smaller than the structuring element*.
 """
-phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True)) 
-phantom[340:360, 200:220], phantom[100:110, 200:210] = 0, 0
 
-selem = disk(6); 
 b_tophat = black_tophat(phantom, selem)
+plot_comparison(phantom, b_tophat, 'black tophat')
 
-fg, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.imshow(phantom)
-ax1.set_title('Original')
-ax2.imshow(b_tophat)
-ax2.set_title('After Black Tophat')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-This technique is used to locate the dark spots in an image which are 
-smaller than the size of the structuring element. As can be seen  below, the 
-10X10 pixel wide black square is highlighted since it is smaller or equal in 
-size as compared to the disk which is of radius 5, i.e. 10 pixels wide. If the 
-radius is decreased to 4, we can see that a center of the square is removed and 
-only the corners are visible, since diagonals are longer than sides.
+As you can see, the 10-pixel wide black square is highlighted since it is
+smaller than the structuring element.
 
-Duality 
+
+Duality
 -------
-In the sense that erosion tends to shrink the size of white objects while 
-increasing the size of black objects. Conversely, dilation does just the 
-opposite. Similarly, opening tends to eliminate black objects smaller than the
-structuring element, wheres closing eliminates white objects.
 
-1. Erosion <-> Dilation 
-2. Opening <-> Closing 
-3. White Tophat <-> Black Tophat
+As you should have noticed, many of these operations are simply the reverse
+of another operation. This duality can be summarized as follows:
 
-SKELETONIZE
+1. Erosion <-> Dilation
+2. Opening <-> Closing
+3. White tophat <-> Black tophat
+
+
+Skeletonize
 ===========
-Thinning is used to reduce each connected component in a binary image to a 
-**single-pixel wide skeleton**. It is important to note that this is performed
+
+Thinning is used to reduce each connected component in a binary image to a
+*single-pixel wide skeleton*. It is important to note that this is performed
 on binary images only.
 
 """
-text = img_as_ubyte(io.imread(data_dir+'/ip_text.gif', as_grey=True)) 
-text = text.astype(bool)
+
+from skimage import img_as_bool
+text = img_as_bool(io.imread(data_dir+'/ip_text.gif'))
 
 sk = skeletonize(text)
+plot_comparison(text, sk, 'skeletonize')
 
-fg, (ax1, ax2) = plt.subplots(ncols=2)
-ax1.imshow(text, vmin=0, vmax=1)
-ax1.set_title('Original')
-ax2.imshow(sk, vmin=0, vmax=1)
-ax2.set_title('After Skeletonization')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-As the name suggests, this technique is used to thin the
-image to 1-pixel wide skeleton by applying thinning successively.
+As the name suggests, this technique is used to thin the image to 1-pixel wide
+skeleton by applying thinning successively.
 
-CONVEX HULL
+
+Convex hull
 ===========
-The ``convex_hull_image`` is the **set of pixels included in the smallest 
-convex polygon that surround all white pixels in the input image**. Again note 
+
+The ``convex_hull_image`` is the *set of pixels included in the smallest
+convex polygon that surround all white pixels in the input image*. Again note
 that this is also performed on binary images.
 
 """
-rooster = img_as_ubyte(io.imread(data_dir+'/rooster.png', as_grey=True))
-rooster = rooster.astype(bool)
+rooster = img_as_bool(io.imread(data_dir+'/rooster.png'))
 
 hull1 = convex_hull_image(rooster)
-rooster1 = np.copy(rooster)
-rooster1[350:355, 90:95] = 1
-hull2 = convex_hull_image(rooster1)
+plot_comparison(rooster, hull1, 'convex hull')
 
-fg, ax = plt.subplots(nrows=2, ncols=2)
-ax[0, 0].imshow(rooster)
-ax1.set_title('Original')
-ax[0, 1].imshow(rooster1)
-ax2.set_title('After adding a small grain')
-ax[1, 0].imshow(hull1)
-ax1.set_title('Convex Hull for Original')
-ax[1, 1].imshow(hull2)
-ax2.set_title('Convex Hull after adding the small grain')
-plt.show()
 """
 .. image:: PLOT2RST.current_figure
 
-As the figure illustrates, convex_hull_image() gives the
-smallestpolygon which covers the white or True completely in the image.
+As the figure illustrates, ``convex_hull_image`` gives the smallest polygon
+which covers the white or True completely in the image.
+
+If we add a small grain to the image, we can see how the convex hull adapts to
+enclose that grain:
+"""
+
+import numpy as np
+
+rooster2 = np.copy(rooster)
+rooster2[350:355, 90:95] = 1
+
+hull2 = convex_hull_image(rooster2)
+plot_comparison(rooster2, hull2, 'convex hull')
 
 """
+.. image:: PLOT2RST.current_figure
+
+
+Additional Resources
+====================
+
+1. `MathWorks tutorial on morphological processing <http://www.mathworks.com/help/images/morphology-fundamentals-dilation-and-erosion.html>`_
+2. Auckland university's tutorial on Morphological Image Processing http://www.cs.auckland.ac.nz/courses/compsci773s1c/lectures/ImageProcessing-html/topic4.htm
+3. http://en.wikipedia.org/wiki/Mathematical_morphology
+
+"""
+
+plt.show()
