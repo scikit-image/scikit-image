@@ -245,9 +245,9 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     cdef list rr = list()
     cdef list cc = list()
 
-    cdef Py_ssize_t x = 0
-    cdef Py_ssize_t y = radius
-    cdef Py_ssize_t d = 0
+    cdef ssize_t x = 0
+    cdef ssize_t y = radius
+    cdef ssize_t d = 0
     cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
