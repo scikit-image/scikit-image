@@ -4,6 +4,55 @@ from numpy.testing import assert_array_almost_equal as assert_close
 import skimage.filter as F
 
 
+def test_roberts_zeros():
+    """Roberts' on an array of all zeros"""
+    result = F.roberts(np.zeros((10, 10)), np.ones((10, 10), bool))
+    assert (np.all(result == 0))
+
+
+def test_roberts_diagonal1():
+    """Roberts' on an edge should be a diagonal"""
+    i = (10, 10)
+    n = (10, 10)
+    i = np.ones(i)
+    i = np.triu(i)
+    image = (i > 0).astype(float)
+    n = np.zeros(n)
+    for k in range(2, 10):
+        for t in range(0, k-1):
+            n[k][t] = 1
+            n[t][k] = 1
+    j = np.identity(10)    
+    result = F.roberts(image)
+    j[9][9] = j[0][0] = 0
+    assert (np.all(result[j == 1] == 1) and np.all(result[n == 1] == 0))
+
+
+def test_roberts_diagonal2():
+    """Roberts' on an edge should be a diagonal"""
+    i = (10, 10)
+    j = (10, 10)
+    n = (10, 10)
+    i = np.ones(i)
+    for k in range(0, 10):
+        for t in range(10-k, 10):
+	        i[k][t] = 0
+    n = np.zeros(n)
+    for k in range(0, 10):
+        for t in range(0, 9-k):
+	        n[k][t] = 0
+	        n[t][k] = 0
+
+    image = (i > 0).astype(float)
+
+    j = np.ones(j)
+    for k in range(0, 10):
+        j[k][9-k] = 5
+    result = F.roberts(image)
+    j[0][9] = j[9][0] = 0
+    assert (np.all(result[j == 5] == 1) and np.all(result[n == 1] == 0))
+
+
 def test_sobel_zeros():
     """Sobel on an array of all zeros"""
     result = F.sobel(np.zeros((10, 10)), np.ones((10, 10), bool))

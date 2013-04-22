@@ -362,8 +362,10 @@ def roberts(image, mask=None):
 
 def pdroberts(image, mask=None):
     """Find the cross edges of an image using the Roberts' Cross operator.
+
     The kernel is applied to the input image, to produce separate measurements
     of the gradient component one orientation.
+
     Parameters
     ----------
     image : 2-D array
@@ -376,7 +378,7 @@ def pdroberts(image, mask=None):
     Returns
     -------
     output : ndarray
-        The Robert edge map.
+        The Robert's edge map.
 
     Notes
     -----
@@ -390,7 +392,7 @@ def pdroberts(image, mask=None):
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[ 1, 0],
-                                       [ 0, -1]]).astype(float) / 1.0 ))
+                                       [ 0, -1]]).astype(float)))
     return _mask_filter_result(result, mask)
 
 
@@ -410,7 +412,7 @@ def ndroberts(image, mask=None):
     Returns
     -------
     output : ndarray
-        The Robert edge map.
+        The Robert's edge map.
 
     Notes
     -----
@@ -424,5 +426,5 @@ def ndroberts(image, mask=None):
     image = img_as_float(image)
     result = np.abs(convolve(image,
                              np.array([[0, 1],
-                                       [-1, 0]]).astype(float) / 1.0))
+                                       [-1, 0]]).astype(float)))
     return _mask_filter_result(result, mask)
