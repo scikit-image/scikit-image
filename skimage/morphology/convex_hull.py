@@ -3,30 +3,30 @@ __all__ = ['convex_hull_image']
 import numpy as np
 from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
-
+from .selem import square as sq
+from skimage.morphology import label, dilation
 
 def convex_hull_image(image):
-    """Compute the convex hull image of a binary image.
-
-    The convex hull is the set of pixels included in the smallest convex
-    polygon that surround all white pixels in the input image.
-
+	"""Compute the convex hull image of a binary image.
+	
+	The convex hull is the set of pixels included in the smallest convex
+	polygon that surround all white pixels in the input image.
+	
     Parameters
     ----------
     image : ndarray
         Binary input image.  This array is cast to bool before processing.
-
-    Returns
+	
+	Returns
     -------
     hull : ndarray of uint8
         Binary image with pixels in convex hull set to 255.
-
-    References
+    
+	References
     ----------
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
-
-    """
-
+	"""
+			
     image = image.astype(bool)
 
     # Here we do an optimisation by choosing only pixels that are
@@ -64,3 +64,17 @@ def convex_hull_image(image):
     mask = grid_points_inside_poly(image.shape[:2], v)
 
     return mask
+
+def connected_component(image, start_pixel_index):
+	next_im = np.zeros(image.shape, dtype=np.uint8)
+	next_im[start_pixel_index] = 1
+	start_im = np.zeros(image.shape)
+	while not np.array_equal(start_im, next_im):
+		start_im = next_im.copy()
+		dilated_im = dilation(start_im, sq(8))
+		next_im = dilated_st & image
+	
+	return next_im
+
+def convex_hull_object(image):
+	
