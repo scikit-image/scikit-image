@@ -3,36 +3,59 @@ Development process
 
 Here's the long and short of it:
 
- * Go to `https://github.com/scikit-image/scikit-image
-   <http://github.com/scikit-image/scikit-image>`_ and follow the
-   instructions on making your own fork.
- * Create a new branch for the feature you want to work on.  Since the
-   branch name will appear in the merge message, use a sensible name
-   such as 'transform-speedups'.
- * Commit locally as you progress.
- * Push your changes back to GitHub and create a Pull Request by
-   clicking 'Pull Request' in GitHub.
- * Optionally, post on the `mailing list <http://groups.google.com/group/scikit-image>`_ to explain your changes.
+1. If you are a first-time contributor:
 
-Read these :doc:`detailed documents <gitwash/index>` on how to use Git with
-``scikit-image`` (`<http://scikit-image.org/docs/dev/gitwash/index.html>`_).
+ * Go to `https://github.com/scikit-image/scikit-image
+   <http://github.com/scikit-image/scikit-image>`_ and click the
+   "fork" button to create your own copy of the project.
+ * Clone the project to your local computer:
+   ``git clone git@github.com:john_doe/scikit-image.git``
+ * Add origin and user branches:
+   ``git remote rm origin``
+   ``git remote add origin git@github.com:scikit-image/scikit-image.git``
+   ``git remote add john_doe git@github.com:john_doe/scikit-image.git``
+   Now, ``origin`` refers to the ``scikit-image`` repository and
+   ``john_doe`` (your username) to yours.
+
+2. Develop your contribution:
+
+ * Pull the latest changes from upstream
+   (``git checkout master ; git pull origin master``)
+ * Create a branch for the feature you want to work on.  Since the
+   branch name will appear in the merge message, use a sensible name
+   such as 'transform-speedups':
+   ``git checkout -b transform-speedups``
+ * Commit locally as you progress (``git add`` and ``git commit``)
+
+3. To submit your contribution:
+
+ * Push your changes back to GitHub:
+   ``git push john_doe transform-speedups``.
+ * Go to GitHub.  The new branch will show up with a Pull Request button--click
+   it.
+ * If you want, post on the `mailing list
+   <http://groups.google.com/group/scikit-image>`_ to explain your changes or
+   to ask for review.
+
+For a more detailed discussion, read these :doc:`detailed documents
+<gitwash/index>` on how to use Git with ``scikit-image``
+(`<http://scikit-image.org/docs/dev/gitwash/index.html>`_).
 
 .. note::
 
-   Do *not* merge the main branch into yours.  If GitHub indicates that the
-   Pull Request can no longer be merged automatically, rebase onto master.
+   Do *not* ever merge the main branch into yours.  If GitHub indicates that
+   the Pull Request can no longer be merged automatically, rebase onto master::
+
+     git fetch origin/master
+     git rebase origin/master
 
    (If you are curious, here's a further discussion on
    the `dangers of rebasing <http://tinyurl.com/lll385>`__.  Also
    see this `LWN article <http://tinyurl.com/nqcbkj>`__.)
 
 * To reviewers: add a short explanation of what a branch did to the merge
-  message or, if closing a bug, add "Closes gh-XXXX".
-
-You may also read this summary by Fernando Perez of the IPython
-project on how they manage to keep review overhead to a minimum:
-
-http://mail.scipy.org/pipermail/ipython-dev/2010-October/006746.html
+  message and, if closing a bug, also add "Closes gh-123" where 123 is the
+  bug number.
 
 Guidelines
 ----------
@@ -40,17 +63,20 @@ Guidelines
  * All code should have tests (see `test coverage`_ below for more details).
  * All code should be documented, to the same
    `standard <http://projects.scipy.org/numpy/wiki/CodingStyleGuidelines>`_
-   as NumPy and SciPy.  For new functionality, always add an example to the
+   as NumPy and SciPy.
+ * For new functionality, always add an example to the
    gallery.
- * Follow the `Python PEPs <http://www.python.org/dev/peps/pep-0008/>`_
-   where possible.
- * No major changes should be committed without review.  Ask on the
+ * No changes should be committed without review.  Ask on the
    `mailing list <http://groups.google.com/group/scikit-image>`_ if
    you get no response to your pull request.
+   **Never merge your own pull request.**
  * Examples in the gallery should have a maximum figure width of 8 inches.
 
 Stylistic Guidelines
 --------------------
+
+ * Set up your editor to remove trailing whitespace.  Follow `PEP08
+   <www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
 
  * Use numpy data types instead of strings (``np.uint8`` instead of
    ``"uint8"``).
@@ -65,14 +91,6 @@ Stylistic Guidelines
  * When documenting array parameters, use ``image : (M, N) ndarray``,
    ``image : (M, N, 3) ndarray`` and then refer to ``M`` and ``N`` in the
    docstring.
-
- * Set up your editor to remove trailing whitespace.  Follow `PEP08
-   <www.python.org/dev/peps/pep-0008/>`__.  Check code with pyflakes / flake8.
-
- * If a function name, say ``segment(...)``, has the same name as the file in
-   which it is implemented, name that file ``_segment.py`` so that it can still
-   be imported.  All Cython files start with an underscore, e.g.
-   ``_some_module.pyx``.
 
  * Functions should support all input image dtypes.  Use utility functions such
    as ``img_as_float`` to help convert to an appropriate type.  The output
