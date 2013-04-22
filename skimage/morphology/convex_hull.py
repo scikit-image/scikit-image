@@ -7,35 +7,35 @@ from .selem import square as sq
 from skimage.morphology import label, dilation
 
 def convex_hull_image(image):
-	"""Compute the convex hull image of a binary image.
-	
-	The convex hull is the set of pixels included in the smallest convex
-	polygon that surround all white pixels in the input image.
-	
+    """Compute the convex hull image of a binary image.
+    
+    The convex hull is the set of pixels included in the smallest convex
+    polygon that surround all white pixels in the input image.
+
     Parameters
     ----------
     image : ndarray
         Binary input image.  This array is cast to bool before processing.
-	
-	Returns
+
+    Returns
     -------
     hull : ndarray of bool
         Binary image with pixels in convex hull set to True.
-    
-	References
+
+    References
     ----------
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
-	"""
-	
-	image = image.astype(bool)
-	
+    """
+    
+    image = image.astype(bool)
+    
     # Here we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual
-    # hull.
-	coords = possible_hull(image.astype(np.uint8))
-	N = len(coords)
-	
+	# hull.
+    coords = possible_hull(image.astype(np.uint8))
+    N = len(coords)
+    
     # Add a vertex for the middle of each pixel edge
 	coords_corners = np.empty((N * 4, 2))
 	for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5), 
@@ -96,42 +96,44 @@ def connected_component(image, start_pixel_tuple):
 	return next_im
 
 def convex_hull_object(image, output_form=None):
-	"""Compute the convex hull image of individual objects in a binary image.
-	
-	The convex hull is the set of pixels included in the smallest convex
-	polygon that surround all white pixels in the input image.
-	
+    """Compute the convex hull image of individual objects in a binary image.
+
+    The convex hull is the set of pixels included in the smallest convex
+    polygon that surround all white pixels in the input image.
+
     Parameters
     ----------
     image : ndarray
         Binary input image.  
-	
-	output_form : string
-		if 'single' then outputs a 3D array with separate convex hull computed 
-		for individual objects, where the 3rd index is used to change the object
-		Default is None, in which case it outputs the convex hull for all 
-		objects individually as a single 2D array
-	
-	Returns
+
+    output_form : string
+        if 'single' then outputs a 3D array with separate convex hull computed 
+        for individual objects, where the 3rd index is used to change the object
+        Default is None, in which case it outputs the convex hull for all 
+        objects individually as a single 2D array
+    
+    Returns
     -------
     hull : ndarray of bool
-        Binary image with pixels in convex hull set to True.
-	"""
-	# We add 1 to the output of label() so as to make the 
-	# background 0 rather than -1
-	(m, n) = image.shape
-	convex_out = np.zeros((m, n), dtype=bool)
-	labeled_im = label(image, neighbors=8, background=0) + 1
-	segmented_objs = np.zeros((m, n, labeled_im.max()), dtype=bool)
-	convex_objs = np.zeros((m, n, labeled_im.max()), dtype=bool)
-	
-	for i in range(1, labeled_im.max()+1):
-		start_pixel_tuple = tuple(transpose(np.where(labeled_im == i))[0])
+    Binary image with pixels in convex hull set to True.
+    """
+    # We add 1 to the output of label() so as to make the 
+    # background 0 rather than -1
+    (m, n) = image.shape
+    convex_out = np.zeros((m, n), dtype=bool)
+    labeled_im = label(image, neighbors=8, background=0) + 1
+    segmented_objs = np.zeros((m, n, labeled_im.max()), dtype=bool)
+    convex_objs = np.zeros((m, n, labeled_im.max()), dtype=bool)
+
+    for i in range(1, labeled_im.max()+1):
+        
+        start_pixel_tuple = tuple(transpose(np.where(labeled_im == i))[0])
 		segmented_objs[:, :, i-1] = connected_component(image, start_pixel_tuple)
 		convex_objs[:, :, i-1] = convex_hull_image(segmented_objs[:, :, i-1])
 		convex_out |= convex_objs[:, :, i-1]
 	
 	if output_form is 'single':
 		return convex_objs
-	if output_form is None:
+	
+    if output_form is None:
 		return convex_out	
