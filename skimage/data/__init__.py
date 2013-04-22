@@ -143,3 +143,17 @@ def immunohistochemistry():
 
     """
     return load("ihc.jpg")
+
+
+def chelsea():
+    """Chelsea the cat.
+
+    An example with texture, prominent edges in horizontal and diagonal
+    directions, as well as features of differing scales.
+
+    Notes
+    -----
+    No copyright restrictions.  CC0 by the photographer (Stefan van der Walt).
+
+    """
+    return load("chelsea.jpg")
