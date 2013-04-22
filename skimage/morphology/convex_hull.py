@@ -37,17 +37,17 @@ def convex_hull_image(image):
     N = len(coords)
     
     # Add a vertex for the middle of each pixel edge
-	coords_corners = np.empty((N * 4, 2))
-	for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5), 
-												 (-0.5, 0.5, 0, 0))):
-		coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
-	coords = coords_corners
-	
-	try:
-		from scipy.spatial import Delaunay
-	except ImportError:
-		raise ImportError('Could not import scipy.spatial, only available in '
-						  'scipy >= 0.9.')
+    coords_corners = np.empty((N * 4, 2))
+    for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5), 
+    						                     (-0.5, 0.5, 0, 0))):
+    	
+    	coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
+    	coords = coords_corners
+    	try:
+    		from scipy.spatial import Delaunay
+    	except ImportError:
+    		raise ImportError('Could not import scipy.spatial, only available in '
+				              'scipy >= 0.9.')
 	# Find the convex hull
 	chull = Delaunay(coords).convex_hull
 	v = coords[np.unique(chull)]
