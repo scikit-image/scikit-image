@@ -218,8 +218,9 @@ def rescale_intensity(image, in_range=None, out_range=None):
     return dtype(image * (omax - omin) + omin)
 
 
-def rescale_intensity_gamma(image, gamma = 1):
-    """Performs Gamma Correction also known as Power Law Transform.
+def rescale_intensity_gamma(image, gamma = 1, gain = 1):
+    """Performs Gamma Correction on the input image.
+    Also known as Power Law Transform.
 
     Parameters
     ----------
@@ -227,59 +228,117 @@ def rescale_intensity_gamma(image, gamma = 1):
         Input image.
 
     gamma : float
-        Non negative real number
+        Non negative real number. Default value is 1.
 
-    param1 : float
-        For type 'gamma', gamma varying from zero to infinity. Default value 1.
-        For type 'logarithmic', param1 should be -1 for inverse logarithmic,
-        else correction will be logarithmic. Default to logarithmic.
-        For type 'sigmoid', gain. Default value 10.
-
-    param2 : float
-        For type 'gamma', positive constatnt multiplier. Default value 1.
-        For type 'logarithmic', positive constatnt multiplier. Default value 1.
-        For type 'sigmoid', cutoff between 0 and 1. Default value 0.5.
+    gain : float
+        The constant multiplier. Default value is 1.
 
     Returns
     -------
     out : ndarray
-        Corrected input image according to the type used.
+        Gamma corrected output image.
+
+    Notes
+    -----
+    This function transforms the input image pixelwise according to the
+    equation O = I**gamma after scaling each pixel to the range 0 to 1.
+
+    For gamma greater than 1, the histogram will shift towards left and
+    the output image will be darker than the input image.
+
+    For gamma less than 1, the histogram will shift towards right and
+    the output image will be brighter than the input image.
 
     References
     ----------
     ..[1] http://en.wikipedia.org/wiki/Gamma_correction
-    """
 
+    """
     dtype = image.dtype.type
 
     if gamma < 0:
         return "Gamma should be a non-negative real number"
 
     scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
-    out = ((image / scale)**gamma) * scale * param2
+    out = ((image / scale) ** gamma) * scale * gain
     return dtype(out)
 
 
 def rescale_intensity_logarithmic(image, gain = 1, inv = 1):
+    """Performs Logarithmic correction on the input image.
 
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    gain : float
+        The constant multiplier. Default value is 1.
+
+    inv : float
+        Value passed should be -1 for inverse logarithmic correction,
+        else correction will be logarithmic. Default to logarithmic.
+    
+    Returns
+    -------
+    out : ndarray
+        Logarithm corrected output image.
+
+    Notes
+    -----
+    This function transforms the input image pixelwise according to the
+    equation O = gain*log(1 + I) after scaling each pixel to the range 0 to 1.
+    For inverse logarithmic correction, the equation is O = gain*(2**I - 1)
+
+    References
+    ----------
+    ..[1] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
+
+    """
     dtype = image.dtype.type
     scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
 
     if inv == -1:
-        out = (2**(image / scale) - 1) * scale * param2
+        out = (2 ** (image / scale) - 1) * scale * gain
         return dtype(out)
 
-    out = np.log2(1 + image / scale) * scale * param2
+    out = np.log2(1 + image / scale) * scale * gain
     return dtype(out)
 
 
-def rescale_intensity_sigmoid(image, cutoff = 0.5, gain = 1):
+def rescale_intensity_sigmoid(image, cutoff = 0.5, gain = 10):
+    """Performs Sigmoid Correction on input image also known
+    as Contrast Adjustment.
 
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    cutoff : float
+        Cutoff of the sigmoid function. Default value is 0.5.
+
+    gain : float
+        The constant multiplier in exponential's power of sigmoid function.
+        Default value is 10.
+    
+    Returns
+    -------
+    out : ndarray
+        Sigmoid corrected output image.
+
+    Notes
+    -----
+    This function transforms the input image pixelwise according to the
+    equation O = 1/(1 + exp*(gain*(cutoff - I))) after scaling each pixel to
+    the range 0 to 1.
+
+    References
+    ----------
+    ..[1] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
+
+    """
     dtype = image.dtype.type
     scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
     out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
     return dtype(out)
-
-
-..[2] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
-    ..[3] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
