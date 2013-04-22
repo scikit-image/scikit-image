@@ -271,15 +271,15 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
             x += 1
         elif cmethod == 'a':
             if d >= 2 * (x - 1):
-                d = d - 2 * x
-                x = x + 1
+                d -= 2 * x
+                x += 1
             elif d <= 2 * (radius - y):
-                d = d + 2 * y - 1
-                y = y - 1
+                d += 2 * y - 1
+                y -= 1
             else:
-                d = d + 2 * (y - x - 1)
-                y = y - 1
-                x = x + 1
+                d += 2 * (y - x - 1)
+                y -= 1
+                x += 1
 
     return np.array(rr, dtype=np.intp) + cy, np.array(cc, dtype=np.intp) + cx
 
