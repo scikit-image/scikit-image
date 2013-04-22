@@ -128,7 +128,7 @@ def convex_hull_object(image, output_form=None):
     for i in range(1, labeled_im.max()+1):
         
         start_pixel_tuple = tuple(transpose(np.where(labeled_im == i))[0])
-		segmented_objs[:, :, i-1] = connected_component(image, start_pixel_tuple)
+	    segmented_objs[:, :, i-1] = connected_component(image, start_pixel_tuple)
 		convex_objs[:, :, i-1] = convex_hull_image(segmented_objs[:, :, i-1])
 		convex_out |= convex_objs[:, :, i-1]
 	
