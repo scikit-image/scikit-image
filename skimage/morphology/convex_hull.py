@@ -65,9 +65,9 @@ def convex_hull_image(image):
 
     return mask
 
-def connected_component(image, start_pixel_index):
+def connected_component(image, start_pixel_tuple):
 	next_im = np.zeros(image.shape, dtype=np.uint8)
-	next_im[start_pixel_index] = 1
+	next_im[start_pixel_tuple] = 1
 	start_im = np.zeros(image.shape)
 	while not np.array_equal(start_im, next_im):
 		start_im = next_im.copy()
@@ -76,5 +76,33 @@ def connected_component(image, start_pixel_index):
 	
 	return next_im
 
-def convex_hull_object(image):
+def convex_hull_object(image, output_type=None):
+	# We add 1 to the output of label() so as to make the 
+	# background 0 rather than -1
+	segmented_objs = np.zeros((m, n, labeled_st.max()))
+	convex_objs = np.zeros((m, n))
+	labeled_im = label(image, neighbors=8, background=0) + 1
+	
+	for i in range[1, labeled_im.max()+1]:
+		start_pixel_tuple = tuple(transpose(np.where(labeled_im == i))[0])
+		segmented_objs[:, :, i] = connected_component(image, start_pixel_tuple)
+		convex_objs[:, :, i] = convex_hull_image(segmented_objs[:, :, i])
+		convex_out |= convex_objs[:, :, i]
+	
+	if output_type is 'single':
+		return convex_objs
+	else if output_type is None:
+		return convex_out
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
