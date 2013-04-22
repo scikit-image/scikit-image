@@ -95,7 +95,7 @@ def hough_circle(cnp.ndarray img,
                 ty = circle_y[c] + y[p]
                 if offset:
                     acc[i, tx, ty] += incr
-                elif tx < xmax and ty < ymax and tx > 0 and ty > 0:
+                elif 0 <= tx < xmax and 0 <= ty < ymax:
                     acc[i, tx, ty] += incr
 
     return acc
