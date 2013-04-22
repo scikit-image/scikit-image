@@ -44,9 +44,9 @@ def convex_hull_image(image):
     	coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
     	coords = coords_corners
     	try:
-    		from scipy.spatial import Delaunay
+            from scipy.spatial import Delaunay
     	except ImportError:
-    		raise ImportError('Could not import scipy.spatial, only available in '
+            raise ImportError('Could not import scipy.spatial, only available in '
 				              'scipy >= 0.9.')
 	# Find the convex hull
 	chull = Delaunay(coords).convex_hull
@@ -86,12 +86,11 @@ def connected_component(image, start_pixel_tuple):
 	next_im = np.zeros(image.shape, dtype=np.uint8)
 	next_im[start_pixel_tuple] = 1
 	start_im = np.zeros(image.shape)
-	
 	# Structuring element for Dilation: square of side 3 with all elements 1. 
 	while not np.array_equal(start_im, next_im):
-		start_im = next_im.copy()
-		dilated_im = dilation(start_im, sq(3))
-		next_im = dilated_im & image
+        start_im = next_im.copy()
+        dilated_im = dilation(start_im, sq(3))
+        next_im = dilated_im & image
 	
 	return next_im
 
@@ -126,14 +125,13 @@ def convex_hull_object(image, output_form=None):
     convex_objs = np.zeros((m, n, labeled_im.max()), dtype=bool)
 
     for i in range(1, labeled_im.max()+1):
-        
         start_pixel_tuple = tuple(transpose(np.where(labeled_im == i))[0])
-	    segmented_objs[:, :, i-1] = connected_component(image, start_pixel_tuple)
-		convex_objs[:, :, i-1] = convex_hull_image(segmented_objs[:, :, i-1])
-		convex_out |= convex_objs[:, :, i-1]
+        segmented_objs[:, :, i-1] = connected_component(image, start_pixel_tuple)
+        convex_objs[:, :, i-1] = convex_hull_image(segmented_objs[:, :, i-1])
+        convex_out |= convex_objs[:, :, i-1]
 	
 	if output_form is 'single':
-		return convex_objs
+        return convex_objs
 	
     if output_form is None:
-		return convex_out	
+        return convex_out	
