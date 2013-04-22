@@ -12,16 +12,11 @@ def test_roberts_zeros():
 
 def test_roberts_diagonal1():
     """Roberts' on an edge should be a diagonal"""
-    i = (10, 10)
     n = (10, 10)
-    i = np.ones(i)
-    i = np.triu(i)
+    i = np.tri(10,10,0)
     image = (i > 0).astype(float)
-    n = np.zeros(n)
-    for k in range(2, 10):
-        for t in range(0, k-1):
-            n[k][t] = 1
-            n[t][k] = 1
+    n = np.tri(10,10,-2)
+    n = n+n.transpose()
     j = np.identity(10)    
     result = F.roberts(image)
     j[9][9] = j[0][0] = 0
@@ -30,27 +25,18 @@ def test_roberts_diagonal1():
 
 def test_roberts_diagonal2():
     """Roberts' on an edge should be a diagonal"""
-    i = (10, 10)
-    j = (10, 10)
-    n = (10, 10)
-    i = np.ones(i)
-    for k in range(0, 10):
-        for t in range(10-k, 10):
-	        i[k][t] = 0
-    n = np.zeros(n)
-    for k in range(0, 10):
-        for t in range(0, 9-k):
-	        n[k][t] = 0
-	        n[t][k] = 0
+    i = np.tri(10,10,0,dtype=int)
+    i = np.rot90(i.transpose())
+    n = np.tri(10,10,-2,dtype=int)
+    n = np.rot90(n.transpose()) + np.rot90(n)
 
     image = (i > 0).astype(float)
 
-    j = np.ones(j)
-    for k in range(0, 10):
-        j[k][9-k] = 5
+    j = np.identity(10)  
+    j = np.rot90(j)
     result = F.roberts(image)
     j[0][9] = j[9][0] = 0
-    assert (np.all(result[j == 5] == 1) and np.all(result[n == 1] == 0))
+    assert (np.all(result[j == 1] == 1) and np.all(result[n == 1] == 0))
 
 
 def test_sobel_zeros():
