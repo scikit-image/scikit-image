@@ -49,6 +49,9 @@ def hough_circle(cnp.ndarray img,
     if img.ndim != 2:
         raise ValueError('The input image must be 2D.')
 
+    cdef Py_ssize_t xmax = img.shape[0]
+    cdef Py_ssize_t ymax = img.shape[1]
+
     # compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] x, y
     x, y = np.nonzero(img)
@@ -90,7 +93,10 @@ def hough_circle(cnp.ndarray img,
             for c in range(num_circle_pixels):
                 tx = circle_x[c] + x[p]
                 ty = circle_y[c] + y[p]
-                acc[i, tx, ty] += incr
+                if offset:
+                    acc[i, tx, ty] += incr
+                elif tx < xmax and ty < ymax and tx > 0 and ty > 0:
+                    acc[i, tx, ty] += incr
 
     return acc
 
