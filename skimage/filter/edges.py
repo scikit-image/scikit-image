@@ -357,10 +357,10 @@ def roberts(image, mask=None):
     output : ndarray
         The Roberts' Cross edge map.
     """
-    return np.sqrt(pdroberts(image, mask)**2 + ndroberts(image, mask)**2)
+    return np.sqrt(roberts_positive_diagonal(image, mask)**2 + roberts_negative_diagonal(image, mask)**2)
 
 
-def pdroberts(image, mask=None):
+def roberts_positive_diagonal(image, mask=None):
     """Find the cross edges of an image using the Roberts' Cross operator.
 
     The kernel is applied to the input image, to produce separate measurements
@@ -396,7 +396,7 @@ def pdroberts(image, mask=None):
     return _mask_filter_result(result, mask)
 
 
-def ndroberts(image, mask=None):
+def roberts_negative_diagonal(image, mask=None):
     """Find the cross edges of an image using the Roberts' Cross operator.
     The kernel is applied to the input image, to produce separate measurements
     of the gradient component one orientation.
