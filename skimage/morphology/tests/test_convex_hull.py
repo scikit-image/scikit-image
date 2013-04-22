@@ -31,6 +31,44 @@ def test_basic():
 
     assert_array_equal(convex_hull_image(image), expected)
 
+@skipif(not scipy_spatial)
+def test_connected_components():
+    image = np.array(
+        [[0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 1, 0, 0, 0],
+         [0, 1, 1, 1, 0, 1, 0, 0],
+         [0, 0, 1, 1, 0, 0, 0, 0],
+         [0, 1, 0, 1, 0, 1, 1, 0],
+         [0, 0, 0, 0, 0, 1, 0, 0]], dtype=bool)
+		
+	expected = np.array(
+		[[0, 0, 0, 0, 0, 0, 0, 0],
+		 [0, 0, 0, 1, 1, 0, 0, 0],
+		 [0, 1, 1, 1, 1, 1, 0, 0],
+		 [0, 1, 1, 1, 1, 0, 0, 0],
+		 [0, 1, 1, 1, 0, 1, 1, 0],
+		 [0, 0, 0, 0, 0, 1, 0, 0]], dtype=uint8)
+		
+	assert_array_equal(convex_hull_image(image), expected)
+	
+	image = np.array(
+	        [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	         [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+	         [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	         [0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+	         [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+	
+	expected = np.array(
+			[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			 [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			 [0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+			 [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+			 [0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+			 [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+	
+	assert_array_equal(convex_hull_image(image), expected)
+
 
 @skipif(not scipy_spatial)
 def test_possible_hull():
