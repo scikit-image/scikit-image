@@ -217,35 +217,53 @@ def test_rescale_intensity_gamma_greater_one():
 # ===========================
 
 def test_rescale_intensity_logarithmic():
-    """Output's mean should be greater than input's mean for logarithmic
-    correction with multiplier constant equal to unity"""
+    """Output's mean should be greater than input's mean and all pixel values
+    in output should be either greater than or equal to that of corresponding
+    pixel in input for logarithmiccorrection with multiplier constant equal
+    to unity"""
     image = data.camera()
     result = exposure.rescale_intensity_logarithmic(image, 1)
     assert result.mean() > image.mean()
-
+    assert result.all() >= image.all()
 
 def test_rescale_intensity_inv_logarithmic():
-    """Output's mean should be less than input's mean for inverse logarithmic
-    correction with multiplier constant equal to unity"""
+    """Output's mean should be less than input's mean and all pixel values
+    in output should be either less than or equal to that of corresponding
+    pixel in inputfor inverse logarithmic correction with multiplier constant
+    equal to unity"""
     image = data.camera()
     result = exposure.rescale_intensity_logarithmic(image, 1, -1)
     assert result.mean() < image.mean()
+    assert result.all() <= image.all()
 
 
 # Test Sigmoid Correction
 # =======================
 
 def test_rescale_intensity_sigmoid_cutoff_one():
-    """Output's mean should be less than input's mean for sigmoid
-    correction with cutoff equal to one and gain of 10"""
+    """Output's std should be less than input's std and all pixel values
+    in output should be either less than or equal to that of
+    corresponding pixel in input for sigmoid correction with cutoff equal
+    to one and gain of 10"""
     image = data.camera()
     result = exposure.rescale_intensity_sigmoid(image, 1, 10)
-    assert result.mean() < image.mean()
+    assert result.std() < image.std()
+    assert result.all() <= image.all()
 
 
 def test_rescale_intensity_sigmoid_cutoff_zero():
-    """Output's mean should be greater than input's mean for sigmoid
-    correction with cutoff equal to zero and gain of 10"""
+    """Output's std should be less than input's std and all pixel values
+    in output should be either greater than or equal to that of
+    corresponding pixel in input for sigmoid correction with cutoff equal
+    to zero and gain of 10"""
     image = data.camera()
     result = exposure.rescale_intensity_sigmoid(image, 0, 10)
-    assert result.mean() > image.mean()
+    assert result.std() < image.std()
+    assert result.all() >= image.all()
+
+def test_rescale_intensity_sigmoid_cutoff_half():
+    """Output's std should be greater than input's std for sigmoid
+    correction with cutoff equal to 0.5 and gain of 10"""
+    image = data.camera()
+    result = exposure.rescale_intensity_sigmoid(image, 0.5, 10)
+    assert result.std() > image.std()
