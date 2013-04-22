@@ -240,7 +240,7 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
     Notes
     -----
     This function transforms the input image pixelwise according to the
-    equation O = I**gamma after scaling each pixel to the range 0 to 1.
+    equation ``O = I**gamma`` after scaling each pixel to the range 0 to 1.
 
     For gamma greater than 1, the histogram will shift towards left and
     the output image will be darker than the input image.
@@ -250,7 +250,7 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
 
     References
     ----------
-    ..[1] http://en.wikipedia.org/wiki/Gamma_correction
+    .. [1] http://en.wikipedia.org/wiki/Gamma_correction
 
     """
     dtype = image.dtype.type
@@ -284,12 +284,12 @@ def rescale_intensity_logarithmic(image, gain=1, inv=1):
     Notes
     -----
     This function transforms the input image pixelwise according to the
-    equation O = gain*log(1 + I) after scaling each pixel to the range 0 to 1.
-    For inverse logarithmic correction, the equation is O = gain*(2**I - 1)
+    equation ``O = gain*log(1 + I)`` after scaling each pixel to the range 0 to 1.
+    For inverse logarithmic correction, the equation is ``O = gain*(2**I - 1)``.
 
     References
     ----------
-    ..[1] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
+    .. [1] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
 
     """
     dtype = image.dtype.type
@@ -305,7 +305,7 @@ def rescale_intensity_logarithmic(image, gain=1, inv=1):
 
 def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10):
     """Performs Sigmoid Correction on input image.
-    
+
     Also known as Contrast Adjustment.
 
     Parameters
@@ -326,12 +326,12 @@ def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10):
     Notes
     -----
     This function transforms the input image pixelwise according to the
-    equation O = 1/(1 + exp*(gain*(cutoff - I))) after scaling each pixel to
-    the range 0 to 1.
+    equation ``O = 1/(1 + exp*(gain*(cutoff - I)))`` after scaling each pixel
+    to the range 0 to 1.
 
     References
     ----------
-    ..[1] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
+    .. [1] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
 
     """
     dtype = image.dtype.type
