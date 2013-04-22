@@ -76,7 +76,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, Py_ssize_t min_size=20)
             = np.ones(width * height, dtype=np.intp)
     # inner cost of segments
     cdef cnp.ndarray[cnp.float_t, ndim=1] cint = np.zeros(width * height)
-    cdef int seg0, seg1, seg_new, e
+    cdef cnp.intp_t seg0, seg1, seg_new, e
     cdef float cost, inner_cost0, inner_cost1
     # set costs_p back one. we increase it before we use it
     # since we might continue before that.
