@@ -218,18 +218,17 @@ def rescale_intensity(image, in_range=None, out_range=None):
     return dtype(image * (omax - omin) + omin)
 
 
-def rescale_intensity_gamma(image, gamma = 1, gain = 1):
+def rescale_intensity_gamma(image, gamma=1, gain=1):
     """Performs Gamma Correction on the input image.
+
     Also known as Power Law Transform.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-
     gamma : float
         Non negative real number. Default value is 1.
-
     gain : float
         The constant multiplier. Default value is 1.
 
@@ -264,17 +263,15 @@ def rescale_intensity_gamma(image, gamma = 1, gain = 1):
     return dtype(out)
 
 
-def rescale_intensity_logarithmic(image, gain = 1, inv = 1):
+def rescale_intensity_logarithmic(image, gain=1, inv=1):
     """Performs Logarithmic correction on the input image.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-
     gain : float
         The constant multiplier. Default value is 1.
-
     inv : float
         Value passed should be -1 for inverse logarithmic correction,
         else correction will be logarithmic. Default to logarithmic.
@@ -306,18 +303,17 @@ def rescale_intensity_logarithmic(image, gain = 1, inv = 1):
     return dtype(out)
 
 
-def rescale_intensity_sigmoid(image, cutoff = 0.5, gain = 10):
-    """Performs Sigmoid Correction on input image also known
-    as Contrast Adjustment.
+def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10):
+    """Performs Sigmoid Correction on input image.
+    
+    Also known as Contrast Adjustment.
 
     Parameters
     ----------
     image : ndarray
         Input image.
-
     cutoff : float
         Cutoff of the sigmoid function. Default value is 0.5.
-
     gain : float
         The constant multiplier in exponential's power of sigmoid function.
         Default value is 10.
