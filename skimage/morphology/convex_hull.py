@@ -7,24 +7,26 @@ from .selem import square as sq
 from skimage.morphology import label, dilation
 
 def convex_hull_image(image):
+    
     """Compute the convex hull image of a binary image.
     
     The convex hull is the set of pixels included in the smallest convex
     polygon that surround all white pixels in the input image.
-
+    
     Parameters
     ----------
     image : ndarray
         Binary input image.  This array is cast to bool before processing.
-
+    
     Returns
     -------
     hull : ndarray of bool
         Binary image with pixels in convex hull set to True.
-
+    
     References
     ----------
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
+    
     """
     
     image = image.astype(bool)
@@ -47,8 +49,9 @@ def convex_hull_image(image):
             from scipy.spatial import Delaunay
     	except ImportError:
             raise ImportError('Could not import scipy.spatial, only available in '
-				              'scipy >= 0.9.')
-	# Find the convex hull
+                              'scipy >= 0.9.')
+    
+    # Find the convex hull
     chull = Delaunay(coords).convex_hull
     v = coords[np.unique(chull)]
     
@@ -67,19 +70,19 @@ def connected_component(image, start_pixel_tuple):
     
     """Compute the connected object to a given starting pixel with 
     8-connectivity for a binary image
-	
-	The convex hull is the set of pixels included in the smallest convex
-	polygon that surround all white pixels in the input image.
-	
+    
+    The convex hull is the set of pixels included in the smallest convex
+    polygon that surround all white pixels in the input image.
+    
     Parameters
     ----------
     image : ndarray
         Binary input image.  
-	
-	start_pixel_tuple : tuple of int
-		Of the form (x, y) which represents the index of the starting pixel
-	
-	Returns
+    
+    start_pixel_tuple : tuple of int
+        Of the form (x, y) which represents the index of the starting pixel
+    
+    Returns
     -------
     obj : ndarray of uint8
         Binary image with pixels in convex hull set to True.
@@ -89,26 +92,26 @@ def connected_component(image, start_pixel_tuple):
     next_im = np.zeros(image.shape, dtype=np.uint8)
     next_im[start_pixel_tuple] = 1
     start_im = np.zeros(image.shape)
-	# Structuring element for Dilation: square of side 3 with all elements 1. 
-	while not np.array_equal(start_im, next_im):
+    # Structuring element for Dilation: square of side 3 with all elements 1. 
+    while not np.array_equal(start_im, next_im):
         start_im = next_im.copy()
         dilated_im = dilation(start_im, sq(3))
         next_im = dilated_im & image
-	
-	return next_im
+    
+    return next_im
 
 def convex_hull_object(image, output_form=None):
     
     """Compute the convex hull image of individual objects in a binary image.
-
+    
     The convex hull is the set of pixels included in the smallest convex
     polygon that surround all white pixels in the input image.
-
+    
     Parameters
     ----------
     image : ndarray
         Binary input image.  
-
+    
     output_form : string
         if 'single' then outputs a 3D array with separate convex hull computed 
         for individual objects, where the 3rd index is used to change the object
@@ -127,7 +130,7 @@ def convex_hull_object(image, output_form=None):
     
     (m, n) = image.shape
     convex_out = np.zeros((m, n), dtype=bool)
-    labeled_im = label(image, neighbors=8, background=0) + 1
+    labeled_im = label(image, neighbors=8, background=0) + 
     segmented_objs = np.zeros((m, n, labeled_im.max()), dtype=bool)
     convex_objs = np.zeros((m, n, labeled_im.max()), dtype=bool)
     
