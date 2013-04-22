@@ -107,6 +107,8 @@ def convex_hull_object(image, output_form=None):
 	output_form : string
 		if 'single' then outputs a 3D array with all convex hull computed for 
 		individual objects, where the 3rd index is used to change the object
+		Default is None, in which case it outputs the convex hull for all 
+		objects individually
 	
 	Returns
     -------
