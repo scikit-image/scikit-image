@@ -1,7 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from scipy import stats
-from skimage.color import rgb2grey
+from skimage.color import rgb2grey, is_rgb
 from skimage.util import img_as_float
 from skimage.feature import peak_local_max
 
@@ -51,7 +51,7 @@ def _compute_auto_correlation(image, sigma):
 
     """
 
-    if image.ndim == 3:
+    if is_rgb(image):
         image = img_as_float(rgb2grey(image))
 
     imx, imy = _compute_derivatives(image)
