@@ -29,7 +29,7 @@ from skimage.color import (
     rgb2grey, gray2rgb,
     xyz2lab, lab2xyz,
     lab2rgb, rgb2lab,
-    is_rgb, is_gray
+    is_gray
     )
 
 from skimage import data_dir, data
@@ -255,15 +255,13 @@ def test_gray2rgb_rgb():
     assert_equal(x, y)
 
 
-def test_is_rgb():
+def test_is_gray():
     color = data.lena()
     gray = data.camera()
 
-    assert is_rgb(color)
-    assert not is_gray(color)
-
     assert is_gray(gray)
     assert not is_gray(color)
+
 
 
 if __name__ == "__main__":
