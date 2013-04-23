@@ -263,8 +263,12 @@ plot_comparison(horse2, hull2, 'convex hull')
 Additional Resources
 ====================
 
-1. `MathWorks tutorial on morphological processing <http://www.mathworks.com/help/images/morphology-fundamentals-dilation-and-erosion.html>`_
-2. Auckland university's tutorial on Morphological Image Processing http://www.cs.auckland.ac.nz/courses/compsci773s1c/lectures/ImageProcessing-html/topic4.htm
+1. `MathWorks tutorial on morphological processing
+<http://www.mathworks.com/help/images/morphology-fundamentals-dilation-and-
+erosion.html>`_  
+2. `Auckland university's tutorial on Morphological Image Processing 
+<http://www.cs.auckland.ac.nz/courses/compsci773s1c/lectures
+/ImageProcessing-html/topic4.htm>`  
 3. http://en.wikipedia.org/wiki/Mathematical_morphology
 
 """
