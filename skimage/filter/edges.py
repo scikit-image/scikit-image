@@ -357,7 +357,8 @@ def roberts(image, mask=None):
     output : ndarray
         The Roberts' Cross edge map.
     """
-    return np.sqrt(roberts_positive_diagonal(image, mask)**2 + roberts_negative_diagonal(image, mask)**2)
+    return np.sqrt(roberts_positive_diagonal(image, mask)**2 +\
+                   roberts_negative_diagonal(image, mask)**2)
 
 
 def roberts_positive_diagonal(image, mask=None):
