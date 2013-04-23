@@ -123,7 +123,6 @@ def test_hough_circle():
     out = tf.hough_circle(img, np.array([radius]))
 
     x, y = np.where(out[0] == out[0].max())
-    # Offset for x_0, y_0
     assert_equal(x[0], x_0)
     assert_equal(y[0], y_0)
 
