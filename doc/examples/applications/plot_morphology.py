@@ -214,7 +214,7 @@ on binary images only.
 """
 
 from skimage import img_as_bool
-horse = ~img_as_bool(io.imread(data_dir+'/horse.jpeg', as_grey=True))
+horse = ~img_as_bool(io.imread(data_dir+'/horse.png', as_grey=True))
 
 sk = skeletonize(horse)
 plot_comparison(horse, sk, 'skeletonize')
