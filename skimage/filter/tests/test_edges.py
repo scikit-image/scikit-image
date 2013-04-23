@@ -2,7 +2,7 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
 
 import skimage.filter as F
-
+from skimage.filter.edges import _mask_filter_result
 
 def test_roberts_zeros():
     """Roberts' on an array of all zeros"""
@@ -11,32 +11,26 @@ def test_roberts_zeros():
 
 
 def test_roberts_diagonal1():
-    """Roberts' on an edge should be a diagonal"""
-    n = (10, 10)
-    i = np.tri(10,10,0)
-    image = (i > 0).astype(float)
-    n = np.tri(10,10,-2)
-    n = n+n.transpose()
-    j = np.identity(10)    
-    result = F.roberts(image)
-    j[9][9] = j[0][0] = 0
-    assert (np.all(result[j == 1] == 1) and np.all(result[n == 1] == 0))
+    """Roberts' on an edge should be a one diagonal"""
+    image = np.tri(10, 10, 0)
+    expected = ~(np.tri(10, 10, -1).astype(bool) | \
+                 np.tri(10, 10, -2).astype(bool).transpose())
+    expected = _mask_filter_result(expected,None)
+    result = F.roberts(image).astype(bool)
+    assert_close(result,expected)
 
 
 def test_roberts_diagonal2():
-    """Roberts' on an edge should be a diagonal"""
-    i = np.tri(10,10,0,dtype=int)
-    i = np.rot90(i.transpose())
-    n = np.tri(10,10,-2,dtype=int)
-    n = np.rot90(n.transpose()) + np.rot90(n)
+    """Roberts' on an edge should be a other diagonal"""
+    diagonal = np.tri(10, 10, 0,dtype=int)
+    rev_diagonal = np.rot90(diagonal.transpose(),1)
 
-    image = (i > 0).astype(float)
-
-    j = np.identity(10)  
-    j = np.rot90(j)
-    result = F.roberts(image)
-    j[0][9] = j[9][0] = 0
-    assert (np.all(result[j == 1] == 1) and np.all(result[n == 1] == 0))
+    image = (rev_diagonal > 0).astype(float)
+    expected = ~np.rot90((np.tri(10, 10, -1).astype(bool) | \
+                np.tri(10, 10, -2).astype(bool).transpose()),1)
+    expected = _mask_filter_result(expected,None)
+    result = F.roberts(image).astype(bool)
+    assert_close(result,expected)
 
 
 def test_sobel_zeros():
