@@ -1,6 +1,8 @@
 try:
     from .spath import shortest_path
     from .mcp import MCP, MCP_Geometric, route_through_array
+    from ._dtw import dtw
+
 except ImportError:
     print """*** The cython extensions have not been compiled.  Run
 

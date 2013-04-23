@@ -1,15 +1,12 @@
-# cython: boundscheck=True
+# cython: boundscheck=False
 # cython: cdivision=True
 # cython: nonecheck=False
 # cython: wraparound=False
 
 from __future__ import division
 
-cdef extern from "float.h":
-    double DBL_MAX
-
-cdef extern from "math.h":
-    double sqrt(double)
+from libc.float cimport DBL_MAX
+from libc.math cimport sqrt
 
 import numpy as np
 
@@ -32,20 +29,19 @@ cdef inline double min3(double[3] v):
     return v[m]
 
 
-def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0, int end_anchor_slack=0):
+def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
+        int end_anchor_slack=0):
     """DTW(sequence1, sequence2, case=type1)
 
-    Dynamic time warping (DTW) is an algorithm for measuring similarity
-    between two sequences which may vary in time or speed
+    Dynamic time warping (DTW) for measuring similarity between two sequences.
 
-    For instance, similarities in walking patterns would be detected,
-    even if in one video the person was walking slowly and if in another
-    he or she were walking more quickly, or even if there were accelerations
-    and decelerations during the course of one observation
+    DTW is an algorithm for measuring similarity between two sequences which
+    may vary in time or speed
 
-    After instantiating the class, use the method calculate() to perform the
-    matching and return the difference measure and get_path() to return the
-    matching.
+    For instance, similarities in walking patterns would be detected, even if
+    in one video the person was walking slowly and if in another he or she were
+    walking more quickly, or even if there were accelerations and decelerations
+    during the course of one observation
 
     Parameters
     ----------
@@ -64,7 +60,8 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0, int end_
 
     References
     ----------
-    .. [1] http://mirlab.org/jang/books/dcpr/dpDtw.asp?title=8-4%20Dynamic%20Time%20Warping
+    .. [1] http://mirlab.org/jang/books/dcpr/dpDtw.asp?title=8-4%20Dynamic%20
+    Time%20Warping
     .. [2] http://en.wikipedia.org/wiki/Dynamic_time_warping
 
     """
@@ -86,8 +83,8 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0, int end_
         for j in range(2, n+2):
 
             # Could save some minor cost by limiting calculation to fan
-            ## if ((j <= 2 * i) and (i <= 2 * j) and (2 * (n - j) >= (m - i)) and \
-            ##     ((n - j) <= 2 * (m - i))):
+            ## if ((j <= 2 * i) and (i <= 2 * j) and (2 * (n - j) >= (m - i))
+            # and ((n - j) <= 2 * (m - i))):
 
             costs[0] = distance[i - 1, j - 1]
             costs[1] = distance[i - 1, j]

@@ -1,6 +1,6 @@
 from __future__ import division
 
-from skimage.dtw import dtw
+from skimage.graph import dtw
 import numpy as np
 
 import time
