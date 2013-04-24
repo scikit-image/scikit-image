@@ -117,13 +117,13 @@ def page():
 
 
 def horse():
-    """Image of a horse.
+    """Black and white silhouette of a horse.
 
     This image was downloaded from
     `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
 
-    Released into public domain and drawn by Andreas Preuss and uploaded by
-    marauder.
+    Released into public domain and drawn and uploaded by Andreas Preuss
+    (marauder).
 
     """
     return load("horse.png")
