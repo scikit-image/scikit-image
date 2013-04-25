@@ -1,7 +1,5 @@
 #cython: cdivision=True
-#cython: boundscheck=False
 #cython: nonecheck=False
-#cython: wraparound=False
 """Cython implementation of Dijkstra's minimum cost path algorithm,
 for use with data on a n-dimensional lattice.
 
@@ -34,6 +32,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import cython
 import numpy as np
 import heap
 
@@ -51,7 +50,8 @@ INDEX_D = np.intp
 FLOAT_D = np.float64
 
 
-
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def _get_edge_map(shape):
     """Return an array with edge points/lines/planes/hyperplanes marked.
 
@@ -75,6 +75,9 @@ def _get_edge_map(shape):
         edges[tuple(slices)] = 1
     return edges
 
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def _offset_edge_map(shape, offsets):
     """Return an array with positions marked where offsets will step
     out of bounds.
@@ -117,6 +120,9 @@ def _offset_edge_map(shape, offsets):
         neg[neg < mn] = 0
     return pos_edges.astype(EDGE_D), neg_edges.astype(EDGE_D)
 
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def make_offsets(d, fully_connected):
     """Make a list of offsets from a center point defining a n-dim
     neighborhood.
@@ -160,6 +166,9 @@ def make_offsets(d, fully_connected):
             offsets.append(indices)
     return offsets
 
+
+@cython.boundscheck(True)
+@cython.wraparound(True)
 def _unravel_index_fortran(flat_indices, shape):
     """_unravel_index_fortran(flat_indices, shape)
 
@@ -170,6 +179,9 @@ def _unravel_index_fortran(flat_indices, shape):
     indices = [tuple(idx/strides % shape) for idx in flat_indices]
     return indices
 
+
+@cython.boundscheck(True)
+@cython.wraparound(True)
 def _ravel_index_fortran(indices, shape):
     """_ravel_index_fortran(flat_indices, shape)
 
@@ -180,6 +192,9 @@ def _ravel_index_fortran(indices, shape):
     flat_indices = [np.sum(strides * idx) for idx in indices]
     return flat_indices
 
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 def _normalize_indices(indices, shape):
     """_normalize_indices(indices, shape)
 
@@ -201,6 +216,16 @@ def _normalize_indices(indices, shape):
         new_indices.append(new_index)
     return new_indices
 
+
+@cython.boundscheck(True)
+@cython.wraparound(True)
+def _reverse(arr):
+    """Reverse index an array safely, with bounds/wraparound checks on."""
+    return arr[::-1]
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef class MCP:
     """MCP(costs, offsets=None, fully_connected=True)
 
@@ -574,8 +599,11 @@ cdef class MCP:
             for d in range(dim):
                 position[d] -= offsets[offset, d]
             traceback.append(tuple(position))
-        return traceback[::-1]
+        return _reverse(traceback)
 
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
 cdef class MCP_Geometric(MCP):
     """MCP_Geometric(costs, offsets=None, fully_connected=True)
 
