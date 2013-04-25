@@ -338,3 +338,94 @@ def vprewitt(image, mask=None):
                                        [1, 0, -1],
                                        [1, 0, -1]]).astype(float) / 3.0))
     return _mask_filter_result(result, mask)
+
+
+def roberts(image, mask=None):
+    """Find the edge magnitude using Roberts' Cross Operator.
+
+    Parameters
+	----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Roberts' Cross edge map.
+    """
+    return np.sqrt(roberts_positive_diagonal(image, mask)**2 +\
+                   roberts_negative_diagonal(image, mask)**2)
+
+
+def roberts_positive_diagonal(image, mask=None):
+    """Find the cross edges of an image using the Roberts' Cross operator.
+
+    The kernel is applied to the input image, to produce separate measurements
+    of the gradient component one orientation.
+
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Robert's edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      1   0
+      0  -1
+
+    """
+    image = img_as_float(image)
+    result = np.abs(convolve(image,
+                             np.array([[ 1, 0],
+                                       [ 0, -1]]).astype(float)))
+    return _mask_filter_result(result, mask)
+
+
+def roberts_negative_diagonal(image, mask=None):
+    """Find the cross edges of an image using the Roberts' Cross operator.
+    The kernel is applied to the input image, to produce separate measurements
+    of the gradient component one orientation.
+    Parameters
+    ----------
+    image : 2-D array
+        Image to process.
+    mask : 2-D array, optional
+        An optional mask to limit the application to a certain area.
+        Note that pixels surrounding masked regions are also masked to
+        prevent masked regions from affecting the result.
+
+    Returns
+    -------
+    output : ndarray
+        The Robert's edge map.
+
+    Notes
+    -----
+    We use the following kernel and return the absolute value of the
+    result at each point::
+
+      0   1
+     -1   0
+
+    """
+    image = img_as_float(image)
+    result = np.abs(convolve(image,
+                             np.array([[0, 1],
+                                       [-1, 0]]).astype(float)))
+    return _mask_filter_result(result, mask)
