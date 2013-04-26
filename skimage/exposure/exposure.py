@@ -14,6 +14,7 @@ __all__ = ['histogram', 'cumulative_distribution', 'equalize',
 def histogram(image, nbins=256):
     """Return histogram of image.
 
+
     Unlike `numpy.histogram`, this function returns the centers of bins and
     does not rebin integer arrays. For integer arrays, each integer value has
     its own bin, which improves speed and intensity-resolution.
@@ -32,6 +33,14 @@ def histogram(image, nbins=256):
         The values of the histogram.
     bin_centers : array
         The values at the center of the bins.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> hist = histogram(data.camera())
+    >>> import matplotlib.pyplot as plt
+    >>> plt.plot(hist[1], hist[0])  # doctest: +ELLIPSIS
+    [...]
     """
 
     # For integer types, histogramming with bincount is more efficient.
