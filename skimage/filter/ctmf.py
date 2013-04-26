@@ -46,7 +46,7 @@ def median_filter(image, radius=2, mask=None, percent=50):
     --------
     >>> a = np.ones((5, 5))
     >>> a[2, 2] = 10 # introduce outlier
-    >>> b = filter.median_filter(a)
+    >>> b = median_filter(a)
     >>> b[2, 2] # the median filter is good at removing outliers
     1.0
     '''

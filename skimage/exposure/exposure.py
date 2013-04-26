@@ -36,11 +36,11 @@ def histogram(image, nbins=256):
 
     Examples
     --------
-    >>> camera = skimage.data.camera()
-    >>> hi = exposure.histogram(camera)
-    >>> # Plot histogram
+    >>> from skimage import data
+    >>> hist = histogram(data.camera())
     >>> import matplotlib.pyplot as plt
-    >>> plt.plot(hi[1], hi[0])
+    >>> plt.plot(hist[1], hist[0])  # doctest: +ELLIPSIS
+    [...]
     """
 
     # For integer types, histogramming with bincount is more efficient.

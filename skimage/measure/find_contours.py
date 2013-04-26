@@ -103,7 +103,7 @@ def find_contours(array, level,
     array([[ 1.,  0.,  0.],
            [ 0.,  0.,  0.],
            [ 0.,  0.,  0.]])
-    >>> measure.find_contours(a, 0.5)
+    >>> find_contours(a, 0.5)
     [array([[ 0. ,  0.5],
            [ 0.5,  0. ]])]
     """
