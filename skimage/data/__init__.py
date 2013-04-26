@@ -116,6 +116,19 @@ def page():
     return load("page.png")
 
 
+def horse():
+    """Black and white silhouette of a horse.
+
+    This image was downloaded from
+    `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
+
+    Released into public domain and drawn and uploaded by Andreas Preuss
+    (marauder).
+
+    """
+    return load("horse.png")
+
+
 def clock():
     """Motion blurred clock.
 
