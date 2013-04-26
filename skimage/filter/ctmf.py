@@ -42,6 +42,13 @@ def median_filter(image, radius=2, mask=None, percent=50):
         not overlap the mask, the filtered result is underfined, but
         in practice, it will be the lowest value in the valid area.
 
+    Examples
+    --------
+    >>> a = np.ones((5, 5))
+    >>> a[2, 2] = 10 # introduce outlier
+    >>> b = filter.median_filter(a)
+    >>> b[2, 2] # the median filter is good at removing outliers
+    1.0
     '''
 
     if image.ndim != 2:
