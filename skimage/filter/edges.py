@@ -341,7 +341,7 @@ def vprewitt(image, mask=None):
 
 
 def roberts(image, mask=None):
-    """Find the edge magnitude using Roberts' Cross Operator.
+    """Find the edge magnitude using Roberts' cross operator.
 
     Parameters
 	----------
@@ -357,14 +357,14 @@ def roberts(image, mask=None):
     output : ndarray
         The Roberts' Cross edge map.
     """
-    return np.sqrt(roberts_positive_diagonal(image, mask)**2 +\
+    return np.sqrt(roberts_positive_diagonal(image, mask)**2 +
                    roberts_negative_diagonal(image, mask)**2)
 
 
 def roberts_positive_diagonal(image, mask=None):
-    """Find the cross edges of an image using the Roberts' Cross operator.
+    """Find the cross edges of an image using Roberts' cross operator.
 
-    The kernel is applied to the input image, to produce separate measurements
+    The kernel is applied to the input image to produce separate measurements
     of the gradient component one orientation.
 
     Parameters
@@ -399,8 +399,10 @@ def roberts_positive_diagonal(image, mask=None):
 
 def roberts_negative_diagonal(image, mask=None):
     """Find the cross edges of an image using the Roberts' Cross operator.
-    The kernel is applied to the input image, to produce separate measurements
+
+    The kernel is applied to the input image to produce separate measurements
     of the gradient component one orientation.
+
     Parameters
     ----------
     image : 2-D array
