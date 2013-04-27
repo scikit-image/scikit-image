@@ -52,7 +52,7 @@ __all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
            'rgb_from_gdx', 'gdx_from_rgb', 'rgb_from_hax', 'hax_from_rgb',
            'rgb_from_bro', 'bro_from_rgb', 'rgb_from_bpx', 'bpx_from_rgb',
            'rgb_from_ahx', 'ahx_from_rgb', 'rgb_from_hpx', 'hpx_from_rgb',
-           'is_gray'
+           'is_rgb', 'is_gray'
            ]
 
 __docformat__ = "restructuredtext en"
@@ -61,6 +61,17 @@ import numpy as np
 from scipy import linalg
 from ..util import dtype
 
+
+def is_rgb(image):
+    """Test whether the image is RGB or RGBA.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    """
+    return (image.ndim == 3 and image.shape[2] in (3, 4))
 
 
 def is_gray(image):
@@ -641,7 +652,7 @@ def gray2rgb(image):
         If the input is not 2-dimensional.
 
     """
-    if (image.ndim == 3 and image.shape[2] in (3, 4)):
+    if is_rgb(image):
         return image
     elif is_gray(image):
         return np.dstack((image, image, image))
