@@ -5,8 +5,8 @@ Approximate and subdivide polygons
 
 This example shows how to approximate (Douglas-Peucker algorithm) and subdivide
 (B-Splines) polygonal chains.
-"""
 
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.draw import ellipse

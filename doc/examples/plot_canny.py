@@ -13,11 +13,14 @@ thresholding on the gradient magnitude.
 The Canny has three adjustable parameters: the width of the Gaussian (the
 noisier the image, the greater the width), and the low and high threshold for
 the hysteresis thresholding.
+
 """
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import ndimage
+
 from skimage import filter
+
 
 # Generate noisy image of a square
 im = np.zeros((128, 128))
@@ -51,7 +54,6 @@ plt.title('Canny filter, $\sigma=3$', fontsize=20)
 
 plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
                     bottom=0.02, left=0.02, right=0.98)
-
 
 plt.show()
 

@@ -178,7 +178,7 @@ element, but the thicker region at the top disappears.
 Black tophat
 ============
 
-The ``black_tophat`` of an image is defined as its morphological **closing 
+The ``black_tophat`` of an image is defined as its morphological **closing
 minus the original image**. This operation returns the *dark spots of the
 image that are smaller than the structuring element*.
 """
@@ -264,8 +264,8 @@ Additional Resources
 ====================
 
 1. `MathWorks tutorial on morphological processing
-<http://www.mathworks.com/help/images/morphology-fundamentals-dilation-and-erosion.html>`_ 
-2. `Auckland university's tutorial on Morphological Image Processing 
+<http://www.mathworks.com/help/images/morphology-fundamentals-dilation-and-erosion.html>`_
+2. `Auckland university's tutorial on Morphological Image Processing
 <http://www.cs.auckland.ac.nz/courses/compsci773s1c/lectures/ImageProcessing-html/topic4.htm>`_
 3. http://en.wikipedia.org/wiki/Mathematical_morphology
 
