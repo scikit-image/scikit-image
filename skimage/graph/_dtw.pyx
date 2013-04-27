@@ -14,10 +14,8 @@ cdef int type1 = 1
 cdef int type2 = 2
 cdef int type3 = 3
 
-
 cdef inline double euclidean(double x, double y):
     return sqrt((x - y) * (x - y))
-
 
 cdef inline double min3(double[3] v):
     cdef int i, m = 0
@@ -28,12 +26,9 @@ cdef inline double min3(double[3] v):
 
     return v[m]
 
-
 def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
         int end_anchor_slack=0):
-    """DTW(sequence1, sequence2, case=type1)
-
-    Dynamic time warping (DTW) for measuring similarity between two sequences.
+    """Return mapping between two curves based on dynamic time warping.
 
     DTW is an algorithm for measuring similarity between two sequences which
     may vary in time or speed
@@ -45,10 +40,7 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
 
     Parameters
     ----------
-    x : 1-D ndarray, dtype float64
-        A 1-dimensional sequence of points.
-    y : 1-D ndarray, dtype float64
-        A 1-dimensional sequence of points.
+    x, y : 1D array, dtype float64
     case : int, {1, 2, 3}
         Type-1 DTW uses 27-, 45- and 63-degree local path constraint.
         Type-2 DTW uses 0-, 45- and 90-degree local path constraint.
@@ -79,13 +71,8 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
     distance[1, 1] = 0
 
     # Step forward
-    for i in range(2, m+2):
-        for j in range(2, n+2):
-
-            # Could save some minor cost by limiting calculation to fan
-            ## if ((j <= 2 * i) and (i <= 2 * j) and (2 * (n - j) >= (m - i))
-            # and ((n - j) <= 2 * (m - i))):
-
+    for i in range(2, m + 2):
+        for j in range(2, n + 2):
             costs[0] = distance[i - 1, j - 1]
             costs[1] = distance[i - 1, j]
             costs[2] = distance[i, j - 1]
@@ -116,14 +103,14 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
 
         min_i, min_j = i - 1, j - 1
 
-        if case == 1 or case == 3:
+        if case == type1 or case == type3:
             if distance[i - 2, j - 1] < distance[min_i, min_j]:
                 min_i, min_j = i - 2, j - 1
 
             if distance[i - 1, j - 2] < distance[min_i, min_j]:
                 min_i, min_j = i - 1, j - 2
 
-        if case == 2 or case == 3:
+        if case == type2 or case == type3:
             if distance[i, j - 1] < distance[min_i, min_j]:
                 min_i, min_j = i, j - 1
 
