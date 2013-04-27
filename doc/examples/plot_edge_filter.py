@@ -1,3 +1,13 @@
+"""
+==============
+Edge operators
+==============
+
+Edge operators are used in image processing within edge detection algorithms.
+They are discrete differentiation operators, computing an approximation of the
+gradient of the image intensity function.
+
+"""
 import matplotlib.pyplot as plt
 
 from skimage.data import camera
