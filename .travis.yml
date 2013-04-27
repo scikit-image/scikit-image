@@ -26,4 +26,5 @@ script:
     - mkdir for_test
     - cd for_test
     - nosetests-$PYVER --exe -v --cover-package=skimage skimage
-
+    - cd ..
+    - make run-all-examples
