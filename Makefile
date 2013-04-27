@@ -13,4 +13,4 @@ coverage:
 	nosetests skimage --with-coverage --cover-package=skimage
 
 run-all-examples:
-	for f in doc/examples/*.py; do python "$f"; done
+	for f in doc/examples/*.py; do python "$$f"; done
