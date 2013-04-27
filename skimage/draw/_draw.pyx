@@ -8,6 +8,7 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport sqrt
 from skimage._shared.geometry cimport point_in_polygon
+from skimage._shared.utils import deprecated
 
 
 def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
@@ -71,6 +72,9 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     cc[dx] = x2
 
     return rr, cc
+
+
+bresenham = deprecated('skimage.draw.line')(line)
 
 
 def polygon(y, x, shape=None):
