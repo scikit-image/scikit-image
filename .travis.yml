@@ -30,5 +30,5 @@ script:
     - nosetests-$PYVER --exe -v --cover-package=skimage skimage
     # run all examples
     - cd ..
-    - echo 'backend : Agg' > matplotlibrc
+    - echo 'backend : Agg' >> matplotlibrc
     - make run-all-examples
