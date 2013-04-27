@@ -17,12 +17,11 @@ that fall within the 2nd and 98th percentiles [2]_.
 .. [2] http://homepages.inf.ed.ac.uk/rbf/HIPR2/stretch.htm
 
 """
+import matplotlib.pyplot as plt
+import numpy as np
 
 from skimage import data, img_as_float
 from skimage import exposure
-
-import matplotlib.pyplot as plt
-import numpy as np
 
 
 def plot_img_and_hist(img, axes, bins=256):

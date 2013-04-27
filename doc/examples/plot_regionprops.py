@@ -4,8 +4,8 @@ Measure region properties
 =========================
 
 This example shows how to measure properties of labelled image regions.
-"""
 
+"""
 import math
 import matplotlib.pyplot as plt
 import numpy as np

@@ -18,12 +18,13 @@ values, and use the random walker for the segmentation.
 
 .. [1] *Random walks for image segmentation*, Leo Grady, IEEE Trans. Pattern
        Anal. Mach. Intell. 2006 Nov; 28(11):1768-83
-"""
 
+"""
 import numpy as np
 from scipy import ndimage
-from skimage.segmentation import random_walker
 import matplotlib.pyplot as plt
+
+from skimage.segmentation import random_walker
 
 
 def microstructure(l=256):

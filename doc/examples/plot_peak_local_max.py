@@ -1,7 +1,7 @@
 """
-===============================================================================
+====================
 Finding local maxima
-===============================================================================
+====================
 
 The ``peak_local_max`` function returns the coordinates of local peaks (maxima)
 in an image. A maximum filter is used for finding local maxima. This operation
@@ -47,4 +47,3 @@ plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
                     bottom=0.02, left=0.02, right=0.98)
 
 plt.show()
-

@@ -12,11 +12,11 @@ kernels. The mean and variance of the filtered images are then used as features
 for classification, which is based on the least squared error for simplicity.
 
 """
-
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import ndimage as nd
+
 from skimage import data
 from skimage.util import img_as_float
 from skimage.filter import gabor_kernel

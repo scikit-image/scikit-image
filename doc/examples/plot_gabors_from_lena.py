@@ -35,7 +35,6 @@ is not rocket science.
        Interaction, and Functional Architecture in the Cat's Visual Cortex,
        J. Physiol. 160 pp.  106-154 1962
 """
-
 import numpy as np
 from scipy.cluster.vq import kmeans2
 from scipy import ndimage as ndi

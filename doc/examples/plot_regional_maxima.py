@@ -11,14 +11,15 @@ First we try reconstruction by dilation starting at the edges of the image. We
 initialize a seed image to the minimum intensity of the image, and set its
 border to be the pixel values in the original image. These maximal pixels will
 get dilated in order to reconstruct the background image.
+
 """
 import numpy as np
+from scipy.ndimage import gaussian_filter
+import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import img_as_float
 from skimage.morphology import reconstruction
-from scipy.ndimage import gaussian_filter
-import matplotlib.pyplot as plt
 
 # Convert to float: Important for subtraction later which won't work with uint8
 image = img_as_float(data.coins())

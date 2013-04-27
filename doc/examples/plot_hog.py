@@ -1,4 +1,4 @@
-r'''
+"""
 ===============================
 Histogram of Oriented Gradients
 ===============================
@@ -77,12 +77,13 @@ References
 .. [2] David G. Lowe, "Distinctive image features from scale-invariant
        keypoints," International Journal of Computer Vision, 60, 2 (2004),
        pp. 91-110.
-'''
+
+"""
+import matplotlib.pyplot as plt
 
 from skimage.feature import hog
 from skimage import data, color, exposure
 
-import matplotlib.pyplot as plt
 
 image = color.rgb2gray(data.lena())
 
