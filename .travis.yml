@@ -14,8 +14,8 @@ install:
     - sudo apt-get install $PYTHON-dev
     - sudo apt-get install $PYTHON-numpy
     - sudo apt-get install $PYTHON-scipy
-    - if [[ ${TRAVIS_PYTHON_VERSION:0:1} == '2' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
-    - if [[ ${TRAVIS_PYTHON_VERSION:0:1} == '3' ]]; then sudo pip install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
+    - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
+    - if [[ $PYVER == '3.2' ]]; then sudo pip install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
     - sudo apt-get install $PYTHON-setuptools
     - sudo apt-get install $PYTHON-nose
     - sudo easy_install$PYSUF pip
