@@ -57,7 +57,7 @@ def sobel(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Sobel edge map.
 
     Notes
@@ -86,7 +86,7 @@ def hsobel(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Sobel edge map.
 
     Notes
@@ -118,7 +118,7 @@ def vsobel(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Sobel edge map.
 
     Notes
@@ -150,7 +150,7 @@ def scharr(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Scharr edge map.
 
     Notes
@@ -182,7 +182,7 @@ def hscharr(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Scharr edge map.
 
     Notes
@@ -219,7 +219,7 @@ def vscharr(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Scharr edge map.
 
     Notes
@@ -256,7 +256,7 @@ def prewitt(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Prewitt edge map.
 
     Notes
@@ -281,7 +281,7 @@ def hprewitt(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Prewitt edge map.
 
     Notes
@@ -313,7 +313,7 @@ def vprewitt(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Prewitt edge map.
 
     Notes
@@ -345,7 +345,7 @@ def roberts(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Roberts' Cross edge map.
     """
     return np.sqrt(roberts_positive_diagonal(image, mask)**2 +
@@ -369,7 +369,7 @@ def roberts_positive_diagonal(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Robert's edge map.
 
     Notes
@@ -403,7 +403,7 @@ def roberts_negative_diagonal(image, mask=None):
 
     Returns
     -------
-    output : ndarray
+    output : 2-D array
         The Robert's edge map.
 
     Notes
