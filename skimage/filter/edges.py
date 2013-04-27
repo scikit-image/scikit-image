@@ -16,6 +16,26 @@ from scipy.ndimage import convolve, binary_erosion, generate_binary_structure
 
 EROSION_SELEM = generate_binary_structure(2, 2)
 
+HSOBEL_WEIGHTS = np.array([[ 1, 2, 1],
+                           [ 0, 0, 0],
+                           [-1,-2,-1]]) / 4.0
+VSOBEL_WEIGHTS = HSOBEL_WEIGHTS.T
+
+HSCHARR_WEIGHTS = np.array([[ 3,  10,  3],
+                            [ 0,   0,  0],
+                            [-3, -10, -3]]) / 16.0
+VSCHARR_WEIGHTS = HSCHARR_WEIGHTS.T
+
+HPREWITT_WEIGHTS = np.array([[ 1, 1, 1],
+                             [ 0, 0, 0],
+                             [-1,-1,-1]]) / 3.0
+VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
+
+ROBERTS_PD_WEIGHTS = np.array([[ 1, 0],
+                               [ 0, -1]], dtype=np.double)
+ROBERTS_ND_WEIGHTS = np.array([[0, 1],
+                               [-1, 0]], dtype=np.double)
+
 
 def _mask_filter_result(result, mask):
     """Return result after masking.
@@ -91,10 +111,7 @@ def hsobel(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[ 1, 2, 1],
-                                       [ 0, 0, 0],
-                                       [-1,-2,-1]]).astype(float) / 4.0))
+    result = np.abs(convolve(image, HSOBEL_WEIGHTS))
     return _mask_filter_result(result, mask)
 
 
@@ -126,10 +143,7 @@ def vsobel(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[1, 0, -1],
-                                       [2, 0, -2],
-                                       [1, 0, -1]]).astype(float) / 4.0))
+    result = np.abs(convolve(image, VSOBEL_WEIGHTS))
     return _mask_filter_result(result, mask)
 
 
@@ -198,10 +212,7 @@ def hscharr(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[ 3,  10,  3],
-                                       [ 0,   0,  0],
-                                       [-3, -10, -3]]).astype(float) / 16.0))
+    result = np.abs(convolve(image, HSCHARR_WEIGHTS))
     return _mask_filter_result(result, mask)
 
 
@@ -238,10 +249,7 @@ def vscharr(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[ 3, 0,  -3],
-                                       [10, 0, -10],
-                                       [ 3, 0,  -3]]).astype(float) / 16.0))
+    result = np.abs(convolve(image, VSCHARR_WEIGHTS))
     return _mask_filter_result(result, mask)
 
 
@@ -298,10 +306,7 @@ def hprewitt(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[ 1, 1, 1],
-                                       [ 0, 0, 0],
-                                       [-1,-1,-1]]).astype(float) / 3.0))
+    result = np.abs(convolve(image, HPREWITT_WEIGHTS))
     return _mask_filter_result(result, mask)
 
 
@@ -333,10 +338,7 @@ def vprewitt(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[1, 0, -1],
-                                       [1, 0, -1],
-                                       [1, 0, -1]]).astype(float) / 3.0))
+    result = np.abs(convolve(image, VPREWITT_WEIGHTS))
     return _mask_filter_result(result, mask)
 
 
@@ -391,9 +393,7 @@ def roberts_positive_diagonal(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[ 1, 0],
-                                       [ 0, -1]]).astype(float)))
+    result = np.abs(convolve(image, ROBERTS_PD_WEIGHTS))
     return _mask_filter_result(result, mask)
 
 
@@ -427,7 +427,5 @@ def roberts_negative_diagonal(image, mask=None):
 
     """
     image = img_as_float(image)
-    result = np.abs(convolve(image,
-                             np.array([[0, 1],
-                                       [-1, 0]]).astype(float)))
+    result = np.abs(convolve(image, ROBERTS_ND_WEIGHTS))
     return _mask_filter_result(result, mask)
