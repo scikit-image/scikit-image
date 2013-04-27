@@ -59,7 +59,8 @@ References
 
 '''
 
-from skimage.transform import hough_line, hough_peaks, probabilistic_hough
+from skimage.transform import (hough_line, hough_line_peaks,
+                               probabilistic_hough_line)
 from skimage.filter import canny
 from skimage import data
 
@@ -97,7 +98,7 @@ plt.ylabel('Distance (pixels)')
 plt.subplot(133)
 plt.imshow(image, cmap=plt.cm.gray)
 rows, cols = image.shape
-for _, angle, dist in zip(*hough_peaks(h, theta, d)):
+for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
     y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
     y1 = (dist - cols * np.cos(angle)) / np.sin(angle)
     plt.plot((0, cols), (y0, y1), '-r')
@@ -108,7 +109,7 @@ plt.title('Detected lines')
 
 image = data.camera()
 edges = canny(image, 2, 1, 25)
-lines = probabilistic_hough(edges, threshold=10, line_length=5, line_gap=3)
+lines = probabilistic_hough_line(edges, threshold=10, line_length=5, line_gap=3)
 
 plt.figure(figsize=(8, 3))
 
