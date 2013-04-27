@@ -3,7 +3,7 @@
 Comparing edge-based segmentation and region-based segmentation
 ===============================================================
 
-In this example, we will see how to segment objects from a background.  We use
+In this example, we will see how to segment objects from a background. We use
 the ``coins`` image from ``skimage.data``, which shows several coins outlined
 against a darker background.
 """
@@ -108,9 +108,8 @@ closed are not filled correctly, as is the case for one unfilled coin above.
 Region-based segmentation
 =========================
 
-We therefore try a region-based method using the
-watershed transform. First, we find an elevation map using the Sobel gradient of the
-image. 
+We therefore try a region-based method using the watershed transform. First, we
+find an elevation map using the Sobel gradient of the image.
 
 """
 
@@ -142,7 +141,8 @@ plt.title('markers')
 """
 .. image:: PLOT2RST.current_figure
 
-Finally, we use the watershed transform to fill regions of the elevation map starting from the markers determined above:
+Finally, we use the watershed transform to fill regions of the elevation map
+starting from the markers determined above:
 
 """
 segmentation = morphology.watershed(elevation_map, markers)
@@ -155,8 +155,8 @@ plt.title('segmentation')
 """
 .. image:: PLOT2RST.current_figure
 
-This last method works even better, and the coins can be segmented and 
-labeled individually.
+This last method works even better, and the coins can be segmented and labeled
+individually.
 
 """
 

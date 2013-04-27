@@ -1,14 +1,20 @@
 """
-===============================
+============================
 Local Histogram Equalization
-===============================
+============================
 
-This examples enhances an image with low contrast, using a method called
-*local histogram equalization*, which "spreads out the most frequent intensity
-values" in an image .
-The equalized image [1]_ has a roughly linear cumulative distribution function for each pixel neighborhood.
-The local version [2]_ of the histogram equalization emphasized every local graylevel variations.
+This examples enhances an image with low contrast, using a method called *local
+histogram equalization*, which spreads out the most frequent intensity values in
+an image.
 
+The equalized image [1]_ has a roughly linear cumulative distribution function
+for each pixel neighborhood.
+
+The local version [2]_ of the histogram equalization emphasized every local
+graylevel variations.
+
+References
+----------
 .. [1] http://en.wikipedia.org/wiki/Histogram_equalization
 .. [2] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 

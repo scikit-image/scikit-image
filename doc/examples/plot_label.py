@@ -12,7 +12,6 @@ steps are applied:
 4. Measure image regions to filter small objects
 
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches

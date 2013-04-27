@@ -14,7 +14,6 @@ the intra-class variance.
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
 """
-
 import matplotlib.pyplot as plt
 
 from skimage.data import camera
@@ -42,4 +41,3 @@ plt.title('Thresholded')
 plt.axis('off')
 
 plt.show()
-

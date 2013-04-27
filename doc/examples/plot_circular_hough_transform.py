@@ -29,8 +29,6 @@ original picture in order to detect centers outside the frame.
 Its size is extended by two times the larger radius.
 
 """
-
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -38,6 +36,7 @@ from skimage import data, filter, color
 from skimage.transform import hough_circle
 from skimage.feature import peak_local_max
 from skimage.draw import circle_perimeter
+
 
 # Load picture and detect edges
 image = data.coins()[0:95, 70:370]
