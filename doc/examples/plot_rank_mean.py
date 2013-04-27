@@ -25,7 +25,7 @@ from skimage import data
 from skimage.morphology import disk
 import skimage.filter.rank as rank
 
-a16 = (data.coins()).astype('uint16') * 16
+a16 = (data.coins()).astype(np.uint16) * 16
 selem = disk(20)
 
 f1 = rank.percentile_mean(a16, selem=selem, p0=.1, p1=.9)
