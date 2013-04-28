@@ -73,15 +73,15 @@ ref_feats[2, :, :] = compute_feats(wall, kernels)
 
 print('Rotated images matched against references using Gabor filter banks:')
 
-print('original: brick, rotated: 30deg, match result:', end='')
+print('original: brick, rotated: 30deg, match result: ', end='')
 feats = compute_feats(nd.rotate(brick, angle=190, reshape=False), kernels)
 print(image_names[match(feats, ref_feats)])
 
-print('original: brick, rotated: 70deg, match result:', end='')
+print('original: brick, rotated: 70deg, match result: ', end='')
 feats = compute_feats(nd.rotate(brick, angle=70, reshape=False), kernels)
 print(image_names[match(feats, ref_feats)])
 
-print('original: grass, rotated: 145deg, match result:', end='')
+print('original: grass, rotated: 145deg, match result: ', end='')
 feats = compute_feats(nd.rotate(grass, angle=145, reshape=False), kernels)
 print(image_names[match(feats, ref_feats)])
 
