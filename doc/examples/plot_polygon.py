@@ -7,8 +7,11 @@ This example shows how to approximate (Douglas-Peucker algorithm) and subdivide
 (B-Splines) polygonal chains.
 
 """
+from __future__ import print_function
+
 import numpy as np
 import matplotlib.pyplot as plt
+
 from skimage.draw import ellipse
 from skimage.measure import find_contours, approximate_polygon, \
     subdivide_polygon
