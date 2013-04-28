@@ -31,4 +31,4 @@ script:
     # run all examples
     - cd ..
     - "echo 'backend : Agg' > matplotlibrc"
-    - for f in doc/examples/*.py; do python "$$f"; done
+    - for f in doc/examples/*.py; do $PYTHON "$f"; done
