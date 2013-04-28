@@ -17,10 +17,10 @@ install:
     - sudo apt-get install $PYTHON-setuptools
     - sudo apt-get install $PYTHON-nose
     - sudo easy_install$PYSUF pip
-    - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
-    - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
     - sudo pip-$PYVER install cython
     - sudo apt-get install libfreeimage3
+    - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
+    - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
     - $PYTHON setup.py build
     - sudo $PYTHON setup.py install
 script:
