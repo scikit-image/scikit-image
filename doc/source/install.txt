@@ -9,6 +9,12 @@ The latest stable release is also included as part of the `Enthought Python
 Distribution (EPD) <http://enthought.com/products/epd.php>`__ and `Python(x,y)
 <http://code.google.com/p/pythonxy/wiki/Welcome>`__.
 
+On Debian and Ubuntu, a Debian package ``python-skimage`` can be found in
+`the Neurodebian repository <http://neuro.debian.net>`__. Follow `the
+instructions <http://neuro.debian.net/#how-to-use-this-repository>`__ to
+add Neurodebian to your system package manager, then look for
+``python-skimage`` in the package manager.
+
 On systems that support setuptools, the package can be installed from the
 `Python packaging index <http://pypi.python.org/pypi/scikit-image>`__ using
 
