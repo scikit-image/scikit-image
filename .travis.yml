@@ -28,7 +28,7 @@ script:
     - mkdir for_test
     - cd for_test
     - nosetests-$PYVER --exe -v --cover-package=skimage skimage
-    # run all examples
+    # Change back to repository root directory and run all doc examples
     - cd ..
     - "echo 'backend : Agg' > matplotlibrc"
     - for f in doc/examples/*.py; do $PYTHON "$f"; done
