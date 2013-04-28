@@ -31,4 +31,4 @@ script:
     # Change back to repository root directory and run all doc examples
     - cd ..
     - "echo 'backend : Agg' > matplotlibrc"
-    - for f in doc/examples/*.py; do $PYTHON "$f"; done
+    - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit $?; fi done
