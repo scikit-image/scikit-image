@@ -29,10 +29,10 @@ image[-100:-10, 10:-10] = 1
 image[10:-10, -100:-10] = 1
 
 # foreground object 2
-rs, cs = draw.bresenham(250, 150, 10, 280)
+rs, cs = draw.line(250, 150, 10, 280)
 for i in range(10):
     image[rs + i, cs] = 1
-rs, cs = draw.bresenham(10, 150, 250, 280)
+rs, cs = draw.line(10, 150, 250, 280)
 for i in range(20):
     image[rs + i, cs] = 1
 
