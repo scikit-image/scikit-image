@@ -9,9 +9,12 @@ textures. For simplicity the histogram distributions are then tested against
 each other using the Kullback-Leibler-Divergence.
 
 """
+from __future__ import print_function
+
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+
 from skimage.transform import rotate
 from skimage.feature import local_binary_pattern
 from skimage import data
@@ -57,13 +60,13 @@ refs = {
 }
 
 # classify rotated textures
-print 'Rotated images matched against references using LBP:'
-print 'original: brick, rotated: 30deg, match result:',
-print match(refs, rotate(brick, angle=30, resize=False))
-print 'original: brick, rotated: 70deg, match result:',
-print match(refs, rotate(brick, angle=70, resize=False))
-print 'original: grass, rotated: 145deg, match result:',
-print match(refs, rotate(grass, angle=145, resize=False))
+print('Rotated images matched against references using LBP:')
+print('original: brick, rotated: 30deg, match result:', end='')
+print(match(refs, rotate(brick, angle=30, resize=False)))
+print('original: brick, rotated: 70deg, match result:', end='')
+print(match(refs, rotate(brick, angle=70, resize=False)))
+print('original: grass, rotated: 145deg, match result:', end='')
+print(match(refs, rotate(grass, angle=145, resize=False)))
 
 # plot histograms of LBP of textures
 fig, ((ax1, ax2, ax3), (ax4, ax5, ax6)) = plt.subplots(nrows=2, ncols=3,

@@ -12,6 +12,8 @@ kernels. The mean and variance of the filtered images are then used as features
 for classification, which is based on the least squared error for simplicity.
 
 """
+from __future__ import print_function
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -69,19 +71,19 @@ ref_feats[0, :, :] = compute_feats(brick, kernels)
 ref_feats[1, :, :] = compute_feats(grass, kernels)
 ref_feats[2, :, :] = compute_feats(wall, kernels)
 
-print 'Rotated images matched against references using Gabor filter banks:'
+print('Rotated images matched against references using Gabor filter banks:')
 
-print 'original: brick, rotated: 30deg, match result:',
+print('original: brick, rotated: 30deg, match result:', end='')
 feats = compute_feats(nd.rotate(brick, angle=190, reshape=False), kernels)
-print image_names[match(feats, ref_feats)]
+print(image_names[match(feats, ref_feats)])
 
-print 'original: brick, rotated: 70deg, match result:',
+print('original: brick, rotated: 70deg, match result:', end='')
 feats = compute_feats(nd.rotate(brick, angle=70, reshape=False), kernels)
-print image_names[match(feats, ref_feats)]
+print(image_names[match(feats, ref_feats)])
 
-print 'original: grass, rotated: 145deg, match result:',
+print('original: grass, rotated: 145deg, match result:', end='')
 feats = compute_feats(nd.rotate(grass, angle=145, reshape=False), kernels)
-print image_names[match(feats, ref_feats)]
+print(image_names[match(feats, ref_feats)])
 
 
 def power(image, kernel):

@@ -7,6 +7,8 @@ In this example, we will see how to use geometric transformations in the context
 of image processing.
 """
 
+from __future__ import print_function
+
 import math
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,7 +33,7 @@ First we create a transformation using explicit parameters:
 
 tform = tf.SimilarityTransform(scale=1, rotation=math.pi / 2,
                                translation=(0, 1))
-print tform._matrix
+print(tform._matrix)
 
 """
 Alternatively you can define a transformation by the transformation matrix
@@ -49,8 +51,8 @@ systems:
 """
 
 coord = [1, 0]
-print tform2(coord)
-print tform2.inverse(tform(coord))
+print(tform2(coord))
+print(tform2.inverse(tform(coord)))
 
 """
 Image warping

@@ -45,7 +45,7 @@ for _ in range(5):
 # approximate subdivided polygon with Douglas-Peucker algorithm
 appr_hand = approximate_polygon(new_hand, tolerance=0.02)
 
-print "Number of coordinates:", len(hand), len(new_hand), len(appr_hand)
+print("Number of coordinates:", len(hand), len(new_hand), len(appr_hand))
 
 fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(9, 4))
 
@@ -70,7 +70,7 @@ for contour in find_contours(img, 0):
     ax2.plot(coords[:, 1], coords[:, 0], '-r', linewidth=2)
     coords2 = approximate_polygon(contour, tolerance=39.5)
     ax2.plot(coords2[:, 1], coords2[:, 0], '-g', linewidth=2)
-    print "Number of coordinates:", len(contour), len(coords), len(coords2)
+    print("Number of coordinates:", len(contour), len(coords), len(coords2))
 
 ax2.axis((0, 800, 0, 800))
 
