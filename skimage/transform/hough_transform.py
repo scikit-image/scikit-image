@@ -1,5 +1,3 @@
-__all__ = ['hough_line_peaks']
-
 import numpy as np
 from scipy import ndimage
 from skimage import measure, morphology

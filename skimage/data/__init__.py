@@ -12,6 +12,20 @@ from ..io import imread
 from skimage import data_dir
 
 
+__all__ = ['load',
+           'camera',
+           'lena',
+           'text',
+           'checkerboard',
+           'coins',
+           'moon',
+           'page',
+           'horse',
+           'clock',
+           'immunohistochemistry',
+           'chelsea']
+
+
 def load(f):
     """Load an image file located in the data directory.
 
