@@ -19,15 +19,14 @@ References
 .. [2] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
 
 """
+import numpy as np
+import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.util.dtype import dtype_range
+from skimage.util import img_as_ubyte
 from skimage import exposure
 from skimage.morphology import disk
-
-import matplotlib.pyplot as plt
-
-import numpy as np
 from skimage.filter import rank
 
 
@@ -58,7 +57,7 @@ def plot_img_and_hist(img, axes, bins=256):
 
 
 # Load an example image
-img = data.moon()
+img = img_as_ubyte(data.moon())
 
 # Contrast stretching
 p2 = np.percentile(img, 2)

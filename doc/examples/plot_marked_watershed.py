@@ -16,13 +16,14 @@ See Wikipedia_ for more details on the algorithm.
 
 from scipy import ndimage
 import matplotlib.pyplot as plt
+
 from skimage.morphology import watershed, disk
 from skimage import data
-
-# original data
 from skimage.filter import rank
+from skimage.util import img_as_ubyte
 
-image = data.camera()
+
+image = img_as_ubyte(data.camera())
 
 # denoise image
 denoised = rank.median(image, disk(2))

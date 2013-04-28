@@ -18,12 +18,12 @@ The example compares the local threshold with the global threshold.
 import matplotlib.pyplot as plt
 
 from skimage import data
-from skimage.morphology.selem import disk
-import skimage.filter.rank as rank
-from skimage.filter import threshold_otsu
+from skimage.morphology import disk
+from skimage.filter import threshold_otsu, rank
+from skimage.util import img_as_ubyte
 
 
-p8 = data.page()
+p8 = img_as_ubyte(data.page())
 
 radius = 10
 selem = disk(radius)
