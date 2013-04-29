@@ -183,24 +183,23 @@ if __name__ == '__main__':
 
 def test_rescale_intensity_gamma_one():
     """Same image should be returned for gamma equal to one"""
-    image = data.camera()
+    image = np.random.random((8, 8))
     result = exposure.rescale_intensity_gamma(image, 1)
     assert_array_equal(result, image)
 
 
 def test_rescale_intensity_gamma_zero():
     """White image should be returned for gamma equal to zero"""
-    image = data.camera()
+    image = np.random.random((8, 8))
     result = exposure.rescale_intensity_gamma(image, 0)
     dtype = image.dtype.type
-    assert result.mean() == dtype_range[dtype][1]
-    assert result.std() == 0
+    assert_array_equal(result, dtype_range[dtype][1])
 
 
 def test_rescale_intensity_gamma_less_one():
     """Verifying the output with expected results for gamma
     correction with gamma equal to half"""
-    image = np.uint8(4 * np.arange(64).reshape(8,8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     expected = np.array([[  0,  31,  45,  55,  63,  71,  78,  84],
         [ 90,  95, 100, 105, 110, 115, 119, 123],
         [127, 131, 135, 139, 142, 146, 149, 153],
@@ -217,7 +216,7 @@ def test_rescale_intensity_gamma_less_one():
 def test_rescale_intensity_gamma_greater_one():
     """Verifying the output with expected results for gamma
     correction with gamma equal to two"""
-    image = np.uint8(4 * np.arange(64).reshape(8,8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     expected = np.array([[  0,   0,   0,   0,   1,   1,   2,   3],
         [  4,   5,   6,   7,   9,  10,  12,  14],
         [ 16,  18,  20,  22,  25,  27,  30,  33],
@@ -237,7 +236,7 @@ def test_rescale_intensity_gamma_greater_one():
 def test_rescale_intensity_logarithmic():
     """Verifying the output with expected results for logarithmic
     correction with multiplier constant multiplier equal to unity"""
-    image = np.uint8(4 * np.arange(64).reshape(8,8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     expected = np.array([[  0,   5,  11,  16,  22,  27,  33,  38],
         [ 43,  48,  53,  58,  63,  68,  73,  77],
         [ 82,  86,  91,  95, 100, 104, 109, 113],
@@ -247,14 +246,14 @@ def test_rescale_intensity_logarithmic():
         [206, 209, 213, 216, 219, 222, 225, 228],
         [231, 234, 238, 241, 244, 246, 249, 252]], dtype=np.uint8)
 
-    result = exposure.rescale_intensity_logarithmic(image, 1)
+    result = exposure.rescale_intensity_log(image, 1)
     assert_array_equal(result, expected)
 
 
 def test_rescale_intensity_inv_logarithmic():
     """Verifying the output with expected results for inverse logarithmic
     correction with multiplier constant multiplier equal to unity"""
-    image = np.uint8(4 * np.arange(64).reshape(8,8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     expected = np.array([[  0,   2,   5,   8,  11,  14,  17,  20],
         [ 23,  26,  29,  32,  35,  38,  41,  45],
         [ 48,  51,  55,  58,  61,  65,  68,  72],
@@ -264,7 +263,7 @@ def test_rescale_intensity_inv_logarithmic():
         [174, 179, 184, 188, 193, 198, 203, 208],
         [213, 218, 224, 229, 234, 239, 245, 250]], dtype=np.uint8)
 
-    result = exposure.rescale_intensity_logarithmic(image, 1, -1)
+    result = exposure.rescale_intensity_log(image, 1, True)
     assert_array_equal(result, expected)
 
 
@@ -274,7 +273,7 @@ def test_rescale_intensity_inv_logarithmic():
 def test_rescale_intensity_sigmoid_cutoff_one():
     """Verifying the output with expected results for sigmoid correction
     with cutoff equal to one and gain of 5"""
-    image = np.uint8(4 * np.arange(64).reshape(8,8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     expected = np.array([[  1,   1,   1,   2,   2,   2,   2,   2],
         [  3,   3,   3,   4,   4,   4,   5,   5],
         [  5,   6,   6,   7,   7,   8,   9,  10],
@@ -291,7 +290,7 @@ def test_rescale_intensity_sigmoid_cutoff_one():
 def test_rescale_intensity_sigmoid_cutoff_zero():
     """Verifying the output with expected results for sigmoid correction
     with cutoff equal to zero and gain of 10"""
-    image = np.uint8(4 * np.arange(64).reshape(8,8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     expected = np.array([[127, 137, 147, 156, 166, 175, 183, 191],
         [198, 205, 211, 216, 221, 225, 229, 232],
         [235, 238, 240, 242, 244, 245, 247, 248],
@@ -308,7 +307,7 @@ def test_rescale_intensity_sigmoid_cutoff_zero():
 def test_rescale_intensity_sigmoid_cutoff_half():
     """Verifying the output with expected results for sigmoid correction
     with cutoff equal to half and gain of 10"""
-    image = np.uint8(4 * np.arange(64).reshape(8,8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     expected = np.array([[  1,   1,   2,   2,   3,   3,   4,   5],
         [  5,   6,   7,   9,  10,  12,  14,  16],
         [ 19,  22,  25,  29,  34,  39,  44,  50],
