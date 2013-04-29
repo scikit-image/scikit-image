@@ -263,7 +263,7 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
     return dtype(out)
 
 
-def rescale_intensity_logarithmic(image, gain=1, inv=1):
+def rescale_intensity_log(image, gain=1, inv=False):
     """Performs Logarithmic correction on the input image.
 
     Parameters
@@ -273,8 +273,8 @@ def rescale_intensity_logarithmic(image, gain=1, inv=1):
     gain : float
         The constant multiplier. Default value is 1.
     inv : float
-        Value passed should be -1 for inverse logarithmic correction,
-        else correction will be logarithmic. Default to logarithmic.
+        If True, it performs inverse logarithmic correction,
+        else correction will be logarithmic. Defaults to False.
     
     Returns
     -------
@@ -295,7 +295,7 @@ def rescale_intensity_logarithmic(image, gain=1, inv=1):
     dtype = image.dtype.type
     scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
 
-    if inv == -1:
+    if inv == True:
         out = (2 ** (image / scale) - 1) * scale * gain
         return dtype(out)
 
@@ -303,7 +303,7 @@ def rescale_intensity_logarithmic(image, gain=1, inv=1):
     return dtype(out)
 
 
-def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10):
+def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     """Performs Sigmoid Correction on input image.
 
     Also known as Contrast Adjustment.
@@ -313,11 +313,13 @@ def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10):
     image : ndarray
         Input image.
     cutoff : float
-        Cutoff of the sigmoid function. Default value is 0.5.
+        Cutoff of the sigmoid function that shifts the characteristic curve
+        in horizontal direction. Default value is 0.5.
     gain : float
         The constant multiplier in exponential's power of sigmoid function.
         Default value is 10.
-    
+    inv : If True, returns the negative sigmoid correction. Defaults to
+          False.
     Returns
     -------
     out : ndarray
@@ -336,5 +338,8 @@ def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10):
     """
     dtype = image.dtype.type
     scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+    if inv == True:
+        out = 1 - (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+        return dtype(out)
     out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
     return dtype(out)
