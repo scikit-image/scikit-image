@@ -1,29 +1,24 @@
 # TODO : Doc, Tests, PEP8 check
 
 import numpy as np
+from skimage.util.shape import view_as_blocks
 
 def downsample(image, factors, method='sum'):
 
-    is = image.shape
-    f = factors
+    # works only if image.shape is perfectly divisible by factors
+    out = view_as_blocks(image, factors)
+    block_shape = out.shape
 
-    if (f[0] - int(f[0]) != 0) or (f[1] - int(f[1]) != 0):
-        raise ValueError('Use resample() for non-integer downsampling')
-    cropped = image[:is[0] - (is[0] % f[0]), :is[1] - (is[1] % f[1])]
-    out = np.zeros((cropped.shape[0] / f[0], cropped.shape[1] / f[1]))
-
-    for i in range(cropped.shape[0]):
-        for j in range(cropped.shape[1]):
-            out[int(i / f[0])][int(j / f[1])] += cropped[i][j]
     if method == 'sum':
-        return out
+        for i in range(len(block_shape)/2):
+            out = out.sum(-1)
     else:
-        return out / float(f[0] * f[1])
-
+        for i in range(len(block_shape)/2):
+            out = out.mean(-1)
+    return out
 
 def upsample(image, factors, method='divide'):
 
-    is = image.shape
     f = factors
 
     if (f[0] - int(f[0]) != 0) or (f[1] - int(f[1]) != 0):
