@@ -29,7 +29,7 @@ from skimage.color import (
     rgb2grey, gray2rgb,
     xyz2lab, lab2xyz,
     lab2rgb, rgb2lab,
-    is_rgb, is_gray
+    is_rgb, is_gray, is_gray_2d
     )
 
 from skimage import data_dir, data
@@ -232,19 +232,16 @@ class TestColorconv(TestCase):
         assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
 
 def test_gray2rgb():
-    x = np.array([0, 0.5, 1])
-    assert_raises(ValueError, gray2rgb, x)
-
-    x = x.reshape((3, 1))
+    x = np.array([[0, 0.5, 1], [0, 0.5, 1]])
     y = gray2rgb(x)
 
-    assert_equal(y.shape, (3, 1, 3))
+    assert_equal(y.shape, (2, 3, 3))
     assert_equal(y.dtype, x.dtype)
 
-    x = np.array([[0, 128, 255]], dtype=np.uint8)
+    x = np.array([[0, 128], [128, 255], [255, 0]], dtype=np.uint8)
     z = gray2rgb(x)
 
-    assert_equal(z.shape, (1, 3, 3))
+    assert_equal(z.shape, (3, 2, 3))
     assert_equal(z[..., 0], x)
     assert_equal(z[0, 1, :], [128, 128, 128])
 
