@@ -230,12 +230,12 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         Indices of pixels that belong to the circle perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
-        
+
     val: list of floats
         Pixel intensity values for Wu method.
         May be directly assigned to an array, e. g.
         ``img[rr, cc] = val``.
-    
+
     Notes
     -----
     Andres method presents the advantage that concentric
@@ -252,11 +252,11 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     .. [2] E. Andres, "Discrete circles, rings and spheres", 18 (1994) 695-706.
     .. [3] X. Wu, "Fast anti-aliased circle generation", 2 (1995) 446-450.
     """
-    
+
     cdef list rr = list()
     cdef list cc = list()
     cdef list val = list()
-    
+
     cdef Py_ssize_t x = 0
     cdef Py_ssize_t y = radius
     cdef Py_ssize_t d = 0
@@ -271,12 +271,12 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         cmethod = 'w'
     else:
         raise ValueError('Wrong method')
-    
+
     if cmethod == 'a' or cmethod == 'b':
         while y >= x:
             rr.extend([y, -y, y, -y, x, -x, x, -x])
             cc.extend([x, x, -x, -x, y, y, -y, -y])
-            
+
             if cmethod == 'b':
                 if d < 0:
                     d += 4 * x + 6
@@ -296,29 +296,29 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                     y = y - 1
                     x = x + 1
         return np.array(rr, dtype=np.intp) + cy, np.array(cc, dtype=np.intp) + cx
-                    
+
     elif cmethod == 'w':
         T = 0
-                
+
         rr.extend([cy + y, cx + x, cy + y, cx + x, cy - y, cx - x, cy - y, cx - x])
         cc.extend([cx + x, cy + y, cx - x, cy - y, cx + x, cy + y, cx - x, cy - y])
         val.extend([1] * 8)
-        
+
         while y > x + 1:
             x += 1
             D = math.sqrt(radius**2 - x**2)
             D = math.ceil(D) - D
-            if D < T:         
+            if D < T:
                 y -= 1
             rr.extend([cy + y, cy + y - 1, cx + x, cx + x    , cy + y, cy + y - 1, cx + x, cx + x])
             cc.extend([cx + x, cx + x    , cy + y, cy + y - 1, cx - x, cx - x,     cy - y, cy + 1 - y])
-            
+
             rr.extend([cy - y, cy + 1 - y, cx - x, cx - x,     cy + - y, cy + 1 - y, cx - x, cx - x])
             cc.extend([cx + x, cx + x,     cy + y, cy + y - 1, cx -x,    cx -x,      cy - y, cy + 1 - y])
-            
+
             val.extend([1 - D, D] * 8)
             T = D
-            
+
         return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp), val
 
 
