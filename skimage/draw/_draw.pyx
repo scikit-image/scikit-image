@@ -251,6 +251,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         plotter", 4 (1965) 25-30.
     .. [2] E. Andres, "Discrete circles, rings and spheres", 18 (1994) 695-706.
     .. [3] X. Wu, "Fast anti-aliased circle generation", 2 (1995) 446-450.
+
     """
 
     cdef list rr = list()
