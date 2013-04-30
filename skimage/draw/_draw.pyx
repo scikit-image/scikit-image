@@ -319,7 +319,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
             cc.extend([cx + x, cx + x    , cy + y, cy + y - 1, cx - x, cx - x,     cy - y, cy + 1 - y])
 
             rr.extend([cy - y, cy + 1 - y, cx - x, cx - x,     cy + - y, cy + 1 - y, cx - x, cx - x])
-            cc.extend([cx + x, cx + x,     cy + y, cy + y - 1, cx -x,    cx -x,      cy - y, cy + 1 - y])
+            cc.extend([cx + x, cx + x,     cy + y, cy + y - 1, cx - x,   cx - x,     cy - y, cy + 1 - y])
 
             val.extend([1 - dceil, dceil] * 8)
             dceil_prev = dceil
