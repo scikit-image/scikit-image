@@ -261,6 +261,10 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     cdef Py_ssize_t x = 0
     cdef Py_ssize_t y = radius
     cdef Py_ssize_t d = 0
+
+    cdef double dceil = 0
+    cdef double dceil_prev = 0
+
     cdef char cmethod
     if method == 'bresenham':
         d = 3 - 2 * radius
@@ -299,7 +303,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         return np.array(rr, dtype=np.intp) + cy, np.array(cc, dtype=np.intp) + cx
 
     elif cmethod == 'w':
-        T = 0
+        dceil_prev = 0
 
         rr.extend([cy + y, cx + x, cy + y, cx + x, cy - y, cx - x, cy - y, cx - x])
         cc.extend([cx + x, cy + y, cx - x, cy - y, cx + x, cy + y, cx - x, cy - y])
@@ -307,9 +311,9 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
 
         while y > x + 1:
             x += 1
-            D = math.sqrt(radius**2 - x**2)
-            D = math.ceil(D) - D
-            if D < T:
+            dceil = math.sqrt(radius**2 - x**2)
+            dceil = math.ceil(dceil) - dceil
+            if dceil < dceil_prev:
                 y -= 1
             rr.extend([cy + y, cy + y - 1, cx + x, cx + x    , cy + y, cy + y - 1, cx + x, cx + x])
             cc.extend([cx + x, cx + x    , cy + y, cy + y - 1, cx - x, cx - x,     cy - y, cy + 1 - y])
@@ -317,8 +321,8 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
             rr.extend([cy - y, cy + 1 - y, cx - x, cx - x,     cy + - y, cy + 1 - y, cx - x, cx - x])
             cc.extend([cx + x, cx + x,     cy + y, cy + y - 1, cx -x,    cx -x,      cy - y, cy + 1 - y])
 
-            val.extend([1 - D, D] * 8)
-            T = D
+            val.extend([1 - dceil, dceil] * 8)
+            dceil_prev = dceil
 
         return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp), val
 
