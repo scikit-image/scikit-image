@@ -231,7 +231,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    val: list of floats
+    val: ndarray of float
         Pixel intensity values for Wu method.
         May be directly assigned to an array, e. g.
         ``img[rr, cc] = val``.
@@ -326,7 +326,8 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
             dceil_prev = dceil
 
         return (np.array(rr, dtype=np.intp) + cy,
-                np.array(cc, dtype=np.intp) + cx, val)
+                np.array(cc, dtype=np.intp) + cx,
+                np.array(val, dtype=np.float))
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
