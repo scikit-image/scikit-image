@@ -3,9 +3,35 @@
 import numpy as np
 from skimage.util.shape import view_as_blocks
 
+
+def _pad_asymmetric_zeros(arr, pad_amt, axis=-1):
+    """Pads `arr` by `pad_amt` along specified `axis`"""
+    if axis == -1:
+        axis = arr.ndim - 1
+
+    zeroshape = tuple([x if i != axis else pad_amt
+                       for (i, x) in enumerate(arr.shape)])
+
+    return np.concatenate((arr, np.zeros(zeroshape, dtype=arr.dtype)),
+                          axis=axis)
+
+
 def downsample(image, factors, method='sum'):
 
-    # works only if image.shape is perfectly divisible by factors
+    pad_size = []
+    if len(factors) != image.ndim:
+        raise ValueError("'factors' must have the same length "
+                         "as 'image.shape'")
+    else:
+        for i in range(len(factors)):
+            if image.shape[i] % factors[i] != 0:
+                pad_size.append(factors[i] - (image.shape[i] % factors[i]))
+            else:
+                pad_size.append(0)
+
+    for i in range(len(pad_size)):
+        image = _pad_asymmetric_zeros(image, pad_size[i], i)
+
     out = view_as_blocks(image, factors)
     block_shape = out.shape
 
