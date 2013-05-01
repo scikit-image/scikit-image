@@ -42,13 +42,15 @@ class GeometricTransform(object):
         raise NotImplementedError()
 
     @classmethod
-    def is_degenerate(cls, data):
+    def is_degenerate(cls, src, dst):
         """Check whether set of points is degenerate.
 
         Parameters
         ----------
-        data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
 
         Returns
         -------
