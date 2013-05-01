@@ -3,6 +3,11 @@ import numpy as np
 from scipy import optimize
 
 
+def _check_data_dim(data, dim):
+    if data.ndim != 2 or data.shape[1] != dim:
+        raise ValueError('Input data must have shape (N, %d).' % dim)
+
+
 class BaseModel(object):
 
     def __init__(self):
@@ -42,6 +47,8 @@ class LineModel(BaseModel):
 
         '''
 
+        _check_data_dim(data, dim=2)
+
         X0 = data.mean(axis=0)
 
         if data.shape[0] == 2: # well determined
@@ -77,6 +84,8 @@ class LineModel(BaseModel):
             Residual for each data point.
 
         '''
+
+        _check_data_dim(data, dim=2)
 
         dist, theta = self._params
 
@@ -179,6 +188,8 @@ class CircleModel(BaseModel):
 
         '''
 
+        _check_data_dim(data, dim=2)
+
         x = data[:, 0]
         y = data[:, 1]
         # pre-allocate jacobian for all iterations
@@ -225,6 +236,8 @@ class CircleModel(BaseModel):
             Residual for each data point.
 
         '''
+
+        _check_data_dim(data, dim=2)
 
         xc, yc, r = self._params
 
@@ -319,6 +332,8 @@ class EllipseModel(BaseModel):
 
         '''
 
+        _check_data_dim(data, dim=2)
+
         x = data[:, 0]
         y = data[:, 1]
 
@@ -391,6 +406,8 @@ class EllipseModel(BaseModel):
             Residual for each data point.
 
         '''
+
+        _check_data_dim(data, dim=2)
 
         xc, yc, a, b, theta = self._params
 
