@@ -222,7 +222,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     method : {'bresenham', 'andres', 'wu'}, optional
         bresenham : Bresenham method
         andres : Andres method
-        wu : Wu method
+        wu : Wu's method
 
     Returns
     -------
@@ -242,7 +242,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     circles create a disc whereas Bresenham can make holes. There
     is also less distortions when Andres circles are rotated.
     Bresenham method is also known as midpoint circle algorithm.
-    Wu method draws anti-aliased circle. This implementation doesn't use
+    Wu's method draws anti-aliased circle. This implementation doesn't use
     lookup table optimization.
 
     References
@@ -300,13 +300,14 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                     d = d + 2 * (y - x - 1)
                     y = y - 1
                     x = x + 1
-        return np.array(rr, dtype=np.intp) + cy, np.array(cc, dtype=np.intp) + cx
+        return (np.array(rr, dtype=np.intp) + cy,
+                np.array(cc, dtype=np.intp) + cx)
 
     elif cmethod == 'w':
         dceil_prev = 0
 
-        rr.extend([cy + y, cx + x, cy + y, cx + x, cy - y, cx - x, cy - y, cx - x])
-        cc.extend([cx + x, cy + y, cx - x, cy - y, cx + x, cy + y, cx - x, cy - y])
+        rr.extend([y, x,  y,  x, -y, -x, -y, -x])
+        cc.extend([x, y, -x, -y,  x,  y, -x, -y])
         val.extend([1] * 8)
 
         while y > x + 1:
@@ -315,16 +316,17 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
             dceil = math.ceil(dceil) - dceil
             if dceil < dceil_prev:
                 y -= 1
-            rr.extend([cy + y, cy + y - 1, cx + x, cx + x    , cy + y, cy + y - 1, cx + x, cx + x])
-            cc.extend([cx + x, cx + x    , cy + y, cy + y - 1, cx - x, cx - x,     cy - y, cy + 1 - y])
+            rr.extend([y, y - 1, x, x, y, y - 1, x, x])
+            cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
 
-            rr.extend([cy - y, cy + 1 - y, cx - x, cx - x,     cy + - y, cy + 1 - y, cx - x, cx - x])
-            cc.extend([cx + x, cx + x,     cy + y, cy + y - 1, cx - x,   cx - x,     cy - y, cy + 1 - y])
+            rr.extend([-y, 1 - y, -x, -x, -y, 1 - y, -x, -x])
+            cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
 
             val.extend([1 - dceil, dceil] * 8)
             dceil_prev = dceil
 
-        return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp), val
+        return (np.array(rr, dtype=np.intp) + cy,
+                np.array(cc, dtype=np.intp) + cx, val)
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
