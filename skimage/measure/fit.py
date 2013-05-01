@@ -509,7 +509,8 @@ def ransac(data, model_class, min_samples, residual_threshold,
     from a subset of inliers from the complete data set. Each iteration performs
     the following tasks:
 
-    1. Select `min_samples` random samples from the original data.
+    1. Select `min_samples` random samples from the original data and check
+       whether the set of points is valid (`is_degenerate(*data)`).
     2. Estimate a model to the random subset (`estimate(*data[random_subset]`).
     3. Classify all data as inliers or outliers by calculating the residuals to
        the estimated model (`residuals(*data)`) - all data samples with
