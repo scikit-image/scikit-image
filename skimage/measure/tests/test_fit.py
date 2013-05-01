@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.testing import assert_equal, assert_raises, assert_almost_equal
 from skimage.measure import LineModel, CircleModel, EllipseModel, ransac
+from skimage.transform import AffineTransform
 
 
 def test_line_model_invalid_input():
@@ -113,12 +114,14 @@ def test_ellipse_model_estimate():
     assert_almost_equal(model0._params, model_est._params, 0)
 
 
-def test_ransac():
+def test_ransac_shape():
     # generate original data without noise
     model0 = CircleModel()
     model0._params = (10, 12, 3)
     t = np.linspace(0, 2 * np.pi, 1000)
     data0 = model0.predict_xy(t)
+
+    # add some faulty data
     outliers = (10, 30, 200)
     data0[outliers[0], :] = (1000, 1000)
     data0[outliers[1], :] = (-50, 50)
@@ -129,6 +132,28 @@ def test_ransac():
 
     # test whether estimated parameters equal original parameters
     assert_equal(model0._params, model_est._params)
+    for outlier in outliers:
+        assert outlier not in inliers
+
+
+def test_ransac_geometric():
+    # generate original data without noise
+    src = 100 * np.random.random((50, 2))
+    model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
+                                 translation=(10, 20))
+    dst = model0(src)
+
+    # add some faulty data
+    outliers = (0, 5, 20)
+    dst[0] = (10000, 10000)
+    dst[1] = (-100, 100)
+    dst[2] = (50, 50)
+
+    # estimate parameters of corrupted data
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 10)
+
+    # test whether estimated parameters equal original parameters
+    assert_almost_equal(model0._matrix, model_est._matrix)
     for outlier in outliers:
         assert outlier not in inliers
 
