@@ -507,9 +507,12 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     Parameters
     ----------
-    data : (N, D) array
+    data : [list, tuple of] (N, D) array
         Data set to which the model is fitted, where N is the number of data
         points and D the dimensionality of the data.
+        If the model class requires multiple input data arrays (e.g. source and
+        destination coordinates of  ``skimage.transform.AffineTransform``), they
+        can be optionally passed as tuple or list.
     model_class : object
         Object with the following methods implemented:
 
@@ -578,35 +581,58 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     best_model = None
     best_inlier_num = 0
+    best_inlier_residuals_sum = np.inf
     best_inliers = None
-    data_idxs = np.arange(data.shape[0])
+
+    if not isinstance(data, list) and not isinstance(data, tuple):
+        data = [data]
+
+    # make sure data is list and not tuple, so it can be modified below
+    data = list(data)
+    # number of samples
+    N = data[0].shape[0]
+
+    data_idxs = np.arange(N)
 
     for _ in range(max_trials):
 
         # choose random sample
-        sample = data[np.random.randint(0, data.shape[0], min_samples)]
+        samples = []
+        random_idxs = np.random.randint(0, N, min_samples)
+        for d in data:
+            samples.append(d[random_idxs])
 
         # check if random sample is degenerate
-        if model_class.is_degenerate(sample):
+        if model_class.is_degenerate(*samples):
             continue
 
         # create new instance of model class for current sample
         sample_model = model_class()
-        sample_model.estimate(sample)
-        sample_model_residuals = sample_model.residuals(data)
+        sample_model.estimate(*samples)
+        sample_model_residuals = np.abs(sample_model.residuals(*data))
         # consensus set / inliers
-        sample_model_inliers = data_idxs[np.abs(sample_model_residuals)
+        sample_model_inliers = data_idxs[sample_model_residuals
                                          < residual_threshold]
+        sample_model_residuals_sum = np.sum(sample_model_residuals)
 
         # choose as new best model if number of inliers is maximal
         sample_inlier_num = sample_model_inliers.shape[0]
-        if sample_inlier_num > best_inlier_num:
+        if (
+            # more inliers
+            sample_inlier_num > best_inlier_num
+            # same number of inliers but less "error" in terms of residuals
+            or (sample_inlier_num == best_inlier_num
+                and sample_model_residuals_sum < best_inlier_residuals_sum)
+        ):
             best_model = sample_model
             best_inlier_num = sample_inlier_num
+            best_inlier_residuals_sum = sample_model_residuals_sum
             best_inliers = sample_model_inliers
 
     # estimate final model using all inliers
     if best_inliers is not None:
-        best_model.estimate(data[best_inliers])
+        for i in range(len(data)):
+            data[i] = data[i][best_inliers]
+        best_model.estimate(*data)
 
     return best_model, best_inliers
