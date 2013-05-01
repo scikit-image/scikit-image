@@ -41,6 +41,26 @@ class GeometricTransform(object):
         """
         raise NotImplementedError()
 
+    @classmethod
+    def is_degenerate(cls, data):
+        """Check whether set of points is degenerate.
+
+        Parameters
+        ----------
+        data : (N, 2) array
+            N points with `(x, y)` coordinates, respectively.
+
+        Returns
+        -------
+        flag : bool
+            Flag indicating if data is degenerate.
+
+        """
+
+        # by default never degenerate since system equations can be under-,
+        # well- and over-determined.
+        return False
+
     def __add__(self, other):
         """Combine this transformation with another.
 
