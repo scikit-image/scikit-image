@@ -346,9 +346,9 @@ class EllipseModel(BaseModel):
         diag_idxs = np.diag_indices(N)
 
         def fun(params):
-            xt, yt = self.predict_xy(params[5:], params[:5])
-            fx = x - xt
-            fy = y - yt
+            xyt = self.predict_xy(params[5:], params[:5])
+            fx = x - xyt[:, 0]
+            fy = y - xyt[:, 1]
             return np.append(fx, fy)
 
         def Dfun(params):
