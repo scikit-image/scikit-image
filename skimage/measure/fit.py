@@ -277,10 +277,8 @@ class CircleModel(BaseModel):
 
         Returns
         -------
-        x : array
-            Predicted x-coordinates.
-        y : array
-            Predicted y-coordinates.
+        xy : (..., 2) array
+            Predicted x- and y-coordinates.
 
         '''
         if params is None:
@@ -290,7 +288,7 @@ class CircleModel(BaseModel):
         x = xc + r * np.cos(t)
         y = yc + r * np.sin(t)
 
-        return x, y
+        return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
 
 
 class EllipseModel(BaseModel):
@@ -483,10 +481,8 @@ class EllipseModel(BaseModel):
 
         Returns
         -------
-        x : array
-            Predicted x-coordinates.
-        y : array
-            Predicted y-coordinates.
+        xy : (..., 2) array
+            Predicted x- and y-coordinates.
 
         '''
 
@@ -502,7 +498,7 @@ class EllipseModel(BaseModel):
         x = xc + a * ctheta * ct - b * stheta * st
         y = yc + a * stheta * ct + b * ctheta * st
 
-        return x, y
+        return np.concatenate((x[..., None], y[..., None]), axis=t.ndim)
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
