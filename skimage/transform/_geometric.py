@@ -83,7 +83,7 @@ class GeometricTransform(object):
 
         """
 
-        return np.sqrt(np.sum((self(src) - dst) ** 2, axis=1))
+        return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
     def __add__(self, other):
         """Combine this transformation with another.

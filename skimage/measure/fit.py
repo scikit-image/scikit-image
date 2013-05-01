@@ -502,8 +502,27 @@ class EllipseModel(BaseModel):
 
 
 def ransac(data, model_class, min_samples, residual_threshold,
-           max_trials=100):
+           max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0):
     """Fits a model to data with the RANSAC (random sample consensus) algorithm.
+
+    RANSAC is an iterative algorithm for the robust estimation of parameters
+    from a subset of inliers from the complete data set. Each iteration performs
+    the following tasks:
+
+    1. Select `min_samples` random samples from the original data.
+    2. Estimate a model to the random subset (`estimate(*data[random_subset]`).
+    3. Classify all data as inliers or outliers by calculating the residuals to
+       the estimated model (`residuals(*data)`) - all data samples with
+       residuals smaller than the `residual_threshold` are considered as
+       inliers.
+    4. Save estimated model as best model if number of inlier samples is
+       maximal. In case the current estimated model has the same number of
+       inliers, it is only considered as the best model if it has less sum of
+       residuals.
+
+    These steps are performed either a maximum number of times or until one of
+    the special stop criteria are met. The final model is estimated using all
+    inlier samples of the previously determined best model.
 
     Parameters
     ----------
@@ -512,13 +531,16 @@ def ransac(data, model_class, min_samples, residual_threshold,
         points and D the dimensionality of the data.
         If the model class requires multiple input data arrays (e.g. source and
         destination coordinates of  ``skimage.transform.AffineTransform``), they
-        can be optionally passed as tuple or list.
+        can be optionally passed as tuple or list. Note, that in this case the
+        functions `estimate(*data)`, `residuals(*data)` and
+        `is_degenerate(*data)` must all take each data array as separate
+        arguments.
     model_class : object
         Object with the following methods implemented:
 
-         * `estimate(data)`
-         * `residuals(data)`
-         * `is_degenerate(data)`
+         * `estimate(*data)`
+         * `residuals(*data)`
+         * `is_degenerate(*data)`
 
     min_samples : int
         The minimum number of data points to fit a model.
@@ -526,6 +548,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
         Maximum distance for a data point to be classified as an inlier.
     max_trials : int, optional
         Maximum number of iterations for random sample selection.
+    stop_sample_num : int, optional
+        Stop iteration if at least this number of inliers are found.
+    stop_residuals_sum : float, optional
+        Stop iteration if sum of residuals is less equal than this threshold.
 
     Returns
     -------
@@ -613,7 +639,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         # consensus set / inliers
         sample_model_inliers = data_idxs[sample_model_residuals
                                          < residual_threshold]
-        sample_model_residuals_sum = np.sum(sample_model_residuals)
+        sample_model_residuals_sum = np.sum(sample_model_residuals**2)
 
         # choose as new best model if number of inliers is maximal
         sample_inlier_num = sample_model_inliers.shape[0]
@@ -628,9 +654,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
             best_inlier_num = sample_inlier_num
             best_inlier_residuals_sum = sample_model_residuals_sum
             best_inliers = sample_model_inliers
+            if (
+                best_inlier_num >= stop_sample_num
+                or best_inlier_residuals_sum <= stop_residuals_sum
+            ):
+                break
 
     # estimate final model using all inliers
     if best_inliers is not None:
+        # select inliers for each data array
         for i in range(len(data)):
             data[i] = data[i][best_inliers]
         best_model.estimate(*data)
