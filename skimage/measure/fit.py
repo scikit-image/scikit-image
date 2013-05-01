@@ -16,7 +16,7 @@ class BaseModel(object):
 
 class LineModel(BaseModel):
 
-    '''Total least squares estimator for 2D lines.
+    """Total least squares estimator for 2D lines.
 
     Lines are parameterized using polar coordinates as functional model:
 
@@ -35,17 +35,17 @@ class LineModel(BaseModel):
 
     A minimum number of 2 points is required to solve for the parameters.
 
-    '''
+    """
 
     def estimate(self, data):
-        '''Estimate line model from data using total least squares.
+        """Estimate line model from data using total least squares.
 
         Parameters
         ----------
         data : (N, 2) array
             N points with `(x, y)` coordinates, respectively.
 
-        '''
+        """
 
         _check_data_dim(data, dim=2)
 
@@ -69,7 +69,7 @@ class LineModel(BaseModel):
         self._params = (dist, theta)
 
     def residuals(self, data):
-        '''Determine residuals of data to model.
+        """Determine residuals of data to model.
 
         For each point the shortest distance to the line is returned.
 
@@ -83,7 +83,7 @@ class LineModel(BaseModel):
         residuals : (N, ) array
             Residual for each data point.
 
-        '''
+        """
 
         _check_data_dim(data, dim=2)
 
@@ -96,7 +96,7 @@ class LineModel(BaseModel):
 
     @classmethod
     def is_degenerate(cls, data):
-        '''Check whether set of points is degenerate.
+        """Check whether set of points is degenerate.
 
         Parameters
         ----------
@@ -108,12 +108,12 @@ class LineModel(BaseModel):
         flag : bool
             Flag indicating if data is degenerate.
 
-        '''
+        """
 
         return data.shape[0] < 2
 
     def predict_x(self, y, params=None):
-        '''Predict x-coordinates using the estimated model.
+        """Predict x-coordinates using the estimated model.
 
         Parameters
         ----------
@@ -127,7 +127,7 @@ class LineModel(BaseModel):
         x : array
             Predicted x-coordinates.
 
-        '''
+        """
 
         if params is None:
             params = self._params
@@ -135,7 +135,7 @@ class LineModel(BaseModel):
         return (dist - y * math.sin(theta)) / math.cos(theta)
 
     def predict_y(self, x, params=None):
-        '''Predict y-coordinates using the estimated model.
+        """Predict y-coordinates using the estimated model.
 
         Parameters
         ----------
@@ -149,7 +149,7 @@ class LineModel(BaseModel):
         y : array
             Predicted y-coordinates.
 
-        '''
+        """
 
         if params is None:
             params = self._params
@@ -159,7 +159,7 @@ class LineModel(BaseModel):
 
 class CircleModel(BaseModel):
 
-    '''Total least squares estimator for 2D circles.
+    """Total least squares estimator for 2D circles.
 
     The functional model of the circle is:
 
@@ -176,17 +176,17 @@ class CircleModel(BaseModel):
 
     A minimum number of 3 points is required to solve for the parameters.
 
-    '''
+    """
 
     def estimate(self, data):
-        '''Estimate circle model from data using total least squares.
+        """Estimate circle model from data using total least squares.
 
         Parameters
         ----------
         data : (N, 2) array
             N points with `(x, y)` coordinates, respectively.
 
-        '''
+        """
 
         _check_data_dim(data, dim=2)
 
@@ -221,7 +221,7 @@ class CircleModel(BaseModel):
         self._params = params
 
     def residuals(self, data):
-        '''Determine residuals of data to model.
+        """Determine residuals of data to model.
 
         For each point the shortest distance to the circle is returned.
 
@@ -235,7 +235,7 @@ class CircleModel(BaseModel):
         residuals : (N, ) array
             Residual for each data point.
 
-        '''
+        """
 
         _check_data_dim(data, dim=2)
 
@@ -248,7 +248,7 @@ class CircleModel(BaseModel):
 
     @classmethod
     def is_degenerate(cls, data):
-        '''Check whether set of points is degenerate.
+        """Check whether set of points is degenerate.
 
         Parameters
         ----------
@@ -260,12 +260,12 @@ class CircleModel(BaseModel):
         flag : bool
             Flag indicating if data is degenerate.
 
-        '''
+        """
 
         return data.shape[0] < 3
 
     def predict_xy(self, t, params=None):
-        '''Predict x- and y-coordinates using the estimated model.
+        """Predict x- and y-coordinates using the estimated model.
 
         Parameters
         ----------
@@ -280,7 +280,7 @@ class CircleModel(BaseModel):
         xy : (..., 2) array
             Predicted x- and y-coordinates.
 
-        '''
+        """
         if params is None:
             params = self._params
         xc, yc, r = params
@@ -293,7 +293,7 @@ class CircleModel(BaseModel):
 
 class EllipseModel(BaseModel):
 
-    '''Total least squares estimator for 2D ellipses.
+    """Total least squares estimator for 2D ellipses.
 
     The functional model of the ellipse is:
 
@@ -318,17 +318,17 @@ class EllipseModel(BaseModel):
 
     A minimum number of 5 points is required to solve for the parameters.
 
-    '''
+    """
 
     def estimate(self, data):
-        '''Estimate circle model from data using total least squares.
+        """Estimate circle model from data using total least squares.
 
         Parameters
         ----------
         data : (N, 2) array
             N points with `(x, y)` coordinates, respectively.
 
-        '''
+        """
 
         _check_data_dim(data, dim=2)
 
@@ -389,7 +389,7 @@ class EllipseModel(BaseModel):
         self._params = params[:5]
 
     def residuals(self, data):
-        '''Determine residuals of data to model.
+        """Determine residuals of data to model.
 
         For each point the shortest distance to the ellipse is returned.
 
@@ -403,7 +403,7 @@ class EllipseModel(BaseModel):
         residuals : (N, ) array
             Residual for each data point.
 
-        '''
+        """
 
         _check_data_dim(data, dim=2)
 
@@ -452,7 +452,7 @@ class EllipseModel(BaseModel):
 
     @classmethod
     def is_degenerate(cls, data):
-        '''Check whether set of points is degenerate.
+        """Check whether set of points is degenerate.
 
         Parameters
         ----------
@@ -464,12 +464,12 @@ class EllipseModel(BaseModel):
         flag : bool
             Flag indicating if data is degenerate.
 
-        '''
+        """
 
         return data.shape[0] < 5
 
     def predict_xy(self, t, params=None):
-        '''Predict x- and y-coordinates using the estimated model.
+        """Predict x- and y-coordinates using the estimated model.
 
         Parameters
         ----------
@@ -484,7 +484,7 @@ class EllipseModel(BaseModel):
         xy : (..., 2) array
             Predicted x- and y-coordinates.
 
-        '''
+        """
 
         if params is None:
             params = self._params
@@ -503,7 +503,7 @@ class EllipseModel(BaseModel):
 
 def ransac(data, model_class, min_samples, residual_threshold,
            max_trials=100):
-    '''Fits a model to data with the RANSAC (random sample consensus) algorithm.
+    """Fits a model to data with the RANSAC (random sample consensus) algorithm.
 
     Parameters
     ----------
@@ -574,7 +574,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
          21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
          38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49])
 
-    '''
+    """
 
     best_model = None
     best_inlier_num = 0
