@@ -132,7 +132,7 @@ class LineModel(BaseModel):
         if params is None:
             params = self._params
         dist, theta = params
-        return (dist - y * math.cos(theta)) / math.cos(theta)
+        return (dist - y * math.sin(theta)) / math.cos(theta)
 
     def predict_y(self, x, params=None):
         '''Predict y-coordinates using the estimated model.
