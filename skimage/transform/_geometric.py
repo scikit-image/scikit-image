@@ -441,7 +441,7 @@ class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form::
 
         X = a0*x - b0*y + a1 =
-          = m*x*cos(rotation) + m*y*sin(rotation) + a1
+          = m*x*cos(rotation) - m*y*sin(rotation) + a1
 
         Y = b0*x + a0*y + b1 =
           = m*x*sin(rotation) + m*y*cos(rotation) + b1
