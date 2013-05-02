@@ -582,6 +582,74 @@ class SimilarityTransform(ProjectiveTransform):
         return self._matrix[0:2, 2]
 
 
+class TranslationalTransform(ProjectiveTransform):
+    """2D transformation of the form
+
+        X = x + tx
+        Y = y + ty
+
+    where (tx, ty) is a 2d translation and the
+    homogeneous transformation matrix is::
+
+        [[1  0  tx]
+         [0  1  ty]
+         [0  0   1]]
+
+    Parameters
+    ----------
+    translation : (tx, ty) as array, list or tuple, optional
+        x, y translation parameters."""
+    def __init__(self, translation=None):
+        self._matrix = np.eye(3)
+        if translation is not None:
+            try:
+                x, y = translation
+            except ValueError:
+                raise ValueError("couldn't 2 elements from translation: %s" % translation)
+            self._matrix[0:2, 2] = [x, y]
+
+    def estimate(self, src, dst):
+        """Set the transformation matrix with the explicit parameters.
+
+        You can determine the over-, well- and under-determined parameters
+        with the total least-squares method.
+
+        Number of source and destination coordinates must match.
+
+        The transformation is defined as::
+
+            X = x + tx
+            Y = y + ty
+
+        This is much simpler than the other transforms as the x and y are
+        independent - the best value for tx is simply the average
+        of the difference between source and destination points
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates."""
+        if src.shape != dst.shape:
+            raise ValueError('src and dst must be same shape')
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+
+        tx = (xd - xs).mean()
+        ty = (yd - ys).mean()
+
+        self._matrix = np.array([[1, 0, tx],
+                                 [0, 1, ty],
+                                 [0, 0,  1]])
+
+    @property
+    def translation(self):
+        return self._matrix[0:2, 2]
+
+
 class PolynomialTransform(GeometricTransform):
     """2D transformation of the form::
 
@@ -718,11 +786,13 @@ class PolynomialTransform(GeometricTransform):
 TRANSFORMS = {
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
+    'translation': TranslationalTransform,
     'piecewise-affine': PiecewiseAffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
 }
 HOMOGRAPHY_TRANSFORMS = (
+    TranslationalTransform,
     SimilarityTransform,
     AffineTransform,
     ProjectiveTransform

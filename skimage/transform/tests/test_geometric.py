@@ -165,6 +165,15 @@ def test_polynomial_default_order():
     assert_array_almost_equal(tform2._params, tform._params)
 
 
+def test_translation_estimation(num_points=20):
+    src_points = np.random.randn(num_points, 2)
+    translation_vec = np.random.randn(2)
+    dst_points = src_points + translation_vec
+
+    tform = estimate_transform('translation', src_points, dst_points)
+    assert_array_almost_equal(tform.translation, translation_vec)
+
+
 def test_union():
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
