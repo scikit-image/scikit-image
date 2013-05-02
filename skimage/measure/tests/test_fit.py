@@ -16,10 +16,6 @@ def test_line_model_predict():
     assert_almost_equal(x, model.predict_x(y))
 
 
-def test_line_model_is_degenerate():
-    assert_equal(LineModel().is_degenerate(np.empty((1, 2))), True)
-
-
 def test_line_model_estimate():
     # generate original data without noise
     model0 = LineModel()
@@ -54,10 +50,6 @@ def test_circle_model_predict():
     assert_almost_equal(xy, model.predict_xy(t))
 
 
-def test_circle_model_is_degenerate():
-    assert_equal(CircleModel().is_degenerate(np.empty((1, 2))), True)
-
-
 def test_circle_model_estimate():
     # generate original data without noise
     model0 = CircleModel()
@@ -89,10 +81,6 @@ def test_ellipse_model_predict():
 
     xy = np.array(((5, 0), (0, 10), (-5, 0), (0, -10)))
     assert_almost_equal(xy, model.predict_xy(t))
-
-
-def test_ellipse_model_is_degenerate():
-    assert_equal(EllipseModel().is_degenerate(np.empty((1, 2))), True)
 
 
 def test_ellipse_model_estimate():
@@ -156,6 +144,23 @@ def test_ransac_geometric():
     assert_almost_equal(model0._matrix, model_est._matrix)
     for outlier in outliers:
         assert outlier not in inliers
+
+
+def test_ransac_is_data_valid():
+    is_data_valid = lambda data: data.shape[0] > 2
+    model, inliers = ransac(np.empty((10, 2)), LineModel, 2, np.inf,
+                            is_data_valid=is_data_valid)
+    assert_equal(model, None)
+    assert_equal(inliers, None)
+
+
+def test_ransac_is_model_valid():
+    def is_model_valid(model, data):
+        return False
+    model, inliers = ransac(np.empty((10, 2)), LineModel, 2, np.inf,
+                            is_model_valid=is_model_valid)
+    assert_equal(model, None)
+    assert_equal(inliers, None)
 
 
 if __name__ == "__main__":
