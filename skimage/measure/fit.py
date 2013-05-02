@@ -94,24 +94,6 @@ class LineModel(BaseModel):
 
         return dist - (x * math.cos(theta) + y * math.sin(theta))
 
-    @classmethod
-    def is_degenerate(cls, data):
-        """Check whether set of points is degenerate.
-
-        Parameters
-        ----------
-        data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
-
-        Returns
-        -------
-        flag : bool
-            Flag indicating if data is degenerate.
-
-        """
-
-        return data.shape[0] < 2
-
     def predict_x(self, y, params=None):
         """Predict x-coordinates using the estimated model.
 
@@ -245,24 +227,6 @@ class CircleModel(BaseModel):
         y = data[:, 1]
 
         return r - np.sqrt((x - xc)**2 + (y - yc)**2)
-
-    @classmethod
-    def is_degenerate(cls, data):
-        """Check whether set of points is degenerate.
-
-        Parameters
-        ----------
-        data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
-
-        Returns
-        -------
-        flag : bool
-            Flag indicating if data is degenerate.
-
-        """
-
-        return data.shape[0] < 3
 
     def predict_xy(self, t, params=None):
         """Predict x- and y-coordinates using the estimated model.
@@ -449,24 +413,6 @@ class EllipseModel(BaseModel):
             residuals[i] = np.sqrt(fun(t, xi, yi))
 
         return residuals
-
-    @classmethod
-    def is_degenerate(cls, data):
-        """Check whether set of points is degenerate.
-
-        Parameters
-        ----------
-        data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
-
-        Returns
-        -------
-        flag : bool
-            Flag indicating if data is degenerate.
-
-        """
-
-        return data.shape[0] < 5
 
     def predict_xy(self, t, params=None):
         """Predict x- and y-coordinates using the estimated model.

@@ -41,28 +41,6 @@ class GeometricTransform(object):
         """
         raise NotImplementedError()
 
-    @classmethod
-    def is_degenerate(cls, src, dst):
-        """Check whether set of points is degenerate.
-
-        Parameters
-        ----------
-        src : (N, 2) array
-            Source coordinates.
-        dst : (N, 2) array
-            Destination coordinates.
-
-        Returns
-        -------
-        flag : bool
-            Flag indicating if data is degenerate.
-
-        """
-
-        # by default never degenerate since system equations can be under-,
-        # well- and over-determined.
-        return False
-
     def residuals(self, src, dst):
         """Determine residuals of transformed destination coordinates.
 
