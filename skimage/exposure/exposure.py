@@ -222,6 +222,8 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
     """Performs Gamma Correction on the input image.
 
     Also known as Power Law Transform.
+    This function transforms the input image pixelwise according to the
+    equation ``O = I**gamma`` after scaling each pixel to the range 0 to 1.
 
     Parameters
     ----------
@@ -239,9 +241,6 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
 
     Notes
     -----
-    This function transforms the input image pixelwise according to the
-    equation ``O = I**gamma`` after scaling each pixel to the range 0 to 1.
-
     For gamma greater than 1, the histogram will shift towards left and
     the output image will be darker than the input image.
 
@@ -266,6 +265,10 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
 def rescale_intensity_log(image, gain=1, inv=False):
     """Performs Logarithmic correction on the input image.
 
+    This function transforms the input image pixelwise according to the
+    equation ``O = gain*log(1 + I)`` after scaling each pixel to the range 0 to 1.
+    For inverse logarithmic correction, the equation is ``O = gain*(2**I - 1)``.
+
     Parameters
     ----------
     image : ndarray
@@ -280,12 +283,6 @@ def rescale_intensity_log(image, gain=1, inv=False):
     -------
     out : ndarray
         Logarithm corrected output image.
-
-    Notes
-    -----
-    This function transforms the input image pixelwise according to the
-    equation ``O = gain*log(1 + I)`` after scaling each pixel to the range 0 to 1.
-    For inverse logarithmic correction, the equation is ``O = gain*(2**I - 1)``.
 
     References
     ----------
@@ -304,9 +301,12 @@ def rescale_intensity_log(image, gain=1, inv=False):
 
 
 def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10, inv=False):
-    """Performs Sigmoid Correction on input image.
+    """Performs Sigmoid Correction on the input image.
 
     Also known as Contrast Adjustment.
+    This function transforms the input image pixelwise according to the
+    equation ``O = 1/(1 + exp*(gain*(cutoff - I)))`` after scaling each pixel
+    to the range 0 to 1.
 
     Parameters
     ----------
@@ -325,12 +325,6 @@ def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     out : ndarray
         Sigmoid corrected output image.
 
-    Notes
-    -----
-    This function transforms the input image pixelwise according to the
-    equation ``O = 1/(1 + exp*(gain*(cutoff - I)))`` after scaling each pixel
-    to the range 0 to 1.
-
     References
     ----------
     .. [1] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
@@ -339,7 +333,7 @@ def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     dtype = image.dtype.type
     scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
     if inv == True:
-        out = 1 - (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
         return dtype(out)
     out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
     return dtype(out)
