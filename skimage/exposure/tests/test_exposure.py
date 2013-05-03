@@ -183,14 +183,14 @@ if __name__ == '__main__':
 
 def test_rescale_intensity_gamma_one():
     """Same image should be returned for gamma equal to one"""
-    image = np.random.random((8, 8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     result = exposure.rescale_intensity_gamma(image, 1)
     assert_array_equal(result, image)
 
 
 def test_rescale_intensity_gamma_zero():
     """White image should be returned for gamma equal to zero"""
-    image = np.random.random((8, 8))
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
     result = exposure.rescale_intensity_gamma(image, 0)
     dtype = image.dtype.type
     assert_array_equal(result, dtype_range[dtype][1])
@@ -233,7 +233,7 @@ def test_rescale_intensity_gamma_greater_one():
 # Test Logarithmic Correction
 # ===========================
 
-def test_rescale_intensity_logarithmic():
+def test_rescale_intensity_log():
     """Verifying the output with expected results for logarithmic
     correction with multiplier constant multiplier equal to unity"""
     image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
@@ -250,7 +250,7 @@ def test_rescale_intensity_logarithmic():
     assert_array_equal(result, expected)
 
 
-def test_rescale_intensity_inv_logarithmic():
+def test_rescale_intensity_inv_log():
     """Verifying the output with expected results for inverse logarithmic
     correction with multiplier constant multiplier equal to unity"""
     image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
@@ -318,4 +318,21 @@ def test_rescale_intensity_sigmoid_cutoff_half():
         [249, 250, 250, 251, 251, 252, 252, 253]], dtype=np.uint8)
 
     result = exposure.rescale_intensity_sigmoid(image, 0.5, 10)
+    assert_array_equal(result, expected)
+
+
+def test_rescale_intensity_inv_sigmoid_cutoff_half():
+    """Verifying the output with expected results for inverse sigmoid
+    correction with cutoff equal to half and gain of 10"""
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
+    expected = np.array([[253, 253, 252, 252, 251, 251, 250, 249],
+        [249, 248, 247, 245, 244, 242, 240, 238],
+        [235, 232, 229, 225, 220, 215, 210, 204],
+        [197, 190, 182, 174, 165, 155, 146, 136],
+        [126, 116, 106,  96,  87,  78,  70,  62],
+        [ 55,  49,  43,  37,  33,  28,  25,  21],
+        [ 18,  16,  14,  12,  10,   8,   7,   6],
+        [  5,   4,   4,   3,   3,   2,   2,   1]], dtype=np.uint8)
+
+    result = exposure.rescale_intensity_sigmoid(image, 0.5, 10, True)
     assert_array_equal(result, expected)
