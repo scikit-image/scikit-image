@@ -515,6 +515,10 @@ def ransac(data, model_class, min_samples, residual_threshold,
     inliers : (N,) array
         Indices of inliers.
 
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/RANSAC
+
     Examples
     --------
 
