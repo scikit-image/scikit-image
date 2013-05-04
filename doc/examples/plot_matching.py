@@ -41,8 +41,7 @@ img_orig = rescale_intensity(img_orig)
 img_orig_gray = rgb2gray(img_orig)
 
 # warp synthetic image
-tform = AffineTransform(scale=(0.9, 0.9), rotation=0.2, shear=0,
-                        translation=(20, -10))
+tform = AffineTransform(scale=(0.9, 0.9), rotation=0.2, translation=(20, -10))
 img_warped = warp(img_orig, tform.inverse, output_shape=(200, 200))
 img_warped_gray = rgb2gray(img_warped)
 
