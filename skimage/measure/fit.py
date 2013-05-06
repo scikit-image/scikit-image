@@ -43,7 +43,7 @@ class LineModel(BaseModel):
         Parameters
         ----------
         data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
+            N points with ``(x, y)`` coordinates, respectively.
 
         """
 
@@ -76,7 +76,7 @@ class LineModel(BaseModel):
         Parameters
         ----------
         data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
+            N points with ``(x, y)`` coordinates, respectively.
 
         Returns
         -------
@@ -166,7 +166,7 @@ class CircleModel(BaseModel):
         Parameters
         ----------
         data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
+            N points with ``(x, y)`` coordinates, respectively.
 
         """
 
@@ -211,7 +211,7 @@ class CircleModel(BaseModel):
         Parameters
         ----------
         data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
+            N points with ``(x, y)`` coordinates, respectively.
 
         Returns
         -------
@@ -291,7 +291,7 @@ class EllipseModel(BaseModel):
         Parameters
         ----------
         data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
+            N points with ``(x, y)`` coordinates, respectively.
 
         """
 
@@ -361,7 +361,7 @@ class EllipseModel(BaseModel):
         Parameters
         ----------
         data : (N, 2) array
-            N points with `(x, y)` coordinates, respectively.
+            N points with ``(x, y)`` coordinates, respectively.
 
         Returns
         -------
