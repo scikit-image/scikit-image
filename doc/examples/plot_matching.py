@@ -4,7 +4,7 @@ Robust matching using RANSAC
 ============================
 
 In this simplified example we first generate two synthetic images as if they
-were  taken from different view points.
+were taken from different view points.
 
 In the next step we find interest points in both images and find
 correspondencies based on a weighted sum of squared differences measure. Note,
