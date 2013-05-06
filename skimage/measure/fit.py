@@ -18,18 +18,18 @@ class LineModel(BaseModel):
 
     """Total least squares estimator for 2D lines.
 
-    Lines are parameterized using polar coordinates as functional model:
+    Lines are parameterized using polar coordinates as functional model::
 
         dist = x * cos(theta) + y * sin(theta)
 
     This parameterization is able to model vertical lines in contrast to the
     standard line model `y = a*x + b`.
 
-    This estimator minimizes the squared distances from all points to the line:
+    This estimator minimizes the squared distances from all points to the line::
 
         min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
 
-    The `_params` attribute contains the parameters in the following order:
+    The `_params` attribute contains the parameters in the following order::
 
         dist, theta
 
@@ -143,16 +143,16 @@ class CircleModel(BaseModel):
 
     """Total least squares estimator for 2D circles.
 
-    The functional model of the circle is:
+    The functional model of the circle is::
 
         r**2 = (x - xc)**2 + (y - yc)**2
 
     This estimator minimizes the squared distances from all points to the
-    circle:
+    circle::
 
         min{ sum((r - sqrt((x_i - xc)**2 + (y_i - yc)**2))**2) }
 
-    The `_params` attribute contains the parameters in the following order:
+    The `_params` attribute contains the parameters in the following order::
 
         xc, yc, r
 
@@ -260,7 +260,7 @@ class EllipseModel(BaseModel):
 
     """Total least squares estimator for 2D ellipses.
 
-    The functional model of the ellipse is:
+    The functional model of the ellipse is::
 
         xt = xc + a*cos(theta)*cos(t) - b*sin(theta)*sin(t)
         yt = yc + a*sin(theta)*cos(t) + b*cos(theta)*sin(t)
@@ -270,14 +270,14 @@ class EllipseModel(BaseModel):
     shortest distance from the point to the ellipse.
 
     This estimator minimizes the squared distances from all points to the
-    ellipse:
+    ellipse::
 
         min{ sum(d_i**2) } = min{ sum((x_i - xt)**2 + (y_i - yt)**2) }
 
     Thus you have `2 * N` equations (x_i, y_i) for `N + 5` unknowns (t_i, xc,
     yc, a, b, theta), which gives you an effective redundancy of `N - 5`.
 
-    The `_params` attribute contains the parameters in the following order:
+    The `_params` attribute contains the parameters in the following order::
 
         xc, yc, a, b, theta
 
@@ -513,7 +513,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     -------
     model : object
         Best model with largest consensus set.
-    inliers : (N,) array
+    inliers : (N, ) array
         Indices of inliers.
 
     References
