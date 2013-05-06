@@ -36,6 +36,17 @@ def test_line_model_estimate():
     assert_almost_equal(model0._params, model_est._params, 1)
 
 
+def test_line_model_residuals():
+    model = LineModel()
+    model._params = (0, 0)
+    assert_equal(abs(model.residuals(np.array([[0, 0]]))), 0)
+    assert_equal(abs(model.residuals(np.array([[0, 10]]))), 0)
+    assert_equal(abs(model.residuals(np.array([[10, 0]]))), 10)
+    model._params = (5, np.pi / 4)
+    assert_equal(abs(model.residuals(np.array([[0, 0]]))), 5)
+    assert_equal(abs(model.residuals(np.array([[np.sqrt(50), 0]]))), 5)
+
+
 def test_line_model_under_determined():
     data = np.empty((1, 2))
     assert_raises(ValueError, LineModel().estimate, data)
@@ -74,6 +85,15 @@ def test_circle_model_estimate():
     assert_almost_equal(model0._params, model_est._params, 1)
 
 
+def test_circle_model_residuals():
+    model = CircleModel()
+    model._params = (0, 0, 5)
+    assert_almost_equal(abs(model.residuals(np.array([[5, 0]]))), 0)
+    assert_almost_equal(abs(model.residuals(np.array([[6, 6]]))),
+                        np.sqrt(2 * 6**2) - 5)
+    assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 5)
+
+
 def test_ellipse_model_invalid_input():
     assert_raises(ValueError, EllipseModel().estimate, np.empty((5, 3)))
 
@@ -105,6 +125,15 @@ def test_ellipse_model_estimate():
 
     # test whether estimated parameters almost equal original parameters
     assert_almost_equal(model0._params, model_est._params, 0)
+
+
+def test_line_model_residuals():
+    model = EllipseModel()
+    # vertical line through origin
+    model._params = (0, 0, 10, 5, 0)
+    assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 0)
+    assert_almost_equal(abs(model.residuals(np.array([[0, 5]]))), 0)
+    assert_almost_equal(abs(model.residuals(np.array([[0, 10]]))), 5)
 
 
 def test_ransac_shape():
