@@ -8,9 +8,9 @@ were taken from different view points.
 
 In the next step we find interest points in both images and find
 correspondencies based on a weighted sum of squared differences of a small
-neighbourhood around them. Note, that this measure is only robust towards linear
-radiometric and not geometric distortions and is thus only usable with slight
-view point changes.
+neighbourhood around them. Note, that this measure is only robust towards
+linear radiometric and not geometric distortions and is thus only usable with
+slight view point changes.
 
 After finding the correspondencies we end up having a set of source and
 destination coordinates which can be used to estimate the geometric
@@ -134,6 +134,7 @@ for ax_idx, (m, color) in enumerate(((inliers, 'g'), (outliers, 'r'))):
     ax[ax_idx].plot((src[m, 1], dst[m, 1] + 200), (src[m, 0], dst[m, 0]), '-',
                     color=color)
     ax[ax_idx].plot(src[m, 1], src[m, 0], '.', markersize=10, color=color)
-    ax[ax_idx].plot(dst[m, 1] + 200, dst[m, 0], '.', markersize=10, color=color)
+    ax[ax_idx].plot(dst[m, 1] + 200, dst[m, 0], '.', markersize=10,
+                    color=color)
 
 plt.show()
