@@ -1,6 +1,8 @@
 import numpy as np
 from scipy import ndimage
+
 from ._geometric import warp, SimilarityTransform, AffineTransform
+from skimage.util.shape import view_as_blocks, _pad_asymmetric_zeros
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
@@ -283,3 +285,62 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     return warp(image, _swirl_mapping, map_args=warp_args,
                 output_shape=output_shape,
                 order=order, mode=mode, cval=cval)
+
+
+def downsample(array, factors, mode='sum'):
+    """Performs downsampling with integer factors.
+
+    Parameters
+    ----------
+    array : ndarray
+        Input n-dimensional array.
+    factors: tuple
+        Tuple containing downsampling factor along each axis.
+    mode : string
+        Decides whether the downsampled element is the sum or mean
+        of its corresponding constituent elements in the input array. Default
+        is 'sum'.
+
+    Returns
+    -------
+    array : ndarray
+        Downsampled array with same number of dimensions as that of input
+        array.
+
+    Example
+    -------
+    >>> a = np.arange(15).reshape(3, 5)
+    >>> a
+    array([[ 0,  1,  2,  3,  4],
+           [ 5,  6,  7,  8,  9],
+           [10, 11, 12, 13, 14]])
+    >>> downsample(a, (2,3))
+    array([[21, 24],
+           [33, 27]])
+
+    """
+
+    pad_size = []
+    if len(factors) != array.ndim:
+        raise ValueError("'factors' must have the same length "
+                         "as 'array.shape'")
+    else:
+        for i in range(len(factors)):
+            if array.shape[i] % factors[i] != 0:
+                pad_size.append(factors[i] - (array.shape[i] % factors[i]))
+            else:
+                pad_size.append(0)
+
+    for i in range(len(pad_size)):
+        array = _pad_asymmetric_zeros(array, pad_size[i], i)
+
+    out = view_as_blocks(array, factors)
+    block_shape = out.shape
+
+    if mode == 'sum':
+        for i in range(len(block_shape)/2):
+            out = out.sum(-1)
+    else:
+        for i in range(len(block_shape)/2):
+            out = out.mean(-1)
+    return out
