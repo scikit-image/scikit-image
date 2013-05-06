@@ -494,7 +494,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
          * ``residuals(*data)``
 
     min_samples : int
-        The minimum number of data points to fit a model.
+        The minimum number of data points to fit a model to.
     residual_threshold : float
         Maximum distance for a data point to be classified as an inlier.
     is_data_valid : function, optional
@@ -519,7 +519,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     References
     ----------
-    .. [1] http://en.wikipedia.org/wiki/RANSAC
+    .. [1] "RANSAC", Wikipedia, http://en.wikipedia.org/wiki/RANSAC
 
     Examples
     --------
