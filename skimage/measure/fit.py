@@ -25,7 +25,8 @@ class LineModel(BaseModel):
     This parameterization is able to model vertical lines in contrast to the
     standard line model ``y = a*x + b``.
 
-    This estimator minimizes the squared distances from all points to the line::
+    This estimator minimizes the squared distances from all points to the
+    line::
 
         min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
 
@@ -51,14 +52,15 @@ class LineModel(BaseModel):
 
         X0 = data.mean(axis=0)
 
-        if data.shape[0] == 2: # well determined
-            theta = np.arctan2(data[1, 1] - data[0, 1], data[1, 0] - data[0, 0])
-        elif data.shape[0] > 2: # over-determined
+        if data.shape[0] == 2:  # well determined
+            theta = np.arctan2(data[1, 1] - data[0, 1],
+                               data[1, 0] - data[0, 0])
+        elif data.shape[0] > 2:  # over-determined
             data = data - X0
             # first principal component
             _, _, v = np.linalg.svd(data)
             theta = np.arctan2(v[0, 1], v[0, 0])
-        else: # under-determined
+        else:  # under-determined
             raise ValueError('At least 2 input points needed.')
 
         # angle perpendicular to line angle
@@ -266,8 +268,8 @@ class EllipseModel(BaseModel):
         yt = yc + a*sin(theta)*cos(t) + b*cos(theta)*sin(t)
         d = sqrt((x - xt)**2 + (y - yt)**2)
 
-    where ``(xt, yt)`` is the closest point on the ellipse to ``(x, y)``. Thus d
-    is the shortest distance from the point to the ellipse.
+    where ``(xt, yt)`` is the closest point on the ellipse to ``(x, y)``. Thus
+    d is the shortest distance from the point to the ellipse.
 
     This estimator minimizes the squared distances from all points to the
     ellipse::
@@ -451,19 +453,19 @@ class EllipseModel(BaseModel):
 def ransac(data, model_class, min_samples, residual_threshold,
            is_data_valid=None, is_model_valid=None,
            max_trials=100, stop_sample_num=np.inf, stop_residuals_sum=0):
-    """Fits a model to data with the RANSAC (random sample consensus) algorithm.
+    """Fit a model to data with the RANSAC (random sample consensus) algorithm.
 
     RANSAC is an iterative algorithm for the robust estimation of parameters
-    from a subset of inliers from the complete data set. Each iteration performs
-    the following tasks:
+    from a subset of inliers from the complete data set. Each iteration
+    performs the following tasks:
 
     1. Select `min_samples` random samples from the original data and check
        whether the set of data is valid (see `is_data_valid`).
     2. Estimate a model to the random subset
        (`model_cls.estimate(*data[random_subset]`) and check whether the
        estimated model is valid (see `is_model_valid`).
-    3. Classify all data as inliers or outliers by calculating the residuals to
-       the estimated model (`model_cls.residuals(*data)`) - all data samples
+    3. Classify all data as inliers or outliers by calculating the residuals
+       to the estimated model (`model_cls.residuals(*data)`) - all data samples
        with residuals smaller than the `residual_threshold` are considered as
        inliers.
     4. Save estimated model as best model if number of inlier samples is
@@ -481,9 +483,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
         Data set to which the model is fitted, where N is the number of data
         points and D the dimensionality of the data.
         If the model class requires multiple input data arrays (e.g. source and
-        destination coordinates of  ``skimage.transform.AffineTransform``), they
-        can be optionally passed as tuple or list. Note, that in this case the
-        functions ``estimate(*data)``, ``residuals(*data)``,
+        destination coordinates of  ``skimage.transform.AffineTransform``),
+        they can be optionally passed as tuple or list. Note, that in this case
+        the functions ``estimate(*data)``, ``residuals(*data)``,
         ``is_model_valid(model, *random_data)`` and
         ``is_data_valid(*random_data)`` must all take each data array as
         separate arguments.

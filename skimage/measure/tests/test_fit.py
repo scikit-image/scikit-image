@@ -162,7 +162,7 @@ def test_ransac_geometric():
     # generate original data without noise
     src = 100 * np.random.random((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
-                                 translation=(10, 20))
+                             translation=(10, 20))
     dst = model0(src)
 
     # add some faulty data
