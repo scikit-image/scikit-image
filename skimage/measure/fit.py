@@ -191,6 +191,7 @@ class CircleModel(BaseModel):
             d = dist(xc, yc)
             A[0, :] = -(x - xc) / d
             A[1, :] = -(y - yc) / d
+            # same for all iterations, so not changed in each iteration
             #A[2, :] = -1
             return A
 
