@@ -7,9 +7,10 @@ In this simplified example we first generate two synthetic images as if they
 were taken from different view points.
 
 In the next step we find interest points in both images and find
-correspondencies based on a weighted sum of squared differences measure. Note,
-that this measure is only robust towards linear radiometric and not geometric
-distortions and is thus only usable with slight view point changes.
+correspondencies based on a weighted sum of squared differences of a small
+neighbourhood around them. Note, that this measure is only robust towards linear
+radiometric and not geometric distortions and is thus only usable with slight
+view point changes.
 
 After finding the correspondencies we end up having a set of source and
 destination coordinates which can be used to estimate the geometric
