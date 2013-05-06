@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from skimage.filter import sobel
 from skimage.segmentation import slic, join_segmentations
 from skimage.morphology import watershed
-from skimage.color import image_label2rgb
+from skimage.color import label2rgb
 from skimage import data
 
 
@@ -48,15 +48,15 @@ fig, axes = plt.subplots(ncols=4, figsize=(9, 2.5))
 axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 axes[0].set_title('Image')
 
-color1 = image_label2rgb(coins, seg1, bg_label=0)
+color1 = label2rgb(seg1, image=coins, bg_label=0)
 axes[1].imshow(color1, interpolation='nearest')
 axes[1].set_title('Sobel+Watershed')
 
-color2 = image_label2rgb(coins, seg2, image_alpha=0.5)
+color2 = label2rgb(seg2, image=coins, image_alpha=0.5)
 axes[2].imshow(color2, interpolation='nearest')
 axes[2].set_title('SLIC superpixels')
 
-color3 = image_label2rgb(coins, segj, image_alpha=0.5)
+color3 = label2rgb(segj, image=coins, image_alpha=0.5)
 axes[3].imshow(color3, interpolation='nearest')
 axes[3].set_title('Join')
 

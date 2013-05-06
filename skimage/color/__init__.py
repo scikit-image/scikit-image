@@ -41,7 +41,7 @@ from .colorconv import (convert_colorspace,
                         is_rgb,
                         is_gray)
 
-from .colorlabel import color_dict, image_label2rgb
+from .colorlabel import color_dict, label2rgb
 
 
 __all__ = ['convert_colorspace',
@@ -87,4 +87,4 @@ __all__ = ['convert_colorspace',
            'is_rgb',
            'is_gray',
            'color_dict',
-           'image_label2rgb']
+           'label2rgb']

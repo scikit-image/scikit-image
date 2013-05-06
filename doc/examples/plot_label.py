@@ -21,7 +21,7 @@ from skimage.filter import threshold_otsu
 from skimage.segmentation import clear_border
 from skimage.morphology import label, closing, square
 from skimage.measure import regionprops
-from skimage.color import image_label2rgb
+from skimage.color import label2rgb
 
 
 image = data.coins()[50:-50, 50:-50]
@@ -38,7 +38,7 @@ clear_border(cleared)
 label_image = label(cleared)
 borders = np.logical_xor(bw, cleared)
 label_image[borders] = -1
-image_label_overlay = image_label2rgb(image, label_image)
+image_label_overlay = label2rgb(label_image, image=image)
 
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
 ax.imshow(image_label_overlay)

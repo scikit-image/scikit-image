@@ -160,11 +160,11 @@ individually.
 
 """
 
-from skimage.color import image_label2rgb
+from skimage.color import label2rgb
 
 segmentation = ndimage.binary_fill_holes(segmentation - 1)
 labeled_coins, _ = ndimage.label(segmentation)
-image_label_overlay = image_label2rgb(coins, labeled_coins)
+image_label_overlay = label2rgb(labeled_coins, image=coins)
 
 plt.figure(figsize=(6, 3))
 plt.subplot(121)
