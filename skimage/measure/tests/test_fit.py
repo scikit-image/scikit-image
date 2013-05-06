@@ -36,6 +36,11 @@ def test_line_model_estimate():
     assert_almost_equal(model0._params, model_est._params, 1)
 
 
+def test_line_model_under_determined():
+    data = np.empty((1, 2))
+    assert_raises(ValueError, LineModel().estimate, data)
+
+
 def test_circle_model_invalid_input():
     assert_raises(ValueError, CircleModel().estimate, np.empty((5, 3)))
 
