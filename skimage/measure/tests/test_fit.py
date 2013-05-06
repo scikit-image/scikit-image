@@ -137,6 +137,8 @@ def test_line_model_residuals():
 
 
 def test_ransac_shape():
+    np.random.seed(1)
+
     # generate original data without noise
     model0 = CircleModel()
     model0._params = (10, 12, 3)
@@ -159,6 +161,8 @@ def test_ransac_shape():
 
 
 def test_ransac_geometric():
+    np.random.seed(1)
+
     # generate original data without noise
     src = 100 * np.random.random((50, 2))
     model0 = AffineTransform(scale=(0.5, 0.3), rotation=1,
@@ -180,6 +184,8 @@ def test_ransac_geometric():
 
 
 def test_ransac_is_data_valid():
+    np.random.seed(1)
+
     is_data_valid = lambda data: data.shape[0] > 2
     model, inliers = ransac(np.empty((10, 2)), LineModel, 2, np.inf,
                             is_data_valid=is_data_valid)
@@ -188,6 +194,8 @@ def test_ransac_is_data_valid():
 
 
 def test_ransac_is_model_valid():
+    np.random.seed(1)
+
     def is_model_valid(model, data):
         return False
     model, inliers = ransac(np.empty((10, 2)), LineModel, 2, np.inf,
