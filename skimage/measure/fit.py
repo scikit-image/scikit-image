@@ -23,13 +23,13 @@ class LineModel(BaseModel):
         dist = x * cos(theta) + y * sin(theta)
 
     This parameterization is able to model vertical lines in contrast to the
-    standard line model `y = a*x + b`.
+    standard line model ``y = a*x + b``.
 
     This estimator minimizes the squared distances from all points to the line::
 
         min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
 
-    The `_params` attribute contains the parameters in the following order::
+    The ``_params`` attribute contains the parameters in the following order::
 
         dist, theta
 
@@ -152,7 +152,7 @@ class CircleModel(BaseModel):
 
         min{ sum((r - sqrt((x_i - xc)**2 + (y_i - yc)**2))**2) }
 
-    The `_params` attribute contains the parameters in the following order::
+    The ``_params`` attribute contains the parameters in the following order::
 
         xc, yc, r
 
@@ -266,18 +266,18 @@ class EllipseModel(BaseModel):
         yt = yc + a*sin(theta)*cos(t) + b*cos(theta)*sin(t)
         d = sqrt((x - xt)**2 + (y - yt)**2)
 
-    where xt, yt is the closest point on the ellipse to x, y. Thus d is the
-    shortest distance from the point to the ellipse.
+    where ``(xt, yt)`` is the closest point on the ellipse to ``(x, y)``. Thus d
+    is the shortest distance from the point to the ellipse.
 
     This estimator minimizes the squared distances from all points to the
     ellipse::
 
         min{ sum(d_i**2) } = min{ sum((x_i - xt)**2 + (y_i - yt)**2) }
 
-    Thus you have `2 * N` equations (x_i, y_i) for `N + 5` unknowns (t_i, xc,
-    yc, a, b, theta), which gives you an effective redundancy of `N - 5`.
+    Thus you have ``2 * N`` equations (x_i, y_i) for ``N + 5`` unknowns (t_i,
+    xc, yc, a, b, theta), which gives you an effective redundancy of ``N - 5``.
 
-    The `_params` attribute contains the parameters in the following order::
+    The ``_params`` attribute contains the parameters in the following order::
 
         xc, yc, a, b, theta
 
