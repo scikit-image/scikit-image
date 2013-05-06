@@ -338,9 +338,9 @@ def downsample(array, factors, mode='sum'):
     block_shape = out.shape
 
     if mode == 'sum':
-        for i in range(len(block_shape)/2):
+        for i in range(len(block_shape)//2):
             out = out.sum(-1)
     else:
-        for i in range(len(block_shape)/2):
+        for i in range(len(block_shape)//2):
             out = out.mean(-1)
     return out
