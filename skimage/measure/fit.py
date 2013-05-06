@@ -483,14 +483,15 @@ def ransac(data, model_class, min_samples, residual_threshold,
         If the model class requires multiple input data arrays (e.g. source and
         destination coordinates of  ``skimage.transform.AffineTransform``), they
         can be optionally passed as tuple or list. Note, that in this case the
-        functions `estimate(*data)`, `residuals(*data)` and
-        `is_degenerate(*data)` must all take each data array as separate
-        arguments.
+        functions ``estimate(*data)``, ``residuals(*data)``,
+        ``is_model_valid(model, *random_data)`` and
+        ``is_data_valid(*random_data)`` must all take each data array as
+        separate arguments.
     model_class : object
         Object with the following object methods:
 
-         * `estimate(*data)`
-         * `residuals(*data)`
+         * ``estimate(*data)``
+         * ``residuals(*data)``
 
     min_samples : int
         The minimum number of data points to fit a model.
