@@ -517,7 +517,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     model : object
         Best model with largest consensus set.
     inliers : (N, ) array
-        Indices of inliers.
+        Boolean mask of inliers classified as ``True``.
 
     References
     ----------
@@ -598,8 +598,6 @@ def ransac(data, model_class, min_samples, residual_threshold,
     # number of samples
     N = data[0].shape[0]
 
-    data_idxs = np.arange(N)
-
     for _ in range(max_trials):
 
         # choose random sample set
@@ -623,12 +621,11 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
         sample_model_residuals = np.abs(sample_model.residuals(*data))
         # consensus set / inliers
-        sample_model_inliers = data_idxs[sample_model_residuals
-                                         < residual_threshold]
+        sample_model_inliers = sample_model_residuals < residual_threshold
         sample_model_residuals_sum = np.sum(sample_model_residuals**2)
 
         # choose as new best model if number of inliers is maximal
-        sample_inlier_num = sample_model_inliers.shape[0]
+        sample_inlier_num = np.sum(sample_model_inliers)
         if (
             # more inliers
             sample_inlier_num > best_inlier_num

@@ -105,6 +105,7 @@ model.estimate(src, dst)
 # robustly estimate affine transform model with RANSAC
 model_robust, inliers = ransac((src, dst), AffineTransform, min_samples=3,
                                residual_threshold=2, max_trials=100)
+outliers = inliers == False
 
 
 # compare "true" and estimated transform parameters
@@ -128,16 +129,11 @@ ax[1].axis('off')
 ax[1].axis((0, 400, 200, 0))
 ax[1].set_title('Faulty correspondencies')
 
-for i in range(len(src)):
-    if i in inliers:
-        ax_idx = 0
-        color = 'g'
-    else:
-        ax_idx = 1
-        color = 'r'
-    ax[ax_idx].plot((src[i, 1], dst[i, 1] + 200), (src[i, 0], dst[i, 0]), '-',
+
+for ax_idx, (m, color) in enumerate(((inliers, 'g'), (outliers, 'r'))):
+    ax[ax_idx].plot((src[m, 1], dst[m, 1] + 200), (src[m, 0], dst[m, 0]), '-',
                     color=color)
-    ax[ax_idx].plot(src[i, 1], src[i, 0], '.', markersize=10, color=color)
-    ax[ax_idx].plot(dst[i, 1] + 200, dst[i, 0], '.', markersize=10, color=color)
+    ax[ax_idx].plot(src[m, 1], src[m, 0], '.', markersize=10, color=color)
+    ax[ax_idx].plot(dst[m, 1] + 200, dst[m, 0], '.', markersize=10, color=color)
 
 plt.show()

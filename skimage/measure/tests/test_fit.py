@@ -167,17 +167,16 @@ def test_ransac_geometric():
 
     # add some faulty data
     outliers = (0, 5, 20)
-    dst[0] = (10000, 10000)
-    dst[1] = (-100, 100)
-    dst[2] = (50, 50)
+    dst[outliers[0]] = (10000, 10000)
+    dst[outliers[1]] = (-100, 100)
+    dst[outliers[2]] = (50, 50)
 
     # estimate parameters of corrupted data
-    model_est, inliers = ransac((src, dst), AffineTransform, 2, 10)
+    model_est, inliers = ransac((src, dst), AffineTransform, 2, 20)
 
     # test whether estimated parameters equal original parameters
     assert_almost_equal(model0._matrix, model_est._matrix)
-    for outlier in outliers:
-        assert outlier not in inliers
+    assert np.all(np.nonzero(inliers == False)[0] == outliers)
 
 
 def test_ransac_is_data_valid():
