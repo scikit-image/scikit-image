@@ -299,7 +299,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     p0, p1 : float in [0, ..., 1]
-        Define the percentile p0. The p1 value in unused.
+        Define the percentile p0. The p1 value is unused.
 
     Returns
     -------
@@ -380,7 +380,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     p0, p1 : float in [0, ..., 1]
-        Define the percentile p0. The p1 value in unused.
+        Define the percentile p0. The p1 value is unused.
 
     Returns
     -------
