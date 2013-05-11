@@ -265,11 +265,11 @@ def percentile(cnp.ndarray[dtype_t, ndim=2] image,
                cnp.ndarray[dtype_t, ndim=2] selem,
                cnp.ndarray[dtype_t, ndim=2] mask=None,
                cnp.ndarray[dtype_t, ndim=2] out=None,
-               char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
+               char shift_x=0, char shift_y=0, float p0=0.):
     """return p0 percentile
     """
     _core8(kernel_percentile, image, selem, mask, out, shift_x, shift_y,
-           p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+           p0, 0., <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def pop(cnp.ndarray[dtype_t, ndim=2] image,
@@ -287,8 +287,8 @@ def threshold(cnp.ndarray[dtype_t, ndim=2] image,
               cnp.ndarray[dtype_t, ndim=2] selem,
               cnp.ndarray[dtype_t, ndim=2] mask=None,
               cnp.ndarray[dtype_t, ndim=2] out=None,
-              char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
+              char shift_x=0, char shift_y=0, float p0=0.):
     """return 255 if g > percentile p0
     """
-    _core8(kernel_threshold, image, selem, mask, out, shift_x, shift_y, p0, p1,
+    _core8(kernel_threshold, image, selem, mask, out, shift_x, shift_y, p0, 0.,
            <Py_ssize_t>0, <Py_ssize_t>0)

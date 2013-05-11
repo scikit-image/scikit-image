@@ -275,11 +275,11 @@ def percentile_morph_contr_enh(
 
 
 def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
-               p0=.0, p1=1.):
+               p0=.0):
     """Return greyscale local percentile of an image.
 
-    percentile is computed on the given structuring element. Only levels between
-    percentiles [p0, p1] are used.
+    percentile is computed on the given structuring element. Returns the value
+    of the p0 lower percentile of the neighborhood value distribution.
 
     Parameters
     ----------
@@ -298,9 +298,8 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
-    p0, p1 : float in [0, ..., 1]
-        Define the [p0, p1] percentile interval to be considered for computing
-        the value.
+    p0 : float in [0, ..., 1]
+        Set the percentile value.
 
     Returns
     -------
@@ -312,7 +311,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
     return _apply(_crank8_percentiles.percentile,
                   _crank16_percentiles.percentile,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
-                  shift_y=shift_y, p0=p0, p1=p1)
+                  shift_y=shift_y, p0=p0, p1=0.)
 
 
 def percentile_pop(image, selem, out=None, mask=None, shift_x=False,
@@ -356,11 +355,13 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False,
 
 
 def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
-                         shift_y=False, p0=.0, p1=1.):
+                         shift_y=False, p0=.0):
     """Return greyscale local threshold of an image.
 
-    threshold is computed on the given structuring element. Only levels between
-    percentiles [p0, p1] are used.
+    threshold is computed on the given structuring element. Returns
+    thresholded image such that pixels having a higher value than the the p0
+    percentile of the neighborhood value distribution are set to 2^nbit-1
+    (e.g. 255 for 8bit image).
 
     Parameters
     ----------
@@ -379,9 +380,8 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
-    p0, p1 : float in [0, ..., 1]
-        Define the [p0, p1] percentile interval to be considered for computing
-        the value.
+    p0 : float in [0, ..., 1]
+        Set the percentile value.
 
     Returns
     -------
@@ -393,4 +393,4 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
     return _apply(
         _crank8_percentiles.threshold, _crank16_percentiles.threshold,
         image, selem, out=out, mask=mask, shift_x=shift_x,
-        shift_y=shift_y, p0=p0, p1=p1)
+        shift_y=shift_y, p0=p0, p1=0.)
