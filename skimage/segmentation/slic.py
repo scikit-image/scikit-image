@@ -3,7 +3,7 @@ import numpy as np
 from scipy import ndimage
 
 from ..util import img_as_float, regular_grid
-from ..color import rgb2lab, gray2rgb
+from ..color import rgb2lab, gray2rgb, is_rgb
 from ._slic import _slic_cython
 
 
@@ -72,9 +72,9 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
             (multichannel and image.ndim not in [3, 4]) or
             (multichannel and image.shape[-1] != 3)):
         ValueError("Only 1- or 3-channel 2- or 3-D images are supported.")
-    if image.ndim in [2, 3] and not multichannel:
+    if not multichannel:
         image = gray2rgb(image)
-    if image.ndim == 3:
+    if image.ndim == 3 and is_rgb(image):
         # See 2D RGB image as 3D RGB image with Z = 1
         image = image[np.newaxis, ...]
     if not isinstance(sigma, coll.Iterable):
