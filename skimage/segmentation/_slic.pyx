@@ -22,7 +22,8 @@ def _slic_cython(cnp.ndarray[dtype=cnp.float_t, ndim=4] image_zyx,
 
     # initialize on grid:
     cdef Py_ssize_t depth, height, width
-    depth, height, width = image_zyx.shape[0], image_zyx[1], image_zyx[2]
+    shape = image_zyx.shape
+    depth, height, width = shape[0], shape[1], shape[2]
     # approximate grid size for desired n_segments
     cdef Py_ssize_t step_z, step_y, step_x
     grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
