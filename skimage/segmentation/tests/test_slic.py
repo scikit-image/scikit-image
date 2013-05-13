@@ -66,7 +66,7 @@ def test_gray_3d():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21, 22))
     slices = []
-    for dim_size in img.shape[:-1]:
+    for dim_size in img.shape:
         midpoint = dim_size // 2
         slices.append((slice(None, midpoint), slice(midpoint, None)))
     slices = list(it.product(*slices))
@@ -76,7 +76,7 @@ def test_gray_3d():
     img += 0.001 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=8, ratio=40.0, multichannel=False)
+    seg = slic(img, sigma=0, n_segments=8, ratio=20.0, multichannel=False)
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
