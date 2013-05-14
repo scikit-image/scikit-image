@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def regular_grid(ar_shape, n_points):
     """Find `n_points` regularly spaced along `ar_shape`.
     
@@ -36,7 +37,7 @@ def regular_grid(ar_shape, n_points):
                                             (1.0 / (ndim - dim - 1)))
             if (sorted_dims >= stepsizes).all():
                 break
-    starts = np.floor(stepsizes/2)
+    starts = stepsizes // 2
     stepsizes = np.round(stepsizes)
     slices = [slice(start, None, step) for 
                                         start, step in zip(starts, stepsizes)]
