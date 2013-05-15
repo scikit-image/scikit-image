@@ -50,8 +50,10 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
 
     Notes
     -----
-    The image is optionally smoothed using a Gaussian kernel prior to
-    segmentation.
+    If `sigma > 0` as is default, the image is smoothed using a Gaussian kernel
+    prior to segmentation.
+
+    The image is rescaled to be in [0, 1] prior to processing.
 
     References
     ----------
@@ -72,6 +74,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
             (multichannel and image.ndim not in [3, 4]) or
             (multichannel and image.shape[-1] != 3)):
         ValueError("Only 1- or 3-channel 2- or 3-D images are supported.")
+    image = img_as_float(image)
     if not multichannel:
         image = gray2rgb(image)
     if image.ndim == 3 and is_rgb(image):
@@ -80,7 +83,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma, sigma, sigma, 0])
     if (sigma > 0).any():
-        image = ndimage.gaussian_filter(img_as_float(image), sigma)
+        image = ndimage.gaussian_filter(image, sigma)
     if convert2lab:
         image = rgb2lab(image)
 
