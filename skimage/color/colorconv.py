@@ -59,7 +59,6 @@ __docformat__ = "restructuredtext en"
 import numpy as np
 from scipy import linalg
 from ..util import dtype
-from skimage._shared.utils import deprecated
 
 
 def convert_colorspace(arr, fromspace, tospace):
