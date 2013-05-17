@@ -7,14 +7,14 @@ In this simplified example we first generate two synthetic images as if they
 were taken from different view points.
 
 In the next step we find interest points in both images and find
-correspondencies based on a weighted sum of squared differences of a small
-neighbourhood around them. Note, that this measure is only robust towards
+correspondences based on a weighted sum of squared differences of a small
+neighborhood around them. Note, that this measure is only robust towards
 linear radiometric and not geometric distortions and is thus only usable with
 slight view point changes.
 
-After finding the correspondencies we end up having a set of source and
+After finding the correspondences we end up having a set of source and
 destination coordinates which can be used to estimate the geometric
-transformation between both images. However, many of the correspondencies are
+transformation between both images. However, many of the correspondences are
 faulty and simply estimating the parameter set with all coordinates is not
 sufficient. Therefore, the RANSAC algorithm is used on top of the normal model
 to robustly estimate the parameter set by detecting outliers.
@@ -52,7 +52,7 @@ coords_orig = corner_peaks(corner_harris(img_orig_gray), threshold_rel=0.001,
 coords_warped = corner_peaks(corner_harris(img_warped_gray),
                              threshold_rel=0.001, min_distance=5)
 
-# determine subpixel corner position
+# determine sub-pixel corner position
 coords_orig_subpix = corner_subpix(img_orig_gray, coords_orig, window_size=10)
 coords_warped_subpix = corner_subpix(img_warped_gray, coords_warped,
                                      window_size=10)
@@ -83,12 +83,12 @@ def match_corner(coord, window_ext=5):
         SSD = np.sum(weights * (window_orig - window_warped)**2)
         SSDs.append(SSD)
 
-    # use corner with minimum SSD as correspondency
+    # use corner with minimum SSD as correspondence
     min_idx = np.argmin(SSDs)
     return coords_warped_subpix[min_idx]
 
 
-# find correspondencies using simple weighted sum of squared differences
+# find correspondences using simple weighted sum of squared differences
 src = []
 dst = []
 for coord in coords_orig_subpix:
@@ -114,7 +114,7 @@ print model.scale, model.translation, model.rotation
 print model_robust.scale, model_robust.translation, model_robust.rotation
 
 
-# visualize correspondencies
+# visualize correspondences
 img_combined = np.concatenate((img_orig_gray, img_warped_gray), axis=1)
 
 fig, ax = plt.subplots(nrows=2, ncols=1)
@@ -123,11 +123,11 @@ plt.gray()
 ax[0].imshow(img_combined, interpolation='nearest')
 ax[0].axis('off')
 ax[0].axis((0, 400, 200, 0))
-ax[0].set_title('Correct correspondencies')
+ax[0].set_title('Correct correspondences')
 ax[1].imshow(img_combined, interpolation='nearest')
 ax[1].axis('off')
 ax[1].axis((0, 400, 200, 0))
-ax[1].set_title('Faulty correspondencies')
+ax[1].set_title('Faulty correspondences')
 
 
 for ax_idx, (m, color) in enumerate(((inliers, 'g'), (outliers, 'r'))):
