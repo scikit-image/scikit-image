@@ -16,13 +16,12 @@ install:
     - sudo apt-get install $PYTHON-scipy
     - sudo apt-get install $PYTHON-setuptools
     - sudo apt-get install $PYTHON-nose
-    - sudo apt-get install pep8
-    - sudo apt-get install pyflakes
     - sudo easy_install$PYSUF pip
     - sudo pip-$PYVER install cython
     - sudo apt-get install libfreeimage3
     - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
     - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
+    - sudo pip-$PYVER install flake8
     - $PYTHON setup.py build
     - sudo $PYTHON setup.py install
 script:
@@ -34,7 +33,4 @@ script:
     - cd ..
     - "echo 'backend : Agg' > matplotlibrc"
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit $?; fi done
-    - echo "### pyflakes ###"
-    - pyflakes skimage
-    - echo "### pep8 ###"
-    - "pep8 skimage"
+    - flake8 skimage doc/examples viewer_examples
