@@ -1,9 +1,6 @@
 import os
 
-try:
-    from PyQt4 import QtGui
-except ImportError:
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
 
 
 def open_file_dialog(default_format='png'):
@@ -16,7 +13,12 @@ def open_file_dialog(default_format='png'):
 
 def save_file_dialog(default_format='png'):
     """Return user-selected file path."""
-    filename = str(QtGui.QFileDialog.getSaveFileName())
+    filename = QtGui.QFileDialog.getSaveFileName()
+    # Handle discrepancy between PyQt4 and PySide APIs.
+    if isinstance(filename, tuple):
+        filename = filename[0]
+    filename = str(filename)
+
     if len(filename) == 0:
         return None
     #TODO: io plugins should assign default image formats
