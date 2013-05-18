@@ -96,3 +96,4 @@ def convex_hull_object(image):
         convex_img = np.logical_or(convex_img, convex_obj)
 
     return convex_img
+    
