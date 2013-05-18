@@ -33,4 +33,4 @@ script:
     - cd ..
     - "echo 'backend : Agg' > matplotlibrc"
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit $?; fi done
-    - flake8 skimage doc/examples viewer_examples
+    - flake8 --exit-zero skimage doc/examples viewer_examples
