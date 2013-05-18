@@ -384,16 +384,16 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         iyd = int(floor(ya * w + 0.5))
 
         # Draw the 4 quadrants
-        rr, cc = bezier_segment(iy0+iyd, ix0, iy0, ix0, iy0, ix0+ixd, 1-w)
+        rr, cc = bezier_segment(iy0 + iyd, ix0, iy0, ix0, iy0, ix0 + ixd, 1-w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_segment(iy0+iyd, ix0, iy1, ix0, iy1, ix1-ixd, w)
+        rr, cc = bezier_segment(iy0 + iyd, ix0, iy1, ix0, iy1, ix1 - ixd, w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_segment(iy1-iyd, ix1, iy1, ix1, iy1, ix1-ixd, 1-w)
+        rr, cc = bezier_segment(iy1 - iyd, ix1, iy1, ix1, iy1, ix1 - ixd, 1-w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_segment(iy1-iyd, ix1, iy0, ix1, iy0, ix0+ixd,  w)
+        rr, cc = bezier_segment(iy1 - iyd, ix1, iy0, ix1, iy0, ix0 + ixd,  w)
         py.extend(rr)
         px.extend(cc)
 
@@ -401,9 +401,9 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
 
 
 def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
-                 Py_ssize_t y1, Py_ssize_t x1,
-                 Py_ssize_t y2, Py_ssize_t x2,
-                 double weight):
+                   Py_ssize_t y1, Py_ssize_t x1,
+                   Py_ssize_t y2, Py_ssize_t x2,
+                   double weight):
     """Generate Bezier segment coordinates.
 
     Parameters

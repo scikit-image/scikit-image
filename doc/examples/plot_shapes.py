@@ -19,7 +19,7 @@ from skimage.draw import line, polygon, circle, circle_perimeter, \
 import numpy as np
 import math
 
-img = np.zeros((500, 500, 3), 'uint8')
+img = np.zeros((500, 500, 3), dtype=np.uint8)
 
 # draw line
 rr, cc = line(120, 123, 20, 400)
@@ -49,11 +49,11 @@ rr, cc = circle_perimeter(120, 400, 15)
 img[rr, cc, :] = (255, 0, 0)
 
 # ellipses
-rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi/4.)
+rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 4.)
 img[rr, cc, :] = (255, 0, 255)
-rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=-math.pi/4.)
+rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=-math.pi / 4.)
 img[rr, cc, :] = (0, 0, 255)
-rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi/2.)
+rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 2.)
 img[rr, cc, :] = (255, 255, 255)
 
 plt.imshow(img)
