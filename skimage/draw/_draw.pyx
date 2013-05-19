@@ -456,9 +456,9 @@ def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
             # Swap point 0 and point 2
             # to start from the longer part
             x2 = x0
-            x0 -= int(dx)
+            x0 -= <Py_ssize_t>(dx)
             y2 = y0
-            y0 -= int(dy)
+            y0 -= <Py_ssize_t>(dy)
             cur = -cur
         xx = 2 * (4 * weight * sx * xx + dx * dx)
         yy = 2 * (4 * weight * sy * yy + dy * dy)
@@ -492,7 +492,8 @@ def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
             sy = floor((y0 + 2 * weight * y1 + y2) * xy * 0.5 + 0.5)
             dx = floor((weight * x1 + x0) * xy + 0.5)
             dy = floor((y1 * weight + y0) * xy + 0.5)
-            return bezier_segment(y0, x0, int(dy), int(dx), int(sy), int(sx), cur)
+            return bezier_segment(y0, x0, <Py_ssize_t>(dy), <Py_ssize_t>(dx),
+                                  <Py_ssize_t>(sy), <Py_ssize_t>(sx), cur)
 
         err = dx + dy - xy
         while dy <= xy and dx >= xy:
@@ -507,12 +508,12 @@ def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
             test2 = 2 * (err + yy) < -dy
             # Move (x0,y0) to the next position
             if 2 * err < dx or test2:
-                y0 += int(sy)
+                y0 += <Py_ssize_t>(sy)
                 dy += xy
                 dx += xx
                 err += dx
             if 2 * err > dx or test1:
-                x0 += int(sx)
+                x0 += <Py_ssize_t>(sx)
                 dx += xy
                 dy += yy
                 err += dy

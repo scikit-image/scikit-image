@@ -182,6 +182,7 @@ def test_circle_perimeter_bresenham():
     )
     assert_array_equal(img, img_)
 
+
 def test_circle_perimeter_andres():
     img = np.zeros((15, 15), 'uint8')
     rr, cc = circle_perimeter(7, 7, 0, method='andres')
@@ -213,6 +214,7 @@ def test_circle_perimeter_andres():
     )
     assert_array_equal(img, img_)
 
+
 def test_ellipse():
     img = np.zeros((15, 15), 'uint8')
 
@@ -239,6 +241,7 @@ def test_ellipse():
 
     assert_array_equal(img, img_)
 
+
 def test_ellipse_perimeter_dot_zeroangle():
     # dot, angle == 0
     img = np.zeros((30, 15), 'uint8')
@@ -247,6 +250,7 @@ def test_ellipse_perimeter_dot_zeroangle():
     assert(np.sum(img) == 1)
     assert(img[15][7] == 1)
 
+
 def test_ellipse_perimeter_dot_nzeroangle():
     # dot, angle != 0
     img = np.zeros((30, 15), 'uint8')
@@ -254,6 +258,7 @@ def test_ellipse_perimeter_dot_nzeroangle():
     img[rr, cc] = 1
     assert(np.sum(img) == 1)
     assert(img[15][7] == 1)
+
 
 def test_ellipse_perimeter_flat_zeroangle():
     # flat ellipse
@@ -264,6 +269,7 @@ def test_ellipse_perimeter_flat_zeroangle():
     rr, cc = line(6, 2, 6, 12)
     img_[rr, cc] = 1
     assert_array_equal(img, img_)
+
 
 def test_ellipse_perimeter_zeroangle():
     # angle == 0
@@ -304,6 +310,7 @@ def test_ellipse_perimeter_zeroangle():
     )
 
     assert_array_equal(img, img_)
+
 
 def test_ellipse_perimeter_nzeroangle():
     # angle != 0
@@ -361,6 +368,7 @@ def test_bezier_segment_straight():
     image2 [rr, cc] = 1
     assert_array_equal(image, image2)
 
+
 def test_bezier_segment_curved():
     img = np.zeros((25, 25), 'uint8')
     rr, cc = bezier_segment(20, 20, 20, 2, 2, 2, 1)
@@ -393,7 +401,6 @@ def test_bezier_segment_curved():
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
             )
     assert_array_equal(img, img_)
-
 
 
 if __name__ == "__main__":
