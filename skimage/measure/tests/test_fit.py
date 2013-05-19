@@ -90,7 +90,7 @@ def test_circle_model_residuals():
     model._params = (0, 0, 5)
     assert_almost_equal(abs(model.residuals(np.array([[5, 0]]))), 0)
     assert_almost_equal(abs(model.residuals(np.array([[6, 6]]))),
-                        np.sqrt(2 * 6**2) - 5)
+                        np.sqrt(2 * 6 ** 2) - 5)
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 5)
 
 

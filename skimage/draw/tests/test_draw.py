@@ -130,10 +130,10 @@ def test_circle():
     img[rr, cc] = 1
 
     img_ = np.array(
-      [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-       [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
-       [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+         [0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0],
        [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
        [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
        [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -181,6 +181,7 @@ def test_circle_perimeter_bresenham():
     )
     assert_array_equal(img, img_)
 
+
 def test_circle_perimeter_andres():
     img = np.zeros((15, 15), 'uint8')
     rr, cc = circle_perimeter(7, 7, 0, method='andres')
@@ -212,6 +213,7 @@ def test_circle_perimeter_andres():
     )
     assert_array_equal(img, img_)
 
+
 def test_ellipse():
     img = np.zeros((15, 15), 'uint8')
 
@@ -219,7 +221,7 @@ def test_ellipse():
     img[rr, cc] = 1
 
     img_ = np.array(
-      [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -238,6 +240,7 @@ def test_ellipse():
 
     assert_array_equal(img, img_)
 
+
 def test_ellipse_perimeter():
     img = np.zeros((30, 15), 'uint8')
     rr, cc = ellipse_perimeter(15, 7, 0, 0)
@@ -249,7 +252,7 @@ def test_ellipse_perimeter():
     rr, cc = ellipse_perimeter(15, 7, 14, 6)
     img[rr, cc] = 1
     img_ = np.array(
-      [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
        [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],

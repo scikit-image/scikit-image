@@ -9,6 +9,7 @@ import os.path
 
 
 class TestSkeletonize():
+
     def test_skeletonize_no_foreground(self):
         im = np.zeros((5, 5))
         result = skeletonize(im)
@@ -80,8 +81,8 @@ class TestSkeletonize():
 
         # foreground object 3
         ir, ic = np.indices(image.shape)
-        circle1 = (ic - 135)**2 + (ir - 150)**2 < 30**2
-        circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
+        circle1 = (ic - 135) ** 2 + (ir - 150) ** 2 < 30 ** 2
+        circle2 = (ic - 135) ** 2 + (ir - 150) ** 2 < 20 ** 2
         image[circle1] = 1
         image[circle2] = 0
         result = skeletonize(image)
@@ -112,6 +113,7 @@ class TestSkeletonize():
 
 
 class TestMedialAxis():
+
     def test_00_00_zeros(self):
         '''Test skeletonize on an array of all zeros'''
         result = medial_axis(np.zeros((10, 10), bool))
@@ -120,7 +122,7 @@ class TestMedialAxis():
     def test_00_01_zeros_masked(self):
         '''Test skeletonize on an array that is completely masked'''
         result = medial_axis(np.zeros((10, 10), bool),
-                                   np.zeros((10, 10), bool))
+                             np.zeros((10, 10), bool))
         assert np.all(result == False)
 
     def test_01_01_rectangle(self):
@@ -140,7 +142,7 @@ class TestMedialAxis():
                              [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
                              [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                             bool)
+                            bool)
         result = medial_axis(image)
         assert np.all(result == expected)
         result, distance = medial_axis(image, return_distance=True)
@@ -160,7 +162,7 @@ class TestMedialAxis():
                              [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
                              [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
-                             bool)
+                            bool)
         result = medial_axis(image)
         assert np.all(result == expected)
 

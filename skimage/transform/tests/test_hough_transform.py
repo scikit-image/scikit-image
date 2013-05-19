@@ -79,8 +79,10 @@ def test_hough_line_peaks_dist():
     img[:, 30] = True
     img[:, 40] = True
     hspace, angles, dists = tf.hough_line(img)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=5)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_distance=15)[0]) == 1
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_distance=5)[0]) == 2
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_distance=15)[0]) == 1
 
 
 def test_hough_line_peaks_angle():
@@ -89,18 +91,24 @@ def test_hough_line_peaks_angle():
     img[0, :] = True
 
     hspace, angles, dists = tf.hough_line(img)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_angle=45)[0]) == 2
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_angle=90)[0]) == 1
 
     theta = np.linspace(0, np.pi, 100)
     hspace, angles, dists = tf.hough_line(img, theta)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_angle=45)[0]) == 2
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_angle=90)[0]) == 1
 
     theta = np.linspace(np.pi / 3, 4. / 3 * np.pi, 100)
     hspace, angles, dists = tf.hough_line(img, theta)
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=45)[0]) == 2
-    assert len(tf.hough_line_peaks(hspace, angles, dists, min_angle=90)[0]) == 1
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_angle=45)[0]) == 2
+    assert len(tf.hough_line_peaks(
+        hspace, angles, dists, min_angle=90)[0]) == 1
 
 
 def test_hough_line_peaks_num():
@@ -126,6 +134,7 @@ def test_hough_circle():
     assert_equal(x[0], x_0)
     assert_equal(y[0], y_0)
 
+
 def test_hough_circle_extended():
     # Prepare picture
     # The circle center is outside the image
@@ -133,7 +142,7 @@ def test_hough_circle_extended():
     radius = 20
     x_0, y_0 = (-5, 50)
     y, x = circle_perimeter(y_0, x_0, radius)
-    img[x[np.where(x>0)], y[np.where(x>0)]] = 1
+    img[x[np.where(x > 0)], y[np.where(x > 0)]] = 1
 
     out = tf.hough_circle(img, np.array([radius]), full_output=True)
 

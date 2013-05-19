@@ -182,7 +182,7 @@ class CircleModel(BaseModel):
         A[2, :] = -1
 
         def dist(xc, yc):
-            return np.sqrt((x - xc)**2 + (y - yc)**2)
+            return np.sqrt((x - xc) ** 2 + (y - yc) ** 2)
 
         def fun(params):
             xc, yc, r = params
@@ -194,7 +194,7 @@ class CircleModel(BaseModel):
             A[0, :] = -(x - xc) / d
             A[1, :] = -(y - yc) / d
             # same for all iterations, so not changed in each iteration
-            #A[2, :] = -1
+            # A[2, :] = -1
             return A
 
         xc0 = x.mean()
@@ -229,7 +229,7 @@ class CircleModel(BaseModel):
         x = data[:, 0]
         y = data[:, 1]
 
-        return r - np.sqrt((x - xc)**2 + (y - yc)**2)
+        return r - np.sqrt((x - xc) ** 2 + (y - yc) ** 2)
 
     def predict_xy(self, t, params=None):
         """Predict x- and y-coordinates using the estimated model.
@@ -347,7 +347,7 @@ class EllipseModel(BaseModel):
         params0 = np.empty((N + 5, ), dtype=np.double)
         xc0 = x.mean()
         yc0 = y.mean()
-        r0 = np.sqrt((x - xc0)**2 + (y - yc0)**2).mean()
+        r0 = np.sqrt((x - xc0) ** 2 + (y - yc0) ** 2).mean()
         params0[:5] = (xc0, yc0, r0, 0, 0)
         params0[5:] = np.arctan2(y - yc0, x - xc0)
 
@@ -389,7 +389,7 @@ class EllipseModel(BaseModel):
             st = math.sin(t)
             xt = xc + a * ctheta * ct - b * stheta * st
             yt = yc + a * stheta * ct + b * ctheta * st
-            return (xi - xt)**2 + (yi - yt)**2
+            return (xi - xt) ** 2 + (yi - yt) ** 2
 
         # def Dfun(t, xi, yi):
         #     ct = math.cos(t)
@@ -622,7 +622,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
         sample_model_residuals = np.abs(sample_model.residuals(*data))
         # consensus set / inliers
         sample_model_inliers = sample_model_residuals < residual_threshold
-        sample_model_residuals_sum = np.sum(sample_model_residuals**2)
+        sample_model_residuals_sum = np.sum(sample_model_residuals ** 2)
 
         # choose as new best model if number of inliers is maximal
         sample_inlier_num = np.sum(sample_model_inliers)

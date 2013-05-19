@@ -53,9 +53,10 @@ def test_imread_uint16_big_endian():
     assert img.dtype == np.uint16
     assert_array_almost_equal(img, expected)
 
+
 @skipif(not FI_available)
 def test_write_multipage():
-    shape = (64,64,64)
+    shape = (64, 64, 64)
     x = np.ones(shape, dtype=np.uint8) * np.random.random(shape) * 255
     x = x.astype(np.uint8)
     f = NamedTemporaryFile(suffix='.tif')
@@ -64,8 +65,10 @@ def test_write_multipage():
     fi.write_multipage(x, fname)
     y = fi.read_multipage(fname)
     assert_array_equal(x, y)
-    
+
+
 class TestSave:
+
     def roundtrip(self, dtype, x, suffix):
         f = NamedTemporaryFile(suffix='.' + suffix)
         fname = f.name
@@ -77,11 +80,11 @@ class TestSave:
     @skipif(not FI_available)
     def test_imsave_roundtrip(self):
         for shape, dtype, format in [
-              [(10, 10), (np.uint8, np.uint16), ('tif', 'png')],
-              [(10, 10), (np.float32,), ('tif',)],
-              [(10, 10, 3), (np.uint8,), ('png',)],
-              [(10, 10, 4), (np.uint8,), ('png',)]
-            ]:
+            [(10, 10), (np.uint8, np.uint16), ('tif', 'png')],
+            [(10, 10), (np.float32,), ('tif',)],
+            [(10, 10, 3), (np.uint8,), ('png',)],
+            [(10, 10, 4), (np.uint8,), ('png',)]
+        ]:
             tests = [(d, f) for d in dtype for f in format]
             for d, f in tests:
                 x = np.ones(shape, dtype=d) * np.random.random(shape)

@@ -30,6 +30,7 @@ app = None
 
 
 class ImageLabel(QLabel):
+
     def __init__(self, parent, arr):
         QLabel.__init__(self)
 
@@ -59,6 +60,7 @@ class ImageLabel(QLabel):
 
 
 class ImageWindow(QMainWindow):
+
     def __init__(self, arr, mgr):
         QMainWindow.__init__(self)
         self.setWindowTitle('skimage')
@@ -151,7 +153,7 @@ def imsave(filename, img, format_str=None):
     # we can add support for other than 3D uint8 here...
     img = prepare_for_display(img)
     qimg = QImage(img.data, img.shape[1], img.shape[0],
-                          img.strides[0], QImage.Format_RGB888)
+                  img.strides[0], QImage.Format_RGB888)
     if _is_filelike(filename):
         byte_array = QtCore.QByteArray()
         qbuffer = QtCore.QBuffer(byte_array)

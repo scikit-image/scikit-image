@@ -68,6 +68,7 @@ def test_imread_uint16_big_endian():
 
 
 class TestSave:
+
     def roundtrip(self, dtype, x):
         f = NamedTemporaryFile(suffix='.mha')
         fname = f.name

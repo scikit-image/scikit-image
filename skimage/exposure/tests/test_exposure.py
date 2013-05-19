@@ -100,7 +100,7 @@ def test_adapthist_grayscale():
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
-                        nbins=128)
+                                          nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
     assert_almost_equal(peak_snr(img, adapted), 97.531, 3)

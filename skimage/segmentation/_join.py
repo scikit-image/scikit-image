@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def join_segmentations(s1, s2):
     """Return the join of the two input segmentations.
 
@@ -40,6 +41,7 @@ def join_segmentations(s1, s2):
     j = (s2.max() + 1) * s1 + s2
     j = relabel_from_one(j)[0]
     return j
+
 
 def relabel_from_one(label_field):
     """Convert labels in an arbitrary label field to {1, ... number_of_labels}.
@@ -83,9 +85,9 @@ def relabel_from_one(label_field):
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
     m = labels.max()
-    if m == len(labels0): # nothing to do, already 1...n labels
+    if m == len(labels0):  # nothing to do, already 1...n labels
         return label_field, labels, labels
-    forward_map = np.zeros(m+1, int)
+    forward_map = np.zeros(m + 1, int)
     forward_map[labels0] = np.arange(1, len(labels0) + 1)
     if not (labels == 0).any():
         labels = np.concatenate(([0], labels))

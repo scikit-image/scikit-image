@@ -39,6 +39,7 @@ def _pad(data, shape):
 
 
 class LPIFilter2D(object):
+
     """Linear Position-Invariant Filter (2-dimensional)
 
     """
@@ -229,7 +230,7 @@ def wiener(data, impulse_response=None, filter_params={}, K=0.25,
     F, G = filt._prepare(data)
     _min_limit(F)
 
-    H_mag_sqr = np.abs(F)**2
+    H_mag_sqr = np.abs(F) ** 2
     F = 1 / F * H_mag_sqr / (H_mag_sqr + K)
 
     return _centre(np.abs(ifftshift(np.dual.ifftn(G * F))), data.shape)

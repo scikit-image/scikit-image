@@ -12,7 +12,7 @@ def make_2d_syntheticdata(lx, ly=None):
          ly / 2 - small_l:ly / 2 + small_l] = 1
     data[lx / 2 - small_l + 1:lx / 2 + small_l - 1,
          ly / 2 - small_l + 1:ly / 2 + small_l - 1] = \
-                        0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2)
+        0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2)
     data[lx / 2 - small_l, ly / 2 - small_l / 8:ly / 2 + small_l / 8] = 0
     seeds = np.zeros_like(data)
     seeds[lx / 5, ly / 5] = 1
@@ -176,7 +176,8 @@ def test_multispectral_3d():
     assert data[..., 0].shape == labels.shape
     single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
-    assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
+    assert (single_labels.reshape(labels.shape)[
+            13:17, 13:17, 13:17] == 2).all()
     assert data[..., 0].shape == labels.shape
     return data, multi_labels, single_labels, labels
 

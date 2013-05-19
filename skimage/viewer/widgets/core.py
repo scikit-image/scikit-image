@@ -73,6 +73,7 @@ class Text(BaseWidget):
 
 
 class Slider(BaseWidget):
+
     """Slider widget for adjusting numeric parameters.
 
     Parameters
@@ -211,6 +212,7 @@ class Slider(BaseWidget):
 
 
 class ComboBox(BaseWidget):
+
     """ComboBox widget for selecting among a list of choices.
 
     Parameters

@@ -15,6 +15,7 @@ __all__ = ['PaintTool']
 
 
 class PaintTool(CanvasToolBase):
+
     """Widget for painting on top of a plot.
 
     Parameters
@@ -132,13 +133,13 @@ class PaintTool(CanvasToolBase):
     def on_move(self, event):
         if not self.ax.in_axes(event):
             self._cursor.set_visible(False)
-            self.redraw() # make sure cursor is not visible
+            self.redraw()  # make sure cursor is not visible
             return
         self._cursor.set_visible(True)
 
         self.update_cursor(event.xdata, event.ydata)
         if event.button != 1:
-            self.redraw() # update cursor position
+            self.redraw()  # update cursor position
             return
         self.update_overlay(event.xdata, event.ydata)
         self.callback_on_move(self.geometry)
@@ -160,6 +161,7 @@ class PaintTool(CanvasToolBase):
 
 
 class CenteredWindow(object):
+
     """Window that create slices numpy arrays over 2D windows.
 
     Example

@@ -13,6 +13,7 @@ __all__ = ['PlotPlugin']
 
 
 class PlotPlugin(Plugin):
+
     """Plugin for ImageViewer that contains a plot canvas.
 
     Base class for plugins that contain a Matplotlib plot canvas, which can,
@@ -34,7 +35,7 @@ class PlotPlugin(Plugin):
         self.fig, self.ax = new_plot(figsize=(height, width))
         self.canvas = self.fig.canvas
         self.canvas.setMinimumHeight(150)
-        #TODO: Converted color is slightly different than Qt background.
+        # TODO: Converted color is slightly different than Qt background.
         qpalette = QtGui.QPalette()
         qcolor = qpalette.color(QtGui.QPalette.Window)
         bgcolor = qcolor.toRgb().value()

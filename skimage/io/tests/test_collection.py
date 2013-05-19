@@ -21,15 +21,17 @@ else:
 if sys.version_info[0] > 2:
     basestring = str
 
+
 class TestAlphanumericKey():
+
     def setUp(self):
         self.test_string = 'z23a'
         self.test_str_result = ['z', 23, 'a']
         self.filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png',
-            'e9.png', 'e10.png', 'em.png']
+                          'e9.png', 'e10.png', 'em.png']
         self.sorted_filenames = \
             ['e9.png', 'e10.png', 'em.png', 'f9.9.png', 'f9.10.png',
-            'f10.9.png', 'f10.10.png']
+             'f10.9.png', 'f10.10.png']
 
     def test_string_split(self):
         assert_equal(alphanumeric_key(self.test_string), self.test_str_result)
@@ -42,8 +44,8 @@ class TestAlphanumericKey():
 class TestImageCollection():
     pattern = [os.path.join(data_dir, pic) for pic in ['camera.png',
                                                        'color.png']]
-    pattern_matched = [os.path.join(data_dir, pic) for pic in 
-                                                    ['camera.png', 'moon.png']]
+    pattern_matched = [os.path.join(data_dir, pic) for pic in
+                      ['camera.png', 'moon.png']]
 
     def setUp(self):
         self.collection = ImageCollection(self.pattern)
@@ -59,7 +61,7 @@ class TestImageCollection():
         assert_array_almost_equal(self.collection[0],
                                   self.collection[-num])
 
-        #assert_raises expects a callable, hence this do-very-little func
+        # assert_raises expects a callable, hence this do-very-little func
         def return_img(n):
             return self.collection[n]
         assert_raises(IndexError, return_img, num)
@@ -93,8 +95,8 @@ class TestImageCollection():
 
     def test_concatenate(self):
         ar = self.collection_matched.concatenate()
-        assert_equal(ar.shape, (len(self.collection_matched),) + 
-                                self.collection[0].shape)
+        assert_equal(ar.shape, (len(self.collection_matched),) +
+                     self.collection[0].shape)
         assert_raises(ValueError, self.collection.concatenate)
 
 
@@ -118,7 +120,7 @@ class TestMultiImage():
         assert_array_almost_equal(self.img[0],
                                   self.img[-num])
 
-        #assert_raises expects a callable, hence this do-very-little func
+        # assert_raises expects a callable, hence this do-very-little func
         def return_img(n):
             return self.img[n]
         assert_raises(IndexError, return_img, num)
@@ -143,8 +145,8 @@ class TestMultiImage():
     @skipif(not PIL_available)
     def test_concatenate(self):
         ar = self.img.concatenate()
-        assert_equal(ar.shape, (len(self.img),) + 
-                                self.img[0].shape)
+        assert_equal(ar.shape, (len(self.img),) +
+                     self.img[0].shape)
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from ._warps_cy import _warp_fast
 
 
 class GeometricTransform(object):
+
     """Perform geometric transformations on a set of coordinates.
 
     """
@@ -61,7 +62,7 @@ class GeometricTransform(object):
 
         """
 
-        return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
+        return np.sqrt(np.sum((self(src) - dst) ** 2, axis=1))
 
     def __add__(self, other):
         """Combine this transformation with another.
@@ -71,6 +72,7 @@ class GeometricTransform(object):
 
 
 class ProjectiveTransform(GeometricTransform):
+
     """Matrix transformation.
 
     Apply a projective transformation (homography) on coordinates.
@@ -311,7 +313,7 @@ class AffineTransform(ProjectiveTransform):
             self._matrix = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
                 [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
-                [                      0,                                0, 1]
+                [0,                                0, 1]
             ])
             self._matrix[0:2, 2] = translation
         else:
@@ -460,6 +462,7 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
 
 class SimilarityTransform(ProjectiveTransform):
+
     """2D similarity transformation of the form::
 
         X = a0*x - b0*y + a1 =
@@ -510,7 +513,7 @@ class SimilarityTransform(ProjectiveTransform):
             self._matrix = np.array([
                 [math.cos(rotation), - math.sin(rotation), 0],
                 [math.sin(rotation),   math.cos(rotation), 0],
-                [                 0,                    0, 1]
+                [0,                    0, 1]
             ])
             self._matrix *= scale
             self._matrix[0:2, 2] = translation
@@ -584,7 +587,7 @@ class SimilarityTransform(ProjectiveTransform):
 
         self._matrix = np.array([[a0, -b0, a1],
                                  [b0,  a0, b1],
-                                 [ 0,   0,  1]])
+                                 [0,   0,  1]])
 
     @property
     def scale(self):
@@ -605,6 +608,7 @@ class SimilarityTransform(ProjectiveTransform):
 
 
 class PolynomialTransform(GeometricTransform):
+
     """2D transformation of the form::
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))

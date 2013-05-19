@@ -28,11 +28,13 @@ def mpl_image_to_rgba(mpl_image):
     """
     input_range = (mpl_image.norm.vmin, mpl_image.norm.vmax)
     image = rescale_intensity(mpl_image.get_array(), in_range=input_range)
-    image = mpl_image.cmap(img_as_float(image)) # cmap complains on bool arrays
+    image = mpl_image.cmap(img_as_float(
+        image))  # cmap complains on bool arrays
     return img_as_float(image)
 
 
 class ImageViewer(QMainWindow):
+
     """Viewer for displaying images.
 
     This viewer is a simple container object that holds a Matplotlib axes
@@ -68,7 +70,7 @@ class ImageViewer(QMainWindow):
         utils.init_qtapp()
         super(ImageViewer, self).__init__()
 
-        #TODO: Add ImageViewer to skimage.io window manager
+        # TODO: Add ImageViewer to skimage.io window manager
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
@@ -159,7 +161,7 @@ class ImageViewer(QMainWindow):
         self.move(0, 0)
         w = size.width()
         y = 0
-        #TODO: Layout isn't quite correct for multiple plugins (overlaps).
+        # TODO: Layout isn't quite correct for multiple plugins (overlaps).
         for p in self.plugins:
             p.move(w, y)
             y += p.geometry().height()
@@ -232,6 +234,7 @@ class ImageViewer(QMainWindow):
 
 
 class CollectionViewer(ImageViewer):
+
     """Viewer for displaying image collections.
 
     Select the displayed frame of the image collection using the slider or
@@ -274,7 +277,7 @@ class CollectionViewer(ImageViewer):
         self.slider = Slider('frame', **slider_kws)
         self.layout.addWidget(self.slider)
 
-        #TODO: Adjust height to accomodate slider; the following doesn't work
+        # TODO: Adjust height to accomodate slider; the following doesn't work
         # s_size = self.slider.sizeHint()
         # cs_size = self.canvas.sizeHint()
         # self.resize(cs_size.width(), cs_size.height() + s_size.height())
