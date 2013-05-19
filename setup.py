@@ -9,20 +9,20 @@ Please refer to the online documentation at
 http://scikit-image.org/
 """
 
-DISTNAME            = 'scikit-image'
-DESCRIPTION         = 'Image processing routines for SciPy'
-LONG_DESCRIPTION    = descr
-MAINTAINER          = 'Stefan van der Walt'
-MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
-URL                 = 'http://scikit-image.org'
-LICENSE             = 'Modified BSD'
-DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
-VERSION             = '0.8dev'
-PYTHON_VERSION      = (2, 5)
-DEPENDENCIES        = {
-                        'numpy': (1, 6),
-                        'Cython': (0, 15),
-                      }
+DISTNAME = 'scikit-image'
+DESCRIPTION = 'Image processing routines for SciPy'
+LONG_DESCRIPTION = descr
+MAINTAINER = 'Stefan van der Walt'
+MAINTAINER_EMAIL = 'stefan@sun.ac.za'
+URL = 'http://scikit-image.org'
+LICENSE = 'Modified BSD'
+DOWNLOAD_URL = 'http://github.com/scikit-image/scikit-image'
+VERSION = '0.8dev'
+PYTHON_VERSION = (2, 5)
+DEPENDENCIES = {
+    'numpy': (1, 6),
+    'Cython': (0, 15),
+}
 
 
 import os
@@ -36,17 +36,19 @@ try:
 except ImportError:
     from distutils.command.build_py import build_py
 
+
 def configuration(parent_package='', top_path=None):
-    if os.path.exists('MANIFEST'): os.remove('MANIFEST')
+    if os.path.exists('MANIFEST'):
+        os.remove('MANIFEST')
 
     from numpy.distutils.misc_util import Configuration
     config = Configuration(None, parent_package, top_path)
 
     config.set_options(
-            ignore_setup_xxx_py=True,
-            assume_default_configuration=True,
-            delegate_options_to_subpackages=True,
-            quiet=True)
+        ignore_setup_xxx_py=True,
+        assume_default_configuration=True,
+        delegate_options_to_subpackages=True,
+        quiet=True)
 
     config.add_subpackage('skimage')
     config.add_data_dir('skimage/data')
@@ -84,7 +86,7 @@ def get_package_version(package):
 
 def check_requirements():
     if sys.version_info < PYTHON_VERSION:
-        raise SystemExit('You need Python version %d.%d or later.' \
+        raise SystemExit('You need Python version %d.%d or later.'
                          % PYTHON_VERSION)
 
     for package_name, min_version in DEPENDENCIES.items():
@@ -99,18 +101,22 @@ def check_requirements():
                 dep_error = True
 
         if dep_error:
-            raise ImportError('You need `%s` version %d.%d or later.' \
+            raise ImportError('You need `%s` version %d.%d or later.'
                               % ((package_name, ) + min_version))
 
-# uses searching from waf docs: 
-# http://docs.waf.googlecode.com/git/book_16/single.html#_download_and_installation
+# uses searching from waf docs
+# http://docs.waf.googlecode.com\
+#    /git/book_16/single.html#_download_and_installation
+
 
 def waflib_exists():
     if os.environ.get('WAFDIR'):
         return True
-    if 'waf' in os.listdir(os.getcwd()) and 'waflib' in os.listdir(os.path.join(os.getcwd(),'waflib')):
+    if 'waf' in os.listdir(os.getcwd()) and 'waflib' in os.listdir(
+            os.path.join(os.getcwd(), 'waflib')):
         return True
-    if len(re.findall(re.findall('[.]waf-[0-9][.][0-9]-version',os.listdir(os.getcwd()))))>0:
+    if len(re.findall('[.]waf-[0-9][.][0-9]-version',
+                      os.listdir(os.getcwd()))) > 0:
         return True
     return False
 
@@ -156,7 +162,7 @@ if __name__ == "__main__":
 
             packages=setuptools.find_packages(exclude=['doc']),
             include_package_data=True,
-            zip_safe=False, # the package can run out of an .egg file
+            zip_safe=False,  # the package can run out of an .egg file
 
             entry_points={
                 'console_scripts': ['skivi = skimage.scripts.skivi:main'],
