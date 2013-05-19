@@ -28,7 +28,7 @@ DEPENDENCIES        = {
 import os
 import sys
 import setuptools
-from re import findall
+import re
 from numpy.distutils.core import setup
 from numpy.distutils.exec_command import exec_command, find_executable
 try:
@@ -110,7 +110,7 @@ def waflib_exists():
         return True
     if 'waf' in os.listdir(os.getcwd()) and 'waflib' in os.listdir(os.getcwd()+'/'+'waflib'):
         return True
-    if len(findall(re.findall('[.]waf-[0-9][.][0-9]-version',os.listdir(os.getcwd()))))>0:
+    if len(re.findall(re.findall('[.]waf-[0-9][.][0-9]-version',os.listdir(os.getcwd()))))>0:
         return True
     return False
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     # check for bento installation
     bento_path = find_executable('bentomaker')
-    if bento_path && waflib_exists():
+    if bento_path and waflib_exists():
         exec_command(bento_path+' install')
     else:
         setup(
