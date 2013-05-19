@@ -108,7 +108,7 @@ def check_requirements():
 def waflib_exists():
     if os.environ.get('WAFDIR'):
         return True
-    if 'waf' in os.listdir(os.getcwd()) and 'waflib' in os.listdir(os.getcwd()+'/'+'waflib'):
+    if 'waf' in os.listdir(os.getcwd()) and 'waflib' in os.listdir(os.path.join(os.getcwd(),'waflib')):
         return True
     if len(re.findall(re.findall('[.]waf-[0-9][.][0-9]-version',os.listdir(os.getcwd()))))>0:
         return True
