@@ -30,14 +30,16 @@ image[10:-10, -100:-10] = 1
 
 # foreground object 2
 rs, cs = draw.bresenham(250, 150, 10, 280)
-for i in range(10): image[rs+i, cs] = 1
+for i in range(10):
+    image[rs + i, cs] = 1
 rs, cs = draw.bresenham(10, 150, 250, 280)
-for i in range(20): image[rs+i, cs] = 1
+for i in range(20):
+    image[rs + i, cs] = 1
 
 # foreground object 3
 ir, ic = np.indices(image.shape)
-circle1 = (ic - 135)**2 + (ir - 150)**2 < 30**2
-circle2 = (ic - 135)**2 + (ir - 150)**2 < 20**2
+circle1 = (ic - 135) ** 2 + (ir - 150) ** 2 < 30 ** 2
+circle2 = (ic - 135) ** 2 + (ir - 150) ** 2 < 20 ** 2
 image[circle1] = 1
 image[circle2] = 0
 

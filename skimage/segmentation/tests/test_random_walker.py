@@ -16,7 +16,7 @@ def make_2d_syntheticdata(lx, ly=None):
          ly / 2 - small_l:ly / 2 + small_l] = 1
     data[lx / 2 - small_l + 1:lx / 2 + small_l - 1,
          ly / 2 - small_l + 1:ly / 2 + small_l - 1] = \
-                        0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2)
+        0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2)
     data[lx / 2 - small_l, ly / 2 - small_l / 8:ly / 2 + small_l / 8] = 0
     seeds = np.zeros_like(data)
     seeds[lx / 5, ly / 5] = 1
@@ -40,8 +40,8 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
     # make a hole
     hole_size = np.max([1, small_l / 8])
     data[lx / 2 - small_l,
-            ly / 2 - hole_size:ly / 2 + hole_size,\
-            lz / 2 - hole_size:lz / 2 + hole_size] = 0
+        ly / 2 - hole_size:ly / 2 + hole_size,
+        lz / 2 - hole_size:lz / 2 + hole_size] = 0
     seeds = np.zeros_like(data)
     seeds[lx / 5, ly / 5, lz / 5] = 1
     seeds[lx / 2 + small_l / 4, ly / 2 - small_l / 4, lz / 2 - small_l / 4] = 2
@@ -55,7 +55,7 @@ def test_2d_bf():
     labels_bf = random_walker(data, labels, beta=90, mode='bf')
     assert (labels_bf[25:45, 40:60] == 2).all()
     full_prob_bf = random_walker(data, labels, beta=90, mode='bf',
-                                    return_full_prob=True)
+                                return_full_prob=True)
     assert (full_prob_bf[1, 25:45, 40:60] >=
                         full_prob_bf[0, 25:45, 40:60]).all()
     # Now test with more than two labels
@@ -65,6 +65,7 @@ def test_2d_bf():
     assert (full_prob_bf[1, 25:45, 40:60] >=
                         full_prob_bf[0, 25:45, 40:60]).all()
     assert len(full_prob_bf) == 3
+
 
 def test_2d_cg():
     lx = 70
@@ -166,7 +167,13 @@ def test_multispectral_3d():
     multi_labels = random_walker(data, labels, mode='cg', multichannel=True)
     single_labels = random_walker(data[..., 0], labels, mode='cg')
     assert (multi_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
-    assert (single_labels.reshape(labels.shape)[13:17, 13:17, 13:17] == 2).all()
+    assert (
+        single_labels.reshape(
+            labels.shape)[
+                13:17,
+                13:17,
+                13:17] == 2).all(
+                )
     return data, multi_labels, single_labels, labels
 
 if __name__ == '__main__':

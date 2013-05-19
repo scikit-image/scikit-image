@@ -34,8 +34,8 @@ from skimage.morphology import watershed, is_local_maximum
 x, y = np.indices((80, 80))
 x1, y1, x2, y2 = 28, 28, 44, 52
 r1, r2 = 16, 20
-mask_circle1 = (x - x1)**2 + (y - y1)**2 < r1**2
-mask_circle2 = (x - x2)**2 + (y - y2)**2 < r2**2
+mask_circle1 = (x - x1) ** 2 + (y - y1) ** 2 < r1 ** 2
+mask_circle2 = (x - x2) ** 2 + (y - y2) ** 2 < r2 ** 2
 image = np.logical_or(mask_circle1, mask_circle2)
 
 # Now we want to separate the two objects in image

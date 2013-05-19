@@ -6,6 +6,7 @@ from ._warps_cy import _warp_fast
 
 
 class GeometricTransform(object):
+
     """Perform geometric transformations on a set of coordinates.
 
     """
@@ -49,6 +50,7 @@ class GeometricTransform(object):
 
 
 class ProjectiveTransform(GeometricTransform):
+
     """Matrix transformation.
 
     Apply a projective transformation (homography) on coordinates.
@@ -219,7 +221,7 @@ class ProjectiveTransform(GeometricTransform):
         if isinstance(other, ProjectiveTransform):
             # combination of the same types result in a transformation of this
             # type again, otherwise use general projective transformation
-            if type(self) == type(other):
+            if isinstance(self, type(other)):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
@@ -288,8 +290,8 @@ class AffineTransform(ProjectiveTransform):
             sx, sy = scale
             self._matrix = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
-                [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
-                [                      0,                                0, 1]
+                [sx * math.sin(rotation), sy * math.cos(rotation + shear), 0],
+                [0, 0, 1]
             ])
             self._matrix[0:2, 2] = translation
         else:
@@ -438,6 +440,7 @@ class PiecewiseAffineTransform(ProjectiveTransform):
 
 
 class SimilarityTransform(ProjectiveTransform):
+
     """2D similarity transformation of the form::
 
         X = a0*x - b0*y + a1 =
@@ -487,8 +490,8 @@ class SimilarityTransform(ProjectiveTransform):
 
             self._matrix = np.array([
                 [math.cos(rotation), - math.sin(rotation), 0],
-                [math.sin(rotation),   math.cos(rotation), 0],
-                [                 0,                    0, 1]
+                [math.sin(rotation), math.cos(rotation), 0],
+                [0, 0, 1]
             ])
             self._matrix *= scale
             self._matrix[0:2, 2] = translation
@@ -561,8 +564,8 @@ class SimilarityTransform(ProjectiveTransform):
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
         self._matrix = np.array([[a0, -b0, a1],
-                                 [b0,  a0, b1],
-                                 [ 0,   0,  1]])
+                                 [b0, a0, b1],
+                                 [0, 0, 1]])
 
     @property
     def scale(self):
@@ -583,6 +586,7 @@ class SimilarityTransform(ProjectiveTransform):
 
 
 class PolynomialTransform(GeometricTransform):
+
     """2D transformation of the form::
 
         X = sum[j=0:order]( sum[i=0:j]( a_ji * x**(j - i) * y**i ))
@@ -980,8 +984,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             matrix = inverse_map._matrix
         elif hasattr(inverse_map, '__name__') \
                 and inverse_map.__name__ == 'inverse' \
-                and inverse_map.im_class in HOMOGRAPHY_TRANSFORMS:
-            matrix = np.linalg.inv(inverse_map.im_self._matrix)
+                and inverse_map.__self__.__class__ in HOMOGRAPHY_TRANSFORMS:
+            matrix = np.linalg.inv(inverse_map.__self__._matrix)
         if matrix is not None:
             # transform all bands
             dims = []

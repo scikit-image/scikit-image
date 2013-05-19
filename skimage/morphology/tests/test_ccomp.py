@@ -5,6 +5,7 @@ from skimage.morphology import label
 
 
 class TestConnectedComponents:
+
     def setup(self):
         self.x = np.array([[0, 0, 3, 2, 1, 9],
                            [0, 1, 1, 9, 2, 9],
@@ -59,7 +60,7 @@ class TestConnectedComponents:
 
         assert_array_equal(label(x, background=0),
                            [[0, -1, -1],
-                            [0,  0,  1],
+                            [0, 0, 1],
                             [-1, -1, -1]])
 
     def test_background_two_regions(self):
@@ -70,7 +71,7 @@ class TestConnectedComponents:
         assert_array_equal(label(x, background=0),
                            [[-1, -1, 0],
                             [-1, -1, 0],
-                            [ 1,  1, 1]])
+                            [1, 1, 1]])
 
     def test_background_one_region_center(self):
         x = np.array([[0, 0, 0],
@@ -79,7 +80,7 @@ class TestConnectedComponents:
 
         assert_array_equal(label(x, neighbors=4, background=0),
                            [[-1, -1, -1],
-                            [-1,  0, -1],
+                            [-1, 0, -1],
                             [-1, -1, -1]])
 
 

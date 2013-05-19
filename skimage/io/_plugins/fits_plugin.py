@@ -6,8 +6,8 @@ try:
     import pyfits
 except ImportError:
     raise ImportError("PyFITS could not be found. Please refer to\n"
-        "http://www.stsci.edu/resources/software_hardware/pyfits\n"
-        "for further instructions.")
+                      "http://www.stsci.edu/resources/software_hardware/pyfits\n"
+                      "for further instructions.")
 
 
 def imread(fname, dtype=None):
@@ -131,7 +131,7 @@ def FITSFactory(image_ext):
     filename = image_ext[0]
     extnum = image_ext[1]
 
-    if type(filename) is not str or type(extnum) is not int:
+    if not isinstance(filename, str) or not isinstance(extnum, int):
         raise ValueError("Expected a (filename, extension) tuple")
 
     hdulist = pyfits.open(filename)
@@ -142,6 +142,6 @@ def FITSFactory(image_ext):
 
     if data is None:
         raise RuntimeError("Extension %d of %s has no data" %
-                  (extnum, filename))
+                          (extnum, filename))
 
     return data

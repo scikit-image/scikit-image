@@ -42,4 +42,3 @@ plt.title('Thresholded')
 plt.axis('off')
 
 plt.show()
-

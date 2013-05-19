@@ -6,6 +6,7 @@ __all__ = ['deprecated']
 
 
 class deprecated(object):
+
     """Decorator to mark deprecated functions with warning.
 
     Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
@@ -33,9 +34,9 @@ class deprecated(object):
         def wrapped(*args, **kwargs):
             if self.behavior == 'warn':
                 warnings.warn_explicit(msg,
-                    category=DeprecationWarning,
-                    filename=func.func_code.co_filename,
-                    lineno=func.func_code.co_firstlineno + 1)
+                                       category=DeprecationWarning,
+                                       filename=func.func_code.co_filename,
+                                       lineno=func.func_code.co_firstlineno + 1)
             elif self.behavior == 'raise':
                 raise DeprecationWarning(msg)
             return func(*args, **kwargs)

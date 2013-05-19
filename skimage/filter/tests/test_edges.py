@@ -116,7 +116,7 @@ def test_scharr_mask():
     """Scharr on a masked array should be zero"""
     np.random.seed(0)
     result = F.scharr(np.random.uniform(size=(10, 10)),
-                     np.zeros((10, 10), bool))
+                      np.zeros((10, 10), bool))
     assert (np.all(result == 0))
 
 
@@ -151,7 +151,7 @@ def test_hscharr_mask():
     """Horizontal Scharr on a masked array should be zero"""
     np.random.seed(0)
     result = F.hscharr(np.random.uniform(size=(10, 10)),
-                      np.zeros((10, 10), bool))
+                       np.zeros((10, 10), bool))
     assert (np.all(result == 0))
 
 
@@ -184,7 +184,7 @@ def test_vscharr_mask():
     """Vertical Scharr on a masked array should be zero"""
     np.random.seed(0)
     result = F.vscharr(np.random.uniform(size=(10, 10)),
-                      np.zeros((10, 10), bool))
+                       np.zeros((10, 10), bool))
     assert (np.all(result == 0))
 
 
@@ -319,7 +319,7 @@ def test_vprewitt_horizontal():
 
 def test_horizontal_mask_line():
     """Horizontal edge filters mask pixels surrounding input mask."""
-    vgrad, _ = np.mgrid[:1:11j, :1:11j] # vertical gradient with spacing 0.1
+    vgrad, _ = np.mgrid[:1:11j, :1:11j]  # vertical gradient with spacing 0.1
     vgrad[5, :] = 1                     # bad horizontal line
 
     mask = np.ones_like(vgrad)
@@ -336,7 +336,7 @@ def test_horizontal_mask_line():
 
 def test_vertical_mask_line():
     """Vertical edge filters mask pixels surrounding input mask."""
-    _, hgrad = np.mgrid[:1:11j, :1:11j] # horizontal gradient with spacing 0.1
+    _, hgrad = np.mgrid[:1:11j, :1:11j]  # horizontal gradient with spacing 0.1
     hgrad[:, 5] = 1                     # bad vertical line
 
     mask = np.ones_like(hgrad)

@@ -6,6 +6,7 @@ from util import histograms
 
 
 class ColorHistogram(QWidget):
+
     '''A Class which draws a scaling histogram in
     a widget.
 
@@ -103,6 +104,7 @@ class ColorHistogram(QWidget):
 
 
 class QuadHistogram(QFrame):
+
     '''A class which uses ColorHistogram to draw
     the 4 histograms of an image. R, G, B, and Value.
 

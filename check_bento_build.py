@@ -73,7 +73,6 @@ def print_results(cy_bento, cy_setup):
         info("Extensions found in 'bento.info' but not in any 'setup.py:")
         print('\n'.join(cy_bento))
 
-
     if cy_setup:
         info("Extensions found in a 'setup.py' but not in any 'bento.info:")
         print('\n'.join(cy_setup))

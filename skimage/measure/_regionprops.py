@@ -20,14 +20,14 @@ PROPS = (
     'CentralMoments',
     'Centroid',
     'ConvexArea',
-#    'ConvexHull',
+    #    'ConvexHull',
     'ConvexImage',
     'Coordinates',
     'Eccentricity',
     'EquivDiameter',
     'EulerNumber',
     'Extent',
-#    'Extrema',
+    #    'Extrema',
     'FilledArea',
     'FilledImage',
     'HuMoments',
@@ -41,10 +41,10 @@ PROPS = (
     'NormalizedMoments',
     'Orientation',
     'Perimeter',
-#    'PixelIdxList',
-#    'PixelList',
+    #    'PixelIdxList',
+    #    'PixelList',
     'Solidity',
-#    'SubarrayIdx'
+    #    'SubarrayIdx'
     'WeightedCentralMoments',
     'WeightedCentroid',
     'WeightedHuMoments',
@@ -445,12 +445,12 @@ def perimeter(image, neighbourhood=4):
 
     # perimeter contribution: corresponding values in convolved image
     perimeter_weights = {
-        1:                 (5, 7, 15, 17, 25, 27),
-        sqrt(2):           (21, 33),
+        1: (5, 7, 15, 17, 25, 27),
+        sqrt(2): (21, 33),
         (1 + sqrt(2)) / 2: (13, 23)
     }
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
-                                                               [ 2, 1,  2],
+                                                               [2, 1, 2],
                                                                [10, 2, 10]]),
                                        mode='constant', cval=0)
     total_perimeter = 0

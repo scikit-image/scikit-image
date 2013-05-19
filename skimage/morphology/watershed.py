@@ -124,16 +124,16 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     separate overlapping spheres.
     """
 
-    if connectivity == None:
+    if connectivity is None:
         c_connectivity = scipy.ndimage.generate_binary_structure(image.ndim, 1)
     else:
         c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image.ndim:
             raise ValueError("Connectivity dimension must be same as image")
-    if offset == None:
+    if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
             raise ValueError("Connectivity array must have an unambiguous "
-                    "center")
+                             "center")
         #
         # offset to center of connectivity array
         #
@@ -144,7 +144,11 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     pads = offset
 
     def pad(im):
-        new_im = np.zeros([i + 2 * p for i, p in zip(im.shape, pads)], im.dtype)
+        new_im = np.zeros(
+            [i + 2 * p for i,
+             p in zip(im.shape,
+                      pads)],
+            im.dtype)
         new_im[[slice(p, -p, None) for p in pads]] = im
         return new_im
 
@@ -162,7 +166,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
                          "as image (ndim=%d)" % (c_markers.ndim, c_image.ndim))
     if c_markers.shape != c_image.shape:
         raise ValueError("image and markers must have the same shape")
-    if mask != None:
+    if mask is not None:
         c_mask = np.ascontiguousarray(mask, dtype=bool)
         if c_mask.ndim != c_markers.ndim:
             raise ValueError("mask must have same # of dimensions as image")
@@ -208,7 +212,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         # If nothing is labeled, the output is empty and we don't have to
         # do anything
         c_output = c_output.flatten()
-        if c_mask == None:
+        if c_mask is None:
             c_mask = np.ones(c_image.shape, np.int8).flatten()
         else:
             c_mask = c_mask.astype(np.int8).flatten()
@@ -219,7 +223,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
                              np.array(c_image.shape, np.int32),
                              c_output)
     c_output = c_output.reshape(c_image.shape)[[slice(1, -1, None)] *
-                                                image.ndim]
+                                               image.ndim]
     try:
         return c_output.astype(markers.dtype)
     except:
@@ -400,7 +404,7 @@ def _slow_watershed(image, markers, connectivity=8, mask=None):
                 continue
             if labels[x, y]:
                 continue
-            if mask != None and not mask[x, y]:
+            if mask is not None and not mask[x, y]:
                 continue
             # label the pixel
             labels[x, y] = pix_label

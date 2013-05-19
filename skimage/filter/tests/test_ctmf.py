@@ -49,8 +49,7 @@ def test_02_02_median_bigger():
     np.random.seed(0)
     img = np.random.uniform(size=(20, 20))
     result = median_filter(img, 40, np.ones((20, 20), bool))
-    sorted = np.ravel(img)
-    sorted.sort()
+    sorted = sorted(np.ravel(img))
     min_acceptable = sorted[198]
     max_acceptable = sorted[202]
     assert (np.all(result >= min_acceptable))
@@ -79,8 +78,7 @@ def test_03_01_shape():
     np.random.seed(0)
     img = np.random.uniform(size=(21, 21))
     result = median_filter(img, radius, np.ones((21, 21), bool))
-    sorted = img[octagon]
-    sorted.sort()
+    sorted = sorted(img[octagon])
     min_acceptable = sorted[len(sorted) / 2 - 1]
     max_acceptable = sorted[len(sorted) / 2 + 1]
     assert (result[10, 10] >= min_acceptable)

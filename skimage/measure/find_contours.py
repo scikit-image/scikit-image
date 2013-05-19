@@ -103,9 +103,9 @@ def find_contours(array, level,
     if (fully_connected not in _param_options or
        positive_orientation not in _param_options):
         raise ValueError('Parameters "fully_connected" and'
-        ' "positive_orientation" must be either "high" or "low".')
+                         ' "positive_orientation" must be either "high" or "low".')
     point_list = _find_contours.iterate_and_store(array, level,
-        fully_connected == 'high')
+                                                  fully_connected == 'high')
     contours = _assemble_contours(_take_2(point_list))
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]

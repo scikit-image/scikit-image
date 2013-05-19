@@ -21,6 +21,7 @@ def test_color():
     assert_array_equal(seg[:10, 10:], 1)
     assert_array_equal(seg[10:, 10:], 3)
 
+
 def test_gray():
     rnd = np.random.RandomState(0)
     img = np.zeros((20, 21))

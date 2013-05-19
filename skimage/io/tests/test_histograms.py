@@ -5,6 +5,7 @@ from skimage.io._plugins._histograms import histograms
 
 
 class TestHistogram:
+
     def test_basic(self):
         img = np.ones((50, 50, 3), dtype=np.uint8)
         r, g, b, v = histograms(img, 255)

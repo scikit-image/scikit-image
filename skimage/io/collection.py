@@ -69,6 +69,7 @@ def alphanumeric_key(s):
 
 
 class MultiImage(object):
+
     """A class containing a single multi-frame image.
 
     Parameters
@@ -221,6 +222,7 @@ class MultiImage(object):
 
 
 class ImageCollection(object):
+
     """Load and manage a collection of image files.
 
     Note that files are always stored in alphabetical order. Also note that
@@ -351,12 +353,12 @@ class ImageCollection(object):
         if type(n) not in [int, slice]:
             raise TypeError('slicing must be with an int or slice object')
 
-        if type(n) is int:
+        if isinstance(n, int):
             n = self._check_imgnum(n)
             idx = n % len(self.data)
 
             if (self.conserve_memory and n != self._cached) or \
-                (self.data[idx] is None):
+                    (self.data[idx] is None):
                 self.data[idx] = self.load_func(self.files[n])
                 self._cached = n
 

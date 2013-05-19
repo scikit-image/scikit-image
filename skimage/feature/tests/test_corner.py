@@ -93,8 +93,8 @@ def test_rotated_lena():
 
 def test_subpix():
     img = np.zeros((50, 50))
-    img[:25,:25] = 255
-    img[25:,25:] = 255
+    img[:25, :25] = 255
+    img[25:, 25:] = 255
     corner = peak_local_max(corner_harris(img), num_peaks=1)
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (24.5, 24.5))

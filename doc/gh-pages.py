@@ -35,6 +35,8 @@ pages_repo = 'git@github.com:scikit-image/docs.git'
 #-----------------------------------------------------------------------------
 # Functions
 #-----------------------------------------------------------------------------
+
+
 def sh(cmd):
     """Execute command in a subshell, return status code."""
     return check_call(cmd, shell=True)
@@ -69,7 +71,7 @@ def sh3(cmd):
 
 def init_repo(path):
     """clone the gh-pages repo if we haven't already."""
-    sh("git clone %s %s"%(pages_repo, path))
+    sh("git clone %s %s" % (pages_repo, path))
     here = os.getcwd()
     cd(path)
     sh('git checkout gh-pages')
@@ -107,7 +109,8 @@ if __name__ == '__main__':
     shutil.rmtree(dest, ignore_errors=True)
     shutil.copytree(html_dir, dest)
     # copy pdf file into tree
-    #shutil.copy(pjoin(pdf_dir, 'scikits.image.pdf'), pjoin(dest, 'scikits.image.pdf'))
+    # shutil.copy(pjoin(pdf_dir, 'scikits.image.pdf'), pjoin(dest,
+    # 'scikits.image.pdf'))
 
     try:
         cd(pages_dir)

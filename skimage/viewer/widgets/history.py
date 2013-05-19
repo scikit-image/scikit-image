@@ -14,6 +14,7 @@ __all__ = ['OKCancelButtons', 'SaveButtons']
 
 
 class OKCancelButtons(BaseWidget):
+
     """Buttons that close the parent plugin.
 
     OK will replace the original image with the current (filtered) image.
@@ -46,6 +47,7 @@ class OKCancelButtons(BaseWidget):
 
 
 class SaveButtons(BaseWidget):
+
     """Buttons to save image to io.stack or to a file."""
 
     def __init__(self, name='Save to:', default_format='png'):
@@ -80,7 +82,7 @@ class SaveButtons(BaseWidget):
         filename = str(QtGui.QFileDialog.getSaveFileName())
         if len(filename) == 0:
             return
-        #TODO: io plugins should assign default image formats
+        # TODO: io plugins should assign default image formats
         basename, ext = os.path.splitext(filename)
         if not ext:
             filename = '%s.%s' % (filename, self.default_format)

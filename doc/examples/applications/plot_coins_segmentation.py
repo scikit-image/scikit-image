@@ -62,7 +62,7 @@ edge-detector.
 """
 
 from skimage.filter import canny
-edges = canny(coins/255.)
+edges = canny(coins / 255.)
 
 plt.figure(figsize=(4, 3))
 plt.imshow(edges, cmap=plt.cm.gray, interpolation='nearest')
@@ -114,7 +114,7 @@ Region-based segmentation
 
 We therefore try a region-based method using the
 watershed transform. First, we find an elevation map using the Sobel gradient of the
-image. 
+image.
 
 """
 
@@ -160,7 +160,7 @@ plt.title('segmentation')
 """
 .. image:: PLOT2RST.current_figure
 
-This last method works even better, and the coins can be segmented and 
+This last method works even better, and the coins can be segmented and
 labeled individually.
 
 """

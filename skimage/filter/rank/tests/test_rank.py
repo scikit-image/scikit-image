@@ -298,7 +298,8 @@ def test_smallest_selem16():
 
 
 def test_empty_selem():
-    # check that min, max and mean returns zeros if structuring element is empty
+    # check that min, max and mean returns zeros if structuring element is
+    # empty
 
     image = np.zeros((5, 5), dtype=np.uint16)
     out = np.zeros_like(image)

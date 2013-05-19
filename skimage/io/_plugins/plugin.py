@@ -2,7 +2,13 @@
 
 """
 
-__all__ = ['use', 'available', 'call', 'info', 'configuration', 'reset_plugins']
+__all__ = [
+    'use',
+    'available',
+    'call',
+    'info',
+    'configuration',
+    'reset_plugins']
 
 from ConfigParser import ConfigParser
 import os.path
@@ -94,7 +100,7 @@ command.  A list of all available plugins can be found using
         try:
             func = [f for (p, f) in plugin_funcs if p == plugin][0]
         except IndexError:
-            raise RuntimeError('Could not find the plugin "%s" for %s.' % \
+            raise RuntimeError('Could not find the plugin "%s" for %s.' %
                                (plugin, kind))
 
     return func(*args, **kwargs)
@@ -129,7 +135,7 @@ def use(name, kind=None):
         kind = plugin_store.keys()
     else:
         if not kind in plugin_provides[name]:
-            raise RuntimeError("Plugin %s does not support `%s`." % \
+            raise RuntimeError("Plugin %s does not support `%s`." %
                                (name, kind))
 
         if kind == 'imshow':
@@ -177,7 +183,7 @@ def available(loaded=False):
     d = {}
     for plugin in plugin_provides:
         if not loaded or plugin in active_plugins:
-            d[plugin] = [f for f in plugin_provides[plugin] \
+            d[plugin] = [f for f in plugin_provides[plugin]
                          if not f.startswith('_')]
 
     return d

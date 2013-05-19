@@ -21,6 +21,7 @@ except ImportError:
 
 
 class CvVideo(object):
+
     """
     Opencv-based video loader.
 
@@ -109,6 +110,7 @@ class CvVideo(object):
 
 
 class GstVideo(object):
+
     """
     GStreamer-based video loader.
 
@@ -202,7 +204,10 @@ class GstVideo(object):
         frame_number : int
             Frame position
         """
-        self.pipeline.seek_simple(gst.FORMAT_DEFAULT, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, frame_number)
+        self.pipeline.seek_simple(
+            gst.FORMAT_DEFAULT,
+            gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT,
+            frame_number)
 
     def seek_time(self, milliseconds):
         """
@@ -213,7 +218,10 @@ class GstVideo(object):
         milliseconds : int
             Time position
         """
-        self.pipeline.seek_simple(gst.FORMAT_TIME, gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT, milliseconds / 1000.0 * gst.SECOND)
+        self.pipeline.seek_simple(
+            gst.FORMAT_TIME,
+            gst.SEEK_FLAG_FLUSH | gst.SEEK_FLAG_KEY_UNIT,
+            milliseconds / 1000.0 * gst.SECOND)
 
     def frame_count(self):
         """
@@ -239,6 +247,7 @@ class GstVideo(object):
 
 
 class Video(object):
+
     """
     Video loader. Supports Opencv and Gstreamer backends.
 
@@ -256,7 +265,7 @@ class Video(object):
         Backend to use.
     """
     def __init__(self, source=None, size=None, sync=False, backend=None):
-        if backend == None:
+        if backend is None:
             # select backend that is available
             if gstreamer_available:
                 self.video = GstVideo(source, size, sync)

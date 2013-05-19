@@ -44,7 +44,9 @@ for e in examples:
 
 javascript = javascript.replace('{{IMAGES}}', str(images))
 javascript = javascript.replace('{{LINKS}}', str(links))
-javascript = javascript.replace('{{GALLERY_DIV}}', ''.join(gallery_div.split('\n')))
+javascript = javascript.replace(
+    '{{GALLERY_DIV}}',
+    ''.join(gallery_div.split('\n')))
 
 f = open(js_fn, 'w')
 f.write(javascript)

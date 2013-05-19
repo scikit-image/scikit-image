@@ -7,6 +7,7 @@ from skimage.filter.thresholding import threshold_otsu, threshold_adaptive
 
 
 class TestSimpleImage():
+
     def setup(self):
         self.image = np.array([[0, 0, 1, 3, 5],
                                [0, 1, 4, 3, 4],
@@ -29,44 +30,44 @@ class TestSimpleImage():
         def func(arr):
             return arr.sum() / arr.shape[0]
         ref = np.array(
-            [[False, False, False, False,  True],
-             [False, False,  True, False,  True],
-             [False, False,  True,  True, False],
-             [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+            [[False, False, False, False, True],
+             [False, False, True, False, True],
+             [False, False, True, True, False],
+             [False, True, True, False, False],
+             [True, True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='generic', param=func)
         assert_array_equal(ref, out)
 
     def test_threshold_adaptive_gaussian(self):
         ref = np.array(
-            [[False, False, False, False,  True],
-             [False, False,  True, False,  True],
-             [False, False,  True,  True, False],
-             [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+            [[False, False, False, False, True],
+             [False, False, True, False, True],
+             [False, False, True, True, False],
+             [False, True, True, False, False],
+             [True, True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='gaussian')
         assert_array_equal(ref, out)
 
     def test_threshold_adaptive_mean(self):
         ref = np.array(
-            [[False, False, False, False,  True],
-             [False, False,  True, False,  True],
-             [False, False,  True,  True, False],
-             [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+            [[False, False, False, False, True],
+             [False, False, True, False, True],
+             [False, False, True, True, False],
+             [False, True, True, False, False],
+             [True, True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='mean')
         assert_array_equal(ref, out)
 
     def test_threshold_adaptive_median(self):
         ref = np.array(
-            [[False, False, False, False,  True],
-             [False, False,  True, False, False],
-             [False, False,  True, False, False],
-             [False, False,  True,  True, False],
-             [False,  True, False, False, False]]
+            [[False, False, False, False, True],
+             [False, False, True, False, False],
+             [False, False, True, False, False],
+             [False, False, True, True, False],
+             [False, True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='median')
         assert_array_equal(ref, out)

@@ -21,6 +21,8 @@ image = data.moon()
 image = rescale_intensity(image, in_range=(50, 200))
 
 # convenience function for plotting images
+
+
 def imshow(image, **kwargs):
     plt.figure(figsize=(5, 4))
     plt.imshow(image, **kwargs)

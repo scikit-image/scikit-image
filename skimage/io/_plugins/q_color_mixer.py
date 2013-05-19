@@ -6,6 +6,7 @@ from util import ColorMixer
 
 
 class IntelligentSlider(QWidget):
+
     ''' A slider that adds a 'name' attribute and calls a callback
     with 'name' as an argument to the registerd callback.
 
@@ -36,7 +37,7 @@ class IntelligentSlider(QWidget):
 
         self.value_label = QLabel()
         self.value_label.setText('%2.2f' % (self.slider.value() * self.a
-                                             + self.b))
+                                            + self.b))
         self.value_label.setAlignment(QtCore.Qt.AlignCenter)
 
         self.layout = QGridLayout(self)
@@ -67,6 +68,7 @@ class IntelligentSlider(QWidget):
 
 
 class MixerPanel(QtGui.QFrame):
+
     '''A color mixer to hook up to an image.
     You pass the image you the panel to operate on
     and it operates on that image in place. You also
@@ -75,7 +77,7 @@ class MixerPanel(QtGui.QFrame):
     your image.'''
     def __init__(self, img):
         QtGui.QFrame.__init__(self)
-        #self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Sunken)
+        # self.setFrameStyle(QtGui.QFrame.Box|QtGui.QFrame.Sunken)
 
         self.img = img
         self.mixer = ColorMixer(self.img)

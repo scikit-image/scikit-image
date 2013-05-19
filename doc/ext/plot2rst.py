@@ -118,6 +118,7 @@ GALLERY_IMAGE_TEMPLATE = """
 
 
 class Path(str):
+
     """Path object for manipulating directory and file paths."""
 
     def __init__(self, path):
@@ -172,7 +173,7 @@ def setup(app):
 def generate_example_galleries(app):
     cfg = app.builder.config
 
-    doc_src = Path(os.path.abspath(app.builder.srcdir)) # path/to/doc/source
+    doc_src = Path(os.path.abspath(app.builder.srcdir))  # path/to/doc/source
 
     if isinstance(cfg.plot2rst_paths, tuple):
         cfg.plot2rst_paths = [cfg.plot2rst_paths]
@@ -191,7 +192,7 @@ def generate_examples_and_gallery(example_dir, rst_dir, cfg):
     rst_dir.makedirs()
 
     # we create an index.rst with all examples
-    gallery_index = file(rst_dir.pjoin('index'+cfg.source_suffix), 'w')
+    gallery_index = file(rst_dir.pjoin('index' + cfg.source_suffix), 'w')
 
     # Here we don't use an os.walk, but we recurse only twice: flat is
     # better than nested.
@@ -225,11 +226,11 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     gallery_template = src_dir.pjoin(index_name)
     if not os.path.exists(gallery_template):
         print src_dir
-        print 80*'_'
+        print 80 * '_'
         print ('Example directory %s does not have a %s file'
-                        % (src_dir, index_name))
+               % (src_dir, index_name))
         print 'Skipping this directory'
-        print 80*'_'
+        print 80 * '_'
         return
 
     gallery_description = file(gallery_template).read()
@@ -237,8 +238,8 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
 
     rst_dir.makedirs()
     examples = [fname for fname in sorted(src_dir.listdir(), key=_plots_first)
-                      if fname.endswith('py')]
-    ex_names = [ex[:-3] for ex in examples] # strip '.py' extension
+                if fname.endswith('py')]
+    ex_names = [ex[:-3] for ex in examples]  # strip '.py' extension
     if depth == 0:
         sub_dir = Path('')
     else:
@@ -309,7 +310,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
 
     blocks = split_code_and_text_blocks(example_file)
     if blocks[0][2].startswith('#!'):
-        blocks.pop(0) # don't add shebang line to rst file.
+        blocks.pop(0)  # don't add shebang line to rst file.
 
     rst_link = '.. _example_%s:\n\n' % (last_dir + src_name)
     figure_list, rst = process_blocks(blocks, src_path, image_path, cfg)
@@ -332,7 +333,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
 
     example_rst += CODE_LINK.format(src_name)
 
-    f = open(rst_path,'w')
+    f = open(rst_path, 'w')
     f.write(example_rst)
     f.flush()
 
@@ -367,7 +368,7 @@ def save_thumbnail(image, thumb_path, shape):
 
     i = (shape[0] - small_shape[0]) // 2
     j = (shape[1] - small_shape[1]) // 2
-    thumb[i:i+small_shape[0], j:j+small_shape[1]] = small_image
+    thumb[i:i + small_shape[0], j:j + small_shape[1]] = small_image
 
     io.imsave(thumb_path, thumb)
 
@@ -404,7 +405,7 @@ def split_code_and_text_blocks(source_file):
     for i, (start, end) in enumerate(slice_ranges):
         block_label = 'text' if i in idx_text_block else 'code'
         # subtract 1 from indices b/c line numbers start at 1, not 0
-        content = ''.join(source_lines[start-1:end-1])
+        content = ''.join(source_lines[start - 1:end - 1])
         blocks.append((block_label, (start, end), content))
     return blocks
 
@@ -426,14 +427,14 @@ def get_block_edges(source_file):
             t_id, t_str, (srow, scol), (erow, ecol), src_line = token_tuple
             if (token.tok_name[t_id] == 'STRING' and scol == 0):
                 # Add one point to line after text (for later slicing)
-                block_edges.extend((srow, erow+1))
+                block_edges.extend((srow, erow + 1))
     idx_first_text_block = 0
     # when example doesn't start with text block.
     if not block_edges[0] == 1:
         block_edges.insert(0, 1)
         idx_first_text_block = 1
     # when example doesn't end with text block.
-    if not block_edges[-1] == erow: # iffy: I'm using end state of loop
+    if not block_edges[-1] == erow:  # iffy: I'm using end state of loop
         block_edges.append(erow)
     return block_edges, idx_first_text_block
 
@@ -526,4 +527,3 @@ def save_all_figures(image_path):
         plt.savefig(image_path.format(fig_num))
         figure_list.append(image_fmt_str.format(fig_num))
     return figure_list
-

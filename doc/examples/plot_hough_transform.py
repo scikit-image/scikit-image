@@ -89,7 +89,7 @@ plt.subplot(132)
 plt.imshow(np.log(1 + h),
            extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]),
                    d[-1], d[0]],
-           cmap=plt.cm.gray, aspect=1/1.5)
+           cmap=plt.cm.gray, aspect=1 / 1.5)
 plt.title('Hough transform')
 plt.xlabel('Angles (degrees)')
 plt.ylabel('Distance (pixels)')

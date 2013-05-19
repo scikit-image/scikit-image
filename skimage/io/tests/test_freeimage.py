@@ -55,6 +55,7 @@ def test_imread_uint16_big_endian():
 
 
 class TestSave:
+
     def roundtrip(self, dtype, x, suffix):
         f = NamedTemporaryFile(suffix='.' + suffix)
         fname = f.name
@@ -66,11 +67,11 @@ class TestSave:
     @skipif(not FI_available)
     def test_imsave_roundtrip(self):
         for shape, dtype, format in [
-              [(10, 10), (np.uint8, np.uint16), ('tif', 'png')],
-              [(10, 10), (np.float32,), ('tif',)],
-              [(10, 10, 3), (np.uint8,), ('png',)],
-              [(10, 10, 4), (np.uint8,), ('png',)]
-            ]:
+            [(10, 10), (np.uint8, np.uint16), ('tif', 'png')],
+            [(10, 10), (np.float32,), ('tif',)],
+            [(10, 10, 3), (np.uint8,), ('png',)],
+            [(10, 10, 4), (np.uint8,), ('png',)]
+        ]:
             tests = [(d, f) for d in dtype for f in format]
             for d, f in tests:
                 x = np.ones(shape, dtype=d) * np.random.random(shape)

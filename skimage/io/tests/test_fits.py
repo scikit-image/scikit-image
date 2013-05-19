@@ -25,7 +25,7 @@ def test_fits_plugin_import():
     except ImportError:
         assert pyfits_available == False
     else:
-        assert pyfits_available == True
+        assert pyfits_available
 
 
 def teardown():
@@ -54,7 +54,7 @@ def test_imread_collection_single_MEF():
     testfile = os.path.join(data_dir, 'multi.fits')
     ic1 = io.imread_collection(testfile)
     ic2 = io.ImageCollection([(testfile, 1), (testfile, 2), (testfile, 3)],
-              load_func=fplug.FITSFactory)
+                             load_func=fplug.FITSFactory)
     assert _same_ImageCollection(ic1, ic2)
 
 

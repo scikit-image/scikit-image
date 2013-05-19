@@ -14,6 +14,7 @@ except:
 
 
 class GuiLockError(Exception):
+
     def __init__(self, msg):
         self.msg = msg
 
@@ -22,6 +23,7 @@ class GuiLockError(Exception):
 
 
 class WindowManager(object):
+
     ''' A class to keep track of spawned windows,
     and make any needed callback once all the windows,
     are closed.'''
@@ -35,8 +37,8 @@ class WindowManager(object):
 
     def _check_locked(self):
         if not self._gui_lock:
-            raise GuiLockError(\
-            'Must first acquire the gui lock before using this image manager')
+            raise GuiLockError(
+                'Must first acquire the gui lock before using this image manager')
 
     def _exec_callback(self):
         if self._callback:
@@ -44,8 +46,8 @@ class WindowManager(object):
 
     def acquire(self, kit):
         if self._gui_lock:
-            raise GuiLockError(\
-            'The gui lock can only be acquired by one toolkit per session. \
+            raise GuiLockError(
+                'The gui lock can only be acquired by one toolkit per session. \
             The lock is already aquired by %s' % self._guikit)
         else:
             self._gui_lock = True
@@ -179,6 +181,7 @@ def histograms(img, nbins):
 
 
 class ImgThread(threading.Thread):
+
     def __init__(self, func, *args):
         super(ImgThread, self).__init__()
         self.func = func
@@ -189,6 +192,7 @@ class ImgThread(threading.Thread):
 
 
 class ThreadDispatch(object):
+
     def __init__(self, img, stateimg, func, *args):
 
         height = img.shape[0]
@@ -228,6 +232,7 @@ class ThreadDispatch(object):
 
 
 class ColorMixer(object):
+
     ''' a class to manage mixing colors in an image.
     The input array must be an RGB uint8 image.
 
@@ -260,7 +265,7 @@ class ColorMixer(object):
     valid_channels = [RED, GREEN, BLUE]
 
     def __init__(self, img):
-        if type(img) != np.ndarray:
+        if not isinstance(img, np.ndarray):
             raise ValueError('Image must be a numpy array')
         if img.dtype != np.uint8:
             raise ValueError('Image must have dtype uint8')

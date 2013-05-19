@@ -6,7 +6,7 @@ try:
     from PyQt4.QtCore import Qt
     from PyQt4.QtGui import QDialog
 except ImportError:
-    QDialog = object # hack to prevent nosetest and autodoc errors
+    QDialog = object  # hack to prevent nosetest and autodoc errors
     print("Could not import PyQt4 -- skimage.viewer not available.")
 
 try:
@@ -18,6 +18,7 @@ from ..utils import RequiredAttr, init_qtapp
 
 
 class Plugin(QDialog):
+
     """Base class for plugins that interact with an ImageViewer.
 
     A plugin connects an image filter (or another function) to an image viewer.
@@ -96,7 +97,7 @@ class Plugin(QDialog):
         self.row = 0
 
         self.arguments = []
-        self.keyword_arguments= {}
+        self.keyword_arguments = {}
 
         if useblit is None:
             useblit = True if mpl.backends.backend.endswith('Agg') else False
@@ -120,7 +121,7 @@ class Plugin(QDialog):
 
         self.image_viewer = image_viewer
         self.image_viewer.plugins.append(self)
-        #TODO: Always passing image as first argument may be bad assumption.
+        # TODO: Always passing image as first argument may be bad assumption.
         self.arguments.append(self.image_viewer.original_image)
 
         if self.draws_on_image:

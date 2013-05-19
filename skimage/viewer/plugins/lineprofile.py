@@ -7,10 +7,11 @@ from .plotplugin import PlotPlugin
 
 __all__ = ['LineProfile']
 
-#TODO: Extract line tool and add it to a new `canvastools` subpackage.
+# TODO: Extract line tool and add it to a new `canvastools` subpackage.
 
 
 class LineProfile(PlotPlugin):
+
     """Plugin to compute interpolated intensity under a scan line on an image.
 
     See PlotPlugin and Plugin classes for additional details.
@@ -137,7 +138,7 @@ class LineProfile(PlotPlugin):
         xy = np.asarray(self.scan_line.get_xydata())
         xyt = self.scan_line.get_transform().transform(xy)
         xt, yt = xyt[:, 0], xyt[:, 1]
-        d = np.sqrt((xt - event.x)**2 + (yt - event.y)**2)
+        d = np.sqrt((xt - event.x) ** 2 + (yt - event.y) ** 2)
         indseq = np.nonzero(np.equal(d, np.amin(d)))[0]
         ind = indseq[0]
         if d[ind] >= self.epsilon:
@@ -147,7 +148,7 @@ class LineProfile(PlotPlugin):
     def on_mouse_press(self, event):
         if event.button != 1:
             return
-        if event.inaxes == None:
+        if event.inaxes is None:
             return
         self._active_pt = self.get_pt_under_cursor(event)
 
@@ -222,11 +223,11 @@ def profile_line(img, end_pts, linewidth=1):
     # Quick calculation if perfectly horizontal or vertical (remove?)
     if x1 == x2:
         pixels = img[min(y1, y2): max(y1, y2) + 1,
-                     x1 - linewidth / 2:  x1 + linewidth / 2 + 1]
+                     x1 - linewidth / 2: x1 + linewidth / 2 + 1]
         intensities = pixels.mean(axis=1)
         return intensities
     elif y1 == y2:
-        pixels = img[y1 - linewidth / 2:  y1 + linewidth / 2 + 1,
+        pixels = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
                      min(x1, x2): max(x1, x2) + 1]
         intensities = pixels.mean(axis=0)
         return intensities

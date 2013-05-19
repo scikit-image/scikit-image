@@ -33,12 +33,18 @@ def test_radon_iradon():
 
         assert delta < 0.05
 
-    reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
+    reconstructed = iradon(
+        radon(image),
+        filter="ramp",
+        interpolation="nearest")
     delta = np.mean(abs(image - reconstructed))
     assert delta < 0.05
     size = 20
     image = np.tri(size) + np.tri(size)[::-1]
-    reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
+    reconstructed = iradon(
+        radon(image),
+        filter="ramp",
+        interpolation="nearest")
 
 
 def test_iradon_angles():
@@ -51,14 +57,14 @@ def test_iradon_angles():
     # Large number of projections: a good quality is expected
     nb_angles = 200
     radon_image_200 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                    endpoint=False))
+                                                     endpoint=False))
     reconstructed = iradon(radon_image_200)
     delta_200 = np.mean(abs(rescale(image) - rescale(reconstructed)))
     assert delta_200 < 0.03
     # Lower number of projections
     nb_angles = 80
     radon_image_80 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                    endpoint=False))
+                                                    endpoint=False))
     # Test whether the sum of all projections is approximately the same
     s = radon_image_80.sum(axis=0)
     assert np.allclose(s, s[0], rtol=0.01)

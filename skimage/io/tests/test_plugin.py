@@ -28,6 +28,7 @@ def teardown_module(self):
 
 
 class TestPlugin:
+
     def test_read(self):
         io.imread('test.png', as_grey=True, dtype='i4', plugin='test')
 

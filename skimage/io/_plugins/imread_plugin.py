@@ -10,6 +10,7 @@ except ImportError:
                       "Please refer to http://pypi.python.org/pypi/imread/ "
                       "for further instructions.")
 
+
 def imread(fname, dtype=None):
     """Load an image from file.
 
@@ -24,6 +25,7 @@ def imread(fname, dtype=None):
         im = convert(im, dtype)
     return im
 
+
 def imsave(fname, arr, format_str=None):
     """Save an image to disk.
 
@@ -34,11 +36,10 @@ def imsave(fname, arr, format_str=None):
     arr : ndarray of uint8 or uint16
         Array (image) to save.
     format_str: str,optional
-        Format to save as. 
+        Format to save as.
 
     Notes
     -----
     Currently, only 8-bit precision is supported.
     """
     return _imread.imsave(fname, arr, formatstr=format_str)
-

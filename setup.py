@@ -106,7 +106,7 @@ def check_requirements():
 
 # uses searching from waf docs
 # http://docs.waf.googlecode.com\
-#    /git/book_16/single.html#_download_and_installation
+# /git/book_16/single.html#_download_and_installation
 
 
 def waflib_exists():
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     # check for bento installation
     bento_path = find_executable('bentomaker')
     if bento_path and waflib_exists():
-        exec_command(bento_path+' install')
+        exec_command(bento_path + ' install')
     else:
         setup(
             name=DISTNAME,

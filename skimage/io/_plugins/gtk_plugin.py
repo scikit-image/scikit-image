@@ -5,7 +5,7 @@ try:
     # or else the gui import might trample another
     # gui's pyos_inputhook.
     window_manager.acquire('gtk')
-except GuiLockError, gle:
+except GuiLockError as gle:
     print gle
 else:
     try:
@@ -17,6 +17,7 @@ else:
     else:
 
         class ImageWindow(gtk.Window):
+
             def __init__(self, arr, mgr):
                 gtk.Window.__init__(self)
                 self.mgr = mgr

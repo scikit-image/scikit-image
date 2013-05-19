@@ -125,7 +125,7 @@ def _setup_log():
 
     formatter = logging.Formatter(
         '%(name)s: %(levelname)s: %(message)s'
-        )
+    )
 
     try:
         handler = logging.StreamHandler(stream=sys.stdout)

@@ -8,6 +8,7 @@ from .base import Plugin
 
 
 class PlotCanvas(MatplotlibCanvas):
+
     """Canvas for displaying images.
 
     This canvas derives from Matplotlib, and has attributes `fig` and `ax`,
@@ -18,7 +19,9 @@ class PlotCanvas(MatplotlibCanvas):
         super(PlotCanvas, self).__init__(parent, self.fig, **kwargs)
         self.setMinimumHeight(150)
 
+
 class PlotPlugin(Plugin):
+
     """Plugin for ImageViewer that contains a plot canvas.
 
     Base class for plugins that contain a Matplotlib plot canvas, which can,
@@ -39,7 +42,7 @@ class PlotPlugin(Plugin):
     def add_plot(self, height=4, width=4):
         self.canvas = PlotCanvas(self, height, width)
         self.fig = self.canvas.fig
-        #TODO: Converted color is slightly different than Qt background.
+        # TODO: Converted color is slightly different than Qt background.
         qpalette = QtGui.QPalette()
         qcolor = qpalette.color(QtGui.QPalette.Window)
         bgcolor = qcolor.toRgb().value()

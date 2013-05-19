@@ -67,7 +67,7 @@ def _compute_weights_3d(data, beta=130, eps=1.e-6, depth=1.,
     gradients = 0
     for channel in range(0, data.shape[-1]):
         gradients += _compute_gradients_3d(data[..., channel],
-                                               depth=depth) ** 2
+                                           depth=depth) ** 2
     # All channels considered together in this standard deviation
     beta /= 10 * data.std()
     if multichannel:
@@ -100,8 +100,8 @@ def _make_laplacian_sparse(edges, weights):
                             shape=(pixel_nb, pixel_nb))
     connect = - np.ravel(lap.sum(axis=1))
     lap = sparse.coo_matrix((np.hstack((data, connect)),
-                (np.hstack((i_indices, diag)), np.hstack((j_indices, diag)))),
-                shape=(pixel_nb, pixel_nb))
+                           (np.hstack((i_indices, diag)), np.hstack((j_indices, diag)))),
+        shape=(pixel_nb, pixel_nb))
     return lap.tocsr()
 
 
@@ -374,7 +374,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if mode == 'cg_mg':
         if not amg_loaded:
             warnings.warn(
-            """pyamg (http://code.google.com/p/pyamg/)) is needed to use
+                """pyamg (http://code.google.com/p/pyamg/)) is needed to use
             this mode, but is not installed. The 'cg' mode will be used
             instead.""")
             X = _solve_cg(lap_sparse, B, tol=tol,
@@ -407,7 +407,7 @@ def _solve_bf(lap_sparse, B, return_full_prob=False):
     """
     lap_sparse = lap_sparse.tocsc()
     solver = sparse.linalg.factorized(lap_sparse.astype(np.double))
-    X = np.array([solver(np.array((-B[i]).todense()).ravel())\
+    X = np.array([solver(np.array((-B[i]).todense()).ravel())
                   for i in range(len(B))])
     if not return_full_prob:
         X = np.argmax(X, axis=0)

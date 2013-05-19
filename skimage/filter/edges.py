@@ -24,8 +24,8 @@ def _mask_filter_result(result, mask):
     affect values in the result.
     """
     if mask is None:
-        result[0, :] = 0
-        result[-1, :] = 0
+        result[0,:] = 0
+        result[-1,:] = 0
         result[:, 0] = 0
         result[:, -1] = 0
         return result
@@ -94,7 +94,7 @@ def hsobel(image, mask=None):
     result = np.abs(convolve(image,
                              np.array([[ 1, 2, 1],
                                        [ 0, 0, 0],
-                                       [-1,-2,-1]]).astype(float) / 4.0))
+                                       [-1, -2, -1]]).astype(float) / 4.0))
     return _mask_filter_result(result, mask)
 
 
@@ -301,7 +301,7 @@ def hprewitt(image, mask=None):
     result = np.abs(convolve(image,
                              np.array([[ 1, 1, 1],
                                        [ 0, 0, 0],
-                                       [-1,-1,-1]]).astype(float) / 3.0))
+                                       [-1, -1, -1]]).astype(float) / 3.0))
     return _mask_filter_result(result, mask)
 
 

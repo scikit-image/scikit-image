@@ -53,4 +53,3 @@ ax3.autoscale(False)
 ax3.plot(x, y, 'o', markeredgecolor='r', markerfacecolor='none', markersize=10)
 
 plt.show()
-

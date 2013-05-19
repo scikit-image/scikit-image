@@ -28,13 +28,14 @@ def test_denoise_tv_chambolle_2d():
         denoised_lena, size=((3, 3)))
     # test if the total variation has decreased
     assert grad_denoised.dtype == np.float
-    assert (np.sqrt((grad_denoised**2).sum())
-            < np.sqrt((grad**2).sum()) / 2)
+    assert (np.sqrt((grad_denoised ** 2).sum())
+            < np.sqrt((grad ** 2).sum()) / 2)
 
 
 def test_denoise_tv_chambolle_multichannel():
     denoised0 = filter.denoise_tv_chambolle(lena[..., 0], weight=60.0)
-    denoised = filter.denoise_tv_chambolle(lena, weight=60.0, multichannel=True)
+    denoised = filter.denoise_tv_chambolle(
+        lena, weight=60.0, multichannel=True)
     assert_equal(denoised[..., 0], denoised0)
 
 
@@ -53,7 +54,7 @@ def test_denoise_tv_chambolle_float_result_range():
 def test_denoise_tv_chambolle_3d():
     """Apply the TV denoising algorithm on a 3D image representing a sphere."""
     x, y, z = np.ogrid[0:40, 0:40, 0:40]
-    mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
+    mask = (x - 22) ** 2 + (y - 20) ** 2 + (z - 17) ** 2 < 8 ** 2
     mask = 100 * mask.astype(np.float)
     mask += 60
     mask += 20 * np.random.random(mask.shape)

@@ -17,6 +17,7 @@ __all__ = ['ImageViewer', 'CollectionViewer']
 
 
 class ImageCanvas(utils.MatplotlibCanvas):
+
     """Canvas for displaying images."""
     def __init__(self, parent, image, **kwargs):
         self.fig, self.ax = utils.figimage(image, **kwargs)
@@ -24,6 +25,7 @@ class ImageCanvas(utils.MatplotlibCanvas):
 
 
 class ImageViewer(QMainWindow):
+
     """Viewer for displaying images.
 
     This viewer is a simple container object that holds a Matplotlib axes
@@ -59,7 +61,7 @@ class ImageViewer(QMainWindow):
         utils.init_qtapp()
         super(ImageViewer, self).__init__()
 
-        #TODO: Add ImageViewer to skimage.io window manager
+        # TODO: Add ImageViewer to skimage.io window manager
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
@@ -116,7 +118,7 @@ class ImageViewer(QMainWindow):
         self.move(0, 0)
         w = size.width()
         y = 0
-        #TODO: Layout isn't quite correct for multiple plugins (overlaps).
+        # TODO: Layout isn't quite correct for multiple plugins (overlaps).
         for p in self.plugins:
             p.move(w, y)
             y += p.geometry().height()
@@ -197,6 +199,7 @@ class ImageViewer(QMainWindow):
 
 
 class CollectionViewer(ImageViewer):
+
     """Viewer for displaying image collections.
 
     Select the displayed frame of the image collection using the slider or
@@ -239,7 +242,7 @@ class CollectionViewer(ImageViewer):
         self.slider = Slider('frame', **slider_kws)
         self.layout.addWidget(self.slider)
 
-        #TODO: Adjust height to accomodate slider; the following doesn't work
+        # TODO: Adjust height to accomodate slider; the following doesn't work
         # s_size = self.slider.sizeHint()
         # cs_size = self.canvas.sizeHint()
         # self.resize(cs_size.width(), cs_size.height() + s_size.height())
@@ -268,7 +271,7 @@ class CollectionViewer(ImageViewer):
         self.image = image
 
     def keyPressEvent(self, event):
-        if type(event) == QtGui.QKeyEvent:
+        if isinstance(event, QtGui.QKeyEvent):
             key = event.key()
             # Number keys (code: 0 = key 48, 9 = key 57) move to deciles
             if 48 <= key < 58:

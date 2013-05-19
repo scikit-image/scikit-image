@@ -29,7 +29,7 @@ def cython(pyx_files, working_path=''):
     except ImportError:
         # If cython is not found, we do nothing -- the build will make use of
         # the distributed .c files
-        print("Cython not found; falling back to pre-built %s" \
+        print("Cython not found; falling back to pre-built %s"
               % " ".join([f.replace('.pyx', '.c') for f in pyx_files]))
     else:
         for pyxfile in [os.path.join(working_path, f) for f in pyx_files]:

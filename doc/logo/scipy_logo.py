@@ -9,6 +9,7 @@ import matplotlib.nxutils as nx
 
 
 class SymmetricAnchorPoint(object):
+
     """Anchor point in a parametric curve with symmetric handles
 
     Parameters
@@ -46,7 +47,7 @@ class SymmetricAnchorPoint(object):
         return p1, p2
 
     def __repr__(self):
-        v = (self.pt, self.theta * 180/np.pi, self.length)
+        v = (self.pt, self.theta * 180 / np.pi, self.length)
         return 'SymmetricAnchorPoint(pt={0}, theta={1}, length={2})'.format(*v)
 
 
@@ -61,8 +62,8 @@ def curve_from_anchor_points(pts):
     bezier_pts = bezier_pts[1:-1]
     x, y = [], []
     # every third point is an anchor point
-    for i in range(0, len(bezier_pts)-1, 3):
-        xi, yi = cubic_curve(*bezier_pts[i:i+4])
+    for i in range(0, len(bezier_pts) - 1, 3):
+        xi, yi = cubic_curve(*bezier_pts[i:i + 4])
         x.append(xi)
         y.append(yi)
     return np.hstack(x), np.hstack(y)
@@ -87,7 +88,10 @@ def cubic_curve(p0, p1, p2, p3, npts=20):
     """
     t = np.linspace(0, 1, npts)[:, np.newaxis]
     # cubic bezier curve from http://en.wikipedia.org/wiki/Bezier_curve
-    b = (1-t)**3 * p0 + 3*t*(1-t)**2 * p1 + 3*t**2*(1-t) * p2 + t**3 * p3
+    b = (
+    1 - t) ** 3 * p0 + 3 * t * (
+        1 -t)**2 * p1 + 3*t**2*(
+            1 -t) * p2 + t**3 * p3
     x, y = b.transpose()
     return x, y
 
@@ -112,6 +116,7 @@ class Circle(object):
 
 
 class ScipyLogo(object):
+
     """Object to generate scipy logo
 
     Parameters
@@ -138,7 +143,6 @@ class ScipyLogo(object):
             radius = self.RADIUS
         self.radius = radius
 
-
         # calculate end points of curve so that it lies exactly on circle
         logo_circle = Circle(self.CENTER, self.RADIUS)
         s_start = logo_circle.point_from_angle(self.THETA_START)
@@ -147,16 +151,16 @@ class ScipyLogo(object):
         self.circle = Circle(self.center, self.radius)
         # note that angles are clockwise because of inverted y-axis
         self._anchors = [SymmetricAnchorPoint(*t, use_degrees=True)
-                         for t in [(s_start,    -37, 90),
-                                   ((144, 312),   7, 20),
-                                   ((205, 375),  52, 50),
+                         for t in [(s_start, -37, 90),
+                                   ((144, 312), 7, 20),
+                                   ((205, 375), 52, 50),
                                    ((330, 380), -53, 60),
-                                   ((290, 260),-168, 50),
-                                   ((217, 245),-168, 50),
+                                   ((290, 260), -168, 50),
+                                   ((217, 245), -168, 50),
                                    ((182, 118), -50, 60),
-                                   ((317, 125),  53, 60),
-                                   ((385, 198),  10, 20),
-                                   (s_end,      -25, 60)]]
+                                   ((317, 125), 53, 60),
+                                   ((385, 198), 10, 20),
+                                   (s_end, -25, 60)]]
         # normalize anchors so they have unit radius and are centered at origin
         for a in self._anchors:
             a.pt = (a.pt - self.CENTER) / self.RADIUS
@@ -237,8 +241,8 @@ def plot_snake_overlay():
     logo.plot_snake_curve()
     logo.plot_circle()
     img = imgio.imread('data/snake_pixabay.jpg')
-    #mask = logo.get_mask(img.shape, 'upper left')
-    #img[mask] = 255
+    # mask = logo.get_mask(img.shape, 'upper left')
+    # img[mask] = 255
     plt.imshow(img)
 
 
@@ -248,8 +252,8 @@ def plot_lena_overlay():
     logo.plot_snake_curve()
     logo.plot_circle()
     img = lena()
-    #mask = logo.get_mask(img.shape, 'upper left')
-    #img[mask] = 255
+    # mask = logo.get_mask(img.shape, 'upper left')
+    # img[mask] = 255
     plt.imshow(img)
 
 
@@ -259,4 +263,3 @@ if __name__ == '__main__':
     plot_lena_overlay()
 
     plt.show()
-

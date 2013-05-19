@@ -33,7 +33,6 @@ def setup_module(self):
         pass
 
 
-
 @skipif(not PIL_available)
 def test_imread_flatten():
     # a color image is flattened
@@ -104,6 +103,7 @@ def test_imread_uint16_big_endian():
 
 
 class TestSave:
+
     def roundtrip(self, dtype, x, scaling=1):
         f = NamedTemporaryFile(suffix='.png')
         fname = f.name

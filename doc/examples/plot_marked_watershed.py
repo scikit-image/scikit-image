@@ -31,7 +31,7 @@ denoised = rank.median(image, disk(2))
 markers = rank.gradient(denoised, disk(5)) < 10
 markers = ndimage.label(markers)[0]
 
-#local gradient
+# local gradient
 gradient = rank.gradient(denoised, disk(2))
 
 # process the watershed

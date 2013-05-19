@@ -2,7 +2,8 @@
 """Script to auto-generate our API docs.
 """
 # stdlib imports
-import os, sys
+import os
+import sys
 
 # local imports
 from apigen import ApiDocWriter
@@ -12,8 +13,9 @@ from distutils.version import LooseVersion as V
 
 #*****************************************************************************
 
+
 def abort(error):
-    print '*WARNING* API documentation not generated: %s'%error
+    print '*WARNING* API documentation not generated: %s' % error
     exit()
 
 if __name__ == '__main__':
@@ -25,7 +27,7 @@ if __name__ == '__main__':
 
     try:
         __import__(package)
-    except ImportError, e:
+    except ImportError as e:
         abort("Can not import skimage")
 
     module = sys.modules[package]

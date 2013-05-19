@@ -33,6 +33,7 @@ month_duration = 24
 for r in releases:
     releases[r] = dateutil.parser.parse(releases[r])
 
+
 def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
     params = {'state': state,
               'per_page': 100,
@@ -51,7 +52,7 @@ def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
         print fetch_status
 
         f = urllib.urlopen(
-            'https://api.github.com/repos/%(user)s/%(repo)s/pulls?%(params)s' \
+            'https://api.github.com/repos/%(user)s/%(repo)s/pulls?%(params)s'
             % config
         )
 
@@ -87,11 +88,13 @@ dates = [dateutil.parser.parse(pr['created_at']) for pr in PRs]
 
 epoch = datetime(2009, 1, 1, tzinfo=dates[0].tzinfo)
 
+
 def seconds_from_epoch(dates):
     seconds = [(dt - epoch).total_seconds() for dt in dates]
     return seconds
 
 dates_f = seconds_from_epoch(dates)
+
 
 def date_formatter(value, _):
     dt = epoch + timedelta(seconds=value)
@@ -103,7 +106,7 @@ now = datetime.now(tz=dates[0].tzinfo)
 this_month = datetime(year=now.year, month=now.month, day=1,
                       tzinfo=dates[0].tzinfo)
 
-bins = [this_month - relativedelta(months=i) \
+bins = [this_month - relativedelta(months=i)
         for i in reversed(range(-1, month_duration))]
 bins = seconds_from_epoch(bins)
 plt.hist(dates_f, bins=bins)

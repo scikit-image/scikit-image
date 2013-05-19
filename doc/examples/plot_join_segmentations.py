@@ -43,9 +43,11 @@ seg2 = slic(coins_colour, n_segments=30, max_iter=160, sigma=1, ratio=9,
 # combine the two
 segj = join_segmentations(seg1, seg2)
 
-### Display the result ###
+# Display the result ###
 
 # make a random colormap for a set number of values
+
+
 def random_cmap(im):
     np.random.seed(9)
     cmap_array = np.concatenate(

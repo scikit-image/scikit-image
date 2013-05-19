@@ -29,10 +29,12 @@ def get_edges(img):
     edge = rescale_intensity(edge)
     return edge
 
+
 def rescale_intensity(img):
     i_range = float(img.max() - img.min())
     img = (img - img.min()) / i_range * 255
     return np.uint8(img)
+
 
 def colorize(img, color, whiten=False):
     """Return colorized image from gray scale image
@@ -66,6 +68,8 @@ def prepare_axes(ax):
 
 
 _rgb_stack = np.ones((1, 1, 3), dtype=bool)
+
+
 def gray2rgb(arr):
     """Return RGB image from a grayscale image.
 
@@ -89,11 +93,10 @@ class LogoBase(object):
         self.edges = np.clip(self.edges, 0, 100)
         self.edges = rescale_intensity(self.edges)
 
-
     def _crop_image(self, img):
         w = 2 * self.radius
         x, y = self.origin
-        return img[y:y+w, x:x+w]
+        return img[y:y + w, x:x + w]
 
     def get_canvas(self):
         return 255 * np.ones(self.img.shape, dtype=np.uint8)
@@ -107,7 +110,7 @@ class SnakeLogo(LogoBase):
     def __init__(self):
         self.radius = 250
         self.origin = (420, 0)
-        img = sio.imread('data/snake_pixabay.jpg')        
+        img = sio.imread('data/snake_pixabay.jpg')
         img = self._crop_image(img)
 
         img = img.astype(float) * 1.1
@@ -127,7 +130,8 @@ snake.edges = np.mean(snake.edges, axis=2)
 # Demo plotting functions
 # =======================
 
-def plot_colorized_logo(logo, color, edges='light', switch=False, whiten=False):
+def plot_colorized_logo(
+        logo, color, edges='light', switch=False, whiten=False):
     """Convenience function to plot artificially colored logo.
 
     Parameters
@@ -170,6 +174,7 @@ def red_light_edges(logo, **kwargs):
 def red_dark_edges(logo, **kwargs):
     plot_colorized_logo(logo, (1, 0, 0), edges='dark', **kwargs)
 
+
 def blue_light_edges(logo, **kwargs):
     plot_colorized_logo(logo, (0.35, 0.55, 0.85), edges='light', **kwargs)
 
@@ -181,6 +186,7 @@ def blue_dark_edges(logo, **kwargs):
 def green_orange_light_edges(logo, **kwargs):
     colors = ((0.6, 0.8, 0.3), (1, 0.5, 0.1))
     plot_colorized_logo(logo, colors, edges='light', **kwargs)
+
 
 def green_orange_dark_edges(logo, **kwargs):
     colors = ((0.6, 0.8, 0.3), (1, 0.5, 0.1))
@@ -223,4 +229,3 @@ if __name__ == '__main__':
 
     if plot:
         plt.show()
-

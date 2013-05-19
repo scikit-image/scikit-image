@@ -60,7 +60,7 @@ def median_filter(image, radius=2, mask=None, percent=50):
     # Normalize the ranked image to 0-255
     #
     if (not np.issubdtype(image.dtype, np.int) or
-        np.min(image) < 0 or np.max(image) > 255):
+            np.min(image) < 0 or np.max(image) > 255):
         ranked_image, translation = rank_order(image[mask])
         max_ranked_image = np.max(ranked_image)
         if max_ranked_image == 0:

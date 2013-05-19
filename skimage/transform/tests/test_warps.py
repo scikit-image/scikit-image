@@ -30,8 +30,8 @@ def test_homography():
     x = img_as_float(x)
     theta = -np.pi / 2
     M = np.array([[np.cos(theta), - np.sin(theta), 0],
-                  [np.sin(theta),   np.cos(theta), 4],
-                  [0,               0,             1]])
+                  [np.sin(theta), np.cos(theta), 4],
+                  [0, 0, 1]])
 
     x90 = warp(x,
                inverse_map=ProjectiveTransform(M).inverse,
@@ -87,10 +87,10 @@ def test_rotate():
 
 def test_rotate_resize():
     x = np.zeros((10, 10), dtype=np.double)
-    
+
     x45 = rotate(x, 45, resize=False)
     assert x45.shape == (10, 10)
-    
+
     x45 = rotate(x, 45, resize=True)
     # new dimension should be d = sqrt(2 * (10/2)^2)
     assert x45.shape == (14, 14)

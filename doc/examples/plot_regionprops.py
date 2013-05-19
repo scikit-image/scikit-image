@@ -18,6 +18,7 @@ from scipy.ndimage import geometric_transform
 
 ANGLE = 0.2
 
+
 def rotate(xy):
     x, y = xy
     out_x = math.cos(ANGLE) * x - math.sin(ANGLE) * y
@@ -27,7 +28,7 @@ def rotate(xy):
 image = np.zeros((600, 600), 'int')
 
 rr, cc = ellipse(300, 350, 100, 220)
-image[rr,cc] = 1
+image[rr, cc] = 1
 
 image = geometric_transform(image, rotate)
 

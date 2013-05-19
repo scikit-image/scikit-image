@@ -91,8 +91,8 @@ def corner_kitchen_rosenfeld(image):
     imxx, imxy = _compute_derivatives(imx)
     imyx, imyy = _compute_derivatives(imy)
 
-    response = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy) \
-               / (imx**2 + imy**2)
+    response = (imxx * imy ** 2 + imyy * imx ** 2 - 2 * imxy * imx * imy) \
+        / (imx ** 2 + imy ** 2)
 
     return response
 
@@ -166,12 +166,12 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
 
     # determinant
-    detA = Axx * Ayy - Axy**2
+    detA = Axx * Ayy - Axy ** 2
     # trace
     traceA = Axx + Ayy
 
     if method == 'k':
-        response = detA - k * traceA**2
+        response = detA - k * traceA ** 2
     else:
         response = 2 * detA / (traceA + eps)
 
@@ -236,7 +236,7 @@ def corner_shi_tomasi(image, sigma=1):
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
 
     # minimum eigenvalue of A
-    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
+    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy) ** 2 + 4 * Axy ** 2)) / 2
 
     return response
 
@@ -307,12 +307,12 @@ def corner_foerstner(image, sigma=1):
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
 
     # determinant
-    detA = Axx * Ayy - Axy**2
+    detA = Axx * Ayy - Axy ** 2
     # trace
     traceA = Axx + Ayy
 
     w = detA / traceA
-    q = 4 * detA / traceA**2
+    q = 4 * detA / traceA ** 2
 
     return w, q
 
@@ -354,7 +354,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     b_edge = np.zeros((2, ), dtype=np.double)
 
     # critical statistical test values
-    redundancy = window_size**2 - 2
+    redundancy = window_size ** 2 - 2
     t_crit_dot = stats.f.isf(1 - alpha, redundancy, redundancy)
     t_crit_edge = stats.f.isf(alpha, redundancy, redundancy)
 
@@ -424,9 +424,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
         # determine corner class (dot or edge)
         # variance for different models
-        var_dot = np.sum(winx_winx * ryy_dot - 2 * winx_winy * rxy_dot \
+        var_dot = np.sum(winx_winx * ryy_dot - 2 * winx_winy * rxy_dot
                          + winy_winy * rxx_dot)
-        var_edge = np.sum(winy_winy * ryy_edge + 2 * winx_winy * rxy_edge \
+        var_edge = np.sum(winy_winy * ryy_edge + 2 * winx_winy * rxy_edge
                           + winx_winx * rxx_edge)
         # test value (F-distributed)
         t = var_edge / var_dot
