@@ -30,11 +30,11 @@ import sys
 import re
 import setuptools
 from numpy.distutils.core import setup
+from numpy.distutils.exec_command import exec_command, find_executable
 try:
     from distutils.command.build_py import build_py_2to3 as build_py
 except ImportError:
     from distutils.command.build_py import build_py
-
 
 def configuration(parent_package='', top_path=None):
     if os.path.exists('MANIFEST'): os.remove('MANIFEST')
@@ -102,49 +102,53 @@ def check_requirements():
             raise ImportError('You need `%s` version %d.%d or later.' \
                               % ((package_name, ) + min_version))
 
-
 if __name__ == "__main__":
 
     check_requirements()
 
     write_version_py()
 
-    setup(
-        name=DISTNAME,
-        description=DESCRIPTION,
-        long_description=LONG_DESCRIPTION,
-        maintainer=MAINTAINER,
-        maintainer_email=MAINTAINER_EMAIL,
-        url=URL,
-        license=LICENSE,
-        download_url=DOWNLOAD_URL,
-        version=VERSION,
+    # check for bento installation
+    bento_path = find_executable('bentomaker')
+    if bento_path:
+        exec_command(bento_path+' install')
+    else:
+        setup(
+            name=DISTNAME,
+            description=DESCRIPTION,
+            long_description=LONG_DESCRIPTION,
+            maintainer=MAINTAINER,
+            maintainer_email=MAINTAINER_EMAIL,
+            url=URL,
+            license=LICENSE,
+            download_url=DOWNLOAD_URL,
+            version=VERSION,
 
-        classifiers=[
-            'Development Status :: 4 - Beta',
-            'Environment :: Console',
-            'Intended Audience :: Developers',
-            'Intended Audience :: Science/Research',
-            'License :: OSI Approved :: BSD License',
-            'Programming Language :: C',
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 3',
-            'Topic :: Scientific/Engineering',
-            'Operating System :: Microsoft :: Windows',
-            'Operating System :: POSIX',
-            'Operating System :: Unix',
-            'Operating System :: MacOS',
-        ],
+            classifiers=[
+                'Development Status :: 4 - Beta',
+                'Environment :: Console',
+                'Intended Audience :: Developers',
+                'Intended Audience :: Science/Research',
+                'License :: OSI Approved :: BSD License',
+                'Programming Language :: C',
+                'Programming Language :: Python',
+                'Programming Language :: Python :: 3',
+                'Topic :: Scientific/Engineering',
+                'Operating System :: Microsoft :: Windows',
+                'Operating System :: POSIX',
+                'Operating System :: Unix',
+                'Operating System :: MacOS',
+            ],
 
-        configuration=configuration,
+            configuration=configuration,
 
-        packages=setuptools.find_packages(exclude=['doc']),
-        include_package_data=True,
-        zip_safe=False, # the package can run out of an .egg file
+            packages=setuptools.find_packages(exclude=['doc']),
+            include_package_data=True,
+            zip_safe=False, # the package can run out of an .egg file
 
-        entry_points={
-            'console_scripts': ['skivi = skimage.scripts.skivi:main'],
-        },
+            entry_points={
+                'console_scripts': ['skivi = skimage.scripts.skivi:main'],
+            },
 
-        cmdclass={'build_py': build_py},
-    )
+            cmdclass={'build_py': build_py},
+        )
