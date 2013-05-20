@@ -93,7 +93,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     image = img_as_float(image)
     if not multichannel:
         image = gray2rgb(image)
-    elif image.ndim == 3:
+    if image.ndim == 3:
         # See 2D RGB image as 3D RGB image with Z = 1
         image = image[np.newaxis, ...]
     if not isinstance(sigma, coll.Iterable):
