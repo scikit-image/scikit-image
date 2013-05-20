@@ -43,22 +43,36 @@ References
 
 from __future__ import division
 
-__all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
-           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb',
-           'xyz2lab', 'lab2xyz', 'lab2rgb', 'rgb2lab', 'rgb2hed', 'hed2rgb',
-           'separate_stains', 'combine_stains', 'rgb_from_hed', 'hed_from_rgb',
-           'rgb_from_hdx', 'hdx_from_rgb', 'rgb_from_fgx', 'fgx_from_rgb',
-           'rgb_from_bex', 'bex_from_rgb', 'rgb_from_rbd', 'rbd_from_rgb',
-           'rgb_from_gdx', 'gdx_from_rgb', 'rgb_from_hax', 'hax_from_rgb',
-           'rgb_from_bro', 'bro_from_rgb', 'rgb_from_bpx', 'bpx_from_rgb',
-           'rgb_from_ahx', 'ahx_from_rgb', 'rgb_from_hpx', 'hpx_from_rgb'
-           ]
-
-__docformat__ = "restructuredtext en"
-
 import numpy as np
 from scipy import linalg
 from ..util import dtype
+from skimage._shared.utils import deprecated
+
+
+@deprecated()
+def is_rgb(image):
+    """Test whether the image is RGB or RGBA.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    """
+    return (image.ndim == 3 and image.shape[2] in (3, 4))
+
+
+@deprecated()
+def is_gray(image):
+    """Test whether the image is gray (i.e. has only one color band).
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+
+    """
+    return np.squeeze(image).ndim == 2
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -629,7 +643,7 @@ def gray2rgb(image):
     """
     if np.squeeze(image).ndim == 3 and image.shape[2] in (3, 4):
         return image
-    elif np.squeeze(image).ndim == 2:
+    elif image.ndim == 2 or np.squeeze(image).ndim == 2:
         return np.dstack((image, image, image))
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
