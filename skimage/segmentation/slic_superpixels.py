@@ -85,7 +85,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         warnings.warn(RuntimeWarning(msg))
         multichannel = True
     elif multichannel is None:
-        multichannel = (spatial_dims == image.ndim + 1)
+        multichannel = (spatial_dims + 1 == image.ndim)
     if ((not multichannel and image.ndim not in [2, 3]) or
             (multichannel and image.ndim not in [3, 4]) or
             (multichannel and image.shape[-1] != 3)):
