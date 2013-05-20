@@ -450,6 +450,8 @@ def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
     cdef double cur = xx * sy - yy * sx
     cdef double err
 
+    cdef bint test1, test2
+
     # if it's not a straight line
     if cur != 0 and weight > 0:
         if (sx * sx + sy * sy > xx * xx + yy * yy):
@@ -504,8 +506,8 @@ def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
                 return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
 
             # Save boolean values
-            cdef bint test1 = 2 * err > dy
-            cdef bint test2 = 2 * (err + yy) < -dy
+            test1 = 2 * err > dy
+            test2 = 2 * (err + yy) < -dy
             # Move (x0,y0) to the next position
             if 2 * err < dx or test2:
                 y0 += <Py_ssize_t>(sy)
