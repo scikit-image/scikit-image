@@ -90,7 +90,7 @@ def is_rgb(image):
         Input image.
 
     """
-    return (image.ndim in (3, 4) and image.shape[-1] in (3, 4))
+    return (image.ndim == 3 and image.shape[2] in (3, 4))
 
 
 @deprecated()
