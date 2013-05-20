@@ -1,14 +1,15 @@
 import collections as coll
 import numpy as np
 from scipy import ndimage
+import warnings
 
 from ..util import img_as_float, regular_grid
-from ..color import rgb2lab, gray2rgb, is_rgb
+from ..color import rgb2lab, gray2rgb, guess_spatial_dimensions
 from ._slic import _slic_cython
 
 
 def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
-         multichannel=True, convert2lab=True):
+         multichannel=None, convert2lab=True):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -26,9 +27,11 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     sigma : float, optional (default: 1)
         Width of Gaussian smoothing kernel for preprocessing. Zero means no
         smoothing.
-    multichannel : bool, optional (default: True)
+    multichannel : bool, optional (default: None)
         Whether the last axis of the image is to be interpreted as multiple
-        channels. Only 3 channels are supported.
+        channels. Only 3 channels are supported. If `None`, the function will
+        attempt to guess this, and raise a warning if ambiguous, when the
+        array has shape (M, N, 3).
     convert2lab : bool, optional (default: True)
         Whether the input should be converted to Lab colorspace prior to
         segmentation.  For this purpose, the input is assumed to be RGB. Highly
@@ -46,7 +49,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
             - the image dimension is not 2 or 3 and `multichannel == False`, OR
             - the image dimension is not 3 or 4 and `multichannel == True`, OR
             - `multichannel == True` and the length of the last dimension of
-            the image is not 3.
+            the image is not 3, OR
 
     Notes
     -----
@@ -54,6 +57,10 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     prior to segmentation.
 
     The image is rescaled to be in [0, 1] prior to processing.
+
+    Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
+    interpret them as 3D with the last dimension having length 3, use
+    `multichannel=False`.
 
     References
     ----------
@@ -70,6 +77,15 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     >>> # Increasing the ratio parameter yields more square regions
     >>> segments = slic(img, n_segments=100, ratio=20)
     """
+    spatial_dims = guess_spatial_dimensions(image)
+    if spatial_dims is None and multichannel is None:
+        msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB" +
+                   " by default. Use `multichannel=False` to interpret as " +
+                   " 3D image with last dimension of length 3.")
+        warnings.warn(RuntimeWarning(msg))
+        multichannel = True
+    elif multichannel is None:
+        multichannel = (spatial_dims == image.ndim + 1)
     if ((not multichannel and image.ndim not in [2, 3]) or
             (multichannel and image.ndim not in [3, 4]) or
             (multichannel and image.shape[-1] != 3)):
@@ -77,7 +93,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     image = img_as_float(image)
     if not multichannel:
         image = gray2rgb(image)
-    if image.ndim == 3 and is_rgb(image):
+    elif image.ndim == 3:
         # See 2D RGB image as 3D RGB image with Z = 1
         image = image[np.newaxis, ...]
     if not isinstance(sigma, coll.Iterable):
