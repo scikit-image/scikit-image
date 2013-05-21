@@ -94,15 +94,13 @@ def convex_hull_object(image):
 
     # Add 1 to the output of label() so as to make the 
     # background value 0 rather than -1
-    labeled_im = label(image, neighbors=8, background=0) + 1
+    labeled_im = label(image, neighbors=8, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
     mask = np.zeros(image.shape, dtype=np.uint8)
     convex_img = np.zeros(image.shape, dtype=bool)
     
-    for i in range(1, labeled_im.max()+1):
-        mask[:] = i
-        mask = img_as_ubyte(np.logical_not(np.bitwise_xor(labeled_im, mask)))
-        convex_obj = convex_hull_image(mask)
+    for i in range(0, labeled_im.max()+1):
+        convex_obj = convex_hull_image(labeled_im == i)
         convex_img = np.logical_or(convex_img, convex_obj)
 
     return convex_img
