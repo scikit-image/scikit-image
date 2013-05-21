@@ -71,6 +71,14 @@ def convex_hull_object(image):
     The convex hull is the set of pixels included in the smallest convex
     polygon that surround all white pixels in the input image.
 
+    Note that in this function individual masks are generated using the label
+    function in ``skimage.morphology``. ``convex_hull_image`` is applied on the
+    extracted object and combined with other hulls using logical OR. This can
+    however lead to overlapping of hulls, producing inaccurate results. In this
+    case it is advisable to create a single mask of the objects who's hulls
+    would otherwise overlap. The ``convex_hull_image`` can be applied on the 
+    extracted objects, rather than individually.
+
     Parameters
     ----------
     image : ndarray
@@ -96,4 +104,3 @@ def convex_hull_object(image):
         convex_img = np.logical_or(convex_img, convex_obj)
 
     return convex_img
-    
