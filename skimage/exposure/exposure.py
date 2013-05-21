@@ -2,7 +2,7 @@ import warnings
 import numpy as np
 
 from skimage import img_as_float
-from skimage.util.dtype import dtype_range
+from skimage.util.dtype import dtype_range, dtype_limits
 import skimage.color as color
 from skimage.util.dtype import convert
 from skimage._shared.utils import deprecated
@@ -257,7 +257,13 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
     if gamma < 0:
         return "Gamma should be a non-negative real number"
 
-    scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
+    if np.any(image < 0):
+        raise ValueError('Image Correction methods work correctly only on '
+                         'images with non-negative values. Use '
+                         'skimage.exposure.rescale_intensity.')
+    else:
+        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+
     out = ((image / scale) ** gamma) * scale * gain
     return dtype(out)
 
@@ -290,11 +296,17 @@ def rescale_intensity_log(image, gain=1, inv=False):
 
     """
     dtype = image.dtype.type
-    scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
 
-    if inv == True:
-        out = (2 ** (image / scale) - 1) * scale * gain
-        return dtype(out)
+    if np.any(image < 0):
+        raise ValueError('Image Correction methods work correctly only on '
+                         'images with non-negative values. Use '
+                         'skimage.exposure.rescale_intensity.')
+    else:
+        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+
+        if inv == True:
+            out = (2 ** (image / scale) - 1) * scale * gain
+            return dtype(out)
 
     out = np.log2(1 + image / scale) * scale * gain
     return dtype(out)
@@ -331,9 +343,16 @@ def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10, inv=False):
 
     """
     dtype = image.dtype.type
-    scale = float(dtype_range[dtype][1] - dtype_range[dtype][0])
-    if inv == True:
-        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+
+    if np.any(image < 0):
+        raise ValueError('Image Correction methods work correctly only on '
+                         'images with non-negative values. Use '
+                         'skimage.exposure.rescale_intensity.')
+    else:
+        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+        if inv == True:
+            out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+            return dtype(out)
+
+        out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
         return dtype(out)
-    out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
-    return dtype(out)
