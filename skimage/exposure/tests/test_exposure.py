@@ -183,14 +183,14 @@ if __name__ == '__main__':
 
 def test_rescale_intensity_gamma_one():
     """Same image should be returned for gamma equal to one"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
+    image = np.random.uniform(0, 255, (8, 8))
     result = exposure.rescale_intensity_gamma(image, 1)
     assert_array_equal(result, image)
 
 
 def test_rescale_intensity_gamma_zero():
     """White image should be returned for gamma equal to zero"""
-    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
+    image = np.random.uniform(0, 255, (8, 8))
     result = exposure.rescale_intensity_gamma(image, 0)
     dtype = image.dtype.type
     assert_array_equal(result, dtype_range[dtype][1])
