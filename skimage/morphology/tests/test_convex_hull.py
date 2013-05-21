@@ -65,6 +65,7 @@ def test_possible_hull():
     ph = possible_hull(image)
     assert_array_equal(ph, expected)
 
+
 @skipif(not scipy_spatial)
 def test_object():
     image = np.array(
