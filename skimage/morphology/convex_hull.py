@@ -5,7 +5,7 @@ from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
 from .selem import square
 from skimage.morphology import label, dilation
-from skimage.util import img_as_ubyte, img_as_bool
+from ..util import img_as_ubyte, img_as_bool
 
 def convex_hull_image(image):
     """Compute the convex hull image of a binary image.
@@ -71,14 +71,6 @@ def convex_hull_object(image):
     The convex hull is the set of pixels included in the smallest convex
     polygon that surround all white pixels in the input image.
 
-    Note that in this function individual masks are generated using the label
-    function in ``skimage.morphology``. ``convex_hull_image`` is applied on the
-    extracted object and combined with other hulls using logical OR. This can
-    however lead to overlapping of hulls, producing inaccurate results. In this
-    case it is advisable to create a single mask of the objects who's hulls
-    would otherwise overlap. The ``convex_hull_image`` can be applied on the 
-    extracted objects, rather than individually.
-
     Parameters
     ----------
     image : ndarray
@@ -88,6 +80,16 @@ def convex_hull_object(image):
     -------
     hull : ndarray of bool
         Binary image with pixels in convex hull set to True.
+
+    Note 
+    ----
+    In this function individual masks are generated using the label
+    function in ``skimage.morphology``. ``convex_hull_image`` is applied on the
+    extracted object and combined with other hulls using logical OR. This can
+    however lead to overlapping of hulls, producing inaccurate results. In this
+    case it is advisable to create a single mask of the objects who's hulls
+    would otherwise overlap. The ``convex_hull_image`` can be applied on the 
+    extracted objects, rather than individually.
     """
 
     # Add 1 to the output of label() so as to make the 
