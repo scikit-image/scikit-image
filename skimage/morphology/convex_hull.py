@@ -26,6 +26,7 @@ def convex_hull_image(image):
     References
     ----------
     .. [1] http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/
+
     """
 
     image = image.astype(bool)
@@ -90,6 +91,7 @@ def convex_hull_object(image):
     case it is advisable to create a single mask of the objects who's hulls
     would otherwise overlap. The ``convex_hull_image`` can be applied on the 
     extracted objects, rather than individually.
+    
     """
 
     # Add 1 to the output of label() so as to make the 
