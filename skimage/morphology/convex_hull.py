@@ -38,7 +38,7 @@ def convex_hull_image(image):
 
     # Add a vertex for the middle of each pixel edge
     coords_corners = np.empty((N * 4, 2))
-    for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5), 
+    for i, (x_offset, y_offset) in enumerate(zip((0, 0, -0.5, 0.5),
                                                  (-0.5, 0.5, 0, 0))):
         coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
   
