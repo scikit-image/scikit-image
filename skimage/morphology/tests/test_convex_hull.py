@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 from numpy.testing.decorators import skipif
-from skimage.morphology import convex_hull_image
+from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
 
 try:
@@ -64,6 +64,27 @@ def test_possible_hull():
 
     ph = possible_hull(image)
     assert_array_equal(ph, expected)
+
+
+def test_object():
+    image = np.array(
+        [[1, 0, 1, 0, 0, 0, 0, 0, 0],
+         [1, 0, 1, 0, 1, 0, 0, 0, 1],
+         [0, 1, 0, 0, 0, 1, 0, 0, 1],
+         [0, 0, 0, 0, 0, 0, 1, 0, 1],
+         [0, 0, 0, 0, 0, 0, 0, 1, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+
+    expected = np.array(
+        [[1, 1, 1, 0, 0, 0, 0, 0, 0],
+         [1, 1, 1, 0, 1, 1, 1, 1, 1],
+         [0, 1, 0, 0, 0, 1, 1, 1, 1],
+         [0, 0, 0, 0, 0, 0, 1, 1, 1],
+         [0, 0, 0, 0, 0, 0, 0, 1, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
+
+    assert_array_equal(convex_hull_object(image), expected)
+
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
