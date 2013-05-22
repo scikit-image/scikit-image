@@ -8,7 +8,7 @@ from .selem import square, rectangle, diamond, disk, cube, octahedron, ball
 from .ccomp import label
 from .watershed import watershed, is_local_maximum
 from ._skeletonize import skeletonize, medial_axis
-from .convex_hull import convex_hull_image
+from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects
 
