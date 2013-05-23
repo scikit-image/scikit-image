@@ -3,9 +3,8 @@ __all__ = ['convex_hull_image', 'convex_hull_object']
 import numpy as np
 from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
-from .selem import square
-from skimage.morphology import label, dilation
-from ..util import img_as_ubyte, img_as_bool
+from skimage.morphology import label
+
 
 def convex_hull_image(image):
     """Compute the convex hull image of a binary image.
@@ -66,6 +65,7 @@ def convex_hull_image(image):
 
     return mask
 
+
 def convex_hull_object(image):
     """Compute the convex hull image of individual objects in a binary image.
 
@@ -94,11 +94,8 @@ def convex_hull_object(image):
     
     """
 
-    # Add 1 to the output of label() so as to make the 
-    # background value 0 rather than -1
     labeled_im = label(image, neighbors=8, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
-    mask = np.zeros(image.shape, dtype=np.uint8)
     convex_img = np.zeros(image.shape, dtype=bool)
     
     for i in range(0, labeled_im.max()+1):
