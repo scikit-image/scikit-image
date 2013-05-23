@@ -48,7 +48,9 @@ def histogram_backproject(img1, img2):
 
     References
     ----------
-    .. [1] "Indexing via color histograms", M.J.Swain & D.H.Ballard, IEEE, 1990
+    .. [1] "Indexing via color histograms", M.J.Swain & D.H.Ballard published
+    in Computer Vision, 1990. Proceedings, Third International Conference on,
+    pp.390-393.
 
     """
 
@@ -97,13 +99,13 @@ def histogram_backproject(img1, img2):
                                      [180, 256], [[0, 180], [0, 256]])
 
         # find their ratio hist2/hist1
-        R = np.float64(hist2) / (hist1 + 1)
+        R = hist2 / (hist1 + 1)
 
         # backproject
         B = R[h1.ravel(), s1.ravel()]
         B = np.minimum(B, 1)
         B = B.reshape(img1.shape[:2])
         B = rescale_intensity(B, out_range=(0, 255))
-        B = np.uint8(B)
         B = convolve(B, disc)
+        B = np.clip(B, 0, 255).astype('uint8')
         return B
