@@ -66,7 +66,7 @@ def convex_hull_image(image):
     return mask
 
 
-def convex_hull_object(image):
+def convex_hull_object(image, neighbors=8):
     """Compute the convex hull image of individual objects in a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -76,6 +76,8 @@ def convex_hull_object(image):
     ----------
     image : ndarray
         Binary input image.
+    neighbors : {4, 8}, int
+        Whether to use 4- or 8-connectivity.
 
     Returns
     -------
@@ -94,7 +96,10 @@ def convex_hull_object(image):
     
     """
 
-    labeled_im = label(image, neighbors=8, background=0)
+    if neighbors != 4 and neighbors != 8:
+        raise ValueError('Neighbors must be either 4 or 8.')
+    
+    labeled_im = label(image, neighbors, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
     
