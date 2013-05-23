@@ -66,7 +66,7 @@ def convex_hull_image(image):
     return mask
 
 
-def convex_hull_object(image, neighbors):
+def convex_hull_object(image, neighbors=8):
     """Compute the convex hull image of individual objects in a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
@@ -86,13 +86,12 @@ def convex_hull_object(image, neighbors):
 
     Note 
     ----
-    In this function individual masks are generated using the label
-    function in ``skimage.morphology``. ``convex_hull_image`` is applied on the
-    extracted object and combined with other hulls using logical OR. This can
-    however lead to overlapping of hulls, producing inaccurate results. In this
-    case it is advisable to create a single mask of the objects who's hulls
-    would otherwise overlap. The ``convex_hull_image`` can be applied on the 
-    extracted objects, rather than individually.
+    This function uses the label function defined in ccomp.pyx. Using this 
+    convex_hull_image of individual objects are extracted and combined using 
+    logical OR. However, OR operation may lead to overlapping of hulls, thus 
+    giving inaccurate results. In such a case, it would be helpful for users 
+    to use the above approach to create a mask of several objects (whose hulls 
+    overlap).
     
     """
 
