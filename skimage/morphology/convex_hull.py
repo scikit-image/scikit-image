@@ -66,7 +66,7 @@ def convex_hull_image(image):
     return mask
 
 
-def convex_hull_object(image, neighbors=8):
+def convex_hull_object(image, neighbors):
     """Compute the convex hull image of individual objects in a binary image.
 
     The convex hull is the set of pixels included in the smallest convex
