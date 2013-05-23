@@ -1,22 +1,23 @@
 """
-===================
+=======
 Entropy
-===================
-
+=======
 
 """
-from skimage import data
-from skimage.filter.rank import entropy
-from skimage.morphology import disk
 import numpy as np
 import matplotlib.pyplot as plt
 
+from skimage import data
+from skimage.filter.rank import entropy
+from skimage.morphology import disk
+
+
 # defining a 8- and a 16-bit test images
 a8 = data.camera()
-a16 = data.camera().astype(np.uint16)*4
+a16 = a8.astype(np.uint16) * 4
 
-ent8 = entropy(a8,disk(5)) # pixel value contain 10x the local entropy
-ent16 = entropy(a16,disk(5)) # pixel value contain 1000x the local entropy
+ent8 = entropy(a8, disk(5)) # pixel value contain 10x the local entropy
+ent16 = entropy(a16, disk(5)) # pixel value contain 1000x the local entropy
 
 # display results
 plt.figure(figsize=(10, 10))
@@ -41,4 +42,3 @@ plt.imshow(ent16, cmap=plt.cm.jet)
 plt.xlabel('entropy*1000')
 plt.colorbar()
 plt.show()
-

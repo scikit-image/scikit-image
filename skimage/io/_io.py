@@ -130,7 +130,8 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         as_grey = flatten
 
     if is_url(fname):
-        with tempfile.NamedTemporaryFile(delete=False) as f:
+        _, ext = os.path.splitext(fname)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as f:
             u = urllib2.urlopen(fname)
             f.write(u.read())
         img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)

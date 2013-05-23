@@ -7,8 +7,8 @@ In this example, we will see how to classify textures based on LBP (Local
 Binary Pattern). The histogram of the LBP result is a good measure to classify
 textures. For simplicity the histogram distributions are then tested against
 each other using the Kullback-Leibler-Divergence.
-"""
 
+"""
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt

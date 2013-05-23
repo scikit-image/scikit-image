@@ -3,9 +3,6 @@
 :license: modified BSD
 """
 
-__all__ = ['inverse', 'wiener', 'LPIFilter2D']
-__docformat__ = 'restructuredtext en'
-
 import numpy as np
 from scipy.fftpack import ifftshift
 

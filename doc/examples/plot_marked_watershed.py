@@ -1,7 +1,7 @@
 """
-================================
+===============================
 Markers for watershed transform
-================================
+===============================
 
 The watershed is a classical algorithm used for **segmentation**, that
 is, for separating different objects in an image.

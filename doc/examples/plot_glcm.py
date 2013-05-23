@@ -19,10 +19,11 @@ this example) would be to train a classifier, such as logistic
 regression, to label image patches from new images.
 
 """
+import matplotlib.pyplot as plt
 
 from skimage.feature import greycomatrix, greycoprops
 from skimage import data
-import matplotlib.pyplot as plt
+
 
 PATCH_SIZE = 21
 

@@ -3,7 +3,7 @@
 Medial axis skeletonization
 ===========================
 
-The medial axis of an object is the set of all points having more than one 
+The medial axis of an object is the set of all points having more than one
 closest point on the object's boundary. It is often called the **topological
 skeleton**, because it is a 1-pixel wide skeleton of the object, with the same
 connectivity as the original object.
@@ -15,11 +15,11 @@ argument ``return_distance=True``), it is possible to compute the distance to
 the background for all points of the medial axis with this function. This gives
 an estimate of the local width of the objects.
 
-For a skeleton with fewer branches, there exists another skeletonization 
+For a skeleton with fewer branches, there exists another skeletonization
 algorithm in ``skimage``: ``skimage.morphology.skeletonize``, that computes
 a skeleton by iterative morphological thinnings.
-"""
 
+"""
 import numpy as np
 from scipy import ndimage
 from skimage.morphology import medial_axis
@@ -33,7 +33,7 @@ def microstructure(l=256):
     Parameters
     ----------
 
-    l: int, optional 
+    l: int, optional
         linear size of the returned image
 
     """
@@ -64,7 +64,5 @@ plt.imshow(dist_on_skel, cmap=plt.cm.spectral, interpolation='nearest')
 plt.contour(data, [0.5], colors='w')
 plt.axis('off')
 
-plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0,
-                    right=1)
+plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
 plt.show()
-

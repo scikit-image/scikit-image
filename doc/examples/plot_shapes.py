@@ -4,17 +4,17 @@ Fill shapes
 ===========
 
 This example shows how to fill several different shapes:
+
 * line
 * polygon
 * circle
 * ellipse
 
 """
-
+import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.draw import line, polygon, circle, circle_perimeter, ellipse
-import numpy as np
 
 
 img = np.zeros((500, 500, 3), 'uint8')

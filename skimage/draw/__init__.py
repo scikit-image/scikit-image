@@ -1,5 +1,11 @@
 from ._draw import line, polygon, ellipse, ellipse_perimeter, \
-                   circle, circle_perimeter, set_color
+                   circle, circle_perimeter, set_color, bresenham
 
-
-bresenham = line
+__all__ = ['line',
+           'polygon',
+           'ellipse',
+           'ellipse_perimeter',
+           'circle',
+           'circle_perimeter',
+           'set_color',
+           'bresenham']

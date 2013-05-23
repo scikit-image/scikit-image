@@ -15,12 +15,12 @@ Cubes: A High Resolution 3D Surface Construction Algorithm. Computer Graphics
 (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
 
 """
+import numpy as np
+import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage import measure
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 # Construct some test data
 x, y = np.ogrid[-np.pi:np.pi:100j, -np.pi:np.pi:100j]
@@ -39,4 +39,3 @@ plt.axis('image')
 plt.xticks([])
 plt.yticks([])
 plt.show()
-

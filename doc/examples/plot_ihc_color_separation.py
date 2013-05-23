@@ -3,9 +3,9 @@
 Immunohistochemical staining colors separation
 ==============================================
 
-In this example we separate the immunohistochemical (IHC) staining
-from the hematoxylin counterstaining. The separation is achieved with the
-method described in [1]_, known as "color deconvolution".
+In this example we separate the immunohistochemical (IHC) staining from the
+hematoxylin counterstaining. The separation is achieved with the method
+described in [1]_, known as "color deconvolution".
 
 The IHC staining expression of the FHL2 protein is here revealed with
 Diaminobenzidine (DAB) which gives a brown color.
@@ -15,6 +15,7 @@ Diaminobenzidine (DAB) which gives a brown color.
        staining by color deconvolution.," Analytical and quantitative
        cytology and histology / the International Academy of Cytology [and]
        American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+
 """
 import matplotlib.pyplot as plt
 

@@ -13,11 +13,11 @@ A good overview of the algorithm is given on `Steve Eddin's blog
 <http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/>`__.
 
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.morphology import convex_hull_image
+
 
 image = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0],

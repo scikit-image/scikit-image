@@ -17,12 +17,14 @@ the template.
 
 .. [1] J. P. Lewis, "Fast Normalized Cross-Correlation", Industrial Light and
        Magic.
-"""
 
+"""
 import numpy as np
 import matplotlib.pyplot as plt
+
 from skimage import data
 from skimage.feature import match_template
+
 
 image = data.coins()
 coin = image[170:220, 75:130]
@@ -53,4 +55,3 @@ ax3.autoscale(False)
 ax3.plot(x, y, 'o', markeredgecolor='r', markerfacecolor='none', markersize=10)
 
 plt.show()
-

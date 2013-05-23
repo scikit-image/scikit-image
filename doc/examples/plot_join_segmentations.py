@@ -8,8 +8,8 @@ segmentations. The `skimage.segmentation.join_segmentations` function
 computes the join of two segmentations, in which a pixel is placed in
 the same segment if and only if it is in the same segment in _both_
 segmentations.
-"""
 
+"""
 import numpy as np
 from scipy import ndimage as nd
 import matplotlib.pyplot as plt
@@ -18,8 +18,8 @@ import matplotlib as mpl
 from skimage.filter import sobel
 from skimage.segmentation import slic, join_segmentations
 from skimage.morphology import watershed
-
 from skimage import data
+
 
 coins = data.coins()
 

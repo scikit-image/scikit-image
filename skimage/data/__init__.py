@@ -12,6 +12,20 @@ from ..io import imread
 from skimage import data_dir
 
 
+__all__ = ['load',
+           'camera',
+           'lena',
+           'text',
+           'checkerboard',
+           'coins',
+           'moon',
+           'page',
+           'horse',
+           'clock',
+           'immunohistochemistry',
+           'chelsea']
+
+
 def load(f):
     """Load an image file located in the data directory.
 
@@ -116,6 +130,19 @@ def page():
     return load("page.png")
 
 
+def horse():
+    """Black and white silhouette of a horse.
+
+    This image was downloaded from
+    `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
+
+    Released into public domain and drawn and uploaded by Andreas Preuss
+    (marauder).
+
+    """
+    return load("horse.png")
+
+
 def clock():
     """Motion blurred clock.
 
@@ -143,3 +170,17 @@ def immunohistochemistry():
 
     """
     return load("ihc.jpg")
+
+
+def chelsea():
+    """Chelsea the cat.
+
+    An example with texture, prominent edges in horizontal and diagonal
+    directions, as well as features of differing scales.
+
+    Notes
+    -----
+    No copyright restrictions.  CC0 by the photographer (Stefan van der Walt).
+
+    """
+    return load("chelsea.jpg")

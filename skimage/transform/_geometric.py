@@ -41,6 +41,28 @@ class GeometricTransform(object):
         """
         raise NotImplementedError()
 
+    def residuals(self, src, dst):
+        """Determine residuals of transformed destination coordinates.
+
+        For each transformed source coordinate the euclidean distance to the
+        respective destination coordinate is determined.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Residual for coordinate.
+
+        """
+
+        return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
+
     def __add__(self, other):
         """Combine this transformation with another.
 
