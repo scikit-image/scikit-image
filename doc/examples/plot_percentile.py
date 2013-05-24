@@ -9,9 +9,6 @@ is higher or equal to percentile p0
 import numpy as np
 import matplotlib.pyplot as plt
 
-import sys
-sys.path.insert(0,'/home/olivier/workspace/scikits-image')
-
 from skimage import data
 from skimage.morphology import disk
 import skimage.filter.rank as rank
