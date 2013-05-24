@@ -395,6 +395,17 @@ def test_selem_dtypes():
                              shift_x=0, shift_y=0)
         assert_array_equal(image, out)
 
+def test_percentile():
+
+    import skimage.color as color
+
+    lena = np.array(256*color.rgb2gray(data.lena()),dtype=np.uint8)
+    selem = disk(15)
+    lena5_8bit = rank.percentile(lena,selem=selem,p0=0.05)
+    lena5_16bit = rank.percentile(lena.astype(np.uint16),selem=selem,p0=0.05)
+    assert(lena5_8bit.sum()<lena.sum())
+    assert_array_equal(lena5_8bit, lena5_16bit)
+
 
 if __name__ == "__main__":
     run_module_suite()
