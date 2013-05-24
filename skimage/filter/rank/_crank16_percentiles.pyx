@@ -180,7 +180,7 @@ cdef inline dtype_t kernel_percentile(Py_ssize_t * histo, float pop,
     if pop:
         for i in range(maxbin):
             sum += histo[i]
-            if sum >= p0 * pop:
+            if sum > (p0 * pop):
                 break
 
         return <dtype_t>(i)
