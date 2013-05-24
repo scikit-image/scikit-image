@@ -159,11 +159,11 @@ cdef inline dtype_t kernel_percentile(Py_ssize_t * histo, float pop,
     if pop:
         for i in range(256):
             sum += histo[i]
-            if sum > (p0 * pop):
+            if sum >= (p0 * pop):
                 break
         return <dtype_t>(i)
     else:
-        return <dtype_t>(255)
+        return <dtype_t>(0)
 
 
 cdef inline dtype_t kernel_pop(Py_ssize_t * histo, float pop,

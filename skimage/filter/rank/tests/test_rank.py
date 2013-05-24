@@ -407,17 +407,17 @@ def test_percentile():
     assert_array_equal(lena5_8bit, lena5_16bit)
 
 def test_percentile_min():
-    #check that percentile p0 = 0 is identical to local min
+    #check that percentile p0 = 0+eps is identical to local min
     lena = np.array(256*color.rgb2gray(data.lena()),dtype=np.uint8)
     lena16 = lena.astype(np.uint16)
     selem = disk(15)
     #check for 8bit
-    lena_p0 = rank.percentile(lena,selem=selem,p0=0.)
+    lena_p0 = rank.percentile(lena,selem=selem,p0=0.000000001)
     lena_min = rank.minimum(lena,selem=selem)
     lena_min = rank.minimum(lena,selem=selem)
     assert_array_equal(lena_p0,lena_min)
     #check for 16bit
-    lena_p0 = rank.percentile(lena16,selem=selem,p0=0.)
+    lena_p0 = rank.percentile(lena16,selem=selem,p0=0.000000001)
     lena_min = rank.minimum(lena16,selem=selem)
     assert_array_equal(lena_p0,lena_min)
 
