@@ -29,7 +29,7 @@ fig, axes = plt.subplots(ncols=4,nrows=4, figsize=(15, 10))
 
 max_row = 4
 max_col = 4
-p0 = np.linspace(0.0000001,1,max_col*max_row,endpoint=True)
+p0 = np.linspace(0,1,max_col*max_row,endpoint=True)
 i=0
 for row in axes:
     for ax in row:
