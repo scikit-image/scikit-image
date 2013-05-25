@@ -86,12 +86,11 @@ def convex_hull_object(image, neighbors=8):
 
     Note 
     ----
-    This function uses the label function defined in ccomp.pyx. Using this 
-    convex_hull_image of individual objects are extracted and combined using 
-    logical OR. However, OR operation may lead to overlapping of hulls, thus 
-    giving inaccurate results. In such a case, it would be helpful for users 
-    to use the above approach to create a mask of several objects (whose hulls 
-    overlap).
+    This function uses skimage.morphology.label to define unique objects,
+    finds the convex hull of each using convex_hull_image, and combines
+    these regions with logical OR. Be aware the convex hulls of unconnected
+    objects may overlap in the result. If this is suspected, consider using
+    convex_hull_image on those objects together.
     
     """
 
