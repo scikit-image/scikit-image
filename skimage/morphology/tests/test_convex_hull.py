@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_raises
 from numpy.testing.decorators import skipif
 from skimage.morphology import convex_hull_image, convex_hull_object
 from skimage.morphology._convex_hull import possible_hull
@@ -104,6 +104,8 @@ def test_object():
          [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=bool)
 
     assert_array_equal(convex_hull_object(image, 8), expected8)
+
+    assert_raises(ValueError, convex_hull_object, image, 7)
 
 if __name__ == "__main__":
     np.testing.run_module_suite()
