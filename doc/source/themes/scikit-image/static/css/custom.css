@@ -44,6 +44,9 @@ h6 {
 blockquote {
     border-left: 0;
 }
+dt {
+    font-weight: normal;
+}
 
 .logo {
     float: left;
