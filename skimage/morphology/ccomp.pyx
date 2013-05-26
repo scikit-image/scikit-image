@@ -93,7 +93,7 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
            [ ]           [ ]  [ ]  [ ]
             |               \  |  /
       [ ]--[ ]--[ ]      [ ]--[ ]--[ ]
-            |               /  |  \
+            |               /  |  \\
            [ ]           [ ]  [ ]  [ ]
 
     Parameters
