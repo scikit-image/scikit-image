@@ -287,7 +287,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
                 order=order, mode=mode, cval=cval)
 
 
-def downsample(array, factors, mode='sum'):
+def _downsample(array, factors, mode='sum'):
     """Performs downsampling with integer factors.
 
     Parameters
@@ -338,9 +338,9 @@ def downsample(array, factors, mode='sum'):
     block_shape = out.shape
 
     if mode == 'sum':
-        for i in range(len(block_shape)//2):
+        for i in range(len(block_shape) // 2):
             out = out.sum(-1)
     else:
-        for i in range(len(block_shape)//2):
+        for i in range(len(block_shape) // 2):
             out = out.mean(-1)
     return out
