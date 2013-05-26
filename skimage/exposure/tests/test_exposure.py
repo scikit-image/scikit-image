@@ -1,3 +1,5 @@
+import warnings
+
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
 import skimage
@@ -112,6 +114,10 @@ def test_adapthist_color():
     '''Test an RGB color uint16 image
     '''
     img = skimage.img_as_uint(data.lena())
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter('always')
+        hist, bin_centers = exposure.histogram(img)
+        assert len(w) > 0
     adapted = exposure.equalize_adapthist(img, clip_limit=0.01)
     assert_almost_equal = np.testing.assert_almost_equal
     assert adapted.min() == 0
