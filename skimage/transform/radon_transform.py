@@ -34,7 +34,7 @@ def radon(image, theta=None, circle=False):
     circle : boolean, optional (default False)
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
-        equal to min(image.shape).
+        equal to ``min(image.shape)``.
 
     Returns
     -------
@@ -44,7 +44,7 @@ def radon(image, theta=None, circle=False):
     Raises
     ------
     ValueError
-        If called with `circle=True` and image != 0 outside the inscribed
+        If called with ``circle=True`` and ``image != 0`` outside the inscribed
         circle
     """
     if image.ndim != 2:
@@ -58,8 +58,8 @@ def radon(image, theta=None, circle=False):
         reconstruction_circle = ((c0 - image.shape[0] // 2)**2
                                  + (c1 - image.shape[1] // 2)**2) < radius**2
         if not np.all(reconstruction_circle | (image == 0)):
-            raise ValueError('image must be zero outside the reconstruction'
-                             + ' circle')
+            raise ValueError('Image must be zero outside the reconstruction'
+                             ' circle')
         slices = []
         for d in (0, 1):
             if image.shape[d] > min(image.shape):
@@ -143,7 +143,7 @@ def iradon(radon_image, theta=None, output_size=None,
     circle : boolean, optional (default False)
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
-        ``radon`` called with circle=True.
+        ``radon`` called with ``circle=True``.
 
     Returns
     -------
