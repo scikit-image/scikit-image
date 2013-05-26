@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 
 from skimage import img_as_float
@@ -18,6 +19,10 @@ def histogram(image, nbins=256):
     Unlike `numpy.histogram`, this function returns the centers of bins and
     does not rebin integer arrays. For integer arrays, each integer value has
     its own bin, which improves speed and intensity-resolution.
+
+    The histogram is computed on the flattened image: for color images, the
+    function should be used separately on each channel to obtain a histogram
+    for each color channel.
 
     Parameters
     ----------
@@ -42,6 +47,11 @@ def histogram(image, nbins=256):
     >>> plt.plot(hist[1], hist[0])  # doctest: +ELLIPSIS
     [...]
     """
+    sh = image.shape
+    if len(sh) == 3 and sh[-1] < 4:
+        warnings.warn("This might be a color image. The histogram will be "
+                      "computed on the flattened image. You can instead "
+                      "apply this function to each color channel.")
 
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
