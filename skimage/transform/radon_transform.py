@@ -116,7 +116,7 @@ def radon(image, theta=None, circle=False):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear"):
+           filter="ramp", interpolation="linear", circle=False):
     """
     Inverse radon transform.
 
@@ -140,6 +140,10 @@ def iradon(radon_image, theta=None, output_size=None,
     interpolation : str, optional (default linear)
         Interpolation method used in reconstruction.
         Methods available: nearest, linear.
+    circle : boolean, optional (default False)
+        Assume the reconstructed image is zero outside the inscribed circle.
+        Also changes the default output_size to match the behaviour of
+        ``radon`` called with circle=True.
 
     Returns
     -------
@@ -169,7 +173,19 @@ def iradon(radon_image, theta=None, output_size=None,
     th = (np.pi / 180.0) * theta
     # if output size not specified, estimate from input radon image
     if not output_size:
-        output_size = int(np.floor(np.sqrt((radon_image.shape[0])**2 / 2.0)))
+        if circle:
+            output_size = radon_image.shape[0]
+        else:
+            output_size = int(np.floor(np.sqrt((radon_image.shape[0])**2
+                                               / 2.0)))
+    if circle:
+        radon_size = int(np.ceil(np.sqrt(2) * radon_image.shape[0]))
+        radon_image_padded = np.zeros((radon_size, radon_image.shape[1]))
+        radon_pad = (radon_size - radon_image.shape[0]) // 2
+        radon_image_padded[radon_pad:radon_pad + radon_image.shape[0], :] \
+            = radon_image
+        radon_image = radon_image_padded
+
     n = radon_image.shape[0]
 
     img = radon_image.copy()
@@ -215,12 +231,19 @@ def iradon(radon_image, theta=None, output_size=None,
     xpr = X - int(output_size) // 2
     ypr = Y - int(output_size) // 2
 
+    if circle:
+        radius = (output_size - 1) // 2
+        reconstruction_circle = (xpr**2 + ypr**2) < radius**2
+
     # reconstruct image by interpolation
     if interpolation == "nearest":
         for i in range(len(theta)):
             k = np.round(mid_index + xpr * np.sin(th[i]) - ypr * np.cos(th[i]))
-            reconstructed += radon_filtered[
+            backprojected = radon_filtered[
                 ((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]
+            if circle:
+                backprojected[~reconstruction_circle] = 0.
+            reconstructed += backprojected
 
     elif interpolation == "linear":
         for i in range(len(theta)):
@@ -229,9 +252,11 @@ def iradon(radon_image, theta=None, output_size=None,
             b = mid_index + a
             b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
             b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
-            reconstructed += (t - a) * radon_filtered[b0, i] + \
+            backprojected = (t - a) * radon_filtered[b0, i] + \
                              (a - t + 1) * radon_filtered[b1, i]
-
+            if circle:
+                backprojected[~reconstruction_circle] = 0.
+            reconstructed += backprojected
     else:
         raise ValueError("Unknown interpolation: %s" % interpolation)
 
