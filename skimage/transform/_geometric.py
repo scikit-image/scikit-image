@@ -493,8 +493,8 @@ class SimilarityTransform(ProjectiveTransform):
                      for param in (scale, rotation, translation))
 
         if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and "
-                             "the implicit parameters at the same time.")
+            raise ValueError("You cannot specify the transformation matrix and"
+                             " the implicit parameters at the same time.")
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
