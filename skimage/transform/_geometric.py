@@ -946,7 +946,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     Parameters
     ----------
-    image : 2-D array
+    image : 2-D or 3-D array
         Input image.
     inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``
         Inverse coordinate map. A function that transforms a (N, 2) array of
@@ -955,15 +955,16 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         inverse).
     map_args : dict, optional
         Keyword arguments passed to `inverse_map`.
-    output_shape : tuple (rows, cols)
-        Shape of the output image generated.
-    order : int
-        Order of splines used in interpolation. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : float
+    output_shape : tuple (rows, cols), optional
+        Shape of the output image generated. By default the shape of the input
+        image is preserved.
+    order : int, optional
+        The order of the spline interpolation, default is 3. The order has to
+        be in the range 0-5.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
