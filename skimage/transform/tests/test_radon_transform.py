@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import division
 
 import numpy as np
 from numpy.testing import *
@@ -102,6 +103,32 @@ def test_reconstruct_with_wrong_angles():
     p = radon(a, theta=[0, 1, 2])
     iradon(p, theta=[0, 1, 2])
     assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
+
+def test_radon_circle():
+    a = np.ones((10, 10))
+    assert_raises(ValueError, radon, a, circle=True)
+
+    # Synthetic data, circular symmetry
+    shape = (61, 79)
+    c0, c1 = np.ogrid[0:shape[0], 0:shape[1]]
+    r = np.sqrt((c0 - shape[0] // 2)**2 + (c1 - shape[1] // 2)**2)
+    radius = min(shape) // 2
+    image = np.clip(radius - r, 0, np.inf)
+    image = rescale(image)
+    angles = np.linspace(0, 180, min(shape), endpoint=False)
+    sinogram = radon(image, theta=angles, circle=True)
+    assert np.all(sinogram.std(axis=1) < 1e-2)
+
+    # Synthetic data, random
+    np.random.seed(98312871)
+    image = np.random.rand(*shape)
+    image[r >= radius] = 0.
+    sinogram = radon(image, theta=angles, circle=True)
+    mass = sinogram.sum(axis=0)
+    average_mass = mass.mean()
+    relative_error = np.abs(mass - average_mass) / average_mass
+    print(relative_error.max(), relative_error.mean())
+    assert np.all(relative_error < 3e-3)
 
 
 if __name__ == "__main__":
