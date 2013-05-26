@@ -84,26 +84,25 @@ def convex_hull_object(image, neighbors=8):
     hull : ndarray of bool
         Binary image with pixels in convex hull set to True.
 
-    Note 
+    Note
     ----
     This function uses skimage.morphology.label to define unique objects,
     finds the convex hull of each using convex_hull_image, and combines
     these regions with logical OR. Be aware the convex hulls of unconnected
     objects may overlap in the result. If this is suspected, consider using
-    convex_hull_image on those objects together.
-    
+    convex_hull_image separately on each object.
+
     """
 
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
-    
+
     labeled_im = label(image, neighbors, background=0)
     convex_obj = np.zeros(image.shape, dtype=bool)
     convex_img = np.zeros(image.shape, dtype=bool)
-    
+
     for i in range(0, labeled_im.max()+1):
         convex_obj = convex_hull_image(labeled_im == i)
         convex_img = np.logical_or(convex_img, convex_obj)
 
     return convex_img
-    
