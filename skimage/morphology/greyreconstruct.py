@@ -187,7 +187,8 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         value_map = -value_map
 
     start = index_sorted[0]
-    reconstruction_loop(value_rank, prev, next, nb_strides, start, image_stride)
+    reconstruction_loop(
+        value_rank, prev, next, nb_strides, start, image_stride)
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]

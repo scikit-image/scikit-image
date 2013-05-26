@@ -44,15 +44,15 @@ def radon(image, theta=None):
         theta = np.arange(180)
 
     height, width = image.shape
-    diagonal = np.sqrt(height**2 + width**2)
+    diagonal = np.sqrt(height ** 2 + width ** 2)
     heightpad = np.ceil(diagonal - height)
     widthpad = np.ceil(diagonal - width)
     padded_image = np.zeros((int(height + heightpad),
                              int(width + widthpad)))
     y0, y1 = int(np.ceil(heightpad / 2)), \
-             int((np.ceil(heightpad / 2) + height))
+        int((np.ceil(heightpad / 2) + height))
     x0, x1 = int((np.ceil(widthpad / 2))), \
-             int((np.ceil(widthpad / 2) + width))
+        int((np.ceil(widthpad / 2) + width))
 
     padded_image[y0:y1, x0:x1] = image
     out = np.zeros((max(padded_image.shape), len(theta)))
@@ -139,13 +139,13 @@ def iradon(radon_image, theta=None, output_size=None,
     th = (np.pi / 180.0) * theta
     # if output size not specified, estimate from input radon image
     if not output_size:
-        output_size = int(np.floor(np.sqrt((radon_image.shape[0])**2 / 2.0)))
+        output_size = int(np.floor(np.sqrt((radon_image.shape[0]) ** 2 / 2.0)))
     n = radon_image.shape[0]
 
     img = radon_image.copy()
     # resize image to next power of two for fourier analysis
     # speeds up fourier and lessens artifacts
-    order = max(64., 2**np.ceil(np.log(2 * n) / np.log(2)))
+    order = max(64., 2 ** np.ceil(np.log(2 * n) / np.log(2)))
     # zero pad input image
     img.resize((order, img.shape[1]))
     # construct the fourier filter

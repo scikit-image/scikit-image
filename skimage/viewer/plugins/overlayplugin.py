@@ -15,6 +15,7 @@ def recent_mpl_version():
 
 
 class OverlayPlugin(Plugin):
+
     """Plugin for ImageViewer that displays an overlay on top of main image.
 
     The base Plugin class displays the filtered image directly on the viewer.
@@ -47,7 +48,7 @@ class OverlayPlugin(Plugin):
 
     def attach(self, image_viewer):
         super(OverlayPlugin, self).attach(image_viewer)
-        #TODO: `color` doesn't update GUI widget when set manually.
+        # TODO: `color` doesn't update GUI widget when set manually.
         self.color = 0
 
     @property

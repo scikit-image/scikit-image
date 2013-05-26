@@ -18,7 +18,7 @@ EROSION_SELEM = generate_binary_structure(2, 2)
 
 HSOBEL_WEIGHTS = np.array([[ 1, 2, 1],
                            [ 0, 0, 0],
-                           [-1,-2,-1]]) / 4.0
+                           [-1, -2, -1]]) / 4.0
 VSOBEL_WEIGHTS = HSOBEL_WEIGHTS.T
 
 HSCHARR_WEIGHTS = np.array([[ 3,  10,  3],
@@ -28,7 +28,7 @@ VSCHARR_WEIGHTS = HSCHARR_WEIGHTS.T
 
 HPREWITT_WEIGHTS = np.array([[ 1, 1, 1],
                              [ 0, 0, 0],
-                             [-1,-1,-1]]) / 3.0
+                             [-1, -1, -1]]) / 3.0
 VPREWITT_WEIGHTS = HPREWITT_WEIGHTS.T
 
 ROBERTS_PD_WEIGHTS = np.array([[ 1, 0],
@@ -44,8 +44,8 @@ def _mask_filter_result(result, mask):
     affect values in the result.
     """
     if mask is None:
-        result[0, :] = 0
-        result[-1, :] = 0
+        result[0,:] = 0
+        result[-1,:] = 0
         result[:, 0] = 0
         result[:, -1] = 0
         return result
@@ -346,7 +346,7 @@ def roberts(image, mask=None):
     """Find the edge magnitude using Roberts' cross operator.
 
     Parameters
-	----------
+        ----------
     image : 2-D array
         Image to process.
     mask : 2-D array, optional

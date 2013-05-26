@@ -111,8 +111,8 @@ def disk(radius, dtype=np.uint8):
     """
     L = np.linspace(-radius, radius, 2 * radius + 1)
     (X, Y) = np.meshgrid(L, L)
-    s = X**2
-    s += Y**2
+    s = X ** 2
+    s += Y ** 2
     return np.array(s <= radius * radius, dtype=dtype)
 
 
@@ -167,10 +167,10 @@ def octahedron(radius, dtype=np.uint8):
     """
     # note that in contrast to diamond(), this method allows non-integer radii
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
-                        -radius:radius:n*1j,
-                        -radius:radius:n*1j]
-    s = np.abs(X) + np.abs(Y) + np.abs(Z) 
+    Z, Y, X = np.mgrid[-radius:radius:n * 1j,
+                      -radius:radius:n * 1j,
+                      -radius:radius:n * 1j]
+    s = np.abs(X) + np.abs(Y) + np.abs(Z)
     return np.array(s <= radius, dtype=dtype)
 
 
@@ -196,8 +196,8 @@ def ball(radius, dtype=np.uint8):
        are 1 and 0 otherwise.
     """
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
-                        -radius:radius:n*1j, 
-                        -radius:radius:n*1j]
-    s = X**2 + Y**2 + Z**2
+    Z, Y, X = np.mgrid[-radius:radius:n * 1j,
+                      -radius:radius:n * 1j,
+                      -radius:radius:n * 1j]
+    s = X ** 2 + Y ** 2 + Z ** 2
     return np.array(s <= radius * radius, dtype=dtype)

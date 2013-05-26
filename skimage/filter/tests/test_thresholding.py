@@ -7,6 +7,7 @@ from skimage.filter.thresholding import threshold_otsu, threshold_adaptive
 
 
 class TestSimpleImage():
+
     def setup(self):
         self.image = np.array([[0, 0, 1, 3, 5],
                                [0, 1, 4, 3, 4],
@@ -33,7 +34,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='generic', param=func)
         assert_array_equal(ref, out)
@@ -44,7 +45,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='gaussian')
         assert_array_equal(ref, out)
@@ -55,7 +56,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='mean')
         assert_array_equal(ref, out)

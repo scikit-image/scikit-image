@@ -28,8 +28,8 @@ def _generate_candidate_libs():
         for lib_name in lib_names:
             files = os.listdir(lib_dir)
             lib_paths += [os.path.join(lib_dir, lib) for lib in files
-                           if lib.lower().startswith(lib_name) and not
-                           os.path.splitext(lib)[1] in ('.py', '.pyc', '.ini')]
+                         if lib.lower().startswith(lib_name) and not
+                         os.path.splitext(lib)[1] in ('.py', '.pyc', '.ini')]
     lib_paths = [lp for lp in lib_paths if os.path.exists(lp)]
 
     return lib_dirs, lib_paths
@@ -111,7 +111,7 @@ API = {
     'FreeImage_Load': (ctypes.c_void_p, None),
     'FreeImage_LockPage': (ctypes.c_void_p, None),
     'FreeImage_OpenMultiBitmap': (ctypes.c_void_p, None)
-    }
+}
 
 # Albert's ctypes pattern
 
@@ -153,7 +153,7 @@ class FI_TYPES(object):
         FIT_RGBA16: numpy.uint16,
         FIT_RGBF: numpy.float32,
         FIT_RGBAF: numpy.float32
-        }
+    }
 
     fi_types = {
         (numpy.dtype('uint8'), 1): FIT_BITMAP,
@@ -170,7 +170,7 @@ class FI_TYPES(object):
         (numpy.dtype('uint16'), 4): FIT_RGBA16,
         (numpy.dtype('float32'), 3): FIT_RGBF,
         (numpy.dtype('float32'), 4): FIT_RGBAF
-        }
+    }
 
     extra_dims = {
         FIT_UINT16: [],
@@ -184,7 +184,7 @@ class FI_TYPES(object):
         FIT_RGBA16: [4],
         FIT_RGBF: [3],
         FIT_RGBAF: [4]
-        }
+    }
 
     @classmethod
     def get_type_and_shape(cls, bitmap):
@@ -371,7 +371,7 @@ class METADATA_DATATYPE(object):
         FIDT_LONG8: numpy.uint64,
         FIDT_SLONG8: numpy.int64,
         FIDT_IFD8: numpy.uint64
-        }
+    }
 
 
 def _process_bitmap(filename, flags, process_func):
@@ -433,7 +433,7 @@ def _process_multipage(filename, flags, process_func):
             bitmap = ctypes.c_void_p(bitmap)
             if not bitmap:
                 raise ValueError('Could not open %s as a multi-page image.'
-                                  % filename)
+                                % filename)
             try:
                 out.append(process_func(bitmap))
             finally:
@@ -479,7 +479,8 @@ def _wrap_bitmap_bits_in_array(bitmap, shape, dtype):
         strides = (itemsize, pitch)
     bits = _FI.FreeImage_GetBits(bitmap)
     array = numpy.ndarray(shape, dtype=dtype,
-                          buffer=(ctypes.c_char * byte_size).from_address(bits),
+                          buffer=(
+                              ctypes.c_char * byte_size).from_address(bits),
                           strides=strides)
     return array
 
@@ -540,7 +541,8 @@ def _read_metadata(bitmap):
                     if len(tag_val) == 1:
                         tag_val = tag_val[0]
                 metadata[(model_name, tag_name)] = tag_val
-                more = _FI.FreeImage_FindNextMetadata(mdhandle, ctypes.byref(tag))
+                more = _FI.FreeImage_FindNextMetadata(
+                    mdhandle, ctypes.byref(tag))
             _FI.FreeImage_FindCloseMetadata(mdhandle)
     return metadata
 
@@ -642,7 +644,7 @@ def _array_to_bitmap(array):
         # swizzle the color components and flip the scanlines to go to
         # FreeImage's BGR[A] and upside-down internal memory format
         if len(shape) == 3 and _FI.FreeImage_IsLittleEndian() and \
-               dtype.type == numpy.uint8:
+            dtype.type == numpy.uint8:
             wrapped_array[0] = n(array[:, :, 2])
             wrapped_array[1] = n(array[:, :, 1])
             wrapped_array[2] = n(array[:, :, 0])

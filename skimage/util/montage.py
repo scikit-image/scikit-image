@@ -71,7 +71,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
     assert arr_in.ndim == 3
 
     n_images, height, width = arr_in.shape
-    
+
     arr_in = arr_in.copy()
 
     # -- rescale intensity if necessary
@@ -86,7 +86,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
     if fill == 'mean':
         fill = arr_in.mean()
 
-    n_missing = int((alpha**2.) - n_images)
+    n_missing = int((alpha ** 2.) - n_images)
     missing = np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill
     arr_out = np.vstack((arr_in, missing))
 

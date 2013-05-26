@@ -26,6 +26,7 @@ def test_single():
     assert_equal(x[0, 0], integrate(s, 0, 0, 0, 0))
     assert_equal(x[10, 10], integrate(s, 10, 10, 10, 10))
 
+
 def test_vectorized_integrate():
     r0 = np.array([12, 0, 0, 10, 0, 10, 30])
     c0 = np.array([10, 0, 10, 0, 0, 10, 31])
@@ -36,7 +37,7 @@ def test_vectorized_integrate():
                          x[:20, :20].sum(),
                          x[:20, 10:20].sum(),
                          x[10:20, :20].sum(),
-                         x[0,0],
+                         x[0, 0],
                          x[10, 10],
                          x[30:, 31:].sum()])
     assert_equal(expected, integrate(s, r0, c0, r1, c1))

@@ -50,8 +50,8 @@ class TestSElem():
             # mask.
             c = int(expected_mask.shape[0]/2)
             assert_equal(expected_mask, actual_mask[c,:,:])
-            assert_equal(expected_mask, actual_mask[:,c,:])
-            assert_equal(expected_mask, actual_mask[:,:,c])
+            assert_equal(expected_mask, actual_mask[:, c,:])
+            assert_equal(expected_mask, actual_mask[:,:, c])
             k = k + 1
 
     def test_selem_disk(self):

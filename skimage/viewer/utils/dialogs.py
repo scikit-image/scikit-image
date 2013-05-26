@@ -19,7 +19,7 @@ def save_file_dialog(default_format='png'):
     filename = str(QtGui.QFileDialog.getSaveFileName())
     if len(filename) == 0:
         return None
-    #TODO: io plugins should assign default image formats
+    # TODO: io plugins should assign default image formats
     basename, ext = os.path.splitext(filename)
     if not ext:
         filename = '%s.%s' % (filename, default_format)

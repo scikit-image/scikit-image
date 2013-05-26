@@ -43,6 +43,7 @@ def start_qtapp():
 
 
 class RequiredAttr(object):
+
     """A class attribute that must be set before use."""
 
     def __init__(self, msg):
@@ -59,6 +60,7 @@ class RequiredAttr(object):
 
 
 class LinearColormap(LinearSegmentedColormap):
+
     """LinearSegmentedColormap in which color varies smoothly.
 
     This class is a simplification of LinearSegmentedColormap, which doesn't
@@ -84,6 +86,7 @@ class LinearColormap(LinearSegmentedColormap):
 
 
 class ClearColormap(LinearColormap):
+
     """Color map that varies linearly from alpha = 0 to 1
     """
     def __init__(self, rgb, max_alpha=1, name='clear_color'):
@@ -96,6 +99,7 @@ class ClearColormap(LinearColormap):
 
 
 class FigureCanvas(FigureCanvasQTAgg):
+
     """Canvas for displaying images."""
     def __init__(self, figure, **kwargs):
         self.fig = figure

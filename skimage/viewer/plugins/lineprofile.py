@@ -12,6 +12,7 @@ __all__ = ['LineProfile']
 
 
 class LineProfile(PlotPlugin):
+
     """Plugin to compute interpolated intensity under a scan line on an image.
 
     See PlotPlugin and Plugin classes for additional details.

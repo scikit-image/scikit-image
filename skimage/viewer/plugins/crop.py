@@ -30,6 +30,6 @@ class Crop(Plugin):
 
     def crop(self, extents):
         xmin, xmax, ymin, ymax = extents
-        image = self.image_viewer.image[ymin:ymax+1, xmin:xmax+1]
+        image = self.image_viewer.image[ymin:ymax + 1, xmin:xmax + 1]
         self.image_viewer.image = image
         self.image_viewer.ax.relim()

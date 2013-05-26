@@ -6,6 +6,7 @@ from skimage import img_as_float
 from skimage import draw
 from numpy.testing import *
 
+
 def test_histogram_of_oriented_gradients():
     img = img_as_float(data.lena()[:256, :].mean(axis=2))
 
@@ -14,15 +15,18 @@ def test_histogram_of_oriented_gradients():
 
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
 
+
 def test_hog_image_size_cell_size_mismatch():
     image = data.camera()[:150, :200]
     fd = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
                      cells_per_block=(1, 1))
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
 
+
 def test_hog_color_image_unsupported_error():
     image = np.zeros((20, 20, 3))
     assert_raises(ValueError, feature.hog, image)
+
 
 def test_hog_basic_orientations_and_data_types():
     # scenario:
@@ -60,23 +64,39 @@ def test_hog_basic_orientations_and_data_types():
         if False:
             import matplotlib.pyplot as plt
             plt.figure()
-            plt.subplot(2, 3, 1); plt.imshow(image_float); plt.colorbar(); plt.title('image')
-            plt.subplot(2, 3, 2); plt.imshow(hog_img_float); plt.colorbar(); plt.title('HOG result visualisation (float img)')
-            plt.subplot(2, 3, 5); plt.imshow(hog_img_uint8); plt.colorbar(); plt.title('HOG result visualisation (uint8 img)')
-            plt.subplot(2, 3, 3); plt.imshow(hog_img_float_norm); plt.colorbar(); plt.title('HOG result (normalise) visualisation (float img)')
-            plt.subplot(2, 3, 6); plt.imshow(hog_img_uint8_norm); plt.colorbar(); plt.title('HOG result (normalise) visualisation (uint8 img)')
+            plt.subplot(2, 3, 1)
+            plt.imshow(image_float)
+            plt.colorbar()
+            plt.title('image')
+            plt.subplot(2, 3, 2)
+            plt.imshow(hog_img_float)
+            plt.colorbar()
+            plt.title(
+                'HOG result visualisation (float img)')
+            plt.subplot(2, 3, 5)
+            plt.imshow(hog_img_uint8)
+            plt.colorbar()
+            plt.title(
+                'HOG result visualisation (uint8 img)')
+            plt.subplot(2, 3, 3); plt.imshow(hog_img_float_norm); plt.colorbar(); plt.title(
+                'HOG result (normalise) visualisation (float img)')
+            plt.subplot(2, 3, 6); plt.imshow(hog_img_uint8_norm); plt.colorbar(); plt.title(
+                'HOG result (normalise) visualisation (uint8 img)')
             plt.show()
 
-        # results (features and visualisation) for float and uint8 images must be almost equal
+        # results (features and visualisation) for float and uint8 images must
+        # be almost equal
         assert_almost_equal(hog_float, hog_uint8)
         assert_almost_equal(hog_img_float, hog_img_uint8)
 
-        # resulting features should be almost equal when 'normalise' is enabled or disabled (for current simple testing image)
+        # resulting features should be almost equal when 'normalise' is enabled
+        # or disabled (for current simple testing image)
         assert_almost_equal(hog_float, hog_float_norm, decimal=4)
         assert_almost_equal(hog_float, hog_uint8_norm, decimal=4)
 
         # reshape resulting feature vector to matrix with 4 columns (each corresponding to one of 4 directions),
-        # only one direction should contain nonzero values (this is manually determined for testing image)
+        # only one direction should contain nonzero values (this is manually
+        # determined for testing image)
         actual = np.max(hog_float.reshape(-1, 4), axis=0)
 
         if rot in [0, 2]:
@@ -89,6 +109,7 @@ def test_hog_basic_orientations_and_data_types():
             raise Exception('Result is not determined for this rotation.')
 
         assert_almost_equal(actual, desired, decimal=2)
+
 
 def test_hog_orientations_circle():
     # scenario:
@@ -115,11 +136,14 @@ def test_hog_orientations_circle():
         if False:
             import matplotlib.pyplot as plt
             plt.figure()
-            plt.subplot(1, 2, 1); plt.imshow(image); plt.colorbar(); plt.title('image_float')
-            plt.subplot(1, 2, 2); plt.imshow(hog_img); plt.colorbar(); plt.title('HOG result visualisation, orientations=%d' % (orientations))
+            plt.subplot(1, 2, 1); plt.imshow(
+                image); plt.colorbar(); plt.title('image_float')
+            plt.subplot(1, 2, 2); plt.imshow(hog_img); plt.colorbar(); plt.title(
+                'HOG result visualisation, orientations=%d' % (orientations))
             plt.show()
 
-        # reshape resulting feature vector to matrix with N columns (each column corresponds to one direction),
+        # reshape resulting feature vector to matrix with N columns (each
+        # column corresponds to one direction),
         hog_matrix = hog.reshape(-1, orientations)
 
         # compute mean values in the resulting feature vector for each direction,

@@ -12,6 +12,7 @@ __all__ = ['RectangleTool']
 
 
 class RectangleTool(CanvasToolBase, RectangleSelector):
+
     """Widget for selecting a rectangular region in a plot.
 
     After making the desired selection, press "Enter" to accept the selection

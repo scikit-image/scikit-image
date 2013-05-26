@@ -26,6 +26,7 @@ def is_url(filename):
 
 
 class Image(np.ndarray):
+
     """Class representing Image data.
 
     These objects have tags for image metadata and IPython display protocol

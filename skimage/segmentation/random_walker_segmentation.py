@@ -102,8 +102,8 @@ def _make_laplacian_sparse(edges, weights):
                             shape=(pixel_nb, pixel_nb))
     connect = - np.ravel(lap.sum(axis=1))
     lap = sparse.coo_matrix((np.hstack((data, connect)),
-                (np.hstack((i_indices, diag)), np.hstack((j_indices, diag)))),
-                shape=(pixel_nb, pixel_nb))
+                           (np.hstack((i_indices, diag)), np.hstack((j_indices, diag)))),
+        shape=(pixel_nb, pixel_nb))
     return lap.tocsr()
 
 

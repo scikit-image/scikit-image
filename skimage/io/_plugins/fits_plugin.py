@@ -6,8 +6,8 @@ try:
     import pyfits
 except ImportError:
     raise ImportError("PyFITS could not be found. Please refer to\n"
-        "http://www.stsci.edu/resources/software_hardware/pyfits\n"
-        "for further instructions.")
+                      "http://www.stsci.edu/resources/software_hardware/pyfits\n"
+                      "for further instructions.")
 
 
 def imread(fname, dtype=None):
@@ -142,6 +142,6 @@ def FITSFactory(image_ext):
 
     if data is None:
         raise RuntimeError("Extension %d of %s has no data" %
-                  (extnum, filename))
+                          (extnum, filename))
 
     return data

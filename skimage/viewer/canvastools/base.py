@@ -14,6 +14,7 @@ def _pass(*args):
 
 
 class CanvasToolBase(object):
+
     """Base canvas tool for matplotlib axes.
 
     Parameters
@@ -89,7 +90,7 @@ class CanvasToolBase(object):
 
         Note that the naming here mimics the interface of Matplotlib artists.
         """
-        #TODO: For some reason, RectangleTool doesn't get properly removed
+        # TODO: For some reason, RectangleTool doesn't get properly removed
         self.disconnect_events()
         for a in self._artists:
             a.remove()
@@ -119,6 +120,7 @@ class CanvasToolBase(object):
 
 
 class ToolHandles(object):
+
     """Control handles for canvas tools.
 
     Parameters
@@ -172,5 +174,5 @@ class ToolHandles(object):
         # Transform data coordinates to pixel coordinates.
         pts = self.ax.transData.transform(pts)
         diff = pts - ((x, y))
-        dist = np.sqrt(np.sum(diff**2, axis=1))
+        dist = np.sqrt(np.sum(diff ** 2, axis=1))
         return np.argmin(dist), np.min(dist)

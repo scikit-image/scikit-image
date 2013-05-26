@@ -63,6 +63,3 @@ def pct_total_area(image, percentile=80):
     idx = int((image.size - 1) * percentile / 100.0)
     sorted_pixels = np.sort(image.flat)
     return sorted_pixels[idx]
-
-
-

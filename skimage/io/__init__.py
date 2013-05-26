@@ -41,9 +41,11 @@ def _load_preferred_plugins():
     except ImportError:
         pass
 
+
 def reset_plugins():
     _reset_plugins()
     _load_preferred_plugins()
+
 
 def _update_doc(doc):
     """Add a list of plugins to the module docstring, formatted as

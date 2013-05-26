@@ -5,6 +5,7 @@ import skimage.io._plugins._colormixer as cm
 
 
 class ColorMixerTest(object):
+
     def setup(self):
         self.state = np.ones((18, 33, 3), dtype=np.uint8) * 200
         self.img = np.zeros_like(self.state)
@@ -92,7 +93,7 @@ class TestColorMixer(object):
     def test_gamma(self):
         gamma = 1.5
         cm.gamma(self.img, self.state, gamma)
-        img = np.asarray(((self.state / 255.)**(1 / gamma)) * 255,
+        img = np.asarray(((self.state / 255.) ** (1 / gamma)) * 255,
                          dtype='uint8')
         assert_array_almost_equal(img, self.img)
 

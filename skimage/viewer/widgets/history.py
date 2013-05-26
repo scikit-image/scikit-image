@@ -17,6 +17,7 @@ __all__ = ['OKCancelButtons', 'SaveButtons']
 
 
 class OKCancelButtons(BaseWidget):
+
     """Buttons that close the parent plugin.
 
     OK will replace the original image with the current (filtered) image.
@@ -51,6 +52,7 @@ class OKCancelButtons(BaseWidget):
 
 
 class SaveButtons(BaseWidget):
+
     """Buttons to save image to io.stack or to a file."""
 
     def __init__(self, name='Save to:', default_format='png'):
@@ -89,7 +91,7 @@ class SaveButtons(BaseWidget):
             return
         image = self.plugin.filtered_image
         if image.dtype == np.bool:
-            #TODO: This check/conversion should probably be in `imsave`.
+            # TODO: This check/conversion should probably be in `imsave`.
             image = skimage.img_as_ubyte(image)
         io.imsave(filename, image)
 

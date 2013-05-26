@@ -23,6 +23,7 @@ from .q_histogram import QuadHistogram
 
 
 class ImageLabel(QLabel):
+
     def __init__(self, parent, arr):
         QLabel.__init__(self)
         self.parent = parent
@@ -63,6 +64,7 @@ class ImageLabel(QLabel):
 
 
 class RGBHSVDisplay(QFrame):
+
     def __init__(self):
         QFrame.__init__(self)
         self.setFrameStyle(QtGui.QFrame.Box | QtGui.QFrame.Sunken)
@@ -115,6 +117,7 @@ class RGBHSVDisplay(QFrame):
 
 
 class SkiviImageWindow(QMainWindow):
+
     def __init__(self, arr, mgr):
         QMainWindow.__init__(self)
 

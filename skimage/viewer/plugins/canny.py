@@ -7,6 +7,7 @@ from ..widgets import Slider, ComboBox
 
 
 class CannyPlugin(OverlayPlugin):
+
     """Canny filter plugin to show edges of an image."""
 
     name = 'Canny Filter'
@@ -27,4 +28,4 @@ class CannyPlugin(OverlayPlugin):
         # Call parent method at end b/c it calls `filter_image`, which needs
         # the values specified by the widgets. Alternatively, move call to
         # parent method to beginning and add a call to `self.filter_image()`
-        super(CannyPlugin,self).attach(image_viewer)
+        super(CannyPlugin, self).attach(image_viewer)

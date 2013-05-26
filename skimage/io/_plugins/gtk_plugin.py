@@ -17,6 +17,7 @@ else:
     else:
 
         class ImageWindow(gtk.Window):
+
             def __init__(self, arr, mgr):
                 gtk.Window.__init__(self)
                 self.mgr = mgr

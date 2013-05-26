@@ -5,6 +5,7 @@ import skimage.filter as F
 
 
 class TestCanny(unittest.TestCase):
+
     def test_00_00_zeros(self):
         '''Test that the Canny filter finds no points for a blank field'''
         result = F.canny(np.zeros((20, 20)), 4, 0, 0, np.ones((20, 20), bool))
