@@ -1,18 +1,13 @@
 """
 Base class for Plugins that interact with ImageViewer.
 """
-try:
-    from PyQt4 import QtGui
-    from PyQt4.QtCore import Qt
-    from PyQt4.QtGui import QDialog
-except ImportError:
-    QDialog = object # hack to prevent nosetest and autodoc errors
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
+from ..qt.QtCore import Qt
 
 from ..utils import RequiredAttr, init_qtapp
 
 
-class Plugin(QDialog):
+class Plugin(QtGui.QDialog):
     """Base class for plugins that interact with an ImageViewer.
 
     A plugin connects an image filter (or another function) to an image viewer.

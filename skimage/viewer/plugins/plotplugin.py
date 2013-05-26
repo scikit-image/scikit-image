@@ -1,9 +1,5 @@
 import numpy as np
-
-try:
-    from PyQt4 import QtGui
-except ImportError:
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
 
 from ..utils import new_plot
 from .base import Plugin
