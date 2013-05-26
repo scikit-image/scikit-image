@@ -20,7 +20,7 @@ from ._warps_cy import _warp_fast
 __all__ = ["radon", "iradon"]
 
 
-def radon(image, theta=None):
+def radon(image, theta=None, circle=False):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -31,31 +31,61 @@ def radon(image, theta=None):
         Input image.
     theta : array_like, dtype=float, optional (default np.arange(180))
         Projection angles (in degrees).
+    circle : boolean, optional (default False)
+        Assume image is zero outside the inscribed circle, making the
+        width of each projection (the first dimension of the sinogram)
+        equal to min(image.shape).
 
     Returns
     -------
     output : ndarray
         Radon transform (sinogram).
 
+    Raises
+    ------
+    ValueError
+        If called with `circle=True` and image != 0 outside the inscribed
+        circle
     """
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
 
-    height, width = image.shape
-    diagonal = np.sqrt(height**2 + width**2)
-    heightpad = np.ceil(diagonal - height)
-    widthpad = np.ceil(diagonal - width)
-    padded_image = np.zeros((int(height + heightpad),
-                             int(width + widthpad)))
-    y0, y1 = int(np.ceil(heightpad / 2)), \
-             int((np.ceil(heightpad / 2) + height))
-    x0, x1 = int((np.ceil(widthpad / 2))), \
-             int((np.ceil(widthpad / 2) + width))
+    if circle:
+        radius = min(image.shape) // 2
+        c0, c1 = np.ogrid[0:image.shape[0], 0:image.shape[1]]
+        reconstruction_circle = ((c0 - image.shape[0] // 2)**2
+                                 + (c1 - image.shape[1] // 2)**2) < radius**2
+        if not np.all(reconstruction_circle | (image == 0)):
+            raise ValueError('image must be zero outside the reconstruction'
+                             + ' circle')
+        slices = []
+        for d in (0, 1):
+            if image.shape[d] > min(image.shape):
+                excess = image.shape[d] - min(image.shape)
+                slices.append(slice(int(np.ceil(excess / 2)),
+                                    int(np.ceil(excess / 2)
+                                        + min(image.shape))))
+            else:
+                slices.append(slice(None))
+        slices = tuple(slices)
+        padded_image = image[slices]
+        out = np.zeros((min(padded_image.shape), len(theta)))
+    else:
+        height, width = image.shape
+        diagonal = np.sqrt(height**2 + width**2)
+        heightpad = np.ceil(diagonal - height)
+        widthpad = np.ceil(diagonal - width)
+        padded_image = np.zeros((int(height + heightpad),
+                                int(width + widthpad)))
+        y0, y1 = int(np.ceil(heightpad / 2)), \
+                int((np.ceil(heightpad / 2) + height))
+        x0, x1 = int((np.ceil(widthpad / 2))), \
+                int((np.ceil(widthpad / 2) + width))
 
-    padded_image[y0:y1, x0:x1] = image
-    out = np.zeros((max(padded_image.shape), len(theta)))
+        padded_image[y0:y1, x0:x1] = image
+        out = np.zeros((max(padded_image.shape), len(theta)))
 
     h, w = padded_image.shape
     dh, dw = h // 2, w // 2
