@@ -236,7 +236,7 @@ class ComboBox(BaseWidget):
 
         self.layout = QtGui.QHBoxLayout(self)
         self.layout.addWidget(self.name_label)
-        self.layout.addWidget(self._combo_box, alignment=QtCore.Qt.AlignLeft)
+        self.layout.addWidget(self._combo_box)
 
         self._combo_box.currentIndexChanged.connect(self._value_changed)
         # self.connect(self._combo_box,
