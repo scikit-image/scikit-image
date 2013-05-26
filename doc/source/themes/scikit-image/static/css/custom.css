@@ -41,6 +41,9 @@ h6 {
     font-size: 13px;
     line-height: 15px;
 }
+blockquote {
+    border-left: 0;
+}
 
 .logo {
     float: left;
@@ -221,4 +224,9 @@ p.admonition-title {
 .figure .caption {
     width: 200px;
     text-align: center !important;
+}
+
+/* misc */
+div.math {
+    text-align: center;
 }
