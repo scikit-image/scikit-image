@@ -11,12 +11,8 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.morphology import disk
-import skimage.filter.rank as rank
-
-import skimage.color as color
-
-import skimage
-print skimage
+from skimage.filter import rank
+from skimage import color
 
 lena = np.array(256*color.rgb2gray(data.lena()),dtype=np.uint8)
 selem = disk(5)
