@@ -1,8 +1,55 @@
+import sys
 import warnings
 import functools
 
+import numpy as np
+from numpy import math as npmath
 
-__all__ = ['deprecated']
+
+__all__ = ['deprecated', 'numexpr_eval_fallback']
+
+
+try:
+    import numexpr
+except ImportError:
+    numexpr = None
+
+
+def numexpr_eval_fallback(ex, local_dict=None, global_dict=None,
+                          out=None, order='K', casting='safe', fallback=False):
+    """Call ``numexpr.evaluate`` if existing, otherwise fallback to pure NumPy.
+
+    Parameters
+    ----------
+    See ``numexpr.evaluate`` for parameter description.
+
+    Note, that the ``casting`` parameter is ignored if ``numexpr`` is not
+    available.
+
+    """
+    call_frame = sys._getframe(1)
+    if local_dict is None:
+        local_dict = call_frame.f_locals
+    if global_dict is None:
+        if numexpr is None or fallback:
+            global_dict = npmath.__dict__
+        else:
+            global_dict = dict()
+        global_dict.update(call_frame.f_globals)
+
+    if numexpr is None or fallback:
+        print global_dict['sqrt']
+        out_temp = eval(ex, global_dict, local_dict)
+        out_temp = np.array(out_temp, copy=False, order=order)
+        if out is None:
+            out = out_temp
+        else:
+            out[:] = out_temp
+    else:
+        out = numexpr.evaluate(ex, local_dict=local_dict,
+                               global_dict=global_dict, out=out, order=order)
+
+    return out
 
 
 class deprecated(object):

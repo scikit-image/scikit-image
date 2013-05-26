@@ -1,9 +1,14 @@
 import numpy as np
 from scipy import ndimage
 from scipy import stats
+
+from skimage._shared.utils import numexpr_eval_fallback
 from skimage.color import rgb2grey
 from skimage.util import img_as_float
 from skimage.feature import peak_local_max
+
+
+FALLBACK = True
 
 
 def _compute_derivatives(image):
@@ -91,8 +96,9 @@ def corner_kitchen_rosenfeld(image):
     imxx, imxy = _compute_derivatives(imx)
     imyx, imyy = _compute_derivatives(imy)
 
-    response = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy) \
-               / (imx**2 + imy**2)
+    response = numexpr_eval_fallback('(imxx * imy**2 + imyy * imx**2 - 2 *'
+                                     'imxy * imx * imy) / (imx**2 + imy**2)',
+                                     fallback=FALLBACK)
 
     return response
 
@@ -165,15 +171,15 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
 
-    # determinant
-    detA = Axx * Ayy - Axy**2
-    # trace
-    traceA = Axx + Ayy
+    # determinant: Axx * Ayy - Axy**2
+    # trace: Axx + Ayy
 
     if method == 'k':
-        response = detA - k * traceA**2
+        response = numexpr_eval_fallback('Axx * Ayy - Axy**2'
+                                         ' - k * (Axx + Ayy)**2', fallback=FALLBACK)
     else:
-        response = 2 * detA / (traceA + eps)
+        response = numexpr_eval_fallback('2 * (Axx * Ayy - Axy**2)'
+                                         ' / (Axx + Ayy + eps)', fallback=FALLBACK)
 
     return response
 
@@ -236,7 +242,8 @@ def corner_shi_tomasi(image, sigma=1):
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
 
     # minimum eigenvalue of A
-    response = ((Axx + Ayy) - np.sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
+    response = numexpr_eval_fallback('((Axx + Ayy) - sqrt((Axx - Ayy)**2'
+                                     ' + 4 * Axy**2)) / 2', fallback=FALLBACK)
 
     return response
 
@@ -307,12 +314,12 @@ def corner_foerstner(image, sigma=1):
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
 
     # determinant
-    detA = Axx * Ayy - Axy**2
+    detA = numexpr_eval_fallback('Axx * Ayy - Axy**2')
     # trace
-    traceA = Axx + Ayy
+    traceA = numexpr_eval_fallback('Axx + Ayy')
 
-    w = detA / traceA
-    q = 4 * detA / traceA**2
+    w = numexpr_eval_fallback('detA / traceA')
+    q = numexpr_eval_fallback('4 * detA / traceA**2')
 
     return w, q
 
