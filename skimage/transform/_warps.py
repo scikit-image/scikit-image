@@ -13,7 +13,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
         Input image.
     output_shape : tuple or ndarray
         Size of the generated output image `(rows, cols[, dim])`. If `dim` is
-        not provided, the number of channels are preserved. In case the number
+        not provided, the number of channels is preserved. In case the number
         of input channels does not equal the number of output channels a
         3-dimensional interpolation is applied.
 
