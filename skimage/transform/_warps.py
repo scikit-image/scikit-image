@@ -34,6 +34,14 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.transform import resize
+    >>> image = data.camera()
+    >>> resize(image, (100, 100)).shape
+    (100, 100)
+
     """
 
     rows, cols = output_shape[0], output_shape[1]
@@ -105,6 +113,16 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.transform import resize
+    >>> image = data.camera()
+    >>> rescale(image, 0.1).shape
+    (51, 51)
+    >>> rescale(image, 0.5).shape
+    (256, 256)
+
     """
 
     try:
@@ -150,6 +168,18 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.transform import rotate
+    >>> image = data.camera()
+    >>> rotate(image, 2).shape
+    (512, 512)
+    >>> rotate(image, 2, resize=True).shape
+    (530, 530)
+    >>> rotate(image, 90, resize=True).shape
+    (512, 512)
 
     """
 
