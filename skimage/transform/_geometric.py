@@ -971,6 +971,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     --------
     Shift an image to the right:
 
+    >>> from skimage.transform import warp
     >>> from skimage import data
     >>> image = data.camera()
     >>>
@@ -979,6 +980,12 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ...     return xy
     >>>
     >>> warp(image, shift_right)
+
+    Use a geometric transform to warp an image:
+
+    >>> from skimage.transform import SimilarityTransform
+    >>> tform = SimilarityTransform(scale=0.1, rotation=0.1)
+    >>> warp(image, tform)
 
     """
     # Backward API compatibility
