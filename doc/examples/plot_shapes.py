@@ -46,5 +46,9 @@ img[rr,cc,2] = 255
 rr, cc = circle_perimeter(120, 400, 50)
 img[rr, cc, :] = (255, 0, 255)
 
+# anti-aliased circle
+rr, cc, val = circle_perimeter(120, 400, 70, 'wu')
+img[rr, cc, 1] = val * 255
+
 plt.imshow(img)
 plt.show()
