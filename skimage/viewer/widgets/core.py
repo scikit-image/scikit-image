@@ -160,9 +160,9 @@ class Slider(BaseWidget):
         self.editbox.setAlignment(align_value)
         self.editbox.editingFinished.connect(self._on_editbox_changed)
 
-        self.layout.addWidget(self.name_label, alignment=align_text)
-        self.layout.addWidget(self.slider, alignment=alignment)
-        self.layout.addWidget(self.editbox, alignment=align_value)
+        self.layout.addWidget(self.name_label)
+        self.layout.addWidget(self.slider)
+        self.layout.addWidget(self.editbox)
 
     def _on_slider_changed(self):
         """Call callback function with slider's name and value as parameters"""
