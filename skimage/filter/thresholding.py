@@ -9,10 +9,10 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
                        mode='reflect', param=None):
     """Applies an adaptive threshold to an array.
 
-    Also known as local or dynamic thresholding where the threshold value is the
-    weighted mean for the local neighborhood of a pixel subtracted by a
-    constant. Alternatively the threshold can be determined dynamically by a
-    a given function using the 'generic' method.
+    Also known as local or dynamic thresholding where the threshold value is
+    the weighted mean for the local neighborhood of a pixel subtracted by a
+    constant. Alternatively the threshold can be determined dynamically by a a
+    given function using the 'generic' method.
 
     Parameters
     ----------
@@ -26,10 +26,10 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
         weighted mean image.
 
         * 'generic': use custom function (see `param` parameter)
-        * 'gaussian': apply gaussian filter (see `param` parameter for custom
+        * 'gaussian': apply gaussian filter (see `param` parameter for custom\
                       sigma value)
         * 'mean': apply arithmetic mean filter
-        * 'median' apply median rank filter
+        * 'median': apply median rank filter
 
         By default the 'gaussian' method is used.
     offset : float, optional
@@ -42,8 +42,8 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     param : {int, function}, optional
         Either specify sigma for 'gaussian' method or function object for
         'generic' method. This functions takes the flat array of local
-        neighbourhood as a single argument and returns the calculated threshold
-        for the centre pixel.
+        neighbourhood as a single argument and returns the calculated
+        threshold for the centre pixel.
 
     Returns
     -------
@@ -52,8 +52,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
 
     References
     ----------
-    http://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations
-        .html?highlight=threshold#adaptivethreshold
+    .. [1] http://docs.opencv.org/modules/imgproc/doc/miscellaneous_transformations.html?highlight=threshold#adaptivethreshold
 
     Examples
     --------

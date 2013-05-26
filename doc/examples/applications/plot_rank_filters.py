@@ -361,7 +361,7 @@ The example compares the local threshold with the global threshold
     Local thresholding is much slower than global one. There exists a function
     for global Otsu thresholding: `skimage.filter.threshold_otsu`.
 
-.. [1] http://en.wikipedia.org/wiki/Otsu's_method
+.. [4] http://en.wikipedia.org/wiki/Otsu's_method
 
 """
 
