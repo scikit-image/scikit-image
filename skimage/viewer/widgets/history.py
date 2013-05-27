@@ -1,9 +1,7 @@
 from textwrap import dedent
 
-try:
-    from PyQt4 import QtGui, QtCore
-except ImportError:
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
+from ..qt import QtCore
 
 import numpy as np
 

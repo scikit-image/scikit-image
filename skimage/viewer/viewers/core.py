@@ -1,12 +1,8 @@
 """
 ImageViewer class for viewing and interacting with images.
 """
-try:
-    from PyQt4 import QtGui, QtCore
-    from PyQt4.QtGui import QMainWindow
-except ImportError:
-    QMainWindow = object  # hack to prevent nosetest and autodoc errors
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
+from ..qt import QtCore
 
 from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
@@ -32,7 +28,7 @@ def mpl_image_to_rgba(mpl_image):
     return img_as_float(image)
 
 
-class ImageViewer(QMainWindow):
+class ImageViewer(QtGui.QMainWindow):
     """Viewer for displaying images.
 
     This viewer is a simple container object that holds a Matplotlib axes
