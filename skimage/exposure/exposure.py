@@ -9,8 +9,8 @@ from skimage._shared.utils import deprecated
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
-           'rescale_intensity', 'rescale_intensity_gamma',
-           'rescale_intensity_log', 'rescale_intensity_sigmoid']
+           'rescale_intensity', 'adjust_gamma',
+           'adjust_log', 'adjust_sigmoid']
 
 
 def histogram(image, nbins=256):
@@ -219,7 +219,7 @@ def rescale_intensity(image, in_range=None, out_range=None):
     return dtype(image * (omax - omin) + omin)
 
 
-def _assert_not_negative(image):
+def _assert_non_negative(image):
 
     if np.any(image < 0):
         raise ValueError('Image Correction methods work correctly only on '
@@ -229,7 +229,7 @@ def _assert_not_negative(image):
         return True
 
 
-def rescale_intensity_gamma(image, gamma=1, gain=1):
+def adjust_gamma(image, gamma=1, gain=1):
     """Performs Gamma Correction on the input image.
 
     Also known as Power Law Transform.
@@ -263,19 +263,19 @@ def rescale_intensity_gamma(image, gamma=1, gain=1):
     .. [1] http://en.wikipedia.org/wiki/Gamma_correction
 
     """
+    _assert_non_negative(image)
     dtype = image.dtype.type
 
     if gamma < 0:
         return "Gamma should be a non-negative real number"
 
-    if _assert_not_negative(image):
-        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
+    scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
     out = ((image / scale) ** gamma) * scale * gain
     return dtype(out)
 
 
-def rescale_intensity_log(image, gain=1, inv=False):
+def adjust_log(image, gain=1, inv=False):
     """Performs Logarithmic correction on the input image.
 
     This function transforms the input image pixelwise according to the
@@ -302,20 +302,19 @@ def rescale_intensity_log(image, gain=1, inv=False):
     .. [1] http://www.ece.ucsb.edu/Faculty/Manjunath/courses/ece178W03/EnhancePart1.pdf
 
     """
+    _assert_non_negative(image)
     dtype = image.dtype.type
+    scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
-    if _assert_not_negative(image):
-        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
-
-        if inv == True:
-            out = (2 ** (image / scale) - 1) * scale * gain
-            return dtype(out)
+    if inv == True:
+        out = (2 ** (image / scale) - 1) * scale * gain
+        return dtype(out)
 
     out = np.log2(1 + image / scale) * scale * gain
     return dtype(out)
 
 
-def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10, inv=False):
+def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     """Performs Sigmoid Correction on the input image.
 
     Also known as Contrast Adjustment.
@@ -345,13 +344,13 @@ def rescale_intensity_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     .. [1] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
 
     """
+    _assert_non_negative(image)
     dtype = image.dtype.type
+    scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
-    if _assert_not_negative(image):
-        scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
-        if inv == True:
-            out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
-            return dtype(out)
-
-        out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+    if inv == True:
+        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
         return dtype(out)
+
+    out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+    return dtype(out)
