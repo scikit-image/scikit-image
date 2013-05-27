@@ -31,7 +31,7 @@ def radon(image, theta=None, circle=False):
         Input image.
     theta : array_like, dtype=float, optional (default np.arange(180))
         Projection angles (in degrees).
-    circle : boolean, optional (default False)
+    circle : boolean, optional
         Assume image is zero outside the inscribed circle, making the
         width of each projection (the first dimension of the sinogram)
         equal to ``min(image.shape)``.
@@ -140,7 +140,7 @@ def iradon(radon_image, theta=None, output_size=None,
     interpolation : str, optional (default linear)
         Interpolation method used in reconstruction.
         Methods available: nearest, linear.
-    circle : boolean, optional (default False)
+    circle : boolean, optional
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
