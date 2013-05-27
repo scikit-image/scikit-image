@@ -20,7 +20,7 @@ from ._warps_cy import _warp_fast
 __all__ = ["radon", "iradon"]
 
 
-def radon(image, theta=None):
+def radon(image, theta=None, circle=False):
     """
     Calculates the radon transform of an image given specified
     projection angles.
@@ -31,31 +31,61 @@ def radon(image, theta=None):
         Input image.
     theta : array_like, dtype=float, optional (default np.arange(180))
         Projection angles (in degrees).
+    circle : boolean, optional
+        Assume image is zero outside the inscribed circle, making the
+        width of each projection (the first dimension of the sinogram)
+        equal to ``min(image.shape)``.
 
     Returns
     -------
     output : ndarray
         Radon transform (sinogram).
 
+    Raises
+    ------
+    ValueError
+        If called with ``circle=True`` and ``image != 0`` outside the inscribed
+        circle
     """
     if image.ndim != 2:
         raise ValueError('The input image must be 2-D')
     if theta is None:
         theta = np.arange(180)
 
-    height, width = image.shape
-    diagonal = np.sqrt(height**2 + width**2)
-    heightpad = np.ceil(diagonal - height)
-    widthpad = np.ceil(diagonal - width)
-    padded_image = np.zeros((int(height + heightpad),
-                             int(width + widthpad)))
-    y0, y1 = int(np.ceil(heightpad / 2)), \
-             int((np.ceil(heightpad / 2) + height))
-    x0, x1 = int((np.ceil(widthpad / 2))), \
-             int((np.ceil(widthpad / 2) + width))
+    if circle:
+        radius = min(image.shape) // 2
+        c0, c1 = np.ogrid[0:image.shape[0], 0:image.shape[1]]
+        reconstruction_circle = ((c0 - image.shape[0] // 2)**2
+                                 + (c1 - image.shape[1] // 2)**2) < radius**2
+        if not np.all(reconstruction_circle | (image == 0)):
+            raise ValueError('Image must be zero outside the reconstruction'
+                             ' circle')
+        slices = []
+        for d in (0, 1):
+            if image.shape[d] > min(image.shape):
+                excess = image.shape[d] - min(image.shape)
+                slices.append(slice(int(np.ceil(excess / 2)),
+                                    int(np.ceil(excess / 2)
+                                        + min(image.shape))))
+            else:
+                slices.append(slice(None))
+        slices = tuple(slices)
+        padded_image = image[slices]
+        out = np.zeros((min(padded_image.shape), len(theta)))
+    else:
+        height, width = image.shape
+        diagonal = np.sqrt(height**2 + width**2)
+        heightpad = np.ceil(diagonal - height)
+        widthpad = np.ceil(diagonal - width)
+        padded_image = np.zeros((int(height + heightpad),
+                                int(width + widthpad)))
+        y0 = int(np.ceil(heightpad / 2))
+        y1 = int((np.ceil(heightpad / 2) + height))
+        x0 = int((np.ceil(widthpad / 2)))
+        x1 = int((np.ceil(widthpad / 2) + width))
 
-    padded_image[y0:y1, x0:x1] = image
-    out = np.zeros((max(padded_image.shape), len(theta)))
+        padded_image[y0:y1, x0:x1] = image
+        out = np.zeros((max(padded_image.shape), len(theta)))
 
     h, w = padded_image.shape
     dh, dw = h // 2, w // 2
@@ -86,7 +116,7 @@ def radon(image, theta=None):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear"):
+           filter="ramp", interpolation="linear", circle=False):
     """
     Inverse radon transform.
 
@@ -110,6 +140,10 @@ def iradon(radon_image, theta=None, output_size=None,
     interpolation : str, optional (default linear)
         Interpolation method used in reconstruction.
         Methods available: nearest, linear.
+    circle : boolean, optional
+        Assume the reconstructed image is zero outside the inscribed circle.
+        Also changes the default output_size to match the behaviour of
+        ``radon`` called with ``circle=True``.
 
     Returns
     -------
@@ -139,7 +173,19 @@ def iradon(radon_image, theta=None, output_size=None,
     th = (np.pi / 180.0) * theta
     # if output size not specified, estimate from input radon image
     if not output_size:
-        output_size = int(np.floor(np.sqrt((radon_image.shape[0])**2 / 2.0)))
+        if circle:
+            output_size = radon_image.shape[0]
+        else:
+            output_size = int(np.floor(np.sqrt((radon_image.shape[0])**2
+                                               / 2.0)))
+    if circle:
+        radon_size = int(np.ceil(np.sqrt(2) * radon_image.shape[0]))
+        radon_image_padded = np.zeros((radon_size, radon_image.shape[1]))
+        radon_pad = (radon_size - radon_image.shape[0]) // 2
+        radon_image_padded[radon_pad:radon_pad + radon_image.shape[0], :] \
+            = radon_image
+        radon_image = radon_image_padded
+
     n = radon_image.shape[0]
 
     img = radon_image.copy()
@@ -163,7 +209,7 @@ def iradon(radon_image, theta=None, output_size=None,
         f[1:] = f[1:] * (0.54 + 0.46 * np.cos(w[1:]))
     elif filter == "hann":
         f[1:] = f[1:] * (1 + np.cos(w[1:])) / 2
-    elif filter == None:
+    elif filter is None:
         f[1:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
@@ -185,12 +231,19 @@ def iradon(radon_image, theta=None, output_size=None,
     xpr = X - int(output_size) // 2
     ypr = Y - int(output_size) // 2
 
+    if circle:
+        radius = (output_size - 1) // 2
+        reconstruction_circle = (xpr**2 + ypr**2) < radius**2
+
     # reconstruct image by interpolation
     if interpolation == "nearest":
         for i in range(len(theta)):
             k = np.round(mid_index + xpr * np.sin(th[i]) - ypr * np.cos(th[i]))
-            reconstructed += radon_filtered[
+            backprojected = radon_filtered[
                 ((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]
+            if circle:
+                backprojected[~reconstruction_circle] = 0.
+            reconstructed += backprojected
 
     elif interpolation == "linear":
         for i in range(len(theta)):
@@ -199,9 +252,11 @@ def iradon(radon_image, theta=None, output_size=None,
             b = mid_index + a
             b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
             b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
-            reconstructed += (t - a) * radon_filtered[b0, i] + \
-                             (a - t + 1) * radon_filtered[b1, i]
-
+            backprojected = (t - a) * radon_filtered[b0, i] + \
+                            (a - t + 1) * radon_filtered[b1, i]
+            if circle:
+                backprojected[~reconstruction_circle] = 0.
+            reconstructed += backprojected
     else:
         raise ValueError("Unknown interpolation: %s" % interpolation)
 
