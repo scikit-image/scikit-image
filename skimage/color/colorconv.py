@@ -46,8 +46,10 @@ from __future__ import division
 import numpy as np
 from scipy import linalg
 from ..util import dtype
+from skimage._shared.utils import deprecated
 
 
+@deprecated()
 def is_rgb(image):
     """Test whether the image is RGB or RGBA.
 
@@ -60,6 +62,7 @@ def is_rgb(image):
     return (image.ndim == 3 and image.shape[2] in (3, 4))
 
 
+@deprecated()
 def is_gray(image):
     """Test whether the image is gray (i.e. has only one color band).
 
@@ -69,7 +72,7 @@ def is_gray(image):
         Input image.
 
     """
-    return image.ndim == 2
+    return np.squeeze(image).ndim == 2
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -638,9 +641,9 @@ def gray2rgb(image):
         If the input is not 2-dimensional.
 
     """
-    if is_rgb(image):
+    if np.squeeze(image).ndim == 3 and image.shape[2] in (3, 4):
         return image
-    elif is_gray(image):
+    elif image.ndim == 2 or np.squeeze(image).ndim == 2:
         return np.dstack((image, image, image))
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
