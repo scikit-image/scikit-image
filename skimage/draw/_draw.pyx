@@ -181,7 +181,6 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         bresenham : Bresenham method
         andres : Andres method
 
-
     Returns
     -------
     rr, cc : (N,) ndarray of int
@@ -199,8 +198,27 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     References
     ----------
     .. [1] J.E. Bresenham, "Algorithm for computer control of a digital
-        plotter", 4 (1965) 25-30.
-    .. [2] E. Andres, "Discrete circles, rings and spheres", 18 (1994) 695-706.
+           plotter", 4 (1965) 25-30.
+    .. [2] E. Andres, "Discrete circles, rings and spheres",
+           18 (1994) 695-706.
+
+    Examples
+    --------
+    >>> from skimage.draw import circle_perimeter
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = circle_perimeter(4, 4, 3)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
+           [0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
 
     """
 
