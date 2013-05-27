@@ -83,7 +83,7 @@ def polygon(y, x, shape=None):
     x : (N,) ndarray
         X-coordinates of vertices of polygon.
     shape : tuple, optional
-        image shape which is used to determine maximum extents of output pixel
+        Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for polygons which exceed the image size.
         By default the full extents of the polygon are used.
 

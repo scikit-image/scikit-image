@@ -17,7 +17,7 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
     yradius, xradius : double
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
     shape : tuple, optional
-        image shape which is used to determine maximum extents of output pixel
+        Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for ellipses which exceed the image size.
         By default the full extents of the ellipse are used.
 
@@ -57,7 +57,7 @@ def circle(cy, cx, radius, shape=None):
     radius: double
         Radius of circle.
     shape : tuple, optional
-        image shape which is used to determine maximum extents of output pixel
+        Image shape which is used to determine maximum extents of output pixel
         coordinates. This is useful for circles which exceed the image size.
         By default the full extents of the circle are used.
 
