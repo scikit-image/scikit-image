@@ -28,6 +28,25 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
+
+    Examples
+    --------
+    >>> from skimage.draw import ellipse
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = ellipse(5, 5, 3, 4)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 1, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
     """
 
     dr = 1 / float(yradius)
