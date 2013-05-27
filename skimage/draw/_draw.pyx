@@ -287,6 +287,24 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     .. [1] J. Kennedy "A fast Bresenham type algorithm for
         drawing ellipses".
 
+    Examples
+    --------
+    >>> from skimage.draw import ellipse_perimeter
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = ellipse_perimeter(5, 5, 3, 4)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+           [0, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+
     """
 
     # If both radii == 0, return the center to avoid infinite loop in 2nd set
