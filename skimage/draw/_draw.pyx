@@ -8,7 +8,6 @@ import numpy as np
 cimport numpy as cnp
 from libc.math cimport sqrt
 from skimage._shared.geometry cimport point_in_polygon
-from skimage._shared.utils import deprecated
 
 
 def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
@@ -74,9 +73,6 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     return rr, cc
 
 
-bresenham = deprecated('skimage.draw.line')(line)
-
-
 def polygon(y, x, shape=None):
     """Generate coordinates of pixels within polygon.
 
@@ -131,82 +127,6 @@ def polygon(y, x, shape=None):
                 cc.append(c)
 
     return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
-
-
-def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
-    """Generate coordinates of pixels within ellipse.
-
-    Parameters
-    ----------
-    cy, cx : double
-        Centre coordinate of ellipse.
-    yradius, xradius : double
-        Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
-    shape : tuple, optional
-        image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for ellipses which exceed the image size.
-        By default the full extents of the ellipse are used.
-
-    Returns
-    -------
-    rr, cc : ndarray of int
-        Pixel coordinates of ellipse.
-        May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
-
-    """
-
-    cdef Py_ssize_t minr = int(max(0, cy - yradius))
-    cdef Py_ssize_t maxr = int(math.ceil(cy + yradius))
-    cdef Py_ssize_t minc = int(max(0, cx - xradius))
-    cdef Py_ssize_t maxc = int(math.ceil(cx + xradius))
-
-    # make sure output coordinates do not exceed image size
-    if shape is not None:
-        maxr = min(shape[0] - 1, maxr)
-        maxc = min(shape[1] - 1, maxc)
-
-    cdef Py_ssize_t r, c
-
-    # output coordinate arrays
-    cdef list rr = list()
-    cdef list cc = list()
-
-    for r in range(minr, maxr+1):
-        for c in range(minc, maxc+1):
-            if sqrt(((r - cy) / yradius)**2 + ((c - cx) / xradius)**2) < 1:
-                rr.append(r)
-                cc.append(c)
-
-    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
-
-
-def circle(double cy, double cx, double radius, shape=None):
-    """Generate coordinates of pixels within circle.
-
-    Parameters
-    ----------
-    cy, cx : double
-        Centre coordinate of circle.
-    radius: double
-        Radius of circle.
-    shape : tuple, optional
-        image shape which is used to determine maximum extents of output pixel
-        coordinates. This is useful for circles which exceed the image size.
-        By default the full extents of the circle are used.
-
-    Returns
-    -------
-    rr, cc : ndarray of int
-        Pixel coordinates of circle.
-        May be used to directly index into an array, e.g.
-        ``img[rr, cc] = 1``.
-    Notes
-    -----
-        This function is a wrapper for skimage.draw.ellipse()
-    """
-
-    return ellipse(cy, cx, radius, radius, shape)
 
 
 def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
@@ -373,31 +293,3 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
             ychange += twobsquared
 
     return np.array(py, dtype=np.intp) + cy, np.array(px, dtype=np.intp) + cx
-
-
-def set_color(img, coords, color):
-    """Set pixel color in the image at the given coordinates.
-
-    Coordinates that exceed the shape of the image will be ignored.
-
-    Parameters
-    ----------
-    img : (M, N, D) ndarray
-        Image
-    coords : ((P,) ndarray, (P,) ndarray)
-        Coordinates of pixels to be colored.
-    color : (D,) ndarray
-        Color to be assigned to coordinates in the image.
-
-    Returns
-    -------
-    img : (M, N, D) ndarray
-        The updated image.
-
-    """
-
-    rr, cc = coords
-    rr_inside = np.logical_and(rr >= 0, rr < img.shape[0])
-    cc_inside = np.logical_and(cc >= 0, cc < img.shape[1])
-    inside = np.logical_and(rr_inside, cc_inside)
-    img[rr[inside], cc[inside]] = color
