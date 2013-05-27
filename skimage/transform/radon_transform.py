@@ -79,10 +79,10 @@ def radon(image, theta=None, circle=False):
         widthpad = np.ceil(diagonal - width)
         padded_image = np.zeros((int(height + heightpad),
                                 int(width + widthpad)))
-        y0, y1 = int(np.ceil(heightpad / 2)), \
-                int((np.ceil(heightpad / 2) + height))
-        x0, x1 = int((np.ceil(widthpad / 2))), \
-                int((np.ceil(widthpad / 2) + width))
+        y0 = int(np.ceil(heightpad / 2))
+        y1 = int((np.ceil(heightpad / 2) + height))
+        x0 = int((np.ceil(widthpad / 2)))
+        x1 = int((np.ceil(widthpad / 2) + width))
 
         padded_image[y0:y1, x0:x1] = image
         out = np.zeros((max(padded_image.shape), len(theta)))
@@ -209,7 +209,7 @@ def iradon(radon_image, theta=None, output_size=None,
         f[1:] = f[1:] * (0.54 + 0.46 * np.cos(w[1:]))
     elif filter == "hann":
         f[1:] = f[1:] * (1 + np.cos(w[1:])) / 2
-    elif filter == None:
+    elif filter is None:
         f[1:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
@@ -253,7 +253,7 @@ def iradon(radon_image, theta=None, output_size=None,
             b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
             b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
             backprojected = (t - a) * radon_filtered[b0, i] + \
-                             (a - t + 1) * radon_filtered[b1, i]
+                            (a - t + 1) * radon_filtered[b1, i]
             if circle:
                 backprojected[~reconstruction_circle] = 0.
             reconstructed += backprojected

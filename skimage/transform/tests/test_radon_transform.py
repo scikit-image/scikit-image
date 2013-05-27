@@ -105,6 +105,7 @@ def test_reconstruct_with_wrong_angles():
     iradon(p, theta=[0, 1, 2])
     assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
 
+
 def test_radon_circle():
     a = np.ones((10, 10))
     assert_raises(ValueError, radon, a, circle=True)
@@ -130,6 +131,7 @@ def test_radon_circle():
     relative_error = np.abs(mass - average_mass) / average_mass
     print(relative_error.max(), relative_error.mean())
     assert np.all(relative_error < 3e-3)
+
 
 def test_radon_iradon_circle():
     shape = (61, 79)
