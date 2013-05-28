@@ -1,3 +1,11 @@
+skimage (0.7.2-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Rebuild to get rid of python2.6 dependencies (Closes: #707894).
+  * Build-depend on python-support (Closes: #681896).
+
+ -- Luca Falavigna <dktrkranz@debian.org>  Sun, 12 May 2013 16:33:39 +0200
+
 skimage (0.7.2-1) unstable; urgency=low
 
   * Recent upstream release
