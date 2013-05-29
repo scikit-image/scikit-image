@@ -20,6 +20,8 @@ sufficient. Therefore, the RANSAC algorithm is used on top of the normal model
 to robustly estimate the parameter set by detecting outliers.
 
 """
+from __future__ import print_function
+
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -109,9 +111,9 @@ outliers = inliers == False
 
 
 # compare "true" and estimated transform parameters
-print tform.scale, tform.translation, tform.rotation
-print model.scale, model.translation, model.rotation
-print model_robust.scale, model_robust.translation, model_robust.rotation
+print(tform.scale, tform.translation, tform.rotation)
+print(model.scale, model.translation, model.rotation)
+print(model_robust.scale, model_robust.translation, model_robust.rotation)
 
 
 # visualize correspondences
