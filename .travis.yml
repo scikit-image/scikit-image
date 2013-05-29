@@ -26,11 +26,11 @@ install:
     - sudo $PYTHON setup.py install
 script:
     # Change into an innocuous directory and find tests from installation
+    - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - mkdir for_test
     - cd for_test
     - nosetests-$PYVER --exe -v --cover-package=skimage skimage
     # Change back to repository root directory and run all doc examples
     - cd ..
-    - "echo 'backend : Agg' > matplotlibrc"
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit $?; fi done
     - flake8 --exit-zero skimage doc/examples viewer_examples
