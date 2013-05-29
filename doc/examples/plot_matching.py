@@ -55,9 +55,9 @@ coords_warped = corner_peaks(corner_harris(img_warped_gray),
                              threshold_rel=0.001, min_distance=5)
 
 # determine sub-pixel corner position
-coords_orig_subpix = corner_subpix(img_orig_gray, coords_orig, window_size=10)
+coords_orig_subpix = corner_subpix(img_orig_gray, coords_orig, window_size=9)
 coords_warped_subpix = corner_subpix(img_warped_gray, coords_warped,
-                                     window_size=10)
+                                     window_size=9)
 
 
 def gaussian_weights(window_ext, sigma=1):
