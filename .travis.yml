@@ -26,6 +26,7 @@ install:
     - sudo $PYTHON setup.py install
 script:
     # Change into an innocuous directory and find tests from installation
+    - mkdir $HOME/.matplotlib
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - mkdir for_test
     - cd for_test
