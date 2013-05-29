@@ -36,10 +36,11 @@ from skimage import data, filter, color
 from skimage.transform import hough_circle
 from skimage.feature import peak_local_max
 from skimage.draw import circle_perimeter
+from skimage.util import img_as_ubyte
 
 
 # Load picture and detect edges
-image = data.coins()[0:95, 70:370]
+image = img_as_ubyte(data.coins()[0:95, 70:370])
 edges = filter.canny(image, sigma=3, low_threshold=10, high_threshold=50)
 
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
