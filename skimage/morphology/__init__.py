@@ -42,5 +42,6 @@ __all__ = ['binary_erosion',
            'skeletonize',
            'medial_axis',
            'convex_hull_image',
+           'convex_hull_object',
            'reconstruction',
            'remove_small_objects']
