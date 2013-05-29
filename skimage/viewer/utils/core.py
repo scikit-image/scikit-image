@@ -42,17 +42,22 @@ def start_qtapp():
 class RequiredAttr(object):
     """A class attribute that must be set before use."""
 
-    def __init__(self, msg):
+    instances = dict()
+
+    def __init__(self, msg='Required attribute not set', init_val=None):
+        self.instances[self, None] = init_val
         self.msg = msg
-        self.val = None
 
     def __get__(self, obj, objtype):
-        if self.val is None:
+        value = self.instances[self, obj]
+        if value is None:
+            # Should raise an error but that causes issues with the buildbot.
             warnings.warn(self.msg)
-        return self.val
+            self.__set__(obj, self.init_val)
+        return value
 
-    def __set__(self, obj, val):
-        self.val = val
+    def __set__(self, obj, value):
+        self.instances[self, obj] = value
 
 
 class LinearColormap(LinearSegmentedColormap):
