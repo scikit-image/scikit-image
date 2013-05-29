@@ -1,5 +1,6 @@
 from .draw import circle, ellipse, set_color
-from ._draw import line, polygon, ellipse_perimeter, circle_perimeter
+from ._draw import line, polygon, ellipse_perimeter, circle_perimeter, \
+                   bezier_segment
 
 __all__ = ['line',
            'polygon',
