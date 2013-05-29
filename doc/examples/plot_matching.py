@@ -26,6 +26,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from skimage import data
+from skimage.util import img_as_float
 from skimage.feature import corner_harris, corner_subpix, corner_peaks
 from skimage.transform import warp, AffineTransform
 from skimage.exposure import rescale_intensity
@@ -34,10 +35,11 @@ from skimage.measure import ransac
 
 
 # generate synthetic checkerboard image and add gradient for the later matching
-checkerboard = data.checkerboard()
+checkerboard = img_as_float(data.checkerboard())
 img_orig = np.zeros(list(checkerboard.shape) + [3])
 img_orig[..., 0] = checkerboard
-gradient_r, gradient_c = np.mgrid[0:img_orig.shape[0], 0:img_orig.shape[1]]
+gradient_r, gradient_c = np.mgrid[0:img_orig.shape[0],
+                                  0:img_orig.shape[1]] / float(img_orig.shape[0])
 img_orig[..., 1] = gradient_r
 img_orig[..., 2] = gradient_c
 img_orig = rescale_intensity(img_orig)
