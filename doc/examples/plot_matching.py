@@ -20,10 +20,13 @@ sufficient. Therefore, the RANSAC algorithm is used on top of the normal model
 to robustly estimate the parameter set by detecting outliers.
 
 """
+from __future__ import print_function
+
 import numpy as np
 from matplotlib import pyplot as plt
 
 from skimage import data
+from skimage.util import img_as_float
 from skimage.feature import corner_harris, corner_subpix, corner_peaks
 from skimage.transform import warp, AffineTransform
 from skimage.exposure import rescale_intensity
@@ -32,10 +35,11 @@ from skimage.measure import ransac
 
 
 # generate synthetic checkerboard image and add gradient for the later matching
-checkerboard = data.checkerboard()
+checkerboard = img_as_float(data.checkerboard())
 img_orig = np.zeros(list(checkerboard.shape) + [3])
 img_orig[..., 0] = checkerboard
-gradient_r, gradient_c = np.mgrid[0:img_orig.shape[0], 0:img_orig.shape[1]]
+gradient_r, gradient_c = np.mgrid[0:img_orig.shape[0],
+                                  0:img_orig.shape[1]] / float(img_orig.shape[0])
 img_orig[..., 1] = gradient_r
 img_orig[..., 2] = gradient_c
 img_orig = rescale_intensity(img_orig)
@@ -53,9 +57,9 @@ coords_warped = corner_peaks(corner_harris(img_warped_gray),
                              threshold_rel=0.001, min_distance=5)
 
 # determine sub-pixel corner position
-coords_orig_subpix = corner_subpix(img_orig_gray, coords_orig, window_size=10)
+coords_orig_subpix = corner_subpix(img_orig_gray, coords_orig, window_size=9)
 coords_warped_subpix = corner_subpix(img_warped_gray, coords_warped,
-                                     window_size=10)
+                                     window_size=9)
 
 
 def gaussian_weights(window_ext, sigma=1):
@@ -109,9 +113,9 @@ outliers = inliers == False
 
 
 # compare "true" and estimated transform parameters
-print tform.scale, tform.translation, tform.rotation
-print model.scale, model.translation, model.rotation
-print model_robust.scale, model_robust.translation, model_robust.rotation
+print(tform.scale, tform.translation, tform.rotation)
+print(model.scale, model.translation, model.rotation)
+print(model_robust.scale, model_robust.translation, model_robust.rotation)
 
 
 # visualize correspondences
