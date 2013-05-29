@@ -28,10 +28,11 @@ script:
     # Change into an innocuous directory and find tests from installation
     - mkdir $HOME/.matplotlib
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
+    - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
     - mkdir for_test
     - cd for_test
     - nosetests-$PYVER --exe -v --cover-package=skimage skimage
     # Change back to repository root directory and run all doc examples
     - cd ..
-    - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit $?; fi done
+    - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     - flake8 --exit-zero skimage doc/examples viewer_examples
