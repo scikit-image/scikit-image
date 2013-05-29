@@ -11,6 +11,7 @@ import numpy as np
 from .. import utils
 from ..widgets import Slider
 from ..utils import dialogs
+from ..plugins.base import Plugin
 
 
 __all__ = ['ImageViewer', 'CollectionViewer']
@@ -81,6 +82,13 @@ class ImageViewer(QtGui.QMainWindow):
         self.main_widget = QtGui.QWidget()
         self.setCentralWidget(self.main_widget)
 
+        if isinstance(image, Plugin):
+            plugin = image
+            image = plugin.filtered_image
+            plugin.image_updated.connect(self._new_original_image)
+            # When plugin is started, start
+            plugin._started.connect(self._show)
+
         self.fig, self.ax = utils.figimage(image)
         self.canvas = self.fig.canvas
         self.canvas.setParent(self)
@@ -88,9 +96,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.ax.autoscale(enable=False)
 
         self._image_plot = self.ax.images[0]
-
-        self.original_image = image
-        self.image = image.copy()
+        self._new_original_image(image)
         self.plugins = []
 
         self.layout = QtGui.QVBoxLayout(self.main_widget)
@@ -115,8 +121,11 @@ class ImageViewer(QtGui.QMainWindow):
         if filename is None:
             return
         image = io.imread(filename)
+        self._new_original_image(image)
+
+    def _new_original_image(self, image):
         self.original_image = image     # update saved image
-        self.image = image              # update displayed image
+        self.image = image.copy()       # update displayed image
 
     def save_to_file(self):
         """Save current image to file.
@@ -160,16 +169,20 @@ class ImageViewer(QtGui.QMainWindow):
             p.move(w, y)
             y += p.geometry().height()
 
-    def show(self):
-        """Show ImageViewer and attached plugins.
-
-        This behaves much like `matplotlib.pyplot.show` and `QWidget.show`.
-        """
+    def _show(self):
         self.auto_layout()
         for p in self.plugins:
             p.show()
         super(ImageViewer, self).show()
-        utils.start_qtapp()
+
+    def show(self, main_window=True):
+        """Show ImageViewer and attached plugins.
+
+        This behaves much like `matplotlib.pyplot.show` and `QWidget.show`.
+        """
+        self._show()
+        if main_window:
+            utils.start_qtapp()
 
     def redraw(self):
         self.canvas.draw_idle()

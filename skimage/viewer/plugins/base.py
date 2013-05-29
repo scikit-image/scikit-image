@@ -1,9 +1,12 @@
 """
 Base class for Plugins that interact with ImageViewer.
 """
-from ..qt import QtGui
-from ..qt.QtCore import Qt
+from warnings import warn
 
+import numpy as np
+
+from ..qt import QtGui
+from ..qt.QtCore import Qt, pyqtSignal
 from ..utils import RequiredAttr, init_qtapp
 
 
@@ -71,6 +74,10 @@ class Plugin(QtGui.QDialog):
     name = 'Plugin'
     image_viewer = RequiredAttr("%s is not attached to ImageViewer" % name)
 
+    # Signals used when viewers are linked to the Plugin output.
+    image_updated = pyqtSignal(np.ndarray)
+    _started = pyqtSignal()
+
     def __init__(self, image_filter=None, height=0, width=400, useblit=True):
         init_qtapp()
         super(Plugin, self).__init__()
@@ -79,6 +86,9 @@ class Plugin(QtGui.QDialog):
         # If subclass defines `image_filter` method ignore input.
         if not hasattr(self, 'image_filter'):
             self.image_filter = image_filter
+        elif image_filter is not None:
+            warn("If the Plugin class defines an `image_filter` method, "
+                 "then the `image_filter` argument is ignored.")
 
         self.setWindowTitle(self.name)
         self.layout = QtGui.QGridLayout(self)
@@ -155,7 +165,9 @@ class Plugin(QtGui.QDialog):
         kwargs = dict([(name, self._get_value(a))
                        for name, a in self.keyword_arguments.iteritems()])
         filtered = self.image_filter(*arguments, **kwargs)
+
         self.display_filtered_image(filtered)
+        self.image_updated.emit(filtered)
 
     def _get_value(self, param):
         # If param is a widget, return its `val` attribute.
@@ -182,6 +194,11 @@ class Plugin(QtGui.QDialog):
         that they update the image or some other component.
         """
         setattr(self, name, value)
+
+    def show(self, main_window=True):
+        """Show plugin."""
+        super(Plugin, self).show()
+        self._started.emit()
 
     def closeEvent(self, event):
         """On close disconnect all artists and events from ImageViewer.
