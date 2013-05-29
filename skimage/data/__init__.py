@@ -10,6 +10,7 @@ import os as _os
 
 from ..io import imread
 from skimage import data_dir
+from ..util import img_as_float
 
 
 __all__ = ['load',
@@ -39,7 +40,7 @@ def load(f):
     img : ndarray
         Image loaded from skimage.data_dir.
     """
-    return imread(_os.path.join(data_dir, f))
+    return img_as_float(imread(_os.path.join(data_dir, f)))
 
 
 def camera():
