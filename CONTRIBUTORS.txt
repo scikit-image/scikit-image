@@ -131,7 +131,7 @@
   Dense DAISY feature description, circle perimeter drawing.
 
 - François Boulogne
-  Andres Method for circle perimeter, ellipse perimeter drawing.
+  Drawing: Andres Method for circle perimeter, ellipse perimeter drawing, Bezier curve.
   Circular Hough Transform
 
 - Thouis Jones
