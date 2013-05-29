@@ -81,7 +81,7 @@ class Slider(BaseWidget):
         Range of slider values.
     value : float
         Default slider value. If None, use midpoint between `low` and `high`.
-    value : {'float' | 'int'}
+    value_type : {'float' | 'int'}
         Numeric type of slider value.
     ptype : {'arg' | 'kwarg' | 'plugin'}
         Parameter type.
