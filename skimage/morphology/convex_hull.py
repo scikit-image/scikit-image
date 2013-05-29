@@ -29,6 +29,7 @@ def convex_hull_image(image):
     """
 
     image = image.astype(bool)
+
     # Here we do an optimisation by choosing only pixels that are
     # the starting or ending pixel of a row or column.  This vastly
     # limits the number of coordinates to examine for the virtual
