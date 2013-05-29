@@ -169,7 +169,7 @@ def immunohistochemistry():
     No known copyright restrictions.
 
     """
-    return load("ihc.jpg")
+    return load("ihc.png")
 
 
 def chelsea():
@@ -183,4 +183,4 @@ def chelsea():
     No copyright restrictions.  CC0 by the photographer (Stefan van der Walt).
 
     """
-    return load("chelsea.jpg")
+    return load("chelsea.png")

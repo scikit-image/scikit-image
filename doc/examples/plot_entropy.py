@@ -10,10 +10,11 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filter.rank import entropy
 from skimage.morphology import disk
+from skimage.util import img_as_ubyte
 
 
 # defining a 8- and a 16-bit test images
-a8 = data.camera()
+a8 = img_as_ubyte(data.camera())
 a16 = a8.astype(np.uint16) * 4
 
 ent8 = entropy(a8, disk(5)) # pixel value contain 10x the local entropy
