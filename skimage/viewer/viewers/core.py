@@ -252,7 +252,7 @@ class CollectionViewer(ImageViewer):
     ----------
     image_collection : list of images
         List of images to be displayed.
-    update_on : {'on_slide' | 'on_release'}
+    update_on : {'slide' | 'release'}
         Control whether image is updated on slide or release of the image
         slider. Using 'on_release' will give smoother behavior when displaying
         large images or when writing a plugin/subclass that requires heavy
