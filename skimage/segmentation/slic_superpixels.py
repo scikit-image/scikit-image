@@ -117,6 +117,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     means = np.concatenate([means_z[..., np.newaxis], means_y[..., np.newaxis],
                             means_x[..., np.newaxis], means_color
                            ], axis=-1).reshape(-1, 6)
+    means = np.ascontiguousarray(means)
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
     ratio = (ratio / float(max((step_z, step_y, step_x)))) ** 2
