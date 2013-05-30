@@ -178,7 +178,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     radius: int
         Radius of circle.
     method : {'bresenham', 'andres'}, optional
-        bresenham : Bresenham method
+        bresenham : Bresenham method (default)
         andres : Andres method
 
     Returns
@@ -274,7 +274,7 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         Centre coordinate of ellipse.
     yradius, xradius: int
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
-    orientation: double, optional
+    orientation: double, optional (default 0)
         Major axis orientation in clockwise direction as radians.
 
     Returns

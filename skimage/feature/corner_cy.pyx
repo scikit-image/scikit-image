@@ -20,7 +20,7 @@ def corner_moravec(image, Py_ssize_t window_size=1):
     ----------
     image : ndarray
         Input image.
-    window_size : int, optional
+    window_size : int, optional (default 1)
         Window size.
 
     Returns

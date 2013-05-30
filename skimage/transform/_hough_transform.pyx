@@ -31,10 +31,10 @@ def hough_circle(cnp.ndarray img,
         Input image with nonzero values representing edges.
     radius : ndarray
         Radii at which to compute the Hough transform.
-    normalize : boolean, optional
+    normalize : boolean, optional (default True)
         Normalize the accumulator with the number
-        of pixels used to draw the radius
-    full_output : boolean, optional
+        of pixels used to draw the radius.
+    full_output : boolean, optional (default False)
         Extend the output size by twice the largest
         radius in order to detect centers outside the
         input picture.

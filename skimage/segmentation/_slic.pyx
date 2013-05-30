@@ -20,17 +20,17 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     ----------
     image : (width, height [, 3]) ndarray
         Input image.
-    n_segments : int
+    n_segments : int, optional (default 100)
         The (approximate) number of labels in the segmented output image.
-    ratio: float
+    ratio: float, optional (default 10)
         Balances color-space proximity and image-space proximity.
         Higher values give more weight to color-space.
-    max_iter : int
+    max_iter : int, optional (default 10)
         Maximum number of iterations of k-means.
-    sigma : float
+    sigma : float, optional (default 1)
         Width of Gaussian smoothing kernel for preprocessing. Zero means no
         smoothing.
-    convert2lab : bool
+    convert2lab : bool, optional (default True)
         Whether the input should be converted to Lab colorspace prior to
         segmentation.  For this purpose, the input is assumed to be RGB. Highly
         recommended.
