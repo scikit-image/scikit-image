@@ -397,7 +397,7 @@ def test_selem_dtypes():
         assert_array_equal(image, out)
 
 def test_percentile():
-
+    #check that both 8- and 16-bit versions return the same image
     lena = np.array(256*color.rgb2gray(data.lena()),dtype=np.uint8)
     selem = disk(15)
     lena5_8bit = rank.percentile(lena,selem=selem,p0=0.05)
@@ -406,8 +406,7 @@ def test_percentile():
     assert_array_equal(lena5_8bit, lena5_16bit)
 
 def test_percentile_min():
-
-#check that percentile p0 = 0 is identical to local min
+    #check that percentile p0 = 0 is identical to local min
     lena = np.array(256*color.rgb2gray(data.lena()),dtype=np.uint8)
     lena16 = lena.astype(np.uint16)
     selem = disk(15)
@@ -422,7 +421,7 @@ def test_percentile_min():
     assert_array_equal(lena_p0,lena_min)
 
 def test_percentile_max():
-    #check that percentile p0 = 0 is identical to local min
+    #check that percentile p0 = 0 is identical to local max
     lena = np.array(256*color.rgb2gray(data.lena()),dtype=np.uint8)
     lena16 = lena.astype(np.uint16)
     selem = disk(15)
