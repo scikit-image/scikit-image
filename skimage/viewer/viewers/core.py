@@ -17,12 +17,6 @@ from ..plugins.base import Plugin
 __all__ = ['ImageViewer', 'CollectionViewer']
 
 
-dock_areas = {'top': Qt.TopDockWidgetArea,
-              'bottom': Qt.BottomDockWidgetArea,
-              'left': Qt.LeftDockWidgetArea,
-              'right': Qt.RightDockWidgetArea}
-
-
 def mpl_image_to_rgba(mpl_image):
     """Return RGB image from the given matplotlib image object.
 
@@ -66,6 +60,12 @@ class ImageViewer(QtGui.QMainWindow):
     >>> # viewer.show()
 
     """
+
+    dock_areas = {'top': Qt.TopDockWidgetArea,
+                  'bottom': Qt.BottomDockWidgetArea,
+                  'left': Qt.LeftDockWidgetArea,
+                  'right': Qt.RightDockWidgetArea}
+
     def __init__(self, image):
         # Start main loop
         utils.init_qtapp()
@@ -120,14 +120,14 @@ class ImageViewer(QtGui.QMainWindow):
         """Add plugin to ImageViewer"""
         plugin.attach(self)
         if plugin.dock:
-            location = dock_areas[plugin.dock]
+            location = self.dock_areas[plugin.dock]
             dock_location = Qt.DockWidgetArea(location)
             dock = QtGui.QDockWidget()
             dock.setWidget(plugin)
             dock.setWindowTitle(plugin.name)
             self.addDockWidget(dock_location, dock)
 
-            horiz = (dock_areas['left'], dock_areas['right'])
+            horiz = (self.dock_areas['left'], self.dock_areas['right'])
             dimension = 'width' if location in horiz else 'height'
             self._add_widget_size(plugin, dimension=dimension)
 
