@@ -124,6 +124,7 @@ class ImageViewer(QtGui.QMainWindow):
             dock_location = Qt.DockWidgetArea(location)
             dock = QtGui.QDockWidget()
             dock.setWidget(plugin)
+            dock.setWindowTitle(plugin.name)
             self.addDockWidget(dock_location, dock)
 
             horiz = (dock_areas['left'], dock_areas['right'])
