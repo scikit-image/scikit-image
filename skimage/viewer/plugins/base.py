@@ -78,9 +78,12 @@ class Plugin(QtGui.QDialog):
     image_updated = pyqtSignal(np.ndarray)
     _started = pyqtSignal()
 
-    def __init__(self, image_filter=None, height=0, width=400, useblit=True):
+    def __init__(self, image_filter=None, height=0, width=400, useblit=True,
+                 dock='bottom'):
         init_qtapp()
         super(Plugin, self).__init__()
+
+        self.dock = dock
 
         self.image_viewer = None
         # If subclass defines `image_filter` method ignore input.
