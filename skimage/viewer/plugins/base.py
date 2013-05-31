@@ -76,7 +76,7 @@ class Plugin(QtGui.QDialog):
 
     # Signals used when viewers are linked to the Plugin output.
     image_updated = pyqtSignal(np.ndarray)
-    _started = pyqtSignal()
+    _started = pyqtSignal(int)
 
     def __init__(self, image_filter=None, height=0, width=400, useblit=True,
                  dock='bottom'):
@@ -201,7 +201,9 @@ class Plugin(QtGui.QDialog):
     def show(self, main_window=True):
         """Show plugin."""
         super(Plugin, self).show()
-        self._started.emit()
+        size = self.frameGeometry()
+        x_hint = size.x() + size.width()
+        self._started.emit(x_hint)
 
     def closeEvent(self, event):
         """On close disconnect all artists and events from ImageViewer.
