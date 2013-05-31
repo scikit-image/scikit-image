@@ -7,3 +7,5 @@ elif qt_api == 'pyqt':
 else:
     # Mock objects
     Qt = None
+    def pyqtSignal(*args, **kwargs):
+        pass
