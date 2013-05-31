@@ -98,6 +98,15 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     """
 
     image = np.atleast_3d(img_as_float(image))
+    
+    # if image.max() is 0, then dist_scale can have an unverified value
+    # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
+    # so we verify we have a positive image and that the max is not 0.0.
+    if image.min() < 0.0:
+        raise ValueError("Image must contain only positive values")
+
+    if image.max() == 0.0:
+        return image
 
     cdef:
         Py_ssize_t rows = image.shape[0]
@@ -115,7 +124,8 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
         double* image_data = <double*>cimage.data
         double* out_data = <double*>out.data
 
-        double* color_lut = _compute_color_lut(bins, sigma_range, max_value)
+        double* color_lut # the value of sigma_range must be checked before 
+                          # initialization.
         double* range_lut = _compute_range_lut(win_size, sigma_spatial)
 
         Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr
@@ -130,6 +140,8 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
         csigma_range = image.std()
     else:
         csigma_range = sigma_range
+
+    color_lut = _compute_color_lut(bins, csigma_range, max_value)
 
     if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
         raise ValueError("Invalid mode specified.  Please use "
