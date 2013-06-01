@@ -1,0 +1,11 @@
+#!/bin/sh
+set -efu
+
+pys="$(pyversions -r 2>/dev/null)"
+
+cd "$ADTTMP"
+
+for py in $pys; do
+    echo "=== $py ==="
+    $py /usr/bin/nosetests -v skimage 2>&1
+done

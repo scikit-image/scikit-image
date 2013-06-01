@@ -1,3 +1,9 @@
+skimage (0.8.2-2) UNRELEASED; urgency=low
+
+  * add autopkgtests
+
+ -- Julian Taylor <jtaylor.debian@googlemail.com>  Mon, 10 Jun 2013 21:15:36 +0200
+
 skimage (0.8.2-1) unstable; urgency=low
 
   [ Stefan van der Walt ]
