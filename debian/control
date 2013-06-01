@@ -4,7 +4,8 @@ Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>
 Build-Depends: cython (>= 0.15),
-               debhelper (>= 7.0.50),
+               cython3 (>= 0.15),
+               debhelper (>= 9~),
                libfreeimage3,
                python-all-dev (>= 2.6.6-3~),
                python-imaging,
@@ -13,9 +14,15 @@ Build-Depends: cython (>= 0.15),
                python-numpy,
                python-scipy (>= 0.10),
                python-setuptools,
-               python-sphinx (>= 1.0.7+dfsg-1~)
+               python-sphinx (>= 1.0.7+dfsg-1~),
+               python3-all-dev,
+               python3-imaging,
+               python3-nose,
+               python3-numpy,
+               python3-setuptools
 Standards-Version: 3.9.4
 X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.2
 Homepage: http://scikits-image.org
 Vcs-Browser: https://github.com/scikits-image/scikits-image
 Vcs-Git: git://github.com/scikits-image/scikits-image.git
@@ -35,6 +42,25 @@ Description: Python modules for image processing
  scikits-image is a collection of image processing algorithms for
  Python.  It performs tasks such as image loading, filtering,
  morphology, segmentation, color conversions, and transformations.
+ .
+ This package provides the Python 2 module.
+
+Package: python3-skimage
+Architecture: all
+Depends: libfreeimage3,
+         python3-numpy,
+         python3-scipy (>= 0.10),
+         python3-skimage-lib (>= ${source:Version}),
+         ${misc:Depends},
+         ${python3:Depends}
+Recommends: python3-imaging, python3-matplotlib (>= 1.0), python3-nose
+Suggests: python-skimage-doc
+Description: Python 3 modules for image processing
+ scikits-image is a collection of image processing algorithms for
+ Python.  It performs tasks such as image loading, filtering,
+ morphology, segmentation, color conversions, and transformations.
+ .
+ This package provides the Python 3 module.
 
 Package: python-skimage-doc
 Architecture: all
@@ -52,3 +78,15 @@ Recommends: python-skimage
 Description: Optimized low-level algorithms for scikits-image
  This is an add-on package for python-skimage. It provides
  optimized, low-level implementations of algorithms.
+ .
+ This package provides the Python 2 libraries.
+
+Package: python3-skimage-lib
+Architecture: any
+Depends: python3-numpy, ${misc:Depends}, ${python3:Depends}, ${shlibs:Depends}
+Recommends: python3-skimage
+Description: Optimized low-level algorithms for Python 3 scikits-image
+ This is an add-on package for python-skimage. It provides
+ optimized, low-level implementations of algorithms.
+ .
+ This package provides the Python 3 libraries.

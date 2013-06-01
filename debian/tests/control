@@ -1,2 +1,5 @@
 Tests: python2
 Depends: python-all, python-nose, python-skimage
+
+Tests: python3
+Depends: python3-all, python3-nose, python3-skimage
