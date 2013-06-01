@@ -1,4 +1,0 @@
-# For easy backportability just rely on the shipped copy of underscore.js for now until problems with nodejs get resolved
-#
-
-python-skimage-doc binary: embedded-javascript-library usr/share/doc/python-skimage-doc/html/_static/underscore.js

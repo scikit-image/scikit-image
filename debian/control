@@ -7,15 +7,14 @@ Build-Depends: debhelper (>= 7.0.50),
                python-all-dev (>= 2.6.6-3~), python-setuptools,
                python-numpy,
                python-scipy (>= 0.10),
-               python-sphinx,
+               python-sphinx (>= 1.0.7+dfsg-1~),
                python-nose,
                cython (>= 0.15),
                python-matplotlib (>= 1.0),
                libfreeimage3,
-               python-imaging,
-               python-support
+               python-imaging
 Standards-Version: 3.9.4
-XS-Python-Version: >= 2.6
+X-Python-Version: >= 2.6
 Homepage: http://scikits-image.org
 Vcs-Browser: https://github.com/scikits-image/scikits-image
 Vcs-Git: git://github.com/scikits-image/scikits-image.git
@@ -28,7 +27,6 @@ Depends: ${misc:Depends}, ${python:Depends},
          python-scipy (>= 0.10),
          python-skimage-lib (>= ${source:Version}),
          libfreeimage3,
-Provides: ${python:Provides}
 Recommends: python-nose, python-matplotlib (>= 1.0), python-imaging, python-qt4
 Suggests: python-skimage-doc, python-opencv
 Description: Python modules for image processing
@@ -39,7 +37,7 @@ Description: Python modules for image processing
 Package: python-skimage-doc
 Architecture: all
 Section: doc
-Depends: ${misc:Depends}, libjs-jquery
+Depends: ${misc:Depends}, ${sphinxdoc:Depends}
 Suggests: python-skimage
 Description: Documentation and examples for scikits-image
  This package contains documentation and example scripts for
@@ -49,8 +47,6 @@ Package: python-skimage-lib
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, ${python:Depends}, python-numpy
 Recommends: python-skimage
-Provides: ${python:Provides}
-XB-Python-Version: ${python:Versions}
 Description: Optimized low-level algorithms for scikits-image
  This is an add-on package for python-skimage. It provides
  optimized, low-level implementations of algorithms.
