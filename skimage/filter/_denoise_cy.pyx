@@ -105,43 +105,52 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     if image.min() < 0.0:
         raise ValueError("Image must contain only positive values")
 
-    if image.max() == 0.0:
-        return image
-
     cdef:
         Py_ssize_t rows = image.shape[0]
         Py_ssize_t cols = image.shape[1]
         Py_ssize_t dims = image.shape[2]
         Py_ssize_t window_ext = (win_size - 1) / 2
 
-        double max_value = image.max()
+        double max_value
+        
+        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] cimage
+        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] out
 
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] cimage = \
-            np.ascontiguousarray(image)
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] out = \
-            np.zeros((rows, cols, dims), dtype=np.double)
+        double* image_data
+        double* out_data
 
-        double* image_data = <double*>cimage.data
-        double* out_data = <double*>out.data
-
-        double* color_lut # the value of sigma_range must be checked before 
-                          # initialization.
-        double* range_lut = _compute_range_lut(win_size, sigma_spatial)
+        double* color_lut
+        double* range_lut
 
         Py_ssize_t r, c, d, wr, wc, kr, kc, rr, cc, pixel_addr
         double value, weight, dist, total_weight, csigma_range, color_weight, \
                range_weight
-        double dist_scale = bins / dims / max_value
-        double* values = <double*>malloc(dims * sizeof(double))
-        double* centres = <double*>malloc(dims * sizeof(double))
-        double* total_values = <double*>malloc(dims * sizeof(double))
+        double dist_scale
+        double* values
+        double* centres
+        double* total_values
 
     if sigma_range is None:
         csigma_range = image.std()
     else:
         csigma_range = sigma_range
 
+    max_value = image.max()
+    
+    cimage = np.ascontiguousarray(image)
+    
+    if max_value == 0.0:
+        raise ValueError("The maximum value found in the image was 0.")
+
+    out = np.zeros((rows, cols, dims), dtype=np.double)
+    image_data = <double*>cimage.data
+    out_data = <double*>out.data
     color_lut = _compute_color_lut(bins, csigma_range, max_value)
+    range_lut = _compute_range_lut(win_size, sigma_spatial)
+    dist_scale = bins / dims / max_value
+    values = <double*>malloc(dims * sizeof(double))
+    centres = <double*>malloc(dims * sizeof(double))
+    total_values = <double*>malloc(dims * sizeof(double))
 
     if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
         raise ValueError("Invalid mode specified.  Please use "
