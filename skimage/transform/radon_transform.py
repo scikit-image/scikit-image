@@ -16,8 +16,9 @@ from __future__ import division
 import numpy as np
 from scipy.fftpack import fftshift, fft, ifft
 from ._warps_cy import _warp_fast
+from ._radon_transform import sart_projection_update
 
-__all__ = ["radon", "iradon"]
+__all__ = ["radon", "iradon", "iradon_sart"]
 
 
 def radon(image, theta=None, circle=False):
@@ -254,3 +255,91 @@ def iradon(radon_image, theta=None, output_size=None,
         raise ValueError("Unknown interpolation: %s" % interpolation)
 
     return reconstructed * np.pi / (2 * len(th))
+
+
+def _sart_next_angle(remaining, used):
+    used = np.array(used)
+    used.shape = (-1, 1)
+    remaining = np.array(remaining)
+    remaining.shape = (1, -1)
+    time = np.arange(used.shape[0]) + 1
+    time.shape = (-1, 1)
+    tau = 3.
+    difference = used - remaining
+    distance = np.minimum(abs(difference % 180), abs(difference % -180))
+    #print distance
+    cost = np.exp(-distance * time / tau).sum(axis=0).squeeze()
+    next_angle_index = np.argmin(cost)
+    return remaining[0, next_angle_index]
+
+
+def iradon_sart(radon_image, theta=None, image=None,
+                clip=None, relaxation=0.15):
+    """
+    Inverse radon transform
+
+    Reconstruct an image from the radon transform, using a single iteration of
+    the Simultaneous Algebraic Reconstruction Technique (SART) algorithm.
+
+    Parameters
+    ----------
+    radon_image : array_like, dtype=float
+        Image containing radon transform (sinogram). Each column of
+        the image corresponds to a projection along a different angle.
+    theta : array_like, dtype=float, optional
+        Reconstruction angles (in degrees). Default: m angles evenly spaced
+        between 0 and 180 (if the shape of `radon_image` is (N, M)).
+    image : array_like, dtype=float, optional
+        Image containing an initial reconstruction estimate. Shape of this
+        array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
+        default is an array of zeros.
+
+    Returns
+    -------
+    output : ndarray
+      Reconstructed image.
+
+    Notes
+    -----
+    Algebraic Reconstruction Techniques are based on formulating the tomography
+    reconstruction problem as a set of linear equations. Along each ray,
+    the projected value is the sum of all the values of the cross section along
+    the ray. A typical feature of SART (and a few other variants of algebraic
+    techniques) is that it samples the cross section at equidistant points
+    along the ray, using linear interpolation between the pixel values of the
+    cross section. The resulting set of linear equations are then solved using
+    a slightly modified Kaczmarz method.
+
+    When using SART, a single iteration is usually sufficient to obtain a good
+    reconstruction. Further iterations will tend to enhance high-frequency
+    information, but will also often increase the noise.
+
+    References:
+        -A. C. Kak, Malcolm Slaney, "Principles of Computerized Tomographic
+        Imaging", IEEE Press 1988.
+        -AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
+        (SART): a superior implementation of the ART algorithm", Ultrasonic
+        Imaging 6 pp 81--94 (1984)
+    """
+    if theta is None:
+        theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
+    angle_indices = {theta[i]: i for i in range(theta.shape[0])}
+    reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
+    if image is None:
+        image = np.zeros(reconstructed_shape, dtype=np.float)
+    elif image.shape != reconstructed_shape:
+        raise ValueError('Shape of image (%s) does not match first dimension '
+                         'of radon_image (%s)'
+                         % (image.shape, reconstructed_shape))
+    used_angles = []
+    while angle_indices:
+        angle_index = angle_indices.pop(_sart_next_angle(angle_indices.keys(),
+                                                         used_angles))
+        image_update = sart_projection_update(image, theta[angle_index],
+                                                  radon_image[:, angle_index])
+        image += relaxation * image_update
+        if not clip is None:
+            image = clip(image, clip[0], clip[1])
+        used_angles.append(theta[angle_index])
+
+    return image
