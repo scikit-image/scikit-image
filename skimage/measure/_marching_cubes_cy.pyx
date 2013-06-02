@@ -13,9 +13,9 @@ cdef inline double _get_fraction(double from_value, double to_value,
     return ((level - from_value) / (to_value - from_value))
 
 
-def unpack_unique_vert_list(list trilist):
+def unpack_unique_verts(list trilist):
     """
-    Convert_list a list of lists of tuples corresponding to triangle vertices
+    Convert a list of lists of tuples corresponding to triangle vertices
     into a unique vertex list, and a list of triangle faces w/indices
     corresponding to entries of the vertex list.
 
@@ -152,14 +152,14 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
 
         # We use a right-handed coordinate system, UNlike the paper, but want
         # to index in agreement - the coordinate adjustment takes place here.
-        v1 = arr[z0, y0, x0]
-        v2 = arr[z0, y0, x1]
-        v3 = arr[z0, y1, x1]
-        v4 = arr[z0, y1, x0]
-        v5 = arr[z1, y0, x0]
-        v6 = arr[z1, y0, x1]
-        v7 = arr[z1, y1, x1]
-        v8 = arr[z1, y1, x0]
+        v1 = arr[x0, y0, z0]
+        v2 = arr[x1, y0, z0]
+        v3 = arr[x1, y1, z0]
+        v4 = arr[x0, y1, z0]
+        v5 = arr[x0, y0, z1]
+        v6 = arr[x1, y0, z1]
+        v7 = arr[x1, y1, z1]
+        v8 = arr[x0, y1, z1]
 
         # Unique triangulation cases
         cube_case = 0
@@ -233,7 +233,7 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
                            e6, e7, e8, e9, e10, e11, e12)
 
         # Advance the coords indices
-        if coords[2] < arr.shape[0] - 2:
+        if coords[2] < arr.shape[2] - 2:
             coords[2] += 1
             plus_z = True
         elif coords[1] < arr.shape[1] - 2:
