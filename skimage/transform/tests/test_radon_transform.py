@@ -35,12 +35,14 @@ def test_radon_iradon():
 
         assert delta < 0.05
 
-    reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
+    reconstructed = iradon(radon(image), filter="ramp",
+                           interpolation="nearest")
     delta = np.mean(abs(image - reconstructed))
     assert delta < 0.05
     size = 20
     image = np.tri(size) + np.tri(size)[::-1]
-    reconstructed = iradon(radon(image), filter="ramp", interpolation="nearest")
+    reconstructed = iradon(radon(image), filter="ramp",
+                           interpolation="nearest")
 
 
 def test_iradon_angles():
@@ -53,14 +55,14 @@ def test_iradon_angles():
     # Large number of projections: a good quality is expected
     nb_angles = 200
     radon_image_200 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                    endpoint=False))
+                                                     endpoint=False))
     reconstructed = iradon(radon_image_200)
     delta_200 = np.mean(abs(rescale(image) - rescale(reconstructed)))
     assert delta_200 < 0.03
     # Lower number of projections
     nb_angles = 80
     radon_image_80 = radon(image, theta=np.linspace(0, 180, nb_angles,
-                    endpoint=False))
+                                                    endpoint=False))
     # Test whether the sum of all projections is approximately the same
     s = radon_image_80.sum(axis=0)
     assert np.allclose(s, s[0], rtol=0.01)
@@ -106,6 +108,17 @@ def test_reconstruct_with_wrong_angles():
     assert_raises(ValueError, iradon, p, theta=[0, 1, 2, 3])
 
 
+def _random_circle(shape):
+    # Synthetic random data, zero outside reconstruction circle
+    np.random.seed(98312871)
+    image = np.random.rand(*shape)
+    c0, c1 = np.ogrid[0:shape[0], 0:shape[1]]
+    r = np.sqrt((c0 - shape[0] // 2)**2 + (c1 - shape[1] // 2)**2)
+    radius = min(shape) // 2
+    image[r >= radius] = 0.
+    return image
+
+
 def test_radon_circle():
     a = np.ones((10, 10))
     assert_raises(ValueError, radon, a, circle=True)
@@ -122,9 +135,7 @@ def test_radon_circle():
     assert np.all(sinogram.std(axis=1) < 1e-2)
 
     # Synthetic data, random
-    np.random.seed(98312871)
-    image = np.random.rand(*shape)
-    image[r >= radius] = 0.
+    image = _random_circle(shape)
     sinogram = radon(image, theta=angles, circle=True)
     mass = sinogram.sum(axis=0)
     average_mass = mass.mean()
@@ -135,8 +146,8 @@ def test_radon_circle():
 
 def test_radon_iradon_circle():
     shape = (61, 79)
-    # Synthetic random data, zero outside reconstruction circle
-    image = np.random.rand(*shape)
+    radius = min(shape) // 2
+    image = _random_circle(shape)
     interpolations = ('nearest', 'linear')
     output_sizes = (None, min(shape), max(shape), 97)
 
@@ -144,10 +155,6 @@ def test_radon_iradon_circle():
                                                         output_sizes):
         print('interpolation =', interpolation)
         print('output_size =', output_size)
-        c0, c1 = np.ogrid[0:shape[0], 0:shape[1]]
-        r = np.sqrt((c0 - shape[0] // 2)**2 + (c1 - shape[1] // 2)**2)
-        radius = min(shape) // 2
-        image[r >= radius] = 0.
         # Forward and inverse radon on synthetic data
         sinogram_rectangle = radon(image, circle=False)
         reconstruction_rectangle = iradon(sinogram_rectangle,
