@@ -113,7 +113,8 @@
   Fixes and tests for Histograms of Oriented Gradients.
 
 - Joshua Warner
-  Multichannel random walker segmentation.
+  Multichannel random walker segmentation, unified peak finder backend,
+  n-dimensional array padding, bug and doc fixes.
 
 - Petter Strandmark
   Perimeter calculation in regionprops.
