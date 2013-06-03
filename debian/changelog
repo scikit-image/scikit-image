@@ -14,6 +14,8 @@ skimage (0.8.2-1) unstable; urgency=low
     - changeset_0eea2a48fe2dca7bbb3681fcd5b511579cad6347.diff -- resolves
       incompatibility with cython 0.19 (thanks Julian Taylor for the
       pointer)
+    - up_correct_version -- fix upstream version to be 0.8.2 (thanks
+      Julian again)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 03 Jun 2013 10:28:31 -0400
 
