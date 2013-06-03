@@ -9,12 +9,12 @@ Build-Depends: debhelper (>= 7.0.50),
                python-scipy (>= 0.10),
                python-sphinx,
                python-nose,
-               cython (>= 0.13),
+               cython (>= 0.15),
                python-matplotlib (>= 1.0),
                libfreeimage3,
                python-imaging,
                python-support
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 XS-Python-Version: >= 2.6
 Homepage: http://scikits-image.org
 Vcs-Browser: https://github.com/scikits-image/scikits-image

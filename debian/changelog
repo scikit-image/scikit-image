@@ -7,6 +7,9 @@ skimage (0.8.2-1) unstable; urgency=low
   * New upstream release
   * ACK NMU + reincarnated the record of 0.6.1-1, which as 0.7.2-1.1 fixed
     python-support issue
+  * debian/control
+    - boosted required cython version to 0.15
+    - boosted policy cmopliance to 3.9.4
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 03 Jun 2013 10:28:31 -0400
 
