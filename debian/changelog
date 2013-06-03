@@ -12,6 +12,14 @@ skimage (0.7.2-1) unstable; urgency=low
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 01 Dec 2012 22:06:51 -0500
 
+skimage (0.6.1-1) unstable; urgency=low
+
+  * Upstream bugfix release (correctly compare dtypes in the freeimage loader
+    on all platforms).
+  * Add python-support as build dependency (Closes: #681896).
+
+ -- Stefan van der Walt <stefan@sun.ac.za>  Tue, 17 Jul 2012 15:03:25 -0400
+
 skimage (0.6-1) unstable; urgency=low
 
   * New upstream release
