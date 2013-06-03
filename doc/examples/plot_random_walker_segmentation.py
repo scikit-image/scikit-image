@@ -19,7 +19,6 @@ values, and use the random walker for the segmentation.
 .. [1] *Random walks for image segmentation*, Leo Grady, IEEE Trans. Pattern
        Anal. Mach. Intell. 2006 Nov; 28(11):1768-83
 """
-print __doc__
 
 import numpy as np
 from scipy import ndimage

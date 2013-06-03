@@ -14,13 +14,9 @@ import numpy as np
 from scipy import sparse, ndimage
 try:
     from scipy.sparse.linalg.dsolve import umfpack
-    u = umfpack.UmfpackContext()
+    UmfpackContext = umfpack.UmfpackContext()
 except:
-    warnings.warn("""Scipy was built without UMFPACK. Consider rebuilding
-    Scipy with UMFPACK, this will greatly speed up the random walker
-    functions. You may also install pyamg and run the random walker function
-    in cg_mg mode (see the docstrings)
-    """)
+    UmfpackContext = None
 try:
     from pyamg import ruge_stuben_solver
     amg_loaded = True
@@ -34,8 +30,7 @@ from ..filter import rank_order
 
 
 def _make_graph_edges_3d(n_x, n_y, n_z):
-    """
-    Returns a list of edges for a 3D image.
+    """Returns a list of edges for a 3D image.
 
     Parameters
     ----------
@@ -49,9 +44,12 @@ def _make_graph_edges_3d(n_x, n_y, n_z):
     Returns
     -------
     edges : (2, N) ndarray
-        with the total number of edges N = n_x * n_y * (nz - 1) +
-                                           n_x * (n_y - 1) * nz +
-                                           (n_x - 1) * n_y * nz
+        with the total number of edges::
+
+            N = n_x * n_y * (nz - 1) +
+                n_x * (n_y - 1) * nz +
+                (n_x - 1) * n_y * nz
+
         Graph edges with each column describing a node-id pair.
     """
     vertices = np.arange(n_x * n_y * n_z).reshape((n_x, n_y, n_z))
@@ -176,20 +174,19 @@ def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                   multichannel=False, return_full_prob=False, depth=1.):
-    """
-    Random walker algorithm for segmentation from markers, for gray-level or
-    multichannel images.
+    """Random walker algorithm for segmentation from markers.
+
+    Random walker algorithm is implemented for gray-level or multichannel
+    images.
 
     Parameters
     ----------
-
     data : array_like
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
         dimensional (multichannel=True) with the highest dimension denoting
         channels. Data spacing is assumed isotropic unless depth keyword
         argument is used.
-
     labels : array of ints, of same shape as `data` without channels dimension
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
@@ -199,11 +196,9 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         labels are consecutive. In the multichannel case, `labels` should have
         the same shape as a single channel of `data`, i.e. without the final
         dimension denoting channels.
-
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-
     mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
         Mode for solving the linear system in the random walker
         algorithm.
@@ -212,12 +207,10 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
           computed. This is fast for small images (<1024x1024), but very slow
           (due to the memory cost) and memory-consuming for big images (in 3-D
           for example).
-
         - 'cg' (conjugate gradient): the linear system is solved iteratively
           using the Conjugate Gradient method from scipy.sparse.linalg. This is
           less memory-consuming than the brute force method for large images,
           but it is quite slow.
-
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method.  This mode
@@ -228,20 +221,16 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     tol : float
         tolerance to achieve when solving the linear system, in
         cg' and 'cg_mg' modes.
-
     copy : bool
         If copy is False, the `labels` array will be overwritten with
         the result of the segmentation. Use copy=False if you want to
         save on memory.
-
     multichannel : bool, default False
         If True, input data is parsed as multichannel data (see 'data' above
         for proper input format in this case)
-
     return_full_prob : bool, default False
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
-
     depth : float, default 1.
         Correction for non-isotropic voxel depths in 3D volumes.
         Default (1.) implies isotropy.  This factor is derived as follows:
@@ -251,25 +240,22 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Returns
     -------
-
     output : ndarray
-        If `return_full_prob` is False, array of ints of same shape as `data`,
-        in which each pixel has been labeled according to the marker that
-        reached the pixel first by anisotropic diffusion.
-        If `return_full_prob` is True, array of floats of shape
-        `(nlabels, data.shape)`. `output[label_nb, i, j]` is the probability
-        that label `label_nb` reaches the pixel `(i, j)` first.
+        * If `return_full_prob` is False, array of ints of same shape as
+          `data`, in which each pixel has been labeled according to the marker
+          that reached the pixel first by anisotropic diffusion.
+        * If `return_full_prob` is True, array of floats of shape
+          `(nlabels, data.shape)`. `output[label_nb, i, j]` is the probability
+          that label `label_nb` reaches the pixel `(i, j)` first.
 
     See also
     --------
-
     skimage.morphology.watershed: watershed segmentation
         A segmentation algorithm based on mathematical morphology
         and "flooding" of regions from markers.
 
     Notes
     -----
-
     Multichannel inputs are scaled with all channel data combined. Ensure all
     channels are separately normalized prior to running this algorithm.
 
@@ -319,7 +305,6 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Examples
     --------
-
     >>> a = np.zeros((10, 10)) + 0.2*np.random.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a)
@@ -338,6 +323,14 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=int32)
 
     """
+
+    if UmfpackContext is None:
+        warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
+                      'SciPy with UMFPACK, this will greatly speed up the '
+                      'random walker functions. You may also install pyamg '
+                      'and run the random walker function in cg_mg mode '
+                      '(see the docstrings)')
+
     # Parse input data
     if not multichannel:
         # We work with 4-D arrays of floats

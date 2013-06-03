@@ -604,7 +604,7 @@ class PolynomialTransform(GeometricTransform):
             raise ValueError("invalid shape of transformation parameters")
         self._params = params
 
-    def estimate(self, src, dst, order):
+    def estimate(self, src, dst, order=2):
         """Set the transformation matrix with the explicit transformation
         parameters.
 
@@ -645,7 +645,7 @@ class PolynomialTransform(GeometricTransform):
             Source coordinates.
         dst : (N, 2) array
             Destination coordinates.
-        order : int
+        order : int, optional
             Polynomial order (number of coefficients is order + 1).
 
         """
@@ -750,7 +750,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
             'affine'            `src, `dst`
             'piecewise-affine'  `src, `dst`
             'projective'        `src, `dst`
-            'polynomial'        `src, `dst`, `order` (polynomial order)
+            'polynomial'        `src, `dst`, `order` (polynomial order,
+                                                      default order is 2)
 
         Also see examples below.
 
@@ -848,6 +849,8 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     ----------
     coord_map : callable like GeometricTransform.inverse
         Return input coordinates for given output coordinates.
+        Coordinates are in the shape (P, 2), where P is the number
+        of coordinates and each element is a ``(x, y)`` pair.
     shape : tuple
         Shape of output image ``(rows, cols[, bands])``.
     dtype : np.dtype or string
@@ -874,17 +877,16 @@ def warp_coords(coord_map, shape, dtype=np.float64):
 
     Examples
     --------
-    Produce a coordinate map that Shifts an image to the right:
+    Produce a coordinate map that Shifts an image up and to the right:
 
     >>> from skimage import data
     >>> from scipy.ndimage import map_coordinates
     >>>
-    >>> def shift_right(xy):
-    ...     xy[:, 0] -= 10
-    ...     return xy
+    >>> def shift_up10_left20(xy):
+    ...     return xy - np.array([-20, 10])[None, :]
     >>>
     >>> image = data.lena().astype(np.float32)
-    >>> coords = warp_coords(shift_right, image.shape)
+    >>> coords = warp_coords(shift_up10_left20, image.shape)
     >>> warped_image = map_coordinates(image, coords)
 
     """

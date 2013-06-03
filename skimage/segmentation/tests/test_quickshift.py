@@ -34,10 +34,10 @@ def test_color():
     seg = quickshift(img, random_seed=0, max_dist=30, kernel_size=10, sigma=0)
     # we expect 4 segments:
     assert_equal(len(np.unique(seg)), 4)
-    assert_array_equal(seg[:10, :10], 0)
-    assert_array_equal(seg[10:, :10], 3)
-    assert_array_equal(seg[:10, 10:], 1)
-    assert_array_equal(seg[10:, 10:], 2)
+    assert_array_equal(seg[:10, :10], 1)
+    assert_array_equal(seg[10:, :10], 2)
+    assert_array_equal(seg[:10, 10:], 0)
+    assert_array_equal(seg[10:, 10:], 3)
 
     seg2 = quickshift(img, kernel_size=1, max_dist=2, random_seed=0,
             convert2lab=False, sigma=0)

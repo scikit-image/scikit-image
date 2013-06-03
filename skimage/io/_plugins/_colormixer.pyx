@@ -1,4 +1,7 @@
-# -*- python -*-
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 
 """Colour Mixer
 
@@ -9,15 +12,14 @@ one.
 
 """
 import cython
-import numpy as np
-cimport numpy as np
+
+cimport numpy as cnp
 from libc.math cimport exp, pow
 
 
-@cython.boundscheck(False)
-def add(np.ndarray[np.uint8_t, ndim=3] img,
-        np.ndarray[np.uint8_t, ndim=3] stateimg,
-        int channel, int amount):
+def add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
+        cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
+        Py_ssize_t channel, Py_ssize_t amount):
     """Add a given amount to a colour channel of `stateimg`, and
     store the result in `img`.  Overflow is clipped.
 
@@ -33,38 +35,37 @@ def add(np.ndarray[np.uint8_t, ndim=3] img,
         Value to add.
 
     """
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
-    cdef int k = channel
-    cdef int n = amount
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
+    cdef Py_ssize_t k = channel
+    cdef Py_ssize_t n = amount
 
-    cdef np.int16_t op_result
+    cdef cnp.int16_t op_result
 
-    cdef np.uint8_t lut[256]
+    cdef cnp.uint8_t lut[256]
 
-    cdef int i, j, l
+    cdef Py_ssize_t i, j, l
 
     with nogil:
 
         for l from 0 <= l < 256:
-            op_result = <np.int16_t>(l + n)
+            op_result = <cnp.int16_t>(l + n)
             if op_result > 255:
                 op_result = 255
             elif op_result < 0:
                 op_result = 0
             else:
                 pass
-            lut[l] = <np.uint8_t>op_result
+            lut[l] = <cnp.uint8_t>op_result
 
         for i from 0 <= i < height:
             for j from 0 <= j < width:
                 img[i, j, k] = lut[stateimg[i,j,k]]
 
 
-@cython.boundscheck(False)
-def multiply(np.ndarray[np.uint8_t, ndim=3] img,
-             np.ndarray[np.uint8_t, ndim=3] stateimg,
-             int channel, float amount):
+def multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
+             cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
+             Py_ssize_t channel, float amount):
     """Multiply a colour channel of `stateimg` by a certain amount, and
     store the result in `img`.  Overflow is clipped.
 
@@ -80,16 +81,16 @@ def multiply(np.ndarray[np.uint8_t, ndim=3] img,
         Multiplication factor.
 
     """
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
-    cdef int k = channel
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
+    cdef Py_ssize_t k = channel
     cdef float n = amount
 
     cdef float op_result
 
-    cdef np.uint8_t lut[256]
+    cdef cnp.uint8_t lut[256]
 
-    cdef int i, j, l
+    cdef Py_ssize_t i, j, l
 
     with nogil:
 
@@ -101,17 +102,16 @@ def multiply(np.ndarray[np.uint8_t, ndim=3] img,
                 op_result = 0
             else:
                 pass
-            lut[l] = <np.uint8_t>op_result
+            lut[l] = <cnp.uint8_t>op_result
 
         for i from 0 <= i < height:
             for j from 0 <= j < width:
                 img[i,j,k] = lut[stateimg[i,j,k]]
 
 
-@cython.boundscheck(False)
-def brightness(np.ndarray[np.uint8_t, ndim=3] img,
-             np.ndarray[np.uint8_t, ndim=3] stateimg,
-             float factor, int offset):
+def brightness(cnp.ndarray[cnp.uint8_t, ndim=3] img,
+             cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
+             float factor, Py_ssize_t offset):
     """Modify the brightness of an image.
     'factor' is multiplied to all channels, which are
     then added by 'amount'. Overflow is clipped.
@@ -129,13 +129,13 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
 
     """
 
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
 
     cdef float op_result
-    cdef np.uint8_t lut[256]
+    cdef cnp.uint8_t lut[256]
 
-    cdef int i, j, k
+    cdef Py_ssize_t i, j, k
     with nogil:
 
         for k from 0 <= k < 256:
@@ -146,7 +146,7 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
                 op_result = 0
             else:
                 pass
-            lut[k] = <np.uint8_t>op_result
+            lut[k] = <cnp.uint8_t>op_result
 
         for i from 0 <= i < height:
             for j from 0 <= j < width:
@@ -155,27 +155,25 @@ def brightness(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i,j,2] = lut[stateimg[i,j,2]]
 
 
-@cython.boundscheck(False)
-@cython.cdivision(True)
-def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
-                  np.ndarray[np.uint8_t, ndim=3] stateimg,
+def sigmoid_gamma(cnp.ndarray[cnp.uint8_t, ndim=3] img,
+                  cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
                   float alpha, float beta):
 
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
 
-    cdef int i, j, k
+    cdef Py_ssize_t i, j, k
 
     cdef float c1 = 1 / (1 + exp(beta))
     cdef float c2 = 1 / (1 + exp(beta - alpha)) - c1
 
-    cdef np.uint8_t lut[256]
+    cdef cnp.uint8_t lut[256]
 
     with nogil:
 
         # compute the lut
         for k from 0 <= k < 256:
-            lut[k] = <np.uint8_t>(((1 / (1 + exp(beta - (k / 255.) * alpha)))
+            lut[k] = <cnp.uint8_t>(((1 / (1 + exp(beta - (k / 255.) * alpha)))
                                     - c1) * 255 / c2)
         for i from 0 <= i < height:
             for j from 0 <= j < width:
@@ -184,17 +182,16 @@ def sigmoid_gamma(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i,j,2] = lut[stateimg[i,j,2]]
 
 
-@cython.boundscheck(False)
-def gamma(np.ndarray[np.uint8_t, ndim=3] img,
-          np.ndarray[np.uint8_t, ndim=3] stateimg,
+def gamma(cnp.ndarray[cnp.uint8_t, ndim=3] img,
+          cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
           float gamma):
 
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
 
-    cdef np.uint8_t lut[256]
+    cdef cnp.uint8_t lut[256]
 
-    cdef int i, j, k
+    cdef Py_ssize_t i, j, k
 
     if gamma == 0:
         gamma = 0.00000000000000000001
@@ -204,7 +201,7 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
 
         # compute the lut
         for k from 0 <= k < 256:
-            lut[k] = <np.uint8_t>((pow((k / 255.), gamma) * 255))
+            lut[k] = <cnp.uint8_t>((pow((k / 255.), gamma) * 255))
 
         for i from 0 <= i < height:
             for j from 0 <= j < width:
@@ -213,7 +210,6 @@ def gamma(np.ndarray[np.uint8_t, ndim=3] img,
                 img[i,j,2] = lut[stateimg[i,j,2]]
 
 
-@cython.cdivision(True)
 cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     cdef float R, G, B, H, S, V, MAX, MIN
     R = RGB[0]
@@ -277,11 +273,10 @@ cdef void rgb_2_hsv(float* RGB, float* HSV) nogil:
     HSV[2] = V
 
 
-@cython.cdivision(True)
 cdef void hsv_2_rgb(float* HSV, float* RGB) nogil:
     cdef float H, S, V
     cdef float f, p, q, t, r, g, b
-    cdef int hi
+    cdef Py_ssize_t hi
 
     H = HSV[0]
     S = HSV[1]
@@ -422,9 +417,8 @@ def py_rgb_2_hsv(R, G, B):
     return (H, S, V)
 
 
-@cython.boundscheck(False)
-def hsv_add(np.ndarray[np.uint8_t, ndim=3] img,
-            np.ndarray[np.uint8_t, ndim=3] stateimg,
+def hsv_add(cnp.ndarray[cnp.uint8_t, ndim=3] img,
+            cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
             float h_amt, float s_amt, float v_amt):
     """Modify the image color by specifying additive HSV Values.
 
@@ -455,13 +449,13 @@ def hsv_add(np.ndarray[np.uint8_t, ndim=3] img,
 
     """
 
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
 
     cdef float HSV[3]
     cdef float RGB[3]
 
-    cdef int i, j
+    cdef Py_ssize_t i, j
 
     with nogil:
         for i from 0 <= i < height:
@@ -483,14 +477,13 @@ def hsv_add(np.ndarray[np.uint8_t, ndim=3] img,
                 RGB[1] *= 255
                 RGB[2] *= 255
 
-                img[i, j, 0] = <np.uint8_t>RGB[0]
-                img[i, j, 1] = <np.uint8_t>RGB[1]
-                img[i, j, 2] = <np.uint8_t>RGB[2]
+                img[i, j, 0] = <cnp.uint8_t>RGB[0]
+                img[i, j, 1] = <cnp.uint8_t>RGB[1]
+                img[i, j, 2] = <cnp.uint8_t>RGB[2]
 
 
-@cython.boundscheck(False)
-def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
-                 np.ndarray[np.uint8_t, ndim=3] stateimg,
+def hsv_multiply(cnp.ndarray[cnp.uint8_t, ndim=3] img,
+                 cnp.ndarray[cnp.uint8_t, ndim=3] stateimg,
                  float h_amt, float s_amt, float v_amt):
     """Modify the image color by specifying multiplicative HSV Values.
 
@@ -525,13 +518,13 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
 
     """
 
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
 
     cdef float HSV[3]
     cdef float RGB[3]
 
-    cdef int i, j
+    cdef Py_ssize_t i, j
 
     with nogil:
         for i from 0 <= i < height:
@@ -553,6 +546,6 @@ def hsv_multiply(np.ndarray[np.uint8_t, ndim=3] img,
                 RGB[1] *= 255
                 RGB[2] *= 255
 
-                img[i, j, 0] = <np.uint8_t>RGB[0]
-                img[i, j, 1] = <np.uint8_t>RGB[1]
-                img[i, j, 2] = <np.uint8_t>RGB[2]
+                img[i, j, 0] = <cnp.uint8_t>RGB[0]
+                img[i, j, 1] = <cnp.uint8_t>RGB[1]
+                img[i, j, 2] = <cnp.uint8_t>RGB[2]

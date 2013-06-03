@@ -114,3 +114,16 @@ def page():
 
     """
     return load("page.png")
+
+
+def clock():
+    """Motion blurred clock.
+
+    This photograph of a wall clock was taken while moving the camera in an
+    aproximately horizontal direction.  It may be used to illustrate
+    inverse filters and deconvolution.
+
+    Released into the public domain by the photographer (Stefan van der Walt).
+
+    """
+    return load("clock_motion.png")

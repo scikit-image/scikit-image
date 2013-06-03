@@ -1,5 +1,5 @@
 Name: scikit-image
-Version: 0.7.2
+Version: 0.8.0
 Summary: Image processing routines for SciPy
 Url: http://scikit-image.org
 DownloadUrl: http://github.com/scikit-image/scikit-image
@@ -64,6 +64,9 @@ Library:
     Extension: skimage.filter._ctmf
         Sources:
             skimage/filter/_ctmf.pyx
+    Extension: skimage.filter._denoise_cy
+        Sources:
+            skimage/filter/_denoise_cy.pyx
     Extension: skimage.morphology.ccomp
         Sources:
             skimage/morphology/ccomp.pyx
@@ -88,6 +91,9 @@ Library:
     Extension: skimage.morphology._greyreconstruct
         Sources:
             skimage/morphology/_greyreconstruct.pyx
+    Extension: skimage.feature.corner_cy
+        Sources:
+            skimage/feature/corner_cy.pyx
     Extension: skimage.feature._texture
         Sources:
             skimage/feature/_texture.pyx
@@ -115,6 +121,36 @@ Library:
     Extension: skimage._shared.geometry
         Sources:
             skimage/_shared/geometry.pyx
+    Extension: skimage.filter.rank._core16
+        Sources:
+            skimage/filter/rank/_core16.pyx
+    Extension: skimage.filter.rank._crank8
+        Sources:
+            skimage/filter/rank/_crank8.pyx
+    Extension: skimage.filter.rank._crank16
+        Sources:
+            skimage/filter/rank/_crank16.pyx
+    Extension: skimage.filter.rank._core8
+        Sources:
+            skimage/filter/rank/_core8.pyx
+    Extension: skimage.filter.rank.rank
+        Sources:
+            skimage/filter/rank/rank.pyx
+    Extension: skimage.filter.rank.bilateral_rank
+        Sources:
+            skimage/filter/rank/bilateral_rank.pyx
+    Extension: skimage.filter.rank._crank16_percentiles
+        Sources:
+            skimage/filter/rank/_crank16_percentiles.pyx
+    Extension: skimage.filter.rank.percentile_rank
+        Sources:
+            skimage/filter/rank/percentile_rank.pyx
+    Extension: skimage.filter.rank._crank8_percentiles
+        Sources:
+            skimage/filter/rank/_crank8_percentiles.pyx
+    Extension: skimage.filter.rank._crank16_bilateral
+        Sources:
+            skimage/filter/rank/_crank16_bilateral.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

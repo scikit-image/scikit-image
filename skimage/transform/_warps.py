@@ -1,17 +1,21 @@
 import numpy as np
+from scipy import ndimage
 from ._geometric import (warp, SimilarityTransform, AffineTransform,
                          ProjectiveTransform)
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
-    """Resize image.
+    """Resize image to match a certain size.
 
     Parameters
     ----------
     image : ndarray
         Input image.
     output_shape : tuple or ndarray
-        Size of the generated output image `(rows, cols)`.
+        Size of the generated output image `(rows, cols[, dim])`. If `dim` is
+        not provided, the number of channels are preserved. In case the number
+        of input channels does not equal the number of output channels a
+        3-dimensional interpolation is applied.
 
     Returns
     -------
@@ -32,24 +36,88 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
     """
 
-    rows, cols = output_shape
+    rows, cols = output_shape[0], output_shape[1]
     orig_rows, orig_cols = image.shape[0], image.shape[1]
 
-    rscale = float(orig_rows) / rows
-    cscale = float(orig_cols) / cols
+    row_scale = float(orig_rows) / rows
+    col_scale = float(orig_cols) / cols
 
-    # 3 control points necessary to estimate exact AffineTransform
-    src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
-    dst_corners = np.zeros(src_corners.shape, dtype=np.double)
-    # take into account that 0th pixel is at position (0.5, 0.5)
-    dst_corners[:, 0] = cscale * (src_corners[:, 0] + 0.5) - 0.5
-    dst_corners[:, 1] = rscale * (src_corners[:, 1] + 0.5) - 0.5
+    # 3-dimensional interpolation
+    if len(output_shape) == 3 and (image.ndim == 2
+                                   or output_shape[2] != image.shape[2]):
+        dim = output_shape[2]
+        orig_dim = 1 if image.ndim == 2 else image.shape[2]
+        dim_scale = float(orig_dim) / dim
 
-    tform = AffineTransform()
-    tform.estimate(src_corners, dst_corners)
+        map_rows, map_cols, map_dims = np.mgrid[:rows, :cols, :dim]
+        map_rows = row_scale * (map_rows + 0.5) - 0.5
+        map_cols = col_scale * (map_cols + 0.5) - 0.5
+        map_dims = dim_scale * (map_dims + 0.5) - 0.5
 
-    return warp(image, tform, output_shape=output_shape, order=order,
-                mode=mode, cval=cval)
+        coord_map = np.array([map_rows, map_cols, map_dims])
+
+        out = ndimage.map_coordinates(image, coord_map, order=order, mode=mode,
+                                      cval=cval)
+
+    else: # 2-dimensional interpolation
+
+        # 3 control points necessary to estimate exact AffineTransform
+        src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
+        dst_corners = np.zeros(src_corners.shape, dtype=np.double)
+        # take into account that 0th pixel is at position (0.5, 0.5)
+        dst_corners[:, 0] = col_scale * (src_corners[:, 0] + 0.5) - 0.5
+        dst_corners[:, 1] = row_scale * (src_corners[:, 1] + 0.5) - 0.5
+
+        tform = AffineTransform()
+        tform.estimate(src_corners, dst_corners)
+
+        out = warp(image, tform, output_shape=output_shape, order=order,
+                   mode=mode, cval=cval)
+
+    return out
+
+
+def rescale(image, scale, order=1, mode='constant', cval=0.):
+    """Scale image by a certain factor.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    scale : {float, tuple of floats}
+        Scale factors. Separate scale factors can be defined as
+        `(row_scale, col_scale)`.
+
+    Returns
+    -------
+    scaled : ndarray
+        Scaled version of the input.
+
+    Other parameters
+    ----------------
+    order : int
+        Order of splines used in interpolation.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    mode : string
+        How to handle values outside the image borders.  See
+        `scipy.ndimage.map_coordinates` for detail.
+    cval : string
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    """
+
+    try:
+        row_scale, col_scale = scale
+    except TypeError:
+        row_scale = col_scale = scale
+
+    orig_rows, orig_cols = image.shape[0], image.shape[1]
+    rows = np.round(row_scale * orig_rows)
+    cols = np.round(col_scale * orig_cols)
+    output_shape = (rows, cols)
+
+    return resize(image, output_shape, order=order, mode=mode, cval=cval)
 
 
 def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
@@ -95,7 +163,7 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     tform = tform1 + tform2 + tform3
 
     output_shape = None
-    if not resize:
+    if resize:
         # determine shape of output image
         corners = np.array([[1, 1], [1, rows], [cols, rows], [cols, 1]])
         corners = tform(corners - 1)
@@ -184,99 +252,4 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
 
     return warp(image, _swirl_mapping, map_args=warp_args,
                 output_shape=output_shape,
-                order=order, mode=mode, cval=cval)
-
-
-def homography(image, H, output_shape=None, order=1,
-               mode='constant', cval=0.):
-    """
-    .. note:: Deprecated in skimage 0.7
-        `homography` will be removed in skimage 0.8, it is replaced by
-        `warp` because the latter provides the same functionality::
-
-            warp(image, ProjectiveTransform(H))
-
-    Perform a projective transformation (homography) on an image.
-
-    For each pixel, given its homogeneous coordinate :math:`\mathbf{x}
-    = [x, y, 1]^T`, its target position is calculated by multiplying
-    with the given matrix, :math:`H`, to give :math:`H \mathbf{x}`.
-    E.g., to rotate by theta degrees clockwise, the matrix should be
-
-    ::
-
-      [[cos(theta) -sin(theta) 0]
-       [sin(theta)  cos(theta) 0]
-       [0            0         1]]
-
-    or, to translate x by 10 and y by 20,
-
-    ::
-
-      [[1 0 10]
-       [0 1 20]
-       [0 0 1 ]].
-
-    Parameters
-    ----------
-    image : 2-D array
-        Input image.
-    H : array of shape ``(3, 3)``
-        Transformation matrix H that defines the homography.
-    output_shape : tuple (rows, cols)
-        Shape of the output image generated.
-    order : int
-        Order of splines used in interpolation.
-    mode : string
-        How to handle values outside the image borders.  Passed as-is
-        to ndimage.
-    cval : string
-        Used in conjunction with mode 'constant', the value outside
-        the image boundaries.
-
-    Examples
-    --------
-    >>> # rotate by 90 degrees around origin and shift down by 2
-    >>> x = np.arange(9, dtype=np.uint8).reshape((3, 3)) + 1
-    >>> x
-    array([[1, 2, 3],
-           [4, 5, 6],
-           [7, 8, 9]], dtype=uint8)
-    >>> theta = -np.pi/2
-    >>> M = np.array([[np.cos(theta),-np.sin(theta),0],
-    ...               [np.sin(theta), np.cos(theta),2],
-    ...               [0,             0,            1]])
-    >>> x90 = homography(x, M, order=1)
-    >>> x90
-    array([[3, 6, 9],
-           [2, 5, 8],
-           [1, 4, 7]], dtype=uint8)
-    >>> # translate right by 2 and down by 1
-    >>> y = np.zeros((5,5), dtype=np.uint8)
-    >>> y[1, 1] = 255
-    >>> y
-    array([[  0,   0,   0,   0,   0],
-           [  0, 255,   0,   0,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
-    >>> M = np.array([[ 1.,  0.,  2.],
-    ...               [ 0.,  1.,  1.],
-    ...               [ 0.,  0.,  1.]])
-    >>> y21 = homography(y, M, order=1)
-    >>> y21
-    array([[  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0,   0, 255,   0],
-           [  0,   0,   0,   0,   0],
-           [  0,   0,   0,   0,   0]], dtype=uint8)
-
-    """
-    import warnings
-    warnings.warn('the homography function is deprecated; '
-                  'use the `warp` and `ProjectiveTransform` class instead',
-                  category=DeprecationWarning)
-
-    tform = ProjectiveTransform(H)
-    return warp(image, inverse_map=tform.inverse, output_shape=output_shape,
                 order=order, mode=mode, cval=cval)

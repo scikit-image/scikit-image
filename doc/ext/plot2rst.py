@@ -69,6 +69,7 @@ import os
 import shutil
 import token
 import tokenize
+import traceback
 
 import numpy as np
 import matplotlib
@@ -247,7 +248,16 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     gallery_index.write(TOCTREE_TEMPLATE % (sub_dir + '\n   '.join(ex_names)))
 
     for src_name in examples:
-        write_example(src_name, src_dir, rst_dir, cfg)
+
+        try:
+            write_example(src_name, src_dir, rst_dir, cfg)
+        except Exception:
+            print "Exception raised while running:"
+            print "%s in %s" % (src_name, src_dir)
+            print '~' * 60
+            traceback.print_exc()
+            print '~' * 60
+            continue
 
         link_name = sub_dir.pjoin(src_name)
         link_name = link_name.replace(os.path.sep, '_')

@@ -2,9 +2,9 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-
-cimport numpy as np
 import numpy as np
+
+cimport numpy as cnp
 from skimage._shared.interpolation cimport (nearest_neighbour_interpolation,
                                             bilinear_interpolation,
                                             biquadratic_interpolation,
@@ -35,7 +35,7 @@ cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
     y_[0] = yy / zz
 
 
-def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
+def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None, int order=1,
                mode='constant', double cval=0):
     """Projective transformation (homography).
 
@@ -83,9 +83,9 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
 
     """
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] img = \
+    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode="c"] img = \
          np.ascontiguousarray(image, dtype=np.double)
-    cdef np.ndarray[dtype=np.double_t, ndim=2, mode="c"] M = \
+    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode="c"] M = \
          np.ascontiguousarray(H)
 
     if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
@@ -93,7 +93,7 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
                          "`constant`, `nearest`, `wrap` or `reflect`.")
     cdef char mode_c = ord(mode[0].upper())
 
-    cdef int out_r, out_c
+    cdef Py_ssize_t out_r, out_c
     if output_shape is None:
         out_r = img.shape[0]
         out_c = img.shape[1]
@@ -101,15 +101,15 @@ def _warp_fast(np.ndarray image, np.ndarray H, output_shape=None, int order=1,
         out_r = output_shape[0]
         out_c = output_shape[1]
 
-    cdef np.ndarray[dtype=np.double_t, ndim=2] out = \
+    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2] out = \
          np.zeros((out_r, out_c), dtype=np.double)
 
-    cdef int tfr, tfc
+    cdef Py_ssize_t tfr, tfc
     cdef double r, c
-    cdef int rows = img.shape[0]
-    cdef int cols = img.shape[1]
+    cdef Py_ssize_t rows = img.shape[0]
+    cdef Py_ssize_t cols = img.shape[1]
 
-    cdef double (*interp_func)(double*, int, int, double, double,
+    cdef double (*interp_func)(double*, Py_ssize_t, Py_ssize_t, double, double,
                                char, double)
     if order == 0:
         interp_func = nearest_neighbour_interpolation

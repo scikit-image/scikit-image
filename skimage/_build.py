@@ -4,6 +4,13 @@ import hashlib
 import subprocess
 
 
+# WindowsError is not defined on unix systems
+try:
+    WindowsError
+except NameError:
+    WindowsError = None
+
+
 def cython(pyx_files, working_path=''):
     """Use Cython to convert the given files to C.
 

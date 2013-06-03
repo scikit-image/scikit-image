@@ -34,6 +34,11 @@ def test_page():
     data.page()
 
 
+def test_page():
+    """ Test that "clock" image can be loaded. """
+    data.clock()
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
