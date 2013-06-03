@@ -1,9 +1,14 @@
-skimage (0.7.0-1) UNRELEASED; urgency=low
+skimage (0.8.2-1) unstable; urgency=low
 
   [ Stefan van der Walt ]
   * Add python-qt4 as a recommended package (Closes: #684753).
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 03 Jun 2013 10:23:16 -0400
+  [ Yaroslav Halchenko ]
+  * New upstream release
+  * ACK NMU + reincarnated the record of 0.6.1-1, which as 0.7.2-1.1 fixed
+    python-support issue
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 03 Jun 2013 10:28:31 -0400
 
 skimage (0.7.2-1.1) unstable; urgency=low
 
