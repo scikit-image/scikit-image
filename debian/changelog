@@ -10,6 +10,10 @@ skimage (0.8.2-1) unstable; urgency=low
   * debian/control
     - boosted required cython version to 0.15
     - boosted policy cmopliance to 3.9.4
+  * debian/patches
+    - changeset_0eea2a48fe2dca7bbb3681fcd5b511579cad6347.diff -- resolves
+      incompatibility with cython 0.19 (thanks Julian Taylor for the
+      pointer)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 03 Jun 2013 10:28:31 -0400
 
