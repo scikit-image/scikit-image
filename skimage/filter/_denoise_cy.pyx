@@ -137,11 +137,11 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
 
     max_value = image.max()
     
-    cimage = np.ascontiguousarray(image)
-    
     if max_value == 0.0:
         raise ValueError("The maximum value found in the image was 0.")
 
+    cimage = np.ascontiguousarray(image)
+    
     out = np.zeros((rows, cols, dims), dtype=np.double)
     image_data = <double*>cimage.data
     out_data = <double*>out.data
