@@ -13,14 +13,30 @@ def test_color():
     img[img > 1] = 1
     img[img < 0] = 0
     seg = slic(img, sigma=0, n_segments=4)
-    # we expect 4 segments:
-    print(seg)
+
+    # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
     assert_array_equal(seg[:10, :10], 0)
     assert_array_equal(seg[10:, :10], 2)
     assert_array_equal(seg[:10, 10:], 1)
     assert_array_equal(seg[10:, 10:], 3)
 
+def test_gray():
+    rnd = np.random.RandomState(0)
+    img = np.zeros((20, 21))
+    img[:10, :10] = 0.33
+    img[10:, :10] = 0.67
+    img[10:, 10:] = 1.00
+    img += 0.0033 * rnd.normal(size=img.shape)
+    img[img > 1] = 1
+    img[img < 0] = 0
+    seg = slic(img, sigma=0, n_segments=4, ratio=50.0)
+
+    assert_equal(len(np.unique(seg)), 4)
+    assert_array_equal(seg[:10, :10], 0)
+    assert_array_equal(seg[10:, :10], 2)
+    assert_array_equal(seg[:10, 10:], 1)
+    assert_array_equal(seg[10:, 10:], 3)
 
 if __name__ == '__main__':
     from numpy import testing

@@ -17,7 +17,7 @@ MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
 URL                 = 'http://scikit-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
-VERSION             = '0.7.2'
+VERSION             = '0.8.1'
 PYTHON_VERSION      = (2, 5)
 DEPENDENCIES        = {
                         'numpy': (1, 6),
@@ -27,6 +27,7 @@ DEPENDENCIES        = {
 
 import os
 import sys
+import re
 import setuptools
 from numpy.distutils.core import setup
 try:
@@ -72,8 +73,8 @@ def get_package_version(package):
     for version_attr in ('version', 'VERSION', '__version__'):
         if hasattr(package, version_attr) \
                 and isinstance(getattr(package, version_attr), str):
-            version_info = getattr(package, version_attr)
-            for part in version_info.split('.'):
+            version_info = getattr(package, version_attr, '')
+            for part in re.split('\D+', version_info):
                 try:
                     version.append(int(part))
                 except ValueError:
@@ -137,7 +138,7 @@ if __name__ == "__main__":
 
         configuration=configuration,
 
-        packages=setuptools.find_packages(),
+        packages=setuptools.find_packages(exclude=['doc']),
         include_package_data=True,
         zip_safe=False, # the package can run out of an .egg file
 

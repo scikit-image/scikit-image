@@ -117,3 +117,22 @@
 
 - Petter Strandmark
   Perimeter calculation in regionprops.
+
+- Olivier Debeir
+  Rank filters (8- and 16-bits) using sliding window.
+
+- Luis Pedro Coelho
+  imread plugin
+
+- Steven Silvester, Karel Zuiderveld
+  Adaptive Histogram Equalization
+
+- Anders Boesen Lindbo Larsen
+  Dense DAISY feature description, circle perimeter drawing.
+
+- François Boulogne
+  Andres Method for circle perimeter, ellipse perimeter drawing.
+  Circular Hough Transform
+
+- Thouis Jones
+  Vectorized operators for arrays of 16-bit ints.

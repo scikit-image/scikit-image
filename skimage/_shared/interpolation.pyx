@@ -5,12 +5,12 @@
 from libc.math cimport ceil, floor
 
 
-cdef inline int round(double r):
-    return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
+cdef inline Py_ssize_t round(double r):
+    return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-cdef inline double nearest_neighbour_interpolation(double* image, int rows,
-                                                   int cols, double r,
+cdef inline double nearest_neighbour_interpolation(double* image, Py_ssize_t rows,
+                                                   Py_ssize_t cols, double r,
                                                    double c, char mode,
                                                    double cval):
     """Nearest neighbour interpolation at a given position in the image.
@@ -35,13 +35,12 @@ cdef inline double nearest_neighbour_interpolation(double* image, int rows,
 
     """
 
-    return get_pixel(image, rows, cols, <int>round(r), <int>round(c),
-                     mode, cval)
+    return get_pixel2d(image, rows, cols, round(r), round(c), mode, cval)
 
 
-cdef inline double bilinear_interpolation(double* image, int rows, int cols,
-                                          double r, double c, char mode,
-                                          double cval):
+cdef inline double bilinear_interpolation(double* image, Py_ssize_t rows,
+                                          Py_ssize_t cols, double r, double c,
+                                          char mode, double cval):
     """Bilinear interpolation at a given position in the image.
 
     Parameters
@@ -64,18 +63,18 @@ cdef inline double bilinear_interpolation(double* image, int rows, int cols,
 
     """
     cdef double dr, dc
-    cdef int minr, minc, maxr, maxc
+    cdef Py_ssize_t minr, minc, maxr, maxc
 
-    minr = <int>floor(r)
-    minc = <int>floor(c)
-    maxr = <int>ceil(r)
-    maxc = <int>ceil(c)
+    minr = <Py_ssize_t>floor(r)
+    minc = <Py_ssize_t>floor(c)
+    maxr = <Py_ssize_t>ceil(r)
+    maxc = <Py_ssize_t>ceil(c)
     dr = r - minr
     dc = c - minc
-    top = (1 - dc) * get_pixel(image, rows, cols, minr, minc, mode, cval) \
-          + dc * get_pixel(image, rows, cols, minr, maxc, mode, cval)
-    bottom = (1 - dc) * get_pixel(image, rows, cols, maxr, minc, mode, cval) \
-             + dc * get_pixel(image, rows, cols, maxr, maxc, mode, cval)
+    top = (1 - dc) * get_pixel2d(image, rows, cols, minr, minc, mode, cval) \
+          + dc * get_pixel2d(image, rows, cols, minr, maxc, mode, cval)
+    bottom = (1 - dc) * get_pixel2d(image, rows, cols, maxr, minc, mode, cval) \
+             + dc * get_pixel2d(image, rows, cols, maxr, maxc, mode, cval)
     return (1 - dr) * top + dr * bottom
 
 
@@ -98,9 +97,9 @@ cdef inline double quadratic_interpolation(double x, double[3] f):
     return f[1] - 0.25 * (f[0] - f[2]) * x
 
 
-cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
-                                             double r, double c, char mode,
-                                             double cval):
+cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
+                                             Py_ssize_t cols, double r, double c,
+                                             char mode, double cval):
     """Biquadratic interpolation at a given position in the image.
 
     Parameters
@@ -123,8 +122,8 @@ cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
 
     """
 
-    cdef int r0 = <int>round(r)
-    cdef int c0 = <int>round(c)
+    cdef Py_ssize_t r0 = round(r)
+    cdef Py_ssize_t c0 = round(c)
     if r < 0:
         r0 -= 1
     if c < 0:
@@ -139,12 +138,12 @@ cdef inline double biquadratic_interpolation(double* image, int rows, int cols,
 
     cdef double fc[3], fr[3]
 
-    cdef int pr, pc
+    cdef Py_ssize_t pr, pc
 
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 3):
         for pc in range(c0, c0 + 3):
-            fc[pc - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
+            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
         fr[pr - r0] = quadratic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
@@ -174,9 +173,9 @@ cdef inline double cubic_interpolation(double x, double[4] f):
                     (3.0 * (f[1] - f[2]) + f[3] - f[0])))
 
 
-cdef inline double bicubic_interpolation(double* image, int rows, int cols,
-                                         double r, double c, char mode,
-                                         double cval):
+cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
+                                         Py_ssize_t cols, double r, double c,
+                                         char mode, double cval):
     """Bicubic interpolation at a given position in the image.
 
     Parameters
@@ -199,8 +198,8 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
 
     """
 
-    cdef int r0 = <int>r - 1
-    cdef int c0 = <int>c - 1
+    cdef Py_ssize_t r0 = <Py_ssize_t>r - 1
+    cdef Py_ssize_t c0 = <Py_ssize_t>c - 1
     if r < 0:
         r0 -= 1
     if c < 0:
@@ -211,20 +210,20 @@ cdef inline double bicubic_interpolation(double* image, int rows, int cols,
 
     cdef double fc[4], fr[4]
 
-    cdef int pr, pc
+    cdef Py_ssize_t pr, pc
 
     # row-wise cubic interpolation
     for pr in range(r0, r0 + 4):
         for pc in range(c0, c0 + 4):
-            fc[pc - c0] = get_pixel(image, rows, cols, pr, pc, mode, cval)
+            fc[pc - c0] = get_pixel2d(image, rows, cols, pr, pc, mode, cval)
         fr[pr - r0] = cubic_interpolation(xc, fc)
 
     # cubic interpolation for interpolated values of each row
     return cubic_interpolation(xr, fr)
 
 
-cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
-                             char mode, double cval):
+cdef inline double get_pixel2d(double* image, Py_ssize_t rows, Py_ssize_t cols,
+                               Py_ssize_t r, Py_ssize_t c, char mode, double cval):
     """Get a pixel from the image, taking wrapping mode into consideration.
 
     Parameters
@@ -255,7 +254,42 @@ cdef inline double get_pixel(double* image, int rows, int cols, int r, int c,
         return image[coord_map(rows, r, mode) * cols + coord_map(cols, c, mode)]
 
 
-cdef inline int coord_map(int dim, int coord, char mode):
+cdef inline double get_pixel3d(double* image, Py_ssize_t rows, Py_ssize_t cols,
+                               Py_ssize_t dims, Py_ssize_t r, Py_ssize_t c, Py_ssize_t d,
+                               char mode, double cval):
+    """Get a pixel from the image, taking wrapping mode into consideration.
+
+    Parameters
+    ----------
+    image : double array
+        Input image.
+    rows, cols, dims : int
+        Shape of image.
+    r, c, d : int
+        Position at which to get the pixel.
+    mode : {'C', 'W', 'R', 'N'}
+        Wrapping mode. Constant, Wrap, Reflect or Nearest.
+    cval : double
+        Constant value to use for constant mode.
+
+    Returns
+    -------
+    value : double
+        Pixel value at given position.
+
+    """
+    if mode == 'C':
+        if (r < 0) or (r > rows - 1) or (c < 0) or (c > cols - 1):
+            return cval
+        else:
+            return image[r * cols * dims + c * dims + d]
+    else:
+        return image[coord_map(rows, r, mode) * cols * dims
+                     + coord_map(cols, c, mode) * dims
+                     + d]
+
+
+cdef inline Py_ssize_t coord_map(Py_ssize_t dim, Py_ssize_t coord, char mode):
     """
     Wrap a coordinate, according to a given mode.
 
@@ -274,20 +308,20 @@ cdef inline int coord_map(int dim, int coord, char mode):
     if mode == 'R': # reflect
         if coord < 0:
             # How many times times does the coordinate wrap?
-            if <int>(-coord / dim) % 2 != 0:
-                return dim - <int>(-coord % dim)
+            if <Py_ssize_t>(-coord / dim) % 2 != 0:
+                return dim - <Py_ssize_t>(-coord % dim)
             else:
-                return <int>(-coord % dim)
+                return <Py_ssize_t>(-coord % dim)
         elif coord > dim:
-            if <int>(coord / dim) % 2 != 0:
-                return <int>(dim - (coord % dim))
+            if <Py_ssize_t>(coord / dim) % 2 != 0:
+                return <Py_ssize_t>(dim - (coord % dim))
             else:
-                return <int>(coord % dim)
+                return <Py_ssize_t>(coord % dim)
     elif mode == 'W': # wrap
         if coord < 0:
-            return <int>(dim - (-coord % dim))
+            return <Py_ssize_t>(dim - (-coord % dim))
         elif coord > dim:
-            return <int>(coord % dim)
+            return <Py_ssize_t>(coord % dim)
     elif mode == 'N': # nearest
         if coord < 0:
             return 0

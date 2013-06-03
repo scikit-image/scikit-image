@@ -71,11 +71,6 @@ issued::
    float64 to uint8
    array([  0, 128, 255], dtype=uint8)
 
-Wherever possible, functions should try to handle input without explicit
-conversion. For example, there is no need to force values to a specific type
-for doing a convolution; a plotting function, on the other hand, needs to know
-the range of the input.
-
 
 Output types
 ============

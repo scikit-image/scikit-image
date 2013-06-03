@@ -159,6 +159,12 @@ def test_polynomial_init():
     assert_array_almost_equal(tform2._params, tform._params)
 
 
+def test_polynomial_default_order():
+    tform = estimate_transform('polynomial', SRC, DST)
+    tform2 = estimate_transform('polynomial', SRC, DST, order=2)
+    assert_array_almost_equal(tform2._params, tform._params)
+
+
 def test_union():
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)

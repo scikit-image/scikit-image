@@ -277,8 +277,8 @@ def medial_axis(image, mask=None, return_distance=False):
     i, j = np.mgrid[0:image.shape[0], 0:image.shape[1]]
     result = masked_image.copy()
     distance = distance[result]
-    i = np.ascontiguousarray(i[result], np.int32)
-    j = np.ascontiguousarray(j[result], np.int32)
+    i = np.ascontiguousarray(i[result], np.intp)
+    j = np.ascontiguousarray(j[result], np.intp)
     result = np.ascontiguousarray(result, np.uint8)
 
     # Determine the order in which pixels are processed.

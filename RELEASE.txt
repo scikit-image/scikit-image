@@ -12,7 +12,7 @@ How to make a new release of ``skimage``
 
   - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
   - Build a clean version of the docs.  Run ``make`` in the root dir, then
-    ``rm build -rf; make html`` in the docs.
+    ``rm -rf build; make html`` in the docs.
   - Run ``make html`` again to copy the newly generated ``random.js`` into
     place.  Double check ``random.js``, otherwise the skimage.org front
     page gets broken!
@@ -49,7 +49,15 @@ How to make a new release of ``skimage``
   - Build using ``make gh-pages``.
   - Push upstream: ``git push`` in ``gh-pages``.
 
+- Update the development docs for the new version ``0.Xdev`` just like above
+
 - Post release notes on mailing lists, blog, G+, etc.
+
+  - scikit-image@googlegroups.com
+  - scipy-user@scipy.org
+  - scikit-learn-general@lists.sourceforge.net
+  - pythonvision@googlegroups.com
+
 
 Debian
 ------
