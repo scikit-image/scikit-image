@@ -71,5 +71,5 @@ override_dh_compress:
 	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
 
 override_dh_installdocs:
-	dh_installdocs -A CONTRIBUTORS.txt README.rst DEVELOPMENT.txt TASKS.txt
+	dh_installdocs -A CONTRIBUTORS.txt README.md DEVELOPMENT.txt TASKS.txt
 
