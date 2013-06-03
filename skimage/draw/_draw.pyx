@@ -109,14 +109,14 @@ def polygon(y, x, shape=None):
 
     cdef Py_ssize_t r, c
 
-    #: make contigous arrays for r, c coordinates
+    # make contigous arrays for r, c coordinates
     cdef cnp.ndarray contiguous_rdata, contiguous_cdata
     contiguous_rdata = np.ascontiguousarray(y, 'double')
     contiguous_cdata = np.ascontiguousarray(x, 'double')
     cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
     cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
 
-    #: output coordinate arrays
+    # output coordinate arrays
     cdef list rr = list()
     cdef list cc = list()
 
@@ -126,7 +126,7 @@ def polygon(y, x, shape=None):
                 rr.append(r)
                 cc.append(c)
 
-    return np.array(rr), np.array(cc)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
 def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
@@ -164,7 +164,7 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
 
     cdef Py_ssize_t r, c
 
-    #: output coordinate arrays
+    # output coordinate arrays
     cdef list rr = list()
     cdef list cc = list()
 
@@ -174,7 +174,7 @@ def ellipse(double cy, double cx, double yradius, double xradius, shape=None):
                 rr.append(r)
                 cc.append(c)
 
-    return np.array(rr), np.array(cc)
+    return np.array(rr, dtype=np.intp), np.array(cc, dtype=np.intp)
 
 
 def circle(double cy, double cx, double radius, shape=None):
@@ -281,7 +281,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
                 y = y - 1
                 x = x + 1
 
-    return np.array(rr) + cy, np.array(cc) + cx
+    return np.array(rr, dtype=np.intp) + cy, np.array(cc, dtype=np.intp) + cx
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
@@ -368,7 +368,7 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
             err += ychange
             ychange += twobsquared
 
-    return np.array(py) + cy, np.array(px) + cx
+    return np.array(py, dtype=np.intp) + cy, np.array(px, dtype=np.intp) + cx
 
 
 def set_color(img, coords, color):

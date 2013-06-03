@@ -73,7 +73,7 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, Py_ssize_t min_size=20)
     cdef cnp.intp_t *edges_p = <cnp.intp_t*>edges.data
     cdef cnp.float_t *costs_p = <cnp.float_t*>costs.data
     cdef cnp.ndarray[cnp.intp_t, ndim=1] segment_size \
-            = np.ones(width * height, dtype=np.int)
+            = np.ones(width * height, dtype=np.intp)
     # inner cost of segments
     cdef cnp.ndarray[cnp.float_t, ndim=1] cint = np.zeros(width * height)
     cdef int seg0, seg1, seg_new, e

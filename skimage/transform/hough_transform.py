@@ -164,7 +164,7 @@ def hough_circle(img, radius, normalize=True):
         Hough transform accumulator for each radius
 
     """
-    return _hough_circle(img, radius, normalize)
+    return _hough_circle(img, radius.astype(np.intp), normalize)
 
 def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
                 threshold=None, num_peaks=np.inf):

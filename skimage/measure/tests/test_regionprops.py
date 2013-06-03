@@ -49,7 +49,7 @@ def test_bbox():
 
 def test_central_moments():
     mu = regionprops(SAMPLE, ['CentralMoments'])[0]['CentralMoments']
-    #: determined with OpenCV
+    # determined with OpenCV
     assert_almost_equal(mu[0,2], 436.00000000000045)
     # different from OpenCV results, bug in OpenCV
     assert_almost_equal(mu[0,3], -737.333333333333)
@@ -198,7 +198,7 @@ def test_minor_axis_length():
 
 def test_moments():
     m = regionprops(SAMPLE, ['Moments'])[0]['Moments']
-    #: determined with OpenCV
+    # determined with OpenCV
     assert_almost_equal(m[0,0], 72.0)
     assert_almost_equal(m[0,1], 408.0)
     assert_almost_equal(m[0,2], 2748.0)
@@ -213,7 +213,7 @@ def test_moments():
 
 def test_normalized_moments():
     nu = regionprops(SAMPLE, ['NormalizedMoments'])[0]['NormalizedMoments']
-    #: determined with OpenCV
+    # determined with OpenCV
     assert_almost_equal(nu[0,2], 0.08410493827160502)
     assert_almost_equal(nu[1,1], -0.016846707818929982)
     assert_almost_equal(nu[1,2], -0.002899800614433943)
