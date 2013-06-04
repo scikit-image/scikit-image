@@ -26,6 +26,7 @@ cdef inline double min3(double[3] v):
 
     return v[m]
 
+
 def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
         int end_anchor_slack=0):
     """Return mapping between two curves based on dynamic time warping.
@@ -36,19 +37,23 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
     For instance, similarities in walking patterns would be detected, even if
     in one video the person was walking slowly and if in another he or she were
     walking more quickly, or even if there were accelerations and decelerations
-    during the course of one observation
+    during the course of one observation.
+
+    Anchoring sets an upper limit on the number of elements that may be
+    excluded in either sequence when mapping.
 
     Parameters
     ----------
     x, y : 1D array, dtype float64
+        Input sequences
     case : int, {1, 2, 3}
         Type-1 DTW uses 27-, 45- and 63-degree local path constraint.
         Type-2 DTW uses 0-, 45- and 90-degree local path constraint.
         Type-3 DTW uses a combination of Type-1 and Type-2
     start_anchor_slack : int
-        Maximum deviation allowed from start boundary condition
+        Maximum deviation allowed from start boundary condition.
     end_anchor_slack : int
-        Maximum deviation allowed from end boundary condition
+        Maximum deviation allowed from end boundary condition.
 
     References
     ----------
@@ -70,20 +75,25 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
     distance = np.zeros((m + 2, n + 2)) + DBL_MAX
     distance[1, 1] = 0
 
-    # Step forward
-    for i in range(2, m + 2):
-        for j in range(2, n + 2):
+    # Populate distance matrix
+    for i in range(2, 3+start_anchor_slack):
+        distance[i, 2] = euclidean(x[i - 2], y[0])
+
+    for j in range(2, 3+start_anchor_slack):
+        distance[2, j] = euclidean(x[0], y[j-2])
+
+    for i in range(3, m + 2):
+        for j in range(3, n + 2):
             costs[0] = distance[i - 1, j - 1]
             costs[1] = distance[i - 1, j]
             costs[2] = distance[i, j - 1]
+
+            print i, j, costs[0], costs[1], costs[2]
 
             distance[i, j] = euclidean(x[i - 2], y[j - 2]) + min3(costs)
 
     # Trace back
     cdef list path = []
-
-    #todo: implement ability for a non anchored begin
-    start_anchor_slack = 0
 
     i = m + 1
     j = n + 1
@@ -98,7 +108,7 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
             i = m + 1
             j = j - 1
 
-    while i >= 2 and j >= 2:
+    while i > 2 and j > 2:
         path.append((i - 2, j - 2))
 
         min_i, min_j = i - 1, j - 1
@@ -119,7 +129,6 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
 
         i, j = min_i, min_j
 
-    if start_anchor_slack == 0 and (i != 2 and j != 2):
-        path.append((0, 0))
+    path.append((i - 2, j - 2))
 
     return path, np.asarray(distance)
