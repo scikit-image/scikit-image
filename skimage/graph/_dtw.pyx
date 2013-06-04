@@ -88,8 +88,6 @@ def dtw(double[:] x, double[:] y, int case=1, int start_anchor_slack=0,
             costs[1] = distance[i - 1, j]
             costs[2] = distance[i, j - 1]
 
-            print i, j, costs[0], costs[1], costs[2]
-
             distance[i, j] = euclidean(x[i - 2], y[j - 2]) + min3(costs)
 
     # Trace back
