@@ -6,7 +6,7 @@ from warnings import warn
 import numpy as np
 
 from ..qt import QtGui
-from ..qt.QtCore import Qt, pyqtSignal
+from ..qt.QtCore import Qt, Signal
 from ..utils import RequiredAttr, init_qtapp
 
 
@@ -75,8 +75,8 @@ class Plugin(QtGui.QDialog):
     image_viewer = RequiredAttr("%s is not attached to ImageViewer" % name)
 
     # Signals used when viewers are linked to the Plugin output.
-    image_updated = pyqtSignal(np.ndarray)
-    _started = pyqtSignal(int)
+    image_updated = Signal(np.ndarray)
+    _started = Signal(int)
 
     def __init__(self, image_filter=None, height=0, width=400, useblit=True,
                  dock='bottom'):
