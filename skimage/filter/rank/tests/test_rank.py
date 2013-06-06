@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.testing import run_module_suite, assert_array_equal, assert_raises
-
 from skimage import data
 from skimage.morphology import cmorph, disk
 from skimage.filter import rank
