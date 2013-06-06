@@ -60,7 +60,7 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
     """Iterate across the given array in a marching-cubes fashion,
     looking for volumes with edges that cross 'level'. If such a volume is
     found, appropriate triangulations are added to a growing list of
-    triangles to be returned by the function.
+    faces to be returned by this function.
 
     If `sampling` is not provided, vertices are returned in the indexing
     coordinate system (assuming all 3 spatial dimensions sampled equally).

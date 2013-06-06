@@ -9,8 +9,7 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
     Parameters
     ----------
     volume : (M, N, P) array of doubles
-        Input data volume to find isosurfaces. Will be cast to `np.float64` if
-        not provided in this format.
+        Input data volume to find isosurfaces. Will be cast to `np.float64`.
     level : float
         Contour value to search for isosurfaces in `volume`.
     sampling : length-3 tuple of floats
@@ -20,7 +19,8 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
     Returns
     -------
     verts : (V, 3) array
-        Spatial (x, y, z) coordinates for V unique vertices in mesh.
+        Spatial coordinates for V unique mesh vertices. Coordinate order
+        matches input `volume` (M, N, P).
     faces : (F, 3) array
         Define triangular faces via referencing vertex indices from ``verts``.
         This algorithm specifically outputs triangles, so each face has
