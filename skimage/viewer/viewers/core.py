@@ -297,6 +297,9 @@ class CollectionViewer(ImageViewer):
         react to image changes.
         """
         self.image = image
+        for plugin in self.plugins:
+            plugin.arguments[0] = self.image
+            plugin.filter_image()              # updates self.image
 
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent:
