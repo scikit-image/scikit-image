@@ -400,11 +400,12 @@ def test_selem_dtypes():
 def test_percentile():
     #check that both 8- and 16-bit versions return the same image
     img = data.camera()
+    img16 = img.astype(np.uint16)
     selem = disk(15)
-    img = rank.percentile(img, selem=selem, p0=0.05)
-    img16 = rank.percentile(img.astype(np.uint16), selem=selem, p0=0.05)
-    assert(img.sum() < img.sum())
-    assert_array_equal(img, img16)
+    perc = rank.percentile(img, selem=selem, p0=0.05)
+    perc16 = rank.percentile(img16, selem=selem, p0=0.05)
+    assert(perc.sum() < img.sum())
+    assert_array_equal(perc, perc16)
 
 
 def test_percentile_min():
