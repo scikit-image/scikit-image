@@ -123,7 +123,7 @@ cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_meansubstraction(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_meansubtraction(Py_ssize_t * histo, float pop,
                                             dtype_t g, float p0, float p1,
                                             Py_ssize_t s0, Py_ssize_t s1):
 
@@ -384,12 +384,12 @@ def mean(cnp.ndarray[dtype_t, ndim=2] image,
            0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def meansubstraction(cnp.ndarray[dtype_t, ndim=2] image,
+def meansubtraction(cnp.ndarray[dtype_t, ndim=2] image,
                      cnp.ndarray[dtype_t, ndim=2] selem,
                      cnp.ndarray[dtype_t, ndim=2] mask=None,
                      cnp.ndarray[dtype_t, ndim=2] out=None,
                      char shift_x=0, char shift_y=0):
-    _core8(kernel_meansubstraction, image, selem, mask, out, shift_x, shift_y,
+    _core8(kernel_meansubtraction, image, selem, mask, out, shift_x, shift_y,
            0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 

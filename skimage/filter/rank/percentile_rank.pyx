@@ -29,7 +29,7 @@ from skimage.filter.rank import _crank16_percentiles, _crank8_percentiles
 
 
 __all__ = ['percentile_autolevel', 'percentile_gradient',
-           'percentile_mean', 'percentile_mean_substraction',
+           'percentile_mean', 'percentile_mean_subtraction',
            'percentile_morph_contr_enh', 'percentile', 'percentile_pop',
            'percentile_threshold']
 
@@ -191,11 +191,11 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_mean_substraction(image, selem, out=None, mask=None,
+def percentile_mean_subtraction(image, selem, out=None, mask=None,
                                  shift_x=False, shift_y=False, p0=.0, p1=1.):
-    """Return greyscale local mean_substraction of an image.
+    """Return greyscale local mean_subtraction of an image.
 
-    mean_substraction is computed on the given structuring element. Only levels
+    mean_subtraction is computed on the given structuring element. Only levels
     between percentiles [p0, p1] are used.
 
     Parameters
@@ -221,13 +221,13 @@ def percentile_mean_substraction(image, selem, out=None, mask=None,
 
     Returns
     -------
-    local mean_substraction : uint8 array or uint16
-        The result of the local mean_substraction.
+    local mean_subtraction : uint8 array or uint16
+        The result of the local mean_subtraction.
 
     """
 
-    return _apply(_crank8_percentiles.mean_substraction,
-                  _crank16_percentiles.mean_substraction,
+    return _apply(_crank8_percentiles.mean_subtraction,
+                  _crank16_percentiles.mean_subtraction,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
