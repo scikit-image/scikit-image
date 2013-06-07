@@ -94,7 +94,7 @@ cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_mean_substraction(Py_ssize_t * histo,
+cdef inline dtype_t kernel_mean_subtraction(Py_ssize_t * histo,
                                              float pop,
                                              dtype_t g,
                                              float p0, float p1,
@@ -239,14 +239,14 @@ def mean(cnp.ndarray[dtype_t, ndim=2] image,
            <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def mean_substraction(cnp.ndarray[dtype_t, ndim=2] image,
+def mean_subtraction(cnp.ndarray[dtype_t, ndim=2] image,
                       cnp.ndarray[dtype_t, ndim=2] selem,
                       cnp.ndarray[dtype_t, ndim=2] mask=None,
                       cnp.ndarray[dtype_t, ndim=2] out=None,
                       char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
     """return original - mean between [p0 and p1] percentiles *.5 +127
     """
-    _core8(kernel_mean_substraction, image, selem, mask, out, shift_x, shift_y,
+    _core8(kernel_mean_subtraction, image, selem, mask, out, shift_x, shift_y,
            p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 

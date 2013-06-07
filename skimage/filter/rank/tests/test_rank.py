@@ -195,7 +195,7 @@ def test_compare_8bit_vs_16bit():
     assert_array_equal(image8, image16)
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
-               'mean', 'meansubstraction', 'median', 'minimum', 'modal',
+               'mean', 'meansubtraction', 'median', 'minimum', 'modal',
                'morph_contr_enh', 'pop', 'threshold', 'tophat']
 
     for method in methods:
