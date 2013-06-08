@@ -16,18 +16,23 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         Input image.
     n_segments : int
         The (approximate) number of labels in the segmented output image.
+        Default is 100 segments.
     ratio: float
         Balances color-space proximity and image-space proximity.
         Higher values give more weight to color-space.
+        Default ratio is 10.
     max_iter : int
         Maximum number of iterations of k-means.
+        Default is 10.
     sigma : float
         Width of Gaussian smoothing kernel for preprocessing. Zero means no
         smoothing.
+        Default is 1.
     convert2lab : bool
         Whether the input should be converted to Lab colorspace prior to
         segmentation.  For this purpose, the input is assumed to be RGB. Highly
         recommended.
+        Default is True.
 
     Returns
     -------
