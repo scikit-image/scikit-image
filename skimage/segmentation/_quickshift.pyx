@@ -27,21 +27,28 @@ def quickshift(image, ratio=1., float kernel_size=5, max_dist=10,
     ratio : float, between 0 and 1.
         Balances color-space proximity and image-space proximity.
         Higher values give more weight to color-space.
+        Default is 1.
     kernel_size : float
         Width of Gaussian kernel used in smoothing the
         sample density. Higher means fewer clusters.
+        Default is 5.
     max_dist : float
         Cut-off point for data distances.
         Higher means fewer clusters.
+        Default is 10.
     return_tree : bool
         Whether to return the full segmentation hierarchy tree and distances.
+        Default is False.
     sigma : float
         Width for Gaussian smoothing as preprocessing. Zero means no smoothing.
+        Default is 0.
     convert2lab : bool
         Whether the input should be converted to Lab colorspace prior to
         segmentation. For this purpose, the input is assumed to be RGB.
+        Default is True.
     random_seed : None or int
         Random seed used for breaking ties.
+        Default is None.
 
     Returns
     -------
