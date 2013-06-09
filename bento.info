@@ -28,7 +28,6 @@ Classifiers:
     Operating System :: Unix,
     Operating System :: MacOS
 
-HookFile: bscript
 UseBackends: Waf
 
 Library:
