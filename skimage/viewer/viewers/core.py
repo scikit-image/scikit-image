@@ -2,7 +2,7 @@
 ImageViewer class for viewing and interacting with images.
 """
 from ..qt import QtGui
-from ..qt.QtCore import Qt
+from ..qt.QtCore import Qt, Signal
 
 from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
@@ -66,6 +66,9 @@ class ImageViewer(QtGui.QMainWindow):
                   'left': Qt.LeftDockWidgetArea,
                   'right': Qt.RightDockWidgetArea}
 
+    # Signal that the original image has been changed
+    original_image_changed = Signal(np.ndarray)
+
     def __init__(self, image):
         # Start main loop
         utils.init_qtapp()
@@ -91,7 +94,7 @@ class ImageViewer(QtGui.QMainWindow):
         if isinstance(image, Plugin):
             plugin = image
             image = plugin.filtered_image
-            plugin.image_updated.connect(self._new_original_image)
+            plugin.image_changed.connect(self._update_original_image)
             # When plugin is started, start
             plugin._started.connect(self._show)
 
@@ -102,7 +105,7 @@ class ImageViewer(QtGui.QMainWindow):
         self.ax.autoscale(enable=False)
 
         self._image_plot = self.ax.images[0]
-        self._new_original_image(image)
+        self._update_original_image(image)
         self.plugins = []
 
         self.layout = QtGui.QVBoxLayout(self.main_widget)
@@ -119,6 +122,8 @@ class ImageViewer(QtGui.QMainWindow):
     def __add__(self, plugin):
         """Add plugin to ImageViewer"""
         plugin.attach(self)
+        self.original_image_changed.connect(plugin._update_original_image)
+
         if plugin.dock:
             location = self.dock_areas[plugin.dock]
             dock_location = Qt.DockWidgetArea(location)
@@ -153,11 +158,12 @@ class ImageViewer(QtGui.QMainWindow):
         if filename is None:
             return
         image = io.imread(filename)
-        self._new_original_image(image)
+        self._update_original_image(image)
 
-    def _new_original_image(self, image):
+    def _update_original_image(self, image):
         self.original_image = image     # update saved image
         self.image = image.copy()       # update displayed image
+        self.original_image_changed.emit(image)
 
     def save_to_file(self):
         """Save current image to file.
@@ -330,7 +336,7 @@ class CollectionViewer(ImageViewer):
         This method can be overridden or extended in subclasses and plugins to
         react to image changes.
         """
-        self.image = image
+        self._update_original_image(image)
 
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent:

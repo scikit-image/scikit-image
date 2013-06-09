@@ -75,7 +75,7 @@ class Plugin(QtGui.QDialog):
     image_viewer = RequiredAttr("%s is not attached to ImageViewer" % name)
 
     # Signals used when viewers are linked to the Plugin output.
-    image_updated = Signal(np.ndarray)
+    image_changed = Signal(np.ndarray)
     _started = Signal(int)
 
     def __init__(self, image_filter=None, height=0, width=400, useblit=True,
@@ -122,7 +122,7 @@ class Plugin(QtGui.QDialog):
         self.image_viewer = image_viewer
         self.image_viewer.plugins.append(self)
         #TODO: Always passing image as first argument may be bad assumption.
-        self.arguments.append(self.image_viewer.original_image)
+        self.arguments = [self.image_viewer.original_image]
 
         # Call filter so that filtered image matches widget values
         self.filter_image()
@@ -170,11 +170,19 @@ class Plugin(QtGui.QDialog):
         filtered = self.image_filter(*arguments, **kwargs)
 
         self.display_filtered_image(filtered)
-        self.image_updated.emit(filtered)
+        self.image_changed.emit(filtered)
 
     def _get_value(self, param):
         # If param is a widget, return its `val` attribute.
         return param if not hasattr(param, 'val') else param.val
+
+    def _update_original_image(self, image):
+        """Update the original image argument passed to the filter function.
+
+        This method is called by the viewer when the original image is updated.
+        """
+        self.arguments[0] = image
+        self.filter_image()
 
     @property
     def filtered_image(self):
@@ -201,6 +209,8 @@ class Plugin(QtGui.QDialog):
     def show(self, main_window=True):
         """Show plugin."""
         super(Plugin, self).show()
+
+        # Emit signal with x-hint so new windows can be displayed w/o overlap.
         size = self.frameGeometry()
         x_hint = size.x() + size.width()
         self._started.emit(x_hint)
