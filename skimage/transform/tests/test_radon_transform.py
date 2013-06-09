@@ -296,6 +296,41 @@ def test_radon_iradon_circle():
         yield check_radon_iradon_circle, interpolation, shape, output_size
 
 
+def test_iradon_sart():
+    from skimage.io import imread
+    from skimage import data_dir
+    from skimage.transform import rescale, radon, iradon_sart
+
+    debug = False
+
+    shepp_logan = imread(data_dir + "/phantom.png", as_grey=True)
+    image = rescale(shepp_logan, scale=0.4)
+    theta = np.linspace(0., 180., image.shape[0], endpoint=False)
+    sinogram = radon(image, theta, circle=True)
+    reconstructed = iradon_sart(sinogram, theta)
+
+    if debug:
+        from matplotlib import pyplot as plt
+        plt.figure()
+        plt.subplot(221)
+        plt.imshow(image, interpolation='nearest')
+        plt.subplot(222)
+        plt.imshow(sinogram, interpolation='nearest')
+        plt.subplot(223)
+        plt.imshow(reconstructed, interpolation='nearest')
+        plt.subplot(224)
+        plt.imshow(reconstructed - image, interpolation='nearest')
+        plt.show()
+
+    delta = np.mean(np.abs(reconstructed - image))
+    print('delta (1 iteration) =', delta)
+    assert delta < 0.025
+    reconstructed = iradon_sart(sinogram, theta, reconstructed)
+    delta = np.mean(np.abs(reconstructed - image))
+    print('delta (2 iterations) =', delta)
+    assert delta < 0.015
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
