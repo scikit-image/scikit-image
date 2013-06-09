@@ -44,9 +44,9 @@ plt.ylabel("Intensity");
 projections = radon(image)
 plt.subplot(223)
 plt.title("Radon transform\n(Sinogram)");
-plt.xlabel("Projection axis");
-plt.ylabel("Intensity");
-plt.imshow(projections)
+plt.xlabel("Projection angle (degrees)");
+plt.ylabel("Projection axis");
+plt.imshow(projections, aspect='auto')
 
 reconstruction = iradon(projections)
 plt.subplot(224)
