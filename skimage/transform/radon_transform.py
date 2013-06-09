@@ -257,20 +257,30 @@ def iradon(radon_image, theta=None, output_size=None,
     return reconstructed * np.pi / (2 * len(th))
 
 
-def _sart_next_angle(remaining, used):
-    used = np.array(used)
-    used.shape = (-1, 1)
-    remaining = np.array(remaining)
-    remaining.shape = (1, -1)
-    time = np.arange(used.shape[0]) + 1
-    time.shape = (-1, 1)
-    tau = 3.
-    difference = used - remaining
-    distance = np.minimum(abs(difference % 180), abs(difference % -180))
-    #print distance
-    cost = np.exp(-distance * time / tau).sum(axis=0).squeeze()
-    next_angle_index = np.argmin(cost)
-    return remaining[0, next_angle_index]
+def _sart_order_angles(theta, tau=3.):
+    """
+    Order angles to reduce the amount of correlated information
+    in subsequent projections, i.e. make sure subsequent angles
+    are as far away from each other mod 180 degrees as possible.
+    Indices into the ``theta`` array are yielded.
+    """
+    used_indices = [0]
+    remaining_indices = range(1, len(theta))
+    yield 0
+    while remaining_indices:
+        used = np.array(theta[used_indices])
+        used.shape = (-1, 1)
+        remaining = np.array(theta[remaining_indices])
+        remaining.shape = (1, -1)
+        time = (np.arange(used.shape[0]) + 1)[::-1]
+        time.shape = (-1, 1)
+        difference = used - remaining
+        distance = np.minimum(abs(difference % 180), abs(difference % -180))
+        cost = np.exp(-distance * time / tau).sum(axis=0).squeeze()
+        next_angle_remaining_index = np.argmin(cost)
+        next_angle_index = remaining_indices.pop(next_angle_remaining_index)
+        used_indices.append(next_angle_index)
+        yield next_angle_index
 
 
 def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
@@ -334,7 +344,6 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     """
     if theta is None:
         theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
-    angle_indices = {theta[i]: i for i in range(theta.shape[0])}
     reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
     if image is None:
         image = np.zeros(reconstructed_shape, dtype=np.float)
@@ -344,16 +353,11 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         raise ValueError('Shape of image (%s) does not match first dimension '
                          'of radon_image (%s)'
                          % (image.shape, reconstructed_shape))
-    used_angles = []
-    while angle_indices:
-        angle_index = angle_indices.pop(_sart_next_angle(angle_indices.keys(),
-                                                         used_angles))
+    for angle_index in _sart_order_angles(theta):
         image_update = sart_projection_update(image, theta[angle_index],
                                               radon_image[:, angle_index],
                                               projection_shifts[angle_index])
         image += relaxation * image_update
         if not clip is None:
             image = clip(image, clip[0], clip[1])
-        used_angles.append(theta[angle_index])
-
     return image
