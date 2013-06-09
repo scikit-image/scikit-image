@@ -12,14 +12,17 @@ from libc.math cimport cos, sin, floor, ceil, sqrt, abs
 
 cpdef bilinear_ray_sum(cnp.ndarray[cnp.double_t, ndim=2] image, double theta,
                        double ray_position):
-    '''Compute the projection of an image along a ray.
+    """
+    Compute the projection of an image along a ray.
 
     Parameters
     ----------
     image : 2D array, dtype=float
         Image to project.
-    :param theta: Angle of the projection.
-    :param ray_position: Position of the ray within the projection
+    theta : float
+        Angle of the projection
+    ray_position : float
+        Position of the ray within the projection
 
     Returns
     -------
@@ -28,7 +31,7 @@ cpdef bilinear_ray_sum(cnp.ndarray[cnp.double_t, ndim=2] image, double theta,
     norm_of_weights :
         A measure of how long the ray's path through the reconstruction
         circle was
-    '''
+    """
     theta = theta / 180. * pi
     cdef double radius = image.shape[0] // 2 - 1
     cdef double projection_center = image.shape[0] // 2 - 1
@@ -80,19 +83,20 @@ cpdef bilinear_ray_sum(cnp.ndarray[cnp.double_t, ndim=2] image, double theta,
 cpdef bilinear_ray_update(cnp.ndarray[cnp.double_t, ndim=2] image,
         cnp.ndarray[cnp.double_t, ndim=2] image_update,
         double theta, double ray_position, double projected_value):
-    """Compute the update along a ray using bilinear interpolation.
+    """
+    Compute the update along a ray using bilinear interpolation.
 
     Parameters
     ----------
-    image :
+    image : 2D array, dtype=float
         Current reconstruction estimate
-    image_update :
+    image_update : 2D array, dtype=float
         Array of same shape as ``image``. Updates will be added to this array.
-    theta :
+    theta : float
         Angle of the projection
-    ray_position :
+    ray_position : float
         Position of the ray within the projection
-    projected_value :
+    projected_value : float
         Projected value (from the sinogram)
 
     Returns
@@ -159,6 +163,28 @@ def sart_projection_update(cnp.ndarray[cnp.double_t, ndim=2] image, \
                            double theta, \
                            cnp.ndarray[cnp.double_t, ndim=1] projection,
                            double projection_shift=0.):
+    """
+    Compute update to a reconstruction estimate from a single projection
+    using bilinear interpolation.
+
+    Parameters
+    ----------
+    image : 2D array, dtype=float
+        Current reconstruction estimate
+    theta : float
+        Angle of the projection
+    projection : 1D array, dtype=float
+        Projected values, taken from the sinogram
+    projection_shift : float
+        Shift the position of the projection by this many pixels before
+        using it to compute an update to the reconstruction estimate
+
+    Returns
+    -------
+    image_update : 2D array, dtype=float
+        Array of same shape as ``image`` containing updates that should be
+        added to ``image`` to improve the reconstruction estimate
+    """
     cdef cnp.ndarray[cnp.double_t, ndim=2] image_update = np.zeros_like(image)
     cdef double ray_position
     cdef Py_ssize_t i

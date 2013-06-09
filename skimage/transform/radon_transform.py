@@ -283,13 +283,13 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
 
     Parameters
     ----------
-    radon_image : array_like, dtype=float
+    radon_image : 2D array, dtype=float
         Image containing radon transform (sinogram). Each column of
         the image corresponds to a projection along a different angle.
-    theta : array_like, dtype=float, optional
+    theta : 1D array, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
-    image : array_like, dtype=float, optional
+    image : 2D array, dtype=float, optional
         Image containing an initial reconstruction estimate. Shape of this
         array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
         default is an array of zeros.
@@ -297,6 +297,13 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.
+    clip : length-2 sequence of floats
+        Force all values in the reconstructed tomogram to lie in the range
+        ``[clip[0], clip[1]]``
+    relaxation : float
+        Relaxation parameter for the update step. A higher value can
+        improve the convergence rate, but one runs the risk of instabilities.
+        Values close to or higher than 1 are not recommended.
 
     Returns
     -------
