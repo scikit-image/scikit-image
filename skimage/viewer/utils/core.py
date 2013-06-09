@@ -18,7 +18,8 @@ from ..qt import QtGui
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
-           'LinearColormap', 'ClearColormap', 'FigureCanvas', 'new_plot']
+           'LinearColormap', 'ClearColormap', 'FigureCanvas', 'new_plot',
+           'update_axes_image']
 
 
 QApp = None
@@ -179,3 +180,22 @@ def figimage(image, scale=1, dpi=None, **kwargs):
     ax.set_axis_off()
     ax.imshow(image, **kwargs)
     return fig, ax
+
+
+def update_axes_image(image_axes, image):
+    """Update the image displayed by an image plot.
+
+    This sets the image plot's array and updates its shape appropriately
+
+    Parameters
+    ----------
+    image_axes : `matplotlib.image.AxesImage`
+        Image axes to update.
+    image : array
+        Image array.
+    """
+    image_axes.set_array(image)
+
+    # Adjust size if new image shape doesn't match the original
+    h, w = image.shape[:2]
+    image_axes.set_extent((0, w, h, 0))

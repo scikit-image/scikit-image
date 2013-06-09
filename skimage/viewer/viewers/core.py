@@ -221,13 +221,10 @@ class ImageViewer(QtGui.QMainWindow):
     @image.setter
     def image(self, image):
         self._img = image
-        self._image_plot.set_array(image)
+        utils.update_axes_image(self._image_plot, image)
 
-        # Adjust size if new image shape doesn't match the original
-        h, w = image.shape[:2]
-        # update data coordinates (otherwise pixel coordinates are off)
-        self._image_plot.set_extent((0, w, h, 0))
         # update display (otherwise image doesn't fill the canvas)
+        h, w = image.shape[:2]
         self.ax.set_xlim(0, w)
         self.ax.set_ylim(h, 0)
 

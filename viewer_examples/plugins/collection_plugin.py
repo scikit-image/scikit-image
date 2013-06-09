@@ -1,7 +1,7 @@
 """
-=================
-Collection plugin
-=================
+==================================
+``CollectionViewer`` with a plugin
+==================================
 
 Demo of a CollectionViewer for viewing collections of images with the
 `autolevel` rank filter connected as a plugin.
