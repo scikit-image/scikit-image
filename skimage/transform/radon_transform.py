@@ -273,7 +273,7 @@ def _sart_next_angle(remaining, used):
     return remaining[0, next_angle_index]
 
 
-def iradon_sart(radon_image, theta=None, image=None,
+def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
                 clip=None, relaxation=0.15):
     """
     Inverse radon transform
@@ -293,6 +293,10 @@ def iradon_sart(radon_image, theta=None, image=None,
         Image containing an initial reconstruction estimate. Shape of this
         array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
         default is an array of zeros.
+    projection_shifts : 1D array, dtype=float
+        Shift the projections contained in ``radon_image`` (the sinogram) by
+        this many pixels before reconstructing the image. The i'th value
+        defines the shift of the i'th column of ``radon_image``.
 
     Returns
     -------
@@ -327,6 +331,8 @@ def iradon_sart(radon_image, theta=None, image=None,
     reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
     if image is None:
         image = np.zeros(reconstructed_shape, dtype=np.float)
+    if projection_shifts is None:
+        projection_shifts = np.zeros((radon_image.shape[1],), dtype=np.float)
     elif image.shape != reconstructed_shape:
         raise ValueError('Shape of image (%s) does not match first dimension '
                          'of radon_image (%s)'
@@ -336,7 +342,8 @@ def iradon_sart(radon_image, theta=None, image=None,
         angle_index = angle_indices.pop(_sart_next_angle(angle_indices.keys(),
                                                          used_angles))
         image_update = sart_projection_update(image, theta[angle_index],
-                                                  radon_image[:, angle_index])
+                                              radon_image[:, angle_index],
+                                              projection_shifts[angle_index])
         image += relaxation * image_update
         if not clip is None:
             image = clip(image, clip[0], clip[1])

@@ -157,14 +157,13 @@ cpdef bilinear_ray_update(cnp.ndarray[cnp.double_t, ndim=2] image,
 
 def sart_projection_update(cnp.ndarray[cnp.double_t, ndim=2] image, \
                            double theta, \
-                           cnp.ndarray[cnp.double_t, ndim=1] projection):
+                           cnp.ndarray[cnp.double_t, ndim=1] projection,
+                           double projection_shift=0.):
     cdef cnp.ndarray[cnp.double_t, ndim=2] image_update = np.zeros_like(image)
-    cdef unsigned int ray_position
+    cdef double ray_position
     cdef Py_ssize_t i
     for i in range(projection.shape[0]):
-        # TODO:
-        # ip may differ from i in the future (for alignment of projections)
-        ray_position = i
+        ray_position = i + projection_shift
         bilinear_ray_update(image, image_update, theta, ray_position,
                             projection[i])
     return image_update
