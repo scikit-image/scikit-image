@@ -3,8 +3,6 @@ import numpy as np
 
 from skimage import img_as_float
 from skimage.util.dtype import dtype_range, dtype_limits
-import skimage.color as color
-from skimage.util.dtype import convert
 from skimage._shared.utils import deprecated
 
 
@@ -225,8 +223,6 @@ def _assert_non_negative(image):
         raise ValueError('Image Correction methods work correctly only on '
                          'images with non-negative values. Use '
                          'skimage.exposure.rescale_intensity.')
-    else:
-        return True
 
 
 def adjust_gamma(image, gamma=1, gain=1):
@@ -306,7 +302,7 @@ def adjust_log(image, gain=1, inv=False):
     dtype = image.dtype.type
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
-    if inv == True:
+    if inv:
         out = (2 ** (image / scale) - 1) * scale * gain
         return dtype(out)
 
@@ -332,8 +328,9 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     gain : float
         The constant multiplier in exponential's power of sigmoid function.
         Default value is 10.
-    inv : If True, returns the negative sigmoid correction. Defaults to
-          False.
+    inv : bool
+        If True, returns the negative sigmoid correction. Defaults to False.
+
     Returns
     -------
     out : ndarray
@@ -348,7 +345,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     dtype = image.dtype.type
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
-    if inv == True:
+    if inv:
         out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
         return dtype(out)
 
