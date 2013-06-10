@@ -3,16 +3,17 @@ Section: python
 Priority: optional
 Maintainer: Stefan van der Walt <stefan@sun.ac.za>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>
-Build-Depends: debhelper (>= 7.0.50),
-               python-all-dev (>= 2.6.6-3~), python-setuptools,
+Build-Depends: cython (>= 0.15),
+               debhelper (>= 7.0.50),
+               libfreeimage3,
+               python-all-dev (>= 2.6.6-3~),
+               python-imaging,
+               python-matplotlib (>= 1.0),
+               python-nose,
                python-numpy,
                python-scipy (>= 0.10),
-               python-sphinx (>= 1.0.7+dfsg-1~),
-               python-nose,
-               cython (>= 0.15),
-               python-matplotlib (>= 1.0),
-               libfreeimage3,
-               python-imaging
+               python-setuptools,
+               python-sphinx (>= 1.0.7+dfsg-1~)
 Standards-Version: 3.9.4
 X-Python-Version: >= 2.6
 Homepage: http://scikits-image.org
@@ -22,13 +23,14 @@ XS-Testsuite: autopkgtest
 
 Package: python-skimage
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends},
+Depends: libfreeimage3,
          python-numpy,
          python-scipy (>= 0.10),
          python-skimage-lib (>= ${source:Version}),
-         libfreeimage3,
-Recommends: python-nose, python-matplotlib (>= 1.0), python-imaging, python-qt4
-Suggests: python-skimage-doc, python-opencv
+         ${misc:Depends},
+         ${python:Depends}
+Recommends: python-imaging, python-matplotlib (>= 1.0), python-nose, python-qt4
+Suggests: python-opencv, python-skimage-doc
 Description: Python modules for image processing
  scikits-image is a collection of image processing algorithms for
  Python.  It performs tasks such as image loading, filtering,
@@ -45,7 +47,7 @@ Description: Documentation and examples for scikits-image
 
 Package: python-skimage-lib
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, ${python:Depends}, python-numpy
+Depends: python-numpy, ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
 Recommends: python-skimage
 Description: Optimized low-level algorithms for scikits-image
  This is an add-on package for python-skimage. It provides
