@@ -341,6 +341,8 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         -AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
         (SART): a superior implementation of the ART algorithm", Ultrasonic
         Imaging 6 pp 81--94 (1984)
+        -Kaczmarz' method, Wikipedia,
+        http://en.wikipedia.org/wiki/Kaczmarz_method
     """
     if theta is None:
         theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
