@@ -1,13 +1,16 @@
-skimage (0.8.2-2) UNRELEASED; urgency=low
+skimage (0.8.2-2) unstable; urgency=low
 
+  [ Julian Taylor ]
   * add python 3 packages
   * add autopkgtests
   * update packaging to use dh_sphinxdoc and dh_python2
     requires search-html.patch to fix file so dh_sphinxdoc recognises it
-  * fix-doc-links.patch: fix navbar links in documentation
-  * wrap-and-sort debian/
+  * debian/patches
+    - fix-doc-links.patch: fix navbar links in documentation
+  * debian/control:
+    - wrap-and-sort
 
- -- Julian Taylor <jtaylor.debian@googlemail.com>  Mon, 10 Jun 2013 21:20:18 +0200
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 10 Jun 2013 15:31:21 -0400
 
 skimage (0.8.2-1) unstable; urgency=low
 
