@@ -9,8 +9,8 @@ cimport cython
 from libc.math cimport cos, sin, floor, ceil, sqrt, abs, M_PI
 
 
-cpdef bilinear_ray_sum(cnp.ndarray[cnp.double_t, ndim=2] image, double theta,
-                       double ray_position):
+cpdef bilinear_ray_sum(cnp.double_t[:, :] image, cnp.double_t theta,
+                       cnp.double_t ray_position):
     """
     Compute the projection of an image along a ray.
 
@@ -32,18 +32,18 @@ cpdef bilinear_ray_sum(cnp.ndarray[cnp.double_t, ndim=2] image, double theta,
         circle was
     """
     theta = theta / 180. * M_PI
-    cdef double radius = image.shape[0] // 2 - 1
-    cdef double projection_center = image.shape[0] // 2 - 1
-    cdef double rotation_center = image.shape[0] // 2
+    cdef cnp.double_t radius = image.shape[0] // 2 - 1
+    cdef cnp.double_t projection_center = image.shape[0] // 2 - 1
+    cdef cnp.double_t rotation_center = image.shape[0] // 2
     # (s, t) is the (x, y) system rotated by theta
-    cdef double t = ray_position - projection_center
+    cdef cnp.double_t t = ray_position - projection_center
     # s0 is the half-length of the ray's path in the reconstruction circle
-    cdef double s0
+    cdef cnp.double_t s0
     s0 = sqrt(radius**2 - t**2) if radius**2 >= t**2 else 0.
     cdef Py_ssize_t Ns = 2 * (<Py_ssize_t> ceil(2 * s0))  # number of steps along the ray
-    cdef double ray_sum = 0.
-    cdef double weight_norm = 0.
-    cdef double ds, dx, dy, x0, y0, x, y, di, dj, index_i, index_j
+    cdef cnp.double_t ray_sum = 0.
+    cdef cnp.double_t weight_norm = 0.
+    cdef cnp.double_t ds, dx, dy, x0, y0, x, y, di, dj, index_i, index_j
     cdef Py_ssize_t k, i, j
     if Ns > 0:
         # step length between samples
@@ -79,9 +79,10 @@ cpdef bilinear_ray_sum(cnp.ndarray[cnp.double_t, ndim=2] image, double theta,
     return ray_sum, weight_norm
 
 
-cpdef bilinear_ray_update(cnp.ndarray[cnp.double_t, ndim=2] image,
-        cnp.ndarray[cnp.double_t, ndim=2] image_update,
-        double theta, double ray_position, double projected_value):
+cpdef bilinear_ray_update(cnp.double_t[:, :] image,
+                          cnp.double_t[:, :] image_update,
+                          cnp.double_t theta, cnp.double_t ray_position,
+                          cnp.double_t projected_value):
     """
     Compute the update along a ray using bilinear interpolation.
 
@@ -103,26 +104,26 @@ cpdef bilinear_ray_update(cnp.ndarray[cnp.double_t, ndim=2] image,
     deviation :
         Deviation before updating the image
     """
-    cdef double ray_sum, weight_norm, deviation
+    cdef cnp.double_t ray_sum, weight_norm, deviation
     ray_sum, weight_norm = bilinear_ray_sum(image, theta, ray_position)
     if weight_norm > 0.:
         deviation = -(ray_sum - projected_value) / weight_norm
     else:
         deviation = 0.
     theta = theta / 180. * M_PI
-    cdef double radius = image.shape[0] // 2 - 1
-    cdef double projection_center = image.shape[0] // 2 - 1
-    cdef double rotation_center = image.shape[0] // 2
+    cdef cnp.double_t radius = image.shape[0] // 2 - 1
+    cdef cnp.double_t projection_center = image.shape[0] // 2 - 1
+    cdef cnp.double_t rotation_center = image.shape[0] // 2
     # (s, t) is the (x, y) system rotated by theta
-    cdef double t = ray_position - projection_center
+    cdef cnp.double_t t = ray_position - projection_center
     # s0 is the half-length of the ray's path in the reconstruction circle
-    cdef double s0
+    cdef cnp.double_t s0
     s0 = sqrt(radius*radius - t*t) if radius**2 >= t**2 else 0.
     cdef Py_ssize_t Ns = 2 * (<Py_ssize_t> ceil(2 * s0))
-    cdef double hamming_beta = 0.46164    # beta for equiripple Hamming window
+    cdef cnp.double_t hamming_beta = 0.46164    # beta for equiripple Hamming window
 
-    cdef double ds, dx, dy, x0, y0, x, y, di, dj, index_i, index_j
-    cdef double hamming_window
+    cdef cnp.double_t ds, dx, dy, x0, y0, x, y, di, dj, index_i, index_j
+    cdef cnp.double_t hamming_window
     cdef Py_ssize_t k, i, j
     if Ns > 0:
         # Step length between samples
@@ -159,10 +160,10 @@ cpdef bilinear_ray_update(cnp.ndarray[cnp.double_t, ndim=2] image,
 
 
 @cython.boundscheck(True)
-def sart_projection_update(cnp.ndarray[cnp.double_t, ndim=2] image not None,
-                           double theta,
-                           cnp.ndarray[cnp.double_t, ndim=1] projection not None,
-                           double projection_shift=0.):
+def sart_projection_update(cnp.double_t[:, :] image not None,
+                           cnp.double_t theta,
+                           cnp.double_t[:] projection not None,
+                           cnp.double_t projection_shift=0.):
     """
     Compute update to a reconstruction estimate from a single projection
     using bilinear interpolation.
@@ -185,11 +186,11 @@ def sart_projection_update(cnp.ndarray[cnp.double_t, ndim=2] image not None,
         Array of same shape as ``image`` containing updates that should be
         added to ``image`` to improve the reconstruction estimate
     """
-    cdef cnp.ndarray[cnp.double_t, ndim=2] image_update = np.zeros_like(image)
-    cdef double ray_position
+    cdef cnp.double_t[:, :] image_update = np.zeros_like(image)
+    cdef cnp.double_t ray_position
     cdef Py_ssize_t i
     for i in range(projection.shape[0]):
         ray_position = i + projection_shift
         bilinear_ray_update(image, image_update, theta, ray_position,
                             projection[i])
-    return image_update
+    return np.asarray(image_update)
