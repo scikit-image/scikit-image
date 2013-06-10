@@ -345,17 +345,33 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         -Kaczmarz' method, Wikipedia,
         http://en.wikipedia.org/wiki/Kaczmarz_method
     """
+    if radon_image.ndim != 2:
+        raise ValueError('radon_image must be two dimensional')
+    reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
     if theta is None:
         theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
-    reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
+    elif theta.shape != (radon_image.shape[1],):
+        raise ValueError('Shape of theta (%s) does not match the '
+                         'number of projections (%d)'
+                         % (projection_shifts.shape, radon_image.shape[1]))
     if image is None:
         image = np.zeros(reconstructed_shape, dtype=np.float)
-    if projection_shifts is None:
-        projection_shifts = np.zeros((radon_image.shape[1],), dtype=np.float)
     elif image.shape != reconstructed_shape:
         raise ValueError('Shape of image (%s) does not match first dimension '
                          'of radon_image (%s)'
                          % (image.shape, reconstructed_shape))
+    if projection_shifts is None:
+        projection_shifts = np.zeros((radon_image.shape[1],), dtype=np.float)
+    elif projection_shifts.shape != (radon_image.shape[1],):
+        raise ValueError('Shape of projection_shifts (%s) does not match the '
+                         'number of projections (%d)'
+                         % (projection_shifts.shape, radon_image.shape[1]))
+    if not clip is None:
+        if len(clip) != 2:
+            raise ValueError('clip must be a length-2 sequence')
+        clip = (float(clip[0]), float(clip[1]))
+    relaxation = float(relaxation)
+
     for angle_index in _sart_order_angles(theta):
         image_update = sart_projection_update(image, theta[angle_index],
                                               radon_image[:, angle_index],
