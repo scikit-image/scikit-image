@@ -1,15 +1,17 @@
-from __future__ import print_function
-from __future__ import division
+from __future__ import print_function, division
 
 import numpy as np
 from numpy.testing import assert_raises
 import itertools
+import os.path
+
 from skimage.transform import radon, iradon
 from skimage.io import imread
 from skimage import data_dir
 
 
-__PHANTOM = imread(data_dir + "/phantom.png", as_grey=True)[::2, ::2]
+__PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
+                   as_grey=True)[::2, ::2]
 
 
 def _get_phantom():
@@ -303,7 +305,7 @@ def test_iradon_sart():
 
     debug = False
 
-    shepp_logan = imread(data_dir + "/phantom.png", as_grey=True)
+    shepp_logan = imread(os.path.join(data_dir, "phantom.png"), as_grey=True)
     image = rescale(shepp_logan, scale=0.4)
     theta = np.linspace(0., 180., image.shape[0], endpoint=False)
     sinogram = radon(image, theta, circle=True)
