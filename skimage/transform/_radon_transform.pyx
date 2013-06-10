@@ -120,7 +120,7 @@ cpdef bilinear_ray_update(cnp.ndarray[cnp.double_t, ndim=2] image,
     cdef double s0
     s0 = sqrt(radius*radius - t*t) if radius**2 >= t**2 else 0.
     cdef unsigned int Ns = 2 * int(ceil(2 * s0))
-    cdef double hamming_beta = 0.46164
+    cdef double hamming_beta = 0.46164    # beta for equiripple Hamming window
 
     cdef double ds, dx, dy, x0, y0, x, y, di, dj, index_i, index_j
     cdef double hamming_window

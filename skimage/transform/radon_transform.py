@@ -257,13 +257,14 @@ def iradon(radon_image, theta=None, output_size=None,
     return reconstructed * np.pi / (2 * len(th))
 
 
-def _sart_order_angles(theta, tau=3.):
+def _sart_order_angles(theta):
     """
     Order angles to reduce the amount of correlated information
     in subsequent projections, i.e. make sure subsequent angles
     are as far away from each other mod 180 degrees as possible.
     Indices into the ``theta`` array are yielded.
     """
+    tau = 3.    # time constant for correlations; 0.1 < tau < 100 works well
     used_indices = [0]
     remaining_indices = range(1, len(theta))
     yield 0
