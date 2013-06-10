@@ -40,10 +40,12 @@ cpdef bilinear_ray_sum(cnp.double_t[:, :] image, cnp.double_t theta,
     # s0 is the half-length of the ray's path in the reconstruction circle
     cdef cnp.double_t s0
     s0 = sqrt(radius**2 - t**2) if radius**2 >= t**2 else 0.
-    cdef Py_ssize_t Ns = 2 * (<Py_ssize_t> ceil(2 * s0))  # number of steps along the ray
+    cdef Py_ssize_t Ns = 2 * (<Py_ssize_t> ceil(2 * s0))  # number of steps
+                                                          # along the ray
     cdef cnp.double_t ray_sum = 0.
     cdef cnp.double_t weight_norm = 0.
-    cdef cnp.double_t ds, dx, dy, x0, y0, x, y, di, dj, index_i, index_j
+    cdef cnp.double_t ds, dx, dy, x0, y0, x, y, di, dj,
+    cdef cnp.double_t index_i, index_j, weight
     cdef Py_ssize_t k, i, j
     if Ns > 0:
         # step length between samples
@@ -65,17 +67,21 @@ cpdef bilinear_ray_sum(cnp.double_t[:, :] image, cnp.double_t theta,
             # Use linear interpolation between values
             # Where values fall outside the array, assume zero
             if i > 0 and j > 0:
-                ray_sum += (1. - di) * (1. - dj) * image[i, j] * ds
-                weight_norm += ((1 - di) * (1 - dj) * ds)**2
+                weight = (1. - di) * (1. - dj) * ds
+                ray_sum += weight * image[i, j]
+                weight_norm += weight**2
             if i > 0 and j < image.shape[1] - 1:
-                ray_sum += (1. - di) * dj * image[i, j+1] * ds
-                weight_norm += ((1 - di) * dj * ds)**2
+                weight = (1. - di) * dj * ds
+                ray_sum += weight * image[i, j+1]
+                weight_norm += weight**2
             if i < image.shape[0] - 1 and j > 0:
-                ray_sum += di * (1 - dj) * image[i+1, j] * ds
-                weight_norm += (di * (1 - dj) * ds)**2
+                weight = di * (1 - dj) * ds
+                ray_sum += weight * image[i+1, j]
+                weight_norm += weight**2
             if i < image.shape[0] - 1 and j < image.shape[1] - 1:
-                ray_sum += di * dj * image[i+1, j+1] * ds
-                weight_norm += (di * dj * ds)**2
+                weight = di * dj * ds
+                ray_sum += weight * image[i+1, j+1]
+                weight_norm += weight**2
     return ray_sum, weight_norm
 
 
