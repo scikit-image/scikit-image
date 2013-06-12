@@ -18,7 +18,6 @@ Cubes: A High Resolution 3D Surface Construction Algorithm. Computer Graphics
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data
 from skimage import measure
 
 

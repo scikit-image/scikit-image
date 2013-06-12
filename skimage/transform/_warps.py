@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from ._geometric import (warp, SimilarityTransform, AffineTransform,
-                         ProjectiveTransform)
+from ._geometric import warp, SimilarityTransform, AffineTransform
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
@@ -67,7 +66,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
         out = ndimage.map_coordinates(image, coord_map, order=order, mode=mode,
                                       cval=cval)
 
-    else: # 2-dimensional interpolation
+    else:  # 2-dimensional interpolation
 
         # 3 control points necessary to estimate exact AffineTransform
         src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
@@ -116,7 +115,7 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
     Examples
     --------
     >>> from skimage import data
-    >>> from skimage.transform import resize
+    >>> from skimage.transform import rescale
     >>> image = data.camera()
     >>> rescale(image, 0.1).shape
     (51, 51)
