@@ -4,7 +4,11 @@
 
 __all__ = ['use', 'available', 'call', 'info', 'configuration', 'reset_plugins']
 
-from ConfigParser import ConfigParser
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
 import os.path
 from glob import glob
 
