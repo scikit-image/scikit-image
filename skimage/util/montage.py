@@ -50,7 +50,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
     >>> import numpy as np
     >>> from skimage.util.montage import montage2d
     >>> arr_in = np.arange(3 * 2 * 2).reshape(3, 2, 2)
-    >>> print arr_in  # doctest: +NORMALIZE_WHITESPACE
+    >>> print(arr_in)  # doctest: +NORMALIZE_WHITESPACE
     [[[ 0  1]
       [ 2  3]]
      [[ 4  5]
@@ -58,20 +58,20 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
      [[ 8  9]
       [10 11]]]
     >>> arr_out = montage2d(arr_in)
-    >>> print arr_out.shape
+    >>> print(arr_out.shape)
     (4, 4)
-    >>> print arr_out
+    >>> print(arr_out)
     [[  0.    1.    4.    5. ]
      [  2.    3.    6.    7. ]
      [  8.    9.    5.5   5.5]
      [ 10.   11.    5.5   5.5]]
-    >>> print arr_in.mean()
+    >>> print(arr_in.mean())
     5.5
     """
     assert arr_in.ndim == 3
 
     n_images, height, width = arr_in.shape
-    
+
     arr_in = arr_in.copy()
 
     # -- rescale intensity if necessary

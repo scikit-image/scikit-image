@@ -52,8 +52,8 @@ def _scan_plugins():
 
         for p in provides:
             if not p in plugin_store:
-                print "Plugin `%s` wants to provide non-existent `%s`." \
-                      " Ignoring." % (name, p)
+                print("Plugin `%s` wants to provide non-existent `%s`." \
+                      " Ignoring." % (name, p))
 
         plugin_provides[name] = valid_provides
         plugin_module_name[name] = os.path.basename(f)[:-4]
@@ -208,8 +208,8 @@ def _load(plugin):
     provides = plugin_provides[plugin]
     for p in provides:
         if not hasattr(plugin_module, p):
-            print "Plugin %s does not provide %s as advertised.  Ignoring." % \
-                  (plugin, p)
+            print("Plugin %s does not provide %s as advertised.  Ignoring." % \
+                  (plugin, p))
         else:
             store = plugin_store[p]
             func = getattr(plugin_module, p)

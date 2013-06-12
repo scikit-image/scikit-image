@@ -6,13 +6,13 @@ try:
     # gui's pyos_inputhook.
     window_manager.acquire('gtk')
 except GuiLockError, gle:
-    print gle
+    print(gle)
 else:
     try:
         import gtk
     except ImportError:
-        print 'pygtk libraries not installed.'
-        print 'plugin not loaded.'
+        print('pygtk libraries not installed.')
+        print('plugin not loaded.')
         window_manager._release('gtk')
     else:
 
@@ -51,4 +51,4 @@ else:
                 window_manager.register_callback(gtk.main_quit)
                 gtk.main()
             else:
-                print 'no images to display'
+                print('no images to display')
