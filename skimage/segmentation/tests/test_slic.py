@@ -1,4 +1,5 @@
 import itertools as it
+import warnings
 import numpy as np
 from numpy.testing import assert_equal, assert_array_equal
 from skimage.segmentation import slic
@@ -13,7 +14,9 @@ def test_color_2d():
     img += 0.01 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=4)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        seg = slic(img, sigma=0, n_segments=4)
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
