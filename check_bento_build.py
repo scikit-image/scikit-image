@@ -62,7 +62,7 @@ def remove_common_extensions(cy_bento, cy_setup):
 
 def print_results(cy_bento, cy_setup):
     def info(text):
-        print()
+        print('')
         print(text)
         print('-' * len(text))
 

@@ -257,7 +257,7 @@ if __name__ == "__main__":
             print("  Usage: coverage_generator.py [csv] [output]")
             print("    csv - Path to csv file, defaults to ./coverage.csv")
             print("    output - Ouput path, defaults to ./coverage_table.txt")
-            print()
+            print('')
             sys.exit(0)
         if len(sys.argv) == 2:
             csv_path = os.path.abspath(sys.argv[1])
