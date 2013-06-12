@@ -8,7 +8,7 @@ Original snake image from pixabay [1]_
 """
 import sys
 if len(sys.argv) != 2 or sys.argv[1] != '--no-plot':
-    print "Run with '--no-plot' flag to generate logo silently."
+    print("Run with '--no-plot' flag to generate logo silently.")
 else:
     import matplotlib as mpl
     mpl.use('Agg')

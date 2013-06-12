@@ -49,13 +49,13 @@ def calculate_coverage(reader):
               partial_items,
               total_items - (partial_items + done_items + na_items),
               na_items)
-    
+
     return list(i / total_items for i in counts)
 
 def read_table_titles(reader):
     r"""Create a dictionary with keys as section names and values as a list of
     table names
-    
+
     return (dict)
     """
     section_titles = []
@@ -69,39 +69,39 @@ def read_table_titles(reader):
             # Extract names of the tables
             for name in row[1:]:
                 if len(name) > 0:
-                    names.append(name) 
+                    names.append(name)
                 else:
                     break
             section_titles.append(row[0])
             table_names[row[0]] = names
     except csv.Error, e:
         sys.exit('line %d: %s' % (reader.line_num, e))
-    
+
     return section_titles,table_names
 
 def table_seperator(stream,lengths,character="-"):
     r"""Write out table row seperator
-    
+
     :Input:
      - *stream* (io/stream) Stream where output is put
      - *lengths* (list) A list of the lengths of the columns
      - *character* (string) Character to be filled between +, defaults to "-".
-     
+
     """
     stream.write("+")
     stream.write('+'.join([character*(length+2) for length in lengths]))
     stream.write("+")
-    
+
 def table_row(stream,data,lengths,num_columns=None):
     r"""Write out table row data
-    
+
     :Input:
      - *stream* (io/stream) Stream where output is put
      - *data* (list) List of strings containing data
      - *lengths* (list) A list of the lengths of the columns
-     - *num_columns* (string) Number of columns, defaults to the length of the 
+     - *num_columns* (string) Number of columns, defaults to the length of the
        data array
-     
+
     """
     if num_columns is None:
         num_columns = len(data)
@@ -115,11 +115,11 @@ def table_row(stream,data,lengths,num_columns=None):
         else:
             entry = MISSING_STRING
         stream.write(" " + entry + " "*(lengths[i] - len(entry)) + " |")
-    
+
 def generate_table(reader,stream,table_name=None,
                     column_titles=["Functionality","Matlab","Scipy","Scipy"]):
     r"""Generate a reST grid table based on the CSV data in reader
-    
+
     Reads CSV data from *reader* until an empty line is found and generates a
     reST table based on the data into *stream*.  A table name can be given for
     a section and table label.  All rows are read in and checked for maximum
@@ -127,13 +127,13 @@ def generate_table(reader,stream,table_name=None,
     widths so that the table can be constructed.  If a row contains less than
     the maximum number of columns a string is inserted that defaults to the
     string *MISSING_STRING* which is a global parameter.
-    
+
     :Input:
      - reader (csv.reader) The CSV reader to read in from
      - stream (iostream) Output target
      - table_name (string) Optional name of table, defaults to *None*
      - column_titles (list) List of column titles
-     
+
     """
     # Find number of columns and column widths, base number of columns is
     # determined by the headers
@@ -141,7 +141,6 @@ def generate_table(reader,stream,table_name=None,
     data = [column_titles]
     try:
         for row in reader:
-            # print row
             if len(row[0]) == 0:
                 break
             data.append([entry.expandtabs() for entry in row])
@@ -153,7 +152,7 @@ def generate_table(reader,stream,table_name=None,
     for row in data:
         for i in xrange(len(row)):
             column_lengths[i] = max(column_lengths[i],len(row[i]))
-    
+
     # Output table header
     stream.write(table_name + "\n")
     if table_name is not None:
@@ -167,7 +166,7 @@ def generate_table(reader,stream,table_name=None,
     stream.write("\n")
     table_seperator(stream,column_lengths,character="=")
     stream.write("\n")
-    
+
     # Output table data
     for row in data[1:]:
         table_row(stream,row,column_lengths,num_columns)
@@ -175,28 +174,28 @@ def generate_table(reader,stream,table_name=None,
         table_seperator(stream,column_lengths,character='-')
         stream.write("\n")
     stream.write("\n\n")
-    
+
 def generate_page(csv_path,stream,page_title="Coverage Tables"):
     r"""Generate coverage table page
-    
+
     Generates all reST for all tables contained in the CSV file at *csv_path*
     and output it to *stream*.
-    
+
     :Input:
      - *csv_path* (path) Path to CSV file
      - *stream* (iostream) Output stream
-     - *page_title* (string) Optional page title, defaults to 
+     - *page_title* (string) Optional page title, defaults to
        ``Coverage Tables``.
     """
     # Open reader
     csv_file = open(csv_path,'U')
-    
+
     # Sniffer does not seem to work all the time even when an Excel
     # spread sheet is being used
     # dialect = csv.Sniffer().sniff(csv_file.read(1024))
     # csv_file.seek(0)
     # reader = csv.reader(csv_file, dialect)
-    
+
     reader = csv.reader(csv_file)
     item_counts = calculate_coverage(reader)
     csv_file.seek(0)
@@ -254,21 +253,21 @@ if __name__ == "__main__":
     output_path = './coverage_table.txt'
     if len(sys.argv) > 1:
         if sys.argv[1][:5].lower() == "help":
-            print "Coverage Table Generator: coverage_generator.py"
-            print "  Usage: coverage_generator.py [csv] [output]"
-            print "    csv - Path to csv file, defaults to ./coverage.csv"
-            print "    output - Ouput path, defaults to ./coverage_table.txt"
-            print ""
+            print("Coverage Table Generator: coverage_generator.py")
+            print("  Usage: coverage_generator.py [csv] [output]")
+            print("    csv - Path to csv file, defaults to ./coverage.csv")
+            print("    output - Ouput path, defaults to ./coverage_table.txt")
+            print('')
             sys.exit(0)
         if len(sys.argv) == 2:
             csv_path = os.path.abspath(sys.argv[1])
         if len(sys.argv) == 3:
             output_path = os.path.abspath(sys.argv[2])
-    
+
     output = open(output_path,'w')
     generate_page(csv_path,output)
     output.close()
-    
+
     print("Generated %s from %s." % (output_path,csv_path))
 
 

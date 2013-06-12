@@ -118,17 +118,17 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
     Examples
     --------
     >>> x = np.eye(3).astype(int)
-    >>> print x
+    >>> print(x)
     [[1 0 0]
      [0 1 0]
      [0 0 1]]
 
-    >>> print m.label(x, neighbors=4)
+    >>> print(m.label(x, neighbors=4))
     [[0 1 1]
      [2 3 1]
      [2 2 4]]
 
-    >>> print m.label(x, neighbors=8)
+    >>> print(m.label(x, neighbors=8))
     [[0 1 1]
      [1 0 1]
      [1 1 0]]
@@ -137,7 +137,7 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
     ...               [1, 1, 5],
     ...               [0, 0, 0]])
 
-    >>> print m.label(x, background=0)
+    >>> print(m.label(x, background=0))
     [[ 0 -1 -1]
      [ 0  0  1]
      [-1 -1 -1]]

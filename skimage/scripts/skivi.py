@@ -6,7 +6,7 @@ def main():
     import sys
 
     if len(sys.argv) != 2:
-        print "Usage: skivi <image-file>"
+        print("Usage: skivi <image-file>")
         sys.exit(-1)
 
     io.use_plugin('qt')
