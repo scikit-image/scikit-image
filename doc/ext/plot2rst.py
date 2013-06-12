@@ -187,7 +187,7 @@ def generate_example_galleries(app):
 def generate_examples_and_gallery(example_dir, rst_dir, cfg):
     """Generate rst from examples and create gallery to showcase examples."""
     if not example_dir.exists:
-        print "No example directory found at", example_dir
+        print("No example directory found at", example_dir)
         return
     rst_dir.makedirs()
 
@@ -225,12 +225,12 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
     index_name = cfg.plot2rst_index_name + cfg.source_suffix
     gallery_template = src_dir.pjoin(index_name)
     if not os.path.exists(gallery_template):
-        print src_dir
-        print 80*'_'
-        print ('Example directory %s does not have a %s file'
+        print(src_dir)
+        print(80*'_')
+        print('Example directory %s does not have a %s file'
                         % (src_dir, index_name))
-        print 'Skipping this directory'
-        print 80*'_'
+        print('Skipping this directory')
+        print(80*'_')
         return
 
     gallery_description = file(gallery_template).read()
@@ -252,11 +252,11 @@ def write_gallery(gallery_index, src_dir, rst_dir, cfg, depth=0):
         try:
             write_example(src_name, src_dir, rst_dir, cfg)
         except Exception:
-            print "Exception raised while running:"
-            print "%s in %s" % (src_name, src_dir)
-            print '~' * 60
+            print("Exception raised while running:")
+            print("%s in %s" % (src_name, src_dir))
+            print('~' * 60)
             traceback.print_exc()
-            print '~' * 60
+            print('~' * 60)
             continue
 
         link_name = sub_dir.pjoin(src_name)
@@ -354,8 +354,8 @@ def write_example(src_name, src_dir, rst_dir, cfg):
 
     if not thumb_path.exists:
         if cfg.plot2rst_default_thumb is None:
-            print "WARNING: No plots found and default thumbnail not defined."
-            print "Specify 'plot2rst_default_thumb' in Sphinx config file."
+            print("WARNING: No plots found and default thumbnail not defined.")
+            print("Specify 'plot2rst_default_thumb' in Sphinx config file.")
         else:
             shutil.copy(cfg.plot2rst_default_thumb, thumb_path)
 

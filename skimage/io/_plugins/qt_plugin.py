@@ -144,7 +144,7 @@ def _app_show():
     if app and window_manager.has_windows():
         app.exec_()
     else:
-        print 'No images to show.  See `imshow`.'
+        print('No images to show.  See `imshow`.')
 
 
 def imsave(filename, img, format_str=None):
