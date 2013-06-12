@@ -34,7 +34,6 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     Examples
     --------
     >>> from skimage import morphology
-    >>> from scipy import ndimage as nd
     >>> a = np.array([[0, 0, 0, 1, 0],
     ...               [1, 1, 1, 0, 0],
     ...               [1, 1, 1, 0, 1]], bool)
@@ -55,7 +54,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
     if not (ar.dtype == bool or np.issubdtype(ar.dtype, int)):
         raise TypeError("Only bool or integer image types are supported. "
-                         "Got %s." % ar.dtype)
+                        "Got %s." % ar.dtype)
 
     if in_place:
         out = ar

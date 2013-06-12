@@ -28,7 +28,7 @@ pixels based on their spatial closeness and radiometric similarity.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data, color, img_as_float
+from skimage import data, img_as_float
 from skimage.filter import denoise_tv_chambolle, denoise_bilateral
 
 
