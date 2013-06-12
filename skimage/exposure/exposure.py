@@ -338,8 +338,7 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
 
     References
     ----------
-    .. [1] http://bme.med.upatras.gr/improc/matalb_code_toc.htm#12. Adjust Contrast :
-
+    .. [1] http://www.cis.rit.edu/fairchild/PDFs/PAP07.pdf
     """
     _assert_non_negative(image)
     dtype = image.dtype.type
