@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import ndimage
-from ._geometric import (warp, SimilarityTransform, AffineTransform)
+from ._geometric import warp, SimilarityTransform, AffineTransform
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
