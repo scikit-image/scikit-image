@@ -76,8 +76,8 @@ class WindowManager(object):
         try:
             self._windows.remove(win)
         except ValueError:
-            print 'Unable to find referenced window in tracked windows.'
-            print 'Ignoring...'
+            print('Unable to find referenced window in tracked windows.')
+            print('Ignoring...')
         else:
             if len(self._windows) == 0:
                 self._exec_callback()

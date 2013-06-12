@@ -60,7 +60,7 @@ class LineTool(CanvasToolBase):
         if on_enter is None:
             def on_enter(pts):
                 x, y = np.transpose(pts)
-                print "length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2)
+                print("length = %0.2f" % np.sqrt(np.diff(x)**2 + np.diff(y)**2))
         self.callback_on_enter = on_enter
 
         self.connect_event('button_press_event', self.on_mouse_press)
