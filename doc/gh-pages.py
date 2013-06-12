@@ -129,6 +129,6 @@ if __name__ == '__main__':
     finally:
         cd(startdir)
 
-    print()
+    print('')
     print('Now verify the build in: %r' % dest)
     print("If everything looks good, run 'git push' inside doc/gh-pages.")
