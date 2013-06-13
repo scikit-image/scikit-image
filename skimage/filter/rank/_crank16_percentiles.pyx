@@ -178,12 +178,18 @@ cdef inline dtype_t kernel_percentile(Py_ssize_t * histo, float pop,
     cdef float sum = 0.
 
     if pop:
-        for i in range(maxbin):
-            sum += histo[i]
-            if sum >= p0 * pop:
-                break
-
-        return <dtype_t>(i)
+        if p0==0:
+            for i in range(maxbin):
+                sum += histo[i]
+                if sum > (p0 * pop):
+                    break
+            return <dtype_t>(i)
+        else:
+            for i in range(maxbin):
+                sum += histo[i]
+                if sum >= (p0 * pop):
+                    break
+            return <dtype_t>(i)
     else:
         return <dtype_t>(0)
 
@@ -299,7 +305,7 @@ def percentile(cnp.ndarray[dtype_t, ndim=2] image,
                cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
                cnp.ndarray[dtype_t, ndim=2] out=None,
                char shift_x=0, char shift_y=0, int bitdepth=8,
-               float p0=0.):
+               float p0=0., float p1=0.):
     """return p0 percentile
     """
     _core16(kernel_percentile, image, selem, mask, out, shift_x, shift_y,
@@ -323,7 +329,7 @@ def threshold(cnp.ndarray[dtype_t, ndim=2] image,
               cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
               cnp.ndarray[dtype_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0, int bitdepth=8,
-              float p0=0.):
+              float p0=0., float p1=0.):
     """return (maxbin-1) if g > percentile p0
     """
     _core16(kernel_threshold, image, selem, mask, out, shift_x, shift_y,

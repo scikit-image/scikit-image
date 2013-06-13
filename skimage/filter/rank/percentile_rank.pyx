@@ -26,6 +26,7 @@ import numpy as np
 from skimage import img_as_ubyte
 from skimage.filter.rank.generic import find_bitdepth
 from skimage.filter.rank import _crank16_percentiles, _crank8_percentiles
+from skimage.filter.rank import _crank16, _crank8
 
 
 __all__ = ['percentile_autolevel', 'percentile_gradient',
@@ -307,7 +308,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
         The result of the local percentile.
 
     """
-
+    # handle the specific case where p0=0 == local minimum
     return _apply(_crank8_percentiles.percentile,
                   _crank16_percentiles.percentile,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
