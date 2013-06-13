@@ -1,1 +1,1 @@
-from viewers import ImageViewer, CollectionViewer
+from .viewers import ImageViewer, CollectionViewer
