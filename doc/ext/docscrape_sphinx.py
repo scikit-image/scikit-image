@@ -2,6 +2,15 @@ import re, inspect, textwrap, pydoc
 import sphinx
 from docscrape import NumpyDocString, FunctionDoc, ClassDoc
 
+# Python2/3 compatibility
+import sys
+PY2 = sys.version_info[0] == 2
+if PY2:
+    iteritems = lambda d: d.iteritems()
+else:
+    iteritems = lambda d: d.items()
+
+
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
         self.use_plots = config.get('use_plots', False)
@@ -127,7 +136,7 @@ class SphinxDocString(NumpyDocString):
             return out
 
         out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in idx.iteritems():
+        for section, references in iteritems(idx):
             if section == 'default':
                 continue
             elif section == 'refguide':

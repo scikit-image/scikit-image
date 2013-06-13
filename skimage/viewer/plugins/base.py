@@ -7,6 +7,15 @@ from ..qt.QtCore import Qt
 from ..utils import RequiredAttr, init_qtapp
 
 
+# Python2/3 compatibility
+import sys
+PY2 = sys.version_info[0] == 2
+if PY2:
+    iteritems = lambda d: d.iteritems()
+else:
+    iteritems = lambda d: d.items()
+
+
 class Plugin(QtGui.QDialog):
     """Base class for plugins that interact with an ImageViewer.
 
@@ -153,7 +162,7 @@ class Plugin(QtGui.QDialog):
             return
         arguments = [self._get_value(a) for a in self.arguments]
         kwargs = dict([(name, self._get_value(a))
-                       for name, a in self.keyword_arguments.iteritems()])
+                       for name, a in iteritems(self.keyword_arguments)])
         filtered = self.image_filter(*arguments, **kwargs)
         self.display_filtered_image(filtered)
 
