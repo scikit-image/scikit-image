@@ -1,9 +1,13 @@
 __all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
            'push', 'pop']
 
+try:
+    from urllib.request import urlopen
+except ImportError:
+    from urllib2 import urlopen
+
 import os
 import re
-import urllib2
 import tempfile
 from io import BytesIO
 
@@ -132,7 +136,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if is_url(fname):
         _, ext = os.path.splitext(fname)
         with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as f:
-            u = urllib2.urlopen(fname)
+            u = urlopen(fname)
             f.write(u.read())
         img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)
         os.remove(f.name)
