@@ -12,6 +12,14 @@ except ImportError:
 import os.path
 from glob import glob
 
+# Python2/3 compatibility
+import sys
+PY2 = sys.version_info[0] == 2
+if PY2:
+    itervalues = lambda d: d.itervalues()
+else:
+    itervalues = lambda d: d.values()
+
 plugin_store = None
 
 plugin_provides = {}
@@ -174,7 +182,7 @@ def available(loaded=False):
 
     """
     active_plugins = set()
-    for plugin_func in plugin_store.itervalues():
+    for plugin_func in itervalues(plugin_store):
         for plugin, func in plugin_func:
             active_plugins.add(plugin)
 
