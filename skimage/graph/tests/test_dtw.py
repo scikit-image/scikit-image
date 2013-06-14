@@ -3,17 +3,14 @@ from __future__ import division
 from skimage.graph import dtw
 import numpy as np
 
-import time
+def test_identical():
+    vec1 = [5*np.sin(i * 0.1 * np.pi) for i in range(0, 50)]
+    vec2 = [5*np.sin(i * 0.1 * np.pi) for i in range(0, 50)]
 
-N = 1000
-x = np.random.random(N)
-y = np.random.random(N)
+    t = np.array(vec1, np.double)
+    r = np.array(vec2, np.double)
 
-iterations = 100
+    path, distance = dtw(t, r, case=2, start_anchor_slack=0, end_anchor_slack=0)
 
-t0 = time.clock()
-for i in range(iterations):
-    dtw(x, y)
-dt = (time.clock() - t0) / iterations * 1000
-
-print "%.2f milliseconds per iteration (mean)" % dt
+    for edge in path:
+        assert(edge[0] == edge[1])

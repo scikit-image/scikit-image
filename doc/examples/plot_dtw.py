@@ -24,15 +24,15 @@ vec2 = [69, 69, 73, 75, 79, 80, 79, 78, 76, 73, 72, 71, 70, 70, 69, 69, 69, 71,
         73, 75, 76, 76, 76, 76, 76, 75, 73, 71, 70, 70, 71, 73, 75, 80, 80, 80,
         78]
 
-vec1 = [np.sin(i*0.1*np.pi) for i in xrange(0, 50)]
-vec2 = [5*np.sin(i*0.1*np.pi) for i in xrange(0, 50)]
+vec1 = [5*np.sin(i * 0.1 * np.pi) for i in range(0, 50)]
+vec2 = [5*np.sin(i * 0.1 * np.pi) for i in range(0, 50)]
 
 t = np.array(vec1, np.double)
 r = np.array(vec2, np.double)
 
 m = np.zeros((len(t), len(r)))
 
-path, distance = dtw(t, r, case=2, start_anchor_slack=0)
+path, distance = dtw(t, r, case=2, start_anchor_slack=0, end_anchor_slack=0)
 
 for point in path:
     m[point[0], point[1]] = 1
