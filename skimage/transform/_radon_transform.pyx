@@ -192,11 +192,11 @@ def sart_projection_update(cnp.double_t[:, :] image not None,
         Array of same shape as ``image`` containing updates that should be
         added to ``image`` to improve the reconstruction estimate
     """
-    cdef cnp.double_t[:, :] image_update = np.zeros_like(image)
+    cdef cnp.ndarray[cnp.double_t, ndim=2] image_update = np.zeros_like(image)
     cdef cnp.double_t ray_position
     cdef Py_ssize_t i
     for i in range(projection.shape[0]):
         ray_position = i + projection_shift
         bilinear_ray_update(image, image_update, theta, ray_position,
                             projection[i])
-    return np.asarray(image_update)
+    return image_update
