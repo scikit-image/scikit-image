@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 radon.py - Radon and inverse radon transforms
 
