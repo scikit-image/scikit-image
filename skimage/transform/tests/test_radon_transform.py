@@ -298,6 +298,19 @@ def test_radon_iradon_circle():
         yield check_radon_iradon_circle, interpolation, shape, output_size
 
 
+def test_order_angles_golden_ratio():
+    from skimage.transform.radon_transform import order_angles_golden_ratio
+    np.random.seed(1231)
+    lengths = [1, 4, 10, 180]
+    for l in lengths:
+        theta_ordered = np.linspace(0, 180, l, endpoint=False)
+        theta_random = np.random.uniform(0, 180, l)
+        for theta in (theta_random, theta_ordered):
+            indices = [x for x in order_angles_golden_ratio(theta)]
+            # no duplicate indices allowed
+            assert len(indices) == len(set(indices))
+
+
 def test_iradon_sart():
     from skimage.io import imread
     from skimage import data_dir
