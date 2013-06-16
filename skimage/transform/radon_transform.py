@@ -258,31 +258,58 @@ def iradon(radon_image, theta=None, output_size=None,
     return reconstructed * np.pi / (2 * len(th))
 
 
-def _sart_order_angles(theta):
+def order_angles_golden_ratio(theta):
     """
     Order angles to reduce the amount of correlated information
-    in subsequent projections, i.e. make sure subsequent angles
-    are as far away from each other mod 180 degrees as possible.
-    Indices into the ``theta`` array are yielded.
+    in subsequent projections.
+
+    Parameters
+    ----------
+    theta : 1D array of floats
+        Projection angles in degrees. Duplicate angles are not allowed.
+
+    Returns
+    -------
+    indices : 1D array of unsigned integers
+        Indices into ``theta`` such that ``theta[indices]`` gives the
+        approximate golden ratio ordering of the projections.
+
+    Notes
+    -----
+    The method used here is that of the golden ratio introduced
+    by T. Kohler.
+
+    References:
+        -Kohler, T. "A projection access scheme for iterative
+        reconstruction based on the golden section." Nuclear Science
+        Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
+        -Winkelmann, Stefanie, et al. "An optimal radial profile order
+        based on the Golden Ratio for time-resolved MRI."
+        Medical Imaging, IEEE Transactions on 26.1 (2007): 68-76.
     """
-    tau = 3.    # time constant for correlations; 0.1 < tau < 100 works well
-    used_indices = [0]
-    remaining_indices = range(1, len(theta))
-    yield 0
-    while remaining_indices:
-        used = np.array(theta[used_indices])
-        used.shape = (-1, 1)
-        remaining = np.array(theta[remaining_indices])
-        remaining.shape = (1, -1)
-        time = (np.arange(used.shape[0]) + 1)[::-1]
-        time.shape = (-1, 1)
-        difference = used - remaining
-        distance = np.minimum(abs(difference % 180), abs(difference % -180))
-        cost = np.exp(-distance * time / tau).sum(axis=0).squeeze()
-        next_angle_remaining_index = np.argmin(cost)
-        next_angle_index = remaining_indices.pop(next_angle_remaining_index)
-        used_indices.append(next_angle_index)
-        yield next_angle_index
+    interval = 180
+    def angle_distance(a, b):
+        difference = a - b
+        return min(abs(difference % interval), abs(difference % -interval))
+
+    remaining = list(np.argsort(theta))   # indices into theta
+    # yield an arbitrary angle to start things off
+    index = remaining.pop(0)
+    angle = theta[index]
+    yield index
+    # determine subsequent angles using the golden ration method
+    angle_increment = interval * (1 - (np.sqrt(5) - 1) / 2)
+    while remaining:
+        angle = (angle + angle_increment) % interval
+        insert_point = np.searchsorted(theta[remaining], angle)
+        index_below = insert_point - 1
+        index_above = 0 if insert_point == len(remaining) else insert_point
+        distance_below = angle_distance(angle, theta[remaining[index_below]])
+        distance_above = angle_distance(angle, theta[remaining[index_above]])
+        if distance_below < distance_above:
+            yield remaining.pop(index_below)
+        else:
+            yield remaining.pop(index_above)
 
 
 def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
@@ -346,6 +373,9 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         -S Kaczmarz, "Angenäherte auflösung von systemen linearer
         gleichungen", Bulletin International de l’Academie Polonaise des
         Sciences et des Lettres 35 pp 355--357 (1937)
+        -Kohler, T. "A projection access scheme for iterative
+        reconstruction based on the golden section." Nuclear Science
+        Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
         -Kaczmarz' method, Wikipedia,
         http://en.wikipedia.org/wiki/Kaczmarz_method
     """
@@ -376,7 +406,7 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
         clip = (float(clip[0]), float(clip[1]))
     relaxation = float(relaxation)
 
-    for angle_index in _sart_order_angles(theta):
+    for angle_index in order_angles_golden_ratio(theta):
         image_update = sart_projection_update(image, theta[angle_index],
                                               radon_image[:, angle_index],
                                               projection_shifts[angle_index])
