@@ -46,7 +46,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 
      git checkout master
      git pull upstream master
-     git checkout your-branch
+     git checkout transform-speedups
      git rebase master
 
     If any conflicts occur, fix the according files and continue::
@@ -56,7 +56,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 
     Finally, you must push your rebased branch::
 
-     git push -f
+     git push -f origin transform-speedups
 
    (If you are curious, here's a further discussion on
    the `dangers of rebasing <http://tinyurl.com/lll385>`__.  Also
