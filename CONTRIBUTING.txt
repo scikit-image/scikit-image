@@ -9,19 +9,17 @@ Here's the long and short of it:
    <http://github.com/scikit-image/scikit-image>`_ and click the
    "fork" button to create your own copy of the project.
  * Clone the project to your local computer:
-   ``git clone git@github.com:john_doe/scikit-image.git``
- * Add origin and user branches:
-   ``git remote rm origin``
-   ``git remote add origin git@github.com:scikit-image/scikit-image.git``
-   ``git remote add john_doe git@github.com:john_doe/scikit-image.git``
-   Now, ``origin`` refers to the ``scikit-image`` repository and
-   ``john_doe`` (your username) to yours.
+   ``git clone git@github.com:your-username/scikit-image.git``
+ * Add upstream repository:
+   ``git remote add upstream git@github.com:scikit-image/scikit-image.git``
+   Now, ``upstream`` refers to the ``scikit-image`` repository and
+   ``origin`` to your personal forked.
 
 2. Develop your contribution:
 
  * Pull the latest changes from upstream
-   (``git checkout master ; git pull origin master``)
- * Create a branch for the feature you want to work on.  Since the
+   (``git checkout master; git pull upstream master``)
+ * Create a branch for the feature you want to work on. Since the
    branch name will appear in the merge message, use a sensible name
    such as 'transform-speedups':
    ``git checkout -b transform-speedups``
@@ -29,10 +27,10 @@ Here's the long and short of it:
 
 3. To submit your contribution:
 
- * Push your changes back to GitHub:
-   ``git push john_doe transform-speedups``.
- * Go to GitHub.  The new branch will show up with a Pull Request button--click
-   it.
+ * Push your changes back to your fork on GitHub:
+   ``git push origin transform-speedups``.
+ * Go to GitHub. The new branch will show up with a Pull Request button -
+   click it.
  * If you want, post on the `mailing list
    <http://groups.google.com/group/scikit-image>`_ to explain your changes or
    to ask for review.
@@ -43,11 +41,22 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 .. note::
 
-   Do *not* ever merge the main branch into yours.  If GitHub indicates that
+   Do *not* ever merge the main branch into yours. If GitHub indicates that
    the Pull Request can no longer be merged automatically, rebase onto master::
 
-     git fetch origin/master
-     git rebase origin/master
+     git checkout master
+     git pull upstream master
+     git checkout your-branch
+     git rebase master
+
+    If any conflicts occur, fix the according files and continue::
+
+     git add conflict-file1 conflict-file2
+     git rebase --continue
+
+    Finally, you must push your rebased branch::
+
+     git push -f
 
    (If you are curious, here's a further discussion on
    the `dangers of rebasing <http://tinyurl.com/lll385>`__.  Also
