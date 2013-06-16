@@ -288,6 +288,7 @@ def order_angles_golden_ratio(theta):
         Medical Imaging, IEEE Transactions on 26.1 (2007): 68-76.
     """
     interval = 180
+
     def angle_distance(a, b):
         difference = a - b
         return min(abs(difference % interval), abs(difference % -interval))
