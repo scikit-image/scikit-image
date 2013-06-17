@@ -13,7 +13,7 @@ Here's the long and short of it:
  * Add upstream repository:
    ``git remote add upstream git@github.com:scikit-image/scikit-image.git``
    Now, ``upstream`` refers to the ``scikit-image`` repository and
-   ``origin`` to your personal forked.
+   ``origin`` to your personal fork.
 
 2. Develop your contribution:
 
