@@ -32,9 +32,9 @@ def brief(image, keypoints, descriptor_size=32, mode='uniform'):
 
 	if mode == 'uniform':
 		np.random.seed(1)
-		first = np.random.randint(-24, 25, (descriptor_size * 8, 2))
+		first = np.random.randint(-PATCH_SIZE / 2, (PATCH_SIZE / 2) + 1, (descriptor_size * 8, 2))
 		np.random.seed(2)
-		second = np.random.randint(-24, 25, (descriptor_size * 8, 2))
+		second = np.random.randint(-PATCH_SIZE / 2, (PATCH_SIZE / 2) + 1, (descriptor_size * 8, 2))
 	else:
 		#TODO mode='normal'
 		pass
