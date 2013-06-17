@@ -21,9 +21,6 @@ def _remove_border_keypoints(image, keypoints, dist):
 
 def brief(image, keypoints, descriptor_size=32, mode='uniform'):
 
-	if descriptor_size not in (16, 32, 64):
-		raise ValueError('Descriptor size should be either 16, 32 or 64 bytes')
-
 	if np.squeeze(image).ndim == 3:
 		image = rgb2gray(image)
 
