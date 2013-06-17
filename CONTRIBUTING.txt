@@ -41,8 +41,9 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 .. note::
 
-   Do *not* ever merge the main branch into yours. If GitHub indicates that
-   the Pull Request can no longer be merged automatically, rebase onto master::
+   Do *not* ever merge the main branch into yours. If GitHub indicates that the
+   branch of your Pull Request can no longer be merged automatically, rebase
+   onto master::
 
      git checkout master
      git pull upstream master
@@ -53,6 +54,9 @@ For a more detailed discussion, read these :doc:`detailed documents
 
      git add conflict-file1 conflict-file2
      git rebase --continue
+
+    However, you should only rebase your own branches and must generally not
+    rebase any branch which you collaborate on with someone else.
 
     Finally, you must push your rebased branch::
 
