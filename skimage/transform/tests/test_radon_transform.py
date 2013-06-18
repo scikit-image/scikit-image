@@ -37,6 +37,9 @@ def test_radon_center():
     circles = [False, True]
     for shape, circle in itertools.product(shapes, circles):
         yield check_radon_center, shape, circle
+    rectangular_shapes = [(32, 16), (33, 17)]
+    for shape in rectangular_shapes:
+        yield check_radon_center, shape, False
 
 
 def test_radon_iradon():
