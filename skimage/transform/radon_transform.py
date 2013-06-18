@@ -91,25 +91,20 @@ def radon(image, theta=None, circle=False):
     shift0 = np.array([[1, 0, -dw],
                        [0, 1, -dh],
                        [0, 0, 1]])
-
     shift1 = np.array([[1, 0, dw],
                        [0, 1, dh],
                        [0, 0, 1]])
 
     def build_rotation(theta):
         T = np.deg2rad(theta)
-
         R = np.array([[np.cos(T), np.sin(T), 0],
                       [-np.sin(T), np.cos(T), 0],
                       [0, 0, 1]])
-
         return shift1.dot(R).dot(shift0)
 
     for i in range(len(theta)):
         rotated = _warp_fast(padded_image, build_rotation(theta[i]))
-
         out[:, i] = rotated.sum(0)
-
     return out
 
 
@@ -158,27 +153,23 @@ def iradon(radon_image, theta=None, output_size=None,
 
     Notes
     -----
-    It applies the fourier slice theorem to reconstruct an image by
+    It applies the Fourier slice theorem to reconstruct an image by
     multiplying the frequency domain of the filter with the FFT of the
     projection data. This algorithm is called filtered back projection.
 
     """
     if radon_image.ndim != 2:
         raise ValueError('The input image must be 2-D')
-
     if theta is None:
         m, n = radon_image.shape
         theta = np.linspace(0, 180, n, endpoint=False)
     else:
         theta = np.asarray(theta)
-
     if len(theta) != radon_image.shape[1]:
         raise ValueError("The given ``theta`` does not match the number of "
                          "projections in ``radon_image``.")
-
-    th = (np.pi / 180.0) * theta
-    # if output size not specified, estimate from input radon image
     if not output_size:
+        # If output size not specified, estimate from input radon image
         if circle:
             output_size = radon_image.shape[0]
         else:
@@ -187,19 +178,19 @@ def iradon(radon_image, theta=None, output_size=None,
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
 
+    th = (np.pi / 180.0) * theta
     n = radon_image.shape[0]
-
     img = radon_image.copy()
     # resize image to next power of two for fourier analysis
     # speeds up fourier and lessens artifacts
     order = max(64., 2**np.ceil(np.log(2 * n) / np.log(2)))
     # zero pad input image
     img.resize((order, img.shape[1]))
-    # construct the fourier filter
 
+    # Construct the Fourier filter
     f = fftshift(abs(np.mgrid[-1:1:2 / order])).reshape(-1, 1)
     w = 2 * np.pi * f
-    # start from first element to avoid divide by zero
+    # Start from first element to avoid divide by zero
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
@@ -214,14 +205,12 @@ def iradon(radon_image, theta=None, output_size=None,
         f[1:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
-
     filter_ft = np.tile(f, (1, len(theta)))
-
-    # apply filter in fourier domain
+    # Apply filter in Fourier domain
     projection = fft(img, axis=0) * filter_ft
     radon_filtered = np.real(ifft(projection, axis=0))
 
-    # resize filtered image back to original size
+    # Resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
     mid_index = n // 2 + 1
@@ -231,12 +220,11 @@ def iradon(radon_image, theta=None, output_size=None,
     [X, Y] = np.mgrid[0.0:x, 0.0:y]
     xpr = X - int(output_size) // 2
     ypr = Y - int(output_size) // 2
-
     if circle:
         radius = (output_size - 1) // 2
         reconstruction_circle = (xpr**2 + ypr**2) < radius**2
 
-    # reconstruct image by interpolation
+    # Reconstruct image by interpolation
     if interpolation == "nearest":
         for i in range(len(theta)):
             k = np.round(mid_index + ypr * np.cos(th[i]) - xpr * np.sin(th[i]))
@@ -245,7 +233,6 @@ def iradon(radon_image, theta=None, output_size=None,
             if circle:
                 backprojected[~reconstruction_circle] = 0.
             reconstructed += backprojected
-
     elif interpolation == "linear":
         for i in range(len(theta)):
             t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
