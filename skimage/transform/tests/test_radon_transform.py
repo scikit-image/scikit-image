@@ -113,35 +113,31 @@ def test_iradon_center():
         yield check_iradon_center, size, theta, circle
 
 
-def test_radon_iradon():
-    size = 100
+def check_radon_iradon(interpolation_type, filter_type):
     debug = False
-    image = np.tri(size) + np.tri(size)[::-1]
-    for filter_type in ["ramp", "shepp-logan", "cosine", "hamming", "hann"]:
-        reconstructed = iradon(radon(image), filter=filter_type)
+    image = _get_phantom()
+    reconstructed = iradon(radon(image), filter=filter_type,
+                           interpolation=interpolation_type)
+    delta = np.mean(np.abs(image - reconstructed))
+    print('\n\tmean error:', delta)
+    if debug:
+        _debug_plot(image, reconstructed)
+    if filter_type == 'ramp':
+        if interpolation_type == 'linear':
+            allowed_delta = 0.02
+        else:
+            allowed_delta = 0.03
+    else:
+        allowed_delta = 0.05
+    assert delta < allowed_delta
 
-        image = rescale(image)
-        reconstructed = rescale(reconstructed)
-        delta = np.mean(np.abs(image - reconstructed))
 
-        if debug:
-            print(delta)
-            import matplotlib.pyplot as plt
-            f, (ax1, ax2) = plt.subplots(1, 2)
-            ax1.imshow(image, cmap=plt.cm.gray)
-            ax2.imshow(reconstructed, cmap=plt.cm.gray)
-            plt.show()
-
-        assert delta < 0.05
-
-    reconstructed = iradon(radon(image), filter="ramp",
-                           interpolation="nearest")
-    delta = np.mean(abs(image - reconstructed))
-    assert delta < 0.05
-    size = 20
-    image = np.tri(size) + np.tri(size)[::-1]
-    reconstructed = iradon(radon(image), filter="ramp",
-                           interpolation="nearest")
+def test_radon_iradon():
+    filter_types = ["ramp", "shepp-logan", "cosine", "hamming", "hann"]
+    interpolation_types = ["linear", "nearest"]
+    for interpolation_type, filter_type in \
+            itertools.product(interpolation_types, filter_types):
+        yield check_radon_iradon, interpolation_type, filter_type
 
 
 def test_iradon_angles():
