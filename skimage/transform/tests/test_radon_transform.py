@@ -243,6 +243,23 @@ def test_radon_circle():
     assert np.all(relative_error < 3e-3)
 
 
+def check_sinogram_circle_to_square(size):
+    from skimage.transform.radon_transform import _sinogram_circle_to_square
+    image = _random_circle((size, size))
+    theta = np.linspace(0., 180., size, False)
+    sinogram_circle = radon(image, theta, circle=True)
+    sinogram_square = radon(image, theta, circle=False)
+    sinogram_circle_to_square = _sinogram_circle_to_square(sinogram_circle)
+    error = abs(sinogram_square - sinogram_circle_to_square)
+    print(np.mean(error), np.max(error))
+    assert np.allclose(sinogram_square, sinogram_circle_to_square)
+
+
+def test_sinogram_circle_to_square():
+    for size in (50, 51):
+        yield check_sinogram_circle_to_square, size
+
+
 def check_radon_iradon_circle(interpolation, shape, output_size):
     # Forward and inverse radon on synthetic data
     image = _random_circle(shape)
