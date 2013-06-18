@@ -42,6 +42,52 @@ def test_radon_center():
         yield check_radon_center, shape, False
 
 
+def check_iradon_center(size, theta, circle):
+    debug = False
+    # Create a test sinogram corresponding to a single projection
+    # with a single non-zero pixel at the rotation center
+    if circle:
+        sinogram = np.zeros((size, 1), dtype=np.float)
+        sinogram[size // 2, 0] = 1.
+    else:
+        diagonal = int(np.ceil(np.sqrt(2) * size))
+        sinogram = np.zeros((diagonal, 1), dtype=np.float)
+        sinogram[sinogram.shape[0] // 2, 0] = 1.
+    maxpoint = np.unravel_index(np.argmax(sinogram), sinogram.shape)
+    print('shape of generated sinogram', sinogram.shape)
+    print('maximum in generated sinogram', maxpoint)
+    # Compare reconstructions for theta=angle and theta=angle + 180;
+    # these should be exactly equal
+    reconstruction = iradon(sinogram, theta=[theta], circle=circle)
+    reconstruction_opposite = iradon(sinogram, theta=[theta + 180],
+                                     circle=circle)
+    print('rms deviance:',
+          np.sqrt(np.mean((reconstruction_opposite - reconstruction)**2)))
+    if debug:
+        import matplotlib.pyplot as plt
+        imkwargs = dict(cmap='gray', interpolation='nearest')
+        plt.figure()
+        plt.subplot(221)
+        plt.imshow(sinogram, **imkwargs)
+        plt.subplot(222)
+        plt.imshow(reconstruction_opposite - reconstruction, **imkwargs)
+        plt.subplot(223)
+        plt.imshow(reconstruction, **imkwargs)
+        plt.subplot(224)
+        plt.imshow(reconstruction_opposite, **imkwargs)
+        plt.show()
+
+    assert np.allclose(reconstruction, reconstruction_opposite)
+
+
+def test_iradon_center():
+    sizes = [16, 17]
+    thetas = [0, 90]
+    circles = [False, True]
+    for size, theta, circle in itertools.product(sizes, thetas, circles):
+        yield check_iradon_center, size, theta, circle
+
+
 def test_radon_iradon():
     size = 100
     debug = False
