@@ -179,7 +179,7 @@ def iradon(radon_image, theta=None, output_size=None,
     if circle:
         radon_size = int(np.ceil(np.sqrt(2) * radon_image.shape[0]))
         radon_image_padded = np.zeros((radon_size, radon_image.shape[1]))
-        radon_pad = (radon_size - radon_image.shape[0]) // 2
+        radon_pad = int(np.floor((radon_size - radon_image.shape[0] - 1) / 2.))
         radon_image_padded[radon_pad:radon_pad + radon_image.shape[0], :] \
             = radon_image
         radon_image = radon_image_padded
@@ -221,7 +221,7 @@ def iradon(radon_image, theta=None, output_size=None,
     # resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
-    mid_index = np.ceil(n / 2.0)
+    mid_index = n // 2 + 1
 
     x = output_size
     y = output_size
@@ -236,7 +236,7 @@ def iradon(radon_image, theta=None, output_size=None,
     # reconstruct image by interpolation
     if interpolation == "nearest":
         for i in range(len(theta)):
-            k = np.round(mid_index + xpr * np.sin(th[i]) - ypr * np.cos(th[i]))
+            k = np.round(mid_index + ypr * np.cos(th[i]) - xpr * np.sin(th[i]))
             backprojected = radon_filtered[
                 ((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]
             if circle:
@@ -245,7 +245,7 @@ def iradon(radon_image, theta=None, output_size=None,
 
     elif interpolation == "linear":
         for i in range(len(theta)):
-            t = xpr * np.sin(th[i]) - ypr * np.cos(th[i])
+            t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
             a = np.floor(t)
             b = mid_index + a
             b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
