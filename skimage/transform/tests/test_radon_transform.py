@@ -6,6 +6,35 @@ from numpy.testing import *
 from numpy.fft import ifftshift, ifftn
 import itertools
 from skimage.transform import *
+from skimage.io import imread
+from skimage import data_dir
+
+
+__PHANTOM = imread(data_dir + "/phantom.png", as_grey=True)[::2, ::2]
+
+def _get_phantom():
+    return __PHANTOM
+
+
+def _debug_plot(original, result, sinogram=None):
+    from matplotlib import pyplot as plt
+    imkwargs = dict(cmap='gray', interpolation='nearest')
+    if sinogram is None:
+        plt.figure(figsize=(15, 6))
+        sp = 130
+    else:
+        plt.figure(figsize=(11, 11))
+        sp = 221
+        plt.subplot(sp + 0)
+        plt.imshow(sinogram, aspect='auto', **imkwargs)
+    plt.subplot(sp + 1)
+    plt.imshow(original, **imkwargs)
+    plt.subplot(sp + 2)
+    plt.imshow(result, vmin=original.min(), vmax=original.max(), **imkwargs)
+    plt.subplot(sp + 3)
+    plt.imshow(result - original, **imkwargs)
+    plt.colorbar()
+    plt.show()
 
 
 def rescale(x):
