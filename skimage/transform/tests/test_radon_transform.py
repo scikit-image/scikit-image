@@ -168,39 +168,26 @@ def test_iradon_angles():
     assert delta_80 > delta_200
 
 
-def test_radon_minimal():
-    """
-    Test for small images for various angles
-    """
+def check_radon_iradon_minimal(shape, slices):
     debug = False
-    thetas = [np.arange(180)]
-    for theta in thetas:
-        a = np.zeros((3, 3))
-        a[1, 1] = 1
-        p = radon(a, theta)
-        reconstructed = iradon(p, theta)
-        reconstructed /= np.max(reconstructed)
-        if debug:
-            _debug_plot(a, reconstructed)
-        assert np.all(abs(a - reconstructed) < 0.4)
+    theta = np.arange(180)
+    image = np.zeros(shape, dtype=np.float)
+    image[slices] = 1.
+    sinogram = radon(image, theta)
+    reconstructed = iradon(sinogram, theta)
+    print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
+    if debug:
+        _debug_plot(image, reconstructed)
+    assert np.allclose(image, reconstructed, rtol=1e-1, atol=1e-1)
 
-        b = np.zeros((4, 4))
-        b[1:3, 1:3] = 1
-        p = radon(b, theta)
-        reconstructed = iradon(p, theta)
-        reconstructed /= np.max(reconstructed)
-        if debug:
-            _debug_plot(b, reconstructed)
-        assert np.all(abs(b - reconstructed) < 0.4)
 
-        c = np.zeros((5, 5))
-        c[1:3, 1:3] = 1
-        p = radon(c, theta)
-        reconstructed = iradon(p, theta)
-        reconstructed /= np.max(reconstructed)
-        if debug:
-            _debug_plot(c, reconstructed)
-        assert np.all(abs(c - reconstructed) < 0.4)
+def test_radon_iradon_minimal():
+    # Each testcase is a (image shape, slice of image to set to one) tuple
+    testcases = [((3, 3), np.s_[1, 1]),
+                 ((4, 4), np.s_[1:3, 1:3]),
+                 ((5, 5), np.s_[1:3, 1:3])]
+    for shape, slices in testcases:
+        yield check_radon_iradon_minimal, shape, slices
 
 
 def test_reconstruct_with_wrong_angles():
