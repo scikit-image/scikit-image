@@ -98,17 +98,16 @@ def radon(image, theta=None, circle=False):
                        [0, 0, 1]])
 
     def build_rotation(theta):
-        T = -np.deg2rad(theta)
+        T = np.deg2rad(theta)
 
-        R = np.array([[np.cos(T), -np.sin(T), 0],
-                      [np.sin(T), np.cos(T), 0],
+        R = np.array([[np.cos(T), np.sin(T), 0],
+                      [-np.sin(T), np.cos(T), 0],
                       [0, 0, 1]])
 
         return shift1.dot(R).dot(shift0)
 
     for i in range(len(theta)):
-        rotated = _warp_fast(padded_image,
-                             np.linalg.inv(build_rotation(-theta[i])))
+        rotated = _warp_fast(padded_image, build_rotation(theta[i]))
 
         out[:, i] = rotated.sum(0)[::-1]
 
