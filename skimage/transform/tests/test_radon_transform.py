@@ -172,6 +172,7 @@ def test_radon_minimal():
     """
     Test for small images for various angles
     """
+    debug = False
     thetas = [np.arange(180)]
     for theta in thetas:
         a = np.zeros((3, 3))
@@ -179,6 +180,8 @@ def test_radon_minimal():
         p = radon(a, theta)
         reconstructed = iradon(p, theta)
         reconstructed /= np.max(reconstructed)
+        if debug:
+            _debug_plot(a, reconstructed)
         assert np.all(abs(a - reconstructed) < 0.4)
 
         b = np.zeros((4, 4))
@@ -186,6 +189,8 @@ def test_radon_minimal():
         p = radon(b, theta)
         reconstructed = iradon(p, theta)
         reconstructed /= np.max(reconstructed)
+        if debug:
+            _debug_plot(b, reconstructed)
         assert np.all(abs(b - reconstructed) < 0.4)
 
         c = np.zeros((5, 5))
@@ -193,6 +198,8 @@ def test_radon_minimal():
         p = radon(c, theta)
         reconstructed = iradon(p, theta)
         reconstructed /= np.max(reconstructed)
+        if debug:
+            _debug_plot(c, reconstructed)
         assert np.all(abs(c - reconstructed) < 0.4)
 
 
