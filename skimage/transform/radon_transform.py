@@ -74,9 +74,9 @@ def radon(image, theta=None, circle=False):
         out = np.zeros((min(padded_image.shape), len(theta)))
     else:
         height, width = image.shape
-        diagonal = np.sqrt(height**2 + width**2)
-        heightpad = np.ceil(diagonal - height)
-        widthpad = np.ceil(diagonal - width)
+        diagonal = np.sqrt(2) * max(image.shape)
+        heightpad = int(np.ceil(diagonal - height))
+        widthpad = int(np.ceil(diagonal - width))
         padded_image = np.zeros((int(height + heightpad),
                                 int(width + widthpad)))
         y0 = int(np.ceil(heightpad / 2))
