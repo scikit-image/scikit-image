@@ -3,6 +3,7 @@ from __future__ import division
 
 import numpy as np
 from numpy.testing import *
+from numpy.fft import ifftshift, ifftn
 import itertools
 from skimage.transform import *
 
@@ -12,6 +13,30 @@ def rescale(x):
     x -= x.min()
     x /= x.max()
     return x
+
+
+def check_radon_center(shape, circle):
+    # Determine the center of an array as defined by the fft
+    ft_image = np.abs(ifftshift(ifftn(np.ones(shape))))**2
+    fft_center = np.unravel_index(np.argmax(ft_image), shape)
+    print('fft_center =', fft_center)
+    # Create a test image with only a single non-zero pixel at the origin
+    image = np.zeros(shape, dtype=np.float)
+    image[fft_center] = 1.
+    # Calculate the sinogram
+    theta = np.linspace(0., 180., max(shape), endpoint=False)
+    sinogram = radon(image, theta=theta, circle=circle)
+    # The sinogram should be a straight, horizontal line
+    sinogram_max = np.argmax(sinogram, axis=0)
+    print(sinogram_max)
+    assert np.std(sinogram_max) < 1e-6
+
+
+def test_radon_center():
+    shapes = [(16, 16), (17, 17)]
+    circles = [False, True]
+    for shape, circle in itertools.product(shapes, circles):
+        yield check_radon_center, shape, circle
 
 
 def test_radon_iradon():
