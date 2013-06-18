@@ -113,6 +113,14 @@ def radon(image, theta=None, circle=False):
     return out
 
 
+def _sinogram_circle_to_square(sinogram):
+    size = int(np.ceil(np.sqrt(2) * sinogram.shape[0]))
+    sinogram_padded = np.zeros((size, sinogram.shape[1]))
+    pad = int(np.ceil((size - sinogram.shape[0] - 1) / 2))
+    sinogram_padded[pad:pad + sinogram.shape[0], :] = sinogram
+    return sinogram_padded
+
+
 def iradon(radon_image, theta=None, output_size=None,
            filter="ramp", interpolation="linear", circle=False):
     """
@@ -177,12 +185,7 @@ def iradon(radon_image, theta=None, output_size=None,
             output_size = int(np.floor(np.sqrt((radon_image.shape[0])**2
                                                / 2.0)))
     if circle:
-        radon_size = int(np.ceil(np.sqrt(2) * radon_image.shape[0]))
-        radon_image_padded = np.zeros((radon_size, radon_image.shape[1]))
-        radon_pad = int(np.floor((radon_size - radon_image.shape[0] - 1) / 2.))
-        radon_image_padded[radon_pad:radon_pad + radon_image.shape[0], :] \
-            = radon_image
-        radon_image = radon_image_padded
+        radon_image = _sinogram_circle_to_square(radon_image)
 
     n = radon_image.shape[0]
 
