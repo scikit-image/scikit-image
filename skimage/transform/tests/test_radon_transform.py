@@ -214,40 +214,41 @@ def test_radon_circle():
     assert np.all(relative_error < 3e-3)
 
 
+def check_radon_iradon_circle(interpolation, shape, output_size):
+    # Forward and inverse radon on synthetic data
+    image = _random_circle(shape)
+    radius = min(shape) // 2
+    sinogram_rectangle = radon(image, circle=False)
+    reconstruction_rectangle = iradon(sinogram_rectangle,
+                                        output_size=output_size,
+                                        interpolation=interpolation,
+                                        circle=False)
+    sinogram_circle = radon(image, circle=True)
+    reconstruction_circle = iradon(sinogram_circle,
+                                    output_size=output_size,
+                                    interpolation=interpolation,
+                                    circle=True)
+    # Crop rectangular reconstruction to match circle=True reconstruction
+    width = reconstruction_circle.shape[0]
+    excess = int(np.ceil((reconstruction_rectangle.shape[0] - width) / 2))
+    s = np.s_[excess:width + excess, excess:width + excess]
+    reconstruction_rectangle = reconstruction_rectangle[s]
+    # Find the reconstruction circle, set reconstruction to zero outside
+    c0, c1 = np.ogrid[0:width, 0:width]
+    r = np.sqrt((c0 - width // 2)**2 + (c1 - width // 2)**2)
+    reconstruction_rectangle[r >= radius] = 0.
+    print(reconstruction_circle.shape)
+    print(reconstruction_rectangle.shape)
+    np.allclose(reconstruction_rectangle, reconstruction_circle)
+
+
 def test_radon_iradon_circle():
     shape = (61, 79)
-    radius = min(shape) // 2
-    image = _random_circle(shape)
     interpolations = ('nearest', 'linear')
     output_sizes = (None, min(shape), max(shape), 97)
-
     for interpolation, output_size in itertools.product(interpolations,
                                                         output_sizes):
-        print('interpolation =', interpolation)
-        print('output_size =', output_size)
-        # Forward and inverse radon on synthetic data
-        sinogram_rectangle = radon(image, circle=False)
-        reconstruction_rectangle = iradon(sinogram_rectangle,
-                                          output_size=output_size,
-                                          interpolation=interpolation,
-                                          circle=False)
-        sinogram_circle = radon(image, circle=True)
-        reconstruction_circle = iradon(sinogram_circle,
-                                       output_size=output_size,
-                                       interpolation=interpolation,
-                                       circle=True)
-        # Crop rectangular reconstruction to match circle=True reconstruction
-        width = reconstruction_circle.shape[0]
-        excess = int(np.ceil((reconstruction_rectangle.shape[0] - width) / 2))
-        s = np.s_[excess:width + excess, excess:width + excess]
-        reconstruction_rectangle = reconstruction_rectangle[s]
-        # Find the reconstruction circle, set reconstruction to zero outside
-        c0, c1 = np.ogrid[0:width, 0:width]
-        r = np.sqrt((c0 - width // 2)**2 + (c1 - width // 2)**2)
-        reconstruction_rectangle[r >= radius] = 0.
-        print(reconstruction_circle.shape)
-        print(reconstruction_rectangle.shape)
-        np.allclose(reconstruction_rectangle, reconstruction_circle)
+        yield check_radon_iradon_circle, interpolation, shape, output_size
 
 
 if __name__ == "__main__":
