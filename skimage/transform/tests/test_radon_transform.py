@@ -16,13 +16,9 @@ def rescale(x):
 
 
 def check_radon_center(shape, circle):
-    # Determine the center of an array as defined by the fft
-    ft_image = np.abs(ifftshift(ifftn(np.ones(shape))))**2
-    fft_center = np.unravel_index(np.argmax(ft_image), shape)
-    print('fft_center =', fft_center)
     # Create a test image with only a single non-zero pixel at the origin
     image = np.zeros(shape, dtype=np.float)
-    image[fft_center] = 1.
+    image[(shape[0] // 2, shape[1] // 2)] = 1.
     # Calculate the sinogram
     theta = np.linspace(0., 180., max(shape), endpoint=False)
     sinogram = radon(image, theta=theta, circle=circle)

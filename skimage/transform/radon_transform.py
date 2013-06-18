@@ -79,11 +79,10 @@ def radon(image, theta=None, circle=False):
         widthpad = int(np.ceil(diagonal - width))
         padded_image = np.zeros((int(height + heightpad),
                                 int(width + widthpad)))
-        y0 = int(np.ceil(heightpad / 2))
-        y1 = int((np.ceil(heightpad / 2) + height))
-        x0 = int((np.ceil(widthpad / 2)))
-        x1 = int((np.ceil(widthpad / 2) + width))
-
+        y0 = heightpad // 2
+        y1 = y0 + height
+        x0 = widthpad // 2
+        x1 = x0 + width
         padded_image[y0:y1, x0:x1] = image
         out = np.zeros((max(padded_image.shape), len(theta)))
 
@@ -109,7 +108,7 @@ def radon(image, theta=None, circle=False):
     for i in range(len(theta)):
         rotated = _warp_fast(padded_image, build_rotation(theta[i]))
 
-        out[:, i] = rotated.sum(0)[::-1]
+        out[:, i] = rotated.sum(0)
 
     return out
 
