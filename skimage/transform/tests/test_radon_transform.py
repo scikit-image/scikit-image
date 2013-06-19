@@ -177,17 +177,20 @@ def check_radon_iradon_minimal(shape, slices):
     reconstructed = iradon(sinogram, theta)
     print('\n\tMaximum deviation:', np.max(np.abs(image - reconstructed)))
     if debug:
-        _debug_plot(image, reconstructed)
-    assert np.allclose(image, reconstructed, rtol=1e-1, atol=1e-1)
+        _debug_plot(image, reconstructed, sinogram)
+    if image.sum() == 1:
+        assert (np.unravel_index(np.argmax(reconstructed), image.shape)
+                == np.unravel_index(np.argmax(image), image.shape))
 
 
 def test_radon_iradon_minimal():
-    # Each testcase is a (image shape, slice of image to set to one) tuple
-    testcases = [((3, 3), np.s_[1, 1]),
-                 ((4, 4), np.s_[1:3, 1:3]),
-                 ((5, 5), np.s_[1:3, 1:3])]
-    for shape, slices in testcases:
-        yield check_radon_iradon_minimal, shape, slices
+    shapes = [(3, 3), (4, 4), (5, 5)]
+    for shape in shapes:
+        c0, c1 = shape[0] // 2, shape[1] // 2
+        coordinates = itertools.product((c0 - 1, c0, c0 + 1),
+                                        (c1 - 1, c1, c1 + 1))
+        for coordinate in coordinates:
+            yield check_radon_iradon_minimal, shape, coordinate
 
 
 def test_reconstruct_with_wrong_angles():
