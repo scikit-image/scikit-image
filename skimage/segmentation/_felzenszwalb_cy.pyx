@@ -25,12 +25,12 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8, Py_ssize_t min_size=20)
     ----------
     image: ndarray
         Input image.
-    scale: float
+    scale: float, optional (default 1)
         Sets the obervation level. Higher means larger clusters.
-    sigma: float
+    sigma: float, optional (default 0.8)
         Width of Gaussian smoothing kernel used in preprocessing.
         Larger sigma gives smother segment boundaries.
-    min_size: int
+    min_size: int, optional (default 20)
         Minimum component size. Enforced using postprocessing.
 
     Returns

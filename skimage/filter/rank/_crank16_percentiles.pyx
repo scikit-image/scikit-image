@@ -103,7 +103,7 @@ cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_mean_substraction(Py_ssize_t * histo,
+cdef inline dtype_t kernel_mean_subtraction(Py_ssize_t * histo,
                                              float pop,
                                              dtype_t g,
                                              Py_ssize_t bitdepth,
@@ -269,7 +269,7 @@ def mean(cnp.ndarray[dtype_t, ndim=2] image,
             bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def mean_substraction(cnp.ndarray[dtype_t, ndim=2] image,
+def mean_subtraction(cnp.ndarray[dtype_t, ndim=2] image,
                       cnp.ndarray[cnp.uint8_t, ndim=2] selem,
                       cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
                       cnp.ndarray[dtype_t, ndim=2] out=None,
@@ -278,7 +278,7 @@ def mean_substraction(cnp.ndarray[dtype_t, ndim=2] image,
     """return original - mean between [p0 and p1] percentiles *.5 +127
     """
     _core16(
-        kernel_mean_substraction, image, selem, mask, out, shift_x, shift_y,
+        kernel_mean_subtraction, image, selem, mask, out, shift_x, shift_y,
         bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
@@ -299,11 +299,11 @@ def percentile(cnp.ndarray[dtype_t, ndim=2] image,
                cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
                cnp.ndarray[dtype_t, ndim=2] out=None,
                char shift_x=0, char shift_y=0, int bitdepth=8,
-               float p0=0., float p1=0.):
+               float p0=0.):
     """return p0 percentile
     """
     _core16(kernel_percentile, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, .0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
 def pop(cnp.ndarray[dtype_t, ndim=2] image,
@@ -323,8 +323,8 @@ def threshold(cnp.ndarray[dtype_t, ndim=2] image,
               cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
               cnp.ndarray[dtype_t, ndim=2] out=None,
               char shift_x=0, char shift_y=0, int bitdepth=8,
-              float p0=0., float p1=0.):
+              float p0=0.):
     """return (maxbin-1) if g > percentile p0
     """
     _core16(kernel_threshold, image, selem, mask, out, shift_x, shift_y,
-            bitdepth, p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
+            bitdepth, p0, 0., <Py_ssize_t>0, <Py_ssize_t>0)

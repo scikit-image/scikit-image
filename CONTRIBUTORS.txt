@@ -131,11 +131,15 @@
   Dense DAISY feature description, circle perimeter drawing.
 
 - François Boulogne
-  Andres Method for circle perimeter, ellipse perimeter drawing.
+  Drawing: Andres Method for circle perimeter, ellipse perimeter drawing, Bezier curve.
   Circular Hough Transform
+  Various fixes
 
 - Thouis Jones
   Vectorized operators for arrays of 16-bit ints.
 
 - Xavier Moles Lopez
   Color separation (color deconvolution) for several stainings.
+
+- Jostein Bø Fløystad
+  Reconstruction circle mode for Radon transform

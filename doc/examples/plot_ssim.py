@@ -24,7 +24,7 @@ but with very different mean structural similarity indices.
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import data, color, io, exposure, img_as_float
+from skimage import data, img_as_float
 from skimage.measure import structural_similarity as ssim
 
 
@@ -33,6 +33,7 @@ rows, cols = img.shape
 
 noise = np.ones_like(img) * 0.2 * (img.max() - img.min())
 noise[np.random.random(size=noise.shape) > 0.5] *= -1
+
 
 def mse(x, y):
     return np.linalg.norm(x - y)

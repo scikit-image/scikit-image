@@ -23,7 +23,7 @@ from skimage.filter.rank.generic import find_bitdepth
 
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
-           'meansubstraction', 'median', 'minimum', 'modal', 'morph_contr_enh',
+           'meansubtraction', 'median', 'minimum', 'modal', 'morph_contr_enh',
            'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
 
 
@@ -298,9 +298,9 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
-def meansubstraction(image, selem, out=None, mask=None, shift_x=False,
+def meansubtraction(image, selem, out=None, mask=None, shift_x=False,
                      shift_y=False):
-    """Return image substracted from its local mean.
+    """Return image subtracted from its local mean.
 
     Parameters
     ----------
@@ -323,11 +323,11 @@ def meansubstraction(image, selem, out=None, mask=None, shift_x=False,
     Returns
     -------
     out : uint8 array or uint16 array (same as input image)
-        The result of the local meansubstraction.
+        The result of the local meansubtraction.
 
     """
 
-    return _apply(_crank8.meansubstraction, _crank16.meansubstraction, image,
+    return _apply(_crank8.meansubtraction, _crank16.meansubtraction, image,
                   selem, out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 

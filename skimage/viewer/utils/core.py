@@ -2,22 +2,24 @@ import warnings
 
 import numpy as np
 
+from ..qt import qt_api
+
 try:
     import matplotlib as mpl
     from matplotlib.figure import Figure
     from matplotlib import _pylab_helpers
     from matplotlib.colors import LinearSegmentedColormap
-    from matplotlib.backends.backend_qt4 import FigureManagerQT
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+    if qt_api is None:
+        raise ImportError
+    else:
+        from matplotlib.backends.backend_qt4 import FigureManagerQT
+        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 except ImportError:
     FigureCanvasQTAgg = object  # hack to prevent nosetest and autodoc errors
     LinearSegmentedColormap = object
     print("Could not import matplotlib -- skimage.viewer not available.")
 
-try:
-    from PyQt4 import QtGui
-except ImportError:
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',

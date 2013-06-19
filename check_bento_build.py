@@ -62,12 +62,12 @@ def remove_common_extensions(cy_bento, cy_setup):
 
 def print_results(cy_bento, cy_setup):
     def info(text):
-        print
+        print('')
         print(text)
         print('-' * len(text))
 
     if not (cy_bento or cy_setup):
-        print "bento.info and setup.py files match."
+        print("bento.info and setup.py files match.")
 
     if cy_bento:
         info("Extensions found in 'bento.info' but not in any 'setup.py:")
@@ -80,8 +80,8 @@ def print_results(cy_bento, cy_setup):
         info("Consider adding the following to the 'bento.info' Library:")
         for dir_path in cy_setup:
             module_path = dir_path.replace('/', '.')
-            print BENTO_TEMPLATE.format(module_path=module_path,
-                                        dir_path=dir_path)
+            print(BENTO_TEMPLATE.format(module_path=module_path,
+                                        dir_path=dir_path))
 
 
 if __name__ == '__main__':

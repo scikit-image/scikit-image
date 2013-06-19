@@ -98,7 +98,7 @@ class MultiImage(object):
     >>> len(img)
     2
     >>> for frame in img:
-    ...     print frame.shape
+    ...     print(frame.shape)
     (15, 10)
     (15, 10)
 

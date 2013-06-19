@@ -24,7 +24,7 @@ Contributing examples to the gallery can be done on github (see
 Search field
 ------------
 
-The ``quick search`` field located in the sidebar of the html
+The ``quick search`` field located in the navigation bar of the html
 documentation can be used to search for specific keywords (segmentation,
 rescaling, denoising, etc.).
 

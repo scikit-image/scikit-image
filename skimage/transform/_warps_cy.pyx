@@ -35,8 +35,8 @@ cdef inline void _matrix_transform(double x, double y, double* H, double *x_,
     y_[0] = yy / zz
 
 
-def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None, int order=1,
-               mode='constant', double cval=0):
+def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
+               int order=1, mode='constant', double cval=0):
     """Projective transformation (homography).
 
     Perform a projective transformation (homography) of a
@@ -67,17 +67,17 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None, int order=1,
         Input image.
     H : array of shape ``(3, 3)``
         Transformation matrix H that defines the homography.
-    output_shape : tuple (rows, cols)
-        Shape of the output image generated.
-    order : {0, 1}
+    output_shape : tuple (rows, cols), optional
+        Shape of the output image generated (default None).
+    order : {0, 1}, optional
         Order of interpolation::
         * 0: Nearest-neighbour interpolation.
         * 1: Bilinear interpolation (default).
-        * 2: Biquadratic interpolation (default).
+        * 2: Biquadratic interpolation.
         * 3: Bicubic interpolation.
-    mode : {'constant', 'reflect', 'wrap'}
-        How to handle values outside the image borders.
-    cval : string
+    mode : {'constant', 'reflect', 'wrap', 'nearest'}, optional
+        How to handle values outside the image borders (default is constant).
+    cval : string, optional (default 0)
         Used in conjunction with mode 'C' (constant), the value
         outside the image boundaries.
 
