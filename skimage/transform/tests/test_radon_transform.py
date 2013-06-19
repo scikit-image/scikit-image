@@ -2,10 +2,9 @@ from __future__ import print_function
 from __future__ import division
 
 import numpy as np
-from numpy.testing import *
-from numpy.fft import ifftshift, ifftn
+from numpy.testing import assert_raises
 import itertools
-from skimage.transform import *
+from skimage.transform import radon, iradon
 from skimage.io import imread
 from skimage import data_dir
 
