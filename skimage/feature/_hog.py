@@ -114,6 +114,7 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     n_cellsx = int(np.floor(sx // cx))  # number of cells in x
     n_cellsy = int(np.floor(sy // cy))  # number of cells in y
 
+    # compute orientations integral images
     orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
 
     _hoghistogram.HogHistograms(gx, gy, cx, cy, sx, sy, n_cellsx, n_cellsy, visualise, orientations, 
