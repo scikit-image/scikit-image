@@ -2,7 +2,7 @@ import numpy as np
 from scipy import sqrt, pi, arctan2, cos, sin
 from scipy.ndimage import uniform_filter
 from .._shared.utils import assert_nD
-
+import _hoghistogram
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
         cells_per_block=(3, 3), visualise=False, normalise=False):
@@ -114,24 +114,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     n_cellsx = int(np.floor(sx // cx))  # number of cells in x
     n_cellsy = int(np.floor(sy // cy))  # number of cells in y
 
-    # compute orientations integral images
     orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
-    subsample = np.index_exp[cy // 2:cy * n_cellsy:cy,
-                             cx // 2:cx * n_cellsx:cx]
-    for i in range(orientations):
-        # create new integral image for this orientation
-        # isolate orientations in this range
 
-        temp_ori = np.where(orientation < 180.0 / orientations * (i + 1),
-                            orientation, -1)
-        temp_ori = np.where(orientation >= 180.0 / orientations * i,
-                            temp_ori, -1)
-        # select magnitudes for those orientations
-        cond2 = temp_ori > -1
-        temp_mag = np.where(cond2, magnitude, 0)
-
-        temp_filt = uniform_filter(temp_mag, size=(cy, cx))
-        orientation_histogram[:, :, i] = temp_filt[subsample]
+    _hoghistogram.HogHistograms(gx, gy, cx, cy, sx, sy, n_cellsx, n_cellsy, visualise, orientations, 
+        orientation_histogram)
 
     # now for each cell, compute the histogram
     hog_image = None
