@@ -11,6 +11,7 @@ from skimage import data_dir
 
 __PHANTOM = imread(data_dir + "/phantom.png", as_grey=True)[::2, ::2]
 
+
 def _get_phantom():
     return __PHANTOM
 
@@ -264,14 +265,14 @@ def check_radon_iradon_circle(interpolation, shape, output_size):
     radius = min(shape) // 2
     sinogram_rectangle = radon(image, circle=False)
     reconstruction_rectangle = iradon(sinogram_rectangle,
-                                        output_size=output_size,
-                                        interpolation=interpolation,
-                                        circle=False)
+                                      output_size=output_size,
+                                      interpolation=interpolation,
+                                      circle=False)
     sinogram_circle = radon(image, circle=True)
     reconstruction_circle = iradon(sinogram_circle,
-                                    output_size=output_size,
-                                    interpolation=interpolation,
-                                    circle=True)
+                                   output_size=output_size,
+                                   interpolation=interpolation,
+                                   circle=True)
     # Crop rectangular reconstruction to match circle=True reconstruction
     width = reconstruction_circle.shape[0]
     excess = int(np.ceil((reconstruction_rectangle.shape[0] - width) / 2))
