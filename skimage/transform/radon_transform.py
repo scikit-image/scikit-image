@@ -215,7 +215,10 @@ def iradon(radon_image, theta=None, output_size=None,
     # Resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
-    mid_index = n // 2 + 1
+    # Determine the center of the projections (= center of sinogram)
+    circle_size = int(np.floor(radon_image.shape[0] / np.sqrt(2)))
+    square_size = radon_image.shape[0]
+    mid_index = (square_size - circle_size) // 2 + circle_size // 2 + 1
 
     x = output_size
     y = output_size
