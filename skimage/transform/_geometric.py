@@ -581,6 +581,11 @@ class SimilarityTransform(ProjectiveTransform):
     def translation(self):
         return self._matrix[0:2, 2]
 
+    def __str__(self):
+        return "[SimTf[t:%03.3f,%03.3f r:%03.3f s:%03.3f]" % (self.translation[0], self.translation[1], self.rotation, self.scale)
+
+
+
 
 class TranslationalTransform(ProjectiveTransform):
     """2D transformation of the form
@@ -609,12 +614,8 @@ class TranslationalTransform(ProjectiveTransform):
             self._matrix[0:2, 2] = [x, y]
 
     def estimate(self, src, dst):
-        """Set the transformation matrix with the explicit parameters.
-
-        You can determine the over-, well- and under-determined parameters
-        with the total least-squares method.
-
-        Number of source and destination coordinates must match.
+        """Set the transformation matrix given source and destination
+        parameters.
 
         The transformation is defined as::
 
@@ -648,6 +649,109 @@ class TranslationalTransform(ProjectiveTransform):
     @property
     def translation(self):
         return self._matrix[0:2, 2]
+
+    def __str__(self):
+        return "[TransTf[%03.3f,%03.3f]" % (self.translation[0], self.translation[1])
+
+
+class EuclideanTransform(ProjectiveTransform):
+    """2D transformation of the form
+
+        X = x*cos(rotation) - y*sin(rotation) + tx
+
+        Y = x*sin(rotation) + y*cos(rotation) + ty
+
+    where ``m`` is a zoom factor and the homogeneous transformation matrix is::
+
+        [[cos(theta) -sin(theta)  tx]
+         [sin(theta)  cos(theta)  ty]
+         [0           0            1]]
+
+    Parameters
+    ----------
+    matrix : (3, 3) array, optional
+        Homogeneous transformation matrix.
+    rotation : float, optional
+        Rotation angle in counter-clockwise direction as radians.
+    translation : (tx, ty) as array, list or tuple, optional
+        x, y translation parameters."""
+    def __init__(self, translation=None, rotation=None, matrix=None):
+        params = any(param is not None
+                     for param in (rotation, translation))
+
+        if params and matrix is not None:
+            raise ValueError("You cannot specify the transformation matrix and "
+                             "the implicit parameters at the same time.")
+        elif matrix is not None:
+            if matrix.shape != (3, 3):
+                raise ValueError("Invalid shape of transformation matrix.")
+            self._matrix = matrix
+        elif params:
+            if rotation is None:
+                rotation = 0
+            if translation is None:
+                translation = (0, 0)
+
+            self._matrix = np.array([
+                [math.cos(rotation), - math.sin(rotation), 0],
+                [math.sin(rotation),   math.cos(rotation), 0],
+                [                 0,                    0, 1]
+            ])
+            self._matrix[0:2, 2] = translation
+        else:
+            # default to an identity transform
+            self._matrix = np.eye(3)
+
+    def estimate(self, src, dst):
+        """Using method from Simon Prince's boko (equations 15.23 - 15.26)
+
+        http://computervisionmodels.blogspot.co.uk/"""
+        if src.shape != dst.shape:
+            raise ValueError('src and dst must be same shape')
+        if src.shape[1] != 2:
+            raise ValueError('src must be Nx2 matrix')
+
+        # Simon Prince does everything with column vectors, follow his lead
+        src = src.T
+        dst = dst.T
+
+        src_mean = src.mean(axis=1).reshape(2, 1)
+        dst_mean = dst.mean(axis=1).reshape(2, 1)
+
+        # Need the transpose so that each point is stored as a column, so
+        # we want to solve centred_dst = rot_matrix * centred_src
+        centred_src = src - src_mean
+        centred_dst = dst - dst_mean
+
+        # See Simon Prince's book, appendix C.7.3
+        u, _, v = np.linalg.svd(np.dot(centred_dst, centred_src.T))
+
+        rot_mtx = np.dot(v, u.T)
+
+        # Prince equation 15.24
+        translation = dst_mean - np.dot(rot_mtx, src_mean)
+
+        # print "rot_mtx: ", rot_mtx
+        # print "translation: ", translation
+
+        # import ipdb; ipdb.set_trace()
+
+        self._matrix = np.vstack([np.hstack([rot_mtx, translation]),
+                                  [0, 0, 1]])
+
+        # print "self._matrix: ", self._matrix
+
+    @property
+    def rotation(self):
+        # Top left corner of matrix should be cos(rotation angle)
+        return np.arccos(self._matrix[0, 0])
+
+    @property
+    def translation(self):
+        return self._matrix[0:2, 2]
+
+    def __str__(self):
+        return "[EucTf[t:%03.3f,%03.3f r:%03.3f]" % (self.translation[0], self.translation[1], self.rotation)
 
 
 class PolynomialTransform(GeometricTransform):
@@ -786,12 +890,14 @@ class PolynomialTransform(GeometricTransform):
 TRANSFORMS = {
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
+    'euclid': EuclideanTransform,
     'translation': TranslationalTransform,
     'piecewise-affine': PiecewiseAffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
 }
 HOMOGRAPHY_TRANSFORMS = (
+    EuclideanTransform,
     TranslationalTransform,
     SimilarityTransform,
     AffineTransform,
