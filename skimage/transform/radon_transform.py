@@ -72,6 +72,8 @@ def radon(image, theta=None, circle=False):
         slices = tuple(slices)
         padded_image = image[slices]
         out = np.zeros((min(padded_image.shape), len(theta)))
+        dh = padded_image.shape[0] // 2
+        dw = padded_image.shape[1] // 2
     else:
         height, width = image.shape
         diagonal = np.sqrt(2) * max(image.shape)
@@ -85,9 +87,9 @@ def radon(image, theta=None, circle=False):
         x1 = x0 + width
         padded_image[y0:y1, x0:x1] = image
         out = np.zeros((max(padded_image.shape), len(theta)))
+        dh = y0 + height // 2
+        dw = x0 + width // 2
 
-    h, w = padded_image.shape
-    dh, dw = h // 2, w // 2
     shift0 = np.array([[1, 0, -dw],
                        [0, 1, -dh],
                        [0, 0, 1]])
@@ -111,7 +113,7 @@ def radon(image, theta=None, circle=False):
 def _sinogram_circle_to_square(sinogram):
     size = int(np.ceil(np.sqrt(2) * sinogram.shape[0]))
     sinogram_padded = np.zeros((size, sinogram.shape[1]))
-    pad = int(np.ceil((size - sinogram.shape[0] - 1) / 2))
+    pad = (size - sinogram.shape[0]) // 2
     sinogram_padded[pad:pad + sinogram.shape[0], :] = sinogram
     return sinogram_padded
 
