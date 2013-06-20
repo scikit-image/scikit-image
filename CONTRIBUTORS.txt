@@ -143,3 +143,6 @@
 
 - Jostein Bø Fløystad
   Reconstruction circle mode for Radon transform
+
+- Michael Hansen
+  novice submodule
