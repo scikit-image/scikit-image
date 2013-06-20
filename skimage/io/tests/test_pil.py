@@ -55,7 +55,6 @@ def test_imread_palette():
 
 @skipif(not PIL_available)
 def test_palette_is_gray():
-    from PIL import Image
     gray = Image.open(os.path.join(data_dir, 'palette_gray.png'))
     assert _palette_is_grayscale(gray)
     color = Image.open(os.path.join(data_dir, 'palette_color.png'))
