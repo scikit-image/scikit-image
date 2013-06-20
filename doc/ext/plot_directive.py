@@ -132,13 +132,6 @@ except ImportError:
     def format_template(template, **kw):
         return jinja.from_string(template, **kw)
 
-# Python2/3 compatibility
-import sys
-PY2 = sys.version_info[0] == 2
-if PY2:
-    iteritems = lambda d: d.iteritems()
-else:
-    iteritems = lambda d: d.items()
 
 import matplotlib
 import matplotlib.cbook as cbook
@@ -242,7 +235,7 @@ def mark_plot_labels(app, document):
     the "htmlonly" (or "latexonly") node to the actual figure node
     itself.
     """
-    for name, explicit in iteritems(document.nametypes):
+    for name, explicit in document.nametypes.items():
         if not explicit:
             continue
         labelid = document.nameids[name]

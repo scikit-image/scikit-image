@@ -24,13 +24,6 @@ from skimage.filter import sobel
 
 import scipy_logo
 
-# Python2/3 compatibility
-PY2 = sys.version_info[0] == 2
-if PY2:
-    itervalues = lambda d: d.itervalues()
-else:
-    itervalues = lambda d: d.values()
-
 # Utility functions
 # =================
 
@@ -55,7 +48,7 @@ def prepare_axes(ax):
     plt.sca(ax)
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
-    for spine in itervalues(ax.spines):
+    for spine in ax.spines.values():
         spine.set_visible(False)
 
 

@@ -21,13 +21,6 @@ except ImportError:
 
 from ..qt import QtGui
 
-# Python2/3 compatibility
-import sys
-PY2 = sys.version_info[0] == 2
-if PY2:
-    iteritems = lambda d: d.iteritems()
-else:
-    iteritems = lambda d: d.items()
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
            'LinearColormap', 'ClearColormap', 'FigureCanvas', 'new_plot']
@@ -88,7 +81,7 @@ class LinearColormap(LinearSegmentedColormap):
     """
     def __init__(self, name, segmented_data, **kwargs):
         segmented_data = dict((key, [(x, y, y) for x, y in value])
-                              for key, value in iteritems(segmented_data))
+                              for key, value in segmented_data.items())
         LinearSegmentedColormap.__init__(self, name, segmented_data, **kwargs)
 
 

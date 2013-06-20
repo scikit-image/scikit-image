@@ -9,14 +9,6 @@ import pydoc
 from StringIO import StringIO
 from warnings import warn
 
-# Python2/3 compatibility
-import sys
-PY2 = sys.version_info[0] == 2
-if PY2:
-    iteritems = lambda d: d.iteritems()
-else:
-    iteritems = lambda d: d.items()
-
 
 class Reader(object):
     """A line-based string reader.
@@ -378,7 +370,7 @@ class NumpyDocString(object):
         idx = self['index']
         out = []
         out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in iteritems(idx):
+        for section, references in idx.items():
             if section == 'default':
                 continue
             out += ['   :%s: %s' % (section, ', '.join(references))]
