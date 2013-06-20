@@ -81,7 +81,7 @@ class LinearColormap(LinearSegmentedColormap):
     """
     def __init__(self, name, segmented_data, **kwargs):
         segmented_data = dict((key, [(x, y, y) for x, y in value])
-                              for key, value in segmented_data.iteritems())
+                              for key, value in segmented_data.items())
         LinearSegmentedColormap.__init__(self, name, segmented_data, **kwargs)
 
 

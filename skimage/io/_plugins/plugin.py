@@ -12,6 +12,7 @@ except ImportError:
 import os.path
 from glob import glob
 
+
 plugin_store = None
 
 plugin_provides = {}
@@ -174,7 +175,7 @@ def available(loaded=False):
 
     """
     active_plugins = set()
-    for plugin_func in plugin_store.itervalues():
+    for plugin_func in plugin_store.values():
         for plugin, func in plugin_func:
             active_plugins.add(plugin)
 
