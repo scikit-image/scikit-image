@@ -23,7 +23,8 @@ __all__ = ['load',
            'horse',
            'clock',
            'immunohistochemistry',
-           'chelsea']
+           'chelsea',
+           'elephant']
 
 
 def load(f):
@@ -184,3 +185,15 @@ def chelsea():
 
     """
     return load("chelsea.png")
+
+def elephant():
+    """Cartoon elephant.
+
+    Sample image used in the novice submodule.
+
+    Notes
+    -----
+    No copyright restrictions. Released into the public domain by the artist (Michael Hansen)
+
+    """
+    return load("elephant.png")
