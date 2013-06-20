@@ -1,5 +1,7 @@
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_raises,
+                           assert_array_equal,
+                           )
 
 from skimage.measure import find_contours
 

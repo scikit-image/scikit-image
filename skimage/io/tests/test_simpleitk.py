@@ -1,6 +1,5 @@
 import os.path
 import numpy as np
-from numpy.testing import *
 from numpy.testing.decorators import skipif
 
 from tempfile import NamedTemporaryFile
@@ -90,4 +89,5 @@ class TestSave:
                     yield self.roundtrip, dtype, x
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()
