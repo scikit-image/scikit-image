@@ -132,6 +132,7 @@ except ImportError:
     def format_template(template, **kw):
         return jinja.from_string(template, **kw)
 
+
 import matplotlib
 import matplotlib.cbook as cbook
 matplotlib.use('Agg')
@@ -234,7 +235,7 @@ def mark_plot_labels(app, document):
     the "htmlonly" (or "latexonly") node to the actual figure node
     itself.
     """
-    for name, explicit in document.nametypes.iteritems():
+    for name, explicit in document.nametypes.items():
         if not explicit:
             continue
         labelid = document.nameids[name]

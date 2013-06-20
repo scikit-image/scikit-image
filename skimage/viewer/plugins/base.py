@@ -153,7 +153,7 @@ class Plugin(QtGui.QDialog):
             return
         arguments = [self._get_value(a) for a in self.arguments]
         kwargs = dict([(name, self._get_value(a))
-                       for name, a in self.keyword_arguments.iteritems()])
+                       for name, a in self.keyword_arguments.items()])
         filtered = self.image_filter(*arguments, **kwargs)
         self.display_filtered_image(filtered)
 

@@ -9,6 +9,7 @@ import pydoc
 from StringIO import StringIO
 from warnings import warn
 
+
 class Reader(object):
     """A line-based string reader.
 
@@ -369,7 +370,7 @@ class NumpyDocString(object):
         idx = self['index']
         out = []
         out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in idx.iteritems():
+        for section, references in idx.items():
             if section == 'default':
                 continue
             out += ['   :%s: %s' % (section, ', '.join(references))]
