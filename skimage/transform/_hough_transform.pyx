@@ -149,8 +149,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     if img.ndim != 2:
             raise ValueError('The input image must be 2D.')
 
-    cdef cnp.ndarray[ndim=2, dtype=cnp.intp_t] pixels = \
-         np.transpose(np.nonzero(img))
+    cdef int[:, :] pixels = np.transpose(np.nonzero(img))
     cdef Py_ssize_t num_pixels = pixels.shape[0]
     cdef list acc = list()
     cdef list results = list()
