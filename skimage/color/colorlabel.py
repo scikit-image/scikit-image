@@ -1,14 +1,12 @@
-import os
-import ast
 import warnings
 import itertools
-import ConfigParser
 
 import numpy as np
 
 from skimage import img_as_float
 from skimage._shared.utils import is_str
 from .colorconv import rgb2gray, gray2rgb
+from . import rgb_colors
 
 
 __all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
@@ -18,14 +16,7 @@ DEFAULT_COLORS = ('red', 'blue', 'yellow', 'magenta', 'green',
                   'indigo', 'darkorange', 'cyan', 'pink', 'yellowgreen')
 
 
-def _load_colors():
-    directory, _ = os.path.split(os.path.abspath(__file__))
-    config_file = os.path.join(directory, 'colors.ini')
-
-    parser = ConfigParser.ConfigParser()
-    parser.read(config_file)
-    return dict((k, ast.literal_eval(v)) for k, v in parser.items('colors'))
-color_dict = _load_colors()
+color_dict = rgb_colors.__dict__
 
 
 def _rgb_vector(color):
