@@ -14,23 +14,27 @@ Authors
 import os.path
 
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_equal,
+                           assert_almost_equal,
+                           assert_array_almost_equal,
+                           assert_raises,
+                           TestCase,
+                           )
 
 from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
-from skimage.color import (
-    rgb2hsv, hsv2rgb,
-    rgb2xyz, xyz2rgb,
-    rgb2hed, hed2rgb,
-    separate_stains,
-    combine_stains,
-    rgb2rgbcie, rgbcie2rgb,
-    convert_colorspace,
-    rgb2grey, gray2rgb,
-    xyz2lab, lab2xyz,
-    lab2rgb, rgb2lab,
-    is_rgb, is_gray
-    )
+from skimage.color import (rgb2hsv, hsv2rgb,
+                           rgb2xyz, xyz2rgb,
+                           rgb2hed, hed2rgb,
+                           separate_stains,
+                           combine_stains,
+                           rgb2rgbcie, rgbcie2rgb,
+                           convert_colorspace,
+                           rgb2grey, gray2rgb,
+                           xyz2lab, lab2xyz,
+                           lab2rgb, rgb2lab,
+                           is_rgb, is_gray
+                           )
 
 from skimage import data_dir, data
 
@@ -267,4 +271,5 @@ def test_is_rgb():
 
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()
