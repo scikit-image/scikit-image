@@ -1,4 +1,4 @@
-from ._hough_transform import (hough_circle, hough_line,
+from ._hough_transform import (hough_circle, hough_ellipse, hough_line,
                                probabilistic_hough_line)
 from .hough_transform import (hough, probabilistic_hough, hough_peaks,
                               hough_line_peaks)
@@ -15,6 +15,7 @@ from .pyramids import (pyramid_reduce, pyramid_expand,
 
 
 __all__ = ['hough_circle',
+           'hough_ellipse',
            'hough_line',
            'probabilistic_hough_line',
            'hough',

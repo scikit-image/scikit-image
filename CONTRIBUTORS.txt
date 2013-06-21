@@ -132,7 +132,7 @@
 
 - François Boulogne
   Drawing: Andres Method for circle perimeter, ellipse perimeter drawing, Bezier curve.
-  Circular Hough Transform
+  Circular and elliptical Hough Transforms
   Various fixes
 
 - Thouis Jones
