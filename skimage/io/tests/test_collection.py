@@ -2,7 +2,10 @@ import sys
 import os.path
 
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_raises,
+                           assert_equal,
+                           assert_array_almost_equal,
+                           )
 from numpy.testing.decorators import skipif
 
 from skimage import data_dir
@@ -148,4 +151,5 @@ class TestMultiImage():
 
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

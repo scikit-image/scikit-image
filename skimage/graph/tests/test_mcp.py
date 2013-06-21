@@ -1,20 +1,13 @@
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_array_equal,
+                           assert_almost_equal,
+                           )
 
 import skimage.graph.mcp as mcp
 
 a = np.ones((8, 8), dtype=np.float32)
 a[1:-1, 1] = 0
 a[1, 1:-1] = 0
-
-## array([[ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
-##        [ 1.,  0.,  0.,  0.,  0.,  0.,  0.,  1.],
-##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
-##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
-##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
-##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
-##        [ 1.,  0.,  1.,  1.,  1.,  1.,  1.,  1.],
-##        [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]], dtype=float32)
 
 
 def test_basic():
