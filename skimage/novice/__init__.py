@@ -15,7 +15,8 @@ the normal, array-oriented image functions used by scikit-image.
 .. note::
 
     This module uses the Cartesian coordinate system, where the origin is at
-    the lower-left corner instead of the upper-right.
+    the lower-left corner instead of the upper-right and the order is x, y
+    instead of row, column.
 
 
 Example

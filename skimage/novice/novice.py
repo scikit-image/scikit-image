@@ -56,122 +56,51 @@ class Pixel(object):
 
     @property
     def x(self):
-        """Gets the horizontal location (left = 0).
-
-        Returns
-        -------
-        x : int
-            The horizontal location of the pixel.
-
-        """
+        """Horizontal location of this pixel in the parent image(left = 0)."""
         return self._x
 
     @property
     def y(self):
-        """Gets the vertical location (bottom = 0).
-
-        Returns
-        -------
-        y : int
-            The vertical location of the pixel.
-
-        """
+        """Vertical location of this pixel in the parent image (bottom = 0)."""
         return self._y
 
     @property
     def red(self):
-        """Gets the red component of the pixel.
-
-        Returns
-        -------
-        value : int
-            The red component of the pixel (0-255).
-        """
+        """The red component of the pixel (0-255)."""
         return self._red
 
     @red.setter
     def red(self, value):
-        """Sets the red component of the pixel.
-
-        Parameters
-        ----------
-        value : int
-            Red component of the pixel (0-255)
-
-        """
         self._red = self._validate(value)
         self._setpixel()
 
     @property
     def green(self):
-        """Gets the green component of the pixel.
-
-        Returns
-        -------
-        value : int
-            The green component of the pixel (0-255).
-        """
+        """The green component of the pixel (0-255)."""
         return self._green
 
     @green.setter
     def green(self, value):
-        """Sets the green component of the pixel.
-
-        Parameters
-        ----------
-        value : int
-            Green component of the pixel (0-255)
-
-        """
         self._green = self._validate(value)
         self._setpixel()
 
     @property
     def blue(self):
-        """Gets the blue component of the pixel.
-
-        Returns
-        -------
-        value : int
-            The blue component of the pixel (0-255).
-        """
+        """The blue component of the pixel (0-255)."""
         return self._blue
 
     @blue.setter
     def blue(self, value):
-        """Sets the blue component of the pixel.
-
-        Parameters
-        ----------
-        value : int
-            Blue component of the pixel (0-255)
-
-        """
         self._blue = self._validate(value)
         self._setpixel()
 
     @property
     def rgb(self):
-        """Gets the RGB color of the pixel.
-
-        Returns
-        ----------
-        color : tuple
-            RGB tuple with red, green, and blue components (0-255)
-
-        """
+        """The RGB color components of the pixel (3 values 0-255)."""
         return (self.red, self.green, self.blue)
 
     @rgb.setter
     def rgb(self, value):
-        """Sets the RGB color of the pixel.
-
-        Parameters
-        ----------
-        value : tuple
-            RGB tuple with red, green, and blue components (0-255)
-
-        """
         for v in value:
             self._validate(v)
 
@@ -181,9 +110,7 @@ class Pixel(object):
         self._setpixel()
 
     def _validate(self, value):
-        """Verifies that the pixel value is in [0, 255].
-
-        """
+        """Verifies that the pixel value is in [0, 255]."""
         try:
             value = int(value)
             if (value < 0) or (value > 255):
@@ -196,6 +123,7 @@ class Pixel(object):
 
     def _setpixel(self):
         """Sets the actual pixel value in the picture.
+
         NOTE: Using Cartesian coordinate system!
 
         """
@@ -244,9 +172,7 @@ class PixelGroup(object):
             if dim_slice.step is not None and dim_slice.step != 1:
                 raise IndexError("Only a step size of 1 is supported")
 
-        # ===========
         # Flip y axis
-        # ===========
         y_slice = key[1]
         start = y_slice.start if y_slice.start is not None else 0
         stop = y_slice.stop if y_slice.stop is not None else pic.height
@@ -256,7 +182,7 @@ class PixelGroup(object):
 
         key = (key[0], slice(stop, start + 1, y_slice.step))
 
-        # skimage dimensions are flipped: y, x
+        # array dimensions are row, column (i.e. y, x)
         self._key = (key[1], key[0])
         self._image = pic._image
 
@@ -281,95 +207,38 @@ class PixelGroup(object):
 
     @property
     def red(self):
-        """Gets the red component of the pixel.
-
-        Returns
-        -------
-        value : int
-            The red component of the pixel (0-255).
-        """
+        """The red component of the pixel (0-255)."""
         return self._getdim(0).ravel()
 
     @red.setter
     def red(self, value):
-        """Sets the red component of the pixel.
-
-        Parameters
-        ----------
-        value : int
-            Red component of the pixel (0-255)
-
-        """
         self._setdim(0, value)
 
     @property
     def green(self):
-        """Gets the green component of the pixel.
-
-        Returns
-        -------
-        value : int
-            The green component of the pixel (0-255).
-        """
+        """The green component of the pixel (0-255)."""
         return self._getdim(1).ravel()
 
     @green.setter
     def green(self, value):
-        """Sets the green component of the pixel.
-
-        Parameters
-        ----------
-        value : int
-            green component of the pixel (0-255)
-
-        """
         self._setdim(1, value)
 
     @property
     def blue(self):
-        """Gets the blue component of the pixel.
-
-        Returns
-        -------
-        value : int
-            The blue component of the pixel (0-255).
-        """
+        """The blue component of the pixel (0-255)."""
         return self._getdim(2).ravel()
 
     @blue.setter
     def blue(self, value):
-        """Sets the blue component of the pixel.
-
-        Parameters
-        ----------
-        value : int
-            blue component of the pixel (0-255)
-
-        """
         self._setdim(2, value)
 
     @property
     def rgb(self):
-        """Gets the RGB color of the pixel.
-
-        Returns
-        ----------
-        color : tuple
-            RGB tuple with red, green, and blue components (0-255)
-
-        """
+        """The RGB color components of the pixel (3 values 0-255)."""
         return self._getdim(None)
 
     @rgb.setter
     def rgb(self, value):
-        """Sets the RGB color of the pixel.
-
-        Parameters
-        ----------
-        value : tuple
-            RGB tuple with red, green, and blue components (0-255)
-
-        """
         self._setdim(None, value)
 
     def __iter__(self):
@@ -533,64 +402,27 @@ class Picture(object):
 
     @property
     def path(self):
-        """Gets the path of the picture.
-
-        Returns
-        -------
-        path : str
-            The absolute path of the picture or None if modified.
-
-        """
+        """The path to the picture."""
         return self._path
 
     @property
     def modified(self):
-        """Gets a value indicating if the picture has changed.
-
-        Returns
-        -------
-        modified : bool
-            True if the picture has been changed, False otherwise.
-
-        """
+        """True if the picture has changed."""
         return self._modified
 
     @property
     def format(self):
-        """Gets the format of the picture.
-
-        Returns
-        -------
-        format : str
-            File format of the picture (e.g., png, jpeg) or None if not saved.
-
-        """
+        """The image format of the picture."""
         return self._format
 
     @property
     def size(self):
-        """Gets size of the picture.
-
-        Returns
-        -------
-        size : tuple
-            Width and height of the picture in pixels.
-
-        """
-        # skimage dimensions are flipped: y, x
+        """The size (width, height) of the picture."""
+        # array dimensions are flipped: y, x
         return (self._image.shape[1], self._image.shape[0])
 
     @size.setter
     def size(self, value):
-        """Sets the size of the picture.
-
-        Parameters
-        ----------
-        value : tuple
-            Desired width and height of the picture. Will resize image as
-            necessary.
-
-        """
         try:
             # Don't resize if no change in size
             if (value[0] != self.width) or (value[1] != self.height):
@@ -606,78 +438,29 @@ class Picture(object):
 
     @property
     def width(self):
-        """Gets the width of the picture.
-
-        Returns
-        -------
-        width : int
-            Width of the picture in pixels.
-
-        """
+        """The width of the picture."""
         return self.size[0]
 
     @width.setter
     def width(self, value):
-        """Sets the width of the picture.
-
-        Parameters
-        -------
-        value : int
-            Desired width of the picture in pixels. Will resize the image as
-            necessary.
-
-        """
         self.size = (value, self.height)
 
     @property
     def height(self):
-        """Gets the height of the picture.
-
-        Returns
-        -------
-        height : int
-            Height of the picture in pixels.
-
-        """
+        """The height of the picture."""
         return self.size[1]
 
     @height.setter
     def height(self, value):
-        """Sets the height of the picture.
-
-        Parameters
-        -------
-        value : int
-            Desired height of the picture in pixels. Will resize the image as
-            necessary.
-
-        """
         self.size = (self.width, value)
 
     @property
     def inflation(self):
-        """Gets the inflation factor.
-
-        Returns
-        -------
-        inflation : int
-            Factor to scale each pixel by when saving or viewing (1 = no
-            inflation).
-
-        """
+        """The inflation factor."""
         return self._inflation
 
     @inflation.setter
     def inflation(self, value):
-        """Sets the inflation factor.
-
-        Parameters
-        ----------
-        value : int
-            Factor to scale each pixel by when saving or viewing (1 = no
-            inflation).
-
-        """
         try:
             value = int(value)
             if value < 1:
@@ -717,7 +500,7 @@ class Picture(object):
 
         Parameters
         ----------
-        img : array_like
+        img : array
             Raw RGB image data to inflate using nearest neighbor algorithm.
 
         """
@@ -730,9 +513,7 @@ class Picture(object):
              self.width * self._inflation), order=0))
 
     def __iter__(self):
-        """Iterates over all pixels in the image.
-
-        """
+        """Iterates over all pixels in the image."""
         for x in xrange(self.width):
             for y in xrange(self.height):
                 yield self._makepixel((x, y))
