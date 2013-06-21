@@ -20,6 +20,9 @@ def test_pic_info():
     assert_equal(pic.modified, False)
     assert_equal(pic.inflation, 1)
 
+
+def test_pixel_iteration():
+    pic = novice.open(SMALL_IMAGE_PATH)
     num_pixels = sum(1 for p in pic)
     assert_equal(num_pixels, pic.width * pic.height)
 
