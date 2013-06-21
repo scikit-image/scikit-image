@@ -2,7 +2,7 @@ import os, numpy as np, imghdr
 from skimage.util import img_as_ubyte
 import skimage.io, skimage.transform
 
-# ================================================== 
+# ==================================================
 
 class Pixel(object):
     """A single pixel in a Picture.
@@ -38,7 +38,7 @@ class Pixel(object):
         -------
         x : int
             The horizontal location of the pixel.
-        
+
         """
         return self._x
 
@@ -50,7 +50,7 @@ class Pixel(object):
         -------
         y : int
             The vertical location of the pixel.
-        
+
         """
         return self._y
 
@@ -73,7 +73,7 @@ class Pixel(object):
         ----------
         value : int
             Red component of the pixel (0-255)
-        
+
         """
         self._red = self._validate(value)
         self._setpixel()
@@ -97,7 +97,7 @@ class Pixel(object):
         ----------
         value : int
             Green component of the pixel (0-255)
-        
+
         """
         self._green = self._validate(value)
         self._setpixel()
@@ -121,7 +121,7 @@ class Pixel(object):
         ----------
         value : int
             Blue component of the pixel (0-255)
-        
+
         """
         self._blue = self._validate(value)
         self._setpixel()
@@ -134,7 +134,7 @@ class Pixel(object):
         ----------
         color : tuple
             RGB tuple with red, green, and blue components (0-255)
-        
+
         """
         return (self.red, self.green, self.blue)
 
@@ -146,7 +146,7 @@ class Pixel(object):
         ----------
         value : tuple
             RGB tuple with red, green, and blue components (0-255)
-        
+
         """
         for v in value:
             self._validate(v)
@@ -158,7 +158,7 @@ class Pixel(object):
 
     def _validate(self, value):
         """Verifies that the pixel value is in [0, 255].
-        
+
         """
         try:
             value = int(value)
@@ -185,7 +185,7 @@ class Pixel(object):
     def __repr__(self):
         return "Pixel (red: {0}, green: {1}, blue: {2})".format(self.red, self.green, self.blue)
 
-# ================================================== 
+# ==================================================
 
 class PixelGroup(object):
     """A group of Pixel objects that can be manipulated together.
@@ -273,7 +273,7 @@ class PixelGroup(object):
         ----------
         value : int
             Red component of the pixel (0-255)
-        
+
         """
         self._setdim(0, value)
 
@@ -296,7 +296,7 @@ class PixelGroup(object):
         ----------
         value : int
             green component of the pixel (0-255)
-        
+
         """
         self._setdim(1, value)
 
@@ -319,7 +319,7 @@ class PixelGroup(object):
         ----------
         value : int
             blue component of the pixel (0-255)
-        
+
         """
         self._setdim(2, value)
 
@@ -331,7 +331,7 @@ class PixelGroup(object):
         ----------
         color : tuple
             RGB tuple with red, green, and blue components (0-255)
-        
+
         """
         return self._getdim(None)
 
@@ -343,7 +343,7 @@ class PixelGroup(object):
         ----------
         value : tuple
             RGB tuple with red, green, and blue components (0-255)
-        
+
         """
         self._setdim(None, value)
 
@@ -361,7 +361,7 @@ class PixelGroup(object):
     def __repr__(self):
         return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
 
-# ================================================== 
+# ==================================================
 
 class Picture(object):
     """A 2-D picture made up of pixels.
@@ -495,12 +495,12 @@ class Picture(object):
 
     def save(self, path):
         """Saves the picture to the given path.
-        
+
         Parameters
         ----------
         path : str
             Path to save the picture (with file extension).
-        
+
         """
         skimage.io.imsave(path, self._inflate(self._image))
         self._modified = False
@@ -515,14 +515,14 @@ class Picture(object):
         -------
         path : str
             The absolute path of the picture or None if modified.
-        
+
         """
         return self._path
 
     @property
     def modified(self):
         """Gets a value indicating if the picture has changed.
-        
+
         Returns
         -------
         modified : bool
@@ -534,7 +534,7 @@ class Picture(object):
     @property
     def format(self):
         """Gets the format of the picture.
-        
+
         Returns
         -------
         format : str
@@ -546,12 +546,12 @@ class Picture(object):
     @property
     def size(self):
         """Gets size of the picture.
-        
+
         Returns
         -------
         size : tuple
             Width and height of the picture in pixels.
-        
+
         """
         # skimage dimensions are flipped: y, x
         return (self._image.shape[1], self._image.shape[0])
@@ -581,7 +581,7 @@ class Picture(object):
     @property
     def width(self):
         """Gets the width of the picture.
-        
+
         Returns
         -------
         width : int
@@ -593,7 +593,7 @@ class Picture(object):
     @width.setter
     def width(self, value):
         """Sets the width of the picture.
-        
+
         Parameters
         -------
         value : int
@@ -605,7 +605,7 @@ class Picture(object):
     @property
     def height(self):
         """Gets the height of the picture.
-        
+
         Returns
         -------
         height : int
@@ -617,7 +617,7 @@ class Picture(object):
     @height.setter
     def height(self, value):
         """Sets the height of the picture.
-        
+
         Parameters
         -------
         value : int
@@ -629,24 +629,24 @@ class Picture(object):
     @property
     def inflation(self):
         """Gets the inflation factor.
-        
+
         Returns
         -------
         inflation : int
             Factor to scale each pixel by when saving or viewing (1 = no inflation).
-        
+
         """
         return self._inflation
 
     @inflation.setter
     def inflation(self, value):
         """Sets the inflation factor.
-        
+
         Parameters
         ----------
         value : int
             Factor to scale each pixel by when saving or viewing (1 = no inflation).
-        
+
         """
         try:
             value = int(value)
@@ -664,7 +664,7 @@ class Picture(object):
 
     def show(self):
         """Displays the image in a separate window.
-        
+
         """
         skimage.io.imshow(self._inflate(self._image))
 
@@ -683,24 +683,24 @@ class Picture(object):
 
     def _inflate(self, img):
         """Inflates image according to inflation factor.
-        
+
         Parameters
         ----------
         img : array_like
             Raw RGB image data to inflate using nearest neighbor algorithm.
-        
+
         """
         if self._inflation == 1:
             return img
 
         # skimage dimensions are flipped: y, x
-        return img_as_ubyte(skimage.transform.resize(img, 
+        return img_as_ubyte(skimage.transform.resize(img,
             (self.height * self._inflation,
              self.width * self._inflation), order=0))
 
     def __iter__(self):
         """Iterates over all pixels in the image.
-        
+
         """
         for x in xrange(self.width):
             for y in xrange(self.height):
@@ -717,7 +717,7 @@ class Picture(object):
         Returns
         -------
         p: Pixel or PixelGroup
-            Single pixel for coordinates or PixelGroup for slice.   
+            Single pixel for coordinates or PixelGroup for slice.
 
         Examples
         --------
