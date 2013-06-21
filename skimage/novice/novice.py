@@ -1,8 +1,11 @@
-import os, numpy as np, imghdr
-from skimage.util import img_as_ubyte
-import skimage.io, skimage.transform
+import os
+import imghdr
 
-# ==================================================
+import numpy as np
+from skimage import io
+from skimage import img_as_ubyte
+from skimage.transform import resize
+
 
 class Pixel(object):
     """A single pixel in a Picture.
@@ -165,7 +168,8 @@ class Pixel(object):
             if (value < 0) or (value > 255):
                 raise ValueError()
         except ValueError:
-            raise ValueError("Expected an integer between 0 and 255, but got {0} instead!".format(value))
+            msg = "Expected an integer between 0 and 255, but got {0} instead!"
+            raise ValueError(msg.format(value))
 
         return value
 
@@ -183,9 +187,9 @@ class Pixel(object):
         self._picture._picture_modified = True
 
     def __repr__(self):
-        return "Pixel (red: {0}, green: {1}, blue: {2})".format(self.red, self.green, self.blue)
+        args = self.red, self.green, self.blue
+        return "Pixel (red: {0}, green: {1}, blue: {2})".format(*args)
 
-# ==================================================
 
 class PixelGroup(object):
     """A group of Pixel objects that can be manipulated together.
@@ -361,7 +365,6 @@ class PixelGroup(object):
     def __repr__(self):
         return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
 
-# ==================================================
 
 class Picture(object):
     """A 2-D picture made up of pixels.
@@ -409,7 +412,7 @@ class Picture(object):
         # automatically so (r, g, b) tuples can be used
         # everywhere.
         elif path is not None:
-            self._image = skimage.img_as_ubyte(skimage.io.imread(path))
+            self._image = img_as_ubyte(io.imread(path))
             self._path = path
             self._format = imghdr.what(path)
 
@@ -502,7 +505,7 @@ class Picture(object):
             Path to save the picture (with file extension).
 
         """
-        skimage.io.imsave(path, self._inflate(self._image))
+        io.imsave(path, self._inflate(self._image))
         self._modified = False
         self._path = os.path.abspath(path)
         self._format = imghdr.what(path)
@@ -563,20 +566,22 @@ class Picture(object):
         Parameters
         ----------
         value : tuple
-            Desired width and height of the picture. Will resize image as necessary.
+            Desired width and height of the picture. Will resize image as
+            necessary.
 
         """
         try:
             # Don't resize if no change in size
             if (value[0] != self.width) or (value[1] != self.height):
                 # skimage dimensions are flipped: y, x
-                self._image = skimage.img_as_ubyte(skimage.transform.resize(self._image,
+                self._image = img_as_ubyte(resize(self._image,
                     (int(value[1]), int(value[0])), order=0))
 
                 self._modified = True
                 self._path = None
         except TypeError:
-            raise TypeError("Expected (width, height), but got {0} instead!".format(value))
+            msg = "Expected (width, height), but got {0} instead!"
+            raise TypeError(msg.format(value))
 
     @property
     def width(self):
@@ -597,7 +602,8 @@ class Picture(object):
         Parameters
         -------
         value : int
-            Desired width of the picture in pixels. Will resize the image as necessary.
+            Desired width of the picture in pixels. Will resize the image as
+            necessary.
 
         """
         self.size = (value, self.height)
@@ -621,7 +627,8 @@ class Picture(object):
         Parameters
         -------
         value : int
-            Desired height of the picture in pixels. Will resize the image as necessary.
+            Desired height of the picture in pixels. Will resize the image as
+            necessary.
 
         """
         self.size = (self.width, value)
@@ -633,7 +640,8 @@ class Picture(object):
         Returns
         -------
         inflation : int
-            Factor to scale each pixel by when saving or viewing (1 = no inflation).
+            Factor to scale each pixel by when saving or viewing (1 = no
+            inflation).
 
         """
         return self._inflation
@@ -645,7 +653,8 @@ class Picture(object):
         Parameters
         ----------
         value : int
-            Factor to scale each pixel by when saving or viewing (1 = no inflation).
+            Factor to scale each pixel by when saving or viewing (1 = no
+            inflation).
 
         """
         try:
@@ -654,19 +663,20 @@ class Picture(object):
                 raise ValueError()
             self._inflation = value
         except ValueError:
-            raise ValueError("Expected inflation factor to be an integer greater than one")
+            msg = "Expected inflation factor to be an integer greater than one"
+            raise ValueError(msg)
 
     def _repr_html_(self):
-        return skimage.io.Image(self._inflate(self._image))
+        return io.Image(self._inflate(self._image))
 
     def _repr_png_(self):
-        return skimage.io.Image(self._inflate(self._image))
+        return io.Image(self._inflate(self._image))
 
     def show(self):
         """Displays the image in a separate window.
 
         """
-        skimage.io.imshow(self._inflate(self._image))
+        io.imshow(self._inflate(self._image))
 
     def _makepixel(self, xy):
         """ Creates a Pixel object for a given x, y location.
@@ -694,7 +704,7 @@ class Picture(object):
             return img
 
         # skimage dimensions are flipped: y, x
-        return img_as_ubyte(skimage.transform.resize(img,
+        return img_as_ubyte(resize(img,
             (self.height * self._inflation,
              self.width * self._inflation), order=0))
 
@@ -774,5 +784,5 @@ class Picture(object):
             raise TypeError("Invalid key type")
 
     def __repr__(self):
-        return "Picture (format: {0}, path: {1}, modified: {2})".format(self.format, self.path, self.modified)
-
+        args = self.format, self.path, self.modified
+        return "Picture (format: {0}, path: {1}, modified: {2})".format(*args)
