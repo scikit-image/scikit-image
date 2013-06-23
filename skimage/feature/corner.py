@@ -91,8 +91,13 @@ def corner_kitchen_rosenfeld(image):
     imxx, imxy = _compute_derivatives(imx)
     imyx, imyy = _compute_derivatives(imy)
 
-    response = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy) \
-               / (imx**2 + imy**2)
+    numerator = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy)
+    denominator = (imx**2 + imy**2)
+
+    response = np.zeros_like(image, dtype=np.double)
+
+    mask = denominator != 0
+    response[mask] = numerator[mask] / denominator[mask]
 
     return response
 
@@ -311,8 +316,13 @@ def corner_foerstner(image, sigma=1):
     # trace
     traceA = Axx + Ayy
 
-    w = detA / traceA
-    q = 4 * detA / traceA**2
+    w = np.zeros_like(image, dtype=np.double)
+    q = np.zeros_like(image, dtype=np.double)
+
+    mask = traceA != 0
+
+    w[mask] = detA[mask] / traceA[mask]
+    q[mask] = 4 * detA[mask] / traceA[mask]**2
 
     return w, q
 
