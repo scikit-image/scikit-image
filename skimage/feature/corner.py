@@ -64,7 +64,7 @@ def _compute_auto_correlation(image, sigma):
     return Axx, Axy, Ayy
 
 
-def corner_kitchen_rosenfeld(image):
+def corner_kitchen_rosenfeld(image, eps=1e-6):
     """Compute Kitchen and Rosenfeld corner measure response image.
 
     The corner measure is calculated as follows::
@@ -79,6 +79,9 @@ def corner_kitchen_rosenfeld(image):
     ----------
     image : ndarray
         Input image.
+    eps : float, optional
+        Small number added to denominator to prevent division by
+        zero in areas of constant intensity. Default 1e-6.
 
     Returns
     -------
@@ -91,8 +94,9 @@ def corner_kitchen_rosenfeld(image):
     imxx, imxy = _compute_derivatives(imx)
     imyx, imyy = _compute_derivatives(imy)
 
+    # Eps added because in flat image regions to avoid division by zero
     response = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy) \
-               / (imx**2 + imy**2)
+               / (imx**2 + imy**2 + eps)
 
     return response
 
@@ -241,7 +245,7 @@ def corner_shi_tomasi(image, sigma=1):
     return response
 
 
-def corner_foerstner(image, sigma=1):
+def corner_foerstner(image, sigma=1, eps=1e-6):
     """Compute Foerstner corner measure response image.
 
     This corner detector uses information from the auto-correlation matrix A::
@@ -262,6 +266,10 @@ def corner_foerstner(image, sigma=1):
     sigma : float, optional
         Standard deviation used for the Gaussian kernel, which is used as
         weighting function for the auto-correlation matrix.
+    eps : float, optional
+        Small number added to denominator to prevent division by
+        zero in areas of constant intensity. Default 1e-6.
+
 
     Returns
     -------
@@ -309,7 +317,7 @@ def corner_foerstner(image, sigma=1):
     # determinant
     detA = Axx * Ayy - Axy**2
     # trace
-    traceA = Axx + Ayy
+    traceA = Axx + Ayy + eps
 
     w = detA / traceA
     q = 4 * detA / traceA**2
