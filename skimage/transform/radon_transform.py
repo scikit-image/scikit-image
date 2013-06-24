@@ -413,5 +413,5 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
                                               projection_shifts[angle_index])
         image += relaxation * image_update
         if not clip is None:
-            image = clip(image, clip[0], clip[1])
+            image = np.clip(image, clip[0], clip[1])
     return image

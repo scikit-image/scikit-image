@@ -347,6 +347,9 @@ def test_iradon_sart():
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (2 iterations) =', delta)
         assert delta < 0.013 * error_factor
+        reconstructed = iradon_sart(sinogram, theta, clip=(0, 1))
+        print('delta (1 iteration, clip) =', delta)
+        assert delta < 0.013 * error_factor
 
         np.random.seed(1239867)
         shifts = np.random.uniform(-3, 3, sinogram.shape[1])
