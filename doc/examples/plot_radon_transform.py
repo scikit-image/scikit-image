@@ -76,6 +76,7 @@ plt.imshow(sinogram, cmap=plt.cm.Greys_r,
            extent=(0, 180, 0, sinogram.shape[0]), aspect='auto')
 
 plt.subplots_adjust(hspace=0.4, wspace=0.5)
+plt.show()
 
 """
 .. image:: PLOT2RST.current_figure
@@ -107,6 +108,7 @@ plt.imshow(reconstruction_fbp, cmap=plt.cm.Greys_r)
 plt.subplot(122)
 plt.title("Reconstruction error\nFiltered back projection")
 plt.imshow(reconstruction_fbp - image, cmap=plt.cm.Greys_r, **imkwargs)
+plt.show()
 
 """
 .. image:: PLOT2RST.current_figure
@@ -168,6 +170,7 @@ plt.imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
 plt.subplot(224)
 plt.title("Reconstruction error\nSART, 2 iterations")
 plt.imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
+plt.show()
 
 """
 .. image:: PLOT2RST.current_figure
