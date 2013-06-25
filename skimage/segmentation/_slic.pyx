@@ -14,7 +14,7 @@ from ..color import rgb2lab, gray2rgb
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
-                 int[:, :, ::1] nearest_mean,
+                 long[:, :, ::1] nearest_mean,
                  double[:, :, ::1] distance,
                  double[:, ::1] means,
                  float ratio, int max_iter, int n_segments):
@@ -22,8 +22,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     # initialize on grid:
     cdef Py_ssize_t depth, height, width
-    shape = image_zyx.shape
-    depth, height, width = shape[0], shape[1], shape[2]
+    depth, height, width = (image_zyx.shape[0], image_zyx.shape[1],
+                            image_zyx.shape[2])
     # approximate grid size for desired n_segments
     cdef Py_ssize_t step_z, step_y, step_x
     grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
@@ -36,8 +36,10 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef double dist_mean
 
     cdef double tmp
+    #cdef long[::1] nearest_mean_ravel
+    #cdef double[::1] image_zyx_ravel_j
     for i in range(max_iter):
-        distance.fill(np.inf)
+        distance[:, :, :] = np.inf
         changes = 0
         # assign pixels to means
         for k in range(n_means):
@@ -65,9 +67,13 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         if changes == 0:
             break
         # recompute means:
-        means_list = [np.bincount(nearest_mean.ravel(),
-                      image_zyx[:, :, :, j].ravel()) for j in range(6)]
-        in_mean = np.bincount(nearest_mean.ravel())
+        nearest_mean_ravel = np.asarray(nearest_mean).ravel()
+        means_list = []
+        for j in range(6):
+            image_zyx_ravel = np.asarray(image_zyx[:, :, :, j]).ravel()
+            means_list.append(np.bincount(nearest_mean_ravel,
+                                          image_zyx_ravel))
+        in_mean = np.bincount(nearest_mean_ravel)
         in_mean[in_mean == 0] = 1
         means = (np.vstack(means_list) / in_mean).T.copy("C")
     return nearest_mean
