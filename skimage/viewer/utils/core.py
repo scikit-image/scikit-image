@@ -22,22 +22,37 @@ __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
            'update_axes_image']
 
 
-QApp = None
-
-
 def init_qtapp():
     """Initialize QAppliction.
 
     The QApplication needs to be initialized before creating any QWidgets
     """
-    global QApp
-    if QApp is None:
-        QApp = QtGui.QApplication([])
+    app = QtGui.QApplication.instance()
+    if app is None:
+        app = QtGui.QApplication([])
+    return app
 
 
-def start_qtapp():
+def is_event_loop_running(app=None):
+    """Return True if event loop is running."""
+    if app is None:
+        app = init_qtapp()
+    if hasattr(app, '_in_event_loop'):
+        return app._in_event_loop
+    else:
+        return False
+
+
+def start_qtapp(app=None):
     """Start Qt mainloop"""
-    QApp.exec_()
+    if app is None:
+        app = init_qtapp()
+    if not is_event_loop_running(app):
+        app._in_event_loop = True
+        app.exec_()
+        app._in_event_loop = False
+    else:
+        app._in_event_loop = True
 
 
 class RequiredAttr(object):
