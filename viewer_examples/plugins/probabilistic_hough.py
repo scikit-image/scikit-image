@@ -34,8 +34,8 @@ canny_viewer += canny_plugin
 hough_plugin = OverlayPlugin(image_filter=hough_lines)
 hough_plugin.name = 'Hough Lines'
 
-hough_plugin += Slider('line length', 0, 100, update_on='release')
-hough_plugin += Slider('line gap', 0, 20, update_on='release')
+hough_plugin += Slider('line length', 0, 100)
+hough_plugin += Slider('line gap', 0, 20)
 
 # Passing a plugin to a viewer connects the output of the plugin to the viewer.
 hough_viewer = ImageViewer(canny_plugin)

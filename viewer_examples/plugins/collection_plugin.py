@@ -24,7 +24,7 @@ def autolevel(image, disk_size):
 img_collection = [data.camera(), data.coins(), data.text()]
 
 plugin = Plugin(image_filter=autolevel)
-plugin += Slider('disk_size', 2, 8, value_type='int', update_on='release')
+plugin += Slider('disk_size', 2, 8, value_type='int')
 plugin.name = "Autolevel"
 
 viewer = CollectionViewer(img_collection)

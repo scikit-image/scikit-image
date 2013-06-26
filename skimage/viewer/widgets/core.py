@@ -90,12 +90,12 @@ class Slider(BaseWidget):
         is typically set when the widget is added to a plugin.
     orientation : {'horizontal' | 'vertical'}
         Slider orientation.
-    update_on : {'move' | 'release'}
+    update_on : {'release' | 'move'}
         Control when callback function is called: on slider move or release.
     """
     def __init__(self, name, low=0.0, high=1.0, value=None, value_type='float',
                  ptype='kwarg', callback=None, max_edit_width=60,
-                 orientation='horizontal', update_on='move'):
+                 orientation='horizontal', update_on='release'):
         super(Slider, self).__init__(name, ptype, callback)
 
         if value is None:
