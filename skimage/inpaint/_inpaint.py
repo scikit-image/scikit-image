@@ -7,6 +7,10 @@ KNOWN = 0
 BAND = 1
 INSIDE = 2
 
+BAND = 0
+KNOWN = 1
+INSIDE = 2
+
 
 def inpaint_point(i, j, image, flag, T, epsilon):
     gradT = Vector(0, 0)
@@ -14,11 +18,12 @@ def inpaint_point(i, j, image, flag, T, epsilon):
     r = Vector(0, 0)
     k = i - epsilon
     l = j - epsilon
-    Ia, Jx, Jy, s = 0, 0, 0, 0
+    Jx, Jy, norm = 0, 0, 0
+
     for color in 1, 2, 3:
-        if flag[i, j + 1] is not INSIDE:
-            if flag[i, j - 1] is not INSIDE:
-                gradT.x = (T[i, j + 1] - T[i, j - 1]) * 0.5
+        if flag[i, j+1] is not INSIDE:
+            if flag[i, j-1] is not INSIDE:
+                gradT.x = (T[i, j+1] - T[i, j-1]) * 0.5
             else:
                 gradT.x = T[i, j + 1] - T[i, j]
         elif flag[i, j - 1] is not INSIDE:
@@ -55,7 +60,7 @@ def inpaint_point(i, j, image, flag, T, epsilon):
 
                         if abs(dirc) <= 0.01:
                             dirc = 1.0e-6
-                        w = abs(dst * lev * dirc)
+                        weight = abs(dst * lev * dirc)
 
                         if flag[k, l + 1] is not INSIDE:
                             if flag[k, l - 1] is not INSIDE:
@@ -82,12 +87,12 @@ def inpaint_point(i, j, image, flag, T, epsilon):
                                        image[km - 1, lm, color])
                         else:
                             gradT.y = 0
-                        Ia = w * image[km, lm, color]
-                        Jx -= w * gradI.x * r.x
-                        Jy -= w * gradI.y * r.y
-                        s += w
+                        Ia = weight * image[km, lm, color]
+                        Jx -= weight * gradI.x * r.x
+                        Jy -= weight * gradI.y * r.y
+                        norm += weight
 
-        sat = (Ia / s + (Jx + Jy) / (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
+        sat = (Ia / norm + (Jx + Jy) / (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
         image[i - 1, j - 1, color] = sat
 
 
