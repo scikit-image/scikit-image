@@ -22,7 +22,7 @@ __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
            'update_axes_image']
 
 
-global QApp
+QApp = None
 
 
 def init_qtapp():
