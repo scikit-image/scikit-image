@@ -3,7 +3,7 @@ __all__ = ['generate_heap', 'display_heap']
 import numpy as np
 import heapq
 from functools import total_ordering
-from skimage.util import img_as_ubyte, img_as_bool
+from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, disk
 
 
