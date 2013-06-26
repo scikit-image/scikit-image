@@ -15,6 +15,7 @@ def initialise(_mask):
     Each pixel has 2 new values assigned to it stored in `flag` and `u` arrays.
 
     `flag` Initialisation:
+
     All pixels are classified into 1 of the following flags:
     # KNOWN - denoted by 0 - intensity and u values are known.
     # BAND - denoted by 1 - u value undergoes an update.
