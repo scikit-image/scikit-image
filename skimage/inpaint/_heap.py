@@ -3,11 +3,12 @@ __all__ = ['generate_heap', 'display_heap']
 import numpy as np
 import heapq
 from functools import total_ordering
-from skimage.util import img_as_ubyte, img_as_bool
+from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, disk
 
 
 BAND = 0
+
 
 def generate_flags(mask):
     """Initialization:
@@ -72,15 +73,19 @@ def generate_heap(flag, T):
 
     return heap
 
+
 def display_heap(heap):
     for i in heap:
         print i.t, i.index
+
 
 @total_ordering
 class HeapElem(object):
     def __init__(self, t, index):
         self.data = (t, tuple(index))
         self.t, self.index = self.data[0], self.data[1]
+
     def __le__(self, other):
-        if not isinstance(other, type(self)): return NotImplemented
+        if not isinstance(other, type(self)):
+            return NotImplemented
         return self.data <= other.data
