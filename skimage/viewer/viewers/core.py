@@ -201,6 +201,8 @@ class ImageViewer(QtGui.QMainWindow):
         for p in self.plugins:
             p.show()
         super(ImageViewer, self).show()
+        self.activateWindow()
+        self.raise_()
 
     def show(self, main_window=True):
         """Show ImageViewer and attached plugins.

@@ -209,6 +209,8 @@ class Plugin(QtGui.QDialog):
     def show(self, main_window=True):
         """Show plugin."""
         super(Plugin, self).show()
+        self.activateWindow()
+        self.raise_()
 
         # Emit signal with x-hint so new windows can be displayed w/o overlap.
         size = self.frameGeometry()
