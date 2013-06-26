@@ -23,7 +23,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
     See Equation 4 and Figure 4 in [1]_ for implementation details.
 
     Parameters
-    =---------
+    ---------
     i1, j1, i2, j2 : int
         Row and column indices of two diagonally-adjacent pixels.
     flag : array
