@@ -56,7 +56,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
 
     if flag[i1, j1] == KNOWN:
         if flag[i2, j2] == KNOWN:
-            r = np.sqrt(2 - (u1 - u2)**2)
+            r = np.sqrt(2 - (u1 - u2) ** 2)
             s = (u1 + u2 - r) * 0.5
             if s >= u1 and s >= u2:
                 u_out = s
