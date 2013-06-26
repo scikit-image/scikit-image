@@ -22,15 +22,19 @@ __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
            'update_axes_image']
 
 
+global QApp
+
+
 def init_qtapp():
     """Initialize QAppliction.
 
     The QApplication needs to be initialized before creating any QWidgets
     """
-    app = QtGui.QApplication.instance()
-    if app is None:
-        app = QtGui.QApplication([])
-    return app
+    global QApp
+    QApp = QtGui.QApplication.instance()
+    if QApp is None:
+        QApp = QtGui.QApplication([])
+    return QApp
 
 
 def is_event_loop_running(app=None):
