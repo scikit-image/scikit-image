@@ -34,7 +34,7 @@ def generate_flags(mask):
 
     mask = np.where(mask, 1, 0).astype(np.uint8)
     inside = erosion(mask, disk(1))
-    border = img_as_ubyte(np.logical_xor(mask, inside))/255
+    border = np.logical_xor(mask, inside).astype(np.uint8)
 
     flag = 1 - border + inside
     T = inside * 1.0e6
@@ -82,10 +82,9 @@ def display_heap(heap):
 @total_ordering
 class HeapElem(object):
     def __init__(self, t, index):
-        self.data = (t, tuple(index))
-        self.t, self.index = self.data[0], self.data[1]
+        self.t, self.index = t, tuple(index)
 
     def __le__(self, other):
         if not isinstance(other, type(self)):
             return NotImplemented
-        return self.data <= other.data
+        return self.t <= other.t
