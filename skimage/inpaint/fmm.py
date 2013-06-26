@@ -5,12 +5,12 @@ import _heap
 import _inpaint
 from heapq import heappop, heappush
 
-
 BAND = 0
 KNOWN = 1
 INSIDE = 2
 
-def fast_marching_method(image, mask):
+
+def fast_marching_method(image, mask, epsilon):
     """Fast Marching Method implementation based on the algorithm outlined in
     the paper by Telea.
     """
@@ -25,12 +25,12 @@ def fast_marching_method(image, mask):
         i, j = item.index
 
         if ((i <= 1) or (j <= 1) or (i > mask.shape[0]-1)
-            or (j > mask.shape[1]-1)):
+                or (j > mask.shape[1]-1)):
             continue
         for (k, l) in (i-1, j), (i, j-1), (i+1, j), (i, j+1):
             if flag[k, l] is not KNOWN:
                 if flag[k, l] is INSIDE:
-                    inpaint_point(k, l, image, flag, T, epsilon)
+                    _inpaint.inpaint_point(k, l, image, flag, T, epsilon)
                     flag[k, l] = BAND
                     #below indent-1
                     T[k, l] = min(eikonal_solve(k-1, l, k, l-1, flag, T),
