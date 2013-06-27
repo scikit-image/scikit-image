@@ -1,12 +1,12 @@
 __all__ = ['montage2d']
 
 import numpy as np
-#~ from .. import exposure
+from .. import exposure
 
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0,0)):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0)):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -33,11 +33,11 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0,0)):
         of equal shape (i.e. [height, width]).
 
     fill: float or 'mean', optional
-        How to fill the 2-dimensional output array when sqrt(n_images)
-        is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
+	How to fill the 2-dimensional output array when sqrt(n_images)
+	is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
 
     rescale_intensity: bool, optional
-        Whether to rescale the intensity of each image to [0, 1].
+	Whether to rescale the intensity of each image to [0, 1].
 	
     output_shape: tuple, optional
 	The desired aspect ratio for the montage (default is square).
@@ -83,7 +83,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0,0)):
             arr_in[i] = exposure.rescale_intensity(arr_in[i])
 
     # -- determine alpha
-    if output_shape == (0,0):
+    if output_shape == (0, 0):
 	alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
     else:
 	alpha_y = output_shape[0]
