@@ -1,12 +1,12 @@
 __all__ = ['montage2d']
 
 import numpy as np
-from .. import exposure
+#~ from .. import exposure
 
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0,0)):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -38,6 +38,9 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
 
     rescale_intensity: bool, optional
         Whether to rescale the intensity of each image to [0, 1].
+	
+    output_shape: tuple, optional
+	The desired aspect ratio for the montage (default is square).
 
     Returns
     -------
@@ -80,19 +83,23 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False):
             arr_in[i] = exposure.rescale_intensity(arr_in[i])
 
     # -- determine alpha
-    alpha = int(np.ceil(np.sqrt(n_images)))
+    if output_shape == (0,0):
+	alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
+    else:
+	alpha_y = output_shape[0]
+	alpha_x = output_shape[1]
 
     # -- fill missing patches
     if fill == 'mean':
         fill = arr_in.mean()
 
-    n_missing = int((alpha**2.) - n_images)
+    n_missing = int((alpha_y*alpha_x) - n_images)
     missing = np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill
     arr_out = np.vstack((arr_in, missing))
 
     # -- reshape to 2d montage, step by step
-    arr_out = arr_out.reshape(alpha, alpha, height, width)
+    arr_out = arr_out.reshape(alpha_y, alpha_x, height, width)
     arr_out = arr_out.swapaxes(1, 2)
-    arr_out = arr_out.reshape(alpha * height, alpha * width)
+    arr_out = arr_out.reshape(alpha_y * height, alpha_x * width)
 
     return arr_out
