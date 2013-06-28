@@ -107,7 +107,6 @@ def ep_neighbor(i, j, size, epsilon):
     nb: list of tuples
         List of indexes whose cartesian distance to the input pixel index is
         less than epsilon
-
     """
     nb = []
     indices = np.transpose(np.where(disk(epsilon)))
