@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import run_module_suite, assert_array_equal, assert_raises
 
-from skimage import data
+from skimage import data, util
 from skimage.morphology import cmorph, disk
 from skimage.filter import rank
 
@@ -162,7 +162,7 @@ def test_compare_autolevels():
     # compare autolevel and percentile autolevel with p0=0.0 and p1=1.0
     # should returns the same arrays
 
-    image = data.camera()
+    image = util.img_as_ubyte(data.camera())
 
     selem = disk(20)
     loc_autolevel = rank.autolevel(image, selem=selem)
@@ -190,7 +190,7 @@ def test_compare_8bit_vs_16bit():
     # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
     # dynamic) should be identical
 
-    image8 = data.camera()
+    image8 = util.img_as_ubyte(data.camera())
     image16 = image8.astype(np.uint16)
     assert_array_equal(image8, image16)
 
