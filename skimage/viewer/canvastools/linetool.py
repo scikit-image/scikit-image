@@ -5,7 +5,7 @@ try:
 except ImportError:
     print("Could not import matplotlib -- skimage.viewer not available.")
 
-from base import CanvasToolBase, ToolHandles
+from .base import CanvasToolBase, ToolHandles
 
 
 __all__ = ['LineTool', 'ThickLineTool']
