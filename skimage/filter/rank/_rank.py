@@ -40,13 +40,10 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
     if image is out:
         raise NotImplementedError("Cannot perform rank operation in place.")
 
-    if image.dtype == np.uint8:
-        if func8 is None:
-            raise TypeError("Not implemented for uint8 image.")
-        if out is None:
-            out = np.zeros(image.shape, dtype=np.uint8)
-        func8(image, selem, shift_x=shift_x, shift_y=shift_y,
-              mask=mask, out=out)
+    is_8bit = image.dtype in (np.uint8, np.int8)
+
+    if func8 is not None and (is_8bit or func16 is None):
+        out = _apply8(func8, image, selem, out, mask, shift_x, shift_y)
     elif image.dtype == np.uint16:
         if func16 is None:
             raise TypeError("Not implemented for uint16 image.")
@@ -60,6 +57,15 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
     else:
         raise TypeError("Only uint8 and uint16 image supported.")
 
+    return out
+
+
+def _apply8(func8, image, selem, out, mask, shift_x, shift_y):
+    if out is None:
+        out = np.zeros(image.shape, dtype=np.uint8)
+    image = img_as_ubyte(image)
+    func8(image, selem, shift_x=shift_x, shift_y=shift_y,
+          mask=mask, out=out)
     return out
 
 
