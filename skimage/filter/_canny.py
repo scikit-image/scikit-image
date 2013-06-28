@@ -158,7 +158,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
         raise TypeError("The input 'image' must be a two-dimensional array.")
 
     if low_threshold is None:
-        low_threshold = 0.1 * dtype_limits(image)[0]
+        low_threshold = 0.1 * dtype_limits(image)[1]
 
     if high_threshold is None:
         high_threshold = 0.2 * dtype_limits(image)[1]
