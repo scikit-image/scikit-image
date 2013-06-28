@@ -5,23 +5,23 @@ import heapq
 from skimage.morphology import erosion, disk
 
 
-BAND = 0
+BAND = 1
 
 
-def generate_flags(mask):
+def generate_flags(_mask):
     """Initialization:
     All pixels are classified into 1 of the following flags:
-    # BAND - denoted by an integer value of 0
-    # KNOWN - denoted by an integer value of 1
+    # KNOWN - denoted by an integer value of 0
+    # BAND - denoted by an integer value of 1
     # INSIDE - denoted by an integer value of 2
 
     Depending on the flag value, that is, if flag is BAND or KNOWN
-    T is set to 0 and for flag equal to INSIDE, T is set to 1.0e6,
+    u is set to 0 and for flag equal to INSIDE, u is set to 1.0e6,
     arbitrarily large value.
 
     Parameters
     ----------
-    mask : ndarray
+    mask : ndarray of bool
         This array is cast to uint8 and normalized to 1 before processing.
 
     Returns
@@ -30,11 +30,11 @@ def generate_flags(mask):
         It cosists of either 0, 1 or 2 according to conditions above.
     """
 
-    mask = np.where(mask, 1, 0).astype(np.uint8)
+    mask = _mask.astype(np.uint8)
     inside = erosion(mask, disk(1))
     border = np.logical_xor(mask, inside).astype(np.uint8)
 
-    flag = 1 - border + inside
+    flag = border + (2 * inside)
     u = inside * 1.0e6
 
     return flag, u
