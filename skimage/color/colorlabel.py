@@ -5,6 +5,7 @@ import numpy as np
 
 from skimage import img_as_float
 from skimage._shared import six
+from skimage._shared.six.moves import zip
 from .colorconv import rgb2gray, gray2rgb
 from . import rgb_colors
 
@@ -88,7 +89,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
             bg_color = _rgb_vector(bg_color)
             color_cycle = itertools.chain(bg_color, color_cycle)
 
-    for c, i in itertools.izip(color_cycle, labels):
+    for c, i in zip(color_cycle, labels):
         mask = (label == i)
         colorized[mask] = c * alpha + colorized[mask] * (1 - alpha)
 
