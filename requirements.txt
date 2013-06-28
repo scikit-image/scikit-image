@@ -1,0 +1,3 @@
+cython>=0.15
+matplotlib>=1.0
+numpy>=1.6

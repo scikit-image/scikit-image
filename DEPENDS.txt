@@ -7,6 +7,11 @@ Build Requirements
 `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
 examples in the documentation.
 
+If you like to use pip in a virtualenv, you can do the following to build the
+development version of scikit-image:
+$ pip install -r requirements.txt
+$ python setup.py install
+
 Runtime requirements
 --------------------
 * `SciPy >= 0.10 <http://scipy.org>`__
