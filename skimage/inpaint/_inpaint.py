@@ -63,13 +63,13 @@ def inpaint_point(i, j, image, flag, u, epsilon):
                     cart_d = (j_nb - j) * (j_nb - j) + (i_nb - i) * (i_nb - i)
                     if (flag[i_nb, j_nb] is not INSIDE and
                             cart_d <= epsilon ** 2):
-                        ry = i - i_nb
-                        rx = j - j_nb
+                        rx = i - i_nb
+                        ry = j - j_nb
 
                         dst = 1. / ((rx * rx + ry * ry) *
                                     np.sqrt((rx * rx + ry * ry)))
                         lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
-                        dirc = rx * gradUx
+                        dirc = rx * gradUx + ry * gradUy
 
                         if abs(dirc) <= 0.01:
                             dirc = 1.0e-6
