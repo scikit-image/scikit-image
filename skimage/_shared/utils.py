@@ -1,5 +1,6 @@
 import warnings
 import functools
+import sys
 
 from . import six
 
@@ -54,3 +55,10 @@ class deprecated(object):
             wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
 
         return wrapped
+
+
+def get_bound_method_class(m):
+    """Return the class for a bound method.
+
+    """
+    return m.im_class if sys.version < '3' else m.__self__.__class__

@@ -4,6 +4,7 @@ from scipy import ndimage, spatial
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
 
+from skimage._shared.utils import get_bound_method_class
 
 class GeometricTransform(object):
     """Perform geometric transformations on a set of coordinates.
@@ -1009,8 +1010,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         if inverse_map in HOMOGRAPHY_TRANSFORMS:
             matrix = inverse_map._matrix
         elif hasattr(inverse_map, '__name__') \
-                and inverse_map.__name__ == 'inverse' \
-                and inverse_map.im_class in HOMOGRAPHY_TRANSFORMS:
+             and inverse_map.__name__ == 'inverse' \
+             and get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS:
             matrix = np.linalg.inv(inverse_map.im_self._matrix)
         if matrix is not None:
             # transform all bands
