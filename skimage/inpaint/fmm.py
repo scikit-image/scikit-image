@@ -1,51 +1,14 @@
-__all__ = ['fast_marching_method', 'eikonal']
+__all__ = ['inpaint', 'fast_marching_method', 'eikonal']
 
 import numpy as np
 import _heap
 import _inpaint
 from heapq import heappop, heappush
+from skimage.morphology import dilation, square
 
 KNOWN = 0
 BAND = 1
 INSIDE = 2
-
-
-def fast_marching_method(image, mask, epsilon, negate):
-    """Fast Marching Method implementation based on the algorithm outlined in
-    the paper by Telea.
-    """
-
-    heap = []
-
-    flag, u = _heap.generate_flags(mask)
-    heap = _heap.generate_heap(flag, u)
-
-    while len(heap):
-        i, j = heappop(heap)[1]
-        flag[i, j] = KNOWN
-
-        if ((i <= 1) or (j <= 1) or (i > mask.shape[0] - 1)
-                or (j > mask.shape[1] - 1)):
-            continue
-
-        for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
-            if flag[i_nb, j_nb] is INSIDE:
-                u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb,
-                                            i_nb, j_nb - 1, flag, u),
-                                    eikonal(i_nb + 1, j_nb,
-                                            i_nb, j_nb - 1, flag, u),
-                                    eikonal(i_nb - 1, j_nb,
-                                            i_nb, j_nb + 1, flag, u),
-                                    eikonal(i_nb + 1, j_nb,
-                                            i_nb, j_nb + 1, flag, u))
-                if negate is False:
-                    _inpaint.inpaint_point(i_nb, j_nb, image, flag, u, epsilon)
-
-                flag[i_nb, j_nb] = BAND
-                heappush(heap, [u[i_nb, j_nb], (i_nb, j_nb)])
-
-        if negate is True:
-            u[i, j] = -u[i, j]
 
 
 def eikonal(i1, j1, i2, j2, flag, u):
@@ -69,3 +32,71 @@ def eikonal(i1, j1, i2, j2, flag, u):
         sol = 1 + min_u
 
     return sol
+
+
+def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
+    """Fast Marching Method implementation based on the algorithm outlined in
+    the paper by Telea.
+    """
+
+    while len(heap):
+        i, j = heappop(heap)[1]
+        flag[i, j] = KNOWN
+
+        if ((i <= 1) or (j <= 1) or (i > image.shape[0] - 1)
+                or (j > image.shape[1] - 1)):
+            continue
+
+        for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
+            if flag[i_nb, j_nb] is INSIDE:
+                u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb,
+                                            i_nb, j_nb - 1, flag, u),
+                                    eikonal(i_nb + 1, j_nb,
+                                            i_nb, j_nb - 1, flag, u),
+                                    eikonal(i_nb - 1, j_nb,
+                                            i_nb, j_nb + 1, flag, u),
+                                    eikonal(i_nb + 1, j_nb,
+                                            i_nb, j_nb + 1, flag, u))
+                if negate is False:
+                    image[i_nb - 1, j_nb - 1, :] = _inpaint.inpaint_point(i_nb,
+                                                            j_nb, image, flag, u, epsilon)
+
+                flag[i_nb, j_nb] = BAND
+                heappush(heap, [u[i_nb, j_nb], (i_nb, j_nb)])
+
+        if negate is True:
+            u[i, j] = -u[i, j]
+
+    if negate is True:
+        return u
+    else:
+        return image
+
+
+def inpaint(input_image, inpaint_mask, epsilon=5):
+    """
+    """
+    # TODO: Error checks. Image either 3 or 1 channel. All dims same
+    if input_image.ndim == 3:
+        m, n, channel = input_image.shape
+        image = np.zeros((m + 2, n + 2, channel), np.uint8)
+    else:
+        m, n = input_image.shape
+        image = np.zeros((m + 2, n + 2), np.uint8)
+    mask = np.zeros((m + 2, n + 2), bool)
+    image[1: -1, 1: -1] = input_image
+    mask[1: -1, 1: -1] = inpaint_mask
+
+    flag = _heap.init_flag(mask)
+
+    outside = dilation(mask, square(2 * epsilon + 1))
+    outside_band = np.logical_xor(outside, mask).astype(np.uint8)
+    out_flag = _heap.init_flag(mask)
+    u = _heap.init_u(flag)
+    out_heap = _heap.generate_heap(out_flag, u)
+    u = fast_marching_method(outside_band, out_flag, u, out_heap, negate=True)
+
+    heap = _heap.generate_heap(flag, u)
+    output = fast_marching_method(image, flag, u, heap, negate=False, epsilon)
+
+    return output
