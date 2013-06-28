@@ -2,15 +2,13 @@ Build Requirements
 ------------------
 * `Python >= 2.5 <http://python.org>`__
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
-* `Cython >= 0.15 <http://www.cython.org/>`__
+* `Cython >= 0.17 <http://www.cython.org/>`__
 
 `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
 examples in the documentation.
 
-If you like to use pip in a virtualenv, you can do the following to build the
-development version of scikit-image:
+You can use pip to automatically install the base dependencies as follows:
 $ pip install -r requirements.txt
-$ python setup.py install
 
 Runtime requirements
 --------------------
