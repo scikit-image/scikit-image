@@ -138,13 +138,29 @@ class LineProfile(PlotPlugin):
                                         scan_data[:, 2], 'b-')
 
 
+def _calc_horiz(img, x1, x2, y1, y2, linewidth):
+    # Quick calculation if perfectly horizontal
+    pixels = img[min(y1, y2): max(y1, y2) + 1,
+                 x1 - linewidth / 2: x1 + linewidth / 2 + 1]
+    intensities = pixels.mean(axis=1)
+    return intensities
+
+
+def _calc_vert(img, x1, x2, y1, y2, linewidth):
+    # Quick calculation if perfectly vertical
+    pixels = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
+                 min(x1, x2): max(x1, x2) + 1]
+    intensities = pixels.mean(axis=0)
+    return intensities
+
+
 def profile_line(img, end_points, linewidth=1):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
-    img : 2d array
-        The image.
+    img : 2d or 3d array
+        The image, in grayscale (2d) or RGB (3d) format.
     end_points: (2, 2) list
         End points ((x1, y1), (x2, y2)) of scan line.
     linewidth: int
@@ -160,45 +176,28 @@ def profile_line(img, end_points, linewidth=1):
     x1, y1 = point1 = np.asarray(point1, dtype=float)
     x2, y2 = point2 = np.asarray(point2, dtype=float)
     dx, dy = point2 - point1
+    channels = 1
+    if img.ndim == 3:
+        channels = 3
 
     # Quick calculation if perfectly horizontal or vertical
     if x1 == x2:
-        if img.ndim == 2:
-            pixels = img[min(y1, y2): max(y1, y2) + 1,
-                         x1 - linewidth / 2: x1 + linewidth / 2 + 1]
-            return pixels.mean(axis=1)[:, np.newaxis]
-        else:
-            for i in range(3):
-                try:
-                    temp = img[min(y1, y2): max(y1, y2) + 1,
-                               x1 - linewidth / 2: x1 + linewidth / 2 + 1, i]
-                    pixels = np.concatenate((pixels, temp[..., np.newaxis]),
-                                            axis=2)
-                    del temp
-                except:
-                    pixels = img[min(y1, y2): max(y1, y2) + 1,
-                                 x1 - linewidth / 2: x1 + linewidth / 2 + 1,
-                                 i][..., np.newaxis]
-            return pixels.mean(axis=1)
+        for i in range(channels):
+            try:
+                intensities = np.concatenate(
+                    (intensities,
+                     _calc_horiz(img, x1, x2, y1, y2, linewidth)), axis=1)
+            except:
+                intensities = _calc_horiz(img, x1, x2, y1, y2, linewidth)
 
     elif y1 == y2:
-        if img.ndim == 2:
-            pixels = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
-                         min(x1, x2): max(x1, x2) + 1]
-            return pixels.mean(axis=1)[..., np.newaxis]
-        else:
-            for i in range(3):
-                try:
-                    temp = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
-                               min(x1, x2): max(x1, x2) + 1, i]
-                    pixels = np.concatenate((pixels, temp[..., np.newaxis]),
-                                            axis=2)
-                    del temp
-                except:
-                    pixels = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
-                                 min(x1, x2): max(x1, x2) + 1,
-                                 i][..., np.newaxis]
-            return pixels.mean(axis=0)
+        for i in range(channels):
+            try:
+                intensities = np.concatenate(
+                    (intensities,
+                     _calc_vert(img, x1, x2, y1, y2, linewidth)), axis=1)
+            except:
+                intensities = _calc_vert(img, x1, x2, y1, y2, linewidth)
 
     theta = np.arctan2(dy, dx)
     a = dy / dx
@@ -214,9 +213,9 @@ def profile_line(img, end_points, linewidth=1):
 
     perp_lines = np.array([perp_ys, perp_xs])
     if img.ndim == 3:
-        pixels = np.zeros((perp_lines.shape[1], y_width * 2 + 1, 3))
-        for i in range(3):
-            pixels[..., i] = ndi.map_coordinates(img[..., i], perp_lines)
+        pixels = [ndi.map_coordinates(img[..., i], perp_lines)
+                  for i in range(3)]
+        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
         pixels = ndi.map_coordinates(img, perp_lines)
         pixels = pixels[..., np.newaxis]
