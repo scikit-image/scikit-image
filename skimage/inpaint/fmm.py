@@ -50,6 +50,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
+
     u_out = 1.0e6
     u1 = u[i1, j1]
     u2 = u[i2, j2]
@@ -132,7 +133,6 @@ def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
 
         for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
             if not flag[i_nb, j_nb] == KNOWN:
-
                 u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb,
                                             i_nb, j_nb - 1, flag, u),
                                     eikonal(i_nb + 1, j_nb,
