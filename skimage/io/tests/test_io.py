@@ -28,8 +28,10 @@ def test_imread_url():
     image = io.imread(image_url)
     assert image.shape == (512, 512)
 
+
 def test_imsave_filelike():
-    image = np.array([[0, 0], [0, 0]], dtype=float)
+    shape = (2, 2)
+    image = np.zeros(shape)
     s = StringIO()
 
     # save to file-like object
@@ -37,8 +39,10 @@ def test_imsave_filelike():
 
     # read from file-like object
     s.seek(0)
-    image = io.imread(s)
-    assert image.shape == (2, 2)
+    out = io.imread(s)
+    assert out.shape == shape
+    np.testing.assert_allclose(out, image)
+
 
 if __name__ == "__main__":
     run_module_suite()
