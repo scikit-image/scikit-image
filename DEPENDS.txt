@@ -7,8 +7,9 @@ Build Requirements
 `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
 examples in the documentation.
 
-You can use pip to automatically install the base dependencies as follows:
-$ pip install -r requirements.txt
+You can use pip to automatically install the base dependencies as follows::
+
+    $ pip install -r requirements.txt
 
 Runtime requirements
 --------------------
