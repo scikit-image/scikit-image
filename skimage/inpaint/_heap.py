@@ -2,8 +2,6 @@ __all__ = ['generate_heap', 'display_heap']
 
 import numpy as np
 import heapq
-from functools import total_ordering
-from skimage.util import img_as_ubyte
 from skimage.morphology import erosion, disk
 
 
@@ -37,20 +35,20 @@ def generate_flags(mask):
     border = np.logical_xor(mask, inside).astype(np.uint8)
 
     flag = 1 - border + inside
-    T = inside * 1.0e6
+    u = inside * 1.0e6
 
-    return flag, T
+    return flag, u
 
 
-def generate_heap(flag, T):
+def generate_heap(flag, u):
     """Initialization:
     All pixels are classified into 1 of the following flags:
     # BAND - denoted by an integer value of 0
     # KNOWN - denoted by an integer value of 1
     # INSIDE - denoted by an integer value of 2
 
-    Depending on the flag value, that is, if flag is BAND or KNOWN
-    T is set to 0 and for flag equal to INSIDE, T is set to 1.0e6,
+    Depending on the flag value, that is, if `flag` is BAND or KNOWN
+    `u` or speed is set to 0 and for flag equal to INSIDE, `u` is set to 1.0e6,
     arbitrarily large value.
 
     Parameters
@@ -62,29 +60,29 @@ def generate_heap(flag, T):
     Returns
     -------
     heap : list of HeapData objects
-        It consists of the 'T' values and the index.
+        It consists of the `u` or speed values and the index.
     """
 
     heap = []
 
     indices = np.transpose(np.where(flag == BAND))
     for z in indices:
-        heapq.heappush(heap, HeapElem(T[tuple(z)], z))
+        heapq.heappush(heap, (u[tuple(z)], z))
 
     return heap
 
 
 def display_heap(heap):
     for i in heap:
-        print i.t, i.index
+        print i[0], i[1]
 
 
-@total_ordering
-class HeapElem(object):
-    def __init__(self, t, index):
-        self.t, self.index = t, tuple(index)
+# @total_ordering
+# class HeapElem(object):
+#     def __init__(self, t, index):
+#         self.t, self.index = t, tuple(index)
 
-    def __le__(self, other):
-        if not isinstance(other, type(self)):
-            return NotImplemented
-        return self.t <= other.t
+#     def __le__(self, other):
+#         if not isinstance(other, type(self)):
+#             return NotImplemented
+#         return self.t <= other.t
