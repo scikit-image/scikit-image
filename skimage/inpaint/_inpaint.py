@@ -19,10 +19,17 @@ def grad_func(i, j, flag, array, channel=-1):
     """
 
     if channel is 0 or channel is 1 or channel is 2:
+        #TODO: boundary restrictions
         u = array[:, :, channel]
+        i_nbl = i - 1 + (i == 1)
+        i_nbh = i - 1 - (i == u.shape[0] - 2)
+        j_nbl = j - 1 + (j == 1)
+        j_nbh = j - 1 - (j == u.shape[1] - 2)
     elif channel is -1:
         u = array
+        i_nbl, i_nbh, j_nbl, j_nbh = i, i, j, j
 
+# TODO: use i_nb and j_nb instead of k, l
     if flag[i, j + 1] is not INSIDE and flag[i, j - 1] is not INSIDE:
         gradUx = (u[i, j + 1] - u[i, j - 1]) * 0.5
     elif flag[i, j + 1] is not INSIDE and flag[i, j - 1] is INSIDE:
@@ -47,37 +54,33 @@ def grad_func(i, j, flag, array, channel=-1):
 def inpaint_point(i, j, image, flag, u, epsilon):
     gradIx, gradIy = 0, 0
     rx, ry = 0, 0
-    k = i - epsilon
-    l = j - epsilon
+    i_nb = i - epsilon
+    j_nb = j - epsilon
     Jx, Jy, norm = 0, 0, 0
     #If the input image is 3 channel. TODO: support for a single channel
     for color in 0, 1, 2:
         gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
 
-        for k in xrange(i - epsilon, i + epsilon):
-            km = k - 1 + (k == 1)
-            kp = k - 1 - (k == u.shape[0] - 2)
-            for l in xrange(j - epsilon, j + epsilon):
-                lm = l - 1 + (l == 1)
-                lp = l - 1 - (l == u.shape[1] - 2)
-                if (k > 0 and l > 0 and k > (u.shape[0] - 1)
-                        and l > (u.shape[1] - 1)):
-                    cartesian_distance = (l - j) * (l - j) + (k - i) * (k - i)
-                    if (flag[k, l] is not INSIDE and
-                            cartesian_distance <= epsilon ** 2):
-                        ry = i - k
-                        rx = j - l
+        for i_nb in xrange(i - epsilon, i + epsilon):
+            for j_nb in xrange(j - epsilon, j + epsilon):
+                if (i_nb > 0 and j_nb > 0 and i_nb < (u.shape[0] - 1)
+                        and j_nb < (u.shape[1] - 1)):
+                    cart_d = (j_nb - j) * (j_nb - j) + (i_nb - i) * (i_nb - i)
+                    if (flag[i_nb, j_nb] is not INSIDE and
+                            cart_d <= epsilon ** 2):
+                        ry = i - i_nb
+                        rx = j - j_nb
 
                         dst = 1. / ((rx * rx + ry * ry) *
                                     np.sqrt((rx * rx + ry * ry)))
-                        lev = 1. / (1 + abs(u[k, l] - u[i, j]))
+                        lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
                         dirc = rx * gradUx
 
                         if abs(dirc) <= 0.01:
                             dirc = 1.0e-6
                         weight = abs(dst * lev * dirc)
 
-                        gradIx, gradIy = grad_func(k, l, flag, image,
+                        gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
                                                    channel=color)
 
                         # if flag[k, l + 1] is not INSIDE:
@@ -113,3 +116,8 @@ def inpaint_point(i, j, image, flag, u, epsilon):
         sat = (Ia / norm + (Jx + Jy) /
               (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
         image[i - 1, j - 1, color] = sat
+
+
+def inpaint(input_image, inpaint_mask, range=6):
+    """
+    """
