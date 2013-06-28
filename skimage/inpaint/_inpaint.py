@@ -25,26 +25,33 @@ def grad_func(i, j, flag, array, channel=-1):
         i_nbh = i - 1 - (i == u.shape[0] - 2)
         j_nbl = j - 1 + (j == 1)
         j_nbh = j - 1 - (j == u.shape[1] - 2)
+        factor = 2.0
     elif channel is -1:
         u = array
+        factor = 0.5
         i_nbl, i_nbh, j_nbl, j_nbh = i, i, j, j
 
-# TODO: use i_nb and j_nb instead of k, l
     if flag[i, j + 1] is not INSIDE and flag[i, j - 1] is not INSIDE:
-        gradUx = (u[i, j + 1] - u[i, j - 1]) * 0.5
+        gradUx = (u[i_nbl, j_nbh + 1] - u[i_nbl, j_nbl - 1]) * factor
+
     elif flag[i, j + 1] is not INSIDE and flag[i, j - 1] is INSIDE:
-        gradUx = u[i, j + 1] - u[i, j]
+        gradUx = u[i_nbl, j_nbh + 1] - u[i_nbl, j_nbl]
+
     elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is not INSIDE:
-        gradUx = u[i, j] - u[i, j - 1]
+        gradUx = u[i_nbl, j_nbh] - u[i_nbl, j_nbl - 1]
+
     elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is INSIDE:
         gradUx = 0
 
     if flag[i + 1, j] is not INSIDE and flag[i - 1, j] is not INSIDE:
-        gradUy = (u[i + 1, j] - u[i - 1, j]) * 0.5
+        gradUy = (u[i_nbh + 1, j_nbl] - u[i_nbl - 1, j_nbl]) * factor
+
     elif flag[i + 1, j] is not INSIDE and flag[i - 1, j] is INSIDE:
-        gradUy = u[i + 1, j] - u[i, j]
+        gradUy = u[i_nbh + 1, j_nbl] - u[i_nbl, j_nbl]
+
     elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is not INSIDE:
-        gradUy = u[i, j] - u[i - 1, j]
+        gradUy = u[i_nbh, j_nbl] - u[i_nbl - 1, j_nbl]
+
     elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is INSIDE:
         gradUy = 0
 
@@ -108,7 +115,8 @@ def inpaint_point(i, j, image, flag, u, epsilon):
                         #               image[km - 1, lm, color])
                         # else:
                         #     gradIy = 0
-                        Ia = weight * image[km, lm, color]
+                        Ia = weight * image[i_nb - 1 + (i_nb == 1),
+                                            j_nb - 1 + (j_nb == 1), color]
                         Jx -= weight * gradIx * rx
                         Jy -= weight * gradIy * ry
                         norm += weight
