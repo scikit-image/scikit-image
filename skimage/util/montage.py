@@ -33,14 +33,14 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
         of equal shape (i.e. [height, width]).
 
     fill: float or 'mean', optional
-	    How to fill the 2-dimensional output array when sqrt(n_images)
-	    is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
+        How to fill the 2-dimensional output array when sqrt(n_images)
+        is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
 
     rescale_intensity: bool, optional
-	    Whether to rescale the intensity of each image to [0, 1].
-	
+        Whether to rescale the intensity of each image to [0, 1].
+
     output_shape: tuple, optional
-	    The desired aspect ratio for the montage (default is square).
+        The desired aspect ratio for the montage (default is square).
 
     Returns
     -------
@@ -84,10 +84,10 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
 
     # -- determine alpha
     if output_shape == (0, 0):
-	    alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
+        alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
     else:
-	    alpha_y = output_shape[0]
-	    alpha_x = output_shape[1]
+        alpha_y = output_shape[0]
+        alpha_x = output_shape[1]
 
     # -- fill missing patches
     if fill == 'mean':
