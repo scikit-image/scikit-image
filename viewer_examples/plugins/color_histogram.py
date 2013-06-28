@@ -5,5 +5,5 @@ from skimage import data
 
 image = data.load('color.png')
 viewer = ImageViewer(image)
-viewer += ColorHistogram()
+viewer += ColorHistogram(dock='right')
 viewer.show()
