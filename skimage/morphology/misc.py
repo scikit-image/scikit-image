@@ -66,7 +66,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
     if out.dtype == bool:
         selem = nd.generate_binary_structure(ar.ndim, connectivity)
-        ccs = np.zeros_like(ar, dtype=np.int)
+        ccs = np.zeros_like(ar, dtype=np.int32)
         nd.label(ar, selem, output=ccs)
     else:
         ccs = out
