@@ -71,9 +71,8 @@ def imsave(fname, arr, format_str=None):
         values in [0, 255], whereas floating-point arrays must be
         in [0, 1].
     format_str: str
-        Format to save as, this is required if using a file-like object;
-        this is optional if fname is a string and the format can be
-        derived from the extension.
+        Format to save as, this is defaulted to PNG if using a file-like
+        object; this will be derived from the extension if fname is a string
 
     Notes
     -----
@@ -103,6 +102,10 @@ def imsave(fname, arr, format_str=None):
 
         # Force all integers to bytes
         arr = arr.astype(np.uint8)
+
+    # default to PNG if file-like object
+    if not isinstance(fname, basestring) and format_str is None:
+        format_str = "PNG"
 
     img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
     img.save(fname, format=format_str)
