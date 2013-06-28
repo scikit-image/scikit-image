@@ -70,6 +70,13 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
      [ 10.   11.    5.5   5.5]]
     >>> print(arr_in.mean())
     5.5
+    >>> arr_out_nonsquare = montage2d(arr_in, output_shape = (3, 4))
+    >>> print(arr_out_nonsquare)
+    [[  0.    1.    4.    5. ]
+     [  2.    3.    6.    7. ]
+     [  8.    9.   10.   11. ]]
+    >>> print(arr_out_nonsquare.shape)
+    (3, 4)
     """
     assert arr_in.ndim == 3
 
