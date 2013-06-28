@@ -75,13 +75,4 @@ def generate_heap(flag, T):
 
 def display_heap(heap):
     for i in heap:
-        print i.t, i.index
-
-@total_ordering
-class HeapElem(object):
-    def __init__(self, t, index):
-        self.data = (t, tuple(index))
-        self.t, self.index = self.data[0], self.data[1]
-    def __le__(self, other):
-        if not isinstance(other, type(self)): return NotImplemented
-        return self.data <= other.data
+        print i[0], i[1]
