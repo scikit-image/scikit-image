@@ -60,7 +60,7 @@ class LineProfile(PlotPlugin):
         if not self._limit_type is None:
             self.ax.set_ylim(self.limits)
 
-        h, w = image.shape
+        h, w = image.shape[0:2]
         x = [w / 3, 2 * w / 3]
         y = [h / 2] * 2
 
@@ -71,7 +71,9 @@ class LineProfile(PlotPlugin):
         self.line_tool.end_points = np.transpose([x, y])
 
         scan_data = profile_line(image, self.line_tool.end_points)
-        self.profile = self.ax.plot(scan_data, 'k-')[0]
+
+        self.reset_axes(scan_data)
+
         self._autoscale_view()
 
     def help(self):
@@ -90,7 +92,7 @@ class LineProfile(PlotPlugin):
         profile: 1d array
             Profile of intensity values.
         """
-        profile = self.profile.get_ydata()
+        profile = self.profile[0].get_ydata()
         return self.line_tool.end_points, profile
 
     def _autoscale_view(self):
@@ -105,16 +107,35 @@ class LineProfile(PlotPlugin):
         scan = profile_line(self.image_viewer.original_image, end_points,
                             linewidth=self.line_tool.linewidth)
 
-        self.profile.set_xdata(np.arange(scan.shape[0]))
-        self.profile.set_ydata(scan)
+        try:
+            if scan[1].shape != len(self.profile):
+                self.reset_axes(scan)
+        except:
+            self.reset_axes(scan)
+
+        for i in range(len(scan[0])):
+            self.profile[i].set_xdata(np.arange(scan.shape[0]))
+            self.profile[i].set_ydata(scan[:, i])
 
         self.ax.relim()
 
         if self.useblit:
-            self.ax.draw_artist(self.profile)
+            self.ax.draw_artist(self.profile[0])
 
         self._autoscale_view()
         self.redraw()
+
+    def reset_axes(self, scan_data):
+        # Clear lines out
+        for line in self.ax.lines:
+            self.ax.lines = []
+
+        if scan_data.shape[1] == 1:
+            self.profile = self.ax.plot(scan_data, 'k-')
+        else:
+            self.profile = self.ax.plot(scan_data[:, 0], 'r-',
+                                        scan_data[:, 1], 'g-',
+                                        scan_data[:, 2], 'b-')
 
 
 def profile_line(img, end_points, linewidth=1):
@@ -140,17 +161,44 @@ def profile_line(img, end_points, linewidth=1):
     x2, y2 = point2 = np.asarray(point2, dtype=float)
     dx, dy = point2 - point1
 
-    # Quick calculation if perfectly horizontal or vertical (remove?)
+    # Quick calculation if perfectly horizontal or vertical
     if x1 == x2:
-        pixels = img[min(y1, y2): max(y1, y2) + 1,
-                     x1 - linewidth / 2:  x1 + linewidth / 2 + 1]
-        intensities = pixels.mean(axis=1)
-        return intensities
+        if img.ndim == 2:
+            pixels = img[min(y1, y2): max(y1, y2) + 1,
+                         x1 - linewidth / 2: x1 + linewidth / 2 + 1]
+            return pixels.mean(axis=1)[:, np.newaxis]
+        else:
+            for i in range(3):
+                try:
+                    temp = img[min(y1, y2): max(y1, y2) + 1,
+                               x1 - linewidth / 2: x1 + linewidth / 2 + 1, i]
+                    pixels = np.concatenate((pixels, temp[..., np.newaxis]),
+                                            axis=2)
+                    del temp
+                except:
+                    pixels = img[min(y1, y2): max(y1, y2) + 1,
+                                 x1 - linewidth / 2: x1 + linewidth / 2 + 1,
+                                 i][..., np.newaxis]
+            return pixels.mean(axis=1)
+
     elif y1 == y2:
-        pixels = img[y1 - linewidth / 2:  y1 + linewidth / 2 + 1,
-                     min(x1, x2): max(x1, x2) + 1]
-        intensities = pixels.mean(axis=0)
-        return intensities
+        if img.ndim == 2:
+            pixels = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
+                         min(x1, x2): max(x1, x2) + 1]
+            return pixels.mean(axis=1)[..., np.newaxis]
+        else:
+            for i in range(3):
+                try:
+                    temp = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
+                               min(x1, x2): max(x1, x2) + 1, i]
+                    pixels = np.concatenate((pixels, temp[..., np.newaxis]),
+                                            axis=2)
+                    del temp
+                except:
+                    pixels = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
+                                 min(x1, x2): max(x1, x2) + 1,
+                                 i][..., np.newaxis]
+            return pixels.mean(axis=0)
 
     theta = np.arctan2(dy, dx)
     a = dy / dx
@@ -165,7 +213,17 @@ def profile_line(img, end_points, linewidth=1):
     perp_xs = - a * perp_ys + (line_x + a * line_y)[:, np.newaxis]
 
     perp_lines = np.array([perp_ys, perp_xs])
-    pixels = ndi.map_coordinates(img, perp_lines)
+    if img.ndim == 3:
+        pixels = np.zeros((perp_lines.shape[1], y_width * 2 + 1, 3))
+        for i in range(3):
+            pixels[..., i] = ndi.map_coordinates(img[..., i], perp_lines)
+    else:
+        pixels = ndi.map_coordinates(img, perp_lines)
+        pixels = pixels[..., np.newaxis]
+
     intensities = pixels.mean(axis=1)
 
-    return intensities
+    if intensities.ndim == 1:
+        return intensities[..., np.newaxis]
+    else:
+        return intensities
