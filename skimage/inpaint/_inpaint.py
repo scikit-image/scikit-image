@@ -3,94 +3,112 @@ __all__ = ['inpaint_point']
 import numpy as np
 
 
-def inpaint_point(i, j, image, flag, T, epsilon):
-    gradT = Vector(0, 0)
-    gradI = Vector(0, 0)
-    r = Vector(0, 0)
-    k = i - epsilon
-    l = j - epsilon
+def grad_func(i, j, flag, array, channel=-1):
+    """This function calculates the gradient of the speed/image of a pixel
+    depending on the value of the flag of its neighbours. The gradient
+    is computed using Central Differences.
+    """
 
-    for color in 1, 2, 3:
-        if f[i, j+1] is not INSIDE:
-            if f[i, j-1] is not INSIDE:
-                gradT.x = (T[i, j+1] - T[i, j-1]) * 0.5
-            else:
-                gradT.x = T[i, j+1] - T[i, j]
-        elif flag[i, j-1] is not INSIDE:
-            gradT.x = T[i, j] - T[i, j-1]
-        else:
-            gradT.x = 0
+    if channel is 0 or channel is 1 or channel is 2:
+        #TODO: boundary restrictions
+        u = array[:, :, channel]
+        i_nbl = i - 1 + (i == 1)
+        i_nbh = i - 1 - (i == u.shape[0] - 2)
+        j_nbl = j - 1 + (j == 1)
+        j_nbh = j - 1 - (j == u.shape[1] - 2)
+    elif channel is -1:
+        u = array
+        i_nbl, i_nbh, j_nbl, j_nbh = i, i, j, j
 
-        if flag[i+1, j] is not INSIDE:
-            if flag[i-1, j] is not INSIDE:
-                gradT.y = (T[i+1, j] - T[i-1, j]) * 0.5
-            else:
-                gradT.y = T[i+1, j] - T[i, j]
-        elif flag[i-1, j] is not INSIDE:
-            gradT.y = T[i, j] - T[i-1, j]
-        else:
-            gradT.y = 0
+# TODO: use i_nb and j_nb instead of k, l
+    if flag[i, j + 1] is not INSIDE and flag[i, j - 1] is not INSIDE:
+        gradUx = (u[i, j + 1] - u[i, j - 1]) * 0.5
+    elif flag[i, j + 1] is not INSIDE and flag[i, j - 1] is INSIDE:
+        gradUx = u[i, j + 1] - u[i, j]
+    elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is not INSIDE:
+        gradUx = u[i, j] - u[i, j - 1]
+    elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is INSIDE:
+        gradUx = 0
 
-        for k in xrange(i - epsilon, i + epsilon):
-            km = k - 1 + (k == 1)
-            kp = k - 1 - (k == T.shape[0] - 2)
-            for l in xrange(j - epsilon, j + epsilon):
-                km = l - 1 + (l == 1)
-                kp = l - 1 - (l == T.shape[1] - 2)
-                if (k > 0 and l > 0 and k > (T.shape[0] - 1)
-                    and l > (T.shape[1] - 1)):
-                    if (flag[k, l] is not INSIDE and 
-                        (((l-j) * (l-j) + (k-i) * (k-i)) <= epsilon ** 2)):
-                        r.y = i - k
-                        r.x = j - l
+    if flag[i + 1, j] is not INSIDE and flag[i - 1, j] is not INSIDE:
+        gradUy = (u[i + 1, j] - u[i - 1, j]) * 0.5
+    elif flag[i + 1, j] is not INSIDE and flag[i - 1, j] is INSIDE:
+        gradUy = u[i + 1, j] - u[i, j]
+    elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is not INSIDE:
+        gradUy = u[i, j] - u[i - 1, j]
+    elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is INSIDE:
+        gradUy = 0
 
-                        dst = 1. / (r.VectorLength() * np.sqrt(r.VectorLength()))
-                        lev = 1. / (1 + abs(T[k, l] - T[i, j]))
-                        dirc = r.VectorScalMult(gradT)
-
-                        if abs(dirc) <= 0.01: dirc = 1.0e-6
-                        w = abs(dst * lev * dirc)
-
-                        if flag[k, l+1] is not INSIDE:
-                            if flag[k, l-1] is not INSIDE:
-                                gradI.x = (image[km, lp+1, color] -
-                                           image[km, lm-1, color]) * 2.0
-                            else:
-                                gradI.x = (image[km, lp+1, color] -
-                                           image[km, lm, color])
-                        elif flag[i, j-1] is not INSIDE:
-                            gradI.x = (image[km, lp, color] -
-                                       image[km, lm-1, color])
-                        else:
-                            gradT.x = 0
-
-                        if flag[k+1, l] is not INSIDE:
-                            if flag[k-1, l] is not INSIDE:
-                                gradI.y = (image[kp+1, lm, color] -
-                                           image[km-1, lm, color]) * 2.0
-                            else:
-                                gradI.y = (image[kp+1, lm, color] -
-                                           image[km, lm, color])
-                        elif flag[i, j-1] is not INSIDE:
-                            gradI.y = (image[kp, lm, color] -
-                                       image[km-1, lm, color])
-                        else:
-                            gradT.y = 0
-                        Ia = w * image[km, lm, color]
-                        Jx -= w * gradI.x * r.x
-                        Jy -= w * gradI.y * r.y
-                        s  += w
-
-        sat = (Ia/s + (Jx+Jy) / (np.sqrt(Jx*Jx + Jy*Jy) + 1.0e-20) + 0.5)
-        image[i-1, j-1, color] = sat
+    return gradUx, gradUy
 
 
-class Vector(object):
-    def __init__(self, x, y):
-        self.x, self.y = x, y
+def inpaint_point(i, j, image, flag, u, epsilon):
+    gradIx, gradIy = 0, 0
+    rx, ry = 0, 0
+    i_nb = i - epsilon
+    j_nb = j - epsilon
+    Jx, Jy, norm = 0, 0, 0
+#If the input image is 3 channel. TODO: support for a single channel
+    for color in 0, 1, 2:
+        gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
 
-    def VectorScalMult(self, other):
-        return self.x * other.x + self.y * other.y
+        for i_nb in xrange(i - epsilon, i + epsilon):
+            for j_nb in xrange(j - epsilon, j + epsilon):
+                if (i_nb > 0 and j_nb > 0 and i_nb < (u.shape[0] - 1)
+                        and j_nb < (u.shape[1] - 1)):
+                    cart_d = (j_nb - j) * (j_nb - j) + (i_nb - i) * (i_nb - i)
+                    if (flag[i_nb, j_nb] is not INSIDE and
+                            cart_d <= epsilon ** 2):
+                        ry = i - i_nb
+                        rx = j - j_nb
 
-    def VectorLength(self):
-        return self.x * self.x + self.y * self.y
+                        dst = 1. / ((rx * rx + ry * ry) *
+                                    np.sqrt((rx * rx + ry * ry)))
+                        lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
+                        dirc = rx * gradUx
+
+                        if abs(dirc) <= 0.01:
+                            dirc = 1.0e-6
+                        weight = abs(dst * lev * dirc)
+
+                        gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
+                                                   channel=color)
+
+                        # if flag[k, l + 1] is not INSIDE:
+                        #     if flag[k, l - 1] is not INSIDE:
+                        #         gradIx = (image[km, lp + 1, color] -
+                        #                   image[km, lm - 1, color]) * 2.0
+                        #     else:
+                        #         gradIx = (image[km, lp + 1, color] -
+                        #                   image[km, lm, color])
+                        # elif flag[i, j - 1] is not INSIDE:
+                        #     gradIx = (image[km, lp, color] -
+                        #               image[km, lm - 1, color])
+                        # else:
+                        #     gradIx = 0
+
+                        # if flag[k + 1, l] is not INSIDE:
+                        #     if flag[k - 1, l] is not INSIDE:
+                        #         gradIy = (image[kp + 1, lm, color] -
+                        #                   image[km - 1, lm, color]) * 2.0
+                        #     else:
+                        #         gradIy = (image[kp + 1, lm, color] -
+                        #                   image[km, lm, color])
+                        # elif flag[i, j - 1] is not INSIDE:
+                        #     gradIy = (image[kp, lm, color] -
+                        #               image[km - 1, lm, color])
+                        # else:
+                        #     gradIy = 0
+                        Ia = weight * image[km, lm, color]
+                        Jx -= weight * gradIx * rx
+                        Jy -= weight * gradIy * ry
+                        norm += weight
+
+        sat = (Ia / norm + (Jx + Jy) /
+              (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
+        image[i - 1, j - 1, color] = sat
+
+
+def inpaint(input_image, inpaint_mask, range=6):
+    """
+    """
