@@ -2,7 +2,7 @@ from warnings import warn
 
 from skimage.util.dtype import dtype_range
 from .base import Plugin
-from ..utils import ClearColormap
+from ..utils import ClearColormap, update_axes_image
 
 
 __all__ = ['OverlayPlugin']
@@ -66,7 +66,8 @@ class OverlayPlugin(Plugin):
             self._overlay_plot = ax.imshow(image, cmap=self.cmap,
                                            vmin=vmin, vmax=vmax)
         else:
-            self._overlay_plot.set_array(image)
+            update_axes_image(self._overlay_plot, image)
+
         self.image_viewer.redraw()
 
     @property
