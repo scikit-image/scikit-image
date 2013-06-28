@@ -1,4 +1,4 @@
-__all__ = ['inpaint_point']
+__all__ = ['grad_func', 'inpaint_point']
 
 import numpy as np
 from skimage.morphology import disk
@@ -19,7 +19,6 @@ def grad_func(i, j, flag, array, channel=-1):
     """
 
     if channel is 0 or channel is 1 or channel is 2:
-        #TODO: boundary restrictions
         u = array[:, :, channel]
         i_nbl = i - 1 + (i == 1)
         i_nbh = i - 1 - (i == u.shape[0] - 2)
@@ -30,28 +29,22 @@ def grad_func(i, j, flag, array, channel=-1):
         u = array
         factor = 0.5
         i_nbl, i_nbh, j_nbl, j_nbh = i, i, j, j
-
+# TODO: Try dict implementation instead of if...elif
     if flag[i, j + 1] is not INSIDE and flag[i, j - 1] is not INSIDE:
         gradUx = (u[i_nbl, j_nbh + 1] - u[i_nbl, j_nbl - 1]) * factor
-
     elif flag[i, j + 1] is not INSIDE and flag[i, j - 1] is INSIDE:
         gradUx = u[i_nbl, j_nbh + 1] - u[i_nbl, j_nbl]
-
     elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is not INSIDE:
         gradUx = u[i_nbl, j_nbh] - u[i_nbl, j_nbl - 1]
-
     elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is INSIDE:
         gradUx = 0
 
     if flag[i + 1, j] is not INSIDE and flag[i - 1, j] is not INSIDE:
         gradUy = (u[i_nbh + 1, j_nbl] - u[i_nbl - 1, j_nbl]) * factor
-
     elif flag[i + 1, j] is not INSIDE and flag[i - 1, j] is INSIDE:
         gradUy = u[i_nbh + 1, j_nbl] - u[i_nbl, j_nbl]
-
     elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is not INSIDE:
         gradUy = u[i_nbh, j_nbl] - u[i_nbl - 1, j_nbl]
-
     elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is INSIDE:
         gradUy = 0
 
@@ -59,15 +52,10 @@ def grad_func(i, j, flag, array, channel=-1):
 
 
 def inpaint_point(i, j, image, flag, u, epsilon):
-    gradIx, gradIy = 0, 0
-    rx, ry = 0, 0
-    i_nb = i - epsilon
-    j_nb = j - epsilon
-    Jx, Jy, norm = 0, 0, 0
+    Ia, Jx, Jy, norm = 0, 0, 0, 0
     #If the input image is 3 channel. TODO: support for a single channel
     for color in 0, 1, 2:
         gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
-
         for i_nb in xrange(i - epsilon, i + epsilon):
             for j_nb in xrange(j - epsilon, j + epsilon):
                 if (i_nb > 0 and j_nb > 0 and i_nb < (u.shape[0] - 1)
@@ -90,33 +78,8 @@ def inpaint_point(i, j, image, flag, u, epsilon):
                         gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
                                                    channel=color)
 
-                        # if flag[k, l + 1] is not INSIDE:
-                        #     if flag[k, l - 1] is not INSIDE:
-                        #         gradIx = (image[km, lp + 1, color] -
-                        #                   image[km, lm - 1, color]) * 2.0
-                        #     else:
-                        #         gradIx = (image[km, lp + 1, color] -
-                        #                   image[km, lm, color])
-                        # elif flag[i, j - 1] is not INSIDE:
-                        #     gradIx = (image[km, lp, color] -
-                        #               image[km, lm - 1, color])
-                        # else:
-                        #     gradIx = 0
-
-                        # if flag[k + 1, l] is not INSIDE:
-                        #     if flag[k - 1, l] is not INSIDE:
-                        #         gradIy = (image[kp + 1, lm, color] -
-                        #                   image[km - 1, lm, color]) * 2.0
-                        #     else:
-                        #         gradIy = (image[kp + 1, lm, color] -
-                        #                   image[km, lm, color])
-                        # elif flag[i, j - 1] is not INSIDE:
-                        #     gradIy = (image[kp, lm, color] -
-                        #               image[km - 1, lm, color])
-                        # else:
-                        #     gradIy = 0
-                        Ia = weight * image[i_nb - 1 + (i_nb == 1),
-                                            j_nb - 1 + (j_nb == 1), color]
+                        Ia += weight * image[i_nb - 1 + (i_nb == 1),
+                                             j_nb - 1 + (j_nb == 1), color]
                         Jx -= weight * gradIx * rx
                         Jy -= weight * gradIy * ry
                         norm += weight
@@ -125,7 +88,4 @@ def inpaint_point(i, j, image, flag, u, epsilon):
               (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
         image[i - 1, j - 1, color] = sat
 
-
-def inpaint(input_image, inpaint_mask, range=6):
-    """
-    """
+    return image[i - 1, j - 1, :]
