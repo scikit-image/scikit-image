@@ -1,6 +1,8 @@
 import warnings
 import functools
 
+from . import six
+
 
 __all__ = ['deprecated']
 
@@ -35,10 +37,11 @@ class deprecated(object):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             if self.behavior == 'warn':
+                func_code = six.get_function_code(func)
                 warnings.warn_explicit(msg,
                     category=DeprecationWarning,
-                    filename=func.func_code.co_filename,
-                    lineno=func.func_code.co_firstlineno + 1)
+                    filename=func_code.co_filename,
+                    lineno=func_code.co_firstlineno + 1)
             elif self.behavior == 'raise':
                 raise DeprecationWarning(msg)
             return func(*args, **kwargs)
