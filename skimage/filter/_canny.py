@@ -1,4 +1,4 @@
-'''canny.py - Canny Edge detector
+"""canny.py - Canny Edge detector
 
 Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
@@ -9,13 +9,13 @@ Copyright (c) 2003-2009 Massachusetts Institute of Technology
 Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 Original author: Lee Kamentsky
-
-'''
+"""
 
 import numpy as np
 import scipy.ndimage as ndi
 from scipy.ndimage import (gaussian_filter,
                            generate_binary_structure, binary_erosion, label)
+from skimage import dtype_limits
 
 
 def smooth_with_function_and_mask(image, function, mask):
@@ -30,7 +30,7 @@ def smooth_with_function_and_mask(image, function, mask):
       A function that takes an image and returns a smoothed image
 
     mask : array
-      Mask with 1's for significant pixels, 0 for masked pixels
+      Mask with 1's for significant pixels, 0's for masked pixels.
 
     Notes
     ------
@@ -50,26 +50,27 @@ def smooth_with_function_and_mask(image, function, mask):
     return output_image
 
 
-def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
-    '''Edge filter an image using the Canny algorithm.
+def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
+    """Edge filter an image using the Canny algorithm.
 
     Parameters
     -----------
-    image : array_like, dtype=float
-      The greyscale input image to detect edges on; should be normalized to
-      0.0 to 1.0.
+    image : array_like, dtype=float or int
+      Greyscale input image to detect edges on; can be of any dtype.
 
     sigma : float
-      The standard deviation of the Gaussian filter
+      Standard deviation of the Gaussian filter.
 
     low_threshold : float
-      The lower bound for hysterisis thresholding (linking edges)
+      Lower bound for hysteresis thresholding (linking edges).
+      If none is provided, low_threshold is set to 10%.
 
     high_threshold : float
-      The upper bound for hysterisis thresholding (linking edges)
+      Upper bound for hysteresis thresholding (linking edges).
+      If none is provided, high_threshold is set to 20%.
 
     mask : array, dtype=bool, optional
-      An optional mask to limit the application of Canny to a certain area.
+      Mask to limit the application of Canny to a certain area.
 
     Returns
     -------
@@ -107,7 +108,7 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
 
-    William Green' Canny tutorial
+    William Green's Canny tutorial
     http://dasl.mem.drexel.edu/alumni/bGreen/www.pages.drexel.edu/_weg22/can_tut.html
 
     Examples
@@ -121,7 +122,7 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     >>> edges1 = filter.canny(im)
     >>> # Increase the smoothing for better results
     >>> edges2 = filter.canny(im, sigma=3)
-    '''
+    """
 
     #
     # The steps involved:
@@ -154,7 +155,13 @@ def canny(image, sigma=1., low_threshold=.1, high_threshold=.2, mask=None):
     #
 
     if image.ndim != 2:
-        raise TypeError("The input 'image' must be a two dimensional array.")
+        raise TypeError("The input 'image' must be a two-dimensional array.")
+
+    if low_threshold is None:
+        low_threshold = 0.1 * dtype_limits(image)[0]
+
+    if high_threshold is None:
+        high_threshold = 0.2 * dtype_limits(image)[1]
 
     if mask is None:
         mask = np.ones(image.shape, dtype=bool)
