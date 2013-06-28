@@ -30,12 +30,16 @@ def generate_flags(_mask):
         It cosists of either 0, 1 or 2 according to conditions above.
     """
 
+    m, n = _mask.shape
+    flag = np.zeros((m + 2, n + 2), np.uint8)
+    u = np.zeros((m + 2, n + 2), np.float)
+
     mask = _mask.astype(np.uint8)
     inside = erosion(mask, disk(1))
     border = np.logical_xor(mask, inside).astype(np.uint8)
 
-    flag = border + (2 * inside)
-    u = inside * 1.0e6
+    flag[1: -1, 1: -1] = border + (2 * inside)
+    u[1: -1, 1: -1] = inside * 1.0e6
 
     return flag, u
 
