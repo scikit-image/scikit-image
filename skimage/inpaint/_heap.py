@@ -1,16 +1,14 @@
-__all__ = ['generate_flags', 'generate_heap', 'display_heap']
+__all__ = ['init_flag', 'init_u', 'generate_heap', 'display_heap']
 
 import numpy as np
 import heapq
-from functools import total_ordering
-from skimage.util import img_as_ubyte, img_as_bool
 from skimage.morphology import erosion, disk
 
 
 BAND = 1
 
 
-def generate_flags(mask):
+def init_flag(_mask):
     """Initialization:
     All pixels are classified into 1 of the following flags:
     # KNOWN - denoted by an integer value of 0
@@ -34,12 +32,15 @@ def generate_flags(mask):
 
     mask = _mask.astype(np.uint8)
     inside = erosion(mask, disk(1))
-    border = img_as_ubyte(np.logical_xor(mask, inside))/255
+    band = np.logical_xor(mask, inside).astype(np.uint8)
 
-    flag = border + (2 * inside)
-    u = inside * 1.0e6
+    flag = band + (2 * inside)
 
-    return flag, T
+    return flag
+
+
+def init_u(flag):
+    return np.where(flag == BAND, 0, 1.0e6)
 
 
 def generate_heap(flag, T):
@@ -72,6 +73,7 @@ def generate_heap(flag, T):
         heapq.heappush(heap, HeapElem(T[tuple(z)], z))
 
     return heap
+
 
 def display_heap(heap):
     for i in heap:
