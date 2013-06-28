@@ -1,4 +1,5 @@
-"""canny.py - Canny Edge detector
+"""
+canny.py - Canny Edge detector
 
 Reference: Canny, J., A Computational Approach To Edge Detection, IEEE Trans.
     Pattern Analysis and Machine Intelligence, 8:679-714, 1986
@@ -24,11 +25,9 @@ def smooth_with_function_and_mask(image, function, mask):
     Parameters
     ----------
     image : array
-      The image to smooth
-
+      Image you want to smooth.
     function : callable
-      A function that takes an image and returns a smoothed image
-
+      A function that does image smoothing.
     mask : array
       Mask with 1's for significant pixels, 0's for masked pixels.
 
@@ -55,20 +54,16 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
 
     Parameters
     -----------
-    image : array_like, dtype=float or int
+    image : two-dimensional array
       Greyscale input image to detect edges on; can be of any dtype.
-
     sigma : float
       Standard deviation of the Gaussian filter.
-
     low_threshold : float
       Lower bound for hysteresis thresholding (linking edges).
       If none is provided, low_threshold is set to 10%.
-
     high_threshold : float
       Upper bound for hysteresis thresholding (linking edges).
       If none is provided, high_threshold is set to 20%.
-
     mask : array, dtype=bool, optional
       Mask to limit the application of Canny to a certain area.
 
