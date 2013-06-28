@@ -2,18 +2,7 @@ import warnings
 import functools
 
 
-__all__ = ['deprecated', 'is_str']
-
-
-try:
-    isinstance("", basestring)
-    def is_str(s):
-        """Return True if `s` is a string. Safe for Python 2 and 3."""
-        return isinstance(s, basestring)
-except NameError:
-    def is_str(s):
-        """Return True if `s` is a string. Safe for Python 2 and 3."""
-        return isinstance(s, str)
+__all__ = ['deprecated']
 
 
 class deprecated(object):
