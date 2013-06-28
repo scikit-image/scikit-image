@@ -1,4 +1,4 @@
-__all__ = ['generate_heap', 'display_heap']
+__all__ = ['generate_flags', 'generate_heap', 'display_heap']
 
 import numpy as np
 import heapq
