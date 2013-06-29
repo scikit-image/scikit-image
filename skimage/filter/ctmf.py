@@ -12,6 +12,7 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 
+import warnings
 import numpy as np
 from . import _ctmf
 from ._rank_order import rank_order
@@ -62,16 +63,19 @@ def median_filter(image, radius=2, mask=None, percent=50):
     mask = np.ascontiguousarray(mask, dtype=np.bool)
 
     if np.all(~ mask):
+        warnings.warn('Mask is all over image! Returning copy of input image.')
         return image.copy()
     #
-    # Normalize the ranked image to 0-255
+    # Some manipulation to handle float images and integer values outside
+    # range(256).
     #
     if (not np.issubdtype(image.dtype, np.int) or
         np.min(image) < 0 or np.max(image) > 255):
         ranked_image, translation = rank_order(image[mask])
         max_ranked_image = np.max(ranked_image)
         if max_ranked_image == 0:
-            return image
+            warnings.warn('Very particular case? Returning copy of input image.')
+            return image.copy()
         if max_ranked_image > 255:
             ranked_image = ranked_image * 255 // max_ranked_image
         was_ranked = True
