@@ -12,6 +12,7 @@ from skimage import data_dir
 from skimage.io import ImageCollection, MultiImage
 from skimage.io.collection import alphanumeric_key
 from skimage.io import Image as ioImage
+from skimage._shared import six
 
 
 try:
@@ -21,8 +22,6 @@ except ImportError:
 else:
     PIL_available = True
 
-if sys.version_info[0] > 2:
-    basestring = str
 
 class TestAlphanumericKey():
     def setUp(self):
@@ -129,7 +128,7 @@ class TestMultiImage():
 
     @skipif(not PIL_available)
     def test_files_property(self):
-        assert isinstance(self.img.filename, basestring)
+        assert isinstance(self.img.filename, six.string_types)
 
         def set_filename(f):
             self.img.filename = f

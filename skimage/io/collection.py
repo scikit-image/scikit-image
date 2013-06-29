@@ -10,6 +10,7 @@ from copy import copy
 
 import numpy as np
 from ._io import imread
+from .._shared import six
 
 
 def concatenate_images(ic):
@@ -296,7 +297,7 @@ class ImageCollection(object):
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
-        if isinstance(load_pattern, basestring):
+        if isinstance(load_pattern, six.string_types):
             load_pattern = load_pattern.split(':')
             self._files = []
             for pattern in load_pattern:

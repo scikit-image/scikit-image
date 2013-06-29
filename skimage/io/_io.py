@@ -15,6 +15,7 @@ import numpy as np
 
 from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
+from skimage._shared import six
 
 
 # Shared image queue
@@ -25,7 +26,7 @@ URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
 
 def is_url(filename):
     """Return True if string is an http or ftp path."""
-    return (isinstance(filename, basestring) and
+    return (isinstance(filename, six.string_types) and
             URL_REGEX.match(filename) is not None)
 
 
@@ -220,7 +221,7 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    if isinstance(arr, basestring):
+    if isinstance(arr, six.string_types):
         arr = call_plugin('imread', arr, plugin=plugin)
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 

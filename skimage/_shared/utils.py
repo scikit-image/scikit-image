@@ -1,19 +1,11 @@
 import warnings
 import functools
+import sys
+
+from . import six
 
 
-__all__ = ['deprecated', 'is_str']
-
-
-try:
-    isinstance("", basestring)
-    def is_str(s):
-        """Return True if `s` is a string. Safe for Python 2 and 3."""
-        return isinstance(s, basestring)
-except NameError:
-    def is_str(s):
-        """Return True if `s` is a string. Safe for Python 2 and 3."""
-        return isinstance(s, str)
+__all__ = ['deprecated', 'get_bound_method_class']
 
 
 class deprecated(object):
@@ -46,10 +38,11 @@ class deprecated(object):
         @functools.wraps(func)
         def wrapped(*args, **kwargs):
             if self.behavior == 'warn':
+                func_code = six.get_function_code(func)
                 warnings.warn_explicit(msg,
                     category=DeprecationWarning,
-                    filename=func.func_code.co_filename,
-                    lineno=func.func_code.co_firstlineno + 1)
+                    filename=func_code.co_filename,
+                    lineno=func_code.co_firstlineno + 1)
             elif self.behavior == 'raise':
                 raise DeprecationWarning(msg)
             return func(*args, **kwargs)
@@ -62,3 +55,10 @@ class deprecated(object):
             wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
 
         return wrapped
+
+
+def get_bound_method_class(m):
+    """Return the class for a bound method.
+
+    """
+    return m.im_class if sys.version < '3' else m.__self__.__class__

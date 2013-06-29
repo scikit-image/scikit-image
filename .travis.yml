@@ -35,4 +35,4 @@ script:
     # Change back to repository root directory and run all doc examples
     - cd ..
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    - flake8 --exit-zero skimage doc/examples viewer_examples
+    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples

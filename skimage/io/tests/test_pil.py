@@ -7,6 +7,8 @@ from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
 from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage._shared.six.moves import StringIO
+
 
 try:
     from PIL import Image
@@ -123,6 +125,23 @@ class TestSave:
                 else:
                     x = (x * 255).astype(dtype)
                     yield self.roundtrip, dtype, x
+
+
+@skipif(not PIL_available)
+def test_imsave_filelike():
+    shape = (2, 2)
+    image = np.zeros(shape)
+    s = StringIO()
+
+    # save to file-like object
+    imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert out.shape == shape
+    assert_allclose(out, image)
+
 
 if __name__ == "__main__":
     run_module_suite()
