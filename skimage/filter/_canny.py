@@ -54,22 +54,22 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
 
     Parameters
     -----------
-    image : two-dimensional array
+    image : 2D array
         Greyscale input image to detect edges on; can be of any dtype.
     sigma : float
         Standard deviation of the Gaussian filter.
     low_threshold : float
         Lower bound for hysteresis thresholding (linking edges).
-        If None, low_threshold is set to 10%.
+        If None, low_threshold is set to 10% of dtype's max.
     high_threshold : float
         Upper bound for hysteresis thresholding (linking edges).
-        If None, high_threshold is set to 20%.
+        If None, high_threshold is set to 20% of dtype's max.
     mask : array, dtype=bool, optional
         Mask to limit the application of Canny to a certain area.
 
     Returns
     -------
-    output : array (image)
+    output : 2D array (image)
         The binary edge map.
 
     See also
