@@ -1,4 +1,5 @@
-'''ctmf.py - constant time per pixel median filtering with an octagonal shape
+"""
+ctmf.py - constant time per pixel median filtering with an octagonal shape
 
 Reference: S. Perreault and P. Hebert, "Median Filtering in Constant Time",
 IEEE Transactions on Image Processing, September 2007.
@@ -9,7 +10,7 @@ Copyright (c) 2003-2009 Massachusetts Institute of Technology
 Copyright (c) 2009-2011 Broad Institute
 All rights reserved.
 Original author: Lee Kamentsky
-'''
+"""
 
 import numpy as np
 from . import _ctmf
@@ -17,29 +18,28 @@ from ._rank_order import rank_order
 
 
 def median_filter(image, radius=2, mask=None, percent=50):
-    '''Masked median filter with octagon shape.
+    """Masked median filter with octagon shape.
 
     Parameters
     ----------
-    image : (M,N) ndarray, dtype uint8
+    image : (M,N) ndarray
         Input image.
-    radius : {int, 2}, optional
-        The radius of a circle inscribed into the filtering
-        octagon. Must be at least 2.  Default radius is 2.
-    mask : (M,N) ndarray, dtype uint8, optional
-        A value of 1 indicates a significant pixel, 0
-        that a pixel is masked.  By default, all pixels
-        are considered.
-    percent : {int, 50}, optional
+    radius : int
+        Radius (in pixels) of a circle inscribed into the filtering
+        octagon. Must be at least 2. Default radius is 2.
+    mask : (M,N) ndarray
+        Mask with 1's for significant pixels, 0's for masked pixels.
+        By default, all pixels are considered significant.
+    percent : int
         The unmasked pixels within the octagon are sorted, and the
-        value at the `percent`-th index chosen.  For example, the
-        default value of 50 chooses the median pixel.
+        value at `percent` percent of the index range is chosen.
+        Default value of 50 gives the median pixel.
 
     Returns
     -------
-    out : (M,N) ndarray, dtype uint8
-        Filtered array.  In areas where the median filter does
-        not overlap the mask, the filtered result is underfined, but
+    out : (M,N) ndarray
+        Filtered array. In areas where the median filter does
+        not overlap the mask, the filtered result is undefined, but
         in practice, it will be the lowest value in the valid area.
 
     Examples
@@ -49,13 +49,13 @@ def median_filter(image, radius=2, mask=None, percent=50):
     >>> b = median_filter(a)
     >>> b[2, 2] # the median filter is good at removing outliers
     1.0
-    '''
+    """
 
     if image.ndim != 2:
-        raise TypeError("The input 'image' must be a two dimensional array.")
+        raise TypeError("Input 'image' must be a two-dimensional array.")
 
     if radius < 2:
-        raise ValueError("The input 'radius' must be >= 2.")
+        raise ValueError("Input 'radius' must be >= 2.")
 
     if mask is None:
         mask = np.ones(image.shape, dtype=np.bool)
@@ -78,13 +78,13 @@ def median_filter(image, radius=2, mask=None, percent=50):
     else:
         ranked_image = image[mask]
         was_ranked = False
-    input = np.zeros(image.shape, np.uint8)
-    input[mask] = ranked_image
+    input_ = np.zeros(image.shape, np.uint8)
+    input_[mask] = ranked_image
 
     mask.dtype = np.uint8
     output = np.zeros(image.shape, np.uint8)
 
-    _ctmf.median_filter(input, mask, output, radius, percent)
+    _ctmf.median_filter(input_, mask, output, radius, percent)
     if was_ranked:
         #
         # The translation gives the original value at each ranking.
