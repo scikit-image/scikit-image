@@ -5,7 +5,7 @@ import sys
 from . import six
 
 
-__all__ = ['deprecated']
+__all__ = ['deprecated', 'get_bound_method_class']
 
 
 class deprecated(object):
