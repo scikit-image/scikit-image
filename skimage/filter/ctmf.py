@@ -74,7 +74,8 @@ def median_filter(image, radius=2, mask=None, percent=50):
         ranked_image, translation = rank_order(image[mask])
         max_ranked_image = np.max(ranked_image)
         if max_ranked_image == 0:
-            warnings.warn('Very particular case? Returning copy of input image.')
+            warnings.warn('Very particular case? Returning copy of input
+                          image.')
             return image.copy()
         if max_ranked_image > 255:
             ranked_image = ranked_image * 255 // max_ranked_image
