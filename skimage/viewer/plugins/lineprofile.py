@@ -82,18 +82,18 @@ class LineProfile(PlotPlugin):
                    "Select and drag ends of the scan line to adjust it.")
         return '\n'.join(helpstr)
 
-    def get_profile(self):
+    def get_profiles(self):
         """Return intensity profile of the selected line.
 
         Returns
         -------
         end_points: (2, 2) array
             The positions ((x1, y1), (x2, y2)) of the line ends.
-        profile: 1d array
-            Profile of intensity values.
+        profile: list of 1d arrays
+            Profile of intensity values. Length 1 (grayscale) or 3 (rgb).
         """
-        profile = self.profile[0].get_ydata()
-        return self.line_tool.end_points, profile
+        profiles = [data.get_ydata() for data in self.profile]
+        return self.line_tool.end_points, profiles
 
     def _autoscale_view(self):
         if self.limits is None:
@@ -118,9 +118,6 @@ class LineProfile(PlotPlugin):
             self.profile[i].set_ydata(scan[:, i])
 
         self.ax.relim()
-
-        if self.useblit:
-            self.ax.draw_artist(self.profile[0])
 
         self._autoscale_view()
         self.redraw()
@@ -178,16 +175,12 @@ def profile_line(img, end_points, linewidth=1):
 
     # Quick calculation if perfectly vertical; shortcuts div0 error
     if x1 == x2:
-        for i in range(channels):
-            try:
-                intensities = np.concatenate(
-                    (intensities,
-                     _calc_vert(img[..., i], x1, x2, y1, y2,
-                                linewidth)), axis=1)
-            except:
-                intensities = _calc_vert(img[..., i],
-                                         x1, x2, y1, y2,
-                                         linewidth)
+        if channels == 1:
+            img = img[:, :, np.newaxis]
+
+        img = np.rollaxis(img, -1)
+        intensities = np.hstack([_calc_vert(im, x1, x2, y1, y2, linewidth)
+                                 for im in img])
         return intensities
 
     theta = np.arctan2(dy, dx)
