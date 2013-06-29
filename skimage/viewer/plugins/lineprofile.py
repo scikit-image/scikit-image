@@ -107,10 +107,7 @@ class LineProfile(PlotPlugin):
         scan = profile_line(self.image_viewer.original_image, end_points,
                             linewidth=self.line_tool.linewidth)
 
-        try:
-            if scan[1].shape != len(self.profile):
-                self.reset_axes(scan)
-        except:
+        if scan[1].shape != len(self.profile):
             self.reset_axes(scan)
 
         for i in range(len(scan[0])):
