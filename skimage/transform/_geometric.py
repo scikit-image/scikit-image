@@ -1009,12 +1009,16 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     # use fast Cython version for specific interpolation orders
     if order in range(4) and not map_args:
         matrix = None
+
         if inverse_map in HOMOGRAPHY_TRANSFORMS:
             matrix = inverse_map._matrix
+
         elif hasattr(inverse_map, '__name__') \
              and inverse_map.__name__ == 'inverse' \
              and get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS:
+
             matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
+
         if matrix is not None:
             # transform all bands
             dims = []
