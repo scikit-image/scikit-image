@@ -138,20 +138,16 @@ class LineProfile(PlotPlugin):
                                         scan_data[:, 2], 'b-')
 
 
-def _calc_horiz(img, x1, x2, y1, y2, linewidth):
+def _calc_vert(img, x1, x2, y1, y2, linewidth):
     # Quick calculation if perfectly horizontal
     pixels = img[min(y1, y2): max(y1, y2) + 1,
                  x1 - linewidth / 2: x1 + linewidth / 2 + 1]
-    intensities = pixels.mean(axis=1)
-    return intensities
 
+    # Reverse index if necessary
+    if y2 > y1:
+        pixels = pixels[::-1, :]
 
-def _calc_vert(img, x1, x2, y1, y2, linewidth):
-    # Quick calculation if perfectly vertical
-    pixels = img[y1 - linewidth / 2: y1 + linewidth / 2 + 1,
-                 min(x1, x2): max(x1, x2) + 1]
-    intensities = pixels.mean(axis=0)
-    return intensities
+    return pixels.mean(axis=1)[:, np.newaxis]
 
 
 def profile_line(img, end_points, linewidth=1):
@@ -180,31 +176,26 @@ def profile_line(img, end_points, linewidth=1):
     if img.ndim == 3:
         channels = 3
 
-    # Quick calculation if perfectly horizontal or vertical
+    # Quick calculation if perfectly vertical; shortcuts div0 error
     if x1 == x2:
         for i in range(channels):
             try:
                 intensities = np.concatenate(
                     (intensities,
-                     _calc_horiz(img, x1, x2, y1, y2, linewidth)), axis=1)
+                     _calc_vert(img[..., i], x1, x2, y1, y2,
+                                linewidth)), axis=1)
             except:
-                intensities = _calc_horiz(img, x1, x2, y1, y2, linewidth)
-
-    elif y1 == y2:
-        for i in range(channels):
-            try:
-                intensities = np.concatenate(
-                    (intensities,
-                     _calc_vert(img, x1, x2, y1, y2, linewidth)), axis=1)
-            except:
-                intensities = _calc_vert(img, x1, x2, y1, y2, linewidth)
+                intensities = _calc_vert(img[..., i],
+                                         x1, x2, y1, y2,
+                                         linewidth)
+        return intensities
 
     theta = np.arctan2(dy, dx)
     a = dy / dx
     b = y1 - a * x1
     length = np.hypot(dx, dy)
 
-    line_x = np.linspace(min(x1, x2), max(x1, x2), np.ceil(length))
+    line_x = np.linspace(x2, x1, np.ceil(length))
     line_y = line_x * a + b
     y_width = abs(linewidth * np.cos(theta) / 2)
     perp_ys = np.array([np.linspace(yi - y_width,
