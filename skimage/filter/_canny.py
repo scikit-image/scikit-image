@@ -25,11 +25,11 @@ def smooth_with_function_and_mask(image, function, mask):
     Parameters
     ----------
     image : array
-      Image you want to smooth.
+        Image you want to smooth.
     function : callable
-      A function that does image smoothing.
+        A function that does image smoothing.
     mask : array
-      Mask with 1's for significant pixels, 0's for masked pixels.
+        Mask with 1's for significant pixels, 0's for masked pixels.
 
     Notes
     ------
@@ -55,22 +55,22 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
     Parameters
     -----------
     image : two-dimensional array
-      Greyscale input image to detect edges on; can be of any dtype.
+        Greyscale input image to detect edges on; can be of any dtype.
     sigma : float
-      Standard deviation of the Gaussian filter.
+        Standard deviation of the Gaussian filter.
     low_threshold : float
-      Lower bound for hysteresis thresholding (linking edges).
-      If none is provided, low_threshold is set to 10%.
+        Lower bound for hysteresis thresholding (linking edges).
+        If None, low_threshold is set to 10%.
     high_threshold : float
-      Upper bound for hysteresis thresholding (linking edges).
-      If none is provided, high_threshold is set to 20%.
+        Upper bound for hysteresis thresholding (linking edges).
+        If None, high_threshold is set to 20%.
     mask : array, dtype=bool, optional
-      Mask to limit the application of Canny to a certain area.
+        Mask to limit the application of Canny to a certain area.
 
     Returns
     -------
     output : array (image)
-      The binary edge map.
+        The binary edge map.
 
     See also
     --------
@@ -112,7 +112,7 @@ def canny(image, sigma=1., low_threshold=None, high_threshold=None, mask=None):
     >>> # Generate noisy image of a square
     >>> im = np.zeros((256, 256))
     >>> im[64:-64, 64:-64] = 1
-    >>> im += 0.2*np.random.random(im.shape)
+    >>> im += 0.2 * np.random.random(im.shape)
     >>> # First trial with the Canny filter, with the default smoothing
     >>> edges1 = filter.canny(im)
     >>> # Increase the smoothing for better results
