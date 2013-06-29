@@ -17,7 +17,7 @@ References
 """
 
 import numpy as np
-from skimage import img_as_ubyte
+from skimage import img_as_ubyte, img_as_uint
 from skimage.filter.rank import _crank8, _crank16
 from skimage.filter.rank.generic import find_bitdepth
 
@@ -44,18 +44,16 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
 
     if func8 is not None and (is_8bit or func16 is None):
         out = _apply8(func8, image, selem, out, mask, shift_x, shift_y)
-    elif image.dtype == np.uint16:
-        if func16 is None:
-            raise TypeError("Not implemented for uint16 image.")
+    else:
+        image = img_as_uint(image)
         if out is None:
             out = np.zeros(image.shape, dtype=np.uint16)
         bitdepth = find_bitdepth(image)
         if bitdepth > 11:
-            raise ValueError("Only uint16 <4096 image (12bit) supported.")
+            image = image >> 4
+            bitdepth = find_bitdepth(image)
         func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
                bitdepth=bitdepth + 1, out=out)
-    else:
-        raise TypeError("Only uint8 and uint16 image supported.")
 
     return out
 

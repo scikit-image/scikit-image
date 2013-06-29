@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import run_module_suite, assert_array_equal, assert_raises
 
-from skimage import img_as_ubyte
+from skimage import img_as_ubyte, img_as_uint, img_as_float
 from skimage import data, util
 from skimage.morphology import cmorph, disk
 from skimage.filter import rank
@@ -185,6 +185,24 @@ def test_compare_autolevels_16bit():
                                                    p0=.0, p1=1.)
 
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
+
+
+def test_compare_uint_vs_float():
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
+    # dynamic) should be identical
+
+    # Create signed int8 image that and convert it to uint8
+    image_uint = img_as_uint(data.camera())
+    image_float = img_as_float(image_uint)
+
+    methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
+               'meansubtraction', 'morph_contr_enh', 'pop', 'tophat']
+
+    for method in methods:
+        func = getattr(rank, method)
+        out_u = func(image_uint, disk(3))
+        out_f = func(image_float, disk(3))
+        assert_array_equal(out_u, out_f)
 
 
 def test_compare_8bit_unsigned_vs_signed():
