@@ -1,8 +1,7 @@
 import os
 
-from numpy.testing import *
+from numpy.testing import assert_array_equal, raises, run_module_suite
 import numpy as np
-from StringIO import StringIO
 
 import skimage.io as io
 from skimage import data_dir
@@ -27,21 +26,6 @@ def test_imread_url():
     image_url = 'file:///{0}/camera.png'.format(data_path)
     image = io.imread(image_url)
     assert image.shape == (512, 512)
-
-
-def test_imsave_filelike():
-    shape = (2, 2)
-    image = np.zeros(shape)
-    s = StringIO()
-
-    # save to file-like object
-    io.imsave(s, image)
-
-    # read from file-like object
-    s.seek(0)
-    out = io.imread(s)
-    assert out.shape == shape
-    np.testing.assert_allclose(out, image)
 
 
 if __name__ == "__main__":
