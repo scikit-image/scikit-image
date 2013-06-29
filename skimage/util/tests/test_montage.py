@@ -80,5 +80,6 @@ def test_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
     montage2d(arr_error)
 
+
 if __name__ == '__main__':
     np.testing.run_module_suite()
