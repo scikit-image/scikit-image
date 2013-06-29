@@ -5,45 +5,53 @@ import numpy as np
 from skimage.color import rgb2gray
 from scipy.ndimage.filters import gaussian_filter
 
-KERNEL_SIZE = (9, 9)
-PATCH_SIZE = (49, 49)
-
-
 def _remove_border_keypoints(image, keypoints, dist):
 
 	width = image.shape[0]
 	height = image.shape[1]
-	for i, j in keypoints:
+
+	keypoints_list = keypoints.tolist()
+
+	for i, j in keypoints_list:
 		if i > width - dist[0] or i < dist[0] or j < dist[1] or j > height - dist[0]:
-			keypoints.remove((i, j))
+			keypoints.remove([i, j])
+
+	keypoints = np.asarray(keypoints_list)
 	return keypoints
 
 
-def brief(image, keypoints, descriptor_size=32, mode='uniform'):
+def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49, sample_seed=1):
 
 	if np.squeeze(image).ndim == 3:
 		image = rgb2gray(image)
 
-	keypoints = _remove_border_keypoints(image, keypoints, (PATCH_SIZE[0] / 2, PATCH_SIZE[1] / 2))
+	keypoints = np.round(keypoints)
 
-	descriptor = np.zeros((len(keypoints), descriptor_size * 8), dtype=int)
+	keypoints = _remove_border_keypoints(image, keypoints, (patch_size / 2, patch_size / 2))
 
+	descriptor = np.zeros((len(keypoints), descriptor_size), dtype=int)
+
+	# Gaussian Low pass filtering with variance 2 to alleviate noise sensitivity
 	image = gaussian_filter(image, 2)
 
-	if mode == 'uniform':
-		np.random.seed(1)
-		first = np.random.randint(-PATCH_SIZE / 2, (PATCH_SIZE / 2) + 1, (descriptor_size * 8, 2))
-		np.random.seed(2)
-		second = np.random.randint(-PATCH_SIZE / 2, (PATCH_SIZE / 2) + 1, (descriptor_size * 8, 2))
+	# Sampling pairs of decision pixels in patch_size x patch_size window
+	if mode == 'normal':
+		np.random.seed(sample_seed)
+		samples = np.round((patch_size / 5) * np.random.randn(descriptor_size * 8))
+		samples = samples[samples < (patch_size / 2)]
+		samples = samples[samples > - (patch_size - 1) / 2]
+		first = (samples[: descriptor_size * 2]).reshape(descriptor_size, 2)
+		second = (samples[descriptor_size * 2: descriptor_size * 4]).reshape(descriptor_size, 2)
 	else:
-		#TODO mode='normal'
-		pass
+		np.random.seed(sample_seed)
+		samples = np.random.randint(-patch_size / 2, (patch_size / 2) + 1, (descriptor_size * 2, 2))
+		first, second = np.split(samples, 2)
 
 	for i in range(len(keypoints)):
 		set_1 = first + keypoints[i]
 		set_2 = second + keypoints[i]
 
-		for j in range(descriptor_size * 8):
+		for j in range(descriptor_size):
 			if image[set_1[j, 0]][set_1[j, 1]] < image[set_2[j, 0]][set_2[j, 0]]:
 				descriptor[i][j] = 1
 			else:
