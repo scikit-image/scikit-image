@@ -96,16 +96,16 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
 
     # build attack and release borders by using difference along axis
     t = np.hstack((selem, np.zeros((selem.shape[0], 1))))
-    cdef char[:, :] t_e = np.diff(t, axis=1) < 0
+    cdef char[:, :] t_e = (np.diff(t, axis=1) < 0).view(np.uint8)
 
     t = np.hstack((np.zeros((selem.shape[0], 1)), selem))
-    cdef char[:, :] t_w = np.diff(t, axis=1) > 0
+    cdef char[:, :] t_w = (np.diff(t, axis=1) > 0).view(np.uint8)
 
     t = np.vstack((selem, np.zeros((1, selem.shape[1]))))
-    cdef char[:, :] t_s = np.diff(t, axis=0) < 0
+    cdef char[:, :] t_s = (np.diff(t, axis=0) < 0).view(np.uint8)
 
     t = np.vstack((np.zeros((1, selem.shape[1])), selem))
-    cdef char[:, :] t_n = np.diff(t, axis=0) > 0
+    cdef char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
 
     num_se_n = num_se_s = num_se_e = num_se_w = 0
 
