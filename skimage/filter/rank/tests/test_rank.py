@@ -130,17 +130,6 @@ def test_structuring_element8():
     assert_array_equal(r, out)
 
 
-def test_fail_on_bitdepth():
-    # should fail because data bitdepth is too high for the function
-
-    image = np.ones((100, 100), dtype=np.uint16) * 2 ** 12
-    elem = np.ones((3, 3), dtype=np.uint8)
-    out = np.empty_like(image)
-    mask = np.ones(image.shape, dtype=np.uint8)
-    assert_raises(ValueError, rank.percentile_mean, image=image,
-                  selem=elem, out=out, mask=mask, shift_x=0, shift_y=0)
-
-
 def test_pass_on_bitdepth():
     # should pass because data bitdepth is not too high for the function
 
@@ -192,7 +181,7 @@ def test_compare_uint_vs_float():
     # dynamic) should be identical
 
     # Create signed int8 image that and convert it to uint8
-    image_uint = img_as_uint(data.camera())
+    image_uint = img_as_uint(data.camera()[:50, :50])
     image_float = img_as_float(image_uint)
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
@@ -436,6 +425,18 @@ def test_selem_dtypes():
         rank.percentile_mean(image=image, selem=elem, out=out, mask=mask,
                              shift_x=0, shift_y=0)
         assert_array_equal(image, out)
+
+
+def test_16bit():
+    image = np.zeros((21, 21), dtype=np.uint16)
+    selem = np.ones((3, 3), dtype=np.uint8)
+
+    for bitdepth in range(17):
+        value = 2 ** bitdepth - 1
+        image[10, 10] = value
+        assert rank.minimum(image, selem)[10, 10] == 0
+        assert rank.maximum(image, selem)[10, 10] == value
+        assert rank.mean(image, selem)[10, 10] == value / selem.size
 
 
 if __name__ == "__main__":
