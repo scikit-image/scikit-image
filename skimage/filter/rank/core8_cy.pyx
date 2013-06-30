@@ -97,8 +97,7 @@ cdef void _core8(dtype_t kernel(Py_ssize_t*, float, dtype_t, float,
     cdef Py_ssize_t* se_s_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
     cdef Py_ssize_t* se_s_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
 
-    # build attack and release borders
-    # by using difference along axis
+    # build attack and release borders by using difference along axis
     t = np.hstack((selem, np.zeros((selem.shape[0], 1))))
     cdef char[:, :] t_e = np.diff(t, axis=1) < 0
 
@@ -174,11 +173,11 @@ cdef void _core8(dtype_t kernel(Py_ssize_t*, float, dtype_t, float,
             out[r, c] = kernel(histo, pop, image[r, c], p0, p1, s0, s1)
             # kernel ----------------------------------------------------------
 
-        r += 1          # pass to the next row
+        r += 1  # pass to the next row
         if r >= rows:
             break
 
-            # ---> north to south
+        # ---> north to south
         for s in range(num_se_s):
             rr = r + se_s_r[s]
             cc = c + se_s_c[s]
@@ -214,7 +213,7 @@ cdef void _core8(dtype_t kernel(Py_ssize_t*, float, dtype_t, float,
                 histo, pop, image[r, c], p0, p1, s0, s1)
             # kernel ----------------------------------------------------------
 
-        r += 1           # pass to the next row
+        r += 1  # pass to the next row
         if r >= rows:
             break
 
