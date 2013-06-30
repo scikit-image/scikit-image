@@ -15,7 +15,7 @@ cdef dtype_t is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
 
 # 8-bit core kernel receives extra information about data inferior and superior
 # percentiles
-cdef void _core8(dtype_t kernel(Py_ssize_t *, float, dtype_t, float,
+cdef void _core8(dtype_t kernel(Py_ssize_t*, float, dtype_t, float,
                                 float, Py_ssize_t, Py_ssize_t),
                  dtype_t[:, ::1] image,
                  char[:, ::1] selem,

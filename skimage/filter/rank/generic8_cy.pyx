@@ -13,7 +13,7 @@ from .core8_cy cimport dtype_t, _core8
 # -----------------------------------------------------------------
 
 
-cdef inline dtype_t kernel_autolevel(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_autolevel(Py_ssize_t* histo, float pop,
                                      dtype_t g, float p0, float p1,
                                      Py_ssize_t s0, Py_ssize_t s1):
 
@@ -37,7 +37,7 @@ cdef inline dtype_t kernel_autolevel(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_bottomhat(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_bottomhat(Py_ssize_t* histo, float pop,
                                      dtype_t g, float p0, float p1,
                                      Py_ssize_t s0, Py_ssize_t s1):
 
@@ -53,7 +53,7 @@ cdef inline dtype_t kernel_bottomhat(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_equalize(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_equalize(Py_ssize_t* histo, float pop,
                                     dtype_t g, float p0, float p1,
                                     Py_ssize_t s0, Py_ssize_t s1):
 
@@ -71,7 +71,7 @@ cdef inline dtype_t kernel_equalize(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_gradient(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_gradient(Py_ssize_t* histo, float pop,
                                     dtype_t g, float p0, float p1,
                                     Py_ssize_t s0, Py_ssize_t s1):
 
@@ -91,7 +91,7 @@ cdef inline dtype_t kernel_gradient(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_maximum(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_maximum(Py_ssize_t* histo, float pop,
                                    dtype_t g, float p0, float p1,
                                    Py_ssize_t s0, Py_ssize_t s1):
 
@@ -105,7 +105,7 @@ cdef inline dtype_t kernel_maximum(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_mean(Py_ssize_t* histo, float pop,
                                 dtype_t g, float p0, float p1,
                                 Py_ssize_t s0, Py_ssize_t s1):
 
@@ -120,7 +120,7 @@ cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_meansubtraction(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_meansubtraction(Py_ssize_t* histo, float pop,
                                             dtype_t g, float p0, float p1,
                                             Py_ssize_t s0, Py_ssize_t s1):
 
@@ -135,7 +135,7 @@ cdef inline dtype_t kernel_meansubtraction(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_median(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_median(Py_ssize_t* histo, float pop,
                                   dtype_t g, float p0, float p1,
                                   Py_ssize_t s0, Py_ssize_t s1):
 
@@ -152,7 +152,7 @@ cdef inline dtype_t kernel_median(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_minimum(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_minimum(Py_ssize_t* histo, float pop,
                                    dtype_t g, float p0, float p1,
                                    Py_ssize_t s0, Py_ssize_t s1):
 
@@ -166,7 +166,7 @@ cdef inline dtype_t kernel_minimum(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_modal(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_modal(Py_ssize_t* histo, float pop,
                                  dtype_t g, float p0, float p1,
                                  Py_ssize_t s0, Py_ssize_t s1):
 
@@ -182,7 +182,7 @@ cdef inline dtype_t kernel_modal(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_morph_contr_enh(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_morph_contr_enh(Py_ssize_t* histo, float pop,
                                            dtype_t g, float p0, float p1,
                                            Py_ssize_t s0, Py_ssize_t s1):
 
@@ -205,14 +205,14 @@ cdef inline dtype_t kernel_morph_contr_enh(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_pop(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_pop(Py_ssize_t* histo, float pop,
                                dtype_t g, float p0, float p1,
                                Py_ssize_t s0, Py_ssize_t s1):
 
     return <dtype_t>(pop)
 
 
-cdef inline dtype_t kernel_threshold(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_threshold(Py_ssize_t* histo, float pop,
                                      dtype_t g, float p0, float p1,
                                      Py_ssize_t s0, Py_ssize_t s1):
 
@@ -227,7 +227,7 @@ cdef inline dtype_t kernel_threshold(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_tophat(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_tophat(Py_ssize_t* histo, float pop,
                                   dtype_t g, float p0, float p1,
                                   Py_ssize_t s0, Py_ssize_t s1):
 
@@ -242,7 +242,7 @@ cdef inline dtype_t kernel_tophat(Py_ssize_t * histo, float pop,
     else:
         return <dtype_t>(0)
 
-cdef inline dtype_t kernel_noise_filter(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_noise_filter(Py_ssize_t* histo, float pop,
                                         dtype_t g, float p0, float p1,
                                         Py_ssize_t s0, Py_ssize_t s1):
 
@@ -266,7 +266,7 @@ cdef inline dtype_t kernel_noise_filter(Py_ssize_t * histo, float pop,
         return <dtype_t>min_i
 
 
-cdef inline dtype_t kernel_entropy(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_entropy(Py_ssize_t* histo, float pop,
                                    dtype_t g, float p0, float p1,
                                    Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
@@ -284,7 +284,7 @@ cdef inline dtype_t kernel_entropy(Py_ssize_t * histo, float pop,
     else:
         return <dtype_t>(0)
 
-cdef inline dtype_t kernel_otsu(Py_ssize_t * histo, float pop, dtype_t g,
+cdef inline dtype_t kernel_otsu(Py_ssize_t* histo, float pop, dtype_t g,
                                 float p0, float p1, Py_ssize_t s0,
                                 Py_ssize_t s1):
     cdef Py_ssize_t i

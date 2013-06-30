@@ -12,7 +12,7 @@ from .core8_cy cimport dtype_t, _core8, uint8_max, uint8_min
 # -----------------------------------------------------------------
 
 
-cdef inline dtype_t kernel_autolevel(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_autolevel(Py_ssize_t* histo, float pop,
                                      dtype_t g, float p0, float p1,
                                      Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, imin, imax, sum, delta
@@ -44,7 +44,7 @@ cdef inline dtype_t kernel_autolevel(Py_ssize_t * histo, float pop,
         return <dtype_t>(128)
 
 
-cdef inline dtype_t kernel_gradient(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_gradient(Py_ssize_t* histo, float pop,
                                     dtype_t g, float p0, float p1,
                                     Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, imin, imax, sum, delta
@@ -69,7 +69,7 @@ cdef inline dtype_t kernel_gradient(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_mean(Py_ssize_t* histo, float pop,
                                 dtype_t g, float p0, float p1,
                                 Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, sum, mean, n
@@ -91,7 +91,7 @@ cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_mean_subtraction(Py_ssize_t * histo,
+cdef inline dtype_t kernel_mean_subtraction(Py_ssize_t* histo,
                                              float pop,
                                              dtype_t g,
                                              float p0, float p1,
@@ -115,7 +115,7 @@ cdef inline dtype_t kernel_mean_subtraction(Py_ssize_t * histo,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_morph_contr_enh(Py_ssize_t * histo,
+cdef inline dtype_t kernel_morph_contr_enh(Py_ssize_t* histo,
                                            float pop,
                                            dtype_t g, float p0, float p1,
                                            Py_ssize_t s0, Py_ssize_t s1):
@@ -147,7 +147,7 @@ cdef inline dtype_t kernel_morph_contr_enh(Py_ssize_t * histo,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_percentile(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_percentile(Py_ssize_t* histo, float pop,
                                       dtype_t g, float p0, float p1,
                                       Py_ssize_t s0, Py_ssize_t s1):
     cdef int i
@@ -164,7 +164,7 @@ cdef inline dtype_t kernel_percentile(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_pop(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_pop(Py_ssize_t* histo, float pop,
                                dtype_t g, float p0, float p1,
                                Py_ssize_t s0, Py_ssize_t s1):
     cdef int i, sum, n
@@ -181,7 +181,7 @@ cdef inline dtype_t kernel_pop(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_threshold(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_threshold(Py_ssize_t* histo, float pop,
                                      dtype_t g, float p0, float p1,
                                      Py_ssize_t s0, Py_ssize_t s1):
     cdef int i

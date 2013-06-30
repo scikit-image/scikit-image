@@ -15,7 +15,7 @@ from .core16_cy cimport _core16
 ctypedef cnp.uint16_t dtype_t
 
 
-cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_mean(Py_ssize_t* histo, float pop,
                                 dtype_t g, Py_ssize_t bitdepth,
                                 Py_ssize_t maxbin, Py_ssize_t midbin,
                                 float p0, float p1,
@@ -37,7 +37,7 @@ cdef inline dtype_t kernel_mean(Py_ssize_t * histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t kernel_pop(Py_ssize_t * histo, float pop,
+cdef inline dtype_t kernel_pop(Py_ssize_t* histo, float pop,
                                dtype_t g, Py_ssize_t bitdepth,
                                Py_ssize_t maxbin, Py_ssize_t midbin,
                                float p0, float p1,

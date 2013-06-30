@@ -146,8 +146,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
     r = 0
     c = 0
     # kernel -------------------------------------------
-    out[r, c] = kernel(histo, pop, image[r, c],
-        bitdepth, maxbin, midbin, p0, p1, s0, s1)
+    out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin, midbin,
+                       p0, p1, s0, s1)
     # kernel -------------------------------------------
 
     # main loop
@@ -168,9 +168,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
                     histogram_decrement(histo, &pop, image[rr, cc])
 
             # kernel -------------------------------------------
-            out[r, c] = kernel(
-                histo, pop, image[r, c],
-                bitdepth, maxbin, midbin, p0, p1, s0, s1)
+            out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin,
+                               midbin, p0, p1, s0, s1)
             # kernel -------------------------------------------
 
         r += 1          # pass to the next row
@@ -192,7 +191,7 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
 
         # kernel -------------------------------------------
         out[r, c] = kernel(histo, pop, image[r, c],
-            bitdepth, maxbin, midbin, p0, p1, s0, s1)
+                           bitdepth, maxbin, midbin, p0, p1, s0, s1)
         # kernel -------------------------------------------
 
         # ---> east to west
@@ -210,9 +209,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
                     histogram_decrement(histo, &pop, image[rr, cc])
 
             # kernel -------------------------------------------
-            out[r, c] = kernel(
-                histo, pop, image[r, c],
-                bitdepth, maxbin, midbin, p0, p1, s0, s1)
+            out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin,
+                               midbin, p0, p1, s0, s1)
             # kernel -------------------------------------------
 
         r += 1           # pass to the next row
@@ -233,12 +231,11 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
                 histogram_decrement(histo, &pop, image[rr, cc])
 
         # kernel -------------------------------------------
-        out[r, c] = kernel(histo, pop, image[r, c],
-            bitdepth, maxbin, midbin, p0, p1, s0, s1)
+        out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin, midbin,
+                           p0, p1, s0, s1)
         # kernel -------------------------------------------
 
     # release memory allocated by malloc
-
     free(se_e_r)
     free(se_e_c)
     free(se_w_r)
