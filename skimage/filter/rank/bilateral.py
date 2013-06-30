@@ -130,7 +130,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     >>> bilat_ima = bilateral_mean(ima, disk(20), s0=10,s1=10)
     """
 
-    return _apply(None, _bilateral16_cy.mean, image, selem, out=out,
+    return _apply(None, bilateral16_cy.mean, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
@@ -188,5 +188,5 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(None, _bilateral16_cy.pop, image, selem, out=out,
+    return _apply(None, bilateral16_cy.pop, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
