@@ -356,13 +356,11 @@ def test_otsu():
     # test the local Otsu segmentation on a synthetic image
     # (left to right ramp * sinus)
 
-    test = np.tile(
-        [128, 145, 103, 127, 165, 83, 127, 185, 63, 127, 205, 43,
-            127, 225, 23, 127],
-        (16, 1))
+    test = np.tile([128, 145, 103, 127, 165, 83, 127, 185, 63, 127, 205, 43,
+                    127, 225, 23, 127],
+                   (16, 1))
     test = test.astype(np.uint8)
-    res = np.tile([1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-                 (16, 1))
+    res = np.tile([1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1], (16, 1))
     selem = np.ones((6, 6), dtype=np.uint8)
     th = 1 * (test >= rank.otsu(test, selem))
     assert_array_equal(th, res)
@@ -437,6 +435,20 @@ def test_16bit():
         assert rank.minimum(image, selem)[10, 10] == 0
         assert rank.maximum(image, selem)[10, 10] == value
         assert rank.mean(image, selem)[10, 10] == value / selem.size
+
+
+def test_bilateral():
+    image = np.zeros((21, 21), dtype=np.uint16)
+    selem = np.ones((3, 3), dtype=np.uint8)
+
+    image[10, 10] = 1000
+    image[10, 11] = 1010
+    image[10, 9] = 900
+
+    assert rank.bilateral_mean(image, selem, s0=1, s1=1)[10, 10] == 1000
+    assert rank.bilateral_pop(image, selem, s0=1, s1=1)[10, 10] == 1
+    assert rank.bilateral_mean(image, selem, s0=11, s1=11)[10, 10] == 1005
+    assert rank.bilateral_pop(image, selem, s0=11, s1=11)[10, 10] == 2
 
 
 if __name__ == "__main__":
