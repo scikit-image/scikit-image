@@ -9,7 +9,7 @@ maximum value present in the image.
 The pixel neighborhood is defined by:
 
 * the given structuring element
-* an interval [g-s0,g+s1] in greylevel around g the processed pixel greylevel
+* an interval [g-s0, g+s1] in greylevel around g the processed pixel greylevel
 
 The kernel is flat (i.e. each pixel belonging to the neighborhood contributes
 equally).
@@ -78,7 +78,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     Spatial closeness is measured by considering only the local pixel
     neighborhood given by a structuring element (selem).
 
-    Radiometric similarity is defined by the greylevel interval [g-s0,g+s1]
+    Radiometric similarity is defined by the greylevel interval [g-s0, g+s1]
     where g is the current pixel greylevel. Only pixels belonging to the
     structuring element AND having a greylevel inside this interval are
     averaged. Return greyscale local bilateral_mean of an image.
@@ -99,7 +99,8 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        Define the [s0, s1] interval to be considered for computing the value.
+        Define the [s0, s1] interval around the greyvalue of the center pixel
+        to be considered for computing the value.
 
     Returns
     -------
@@ -152,7 +153,8 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        Define the [s0, s1] interval to be considered for computing the value.
+        Define the [s0, s1] interval around the greyvalue of the center pixel
+        to be considered for computing the value.
 
     Returns
     -------
