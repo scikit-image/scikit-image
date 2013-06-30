@@ -7,9 +7,8 @@ not produce halos.
 The local histogram is computed using a sliding window similar to the method
 described in [1]_.
 
-Input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit), for 16-bit
-input images, the number of histogram bins is determined from the maximum value
-present in the image.
+Input image can be 8-bit or 16-bit, for 16-bit input images, the number of
+histogram bins is determined from the maximum value present in the image.
 
 Result image is 8 or 16-bit with respect to the input image.
 
@@ -60,8 +59,6 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, p0, p1):
         if out is None:
             out = np.zeros(image.shape, dtype=np.uint16)
         bitdepth = find_bitdepth(image)
-        if bitdepth > 11:
-            raise ValueError("Only uint16 <4096 image (12bit) supported.")
         func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
                bitdepth=bitdepth + 1, out=out, p0=p0, p1=p1)
     else:
@@ -80,9 +77,7 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -121,9 +116,7 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -161,9 +154,7 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -201,9 +192,7 @@ def percentile_mean_subtraction(image, selem, out=None, mask=None,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -243,9 +232,7 @@ def percentile_morph_contr_enh(
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -284,9 +271,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -324,9 +309,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -366,9 +349,7 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
     Parameters
     ----------
     image : ndarray
-        Image array (uint8 array or uint16). If image is uint16, as the
-        algorithm uses max. 12bit histogram, an exception will be raised if
-        image has a value > 4095.
+        Image array (uint8 array or uint16).
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray

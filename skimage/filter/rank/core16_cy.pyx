@@ -56,10 +56,10 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
     assert centre_c >= 0
     assert centre_r < srows
     assert centre_c < scols
-    assert bitdepth in range(2, 13)
 
-    maxbin_list = [0, 0, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
-    midbin_list = [0, 0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
+    maxbin_list = [0, 0, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
+                   8192, 16384, 32768, 65536]
+    midbin_list = [m / 2 for m in maxbin_list]
 
     # set maxbin and midbin
     cdef Py_ssize_t maxbin = maxbin_list[bitdepth]

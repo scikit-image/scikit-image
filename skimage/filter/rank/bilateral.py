@@ -3,8 +3,7 @@
 The local histogram is computed using a sliding window similar to the method
 described in [1]_.
 
-Input image must be 16-bit with a value < 4096 (i.e. 12 bit),
-the number of histogram bins is determined from the
+Input image must be 16-bit, the number of histogram bins is determined from the
 maximum value present in the image.
 
 The pixel neighborhood is defined by:
@@ -61,8 +60,6 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, s0, s1):
         if out is None:
             out = np.zeros(image.shape, dtype=np.uint16)
         bitdepth = find_bitdepth(image)
-        if bitdepth > 11:
-            raise ValueError("Only uint16 <4096 image (12bit) supported.")
         func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
                bitdepth=bitdepth + 1, out=out, s0=s0, s1=s1)
     else:
@@ -88,9 +85,8 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint16). As the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
+    image : ndarray (uint16)
+        Input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
@@ -142,9 +138,8 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint16). As the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
+    image : ndarray (uint16)
+        Input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
