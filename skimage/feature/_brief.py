@@ -1,6 +1,3 @@
-# TODO Normal sampling from image patch of size 49 x 49
-# TODO Tests, example, doc
-
 import numpy as np
 from skimage.color import rgb2gray
 from scipy.ndimage.filters import gaussian_filter
@@ -19,7 +16,6 @@ def _remove_border_keypoints(image, keypoints, dist):
 
 def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49, sample_seed=1):
 	"""Extract BRIEF Descriptor about given keypoints for a given image.
-
 
     Parameters
     ----------
@@ -48,7 +44,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49, s
 
     References
     ----------
-    .. [1] Michael Calonder, Vincent Lepetit, Christoph Strecha, and Pascal Fua
+    .. [1] Michael Calonder, Vincent Lepetit, Christoph Strecha and Pascal Fua
     "BRIEF : Binary robust independent elementary features",
     http://cvlabwww.epfl.ch/~lepetit/papers/calonder_eccv10.pdf
 
@@ -56,8 +52,9 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49, s
 	if np.squeeze(image).ndim == 3:
 		image = rgb2gray(image)
 
-	# Removing keypoints that are (patch_size / 2) distance from the image border
 	keypoints = np.array(keypoints + 0.5, dtype=np.intp)
+
+	# Removing keypoints that are (patch_size / 2) distance from the image border
 	keypoints = _remove_border_keypoints(image, keypoints, patch_size / 2)
 
 	descriptor = np.zeros((len(keypoints), descriptor_size), dtype=bool)
@@ -90,8 +87,34 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49, s
 
 
 def hamming_distance(descriptor_1, descriptor_2):
+	"""A dissimilarity measure used for matching keypoints in different images
+	using binary feature descriptors like BRIEF etc.
 
-	distance = np.zeros((len(descriptor_1), len(descriptor_2)), dtype=int)
+    Parameters
+    ----------
+    descriptor_1 : ndarray with dtype bool
+    	Binary feature descriptor for keypoints in the first image.
+    	2D ndarray of dimensions (no_of_keypoints_in_image_1, descriptor_size)
+    	with value at an index (i, j) either being True or False representing
+    	the outcome of Intensity comparison about ith keypoint on jth decision
+    	pixel-pair.
+    descriptor_2 : ndarray with dtype bool
+    	Binary feature descriptor for keypoints in the second image.
+    	2D ndarray of dimensions (no_of_keypoints_in_image_2, descriptor_size)
+    	with value at an index (i, j) either being True or False representing
+    	the outcome of Intensity comparison about ith keypoint on jth decision
+    	pixel-pair.
+
+    Returns
+    -------
+    distance : ndarray
+    	2D ndarray of dimensions (no_of_rows_in_descripto_1, no_of_rows_in_descripto_2)
+    	with value at an index (i, j) between the range [0, 1] representing the
+    	extent of dissimilarity between ith keypoint of in first image and jth
+    	keypoint in second image.
+
+    """
+	distance = np.zeros((len(descriptor_1), len(descriptor_2)), dtype=float)
 	for i in range(len(descriptor_1)):
 		for j in range(len(descriptor_2)):
 			distance[i, j] = hamming(descriptor_1[i][:], descriptor_2[j][:])
