@@ -5,16 +5,12 @@
 
 cimport numpy as cnp
 from libc.math cimport log
-from .core16_cy cimport _core16
+from .core16_cy cimport dtype_t, _core16
 
 
 # -----------------------------------------------------------------
 # kernels uint16 take extra parameter for defining the bitdepth
 # -----------------------------------------------------------------
-
-
-ctypedef cnp.uint16_t dtype_t
-
 
 cdef inline dtype_t kernel_autolevel(Py_ssize_t * histo, float pop,
                                      dtype_t g, Py_ssize_t bitdepth,
@@ -287,136 +283,136 @@ cdef inline dtype_t kernel_entropy(Py_ssize_t * histo, float pop,
 # -----------------------------------------------------------------
 
 
-def autolevel(cnp.ndarray[dtype_t, ndim=2] image,
-              cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-              cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-              cnp.ndarray[dtype_t, ndim=2] out=None,
+def autolevel(dtype_t[:, ::1] image,
+              char[:, ::1] selem,
+              char[:, ::1] mask=None,
+              dtype_t[:, ::1] out=None,
               char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_autolevel, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def bottomhat(cnp.ndarray[dtype_t, ndim=2] image,
-              cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-              cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-              cnp.ndarray[dtype_t, ndim=2] out=None,
+def bottomhat(dtype_t[:, ::1] image,
+              char[:, ::1] selem,
+              char[:, ::1] mask=None,
+              dtype_t[:, ::1] out=None,
               char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_bottomhat, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def equalize(cnp.ndarray[dtype_t, ndim=2] image,
-             cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-             cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-             cnp.ndarray[dtype_t, ndim=2] out=None,
+def equalize(dtype_t[:, ::1] image,
+             char[:, ::1] selem,
+             char[:, ::1] mask=None,
+             dtype_t[:, ::1] out=None,
              char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_equalize, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def gradient(cnp.ndarray[dtype_t, ndim=2] image,
-             cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-             cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-             cnp.ndarray[dtype_t, ndim=2] out=None,
+def gradient(dtype_t[:, ::1] image,
+             char[:, ::1] selem,
+             char[:, ::1] mask=None,
+             dtype_t[:, ::1] out=None,
              char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_gradient, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def maximum(cnp.ndarray[dtype_t, ndim=2] image,
-            cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-            cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-            cnp.ndarray[dtype_t, ndim=2] out=None,
+def maximum(dtype_t[:, ::1] image,
+            char[:, ::1] selem,
+            char[:, ::1] mask=None,
+            dtype_t[:, ::1] out=None,
             char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_maximum, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def mean(cnp.ndarray[dtype_t, ndim=2] image,
-         cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-         cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-         cnp.ndarray[dtype_t, ndim=2] out=None,
+def mean(dtype_t[:, ::1] image,
+         char[:, ::1] selem,
+         char[:, ::1] mask=None,
+         dtype_t[:, ::1] out=None,
          char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_mean, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def meansubtraction(cnp.ndarray[dtype_t, ndim=2] image,
-                     cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-                     cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-                     cnp.ndarray[dtype_t, ndim=2] out=None,
+def meansubtraction(dtype_t[:, ::1] image,
+                     char[:, ::1] selem,
+                     char[:, ::1] mask=None,
+                     dtype_t[:, ::1] out=None,
                      char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_meansubtraction, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def median(cnp.ndarray[dtype_t, ndim=2] image,
-           cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-           cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-           cnp.ndarray[dtype_t, ndim=2] out=None,
+def median(dtype_t[:, ::1] image,
+           char[:, ::1] selem,
+           char[:, ::1] mask=None,
+           dtype_t[:, ::1] out=None,
            char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_median, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def minimum(cnp.ndarray[dtype_t, ndim=2] image,
-            cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-            cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-            cnp.ndarray[dtype_t, ndim=2] out=None,
+def minimum(dtype_t[:, ::1] image,
+            char[:, ::1] selem,
+            char[:, ::1] mask=None,
+            dtype_t[:, ::1] out=None,
             char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_minimum, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def morph_contr_enh(cnp.ndarray[dtype_t, ndim=2] image,
-                    cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-                    cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-                    cnp.ndarray[dtype_t, ndim=2] out=None,
+def morph_contr_enh(dtype_t[:, ::1] image,
+                    char[:, ::1] selem,
+                    char[:, ::1] mask=None,
+                    dtype_t[:, ::1] out=None,
                     char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_morph_contr_enh, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def modal(cnp.ndarray[dtype_t, ndim=2] image,
-          cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-          cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-          cnp.ndarray[dtype_t, ndim=2] out=None,
+def modal(dtype_t[:, ::1] image,
+          char[:, ::1] selem,
+          char[:, ::1] mask=None,
+          dtype_t[:, ::1] out=None,
           char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_modal, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def pop(cnp.ndarray[dtype_t, ndim=2] image,
-        cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-        cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-        cnp.ndarray[dtype_t, ndim=2] out=None,
+def pop(dtype_t[:, ::1] image,
+        char[:, ::1] selem,
+        char[:, ::1] mask=None,
+        dtype_t[:, ::1] out=None,
         char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_pop, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def threshold(cnp.ndarray[dtype_t, ndim=2] image,
-              cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-              cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-              cnp.ndarray[dtype_t, ndim=2] out=None,
+def threshold(dtype_t[:, ::1] image,
+              char[:, ::1] selem,
+              char[:, ::1] mask=None,
+              dtype_t[:, ::1] out=None,
               char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_threshold, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def tophat(cnp.ndarray[dtype_t, ndim=2] image,
-           cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-           cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-           cnp.ndarray[dtype_t, ndim=2] out=None,
+def tophat(dtype_t[:, ::1] image,
+           char[:, ::1] selem,
+           char[:, ::1] mask=None,
+           dtype_t[:, ::1] out=None,
            char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_tophat, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def entropy(cnp.ndarray[dtype_t, ndim=2] image,
-            cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-            cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-            cnp.ndarray[dtype_t, ndim=2] out=None,
+def entropy(dtype_t[:, ::1] image,
+            char[:, ::1] selem,
+            char[:, ::1] mask=None,
+            dtype_t[:, ::1] out=None,
             char shift_x=0, char shift_y=0, Py_ssize_t bitdepth=8):
     _core16(kernel_entropy, image, selem, mask, out, shift_x, shift_y,
             bitdepth, 0, 0, <Py_ssize_t>0, <Py_ssize_t>0)

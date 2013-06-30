@@ -4,15 +4,12 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
-from .core8_cy cimport _core8, uint8_max, uint8_min
+from .core8_cy cimport dtype_t, _core8, uint8_max, uint8_min
 
 
 # -----------------------------------------------------------------
 # kernels uint8 (SOFT version using percentiles)
 # -----------------------------------------------------------------
-
-
-ctypedef cnp.uint8_t dtype_t
 
 
 cdef inline dtype_t kernel_autolevel(Py_ssize_t * histo, float pop,
@@ -206,10 +203,10 @@ cdef inline dtype_t kernel_threshold(Py_ssize_t * histo, float pop,
 # -----------------------------------------------------------------
 
 
-def autolevel(cnp.ndarray[dtype_t, ndim=2] image,
-              cnp.ndarray[dtype_t, ndim=2] selem,
-              cnp.ndarray[dtype_t, ndim=2] mask=None,
-              cnp.ndarray[dtype_t, ndim=2] out=None,
+def autolevel(dtype_t[:, ::1] image,
+              char[:, ::1] selem,
+              char[:, ::1] mask=None,
+              dtype_t[:, ::1] out=None,
               char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
     """autolevel
     """
@@ -217,10 +214,10 @@ def autolevel(cnp.ndarray[dtype_t, ndim=2] image,
            <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def gradient(cnp.ndarray[dtype_t, ndim=2] image,
-             cnp.ndarray[dtype_t, ndim=2] selem,
-             cnp.ndarray[dtype_t, ndim=2] mask=None,
-             cnp.ndarray[dtype_t, ndim=2] out=None,
+def gradient(dtype_t[:, ::1] image,
+             char[:, ::1] selem,
+             char[:, ::1] mask=None,
+             dtype_t[:, ::1] out=None,
              char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
     """return p0,p1 percentile gradient
     """
@@ -228,10 +225,10 @@ def gradient(cnp.ndarray[dtype_t, ndim=2] image,
            <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def mean(cnp.ndarray[dtype_t, ndim=2] image,
-         cnp.ndarray[dtype_t, ndim=2] selem,
-         cnp.ndarray[dtype_t, ndim=2] mask=None,
-         cnp.ndarray[dtype_t, ndim=2] out=None,
+def mean(dtype_t[:, ::1] image,
+         char[:, ::1] selem,
+         char[:, ::1] mask=None,
+         dtype_t[:, ::1] out=None,
          char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
     """return mean between [p0 and p1] percentiles
     """
@@ -239,10 +236,10 @@ def mean(cnp.ndarray[dtype_t, ndim=2] image,
            <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def mean_subtraction(cnp.ndarray[dtype_t, ndim=2] image,
-                      cnp.ndarray[dtype_t, ndim=2] selem,
-                      cnp.ndarray[dtype_t, ndim=2] mask=None,
-                      cnp.ndarray[dtype_t, ndim=2] out=None,
+def mean_subtraction(dtype_t[:, ::1] image,
+                      char[:, ::1] selem,
+                      char[:, ::1] mask=None,
+                      dtype_t[:, ::1] out=None,
                       char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
     """return original - mean between [p0 and p1] percentiles *.5 +127
     """
@@ -250,10 +247,10 @@ def mean_subtraction(cnp.ndarray[dtype_t, ndim=2] image,
            p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def morph_contr_enh(cnp.ndarray[dtype_t, ndim=2] image,
-                    cnp.ndarray[dtype_t, ndim=2] selem,
-                    cnp.ndarray[dtype_t, ndim=2] mask=None,
-                    cnp.ndarray[dtype_t, ndim=2] out=None,
+def morph_contr_enh(dtype_t[:, ::1] image,
+                    char[:, ::1] selem,
+                    char[:, ::1] mask=None,
+                    dtype_t[:, ::1] out=None,
                     char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
     """reforce contrast using percentiles
     """
@@ -261,10 +258,10 @@ def morph_contr_enh(cnp.ndarray[dtype_t, ndim=2] image,
            p0, p1, <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def percentile(cnp.ndarray[dtype_t, ndim=2] image,
-               cnp.ndarray[dtype_t, ndim=2] selem,
-               cnp.ndarray[dtype_t, ndim=2] mask=None,
-               cnp.ndarray[dtype_t, ndim=2] out=None,
+def percentile(dtype_t[:, ::1] image,
+               char[:, ::1] selem,
+               char[:, ::1] mask=None,
+               dtype_t[:, ::1] out=None,
                char shift_x=0, char shift_y=0, float p0=0.):
     """return p0 percentile
     """
@@ -272,10 +269,10 @@ def percentile(cnp.ndarray[dtype_t, ndim=2] image,
            p0, 0., <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def pop(cnp.ndarray[dtype_t, ndim=2] image,
-        cnp.ndarray[dtype_t, ndim=2] selem,
-        cnp.ndarray[dtype_t, ndim=2] mask=None,
-        cnp.ndarray[dtype_t, ndim=2] out=None,
+def pop(dtype_t[:, ::1] image,
+        char[:, ::1] selem,
+        char[:, ::1] mask=None,
+        dtype_t[:, ::1] out=None,
         char shift_x=0, char shift_y=0, float p0=0., float p1=0.):
     """return nb of pixels between [p0 and p1]
     """
@@ -283,10 +280,10 @@ def pop(cnp.ndarray[dtype_t, ndim=2] image,
            <Py_ssize_t>0, <Py_ssize_t>0)
 
 
-def threshold(cnp.ndarray[dtype_t, ndim=2] image,
-              cnp.ndarray[dtype_t, ndim=2] selem,
-              cnp.ndarray[dtype_t, ndim=2] mask=None,
-              cnp.ndarray[dtype_t, ndim=2] out=None,
+def threshold(dtype_t[:, ::1] image,
+              char[:, ::1] selem,
+              char[:, ::1] mask=None,
+              dtype_t[:, ::1] out=None,
               char shift_x=0, char shift_y=0, float p0=0.):
     """return 255 if g > percentile p0
     """
