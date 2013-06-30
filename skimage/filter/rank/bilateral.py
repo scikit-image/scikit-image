@@ -28,8 +28,8 @@ References
 
 import numpy as np
 from skimage import img_as_ubyte
-from skimage.filter.rank import _crank16_bilateral
-from skimage.filter.rank.generic import find_bitdepth
+from . import bilateral16_cy
+from .generic import find_bitdepth
 
 
 __all__ = ['bilateral_mean', 'bilateral_pop']
@@ -130,7 +130,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     >>> bilat_ima = bilateral_mean(ima, disk(20), s0=10,s1=10)
     """
 
-    return _apply(None, _crank16_bilateral.mean, image, selem, out=out,
+    return _apply(None, _bilateral16_cy.mean, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
@@ -188,5 +188,5 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(None, _crank16_bilateral.pop, image, selem, out=out,
+    return _apply(None, _bilateral16_cy.pop, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)

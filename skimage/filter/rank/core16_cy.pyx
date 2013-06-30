@@ -7,7 +7,7 @@ import numpy as np
 
 cimport numpy as cnp
 from libc.stdlib cimport malloc, free
-from _core8 cimport is_in_mask
+from .core8_cy cimport is_in_mask
 
 
 cdef inline int int_max(int a, int b):

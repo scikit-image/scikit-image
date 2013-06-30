@@ -5,7 +5,7 @@
 
 cimport numpy as cnp
 from libc.math cimport log
-from skimage.filter.rank._core8 cimport _core8
+from .core8_cy cimport _core8
 
 
 # -----------------------------------------------------------------
