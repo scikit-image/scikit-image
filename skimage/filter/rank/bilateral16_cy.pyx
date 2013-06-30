@@ -4,15 +4,12 @@
 #cython: wraparound=False
 
 cimport numpy as cnp
-from .core16_cy cimport _core16
+from .core16_cy cimport dtype_t, _core16
 
 
 # -----------------------------------------------------------------
 # kernels uint16 take extra parameter for defining the bitdepth
 # -----------------------------------------------------------------
-
-
-ctypedef cnp.uint16_t dtype_t
 
 
 cdef inline dtype_t kernel_mean(Py_ssize_t* histo, float pop,
@@ -59,10 +56,10 @@ cdef inline dtype_t kernel_pop(Py_ssize_t* histo, float pop,
 # -----------------------------------------------------------------
 
 
-def mean(cnp.ndarray[dtype_t, ndim=2] image,
-         cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-         cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-         cnp.ndarray[dtype_t, ndim=2] out=None,
+def mean(dtype_t[:, ::1] image,
+         char[:, ::1] selem,
+         char[:, ::1] mask=None,
+         dtype_t[:, ::1] out=None,
          char shift_x=0, char shift_y=0, int bitdepth=8, int s0=1, int s1=1):
     """average greylevel (clipped on uint8)
     """
@@ -70,10 +67,10 @@ def mean(cnp.ndarray[dtype_t, ndim=2] image,
             bitdepth, 0., 0., s0, s1)
 
 
-def pop(cnp.ndarray[dtype_t, ndim=2] image,
-        cnp.ndarray[cnp.uint8_t, ndim=2] selem,
-        cnp.ndarray[cnp.uint8_t, ndim=2] mask=None,
-        cnp.ndarray[dtype_t, ndim=2] out=None,
+def pop(dtype_t[:, ::1] image,
+        char[:, ::1] selem,
+        char[:, ::1] mask=None,
+        dtype_t[:, ::1] out=None,
         char shift_x=0, char shift_y=0, int bitdepth=8, int s0=1, int s1=1):
     """returns the number of actual pixels of the structuring element inside
     the mask
