@@ -103,7 +103,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        define the [s0, s1] interval to be considered for computing the value.
+        Define the [s0, s1] interval to be considered for computing the value.
 
     Returns
     -------
@@ -157,7 +157,7 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        define the [s0, s1] interval to be considered for computing the value.
+        Define the [s0, s1] interval to be considered for computing the value.
 
     Returns
     -------
