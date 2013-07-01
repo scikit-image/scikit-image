@@ -3,6 +3,9 @@
 Entropy
 =======
 
+Image entropy is a quantity which is used to describe the amount of information
+coded in an image.
+
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,33 +16,18 @@ from skimage.morphology import disk
 from skimage.util import img_as_ubyte
 
 
-# defining a 8- and a 16-bit test images
-a8 = img_as_ubyte(data.camera())
-a16 = a8.astype(np.uint16) * 4
+image = img_as_ubyte(data.camera())
 
-ent8 = entropy(a8, disk(5)) # pixel value contain 10x the local entropy
-ent16 = entropy(a16, disk(5)) # pixel value contain 1000x the local entropy
+plt.figure(figsize=(10, 4))
 
-# display results
-plt.figure(figsize=(10, 10))
-
-plt.subplot(2,2,1)
-plt.imshow(a8, cmap=plt.cm.gray)
-plt.xlabel('8-bit image')
+plt.subplot(121)
+plt.imshow(image, cmap=plt.cm.gray)
+plt.title('Image')
 plt.colorbar()
 
-plt.subplot(2,2,2)
-plt.imshow(ent8, cmap=plt.cm.jet)
-plt.xlabel('entropy*10')
+plt.subplot(122)
+plt.imshow(entropy(image, disk(5)), cmap=plt.cm.jet)
+plt.title('Entropy')
 plt.colorbar()
 
-plt.subplot(2,2,3)
-plt.imshow(a16, cmap=plt.cm.gray)
-plt.xlabel('16-bit image')
-plt.colorbar()
-
-plt.subplot(2,2,4)
-plt.imshow(ent16, cmap=plt.cm.jet)
-plt.xlabel('entropy*1000')
-plt.colorbar()
 plt.show()
