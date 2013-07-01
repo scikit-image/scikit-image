@@ -17,6 +17,9 @@ References
 
 import numpy as np
 from skimage import img_as_ubyte, img_as_uint
+from ... import get_log
+log = get_log()
+
 from . import generic8_cy, generic16_cy
 
 
@@ -60,6 +63,9 @@ def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
         if out is None:
             out = np.zeros(image.shape, dtype=np.uint16)
         bitdepth = find_bitdepth(image)
+        if bitdepth > 10:
+            log.warn("Bitdepth of %d may result in bad rank filter "
+                     "performance." % bitdepth)
         func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
                bitdepth=bitdepth + 1, out=out)
 
