@@ -176,12 +176,10 @@ def test_compare_autolevels_16bit():
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
-def test_compare_uint_vs_float():
-    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
-    # dynamic) should be identical
+def test_compare_ubyte_vs_float():
 
     # Create signed int8 image that and convert it to uint8
-    image_uint = img_as_uint(data.camera()[:50, :50])
+    image_uint = img_as_ubyte(data.camera()[:50, :50])
     image_float = img_as_float(image_uint)
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
@@ -372,37 +370,37 @@ def test_entropy():
     selem = np.ones((16, 16), dtype=np.uint8)
     # 1 bit per pixel
     data = np.tile(np.asarray([0, 1]), (100, 100)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 10)
+    assert(np.max(rank.entropy(data, selem)) == 1)
 
     # 2 bit per pixel
     data = np.tile(np.asarray([[0, 1], [2, 3]]), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 20)
+    assert(np.max(rank.entropy(data, selem)) == 2)
 
     # 3 bit per pixel
     data = np.tile(
         np.asarray([[0, 1, 2, 3], [4, 5, 6, 7]]), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 30)
+    assert(np.max(rank.entropy(data, selem)) == 3)
 
     # 4 bit per pixel
     data = np.tile(
         np.reshape(np.arange(16), (4, 4)), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 40)
+    assert(np.max(rank.entropy(data, selem)) == 4)
 
     # 6 bit per pixel
     data = np.tile(
         np.reshape(np.arange(64), (8, 8)), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 60)
+    assert(np.max(rank.entropy(data, selem)) == 6)
 
     # 8-bit per pixel
     data = np.tile(
         np.reshape(np.arange(256), (16, 16)), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 80)
+    assert(np.max(rank.entropy(data, selem)) == 8)
 
     # 12 bit per pixel
     selem = np.ones((64, 64), dtype=np.uint8)
     data = np.tile(
         np.reshape(np.arange(4096), (64, 64)), (2, 2)).astype(np.uint16)
-    assert(np.max(rank.entropy(data, selem)) == 12000)
+    assert(np.max(rank.entropy(data, selem)) == 12)
 
 
 def test_selem_dtypes():

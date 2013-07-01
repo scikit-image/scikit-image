@@ -20,7 +20,7 @@ from skimage import img_as_ubyte, img_as_uint
 from ... import get_log
 log = get_log()
 
-from . import generic8_cy, generic16_cy
+from . import generic_cy
 
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
@@ -28,56 +28,43 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
 
 
-import numpy as np
+def _handle_input(image, selem, out, mask):
 
+    if image.dtype not in (np.uint8, np.uint16):
+        image = img_as_ubyte(image)
 
-def find_bitdepth(image):
-    """returns the max bith depth of a uint16 image
-    """
-    umax = np.max(image)
-    if umax > 2:
-        return int(np.log2(umax))
-    else:
-        return 1
-
-
-def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y):
-    selem = img_as_ubyte(selem > 0)
+    selem = np.ascontiguousarray(img_as_ubyte(selem > 0))
     image = np.ascontiguousarray(image)
 
     if mask is None:
         mask = np.ones(image.shape, dtype=np.uint8)
     else:
-        mask = np.ascontiguousarray(mask)
         mask = img_as_ubyte(mask)
+        mask = np.ascontiguousarray(mask)
+
+    if out is None:
+        out = np.empty_like(image, dtype=image.dtype)
 
     if image is out:
         raise NotImplementedError("Cannot perform rank operation in place.")
 
     is_8bit = image.dtype in (np.uint8, np.int8)
 
-    if func8 is not None and (is_8bit or func16 is None):
-        out = _apply8(func8, image, selem, out, mask, shift_x, shift_y)
+    if is_8bit:
+        max_bin = 255
     else:
-        image = img_as_uint(image)
-        if out is None:
-            out = np.zeros(image.shape, dtype=np.uint16)
-        bitdepth = find_bitdepth(image)
-        if bitdepth > 10:
-            log.warn("Bitdepth of %d may result in bad rank filter "
-                     "performance." % bitdepth)
-        func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-               bitdepth=bitdepth + 1, out=out)
+        max_bin = max(4, image.max())
 
-    return out
+    return image, selem, out, mask, max_bin
 
 
-def _apply8(func8, image, selem, out, mask, shift_x, shift_y):
-    if out is None:
-        out = np.zeros(image.shape, dtype=np.uint8)
-    image = img_as_ubyte(image)
-    func8(image, selem, shift_x=shift_x, shift_y=shift_y,
-          mask=mask, out=out)
+def _apply(func, image, selem, out, mask, shift_x, shift_y):
+
+    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask)
+
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+         out=out, max_bin=max_bin)
+
     return out
 
 
@@ -86,13 +73,13 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -102,7 +89,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The result of the local autolevel.
 
     Examples
@@ -117,7 +104,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic8_cy.autolevel, generic16_cy.autolevel, image, selem,
+    return _apply(generic_cy._autolevel, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -126,13 +113,13 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -142,12 +129,12 @@ def bottomhat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    local bottomhat : uint8 array or uint16 array depending on input image
+    bottomhat : ndarray (same dtype as input image)
         The result of the local bottomhat.
 
     """
 
-    return _apply(generic8_cy.bottomhat, generic16_cy.bottomhat, image, selem,
+    return _apply(generic_cy._bottomhat, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -156,13 +143,13 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -172,7 +159,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The result of the local equalize.
 
     Examples
@@ -187,7 +174,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic8_cy.equalize, generic16_cy.equalize, image, selem,
+    return _apply(generic_cy._equalize, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -198,13 +185,13 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -214,12 +201,12 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The local gradient.
 
     """
 
-    return _apply(generic8_cy.gradient, generic16_cy.gradient, image, selem,
+    return _apply(generic_cy._gradient, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -229,13 +216,13 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -245,7 +232,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The local maximum.
 
     See also
@@ -254,13 +241,12 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Note
     ----
-    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
     * the lower algorithm complexity makes the rank.maximum() more efficient for
       larger images and structuring elements
 
     """
 
-    return _apply(generic8_cy.maximum, generic16_cy.maximum, image, selem,
+    return _apply(generic_cy._maximum, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -269,13 +255,13 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -285,7 +271,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The local mean.
 
     Examples
@@ -300,7 +286,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic8_cy.mean, generic16_cy.mean, image, selem, out=out,
+    return _apply(generic_cy._mean, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -310,13 +296,13 @@ def meansubtraction(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -326,14 +312,13 @@ def meansubtraction(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The result of the local meansubtraction.
 
     """
 
-    return _apply(generic8_cy.meansubtraction, generic16_cy.meansubtraction,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
-                  shift_y=shift_y)
+    return _apply(generic_cy._meansubtraction, image, selem,
+                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
 def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -341,13 +326,13 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -357,7 +342,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The local median.
 
     Examples
@@ -372,7 +357,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic8_cy.median, generic16_cy.median, image, selem,
+    return _apply(generic_cy._median, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -381,13 +366,13 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -397,7 +382,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The local minimum.
 
     See also
@@ -406,13 +391,12 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Note
     ----
-    * input image can be 8-bit or 16-bit with a value < 4096 (i.e. 12 bit)
     * the lower algorithm complexity makes the rank.minimum() more efficient
       for larger images and structuring elements
 
     """
 
-    return _apply(generic8_cy.minimum, generic16_cy.minimum, image, selem,
+    return _apply(generic_cy._minimum, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -421,13 +405,13 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -437,12 +421,12 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The local modal.
 
     """
 
-    return _apply(generic8_cy.modal, generic16_cy.modal, image, selem,
+    return _apply(generic_cy._modal, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -454,13 +438,13 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -470,7 +454,7 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The result of the local morph_contr_enh.
 
     Examples
@@ -485,9 +469,8 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(generic8_cy.morph_contr_enh, generic16_cy.morph_contr_enh,
-                  image, selem, out=out, mask=mask, shift_x=shift_x,
-                  shift_y=shift_y)
+    return _apply(generic_cy._morph_contr_enh, image, selem,
+                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
 def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
@@ -496,13 +479,13 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -512,7 +495,7 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The number of pixels belonging to the neighborhood.
 
     Examples
@@ -534,7 +517,7 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic8_cy.pop, generic16_cy.pop, image, selem, out=out,
+    return _apply(generic_cy._pop, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -543,13 +526,13 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -559,7 +542,7 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The result of the local threshold.
 
     Examples
@@ -581,7 +564,7 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic8_cy.threshold, generic16_cy.threshold, image, selem,
+    return _apply(generic_cy._threshold, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -590,13 +573,13 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -606,12 +589,12 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The image tophat.
 
     """
 
-    return _apply(generic8_cy.tophat, generic16_cy.tophat, image, selem,
+    return _apply(generic_cy._tophat, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -621,13 +604,13 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -642,7 +625,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
+    out : ndarray (same dtype as input image)
         The image noise.
 
     """
@@ -654,7 +637,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     selem_cpy = selem.copy()
     selem_cpy[centre_r, centre_c] = 0
 
-    return _apply(generic8_cy.noise_filter, None, image, selem_cpy, out=out,
+    return _apply(generic_cy._noise_filter, image, selem_cpy, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -665,13 +648,13 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint8 array or uint16).
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -681,8 +664,8 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array or uint16 array (same as input image)
-        Entropy x10 (uint8 images) and entropy x1000 (uint16 images)
+    out : ndarray (same dtype as input image)
+        Entropy of image.
 
     References
     ----------
@@ -694,17 +677,12 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage import data
     >>> from skimage.filter.rank import entropy
     >>> from skimage.morphology import disk
-    >>> # defining a 8- and a 16-bit test images
     >>> a8 = data.camera()
-    >>> a16 = data.camera().astype(np.uint16) * 4
-    >>> # pixel values contain 10x the local entropy
     >>> ent8 = entropy(a8, disk(5))
-    >>> # pixel values contain 1000x the local entropy
-    >>> ent16 = entropy(a16, disk(5))
 
     """
 
-    return _apply(generic8_cy.entropy, generic16_cy.entropy, image, selem,
+    return _apply(generic_cy._entropy, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -719,7 +697,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
     shift_x, shift_y : int
@@ -729,16 +707,12 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : uint8 array
-        Otsu's threshold values
+    out : ndarray (same dtype as input image)
+        Otsu's threshold values.
 
     References
     ----------
     .. [otsu] http://en.wikipedia.org/wiki/Otsu's_method
-
-    Notes
-    -----
-    * input image are 8-bit only
 
     Examples
     --------
@@ -753,5 +727,5 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     """
 
-    return _apply(generic8_cy.otsu, None, image, selem, out=out,
+    return _apply(generic_cy._otsu, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)

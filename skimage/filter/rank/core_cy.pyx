@@ -7,14 +7,13 @@ import numpy as np
 
 cimport numpy as cnp
 from libc.stdlib cimport malloc, free
-from .core8_cy cimport is_in_mask
 
 
-cdef inline dtype_t uint16_max(dtype_t a, dtype_t b):
+cdef inline dtype_t _max(dtype_t a, dtype_t b):
     return a if a >= b else b
 
 
-cdef inline dtype_t uint16_min(dtype_t a, dtype_t b):
+cdef inline dtype_t _min(dtype_t a, dtype_t b):
     return a if a <= b else b
 
 
@@ -30,15 +29,30 @@ cdef inline void histogram_decrement(Py_ssize_t* histo, float* pop,
     pop[0] -= 1
 
 
-cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
-                                 Py_ssize_t, Py_ssize_t, Py_ssize_t, float,
-                                 float, Py_ssize_t, Py_ssize_t),
-                  dtype_t[:, ::1] image,
-                  char[:, ::1] selem,
-                  char[:, ::1] mask,
-                  dtype_t[:, ::1] out,
-                  char shift_x, char shift_y, Py_ssize_t bitdepth,
-                  float p0, float p1, Py_ssize_t s0, Py_ssize_t s1) except *:
+cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
+                            Py_ssize_t r, Py_ssize_t c,
+                            char* mask):
+    """Check whether given coordinate is within image and mask is true."""
+    if r < 0 or r > rows - 1 or c < 0 or c > cols - 1:
+        return 0
+    else:
+        if mask[r * cols + c]:
+            return 1
+        else:
+            return 0
+
+
+cdef void _core(dtype_t kernel(Py_ssize_t*, float, dtype_t,
+                               Py_ssize_t, Py_ssize_t, float,
+                               float, Py_ssize_t, Py_ssize_t),
+                dtype_t[:, ::1] image,
+                char[:, ::1] selem,
+                char[:, ::1] mask,
+                dtype_t[:, ::1] out,
+                char shift_x, char shift_y,
+                float p0, float p1,
+                Py_ssize_t s0, Py_ssize_t s1,
+                Py_ssize_t max_bin) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
     use kernel function return value for output image.
     """
@@ -48,8 +62,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
     cdef Py_ssize_t srows = selem.shape[0]
     cdef Py_ssize_t scols = selem.shape[1]
 
-    cdef Py_ssize_t centre_r = int(selem.shape[0] / 2) + shift_y
-    cdef Py_ssize_t centre_c = int(selem.shape[1] / 2) + shift_x
+    cdef Py_ssize_t centre_r = <Py_ssize_t>(selem.shape[0] / 2) + shift_y
+    cdef Py_ssize_t centre_c = <Py_ssize_t>(selem.shape[1] / 2) + shift_x
 
     # check that structuring element center is inside the element bounding box
     assert centre_r >= 0
@@ -57,34 +71,35 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
     assert centre_r < srows
     assert centre_c < scols
 
-    maxbin_list = [0, 0, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096,
-                   8192, 16384, 32768, 65536]
-    midbin_list = [int(m / 2) for m in maxbin_list]
+    # add 1 to ensure maximum value is included in histogram -> range(max_bin)
+    max_bin += 1
 
-    # set maxbin and midbin
-    cdef Py_ssize_t maxbin = maxbin_list[bitdepth]
-    cdef Py_ssize_t midbin = midbin_list[bitdepth]
+    cdef Py_ssize_t mid_bin = max_bin / 2
 
     # define pointers to the data
     cdef char* mask_data = &mask[0, 0]
 
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
+
     # number of pixels actually inside the neighborhood (float)
-    cdef float pop
-
-    # allocate memory with malloc
-    cdef Py_ssize_t max_se = srows * scols
-
-    # number of element in each attack border
-    cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w
+    cdef float pop = 0
 
     # the current local histogram distribution
-    cdef Py_ssize_t* histo = <Py_ssize_t*>malloc(maxbin * sizeof(Py_ssize_t))
+    cdef Py_ssize_t* histo = <Py_ssize_t*>malloc(max_bin * sizeof(Py_ssize_t))
+    for i in range(max_bin):
+        histo[i] = 0
 
     # these lists contain the relative pixel row and column for each of the 4
     # attack borders east, west, north and south e.g. se_e_r lists the rows of
     # the east structuring element border
+
+    cdef Py_ssize_t max_se = srows * scols
+
+    # number of element in each attack border
+    cdef Py_ssize_t num_se_n, num_se_s, num_se_e, num_se_w
+    num_se_n = num_se_s = num_se_e = num_se_w = 0
+
     cdef Py_ssize_t* se_e_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
     cdef Py_ssize_t* se_e_c = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
     cdef Py_ssize_t* se_w_r = <Py_ssize_t*>malloc(max_se * sizeof(Py_ssize_t))
@@ -107,8 +122,6 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
     t = np.vstack((np.zeros((1, selem.shape[1])), selem))
     cdef char[:, :] t_n = (np.diff(t, axis=0) > 0).view(np.uint8)
 
-    num_se_n = num_se_s = num_se_e = num_se_w = 0
-
     for r in range(srows):
         for c in range(scols):
             if t_e[r, c]:
@@ -128,12 +141,6 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
                 se_s_c[num_se_s] = c - centre_c
                 num_se_s += 1
 
-    # initial population and histogram
-    for i in range(maxbin):
-        histo[i] = 0
-
-    pop = 0
-
     for r in range(srows):
         for c in range(scols):
             rr = r - centre_r
@@ -144,14 +151,13 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
 
     r = 0
     c = 0
-    # kernel -------------------------------------------
-    out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin, midbin,
+    out[r, c] = kernel(histo, pop, image[r, c], max_bin, mid_bin,
                        p0, p1, s0, s1)
-    # kernel -------------------------------------------
 
     # main loop
     r = 0
     for even_row in range(0, rows, 2):
+
         # ---> west to east
         for c in range(1, cols):
             for s in range(num_se_e):
@@ -166,10 +172,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            # kernel -------------------------------------------
-            out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin,
-                               midbin, p0, p1, s0, s1)
-            # kernel -------------------------------------------
+            out[r, c] = kernel(histo, pop, image[r, c], max_bin,
+                               mid_bin, p0, p1, s0, s1)
 
         r += 1  # pass to the next row
         if r >= rows:
@@ -188,10 +192,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
             if is_in_mask(rows, cols, rr, cc, mask_data):
                 histogram_decrement(histo, &pop, image[rr, cc])
 
-        # kernel -------------------------------------------
         out[r, c] = kernel(histo, pop, image[r, c],
-                           bitdepth, maxbin, midbin, p0, p1, s0, s1)
-        # kernel -------------------------------------------
+                           max_bin, mid_bin, p0, p1, s0, s1)
 
         # ---> east to west
         for c in range(cols - 2, -1, -1):
@@ -207,10 +209,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
                 if is_in_mask(rows, cols, rr, cc, mask_data):
                     histogram_decrement(histo, &pop, image[rr, cc])
 
-            # kernel -------------------------------------------
-            out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin,
-                               midbin, p0, p1, s0, s1)
-            # kernel -------------------------------------------
+            out[r, c] = kernel(histo, pop, image[r, c], max_bin,
+                               mid_bin, p0, p1, s0, s1)
 
         r += 1  # pass to the next row
         if r >= rows:
@@ -229,10 +229,8 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
             if is_in_mask(rows, cols, rr, cc, mask_data):
                 histogram_decrement(histo, &pop, image[rr, cc])
 
-        # kernel -------------------------------------------
-        out[r, c] = kernel(histo, pop, image[r, c], bitdepth, maxbin, midbin,
+        out[r, c] = kernel(histo, pop, image[r, c], max_bin, mid_bin,
                            p0, p1, s0, s1)
-        # kernel -------------------------------------------
 
     # release memory allocated by malloc
     free(se_e_r)
@@ -243,5 +241,4 @@ cdef void _core16(dtype_t kernel(Py_ssize_t*, float, dtype_t,
     free(se_n_c)
     free(se_s_r)
     free(se_s_c)
-
     free(histo)
