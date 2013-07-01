@@ -100,5 +100,4 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         in_mean = np.bincount(nearest_mean_ravel)
         in_mean[in_mean == 0] = 1
         means = (np.vstack(means_list) / in_mean).T.copy("C")
-    print np.asarray(nearest_mean)
     return nearest_mean
