@@ -55,6 +55,11 @@ def _handle_input(image, selem, out, mask):
     else:
         max_bin = max(4, image.max())
 
+    bitdepth = int(np.log2(max_bin))
+    if bitdepth > 10:
+        log.warn("Bitdepth of %d may result in bad rank filter "
+                 "performance due to large number of bins." % bitdepth)
+
     return image, selem, out, mask, max_bin
 
 

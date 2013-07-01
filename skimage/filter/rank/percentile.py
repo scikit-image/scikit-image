@@ -22,9 +22,6 @@ References
 """
 
 import numpy as np
-from skimage import img_as_ubyte
-from ... import get_log
-log = get_log()
 
 from . import percentile_cy
 from .generic import _handle_input
