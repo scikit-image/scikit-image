@@ -65,6 +65,10 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     #cdef double[::1] image_zyx_ravel_j
     for i in range(max_iter):
         changes = 0
+        for z in range(depth):
+            for y in range(height):
+                for x in range(width):
+                    distance[z, y, x] = np.inf
         # assign pixels to means
         for k in range(n_means):
             # compute windows:
@@ -100,4 +104,4 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         in_mean = np.bincount(nearest_mean_ravel)
         in_mean[in_mean == 0] = 1
         means = (np.vstack(means_list) / in_mean).T.copy("C")
-    return nearest_mean
+    return np.ascontiguousarray(nearest_mean)
