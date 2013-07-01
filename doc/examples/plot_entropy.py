@@ -20,7 +20,6 @@ image = img_as_ubyte(data.camera())
 
 fig, (ax0, ax1) = plt.subplots(ncols=2, figsize=(10, 4))
 
-
 img0 = ax0.imshow(image, cmap=plt.cm.gray)
 ax0.set_title('Image')
 ax0.axis('off')
