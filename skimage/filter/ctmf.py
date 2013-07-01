@@ -71,33 +71,33 @@ def median_filter(image, radius=2, mask=None, percent=50):
     #
     if (not np.issubdtype(image.dtype, np.int) or
         np.min(image) < 0 or np.max(image) > 255):
-        ranked_image, translation = rank_order(image[mask])
-        max_ranked_image = np.max(ranked_image)
-        if max_ranked_image == 0:
+        ranked_values, translation = rank_order(image[mask])
+        max_ranked_values = np.max(ranked_values)
+        if max_ranked_values == 0:
             warnings.warn('Particular case? Returning copy of input image.')
             return image.copy()
-        if max_ranked_image > 255:
-            ranked_image = ranked_image * 255 // max_ranked_image
+        if max_ranked_values > 255:
+            ranked_values = ranked_values * 255 // max_ranked_values
         was_ranked = True
     else:
-        ranked_image = image[mask]
+        ranked_values = image[mask]
         was_ranked = False
-    input_ = np.zeros(image.shape, np.uint8)
-    input_[mask] = ranked_image
+    ranked_image = np.zeros(image.shape, np.uint8)
+    ranked_image[mask] = ranked_values
 
     mask.dtype = np.uint8
     output = np.zeros(image.shape, np.uint8)
 
-    _ctmf.median_filter(input_, mask, output, radius, percent)
+    _ctmf.median_filter(ranked_image, mask, output, radius, percent)
     if was_ranked:
         #
         # The translation gives the original value at each ranking.
         # We rescale the output to the original ranking and then
         # use the translation to look up the original value in the image.
         #
-        if max_ranked_image > 255:
+        if max_ranked_values > 255:
             result = translation[output.astype(np.uint32) *
-                                 max_ranked_image // 255]
+                                 max_ranked_values // 255]
         else:
             result = translation[output]
     else:
