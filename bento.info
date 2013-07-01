@@ -123,27 +123,18 @@ Library:
     Extension: skimage._shared.geometry
         Sources:
             skimage/_shared/geometry.pyx
-    Extension: skimage.filter.rank.bilateral16_cy
+    Extension: skimage.filter.rank.generic_cy
         Sources:
-            skimage/filter/rank/bilateral16_cy.pyx
-    Extension: skimage.filter.rank.generic8_cy
+            skimage/filter/rank/generic_cy.pyx
+    Extension: skimage.filter.rank.percentile_cy
         Sources:
-            skimage/filter/rank/generic8_cy.pyx
-    Extension: skimage.filter.rank.percentile16_cy
+            skimage/filter/rank/percentile_cy.pyx
+    Extension: skimage.filter.rank.core_cy
         Sources:
-            skimage/filter/rank/percentile16_cy.pyx
-    Extension: skimage.filter.rank.core16_cy
+            skimage/filter/rank/core_cy.pyx
+    Extension: skimage.filter.rank.bilateral_cy
         Sources:
-            skimage/filter/rank/core16_cy.pyx
-    Extension: skimage.filter.rank.core8_cy
-        Sources:
-            skimage/filter/rank/core8_cy.pyx
-    Extension: skimage.filter.rank.generic16_cy
-        Sources:
-            skimage/filter/rank/generic16_cy.pyx
-    Extension: skimage.filter.rank.percentile8_cy
-        Sources:
-            skimage/filter/rank/percentile8_cy.pyx
+            skimage/filter/rank/bilateral_cy.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi
