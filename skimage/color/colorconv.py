@@ -739,7 +739,7 @@ def xyz2lab(xyz):
     a = 500.0 * (x - y)
     b = 200.0 * (y - z)
 
-    return np.concatenate(map(lambda x: x[..., np.newaxis], [L, a, b]), -1)
+    return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
 
 def lab2xyz(lab):
