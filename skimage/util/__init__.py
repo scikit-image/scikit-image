@@ -23,5 +23,5 @@ __all__ = ['img_as_float',
            'view_as_blocks',
            'view_as_windows',
            'pad',
-           'random_noise']
+           'random_noise',
            'regular_grid']
