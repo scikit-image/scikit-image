@@ -60,8 +60,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef double dist_mean
 
     cdef double tmp
-    #cdef long[::1] nearest_mean_ravel
-    #cdef double[::1] image_zyx_ravel_j
     for i in range(max_iter):
         changes = 0
         distance[:, :, :] = np.inf
