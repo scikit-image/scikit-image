@@ -51,7 +51,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             image_zyx.shape[2])
     # approximate grid size for desired n_segments
     cdef Py_ssize_t step_z, step_y, step_x
-    grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
     slices = regular_grid((depth, height, width), n_segments)
     step_z, step_y, step_x = [int(s.step) for s in slices]
 
@@ -65,10 +64,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     #cdef double[::1] image_zyx_ravel_j
     for i in range(max_iter):
         changes = 0
-        for z in range(depth):
-            for y in range(height):
-                for x in range(width):
-                    distance[z, y, x] = np.inf
+        distance[:, :, :] = np.inf
         # assign pixels to means
         for k in range(n_means):
             # compute windows:
