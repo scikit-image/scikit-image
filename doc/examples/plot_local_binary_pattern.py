@@ -207,7 +207,7 @@ plt.gray()
 
 ax1.imshow(brick)
 ax1.axis('off')
-hist(ax, refs['brick'])
+hist(ax4, refs['brick'])
 ax4.set_ylabel('Percentage')
 
 ax2.imshow(grass)
