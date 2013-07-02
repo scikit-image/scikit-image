@@ -1,7 +1,11 @@
 import numpy as np
-from skimage.color import rgb2gray
 from scipy.ndimage.filters import gaussian_filter
 from scipy.spatial.distance import hamming
+
+from ..color import rgb2gray
+from ..util import img_as_float
+
+from ._brief_cy import _brief_loop
 
 
 def _remove_border_keypoints(image, keypoints, dist):
@@ -9,12 +13,16 @@ def _remove_border_keypoints(image, keypoints, dist):
     width = image.shape[0]
     height = image.shape[1]
 
-    keypoints = keypoints[(dist < keypoints[:, 0]) & (keypoints[:, 0] < width - dist) &
-                (dist < keypoints[:, 1]) & (keypoints[:, 1] < height - dist)]
+    keypoints = keypoints[(dist < keypoints[:, 0])
+                          & (keypoints[:, 0] < width - dist)
+                          & (dist < keypoints[:, 1])
+                          & (keypoints[:, 1] < height - dist)]
+
     return keypoints
 
 
-def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49, sample_seed=1):
+def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
+          sample_seed=1):
     """Extract BRIEF Descriptor about given keypoints for a given image.
 
     Parameters
@@ -49,41 +57,55 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49, s
     http://cvlabwww.epfl.ch/~lepetit/papers/calonder_eccv10.pdf
 
     """
-    if np.squeeze(image).ndim == 3:
-        image = rgb2gray(image)
 
-    keypoints = np.array(keypoints + 0.5, dtype=np.intp)
+    np.random.seed(sample_seed)
 
-    # Removing keypoints that are (patch_size / 2) distance from the image border
+    image = np.squeeze(image)
+    if image.ndim != 2:
+        raise ValueError("Only 2-D gray-scale images supported.")
+
+    image = img_as_float(image)
+
+    # Gaussian Low pass filtering with variance 2 to alleviate noise
+    # sensitivity
+    image = gaussian_filter(image, 2)
+
+    image = np.ascontiguousarray(image)
+
+    keypoints = np.array(keypoints + 0.5, dtype=np.intp, order='C')
+
+    # Removing keypoints that are (patch_size / 2) distance from the image
+    # border
     keypoints = _remove_border_keypoints(image, keypoints, patch_size / 2)
 
-    descriptor = np.zeros((len(keypoints), descriptor_size), dtype=bool)
-
-    # Gaussian Low pass filtering with variance 2 to alleviate noise sensitivity
-    image = gaussian_filter(image, 2)
+    descriptors = np.zeros((keypoints.shape[0], descriptor_size),
+                           dtype=bool, order='C')
 
     # Sampling pairs of decision pixels in patch_size x patch_size window
     if mode == 'normal':
-        np.random.seed(sample_seed)
-        samples = np.round((patch_size / 5) * np.random.randn(descriptor_size * 8))
-        samples = samples[(samples < (patch_size / 2)) & (samples > - (patch_size - 1) / 2)]
-        first = (samples[: descriptor_size * 2]).reshape(descriptor_size, 2)
-        second = (samples[descriptor_size * 2: descriptor_size * 4]).reshape(descriptor_size, 2)
+
+        samples = (patch_size / 5) * np.random.randn(descriptor_size * 8)
+        samples = np.array(samples, dtype=np.int32)
+        samples = samples[(samples < (patch_size / 2))
+                          & (samples > - (patch_size - 1) / 2)]
+
+        pos1 = samples[:descriptor_size * 2]
+        pos1 = pos1.reshape(descriptor_size, 2)
+        pos2 = samples[descriptor_size * 2:descriptor_size * 4]
+        pos2 = pos2.reshape(descriptor_size, 2)
+
     else:
-        np.random.seed(sample_seed)
-        samples = np.random.randint(-patch_size / 2, (patch_size / 2) + 1, (descriptor_size * 2, 2))
-        first, second = np.split(samples, 2)
 
-    # Intensity comparison tests for building the descriptor
-    for i in range(len(keypoints)):
-        set_1 = first + keypoints[i]
-        set_2 = second + keypoints[i]
+        samples = np.random.randint(-patch_size / 2, (patch_size / 2) + 1,
+                                    (descriptor_size * 2, 2))
+        pos1, pos2 = np.split(samples, 2)
 
-        for j in range(descriptor_size):
-            if image[set_1[j, 0]][set_1[j, 1]] < image[set_2[j, 0]][set_2[j, 0]]:
-                descriptor[i][j] = True
+    pos1 = np.ascontiguousarray(pos1)
+    pos2 = np.ascontiguousarray(pos2)
 
-    return descriptor
+    _brief_loop(image, descriptors.view(np.uint8), keypoints, pos1, pos2)
+
+    return descriptors
 
 
 def hamming_distance(descriptor_1, descriptor_2):
