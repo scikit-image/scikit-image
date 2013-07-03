@@ -112,9 +112,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
 
     # compute orientations integral images
     orientation_histogram = np.zeros((n_cellsy, n_cellsx, orientations))
-    subsample = np.index_exp[cy / 2:cy * n_cellsy:cy, cx / 2:cx * n_cellsx:cx]
+    subsample = np.index_exp[cy // 2:cy * n_cellsy:cy,
+                             cx // 2:cx * n_cellsx:cx]
     for i in range(orientations):
-        #create new integral image for this orientation
+        # create new integral image for this orientation
         # isolate orientations in this range
 
         temp_ori = np.where(orientation < 180.0 / orientations * (i + 1),

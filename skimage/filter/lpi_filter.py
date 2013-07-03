@@ -18,7 +18,7 @@ def _centre(x, oshape):
     """Return an array of oshape from the centre of x.
 
     """
-    start = (np.array(x.shape) - np.array(oshape)) / 2. + 1
+    start = (np.array(x.shape) - np.array(oshape)) // 2 + 1
     out = x[[slice(s, s + n) for s, n in zip(start, oshape)]]
     return out
 

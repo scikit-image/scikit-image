@@ -4,9 +4,7 @@ from skimage import data
 from skimage import feature
 from skimage import img_as_float
 from skimage import draw
-from numpy.testing import (assert_raises,
-                           assert_almost_equal,
-                           )
+from numpy.testing import assert_raises, assert_almost_equal, run_module_suite
 
 
 def test_histogram_of_oriented_gradients():
@@ -32,9 +30,11 @@ def test_hog_color_image_unsupported_error():
 
 def test_hog_basic_orientations_and_data_types():
     # scenario:
-    #  1) create image (with float values) where upper half is filled by zeros, bottom half by 100
+    #  1) create image (with float values) where upper half is filled by zeros,
+    #     bottom half by 100
     #  2) create unsigned integer version of this image
-    #  3) calculate feature.hog() for both images, both with 'normalise' option enabled and disabled
+    #  3) calculate feature.hog() for both images, both with 'normalise' option
+    #     enabled and disabled
     #  4) verify that all results are equal where expected
     #  5) verify that computed feature vector is as expected
     #  6) repeat the scenario for 90, 180 and 270 degrees rotated images
@@ -43,7 +43,7 @@ def test_hog_basic_orientations_and_data_types():
     width = height = 35
 
     image0 = np.zeros((height, width), dtype='float')
-    image0[height / 2:] = 100
+    image0[height // 2:] = 100
 
     for rot in range(4):
         # rotate by 0, 90, 180 and 270 degrees
@@ -52,13 +52,17 @@ def test_hog_basic_orientations_and_data_types():
         # create uint8 image from image_float
         image_uint8 = image_float.astype('uint8')
 
-        (hog_float, hog_img_float) = feature.hog(image_float, orientations=4, pixels_per_cell=(8, 8),
+        (hog_float, hog_img_float) = feature.hog(
+            image_float, orientations=4, pixels_per_cell=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=False)
-        (hog_uint8, hog_img_uint8) = feature.hog(image_uint8, orientations=4, pixels_per_cell=(8, 8),
+        (hog_uint8, hog_img_uint8) = feature.hog(
+            image_uint8, orientations=4, pixels_per_cell=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=False)
-        (hog_float_norm, hog_img_float_norm) = feature.hog(image_float, orientations=4, pixels_per_cell=(8, 8),
+        (hog_float_norm, hog_img_float_norm) = feature.hog(
+            image_float, orientations=4, pixels_per_cell=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=True)
-        (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(image_uint8, orientations=4, pixels_per_cell=(8, 8),
+        (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(
+            image_uint8, orientations=4, pixels_per_cell=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=True)
 
         # set to True to enable manual debugging with graphical output,
@@ -73,16 +77,20 @@ def test_hog_basic_orientations_and_data_types():
             plt.subplot(2, 3, 6); plt.imshow(hog_img_uint8_norm); plt.colorbar(); plt.title('HOG result (normalise) visualisation (uint8 img)')
             plt.show()
 
-        # results (features and visualisation) for float and uint8 images must be almost equal
+        # results (features and visualisation) for float and uint8 images must
+        # be almost equal
         assert_almost_equal(hog_float, hog_uint8)
         assert_almost_equal(hog_img_float, hog_img_uint8)
 
-        # resulting features should be almost equal when 'normalise' is enabled or disabled (for current simple testing image)
+        # resulting features should be almost equal when 'normalise' is enabled
+        # or disabled (for current simple testing image)
         assert_almost_equal(hog_float, hog_float_norm, decimal=4)
         assert_almost_equal(hog_float, hog_uint8_norm, decimal=4)
 
-        # reshape resulting feature vector to matrix with 4 columns (each corresponding to one of 4 directions),
-        # only one direction should contain nonzero values (this is manually determined for testing image)
+        # reshape resulting feature vector to matrix with 4 columns (each
+        # corresponding to one of 4 directions), only one direction should
+        # contain nonzero values (this is manually determined for testing
+        # image)
         actual = np.max(hog_float.reshape(-1, 4), axis=0)
 
         if rot in [0, 2]:
@@ -101,8 +109,9 @@ def test_hog_orientations_circle():
     # scenario:
     #  1) create image with blurred circle in the middle
     #  2) calculate feature.hog()
-    #  3) verify that the resulting feature vector contains uniformly distributed values for all orientations,
-    #     i.e. no orientation is lost or emphasized
+    #  3) verify that the resulting feature vector contains uniformly
+    #     distributed values for all orientations, i.e. no orientation is lost
+    #     or emphasized.
     #  4) repeat the scenario for other 'orientations' option
 
     # size of testing image
@@ -114,8 +123,10 @@ def test_hog_orientations_circle():
     image = ndimage.gaussian_filter(image, 2)
 
     for orientations in range(2, 15):
-        (hog, hog_img) = feature.hog(image, orientations=orientations, pixels_per_cell=(8, 8),
-            cells_per_block=(1, 1), visualise=True, normalise=False)
+        (hog, hog_img) = feature.hog(image, orientations=orientations,
+                                     pixels_per_cell=(8, 8),
+                                     cells_per_block=(1, 1),
+                                     visualise=True, normalise=False)
 
         # set to True to enable manual debugging with graphical output,
         # must be False for automatic testing
@@ -126,17 +137,18 @@ def test_hog_orientations_circle():
             plt.subplot(1, 2, 2); plt.imshow(hog_img); plt.colorbar(); plt.title('HOG result visualisation, orientations=%d' % (orientations))
             plt.show()
 
-        # reshape resulting feature vector to matrix with N columns (each column corresponds to one direction),
+        # reshape resulting feature vector to matrix with N columns (each
+        # column corresponds to one direction)
         hog_matrix = hog.reshape(-1, orientations)
 
-        # compute mean values in the resulting feature vector for each direction,
-        # these values should be almost equal to the global mean value (since the image contains a circle),
-        # i.e. all directions have same contribution to the result
+        # compute mean values in the resulting feature vector for each
+        # direction, these values should be almost equal to the global mean
+        # value (since the image contains a circle), i.e. all directions
+        # contribute equally to the result
         actual = np.mean(hog_matrix, axis=0)
         desired = np.mean(hog_matrix)
         assert_almost_equal(actual, desired, decimal=1)
 
 
 if __name__ == '__main__':
-    from numpy.testing import run_module_suite
     run_module_suite()
