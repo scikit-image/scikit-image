@@ -1,6 +1,7 @@
 import os
 import tempfile
 
+import numpy as np
 from numpy.testing import assert_equal, assert_raises
 from skimage import novice
 from skimage import data_dir
@@ -47,6 +48,29 @@ def test_modify():
     pic.size = (pic.width / 2, pic.height / 2)
     assert_equal(pic.size, (int(s[0] / 2), int(s[1] / 2)))
 
+    assert_equal(pic.modified, True)
+    assert_equal(pic.path, None)
+
+
+def test_modified_on_set():
+    pic = novice.Picture(SMALL_IMAGE_PATH)
+    pic[0, 0] = (1, 1, 1)
+    assert_equal(pic.modified, True)
+    assert_equal(pic.path, None)
+
+
+def test_modified_on_set_pixel():
+    data = np.zeros(shape=(10, 5, 3), dtype=np.uint8)
+    pic = novice.Picture(image=data)
+
+    pixel = pic[0, 0]
+    pixel.green = 1
+    assert_equal(pic.modified, True)
+
+
+def test_update_on_save():
+    pic = novice.Picture(image=np.zeros((3, 3)))
+    pic.size = (6, 6)
     assert_equal(pic.modified, True)
     assert_equal(pic.path, None)
 

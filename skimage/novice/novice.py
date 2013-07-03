@@ -111,13 +111,9 @@ class Pixel(object):
         NOTE: Using Cartesian coordinate system!
 
         """
-        # skimage dimensions are flipped: y, x
-        self._image[self._picture.height - self._y - 1, self._x] = \
-                (self.red, self.green, self.blue)
-
-        # Modified pictures lose their paths
-        self._picture._picture_path = None
-        self._picture._picture_modified = True
+        row = self._picture.height - self._y - 1
+        self._picture._image[row, self._x] = self.rgb
+        self._picture._image_modified()
 
     def __repr__(self):
         args = self.red, self.green, self.blue
@@ -407,6 +403,10 @@ class Picture(object):
         """True if the picture has changed."""
         return self._modified
 
+    def _image_modified(self):
+        self._modified = True
+        self._path = None
+
     @property
     def format(self):
         """The image format of the picture."""
@@ -427,8 +427,7 @@ class Picture(object):
                 self._image = img_as_ubyte(resize(self._image,
                     (int(value[1]), int(value[0])), order=0))
 
-                self._modified = True
-                self._path = None
+                self._image_modified()
         except TypeError:
             msg = "Expected (width, height), but got {0} instead!"
             raise TypeError(msg.format(value))
@@ -519,6 +518,7 @@ class Picture(object):
                 raise TypeError("Invalid value type")
         else:
             raise TypeError("Invalid key type")
+        self._image_modified()
 
     def __repr__(self):
         args = self.format, self.path, self.modified
