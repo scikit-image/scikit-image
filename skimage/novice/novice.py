@@ -327,7 +327,7 @@ class Picture(object):
 
         # Common setup.
         self._modified = False
-        self._inflation = 1
+        self.scale = 1
 
     @staticmethod
     def from_path(path):
@@ -395,7 +395,7 @@ class Picture(object):
             Path to save the picture (with file extension).
 
         """
-        io.imsave(path, self._inflate(self._image))
+        io.imsave(path, self._rescale(self._image))
         self._modified = False
         self._path = os.path.abspath(path)
         self._format = imghdr.what(path)
@@ -454,33 +454,17 @@ class Picture(object):
     def height(self, value):
         self.size = (self.width, value)
 
-    @property
-    def inflation(self):
-        """The inflation factor."""
-        return self._inflation
-
-    @inflation.setter
-    def inflation(self, value):
-        try:
-            value = int(value)
-            if value < 1:
-                raise ValueError()
-            self._inflation = value
-        except ValueError:
-            msg = "Expected inflation factor to be an integer greater than one"
-            raise ValueError(msg)
-
     def _repr_html_(self):
-        return io.Image(self._inflate(self._image))
+        return io.Image(self._rescale(self._image))
 
     def _repr_png_(self):
-        return io.Image(self._inflate(self._image))
+        return io.Image(self._rescale(self._image))
 
     def show(self):
         """Displays the image in a separate window.
 
         """
-        io.imshow(self._inflate(self._image))
+        io.imshow(self._rescale(self._image))
 
     def _makepixel(self, xy):
         """ Creates a Pixel object for a given x, y location.
@@ -495,22 +479,19 @@ class Picture(object):
         rgb = self._image[self.height - xy[1] - 1, xy[0]]
         return Pixel(self, self._image, xy[0], xy[1], rgb)
 
-    def _inflate(self, img):
-        """Inflates image according to inflation factor.
+    def _rescale(self, image):
+        """Inflates image according to scale factor.
 
         Parameters
         ----------
-        img : array
-            Raw RGB image data to inflate using nearest neighbor algorithm.
+        image : array
+            Raw RGB image data to rescale using nearest neighbor algorithm.
 
         """
-        if self._inflation == 1:
-            return img
-
-        # skimage dimensions are flipped: y, x
-        return img_as_ubyte(resize(img,
-            (self.height * self._inflation,
-             self.width * self._inflation), order=0))
+        if self.scale == 1:
+            return image
+        new_size = (self.height * self.scale, self.width * self.scale)
+        return img_as_ubyte(resize(image, new_size, order=0))
 
     def __iter__(self):
         """Iterates over all pixels in the image."""

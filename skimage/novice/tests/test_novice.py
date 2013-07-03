@@ -18,7 +18,7 @@ def test_pic_info():
     assert_equal(pic.width, 665)
     assert_equal(pic.height, 500)
     assert_equal(pic.modified, False)
-    assert_equal(pic.inflation, 1)
+    assert_equal(pic.scale, 1)
 
 
 def test_pixel_iteration():
