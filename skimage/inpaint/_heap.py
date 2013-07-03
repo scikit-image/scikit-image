@@ -6,6 +6,7 @@ from skimage.morphology import erosion, disk
 
 
 BAND = 1
+INSIDE = 2
 
 
 def init_flag(_mask):
@@ -40,10 +41,10 @@ def init_flag(_mask):
 
 
 def init_u(flag):
-    return np.where(flag == BAND, 0, 1.0e6)
+    return np.where(flag == INSIDE, 1.0e6, 0)
 
 
-def generate_heap(flag, T):
+def generate_heap(heap, flag, u):
     """Initialization:
     All pixels are classified into 1 of the following flags:
     # BAND - denoted by an integer value of 0
@@ -66,13 +67,9 @@ def generate_heap(flag, T):
         It consists of the 'T' values and the index.
     """
 
-    heap = []
-
     indices = np.transpose(np.where(flag == BAND))
     for z in indices:
-        heapq.heappush(heap, HeapElem(T[tuple(z)], z))
-
-    return heap
+        heapq.heappush(heap, (u[tuple(z)], tuple(z)))
 
 
 def display_heap(heap):

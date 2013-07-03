@@ -1,5 +1,5 @@
 import numpy as np
-from py_inpaint import inpaint_point as inp_point
+from _inpaint import inpaint_point as inp_point
 from heapq import heappop, heappush
 import _heap
 
@@ -141,8 +141,8 @@ def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
                                             i_nb, j_nb + 1, flag, u))
 
                 if negate is False:
-                    image[i_nb - 1, j_nb - 1, :] = _inpaint.inpaint_point(i_nb,
-                                                            j_nb, image, flag, u, epsilon)
+                    image[i_nb - 1, j_nb - 1, :] = inp_point(i_nb, j_nb, image,
+                                                             flag, u, epsilon)
 
                 if flag[i_nb, j_nb] == INSIDE:
                     flag[i_nb, j_nb] = BAND
