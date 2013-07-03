@@ -278,19 +278,32 @@ class Picture(object):
     Examples
     --------
     Load an image from a file
-
-    >>> pic = Picture(path="/path/to/image/file.png")
+    >>> from skimage import novice
+    >>> from skimage import data
+    >>> picture = novice.open(data.data_dir + '/elephant.png')
 
     Create a blank 100 pixel wide, 200 pixel tall white image
-
     >>> pic = Picture(size=(100, 200), color=(255, 255, 255))
 
     Use numpy to make an RGB byte array (shape is height x width x 3)
-
     >>> import numpy as np
-    >>> data = np.zeros(shape=(200, 100, 3), dtype=np.int8)
+    >>> data = np.zeros(shape=(200, 100, 3), dtype=np.uint8)
     >>> data[:, :, 0] = 255  # Set red component to maximum
     >>> pic = Picture(image=data)
+
+    Get the bottom-left pixel
+    >>> pic[0, 0]
+    Pixel (red: 255, green: 0, blue: 0)
+
+    Get the top row of the picture
+    >>> pic[:, pic.height-1]
+    PixelGroup (100 pixels)
+
+    Set the bottom-left pixel to black
+    >>> pic[0, 0] = (0, 0, 0)
+
+    Set the top row to red
+    >>> pic[:, pic.height-1] = (255, 0, 0)
 
     """
     def __init__(self, path=None, size=None, color=None, image=None):
@@ -500,29 +513,6 @@ class Picture(object):
                 yield self._makepixel((x, y))
 
     def __getitem__(self, key):
-        """Gets pixels using 2D int or slice notations.
-
-        Parameters
-        ----------
-        key : tuple
-            Horizontal and vertical coordinates or slices.
-
-        Returns
-        -------
-        p: Pixel or PixelGroup
-            Single pixel for coordinates or PixelGroup for slice.
-
-        Examples
-        --------
-        Get the bottom-left pixel
-
-        >>> pic[0, 0]
-
-        Get the top row of the picture
-
-        >>> pic[:, pic.height-1]
-
-        """
         if isinstance(key, tuple) and len(key) == 2:
             if isinstance(key[0], int) and isinstance(key[1], int):
                 if key[0] < 0 or key[1] < 0:
@@ -535,26 +525,6 @@ class Picture(object):
             raise TypeError("Invalid key type")
 
     def __setitem__(self, key, value):
-        """Sets pixel values using 2D int or slice notations.
-
-        Parameters
-        ----------
-        key : tuple
-            Horizontal and vertical coordinates or slices.
-        value : tuple
-            RGB tuple with red, green, and blue components [0-255]
-
-        Examples
-        --------
-        Set the bottom-left pixel to black
-
-        >>> pic[0, 0] = (0, 0, 0)
-
-        Set the top row to red
-
-        >>> pic[:, pic.height-1] = (255, 0, 0)
-
-        """
         if isinstance(key, tuple) and len(key) == 2:
             if isinstance(value, tuple):
                 self[key[0], key[1]].rgb = value
