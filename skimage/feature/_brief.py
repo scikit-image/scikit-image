@@ -1,33 +1,20 @@
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
-from scipy.spatial.distance import hamming
 
 from ..color import rgb2gray
 from ..util import img_as_float
+from .util import _remove_border_keypoints
 
 from ._brief_cy import _brief_loop
 
 
-def _remove_border_keypoints(image, keypoints, dist):
-
-    width = image.shape[0]
-    height = image.shape[1]
-
-    keypoints = keypoints[(dist < keypoints[:, 0])
-                          & (keypoints[:, 0] < width - dist)
-                          & (dist < keypoints[:, 1])
-                          & (keypoints[:, 1] < height - dist)]
-
-    return keypoints
-
-
 def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
-          sample_seed=1):
+          sample_seed=1, variance=2, return_keypoints=False):
     """Extract BRIEF Descriptor about given keypoints for a given image.
 
     Parameters
     ----------
-    image : ndarray
+    image : 2D ndarray
         Input image.
     keypoints : (P, 2) ndarray
         Array of keypoint locations.
@@ -42,13 +29,20 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
         the keypoints. Default is 49.
     sample_seed : int
         Seed for sampling the decision pixel-pairs. Default is 1.
+    return_keypoints : bool
+        If True, return the Q keypoints (after filtering out the border
+        keypoints) about which the descriptors are extracted. Default is False.
 
     Returns
     -------
-    descriptor : ndarray with dtype bool
-        2D ndarray of dimensions (no_of_keypoints, descriptor_size) with value
-        at an index (i, j) either being True or False representing the outcome
+    descriptors : (Q, descriptor_size) ndarray of dtype bool
+        2D ndarray of binary descriptors of size descriptor_size about Q
+        keypoints after filtering out border keypoints with value at an index
+        (i, j) either being True or False representing the outcome
         of Intensity comparison about ith keypoint on jth decision pixel-pair.
+    keypoints : (Q, 2) ndarray
+        Keypoints after removing out those that are near border.
+        Returned only if return_keypoints is True.
 
     References
     ----------
@@ -66,9 +60,9 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     image = img_as_float(image)
 
-    # Gaussian Low pass filtering with variance 2 to alleviate noise
+    # Gaussian Low pass filtering to alleviate noise
     # sensitivity
-    image = gaussian_filter(image, 2)
+    image = gaussian_filter(image, variance)
 
     image = np.ascontiguousarray(image)
 
@@ -105,39 +99,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     _brief_loop(image, descriptors.view(np.uint8), keypoints, pos1, pos2)
 
-    return descriptors
-
-
-def hamming_distance(descriptor_1, descriptor_2):
-    """A dissimilarity measure used for matching keypoints in different images
-    using binary feature descriptors like BRIEF etc.
-
-    Parameters
-    ----------
-    descriptor_1 : ndarray with dtype bool
-        Binary feature descriptor for keypoints in the first image.
-        2D ndarray of dimensions (no_of_keypoints_in_image_1, descriptor_size)
-        with value at an index (i, j) either being True or False representing
-        the outcome of Intensity comparison about ith keypoint on jth decision
-        pixel-pair.
-    descriptor_2 : ndarray with dtype bool
-        Binary feature descriptor for keypoints in the second image.
-        2D ndarray of dimensions (no_of_keypoints_in_image_2, descriptor_size)
-        with value at an index (i, j) either being True or False representing
-        the outcome of Intensity comparison about ith keypoint on jth decision
-        pixel-pair.
-
-    Returns
-    -------
-    distance : ndarray
-        2D ndarray of dimensions (no_of_rows_in_descripto_1, no_of_rows_in_descripto_2)
-        with value at an index (i, j) between the range [0, 1] representing the
-        extent of dissimilarity between ith keypoint of in first image and jth
-        keypoint in second image.
-
-    """
-    distance = np.zeros((len(descriptor_1), len(descriptor_2)), dtype=float)
-    for i in range(len(descriptor_1)):
-        for j in range(len(descriptor_2)):
-            distance[i, j] = hamming(descriptor_1[i][:], descriptor_2[j][:])
-    return distance
+    if return_keypoints:
+        return descriptors, keypoints
+    else:
+        return descriptors
