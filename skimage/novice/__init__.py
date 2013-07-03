@@ -71,4 +71,4 @@ False
 """
 
 from . import colors
-from .novice import Picture, open, new, copy
+from .novice import Picture, open

@@ -8,24 +8,8 @@ from skimage.transform import resize
 
 
 def open(path):
-    """
-    Creates a new Picture object from the given image path
-    """
+    """Return Picture object from the given image path."""
     return Picture(path=os.path.abspath(path))
-
-def new(size, color=None):
-    """
-    Create a new RGB picture of the given size, initialized to the
-    given color or to black if none is provided.
-    """
-    return Picture(size=size, color=color)
-
-def copy(image):
-    """
-    Creates a Picture using the supplied image data
-    (e.g., skimage.data.elephant()).
-    """
-    return Picture(image=image)
 
 
 class Pixel(object):
