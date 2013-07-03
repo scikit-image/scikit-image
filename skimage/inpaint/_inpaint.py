@@ -81,6 +81,6 @@ def inpaint_point(i, j, image, flag, u, epsilon):
 
         sat = (Ia / norm + (Jx + Jy) /
               (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
-        image[i - 1, j - 1, color] = sat
+        image[i - 1, j - 1, color] = int(round(sat))
 
     return image[i - 1, j - 1, :]
