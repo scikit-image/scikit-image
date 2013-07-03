@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-from ..color import rgb2gray
 from ..util import img_as_float
 from .util import _remove_border_keypoints
 

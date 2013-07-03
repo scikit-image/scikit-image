@@ -3,8 +3,7 @@ from scipy.spatial.distance import hamming
 
 
 def _remove_border_keypoints(image, keypoints, dist):
-	"""Removes keypoints that are within dist pixels from the image border.
-	"""
+    """Removes keypoints that are within dist pixels from the image border."""
     width = image.shape[0]
     height = image.shape[1]
 
