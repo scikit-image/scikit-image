@@ -8,6 +8,12 @@ from skimage.util.shape import view_as_blocks, _pad_asymmetric_zeros
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
     """Resize image to match a certain size.
 
+    Resize performs interpolation to upsample or downsample 2D arrays. For
+    downsampling any n-dimensional array by performing arithmetic sum or
+    arithmetic mean, see meassure._sum_blocks.sum_blocks and
+    transform._warps.downscale_local_means respectively.
+
+
     Parameters
     ----------
     image : ndarray
@@ -88,6 +94,11 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
 def rescale(image, scale, order=1, mode='constant', cval=0.):
     """Scale image by a certain factor.
+
+    Rescale performs interpolation to upsample or downsample 2D arrays. For
+    downsampling any n-dimensional array by performing arithmetic sum or
+    arithmetic mean, see meassure._sum_blocks.sum_blocks and
+    transform._warps.downscale_local_means respectively.
 
     Parameters
     ----------
@@ -338,6 +349,12 @@ def downscale_local_means(array, factors):
     """Downsamples the array in blocks of input integer factors after padding
     the original array with zeroes if the dimensions are not perfectly
     divisible by factors and replaces it with mean i.e. average value.
+
+    This function is different from resize and rescale in the sense that they
+    use interpolation to upsample or downsample on a 2D array, while this
+    function performs only dawnsampling but on any n-dimensional array and
+    returns the arithmetic mean of elements in a block of size factors in the
+    original array.
 
     Parameters
     ----------

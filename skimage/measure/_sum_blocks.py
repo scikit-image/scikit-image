@@ -5,6 +5,12 @@ def sum_blocks(array, factors):
 	"""Sums the elements in blocks of integer factors and pads the original
 	array with zeroes if the dimensions are not perfectly divisible by factors.
 
+    This function is different from resize and rescale in transform._warps in
+    the sense that they use interpolation to upsample or downsample on a 2D
+    array, while this function performs only dawnsampling but on any
+    n-dimensional array and returns the sum of elements in a block of size
+    factors in the original array.
+
     Parameters
     ----------
     array : ndarray
