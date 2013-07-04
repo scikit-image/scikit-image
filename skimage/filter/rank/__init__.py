@@ -1,6 +1,6 @@
-from .rank import (autolevel, bottomhat, equalize, gradient, maximum, mean,
-                   meansubtraction, median, minimum, modal, morph_contr_enh,
-                   pop, threshold, tophat, noise_filter, entropy, otsu)
+from ._rank import (autolevel, bottomhat, equalize, gradient, maximum, mean,
+                    meansubtraction, median, minimum, modal, morph_contr_enh,
+                    pop, threshold, tophat, noise_filter, entropy, otsu)
 from .percentile_rank import (percentile_autolevel, percentile_gradient,
                               percentile_mean, percentile_mean_subtraction,
                               percentile_morph_contr_enh, percentile,

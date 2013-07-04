@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.testing import run_module_suite, assert_array_equal, assert_raises
 
-from skimage import data
+from skimage import img_as_ubyte, img_as_uint, img_as_float
+from skimage import data, util
 from skimage.morphology import cmorph, disk
 from skimage.filter import rank
 
@@ -162,7 +163,7 @@ def test_compare_autolevels():
     # compare autolevel and percentile autolevel with p0=0.0 and p1=1.0
     # should returns the same arrays
 
-    image = data.camera()
+    image = util.img_as_ubyte(data.camera())
 
     selem = disk(20)
     loc_autolevel = rank.autolevel(image, selem=selem)
@@ -186,11 +187,52 @@ def test_compare_autolevels_16bit():
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
+def test_compare_uint_vs_float():
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
+    # dynamic) should be identical
+
+    # Create signed int8 image that and convert it to uint8
+    image_uint = img_as_uint(data.camera())
+    image_float = img_as_float(image_uint)
+
+    methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
+               'meansubtraction', 'morph_contr_enh', 'pop', 'tophat']
+
+    for method in methods:
+        func = getattr(rank, method)
+        out_u = func(image_uint, disk(3))
+        out_f = func(image_float, disk(3))
+        assert_array_equal(out_u, out_f)
+
+
+def test_compare_8bit_unsigned_vs_signed():
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
+    # dynamic) should be identical
+
+    # Create signed int8 image that and convert it to uint8
+    image = img_as_ubyte(data.camera())
+    image[image > 127] = 0
+    image_s = image.astype(np.int8)
+    image_u = img_as_ubyte(image_s)
+
+    assert_array_equal(image_u, img_as_ubyte(image_s))
+
+    methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
+               'mean', 'meansubtraction', 'median', 'minimum', 'modal',
+               'morph_contr_enh', 'pop', 'threshold', 'tophat']
+
+    for method in methods:
+        func = getattr(rank, method)
+        out_u = func(image_u, disk(3))
+        out_s = func(image_s, disk(3))
+        assert_array_equal(out_u, out_s)
+
+
 def test_compare_8bit_vs_16bit():
     # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
     # dynamic) should be identical
 
-    image8 = data.camera()
+    image8 = util.img_as_ubyte(data.camera())
     image16 = image8.astype(np.uint16)
     assert_array_equal(image8, image16)
 

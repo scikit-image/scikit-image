@@ -10,7 +10,7 @@ image = data.coins()
 viewer = ImageViewer(image)
 
 plugin = Plugin(image_filter=median_filter)
-plugin += Slider('radius', 2, 10, value_type='int', update_on='release')
+plugin += Slider('radius', 2, 10, value_type='int')
 plugin += SaveButtons()
 plugin += OKCancelButtons()
 

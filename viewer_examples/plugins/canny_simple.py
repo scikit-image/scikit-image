@@ -12,9 +12,9 @@ image = data.camera()
 # You can create a UI for a filter just by passing a filter function...
 plugin = OverlayPlugin(image_filter=canny)
 # ... and adding widgets to adjust parameter values.
-plugin += Slider('sigma', 0, 5, update_on='release')
-plugin += Slider('low threshold', 0, 255, update_on='release')
-plugin += Slider('high threshold', 0, 255, update_on='release')
+plugin += Slider('sigma', 0, 5)
+plugin += Slider('low threshold', 0, 255)
+plugin += Slider('high threshold', 0, 255)
 # ... and we can also add buttons to save the overlay:
 plugin += SaveButtons(name='Save overlay to:')
 

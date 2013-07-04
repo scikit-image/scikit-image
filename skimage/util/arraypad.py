@@ -4,8 +4,10 @@ of an n-dimensional array.
 
 """
 from __future__ import division, absolute_import, print_function
+from skimage._shared.six import integer_types
 
 import numpy as np
+
 try:
     # Available on 2.x at base, Py3 requires this compatibility import.
     # Later versions of NumPy have this for 2.x as well.
@@ -1036,11 +1038,11 @@ def _normalize_shape(narray, shape):
                 fmt = "Unable to create correctly shaped tuple from %s"
                 raise ValueError(fmt % (normshp,))
     elif (isinstance(shape, (tuple, list))
-            and isinstance(shape[0], (int, float, long))
+            and isinstance(shape[0], integer_types + (float,))
             and len(shape) == 1):
         normshp = ((shape[0], shape[0]), ) * shapelen
     elif (isinstance(shape, (tuple, list))
-            and isinstance(shape[0], (int, float, long))
+            and isinstance(shape[0], integer_types + (float,))
             and len(shape) == 2):
         normshp = (shape, ) * shapelen
     if normshp is None:

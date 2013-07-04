@@ -23,7 +23,8 @@ from ..qt import QtGui
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
-           'LinearColormap', 'ClearColormap', 'FigureCanvas', 'new_plot']
+           'LinearColormap', 'ClearColormap', 'FigureCanvas', 'new_plot',
+           'update_axes_image']
 
 
 QApp = None
@@ -35,29 +36,53 @@ def init_qtapp():
     The QApplication needs to be initialized before creating any QWidgets
     """
     global QApp
+    QApp = QtGui.QApplication.instance()
     if QApp is None:
         QApp = QtGui.QApplication([])
+    return QApp
 
 
-def start_qtapp():
+def is_event_loop_running(app=None):
+    """Return True if event loop is running."""
+    if app is None:
+        app = init_qtapp()
+    if hasattr(app, '_in_event_loop'):
+        return app._in_event_loop
+    else:
+        return False
+
+
+def start_qtapp(app=None):
     """Start Qt mainloop"""
-    QApp.exec_()
+    if app is None:
+        app = init_qtapp()
+    if not is_event_loop_running(app):
+        app._in_event_loop = True
+        app.exec_()
+        app._in_event_loop = False
+    else:
+        app._in_event_loop = True
 
 
 class RequiredAttr(object):
     """A class attribute that must be set before use."""
 
-    def __init__(self, msg):
+    instances = dict()
+
+    def __init__(self, msg='Required attribute not set', init_val=None):
+        self.instances[self, None] = init_val
         self.msg = msg
-        self.val = None
 
     def __get__(self, obj, objtype):
-        if self.val is None:
+        value = self.instances[self, obj]
+        if value is None:
+            # Should raise an error but that causes issues with the buildbot.
             warnings.warn(self.msg)
-        return self.val
+            self.__set__(obj, self.init_val)
+        return value
 
-    def __set__(self, obj, val):
-        self.val = val
+    def __set__(self, obj, value):
+        self.instances[self, obj] = value
 
 
 class LinearColormap(LinearSegmentedColormap):
@@ -179,3 +204,22 @@ def figimage(image, scale=1, dpi=None, **kwargs):
     ax.set_axis_off()
     ax.imshow(image, **kwargs)
     return fig, ax
+
+
+def update_axes_image(image_axes, image):
+    """Update the image displayed by an image plot.
+
+    This sets the image plot's array and updates its shape appropriately
+
+    Parameters
+    ----------
+    image_axes : `matplotlib.image.AxesImage`
+        Image axes to update.
+    image : array
+        Image array.
+    """
+    image_axes.set_array(image)
+
+    # Adjust size if new image shape doesn't match the original
+    h, w = image.shape[:2]
+    image_axes.set_extent((0, w, h, 0))
