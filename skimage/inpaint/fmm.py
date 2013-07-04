@@ -19,14 +19,14 @@ def eikonal(i1, j1, i2, j2, flag, u):
     u11 = u[i1, j1]
     u22 = u[i2, j2]
     min_u = min(u11, u22)
-    if flag[i1, j1] is not INSIDE and flag[i2, j2] is not INSIDE:
+    if flag[i1, j1] != INSIDE and flag[i2, j2] != INSIDE:
         if abs(u11 - u22) >= 1.0:
             sol = 1 + min_u
         else:
             sol = (u11 + u22 - np.sqrt(2 - (u11 - u22) * (u11 - u22))) * .5
-    elif flag[i1, j1] is not INSIDE and flag[i2, j2] is INSIDE:
+    elif flag[i1, j1] != INSIDE and flag[i2, j2] == INSIDE:
         sol = 1 + u11
-    elif flag[i1, j1] is INSIDE and flag[i2, j2] is not INSIDE:
+    elif flag[i1, j1] == INSIDE and flag[i2, j2] != INSIDE:
         sol = 1 + u22
     else:
         sol = 1 + min_u
@@ -48,7 +48,7 @@ def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
             continue
 
         for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
-            if flag[i_nb, j_nb] is INSIDE:
+            if flag[i_nb, j_nb] == INSIDE:
                 u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb,
                                             i_nb, j_nb - 1, flag, u),
                                     eikonal(i_nb + 1, j_nb,
