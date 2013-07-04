@@ -24,4 +24,5 @@ epsilon = 5
 output = fmm.fast_marching_method(image, flag, u, heap, negate=False,
                                   epsilon=epsilon)
 
+sh(output)
 pass
