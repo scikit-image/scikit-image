@@ -18,7 +18,7 @@ def grad_func(i, j, flag, array, channel=-1):
     is computed using Central Differences.
     """
 
-    if channel is 0 or channel is 1 or channel is 2:
+    if channel == 0 or channel == 1 or channel == 2:
         u = array[:, :, channel]
         i_nbl = i - 1 + (i == 1)
         i_nbh = i - 1 - (i == u.shape[0] - 2)
@@ -30,22 +30,22 @@ def grad_func(i, j, flag, array, channel=-1):
         factor = 0.5
         i_nbl, i_nbh, j_nbl, j_nbh = i, i, j, j
 # TODO: Try dict implementation instead of if...elif
-    if flag[i, j + 1] is not INSIDE and flag[i, j - 1] is not INSIDE:
+    if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
         gradUx = (u[i_nbl, j_nbh + 1] - u[i_nbl, j_nbl - 1]) * factor
-    elif flag[i, j + 1] is not INSIDE and flag[i, j - 1] is INSIDE:
+    elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
         gradUx = u[i_nbl, j_nbh + 1] - u[i_nbl, j_nbl]
-    elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is not INSIDE:
+    elif flag[i, j + 1] == INSIDE and flag[i, j - 1] != INSIDE:
         gradUx = u[i_nbl, j_nbh] - u[i_nbl, j_nbl - 1]
-    elif flag[i, j + 1] is INSIDE and flag[i, j - 1] is INSIDE:
+    elif flag[i, j + 1] == INSIDE and flag[i, j - 1] == INSIDE:
         gradUx = 0
 
-    if flag[i + 1, j] is not INSIDE and flag[i - 1, j] is not INSIDE:
+    if flag[i + 1, j] != INSIDE and flag[i - 1, j] != INSIDE:
         gradUy = (u[i_nbh + 1, j_nbl] - u[i_nbl - 1, j_nbl]) * factor
-    elif flag[i + 1, j] is not INSIDE and flag[i - 1, j] is INSIDE:
+    elif flag[i + 1, j] != INSIDE and flag[i - 1, j] == INSIDE:
         gradUy = u[i_nbh + 1, j_nbl] - u[i_nbl, j_nbl]
-    elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is not INSIDE:
+    elif flag[i + 1, j] == INSIDE and flag[i - 1, j] != INSIDE:
         gradUy = u[i_nbh, j_nbl] - u[i_nbl - 1, j_nbl]
-    elif flag[i + 1, j] is INSIDE and flag[i - 1, j] is INSIDE:
+    elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
         gradUy = 0
 
     return gradUx, gradUy
@@ -61,7 +61,7 @@ def inpaint_point(i, j, image, flag, u, epsilon):
                 if (i_nb > 0 and j_nb > 0 and i_nb < (u.shape[0] - 1)
                         and j_nb < (u.shape[1] - 1)):
                     cart_d = (j_nb - j) * (j_nb - j) + (i_nb - i) * (i_nb - i)
-                    if (flag[i_nb, j_nb] is not INSIDE and
+                    if (flag[i_nb, j_nb] != INSIDE and
                             cart_d <= epsilon ** 2):
                         rx = i - i_nb
                         ry = j - j_nb
