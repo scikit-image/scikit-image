@@ -58,8 +58,8 @@ def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
                                     eikonal(i_nb + 1, j_nb,
                                             i_nb, j_nb + 1, flag, u))
                 if negate is False:
-                    image[i_nb - 1, j_nb - 1, :] = inp_point(i_nb, j_nb, image,
-                                                             flag, u, epsilon)
+                    image[i_nb - 1, j_nb - 1] = inp_point(i_nb, j_nb, image,
+                                                          flag, u, epsilon)
 
                 flag[i_nb, j_nb] = BAND
                 heappush(heap, [u[i_nb, j_nb], (i_nb, j_nb)])
