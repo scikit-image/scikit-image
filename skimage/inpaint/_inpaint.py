@@ -60,8 +60,8 @@ def inpaint_point(i, j, image, flag, u, epsilon):
                     cart_d = (j_nb - j) * (j_nb - j) + (i_nb - i) * (i_nb - i)
                     if (flag[i_nb, j_nb] == KNOWN and
                             cart_d <= epsilon ** 2):
-                        gradUx, gradUy = grad_func(i_nb, j_nb, flag, u,
-                                                   channel=-1)
+                        # gradUx, gradUy = grad_func(i_nb, j_nb, flag, u,
+                        #                            channel=-1)
                         rx = i - i_nb
                         ry = j - j_nb
 
@@ -75,8 +75,8 @@ def inpaint_point(i, j, image, flag, u, epsilon):
                         weight = abs(dst * lev * dirc)
 
                         #Comput the gradient of image intensity at (i_nb, j_nb)
-                        # gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
-                        #                            channel=color)
+                        gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
+                                                   channel=color)
 
                         Ia += weight * image[i_nb - 1 + (i_nb == 1),
                                              j_nb - 1 + (j_nb == 1)]
