@@ -5,7 +5,8 @@ from scipy.ndimage import map_coordinates
 from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
-                               SimilarityTransform)
+                               SimilarityTransform,
+                               downscale_local_means)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -193,29 +194,16 @@ def test_warp_coords_example():
     coords = warp_coords(tform, (30, 30, 3))
     map_coordinates(image[:, :, 0], coords[:2])
 
-def test_downsample_sum():
-    """Verifying downsampling of an array with expected result in sum mode"""
-    image1 = np.arange(4*6).reshape(4, 6)
-    out1 = tf.downsample(image1, (2, 3))
-    expected1 = np.array([[ 24,  42],
-                          [ 96, 114]])
-    assert_array_equal(expected1, out1)
-    image2 = np.arange(5*8).reshape(5, 8)
-    out2 = tf.downsample(image2, (3, 3))
-    expected2 = np.array([[ 81, 108,  87],
-                          [174, 192, 138]])
-    assert_array_equal(expected2, out2)
 
-
-def test_downsample_mean():
+def test_downscale_local_means():
     """Verifying downsampling of an array with expected result in mean mode"""
     image1 = np.arange(4*6).reshape(4, 6)
-    out1 = tf.downsample(image1, (2, 3), 'mean')
+    out1 = downscale_local_means(image1, (2, 3))
     expected1 = np.array([[  4.,   7.],
                           [ 16.,  19.]])
     assert_array_equal(expected1, out1)
     image2 = np.arange(5*8).reshape(5, 8)
-    out2 = tf.downsample(image2, (4, 5), 'mean')
+    out2 = downscale_local_means(image2, (4, 5))
     expected2 = np.array([[ 14. ,  10.8],
                           [  8.5,   5.7]])
     assert_array_equal(expected2, out2)

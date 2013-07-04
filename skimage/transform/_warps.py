@@ -287,7 +287,7 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
                 order=order, mode=mode, cval=cval)
 
 
-def _downsample(array, factors, mode='sum'):
+def _downsample(array, factors, sum=True):
     """Performs downsampling with integer factors.
 
     Parameters
@@ -296,27 +296,15 @@ def _downsample(array, factors, mode='sum'):
         Input n-dimensional array.
     factors: tuple
         Tuple containing downsampling factor along each axis.
-    mode : string
-        Decides whether the downsampled element is the sum or mean
-        of its corresponding constituent elements in the input array. Default
-        is 'sum'.
+    sum : bool
+        If True, downsampled element is the sum of its corresponding
+        constituent elements in the input array. Default is True.
 
     Returns
     -------
     array : ndarray
         Downsampled array with same number of dimensions as that of input
         array.
-
-    Example
-    -------
-    >>> a = np.arange(15).reshape(3, 5)
-    >>> a
-    array([[ 0,  1,  2,  3,  4],
-           [ 5,  6,  7,  8,  9],
-           [10, 11, 12, 13, 14]])
-    >>> downsample(a, (2,3))
-    array([[21, 24],
-           [33, 27]])
 
     """
 
@@ -337,10 +325,44 @@ def _downsample(array, factors, mode='sum'):
     out = view_as_blocks(array, factors)
     block_shape = out.shape
 
-    if mode == 'sum':
+    if sum:
         for i in range(len(block_shape) // 2):
             out = out.sum(-1)
     else:
         for i in range(len(block_shape) // 2):
             out = out.mean(-1)
     return out
+
+
+def downscale_local_means(array, factors):
+    """Downsamples the array in blocks of input integer factors after padding
+    the original array with zeroes if the dimensions are not perfectly
+    divisible by factors and replaces it with mean i.e. average value.
+
+    Parameters
+    ----------
+    array : ndarray
+        Input n-dimensional array.
+    factors: tuple
+        Tuple containing integer values representing block length along each
+        axis.
+
+    Returns
+    -------
+    array : ndarray
+        Downsampled array with same number of dimensions as that of input
+        array.
+
+    Example
+    -------
+    >>> a = np.arange(15).reshape(3, 5)
+    >>> a
+    array([[ 0,  1,  2,  3,  4],
+           [ 5,  6,  7,  8,  9],
+           [10, 11, 12, 13, 14]])
+    >>> downscale_local_means(a, (2,3))
+    array([[3.5, 4.],
+           [5.5, 4.5]])
+
+    """
+    return _downsample(array, factors, False)
