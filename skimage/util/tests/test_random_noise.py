@@ -1,4 +1,4 @@
-from numpy.testing import assert_array_equal, assert_allclose
+from numpy.testing import assert_array_equal, assert_allclose, assert_raises
 
 import numpy as np
 from skimage.data import camera
@@ -15,7 +15,7 @@ def test_set_seed():
 def test_salt():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='salt', d=0.15)
+    cam_noisy = random_noise(cam, seed=seed, mode='salt', prop_replace=0.15)
     saltmask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
@@ -29,7 +29,7 @@ def test_salt():
 def test_pepper():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='pepper', d=0.15)
+    cam_noisy = random_noise(cam, seed=seed, mode='pepper', prop_replace=0.15)
     peppermask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
@@ -43,7 +43,8 @@ def test_pepper():
 def test_salt_and_pepper():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='s&p', d=0.15, p=0.25)
+    cam_noisy = random_noise(cam, seed=seed, mode='s&p', prop_replace=0.15,
+                             prop_salt=0.25)
     saltmask = np.logical_and(cam != cam_noisy, cam_noisy == 1.)
     peppermask = np.logical_and(cam != cam_noisy, cam_noisy == 0.)
 
@@ -63,10 +64,10 @@ def test_salt_and_pepper():
 def test_gaussian():
     seed = 42
     data = np.zeros((128, 128)) + 0.5
-    data_gaussian = random_noise(data, seed=seed, v=0.01)
+    data_gaussian = random_noise(data, seed=seed, var=0.01)
     assert 0.008 < data_gaussian.var() < 0.012
 
-    data_gaussian = random_noise(data, seed=seed, m=0.3, v=0.015)
+    data_gaussian = random_noise(data, seed=seed, mean=0.3, var=0.015)
     assert 0.28 < data_gaussian.mean() - 0.5 < 0.32
     assert 0.012 < data_gaussian.var() < 0.018
 
@@ -78,9 +79,14 @@ def test_speckle():
     noise = np.random.normal(0.1, 0.02 ** 0.5, (128, 128))
     expected = np.clip(data + data * noise, 0, 1)
 
-    data_speckle = random_noise(data, mode='speckle', seed=seed, m=0.1,
-                                v=0.02)
+    data_speckle = random_noise(data, mode='speckle', seed=seed, mean=0.1,
+                                var=0.02)
     assert_allclose(expected, data_speckle)
+
+
+def test_bad_mode():
+    data = np.zeros((64, 64))
+    assert_raises(KeyError, random_noise, data, 'perlin')
 
 
 if __name__ == '__main__':

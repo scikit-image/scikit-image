@@ -24,18 +24,20 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
         'speckle'   Multiplicative noise using out = image + n*image, where
                     n is uniform noise with specified mean & variance.
     seed : int
-        If provided, this will set the random seed before generating noise.
-    m : float
+        If provided, this will set the random seed before generating noise,
+        for valid pseudo-random comparisons.
+    mean : float
         Mean of random distribution. Used in 'gaussian' and 'speckle'.
-    v : float
+        Default : 0.
+    var : float
         Variance of random distribution. Used in 'gaussian' and 'speckle'.
-        Note: variance = (standard deviation) ** 2
-    d : float
+        Note: variance = (standard deviation) ** 2. Default : 0.01
+    prop_replace : float
         Proportion of image pixels to replace with noise on range [0, 1].
-        Used in 'salt', 'pepper', and 'salt & pepper'.
-    p : float
+        Used in 'salt', 'pepper', and 'salt & pepper'. Default : 0.05
+    prop_salt : float
         Proportion of salt vs. pepper noise for 's&p' on range [0, 1].
-        Higher values represent more salt.
+        Higher values represent more salt. Default : 0.5 (equal amounts)
 
     Returns
     -------
@@ -57,15 +59,15 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
         'speckle': 'gaussian_values'}
 
     kwdefaults = {
-        'm': 0.,
-        'v': 0.01,
-        'd': 0.05,
-        'p': 0.5}
+        'mean': 0.,
+        'var': 0.01,
+        'prop_replace': 0.05,
+        'prop_salt': 0.5}
 
     allowedkwargs = {
-        'gaussian_values': ['m', 'v'],
-        'sp_values': ['d'],
-        's&p_values': ['d', 'p']}
+        'gaussian_values': ['mean', 'var'],
+        'sp_values': ['prop_replace'],
+        's&p_values': ['prop_replace', 'prop_salt']}
 
     for key in kwargs:
         if key not in allowedkwargs[allowedtypes[mode]]:
@@ -77,7 +79,8 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
         kwargs.setdefault(kw, kwdefaults[kw])
 
     if mode == 'gaussian':
-        noise = np.random.normal(kwargs['m'], kwargs['v'] ** 0.5, image.shape)
+        noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
+                                 image.shape)
         out = np.clip(image + noise, 0., 1.)
 
     elif mode == 'poisson':
@@ -91,29 +94,36 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
 
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)
-        out = random_noise(image, mode='s&p', seed=seed, d=kwargs['d'], p=1)
+        out = random_noise(image, mode='s&p', seed=seed,
+                           prop_replace=kwargs['prop_replace'], prop_salt=1.)
 
     elif mode == 'pepper':
         # Re-call function with mode='s&p' and p=1 (all pepper noise)
-        out = random_noise(image, mode='s&p', seed=seed, d=kwargs['d'], p=0)
+        out = random_noise(image, mode='s&p', seed=seed,
+                           prop_replace=kwargs['prop_replace'], prop_salt=0.)
 
     elif mode == 's&p':
+        # This mode makes no effort to avoid repeat sampling. Thus, the
+        # exact number of replaced pixels is only approximate.
         out = image.copy()
 
         # Salt mode
-        num_salt = np.ceil(kwargs['d'] * image.size * kwargs['p'])
-        coords = [np.random.randint(0, i - 1, num_salt)
+        num_salt = np.ceil(
+            kwargs['prop_replace'] * image.size * kwargs['prop_salt'])
+        coords = [np.random.randint(0, i - 1, int(num_salt))
                   for i in image.shape]
         out[coords] = 1
 
         # Pepper mode
-        num_pepper = np.ceil(kwargs['d'] * image.size * (1. - kwargs['p']))
-        coords = [np.random.randint(0, i - 1, num_pepper)
+        num_pepper = np.ceil(
+            kwargs['prop_replace'] * image.size * (1. - kwargs['prop_salt']))
+        coords = [np.random.randint(0, i - 1, int(num_pepper))
                   for i in image.shape]
         out[coords] = 0
 
     elif mode == 'speckle':
-        noise = np.random.normal(kwargs['m'], kwargs['v'] ** 0.5, image.shape)
+        noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
+                                 image.shape)
         out = np.clip(image + image * noise, 0., 1.)
 
     return out
