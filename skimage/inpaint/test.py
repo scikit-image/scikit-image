@@ -1,84 +1,27 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from skimage import data
+from matplotlib.pyplot import imshow as sh
+plt.gray()
 
-# import _heap
-# import fmm
+import _heap
+import fmm
+#import _inpaint
+from skimage.io import imread as re
 
-from inpaint import inpaint, initialise, fast_marching_method
+# Import the 20X20 image and mask
+image = np.array(re('/Users/chintak/Pictures/images/t_im.jpg', as_grey=True))
+mask = np.zeros(image.shape, np.uint8)
+mask[15:19, 15: 19] = 1
 
-def inpaint(image, mask, epsilon=3):
-    image = image.copy()
+# Generate `flag` and `u` matrices
+flag = _heap.init_flag(mask)
+u = _heap.init_u(flag)
 
-    flag, u, heap = _heap.initialise(mask)
+# Initialize the heap array
+heap = []
+_heap.generate_heap(heap, flag, u)
 
-    painted = fmm.fast_marching_method(image, flag, u, heap, epsilon=epsilon)
-    plt.imshow(u)
-    plt.show()
-    return painted
+epsilon = 5
+output = fmm.fast_marching_method(image, flag, u, heap, negate=False,
+                                  epsilon=epsilon)
 
-    image = data.camera()[80:180, 200:300]
-    paint_region = (slice(65, 75), slice(55, 75))
-    image[paint_region] = 0
-
-
-def demo_inpaint(image, mask):
-    print np.sum(mask)
-    # painted = fmm.inpaint(image, mask)
-    painted = inpaint(image, mask)
-
-    fig, (ax0, ax1) = plt.subplots(ncols=2)
-    plt.gray()
-    ax0.imshow(image)
-    ax1.imshow(painted)
-    plt.show()
-    return painted
-
-
-<<<<<<< HEAD
-def demo_time_fill():
-    image = np.ones((100, 100))
-    fill_region = (slice(30, 40), slice(50, 70))
-    image[fill_region] = 0
-
-    mask = np.zeros_like(image, dtype=np.uint8)
-    mask[fill_region] = 1
-=======
-def start():
-    image = data.camera()
-    paint_region = (slice(120, 130), slice(440, 470))
-    paint_region1 = (slice(220, 230), slice(440, 470))
-    image[paint_region] = 0
-    image[paint_region1] = 0
-
-    mask = np.zeros_like(image, dtype=np.uint8)
-    mask[paint_region] = 1
-    mask[paint_region1] = 1
->>>>>>> Rewrite `grad_func` and `inpaint_point` to avoid highly indented code
-
-    # flag, u, heap = _heap.initialise(mask)
-    # time_map = fmm.fast_marching_method(image, flag, u, heap,
-    #                                     _run_inpaint=False, epsilon=3)
-
-    flag, u, heap = initialise(mask)
-    time_map = fast_marching_method(image, flag, u, heap,
-                                    _run_inpaint=False, epsilon=3)
-    print np.round(time_map[25:45, 45:75], 1)
-
-    fig, (ax0, ax1) = plt.subplots(ncols=2)
-    ax0.imshow(mask[20:50, 40:80])
-    ax1.imshow(time_map[20:50, 40:80])
-    plt.show()
-
-
-image = data.camera()[80:180, 200:300]
-paint_region = (slice(97, 100), slice(97, 100))
-image[paint_region] = 0
-# image[55:65, 75:80] = 0
-# image[55:65, 82:90] = 0
-
-mask = np.zeros_like(image, dtype=np.uint8)
-mask[paint_region] = 1
-# mask[55:65, 80:83] = 0
-demo_inpaint(image, mask)
-# demo_time_fill()
+pass
