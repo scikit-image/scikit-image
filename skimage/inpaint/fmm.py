@@ -48,7 +48,8 @@ def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
             continue
 
         for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
-            if flag[i_nb, j_nb] == INSIDE:
+            if flag[i_nb, j_nb] != KNOWN:
+
                 u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb,
                                             i_nb, j_nb - 1, flag, u),
                                     eikonal(i_nb + 1, j_nb,
@@ -57,11 +58,12 @@ def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
                                             i_nb, j_nb + 1, flag, u),
                                     eikonal(i_nb + 1, j_nb,
                                             i_nb, j_nb + 1, flag, u))
-                if negate is False:
-                    image[i_nb - 1, j_nb - 1] = inp_point(i_nb, j_nb, image,
-                                                          flag, u, epsilon)
 
+#                if flag[i_nb, j_nb] == INSIDE:
                 flag[i_nb, j_nb] = BAND
+                if negate is False:
+                    inp_point(i_nb, j_nb, image, flag, u, epsilon)
+
                 heappush(heap, [u[i_nb, j_nb], (i_nb, j_nb)])
 
         if negate is True:
