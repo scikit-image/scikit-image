@@ -48,6 +48,8 @@ provided by the projections), and we follow that rule here. Below is the
 original image and its Radon transform, often known as its _sinogram_:
 """
 
+from __future__ import print_function, division
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -97,6 +99,8 @@ different options for the filter.
 from skimage.transform import iradon
 
 reconstruction_fbp = iradon(sinogram, theta=theta, circle=True)
+error = reconstruction_fbp - image
+print('FBP rms reconstruction error: %.3g' % np.sqrt(np.mean(error**2)))
 
 imkwargs = dict(vmin=-0.2, vmax=0.2)
 plt.figure(figsize=(8, 4.5))
@@ -148,6 +152,9 @@ to the reconstruction.
 from skimage.transform import iradon_sart
 
 reconstruction_sart = iradon_sart(sinogram, theta=theta)
+error = reconstruction_sart - image
+print('SART (1 iteration) rms reconstruction error: %.3g'
+      % np.sqrt(np.mean(error**2)))
 
 plt.figure(figsize=(8, 8.5))
 
@@ -162,9 +169,9 @@ plt.imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
 # from the first iteration as an initial estimate
 reconstruction_sart2 = iradon_sart(sinogram, theta=theta,
                                    image=reconstruction_sart)
-
-d = reconstruction_sart - image
-print(d.max(), d.min())
+error = reconstruction_sart2 - image
+print('SART (2 iterations) rms reconstruction error: %.3g'
+      % np.sqrt(np.mean(error**2)))
 
 plt.subplot(223)
 plt.title("Reconstruction\nSART, 2 iterations")
