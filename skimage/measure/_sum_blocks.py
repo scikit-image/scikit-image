@@ -1,9 +1,6 @@
-from ..transform._warps import _downsample
-
-
 def sum_blocks(array, factors):
-	"""Sums the elements in blocks of integer factors and pads the original
-	array with zeroes if the dimensions are not perfectly divisible by factors.
+    """Sums the elements in blocks of integer factors and pads the original
+    array with zeroes if the dimensions are not perfectly divisible by factors.
 
     This function is different from resize and rescale in transform._warps in
     the sense that they use interpolation to upsample or downsample on a 2D
@@ -37,4 +34,6 @@ def sum_blocks(array, factors):
            [33, 27]])
 
     """
-	return _downsample(array, factors)
+    return _downsample(array, factors)
+
+from ..transform._warps import _downsample
