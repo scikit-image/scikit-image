@@ -50,11 +50,11 @@ cpdef bilinear_ray_sum(cnp.double_t[:, :] image, cnp.double_t theta,
     if Ns > 0:
         # step length between samples
         ds = 2 * s0 / Ns
-        dx = ds * cos(theta)
-        dy = ds * sin(theta)
+        dx = -ds * cos(theta)
+        dy = -ds * sin(theta)
         # point of entry of the ray into the reconstruction circle
-        x0 = -s0 * cos(theta) + t * sin(theta)
-        y0 = -s0 * sin(theta) - t * cos(theta)
+        x0 = s0 * cos(theta) - t * sin(theta)
+        y0 = s0 * sin(theta) + t * cos(theta)
         for k in range(Ns+1):
             x = x0 + k * dx
             y = y0 + k * dy
@@ -134,11 +134,11 @@ cpdef bilinear_ray_update(cnp.double_t[:, :] image,
     if Ns > 0:
         # Step length between samples
         ds = 2 * s0 / Ns
-        dx = ds * cos(theta)
-        dy = ds * sin(theta)
+        dx = -ds * cos(theta)
+        dy = -ds * sin(theta)
         # Point of entry of the ray into the reconstruction circle
-        x0 = -s0 * cos(theta) + t * sin(theta)
-        y0 = -s0 * sin(theta) - t * cos(theta)
+        x0 = s0 * cos(theta) - t * sin(theta)
+        y0 = s0 * sin(theta) + t * cos(theta)
         for k in range(Ns+1):
             x = x0 + k * dx
             y = y0 + k * dy
