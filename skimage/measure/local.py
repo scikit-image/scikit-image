@@ -1,19 +1,22 @@
 import numpy as np
-from ..util.shape import view_as_blocks, _pad_asymmetric_zeros
+from skimage.util import view_as_blocks, pad
 
 
-def _local_func(image, factors, func):
+def _local_func(image, block_size, func, cval):
     """Down-sample image by applying function to local blocks.
 
     Parameters
     ----------
     image : ndarray
         N-dimensional input image.
-    factors : array_like
+    block_size : array_like
         Array containing down-sampling integer factor along each axis.
     func : object
         Function object which is used to calculate the return value for each
         local block, e.g. `numpy.sum`.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        block size.
 
     Returns
     -------
@@ -22,34 +25,34 @@ def _local_func(image, factors, func):
 
     """
 
-    pad_size = []
-    if len(factors) != image.ndim:
-        raise ValueError("`factors` must have the same length "
+    if len(block_size) != image.ndim:
+        raise ValueError("`block_size` must have the same length "
                          "as `image.shape`.")
 
-    for i in range(len(factors)):
-        if image.shape[i] % factors[i] != 0:
-            pad_size.append(factors[i] - (image.shape[i] % factors[i]))
+    pad_width = []
+    for i in range(len(block_size)):
+        if image.shape[i] % block_size[i] != 0:
+            after_width = block_size[i] - (image.shape[i] % block_size[i])
         else:
-            pad_size.append(0)
+            after_width = 0
+        pad_width.append((0, after_width))
 
-    for i in range(len(pad_size)):
-        image = _pad_asymmetric_zeros(image, pad_size[i], i)
+    image = pad(image, pad_width=pad_width, mode='constant',
+                constant_values=cval)
 
-    out = view_as_blocks(image, factors)
-    block_shape = out.shape
+    out = view_as_blocks(image, block_size)
 
-    for i in range(len(block_shape) // 2):
+    for i in range(len(out.shape) // 2):
         out = func(out, axis=-1)
 
     return out
 
 
-def local_sum(image, block_size):
+def local_sum(image, block_size, cval=0):
     """Sum elements in local blocks.
 
-    The image is padded with zeros if it is not perfectly divisible by integer
-    factors.
+    The image is padded with zeros if it is not perfectly divisible by the
+    block size.
 
     Parameters
     ----------
@@ -57,6 +60,9 @@ def local_sum(image, block_size):
         N-dimensional input image.
     block_size : array_like
         Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        block size.
 
     Returns
     -------
@@ -75,14 +81,14 @@ def local_sum(image, block_size):
            [33, 27]])
 
     """
-    return _local_func(image, block_size, np.sum)
+    return _local_func(image, block_size, np.sum, cval)
 
 
-def local_mean(image, block_size):
+def local_mean(image, block_size, cval=0):
     """Average elements in local blocks.
 
-    The image is padded with zeros if it is not perfectly divisible by integer
-    factors.
+    The image is padded with zeros if it is not perfectly divisible by the
+    block size.
 
     Parameters
     ----------
@@ -90,6 +96,9 @@ def local_mean(image, block_size):
         N-dimensional input image.
     block_size : array_like
         Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        block size.
 
     Returns
     -------
@@ -108,14 +117,14 @@ def local_mean(image, block_size):
            [ 5.5,  4.5]])
 
     """
-    return _local_func(image, block_size, np.mean)
+    return _local_func(image, block_size, np.mean, cval)
 
 
-def local_median(image, block_size):
+def local_median(image, block_size, cval=0):
     """Median element in local blocks.
 
-    The image is padded with zeros if it is not perfectly divisible by integer
-    factors.
+    The image is padded with zeros if it is not perfectly divisible by the
+    block size.
 
     Parameters
     ----------
@@ -123,6 +132,9 @@ def local_median(image, block_size):
         N-dimensional input image.
     block_size : array_like
         Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        block size.
 
     Returns
     -------
@@ -139,14 +151,14 @@ def local_median(image, block_size):
     array([[ 5.]])
 
     """
-    return _local_func(image, block_size, np.median)
+    return _local_func(image, block_size, np.median, cval)
 
 
-def local_min(image, block_size):
+def local_min(image, block_size, cval=0):
     """Minimum element in local blocks.
 
-    The image is padded with zeros if it is not perfectly divisible by integer
-    factors.
+    The image is padded with zeros if it is not perfectly divisible by the
+    block size.
 
     Parameters
     ----------
@@ -154,6 +166,9 @@ def local_min(image, block_size):
         N-dimensional input image.
     block_size : array_like
         Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        block size.
 
     Returns
     -------
@@ -172,14 +187,14 @@ def local_min(image, block_size):
            [0, 0, 0]])
 
     """
-    return _local_func(image, block_size, np.min)
+    return _local_func(image, block_size, np.min, cval)
 
 
-def local_max(image, block_size):
+def local_max(image, block_size, cval=0):
     """Maximum element in local blocks.
 
-    The image is padded with zeros if it is not perfectly divisible by integer
-    factors.
+    The image is padded with zeros if it is not perfectly divisible by the
+    block size.
 
     Parameters
     ----------
@@ -187,6 +202,9 @@ def local_max(image, block_size):
         N-dimensional input image.
     block_size : array_like
         Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        block size.
 
     Returns
     -------
@@ -205,4 +223,4 @@ def local_max(image, block_size):
            [12, 14]])
 
     """
-    return _local_func(image, block_size, np.max)
+    return _local_func(image, block_size, np.max, cval)

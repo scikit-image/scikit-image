@@ -1,8 +1,9 @@
 import numpy as np
 from scipy import ndimage
 
-from ._geometric import warp, SimilarityTransform, AffineTransform
-from ..measure.local import _local_func
+from skimage.transform._geometric import (warp, SimilarityTransform,
+                                          AffineTransform)
+from skimage.measure.local import _local_func
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
@@ -225,11 +226,11 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
                 mode=mode, cval=cval)
 
 
-def downscale_local_mean(image, factors):
+def downscale_local_mean(image, factors, cval=0):
     """Down-sample N-dimensional image by local averaging.
 
-    The image is padded with zeros if it is not perfectly divisible by integer
-    factors.
+    The image is padded with `cval` if it is not perfectly divisible by the
+    integer factors.
 
     In contrast to the 2-D interpolation in `skimage.transform.resize` and
     `skimage.transform.rescale` this function may be applied to N-dimensional
@@ -242,6 +243,9 @@ def downscale_local_mean(image, factors):
         N-dimensional input image.
     factors : array_like
         Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        integer factors.
 
     Returns
     -------
@@ -260,7 +264,7 @@ def downscale_local_mean(image, factors):
            [5.5, 4.5]])
 
     """
-    return _local_func(image, factors, np.mean)
+    return _local_func(image, factors, np.mean, cval)
 
 
 def _swirl_mapping(xy, center, rotation, strength, radius):
