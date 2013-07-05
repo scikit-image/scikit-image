@@ -70,7 +70,7 @@ def block_sum(image, block_size):
     image([[ 0,  1,  2,  3,  4],
            [ 5,  6,  7,  8,  9],
            [10, 11, 12, 13, 14]])
-    >>> sum_blocks(a, (2, 3))
+    >>> block_sum(a, (2, 3))
     image([[21, 24],
            [33, 27]])
 
@@ -103,9 +103,9 @@ def block_mean(image, block_size):
     image([[ 0,  1,  2,  3,  4],
            [ 5,  6,  7,  8,  9],
            [10, 11, 12, 13, 14]])
-    >>> sum_blocks(a, (2, 3))
-    image([[21, 24],
-           [33, 27]])
+    >>> block_mean(a, (2, 3))
+    array([[ 3.5,  4. ],
+           [ 5.5,  4.5]])
 
     """
     return _block_func(image, block_size, np.mean)
@@ -131,14 +131,12 @@ def block_median(image, block_size):
 
     Example
     -------
-    >>> a = np.arange(15).reshape(3, 5)
+    >>> a = np.array([[1, 5, 100], [0, 5, 1000]])
     >>> a
-    image([[ 0,  1,  2,  3,  4],
-           [ 5,  6,  7,  8,  9],
-           [10, 11, 12, 13, 14]])
-    >>> sum_blocks(a, (2, 3))
-    image([[21, 24],
-           [33, 27]])
+    array([[   1,    5,  100],
+           [   0,    5, 1000]])
+    >>> block_median(a, (2, 3))
+    array([[ 5.]])
 
     """
     return _block_func(image, block_size, np.median)
@@ -169,9 +167,9 @@ def block_min(image, block_size):
     image([[ 0,  1,  2,  3,  4],
            [ 5,  6,  7,  8,  9],
            [10, 11, 12, 13, 14]])
-    >>> sum_blocks(a, (2, 3))
-    image([[21, 24],
-           [33, 27]])
+    >>> block_min(a, (2, 2))
+    array([[0, 2, 0],
+           [0, 0, 0]])
 
     """
     return _block_func(image, block_size, np.min)
@@ -202,9 +200,9 @@ def block_max(image, block_size):
     image([[ 0,  1,  2,  3,  4],
            [ 5,  6,  7,  8,  9],
            [10, 11, 12, 13, 14]])
-    >>> sum_blocks(a, (2, 3))
-    image([[21, 24],
-           [33, 27]])
+    >>> block_max(a, (2, 3))
+    array([[ 7,  9],
+           [12, 14]])
 
     """
     return _block_func(image, block_size, np.max)
