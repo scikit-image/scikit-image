@@ -68,5 +68,6 @@ def test_invalid_input():
 
     assert_raises(ValueError, ssim, X, X, win_size=8)
 
+
 if __name__ == "__main__":
     np.testing.run_module_suite()
