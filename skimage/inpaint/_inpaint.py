@@ -7,10 +7,6 @@ KNOWN = 0
 BAND = 1
 INSIDE = 2
 
-KNOWN = 0
-BAND = 1
-INSIDE = 2
-
 
 def grad_func(i, j, flag, array, channel=-1):
     """This function calculates the gradient of the speed/image of a pixel
@@ -52,42 +48,48 @@ def grad_func(i, j, flag, array, channel=-1):
     return gradUx, gradUy
 
 
+def ep_neighbor(i, j, size, epsilon):
+    nb = []
+    indices = np.transpose(np.where(disk(epsilon)))
+    center_ind = indices - [epsilon, epsilon] + [i, j]
+    for ind in center_ind:
+        if (ind >= [0, 0]).all() and (ind <= np.array(size) - [1, 1]).all():
+            nb.append(ind)
+
+    return nb
+
+
 def inpaint_point(i, j, image, flag, u, epsilon):
     Ia, Jx, Jy, norm = 0, 0, 0, 0
     #If the input image is 3 channel. TODO: support for a single channel
     for color in [0]:
         #Compute the gradient of the u or speed at (i, j)
         gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
-        for i_nb in xrange(i - epsilon, i + epsilon):
-            for j_nb in xrange(j - epsilon, j + epsilon):
-                if (i_nb > 0 and j_nb > 0 and i_nb < (u.shape[0] - 1)
-                        and j_nb < (u.shape[1] - 1)):
-                    cart_d = (j_nb - j) * (j_nb - j) + (i_nb - i) * (i_nb - i)
-                    if (flag[i_nb, j_nb] == KNOWN and
-                            cart_d <= epsilon ** 2):
-                        # gradUx, gradUy = grad_func(i_nb, j_nb, flag, u,
-                        #                            channel=-1)
-                        rx = i - i_nb
-                        ry = j - j_nb
 
-                        dst = 1. / ((rx * rx + ry * ry) *
-                                    np.sqrt((rx * rx + ry * ry)))
-                        lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
-                        dirc = rx * gradUx + ry * gradUy
+        nb = ep_neighbor(i, j, image.shape, epsilon)
+        for [i_nb, j_nb] in nb:
+            if flag[i_nb, j_nb] == KNOWN:
+                rx = i - i_nb
+                ry = j - j_nb
 
-                        if abs(dirc) <= 0.01:
-                            dirc = 1.0e-6
-                        weight = abs(dst * lev * dirc)
+                dst = 1. / ((rx * rx + ry * ry) *
+                            np.sqrt((rx * rx + ry * ry)))
+                lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
+                dirc = rx * gradUx + ry * gradUy
 
-                        #Comput the gradient of image intensity at (i_nb, j_nb)
-                        gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
-                                                   channel=color)
+                if abs(dirc) <= 0.01:
+                    dirc = 1.0e-6
+                weight = abs(dst * lev * dirc)
 
-                        Ia += weight * image[i_nb - 1 + (i_nb == 1),
-                                             j_nb - 1 + (j_nb == 1)]
-                        Jx -= weight * gradIx * rx
-                        Jy -= weight * gradIy * ry
-                        norm += weight
+                #Comput the gradient of image intensity at (i_nb, j_nb)
+                gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
+                                           channel=color)
+
+                Ia += weight * image[i_nb - 1 + (i_nb == 1),
+                                     j_nb - 1 + (j_nb == 1)]
+                Jx -= weight * gradIx * rx
+                Jy -= weight * gradIy * ry
+                norm += weight
 
         sat = (Ia / norm + (Jx + Jy) / (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
                + 0.5)
