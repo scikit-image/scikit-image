@@ -18,6 +18,8 @@ import numpy as np
 from scipy.fftpack import fftshift, fft, ifft
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
+from .. import util
+
 
 __all__ = ["radon", "iradon", "iradon_sart"]
 
@@ -77,20 +79,14 @@ def radon(image, theta=None, circle=False):
         dh = padded_image.shape[0] // 2
         dw = padded_image.shape[1] // 2
     else:
-        height, width = image.shape
         diagonal = np.sqrt(2) * max(image.shape)
-        heightpad = int(np.ceil(diagonal - height))
-        widthpad = int(np.ceil(diagonal - width))
-        padded_image = np.zeros((int(height + heightpad),
-                                int(width + widthpad)))
-        y0 = heightpad // 2
-        y1 = y0 + height
-        x0 = widthpad // 2
-        x1 = x0 + width
-        padded_image[y0:y1, x0:x1] = image
+        pad = [int(np.ceil(diagonal - s)) for s in image.shape]
+        pad_width = [(p // 2, p - p // 2) for p in pad]
+        padded_image = util.pad(image, pad_width, mode='constant',
+                                constant_values=0)
         out = np.zeros((max(padded_image.shape), len(theta)))
-        dh = y0 + height // 2
-        dw = x0 + width // 2
+        dh = pad[0] // 2 + image.shape[0] // 2
+        dw = pad[1] // 2 + image.shape[1] // 2
 
     shift0 = np.array([[1, 0, -dw],
                        [0, 1, -dh],
