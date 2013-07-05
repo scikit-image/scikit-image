@@ -34,6 +34,5 @@ def sum_blocks(array, factors):
            [33, 27]])
 
     """
+    from ..transform._warps import _downsample
     return _downsample(array, factors)
-
-from ..transform._warps import _downsample
