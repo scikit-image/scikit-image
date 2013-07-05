@@ -2,7 +2,7 @@ __all__ = ['init_flag', 'init_u', 'generate_heap', 'display_heap']
 
 import numpy as np
 import heapq
-from skimage.morphology import erosion, disk
+from skimage.morphology import dilation, disk
 
 
 BAND = 1
@@ -32,10 +32,10 @@ def init_flag(_mask):
     """
 
     mask = _mask.astype(np.uint8)
-    inside = erosion(mask, disk(1))
-    band = np.logical_xor(mask, inside).astype(np.uint8)
+    outside = dilation(mask, disk(2))
+    band = np.logical_xor(mask, outside).astype(np.uint8)
 
-    flag = band + (2 * inside)
+    flag = (2 * outside) - band
 
     return flag
 
