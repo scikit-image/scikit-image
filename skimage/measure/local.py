@@ -2,7 +2,7 @@ import numpy as np
 from ..util.shape import view_as_blocks, _pad_asymmetric_zeros
 
 
-def _block_func(image, factors, func):
+def _local_func(image, factors, func):
     """Down-sample image by applying function to local blocks.
 
     Parameters
@@ -45,7 +45,7 @@ def _block_func(image, factors, func):
     return out
 
 
-def block_sum(image, block_size):
+def local_sum(image, block_size):
     """Sum elements in local blocks.
 
     The image is padded with zeros if it is not perfectly divisible by integer
@@ -75,10 +75,10 @@ def block_sum(image, block_size):
            [33, 27]])
 
     """
-    return _block_func(image, block_size, np.sum)
+    return _local_func(image, block_size, np.sum)
 
 
-def block_mean(image, block_size):
+def local_mean(image, block_size):
     """Average elements in local blocks.
 
     The image is padded with zeros if it is not perfectly divisible by integer
@@ -108,10 +108,10 @@ def block_mean(image, block_size):
            [ 5.5,  4.5]])
 
     """
-    return _block_func(image, block_size, np.mean)
+    return _local_func(image, block_size, np.mean)
 
 
-def block_median(image, block_size):
+def local_median(image, block_size):
     """Median element in local blocks.
 
     The image is padded with zeros if it is not perfectly divisible by integer
@@ -139,10 +139,10 @@ def block_median(image, block_size):
     array([[ 5.]])
 
     """
-    return _block_func(image, block_size, np.median)
+    return _local_func(image, block_size, np.median)
 
 
-def block_min(image, block_size):
+def local_min(image, block_size):
     """Minimum element in local blocks.
 
     The image is padded with zeros if it is not perfectly divisible by integer
@@ -172,10 +172,10 @@ def block_min(image, block_size):
            [0, 0, 0]])
 
     """
-    return _block_func(image, block_size, np.min)
+    return _local_func(image, block_size, np.min)
 
 
-def block_max(image, block_size):
+def local_max(image, block_size):
     """Maximum element in local blocks.
 
     The image is padded with zeros if it is not perfectly divisible by integer
@@ -205,4 +205,4 @@ def block_max(image, block_size):
            [12, 14]])
 
     """
-    return _block_func(image, block_size, np.max)
+    return _local_func(image, block_size, np.max)
