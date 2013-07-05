@@ -3,7 +3,7 @@ from ..util.shape import view_as_blocks, _pad_asymmetric_zeros
 
 
 def _block_func(image, factors, func):
-    """Down-sample image by integer factors.
+    """Down-sample image by applying function to local blocks.
 
     Parameters
     ----------
