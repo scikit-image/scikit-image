@@ -33,7 +33,7 @@ cpdef bilinear_ray_sum(cnp.double_t[:, :] image, cnp.double_t theta,
     """
     theta = theta / 180. * M_PI
     cdef cnp.double_t radius = image.shape[0] // 2 - 1
-    cdef cnp.double_t projection_center = image.shape[0] // 2 - 1
+    cdef cnp.double_t projection_center = image.shape[0] // 2
     cdef cnp.double_t rotation_center = image.shape[0] // 2
     # (s, t) is the (x, y) system rotated by theta
     cdef cnp.double_t t = ray_position - projection_center
@@ -118,7 +118,7 @@ cpdef bilinear_ray_update(cnp.double_t[:, :] image,
         deviation = 0.
     theta = theta / 180. * M_PI
     cdef cnp.double_t radius = image.shape[0] // 2 - 1
-    cdef cnp.double_t projection_center = image.shape[0] // 2 - 1
+    cdef cnp.double_t projection_center = image.shape[0] // 2
     cdef cnp.double_t rotation_center = image.shape[0] // 2
     # (s, t) is the (x, y) system rotated by theta
     cdef cnp.double_t t = ray_position - projection_center
