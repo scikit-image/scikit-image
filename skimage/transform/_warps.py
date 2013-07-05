@@ -1,10 +1,18 @@
 import numpy as np
 from scipy import ndimage
+
 from ._geometric import warp, SimilarityTransform, AffineTransform
+from skimage.util.shape import view_as_blocks, _pad_asymmetric_zeros
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
     """Resize image to match a certain size.
+
+    Resize performs interpolation to upsample or downsample 2D arrays. For
+    downsampling any n-dimensional array by performing arithmetic sum or
+    arithmetic mean, see measure._sum_blocks.sum_blocks and
+    transform._warps.downscale_local_means respectively.
+
 
     Parameters
     ----------
@@ -86,6 +94,11 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
 def rescale(image, scale, order=1, mode='constant', cval=0.):
     """Scale image by a certain factor.
+
+    Rescale performs interpolation to upsample or downsample 2D arrays. For
+    downsampling any n-dimensional array by performing arithmetic sum or
+    arithmetic mean, see measure._sum_blocks.sum_blocks and
+    transform._warps.downscale_local_means respectively.
 
     Parameters
     ----------
@@ -283,3 +296,90 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     return warp(image, _swirl_mapping, map_args=warp_args,
                 output_shape=output_shape,
                 order=order, mode=mode, cval=cval)
+
+
+def _downsample(array, factors, sum=True):
+    """Performs downsampling with integer factors.
+
+    Parameters
+    ----------
+    array : ndarray
+        Input n-dimensional array.
+    factors: tuple
+        Tuple containing downsampling factor along each axis.
+    sum : bool
+        If True, downsampled element is the sum of its corresponding
+        constituent elements in the input array. Default is True.
+
+    Returns
+    -------
+    array : ndarray
+        Downsampled array with same number of dimensions as that of input
+        array.
+
+    """
+
+    pad_size = []
+    if len(factors) != array.ndim:
+        raise ValueError("'factors' must have the same length "
+                         "as 'array.shape'")
+    else:
+        for i in range(len(factors)):
+            if array.shape[i] % factors[i] != 0:
+                pad_size.append(factors[i] - (array.shape[i] % factors[i]))
+            else:
+                pad_size.append(0)
+
+    for i in range(len(pad_size)):
+        array = _pad_asymmetric_zeros(array, pad_size[i], i)
+
+    out = view_as_blocks(array, factors)
+    block_shape = out.shape
+
+    if sum:
+        for i in range(len(block_shape) // 2):
+            out = out.sum(-1)
+    else:
+        for i in range(len(block_shape) // 2):
+            out = out.mean(-1)
+    return out
+
+
+def downscale_local_means(array, factors):
+    """Downsamples the array in blocks of input integer factors after padding
+    the original array with zeroes if the dimensions are not perfectly
+    divisible by factors and replaces it with mean i.e. average value.
+
+    This function is different from resize and rescale in the sense that they
+    use interpolation to upsample or downsample on a 2D array, while this
+    function performs only dawnsampling but on any n-dimensional array and
+    returns the arithmetic mean of elements in a block of size factors in the
+    original array.
+
+    Parameters
+    ----------
+    array : ndarray
+        Input n-dimensional array.
+    factors: tuple
+        Tuple containing integer values representing block length along each
+        axis.
+
+    Returns
+    -------
+    array : ndarray
+        Downsampled array with same number of dimensions as that of input
+        array.
+
+    Example
+    -------
+    >>> a = np.arange(15).reshape(3, 5)
+    >>> a
+    array([[ 0,  1,  2,  3,  4],
+           [ 5,  6,  7,  8,  9],
+           [10, 11, 12, 13, 14]])
+    >>> downscale_local_means(a, (2,3))
+    array([[3.5, 4.],
+           [5.5, 4.5]])
+
+    """
+    return _downsample(array, factors, False)

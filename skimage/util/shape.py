@@ -230,3 +230,15 @@ def view_as_windows(arr_in, window_shape):
     arr_out = as_strided(arr_in, shape=new_shape, strides=new_strides)
 
     return arr_out
+
+
+def _pad_asymmetric_zeros(arr, pad_amt, axis=-1):
+    """Pads `arr` with zeros by `pad_amt` along specified `axis`"""
+    if axis == -1:
+        axis = arr.ndim - 1
+
+    zeroshape = tuple([x if i != axis else pad_amt
+                       for (i, x) in enumerate(arr.shape)])
+
+    return np.concatenate((arr, np.zeros(zeroshape, dtype=arr.dtype)),
+                          axis=axis)

@@ -9,7 +9,7 @@ from ._geometric import (warp, warp_coords, estimate_transform,
                          SimilarityTransform, AffineTransform,
                          ProjectiveTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
-from ._warps import swirl, resize, rotate, rescale
+from ._warps import swirl, resize, rotate, rescale, downscale_local_means
 from .pyramids import (pyramid_reduce, pyramid_expand,
                        pyramid_gaussian, pyramid_laplacian)
 
@@ -40,6 +40,7 @@ __all__ = ['hough_circle',
            'resize',
            'rotate',
            'rescale',
+           'downscale_local_means',
            'pyramid_reduce',
            'pyramid_expand',
            'pyramid_gaussian',
