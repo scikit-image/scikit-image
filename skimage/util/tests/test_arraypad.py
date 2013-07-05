@@ -518,5 +518,12 @@ def test_pad_one_axis_three_ways():
                   **kwargs)
 
 
+def test_zero_pad_width():
+    arr = np.arange(30)
+    arr = np.reshape(arr, (6, 5))
+    for pad_width in (0, (0, 0), ((0, 0), (0, 0))):
+        assert np.all(arr == pad(arr, pad_width, mode='constant'))
+
+
 if __name__ == "__main__":
     run_module_suite()
