@@ -196,13 +196,13 @@ def test_warp_coords_example():
 
 
 def test_downscale_local_mean():
-    """Verifying downsampling of an array with expected result in mean mode"""
-    image1 = np.arange(4*6).reshape(4, 6)
+    image1 = np.arange(4 * 6).reshape(4, 6)
     out1 = downscale_local_mean(image1, (2, 3))
     expected1 = np.array([[  4.,   7.],
                           [ 16.,  19.]])
     assert_array_equal(expected1, out1)
-    image2 = np.arange(5*8).reshape(5, 8)
+
+    image2 = np.arange(5 * 8).reshape(5, 8)
     out2 = downscale_local_mean(image2, (4, 5))
     expected2 = np.array([[ 14. ,  10.8],
                           [  8.5,   5.7]])
