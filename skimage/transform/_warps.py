@@ -10,7 +10,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
     Performs interpolation to up-size or down-size images. For down-sampling
     N-dimensional images by applying the arithmetic sum or mean, see
-    `skimage.measure.sum_blocks` and `skimage.transform.downscale_local_means`,
+    `skimage.measure.local_sum` and `skimage.transform.downscale_local_mean`,
     respectively.
 
     Parameters
@@ -96,8 +96,8 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
 
     Performs interpolation to upscale or down-scale images. For down-sampling
     N-dimensional images with integer factors by applying the arithmetic sum or
-    mean, see `skimage.measure.sum_blocks` and
-    `skimage.transform.downscale_local_means`, respectively.
+    mean, see `skimage.measure.local_sum` and
+    `skimage.transform.downscale_local_mean`, respectively.
 
     Parameters
     ----------
