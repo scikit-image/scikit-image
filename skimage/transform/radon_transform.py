@@ -232,8 +232,6 @@ def iradon(radon_image, theta=None, output_size=None,
             k = np.round(mid_index + ypr * np.cos(th[i]) - xpr * np.sin(th[i]))
             backprojected = radon_filtered[
                 ((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]
-            if circle:
-                backprojected[~reconstruction_circle] = 0.
             reconstructed += backprojected
     elif interpolation == "linear":
         for i in range(len(theta)):
@@ -244,11 +242,11 @@ def iradon(radon_image, theta=None, output_size=None,
             b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
             backprojected = (t - a) * radon_filtered[b0, i] + \
                             (a - t + 1) * radon_filtered[b1, i]
-            if circle:
-                backprojected[~reconstruction_circle] = 0.
             reconstructed += backprojected
     else:
         raise ValueError("Unknown interpolation: %s" % interpolation)
+    if circle:
+        reconstructed[~reconstruction_circle] = 0.
 
     return reconstructed * np.pi / (2 * len(th))
 
