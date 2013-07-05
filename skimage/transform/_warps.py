@@ -10,7 +10,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
     Resize performs interpolation to upsample or downsample 2D arrays. For
     downsampling any n-dimensional array by performing arithmetic sum or
-    arithmetic mean, see meassure._sum_blocks.sum_blocks and
+    arithmetic mean, see measure._sum_blocks.sum_blocks and
     transform._warps.downscale_local_means respectively.
 
 
@@ -97,7 +97,7 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
 
     Rescale performs interpolation to upsample or downsample 2D arrays. For
     downsampling any n-dimensional array by performing arithmetic sum or
-    arithmetic mean, see meassure._sum_blocks.sum_blocks and
+    arithmetic mean, see measure._sum_blocks.sum_blocks and
     transform._warps.downscale_local_means respectively.
 
     Parameters
