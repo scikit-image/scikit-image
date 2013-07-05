@@ -298,7 +298,7 @@ def order_angles_golden_ratio(theta):
     index = remaining.pop(0)
     angle = theta[index]
     yield index
-    # determine subsequent angles using the golden ration method
+    # determine subsequent angles using the golden ratio method
     angle_increment = interval * (1 - (np.sqrt(5) - 1) / 2)
     while remaining:
         angle = (angle + angle_increment) % interval
