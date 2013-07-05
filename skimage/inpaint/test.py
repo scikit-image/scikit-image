@@ -14,9 +14,8 @@ image[3:6, 3:6] = 0
 mask = np.zeros(image.shape, np.uint8)
 mask[3:6, 3:6] = 1
 epsilon = 3
+con = image.copy()
 
-sh(image)
-plt.show()
 # Generate `flag` and `u` matrices
 flag = _heap.init_flag(mask)
 
@@ -35,6 +34,8 @@ _heap.generate_heap(heap, flag, u)
 
 output = fmm.fast_marching_method(image, flag, u, heap, negate=False,
                                   epsilon=epsilon)
-
-sh(output)
+# pass
+plt.subplot(1, 3, 1), sh(con)
+plt.subplot(1, 3, 2), sh(output)
+plt.subplot(1, 3, 3), sh(output - con)
 plt.show()
