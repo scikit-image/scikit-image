@@ -16,4 +16,8 @@ __all__ = ['find_contours',
            'CircleModel',
            'EllipseModel',
            'ransac',
-           'sum_blocks']
+           'block_sum',
+           'block_mean',
+           'block_median',
+           'block_min',
+           'block_max']
