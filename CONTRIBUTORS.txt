@@ -144,3 +144,4 @@
 
 - Jostein Bø Fløystad
   Reconstruction circle mode for Radon transform
+  Simultaneous Algebraic Reconstruction Technique for inverse Radon transform
