@@ -1,10 +1,20 @@
 import os
 import imghdr
+from collections import namedtuple
 
 import numpy as np
 from skimage import io
 from skimage import img_as_ubyte
 from skimage.transform import resize
+
+from skimage.color import color_dict
+
+
+# Convert colors from `skimage.color` to uint8 and allow access through
+# dict or a named tuple.
+color_dict = dict((name, tuple(int(255 * c + 0.5) for c in rgb))
+                  for name, rgb in color_dict.iteritems())
+colors = namedtuple('colors', color_dict.keys())(**color_dict)
 
 
 def open(path):

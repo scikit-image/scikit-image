@@ -70,5 +70,4 @@ False
 
 """
 
-from . import colors
-from .novice import Picture, open
+from .novice import Picture, open, colors, color_dict
