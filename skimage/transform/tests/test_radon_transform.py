@@ -124,11 +124,11 @@ def check_radon_iradon(interpolation_type, filter_type):
     print('\n\tmean error:', delta)
     if debug:
         _debug_plot(image, reconstructed)
-    if filter_type == 'ramp':
-        if interpolation_type == 'linear':
-            allowed_delta = 0.02
-        else:
+    if filter_type in ('ramp', 'shepp-logan'):
+        if interpolation_type == 'nearest':
             allowed_delta = 0.03
+        else:
+            allowed_delta = 0.02
     else:
         allowed_delta = 0.05
     assert delta < allowed_delta
@@ -136,11 +136,12 @@ def check_radon_iradon(interpolation_type, filter_type):
 
 def test_radon_iradon():
     filter_types = ["ramp", "shepp-logan", "cosine", "hamming", "hann"]
-    interpolation_types = ["linear", "nearest"]
+    interpolation_types = ['linear', 'nearest']
     for interpolation_type, filter_type in \
             itertools.product(interpolation_types, filter_types):
         yield check_radon_iradon, interpolation_type, filter_type
-
+    # cubic interpolation is slow; only run one test for it
+    yield check_radon_iradon, 'cubic', 'shepp-logan'
 
 def test_iradon_angles():
     """
