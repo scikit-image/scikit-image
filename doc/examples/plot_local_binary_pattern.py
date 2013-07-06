@@ -120,10 +120,11 @@ plt.gray()
 titles = ('edge', 'flat', 'corner')
 w = width = radius - 1
 edge_labels = range(n_points // 2 - w, n_points // 2 + w + 1)
-flat_labels = range(0, w + 1) + range(n_points - w, n_points + 2)
+flat_labels = list(range(0, w + 1)) + list(range(n_points - w, n_points + 2))
 i_14 = n_points // 4            # 1/4th of the histogram
 i_34 = 3 * (n_points // 4)      # 3/4th of the histogram
-corner_labels = range(i_14 - w, i_14 + w + 1) + range(i_34 - w, i_34 + w + 1)
+corner_labels = (list(range(i_14 - w, i_14 + w + 1)) +
+                 list(range(i_34 - w, i_34 + w + 1)))
 
 label_sets = (edge_labels, flat_labels, corner_labels)
 
@@ -148,9 +149,9 @@ for ax in ax_img:
 The above plot highlights flat, edge-like, and corner-like regions of the
 image.
 
-The histogram of the LBP result is a good measure to classify textures. For
-simplicity the histogram distributions are then tested against each other using
-the Kullback-Leibler-Divergence.
+The histogram of the LBP result is a good measure to classify textures. Here,
+we test the histogram distributions against each other using the
+Kullback-Leibler-Divergence.
 """
 
 # settings for LBP
