@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 radon.py - Radon and inverse radon transforms
 
@@ -16,8 +17,9 @@ from __future__ import division
 import numpy as np
 from scipy.fftpack import fftshift, fft, ifft
 from ._warps_cy import _warp_fast
+from ._radon_transform import sart_projection_update
 
-__all__ = ["radon", "iradon"]
+__all__ = ["radon", "iradon", "iradon_sart"]
 
 
 def radon(image, theta=None, circle=False):
@@ -254,3 +256,162 @@ def iradon(radon_image, theta=None, output_size=None,
         raise ValueError("Unknown interpolation: %s" % interpolation)
 
     return reconstructed * np.pi / (2 * len(th))
+
+
+def order_angles_golden_ratio(theta):
+    """
+    Order angles to reduce the amount of correlated information
+    in subsequent projections.
+
+    Parameters
+    ----------
+    theta : 1D array of floats
+        Projection angles in degrees. Duplicate angles are not allowed.
+
+    Returns
+    -------
+    indices : 1D array of unsigned integers
+        Indices into ``theta`` such that ``theta[indices]`` gives the
+        approximate golden ratio ordering of the projections.
+
+    Notes
+    -----
+    The method used here is that of the golden ratio introduced
+    by T. Kohler.
+
+    References:
+        -Kohler, T. "A projection access scheme for iterative
+        reconstruction based on the golden section." Nuclear Science
+        Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
+        -Winkelmann, Stefanie, et al. "An optimal radial profile order
+        based on the Golden Ratio for time-resolved MRI."
+        Medical Imaging, IEEE Transactions on 26.1 (2007): 68-76.
+    """
+    interval = 180
+
+    def angle_distance(a, b):
+        difference = a - b
+        return min(abs(difference % interval), abs(difference % -interval))
+
+    remaining = list(np.argsort(theta))   # indices into theta
+    # yield an arbitrary angle to start things off
+    index = remaining.pop(0)
+    angle = theta[index]
+    yield index
+    # determine subsequent angles using the golden ratio method
+    angle_increment = interval * (1 - (np.sqrt(5) - 1) / 2)
+    while remaining:
+        angle = (angle + angle_increment) % interval
+        insert_point = np.searchsorted(theta[remaining], angle)
+        index_below = insert_point - 1
+        index_above = 0 if insert_point == len(remaining) else insert_point
+        distance_below = angle_distance(angle, theta[remaining[index_below]])
+        distance_above = angle_distance(angle, theta[remaining[index_above]])
+        if distance_below < distance_above:
+            yield remaining.pop(index_below)
+        else:
+            yield remaining.pop(index_above)
+
+
+def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
+                clip=None, relaxation=0.15):
+    """
+    Inverse radon transform
+
+    Reconstruct an image from the radon transform, using a single iteration of
+    the Simultaneous Algebraic Reconstruction Technique (SART) algorithm.
+
+    Parameters
+    ----------
+    radon_image : 2D array, dtype=float
+        Image containing radon transform (sinogram). Each column of
+        the image corresponds to a projection along a different angle.
+    theta : 1D array, dtype=float, optional
+        Reconstruction angles (in degrees). Default: m angles evenly spaced
+        between 0 and 180 (if the shape of `radon_image` is (N, M)).
+    image : 2D array, dtype=float, optional
+        Image containing an initial reconstruction estimate. Shape of this
+        array should be ``(radon_image.shape[0], radon_image.shape[0])``. The
+        default is an array of zeros.
+    projection_shifts : 1D array, dtype=float
+        Shift the projections contained in ``radon_image`` (the sinogram) by
+        this many pixels before reconstructing the image. The i'th value
+        defines the shift of the i'th column of ``radon_image``.
+    clip : length-2 sequence of floats
+        Force all values in the reconstructed tomogram to lie in the range
+        ``[clip[0], clip[1]]``
+    relaxation : float
+        Relaxation parameter for the update step. A higher value can
+        improve the convergence rate, but one runs the risk of instabilities.
+        Values close to or higher than 1 are not recommended.
+
+    Returns
+    -------
+    output : ndarray
+      Reconstructed image.
+
+    Notes
+    -----
+    Algebraic Reconstruction Techniques are based on formulating the tomography
+    reconstruction problem as a set of linear equations. Along each ray,
+    the projected value is the sum of all the values of the cross section along
+    the ray. A typical feature of SART (and a few other variants of algebraic
+    techniques) is that it samples the cross section at equidistant points
+    along the ray, using linear interpolation between the pixel values of the
+    cross section. The resulting set of linear equations are then solved using
+    a slightly modified Kaczmarz method.
+
+    When using SART, a single iteration is usually sufficient to obtain a good
+    reconstruction. Further iterations will tend to enhance high-frequency
+    information, but will also often increase the noise.
+
+    References:
+        -AC Kak, M Slaney, "Principles of Computerized Tomographic
+        Imaging", IEEE Press 1988.
+        -AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
+        (SART): a superior implementation of the ART algorithm", Ultrasonic
+        Imaging 6 pp 81--94 (1984)
+        -S Kaczmarz, "Angenäherte auflösung von systemen linearer
+        gleichungen", Bulletin International de l’Academie Polonaise des
+        Sciences et des Lettres 35 pp 355--357 (1937)
+        -Kohler, T. "A projection access scheme for iterative
+        reconstruction based on the golden section." Nuclear Science
+        Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
+        -Kaczmarz' method, Wikipedia,
+        http://en.wikipedia.org/wiki/Kaczmarz_method
+    """
+    if radon_image.ndim != 2:
+        raise ValueError('radon_image must be two dimensional')
+    reconstructed_shape = (radon_image.shape[0], radon_image.shape[0])
+    if theta is None:
+        theta = np.linspace(0, 180, radon_image.shape[1], endpoint=False)
+    elif theta.shape != (radon_image.shape[1],):
+        raise ValueError('Shape of theta (%s) does not match the '
+                         'number of projections (%d)'
+                         % (projection_shifts.shape, radon_image.shape[1]))
+    if image is None:
+        image = np.zeros(reconstructed_shape, dtype=np.float)
+    elif image.shape != reconstructed_shape:
+        raise ValueError('Shape of image (%s) does not match first dimension '
+                         'of radon_image (%s)'
+                         % (image.shape, reconstructed_shape))
+    if projection_shifts is None:
+        projection_shifts = np.zeros((radon_image.shape[1],), dtype=np.float)
+    elif projection_shifts.shape != (radon_image.shape[1],):
+        raise ValueError('Shape of projection_shifts (%s) does not match the '
+                         'number of projections (%d)'
+                         % (projection_shifts.shape, radon_image.shape[1]))
+    if not clip is None:
+        if len(clip) != 2:
+            raise ValueError('clip must be a length-2 sequence')
+        clip = (float(clip[0]), float(clip[1]))
+    relaxation = float(relaxation)
+
+    for angle_index in order_angles_golden_ratio(theta):
+        image_update = sart_projection_update(image, theta[angle_index],
+                                              radon_image[:, angle_index],
+                                              projection_shifts[angle_index])
+        image += relaxation * image_update
+        if not clip is None:
+            image = np.clip(image, clip[0], clip[1])
+    return image

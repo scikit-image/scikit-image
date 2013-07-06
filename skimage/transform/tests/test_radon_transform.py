@@ -1,15 +1,17 @@
-from __future__ import print_function
-from __future__ import division
+from __future__ import print_function, division
 
 import numpy as np
 from numpy.testing import assert_raises
 import itertools
+import os.path
+
 from skimage.transform import radon, iradon
 from skimage.io import imread
 from skimage import data_dir
 
 
-__PHANTOM = imread(data_dir + "/phantom.png", as_grey=True)[::2, ::2]
+__PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
+                   as_grey=True)[::2, ::2]
 
 
 def _get_phantom():
@@ -295,6 +297,85 @@ def test_radon_iradon_circle():
                                                         output_sizes):
         yield check_radon_iradon_circle, interpolation, shape, output_size
 
+
+def test_order_angles_golden_ratio():
+    from skimage.transform.radon_transform import order_angles_golden_ratio
+    np.random.seed(1231)
+    lengths = [1, 4, 10, 180]
+    for l in lengths:
+        theta_ordered = np.linspace(0, 180, l, endpoint=False)
+        theta_random = np.random.uniform(0, 180, l)
+        for theta in (theta_random, theta_ordered):
+            indices = [x for x in order_angles_golden_ratio(theta)]
+            # no duplicate indices allowed
+            assert len(indices) == len(set(indices))
+
+
+def test_iradon_sart():
+    from skimage.io import imread
+    from skimage import data_dir
+    from skimage.transform import rescale, radon, iradon_sart
+
+    debug = False
+
+    shepp_logan = imread(os.path.join(data_dir, "phantom.png"), as_grey=True)
+    image = rescale(shepp_logan, scale=0.4)
+    theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
+    theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
+    for theta, error_factor in ((theta_ordered, 1.),
+                                (theta_missing_wedge, 2.)):
+        sinogram = radon(image, theta, circle=True)
+        reconstructed = iradon_sart(sinogram, theta)
+
+        if debug:
+            from matplotlib import pyplot as plt
+            plt.figure()
+            plt.subplot(221)
+            plt.imshow(image, interpolation='nearest')
+            plt.subplot(222)
+            plt.imshow(sinogram, interpolation='nearest')
+            plt.subplot(223)
+            plt.imshow(reconstructed, interpolation='nearest')
+            plt.subplot(224)
+            plt.imshow(reconstructed - image, interpolation='nearest')
+            plt.show()
+
+        delta = np.mean(np.abs(reconstructed - image))
+        print('delta (1 iteration) =', delta)
+        assert delta < 0.016 * error_factor
+        reconstructed = iradon_sart(sinogram, theta, reconstructed)
+        delta = np.mean(np.abs(reconstructed - image))
+        print('delta (2 iterations) =', delta)
+        assert delta < 0.013 * error_factor
+        reconstructed = iradon_sart(sinogram, theta, clip=(0, 1))
+        delta = np.mean(np.abs(reconstructed - image))
+        print('delta (1 iteration, clip) =', delta)
+        assert delta < 0.015 * error_factor
+
+        np.random.seed(1239867)
+        shifts = np.random.uniform(-3, 3, sinogram.shape[1])
+        x = np.arange(sinogram.shape[0])
+        sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
+                                               sinogram[:, i])
+                                     for i in range(sinogram.shape[1])).T
+        reconstructed = iradon_sart(sinogram_shifted, theta,
+                                    projection_shifts=shifts)
+        if debug:
+            from matplotlib import pyplot as plt
+            plt.figure()
+            plt.subplot(221)
+            plt.imshow(image, interpolation='nearest')
+            plt.subplot(222)
+            plt.imshow(sinogram_shifted, interpolation='nearest')
+            plt.subplot(223)
+            plt.imshow(reconstructed, interpolation='nearest')
+            plt.subplot(224)
+            plt.imshow(reconstructed - image, interpolation='nearest')
+            plt.show()
+
+        delta = np.mean(np.abs(reconstructed - image))
+        print('delta (1 iteration, shifted sinogram) =', delta)
+        assert delta < 0.018 * error_factor
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
