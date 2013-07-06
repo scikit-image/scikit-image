@@ -7,10 +7,10 @@ def _remove_border_keypoints(image, keypoints, dist):
     width = image.shape[0]
     height = image.shape[1]
 
-    keypoints = keypoints[(dist < keypoints[:, 0])
-                          & (keypoints[:, 0] < width - dist)
-                          & (dist < keypoints[:, 1])
-                          & (keypoints[:, 1] < height - dist)]
+    keypoints = keypoints[(dist - 1 < keypoints[:, 0])
+                          & (keypoints[:, 0] < width - dist + 1)
+                          & (dist - 1 < keypoints[:, 1])
+                          & (keypoints[:, 1] < height - dist + 1)]
 
     return keypoints
 
