@@ -181,5 +181,4 @@ def test_hough_ellipse_non_zero_angle():
 
 
 if __name__ == "__main__":
-    from numpy.testing import run_module_suite
-    run_module_suite()
+    np.testing.run_module_suite()
