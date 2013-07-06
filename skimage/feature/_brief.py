@@ -51,16 +51,55 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     Examples
     --------
-    >>> from skimage.data import camera
-    >>> from skimage.feature._brief import *
     >>> from skimage.feature.corner import *
-    >>> img = camera()
-    >>> keypoints = corner_peaks(corner_harris(img), min_distance=10)
-    >>> keypoints.shape
-    (556, 2)
-    >>> descriptors = brief(img, keypoints)
-    >>> descriptors.shape
-    (489, 256)
+    >>> from skimage.feature import brief, hamming_distance
+    >>> square1 = np.zeros([10, 10])
+    >>> square1[2:8, 2:8] = 1
+    >>> square1
+    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
+    >>> keypoints1
+    array([[2, 2],
+           [2, 7],
+           [7, 2],
+           [7, 7]])
+    >>> descriptors1 = brief(square1, keypoints1, patch_size = 5)
+    >>> square2 = np.zeros([12, 12])
+    >>> square2[3:9, 3:9] = 1
+    >>> square2
+    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
+    >>> keypoints2
+    array([[3, 3],
+           [3, 8],
+           [8, 3],
+           [8, 8]])
+    >>> descriptors2 = brief(square2, keypoints1, patch_size = 5)
+    >>> hamming_distance(descriptors1, descriptors2)
+    array([[ 0.02734375,  0.2890625 ,  0.32421875,  0.6171875 ],
+           [ 0.3359375 ,  0.05078125,  0.6640625 ,  0.37109375],
+           [ 0.359375  ,  0.64453125,  0.03125   ,  0.33203125],
+           [ 0.640625  ,  0.40234375,  0.3828125 ,  0.01953125]])
 
     """
 
