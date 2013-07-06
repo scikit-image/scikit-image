@@ -69,5 +69,7 @@ jpeg
 False
 
 """
+from ._novice import Picture, open, colors, color_dict
 
-from .novice import Picture, open, colors, color_dict
+
+__all__ = ['Picture', 'open', 'colors', 'color_dict']
