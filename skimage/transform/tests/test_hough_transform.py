@@ -1,5 +1,7 @@
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_almost_equal,
+                           assert_equal,
+                           )
 
 import skimage.transform as tf
 from skimage.draw import line, circle_perimeter, ellipse_perimeter
@@ -167,16 +169,16 @@ def test_hough_ellipse_non_zero_angle():
     b = 9
     x0 = 10
     y0 = 10
-    angle = np.pi/1.35
+    angle = np.pi / 1.35
     rr, cc = ellipse_perimeter(x0, x0, b, a, orientation=angle)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=15, accuracy=3)
-    print(result)
-    assert_almost_equal(result[0][0]/100., x0/100., decimal=1)
-    assert_almost_equal(result[0][1]/100., y0/100., decimal=1)
-    assert_almost_equal(result[0][2]/100., b/100., decimal=1)
-    assert_almost_equal(result[0][3]/100., a/100., decimal=1)
+    assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
+    assert_almost_equal(result[0][1] / 100., y0 / 100., decimal=1)
+    assert_almost_equal(result[0][2] / 100., b / 100., decimal=1)
+    assert_almost_equal(result[0][3] / 100., a / 100., decimal=1)
     assert_almost_equal(result[0][4], angle, decimal=1)
 
+
 if __name__ == "__main__":
-    run_module_suite()
+    np.testing.run_module_suite()
