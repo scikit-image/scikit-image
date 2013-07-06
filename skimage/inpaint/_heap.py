@@ -32,7 +32,7 @@ def init_flag(_mask):
     """
 
     mask = _mask.astype(np.uint8)
-    outside = dilation(mask, disk(2))
+    outside = dilation(mask, disk(1))
     band = np.logical_xor(mask, outside).astype(np.uint8)
 
     flag = (2 * outside) - band
