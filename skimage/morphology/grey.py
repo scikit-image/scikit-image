@@ -58,7 +58,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
         raise NotImplementedError("In-place erosion not supported!")
     image = img_as_ubyte(image)
     selem = img_as_ubyte(selem)
-    return cmorph.erode(image, selem, out=out,
+    return cmorph._erode(image, selem, out=out,
                         shift_x=shift_x, shift_y=shift_y)
 
 
@@ -111,7 +111,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
         raise NotImplementedError("In-place dilation not supported!")
     image = img_as_ubyte(image)
     selem = img_as_ubyte(selem)
-    return cmorph.dilate(image, selem, out=out,
+    return cmorph._dilate(image, selem, out=out,
                          shift_x=shift_x, shift_y=shift_y)
 
 

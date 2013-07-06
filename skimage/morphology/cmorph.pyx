@@ -8,7 +8,7 @@ cimport numpy as np
 from libc.stdlib cimport malloc, free
 
 
-def dilate(np.ndarray[np.uint8_t, ndim=2] image,
+def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] selem,
            np.ndarray[np.uint8_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0):
@@ -63,7 +63,7 @@ def dilate(np.ndarray[np.uint8_t, ndim=2] image,
     return out
 
 
-def erode(np.ndarray[np.uint8_t, ndim=2] image,
+def _erode(np.ndarray[np.uint8_t, ndim=2] image,
           np.ndarray[np.uint8_t, ndim=2] selem,
           np.ndarray[np.uint8_t, ndim=2] out=None,
           char shift_x=0, char shift_y=0):
