@@ -16,8 +16,11 @@ References:
 from __future__ import division
 import numpy as np
 from scipy.fftpack import fftshift, fft, ifft
+from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
+from .. import util
+
 
 __all__ = ["radon", "iradon", "iradon_sart"]
 
@@ -77,20 +80,14 @@ def radon(image, theta=None, circle=False):
         dh = padded_image.shape[0] // 2
         dw = padded_image.shape[1] // 2
     else:
-        height, width = image.shape
         diagonal = np.sqrt(2) * max(image.shape)
-        heightpad = int(np.ceil(diagonal - height))
-        widthpad = int(np.ceil(diagonal - width))
-        padded_image = np.zeros((int(height + heightpad),
-                                int(width + widthpad)))
-        y0 = heightpad // 2
-        y1 = y0 + height
-        x0 = widthpad // 2
-        x1 = x0 + width
-        padded_image[y0:y1, x0:x1] = image
+        pad = [int(np.ceil(diagonal - s)) for s in image.shape]
+        pad_width = [(p // 2, p - p // 2) for p in pad]
+        padded_image = util.pad(image, pad_width, mode='constant',
+                                constant_values=0)
         out = np.zeros((max(padded_image.shape), len(theta)))
-        dh = y0 + height // 2
-        dw = x0 + width // 2
+        dh = pad[0] // 2 + image.shape[0] // 2
+        dw = pad[1] // 2 + image.shape[1] // 2
 
     shift0 = np.array([[1, 0, -dw],
                        [0, 1, -dh],
@@ -113,11 +110,10 @@ def radon(image, theta=None, circle=False):
 
 
 def _sinogram_circle_to_square(sinogram):
-    size = int(np.ceil(np.sqrt(2) * sinogram.shape[0]))
-    sinogram_padded = np.zeros((size, sinogram.shape[1]))
-    pad = (size - sinogram.shape[0]) // 2
-    sinogram_padded[pad:pad + sinogram.shape[0], :] = sinogram
-    return sinogram_padded
+    diagonal = int(np.ceil(np.sqrt(2) * sinogram.shape[0]))
+    pad = diagonal - sinogram.shape[0]
+    pad_width = ((pad // 2, pad - pad // 2), (0, 0))
+    return util.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
 def iradon(radon_image, theta=None, output_size=None,
@@ -142,9 +138,9 @@ def iradon(radon_image, theta=None, output_size=None,
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann
         Assign None to use no filter.
-    interpolation : str, optional (default linear)
-        Interpolation method used in reconstruction.
-        Methods available: nearest, linear.
+    interpolation : str, optional (default 'linear')
+        Interpolation method used in reconstruction. Methods available:
+        'linear', 'nearest', and 'cubic' ('cubic' is slow).
     circle : boolean, optional
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
@@ -172,6 +168,9 @@ def iradon(radon_image, theta=None, output_size=None,
     if len(theta) != radon_image.shape[1]:
         raise ValueError("The given ``theta`` does not match the number of "
                          "projections in ``radon_image``.")
+    interpolation_types = ('linear', 'nearest', 'cubic')
+    if not interpolation in interpolation_types:
+        raise ValueError("Unknown interpolation: %s" % interpolation)
     if not output_size:
         # If output size not specified, estimate from input radon image
         if circle:
@@ -183,16 +182,15 @@ def iradon(radon_image, theta=None, output_size=None,
         radon_image = _sinogram_circle_to_square(radon_image)
 
     th = (np.pi / 180.0) * theta
-    n = radon_image.shape[0]
-    img = radon_image.copy()
-    # resize image to next power of two for fourier analysis
-    # speeds up fourier and lessens artifacts
-    order = max(64., 2**np.ceil(np.log(2 * n) / np.log(2)))
-    # zero pad input image
-    img.resize((order, img.shape[1]))
+    # resize image to next power of two (but no less than 64) for
+    # Fourier analysis; speeds up Fourier and lessens artifacts
+    projection_size_padded = \
+        max(64, int(2**np.ceil(np.log2(2 * radon_image.shape[0]))))
+    pad_width = ((0, projection_size_padded - radon_image.shape[0]), (0, 0))
+    img = util.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
-    f = fftshift(abs(np.mgrid[-1:1:2 / order])).reshape(-1, 1)
+    f = fftshift(abs(np.mgrid[-1:1:2 / projection_size_padded])).reshape(-1, 1)
     w = 2 * np.pi * f
     # Start from first element to avoid divide by zero
     if filter == "ramp":
@@ -220,40 +218,30 @@ def iradon(radon_image, theta=None, output_size=None,
     # Determine the center of the projections (= center of sinogram)
     circle_size = int(np.floor(radon_image.shape[0] / np.sqrt(2)))
     square_size = radon_image.shape[0]
-    mid_index = (square_size - circle_size) // 2 + circle_size // 2 + 1
+    mid_index = (square_size - circle_size) // 2 + circle_size // 2
 
     x = output_size
     y = output_size
     [X, Y] = np.mgrid[0.0:x, 0.0:y]
     xpr = X - int(output_size) // 2
     ypr = Y - int(output_size) // 2
+
+    # Reconstruct image by interpolation
+    for i in range(len(theta)):
+        t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
+        x = np.arange(radon_filtered.shape[0]) - mid_index
+        if interpolation == 'linear':
+            backprojected = np.interp(t, x, radon_filtered[:, i],
+                                      left=0, right=0)
+        else:
+            interpolant = interp1d(x, radon_filtered[:, i], kind=interpolation,
+                                   bounds_error=False, fill_value=0)
+            backprojected = interpolant(t)
+        reconstructed += backprojected
     if circle:
         radius = (output_size - 1) // 2
         reconstruction_circle = (xpr**2 + ypr**2) < radius**2
-
-    # Reconstruct image by interpolation
-    if interpolation == "nearest":
-        for i in range(len(theta)):
-            k = np.round(mid_index + ypr * np.cos(th[i]) - xpr * np.sin(th[i]))
-            backprojected = radon_filtered[
-                ((((k > 0) & (k < n)) * k) - 1).astype(np.int), i]
-            if circle:
-                backprojected[~reconstruction_circle] = 0.
-            reconstructed += backprojected
-    elif interpolation == "linear":
-        for i in range(len(theta)):
-            t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
-            a = np.floor(t)
-            b = mid_index + a
-            b0 = ((((b + 1 > 0) & (b + 1 < n)) * (b + 1)) - 1).astype(np.int)
-            b1 = ((((b > 0) & (b < n)) * b) - 1).astype(np.int)
-            backprojected = (t - a) * radon_filtered[b0, i] + \
-                            (a - t + 1) * radon_filtered[b1, i]
-            if circle:
-                backprojected[~reconstruction_circle] = 0.
-            reconstructed += backprojected
-    else:
-        raise ValueError("Unknown interpolation: %s" % interpolation)
+        reconstructed[~reconstruction_circle] = 0.
 
     return reconstructed * np.pi / (2 * len(th))
 
