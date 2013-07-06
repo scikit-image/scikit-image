@@ -253,12 +253,12 @@ class Picture(object):
     ----------
     path : str
         Path to an image file to load.
+    image : array
+        Raw RGB image data [0-255]
     size : tuple
         Size of the empty image to create (width, height).
     color : tuple
         Color to fill empty image if size is given (red, green, blue) [0-255].
-    image : array_like
-        Raw RGB image data [0-255]
 
     Notes
     -----
@@ -296,7 +296,7 @@ class Picture(object):
     >>> pic[:, pic.height-1] = (255, 0, 0)
 
     """
-    def __init__(self, path=None, size=None, color=None, image=None):
+    def __init__(self, path=None, image=None, size=None, color=None):
         # Can only provide either path or size, but not both.
         if (path and size) or (path and image) or (size and image):
             assert False, "Can only provide path, size, or image."
