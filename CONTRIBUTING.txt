@@ -154,6 +154,19 @@ detailing the test coverage::
   skimage/filter/__init__                              1      1   100%
   ...
 
+Activate Travis for your fork (optional)
+----------------------------------------
+
+Travis checks all unittests in the project to prevent breakage.
+
+Before sending a pull request, you may want to check that Travis successfully
+passes all tests. To do so, you can follow step one and two in
+`Travis documentation <http://about.travis-ci.org/docs/user/getting-started/>__
+(Step three is already done in scikit-image).
+
+Thus, as soon as you push your code to your fork, it will triger Travis,
+and you will receive an email notification when the process is done.
+
 Bugs
 ----
 
