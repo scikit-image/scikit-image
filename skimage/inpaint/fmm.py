@@ -18,18 +18,21 @@ def eikonal(i1, j1, i2, j2, flag, u):
     sol = 1.0e6
     u11 = u[i1, j1]
     u22 = u[i2, j2]
-    min_u = min(u11, u22)
-    if flag[i1, j1] != INSIDE and flag[i2, j2] != INSIDE:
-        if abs(u11 - u22) >= 1.0:
-            sol = 1 + min_u
+
+    if flag[i1, j1] == KNOWN:
+        if flag[i2, j2] == KNOWN:
+            r = np.sqrt(2 - (u11 - u22) * (u11 - u22))
+            s = (u11 + u22 - r) * .5
+            if s >= u11 and s >= u22:
+                sol = s
+            else:
+                s = (u11 + u22 + r) * .5
+                if s >= u11 and s >= u22:
+                    sol = s
         else:
-            sol = (u11 + u22 - np.sqrt(2 - (u11 - u22) * (u11 - u22))) * .5
-    elif flag[i1, j1] != INSIDE and flag[i2, j2] == INSIDE:
-        sol = 1 + u11
-    elif flag[i1, j1] == INSIDE and flag[i2, j2] != INSIDE:
+            sol = 1 + u11
+    elif flag[i2, j2] == KNOWN:
         sol = 1 + u22
-    else:
-        sol = 1 + min_u
 
     return sol
 
