@@ -226,9 +226,6 @@ def iradon(radon_image, theta=None, output_size=None,
     [X, Y] = np.mgrid[0.0:x, 0.0:y]
     xpr = X - int(output_size) // 2
     ypr = Y - int(output_size) // 2
-    if circle:
-        radius = (output_size - 1) // 2
-        reconstruction_circle = (xpr**2 + ypr**2) < radius**2
 
     # Reconstruct image by interpolation
     for i in range(len(theta)):
@@ -243,6 +240,8 @@ def iradon(radon_image, theta=None, output_size=None,
             backprojected = interpolant(t)
         reconstructed += backprojected
     if circle:
+        radius = (output_size - 1) // 2
+        reconstruction_circle = (xpr**2 + ypr**2) < radius**2
         reconstructed[~reconstruction_circle] = 0.
 
     return reconstructed * np.pi / (2 * len(th))
