@@ -9,9 +9,9 @@ from libc.stdlib cimport malloc, free
 
 
 def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
-           np.ndarray[np.uint8_t, ndim=2] selem,
-           np.ndarray[np.uint8_t, ndim=2] out=None,
-           char shift_x=0, char shift_y=0):
+            np.ndarray[np.uint8_t, ndim=2] selem,
+            np.ndarray[np.uint8_t, ndim=2] out=None,
+            char shift_x=0, char shift_y=0):
     """Return greyscale morphological erosion of an image.
 
     Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
@@ -87,9 +87,9 @@ def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
 
 
 def _erode(np.ndarray[np.uint8_t, ndim=2] image,
-          np.ndarray[np.uint8_t, ndim=2] selem,
-          np.ndarray[np.uint8_t, ndim=2] out=None,
-          char shift_x=0, char shift_y=0):
+           np.ndarray[np.uint8_t, ndim=2] selem,
+           np.ndarray[np.uint8_t, ndim=2] out=None,
+           char shift_x=0, char shift_y=0):
     """Return greyscale morphological dilation of an image.
 
     Morphological dilation sets a pixel at (i,j) to the maximum over all pixels

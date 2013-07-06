@@ -59,7 +59,7 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     image = img_as_ubyte(image)
     selem = img_as_ubyte(selem)
     return cmorph._erode(image, selem, out=out,
-                        shift_x=shift_x, shift_y=shift_y)
+                         shift_x=shift_x, shift_y=shift_y)
 
 
 def dilation(image, selem, out=None, shift_x=False, shift_y=False):
@@ -112,7 +112,7 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     image = img_as_ubyte(image)
     selem = img_as_ubyte(selem)
     return cmorph._dilate(image, selem, out=out,
-                         shift_x=shift_x, shift_y=shift_y)
+                          shift_x=shift_x, shift_y=shift_y)
 
 
 def opening(image, selem, out=None):
