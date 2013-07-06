@@ -1,64 +1,63 @@
-from numpy.testing import run_module_suite, TestCase, assert_array_almost_equal
-from unwrap import unwrap
 import numpy as np
+from numpy.testing import run_module_suite, TestCase, assert_array_almost_equal
 
-class test_unwrap(TestCase):
+from skimage.exposure import unwrap
 
-    def test_unwrap2D(self):
-        x, y = np.ogrid[:8, :16]
-        phi = 2*np.pi*(x*0.2 + y*0.1)
-        phi_wrapped = np.angle(np.exp(1j*phi))
-        phi_unwrapped = unwrap(phi_wrapped)
+def test_unwrap2D():
+    x, y = np.ogrid[:8, :16]
+    phi = 2*np.pi*(x*0.2 + y*0.1)
+    phi_wrapped = np.angle(np.exp(1j*phi))
+    phi_unwrapped = unwrap(phi_wrapped)
 
-        s = np.round(phi_unwrapped[0,0]/(2*np.pi))
-        assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
+    s = np.round(phi_unwrapped[0,0]/(2*np.pi))
+    assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
 
-    def test_unwrap2D_masked(self):
-        x, y = np.ogrid[:8, :16]
-        phi = 2*np.pi*(x*0.2 + y*0.1)
+def test_unwrap2D_masked():
+    x, y = np.ogrid[:8, :16]
+    phi = 2*np.pi*(x*0.2 + y*0.1)
 
-        mask = np.zeros_like(phi, dtype = np.uint8)
-        mask[4:6, 4:8] = 1
+    mask = np.zeros_like(phi, dtype = np.uint8)
+    mask[4:6, 4:8] = 1
 
-        phi_wrapped = np.angle(np.exp(1j*phi))
-        phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
-        phi_unwrapped_masked = unwrap(phi_wrapped_masked)
+    phi_wrapped = np.angle(np.exp(1j*phi))
+    phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
+    phi_unwrapped_masked = unwrap(phi_wrapped_masked)
 
-        s = np.round(phi_unwrapped_masked[0,0]/(2*np.pi))
-        assert_array_almost_equal(phi + 2*np.pi*s, phi_unwrapped_masked)
+    s = np.round(phi_unwrapped_masked[0,0]/(2*np.pi))
+    assert_array_almost_equal(phi + 2*np.pi*s, phi_unwrapped_masked)
 
-    def test_unwrap3D(self):
-        x, y, z = np.ogrid[:8, :12, :4]
-        phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
-        phi_wrapped = np.angle(np.exp(1j*phi))
-        phi_unwrapped = unwrap(phi_wrapped)
+def test_unwrap3D():
+    x, y, z = np.ogrid[:8, :12, :4]
+    phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
+    phi_wrapped = np.angle(np.exp(1j*phi))
+    phi_unwrapped = unwrap(phi_wrapped)
 
-        s = np.round(phi_unwrapped[0,0]/(2*np.pi))
-        assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
+    s = np.round(phi_unwrapped[0,0]/(2*np.pi))
+    assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
 
-    def test_unwrap3D_masked(self):
-        x, y, z = np.ogrid[:8, :12, :4]
-        phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
-        phi_wrapped = np.angle(np.exp(1j*phi))
-        mask = np.zeros_like(phi, dtype = np.uint8)
-        mask[4:6, 4:6, 1:3] = 1
-        phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
-        phi_unwrapped_masked = unwrap(phi_wrapped_masked)
+def test_unwrap3D_masked():
+    x, y, z = np.ogrid[:8, :12, :4]
+    phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
+    phi_wrapped = np.angle(np.exp(1j*phi))
+    mask = np.zeros_like(phi, dtype = np.uint8)
+    mask[4:6, 4:6, 1:3] = 1
+    phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
+    phi_unwrapped_masked = unwrap(phi_wrapped_masked)
 
-        s = np.round(phi_unwrapped_masked[0,0,0]/(2*np.pi))
-        assert_array_almost_equal(phi + 2*np.pi*s, phi_unwrapped_masked)
+    s = np.round(phi_unwrapped_masked[0,0,0]/(2*np.pi))
+    assert_array_almost_equal(phi + 2*np.pi*s, phi_unwrapped_masked)
 
 def unwrap_plots():
-    
+
     x, y = np.ogrid[:32, :32]
     phi = 2*np.pi*(x*0.2 + y*0.1)
 
     #phi = 1*np.arctan2(x-14.3, y-6.3) - 2*np.arctan2(x-18.3, y-22.1)
 
     phi[8,8] = np.NaN
-    
+
     phi_wrapped = np.angle(np.exp(1j*phi))
-    phi_unwrapped = unwrap(phi_wrapped, 
+    phi_unwrapped = unwrap(phi_wrapped,
                            #wrap_around_axis_0 = True,
                            #wrap_around_axis_1 = True,
                            )
@@ -67,7 +66,7 @@ def unwrap_plots():
     #mask[10:22, 4:10] = 1
     phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
     phi_unwrapped_masked = unwrap(phi_wrapped_masked)
-    
+
     import matplotlib.pyplot as plt
     plt.figure(1)
     plt.clf()
@@ -83,12 +82,12 @@ def unwrap_plots():
 
     plt.draw()
     plt.show()
-    
+
 if __name__=="__main__":
     run_module_suite()
 
     unwrap_plots()
-    
+
     # p0,p1,p2,p3,p4 = test_unwrap2D()
     # plt.figure(1)
     # plt.clf()
