@@ -182,16 +182,15 @@ def iradon(radon_image, theta=None, output_size=None,
         radon_image = _sinogram_circle_to_square(radon_image)
 
     th = (np.pi / 180.0) * theta
-    n = radon_image.shape[0]
-    img = radon_image.copy()
-    # resize image to next power of two for fourier analysis
-    # speeds up fourier and lessens artifacts
-    order = max(64., 2**np.ceil(np.log(2 * n) / np.log(2)))
-    # zero pad input image
-    img.resize((order, img.shape[1]))
+    # resize image to next power of two (but no less than 64) for
+    # Fourier analysis; speeds up Fourier and lessens artifacts
+    projection_size_padded = \
+        max(64, int(2**np.ceil(np.log2(2 * radon_image.shape[0]))))
+    pad_width = ((0, projection_size_padded - radon_image.shape[0]), (0, 0))
+    img = util.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
-    f = fftshift(abs(np.mgrid[-1:1:2 / order])).reshape(-1, 1)
+    f = fftshift(abs(np.mgrid[-1:1:2 / projection_size_padded])).reshape(-1, 1)
     w = 2 * np.pi * f
     # Start from first element to avoid divide by zero
     if filter == "ramp":
