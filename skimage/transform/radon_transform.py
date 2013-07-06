@@ -139,9 +139,8 @@ def iradon(radon_image, theta=None, output_size=None,
         Filters available: ramp, shepp-logan, cosine, hamming, hann
         Assign None to use no filter.
     interpolation : str, optional (default 'linear')
-        Interpolation method used in reconstruction.
-        Methods available are the same as for `scipy.interpolate.interp1d:
-        'linear', 'nearest', 'zero', 'slinear', 'quadratic' and 'cubic'.
+        Interpolation method used in reconstruction. Methods available:
+        'linear', 'nearest', and 'cubic' ('cubic' is slow).
     circle : boolean, optional
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
@@ -169,8 +168,7 @@ def iradon(radon_image, theta=None, output_size=None,
     if len(theta) != radon_image.shape[1]:
         raise ValueError("The given ``theta`` does not match the number of "
                          "projections in ``radon_image``.")
-    interpolation_types = ('linear', 'nearest', 'zero', 'slinear',
-                           'quadratic', 'cubic')
+    interpolation_types = ('linear', 'nearest', 'cubic')
     if not interpolation in interpolation_types:
         raise ValueError("Unknown interpolation: %s" % interpolation)
     if not output_size:
