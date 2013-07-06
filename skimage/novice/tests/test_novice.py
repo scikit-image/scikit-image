@@ -70,6 +70,12 @@ def test_pixel_rgb():
         assert_equal(channel, i + 3)
 
 
+def test_pixel_rgb_float():
+    pixel = novice.Picture(size=(1, 1))[0, 0]
+    pixel.rgb = (1.1, 1.1, 1.1)
+    assert_equal(pixel.rgb, (1, 1, 1))
+
+
 @raises(ValueError)
 def test_pixel_rgb_raises():
     pixel = novice.Picture(size=(1, 1))[0, 0]

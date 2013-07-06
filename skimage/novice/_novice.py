@@ -95,12 +95,7 @@ class Pixel(object):
 
     @rgb.setter
     def rgb(self, value):
-        for v in value:
-            self._validate(v)
-
-        self._red = value[0]
-        self._green = value[1]
-        self._blue = value[2]
+        self._red, self._green, self._blue = (self._validate(v) for v in value)
         self._setpixel()
 
     def _validate(self, value):
