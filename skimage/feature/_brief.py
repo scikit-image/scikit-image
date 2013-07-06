@@ -49,6 +49,19 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     "BRIEF : Binary robust independent elementary features",
     http://cvlabwww.epfl.ch/~lepetit/papers/calonder_eccv10.pdf
 
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> from skimage.feature._brief import *
+    >>> from skimage.feature.corner import *
+    >>> img = camera()
+    >>> keypoints = corner_peaks(corner_harris(img), min_distance=10)
+    >>> keypoints.shape
+    (556, 2)
+    >>> descriptors = brief(img, keypoints)
+    >>> descriptors.shape
+    (489, 256)
+
     """
 
     np.random.seed(sample_seed)
