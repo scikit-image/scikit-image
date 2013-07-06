@@ -1,11 +1,14 @@
 """
-========================
-Circular Hough Transform
-========================
+========================================
+Circular and Elliptical Hough Transforms
+========================================
 
 The Hough transform in its simplest form is a `method to detect
 straight lines <http://en.wikipedia.org/wiki/Hough_transform>`__
-but it can also be used to detect circles.
+but it can also be used to detect circles or ellipses.
+
+Circle detection
+================
 
 In the following example, the Hough transform is used to detect
 coin positions and match their edges. We provide a range of
@@ -69,4 +72,68 @@ for idx in np.argsort(accums)[::-1][:5]:
     image[cy, cx] = (220, 20, 20)
 
 ax.imshow(image, cmap=plt.cm.gray)
+plt.show()
+
+
+"""
+Ellipse detection
+=================
+
+In this second example, the aim is to detect the edge of the coffee cup.
+Basically, this is a projection of a circle, i.e. an ellipse.
+The problem to solve is much more difficult since five parameters have to be determined,
+instead of three for circles.
+
+
+Algorithm overview
+------------------
+
+The algorithm takes two different points belonging to the ellipse. It assumes that it is
+the main axis. A loop on all the other points determines how much an ellipse passes to
+them.
+
+A full description of the algorithm can be found in reference [1].
+
+
+References
+----------
+.. [1] Xie, Yonghong, and Qiang Ji. "A new efficient ellipse detection
+       method." Pattern Recognition, 2002. Proceedings. 16th International
+       Conference on. Vol. 2. IEEE, 2002
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+
+from skimage import data, filter, color
+from skimage.transform import hough_ellipse
+from skimage.draw import ellipse_perimeter
+
+# Load picture, convert to grayscale and detect edges
+image_rgb = data.load('coffee.png')[100:240, 110:250]
+image_gray = color.rgb2gray(image_rgb)
+edges = filter.canny(image_gray, sigma=2.0, low_threshold=0.1, high_threshold=0.6)
+
+# Perform a Hough Transform
+accum = hough_ellipse(edges, accuracy=7, threshold=93)
+center_y = int(accum[0][1])
+center_x = int(accum[0][2])
+xradius = int(accum[0][3])
+yradius = int(accum[0][4])
+angle = accum[0][5]
+
+# Draw the ellipse on the original image
+cx, cy = ellipse_perimeter(center_y, center_x, yradius, xradius, orientation=angle)
+image_rgb[cy, cx] = (0, 0, 220)
+# Draw the edge (white) and the resulting ellipse (red)
+edges = color.gray2rgb(edges)
+edges[cy, cx] = (250, 0, 0)
+
+fig = plt.subplots(figsize=(10, 6))
+plt.subplot(1,2,1)
+plt.title('Original picture')
+plt.imshow(image_rgb)
+plt.subplot(1,2,2)
+plt.title('Edge (white) and result (red)')
+plt.imshow(edges)
+
 plt.show()
