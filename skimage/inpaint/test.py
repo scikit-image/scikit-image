@@ -6,7 +6,8 @@ import _heap
 import fmm
 
 
-def inpaint(image, mask):
+def inpaint(image, mask, epsilon=3):
+    image = image.copy()
     # Generate `flag` and `u` matrices
     flag = _heap.init_flag(mask)
     u = _heap.init_u(flag)
@@ -27,14 +28,10 @@ image[paint_region] = 0
 mask = np.zeros_like(image, dtype=np.uint8)
 mask[paint_region] = 1
 
-epsilon = 3
-con = image.copy()
-
-output = inpaint(image, mask)
-
+painted = inpaint(image, mask)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2)
 plt.gray()
-ax0.imshow(con)
-ax1.imshow(output)
+ax0.imshow(image)
+ax1.imshow(painted)
 plt.show()
