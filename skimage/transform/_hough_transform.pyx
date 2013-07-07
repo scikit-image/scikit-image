@@ -130,9 +130,9 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     --------
     >>> img = np.zeros((25, 25), dtype=int)
     >>> rr, cc = draw.ellipse_perimeter(10, 10, 6, 8)
-    >>> img[rr, cc] = 1
-    >>> result = hough_ellipse(img, threshold=6)
-    [(10.0, 10.0, 8.0, 6.0474292058692187, 0.0, 8)]
+    >>> img[cc, rr] = 1
+    >>> result = hough_ellipse(img, threshold=8)
+    [(10.0, 10.0, 8.0, 6.0, 0.0, 10)]
 
     Notes
     -----
