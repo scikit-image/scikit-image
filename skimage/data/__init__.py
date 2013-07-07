@@ -195,7 +195,7 @@ def coffee():
     Notes
     -----
     This image was downloaded on
-    `Flickr <https://secure.flickr.com/photos/free-stock/4999821195/sizes/o/in/photostream/>`__
+    `Flickr <https://secure.flickr.com/photos/free-stock/4999821195>`__
     No copyright restrictions.
     """
     return load("coffee.png")
