@@ -164,7 +164,7 @@ passes all tests. To do so, you can follow step one and two in
 `Travis documentation <http://about.travis-ci.org/docs/user/getting-started/>__
 (Step three is already done in scikit-image).
 
-Thus, as soon as you push your code to your fork, it will triger Travis,
+Thus, as soon as you push your code to your fork, it will trigger Travis,
 and you will receive an email notification when the process is done.
 
 Bugs
