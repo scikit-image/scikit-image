@@ -76,8 +76,8 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input)
-        The result of the local bilateral mean.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     See also
     --------
@@ -126,8 +126,8 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input)
-        the local number of pixels inside the bilateral neighborhood
+    out : ndarray (same dtype as input image)
+        Output image.
 
     Examples
     --------

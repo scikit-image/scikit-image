@@ -94,7 +94,7 @@ def autolevel(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The result of the local autolevel.
+        Output image.
 
     Examples
     --------
@@ -164,7 +164,7 @@ def equalize(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The result of the local equalize.
+        Output image.
 
     Examples
     --------
@@ -206,7 +206,7 @@ def gradient(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The local gradient.
+        Output image.
 
     """
 
@@ -237,7 +237,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The local maximum.
+        Output image.
 
     See also
     --------
@@ -276,7 +276,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The local mean.
+        Output image.
 
     Examples
     --------
@@ -317,7 +317,7 @@ def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The result of the local mean subtraction.
+        Output image.
 
     """
 
@@ -347,7 +347,7 @@ def median(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The local median.
+        Output image.
 
     Examples
     --------
@@ -387,7 +387,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The local minimum.
+        Output image.
 
     See also
     --------
@@ -426,7 +426,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The local modal.
+        Output image.
 
     """
 
@@ -457,7 +457,7 @@ def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
         structuring element).
 
     Returns
-    -------
+        Output image.
     out : ndarray (same dtype as input image)
         The result of the local enhance_contrast.
 
@@ -500,7 +500,7 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The number of pixels belonging to the neighborhood.
+        Output image.
 
     Examples
     --------
@@ -547,7 +547,7 @@ def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The result of the local threshold.
+        Output image.
 
     Examples
     --------
@@ -594,7 +594,7 @@ def tophat(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The image tophat.
+        Output image.
 
     """
 
@@ -630,7 +630,7 @@ def noise_filter(image, selem, out=None, mask=None, shift_x=False,
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The image noise.
+        Output image.
 
     """
 
@@ -669,7 +669,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        Entropy of image.
+        Output image.
 
     References
     ----------
@@ -712,7 +712,7 @@ def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Returns
     -------
     out : ndarray (same dtype as input image)
-        Otsu's threshold values.
+        Output image.
 
     References
     ----------

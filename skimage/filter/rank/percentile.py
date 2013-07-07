@@ -71,8 +71,8 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    local autolevel : ndarray (same dtype as input)
-        The result of the local autolevel.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     """
 
@@ -109,8 +109,8 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    local percentile_gradient : ndarray (same dtype as input)
-        The result of the local percentile_gradient.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     """
 
@@ -147,8 +147,8 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    local mean : ndarray (same dtype as input)
-        The result of the local mean.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     """
 
@@ -185,8 +185,8 @@ def percentile_subtract_mean(image, selem, out=None, mask=None,
 
     Returns
     -------
-    local subtract_mean : ndarray (same dtype as input)
-        The result of the local subtract_mean.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     """
 
@@ -223,8 +223,8 @@ def percentile_enhance_contrast(image, selem, out=None, mask=None,
 
     Returns
     -------
-    local enhance_contrast : ndarray (same dtype as input)
-        The result of the local enhance_contrast.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     """
 
@@ -260,8 +260,8 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
 
     Returns
     -------
-    local percentile : ndarray (same dtype as input)
-        The result of the local percentile.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     """
 
@@ -298,8 +298,8 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    local pop : ndarray (same dtype as input)
-        The result of the local pop.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     """
 
@@ -335,8 +335,8 @@ def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
     p0 : float in [0, ..., 1]
         Set the percentile value.
 
-    Returns
-    -------
+        out : ndarray (same dtype as input image)
+        Output image.
     local threshold : ndarray (same dtype as input)
         The result of the local threshold.
 
