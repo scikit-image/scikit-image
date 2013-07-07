@@ -183,7 +183,7 @@ def test_compare_ubyte_vs_float():
     image_float = img_as_float(image_uint)
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
-               'meansubtraction', 'morph_contr_enh', 'pop', 'tophat']
+               'subtract_mean', 'enhance_contrast', 'pop', 'tophat']
 
     for method in methods:
         func = getattr(rank, method)
@@ -205,8 +205,8 @@ def test_compare_8bit_unsigned_vs_signed():
     assert_array_equal(image_u, img_as_ubyte(image_s))
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
-               'mean', 'meansubtraction', 'median', 'minimum', 'modal',
-               'morph_contr_enh', 'pop', 'threshold', 'tophat']
+               'mean', 'subtract_mean', 'median', 'minimum', 'modal',
+               'enhance_contrast', 'pop', 'threshold', 'tophat']
 
     for method in methods:
         func = getattr(rank, method)
@@ -224,8 +224,8 @@ def test_compare_8bit_vs_16bit():
     assert_array_equal(image8, image16)
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
-               'mean', 'meansubtraction', 'median', 'minimum', 'modal',
-               'morph_contr_enh', 'pop', 'threshold', 'tophat']
+               'mean', 'subtract_mean', 'median', 'minimum', 'modal',
+               'enhance_contrast', 'pop', 'threshold', 'tophat']
 
     for method in methods:
         func = getattr(rank, method)

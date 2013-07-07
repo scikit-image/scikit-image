@@ -28,8 +28,8 @@ from .generic import _handle_input
 
 
 __all__ = ['percentile_autolevel', 'percentile_gradient',
-           'percentile_mean', 'percentile_mean_subtraction',
-           'percentile_morph_contr_enh', 'percentile', 'percentile_pop',
+           'percentile_mean', 'percentile_subtract_mean',
+           'percentile_enhance_contrast', 'percentile', 'percentile_pop',
            'percentile_threshold']
 
 
@@ -157,11 +157,11 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_mean_subtraction(image, selem, out=None, mask=None,
+def percentile_subtract_mean(image, selem, out=None, mask=None,
                                  shift_x=False, shift_y=False, p0=0, p1=1):
-    """Return greyscale local mean_subtraction of an image.
+    """Return greyscale local subtract_mean of an image.
 
-    mean_subtraction is computed on the given structuring element. Only levels
+    subtract_mean is computed on the given structuring element. Only levels
     between percentiles [p0, p1] are used.
 
     Parameters
@@ -185,21 +185,21 @@ def percentile_mean_subtraction(image, selem, out=None, mask=None,
 
     Returns
     -------
-    local mean_subtraction : ndarray (same dtype as input)
-        The result of the local mean_subtraction.
+    local subtract_mean : ndarray (same dtype as input)
+        The result of the local subtract_mean.
 
     """
 
-    return _apply(percentile_cy._mean_subtraction,
+    return _apply(percentile_cy._subtract_mean,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_morph_contr_enh(image, selem, out=None, mask=None,
+def percentile_enhance_contrast(image, selem, out=None, mask=None,
                                shift_x=False, shift_y=False, p0=0, p1=1):
-    """Return greyscale local morph_contr_enh of an image.
+    """Return greyscale local enhance_contrast of an image.
 
-    morph_contr_enh is computed on the given structuring element. Only levels
+    enhance_contrast is computed on the given structuring element. Only levels
     between percentiles [p0, p1] are used.
 
     Parameters
@@ -223,12 +223,12 @@ def percentile_morph_contr_enh(image, selem, out=None, mask=None,
 
     Returns
     -------
-    local morph_contr_enh : ndarray (same dtype as input)
-        The result of the local morph_contr_enh.
+    local enhance_contrast : ndarray (same dtype as input)
+        The result of the local enhance_contrast.
 
     """
 
-    return _apply(percentile_cy._morph_contr_enh,
+    return _apply(percentile_cy._enhance_contrast,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 

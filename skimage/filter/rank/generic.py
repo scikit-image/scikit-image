@@ -23,7 +23,7 @@ from . import generic_cy
 
 
 __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
-           'meansubtraction', 'median', 'minimum', 'modal', 'morph_contr_enh',
+           'subtract_mean', 'median', 'minimum', 'modal', 'enhance_contrast',
            'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
 
 
@@ -294,7 +294,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
-def meansubtraction(image, selem, out=None, mask=None, shift_x=False,
+def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
                      shift_y=False):
     """Return image subtracted from its local mean.
 
@@ -317,11 +317,11 @@ def meansubtraction(image, selem, out=None, mask=None, shift_x=False,
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The result of the local meansubtraction.
+        The result of the local mean subtraction.
 
     """
 
-    return _apply(generic_cy._meansubtraction, image, selem,
+    return _apply(generic_cy._subtract_mean, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
@@ -434,7 +434,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 
-def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
+def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
                     shift_y=False):
     """Enhance an image replacing each pixel by the local maximum if pixel
     greylevel is closest to maximimum than local minimum OR local minimum
@@ -459,21 +459,21 @@ def morph_contr_enh(image, selem, out=None, mask=None, shift_x=False,
     Returns
     -------
     out : ndarray (same dtype as input image)
-        The result of the local morph_contr_enh.
+        The result of the local enhance_contrast.
 
     Examples
     --------
     >>> from skimage import data
     >>> from skimage.morphology import disk
-    >>> from skimage.filter.rank import morph_contr_enh
+    >>> from skimage.filter.rank import enhance_contrast
     >>> # Load test image
     >>> ima = data.camera()
     >>> # Local mean
-    >>> avg = morph_contr_enh(ima, disk(20))
+    >>> avg = enhance_contrast(ima, disk(20))
 
     """
 
-    return _apply(generic_cy._morph_contr_enh, image, selem,
+    return _apply(generic_cy._enhance_contrast, image, selem,
                   out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 

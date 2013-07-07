@@ -91,11 +91,11 @@ cdef inline dtype_t _kernel_mean(Py_ssize_t* histo, float pop, dtype_t g,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t _kernel_mean_subtraction(Py_ssize_t* histo, float pop,
-                                             dtype_t g, Py_ssize_t max_bin,
-                                             Py_ssize_t mid_bin, float p0,
-                                             float p1, Py_ssize_t s0,
-                                             Py_ssize_t s1):
+cdef inline dtype_t _kernel_subtract_mean(Py_ssize_t* histo, float pop,
+                                          dtype_t g, Py_ssize_t max_bin,
+                                          Py_ssize_t mid_bin, float p0,
+                                          float p1, Py_ssize_t s0,
+                                          Py_ssize_t s1):
 
     cdef Py_ssize_t i, sum, mean, n
 
@@ -116,11 +116,11 @@ cdef inline dtype_t _kernel_mean_subtraction(Py_ssize_t* histo, float pop,
         return <dtype_t>(0)
 
 
-cdef inline dtype_t _kernel_morph_contr_enh(Py_ssize_t* histo, float pop,
-                                            dtype_t g, Py_ssize_t max_bin,
-                                            Py_ssize_t mid_bin, float p0,
-                                            float p1, Py_ssize_t s0,
-                                            Py_ssize_t s1):
+cdef inline dtype_t _kernel_enhance_contrast(Py_ssize_t* histo, float pop,
+                                             dtype_t g, Py_ssize_t max_bin,
+                                             Py_ssize_t mid_bin, float p0,
+                                             float p1, Py_ssize_t s0,
+                                             Py_ssize_t s1):
 
     cdef Py_ssize_t i, imin, imax, sum, delta
 
@@ -252,22 +252,22 @@ def _mean(dtype_t[:, ::1] image,
                         shift_x, shift_y, p0, p1, 0, 0, max_bin)
 
 
-def _mean_subtraction(dtype_t[:, ::1] image,
-                      char[:, ::1] selem,
-                      char[:, ::1] mask,
-                      dtype_t[:, ::1] out,
-                      char shift_x, char shift_y, float p0, float p1,
-                      Py_ssize_t max_bin):
+def _subtract_mean(dtype_t[:, ::1] image,
+                   char[:, ::1] selem,
+                   char[:, ::1] mask,
+                   dtype_t[:, ::1] out,
+                   char shift_x, char shift_y, float p0, float p1,
+                   Py_ssize_t max_bin):
 
     if dtype_t is uint8_t:
-        _core[uint8_t](_kernel_mean_subtraction[uint8_t], image, selem, mask,
+        _core[uint8_t](_kernel_subtract_mean[uint8_t], image, selem, mask,
                        out, shift_x, shift_y, p0, p1, 0, 0, max_bin)
     elif dtype_t is uint16_t:
-        _core[uint16_t](_kernel_mean_subtraction[uint16_t], image, selem, mask,
+        _core[uint16_t](_kernel_subtract_mean[uint16_t], image, selem, mask,
                         out, shift_x, shift_y, p0, p1, 0, 0, max_bin)
 
 
-def _morph_contr_enh(dtype_t[:, ::1] image,
+def _enhance_contrast(dtype_t[:, ::1] image,
                     char[:, ::1] selem,
                     char[:, ::1] mask,
                     dtype_t[:, ::1] out,
@@ -275,10 +275,10 @@ def _morph_contr_enh(dtype_t[:, ::1] image,
                     Py_ssize_t max_bin):
 
     if dtype_t is uint8_t:
-        _core[uint8_t](_kernel_morph_contr_enh[uint8_t], image, selem, mask,
+        _core[uint8_t](_kernel_enhance_contrast[uint8_t], image, selem, mask,
                        out, shift_x, shift_y, p0, p1, 0, 0, max_bin)
     elif dtype_t is uint16_t:
-        _core[uint16_t](_kernel_morph_contr_enh[uint16_t], image, selem, mask,
+        _core[uint16_t](_kernel_enhance_contrast[uint16_t], image, selem, mask,
                         out, shift_x, shift_y, p0, p1, 0, 0, max_bin)
 
 
