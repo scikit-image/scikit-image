@@ -27,9 +27,17 @@ image = np.array(
      [0, 1, 0, 0, 0, 0, 0, 1, 0],
      [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=float)
 
+original_image = np.copy(image)
+
 chull = convex_hull_image(image)
 image[chull] += 1.7
 image -= -1.7
 
+fig = plt.subplots(figsize=(10, 6))
+plt.subplot(1, 2, 1)
+plt.title('Original picture')
+plt.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
+plt.subplot(1, 2, 2)
+plt.title('Transformed picture')
 plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
 plt.show()
