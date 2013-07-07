@@ -15,10 +15,9 @@ References
 
 """
 
+import warnings
 import numpy as np
 from skimage import img_as_ubyte, img_as_uint
-from ... import get_log
-log = get_log()
 
 from . import generic_cy
 
@@ -57,8 +56,8 @@ def _handle_input(image, selem, out, mask):
 
     bitdepth = int(np.log2(max_bin))
     if bitdepth > 10:
-        log.warn("Bitdepth of %d may result in bad rank filter "
-                 "performance due to large number of bins." % bitdepth)
+        warnings.warn("Bitdepth of %d may result in bad rank filter "
+                      "performance due to large number of bins." % bitdepth)
 
     return image, selem, out, mask, max_bin
 
