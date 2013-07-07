@@ -121,11 +121,11 @@ edges = filter.canny(image_gray, sigma=2.0,
 # The threshold eliminates low accumulators
 accum = hough_ellipse(edges, accuracy=7, threshold=93)
 # Estimated parameters for the ellipse
-center_y = int(accum[0, 1])
-center_x = int(accum[0, 2])
-xradius = int(accum[0, 3])
-yradius = int(accum[0, 4])
-angle = accum[0, 5]
+center_y = int(accum[0][1])
+center_x = int(accum[0][2])
+xradius = int(accum[0][3])
+yradius = int(accum[0][4])
+angle = accum[0][5]
 
 # Draw the ellipse on the original image
 cx, cy = ellipse_perimeter(center_y, center_x,
