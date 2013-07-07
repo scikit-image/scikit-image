@@ -30,8 +30,15 @@ image = np.array(
 original_image = np.copy(image)
 
 chull = convex_hull_image(image)
-image[chull] += 1.7
-image -= -1.7
+image[chull] += 1
+# image is now:
+#[[ 0.  0.  0.  0.  0.  0.  0.  0.  0.]
+# [ 0.  0.  0.  0.  2.  0.  0.  0.  0.]
+# [ 0.  0.  0.  2.  1.  2.  0.  0.  0.]
+# [ 0.  0.  2.  1.  1.  1.  2.  0.  0.]
+# [ 0.  2.  1.  1.  1.  1.  1.  2.  0.]
+# [ 0.  0.  0.  0.  0.  0.  0.  0.  0.]]
+
 
 fig = plt.subplots(figsize=(10, 6))
 plt.subplot(1, 2, 1)
