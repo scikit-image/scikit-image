@@ -1,6 +1,6 @@
 """Inferior and superior ranks, provided by the user, are passed to the kernel
 function to provide a softer version of the rank filters. E.g.
-percentile_autolevel will stretch image levels between percentile [p0, p1]
+``autolevel_percentile`` will stretch image levels between percentile [p0, p1]
 instead of using [min, max]. It means that isolated bright or dark pixels will
 not produce halos.
 
@@ -27,10 +27,10 @@ from . import percentile_cy
 from .generic import _handle_input
 
 
-__all__ = ['percentile_autolevel', 'percentile_gradient',
-           'percentile_mean', 'percentile_subtract_mean',
-           'percentile_enhance_contrast', 'percentile', 'percentile_pop',
-           'percentile_threshold']
+__all__ = ['autolevel_percentile', 'gradient_percentile',
+           'mean_percentile', 'subtract_mean_percentile',
+           'enhance_contrast_percentile', 'percentile', 'pop_percentile',
+           'threshold_percentile']
 
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1):
@@ -43,7 +43,7 @@ def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1):
     return out
 
 
-def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False,
+def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0, p1=1):
     """Return greyscale local autolevel of an image.
 
@@ -81,11 +81,11 @@ def percentile_autolevel(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_gradient(image, selem, out=None, mask=None, shift_x=False,
+def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
                         shift_y=False, p0=0, p1=1):
-    """Return greyscale local percentile_gradient of an image.
+    """Return greyscale local gradient of an image.
 
-    percentile_gradient is computed on the given structuring element. Only
+    gradient is computed on the given structuring element. Only
     levels between percentiles [p0, p1] are used.
 
     Parameters
@@ -119,7 +119,7 @@ def percentile_gradient(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_mean(image, selem, out=None, mask=None, shift_x=False,
+def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
                     shift_y=False, p0=0, p1=1):
     """Return greyscale local mean of an image.
 
@@ -157,8 +157,8 @@ def percentile_mean(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_subtract_mean(image, selem, out=None, mask=None,
-                                 shift_x=False, shift_y=False, p0=0, p1=1):
+def subtract_mean_percentile(image, selem, out=None, mask=None,
+                             shift_x=False, shift_y=False, p0=0, p1=1):
     """Return greyscale local subtract_mean of an image.
 
     subtract_mean is computed on the given structuring element. Only levels
@@ -195,8 +195,8 @@ def percentile_subtract_mean(image, selem, out=None, mask=None,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_enhance_contrast(image, selem, out=None, mask=None,
-                               shift_x=False, shift_y=False, p0=0, p1=1):
+def enhance_contrast_percentile(image, selem, out=None, mask=None,
+                                shift_x=False, shift_y=False, p0=0, p1=1):
     """Return greyscale local enhance_contrast of an image.
 
     enhance_contrast is computed on the given structuring element. Only levels
@@ -270,7 +270,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
                   shift_y=shift_y, p0=p0, p1=0.)
 
 
-def percentile_pop(image, selem, out=None, mask=None, shift_x=False,
+def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
     """Return greyscale local pop of an image.
 
@@ -308,7 +308,7 @@ def percentile_pop(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def percentile_threshold(image, selem, out=None, mask=None, shift_x=False,
+def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0):
     """Return greyscale local threshold of an image.
 

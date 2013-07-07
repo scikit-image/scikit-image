@@ -33,10 +33,10 @@ def test_random_sizes():
                   shift_x=+1, shift_y=+1)
         assert_array_equal(image16.shape, out16.shape)
 
-        rank.percentile_mean(image=image16, mask=mask, out=out16,
+        rank.mean_percentile(image=image16, mask=mask, out=out16,
                              selem=elem, shift_x=0, shift_y=0, p0=.1, p1=.9)
         assert_array_equal(image16.shape, out16.shape)
-        rank.percentile_mean(image=image16, mask=mask, out=out16,
+        rank.mean_percentile(image=image16, mask=mask, out=out16,
                              selem=elem, shift_x=+1, shift_y=+1, p0=.1, p1=.9)
         assert_array_equal(image16.shape, out16.shape)
 
@@ -78,7 +78,7 @@ def test_bitdepth():
 
     for i in range(5):
         image = np.ones((100, 100), dtype=np.uint16) * 255 * 2 ** i
-        r = rank.percentile_mean(image=image, selem=elem, mask=mask,
+        r = rank.mean_percentile(image=image, selem=elem, mask=mask,
                                  out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
 
 
@@ -156,7 +156,7 @@ def test_compare_autolevels():
 
     selem = disk(20)
     loc_autolevel = rank.autolevel(image, selem=selem)
-    loc_perc_autolevel = rank.percentile_autolevel(image, selem=selem,
+    loc_perc_autolevel = rank.autolevel_percentile(image, selem=selem,
                                                    p0=.0, p1=1.)
 
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
@@ -170,7 +170,7 @@ def test_compare_autolevels_16bit():
 
     selem = disk(20)
     loc_autolevel = rank.autolevel(image, selem=selem)
-    loc_perc_autolevel = rank.percentile_autolevel(image, selem=selem,
+    loc_perc_autolevel = rank.autolevel_percentile(image, selem=selem,
                                                    p0=.0, p1=1.)
 
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
@@ -418,7 +418,7 @@ def test_selem_dtypes():
         rank.mean(image=image, selem=elem, out=out, mask=mask,
                   shift_x=0, shift_y=0)
         assert_array_equal(image, out)
-        rank.percentile_mean(image=image, selem=elem, out=out, mask=mask,
+        rank.mean_percentile(image=image, selem=elem, out=out, mask=mask,
                              shift_x=0, shift_y=0)
         assert_array_equal(image, out)
 
@@ -443,10 +443,10 @@ def test_bilateral():
     image[10, 11] = 1010
     image[10, 9] = 900
 
-    assert rank.bilateral_mean(image, selem, s0=1, s1=1)[10, 10] == 1000
-    assert rank.bilateral_pop(image, selem, s0=1, s1=1)[10, 10] == 1
-    assert rank.bilateral_mean(image, selem, s0=11, s1=11)[10, 10] == 1005
-    assert rank.bilateral_pop(image, selem, s0=11, s1=11)[10, 10] == 2
+    assert rank.mean_bilateral(image, selem, s0=1, s1=1)[10, 10] == 1000
+    assert rank.pop_bilateral(image, selem, s0=1, s1=1)[10, 10] == 1
+    assert rank.mean_bilateral(image, selem, s0=11, s1=11)[10, 10] == 1005
+    assert rank.pop_bilateral(image, selem, s0=11, s1=11)[10, 10] == 2
 
 
 if __name__ == "__main__":

@@ -27,7 +27,7 @@ from . import bilateral_cy
 from .generic import _handle_input
 
 
-__all__ = ['bilateral_mean', 'bilateral_pop']
+__all__ = ['mean_bilateral', 'pop_bilateral']
 
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1):
@@ -40,7 +40,7 @@ def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1):
     return out
 
 
-def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
+def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
                    shift_y=False, s0=10, s1=10):
     """Apply a flat kernel bilateral filter.
 
@@ -99,7 +99,7 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
-def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
+def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=False, s0=10, s1=10):
     """Return the number (population) of pixels actually inside the bilateral
     neighborhood, i.e. being inside the structuring element AND having a gray

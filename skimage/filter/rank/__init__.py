@@ -1,37 +1,37 @@
 from .generic import (autolevel, bottomhat, equalize, gradient, maximum, mean,
                       subtract_mean, median, minimum, modal, enhance_contrast,
                       pop, threshold, tophat, noise_filter, entropy, otsu)
-from .percentile import (percentile_autolevel, percentile_gradient,
-                         percentile_mean, percentile_subtract_mean,
-                         percentile_enhance_contrast, percentile,
-                         percentile_pop, percentile_threshold)
-from .bilateral import bilateral_mean, bilateral_pop
+from .percentile import (autolevel_percentile, gradient_percentile,
+                         mean_percentile, subtract_mean_percentile,
+                         enhance_contrast_percentile, percentile,
+                         pop_percentile, threshold_percentile)
+from .bilateral import mean_bilateral, pop_bilateral
 
 
 __all__ = ['autolevel',
+           'autolevel_percentile',
            'bottomhat',
            'equalize',
            'gradient',
+           'gradient_percentile',
            'maximum',
            'mean',
+           'mean_percentile',
+           'mean_bilateral',
            'subtract_mean',
+           'subtract_mean_percentile',
            'median',
            'minimum',
            'modal',
            'enhance_contrast',
+           'enhance_contrast_percentile',
            'pop',
+           'pop_percentile',
+           'pop_bilateral',
            'threshold',
+           'threshold_percentile',
            'tophat',
            'noise_filter',
            'entropy',
-           'otsu',
-           'percentile_autolevel',
-           'percentile_gradient',
-           'percentile_mean',
-           'percentile_subtract_mean',
-           'percentile_enhance_contrast',
-           'percentile',
-           'percentile_pop',
-           'percentile_threshold',
-           'bilateral_mean',
-           'bilateral_pop']
+           'otsu'
+           'percentile']
