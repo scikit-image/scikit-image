@@ -6,7 +6,7 @@ Circular and Elliptical Hough Transforms
 The Hough transform in its simplest form is a `method to detect
 straight lines <http://en.wikipedia.org/wiki/Hough_transform>`__
 but it can also be used to detect circles or ellipses.
-The algorithm assumes that the edge is detected and it is rebust against
+The algorithm assumes that the edge is detected and it is robust against
 noise or missing points.
 
 Circle detection
@@ -83,7 +83,7 @@ Ellipse detection
 
 In this second example, the aim is to detect the edge of a coffee cup.
 Basically, this is a projection of a circle, i.e. an ellipse.
-The problem to solve is much more difficult bacause five parameters have to be
+The problem to solve is much more difficult because five parameters have to be
 determined, instead of three for circles.
 
 
@@ -94,7 +94,7 @@ The algorithm takes two different points belonging to the ellipse. It assumes
 that it is the main axis. A loop on all the other points determines how much
 an ellipse passes to them. A good match corresponds to high accumulator values.
 
-A full description of the algorithm can be found in reference [1].
+A full description of the algorithm can be found in reference [1]_.
 
 
 References
@@ -121,11 +121,11 @@ edges = filter.canny(image_gray, sigma=2.0,
 # The threshold eliminates low accumulators
 accum = hough_ellipse(edges, accuracy=7, threshold=93)
 # Estimated parameters for the ellipse
-center_y = int(accum[0][1])
-center_x = int(accum[0][2])
-xradius = int(accum[0][3])
-yradius = int(accum[0][4])
-angle = accum[0][5]
+center_y = int(accum[0, 1])
+center_x = int(accum[0, 2])
+xradius = int(accum[0, 3])
+yradius = int(accum[0, 4])
+angle = accum[0, 5]
 
 # Draw the ellipse on the original image
 cx, cy = ellipse_perimeter(center_y, center_x,
