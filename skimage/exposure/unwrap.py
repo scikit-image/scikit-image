@@ -12,14 +12,14 @@ def unwrap(wrapped_array,
     wrapped_array_masked = np.ma.asarray(wrapped_array)
     unwrapped_array = np.empty_like(wrapped_array_masked.data)
     if wrapped_array.ndim == 2:
-        import unwrap2D
-        unwrap2D._unwrap2D(wrapped_array_masked.data, 
+        import _unwrap_2d
+        _unwrap_2d._unwrap2D(wrapped_array_masked.data,
                            np.ma.getmaskarray(wrapped_array_masked).astype(np.uint8),
                            unwrapped_array,
                            bool(wrap_around_axis_0), bool(wrap_around_axis_1))
     elif wrapped_array.ndim == 3:
-        import unwrap3D
-        unwrap3D._unwrap3D(wrapped_array_masked.data,
+        import _unwrap_3d
+        _unwrap_3d._unwrap3D(wrapped_array_masked.data,
                            np.ma.getmaskarray(wrapped_array_masked).astype(np.uint8),
                            unwrapped_array,
                            bool(wrap_around_axis_0), bool(wrap_around_axis_1), bool(wrap_around_axis_2))
