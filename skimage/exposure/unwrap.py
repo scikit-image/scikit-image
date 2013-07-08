@@ -1,8 +1,9 @@
 import numpy as np
 
-def unwrap(wrapped_array, 
-           wrap_around_axis_0 = False, 
-           wrap_around_axis_1 = False, 
+
+def unwrap(wrapped_array,
+           wrap_around_axis_0 = False,
+           wrap_around_axis_1 = False,
            wrap_around_axis_2 = False):
 
     wrapped_array = np.require(wrapped_array, np.float32, ['C'])
