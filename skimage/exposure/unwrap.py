@@ -4,7 +4,7 @@ import _unwrap_2d
 import _unwrap_3d
 
 
-def unwrap(wrapped_array, wrap_around=False):
+def unwrap(image, wrap_around=False):
     '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
     original, unwrapped image.
 
@@ -17,14 +17,14 @@ def unwrap(wrapped_array, wrap_around=False):
     -------
     image_unwrapped : array_like
     '''
-    wrapped_array = np.require(wrapped_array, np.float32, ['C'])
-    if wrapped_array.ndim not in (2, 3):
+    image = np.require(image, np.float32, ['C'])
+    if image.ndim not in (2, 3):
         raise ValueError('image must be 2 or 3 dimensional')
     if isinstance(wrap_around, bool):
-        wrap_around = [wrap_around] * wrapped_array.ndim
+        wrap_around = [wrap_around] * image.ndim
     elif (hasattr(wrap_around, '__getitem__')
           and not isinstance(wrap_around, basestring)):
-        if not len(wrap_around) == wrapped_array.ndim:
+        if not len(wrap_around) == image.ndim:
             raise ValueError('Length of wrap_around must equal the '
                              'dimensionality of image')
         wrap_around = [bool(wa) for wa in wrap_around]
@@ -32,23 +32,23 @@ def unwrap(wrapped_array, wrap_around=False):
         raise ValueError('wrap_around must be a bool or a sequence with '
                          'length equal to the dimensionality of image')
 
-    wrapped_array_masked = np.ma.asarray(wrapped_array)
-    unwrapped_array = np.empty_like(wrapped_array_masked.data)
-    if wrapped_array.ndim == 2:
-        _unwrap_2d._unwrap2D(wrapped_array_masked.data,
-                           np.ma.getmaskarray(wrapped_array_masked).astype(np.uint8),
-                           unwrapped_array,
+    image_masked = np.ma.asarray(image)
+    image_unwrapped = np.empty_like(image_masked.data)
+    if image.ndim == 2:
+        _unwrap_2d._unwrap2D(image_masked.data,
+                           np.ma.getmaskarray(image_masked).astype(np.uint8),
+                           image_unwrapped,
                            wrap_around[0], wrap_around[1])
-    elif wrapped_array.ndim == 3:
-        _unwrap_3d._unwrap3D(wrapped_array_masked.data,
-                           np.ma.getmaskarray(wrapped_array_masked).astype(np.uint8),
-                           unwrapped_array,
+    elif image.ndim == 3:
+        _unwrap_3d._unwrap3D(image_masked.data,
+                           np.ma.getmaskarray(image_masked).astype(np.uint8),
+                           image_unwrapped,
                            wrap_around[0], wrap_around[1], wrap_around[2])
 
-    if np.ma.isMaskedArray(wrapped_array):
-        return np.ma.array(unwrapped_array, mask = wrapped_array_masked.mask)
+    if np.ma.isMaskedArray(image):
+        return np.ma.array(image_unwrapped, mask = image_masked.mask)
     else:
-        return unwrapped_array
+        return image_unwrapped
 
     #TODO: set_fill to minimum value
     #TODO: check for empty mask, not a single contiguous pixel
