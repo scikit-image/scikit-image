@@ -310,23 +310,6 @@ class Picture(object):
         self.scale = 1
 
     @staticmethod
-    def from_path(path):
-        """Creates a Picture from an image file.
-
-        Parameters
-        ----------
-        path : str
-            Path to the image file.
-
-        Returns
-        -------
-        pic : Picture
-            A Picture with the image file data loaded.
-
-        """
-        return Picture(path=path)
-
-    @staticmethod
     def from_size(size, color='black'):
         """Return a Picture of the specified size and a uniform color.
 
@@ -342,26 +325,6 @@ class Picture(object):
             color = color_dict[color]
         rgb_size = tuple(size) + (3,)
         array = np.ones(rgb_size, dtype=np.uint8) * color
-        return Picture(array=array)
-
-    @staticmethod
-    def from_array(array):
-        """Creates a single color Picture.
-
-        Parameters
-        ----------
-        color : tuple
-            RGB tuple with the fill color for the picture [0-255]
-
-        size : tuple
-            Width and height of the picture in pixels.
-
-        Returns
-        -------
-        pic : Picture
-            A Picture with the given color and size.
-
-        """
         return Picture(array=array)
 
     def save(self, path):
