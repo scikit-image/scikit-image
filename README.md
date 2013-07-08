@@ -1,6 +1,8 @@
 Image Processing SciKit
 =======================
 
+[![Build Status](https://secure.travis-ci.org/scikit-image/scikit-image.png)](http://travis-ci.org/scikit-image/scikit-image)
+
 Source
 ------
 https://github.com/scikit-image/scikit-image
