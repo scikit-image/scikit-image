@@ -93,14 +93,13 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
     if output_shape == (0, 0):
         alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
     else:
-        alpha_y = output_shape[0]
-        alpha_x = output_shape[1]
+        alpha_y, alpha_x = output_shape
 
     # -- fill missing patches
     if fill == 'mean':
         fill = arr_in.mean()
 
-    n_missing = int((alpha_y*alpha_x) - n_images)
+    n_missing = int((alpha_y * alpha_x) - n_images)
     missing = np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill
     arr_out = np.vstack((arr_in, missing))
 
