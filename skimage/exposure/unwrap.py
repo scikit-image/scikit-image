@@ -10,12 +10,29 @@ def unwrap(image, wrap_around=False):
 
     Parameters
     ----------
-    image : 2D or 3D ndarray, optionally a masked array
+    image : 2D or 3D ndarray of floats, optionally a masked array
+        The values should be in the range ``[-pi, pi)``. If a masked array is
+        provided, the masked entries will not be changed, and their values
+        will not be used to guide the unwrapping of neighboring, unmasked
+        values.
     wrap_around : bool or sequence of bool
+        When an element of the sequence is  ``True``, the unwrapping process
+        will regard the edges along the corresponding axis of the image to be
+        connected and use this connectivity to guide the phase unwrapping
+        process. If only a single boolean is given, it will apply to all axes.
 
     Returns
     -------
-    image_unwrapped : array_like
+    image_unwrapped : array_like, float32
+        Unwrapped image of the same shape as the input. If the input ``image``
+        was a masked array, the mask will be preserved.
+
+    References
+    ----------
+        - Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
+        and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
+        algorithm based on sorting by reliability following a noncontinuous
+        path", Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002
     '''
     image = np.require(image, np.float32, ['C'])
     if image.ndim not in (2, 3):
