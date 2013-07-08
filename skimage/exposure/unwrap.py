@@ -5,10 +5,21 @@ import _unwrap_3d
 
 
 def unwrap(wrapped_array,
-           wrap_around_axis_0 = False,
-           wrap_around_axis_1 = False,
-           wrap_around_axis_2 = False):
+           wrap_around_axis_0=False,
+           wrap_around_axis_1=False,
+           wrap_around_axis_2=False):
+    '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
+    original, unwrapped image.
 
+    Parameters
+    ----------
+    image : 2D or 3D ndarray, optionally a masked array
+    wrap_around : bool or sequence of bool
+
+    Returns
+    -------
+    image_unwrapped : array_like
+    '''
     wrapped_array = np.require(wrapped_array, np.float32, ['C'])
     if wrapped_array.ndim not in [2,3]:
         raise ValueError('input array needs to have 2 or 3 dimensions')
