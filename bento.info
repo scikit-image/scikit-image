@@ -108,6 +108,9 @@ Library:
     Extension: skimage.morphology._skeletonize_cy
         Sources:
             skimage/morphology/_skeletonize_cy.pyx
+    Extension: skimage.transform._radon_transform
+        Sources:
+            skimage/transform/_radon_transform.pyx
     Extension: skimage.transform._warps_cy
         Sources:
             skimage/transform/_warps_cy.pyx
@@ -132,9 +135,6 @@ Library:
     Extension: skimage.filter.rank._core8
         Sources:
             skimage/filter/rank/_core8.pyx
-    Extension: skimage.filter.rank.rank
-        Sources:
-            skimage/filter/rank/rank.pyx
     Extension: skimage.filter.rank.bilateral_rank
         Sources:
             skimage/filter/rank/bilateral_rank.pyx
