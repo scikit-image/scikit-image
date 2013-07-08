@@ -268,12 +268,12 @@ def order_angles_golden_ratio(theta):
     by T. Kohler.
 
     References:
-        -Kohler, T. "A projection access scheme for iterative
-        reconstruction based on the golden section." Nuclear Science
-        Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
-        -Winkelmann, Stefanie, et al. "An optimal radial profile order
-        based on the Golden Ratio for time-resolved MRI."
-        Medical Imaging, IEEE Transactions on 26.1 (2007): 68-76.
+        - Kohler, T. "A projection access scheme for iterative
+          reconstruction based on the golden section." Nuclear Science
+          Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
+        - Winkelmann, Stefanie, et al. "An optimal radial profile order
+          based on the Golden Ratio for time-resolved MRI."
+          Medical Imaging, IEEE Transactions on 26.1 (2007): 68-76.
     """
     interval = 180
 
@@ -336,7 +336,7 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     Returns
     -------
     output : ndarray
-      Reconstructed image.
+        Reconstructed image.
 
     Notes
     -----
@@ -354,19 +354,19 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     information, but will also often increase the noise.
 
     References:
-        -AC Kak, M Slaney, "Principles of Computerized Tomographic
-        Imaging", IEEE Press 1988.
-        -AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
-        (SART): a superior implementation of the ART algorithm", Ultrasonic
-        Imaging 6 pp 81--94 (1984)
-        -S Kaczmarz, "Angenäherte auflösung von systemen linearer
-        gleichungen", Bulletin International de l’Academie Polonaise des
-        Sciences et des Lettres 35 pp 355--357 (1937)
-        -Kohler, T. "A projection access scheme for iterative
-        reconstruction based on the golden section." Nuclear Science
-        Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
-        -Kaczmarz' method, Wikipedia,
-        http://en.wikipedia.org/wiki/Kaczmarz_method
+        - AC Kak, M Slaney, "Principles of Computerized Tomographic
+          Imaging", IEEE Press 1988.
+        - AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
+          (SART): a superior implementation of the ART algorithm", Ultrasonic
+          Imaging 6 pp 81--94 (1984)
+        - S Kaczmarz, "Angenäherte auflösung von systemen linearer
+          gleichungen", Bulletin International de l’Academie Polonaise des
+          Sciences et des Lettres 35 pp 355--357 (1937)
+        - Kohler, T. "A projection access scheme for iterative
+          reconstruction based on the golden section." Nuclear Science
+          Symposium Conference Record, 2004 IEEE. Vol. 6. IEEE, 2004.
+        - Kaczmarz' method, Wikipedia,
+          http://en.wikipedia.org/wiki/Kaczmarz_method
     """
     if radon_image.ndim != 2:
         raise ValueError('radon_image must be two dimensional')
