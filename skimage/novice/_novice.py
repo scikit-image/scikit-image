@@ -6,8 +6,8 @@ import numpy as np
 from skimage import io
 from skimage import img_as_ubyte
 from skimage.transform import resize
-
 from skimage.color import color_dict
+from skimage._shared import six
 
 
 # Convert colors from `skimage.color` to uint8 and allow access through
@@ -291,37 +291,19 @@ class Picture(object):
     >>> pic[:, pic.height-1] = (255, 0, 0)
 
     """
-    def __init__(self, path=None, array=None, size=None, color=None):
-        # Can only provide either path or size, but not both.
-        if (path and size) or (path and array) or (size and array):
-            assert False, "Can only provide path, size, or array."
-
-        # Opening a particular file.  Convert the image to RGB
-        # automatically so (r, g, b) tuples can be used
-        # everywhere.
+    def __init__(self, path=None, array=None):
+        if path is not None and array is not None:
+            ValueError("Only provide path or array not both.")
         elif path is not None:
             self._array = img_as_ubyte(io.imread(path))
             self._path = path
             self._format = imghdr.what(path)
-
-        # Creating a particular size of array.
-        elif size is not None:
-            if color is None:
-                color = (0, 0, 0)
-
-            # skimage dimensions are flipped: y, x
-            self._array = np.zeros((size[1], size[0], 3), "uint8")
-            self._array[:, :] = color
-            self._path = None
-            self._format = None
         elif array is not None:
             self._array = array
             self._path = None
             self._format = None
-
-        # Must have provided 'path', 'size', or 'array'.
         else:
-            assert False, "Must provide one of path, size, or array."
+            ValueError("Must provide path or array.")
 
         # Common setup.
         self._modified = False
@@ -345,24 +327,22 @@ class Picture(object):
         return Picture(path=path)
 
     @staticmethod
-    def from_color(color, size):
-        """Creates a single color Picture.
+    def from_size(size, color='black'):
+        """Return a Picture of the specified size and a uniform color.
 
         Parameters
         ----------
-        color : tuple
-            RGB tuple with the fill color for the picture [0-255]
-
         size : tuple
             Width and height of the picture in pixels.
-
-        Returns
-        -------
-        pic : Picture
-            A Picture with the given color and size.
-
+        color : tuple or str
+            RGB tuple with the fill color for the picture [0-255] or a valid
+            key in `color_dict`.
         """
-        return Picture(color=color, size=size)
+        if isinstance(color, six.string_types):
+            color = color_dict[color]
+        rgb_size = tuple(size) + (3,)
+        array = np.ones(rgb_size, dtype=np.uint8) * color
+        return Picture(array=array)
 
     @staticmethod
     def from_array(array):

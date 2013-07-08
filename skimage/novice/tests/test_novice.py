@@ -53,7 +53,7 @@ def test_modify():
 
 
 def test_pixel_rgb():
-    pic = novice.Picture(size=(3, 3), color=(10, 10, 10))
+    pic = novice.Picture.from_size((3, 3), color=(10, 10, 10))
     pixel = pic[0, 0]
     pixel.rgb = range(3)
 
@@ -71,32 +71,32 @@ def test_pixel_rgb():
 
 
 def test_pixel_rgb_float():
-    pixel = novice.Picture(size=(1, 1))[0, 0]
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.rgb = (1.1, 1.1, 1.1)
     assert_equal(pixel.rgb, (1, 1, 1))
 
 
 @raises(ValueError)
 def test_pixel_rgb_raises():
-    pixel = novice.Picture(size=(1, 1))[0, 0]
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.rgb = (-1, -1, -1)
 
 
 @raises(ValueError)
 def test_pixel_red_raises():
-    pixel = novice.Picture(size=(1, 1))[0, 0]
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.red = 256
 
 
 @raises(ValueError)
 def test_pixel_green_raises():
-    pixel = novice.Picture(size=(1, 1))[0, 0]
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.green = 256
 
 
 @raises(ValueError)
 def test_pixel_blue_raises():
-    pixel = novice.Picture(size=(1, 1))[0, 0]
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.blue = 256
 
 
