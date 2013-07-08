@@ -29,8 +29,8 @@ from skimage.filter import rank
 image = (data.coins()).astype(np.uint16) * 16
 selem = disk(20)
 
-percentile_result = rank.percentile_mean(image, selem=selem, p0=.1, p1=.9)
-bilateral_result = rank.bilateral_mean(image, selem=selem, s0=500, s1=500)
+percentile_result = rank.mean_percentile(image, selem=selem, p0=.1, p1=.9)
+bilateral_result = rank.mean_bilateral(image, selem=selem, s0=500, s1=500)
 normal_result = rank.mean(image, selem=selem)
 
 

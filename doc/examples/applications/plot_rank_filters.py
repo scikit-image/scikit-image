@@ -283,16 +283,16 @@ result.
 
 """
 
-from skimage.filter.rank import percentile_autolevel
+from skimage.filter.rank import autolevel_percentile
 
 image = data.camera()
 
 selem = disk(20)
 loc_autolevel = autolevel(image, selem=selem)
-loc_perc_autolevel0 = percentile_autolevel(image, selem=selem, p0=.00, p1=1.0)
-loc_perc_autolevel1 = percentile_autolevel(image, selem=selem, p0=.01, p1=.99)
-loc_perc_autolevel2 = percentile_autolevel(image, selem=selem, p0=.05, p1=.95)
-loc_perc_autolevel3 = percentile_autolevel(image, selem=selem, p0=.1, p1=.9)
+loc_perc_autolevel0 = autolevel_percentile(image, selem=selem, p0=.00, p1=1.0)
+loc_perc_autolevel1 = autolevel_percentile(image, selem=selem, p0=.01, p1=.99)
+loc_perc_autolevel2 = autolevel_percentile(image, selem=selem, p0=.05, p1=.95)
+loc_perc_autolevel3 = autolevel_percentile(image, selem=selem, p0=.1, p1=.9)
 
 fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
 ax0, ax1, ax2 = axes
@@ -321,11 +321,11 @@ otherwise by the minimum local.
 
 """
 
-from skimage.filter.rank import morph_contr_enh
+from skimage.filter.rank import enhance_contrast
 
 noisy_image = data.camera()
 
-enh = morph_contr_enh(noisy_image, disk(5))
+enh = enhance_contrast(noisy_image, disk(5))
 
 fig = plt.figure(figsize=[10, 7])
 plt.subplot(2, 2, 1)
@@ -355,11 +355,11 @@ percentile *p0* and *p1* instead of the local minimum and maximum.
 
 """
 
-from skimage.filter.rank import percentile_morph_contr_enh
+from skimage.filter.rank import enhance_contrast_percentile
 
 noisy_image = data.camera()
 
-penh = percentile_morph_contr_enh(noisy_image, disk(5), p0=.1, p1=.9)
+penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
 fig = plt.figure(figsize=[10, 7])
 plt.subplot(2, 2, 1)
