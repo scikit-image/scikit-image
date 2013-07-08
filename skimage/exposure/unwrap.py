@@ -1,7 +1,7 @@
 import numpy as np
 
-import _unwrap_2d
-import _unwrap_3d
+import ._unwrap_2d
+import ._unwrap_3d
 
 
 def unwrap(image, wrap_around=False):
