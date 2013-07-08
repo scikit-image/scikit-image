@@ -109,7 +109,7 @@ def test_modified_on_set():
 
 def test_modified_on_set_pixel():
     data = np.zeros(shape=(10, 5, 3), dtype=np.uint8)
-    pic = novice.Picture(image=data)
+    pic = novice.Picture(array=data)
 
     pixel = pic[0, 0]
     pixel.green = 1
@@ -117,7 +117,7 @@ def test_modified_on_set_pixel():
 
 
 def test_update_on_save():
-    pic = novice.Picture(image=np.zeros((3, 3)))
+    pic = novice.Picture(array=np.zeros((3, 3)))
     pic.size = (6, 6)
     assert pic.modified
     assert pic.path is None
@@ -131,8 +131,8 @@ def test_update_on_save():
 
 
 def test_indexing():
-    image = 128 * np.ones((10, 10, 3), dtype=np.uint8)
-    pic = novice.Picture(image=image)
+    array = 128 * np.ones((10, 10, 3), dtype=np.uint8)
+    pic = novice.Picture(array=array)
 
     pic[0:5, 0:5] = (0, 0, 0)
     for p in pic:

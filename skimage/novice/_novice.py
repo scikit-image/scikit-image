@@ -29,7 +29,7 @@ class Pixel(object):
     ----------
     pic : Picture
         The Picture object that this pixel references.
-    image : array_like
+    array : array_like
         Byte array with raw image data (RGB).
     x : int
         Horizontal coordinate of this pixel (left = 0).
@@ -39,9 +39,9 @@ class Pixel(object):
         RGB tuple with red, green, and blue components (0-255)
 
     """
-    def __init__(self, pic, image, x, y, rgb):
+    def __init__(self, pic, array, x, y, rgb):
         self._picture = pic
-        self._image = image
+        self._array = array
         self._x = x
         self._y = y
         self._red = self._validate(rgb[0])
@@ -117,8 +117,8 @@ class Pixel(object):
 
         """
         row = self._picture.height - self._y - 1
-        self._picture._image[row, self._x] = self.rgb
-        self._picture._image_modified()
+        self._picture._array[row, self._x] = self.rgb
+        self._picture._array_modified()
 
     def __repr__(self):
         args = self.red, self.green, self.blue
@@ -169,11 +169,11 @@ class PixelGroup(object):
 
         # array dimensions are row, column (i.e. y, x)
         self._key = (key[1], key[0])
-        self._image = pic._image
+        self._array = pic._array
 
         # Save slice for _getdim operations.
-        # This allows you to swap parts of an image.
-        self._slice = self._image[self._key[0], self._key[1]]
+        # This allows you to swap parts of an array.
+        self._slice = self._array[self._key[0], self._key[1]]
 
         shape = self._getdim(0).shape
         self.size = (shape[1], shape[0])
@@ -188,7 +188,7 @@ class PixelGroup(object):
         """ Sets a specific dimension in the raw image data slice.
 
         """
-        self._image[self._key[0], self._key[1], dim] = value
+        self._array[self._key[0], self._key[1], dim] = value
 
     @property
     def red(self):
@@ -248,16 +248,16 @@ class Picture(object):
     ----------
     path : str
         Path to an image file to load.
-    image : array
+    array : array
         Raw RGB image data [0-255]
     size : tuple
-        Size of the empty image to create (width, height).
+        Size of the empty array to create (width, height).
     color : tuple
-        Color to fill empty image if size is given (red, green, blue) [0-255].
+        Color to fill empty array if size is given (red, green, blue) [0-255].
 
     Notes
     -----
-    Cannot provide more than one of 'path' and 'size' and 'image'.
+    Cannot provide more than one of 'path' and 'size' and 'array'.
     Can only provide 'color' if 'size' provided.
 
     Examples
@@ -274,7 +274,7 @@ class Picture(object):
     >>> import numpy as np
     >>> data = np.zeros(shape=(200, 100, 3), dtype=np.uint8)
     >>> data[:, :, 0] = 255  # Set red component to maximum
-    >>> pic = Picture(image=data)
+    >>> pic = Picture(array=data)
 
     Get the bottom-left pixel
     >>> pic[0, 0]
@@ -291,37 +291,37 @@ class Picture(object):
     >>> pic[:, pic.height-1] = (255, 0, 0)
 
     """
-    def __init__(self, path=None, image=None, size=None, color=None):
+    def __init__(self, path=None, array=None, size=None, color=None):
         # Can only provide either path or size, but not both.
-        if (path and size) or (path and image) or (size and image):
-            assert False, "Can only provide path, size, or image."
+        if (path and size) or (path and array) or (size and array):
+            assert False, "Can only provide path, size, or array."
 
         # Opening a particular file.  Convert the image to RGB
         # automatically so (r, g, b) tuples can be used
         # everywhere.
         elif path is not None:
-            self._image = img_as_ubyte(io.imread(path))
+            self._array = img_as_ubyte(io.imread(path))
             self._path = path
             self._format = imghdr.what(path)
 
-        # Creating a particular size of image.
+        # Creating a particular size of array.
         elif size is not None:
             if color is None:
                 color = (0, 0, 0)
 
             # skimage dimensions are flipped: y, x
-            self._image = np.zeros((size[1], size[0], 3), "uint8")
-            self._image[:, :] = color
+            self._array = np.zeros((size[1], size[0], 3), "uint8")
+            self._array[:, :] = color
             self._path = None
             self._format = None
-        elif image is not None:
-            self._image = image
+        elif array is not None:
+            self._array = array
             self._path = None
             self._format = None
 
-        # Must have provided 'path', 'size', or 'image'.
+        # Must have provided 'path', 'size', or 'array'.
         else:
-            assert False, "Must provide one of path, size, or image."
+            assert False, "Must provide one of path, size, or array."
 
         # Common setup.
         self._modified = False
@@ -365,7 +365,7 @@ class Picture(object):
         return Picture(color=color, size=size)
 
     @staticmethod
-    def from_image(image):
+    def from_array(array):
         """Creates a single color Picture.
 
         Parameters
@@ -382,7 +382,7 @@ class Picture(object):
             A Picture with the given color and size.
 
         """
-        return Picture(image=image)
+        return Picture(array=array)
 
     def save(self, path):
         """Saves the picture to the given path.
@@ -393,7 +393,7 @@ class Picture(object):
             Path to save the picture (with file extension).
 
         """
-        io.imsave(path, self._rescale(self._image))
+        io.imsave(path, self._rescale(self._array))
         self._modified = False
         self._path = os.path.abspath(path)
         self._format = imghdr.what(path)
@@ -408,7 +408,7 @@ class Picture(object):
         """True if the picture has changed."""
         return self._modified
 
-    def _image_modified(self):
+    def _array_modified(self):
         self._modified = True
         self._path = None
 
@@ -421,7 +421,7 @@ class Picture(object):
     def size(self):
         """The size (width, height) of the picture."""
         # array dimensions are flipped: y, x
-        return (self._image.shape[1], self._image.shape[0])
+        return (self._array.shape[1], self._array.shape[0])
 
     @size.setter
     def size(self, value):
@@ -429,10 +429,10 @@ class Picture(object):
             # Don't resize if no change in size
             if (value[0] != self.width) or (value[1] != self.height):
                 # skimage dimensions are flipped: y, x
-                self._image = img_as_ubyte(resize(self._image,
+                self._array = img_as_ubyte(resize(self._array,
                     (int(value[1]), int(value[0])), order=0))
 
-                self._image_modified()
+                self._array_modified()
         except TypeError:
             msg = "Expected (width, height), but got {0} instead!"
             raise TypeError(msg.format(value))
@@ -456,16 +456,16 @@ class Picture(object):
         self.size = (self.width, value)
 
     def _repr_html_(self):
-        return io.Image(self._rescale(self._image))
+        return io.Image(self._rescale(self._array))
 
     def _repr_png_(self):
-        return io.Image(self._rescale(self._image))
+        return io.Image(self._rescale(self._array))
 
     def show(self):
         """Displays the image in a separate window.
 
         """
-        io.imshow(self._rescale(self._image))
+        io.imshow(self._rescale(self._array))
 
     def _makepixel(self, xy):
         """ Creates a Pixel object for a given x, y location.
@@ -477,22 +477,22 @@ class Picture(object):
 
         """
         # skimage dimensions are flipped: y, x
-        rgb = self._image[self.height - xy[1] - 1, xy[0]]
-        return Pixel(self, self._image, xy[0], xy[1], rgb)
+        rgb = self._array[self.height - xy[1] - 1, xy[0]]
+        return Pixel(self, self._array, xy[0], xy[1], rgb)
 
-    def _rescale(self, image):
+    def _rescale(self, array):
         """Inflates image according to scale factor.
 
         Parameters
         ----------
-        image : array
+        array : array
             Raw RGB image data to rescale using nearest neighbor algorithm.
 
         """
         if self.scale == 1:
-            return image
+            return array
         new_size = (self.height * self.scale, self.width * self.scale)
-        return img_as_ubyte(resize(image, new_size, order=0))
+        return img_as_ubyte(resize(array, new_size, order=0))
 
     def __iter__(self):
         """Iterates over all pixels in the image."""
@@ -518,12 +518,12 @@ class Picture(object):
                 self[key[0], key[1]].rgb = value
             elif isinstance(value, PixelGroup):
                 src_key = self[key[0], key[1]]._key
-                self._image[src_key] = value._image[value._key]
+                self._array[src_key] = value._array[value._key]
             else:
                 raise TypeError("Invalid value type")
         else:
             raise TypeError("Invalid key type")
-        self._image_modified()
+        self._array_modified()
 
     def __repr__(self):
         args = self.format, self.path, self.modified
