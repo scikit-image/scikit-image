@@ -28,6 +28,9 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
         the keypoints. Default is 49.
     sample_seed : int
         Seed for sampling the decision pixel-pairs. Default is 1.
+    variance : float
+        Variance of the Gaussian Low Pass filter applied on the image to
+        alleviate noise sensitivity. Default is 2.
     return_keypoints : bool
         If True, return the Q keypoints (after filtering out the border
         keypoints) about which the descriptors are extracted. Default is False.
@@ -46,81 +49,76 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     References
     ----------
     .. [1] Michael Calonder, Vincent Lepetit, Christoph Strecha and Pascal Fua
-    "BRIEF : Binary robust independent elementary features",
-    http://cvlabwww.epfl.ch/~lepetit/papers/calonder_eccv10.pdf
+           "BRIEF : Binary robust independent elementary features",
+           http://cvlabwww.epfl.ch/~lepetit/papers/calonder_eccv10.pdf
 
     Examples
     --------
     >>> from skimage.feature.corner import *
-    >>> from skimage.feature import brief, hamming_distance
+    >>> from skimage.feature import hamming_distance
     >>> from skimage.feature._brief import *
-    >>> square1 = np.zeros([10, 10])
-    >>> square1[2:8, 2:8] = 1
+    >>> square1 = np.zeros([8, 8], dtype=np.int32)
+    >>> square1[2:6, 2:6] = 1
     >>> square1
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    array([[0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
     >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
     >>> keypoints1
     array([[2, 2],
-           [2, 7],
-           [7, 2],
-           [7, 7]])
+           [2, 5],
+           [5, 2],
+           [5, 5]])
     >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size = 5, return_keypoints=True)
     >>> keypoints1
     array([[2, 2],
-           [2, 7],
-           [7, 2],
-           [7, 7]])
-    >>> square2 = np.zeros([12, 12])
-    >>> square2[3:9, 3:9] = 1
+           [2, 5],
+           [5, 2],
+           [5, 5]])
+    >>> square2 = np.zeros([9, 9], dtype=np.int32)
+    >>> square2[2:7, 2:7] = 1
     >>> square2
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
     >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
     >>> keypoints2
-    array([[3, 3],
-           [3, 8],
-           [8, 3],
-           [8, 8]])
+    array([[2, 2],
+           [2, 6],
+           [6, 2],
+           [6, 6]])
     >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size = 5, return_keypoints=True)
     >>> keypoints2
-    array([[3, 3],
-           [3, 8],
-           [8, 3],
-           [8, 8]])
+    array([[2, 2],
+           [2, 6],
+           [6, 2],
+           [6, 6]])
     >>> hamming_distance(descriptors1, descriptors2)
-    array([[ 0.00390625,  0.33984375,  0.35546875,  0.63671875],
-           [ 0.3359375 ,  0.        ,  0.65625   ,  0.3515625 ],
-           [ 0.359375  ,  0.65625   ,  0.        ,  0.3515625 ],
-           [ 0.6328125 ,  0.3515625 ,  0.3515625 ,  0.        ]])
+    array([[ 0.03125  ,  0.3203125,  0.3671875,  0.6171875],
+           [ 0.3203125,  0.03125  ,  0.640625 ,  0.375    ],
+           [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
+           [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
     >>> match_keypoints_brief(keypoints1, descriptors1, keypoints2, descriptors2)
     array([[[ 2.,  2.],
-            [ 2.,  7.],
-            [ 7.,  2.],
-            [ 7.,  7.]],
+            [ 2.,  5.],
+            [ 5.,  2.],
+            [ 5.,  5.]],
 
-           [[ 3.,  3.],
-            [ 3.,  8.],
-            [ 8.,  3.],
-            [ 8.,  8.]]])
+           [[ 2.,  2.],
+            [ 2.,  6.],
+            [ 6.,  2.],
+            [ 6.,  6.]]])
 
     """
 
@@ -178,8 +176,30 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
 def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
                           descriptors2, threshold=0.15):
+    """Match keypoints described using BRIEF descriptors.
 
-    if keypoints1.shape[0] != descriptors1.shape[0] or keypoints2.shape[0] != descriptors2.shape[0]:
+    Parameters
+    ----------
+    keypoints1 : (M, 2) ndarray
+        M Keypoints from the first image described using feature._brief.brief
+    descriptors1 : (M, P) ndarray
+        BRIEF descriptors of size P about M keypoints in the first image.
+    keypoints2 : (N, 2) ndarray
+        N Keypoints from the second image described using feature._brief.brief
+    descriptors2 : (N, P) ndarray
+        BRIEF descriptors of size P about N keypoints in the second image.
+    threshold : float in range [0, 1]
+        Threshold for removing matched keypoint pairs with hamming distance
+        greater than it. Default is 0.15
+
+    Returns
+    -------
+    match_keypoints_brief : (2, Q, 2) ndarray
+        Location of Q matched keypoint pairs from two images.
+
+    """
+    if keypoints1.shape[0] != descriptors1.shape[0] or \
+        keypoints2.shape[0] != descriptors2.shape[0]:
         raise ValueError("The number of keypoints and number of described \
                           keypoints do not match. Make the optional parameter \
                           return_keypoints True to get described keypoints.")
@@ -187,12 +207,16 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
     if descriptors1.shape[1] != descriptors2.shape[1]:
         raise ValueError("Descriptor sizes for matching keypoints in both \
                           the images should be equal.")
-
+    # Get hamming distances between keeypoints1 and keypoints2
     distance = hamming_distance(descriptors1, descriptors2)
 
+    # For each keypoint in keypoints1, match it with the keypoint in keypoints2
+    # that has minimum hamming distance
     dist_matched_kp = np.amin(distance, axis=1)
     index_matched_kp2 = distance.argmin(axis=1)
 
+    # Remove the matched pairs which have hamming distance greater than the
+    # threshold
     temp = np.zeros((keypoints1.shape[0], 3))
     temp[:, 0] = range(keypoints1.shape[0])
     temp[:, 1] = index_matched_kp2
@@ -202,8 +226,9 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
     matched_kp1 = keypoints1[np.int16(temp[:, 0])]
     matched_kp2 = keypoints2[np.int16(temp[:, 1])]
 
-    matched_kp = np.zeros((2, matched_kp1.shape[0], 2))
-    matched_kp[0, :, :] = matched_kp1
-    matched_kp[1, :, :] = matched_kp2
+    # Collecting matched keypoint pairs from their index pairs
+    matched_keypoint_pairs = np.zeros((2, matched_kp1.shape[0], 2))
+    matched_keypoint_pairs[0, :, :] = matched_kp1
+    matched_keypoint_pairs[1, :, :] = matched_kp2
 
-    return matched_kp
+    return matched_keypoint_pairs
