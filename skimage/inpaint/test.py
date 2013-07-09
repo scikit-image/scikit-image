@@ -8,13 +8,8 @@ import fmm
 
 def inpaint(image, mask, epsilon=3):
     image = image.copy()
-    # Generate `flag` and `u` matrices
-    flag = _heap.init_flag(mask)
-    u = _heap.init_u(flag)
 
-    # Initialize the heap array
-    heap = []
-    _heap.generate_heap(heap, flag, u)
+    flag, u, heap = _heap.initialise(mask)
 
     painted = fmm.fast_marching_method(image, flag, u, heap, negate=False,
                                        epsilon=epsilon)
@@ -22,7 +17,7 @@ def inpaint(image, mask, epsilon=3):
 
 
 image = data.camera()[80:180, 200:300]
-paint_region = (slice(45, 55), slice(20, 80))
+paint_region = (slice(45, 55), slice(20, 35))
 image[paint_region] = 0
 
 mask = np.zeros_like(image, dtype=np.uint8)
