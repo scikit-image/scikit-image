@@ -70,6 +70,23 @@ def grad_func(i, j, flag, array, channel=-1):
         gradUy = np.subtract(u[i, j], u[i - 1, j])
     elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
         gradUy = 0
+    # if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
+    #     gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl - 1]) * factor
+    # elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
+    #     gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl])
+    # elif flag[i, j + 1] == INSIDE and flag[i, j - 1] != INSIDE:
+    #     gradUx = np.subtract(u[i_nbl, j_nbh], u[i_nbl, j_nbl - 1])
+    # elif flag[i, j + 1] == INSIDE and flag[i, j - 1] == INSIDE:
+    #     gradUx = 0
+
+    # if flag[i + 1, j] != INSIDE and flag[i - 1, j] != INSIDE:
+    #     gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl - 1, j_nbl]) * factor
+    # elif flag[i + 1, j] != INSIDE and flag[i - 1, j] == INSIDE:
+    #     gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl, j_nbl])
+    # elif flag[i + 1, j] == INSIDE and flag[i - 1, j] != INSIDE:
+    #     gradUy = np.subtract(u[i_nbh, j_nbl], u[i_nbl - 1, j_nbl])
+    # elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
+    #     gradUy = 0
 
     # if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
     #     gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl - 1]) * factor
