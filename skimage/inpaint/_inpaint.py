@@ -42,33 +42,51 @@ def grad_func(i, j, flag, array, channel=-1):
     if channel == 0 or channel == 1 or channel == 2:
         #u = array[:, :, channel]
         u = np.array(array, int)
-        i_nbl = i - 1 + (i == 1)
-        i_nbh = i - 1 - (i == u.shape[0] - 2)
-        j_nbl = j - 1 + (j == 1)
-        j_nbh = j - 1 - (j == u.shape[1] - 2)
+        # i_nbl = i - 1 + (i == 1)
+        # i_nbh = i - 1 - (i == u.shape[0] - 2)
+        # j_nbl = j - 1 + (j == 1)
+        # j_nbh = j - 1 - (j == u.shape[1] - 2)
         factor = 2.0
     elif channel is -1:
         u = np.array(array, int)
         factor = 0.5
-        i_nbl, i_nbh, j_nbl, j_nbh = i, i, j, j
+        # i_nbl, i_nbh, j_nbl, j_nbh = i, i, j, j
 # TODO: Try dict implementation instead of if...elif
+
     if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
-        gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl - 1]) * factor
+        gradUx = np.subtract(u[i, j + 1], u[i, j - 1]) * factor
     elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
-        gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl])
+        gradUx = np.subtract(u[i, j + 1], u[i, j])
     elif flag[i, j + 1] == INSIDE and flag[i, j - 1] != INSIDE:
-        gradUx = np.subtract(u[i_nbl, j_nbh], u[i_nbl, j_nbl - 1])
+        gradUx = np.subtract(u[i, j], u[i, j - 1])
     elif flag[i, j + 1] == INSIDE and flag[i, j - 1] == INSIDE:
         gradUx = 0
 
     if flag[i + 1, j] != INSIDE and flag[i - 1, j] != INSIDE:
-        gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl - 1, j_nbl]) * factor
+        gradUy = np.subtract(u[i + 1, j], u[i - 1, j]) * factor
     elif flag[i + 1, j] != INSIDE and flag[i - 1, j] == INSIDE:
-        gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl, j_nbl])
+        gradUy = np.subtract(u[i + 1, j], u[i, j])
     elif flag[i + 1, j] == INSIDE and flag[i - 1, j] != INSIDE:
-        gradUy = np.subtract(u[i_nbh, j_nbl], u[i_nbl - 1, j_nbl])
+        gradUy = np.subtract(u[i, j], u[i - 1, j])
     elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
         gradUy = 0
+    # if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
+    #     gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl - 1]) * factor
+    # elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
+    #     gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl])
+    # elif flag[i, j + 1] == INSIDE and flag[i, j - 1] != INSIDE:
+    #     gradUx = np.subtract(u[i_nbl, j_nbh], u[i_nbl, j_nbl - 1])
+    # elif flag[i, j + 1] == INSIDE and flag[i, j - 1] == INSIDE:
+    #     gradUx = 0
+
+    # if flag[i + 1, j] != INSIDE and flag[i - 1, j] != INSIDE:
+    #     gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl - 1, j_nbl]) * factor
+    # elif flag[i + 1, j] != INSIDE and flag[i - 1, j] == INSIDE:
+    #     gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl, j_nbl])
+    # elif flag[i + 1, j] == INSIDE and flag[i - 1, j] != INSIDE:
+    #     gradUy = np.subtract(u[i_nbh, j_nbl], u[i_nbl - 1, j_nbl])
+    # elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
+    #     gradUy = 0
 
     return gradUx, gradUy
 
@@ -164,8 +182,9 @@ def inpaint_point(i, j, image, flag, u, epsilon):
                 gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
                                            channel=color)
 
-                Ia += weight * image[i_nb - 1 + (i_nb == 1),
-                                     j_nb - 1 + (j_nb == 1)]
+                # Ia += weight * image[i_nb - 1 + (i_nb == 1),
+                #                      j_nb - 1 + (j_nb == 1)]
+                Ia += weight * image[i_nb, j_nb]
                 Jx -= weight * gradIx * rx
                 Jy -= weight * gradIy * ry
                 norm += weight
