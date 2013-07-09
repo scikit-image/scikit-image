@@ -142,7 +142,30 @@ def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
 
 
 def inpaint(input_image, inpaint_mask, epsilon=5):
-    """Wrapper function for
+    """Wrapper function for the inpainitng techique based on Fast Marching
+    Method as introduced by Telea. Check out the `fast_marching_method`
+    function for details regarding the Fast Marching Method implementation
+    and `inpaint_point` for details regarding the Inpainting algorithm.
+
+    Parameters
+    ---------
+    input_image: ndarray of unsigned integers
+        This can be either a single channel or three channel image.
+    inpaint_mask: ndarray of bool
+        Mask containing the pixels to be inpainted. `True` values are to
+        be inpainted
+    epsilon: unsigned integer
+        Determining the range of the neighbourhood for inpainting a pixel
+
+    Returns
+    ------
+    output: ndarray of unsigned integers
+        Contains the final inpainted output image
+
+    References
+    ---------
+    . [1] http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+
     """
     # TODO: Error checks. Image either 3 or 1 channel. All dims same
     # if input_image.ndim == 3:
