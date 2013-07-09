@@ -85,37 +85,3 @@ def unwrap_plots():
 
 if __name__=="__main__":
     run_module_suite()
-
-    unwrap_plots()
-
-    # p0,p1,p2,p3,p4 = test_unwrap2D()
-    # plt.figure(1)
-    # plt.clf()
-    # plt.subplot(322)
-    # plt.imshow(p0,interpolation = 'nearest')
-    # plt.subplot(323)
-    # plt.imshow(p1,interpolation = 'nearest')
-    # plt.subplot(324)
-    # plt.imshow(p2, interpolation = 'nearest')
-    # plt.subplot(325)
-    # plt.imshow(p3, interpolation = 'nearest')
-    # plt.subplot(326)
-    # plt.imshow(p4, interpolation = 'nearest')
-    # plt.draw()
-
-
-    # p0,p1,p2,p3,p4 = test_unwrap3D()
-    # plt.figure(2)
-    # plt.clf()
-    # plt.subplot(322)
-    # plt.imshow(p0[:,:,0],interpolation = 'nearest')
-    # plt.subplot(323)
-    # plt.imshow(p1[:,:,0],interpolation = 'nearest')
-    # plt.subplot(324)
-    # plt.imshow(p2[:,:,0], interpolation = 'nearest')
-    # plt.subplot(325)
-    # plt.imshow(p3[:,:,0], interpolation = 'nearest')
-    # plt.subplot(326)
-    # plt.imshow(p4[:,:,0], interpolation = 'nearest')
-    # plt.draw()
-    # plt.show()
