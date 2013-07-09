@@ -12,7 +12,38 @@ INSIDE = 2
 
 
 def eikonal(i1, j1, i2, j2, flag, u):
-    """This function provides the solution for the Eikonal equation.
+    """This function provides the solution for the Eikonal equation. The
+    numerical approximation to the Eikonal equation is as follows:
+
+    `max(D^{-x}T, -D^{+x}T, 0)^2 +max(D^{-y}T, -D^{+y}T, 0)^2 =1`
+
+    where `D^{-x} T= T[i, j] - T[i-1, j]` and `D^{+x} T= T[i+1, j] - T[i, j]`
+    The `u` values of pixels whose `flag = KNOWN` are considered for computing
+    the `u` value of the neighbouring pixel.
+
+    Parameters
+    ---------
+    i1, j1, i2, j2: unsigned integers
+        x and y indices of two diagonally adjacent pixels respectively.
+    flag: ndarray of unsigned integers
+    u: ndarray of float
+
+    Returns
+    ------
+    sol: float
+        The `u` value for the pixel `(i2, j1)`. This represents the
+        solution for the Eikonal equation.
+
+    Comments
+    ---------
+    `u` which is used synonymously with `T` represents the Time taken by the
+    boundary to reach that particular pixel in the grid. `T=0` represents the
+    initial condition. And since the boundary is moving with a constant speed
+    at all pixels in a direction normal to the boundary at all pixels, the time
+    of arrival i.e. `u` or `T` must be monotonically increasing. This is an
+    important requirement for the fast marching method to propagate ahead
+    correctly.
+
     """
 
     sol = 1.0e6
