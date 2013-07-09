@@ -49,6 +49,23 @@ def grad_func(i, j, flag, array, channel=-1):
 
 
 def ep_neighbor(i, j, size, epsilon):
+    """This computes the epsilon neighbourhood of the `(i, j)` pixel.
+
+    Parameters
+    ---------
+    i, j: unsigned integers
+        Index whose neighborhood is to be calculated
+    size: tuple of integers
+        Consists of the shape of the padded input image
+    epsilon: unsigned integer
+
+    Returns
+    ------
+    nb: list of tuples
+        List of indexes whose cartesian distance to the input pixel index is
+        less than epsilon
+
+    """
     nb = []
     indices = np.transpose(np.where(disk(epsilon)))
     center_ind = indices - [epsilon, epsilon] + [i, j]
