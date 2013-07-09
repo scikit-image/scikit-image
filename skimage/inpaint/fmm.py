@@ -37,12 +37,13 @@ def eikonal(i1, j1, i2, j2, flag, u):
     Comments
     ---------
     `u` which is used synonymously with `T` represents the Time taken by the
-    boundary to reach that particular pixel in the grid. `T=0` represents the
-    initial condition. And since the boundary is moving with a constant speed
-    at all pixels in a direction normal to the boundary at all pixels, the time
-    of arrival i.e. `u` or `T` must be monotonically increasing. This is an
-    important requirement for the fast marching method to propagate ahead
-    correctly.
+    boundary to reach that particular pixel in the grid. This is proportional
+    to the distance between the boundary points and the point of interest.
+    `T=0` represents the initial condition. And since the boundary is moving
+    with a constant speed at all pixels in a direction normal to the boundary
+    at all pixels, the time of arrival i.e. `u` or `T` must be monotonically
+    increasing. This is an important requirement for the fast marching method
+    to propagate ahead correctly.
 
     """
 
