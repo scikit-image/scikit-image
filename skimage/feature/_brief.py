@@ -27,7 +27,11 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
         Length of the two dimensional square patch sampling region around
         the keypoints. Default is 49.
     sample_seed : int
-        Seed for sampling the decision pixel-pairs. Default is 1.
+        Seed for sampling the decision pixel-pairs. From a square window with
+        length patch_size, pixel pairs are sampled using the `mode` parameter
+        to build the descriptors using intensity comparison. The value of
+        `sample_seed` should be the same for the images to be matched while
+        building the descriptors. Default is 1. 
     variance : float
         Variance of the Gaussian Low Pass filter applied on the image to
         alleviate noise sensitivity. Default is 2.
@@ -37,8 +41,8 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     Returns
     -------
-    descriptors : (Q, descriptor_size) ndarray of dtype bool
-        2D ndarray of binary descriptors of size descriptor_size about Q
+    descriptors : (Q, `descriptor_size`) ndarray of dtype bool
+        2D ndarray of binary descriptors of size `descriptor_size` about Q
         keypoints after filtering out border keypoints with value at an index
         (i, j) either being True or False representing the outcome
         of Intensity comparison about ith keypoint on jth decision pixel-pair.
@@ -136,14 +140,13 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     image = np.ascontiguousarray(image)
 
-    keypoints = np.array(keypoints + 0.5, dtype=np.intp, order='C')
+    keypoints = np.array(keypoints + 0.5, dtype=np.intp)
 
-    # Removing keypoints that are (patch_size / 2) distance from the image
-    # border
+    # Removing keypoints that are within (patch_size / 2) distance from the
+    # image border
     keypoints = _remove_border_keypoints(image, keypoints, patch_size / 2)
 
-    descriptors = np.zeros((keypoints.shape[0], descriptor_size),
-                           dtype=bool, order='C')
+    descriptors = np.zeros((keypoints.shape[0], descriptor_size), dtype=bool)
 
     # Sampling pairs of decision pixels in patch_size x patch_size window
     if mode == 'normal':
