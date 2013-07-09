@@ -11,7 +11,32 @@ INSIDE = 2
 def grad_func(i, j, flag, array, channel=-1):
     """This function calculates the gradient of the speed/image of a pixel
     depending on the value of the flag of its neighbours. The gradient
-    is computed using Central Differences.
+    is computed using Central Differences method. If the pixel on either side
+    of the central pixel are KNOWN or BAND, then their difference is taken as
+    the gradient. However, if either of the pixels is not KNOWN nor BAND,
+    then the difference is computed as directly between its negihbour and
+    itself.
+
+    This function is used to compute the gradient of intensity value, I and
+    also the `u` value.
+
+    Parameters
+    ---------
+    i, j: index values
+        of the pixel whose gradient is to be calculated
+    flag: ndarray of unsigned integers
+    array: either `image` or `u`
+    channel: signed integer
+        If channel == -1 then the gradient of `u` is to be calculated
+        If channel == 0, 1, 2 then the gradient of `image` is to be calculated
+
+    Returns
+    ------
+    gradUx: float
+        The signed gradient of `image` or `u` in X direction
+    gradUy: float
+        The signed gradient of `image` or `u` in Y direction
+
     """
 
     if channel == 0 or channel == 1 or channel == 2:
