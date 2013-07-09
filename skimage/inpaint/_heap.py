@@ -10,7 +10,7 @@ BAND = 1
 INSIDE = 2
 
 
-def initialise(_mask, flag, u, heap):
+def initialise(_mask):
     """Initialisation:
     Each pixel has 2 new values assigned to it stored in `flag` and `u` arrays.
 
@@ -35,6 +35,8 @@ def initialise(_mask, flag, u, heap):
     _mask : ndarray of bool
         This array is cast to uint8. Suppose the size is (m, n)
 
+    Returns
+    ------
     flag, u : ndarray of zeros of size (m+2, n+2)
         They contain the results after the initialisation as above.
 
@@ -51,6 +53,9 @@ def initialise(_mask, flag, u, heap):
 
     u = np.where(flag == INSIDE, 1.0e6, 0)
 
+    heap = []
     indices = np.transpose(np.where(flag == BAND))
     for z in indices:
         heapq.heappush(heap, (u[tuple(z)], tuple(z)))
+
+    return flag, u, heap
