@@ -77,6 +77,43 @@ def ep_neighbor(i, j, size, epsilon):
 
 
 def inpaint_point(i, j, image, flag, u, epsilon):
+    """This function does does the actual inpaining. In order for the inpainted
+    region to look natural it is important that the intensity value of a pixel
+    be in accordance with the intensity value of its neighbors. It is also
+    crucial to pass along the gradient information so that edges and sharp
+    changes are preserved in this operation and do not lead to blurring.
+
+    The operation of inpainting is pretty simple and straight forward.
+    We iterate over all pixels belonging to the epsilon neighbourhood of the
+    pixel to be inpainted and whose `flag` values are KNOWN. We use the fact
+    that in discrete case the image gradient can be approximated as:
+
+    `I(p) = I(q) + gradI(q)(p - q)`
+
+    Using this as the basic equation we use a normalized weight function to sum
+    over all the pixels satisfying the above condition and compute the above
+    value. This provides the intensity value of the pixel to be inpainted.
+
+    Parameters
+    ---------
+    i, j: index of the pixel to be inpainted
+    image: ndarray of unsigned integers
+        Padded input image
+    flag: ndarray of unsigned integers
+    u: ndarray of float
+    epsilon: unsigned integer
+        To compute the epsilon neighbourhood
+
+    Returns
+    ------
+    image[i, j]: unsigned integer
+        Inpainted intensity value
+
+    References
+    ----------
+    .. [1] http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+
+    """
     Ia, Jx, Jy, norm = 0, 0, 0, 0
     #If the input image is 3 channel. TODO: support for a single channel
     for color in [0]:
