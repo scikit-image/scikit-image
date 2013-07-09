@@ -14,10 +14,8 @@ def inpaint(image, mask, epsilon=3):
     painted = fmm.fast_marching_method(image, flag, u, heap, epsilon=epsilon)
     return painted
 
-
-def demo_inpaint():
     image = data.camera()[80:180, 200:300]
-    paint_region = (slice(35, 45), slice(80, 95))
+    paint_region = (slice(45, 55), slice(20, 35))
     image[paint_region] = 0
 
     mask = np.zeros_like(image, dtype=np.uint8)
