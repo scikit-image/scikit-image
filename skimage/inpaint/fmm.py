@@ -26,7 +26,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
             if s >= u11 and s >= u22:
                 sol = s
             else:
-                s = (u11 + u22 + r) * .5
+                s += r
                 if s >= u11 and s >= u22:
                     sol = s
         else:
@@ -39,7 +39,69 @@ def eikonal(i1, j1, i2, j2, flag, u):
 
 def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
     """Fast Marching Method implementation based on the algorithm outlined in
-    the paper by Telea.
+    Telea, A. (2004). *An Image Inpainting Technique based on the Fast Marching
+    Method*. Journal of graphics tools, 9(1):23–34.
+
+    Image Inpainting technique based on the Fast Marching Method implementation
+    as described in the paper above. FMM is used for computing the evolution of
+    boundary moving in a direction *normal* to itself. The tangential component
+    of the velocity is not of interest here. This algorithm has been adapted by
+    Telea for the purpose of inpainting. For this we assume that the speed is
+    uniform at all the pixels and set it to 1. There are two phases to this
+    implementation: the initialisation phase which is described in the
+    `initialise` function and the propagation phase, which is described here.
+
+    In order to obtain the correct representation it is important to propagate
+    the boundary pixels to the interior (INSIDE) region in the increasing
+    distance from the boundary. The solution to Eikonal equation helps
+    achieve this.
+    `|gradT| = 1`
+
+    The steps of the algorithm are as follows:
+    * Extract the pixel with the smallest `T` value in the BAND pixels. We use
+            a priority heap implementation whose head is always the smallest
+            value in the heap
+        + `T[i, j] = heappop[0]`
+    * Update its `flag` value as KNOWN
+    * March the boundary inwards by adding new points.
+            `for (k, l) in (i-1, j),(i+1, j), (i, j-1), (i, j+1)`
+        + If they are either INSIDE or BAND, compute its `T` value using the
+                `eikonal` function in all the 4 quadrants
+        + If `flag` is INSIDE
+            - Change it to BAND
+            - Inpaint `(k, l)`
+        + Select the `min` value and assign it as the `T` value of `(k, l)`
+        + Insert this new value in the `heap`
+
+    You can further check out the numerical approximation to the Eikonal
+    equation and the algorithm in the paper.
+
+    Parameters
+    ---------
+    image: ndarray of unsigned integers
+        Input image padded by a single row/column on all sides
+    flag: ndarray of unsigned integers
+        Values are either 0 (KNOWN), 1(BAND) or 2(INSIDE)
+    u: ndarray of float
+        Consists of the `T` values of the pixels. 1.0e6 for pixel marked INSIDE
+        else 0
+    heap: list of tuples
+        Priority Heap implementation based on the in-built Python`heapq` module
+    negate: bool
+        If `True` then used for initialising `u` values outside the BAND
+        If `False` then used to inpaint the pixels marked as INSIDE
+    epsilon: unsgned integer
+        Neighbourhood of the pixel of interest
+
+    Returns
+    ------
+    image: ndarray of unsigned integers
+        Consists of the result after inpainting the all the pixels.
+
+    References
+    ----------
+    .. [1] http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+
     """
 
     while len(heap):
@@ -80,7 +142,7 @@ def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
 
 
 def inpaint(input_image, inpaint_mask, epsilon=5):
-    """
+    """Wrapper function for
     """
     # TODO: Error checks. Image either 3 or 1 channel. All dims same
     # if input_image.ndim == 3:
@@ -95,7 +157,9 @@ def inpaint(input_image, inpaint_mask, epsilon=5):
     image[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
-    flag = _heap.init_flag(mask)
+    flag = np.zeros_like(image, dtype=np.uint8)
+    u = np.zeros_like(image, dtype=float)
+    heap = []
 
     outside = dilation(mask, square(2 * epsilon + 1))
     outside_band = np.logical_xor(outside, mask).astype(np.uint8)
