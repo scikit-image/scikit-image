@@ -29,10 +29,10 @@ def unwrap(image, wrap_around=False):
 
     References
     ----------
-        - Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
-        and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
-        algorithm based on sorting by reliability following a noncontinuous
-        path", Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002
+    .. [1] Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
+           and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
+           algorithm based on sorting by reliability following a noncontinuous
+           path", Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002
     '''
     image = np.require(image, np.float32, ['C'])
     if image.ndim not in (2, 3):
