@@ -136,7 +136,7 @@ def iradon(radon_image, theta=None, output_size=None,
         Number of rows and columns in the reconstruction.
     filter : str, optional (default ramp)
         Filter used in frequency domain filtering. Ramp filter used by default.
-        Filters available: ramp, shepp-logan, cosine, hamming, hann
+        Filters available: ramp, shepp-logan, cosine, hamming, hann.
         Assign None to use no filter.
     interpolation : str, optional (default 'linear')
         Interpolation method used in reconstruction. Methods available:
