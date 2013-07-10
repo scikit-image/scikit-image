@@ -11,8 +11,7 @@ def inpaint(image, mask, epsilon=3):
 
     flag, u, heap = _heap.initialise(mask)
 
-    painted = fmm.fast_marching_method(image, flag, u, heap, negate=False,
-                                       epsilon=epsilon)
+    painted = fmm.fast_marching_method(image, flag, u, heap, epsilon=epsilon)
     return painted
 
 image = data.camera()[80:180, 200:300]
