@@ -66,7 +66,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
         else:
             u_out = 1 + u1
     elif flag[i2, j2] == KNOWN:
-        u_out = 1 + u2
+        u_out = 1 + u2  # Instead of u2 [1]_ uses u[i1, j2]. Typo in paper?
     return u_out
 
 
