@@ -72,10 +72,8 @@ def eikonal(i1, j1, i2, j2, flag, u):
     return u_out
 
 
-def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
-    """Fast Marching Method implementation based on the algorithm outlined in
-    ``Telea, A. (2004). An Image Inpainting Technique based on the Fast
-    Marching Method. Journal of Graphic Tools, 9(1): 23 - 34.``
+def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
+    """Inpaint an image using the Fast Marching Method (FMM).
 
     Image Inpainting technique based on the Fast Marching Method implementation
     as described in [1]_. FMM is used for computing the evolution of
