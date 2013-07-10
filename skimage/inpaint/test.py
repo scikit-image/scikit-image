@@ -31,8 +31,8 @@ def inpaint(image, mask, epsilon=3):
 
 
 def demo_time_fill():
-    image = np.ones((10, 10))
-    fill_region = (slice(4, -4), slice(4, -4))
+    image = np.ones((100, 100))
+    fill_region = (slice(30, 40), slice(50, 70))
     image[fill_region] = 0
 
     mask = np.zeros_like(image, dtype=int)
@@ -43,10 +43,16 @@ def demo_time_fill():
                                         _run_inpaint=False, epsilon=3)
     print np.round(time_map, 1)
 
-    fig, ax = plt.subplots()
-    ax.imshow(time_map)
+    fig, (ax0, ax1) = plt.subplots(ncols=2)
+    ax0.imshow(mask[20:50, 40:80]), plt.title('Input Mask')
+    ax1.imshow(time_map[20:50, 40:80]), plt.title('Distance/Time Map')
+
+    # plt.subplot(1, 2, 1), plt.imshow(mask[20:50, 40:80])
+    # plt.title('Input Mask')
+    # plt.subplot(1, 2, 2), plt.imshow(time_map[20:50, 40:80])
+    # plt.title('Distance/Time Map')
     plt.show()
 
 
-demo_inpaint()
-# demo_time_fill()
+# demo_inpaint()
+demo_time_fill()
