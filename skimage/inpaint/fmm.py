@@ -144,14 +144,15 @@ def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
 
                 if flag[i_nb, j_nb] == INSIDE:
                     flag[i_nb, j_nb] = BAND
+                    heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
                     if _run_inpaint:
                         inp_point(i_nb, j_nb, image, flag, u, epsilon)
 
-                heappush(heap, [u[i_nb, j_nb], (i_nb, j_nb)])
+                # heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
-        if not _run_inpaint:
-            u[i, j] = -u[i, j]
+        # if not _run_inpaint:
+           # u[i, j] = -u[i, j]
 
     if not _run_inpaint:
         return u
