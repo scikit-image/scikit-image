@@ -3,6 +3,7 @@ Check that Cython extensions in setup.py files match those in bento.info.
 """
 import os
 import re
+import sys
 
 
 RE_CYTHON = re.compile("config.add_extension\(\s*['\"]([\S]+)['\"]")
@@ -93,3 +94,6 @@ if __name__ == '__main__':
 
     cy_bento, cy_setup = remove_common_extensions(cy_bento, cy_setup)
     print_results(cy_bento, cy_setup)
+
+    if cy_setup or cy_bento:
+        sys.exit(1)
