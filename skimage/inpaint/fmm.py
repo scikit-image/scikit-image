@@ -59,7 +59,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
             r = np.sqrt(2 - (u1 - u2)**2)
             s = (u1 + u2 - r) * 0.5
             if s >= u1 and s >= u2:
-                return s
+                u_out = s
             else:
                 s += r
                 if s >= u1 and s >= u2:
@@ -67,7 +67,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
         else:
             u_out = 1 + u1
     elif flag[i2, j2] == KNOWN:
-        u_out = 1 + u2
+        u_out = 1 + u2  # Instead of u2 [1]_ uses u[i1, j2]. Typo in paper?
     return u_out
 
 
@@ -131,7 +131,7 @@ def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
             continue
 
         for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
-            if flag[i_nb, j_nb] != KNOWN:
+            if not flag[i_nb, j_nb] == KNOWN:
 
                 u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb,
                                             i_nb, j_nb - 1, flag, u),
