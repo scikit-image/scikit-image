@@ -87,7 +87,7 @@ def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
         - If `flag` is INSIDE
             - Change it to BAND
             - Inpaint the pixel
-        - Select the `min` value and assign it as the `u` value of
+        - Select the `min` value and assign it as the `u` value of the pixel
         - Insert this new value in the `heap`
 
     For further details, see [1]_
