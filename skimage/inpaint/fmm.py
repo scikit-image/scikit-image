@@ -1,10 +1,13 @@
-__all__ = ['inpaint', 'fast_marching_method', 'eikonal']
-
 import numpy as np
-import _heap
+
+from skimage.morphology import dilation, square
 from _inpaint import inpaint_point as inp_point
 from heapq import heappop, heappush
-from skimage.morphology import dilation, square
+import _heap
+
+
+__all__ = ['inpaint', 'fast_marching_method', 'eikonal']
+
 
 KNOWN = 0
 BAND = 1
@@ -12,127 +15,110 @@ INSIDE = 2
 
 
 def eikonal(i1, j1, i2, j2, flag, u):
-    """This function provides the solution for the Eikonal equation. The
-    numerical approximation to the Eikonal equation is as follows:
+    """Solve a step of the Eikonal equation.
 
-    `max(D^{-x}T, -D^{+x}T, 0)^2 +max(D^{-y}T, -D^{+y}T, 0)^2 =1`
+    The `u` values of known pixels (marked by `flag`) are considered for
+    computing the `u` value of the neighbouring pixel.
 
-    where `D^{-x} T= T[i, j] - T[i-1, j]` and `D^{+x} T= T[i+1, j] - T[i, j]`
-    The `u` values of pixels whose `flag = KNOWN` are considered for computing
-    the `u` value of the neighbouring pixel.
+    See Equation 4 and Figure 4 in [1]_ for implementation details.
 
     Parameters
-    ---------
-    i1, j1, i2, j2: unsigned integers
-        x and y indices of two diagonally adjacent pixels respectively.
-    flag: ndarray of unsigned integers
-    u: ndarray of float
+    =---------
+    i1, j1, i2, j2 : int
+        Row and column indices of two diagonally-adjacent pixels.
+    flag : array
+        Array marking pixels as known, along the boundary to be solved, or
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+    u : array
+        The distance/time map from the boundary to each pixel.
 
     Returns
-    ------
-    sol: float
-        The `u` value for the pixel `(i2, j1)`. This represents the
-        solution for the Eikonal equation.
+    -------
+    u_out : float
+        The `u` value for the pixel `(i2, j1)`.
 
-    Comments
-    ---------
-    `u` which is used synonymously with `T` represents the Time taken by the
-    boundary to reach that particular pixel in the grid. This is proportional
-    to the distance between the boundary points and the point of interest.
-    `T=0` represents the initial condition. And since the boundary is moving
-    with a constant speed at all pixels in a direction normal to the boundary
-    at all pixels, the time of arrival i.e. `u` or `T` must be monotonically
-    increasing. This is an important requirement for the fast marching method
-    to propagate ahead correctly.
+    Notes
+    -----
+    The boundary is assumed to move with a constant speed in a direction normal
+    to the boundary at all pixels, such that the time of arrival `u` must be
+    monotonically increasing. Note that `u` is often denoted `T`.
+
+    References
+    ----------
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+           Method", Journal of Graphic Tools (2004).
+           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
-
-    sol = 1.0e6
-    u11 = u[i1, j1]
-    u22 = u[i2, j2]
+    u_out = 1.0e6
+    u1 = u[i1, j1]
+    u2 = u[i2, j2]
 
     if flag[i1, j1] == KNOWN:
         if flag[i2, j2] == KNOWN:
-            r = np.sqrt(2 - (u11 - u22) * (u11 - u22))
-            s = (u11 + u22 - r) * .5
-            if s >= u11 and s >= u22:
-                sol = s
+            r = np.sqrt(2 - (u1 - u2)**2)
+            s = (u1 + u2 - r) * 0.5
+            if s >= u1 and s >= u2:
+                return s
             else:
                 s += r
-                if s >= u11 and s >= u22:
-                    sol = s
+                if s >= u1 and s >= u2:
+                    u_out = s
         else:
-            sol = 1 + u11
+            u_out = 1 + u1
     elif flag[i2, j2] == KNOWN:
-        sol = 1 + u22
+        u_out = 1 + u2
+    return u_out
 
-    return sol
 
-
-def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
-    """Fast Marching Method implementation based on the algorithm outlined in
-    ``Telea, A. (2004). An Image Inpainting Technique based on the Fast
-    Marching Method. Journal of Graphic Tools, 9(1): 23 - 34.``
+def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
+    """Inpaint an image using the Fast Marching Method (FMM).
 
     Image Inpainting technique based on the Fast Marching Method implementation
-    as described in the paper above. FMM is used for computing the evolution of
-    boundary moving in a direction *normal* to itself. The tangential component
-    of the velocity is not of interest here. This algorithm has been adapted by
-    Telea for the purpose of inpainting. For this we assume that the speed is
-    uniform at all the pixels and set it to 1. There are two phases to this
-    implementation: the initialisation phase which is described in the
-    `initialise` function and the propagation phase, which is described here.
-
-    In order to obtain the correct representation it is important to propagate
-    the boundary pixels to the interior (INSIDE) region in the increasing
-    distance from the boundary. The solution to Eikonal equation helps
-    achieve this.
-    `|gradT| = 1`
+    as described in [1]_. FMM is used for computing the evolution of
+    boundary moving in a direction *normal* to itself.
 
     The steps of the algorithm are as follows:
-    * Extract the pixel with the smallest `T` value in the BAND pixels. We use
-            a priority heap implementation whose head is always the smallest
-            value in the heap
-        + `T[i, j] = heappop[0]`
-    * Update its `flag` value as KNOWN
-    * March the boundary inwards by adding new points.
-            `for (k, l) in (i-1, j),(i+1, j), (i, j-1), (i, j+1)`
-        + If they are either INSIDE or BAND, compute its `T` value using the
-                `eikonal` function in all the 4 quadrants
-        + If `flag` is INSIDE
+    - Extract the pixel with the smallest `u` value in the BAND pixels
+    - Update its `flag` value as KNOWN
+    - March the boundary inwards by adding new points.
+        - If they are either INSIDE or BAND, compute its `u` value using the
+          `eikonal` function for all the 4 quadrants
+        - If `flag` is INSIDE
             - Change it to BAND
-            - Inpaint `(k, l)`
-        + Select the `min` value and assign it as the `T` value of `(k, l)`
-        + Insert this new value in the `heap`
+            - Inpaint the pixel
+        - Select the `min` value and assign it as the `u` value of
+        - Insert this new value in the `heap`
 
-    You can further check out the numerical approximation to the Eikonal
-    equation and the algorithm in the paper.
+    For further details, see [1]_
 
     Parameters
     ---------
-    image: ndarray of unsigned integers
+    image : array
         Input image padded by a single row/column on all sides
-    flag: ndarray of unsigned integers
-        Values are either 0 (KNOWN), 1(BAND) or 2(INSIDE)
-    u: ndarray of float
-        Consists of the `T` values of the pixels. 1.0e6 for pixel marked INSIDE
-        else 0
-    heap: list of tuples
-        Priority Heap implementation based on the in-built Python`heapq` module
-    negate: bool
+    flag : array
+        Array marking pixels as known, along the boundary to be solved, or
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+    u : array
+        The distance/time map from the boundary to each pixel.
+    heap : list of tuples
+        Priority heap which stores pixels for processing.
+    _run_inpaint : bool
         If `True` then used for initialising `u` values outside the BAND
         If `False` then used to inpaint the pixels marked as INSIDE
-    epsilon: unsgned integer
+    epsilon : integer
         Neighbourhood of the pixel of interest
 
     Returns
     ------
-    image: ndarray of unsigned integers
-        Consists of the result after inpainting the all the pixels.
+    image or u : array
+        The inpainted image or distance/time map depending on `_run_inpaint`.
 
     References
     ----------
-    .. [1] http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+           Method", Journal of Graphic Tools (2004).
+           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
 
@@ -158,57 +144,56 @@ def fast_marching_method(image, flag, u, heap, negate, epsilon=5):
 
                 if flag[i_nb, j_nb] == INSIDE:
                     flag[i_nb, j_nb] = BAND
-                    if negate is False:
+
+                    if _run_inpaint:
                         inp_point(i_nb, j_nb, image, flag, u, epsilon)
-                    #   inp_point(i, j, image, flag, u, epsilon)
 
                 heappush(heap, [u[i_nb, j_nb], (i_nb, j_nb)])
 
-        if negate is True:
+        if not _run_inpaint:
             u[i, j] = -u[i, j]
 
-    if negate is True:
+    if not _run_inpaint:
         return u
     else:
         return image
 
 
 def inpaint(input_image, inpaint_mask, epsilon=5):
-    """Wrapper function for the inpainitng techique based on Fast Marching
-    Method as introduced by Telea. Check out the `fast_marching_method`
-    function for details regarding the Fast Marching Method implementation
-    and `inpaint_point` for details regarding the Inpainting algorithm.
+    """Inpaint image in areas specified by a mask.
 
     Parameters
     ---------
-    input_image: ndarray of unsigned integers
+    input_image : array
         This can be either a single channel or three channel image.
-    inpaint_mask: ndarray of bool
-        Mask containing the pixels to be inpainted. `True` values are to
-        be inpainted
-    epsilon: unsigned integer
+    inpaint_mask : array, bool
+        Mask containing pixels to be inpainted. `True` values are inpainted.
+    epsilon : int
         Determining the range of the neighbourhood for inpainting a pixel
 
     Returns
     ------
-    output: ndarray of unsigned integers
-        Contains the final inpainted output image
+    painted : array
+        The inpainted image.
 
     References
     ---------
-    . [1] http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+           Method", Journal of Graphic Tools (2004).
+           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
     # TODO: Error checks. Image either 3 or 1 channel. All dims same
     # if input_image.ndim == 3:
-    #     m, n, channel = input_image.shape
-    #     image = np.zeros((m + 2, n + 2, channel), np.uint8)
+    #     h, w, channel = input_image.shape
+    #     image = np.zeros((h + 2, w + 2, channel), np.uint8)
     # else:
-    #     m, n = input_image.shape
-    #     image = np.zeros((m + 2, n + 2), np.uint8)
-    m, n = input_image.shape
-    image = np.zeros((m + 2, n + 2), np.uint8)
-    mask = np.zeros((m + 2, n + 2), bool)
+    #     h, w = input_image.shape
+    #     image = np.zeros((h + 2, w + 2), np.uint8)
+
+    h, w = input_image.shape
+    image = np.zeros((h + 2, w + 2), np.uint8)
+    mask = np.zeros((h + 2, w + 2), bool)
     image[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
@@ -223,11 +208,11 @@ def inpaint(input_image, inpaint_mask, epsilon=5):
 
     out_heap = []
     _heap.generate_heap(out_heap, out_flag, u)
-    u = fast_marching_method(outside_band, out_flag, u, out_heap, negate=True)
+    u = fast_marching_method(outside_band, out_flag, u, out_heap,
+                             _run_inpaint=False)
 
     heap = []
     _heap.generate_heap(heap, flag, u)
-    output = fast_marching_method(image, flag, u, heap, negate=False,
-                                  epsilon=epsilon)
+    painted = fast_marching_method(image, flag, u, heap, epsilon=epsilon)
 
-    return output
+    return painted
