@@ -31,14 +31,11 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
     arr_in: ndarray, shape=[n_images, height, width]
         3-dimensional input array representing an ensemble of n_images
         of equal shape (i.e. [height, width]).
-
     fill: float or 'mean', optional
         How to fill the 2-dimensional output array when sqrt(n_images)
         is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
-
     rescale_intensity: bool, optional
         Whether to rescale the intensity of each image to [0, 1].
-
     output_shape: tuple, optional
         The desired aspect ratio for the montage (default is square).
 
@@ -99,7 +96,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
     if fill == 'mean':
         fill = arr_in.mean()
 
-    n_missing = int((alpha_y * alpha_x) - n_images)
+    n_missing = int((alpha_y *  alpha_x) - n_images)
     missing = np.ones((n_missing, height, width), dtype=arr_in.dtype) * fill
     arr_out = np.vstack((arr_in, missing))
 
