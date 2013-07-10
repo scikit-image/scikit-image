@@ -98,6 +98,9 @@ Library:
     Extension: skimage.feature.corner_cy
         Sources:
             skimage/feature/corner_cy.pyx
+    Extension: skimage.feature._hoghistogram
+        Sources:
+            skimage/feature/_hoghistogram.pyx
     Extension: skimage.feature._texture
         Sources:
             skimage/feature/_texture.pyx
