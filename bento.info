@@ -90,6 +90,9 @@ Library:
     Extension: skimage.morphology._greyreconstruct
         Sources:
             skimage/morphology/_greyreconstruct.pyx
+    Extension: skimage.feature._brief_cy
+        Sources:
+            skimage/feature/_brief_cy.pyx
     Extension: skimage.feature.corner_cy
         Sources:
             skimage/feature/corner_cy.pyx
@@ -150,9 +153,6 @@ Library:
     Extension: skimage.filter.rank._crank16_bilateral
         Sources:
             skimage/filter/rank/_crank16_bilateral.pyx
-    Extension: skimage.feature._brief_cy
-        Sources:
-            skimage/feature/_brief_cy.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi
