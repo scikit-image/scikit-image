@@ -66,7 +66,7 @@ def eikonal(i1, j1, i2, j2, flag, u):
         else:
             u_out = 1 + u1
     elif flag[i2, j2] == KNOWN:
-        u_out = 1 + u2  # Instead of u2 [1]_ uses u[i1, j2]. Typo in paper?
+        u_out = 1 + u2
     return u_out
 
 
@@ -153,8 +153,8 @@ def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
 
                 # heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
-        # if not _run_inpaint:
-           # u[i, j] = -u[i, j]
+        if not _run_inpaint:
+            u[i, j] = -u[i, j]
 
     if not _run_inpaint:
         return u
