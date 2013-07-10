@@ -7,7 +7,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris, corner_shi_tomasi,
 from .corner_cy import corner_moravec
 from .template import match_template
 from ._brief import brief, match_keypoints_brief
-from .util import hamming_distance
+from .util import pairwise_hamming_distance
 
 __all__ = ['daisy',
            'hog',
@@ -24,5 +24,5 @@ __all__ = ['daisy',
            'corner_moravec',
            'match_template',
            'brief',
-           'hamming_distance',
+           'pairwise_hamming_distance',
            'match_keypoints_brief']

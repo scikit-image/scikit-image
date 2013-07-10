@@ -2,13 +2,13 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
 from ..util import img_as_float
-from .util import _remove_border_keypoints, hamming_distance
+from .util import _remove_border_keypoints, pairwise_hamming_distance
 
 from ._brief_cy import _brief_loop
 
 
 def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
-          sample_seed=1, variance=2, return_keypoints=False):
+          sample_seed=1, variance=2):
     """Extract BRIEF Descriptor about given keypoints for a given image.
 
     Parameters
@@ -35,9 +35,6 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     variance : float
         Variance of the Gaussian Low Pass filter applied on the image to
         alleviate noise sensitivity. Default is 2.
-    return_keypoints : bool
-        If True, return the Q keypoints (after filtering out the border
-        keypoints) about which the descriptors are extracted. Default is False.
 
     Returns
     -------
@@ -59,7 +56,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     Examples
     --------
     >>> from skimage.feature.corner import *
-    >>> from skimage.feature import hamming_distance
+    >>> from skimage.feature import pairwise_hamming_distance
     >>> from skimage.feature._brief import *
     >>> square1 = np.zeros([8, 8], dtype=np.int32)
     >>> square1[2:6, 2:6] = 1
@@ -78,7 +75,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size = 5, return_keypoints=True)
+    >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size = 5)
     >>> keypoints1
     array([[2, 2],
            [2, 5],
@@ -102,30 +99,29 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 6],
            [6, 2],
            [6, 6]])
-    >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size = 5, return_keypoints=True)
+    >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size = 5)
     >>> keypoints2
     array([[2, 2],
            [2, 6],
            [6, 2],
            [6, 6]])
-    >>> hamming_distance(descriptors1, descriptors2)
+    >>> pairwise_hamming_distance(descriptors1, descriptors2)
     array([[ 0.03125  ,  0.3203125,  0.3671875,  0.6171875],
            [ 0.3203125,  0.03125  ,  0.640625 ,  0.375    ],
            [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
            [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
     >>> match_keypoints_brief(keypoints1, descriptors1, keypoints2, descriptors2)
-    array([[[ 2.,  2.],
-            [ 2.,  5.],
-            [ 5.,  2.],
-            [ 5.,  5.]],
+    array([[[2, 2],
+            [2, 5],
+            [5, 2],
+            [5, 5]],
 
-           [[ 2.,  2.],
-            [ 2.,  6.],
-            [ 6.,  2.],
-            [ 6.,  6.]]])
+           [[2, 2],
+            [2, 6],
+            [6, 2],
+            [6, 6]]])
 
     """
-
     np.random.seed(sample_seed)
 
     image = np.squeeze(image)
@@ -140,13 +136,15 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     image = np.ascontiguousarray(image)
 
-    keypoints = np.array(keypoints + 0.5, dtype=np.intp)
+    keypoints = np.array(keypoints + 0.5, dtype=np.intp, order='C')
 
     # Removing keypoints that are within (patch_size / 2) distance from the
     # image border
     keypoints = _remove_border_keypoints(image, keypoints, patch_size / 2)
+    keypoints = np.ascontiguousarray(keypoints)
 
-    descriptors = np.zeros((keypoints.shape[0], descriptor_size), dtype=bool)
+    descriptors = np.zeros((keypoints.shape[0], descriptor_size), dtype=bool,
+                            order='C')
 
     # Sampling pairs of decision pixels in patch_size x patch_size window
     if mode == 'normal':
@@ -172,28 +170,27 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     _brief_loop(image, descriptors.view(np.uint8), keypoints, pos1, pos2)
 
-    if return_keypoints:
-        return descriptors, keypoints
-    else:
-        return descriptors
+    return descriptors, keypoints
+
 
 def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
                           descriptors2, threshold=0.15):
-    """Match keypoints described using BRIEF descriptors.
+    """Match keypoints described using BRIEF descriptors in one image to
+    those in second image.
 
     Parameters
     ----------
     keypoints1 : (M, 2) ndarray
-        M Keypoints from the first image described using feature._brief.brief
+        M Keypoints from the first image described using skimage.feature.brief
     descriptors1 : (M, P) ndarray
         BRIEF descriptors of size P about M keypoints in the first image.
     keypoints2 : (N, 2) ndarray
-        N Keypoints from the second image described using feature._brief.brief
+        N Keypoints from the second image described using skimage.feature.brief
     descriptors2 : (N, P) ndarray
         BRIEF descriptors of size P about N keypoints in the second image.
     threshold : float in range [0, 1]
-        Threshold for removing matched keypoint pairs with hamming distance
-        greater than it. Default is 0.15
+        Maximum allowable hamming distance between descriptors of two keypoints
+        in separate images to be regarded as a match. Default is 0.15.
 
     Returns
     -------
@@ -210,28 +207,13 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
     if descriptors1.shape[1] != descriptors2.shape[1]:
         raise ValueError("Descriptor sizes for matching keypoints in both \
                           the images should be equal.")
+
     # Get hamming distances between keeypoints1 and keypoints2
-    distance = hamming_distance(descriptors1, descriptors2)
+    distance = pairwise_hamming_distance(descriptors1, descriptors2)
 
-    # For each keypoint in keypoints1, match it with the keypoint in keypoints2
-    # that has minimum hamming distance
-    dist_matched_kp = np.amin(distance, axis=1)
-    index_matched_kp2 = distance.argmin(axis=1)
-
-    # Remove the matched pairs which have hamming distance greater than the
-    # threshold
-    temp = np.zeros((keypoints1.shape[0], 3))
-    temp[:, 0] = range(keypoints1.shape[0])
-    temp[:, 1] = index_matched_kp2
-    temp[:, 2] = dist_matched_kp
-    temp = temp[temp[:, 2] < threshold]
-
-    matched_kp1 = keypoints1[np.int16(temp[:, 0])]
-    matched_kp2 = keypoints2[np.int16(temp[:, 1])]
-
-    # Collecting matched keypoint pairs from their index pairs
-    matched_keypoint_pairs = np.zeros((2, matched_kp1.shape[0], 2))
-    matched_keypoint_pairs[0, :, :] = matched_kp1
-    matched_keypoint_pairs[1, :, :] = matched_kp2
+    temp = distance > threshold
+    row_check = ~ np.all(temp, axis = 1)
+    matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
+    matched_keypoint_pairs = np.array([keypoints1[row_check], matched_keypoints2[row_check]])
 
     return matched_keypoint_pairs

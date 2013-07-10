@@ -21,4 +21,4 @@ def _brief_loop(double[:, ::1] image, char[:, ::1] descriptors,
             kr = keypoints[k, 0]
             kc = keypoints[k, 1]
             if image[kr + pr0, kc + pc0] < image[kr + pr1, kc + pc1]:
-                    descriptors[k, p] = True
+                descriptors[k, p] = True
