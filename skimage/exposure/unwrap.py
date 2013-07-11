@@ -39,7 +39,6 @@ def unwrap(image, wrap_around=False):
            C. Gorecki, & E. L. Novak (Eds.), Optical Metrology (2005) 32--40,
            International Society for Optics and Photonics.
     '''
-    image = np.require(image, np.float32, ['C'])
     if image.ndim not in (2, 3):
         raise ValueError('image must be 2 or 3 dimensional')
     if isinstance(wrap_around, bool):
@@ -54,21 +53,22 @@ def unwrap(image, wrap_around=False):
         raise ValueError('wrap_around must be a bool or a sequence with '
                          'length equal to the dimensionality of image')
 
-    image_masked = np.ma.asarray(image)
-    image_unwrapped = np.empty_like(image_masked.data)
+    if np.ma.isMaskedArray(image):
+        mask = np.require(image.mask, np.uint8, ['C'])
+    else:
+        mask = np.zeros(image.shape, dtype=np.uint8, order='C')
+    image_not_masked = np.asarray(image, dtype=np.float32, order='C')
+    image_unwrapped = np.empty(image.shape, dtype=np.float32)
+
     if image.ndim == 2:
-        _unwrap_2d._unwrap2D(image_masked.data,
-                           np.ma.getmaskarray(image_masked).astype(np.uint8),
-                           image_unwrapped,
+        _unwrap_2d._unwrap2D(image_not_masked, mask, image_unwrapped,
                            wrap_around[0], wrap_around[1])
     elif image.ndim == 3:
-        _unwrap_3d._unwrap3D(image_masked.data,
-                           np.ma.getmaskarray(image_masked).astype(np.uint8),
-                           image_unwrapped,
+        _unwrap_3d._unwrap3D(image_not_masked, mask, image_unwrapped,
                            wrap_around[0], wrap_around[1], wrap_around[2])
 
     if np.ma.isMaskedArray(image):
-        return np.ma.array(image_unwrapped, mask = image_masked.mask)
+        return np.ma.array(image_unwrapped, mask=mask)
     else:
         return image_unwrapped
 
