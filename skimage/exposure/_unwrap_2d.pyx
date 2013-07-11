@@ -7,12 +7,12 @@ cdef extern void unwrap2D(float* wrapped_image,
 def _unwrap2D(float[:,::1] array, 
               unsigned char[:,::1] mask,
               float[:,::1] unwrapped_array,
-              wrap_around_x, wrap_around_y):
+              wrap_around):
     unwrap2D(&array[0,0], 
              &unwrapped_array[0,0], 
              &mask[0,0], 
              array.shape[1], array.shape[0],
-             wrap_around_x, wrap_around_y,
+             wrap_around[1], wrap_around[0],
              )
  
     

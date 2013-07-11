@@ -62,10 +62,10 @@ def unwrap(image, wrap_around=False):
 
     if image.ndim == 2:
         _unwrap_2d._unwrap2D(image_not_masked, mask, image_unwrapped,
-                           wrap_around[0], wrap_around[1])
+                             wrap_around)
     elif image.ndim == 3:
         _unwrap_3d._unwrap3D(image_not_masked, mask, image_unwrapped,
-                           wrap_around[0], wrap_around[1], wrap_around[2])
+                             wrap_around)
 
     if np.ma.isMaskedArray(image):
         return np.ma.array(image_unwrapped, mask=mask)
