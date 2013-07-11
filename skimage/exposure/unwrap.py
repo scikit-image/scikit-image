@@ -1,7 +1,7 @@
 import numpy as np
 
-from . import _unwrap_2d
-from . import _unwrap_3d
+from ._unwrap_2d import unwrap_2d
+from ._unwrap_3d import unwrap_3d
 
 
 def unwrap(image, wrap_around=False):
@@ -61,10 +61,10 @@ def unwrap(image, wrap_around=False):
     image_unwrapped = np.empty(image.shape, dtype=np.float32)
 
     if image.ndim == 2:
-        _unwrap_2d._unwrap2D(image_not_masked, mask, image_unwrapped,
+        unwrap_2d(image_not_masked, mask, image_unwrapped,
                              wrap_around)
     elif image.ndim == 3:
-        _unwrap_3d._unwrap3D(image_not_masked, mask, image_unwrapped,
+        unwrap_3d(image_not_masked, mask, image_unwrapped,
                              wrap_around)
 
     if np.ma.isMaskedArray(image):

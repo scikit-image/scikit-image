@@ -4,7 +4,7 @@ cdef extern void unwrap3D(float* wrapped_volume,
                      int image_width, int image_height, int volume_depth,
                      int wrap_around_x, int wrap_around_y, int wrap_around_z)
 
-def _unwrap3D(float[:,:,::1] array,
+def unwrap_3d(float[:,:,::1] array,
               unsigned char[:,:,::1] mask,
               float[:,:,::1] unwrapped_array,
               wrap_around):

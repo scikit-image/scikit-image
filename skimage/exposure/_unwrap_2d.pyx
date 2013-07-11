@@ -4,7 +4,7 @@ cdef extern void unwrap2D(float* wrapped_image,
                      int image_width, int image_height,
                      int wrap_around_x, int wrap_around_y)
 
-def _unwrap2D(float[:,::1] array,
+def unwrap_2d(float[:,::1] array,
               unsigned char[:,::1] mask,
               float[:,::1] unwrapped_array,
               wrap_around):
