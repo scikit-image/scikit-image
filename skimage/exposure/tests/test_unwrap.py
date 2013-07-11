@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import run_module_suite, TestCase, assert_array_almost_equal
+from numpy.testing import run_module_suite, assert_array_almost_equal
 
 from skimage.exposure import unwrap
 
