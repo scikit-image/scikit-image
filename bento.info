@@ -144,6 +144,12 @@ Library:
     Extension: skimage.filter.rank.bilateral_cy
         Sources:
             skimage/filter/rank/bilateral_cy.pyx
+    Extension: skimage.exposure._unwrap_3d
+        Sources:
+            skimage/exposure/_unwrap_3d.pyx, skimage/exposure/Hussein_3D_unwrapper_with_mask_and_wrap_around_option.c
+    Extension: skimage.exposure._unwrap_2d
+        Sources:
+            skimage/exposure/_unwrap_2d.pyx, skimage/exposure/Miguel_2D_unwrapper_with_mask_and_wrap_around_option.c
 
 Executable: skivi
     Module: skimage.scripts.skivi
