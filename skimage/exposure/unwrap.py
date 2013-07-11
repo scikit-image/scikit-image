@@ -33,6 +33,11 @@ def unwrap(image, wrap_around=False):
            and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
            algorithm based on sorting by reliability following a noncontinuous
            path", Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002
+    .. [2] Abdul-Rahman, H., Gdeisat, M., Burton, D., & Lalor, M., "Fast
+           three-dimensional phase-unwrapping algorithm based on sorting by
+           reliability following a non-continuous path. In W. Osten,
+           C. Gorecki, & E. L. Novak (Eds.), Optical Metrology (2005) 32--40,
+           International Society for Optics and Photonics.
     '''
     image = np.require(image, np.float32, ['C'])
     if image.ndim not in (2, 3):
