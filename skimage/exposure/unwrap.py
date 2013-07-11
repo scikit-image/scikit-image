@@ -2,6 +2,7 @@ import numpy as np
 
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
+from .._shared.six import string_types
 
 
 def unwrap(image, wrap_around=False):
@@ -44,7 +45,7 @@ def unwrap(image, wrap_around=False):
     if isinstance(wrap_around, bool):
         wrap_around = [wrap_around] * image.ndim
     elif (hasattr(wrap_around, '__getitem__')
-          and not isinstance(wrap_around, basestring)):
+          and not isinstance(wrap_around, string_types)):
         if not len(wrap_around) == image.ndim:
             raise ValueError('Length of wrap_around must equal the '
                              'dimensionality of image')
