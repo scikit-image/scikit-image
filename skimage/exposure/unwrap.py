@@ -71,7 +71,3 @@ def unwrap(image, wrap_around=False):
         return np.ma.array(image_unwrapped, mask=mask)
     else:
         return image_unwrapped
-
-    #TODO: set_fill to minimum value
-    #TODO: check for empty mask, not a single contiguous pixel
-
