@@ -14,7 +14,6 @@ def inpaint(image, mask, epsilon=3):
     painted = fmm.fast_marching_method(image, flag, u, heap, epsilon=epsilon)
     plt.imshow(u)
     plt.show()
-    #print np.round(u, 2)
     return painted
 
     image = data.camera()[80:180, 200:300]
@@ -41,11 +40,11 @@ def demo_time_fill():
     flag, u, heap = _heap.initialise(mask)
     time_map = fmm.fast_marching_method(image, flag, u, heap,
                                         _run_inpaint=False, epsilon=3)
-    print np.round(time_map, 1)
+    print np.round(time_map[25:45, 45:75], 1)
 
     fig, (ax0, ax1) = plt.subplots(ncols=2)
-    ax0.imshow(mask[20:50, 40:80]), plt.title('Input Mask')
-    ax1.imshow(time_map[20:50, 40:80]), plt.title('Distance/Time Map')
+    ax0.imshow(mask[20:50, 40:80])
+    ax1.imshow(time_map[20:50, 40:80])
 
     # plt.subplot(1, 2, 1), plt.imshow(mask[20:50, 40:80])
     # plt.title('Input Mask')

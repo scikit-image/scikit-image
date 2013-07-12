@@ -114,3 +114,67 @@ def ep_neighbor(i, j, size, epsilon):
             nb.append(ind)
 
     return nb
+
+
+def inpaint_point(i, j, image, flag, u, epsilon):
+    """This function performs the actual inpainting operation. Inpainting
+    involves "filling in" color in regions with unkown intensity values using
+    the intensity and gradient information of surrounding known region.
+
+    For further implementation details, see Section 2.3 and Figure 5 in [1]_
+
+    Parameters
+    ---------
+    i, j : int
+        Row and column index value of the pixel to be Inpainted
+    image : array
+        Padded single channel input image
+    flag : array
+        Array marking pixels as known, along the boundary to be solved, or
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+    u : array
+            The distance/time map from the boundary to each pixel.
+    epsilon : integer
+            Neighbourhood of (i, j) to be considered for inpainting
+
+    Returns
+    ------
+    image[i, j] : integer
+        Inpainted intensity value
+
+    References
+    ----------
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+            Method", Journal of Graphic Tools (2004).
+            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+
+    """
+    Ia, Jx, Jy, norm = 0, 0, 0, 0
+    gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
+    nb = ep_neighbor(i, j, image.shape, epsilon)
+
+    for [i_nb, j_nb] in nb:
+        if flag[i_nb, j_nb] == KNOWN:
+            rx = i - i_nb
+            ry = j - j_nb
+
+            dst = 1. / ((rx * rx + ry * ry) *
+                        np.sqrt((rx * rx + ry * ry)))
+            lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
+            dirc = rx * gradUx + ry * gradUy
+
+            if abs(dirc) <= 0.01:
+                dirc = 1.0e-6
+            weight = abs(dst * lev * dirc)
+
+            gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
+                                       channel=0)
+
+            Ia += weight * image[i_nb, j_nb]
+            Jx -= weight * gradIx * rx
+            Jy -= weight * gradIy * ry
+            norm += weight
+
+    sat = (Ia / norm + (Jx + Jy) / (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
+           + 0.5)
+    image[i, j] = int(round(sat))
