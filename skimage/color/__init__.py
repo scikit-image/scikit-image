@@ -1,4 +1,5 @@
 from .colorconv import (convert_colorspace,
+                        guess_spatial_dimensions,
                         rgb2hsv,
                         hsv2rgb,
                         rgb2xyz,
@@ -45,6 +46,7 @@ from .colorlabel import color_dict, label2rgb
 
 
 __all__ = ['convert_colorspace',
+           'guess_spatial_dimensions',
            'rgb2hsv',
            'hsv2rgb',
            'rgb2xyz',
