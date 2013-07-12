@@ -1,8 +1,9 @@
-__all__ = ['initialise']
-
 import numpy as np
 import heapq
 from skimage.morphology import dilation, disk
+
+
+__all__ = ['initialise']
 
 
 KNOWN = 0
@@ -11,14 +12,15 @@ INSIDE = 2
 
 
 def initialise(_mask):
-    """Initialisation:
-    Each pixel has 2 new values assigned to it stored in `flag` and `u` arrays.
+    """Initialisation for Image Inpainting technique based on Fast Marching
+    Method as outined in [1]_. Each pixel has 2 new values assigned to it
+    stored in `flag` and `u` arrays.
 
     `flag` Initialisation:
     All pixels are classified into 1 of the following flags:
-    # KNOWN - denoted by 0 - intensity and u values are known.
-    # BAND - denoted by 1 - u value undergoes an update.
-    # INSIDE - denoted by 2 - intensity and u values unkown
+    # 0 = KNOWN - intensity and u values are known.
+    # 1 = BAND - u value undergoes an update.
+    # 2 = INSIDE - intensity and u values unkown
 
     `u` Initialisation:
     u <- 0 : `flag` equal to BAND or KNOWN
@@ -32,16 +34,24 @@ def initialise(_mask):
 
     Parameters
     ----------
-    _mask : ndarray of bool
-        This array is cast to uint8. Suppose the size is (m, n)
+    _mask : (M, N) array
+        `True` values are to be inpainted.
 
     Returns
     ------
-    flag, u : ndarray of zeros of size (m+2, n+2)
-        They contain the results after the initialisation as above.
+    flag : (M + 2, N + 2) array of int
+        Array marking pixels as known, along the boundary to be solved, or
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+    u : (M + 2, N + 2) array of float
+        The distance/time map from the boundary to each pixel.
+    heap : list of tuples
+        BAND points with heap element as mentioned above
 
-    heap : Empty list
-        Contains the BAND points with heap element as mentioned above
+    References
+    ----------
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+            Method", Journal of Graphic Tools (2004).
+            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
 
