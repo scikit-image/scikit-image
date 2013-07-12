@@ -34,15 +34,15 @@ def initialise(_mask):
 
     Parameters
     ----------
-    _mask : (M, N) array
+    _mask : array
         `True` values are to be inpainted.
 
     Returns
     ------
-    flag : (M + 2, N + 2) array of int
+    flag : array of int
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : (M + 2, N + 2) array of float
+    u : (array of float
         The distance/time map from the boundary to each pixel.
     heap : list of tuples
         BAND points with heap element as mentioned above
