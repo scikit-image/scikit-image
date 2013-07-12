@@ -8,7 +8,7 @@ import fmm
 
 def demo_inpaint():
     image = data.camera()[80:180, 200:300]
-    paint_region = (slice(65, 75), slice(55, 75))
+    paint_region = (slice(65, 70), slice(55, 75))
     image[paint_region] = 0
 
     mask = np.zeros_like(image, dtype=np.uint8)
