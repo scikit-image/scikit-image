@@ -45,13 +45,8 @@ def demo_time_fill():
     fig, (ax0, ax1) = plt.subplots(ncols=2)
     ax0.imshow(mask[20:50, 40:80])
     ax1.imshow(time_map[20:50, 40:80])
-
-    # plt.subplot(1, 2, 1), plt.imshow(mask[20:50, 40:80])
-    # plt.title('Input Mask')
-    # plt.subplot(1, 2, 2), plt.imshow(time_map[20:50, 40:80])
-    # plt.title('Distance/Time Map')
     plt.show()
 
 
-# demo_inpaint()
-demo_time_fill()
+demo_inpaint()
+# demo_time_fill()
