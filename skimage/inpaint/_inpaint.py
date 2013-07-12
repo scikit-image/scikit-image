@@ -111,7 +111,7 @@ def inpaint_point(i, j, image, flag, u, epsilon):
     i, j : int
         Row and column index value of the pixel to be Inpainted
     image : array
-        Padded input image
+        Padded single channel input image
     flag : array
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
@@ -134,8 +134,8 @@ def inpaint_point(i, j, image, flag, u, epsilon):
     """
     Ia, Jx, Jy, norm = 0, 0, 0, 0
     gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
-
     nb = ep_neighbor(i, j, image.shape, epsilon)
+
     for [i_nb, j_nb] in nb:
         if flag[i_nb, j_nb] == KNOWN:
             rx = i - i_nb
