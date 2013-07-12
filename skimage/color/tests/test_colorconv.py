@@ -52,7 +52,7 @@ def test_guess_spatial_dimensions():
     assert_equal(guess_spatial_dimensions(im2), 3)
     assert_equal(guess_spatial_dimensions(im3), None)
     assert_equal(guess_spatial_dimensions(im4), 3)
-    assert_raises(guess_spatial_dimensions(im5), ValueError)
+    assert_raises(ValueError, guess_spatial_dimensions, im5)
 
 
 class TestColorconv(TestCase):
