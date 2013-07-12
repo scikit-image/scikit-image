@@ -1,6 +1,4 @@
 import numpy as np
-
-from skimage.morphology import dilation, square
 from _inpaint import inpaint_point as inp_point
 from heapq import heappop, heappush
 import _heap
@@ -185,35 +183,15 @@ def inpaint(input_image, inpaint_mask, epsilon=5):
 
     """
     # TODO: Error checks. Image either 3 or 1 channel. All dims same
-    # if input_image.ndim == 3:
-    #     h, w, channel = input_image.shape
-    #     image = np.zeros((h + 2, w + 2, channel), np.uint8)
-    # else:
-    #     h, w = input_image.shape
-    #     image = np.zeros((h + 2, w + 2), np.uint8)
 
     h, w = input_image.shape
     image = np.zeros((h + 2, w + 2), np.uint8)
-    mask = np.zeros((h + 2, w + 2), bool)
+    mask = np.zeros((h + 2, w + 2), np.uint8)
     image[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
-    flag = np.zeros_like(image, dtype=np.uint8)
-    u = np.zeros_like(image, dtype=float)
-    heap = []
+    flag, u, heap = _heap.initialise(mask)
 
-    outside = dilation(mask, square(2 * epsilon + 1))
-    outside_band = np.logical_xor(outside, mask).astype(np.uint8)
-    out_flag = _heap.init_flag(mask)
-    u = _heap.init_u(flag)
-
-    out_heap = []
-    _heap.generate_heap(out_heap, out_flag, u)
-    u = fast_marching_method(outside_band, out_flag, u, out_heap,
-                             _run_inpaint=False)
-
-    heap = []
-    _heap.generate_heap(heap, flag, u)
     painted = fast_marching_method(image, flag, u, heap, epsilon=epsilon)
 
     return painted
