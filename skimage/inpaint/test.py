@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from skimage import data
+# from skimage import data
 
 import _heap
 import fmm
@@ -48,5 +48,5 @@ def demo_time_fill():
     plt.show()
 
 
-demo_inpaint()
+# demo_inpaint()
 # demo_time_fill()
