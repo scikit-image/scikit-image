@@ -4,7 +4,8 @@ described in [1]_.
 Input image can be 8-bit or 16-bit, for 16-bit input images, the number of
 histogram bins is determined from the maximum value present in the image.
 
-Result image is 8- or 16-bit with respect to the input image.
+Result image is 8-/16-bit or double with respect to the input image and the
+rank filter operation.
 
 References
 ----------
@@ -17,7 +18,7 @@ References
 
 import warnings
 import numpy as np
-from skimage import img_as_ubyte, img_as_uint
+from skimage import img_as_ubyte
 
 from . import generic_cy
 
@@ -27,7 +28,7 @@ __all__ = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum', 'mean',
            'pop', 'threshold', 'tophat', 'noise_filter', 'entropy', 'otsu']
 
 
-def _handle_input(image, selem, out, mask):
+def _handle_input(image, selem, out, mask, out_dtype=None):
 
     if image.dtype not in (np.uint8, np.uint16):
         image = img_as_ubyte(image)
@@ -42,7 +43,9 @@ def _handle_input(image, selem, out, mask):
         mask = np.ascontiguousarray(mask)
 
     if out is None:
-        out = np.empty_like(image, dtype=image.dtype)
+        if out_dtype is None:
+            out_dtype = image.dtype
+        out = np.empty_like(image, dtype=out_dtype)
 
     if image is out:
         raise NotImplementedError("Cannot perform rank operation in place.")
@@ -62,9 +65,10 @@ def _handle_input(image, selem, out, mask):
     return image, selem, out, mask, max_bin
 
 
-def _apply(func, image, selem, out, mask, shift_x, shift_y):
+def _apply(func, image, selem, out, mask, shift_x, shift_y, out_dtype=None):
 
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask)
+    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
+                                                     out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, max_bin=max_bin)
@@ -668,7 +672,7 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : ndarray (double)
         Output image.
 
     References
@@ -687,7 +691,8 @@ def entropy(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """
 
     return _apply(generic_cy._entropy, image, selem,
-                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y)
+                  out=out, mask=mask, shift_x=shift_x, shift_y=shift_y,
+                  out_dtype=np.double)
 
 
 def otsu(image, selem, out=None, mask=None, shift_x=False, shift_y=False):

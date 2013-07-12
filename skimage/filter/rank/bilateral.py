@@ -11,6 +11,9 @@ The pixel neighborhood is defined by:
 The kernel is flat (i.e. each pixel belonging to the neighborhood contributes
 equally).
 
+Result image is 8-/16-bit or double with respect to the input image and the
+rank filter operation.
+
 References
 ----------
 
@@ -30,9 +33,11 @@ from .generic import _handle_input
 __all__ = ['mean_bilateral', 'pop_bilateral']
 
 
-def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1):
+def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
+           out_dtype=None):
 
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask)
+    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
+                                                     out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, max_bin=max_bin, s0=s0, s1=s1)

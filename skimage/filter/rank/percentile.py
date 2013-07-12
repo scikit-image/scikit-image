@@ -10,7 +10,8 @@ described in [1]_.
 Input image can be 8-bit or 16-bit, for 16-bit input images, the number of
 histogram bins is determined from the maximum value present in the image.
 
-Result image is 8 or 16-bit with respect to the input image.
+Result image is 8-/16-bit or double with respect to the input image and the
+rank filter operation.
 
 References
 ----------
@@ -33,9 +34,11 @@ __all__ = ['autolevel_percentile', 'gradient_percentile',
            'threshold_percentile']
 
 
-def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1):
+def _apply(func, image, selem, out, mask, shift_x, shift_y, p0, p1,
+           out_dtype=None):
 
-    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask)
+    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
+                                                     out_dtype)
 
     func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
          out=out, max_bin=max_bin, p0=p0, p1=p1)
