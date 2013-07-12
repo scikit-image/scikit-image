@@ -1,7 +1,14 @@
 import numpy as np
-from nose.tools import raises
 from numpy.testing import assert_equal
 from skimage.util import regular_grid
+
+
+def test_regular_grid_full():
+    ar = np.zeros((2, 2))
+    g = regular_grid(ar, 25)
+    assert_equal(g, [slice(None, None, None), slice(None, None, None)])
+    ar[g] = 1
+    assert_equal(ar.size, ar.sum())
 
 
 def test_regular_grid_2d_8():
