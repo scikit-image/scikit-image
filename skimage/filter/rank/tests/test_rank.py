@@ -163,8 +163,8 @@ def test_compare_autolevels():
 
 
 def test_compare_autolevels_16bit():
-    # compare autolevel(16-bit) and percentile autolevel(16-bit) with p0=0.0 and
-    # p1=1.0 should returns the same arrays
+    # compare autolevel(16-bit) and percentile autolevel(16-bit) with p0=0.0
+    # and p1=1.0 should returns the same arrays
 
     image = data.camera().astype(np.uint16) * 4
 
@@ -193,8 +193,8 @@ def test_compare_ubyte_vs_float():
 
 
 def test_compare_8bit_unsigned_vs_signed():
-    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
-    # dynamic) should be identical
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
+    # of dynamic) should be identical
 
     # Create signed int8 image that and convert it to uint8
     image = img_as_ubyte(data.camera())
@@ -216,8 +216,8 @@ def test_compare_8bit_unsigned_vs_signed():
 
 
 def test_compare_8bit_vs_16bit():
-    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
-    # dynamic) should be identical
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
+    # of dynamic) should be identical
 
     image8 = util.img_as_ubyte(data.camera())
     image16 = image8.astype(np.uint16)
@@ -327,7 +327,8 @@ def test_smallest_selem16():
 
 
 def test_empty_selem():
-    # check that min, max and mean returns zeros if structuring element is empty
+    # check that min, max and mean returns zeros if structuring element is
+    # empty
 
     image = np.zeros((5, 5), dtype=np.uint16)
     out = np.zeros_like(image)
@@ -401,6 +402,10 @@ def test_entropy():
     data = np.tile(
         np.reshape(np.arange(4096), (64, 64)), (2, 2)).astype(np.uint16)
     assert(np.max(rank.entropy(data, selem)) == 12)
+
+    # make sure output is of dtype double
+    out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
+    assert out.dtype == np.double
 
 
 def test_selem_dtypes():
