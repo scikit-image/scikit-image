@@ -28,18 +28,12 @@ class InpaintPlugin(LabelPainter):
         viewer = self.image_viewer
         image = viewer.image
         mask = self.paint_tool.overlay
-        print mask.shape, mask.max(), mask.dtype
-
-        demo_inpaint(image, mask)
-        # viewer.ax.imshow(mask)
-        # labels = morphology.watershed(edge_image, mask)
-        # viewer.ax.imshow(labels, cmap=plt.cm.jet, alpha=0.5)
+        painted = demo_inpaint(image, mask)
+        viewer.ax.imshow(painted, cmap=plt.cm.jet, alpha=0.5)
         viewer.redraw()
 
 
 image = data.camera()
-# paint_region = (slice(65, 70), slice(55, 75))
-# image[paint_region] = 0
 plugin = InpaintPlugin()
 plugin += OKCancelButtons()
 plt.gray()
