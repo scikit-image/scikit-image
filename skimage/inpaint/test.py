@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-# from skimage import data
+from skimage import data
 
 import _heap
 import fmm
@@ -27,6 +27,7 @@ def inpaint(image, mask, epsilon=3):
     ax0.imshow(image)
     ax1.imshow(painted)
     plt.show()
+    # return painted
 
 
 def demo_time_fill():
@@ -48,5 +49,11 @@ def demo_time_fill():
     plt.show()
 
 
-# demo_inpaint()
+image = data.camera()[80:180, 200:300]
+paint_region = (slice(55, 65), slice(85, 100))
+image[paint_region] = 0
+
+mask = np.zeros_like(image, dtype=np.uint8)
+mask[paint_region] = 1
+demo_inpaint(image, mask)
 # demo_time_fill()
