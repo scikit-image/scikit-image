@@ -9,10 +9,10 @@ from libc.math cimport log
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
 
-cdef inline float _kernel_mean(Py_ssize_t* histo, float pop, dtype_t g,
-                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                               float p0, float p1,
-                               Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_mean(Py_ssize_t* histo, double pop, dtype_t g,
+                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                double p0, double p1,
+                                Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t bilat_pop = 0
@@ -31,10 +31,10 @@ cdef inline float _kernel_mean(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_pop(Py_ssize_t* histo, float pop, dtype_t g,
-                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                              float p0, float p1,
-                              Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_pop(Py_ssize_t* histo, double pop, dtype_t g,
+                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                               double p0, double p1,
+                               Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t bilat_pop = 0

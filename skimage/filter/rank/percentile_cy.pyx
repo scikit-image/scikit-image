@@ -7,10 +7,10 @@ cimport numpy as cnp
 from .core_cy cimport dtype_t, dtype_t_out, _core, _min, _max
 
 
-cdef inline float _kernel_autolevel(Py_ssize_t* histo, float pop, dtype_t g,
-                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                    float p0, float p1,
-                                    Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_autolevel(Py_ssize_t* histo, double pop, dtype_t g,
+                                     Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                     double p0, double p1,
+                                     Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i, imin, imax, sum, delta
 
@@ -31,7 +31,7 @@ cdef inline float _kernel_autolevel(Py_ssize_t* histo, float pop, dtype_t g,
 
         delta = imax - imin
         if delta > 0:
-            return <float>(max_bin - 1) * (_min(_max(imin, g), imax)
+            return <double>(max_bin - 1) * (_min(_max(imin, g), imax)
                                            - imin) / delta
         else:
             return imax - imin
@@ -39,10 +39,10 @@ cdef inline float _kernel_autolevel(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_gradient(Py_ssize_t* histo, float pop, dtype_t g,
-                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                   float p0, float p1,
-                                   Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_gradient(Py_ssize_t* histo, double pop, dtype_t g,
+                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                    double p0, double p1,
+                                    Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i, imin, imax, sum, delta
 
@@ -66,10 +66,10 @@ cdef inline float _kernel_gradient(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_mean(Py_ssize_t* histo, float pop, dtype_t g,
-                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                               float p0, float p1,
-                               Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_mean(Py_ssize_t* histo, double pop, dtype_t g,
+                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                double p0, double p1,
+                                Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i, sum, mean, n
 
@@ -91,12 +91,12 @@ cdef inline float _kernel_mean(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_subtract_mean(Py_ssize_t* histo, float pop,
-                                        dtype_t g,
-                                        Py_ssize_t max_bin,
-                                        Py_ssize_t mid_bin, float p0,
-                                        float p1, Py_ssize_t s0,
-                                        Py_ssize_t s1):
+cdef inline double _kernel_subtract_mean(Py_ssize_t* histo, double pop,
+                                         dtype_t g,
+                                         Py_ssize_t max_bin,
+                                         Py_ssize_t mid_bin, double p0,
+                                         double p1, Py_ssize_t s0,
+                                         Py_ssize_t s1):
 
     cdef Py_ssize_t i, sum, mean, n
 
@@ -117,12 +117,12 @@ cdef inline float _kernel_subtract_mean(Py_ssize_t* histo, float pop,
         return 0
 
 
-cdef inline float _kernel_enhance_contrast(Py_ssize_t* histo, float pop,
-                                           dtype_t g,
-                                           Py_ssize_t max_bin,
-                                           Py_ssize_t mid_bin, float p0,
-                                           float p1, Py_ssize_t s0,
-                                           Py_ssize_t s1):
+cdef inline double _kernel_enhance_contrast(Py_ssize_t* histo, double pop,
+                                            dtype_t g,
+                                            Py_ssize_t max_bin,
+                                            Py_ssize_t mid_bin, double p0,
+                                            double p1, Py_ssize_t s0,
+                                            Py_ssize_t s1):
 
     cdef Py_ssize_t i, imin, imax, sum, delta
 
@@ -152,10 +152,10 @@ cdef inline float _kernel_enhance_contrast(Py_ssize_t* histo, float pop,
         return 0
 
 
-cdef inline float _kernel_percentile(Py_ssize_t* histo, float pop, dtype_t g,
-                                     Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                     float p0, float p1,
-                                     Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_percentile(Py_ssize_t* histo, double pop, dtype_t g,
+                                      Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                      double p0, double p1,
+                                      Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t sum = 0
@@ -171,10 +171,10 @@ cdef inline float _kernel_percentile(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_pop(Py_ssize_t* histo, float pop, dtype_t g,
-                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                              float p0, float p1,
-                              Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_pop(Py_ssize_t* histo, double pop, dtype_t g,
+                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                               double p0, double p1,
+                               Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i, sum, n
 
@@ -190,10 +190,10 @@ cdef inline float _kernel_pop(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_threshold(Py_ssize_t* histo, float pop, dtype_t g,
-                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                    float p0, float p1,
-                                    Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_threshold(Py_ssize_t* histo, double pop, dtype_t g,
+                                     Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                     double p0, double p1,
+                                     Py_ssize_t s0, Py_ssize_t s1):
 
     cdef int i
     cdef Py_ssize_t sum = 0
@@ -213,7 +213,7 @@ def _autolevel(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
                dtype_t_out[:, ::1] out,
-               char shift_x, char shift_y, float p0, float p1,
+               char shift_x, char shift_y, double p0, double p1,
                Py_ssize_t max_bin):
 
     _core(_kernel_autolevel[dtype_t], image, selem, mask, out,
@@ -224,7 +224,7 @@ def _gradient(dtype_t[:, ::1] image,
               char[:, ::1] selem,
               char[:, ::1] mask,
               dtype_t_out[:, ::1] out,
-              char shift_x, char shift_y, float p0, float p1,
+              char shift_x, char shift_y, double p0, double p1,
               Py_ssize_t max_bin):
 
     _core(_kernel_gradient[dtype_t], image, selem, mask, out,
@@ -235,7 +235,7 @@ def _mean(dtype_t[:, ::1] image,
           char[:, ::1] selem,
           char[:, ::1] mask,
           dtype_t_out[:, ::1] out,
-          char shift_x, char shift_y, float p0, float p1,
+          char shift_x, char shift_y, double p0, double p1,
           Py_ssize_t max_bin):
 
     _core(_kernel_mean[dtype_t], image, selem, mask, out,
@@ -246,7 +246,7 @@ def _subtract_mean(dtype_t[:, ::1] image,
                    char[:, ::1] selem,
                    char[:, ::1] mask,
                    dtype_t_out[:, ::1] out,
-                   char shift_x, char shift_y, float p0, float p1,
+                   char shift_x, char shift_y, double p0, double p1,
                    Py_ssize_t max_bin):
 
     _core(_kernel_subtract_mean[dtype_t], image, selem, mask,
@@ -257,7 +257,7 @@ def _enhance_contrast(dtype_t[:, ::1] image,
                       char[:, ::1] selem,
                       char[:, ::1] mask,
                       dtype_t_out[:, ::1] out,
-                      char shift_x, char shift_y, float p0, float p1,
+                      char shift_x, char shift_y, double p0, double p1,
                       Py_ssize_t max_bin):
 
     _core(_kernel_enhance_contrast[dtype_t], image, selem, mask,
@@ -268,7 +268,7 @@ def _percentile(dtype_t[:, ::1] image,
                 char[:, ::1] selem,
                 char[:, ::1] mask,
                 dtype_t_out[:, ::1] out,
-                char shift_x, char shift_y, float p0, Py_ssize_t max_bin):
+                char shift_x, char shift_y, double p0, Py_ssize_t max_bin):
 
     _core(_kernel_percentile[dtype_t], image, selem, mask, out,
           shift_x, shift_y, p0, 1, 0, 0, max_bin)
@@ -278,7 +278,7 @@ def _pop(dtype_t[:, ::1] image,
          char[:, ::1] selem,
          char[:, ::1] mask,
          dtype_t_out[:, ::1] out,
-         char shift_x, char shift_y, float p0, float p1,
+         char shift_x, char shift_y, double p0, double p1,
          Py_ssize_t max_bin):
 
     _core(_kernel_pop[dtype_t], image, selem, mask, out,
@@ -289,7 +289,7 @@ def _threshold(dtype_t[:, ::1] image,
                char[:, ::1] selem,
                char[:, ::1] mask,
                dtype_t_out[:, ::1] out,
-               char shift_x, char shift_y, float p0, Py_ssize_t max_bin):
+               char shift_x, char shift_y, double p0, Py_ssize_t max_bin):
 
     _core(_kernel_threshold[dtype_t], image, selem, mask, out,
           shift_x, shift_y, p0, 1, 0, 0, max_bin)

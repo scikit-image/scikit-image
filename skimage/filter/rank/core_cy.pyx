@@ -17,13 +17,13 @@ cdef inline dtype_t _min(dtype_t a, dtype_t b):
     return a if a <= b else b
 
 
-cdef inline void histogram_increment(Py_ssize_t* histo, float* pop,
+cdef inline void histogram_increment(Py_ssize_t* histo, double* pop,
                                      dtype_t value):
     histo[value] += 1
     pop[0] += 1
 
 
-cdef inline void histogram_decrement(Py_ssize_t* histo, float* pop,
+cdef inline void histogram_decrement(Py_ssize_t* histo, double* pop,
                                      dtype_t value):
     histo[value] -= 1
     pop[0] -= 1
@@ -42,15 +42,15 @@ cdef inline char is_in_mask(Py_ssize_t rows, Py_ssize_t cols,
             return 0
 
 
-cdef void _core(float kernel(Py_ssize_t*, float, dtype_t,
-                             Py_ssize_t, Py_ssize_t, float,
-                             float, Py_ssize_t, Py_ssize_t),
+cdef void _core(double kernel(Py_ssize_t*, double, dtype_t,
+                              Py_ssize_t, Py_ssize_t, double,
+                              double, Py_ssize_t, Py_ssize_t),
                 dtype_t[:, ::1] image,
                 char[:, ::1] selem,
                 char[:, ::1] mask,
                 dtype_t_out[:, ::1] out,
                 char shift_x, char shift_y,
-                float p0, float p1,
+                double p0, double p1,
                 Py_ssize_t s0, Py_ssize_t s1,
                 Py_ssize_t max_bin) except *:
     """Compute histogram for each pixel neighborhood, apply kernel function and
@@ -82,8 +82,8 @@ cdef void _core(float kernel(Py_ssize_t*, float, dtype_t,
     # define local variable types
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max, i, even_row
 
-    # number of pixels actually inside the neighborhood (float)
-    cdef float pop = 0
+    # number of pixels actually inside the neighborhood (double)
+    cdef double pop = 0
 
     # the current local histogram distribution
     cdef Py_ssize_t* histo = <Py_ssize_t*>malloc(max_bin * sizeof(Py_ssize_t))

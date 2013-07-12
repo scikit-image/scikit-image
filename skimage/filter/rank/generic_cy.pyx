@@ -9,10 +9,10 @@ from libc.math cimport log
 from .core_cy cimport dtype_t, dtype_t_out, _core
 
 
-cdef inline float _kernel_autolevel(Py_ssize_t* histo, float pop, dtype_t g,
-                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                    float p0, float p1,
-                                    Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_autolevel(Py_ssize_t* histo, double pop, dtype_t g,
+                                     Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                     double p0, double p1,
+                                     Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i, imin, imax, delta
 
@@ -27,17 +27,17 @@ cdef inline float _kernel_autolevel(Py_ssize_t* histo, float pop, dtype_t g,
                 break
         delta = imax - imin
         if delta > 0:
-            return <float>(max_bin - 1) * (g - imin) / delta
+            return <double>(max_bin - 1) * (g - imin) / delta
         else:
             return imax - imin
     else:
         return 0
 
 
-cdef inline float _kernel_bottomhat(Py_ssize_t* histo, float pop, dtype_t g,
-                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                    float p0, float p1,
-                                    Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_bottomhat(Py_ssize_t* histo, double pop, dtype_t g,
+                                     Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                     double p0, double p1,
+                                     Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
 
@@ -50,10 +50,10 @@ cdef inline float _kernel_bottomhat(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_equalize(Py_ssize_t* histo, float pop, dtype_t g,
-                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                   float p0, float p1,
-                                   Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_equalize(Py_ssize_t* histo, double pop, dtype_t g,
+                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                    double p0, double p1,
+                                    Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t sum = 0
@@ -68,10 +68,10 @@ cdef inline float _kernel_equalize(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_gradient(Py_ssize_t* histo, float pop, dtype_t g,
-                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                   float p0, float p1,
-                                   Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_gradient(Py_ssize_t* histo, double pop, dtype_t g,
+                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                    double p0, double p1,
+                                    Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i, imin, imax
 
@@ -89,10 +89,10 @@ cdef inline float _kernel_gradient(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_maximum(Py_ssize_t* histo, float pop, dtype_t g,
-                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                  float p0, float p1,
-                                  Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_maximum(Py_ssize_t* histo, double pop, dtype_t g,
+                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                   double p0, double p1,
+                                   Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
 
@@ -104,10 +104,10 @@ cdef inline float _kernel_maximum(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_mean(Py_ssize_t* histo, float pop,dtype_t g,
-                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                               float p0, float p1,
-                               Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_mean(Py_ssize_t* histo, double pop,dtype_t g,
+                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                double p0, double p1,
+                                Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t mean = 0
@@ -120,12 +120,12 @@ cdef inline float _kernel_mean(Py_ssize_t* histo, float pop,dtype_t g,
         return 0
 
 
-cdef inline float _kernel_subtract_mean(Py_ssize_t* histo, float pop,
-                                        dtype_t g,
-                                        Py_ssize_t max_bin,
-                                        Py_ssize_t mid_bin, float p0,
-                                        float p1, Py_ssize_t s0,
-                                        Py_ssize_t s1):
+cdef inline double _kernel_subtract_mean(Py_ssize_t* histo, double pop,
+                                         dtype_t g,
+                                         Py_ssize_t max_bin,
+                                         Py_ssize_t mid_bin, double p0,
+                                         double p1, Py_ssize_t s0,
+                                         Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t mean = 0
@@ -138,13 +138,13 @@ cdef inline float _kernel_subtract_mean(Py_ssize_t* histo, float pop,
         return 0
 
 
-cdef inline float _kernel_median(Py_ssize_t* histo, float pop, dtype_t g,
-                                 Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                 float p0, float p1,
-                                 Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_median(Py_ssize_t* histo, double pop, dtype_t g,
+                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                  double p0, double p1,
+                                  Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
-    cdef float sum = pop / 2.0
+    cdef double sum = pop / 2.0
 
     if pop:
         for i in range(max_bin):
@@ -156,10 +156,10 @@ cdef inline float _kernel_median(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_minimum(Py_ssize_t* histo, float pop, dtype_t g,
-                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                  float p0, float p1,
-                                  Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_minimum(Py_ssize_t* histo, double pop, dtype_t g,
+                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                   double p0, double p1,
+                                   Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
 
@@ -171,10 +171,10 @@ cdef inline float _kernel_minimum(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_modal(Py_ssize_t* histo, float pop, dtype_t g,
-                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                float p0, float p1,
-                                Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_modal(Py_ssize_t* histo, double pop, dtype_t g,
+                                 Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                 double p0, double p1,
+                                 Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t hmax = 0, imax = 0
 
@@ -188,12 +188,12 @@ cdef inline float _kernel_modal(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_enhance_contrast(Py_ssize_t* histo, float pop,
-                                           dtype_t g,
-                                           Py_ssize_t max_bin,
-                                           Py_ssize_t mid_bin, float p0,
-                                           float p1, Py_ssize_t s0,
-                                           Py_ssize_t s1):
+cdef inline double _kernel_enhance_contrast(Py_ssize_t* histo, double pop,
+                                            dtype_t g,
+                                            Py_ssize_t max_bin,
+                                            Py_ssize_t mid_bin, double p0,
+                                            double p1, Py_ssize_t s0,
+                                            Py_ssize_t s1):
 
     cdef Py_ssize_t i, imin, imax
 
@@ -214,18 +214,18 @@ cdef inline float _kernel_enhance_contrast(Py_ssize_t* histo, float pop,
         return 0
 
 
-cdef inline float _kernel_pop(Py_ssize_t* histo, float pop, dtype_t g,
-                              Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                              float p0, float p1,
-                              Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_pop(Py_ssize_t* histo, double pop, dtype_t g,
+                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                               double p0, double p1,
+                               Py_ssize_t s0, Py_ssize_t s1):
 
     return pop
 
 
-cdef inline float _kernel_threshold(Py_ssize_t* histo, float pop, dtype_t g,
-                                    Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                    float p0, float p1,
-                                    Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_threshold(Py_ssize_t* histo, double pop, dtype_t g,
+                                     Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                     double p0, double p1,
+                                     Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t mean = 0
@@ -238,10 +238,10 @@ cdef inline float _kernel_threshold(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_tophat(Py_ssize_t* histo, float pop, dtype_t g,
-                                 Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                 float p0, float p1,
-                                 Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_tophat(Py_ssize_t* histo, double pop, dtype_t g,
+                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                  double p0, double p1,
+                                  Py_ssize_t s0, Py_ssize_t s1):
 
     cdef Py_ssize_t i
 
@@ -254,10 +254,11 @@ cdef inline float _kernel_tophat(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_noise_filter(Py_ssize_t* histo, float pop, dtype_t g,
-                                       Py_ssize_t max_bin,
-                                       Py_ssize_t mid_bin, float p0, float p1,
-                                       Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_noise_filter(Py_ssize_t* histo, double pop,
+                                        dtype_t g, Py_ssize_t max_bin,
+                                        Py_ssize_t mid_bin, double p0,
+                                        double p1, Py_ssize_t s0,
+                                        Py_ssize_t s1):
 
     cdef Py_ssize_t i
     cdef Py_ssize_t min_i
@@ -279,12 +280,12 @@ cdef inline float _kernel_noise_filter(Py_ssize_t* histo, float pop, dtype_t g,
         return min_i
 
 
-cdef inline float _kernel_entropy(Py_ssize_t* histo, float pop, dtype_t g,
-                                  Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                                  float p0, float p1,
-                                  Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_entropy(Py_ssize_t* histo, double pop, dtype_t g,
+                                   Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                   double p0, double p1,
+                                   Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
-    cdef float e, p
+    cdef double e, p
 
     if pop:
         e = 0.
@@ -297,14 +298,14 @@ cdef inline float _kernel_entropy(Py_ssize_t* histo, float pop, dtype_t g,
         return 0
 
 
-cdef inline float _kernel_otsu(Py_ssize_t* histo, float pop, dtype_t g,
-                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
-                               float p0, float p1,
-                               Py_ssize_t s0, Py_ssize_t s1):
+cdef inline double _kernel_otsu(Py_ssize_t* histo, double pop, dtype_t g,
+                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                                double p0, double p1,
+                                Py_ssize_t s0, Py_ssize_t s1):
     cdef Py_ssize_t i
     cdef Py_ssize_t max_i
-    cdef float P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b
-    cdef float mu = 0.
+    cdef double P, mu1, mu2, q1, new_q1, sigma_b, max_sigma_b
+    cdef double mu = 0.
 
     # compute local mean
     if pop:
