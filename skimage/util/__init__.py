@@ -11,7 +11,7 @@ if chk < 18:    # Use internal version for numpy versions < 1.8.x
 else:
     from numpy import pad
 del numpy, ver, chk
-from .regular_grid import regular_grid
+from ._regular_grid import regular_grid
 
 
 __all__ = ['img_as_float',

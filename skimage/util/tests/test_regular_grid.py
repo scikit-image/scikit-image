@@ -1,7 +1,7 @@
 import numpy as np
 from nose.tools import raises
 from numpy.testing import assert_equal
-from skimage.util.regular_grid import regular_grid
+from skimage.util import regular_grid
 
 
 def test_regular_grid_2d_8():
