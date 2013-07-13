@@ -82,12 +82,15 @@ def radon(image, theta=None, circle=False):
     else:
         diagonal = np.sqrt(2) * max(image.shape)
         pad = [int(np.ceil(diagonal - s)) for s in image.shape]
-        pad_width = [(p // 2, p - p // 2) for p in pad]
+        new_center = [(s + p) // 2 for s, p in zip(image.shape, pad)]
+        old_center = [s // 2 for s in image.shape]
+        pad_before = [nc - oc for oc, nc in zip(old_center, new_center)]
+        pad_width = [(pb, p - pb) for pb, p in zip(pad_before, pad)]
         padded_image = util.pad(image, pad_width, mode='constant',
                                 constant_values=0)
         out = np.zeros((max(padded_image.shape), len(theta)))
-        dh = pad[0] // 2 + image.shape[0] // 2
-        dw = pad[1] // 2 + image.shape[1] // 2
+        dh = padded_image.shape[0] // 2
+        dw = padded_image.shape[1] // 2
 
     shift0 = np.array([[1, 0, -dw],
                        [0, 1, -dh],
@@ -112,7 +115,10 @@ def radon(image, theta=None, circle=False):
 def _sinogram_circle_to_square(sinogram):
     diagonal = int(np.ceil(np.sqrt(2) * sinogram.shape[0]))
     pad = diagonal - sinogram.shape[0]
-    pad_width = ((pad // 2, pad - pad // 2), (0, 0))
+    old_center = sinogram.shape[0] // 2
+    new_center = diagonal // 2
+    pad_before = new_center - old_center
+    pad_width = ((pad_before, pad - pad_before), (0, 0))
     return util.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
@@ -216,9 +222,7 @@ def iradon(radon_image, theta=None, output_size=None,
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
     # Determine the center of the projections (= center of sinogram)
-    circle_size = int(np.floor(radon_image.shape[0] / np.sqrt(2)))
-    square_size = radon_image.shape[0]
-    mid_index = (square_size - circle_size) // 2 + circle_size // 2
+    mid_index = radon_image.shape[0] // 2
 
     x = output_size
     y = output_size
