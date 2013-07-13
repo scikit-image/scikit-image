@@ -55,9 +55,9 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     Examples
     --------
-    >>> from skimage.feature.corner import *
-    >>> from skimage.feature import pairwise_hamming_distance
-    >>> from skimage.feature._brief import *
+    >>> import numpy as np
+    >>> from skimage.feature.corner import corner_peaks, corner_harris
+    >>> from skimage.feature import pairwise_hamming_distance, brief, match_keypoints_brief
     >>> square1 = np.zeros([8, 8], dtype=np.int32)
     >>> square1[2:6, 2:6] = 1
     >>> square1
@@ -111,15 +111,17 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
            [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
     >>> match_keypoints_brief(keypoints1, descriptors1, keypoints2, descriptors2)
-    array([[[2, 2],
-            [2, 5],
-            [5, 2],
-            [5, 5]],
+    array([[[ 2.,  2.],
+            [ 2.,  2.]],
 
-           [[2, 2],
-            [2, 6],
-            [6, 2],
-            [6, 6]]])
+           [[ 2.,  5.],
+            [ 2.,  6.]],
+
+           [[ 5.,  2.],
+            [ 6.,  2.]],
+
+           [[ 5.,  5.],
+            [ 6.,  6.]]])
 
     """
     np.random.seed(sample_seed)
@@ -140,7 +142,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     # Removing keypoints that are within (patch_size / 2) distance from the
     # image border
-    keypoints = _remove_border_keypoints(image, keypoints, patch_size / 2)
+    keypoints = _remove_border_keypoints(image, keypoints, patch_size // 2)
     keypoints = np.ascontiguousarray(keypoints)
 
     descriptors = np.zeros((keypoints.shape[0], descriptor_size), dtype=bool,
@@ -149,10 +151,10 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     # Sampling pairs of decision pixels in patch_size x patch_size window
     if mode == 'normal':
 
-        samples = (patch_size / 5) * np.random.randn(descriptor_size * 8)
+        samples = (patch_size / 5.0) * np.random.randn(descriptor_size * 8)
         samples = np.array(samples, dtype=np.int32)
-        samples = samples[(samples < (patch_size / 2))
-                          & (samples > - (patch_size - 1) / 2)]
+        samples = samples[(samples < (patch_size // 2))
+                          & (samples > - (patch_size - 2) // 2)]
 
         pos1 = samples[:descriptor_size * 2]
         pos1 = pos1.reshape(descriptor_size, 2)
@@ -161,7 +163,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     else:
 
-        samples = np.random.randint(-patch_size / 2, (patch_size / 2) + 1,
+        samples = np.random.randint(-(patch_size - 2) // 2, (patch_size // 2) + 1,
                                     (descriptor_size * 2, 2))
         pos1, pos2 = np.split(samples, 2)
 
@@ -194,7 +196,7 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
 
     Returns
     -------
-    match_keypoints_brief : (2, Q, 2) ndarray
+    match_keypoints_brief : (Q, 2, 2) ndarray
         Location of Q matched keypoint pairs from two images.
 
     """
@@ -214,6 +216,8 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
     temp = distance > threshold
     row_check = ~ np.all(temp, axis = 1)
     matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
-    matched_keypoint_pairs = np.array([keypoints1[row_check], matched_keypoints2[row_check]])
+    matched_keypoint_pairs = np.zeros((np.sum(row_check), 2, 2))
+    matched_keypoint_pairs[:, 0, :] = keypoints1[row_check]
+    matched_keypoint_pairs[:, 1, :] = matched_keypoints2[row_check]
 
     return matched_keypoint_pairs

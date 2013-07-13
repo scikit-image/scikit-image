@@ -33,7 +33,7 @@ def test_match_keypoints_brief_lena_translation():
 		                                      keypoints2, descriptors2,
 		                                      threshold=0.10)
 
-	assert_array_equal(matched_keypoints[0,::], matched_keypoints[1,::] +
+	assert_array_equal(matched_keypoints[:, 0,:], matched_keypoints[:, 1,:] +
 		               [20, 15])
 
 
@@ -56,15 +56,22 @@ def test_match_keypoints_brief_lena_rotation():
 	matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
 		                                      keypoints2, descriptors2,
 		                                      threshold=0.07)
-	expected = np.array([[[248, 147],
-                          [263, 272],
-                          [271, 120],
-                          [414,  70],
-                          [454, 176]],
+	expected = np.array([[[ 263.,  272.],
+                          [ 234.,  298.]],
 
-                         [[232, 171],
-                          [234, 298],
-                          [258, 146],
-                          [405, 111],
-                          [435, 221]]])
+                         [[ 271.,  120.],
+                          [ 258.,  146.]],
+
+                         [[ 323.,  164.],
+                          [ 305.,  195.]],
+
+                         [[ 414.,   70.],
+                          [ 405.,  111.]],
+
+                         [[ 435.,  181.],
+                          [ 415.,  223.]],
+
+                         [[ 454.,  176.],
+                          [ 435.,  221.]]])
+
 	assert_array_equal(matched_keypoints, expected)
