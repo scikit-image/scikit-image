@@ -374,9 +374,9 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     ----------
     .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
            Imaging", IEEE Press 1988.
-    .. [2] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
-           (SART): a superior implementation of the ART algorithm", Ultrasonic
-           Imaging 6 pp 81--94 (1984)
+    .. [2] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction
+           technique (SART): a superior implementation of the ART algorithm",
+           Ultrasonic Imaging 6 pp 81--94 (1984)
     .. [3] S Kaczmarz, "Angenäherte auflösung von systemen linearer
            gleichungen", Bulletin International de l’Academie Polonaise des
            Sciences et des Lettres 35 pp 355--357 (1937)

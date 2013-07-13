@@ -143,6 +143,7 @@ def test_radon_iradon():
     # cubic interpolation is slow; only run one test for it
     yield check_radon_iradon, 'cubic', 'shepp-logan'
 
+
 def test_iradon_angles():
     """
     Test with different number of projections
