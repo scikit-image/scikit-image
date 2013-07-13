@@ -214,7 +214,7 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
     distance = pairwise_hamming_distance(descriptors1, descriptors2)
 
     temp = distance > threshold
-    row_check = ~ np.all(temp, axis = 1)
+    row_check = np.any(~temp, axis = 1)
     matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
     matched_keypoint_pairs = np.zeros((np.sum(row_check), 2, 2), dtype=np.intp)
     matched_keypoint_pairs[:, 0, :] = keypoints1[row_check]
