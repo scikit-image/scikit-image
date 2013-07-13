@@ -68,6 +68,7 @@ def radon(image, theta=None, circle=False):
         if not np.all(reconstruction_circle | (image == 0)):
             raise ValueError('Image must be zero outside the reconstruction'
                              ' circle')
+        # Crop image to make it square
         slices = []
         for d in (0, 1):
             if image.shape[d] > min(image.shape):
@@ -79,9 +80,6 @@ def radon(image, theta=None, circle=False):
                 slices.append(slice(None))
         slices = tuple(slices)
         padded_image = image[slices]
-        out = np.zeros((min(padded_image.shape), len(theta)))
-        dh = padded_image.shape[0] // 2
-        dw = padded_image.shape[1] // 2
     else:
         diagonal = np.sqrt(2) * max(image.shape)
         pad = [int(np.ceil(diagonal - s)) for s in image.shape]
@@ -91,15 +89,16 @@ def radon(image, theta=None, circle=False):
         pad_width = [(pb, p - pb) for pb, p in zip(pad_before, pad)]
         padded_image = util.pad(image, pad_width, mode='constant',
                                 constant_values=0)
-        out = np.zeros((max(padded_image.shape), len(theta)))
-        dh = padded_image.shape[0] // 2
-        dw = padded_image.shape[1] // 2
+    # padded_image is always square
+    assert padded_image.shape[0] == padded_image.shape[1]
+    radon_image = np.zeros((padded_image.shape[0], len(theta)))
+    center = padded_image.shape[0] // 2
 
-    shift0 = np.array([[1, 0, -dw],
-                       [0, 1, -dh],
+    shift0 = np.array([[1, 0, -center],
+                       [0, 1, -center],
                        [0, 0, 1]])
-    shift1 = np.array([[1, 0, dw],
-                       [0, 1, dh],
+    shift1 = np.array([[1, 0, center],
+                       [0, 1, center],
                        [0, 0, 1]])
 
     def build_rotation(theta):
@@ -111,8 +110,8 @@ def radon(image, theta=None, circle=False):
 
     for i in range(len(theta)):
         rotated = _warp_fast(padded_image, build_rotation(theta[i]))
-        out[:, i] = rotated.sum(0)
-    return out
+        radon_image[:, i] = rotated.sum(0)
+    return radon_image
 
 
 def _sinogram_circle_to_square(sinogram):
@@ -160,7 +159,7 @@ def iradon(radon_image, theta=None, output_size=None,
 
     Returns
     -------
-    output : ndarray
+    reconstructed : ndarray
         Reconstructed image. The rotation axis will be located in the pixel
         with indices
         ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
