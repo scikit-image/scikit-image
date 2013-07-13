@@ -269,9 +269,11 @@ def order_angles_golden_ratio(theta):
 
     Returns
     -------
-    indices : 1D array of unsigned integers
-        Indices into ``theta`` such that ``theta[indices]`` gives the
-        approximate golden ratio ordering of the projections.
+    indices_generator : generator yielding unsigned integers
+        The returned generator yields indices into ``theta`` such that
+        ``theta[indices]`` gives the approximate golden ratio ordering
+        of the projections. In total, ``len(theta)`` indices are yielded.
+        All non-negative integers < ``len(theta)`` are yielded exactly once.
 
     Notes
     -----
