@@ -210,7 +210,7 @@ def _random_circle(shape):
     c0, c1 = np.ogrid[0:shape[0], 0:shape[1]]
     r = np.sqrt((c0 - shape[0] // 2)**2 + (c1 - shape[1] // 2)**2)
     radius = min(shape) // 2
-    image[r >= radius] = 0.
+    image[r > radius] = 0.
     return image
 
 
@@ -236,7 +236,7 @@ def test_radon_circle():
     average_mass = mass.mean()
     relative_error = np.abs(mass - average_mass) / average_mass
     print(relative_error.max(), relative_error.mean())
-    assert np.all(relative_error < 3e-3)
+    assert np.all(relative_error < 3.2e-3)
 
 
 def check_sinogram_circle_to_square(size):
@@ -284,7 +284,7 @@ def check_radon_iradon_circle(interpolation, shape, output_size):
     # Find the reconstruction circle, set reconstruction to zero outside
     c0, c1 = np.ogrid[0:width, 0:width]
     r = np.sqrt((c0 - width // 2)**2 + (c1 - width // 2)**2)
-    reconstruction_rectangle[r >= radius] = 0.
+    reconstruction_rectangle[r > radius] = 0.
     print(reconstruction_circle.shape)
     print(reconstruction_rectangle.shape)
     np.allclose(reconstruction_rectangle, reconstruction_circle)

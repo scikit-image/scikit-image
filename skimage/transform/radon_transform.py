@@ -64,7 +64,7 @@ def radon(image, theta=None, circle=False):
         radius = min(image.shape) // 2
         c0, c1 = np.ogrid[0:image.shape[0], 0:image.shape[1]]
         reconstruction_circle = ((c0 - image.shape[0] // 2)**2
-                                 + (c1 - image.shape[1] // 2)**2) < radius**2
+                                 + (c1 - image.shape[1] // 2)**2) <= radius**2
         if not np.all(reconstruction_circle | (image == 0)):
             raise ValueError('Image must be zero outside the reconstruction'
                              ' circle')
@@ -231,9 +231,7 @@ def iradon(radon_image, theta=None, output_size=None,
     # Determine the center of the projections (= center of sinogram)
     mid_index = radon_image.shape[0] // 2
 
-    x = output_size
-    y = output_size
-    [X, Y] = np.mgrid[0.0:x, 0.0:y]
+    [X, Y] = np.mgrid[0:output_size, 0:output_size]
     xpr = X - int(output_size) // 2
     ypr = Y - int(output_size) // 2
 
@@ -250,8 +248,8 @@ def iradon(radon_image, theta=None, output_size=None,
             backprojected = interpolant(t)
         reconstructed += backprojected
     if circle:
-        radius = (output_size - 1) // 2
-        reconstruction_circle = (xpr**2 + ypr**2) < radius**2
+        radius = output_size // 2
+        reconstruction_circle = (xpr**2 + ypr**2) <= radius**2
         reconstructed[~reconstruction_circle] = 0.
 
     return reconstructed * np.pi / (2 * len(th))
