@@ -33,7 +33,8 @@ def radon(image, theta=None, circle=False):
     Parameters
     ----------
     image : array_like, dtype=float
-        Input image.
+        Input image. The rotation axis will be located in the pixel with
+        indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
     theta : array_like, dtype=float, optional (default np.arange(180))
         Projection angles (in degrees).
     circle : boolean, optional
@@ -43,8 +44,10 @@ def radon(image, theta=None, circle=False):
 
     Returns
     -------
-    output : ndarray
-        Radon transform (sinogram).
+    radon_image : ndarray
+        Radon transform (sinogram).  The tomography rotation axis will lie
+        at the pixel index ``radon_image.shape[0] // 2`` along the 0th
+        dimension of ``radon_image``.
 
     Raises
     ------
@@ -134,7 +137,10 @@ def iradon(radon_image, theta=None, output_size=None,
     ----------
     radon_image : array_like, dtype=float
         Image containing radon transform (sinogram). Each column of
-        the image corresponds to a projection along a different angle.
+        the image corresponds to a projection along a different angle. The
+        tomography rotation axis should lie at the pixel index
+        ``radon_image.shape[0] // 2`` along the 0th dimension of
+        ``radon_image``.
     theta : array_like, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
@@ -155,7 +161,9 @@ def iradon(radon_image, theta=None, output_size=None,
     Returns
     -------
     output : ndarray
-      Reconstructed image.
+        Reconstructed image. The rotation axis will be located in the pixel
+        with indices
+        ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
 
     Notes
     -----
@@ -318,7 +326,10 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     ----------
     radon_image : 2D array, dtype=float
         Image containing radon transform (sinogram). Each column of
-        the image corresponds to a projection along a different angle.
+        the image corresponds to a projection along a different angle. The
+        tomography rotation axis should lie at the pixel index
+        ``radon_image.shape[0] // 2`` along the 0th dimension of
+        ``radon_image``.
     theta : 1D array, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
@@ -340,8 +351,10 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
 
     Returns
     -------
-    output : ndarray
-        Reconstructed image.
+    reconstructed : ndarray
+        Reconstructed image. The rotation axis will be located in the pixel
+        with indices
+        ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
 
     Notes
     -----
