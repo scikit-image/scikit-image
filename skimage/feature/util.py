@@ -14,14 +14,14 @@ def _remove_border_keypoints(image, keypoints, dist):
 
 def pairwise_hamming_distance(array1, array2):
     """Calculate hamming dissimilarity measure between two sets of
-    boolean vectors.
+    vectors.
 
     Parameters
     ----------
-    array1 : (P1, D) array of dtype bool
-        P1 vectors of size D with boolean elements.
-    array2 : (P2, D) array of dtype bool
-        P2 vectors of size D with boolean elements.
+    array1 : (P1, D) array
+        P1 vectors of size D.
+    array2 : (P2, D) array
+        P2 vectors of size D.
 
     Returns
     -------

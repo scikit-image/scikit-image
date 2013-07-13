@@ -111,17 +111,17 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
            [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
     >>> match_keypoints_brief(keypoints1, descriptors1, keypoints2, descriptors2)
-    array([[[ 2.,  2.],
-            [ 2.,  2.]],
+    array([[[ 2,  2],
+            [ 2,  2]],
 
-           [[ 2.,  5.],
-            [ 2.,  6.]],
+           [[ 2,  5],
+            [ 2,  6]],
 
-           [[ 5.,  2.],
-            [ 6.,  2.]],
+           [[ 5,  2],
+            [ 6,  2]],
 
-           [[ 5.,  5.],
-            [ 6.,  6.]]])
+           [[ 5,  5],
+            [ 6,  6]]])
 
     """
     np.random.seed(sample_seed)
@@ -216,7 +216,7 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
     temp = distance > threshold
     row_check = ~ np.all(temp, axis = 1)
     matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
-    matched_keypoint_pairs = np.zeros((np.sum(row_check), 2, 2))
+    matched_keypoint_pairs = np.zeros((np.sum(row_check), 2, 2), dtype=np.intp)
     matched_keypoint_pairs[:, 0, :] = keypoints1[row_check]
     matched_keypoint_pairs[:, 1, :] = matched_keypoints2[row_check]
 

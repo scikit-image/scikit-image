@@ -8,10 +8,10 @@ from skimage.feature import brief, match_keypoints_brief
 
 
 def test_brief_color_image_unsupported_error():
-	"""Brief descriptors can be evaluated on gray-scale images only."""
-	img = np.zeros((20, 20, 3))
-	keypoints = [[7, 5], [11, 13]]
-	assert_raises(ValueError, brief, img, keypoints)
+    """Brief descriptors can be evaluated on gray-scale images only."""
+    img = np.zeros((20, 20, 3))
+    keypoints = [[7, 5], [11, 13]]
+    assert_raises(ValueError, brief, img, keypoints)
 
 
 def test_match_keypoints_brief_lena_translation():
@@ -56,22 +56,23 @@ def test_match_keypoints_brief_lena_rotation():
 	matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
 		                                      keypoints2, descriptors2,
 		                                      threshold=0.07)
-	expected = np.array([[[ 263.,  272.],
-                          [ 234.,  298.]],
+	expected = np.array([[[263, 272],
+                          [234, 298]],
 
-                         [[ 271.,  120.],
-                          [ 258.,  146.]],
+                         [[271, 120],
+                          [258, 146]],
 
-                         [[ 323.,  164.],
-                          [ 305.,  195.]],
+                         [[323, 164],
+                          [305, 195]],
 
-                         [[ 414.,   70.],
-                          [ 405.,  111.]],
+                         [[414,  70],
+                          [405, 111]],
 
-                         [[ 435.,  181.],
-                          [ 415.,  223.]],
+                         [[435, 181],
+                          [415, 223]],
 
-                         [[ 454.,  176.],
-                          [ 435.,  221.]]])
+                         [[454, 176],
+                          [435, 221]]])
+
 
 	assert_array_equal(matched_keypoints, expected)
