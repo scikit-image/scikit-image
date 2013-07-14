@@ -218,7 +218,7 @@ def iradon(radon_image, theta=None, output_size=None,
     elif filter == "hann":
         fourier_filter *= (1 + np.cos(omega / 2)) / 2
     elif filter is None:
-        f[1:] = 1
+        fourier_filter[:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
     # Apply filter in Fourier domain
