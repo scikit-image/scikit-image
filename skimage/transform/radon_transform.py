@@ -15,7 +15,7 @@ References:
 """
 from __future__ import division
 import numpy as np
-from scipy.fftpack import fftshift, fft, ifft
+from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
@@ -203,26 +203,26 @@ def iradon(radon_image, theta=None, output_size=None,
     img = util.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
-    f = fftshift(abs(np.mgrid[-1:1:2 / projection_size_padded])).reshape(-1, 1)
-    w = 2 * np.pi * f
-    # Start from first element to avoid divide by zero
+    f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency
+    omega = 2 * np.pi * f                                # angular frequency
+    fourier_filter = 2 * np.abs(f)                       # ramp filter
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
-        f[1:] = f[1:] * np.sin(w[1:] / 2) / (w[1:] / 2)
+        # Start from first element to avoid divide by zero
+        fourier_filter[1:] = fourier_filter[1:] * np.sin(omega[1:]) / omega[1:]
     elif filter == "cosine":
-        f[1:] = f[1:] * np.cos(w[1:] / 2)
+        fourier_filter *= np.cos(omega)
     elif filter == "hamming":
-        f[1:] = f[1:] * (0.54 + 0.46 * np.cos(w[1:]))
+        fourier_filter *= (0.54 + 0.46 * np.cos(omega / 2))
     elif filter == "hann":
-        f[1:] = f[1:] * (1 + np.cos(w[1:])) / 2
+        fourier_filter *= (1 + np.cos(omega / 2)) / 2
     elif filter is None:
         f[1:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
-    filter_ft = np.tile(f, (1, len(theta)))
     # Apply filter in Fourier domain
-    projection = fft(img, axis=0) * filter_ft
+    projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0))
 
     # Resize filtered image back to original size
