@@ -6,7 +6,7 @@ from .. import exposure
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0)):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=(0, 0)):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -36,8 +36,8 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
         is not an integer. If 'mean' is chosen, then fill = arr_in.mean().
     rescale_intensity: bool, optional
         Whether to rescale the intensity of each image to [0, 1].
-    output_shape: tuple, optional
-        The desired aspect ratio for the montage (default is square).
+    grid_shape: tuple, optional
+        The desired grid shape for the montage (the default aspect ratio is square).
 
     Returns
     -------
@@ -67,7 +67,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
      [ 10.   11.    5.5   5.5]]
     >>> print(arr_in.mean())
     5.5
-    >>> arr_out_nonsquare = montage2d(arr_in, output_shape = (3, 4))
+    >>> arr_out_nonsquare = montage2d(arr_in, grid_shape = (3, 4))
     >>> print(arr_out_nonsquare)
     [[  0.    1.    4.    5. ]
      [  2.    3.    6.    7. ]
@@ -87,10 +87,10 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, output_shape=(0, 0))
             arr_in[i] = exposure.rescale_intensity(arr_in[i])
 
     # -- determine alpha
-    if output_shape == (0, 0):
+    if grid_shape == (0, 0):
         alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
     else:
-        alpha_y, alpha_x = output_shape
+        alpha_y, alpha_x = grid_shape
 
     # -- fill missing patches
     if fill == 'mean':
