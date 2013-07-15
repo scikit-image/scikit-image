@@ -30,44 +30,32 @@ def assert_phase_almost_equal(a, b, *args, **kwargs):
     assert_array_almost_equal(a + shift, b, *args, **kwargs)
 
 
-def test_unwrap2D():
+def check_unwrap(image, mask=None):
+    image_wrapped = np.angle(np.exp(1j * image))
+    if not mask is None:
+        print('Testing a masked image')
+        image = np.ma.array(image, mask=mask)
+        image_wrapped = np.ma.array(image_wrapped, mask=mask)
+    image_unwrapped = unwrap(image_wrapped)
+    assert_phase_almost_equal(image_unwrapped, image)
+
+
+def test_unwrap_2d():
     x, y = np.ogrid[:8, :16]
-    phi = 2*np.pi*(x*0.2 + y*0.1)
-    phi_wrapped = np.angle(np.exp(1j*phi))
-    phi_unwrapped = unwrap(phi_wrapped)
-    assert_phase_almost_equal(phi, phi_unwrapped)
+    image = 2 * np.pi * (x * 0.2 + y * 0.1)
+    yield check_unwrap, image
+    mask = np.zeros(image.shape, dtype=np.bool)
+    mask[4:6, 4:8] = True
+    yield check_unwrap, image, mask
 
 
-def test_unwrap2D_masked():
-    x, y = np.ogrid[:8, :16]
-    phi = 2*np.pi*(x*0.2 + y*0.1)
-
-    mask = np.zeros_like(phi, dtype = np.uint8)
-    mask[4:6, 4:8] = 1
-
-    phi_wrapped = np.angle(np.exp(1j*phi))
-    phi_wrapped_masked = np.ma.array(phi_wrapped, dtype=np.float32, mask=mask)
-    phi_unwrapped_masked = unwrap(phi_wrapped_masked)
-    assert_phase_almost_equal(phi, phi_unwrapped_masked)
-
-
-def test_unwrap3D():
+def test_unwrap_3d():
     x, y, z = np.ogrid[:8, :12, :4]
-    phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
-    phi_wrapped = np.angle(np.exp(1j*phi))
-    phi_unwrapped = unwrap(phi_wrapped)
-    assert_phase_almost_equal(phi, phi_unwrapped)
-
-
-def test_unwrap3D_masked():
-    x, y, z = np.ogrid[:8, :12, :4]
-    phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
-    phi_wrapped = np.angle(np.exp(1j*phi))
-    mask = np.zeros_like(phi, dtype = np.uint8)
-    mask[4:6, 4:6, 1:3] = 1
-    phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
-    phi_unwrapped_masked = unwrap(phi_wrapped_masked)
-    assert_phase_almost_equal(phi, phi_unwrapped_masked)
+    image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
+    yield check_unwrap, image
+    mask = np.zeros(image.shape, dtype=np.bool)
+    mask[4:6, 4:6, 1:3] = True
+    yield check_unwrap, image, mask
 
 
 def check_wrap_around(ndim, axis):
