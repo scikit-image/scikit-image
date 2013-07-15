@@ -124,8 +124,8 @@ def fast_marching_method(image, flag, u, heap, _run_inpaint=True, epsilon=5):
         i, j = heappop(heap)[1]
         flag[i, j] = KNOWN
 
-        if ((i <= 1) or (j <= 1) or (i >= image.shape[0] - 1)
-                or (j >= image.shape[1] - 1)):
+        if ((i <= 1) or (j <= 1) or (i >= image.shape[0] - 2)
+                or (j >= image.shape[1] - 2)):
             continue
 
         for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):

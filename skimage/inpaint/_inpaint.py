@@ -93,7 +93,7 @@ def ep_neighbor(i, j, size, epsilon):
     indices = np.transpose(np.where(disk(epsilon)))
     center_ind = indices - [epsilon, epsilon] + [i, j]
     for ind in center_ind:
-        if (ind >= [0, 0]).all() and (ind <= np.array(size) - [1, 1]).all():
+        if (ind > [0, 0]).all() and (ind < np.array(size) - [1, 1]).all():
             nb.append(ind)
 
     return nb
