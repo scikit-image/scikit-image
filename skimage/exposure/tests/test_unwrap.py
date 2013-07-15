@@ -2,9 +2,32 @@ from __future__ import print_function, division
 
 import numpy as np
 from numpy.testing import (run_module_suite, assert_array_almost_equal,
-                           assert_almost_equal)
+                           assert_almost_equal, assert_array_equal)
+import warnings
 
 from skimage.exposure import unwrap
+
+
+def assert_phase_almost_equal(a, b, *args, **kwargs):
+    '''An assert_almost_equal insensitive to phase shifts of n*2*pi.'''
+    shift = 2 * np.pi * np.round((b.mean() - a.mean()) / (2 * np.pi))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        print('assert_phase_allclose, abs', np.max(np.abs(a - (b - shift))))
+        print('assert_phase_allclose, rel',
+              np.max(np.abs((a - (b - shift)) / a)))
+    if np.ma.isMaskedArray(a):
+        assert np.ma.isMaskedArray(b)
+        assert_array_equal(a.mask, b.mask)
+        au = np.asarray(a)
+        bu = np.asarray(b)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            print('assert_phase_allclose, no mask, abs',
+                  np.max(np.abs(au - (bu - shift))))
+            print('assert_phase_allclose, no mask, rel',
+                  np.max(np.abs((au - (bu - shift)) / au)))
+    assert_array_almost_equal(a + shift, b, *args, **kwargs)
 
 
 def test_unwrap2D():
@@ -12,9 +35,7 @@ def test_unwrap2D():
     phi = 2*np.pi*(x*0.2 + y*0.1)
     phi_wrapped = np.angle(np.exp(1j*phi))
     phi_unwrapped = unwrap(phi_wrapped)
-
-    s = np.round(phi_unwrapped[0,0]/(2*np.pi))
-    assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
+    assert_phase_almost_equal(phi, phi_unwrapped)
 
 
 def test_unwrap2D_masked():
@@ -25,11 +46,9 @@ def test_unwrap2D_masked():
     mask[4:6, 4:8] = 1
 
     phi_wrapped = np.angle(np.exp(1j*phi))
-    phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
+    phi_wrapped_masked = np.ma.array(phi_wrapped, dtype=np.float32, mask=mask)
     phi_unwrapped_masked = unwrap(phi_wrapped_masked)
-
-    s = np.round(phi_unwrapped_masked[0,0]/(2*np.pi))
-    assert_array_almost_equal(phi + 2*np.pi*s, phi_unwrapped_masked)
+    assert_phase_almost_equal(phi, phi_unwrapped_masked)
 
 
 def test_unwrap3D():
@@ -37,9 +56,7 @@ def test_unwrap3D():
     phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
     phi_wrapped = np.angle(np.exp(1j*phi))
     phi_unwrapped = unwrap(phi_wrapped)
-
-    s = np.round(phi_unwrapped[0,0]/(2*np.pi))
-    assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
+    assert_phase_almost_equal(phi, phi_unwrapped)
 
 
 def test_unwrap3D_masked():
@@ -50,9 +67,7 @@ def test_unwrap3D_masked():
     mask[4:6, 4:6, 1:3] = 1
     phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
     phi_unwrapped_masked = unwrap(phi_wrapped_masked)
-
-    s = np.round(phi_unwrapped_masked[0,0,0]/(2*np.pi))
-    assert_array_almost_equal(phi + 2*np.pi*s, phi_unwrapped_masked)
+    assert_phase_almost_equal(phi, phi_unwrapped_masked)
 
 
 def check_wrap_around(ndim, axis):
