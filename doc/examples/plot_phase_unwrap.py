@@ -22,7 +22,7 @@ image = exposure.rescale_intensity(image, out_range=(0, 4 * np.pi))
 # Create a phase-wrapped image in the interval [-pi, pi)
 image_wrapped = np.angle(np.exp(1j * image))
 # Perform phase unwrapping
-image_unwrapped = exposure.unwrap(image_wrapped)
+image_unwrapped = exposure.unwrap_phase(image_wrapped)
 
 # Plotting
 plt.figure()

@@ -5,7 +5,7 @@ from numpy.testing import (run_module_suite, assert_array_almost_equal,
                            assert_almost_equal, assert_array_equal)
 import warnings
 
-from skimage.exposure import unwrap
+from skimage.exposure import unwrap_phase
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
@@ -36,7 +36,7 @@ def check_unwrap(image, mask=None):
         print('Testing a masked image')
         image = np.ma.array(image, mask=mask)
         image_wrapped = np.ma.array(image_wrapped, mask=mask)
-    image_unwrapped = unwrap(image_wrapped)
+    image_unwrapped = unwrap_phase(image_wrapped)
     assert_phase_almost_equal(image_unwrapped, image)
 
 
@@ -70,7 +70,7 @@ def check_wrap_around(ndim, axis):
     index_first = tuple([0] * ndim)
     index_last = tuple([-1 if n == axis else 0 for n in range(ndim)])
     # unwrap the image without wrap around
-    image_unwrap_no_wrap_around = unwrap(image_wrapped)
+    image_unwrap_no_wrap_around = unwrap_phase(image_wrapped)
     print('endpoints without wrap_around:',
           image_unwrap_no_wrap_around[index_first],
           image_unwrap_no_wrap_around[index_last])
@@ -79,7 +79,7 @@ def check_wrap_around(ndim, axis):
                - image_unwrap_no_wrap_around[index_last]) > np.pi
     # unwrap the image with wrap around
     wrap_around = [n == axis for n in range(ndim)]
-    image_unwrap_wrap_around = unwrap(image_wrapped, wrap_around)
+    image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around)
     print('endpoints with wrap_around:',
           image_unwrap_wrap_around[index_first],
           image_unwrap_wrap_around[index_last])
@@ -108,7 +108,7 @@ def test_mask():
         mask |= mask_1d.reshape(1, -1)
         mask[i, :] = False   # unmask i'th ramp
         image_wrapped = np.ma.array(np.angle(np.exp(1j * image)), mask=mask)
-        image_unwrapped = unwrap(image_wrapped)
+        image_unwrapped = unwrap_phase(image_wrapped)
         image_unwrapped -= image_unwrapped[0, 0]    # remove phase shift
         # The end of the unwrapped array should have value equal to the
         # endpoint of the unmasked ramp
@@ -116,7 +116,7 @@ def test_mask():
 
         # Same tests, but forcing use of the 3D unwrapper by reshaping
         image_wrapped_3d = image_wrapped.reshape((1,) + image_wrapped.shape)
-        image_unwrapped_3d = unwrap(image_wrapped_3d)
+        image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
         image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]    # remove phase shift
         assert_array_almost_equal(image_unwrapped_3d[:, :, -1], image[i, -1])
 

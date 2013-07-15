@@ -5,7 +5,7 @@ from ._unwrap_3d import unwrap_3d
 from .._shared.six import string_types
 
 
-def unwrap(image, wrap_around=False):
+def unwrap_phase(image, wrap_around=False):
     '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
     original, unwrapped image.
 
