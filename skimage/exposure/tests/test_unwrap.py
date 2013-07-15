@@ -94,42 +94,5 @@ def test_wrap_around():
             yield check_wrap_around, ndim, axis
 
 
-def unwrap_plots():
-
-    x, y = np.ogrid[:32, :32]
-    phi = 2*np.pi*(x*0.2 + y*0.1)
-
-    #phi = 1*np.arctan2(x-14.3, y-6.3) - 2*np.arctan2(x-18.3, y-22.1)
-
-    phi[8,8] = np.NaN
-
-    phi_wrapped = np.angle(np.exp(1j*phi))
-    phi_unwrapped = unwrap(phi_wrapped,
-                           #wrap_around_axis_0 = True,
-                           #wrap_around_axis_1 = True,
-                           )
-
-    mask = np.zeros_like(phi, dtype = np.uint8)
-    #mask[10:22, 4:10] = 1
-    phi_wrapped_masked = np.ma.array(phi_wrapped, dtype = np.float32, mask = mask)
-    phi_unwrapped_masked = unwrap(phi_wrapped_masked)
-
-    import matplotlib.pyplot as plt
-    plt.figure(1)
-    plt.clf()
-    plt.gray()
-    plt.subplot(221)
-    plt.imshow(phi, interpolation = 'nearest')
-    plt.subplot(222)
-    plt.imshow(phi_wrapped, interpolation = 'nearest')
-    plt.subplot(223)
-    plt.imshow(phi_unwrapped, interpolation = 'nearest')
-    plt.subplot(224)
-    plt.imshow(phi_unwrapped_masked, interpolation = 'nearest')
-
-    plt.draw()
-    plt.show()
-
-
 if __name__=="__main__":
     run_module_suite()
