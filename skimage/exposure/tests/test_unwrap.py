@@ -94,5 +94,32 @@ def test_wrap_around():
             yield check_wrap_around, ndim, axis
 
 
+def test_mask():
+    length = 100
+    ramps = [np.linspace(0, 4 * np.pi, length),
+             np.linspace(0, 8 * np.pi, length),
+             np.linspace(0, 6 * np.pi, length)]
+    image = np.vstack(ramps)
+    mask_1d = np.ones((length,), dtype=np.bool)
+    mask_1d[0] = mask_1d[-1] = False
+    for i in range(len(ramps)):
+        # mask all ramps but the i'th one
+        mask = np.zeros(image.shape, dtype=np.bool)
+        mask |= mask_1d.reshape(1, -1)
+        mask[i, :] = False   # unmask i'th ramp
+        image_wrapped = np.ma.array(np.angle(np.exp(1j * image)), mask=mask)
+        image_unwrapped = unwrap(image_wrapped)
+        image_unwrapped -= image_unwrapped[0, 0]    # remove phase shift
+        # The end of the unwrapped array should have value equal to the
+        # endpoint of the unmasked ramp
+        assert_array_almost_equal(image_unwrapped[:, -1], image[i, -1])
+
+        # Same tests, but forcing use of the 3D unwrapper by reshaping
+        image_wrapped_3d = image_wrapped.reshape((1,) + image_wrapped.shape)
+        image_unwrapped_3d = unwrap(image_wrapped_3d)
+        image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]    # remove phase shift
+        assert_array_almost_equal(image_unwrapped_3d[:, :, -1], image[i, -1])
+
+
 if __name__=="__main__":
     run_module_suite()
