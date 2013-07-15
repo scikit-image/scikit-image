@@ -3,7 +3,7 @@ from ._regionprops import regionprops, perimeter
 from ._structural_similarity import structural_similarity
 from ._polygon import approximate_polygon, subdivide_polygon
 from .fit import LineModel, CircleModel, EllipseModel, ransac
-from .local import local_sum, local_mean, local_median, local_min, local_max
+from .block import block_reduce
 
 
 __all__ = ['find_contours',
@@ -16,8 +16,4 @@ __all__ = ['find_contours',
            'CircleModel',
            'EllipseModel',
            'ransac',
-           'local_sum',
-           'local_mean',
-           'local_median',
-           'local_min',
-           'local_max']
+           'block_reduce']

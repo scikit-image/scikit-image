@@ -1,0 +1,49 @@
+import numpy as np
+from skimage.util import view_as_blocks, pad
+
+
+def block_reduce(image, block_size, func=np.sum, cval=0):
+    """Down-sample image by applying function to local blocks.
+
+    Parameters
+    ----------
+    image : ndarray
+        N-dimensional input image.
+    block_size : array_like
+        Array containing down-sampling integer factor along each axis.
+    func : callable
+        Function object which is used to calculate the return value for each
+        local block. This function must implement an ``axis`` parameter such as
+        ``numpy.sum`` or ``numpy.min``.
+    cval : float
+        Constant padding value if image is not perfectly divisible by the
+        block size.
+
+    Returns
+    -------
+    image : ndarray
+        Down-sampled image with same number of dimensions as input image.
+
+    """
+
+    if len(block_size) != image.ndim:
+        raise ValueError("`block_size` must have the same length "
+                         "as `image.shape`.")
+
+    pad_width = []
+    for i in range(len(block_size)):
+        if image.shape[i] % block_size[i] != 0:
+            after_width = block_size[i] - (image.shape[i] % block_size[i])
+        else:
+            after_width = 0
+        pad_width.append((0, after_width))
+
+    image = pad(image, pad_width=pad_width, mode='constant',
+                constant_values=cval)
+
+    out = view_as_blocks(image, block_size)
+
+    for i in range(len(out.shape) // 2):
+        out = func(out, axis=-1)
+
+    return out
