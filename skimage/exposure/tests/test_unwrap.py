@@ -50,7 +50,7 @@ def test_unwrap_2d():
 
 
 def test_unwrap_3d():
-    x, y, z = np.ogrid[:8, :12, :4]
+    x, y, z = np.ogrid[:8, :12, :16]
     image = 2 * np.pi * (x * 0.2 + y * 0.1 + z * 0.05)
     yield check_unwrap, image
     mask = np.zeros(image.shape, dtype=np.bool)
