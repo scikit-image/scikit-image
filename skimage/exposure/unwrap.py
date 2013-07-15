@@ -46,7 +46,7 @@ def unwrap(image, wrap_around=False):
         wrap_around = [wrap_around] * image.ndim
     elif (hasattr(wrap_around, '__getitem__')
           and not isinstance(wrap_around, string_types)):
-        if not len(wrap_around) == image.ndim:
+        if len(wrap_around) != image.ndim:
             raise ValueError('Length of wrap_around must equal the '
                              'dimensionality of image')
         wrap_around = [bool(wa) for wa in wrap_around]
@@ -57,9 +57,9 @@ def unwrap(image, wrap_around=False):
     if np.ma.isMaskedArray(image):
         mask = np.require(image.mask, np.uint8, ['C'])
     else:
-        mask = np.zeros(image.shape, dtype=np.uint8, order='C')
+        mask = np.zeros_like(image, dtype=np.uint8, order='C')
     image_not_masked = np.asarray(image, dtype=np.float32, order='C')
-    image_unwrapped = np.empty(image.shape, dtype=np.float32)
+    image_unwrapped = np.empty_like(image, dtype=np.float32, order='C')
 
     if image.ndim == 2:
         unwrap_2d(image_not_masked, mask, image_unwrapped,
