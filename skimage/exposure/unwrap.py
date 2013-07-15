@@ -29,6 +29,15 @@ def unwrap_phase(image, wrap_around=False):
         Unwrapped image of the same shape as the input. If the input ``image``
         was a masked array, the mask will be preserved.
 
+    Examples
+    --------
+    >>> c0, c1 = np.ogrid[-1:1:128j, -1:1:128j]
+    >>> image = 12 * np.pi * np.exp(-(c0**2 + c1**2))
+    >>> image_wrapped = np.angle(np.exp(1j * image))
+    >>> image_unwrapped = unwrap_phase(image_wrapped)
+    >>> np.std(image_unwrapped - image) < 1e-6   # A constant offset is normal
+    True
+
     References
     ----------
     .. [1] Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
