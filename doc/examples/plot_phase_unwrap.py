@@ -26,26 +26,24 @@ image_unwrapped = exposure.unwrap(image_wrapped)
 
 # Plotting
 plt.figure()
-plt.gray()    # grayscale colormap as default
-imkwargs = dict(vmin=0, vmax=4 * np.pi)
 plt.subplot(221)
 plt.title('Original')
-plt.imshow(image, **imkwargs)
+plt.imshow(image, cmap='gray', vmin=0, vmax=4 * np.pi)
 plt.colorbar()
 
 plt.subplot(222)
 plt.title('Wrapped phase')
-plt.imshow(image_wrapped, vmin=-np.pi, vmax=np.pi)
+plt.imshow(image_wrapped, cmap='gray', vmin=-np.pi, vmax=np.pi)
 plt.colorbar()
 
 plt.subplot(223)
 plt.title('After phase unwrapping')
-plt.imshow(image_unwrapped)
+plt.imshow(image_unwrapped,  cmap='gray')
 plt.colorbar()
 
 plt.subplot(224)
 plt.title('Unwrapped minus original')
-plt.imshow(image_unwrapped - image)
+plt.imshow(image_unwrapped - image,  cmap='gray')
 plt.colorbar()
 
 plt.show()
