@@ -12,20 +12,21 @@ def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
             np.ndarray[np.uint8_t, ndim=2] selem,
             np.ndarray[np.uint8_t, ndim=2] out=None,
             char shift_x=0, char shift_y=0):
-    """Return greyscale morphological erosion of an image.
+    """Return greyscale morphological dilation of an image.
 
-    Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
-    in the neighborhood centered at (i,j). Erosion shrinks bright regions and
-    enlarges dark regions.
+    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
+    in the neighborhood centered at (i,j). Dilation enlarges bright regions
+    and shrinks dark regions.
 
     Parameters
     ----------
+
     image : ndarray
         Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None is
+        The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
     shift_x, shift_y : bool
         shift structuring element about center point. This only affects
@@ -33,9 +34,10 @@ def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
 
     Returns
     -------
-    eroded : uint8 array
-        The result of the morphological erosion.
+    dilated : uint8 array
+        The result of the morphological dilation.
     """
+
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
     cdef Py_ssize_t srows = selem.shape[0]
@@ -90,21 +92,20 @@ def _erode(np.ndarray[np.uint8_t, ndim=2] image,
            np.ndarray[np.uint8_t, ndim=2] selem,
            np.ndarray[np.uint8_t, ndim=2] out=None,
            char shift_x=0, char shift_y=0):
-    """Return greyscale morphological dilation of an image.
+    """Return greyscale morphological erosion of an image.
 
-    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
-    in the neighborhood centered at (i,j). Dilation enlarges bright regions
-    and shrinks dark regions.
+    Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
+    in the neighborhood centered at (i,j). Erosion shrinks bright regions and
+    enlarges dark regions.
 
     Parameters
     ----------
-
     image : ndarray
         Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray
-        The array to store the result of the morphology. If None, is
+        The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
     shift_x, shift_y : bool
         shift structuring element about center point. This only affects
@@ -112,8 +113,8 @@ def _erode(np.ndarray[np.uint8_t, ndim=2] image,
 
     Returns
     -------
-    dilated : uint8 array
-        The result of the morphological dilation.
+    eroded : uint8 array
+        The result of the morphological erosion.
     """
 
     cdef Py_ssize_t rows = image.shape[0]
