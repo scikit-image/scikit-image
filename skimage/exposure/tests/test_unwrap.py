@@ -16,6 +16,7 @@ def test_unwrap2D():
     s = np.round(phi_unwrapped[0,0]/(2*np.pi))
     assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
 
+
 def test_unwrap2D_masked():
     x, y = np.ogrid[:8, :16]
     phi = 2*np.pi*(x*0.2 + y*0.1)
@@ -30,6 +31,7 @@ def test_unwrap2D_masked():
     s = np.round(phi_unwrapped_masked[0,0]/(2*np.pi))
     assert_array_almost_equal(phi + 2*np.pi*s, phi_unwrapped_masked)
 
+
 def test_unwrap3D():
     x, y, z = np.ogrid[:8, :12, :4]
     phi = 2*np.pi*(x*0.2 + y*0.1 + z*0.05)
@@ -38,6 +40,7 @@ def test_unwrap3D():
 
     s = np.round(phi_unwrapped[0,0]/(2*np.pi))
     assert_array_almost_equal(phi, phi_unwrapped - s*2*np.pi)
+
 
 def test_unwrap3D_masked():
     x, y, z = np.ogrid[:8, :12, :4]
@@ -123,6 +126,7 @@ def unwrap_plots():
 
     plt.draw()
     plt.show()
+
 
 if __name__=="__main__":
     run_module_suite()
