@@ -33,12 +33,26 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            rgb2grey, gray2rgb,
                            xyz2lab, lab2xyz,
                            lab2rgb, rgb2lab,
-                           is_rgb, is_gray
+                           is_rgb, is_gray,
+                           guess_spatial_dimensions
                            )
 
 from skimage import data_dir, data
 
 import colorsys
+
+
+def test_guess_spatial_dimensions():
+    im1 = np.zeros((5, 5))
+    im2 = np.zeros((5, 5, 5))
+    im3 = np.zeros((5, 5, 3))
+    im4 = np.zeros((5, 5, 5, 3))
+    im5 = np.zeros((5,))
+    assert_equal(guess_spatial_dimensions(im1), 2)
+    assert_equal(guess_spatial_dimensions(im2), 3)
+    assert_equal(guess_spatial_dimensions(im3), None)
+    assert_equal(guess_spatial_dimensions(im4), 3)
+    assert_raises(ValueError, guess_spatial_dimensions, im5)
 
 
 class TestColorconv(TestCase):
