@@ -10,6 +10,7 @@ __all__ = ['demo_inpaint', 'demo_time_fill']
 
 
 def demo_inpaint(image, mask):
+    print np.sum(mask)
     painted = fmm.inpaint(image, mask)
 
     fig, (ax0, ax1) = plt.subplots(ncols=2)
@@ -17,7 +18,7 @@ def demo_inpaint(image, mask):
     ax0.imshow(image)
     ax1.imshow(painted)
     plt.show()
-    # return painted
+    return painted
 
 
 def demo_time_fill():
@@ -40,10 +41,13 @@ def demo_time_fill():
 
 
 image = data.camera()[80:180, 200:300]
-paint_region = (slice(55, 65), slice(85, 100))
+paint_region = (slice(97, 100), slice(97, 100))
 image[paint_region] = 0
+# image[55:65, 75:80] = 0
+# image[55:65, 82:90] = 0
 
 mask = np.zeros_like(image, dtype=np.uint8)
 mask[paint_region] = 1
+# mask[55:65, 80:83] = 0
 demo_inpaint(image, mask)
 # demo_time_fill()

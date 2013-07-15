@@ -26,9 +26,9 @@ class InpaintPlugin(LabelPainter):
 
     def _show_inpaint(self):
         viewer = self.image_viewer
-        image = viewer.image
-        mask = self.paint_tool.overlay
-        painted = demo_inpaint(image, mask)
+        # image = viewer.image
+        # mask = self.paint_tool.overlay
+        painted = demo_inpaint(viewer.image, self.paint_tool.overlay)
         viewer.ax.imshow(painted, cmap=plt.cm.jet, alpha=0.5)
         viewer.redraw()
 
