@@ -70,7 +70,10 @@ def check_wrap_around(ndim, axis):
     index_first = tuple([0] * ndim)
     index_last = tuple([-1 if n == axis else 0 for n in range(ndim)])
     # unwrap the image without wrap around
-    image_unwrap_no_wrap_around = unwrap_phase(image_wrapped)
+    with warnings.catch_warnings():
+        # We do not want warnings about length 1 dimensions
+        warnings.simplefilter("ignore")
+        image_unwrap_no_wrap_around = unwrap_phase(image_wrapped)
     print('endpoints without wrap_around:',
           image_unwrap_no_wrap_around[index_first],
           image_unwrap_no_wrap_around[index_last])
@@ -79,7 +82,10 @@ def check_wrap_around(ndim, axis):
                - image_unwrap_no_wrap_around[index_last]) > np.pi
     # unwrap the image with wrap around
     wrap_around = [n == axis for n in range(ndim)]
-    image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around)
+    with warnings.catch_warnings():
+        # We do not want warnings about length 1 dimensions
+        warnings.simplefilter("ignore")
+        image_unwrap_wrap_around = unwrap_phase(image_wrapped, wrap_around)
     print('endpoints with wrap_around:',
           image_unwrap_wrap_around[index_first],
           image_unwrap_wrap_around[index_last])

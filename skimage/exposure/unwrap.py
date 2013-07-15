@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
@@ -53,6 +54,9 @@ def unwrap_phase(image, wrap_around=False):
     else:
         raise ValueError('wrap_around must be a bool or a sequence with '
                          'length equal to the dimensionality of image')
+    if image.ndim == 3 and 1 in image.shape:
+        warnings.warn('image is 3D and has a length 1 dimension; consider '
+                      'using a 2D array to use the 2D unwrapping algorithm')
 
     if np.ma.isMaskedArray(image):
         mask = np.require(image.mask, np.uint8, ['C'])
