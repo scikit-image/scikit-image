@@ -13,6 +13,7 @@ problem.
 import numpy as np
 from matplotlib import pyplot as plt
 from skimage import data, img_as_float, color, exposure
+from skimage.exposure import unwrap_phase
 
 
 # Load an image as a floating-point grayscale
@@ -22,9 +23,8 @@ image = exposure.rescale_intensity(image, out_range=(0, 4 * np.pi))
 # Create a phase-wrapped image in the interval [-pi, pi)
 image_wrapped = np.angle(np.exp(1j * image))
 # Perform phase unwrapping
-image_unwrapped = exposure.unwrap_phase(image_wrapped)
+image_unwrapped = unwrap_phase(image_wrapped)
 
-# Plotting
 plt.figure()
 plt.subplot(221)
 plt.title('Original')
