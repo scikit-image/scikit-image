@@ -150,6 +150,9 @@ Library:
     Extension: skimage.exposure._unwrap_2d
         Sources:
             skimage/exposure/_unwrap_2d.pyx, skimage/exposure/unwrap_2d_ljmu.c
+    Extension: skimage.exposure._unwrap_1d
+        Sources:
+            skimage/exposure/_unwrap_1d.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

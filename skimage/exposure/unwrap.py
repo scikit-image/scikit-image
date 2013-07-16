@@ -1,6 +1,7 @@
 import numpy as np
 import warnings
 
+from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 from .._shared.six import string_types
@@ -12,22 +13,30 @@ def unwrap_phase(image, wrap_around=False):
 
     Parameters
     ----------
-    image : 2D or 3D ndarray of floats, optionally a masked array
+    image : 1D, 2D or 3D ndarray of floats, optionally a masked array
         The values should be in the range ``[-pi, pi)``. If a masked array is
         provided, the masked entries will not be changed, and their values
         will not be used to guide the unwrapping of neighboring, unmasked
-        values.
+        values. Masked 1D arrays are not allowed, and will raise a
+        ``ValueError``.
     wrap_around : bool or sequence of bool
         When an element of the sequence is  ``True``, the unwrapping process
         will regard the edges along the corresponding axis of the image to be
         connected and use this connectivity to guide the phase unwrapping
         process. If only a single boolean is given, it will apply to all axes.
+        Wrap around is not supported for 1D arrays.
 
     Returns
     -------
     image_unwrapped : array_like, float32
         Unwrapped image of the same shape as the input. If the input ``image``
         was a masked array, the mask will be preserved.
+
+    Raises
+    ------
+    ValueError
+        If called with a masked 1D array or called with a 1D array and
+        ``wrap_around=True``.
 
     Examples
     --------
@@ -50,8 +59,8 @@ def unwrap_phase(image, wrap_around=False):
            C. Gorecki, & E. L. Novak (Eds.), Optical Metrology (2005) 32--40,
            International Society for Optics and Photonics.
     '''
-    if image.ndim not in (2, 3):
-        raise ValueError('image must be 2 or 3 dimensional')
+    if image.ndim not in (1, 2, 3):
+        raise ValueError('image must be 1, 2 or 3 dimensional')
     if isinstance(wrap_around, bool):
         wrap_around = [wrap_around] * image.ndim
     elif (hasattr(wrap_around, '__getitem__')
@@ -63,9 +72,15 @@ def unwrap_phase(image, wrap_around=False):
     else:
         raise ValueError('wrap_around must be a bool or a sequence with '
                          'length equal to the dimensionality of image')
-    if image.ndim == 3 and 1 in image.shape:
-        warnings.warn('image is 3D and has a length 1 dimension; consider '
-                      'using a 2D array to use the 2D unwrapping algorithm')
+    if image.ndim == 1:
+        if np.ma.isMaskedArray(image):
+            raise ValueError('1D masked images cannot be unwrapped')
+        if wrap_around[0]:
+            raise ValueError('wrap_around is not supported for 1D images')
+    if image.ndim in (2, 3) and 1 in image.shape:
+        warnings.warn('image has a length 1 dimension; consider using an '
+                      'array of lower dimensionality to use a more efficient '
+                      'algorithm')
 
     if np.ma.isMaskedArray(image):
         mask = np.require(image.mask, np.uint8, ['C'])
@@ -74,7 +89,9 @@ def unwrap_phase(image, wrap_around=False):
     image_not_masked = np.asarray(image, dtype=np.float32, order='C')
     image_unwrapped = np.empty_like(image, dtype=np.float32, order='C')
 
-    if image.ndim == 2:
+    if image.ndim == 1:
+        unwrap_1d(image_not_masked, image_unwrapped)
+    elif image.ndim == 2:
         unwrap_2d(image_not_masked, mask, image_unwrapped,
                   wrap_around)
     elif image.ndim == 3:

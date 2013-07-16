@@ -2,7 +2,8 @@ from __future__ import print_function, division
 
 import numpy as np
 from numpy.testing import (run_module_suite, assert_array_almost_equal,
-                           assert_almost_equal, assert_array_equal)
+                           assert_almost_equal, assert_array_equal,
+                           assert_raises)
 import warnings
 
 from skimage.exposure import unwrap_phase
@@ -38,6 +39,15 @@ def check_unwrap(image, mask=None):
         image_wrapped = np.ma.array(image_wrapped, mask=mask)
     image_unwrapped = unwrap_phase(image_wrapped)
     assert_phase_almost_equal(image_unwrapped, image)
+
+
+def test_unwrap_1d():
+    image = np.linspace(0, 10 * np.pi, 100)
+    check_unwrap(image)
+    # Masked arrays are not allowed in 1D
+    assert_raises(ValueError, check_unwrap, image, True)
+    # wrap_around is not allowed in 1D
+    assert_raises(ValueError, unwrap_phase, image, True)
 
 
 def test_unwrap_2d():
