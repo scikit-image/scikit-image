@@ -1,12 +1,12 @@
-cdef extern void unwrap2D(float* wrapped_image,
-                     float* unwrapped_image,
+cdef extern void unwrap2D(double* wrapped_image,
+                     double* unwrapped_image,
                      unsigned char* input_mask,
                      int image_width, int image_height,
                      int wrap_around_x, int wrap_around_y)
 
-def unwrap_2d(float[:, ::1] image,
+def unwrap_2d(double[:, ::1] image,
               unsigned char[:, ::1] mask,
-              float[:, ::1] unwrapped_image,
+              double[:, ::1] unwrapped_image,
               wrap_around):
     unwrap2D(&image[0, 0],
              &unwrapped_image[0, 0],
