@@ -21,7 +21,7 @@ VERSION             = '0.9dev'
 PYTHON_VERSION      = (2, 5)
 DEPENDENCIES        = {
                         'numpy': (1, 6),
-                        'Cython': (0, 15),
+                        'Cython': (0, 17),
                       }
 
 
