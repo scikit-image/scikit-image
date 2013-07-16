@@ -17,12 +17,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+#define PI M_PI
+#define TWOPI (2 * M_PI)
 
 //TODO: remove global variables
 //TODO: make thresholds independent
-
-static float PI = 3.141592654f;
-static float TWOPI = 6.283185307f;
 
 #define NOMASK 0
 #define MASK 1

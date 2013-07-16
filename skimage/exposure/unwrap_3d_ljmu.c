@@ -19,9 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
-static float PI = 3.141592654f;
-static float TWOPI = 6.283185307f;
+#define PI M_PI
+#define TWOPI (2 * M_PI)
 
 #define NOMASK 0
 #define MASK 1
