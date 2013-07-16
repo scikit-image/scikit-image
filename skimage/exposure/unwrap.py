@@ -97,6 +97,8 @@ def unwrap_phase(image, wrap_around=False):
         unwrap_2d(image_not_masked, mask, image_unwrapped,
                   wrap_around)
     elif image.ndim == 3:
+        image_not_masked = np.asarray(image, dtype=np.float64, order='C')
+        image_unwrapped = np.empty_like(image, dtype=np.float64, order='C')
         unwrap_3d(image_not_masked, mask, image_unwrapped,
                   wrap_around)
 
