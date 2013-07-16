@@ -7,7 +7,8 @@ Some signals can only be observed modulo 2*pi, and this can also apply to
 two- and three dimensional images. In these cases phase unwrapping is
 needed to recover the underlying, unwrapped signal. In this example we will
 demonstrate an algorithm [1]_ implemented in ``skimage`` at work for such a
-problem.
+problem. One-, two- and three dimensional images can all be unwrapped using
+skimage. Here we will demonstrate phase unwrapping in the two dimensional case.
 """
 
 import numpy as np
