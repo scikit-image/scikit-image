@@ -6,11 +6,11 @@
 from libc.math cimport M_PI
 
 
-def unwrap_1d(float[::1] image, float[::1] unwrapped_image):
+def unwrap_1d(double[::1] image, double[::1] unwrapped_image):
     '''Phase unwrapping using the naive approach.'''
     cdef:
         Py_ssize_t i
-        float difference
+        double difference
         long periods = 0
     unwrapped_image[0] = image[0]
     for i in range(1, image.shape[0]):
