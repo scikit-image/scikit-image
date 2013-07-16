@@ -1,4 +1,5 @@
 
+
 def _remove_border_keypoints(image, keypoints, dist):
     """Removes keypoints that are within dist pixels from the image border."""
     width = image.shape[0]
@@ -31,5 +32,5 @@ def pairwise_hamming_distance(array1, array2):
         vector in array2.
 
     """
-    distance = (array1[:,None] != array2[None]).mean(axis=2)
+    distance = (array1[:, None] != array2[None]).mean(axis=2)
     return distance

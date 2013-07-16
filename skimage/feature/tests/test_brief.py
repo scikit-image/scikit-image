@@ -15,48 +15,49 @@ def test_brief_color_image_unsupported_error():
 
 
 def test_match_keypoints_brief_lena_translation():
-	"""Test matched keypoints between lena image and its translated version."""
-	img = data.lena()
-	img = rgb2gray(img)
-	img.shape
-	tform = tf.SimilarityTransform(scale=1, rotation=0, translation=(15, 20))
-	translated_img = tf.warp(img, tform)
+    """Test matched keypoints between lena image and its translated version."""
+    img = data.lena()
+    img = rgb2gray(img)
+    img.shape
+    tform = tf.SimilarityTransform(scale=1, rotation=0, translation=(15, 20))
+    translated_img = tf.warp(img, tform)
 
-	keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
-	descriptors1, keypoints1 = brief(img, keypoints1, descriptor_size=512)
+    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
+    descriptors1, keypoints1 = brief(img, keypoints1, descriptor_size=512)
 
-	keypoints2 = corner_peaks(corner_harris(translated_img), min_distance=5)
-	descriptors2, keypoints2 = brief(translated_img, keypoints2,
-		                             descriptor_size=512)
+    keypoints2 = corner_peaks(corner_harris(translated_img), min_distance=5)
+    descriptors2, keypoints2 = brief(translated_img, keypoints2,
+                                     descriptor_size=512)
 
-	matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
-		                                      keypoints2, descriptors2,
-		                                      threshold=0.10)
+    matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
+                                              keypoints2, descriptors2,
+                                              threshold=0.10)
 
-	assert_array_equal(matched_keypoints[:, 0,:], matched_keypoints[:, 1,:] +
-		               [20, 15])
+    assert_array_equal(matched_keypoints[:, 0, :], matched_keypoints[:, 1, :] +
+                       [20, 15])
 
 
 def test_match_keypoints_brief_lena_rotation():
-	"""Verify matched keypoints result between lena image and its rotated version
-	with the expected keypoint pairs."""
-	img = data.lena()
-	img = rgb2gray(img)
-	img.shape
-	tform = tf.SimilarityTransform(scale=1, rotation=0.10, translation=(0, 0))
-	rotated_img = tf.warp(img, tform)
+    """Verify matched keypoints result between lena image and its rotated
+    version with the expected keypoint pairs."""
+    img = data.lena()
+    img = rgb2gray(img)
+    img.shape
+    tform = tf.SimilarityTransform(scale=1, rotation=0.10, translation=(0, 0))
+    rotated_img = tf.warp(img, tform)
 
-	keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
-	descriptors1, keypoints1 = brief(img, keypoints1, descriptor_size=512)
+    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
+    descriptors1, keypoints1 = brief(img, keypoints1, descriptor_size=512)
 
-	keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
-	descriptors2, keypoints2 = brief(rotated_img, keypoints2,
-		                             descriptor_size=512)
+    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    descriptors2, keypoints2 = brief(rotated_img, keypoints2,
+                                     descriptor_size=512)
 
-	matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
-		                                      keypoints2, descriptors2,
-		                                      threshold=0.07)
-	expected = np.array([[[263, 272],
+    matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
+                                              keypoints2, descriptors2,
+                                              threshold=0.07)
+
+    expected = np.array([[[263, 272],
                           [234, 298]],
 
                          [[271, 120],
@@ -74,5 +75,4 @@ def test_match_keypoints_brief_lena_rotation():
                          [[454, 176],
                           [435, 221]]])
 
-
-	assert_array_equal(matched_keypoints, expected)
+    assert_array_equal(matched_keypoints, expected)

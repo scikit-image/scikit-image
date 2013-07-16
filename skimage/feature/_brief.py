@@ -31,7 +31,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
         length patch_size, pixel pairs are sampled using the `mode` parameter
         to build the descriptors using intensity comparison. The value of
         `sample_seed` should be the same for the images to be matched while
-        building the descriptors. Default is 1. 
+        building the descriptors. Default is 1.
     variance : float
         Variance of the Gaussian Low Pass filter applied on the image to
         alleviate noise sensitivity. Default is 2.
@@ -75,7 +75,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size = 5)
+    >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size=5)
     >>> keypoints1
     array([[2, 2],
            [2, 5],
@@ -99,7 +99,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 6],
            [6, 2],
            [6, 6]])
-    >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size = 5)
+    >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size=5)
     >>> keypoints2
     array([[2, 2],
            [2, 6],
@@ -163,7 +163,8 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     else:
 
-        samples = np.random.randint(-(patch_size - 2) // 2, (patch_size // 2) + 1,
+        samples = np.random.randint(-(patch_size - 2) // 2,
+                                    (patch_size // 2) + 1,
                                     (descriptor_size * 2, 2))
         pos1, pos2 = np.split(samples, 2)
 
@@ -200,21 +201,21 @@ def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
         Location of Q matched keypoint pairs from two images.
 
     """
-    if keypoints1.shape[0] != descriptors1.shape[0] or \
-        keypoints2.shape[0] != descriptors2.shape[0]:
-        raise ValueError("The number of keypoints and number of described \
-                          keypoints do not match. Make the optional parameter \
-                          return_keypoints True to get described keypoints.")
+    if (keypoints1.shape[0] != descriptors1.shape[0]
+    or keypoints2.shape[0] != descriptors2.shape[0]):
+        raise ValueError("The number of keypoints and number of described "
+                         "keypoints do not match. Make the optional parameter "
+                         "return_keypoints True to get described keypoints.")
 
     if descriptors1.shape[1] != descriptors2.shape[1]:
-        raise ValueError("Descriptor sizes for matching keypoints in both \
-                          the images should be equal.")
+        raise ValueError("Descriptor sizes for matching keypoints in both "
+                         "the images should be equal.")
 
     # Get hamming distances between keeypoints1 and keypoints2
     distance = pairwise_hamming_distance(descriptors1, descriptors2)
 
     temp = distance > threshold
-    row_check = np.any(~temp, axis = 1)
+    row_check = np.any(~temp, axis=1)
     matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
     matched_keypoint_pairs = np.zeros((np.sum(row_check), 2, 2), dtype=np.intp)
     matched_keypoint_pairs[:, 0, :] = keypoints1[row_check]
