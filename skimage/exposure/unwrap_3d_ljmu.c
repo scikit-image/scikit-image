@@ -29,7 +29,7 @@
 
 typedef struct
 {
-  float mod;
+  double mod;
   int x_connectivity;
   int y_connectivity;
   int z_connectivity;
@@ -41,8 +41,8 @@ struct VOXELM
 {
   int increment;		//No. of 2*pi to add to the voxel to unwrap it
   int number_of_voxels_in_group;//No. of voxel in the voxel group
-  float value;			//value of the voxel
-  float reliability;
+  double value;			//value of the voxel
+  double reliability;
   unsigned char input_mask;	//MASK voxel is masked. NOMASK voxel is not masked
   unsigned char extended_mask;	//MASK voxel is masked. NOMASK voxel is not masked
   int group;			//group No.
@@ -58,7 +58,7 @@ typedef struct VOXELM VOXELM;
 //if we have S voxels, then we have S horizontal edges and S vertical edges
 struct EDGE
 {
-  float reliab;			//reliabilty of the edge and it depends on the two voxels
+  double reliab;			//reliabilty of the edge and it depends on the two voxels
   VOXELM *pointer_1;		//pointer to the first voxel
   VOXELM *pointer_2;		//pointer to the second voxel
   int increment;		//No. of 2*pi to add to one of the
@@ -76,7 +76,7 @@ typedef struct EDGE EDGE;
 
 typedef enum {yes, no} yes_no;
 
-yes_no find_pivot(EDGE *left, EDGE *right, float *pivot_ptr)
+yes_no find_pivot(EDGE *left, EDGE *right, double *pivot_ptr)
 {
 	EDGE a, b, c, *p;
 
@@ -108,7 +108,7 @@ yes_no find_pivot(EDGE *left, EDGE *right, float *pivot_ptr)
 	}
 }
 
-EDGE *partition(EDGE *left, EDGE *right, float pivot)
+EDGE *partition(EDGE *left, EDGE *right, double pivot)
 {
 	while (left <= right)
 	{
@@ -129,7 +129,7 @@ EDGE *partition(EDGE *left, EDGE *right, float pivot)
 void quicker_sort(EDGE *left, EDGE *right)
 {
 	EDGE *p;
-	float pivot;
+	double pivot;
 
 	if (find_pivot(left, right, &pivot) == yes)
 	{
@@ -144,10 +144,10 @@ void quicker_sort(EDGE *left, EDGE *right)
 //--------------------start initialize voxels ----------------------------------
 //initiale voxels. See the explanation of the voxel class above.
 //initially every voxel is assumed to belong to a group consisting of only itself
-void  initialiseVOXELs(float *WrappedVolume, unsigned char *input_mask, unsigned char *extended_mask, VOXELM *voxel, int volume_width, int volume_height, int volume_depth)
+void  initialiseVOXELs(double *WrappedVolume, unsigned char *input_mask, unsigned char *extended_mask, VOXELM *voxel, int volume_width, int volume_height, int volume_depth)
 {
   VOXELM *voxel_pointer = voxel;
-  float *wrapped_volume_pointer = WrappedVolume;
+  double *wrapped_volume_pointer = WrappedVolume;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   int n, i, j;
@@ -161,7 +161,7 @@ void  initialiseVOXELs(float *WrappedVolume, unsigned char *input_mask, unsigned
 	      voxel_pointer->increment = 0;
 	      voxel_pointer->number_of_voxels_in_group = 1;
 	      voxel_pointer->value = *wrapped_volume_pointer;
-	      voxel_pointer->reliability = 9999999.f + rand();
+	      voxel_pointer->reliability = 9999999 + rand();
 	      voxel_pointer->input_mask = *input_mask_pointer;
 	      voxel_pointer->extended_mask = *extended_mask_pointer;
 	      voxel_pointer->head = voxel_pointer;
@@ -180,9 +180,9 @@ void  initialiseVOXELs(float *WrappedVolume, unsigned char *input_mask, unsigned
 //-------------------end initialize voxels -----------
 
 //gamma function in the paper
-float wrap(float voxel_value)
+double wrap(double voxel_value)
 {
-  float wrapped_voxel_value;
+  double wrapped_voxel_value;
   if (voxel_value > PI)	wrapped_voxel_value = voxel_value - TWOPI;
   else if (voxel_value < -PI)	wrapped_voxel_value = voxel_value + TWOPI;
   else wrapped_voxel_value = voxel_value;
@@ -190,9 +190,9 @@ float wrap(float voxel_value)
 }
 
 // voxelL_value is the left voxel,	voxelR_value is the right voxel
-int find_wrap(float voxelL_value, float voxelR_value)
+int find_wrap(double voxelL_value, double voxelR_value)
 {
-  float difference;
+  double difference;
   int wrap_value;
   difference = voxelL_value - voxelR_value;
 
@@ -433,13 +433,13 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask, int vo
     }
 }
 
-void calculate_reliability(float *wrappedVolume, VOXELM *voxel, int volume_width, int volume_height, int volume_depth, params_t *params)
+void calculate_reliability(double *wrappedVolume, VOXELM *voxel, int volume_width, int volume_height, int volume_depth, params_t *params)
 {
   int frame_size  = volume_width * volume_height;
   int volume_size = volume_width * volume_height * volume_depth;
   VOXELM *voxel_pointer;
-  float H, V, N, D1, D2, D3, D4, D5, D6, D7, D8, D9, D10;
-  float *WVP;
+  double H, V, N, D1, D2, D3, D4, D5, D6, D7, D8, D9, D10;
+  double *WVP;
   int n, i, j;
 
   WVP = wrappedVolume + frame_size + volume_width + 1;
@@ -949,7 +949,7 @@ void unwrapVolume(VOXELM *voxel, int volume_width, int volume_height, int volume
 
   for (i = 0; i < volume_size; i++)
     {
-      voxel_pointer->value += TWOPI * (float)(voxel_pointer->increment);
+      voxel_pointer->value += TWOPI * (double)(voxel_pointer->increment);
       voxel_pointer++;
     }
 }
@@ -964,7 +964,7 @@ void  maskVolume(VOXELM *voxel, unsigned char *input_mask, int volume_width, int
 
   VOXELM *pointer_voxel = voxel;
   unsigned char *IMP = input_mask;	//input mask pointer
-  float min=99999999.;
+  double min=99999999.;
   int i, j;
   int volume_size = volume_width * volume_height * volume_depth;
 
@@ -997,11 +997,11 @@ void  maskVolume(VOXELM *voxel, unsigned char *input_mask, int volume_width, int
 //phase map.  copy the volume on the buffer passed to this unwrapper
 //to over-write the unwrapped phase map on the buffer of the wrapped
 //phase map.
-void  returnVolume(VOXELM *voxel, float *unwrappedVolume, int volume_width, int volume_height, int volume_depth)
+void  returnVolume(VOXELM *voxel, double *unwrappedVolume, int volume_width, int volume_height, int volume_depth)
 {
   int i;
   int volume_size = volume_width * volume_height * volume_depth;
-  float *unwrappedVolume_pointer = unwrappedVolume;
+  double *unwrappedVolume_pointer = unwrappedVolume;
   VOXELM *voxel_pointer = voxel;
 
   for (i=0; i < volume_size; i++)
@@ -1014,7 +1014,7 @@ void  returnVolume(VOXELM *voxel, float *unwrappedVolume, int volume_width, int 
 
 //the main function of the unwrapper
 void
-unwrap3D(float* wrapped_volume, float* unwrapped_volume, unsigned char* input_mask,
+unwrap3D(double* wrapped_volume, double* unwrapped_volume, unsigned char* input_mask,
 	 int volume_width, int volume_height, int volume_depth,
 	 int wrap_around_x, int wrap_around_y, int wrap_around_z)
 {
