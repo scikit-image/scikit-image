@@ -30,7 +30,7 @@
 
 typedef struct
 {
-  float mod;
+  double mod;
   int x_connectivity;
   int y_connectivity;
   int no_of_edges;
@@ -41,8 +41,8 @@ struct PIXELM
 {
   int increment;		//No. of 2*pi to add to the pixel to unwrap it
   int number_of_pixels_in_group;//No. of pixel in the pixel group
-  float value;			//value of the pixel
-  float reliability;
+  double value;			//value of the pixel
+  double reliability;
   unsigned char input_mask;	//0 pixel is masked. NOMASK pixel is not masked
   unsigned char extended_mask;	//0 pixel is masked. NOMASK pixel is not masked
   int group;			//group No.
@@ -58,7 +58,7 @@ typedef struct PIXELM PIXELM;
 //if we have S pixels, then we have S horizontal edges and S vertical edges
 struct EDGE
 {
-  float reliab;			//reliabilty of the edge and it depends on the two pixels
+  double reliab;			//reliabilty of the edge and it depends on the two pixels
   PIXELM *pointer_1;		//pointer to the first pixel
   PIXELM *pointer_2;		//pointer to the second pixel
   int increment;		//No. of 2*pi to add to one of the pixels to
@@ -75,7 +75,7 @@ typedef struct EDGE EDGE;
 
 typedef enum {yes, no} yes_no;
 
-yes_no find_pivot(EDGE *left, EDGE *right, float *pivot_ptr)
+yes_no find_pivot(EDGE *left, EDGE *right, double *pivot_ptr)
 {
   EDGE a, b, c, *p;
 
@@ -107,7 +107,7 @@ yes_no find_pivot(EDGE *left, EDGE *right, float *pivot_ptr)
     }
 }
 
-EDGE *partition(EDGE *left, EDGE *right, float pivot)
+EDGE *partition(EDGE *left, EDGE *right, double pivot)
 {
   while (left <= right)
     {
@@ -128,7 +128,7 @@ EDGE *partition(EDGE *left, EDGE *right, float pivot)
 void quicker_sort(EDGE *left, EDGE *right)
 {
   EDGE *p;
-  float pivot;
+  double pivot;
 
   if (find_pivot(left, right, &pivot) == yes)
     {
@@ -142,10 +142,10 @@ void quicker_sort(EDGE *left, EDGE *right)
 //--------------------start initialize pixels ----------------------------------
 //initialize pixels. See the explination of the pixel class above.
 //initially every pixel is assumed to belong to a group consisting of only itself
-void  initialisePIXELs(float *wrapped_image, unsigned char *input_mask, unsigned char *extended_mask, PIXELM *pixel, int image_width, int image_height)
+void  initialisePIXELs(double *wrapped_image, unsigned char *input_mask, unsigned char *extended_mask, PIXELM *pixel, int image_width, int image_height)
 {
   PIXELM *pixel_pointer = pixel;
-  float *wrapped_image_pointer = wrapped_image;
+  double *wrapped_image_pointer = wrapped_image;
   unsigned char *input_mask_pointer = input_mask;
   unsigned char *extended_mask_pointer = extended_mask;
   int i, j;
@@ -157,7 +157,7 @@ void  initialisePIXELs(float *wrapped_image, unsigned char *input_mask, unsigned
 	  pixel_pointer->increment = 0;
 	  pixel_pointer->number_of_pixels_in_group = 1;
 	  pixel_pointer->value = *wrapped_image_pointer;
-	  pixel_pointer->reliability = 9999999.f + rand();
+	  pixel_pointer->reliability = 9999999. + rand();
 	  pixel_pointer->input_mask = *input_mask_pointer;
 	  pixel_pointer->extended_mask = *extended_mask_pointer;
 	  pixel_pointer->head = pixel_pointer;
@@ -175,9 +175,9 @@ void  initialisePIXELs(float *wrapped_image, unsigned char *input_mask, unsigned
 //-------------------end initialize pixels -----------
 
 //gamma function in the paper
-float wrap(float pixel_value)
+double wrap(double pixel_value)
 {
-  float wrapped_pixel_value;
+  double wrapped_pixel_value;
   if (pixel_value > PI)	wrapped_pixel_value = pixel_value - TWOPI;
   else if (pixel_value < -PI) wrapped_pixel_value = pixel_value + TWOPI;
   else wrapped_pixel_value = pixel_value;
@@ -185,9 +185,9 @@ float wrap(float pixel_value)
 }
 
 // pixelL_value is the left pixel,	pixelR_value is the right pixel
-int find_wrap(float pixelL_value, float pixelR_value)
+int find_wrap(double pixelL_value, double pixelR_value)
 {
-  float difference;
+  double difference;
   int wrap_value;
   difference = pixelL_value - pixelR_value;
 
@@ -299,15 +299,15 @@ void extend_mask(unsigned char *input_mask, unsigned char *extended_mask,
     }
 }
 
-void calculate_reliability(float *wrappedImage, PIXELM *pixel,
+void calculate_reliability(double *wrappedImage, PIXELM *pixel,
 			   int image_width, int image_height,
 			   params_t *params)
 {
   int image_width_plus_one = image_width + 1;
   int image_width_minus_one = image_width - 1;
   PIXELM *pixel_pointer = pixel + image_width_plus_one;
-  float *WIP = wrappedImage + image_width_plus_one; //WIP is the wrapped image pointer
-  float H, V, D1, D2;
+  double *WIP = wrappedImage + image_width_plus_one; //WIP is the wrapped image pointer
+  double H, V, D1, D2;
   int i, j;
 
   for (i = 1; i < image_height -1; ++i)
@@ -333,7 +333,7 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
     {
       //calculating the reliability for the left border of the image
       PIXELM *pixel_pointer = pixel + image_width;
-      float *WIP = wrappedImage + image_width;
+      double *WIP = wrappedImage + image_width;
 
       for (i = 1; i < image_height - 1; ++i)
 	{
@@ -372,7 +372,7 @@ void calculate_reliability(float *wrappedImage, PIXELM *pixel,
     {
       //calculating the reliability for the top border of the image
       PIXELM *pixel_pointer = pixel + 1;
-      float *WIP = wrappedImage + 1;
+      double *WIP = wrappedImage + 1;
 
       for (i = 1; i < image_width - 1; ++i)
 	{
@@ -618,7 +618,7 @@ void  unwrapImage(PIXELM *pixel, int image_width, int image_height)
 
   for (i = 0; i < image_size; i++)
     {
-      pixel_pointer->value += TWOPI * (float)(pixel_pointer->increment);
+      pixel_pointer->value += TWOPI * (double)(pixel_pointer->increment);
       pixel_pointer++;
     }
 }
@@ -633,7 +633,7 @@ void  maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width, int i
 
   PIXELM *pointer_pixel = pixel;
   unsigned char *IMP = input_mask;	//input mask pointer
-  float min=99999999.f;
+  double min=99999999;
   int i;
   int image_size = image_width * image_height;
 
@@ -666,11 +666,11 @@ void  maskImage(PIXELM *pixel, unsigned char *input_mask, int image_width, int i
 //phase map.  copy the image on the buffer passed to this unwrapper to
 //over-write the unwrapped phase map on the buffer of the wrapped
 //phase map.
-void  returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int image_height)
+void  returnImage(PIXELM *pixel, double *unwrapped_image, int image_width, int image_height)
 {
   int i;
   int image_size = image_width * image_height;
-  float *unwrapped_image_pointer = unwrapped_image;
+  double *unwrapped_image_pointer = unwrapped_image;
   PIXELM *pixel_pointer = pixel;
 
   for (i=0; i < image_size; i++)
@@ -683,7 +683,7 @@ void  returnImage(PIXELM *pixel, float *unwrapped_image, int image_width, int im
 
 //the main function of the unwrapper
 void
-unwrap2D(float* wrapped_image, float* UnwrappedImage, unsigned char* input_mask,
+unwrap2D(double* wrapped_image, double* UnwrappedImage, unsigned char* input_mask,
 	 int image_width, int image_height,
 	 int wrap_around_x, int wrap_around_y)
 {
