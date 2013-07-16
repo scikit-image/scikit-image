@@ -153,6 +153,9 @@ Library:
     Extension: skimage.exposure._unwrap_1d
         Sources:
             skimage/exposure/_unwrap_1d.pyx
+    Extension: skimage.exposure._goldstein
+        Sources:
+            skimage/exposure/_goldstein.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi
