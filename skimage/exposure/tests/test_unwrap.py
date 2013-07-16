@@ -133,9 +133,9 @@ def test_mask():
         # Same tests, but forcing use of the 3D unwrapper by reshaping
         image_wrapped_3d = image_wrapped.reshape((1,) + image_wrapped.shape)
         image_unwrapped_3d = unwrap_phase(image_wrapped_3d)
-        image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]    # remove phase shift
+        image_unwrapped_3d -= image_unwrapped_3d[0, 0, 0]  # remove phase shift
         assert_array_almost_equal(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     run_module_suite()
