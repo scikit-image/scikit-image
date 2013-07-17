@@ -11,7 +11,7 @@ from ._slic import _slic_cython
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
-         multichannel=None, convert2lab=True, ratio=None):
+         spacing=None, multichannel=None, convert2lab=True, ratio=None):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -30,6 +30,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     sigma : float, optional (default: 1)
         Width of Gaussian smoothing kernel for preprocessing. Zero means no
         smoothing.
+    spacing : iterable of float, of length image.ndim, optional
+        The resolution or pixel spacing of the image along each axis.
     multichannel : bool, optional (default: None)
         Whether the last axis of the image is to be interpreted as multiple
         channels. Only 3 channels are supported. If `None`, the function will
@@ -114,26 +116,23 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
 
     # initialize on grid:
     depth, height, width = image.shape[:3]
+    if spacing is None:
+        spacing = np.ones(image.ndim - 1)
+    grids = np.mgrid[:depth, :height, :width]
+    grids = [grid * sp for grid, sp in zip(grids, spacing)]
     # approximate grid size for desired n_segments
-    grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
     slices = regular_grid(image.shape[:3], n_segments)
-    step_z, step_y, step_x = [int(s.step) for s in slices]
-    means_z = grid_z[slices]
-    means_y = grid_y[slices]
-    means_x = grid_x[slices]
+    means_space = [grid[slices][..., np.newaxis] for grid in grids]
 
-    means_color = np.zeros(means_z.shape + (3,))
-    means = np.concatenate([means_z[..., np.newaxis], means_y[..., np.newaxis],
-                            means_x[..., np.newaxis], means_color
-                           ], axis=-1).reshape(-1, 6)
+    means_color = np.zeros(means_space[0][..., 0].shape + (3,))
+    means = np.concatenate(means_space + [means_color], axis=-1).reshape(-1, 6)
     means = np.ascontiguousarray(means)
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    ratio = float(max((step_z, step_y, step_x))) / compactness
-    image_zyx = np.concatenate([grid_z[..., np.newaxis],
-                                grid_y[..., np.newaxis],
-                                grid_x[..., np.newaxis],
-                                image * ratio], axis=-1).copy("C")
+    max_step = max([int(s.step) for s in slices])
+    ratio = float(max_step) / compactness
+    image_zyx = np.concatenate([grid[..., np.newaxis] for grid in grids] +
+                                [image * ratio], axis=-1).copy("C")
     nearest_mean = np.zeros((depth, height, width), dtype=np.intp)
     distance = np.empty((depth, height, width), dtype=np.float)
     segment_map = _slic_cython(image_zyx, nearest_mean, distance, means,
