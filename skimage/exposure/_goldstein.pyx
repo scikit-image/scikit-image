@@ -33,6 +33,5 @@ def find_phase_residues_cy(double[:, ::1] image):
                  + _phase_difference(image[i - 1, j], image[i, j])
                  + _phase_difference(image[i, j], image[i, j - 1])
                  + _phase_difference(image[i, j - 1], image[i - 1, j - 1]))
-            r = lround(s / (2 * M_PI))
-            residues[i, j] = r
+            residues[i, j] = lround(s / (2 * M_PI))
     return residues_array
