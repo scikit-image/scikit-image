@@ -76,3 +76,8 @@ def test_match_keypoints_brief_lena_rotation():
                           [435, 221]]])
 
     assert_array_equal(matched_keypoints, expected)
+
+
+if __name__ == '__main__':
+    from numpy import testing
+    testing.run_module_suite()

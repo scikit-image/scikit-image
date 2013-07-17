@@ -25,3 +25,8 @@ def test_pairwise_hamming_distance_value():
                          [0.4 ,  0.55,  0.5 ],
                          [0.47,  0.48,  0.57]])
     assert_array_equal(result, expected)
+
+
+if __name__ == '__main__':
+    from numpy import testing
+    testing.run_module_suite()
