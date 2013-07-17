@@ -44,7 +44,7 @@ def grad_func(i, j, flag, array, channel=-1):
     if channel == 0:
         u = np.array(array, int)
         factor = 2.0
-    elif channel is -1:
+    elif channel == -1:
         u = np.array(array, float)
         factor = 0.5
 
