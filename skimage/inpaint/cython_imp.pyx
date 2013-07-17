@@ -3,9 +3,10 @@ cimport numpy as np
 from heapq import heappush, heappop
 from skimage.morphology import dilation, disk
 
-KNOWN = 0
-BAND = 1
-INSIDE = 2
+cdef:
+    np.uint8_t KNOWN = 0
+    np.uint8_t BAND = 1
+    np.uint8_t INSIDE = 2
 
 
 def initialise(_mask):
@@ -26,38 +27,38 @@ def initialise(_mask):
     return flag, u, heap
 
 
-def grad_func(Py_ssize_t i, Py_ssize_t j, np.uint8_t[:, ::1] flag, np.uint8_t[:, ::1] array, channel=-1):
-    cdef np.uint8_t[:, ::1] u
+cdef np.float32_t[:] grad_func(np.uint8_t i, np.uint8_t j, np.uint8_t[:, ::1] flag, array, Py_ssize_t channel=1):
+    cdef:
+        np.float32_t factor,
+        np.float32_t[:] gradU = np.zeros(2, dtype=np.float32)
 
     if channel == 0:
-        u = np.array(array, int)
         factor = 2.0
-    elif channel is -1:
-        u = np.array(array, float)
+    elif channel == 1:
         factor = 0.5
 
     if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
-        gradUx = np.subtract(u[i, j + 1], u[i, j - 1]) * factor
+        gradU[0] = (array[i, j + 1] - array[i, j - 1]) * factor
     elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
-        gradUx = np.subtract(u[i, j + 1], u[i, j])
+        gradU[0] = (array[i, j + 1] - array[i, j])
     elif flag[i, j + 1] == INSIDE and flag[i, j - 1] != INSIDE:
-        gradUx = np.subtract(u[i, j], u[i, j - 1])
+        gradU[0] = (array[i, j] - array[i, j - 1])
     elif flag[i, j + 1] == INSIDE and flag[i, j - 1] == INSIDE:
-        gradUx = 0
+        gradU[0] = 0
 
     if flag[i + 1, j] != INSIDE and flag[i - 1, j] != INSIDE:
-        gradUy = np.subtract(u[i + 1, j], u[i - 1, j]) * factor
+        gradU[1] = (array[i + 1, j] - array[i - 1, j]) * factor
     elif flag[i + 1, j] != INSIDE and flag[i - 1, j] == INSIDE:
-        gradUy = np.subtract(u[i + 1, j], u[i, j])
+        gradU[1] = (array[i + 1, j] - array[i, j])
     elif flag[i + 1, j] == INSIDE and flag[i - 1, j] != INSIDE:
-        gradUy = np.subtract(u[i, j], u[i - 1, j])
+        gradU[1] = (array[i, j] - array[i - 1, j])
     elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
-        gradUy = 0
+        gradU[1] = 0
 
-    return gradUx, gradUy
+    return gradU
 
 
-def ep_neighbor(Py_ssize_t i, Py_ssize_t j, np.uint8_t[::1] size, Py_ssize_t epsilon):
+def ep_neighbor(Py_ssize_t i, Py_ssize_t j, Py_ssize_t h, Py_ssize_t w, Py_ssize_t epsilon):
     cdef:
         np.int8_t[:, ::1] center_ind
         Py_ssize_t i_ep, j_ep
@@ -67,23 +68,26 @@ def ep_neighbor(Py_ssize_t i, Py_ssize_t j, np.uint8_t[::1] size, Py_ssize_t eps
     center_ind = indices - [epsilon, epsilon] + [i, j]
 
     for i_ep, j_ep in center_ind:
-        if ([i_ep, j_ep] > [0, 0]).all() and ([i_ep, j_ep] < size.base - [1, 1]).all():
-            nb.append(ind)
+        if i_ep > 0 and j_ep > 0:
+            if i_ep < h - 1 and j_ep < w - 1:
+                nb.append([i_ep, j_ep])
 
     return nb
 
 
-def inp_point(Py_ssize_t i, Py_ssize_t j, np.uint8_t[:, ::1] image, np.uint8_t[:, ::1] flag, float[:, ::1] u, Py_ssize_t epsilon):
+cdef void inp_point(Py_ssize_t i, Py_ssize_t j, np.uint8_t[:, ::1] image, np.uint8_t[:, ::1] flag, float[:, ::1] u, Py_ssize_t epsilon):
 
     cdef:
         Py_ssize_t i_nb, j_nb
         np.int8_t rx, ry
         float dst, lev, dirc
         float Ia, weight, Jx, Jy, norm, sat
+        np.float32_t[:] gradU = np.zeros(2, dtype=np.float32)
+        np.float32_t[:] gradI = np.zeros(2, dtype=np.float32)
 
     Ia, Jx, Jy, norm = 0, 0, 0, 0
-    gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
-    nb = ep_neighbor(i, j, image.shape, epsilon)
+    gradU = grad_func(i, j, flag, u, channel=1)
+    nb = ep_neighbor(i, j, image.shape[0], image.shape[1], epsilon)
 
     for [i_nb, j_nb] in nb:
         if flag[i_nb, j_nb] == KNOWN:
@@ -93,18 +97,17 @@ def inp_point(Py_ssize_t i, Py_ssize_t j, np.uint8_t[:, ::1] image, np.uint8_t[:
             dst = 1. / ((rx * rx + ry * ry) *
                         np.sqrt((rx * rx + ry * ry)))
             lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
-            dirc = rx * gradUx + ry * gradUy
+            dirc = rx * gradU[0] + ry * gradU[1]
 
             if abs(dirc) <= 0.01:
                 dirc = 1.0e-6
             weight = abs(dst * lev * dirc)
 
-            gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
-                                       channel=0)
+            gradI = grad_func(i_nb, j_nb, flag, image, channel=0)
 
             Ia += weight * image[i_nb, j_nb]
-            Jx -= weight * gradIx * rx
-            Jy -= weight * gradIy * ry
+            Jx -= weight * gradI[0] * rx
+            Jy -= weight * gradI[1] * ry
             norm += weight
 
     sat = (Ia / norm + (Jx + Jy) / (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
