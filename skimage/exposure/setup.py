@@ -21,11 +21,9 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     unwrap_sources_2d = ['_unwrap_2d.c', 'unwrap_2d_ljmu.c']
     config.add_extension('_unwrap_2d', sources=unwrap_sources_2d,
-                         extra_compile_args=['-g'],
                          include_dirs=[get_numpy_include_dirs()])
     unwrap_sources_3d = ['_unwrap_3d.c', 'unwrap_3d_ljmu.c']
     config.add_extension('_unwrap_3d', sources=unwrap_sources_3d,
-                         extra_compile_args=['-g'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config
