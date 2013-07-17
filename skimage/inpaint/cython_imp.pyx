@@ -1,5 +1,6 @@
 import numpy as np
 cimport numpy as np
+from libc.math cimport sqrt
 from heapq import heappush, heappop
 from skimage.morphology import dilation, disk
 
@@ -16,20 +17,21 @@ def initialise(_mask):
     band = np.logical_xor(mask, outside).astype(np.uint8)
 
     flag = (2 * outside) - band
-
     u = np.where(flag == INSIDE, 1.0e6, 0)
 
     heap = []
+    cdef Py_ssize_t i_in, j_in
     indices = np.transpose(np.where(flag == BAND))
-    for z in indices:
-        heappush(heap, (u[tuple(z)], tuple(z)))
+
+    for i_in, j_in in indices:
+        heappush(heap, (u[i_in, j_in], (i_in, j_in)))
 
     return flag, u, heap
 
 
-cdef np.float32_t[:] grad_func(np.uint8_t i, np.uint8_t j, np.uint8_t[:, ::1] flag, array, Py_ssize_t channel=1):
+cdef np.float32_t[:] grad_func(np.uint32_t i, np.uint32_t j, np.uint8_t[:, ::1] flag, np.ndarray array, Py_ssize_t channel=1):
     cdef:
-        np.float32_t factor,
+        np.float_t factor,
         np.float32_t[:] gradU = np.zeros(2, dtype=np.float32)
 
     if channel == 0:
@@ -62,8 +64,8 @@ def ep_neighbor(Py_ssize_t i, Py_ssize_t j, Py_ssize_t h, Py_ssize_t w, Py_ssize
     cdef:
         np.int8_t[:, ::1] center_ind
         Py_ssize_t i_ep, j_ep
+        list nb = list()
 
-    nb = []
     indices = np.transpose(np.where(disk(epsilon)))
     center_ind = indices - [epsilon, epsilon] + [i, j]
 
@@ -95,7 +97,7 @@ cdef void inp_point(Py_ssize_t i, Py_ssize_t j, np.uint8_t[:, ::1] image, np.uin
             ry = j - j_nb
 
             dst = 1. / ((rx * rx + ry * ry) *
-                        np.sqrt((rx * rx + ry * ry)))
+                        sqrt((rx * rx + ry * ry)))
             lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
             dirc = rx * gradU[0] + ry * gradU[1]
 
@@ -110,7 +112,7 @@ cdef void inp_point(Py_ssize_t i, Py_ssize_t j, np.uint8_t[:, ::1] image, np.uin
             Jy -= weight * gradI[1] * ry
             norm += weight
 
-    sat = (Ia / norm + (Jx + Jy) / (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
+    sat = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
            + 0.5)
     image[i, j] = int(round(sat))
 
@@ -123,7 +125,7 @@ def eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2, Py_ssize_t j2, np.uint8
 
     if flag[i1, j1] == KNOWN:
         if flag[i2, j2] == KNOWN:
-            r = np.sqrt(2 - (u1 - u2) ** 2)
+            r = sqrt(2 - (u1 - u2) ** 2)
             s = (u1 + u2 - r) * 0.5
             if s >= u1 and s >= u2:
                 u_out = s
