@@ -5,7 +5,7 @@ from skimage import data
 # import _heap
 # import fmm
 
-from c_inpaint import inpaint, initialise, fast_marching_method
+from inpaint import inpaint, initialise, fast_marching_method
 
 __all__ = ['demo_inpaint', 'demo_time_fill']
 
