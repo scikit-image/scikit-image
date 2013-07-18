@@ -87,10 +87,10 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
             arr_in[i] = exposure.rescale_intensity(arr_in[i])
 
     # -- determine alpha
-    if grid_shape == (0, 0):
-        alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
-    else:
+    if grid_shape:
         alpha_y, alpha_x = grid_shape
+    else:
+        alpha_y = alpha_x = int(np.ceil(np.sqrt(n_images)))
 
     # -- fill missing patches
     if fill == 'mean':
