@@ -105,7 +105,7 @@ cdef inp_point(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] image, cnp.uint8_
                 dirc = 1.0e-6
             weight = abs(dst * lev * dirc)
 
-            gradI = grad_func(i_nb, j_nb, flag, image.astype(np.float, order='C'), channel=0)
+            gradI = grad_func(i_nb, j_nb, flag, np.ascontiguousarray(image, np.float), channel=0)
 
             Ia += weight * image[i_nb, j_nb]
             Jx -= weight * gradI[0] * rx
