@@ -6,7 +6,7 @@ from .. import exposure
 EPSILON = 1e-6
 
 
-def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=(0, 0)):
+def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
@@ -37,7 +37,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=(0, 0)):
     rescale_intensity: bool, optional
         Whether to rescale the intensity of each image to [0, 1].
     grid_shape: tuple, optional
-        The desired grid shape for the montage (the default aspect ratio is square).
+        The desired grid shape for the montage (tiles_y, tiles_x). Tthe default aspect ratio is square.
 
     Returns
     -------
@@ -67,7 +67,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=(0, 0)):
      [ 10.   11.    5.5   5.5]]
     >>> print(arr_in.mean())
     5.5
-    >>> arr_out_nonsquare = montage2d(arr_in, grid_shape = (3, 4))
+    >>> arr_out_nonsquare = montage2d(arr_in, grid_shape=(3, 4))
     >>> print(arr_out_nonsquare)
     [[  0.    1.    4.    5. ]
      [  2.    3.    6.    7. ]
