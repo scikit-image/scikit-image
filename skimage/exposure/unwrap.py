@@ -5,8 +5,8 @@ from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 from .._shared.six import string_types
-from ._goldstein import find_phase_residues_cy
-from .._shared.six import string_types
+from ._goldstein import (find_phase_residues_cy, branch_cut_dtype,
+                         find_branch_cuts, _prepare_branch_cuts)
 
 
 def unwrap_phase(image, wrap_around=False):
@@ -199,3 +199,63 @@ def find_phase_residues(image, wrap_around=False):
             residues.mask[slice_] = True
 
     return residues
+
+
+def _find_branch_cuts(residues, mask=None, wrap_around=False):
+    wrap_around = _normalize_wrap_around(wrap_around, residues.ndim)
+
+    shape = tuple([s if wa else s + 1
+                   for s, wa in zip(residues.shape, wrap_around)])
+    if not all(wrap_around):
+        raise NotImplementedError('Branch cuts without wrap around is not '
+                                  'implemented yet')
+    if not mask is None:
+        raise NotImplementedError('Branch cuts with mask images is not '
+                                  'implemented yet')
+    branch_cuts = np.zeros(shape, dtype=branch_cut_dtype, order='C')
+
+    # Place cuts at the border where there is no wrap around
+    if not wrap_around[0]:
+        branch_cuts['vcut'][-1, :] = 1
+    if not wrap_around[1]:
+        branch_cuts['hcut'][:, -1] = 1
+    # TODO: How to treat the edge with wrap_around=False
+    # Pad image; include the edge as a masked region
+
+    # TODO: Place edges around masked regions
+    # logical or of the mask and the mask shifted by (-1, -1) gives the
+    # edges that should be set
+
+    # TODO: Sum residues in masked regions and save them to the masked regions
+    # Place residues in the residue array
+    number_of_residues = np.sum(np.abs(residues))  # sum only unmasked entries
+    # labelled_mask = Label the masked regions
+    number_of_masked_regions = 0   # TODO
+    # We will not store any residue in residue_storage[0]; therefore pad by 1
+    residue_storage_size = number_of_residues + number_of_masked_regions + 1
+    residue_storage = np.zeros((residue_storage_size,), dtype=np.int,
+                               order='C')
+    #for label in labels:
+        #residue = sum of residues in and on the boundary of region
+        #residue_storage[label] = residue
+        #branch_cuts['residue_no'][labelled_mask] = label
+    # Save normal residues to the branch cut array
+    if np.ma.isMaskedArray(residues):
+        residues_mask = np.require(residues_mask, np.uint8, ['C'])
+    else:
+        residues_mask = np.zeros(residues.shape, dtype=np.uint8, order='C')
+    _prepare_branch_cuts(branch_cuts,
+                         residue_storage, number_of_masked_regions + 1,
+                         np.asarray(residues, dtype=np.int8, order='C'),
+                         residues_mask)
+    print(branch_cuts)
+    print(residue_storage)
+    branch_cuts = find_branch_cuts(branch_cuts, residue_storage, residues_mask)
+
+
+def _unwrap_phase_goldstein(image, wrap_around=False):
+    if not all(_normalize_wrap_around(wrap_around, image.ndim)):
+        raise NotImplementedError
+    residues = find_phase_residues(image, wrap_around)
+    branch_cuts = _find_branch_cuts(residues, wrap_around=wrap_around)
+    return image
