@@ -25,3 +25,4 @@ doc/source/_static/random.js
 .idea/
 *.log
 *.html
+*.sh
