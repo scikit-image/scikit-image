@@ -5,7 +5,7 @@ from skimage import data
 # import _heap
 # import fmm
 
-from c_inpaint import inpaint, initialise, fast_marching_method
+from inpaint import inpaint, initialise, fast_marching_method
 
 def inpaint(image, mask, epsilon=3):
     image = image.copy()
