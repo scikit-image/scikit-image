@@ -1,6 +1,6 @@
 import numpy as np
 cimport numpy as cnp
-from libc.math cimport sqrt
+from libc.math cimport sqrt, abs, round
 from heapq import heappush, heappop
 from skimage.morphology import dilation, disk
 
@@ -20,8 +20,8 @@ def initialise(_mask):
     u = np.where(flag == INSIDE, 1.0e6, 0)
 
     heap = []
-    cdef Py_ssize_t i_in, j_in
-    indices = np.transpose(np.where(flag == BAND))
+    cdef cnp.uint8_t i_in, j_in
+    indices = np.transpose(np.where(flag == BAND)).astype(dtype=np.uint8)
 
     for i_in, j_in in indices:
         heappush(heap, (u[i_in, j_in], (i_in, j_in)))
@@ -29,7 +29,7 @@ def initialise(_mask):
     return flag, u, heap
 
 
-cdef cnp.float_t[:] grad_func(cnp.uint32_t i, cnp.uint32_t j, cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] array, Py_ssize_t channel=1):
+cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] array, Py_ssize_t channel=1):
     cdef:
         cnp.float_t factor,
         cnp.float_t[:] gradU = np.zeros(2, dtype=np.float)
@@ -39,7 +39,7 @@ cdef cnp.float_t[:] grad_func(cnp.uint32_t i, cnp.uint32_t j, cnp.uint8_t[:, ::1
     elif channel == 1:
         factor = 0.5
 
-    if flag[i, <Py_ssize_t>(j + 1)] != INSIDE and flag[i, j - 1] != INSIDE:
+    if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
         gradU[0] = (array[i, j + 1] - array[i, j - 1]) * factor
     elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
         gradU[0] = (array[i, j + 1] - array[i, j])
@@ -114,10 +114,10 @@ cdef inp_point(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] image, cnp.uint8_
 
     sat = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
            + 0.5)
-    image[i, j] = int(round(sat))
+    image[i, j] = <cnp.uint8_t> round(sat)
 
 
-def eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2, Py_ssize_t j2, cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u):
+cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2, Py_ssize_t j2, cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u):
     cdef cnp.float_t u_out, u1, u2, r, s
     u_out = 1.0e6
     u1 = u[i1, j1]
@@ -177,7 +177,7 @@ def fast_marching_method(cnp.uint8_t[:, ::1] image, cnp.uint8_t[:, ::1] flag, cn
         return image
 
 
-def inpaint(input_image,  inpaint_mask, epsilon=5):
+cpdef inpaint(input_image,  inpaint_mask, epsilon=5):
     h, w = input_image.shape
     image = np.zeros((h + 2, w + 2), np.uint8)
     mask = np.zeros((h + 2, w + 2), np.uint8)
