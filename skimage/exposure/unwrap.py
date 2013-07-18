@@ -6,7 +6,7 @@ from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 from .._shared.six import string_types
 from ._goldstein import (find_phase_residues_cy, branch_cut_dtype,
-                         find_branch_cuts, _prepare_branch_cuts)
+                         find_branch_cuts_cy, _prepare_branch_cuts_cy)
 
 
 def unwrap_phase(image, wrap_around=False):
@@ -250,7 +250,10 @@ def _find_branch_cuts(residues, mask=None, wrap_around=False):
                          residues_mask)
     print(branch_cuts)
     print(residue_storage)
-    branch_cuts = find_branch_cuts(branch_cuts, residue_storage, residues_mask)
+    find_branch_cuts(branch_cuts, residue_storage, residues_mask)
+    print(branch_cuts)
+    print(residues)
+    return branch_cuts
 
 
 def _unwrap_phase_goldstein(image, wrap_around=False):
@@ -258,4 +261,6 @@ def _unwrap_phase_goldstein(image, wrap_around=False):
         raise NotImplementedError
     residues = find_phase_residues(image, wrap_around)
     branch_cuts = _find_branch_cuts(residues, wrap_around=wrap_around)
+    print(image / (2 * np.pi) + 0.5)
+
     return image
