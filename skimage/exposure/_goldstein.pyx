@@ -310,6 +310,15 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
     return np.asarray(branch_cuts)
 
 
+cdef inline long cut_index(long a, long b):
+    if abs(a - b) == 1:
+        return a if a < b else b
+    else:
+        # We are at the boundary of the image and wrapping around; return the
+        # largest index
+        return a if a > b else b
+
+
 cdef inline cnp.uint8_t cut_between_pixels(cnp.uint8_t[:, ::1] vcut,
                                            cnp.uint8_t[:, ::1] hcut,
                                            Py_ssize_t ia, Py_ssize_t ja,
@@ -317,10 +326,10 @@ cdef inline cnp.uint8_t cut_between_pixels(cnp.uint8_t[:, ::1] vcut,
     # Is there a cut between two pixels?
     if ia != ib:
         # Cut normal to 0th dimension; horizontal cut
-        return hcut[edge_index(ia, ib), ja]
+        return hcut[cut_index(ia, ib), ja]
     else:
         # Cut normal to 1st dimension: vertical cut
-        return vcut[ia, edge_index(ib, jb)]
+        return vcut[ia, cut_index(ib, jb)]
 
 
 cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
