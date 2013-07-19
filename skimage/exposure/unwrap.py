@@ -263,6 +263,35 @@ def find_phase_residues(image, wrap_around=False):
 
 
 def unwrap_phase_branch_cuts(image, wrap_around=False):
+    '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
+    original, unwrapped image using a method based on branch cuts [1]_.
+
+    Parameters
+    ----------
+    image : 2D ndarray of floats, optionally a masked array
+        The values should be in the range ``[-pi, pi)``. If a masked array is
+        provided, the masked entries will not be changed, and their values
+        will not be used to guide the unwrapping of neighboring, unmasked
+        values. Masked 1D arrays are not allowed, and will raise a
+        ``ValueError``.
+    wrap_around : bool or sequence of bool
+        When an element of the sequence is ``True``, the unwrapping process
+        will regard the edges along the corresponding axis of the image to be
+        connected and use this connectivity to guide the phase unwrapping
+        process. If only a single boolean is given, it will apply to all axes.
+
+    Returns
+    -------
+    image_unwrapped : array_like, float32
+        Unwrapped image of the same shape as the input. If the input ``image``
+        was a masked array, the mask will be preserved.
+
+    References
+    ----------
+    .. [1] R. M. Goldstein, H. A. Zebker, C. L. Werner, "Satellite radar
+           interferometry: Two-dimensional phase unwrapping", Radio Science 23
+           (1988) 4, pp 713--720.
+    '''
     residues = find_phase_residues(image, wrap_around)
     cut_vertical, cut_horizontal = find_branch_cuts(residues, wrap_around)
     # TODO: integrate the phase
