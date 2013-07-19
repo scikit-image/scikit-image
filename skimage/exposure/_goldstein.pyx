@@ -169,11 +169,11 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
 
 cdef inline long edge_index(long a, long b):
     if abs(a - b) == 1:
-        return a if a < b else b
+        return a if a > b else b
     else:
         # We are at the boundary of the image and wrapping around; return the
-        # largest index
-        return a if a > b else b
+        # smallest index
+        return a if a < b else b
 
 
 cdef inline cnp.uint8_t edge_is_set(branch_cut[:, ::1] branch_cuts,
