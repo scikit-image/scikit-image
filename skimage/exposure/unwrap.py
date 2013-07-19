@@ -122,6 +122,56 @@ def _normalize_wrap_around(wrap_around, ndim):
     return wrap_around
 
 
+def _prepare_branch_cuts(residues, wrap_around):
+    branch_cuts = np.zeros(residues.shape, dtype=branch_cut_dtype, order='C')
+
+    if not np.ma.isMaskedArray(residues):
+        residues = np.ma.array(residues, mask=False)
+
+    # Place edges between neighboring masked intersections
+    # This also takes care of placing edges at the image border
+    branch_cuts['vcut'][...] = (residues.mask
+                                & np.roll(residues.mask, 1, axis=0))
+    branch_cuts['hcut'][...] = (residues.mask
+                                & np.roll(residues.mask, 1, axis=1))
+
+    # Find regions of connected masked intersections
+    labelled_mask = label(residues.mask, neighbors=4, background=0)
+    number_of_masked_regions = np.max(labelled_mask) + 1
+
+    # Allocate storage of residue values
+    number_of_residues = np.sum(np.abs(residues))  # sum only unmasked entries
+    # We will not store any residue in residue_storage[0]; therefore pad by 1
+    residue_storage_size = number_of_residues + number_of_masked_regions + 1
+    residue_storage = np.zeros((residue_storage_size,), dtype=np.int,
+                               order='C')
+
+    # Save residues in masked regions to the branch cut array
+    residues_unmasked = np.asarray(residues)
+    for l in range(number_of_masked_regions):
+        region = labelled_mask == l
+        residue = np.sum(residues_unmasked[region])
+        print('Found residue of net value %d in a masked region' % residue)
+        residue_no = l + 1
+        residue_storage[residue_no] = residue
+        branch_cuts['residue_no'][region] = residue_no
+
+    # Save normal (=not masked) residues to the branch cut array
+    _prepare_branch_cuts_cy(branch_cuts,
+                            residue_storage, number_of_masked_regions + 1,
+                            np.asarray(residues, dtype=np.int8, order='C'),
+                            np.require(residues.mask, np.uint8, ['C']))
+
+    return branch_cuts, residue_storage
+
+
+def find_branch_cuts(residues, wrap_around=False):
+    wrap_around = _normalize_wrap_around(wrap_around, residues.ndim)
+    branch_cuts, residue_storage = _prepare_branch_cuts(residues, wrap_around)
+    branch_cuts = find_branch_cuts_cy(branch_cuts, residue_storage)
+    return branch_cuts['vcut'], branch_cuts['hcut']
+
+
 def find_phase_residues(image, wrap_around=False):
     '''Find the phase residues that will be encountered in phase unwrapping.
 
@@ -210,56 +260,6 @@ def find_phase_residues(image, wrap_around=False):
         residues.mask |= mask
 
     return residues
-
-
-def _prepare_branch_cuts(residues, wrap_around):
-    branch_cuts = np.zeros(residues.shape, dtype=branch_cut_dtype, order='C')
-
-    if not np.ma.isMaskedArray(residues):
-        residues = np.ma.array(residues, mask=False)
-
-    # Place edges between neighboring masked intersections
-    # This also takes care of placing edges at the image border
-    branch_cuts['vcut'][...] = (residues.mask
-                                & np.roll(residues.mask, 1, axis=0))
-    branch_cuts['hcut'][...] = (residues.mask
-                                & np.roll(residues.mask, 1, axis=1))
-
-    # Find regions of connected masked intersections
-    labelled_mask = label(residues.mask, neighbors=4, background=0)
-    number_of_masked_regions = np.max(labelled_mask) + 1
-
-    # Allocate storage of residue values
-    number_of_residues = np.sum(np.abs(residues))  # sum only unmasked entries
-    # We will not store any residue in residue_storage[0]; therefore pad by 1
-    residue_storage_size = number_of_residues + number_of_masked_regions + 1
-    residue_storage = np.zeros((residue_storage_size,), dtype=np.int,
-                               order='C')
-
-    # Save residues in masked regions to the branch cut array
-    residues_unmasked = np.asarray(residues)
-    for l in range(number_of_masked_regions):
-        region = labelled_mask == l
-        residue = np.sum(residues_unmasked[region])
-        print('Found residue of net value %d in a masked region' % residue)
-        residue_no = l + 1
-        residue_storage[residue_no] = residue
-        branch_cuts['residue_no'][region] = residue_no
-
-    # Save normal (=not masked) residues to the branch cut array
-    _prepare_branch_cuts_cy(branch_cuts,
-                            residue_storage, number_of_masked_regions + 1,
-                            np.asarray(residues, dtype=np.int8, order='C'),
-                            np.require(residues.mask, np.uint8, ['C']))
-
-    return branch_cuts, residue_storage
-
-
-def find_branch_cuts(residues, wrap_around=False):
-    wrap_around = _normalize_wrap_around(wrap_around, residues.ndim)
-    branch_cuts, residue_storage = _prepare_branch_cuts(residues, wrap_around)
-    branch_cuts = find_branch_cuts_cy(branch_cuts, residue_storage)
-    return branch_cuts['vcut'], branch_cuts['hcut']
 
 
 def unwrap_phase_branch_cuts(image, wrap_around=False):
