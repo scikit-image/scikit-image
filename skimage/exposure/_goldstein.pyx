@@ -328,7 +328,7 @@ cdef inline cnp.uint8_t cut_between_pixels(cnp.uint8_t[:, ::1] vcut,
         return hcut[cut_index(ia, ib), ja]
     else:
         # Cut normal to 1st dimension: vertical cut
-        return vcut[ia, cut_index(ib, jb)]
+        return vcut[ia, cut_index(ja, jb)]
 
 
 cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
