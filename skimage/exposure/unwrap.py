@@ -122,7 +122,7 @@ def _normalize_wrap_around(wrap_around, ndim):
     return wrap_around
 
 
-def _prepare_branch_cuts(residues, wrap_around):
+def _prepare_branch_cuts(residues):
     branch_cuts = np.zeros(residues.shape, dtype=branch_cut_dtype, order='C')
 
     if not np.ma.isMaskedArray(residues):
@@ -165,8 +165,7 @@ def _prepare_branch_cuts(residues, wrap_around):
     return branch_cuts, residue_storage
 
 
-def find_branch_cuts(residues, wrap_around=False):
-    wrap_around = _normalize_wrap_around(wrap_around, residues.ndim)
+def find_branch_cuts(residues):
     '''Connect residues with branch cuts such that the length of the cuts
     is small subject to the constraint that the net residue of intersections
     along a cut should be zero.
@@ -197,7 +196,7 @@ def find_branch_cuts(residues, wrap_around=False):
         of a cut between the intersections (potential residues) at
         ``(i, j)`` and ``(i, j-1)``.
     '''
-    branch_cuts, residue_storage = _prepare_branch_cuts(residues, wrap_around)
+    branch_cuts, residue_storage = _prepare_branch_cuts(residues)
     branch_cuts = find_branch_cuts_cy(branch_cuts, residue_storage)
     return branch_cuts['vcut'], branch_cuts['hcut']
 
@@ -323,6 +322,6 @@ def unwrap_phase_branch_cuts(image, wrap_around=False):
            (1988) 4, pp 713--720.
     '''
     residues = find_phase_residues(image, wrap_around)
-    cut_vertical, cut_horizontal = find_branch_cuts(residues, wrap_around)
+    cut_vertical, cut_horizontal = find_branch_cuts(residues)
     # TODO: integrate the phase
     return image
