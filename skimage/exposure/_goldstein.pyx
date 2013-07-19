@@ -8,7 +8,7 @@ from __future__ import print_function
 import numpy as np
 
 from libc.math cimport M_PI, lround
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport malloc, free, abort
 cimport numpy as cnp
 
 
@@ -30,6 +30,9 @@ cdef extern from "queue.h":
 
 cdef enum:
     UINT16_MAX = 1 << 16 - 1
+    UNDEFINED = -(1 << 30)
+
+PERIODS_UNDEFINED = UNDEFINED
 
 
 cdef struct branch_cut:
@@ -59,6 +62,16 @@ cdef inline double _phase_difference(double from_, double to):
     elif d < -M_PI:
         d += 2 * M_PI
     return d
+
+
+cdef inline int _phase_period_increment(double from_, double to):
+    cdef double d = to - from_
+    if d > M_PI:
+        return -1
+    elif d < -M_PI:
+        return 1
+    else:
+        return 0
 
 
 def find_phase_residues_cy(double[:, ::1] image):
@@ -165,6 +178,7 @@ cdef inline long edge_index(long a, long b):
 
 cdef inline cnp.uint8_t edge_is_set(branch_cut[:, ::1] branch_cuts,
                                   QueuedLocation *la, QueuedLocation *lb):
+    # Is the edge set between to residues?
     if la.i != lb.i:
         # Edge along 0th dimension (vertical)
         return branch_cuts[edge_index(la.i, lb.i), la.j].vcut
@@ -294,3 +308,119 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
         location_buffer = NULL
     print('free\'d: location_buffer')
     return np.asarray(branch_cuts)
+
+
+cdef inline cnp.uint8_t cut_between_pixels(cnp.uint8_t[:, ::1] vcut,
+                                           cnp.uint8_t[:, ::1] hcut,
+                                           Py_ssize_t ia, Py_ssize_t ja,
+                                           Py_ssize_t ib, Py_ssize_t jb):
+    # Is there a cut between two pixels?
+    if ia != ib:
+        # Cut normal to 0th dimension; horizontal cut
+        return hcut[edge_index(ia, ib), ja]
+    else:
+        # Cut normal to 1st dimension: vertical cut
+        return vcut[ia, edge_index(ib, jb)]
+
+
+cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
+                                       cnp.uint8_t[:, ::1] image_mask,
+                                       cnp.int64_t[:, ::1] periods,
+                                       cnp.uint8_t[:, ::1] vcut,
+                                       cnp.uint8_t[:, ::1] hcut,
+                                       Queue * queue,
+                                       QueuedLocation * location_buffer,
+                                       Py_ssize_t location_index,
+                                       QueuedLocation * coming_from,
+                                       long i, long j):
+    cdef:
+        QueuedLocation *l
+    i = normalize_coordinate(i, image.shape[0])
+    j = normalize_coordinate(j, image.shape[1])
+    print('\tConsidering [%d, %d]' % (i, j))
+    print('\t\tperiods = %d' % periods[i, j])
+    if periods[i, j] != UNDEFINED:
+        # Pixel has already been visited
+        print('\t\tAlready processed')
+        return location_index
+    elif image_mask[i, j] == 1:
+        # Masked pixel
+        print('\t\tMasked')
+        return location_index
+    elif cut_between_pixels(vcut, hcut, i, j, coming_from.i, coming_from.j):
+        # Cut between these pixels, unreachable
+        print('\t\tCut between pixels')
+        return location_index
+    else:
+        # Unwrap phase of the new location
+        print('\t\tAdding at location_index = %d' % location_index)
+        periods[i, j] = (periods[coming_from.i, coming_from.j]
+                         + _phase_period_increment(image[coming_from.i,
+                                                         coming_from.j],
+                                                   image[i, j]))
+        print('\t\tPhase periods at [%d, %d]: %d' % (i, j, periods[i, j]))
+        # Add the new location to the queue
+        if location_index >= (image.shape[0] * image.shape[1]):
+            print('Illegal location_index: %d' % location_index)
+            abort()
+        l = &location_buffer[location_index]
+        l.i = i
+        l.j = j
+        queue_push_tail(queue, <QueueValue> l)
+        return location_index + 1
+
+
+def integrate_phase(cnp.float64_t[:, ::1] image, cnp.uint8_t[:, ::1] image_mask,
+                    cnp.int64_t[:, ::1] periods,
+                    cnp.uint8_t[:, ::1] vcut, cnp.uint8_t[:, ::1] hcut,
+                    Py_ssize_t initial_i, Py_ssize_t initial_j):
+    cdef:
+        Py_ssize_t i, j, location_index
+        Queue * queue
+        QueuedLocation *location_buffer
+        QueuedLocation *l
+
+
+    print('Code for UNDEFINED in periods: %d' % UNDEFINED)
+    print('Code for UINT16_MAX in periods: %d' % UINT16_MAX)
+    size = image.shape[0] * image.shape[1]
+    queue = NULL
+    queue = queue_new()
+    print('queue: %x' % (<long> queue))
+    location_buffer = <QueuedLocation *> malloc(size * sizeof(QueuedLocation))
+    print('location_buffer: %x' % (<long> location_buffer))
+    location_index = 0
+
+    # Push start point into queue
+    l = &location_buffer[location_index]
+    l.i = initial_i
+    l.j = initial_j
+    location_index += 1
+    periods[l.i, l.j] = 0
+    queue_push_tail(queue, <QueueValue> l)
+    # Unwrap all reachable pixels
+    while not queue_is_empty(queue):
+        l = <QueuedLocation *> queue_pop_head(queue)
+        print('At pixel [%d, %d]' % (l.i, l.j))
+        location_index = maybe_add_pixel(image, image_mask, periods, vcut, hcut,
+                                         queue, location_buffer, location_index,
+                                         l, l.i, l.j - 1)
+        location_index = maybe_add_pixel(image, image_mask, periods, vcut, hcut,
+                                         queue, location_buffer, location_index,
+                                         l, l.i + 1, l.j)
+        location_index = maybe_add_pixel(image, image_mask, periods, vcut, hcut,
+                                         queue, location_buffer, location_index,
+                                         l, l.i, l.j + 1)
+        location_index = maybe_add_pixel(image, image_mask, periods, vcut, hcut,
+                                         queue, location_buffer, location_index,
+                                         l, l.i - 1, l.j)
+
+    # Cleanup
+    if location_buffer != NULL:
+        free(location_buffer)
+        location_buffer = NULL
+    if queue != NULL:
+        queue_free(queue)
+        queue = NULL
+
+    return np.asarray(periods)

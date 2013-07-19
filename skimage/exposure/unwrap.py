@@ -1,13 +1,14 @@
 import numpy as np
 import warnings
 
-from ..morphology import label
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
-from .._shared.six import string_types
 from ._goldstein import (find_phase_residues_cy, branch_cut_dtype,
-                         find_branch_cuts_cy, _prepare_branch_cuts_cy)
+                         find_branch_cuts_cy, _prepare_branch_cuts_cy,
+                         PERIODS_UNDEFINED, integrate_phase)
+from .._shared.six import string_types
+from ..morphology import label
 
 
 def unwrap_phase(image, wrap_around=False):
@@ -323,5 +324,37 @@ def unwrap_phase_branch_cuts(image, wrap_around=False):
     '''
     residues = find_phase_residues(image, wrap_around)
     cut_vertical, cut_horizontal = find_branch_cuts(residues)
-    # TODO: integrate the phase
-    return image
+
+    if np.ma.isMaskedArray(image):
+        image_mask = np.require(image.mask, np.uint8, ['C'])
+    else:
+        image_mask = np.zeros_like(image, dtype=np.uint8, order='C')
+    image_unmasked = np.asarray(image, dtype=np.float64, order='C')
+    cut_vertical = np.require(cut_vertical, np.uint8, ['C'])
+    cut_horizontal = np.require(cut_horizontal, np.uint8, ['C'])
+
+    # Integrate phase
+    periods = np.empty(image.shape, dtype=np.int64, order='C')
+    periods[...] = PERIODS_UNDEFINED
+    no_regions = 0
+    remaining_pixels = (~image_mask) & (periods == PERIODS_UNDEFINED)
+    while np.any(remaining_pixels):
+        # Choose a start point (any remaining unmasked pixel)
+        start_point = np.unravel_index(np.argmax(remaining_pixels), image.shape)
+        periods = integrate_phase(image_unmasked, image_mask, periods,
+                                  cut_vertical, cut_horizontal,
+                                  start_point[0], start_point[1])
+        no_regions += 1
+        remaining_pixels = (~image_mask) & (periods == PERIODS_UNDEFINED)
+    if no_regions > 1:
+        warnings.warn('Unwrapped image was separated into %d regions by '
+                      'residue cuts; these regions may have phase offsets '
+                      'of n*2*pi, causing global errors' % no_regions)
+
+    if np.ma.isMaskedArray(image):
+        periods[periods == PERIODS_UNDEFINED] = 0
+        image_unwrapped =  np.ma.array(image_unmasked + 2 * np.pi * periods,
+                                       mask=image_mask)
+    else:
+        image_unwrapped = image_unmasked + 2 * np.pi * periods
+    return image_unwrapped
