@@ -79,6 +79,10 @@ dt {
     padding-left: 15px;
 }
 
+#current {
+    font-weight: bold;
+}
+
 .headerlink {
     margin-left: 10px;
     color: #ddd;
