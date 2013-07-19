@@ -198,7 +198,12 @@ def find_branch_cuts(residues):
         ``(i, j)`` and ``(i, j-1)``.
     '''
     branch_cuts, residue_storage = _prepare_branch_cuts(residues)
-    branch_cuts = find_branch_cuts_cy(branch_cuts, residue_storage)
+    if np.ma.isMaskedArray(residues):
+        residues_mask = np.require(residues, np.uint8, ['C'])
+    else:
+        residues_mask = np.zeros_like(residues, dtype=np.uint8, order='C')
+    branch_cuts = find_branch_cuts_cy(branch_cuts, residue_storage,
+                                      residues_mask)
     return branch_cuts['vcut'], branch_cuts['hcut']
 
 

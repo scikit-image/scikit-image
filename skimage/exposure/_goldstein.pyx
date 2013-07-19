@@ -136,7 +136,8 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
                                           QueuedLocation * location_buffer,
                                           Py_ssize_t location_index,
                                           Queue *queue,
-                                          cnp.uint16_t visit_code):
+                                          cnp.uint16_t visit_code,
+                                          cnp.uint8_t[:, ::1] residues_mask):
     cdef:
         QueuedLocation *l
     i = normalize_coordinate(i, branch_cuts.shape[0])
@@ -152,14 +153,18 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
         l.j = j
         l.came_from = coming_from
         # Add the location to the queue
-        if edge_is_set(branch_cuts, l, coming_from):
+        #if edge_is_set(branch_cuts, l, coming_from):
             # The edge between these locations is already set, so we schedule
             # the new location for immediate processing
-            queue_push_head(queue, <QueueValue> l)
+            #queue_push_head(queue, <QueueValue> l)
 
             # We try the standard version here
             #queue_push_tail(queue, <QueueValue> l)
             #print('\t\t\tAdding location to head of queue: [%d, %d]' % (i, j))
+        if (residues_mask[l.i, l.j]
+            and residues_mask[coming_from.i, coming_from.j]):
+            # We are moving between two masked residues, so we fast-skip ahead
+            queue_push_head(queue, <QueueValue> l)
         else:
             # The between these locations was not set, so we schedule the
             # new location as in an ordinary BFS
@@ -213,7 +218,8 @@ cdef void set_edges_to_root(QueuedLocation *location,
 
 
 def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
-                     cnp.int_t[::1] residue_storage):
+                     cnp.int_t[::1] residue_storage,
+                     cnp.uint8_t[:, ::1] residues_mask):
     cdef:
         Py_ssize_t i, j, size, residue_no, vi, vj
         Queue *queue
@@ -274,25 +280,29 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                                                         branch_cuts,
                                                         location_buffer,
                                                         location_index, queue,
-                                                        visit_code)
+                                                        visit_code,
+                                                        residues_mask)
                     #print('\t\t\tlocation_index = %d' % location_index)
                     location_index = maybe_add_location(l.i + 1, l.j, l,
                                                         branch_cuts,
                                                         location_buffer,
                                                         location_index, queue,
-                                                        visit_code)
+                                                        visit_code,
+                                                        residues_mask)
                     #print('\t\t\tlocation_index = %d' % location_index)
                     location_index = maybe_add_location(l.i, l.j - 1, l,
                                                         branch_cuts,
                                                         location_buffer,
                                                         location_index, queue,
-                                                        visit_code)
+                                                        visit_code,
+                                                        residues_mask)
                     #print('\t\t\tlocation_index = %d' % location_index)
                     location_index = maybe_add_location(l.i, l.j + 1, l,
                                                         branch_cuts,
                                                         location_buffer,
                                                         location_index, queue,
-                                                        visit_code)
+                                                        visit_code,
+                                                        residues_mask)
                     #print('\t\t\tlocation_index = %d' % location_index)
 
                 if queue != NULL:
