@@ -167,6 +167,36 @@ def _prepare_branch_cuts(residues, wrap_around):
 
 def find_branch_cuts(residues, wrap_around=False):
     wrap_around = _normalize_wrap_around(wrap_around, residues.ndim)
+    '''Connect residues with branch cuts such that the length of the cuts
+    is small subject to the constraint that the net residue of intersections
+    along a cut should be zero.
+
+    Parameters
+    ----------
+    residues : 2D ndarray of signed integers, optionally a masked array
+        Residues to connect with branch cuts. The last row/column should
+        correspond to residues wrapping around the image border. Both
+        dimensions of the underlying image are assumed to wrap around;
+        to achieve the effect of a border, mask all entries in the last
+        row and column.
+
+    Returns
+    -------
+    cut_vertical : 2D ndarray of uint8
+        A value of ``1`` and ``0`` of element ``(i, j)`` indicates a cut
+        and no cut, respectively, between pixels ``(i, j)`` and
+        ``(i, j + 1)`` in the underlying image. Equivalently, the value of
+        element ``(i, j)`` can be interpreted as the presence or absence
+        of a cut between the intersections (potential residues) at
+        ``(i, j)`` and ``(i - 1, j)``.
+    cut_horizontal : 2D ndarray of uint8
+        A value of ``1`` and ``0`` of element ``(i, j)`` indicates a cut
+        and no cut, respectively, between pixels ``(i, j)`` and
+        ``(i + 1, j)`` in the underlying image. Equivalently, the value of
+        element ``(i, j)`` can be interpreted as the presence or absence
+        of a cut between the intersections (potential residues) at
+        ``(i, j)`` and ``(i, j-1)``.
+    '''
     branch_cuts, residue_storage = _prepare_branch_cuts(residues, wrap_around)
     branch_cuts = find_branch_cuts_cy(branch_cuts, residue_storage)
     return branch_cuts['vcut'], branch_cuts['hcut']
