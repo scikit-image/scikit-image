@@ -156,6 +156,9 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
             # The edge between these locations is already set, so we schedule
             # the new location for immediate processing
             queue_push_head(queue, <QueueValue> l)
+
+            # We try the standard version here
+            #queue_push_tail(queue, <QueueValue> l)
             #print('\t\t\tAdding location to head of queue: [%d, %d]' % (i, j))
         else:
             # The between these locations was not set, so we schedule the
