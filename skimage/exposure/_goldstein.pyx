@@ -348,6 +348,9 @@ cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
     j = normalize_coordinate(j, image.shape[1])
     print('\tConsidering [%d, %d]' % (i, j))
     print('\t\tperiods = %d' % periods[i, j])
+    print('\t\tCut between pixels? %d' % cut_between_pixels(vcut, hcut, i, j,
+                                                            coming_from.i,
+                                                            coming_from.j))
     if periods[i, j] != UNDEFINED:
         # Pixel has already been visited
         print('\t\tAlready processed')
