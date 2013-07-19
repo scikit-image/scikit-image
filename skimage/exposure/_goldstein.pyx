@@ -204,8 +204,8 @@ cdef void set_edges_to_root(QueuedLocation *location,
             branch_cuts[l.i, edge_index(l.j, l.came_from.j)].hcut = 1
         num_edges += 1
         if num_edges > branch_cuts.shape[0] + branch_cuts.shape[1]:
-            print('Programming error')
-            break
+            print('Programming error: Traversed too many edges')
+            abort()
         l = l.came_from
 
 
