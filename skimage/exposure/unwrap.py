@@ -127,7 +127,7 @@ def find_phase_residues(image, wrap_around=False):
 
     Parameters
     ----------
-    image : 2D ndarray of floats
+    image : 2D ndarray of floats, optionally a masked array
         The values should be in the range ``[-pi, pi)``. The length of both
         dimensions must be at least 2.
     wrap_around : bool or sequence of bool
@@ -145,7 +145,8 @@ def find_phase_residues(image, wrap_around=False):
         have the same shape as ``image``, with the residues in the last
         row/column calculated by wrapping around the array. When
         ``wrap_around`` is ``False`` for an axis, the boundary elements will be
-        masked.
+        masked. All intersections where one or more of the adjacent pixels
+        were masked will also be masked.
 
     Notes
     -----
@@ -181,23 +182,32 @@ def find_phase_residues(image, wrap_around=False):
     '''
     if image.ndim != 2:
         raise ValueError('image must be 2D')
-    if np.ma.isMaskedArray(image):
-        raise ValueError('Residues cannot be computed for masked arrays')
     wrap_around = _normalize_wrap_around(wrap_around, image.ndim)
     if image.shape[0] < 2 or image.shape[1] < 2:
         raise ValueError('Residues cannot be determined for images with one '
                          'or more dimensions of length less than 2')
-    residues = find_phase_residues_cy(np.require(image, np.float64, ['C']))
-    # Roll border residues to last element along their axis and mask
-    # boundary residues for wrap_around=False
-    if not all(wrap_around):
+
+    # Calculate residues assuming wrap around and no image mask
+    residues = find_phase_residues_cy(np.asarray(image, dtype=np.float64,
+                                                 order='C'))
+
+    if (not all(wrap_around)) or np.ma.isMaskedArray(image):
         residues = np.ma.array(residues, mask=False)
     for i in range(image.ndim):
+        # Roll border residues to last element along their axis
         residues = np.roll(residues, -1, axis=i)
         if not wrap_around[i]:
+            # Mask residues on boundaries that do not have wrap around
             slice_ = tuple([-1 if j == i else slice(None)
                             for j in range(image.ndim)])
             residues.mask[slice_] = True
+    if np.ma.isMaskedArray(image):
+        # Mask residues that are calculated based on one or more masked pixel
+        mask = (image.mask
+                | np.roll(image.mask, 1, axis=0)
+                | np.roll(image.mask, 1, axis=1)
+                | np.roll(np.roll(image.mask, 1, axis=1), 1, axis=0))
+        residues.mask |= mask
 
     return residues
 
