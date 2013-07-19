@@ -262,7 +262,7 @@ def find_branch_cuts(residues, wrap_around=False):
     return branch_cuts['vcut'], branch_cuts['hcut']
 
 
-def unwrap_phase_goldstein(image, wrap_around=False):
+def unwrap_phase_branch_cuts(image, wrap_around=False):
     residues = find_phase_residues(image, wrap_around)
     cut_vertical, cut_horizontal = find_branch_cuts(residues, wrap_around)
     # TODO: integrate the phase
