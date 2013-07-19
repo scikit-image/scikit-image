@@ -217,7 +217,6 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
         Py_ssize_t location_index
         QueuedLocation *location_buffer
         QueuedLocation *l
-        QueueValue qv
         int residue, net_residue
         cnp.uint16_t visit_code
     size = branch_cuts.shape[0] * branch_cuts.shape[1]
