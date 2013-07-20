@@ -1,5 +1,5 @@
 import numpy as np
-from _inpaint import inpaint_point as inp_point
+from py_inpaint import inpaint_point as inp_point
 from heapq import heappop, heappush
 import _heap
 
@@ -189,4 +189,4 @@ def inpaint(input_image, inpaint_mask, epsilon=5):
 
     painted = fast_marching_method(image, flag, u, heap, epsilon=epsilon)
 
-    return painted
+    return painted[1:-1, 1:-1]

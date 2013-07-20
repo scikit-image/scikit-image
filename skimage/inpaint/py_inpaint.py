@@ -10,7 +10,7 @@ BAND = 1
 INSIDE = 2
 
 
-def grad_func(i, j, flag, array, channel=-1):
+def grad_func(i, j, flag, array, channel=1):
     """This function calculates the gradient of the distance/image of a pixel
     depending on the value of the flag of its neighbours. The gradient
     is computed using Central Differences method.
@@ -29,8 +29,8 @@ def grad_func(i, j, flag, array, channel=-1):
     array : array
         Either `image` or `u`
     channel : integer
-        If channel == -1 then the gradient of `u` is to be calculated
-        If channel == 0 then the gradient of `image` is to be calculated
+        If channel == 1 then the gradient of `u` is calculated
+        If channel == 0 then the gradient of `image` is calculated
 
     Returns
     ------
@@ -44,7 +44,7 @@ def grad_func(i, j, flag, array, channel=-1):
     if channel == 0:
         u = np.array(array, int)
         factor = 2.0
-    elif channel == -1:
+    elif channel == 1:
         u = np.array(array, float)
         factor = 0.5
 
@@ -112,7 +112,7 @@ def inpaint_point(i, j, image, flag, u, epsilon):
         Row and column index value of the pixel to be Inpainted
     image : array
         Padded single channel input image
-    flag : array
+    flag_view : array
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
     u : array
@@ -132,8 +132,9 @@ def inpaint_point(i, j, image, flag, u, epsilon):
             http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
+
     Ia, Jx, Jy, norm = 0, 0, 0, 0
-    gradUx, gradUy = grad_func(i, j, flag, u, channel=-1)
+    gradUx, gradUy = grad_func(i, j, flag, u, channel=1)
     nb = ep_neighbor(i, j, image.shape, epsilon)
 
     for [i_nb, j_nb] in nb:
