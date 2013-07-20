@@ -1,21 +1,18 @@
-import numpy as np
 cimport numpy as cnp
+import numpy as np
 from libc.math cimport sqrt
 from skimage.morphology import disk
 
-
+print "Cython file"
 __all__ = ['grad_func', 'ep_neighbor', 'inpaint_point']
 
+cdef:
+    cnp.uint8_t KNOWN = 0
+    cnp.uint8_t BAND = 1
+    cnp.uint8_t INSIDE = 2
 
-KNOWN = 0
-BAND = 1
-INSIDE = 2
 
-
-cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
-                              cnp.uint8_t[:, ::1] flag_view,
-                              cnp.float_t[:, ::1] array_view,
-                              Py_ssize_t channel=1):
+cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] flag_view, cnp.float_t[:, ::1] array_view, Py_ssize_t channel=1):
     """This function calculates the gradient of the distance/image of a pixel
     depending on the value of the flag of its neighbours. The gradient
     is computed using Central Differences method.
@@ -32,10 +29,10 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
     array_view : array
-        Either `image` or `u`
+        Either `image_view` or `u_view`
     channel : integer
-        If channel == -1 then the gradient of `u` is to be calculated
-        If channel == 0 then the gradient of `image` is to be calculated
+        If channel == 1 then the gradient of `u` is calculated
+        If channel == 0 then the gradient of `image` is calculated
 
     Returns
     ------
@@ -76,8 +73,7 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
     return gradU
 
 
-cdef ep_neighbor(Py_ssize_t i, Py_ssize_t j, Py_ssize_t h, Py_ssize_t w,
-                Py_ssize_t epsilon):
+cdef ep_neighbor(indices, Py_ssize_t i, Py_ssize_t j, h, w, epsilon):
     """This computes the epsilon neighbourhood of the `(i, j)` pixel.
 
     Parameters
@@ -97,27 +93,22 @@ cdef ep_neighbor(Py_ssize_t i, Py_ssize_t j, Py_ssize_t h, Py_ssize_t w,
         less than epsilon
 
     """
+
     cdef:
         cnp.int8_t[:, ::1] center_ind
         Py_ssize_t i_ep, j_ep
-        list nb = list()
 
-    indices = np.transpose(np.where(disk(epsilon)))
-    center_ind = np.ascontiguousarray(indices - [epsilon, epsilon] + [i, j], dtype=np.int8)
-
+    nb = []
+    center_ind = (indices - [epsilon, epsilon] + [i, j]).astype(np.int8, order='C')
     for i_ep, j_ep in center_ind:
         if i_ep > 0 and j_ep > 0:
             if i_ep < h - 1 and j_ep < w - 1:
                 nb.append([i_ep, j_ep])
 
-    return nb
+    return np.asarray(nb, dtype=np.uint8, order='C')
 
 
-cpdef cnp.uint8_t[:, ::1] inpaint_point(Py_ssize_t i, Py_ssize_t j,
-                                    cnp.uint8_t[:, ::1] image_view,
-                                    cnp.uint8_t[:, ::1] flag_view,
-                                    cnp.float_t[:, ::1] u_view,
-                                    Py_ssize_t epsilon):
+cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
     """This function performs the actual inpainting operation. Inpainting
     involves "filling in" color in regions with unkown intensity values using
     the intensity and gradient information of surrounding known region.
@@ -128,19 +119,19 @@ cpdef cnp.uint8_t[:, ::1] inpaint_point(Py_ssize_t i, Py_ssize_t j,
     ---------
     i, j : int
         Row and column index value of the pixel to be Inpainted
-    image_view : array
+    image : array
         Padded single channel input image
     flag_view : array
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u_view : array
+    u : array
             The distance/time map from the boundary to each pixel.
     epsilon : integer
             Neighbourhood of (i, j) to be considered for inpainting
 
     Returns
     ------
-    image_view[i, j] : integer
+    image[i, j] : integer
         Inpainted intensity value
 
     References
@@ -152,17 +143,23 @@ cpdef cnp.uint8_t[:, ::1] inpaint_point(Py_ssize_t i, Py_ssize_t j,
     """
 
     cdef:
-        Py_ssize_t i_nb, j_nb
+        cnp.uint8_t[:, ::1] image_view = image
+        cnp.uint8_t[:, ::1] flag_view = flag
+        cnp.float_t[:, ::1] u_view = u
+        cnp.uint8_t[:, ::1] nb_view
+        cnp.uint8_t i_nb, j_nb
         cnp.int8_t rx, ry
-        cnp.float_t dst, lev, dirc
-        cnp.float_t Ia = 0, weight, Jx = 0, Jy = 0, norm = 0, sat
-        cnp.float_t[:] gradU = np.zeros(2, dtype=np.float)
-        cnp.float_t[:] gradI = np.zeros(2, dtype=np.float)
+        cnp.float_t dst, lev, dirc, Ia, Jx, Jy, norm, weight
+        cnp.float_t[:] gradU
+        cnp.float_t[:] gradI
 
-    gradU = grad_func(i, j, flag_view, u_view, channel=1)
-    nb = ep_neighbor(i, j, image_view.shape[0], image_view.shape[1], epsilon)
+    Ia, Jx, Jy, norm = 0, 0, 0, 0
+    gradU = grad_func(i, j, flag_view.base, u_view.base, channel=1)
+    indices = np.transpose(np.where(disk(epsilon)))
+    nb = ep_neighbor(indices, i, j, image.shape[0], image.shape[1], epsilon)
+    nb_view = nb.view(np.uint8)
 
-    for i_nb, j_nb in nb:
+    for [i_nb, j_nb] in nb:
         if flag_view[i_nb, j_nb] == KNOWN:
             rx = i - i_nb
             ry = j - j_nb
@@ -176,7 +173,8 @@ cpdef cnp.uint8_t[:, ::1] inpaint_point(Py_ssize_t i, Py_ssize_t j,
                 dirc = 1.0e-6
             weight = abs(dst * lev * dirc)
 
-            gradI = grad_func(i_nb, j_nb, flag_view, np.ascontiguousarray(image_view, np.float), channel=0)
+            gradI = grad_func(i_nb, j_nb, flag_view, image.astype(np.float, order='C'),
+                                       channel=0)
 
             Ia += weight * image_view[i_nb, j_nb]
             Jx -= weight * gradI[0] * rx
@@ -184,7 +182,5 @@ cpdef cnp.uint8_t[:, ::1] inpaint_point(Py_ssize_t i, Py_ssize_t j,
             norm += weight
 
     sat = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
-            + 0.5)
-    image_view[i, j] = <cnp.uint8_t> round(sat)
-
-    return image_view
+           + 0.5)
+    image_view[i, j] = int(round(sat))
