@@ -1,7 +1,11 @@
 import numpy as np
-from _inpaint import inpaint_point as inp_point
 from heapq import heappop, heappush
 import _heap
+
+import pyximport
+pyximport.install(setup_args={"include_dirs": np.get_include()},
+                  reload_support=True)
+from _inpaint import inpaint_point as inp_point
 
 
 __all__ = ['inpaint', 'fast_marching_method', 'eikonal']
