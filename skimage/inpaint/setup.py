@@ -9,11 +9,11 @@ base_path = os.path.abspath(os.path.dirname(__file__))
 def configuration(parent_package='', top_path=None):
     from numpy.distutils.misc_util import Configuration
 
-    config = Configuration('inpaint', parent_package, top_path)
+    config = Configuration('_inpaint', parent_package, top_path)
 
-    cython(['inpaint.pyx'], working_path=base_path)
+    cython(['_inpaint.pyx'], working_path=base_path)
 
-    config.add_extension('inpaint', sources=['inpaint.c'])
+    config.add_extension('_inpaint', sources=['_inpaint.c'])
 
     return config
 
