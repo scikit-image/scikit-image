@@ -59,4 +59,26 @@ in-place::
 
   python setup.py build_ext -i
 
+In addition you can install using 
+`bento`<http://cournape.github.io/Bento/>_. However the extension
+requires you to not only install Bento, but also WAFLIB
+which is part of `Waf`<https://code.google.com/p/waf/>_.
+
+To install bento follow the 
+`instructions on the webpage`<http://cournape.github.io/Bento/html/install.html>,
+then make it aware of WAF by adding::
+
+    export WAFLIB=<path/to/waf>
+
+to the appropriate config file such as ``.bashrc`` or ``.zshrc``.
+Then install scikit-image by going to the latter's directory
+and typing::
+
+    bentomaker configure
+    bentomaker build  -j -i (if you want to build it inplace)
+    bentomaker install
+
+Depending on the permissions of your /usr/local/ dir you might need
+to run the above command as sudo.
+ 
 .. include:: ../../DEPENDS.txt
