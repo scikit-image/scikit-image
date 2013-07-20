@@ -70,10 +70,8 @@ then make it aware of WAF by adding::
 
     export WAFLIB=<path/to/waf>
 
-e.g. WAFLIB=/usr/local/src/waf
-
-to the appropriate config file such as .bashrc or .zshrc.
-then install scikit-image by going to the scikit-image directory
+to the appropriate config file such as ``.bashrc`` or ``.zshrc``.
+Then install scikit-image by going to the latter's directory
 and typing::
 
     bentomaker configure
@@ -81,6 +79,6 @@ and typing::
     bentomaker install
 
 Depending on the permissions of your /usr/local/ dir you might need
-to run the above command as sudo
+to run the above command as sudo.
  
 .. include:: ../../DEPENDS.txt
