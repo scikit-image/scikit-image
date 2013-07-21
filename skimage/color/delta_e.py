@@ -1,0 +1,215 @@
+"""
+Functions for calculating the "distance" between colors.
+
+Implicit in these definitions of "distance" is the notion of "Just Noticible
+Distance" (JND).  This represents the distance between colors where a human can
+percieve different colors.  Humans are more sensitive to certain colors than
+others, which different deltaE metrics correct for this with varying degrees of
+sophistication.
+
+:author: Matt Terry
+
+:license: modified BSD
+
+Reference
+---------
+
+"""
+from __future__ import division
+
+import numpy as np
+from .colorconv import lab2lch
+
+DEG = np.pi/180
+
+
+def _unpack_last(x):
+    x = np.asarray(x)
+    shape = x.shape
+    return [x[..., i] for i in range(shape[-1])]
+
+
+def _arctan2pi(b, a):
+    """np.arctan2 mapped to (0, 2*pi)"""
+    ans = np.arctan2(b, a)
+    ans += np.where(ans < 0, 2*np.pi, 0.)
+    assert ans.max() <= 2*np.pi
+    assert ans.min() >= 0.
+    return ans
+
+
+def deltaE_cie76(lab1, lab2):
+    """
+    "just noticible difference" ~ 2.3
+    """
+    l1, a1, b1 = _unpack_last(lab1)
+    l2, a2, b2 = _unpack_last(lab2)
+    return np.sqrt((l2-l1)**2 + (a2-a1)**2 + (b2-b1)**2)
+
+
+def deltaE_ciede94(lab1, lab2, kC=1, kH=1, kL=1, k1=0.045, k2=0.015):
+    """
+    kC, kH are weighting factors, usually unity (default)
+
+    kL, k1, k2 depend on the application.  Sample values are:
+    kL, k1, k2 = 1, 0.045, 0.015 (graphic arts, default)
+    kL, k1, k2 = 2, 0.048, 0.014 (textiles)
+
+    Note: deltaE_ciede94 the defines the scales for the lightness, hue, and
+    chroma in terms of the first color.  Consequently
+    deltaE_ciede94(lab1, lab2) != deltaE_ciede94(lab2, lab1)
+    """
+    l1, a1, b1 = _unpack_last(lab1)
+    l2, a2, b2 = _unpack_last(lab2)
+
+    dl = l1 - l2
+    c1 = np.sqrt(a1**2 + b1**2)
+    c2 = np.sqrt(a2**2 + b2**2)
+    da = a1 - a2
+    db = b1 - b2
+    dc = c1 - c2
+    dh_ab = np.sqrt(da**2 + db**2 + dc**2)
+
+    SL = 1
+    SC = 1 + k1*c1
+    SH = 1 + k2*c1
+
+    ans = (dl/(kL*SL))**2 + (dc/(kC*SC))**2 + (dh_ab/(kH*SH))**2
+    return np.sqrt(ans)
+
+
+def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
+    """
+    Parameters
+    ----------
+    lab1 : array_like
+        pass
+    lab2 : array_like
+        pass
+    kL : float (range), optional
+        pass
+    kC : float (range), optional
+        pass
+    kH : float (range), optional
+        pass
+
+    Returns
+    -------
+    deltaE : array_like
+        The distance between `lab1` and `lab2`
+
+    Notes
+    -----
+    CIEDE 2000 assumes parametric weighting factors for the luminance, chroma,
+    and hue (kL, kC, kH respectively).
+    kL = 1  # graphic arts
+    kL = 2  # textiles
+
+    References
+    ----------
+    http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
+    """
+    L1, a1, b1 = _unpack_last(lab1)
+    L2, a2, b2 = _unpack_last(lab2)
+
+    c1 = np.sqrt(a1**2 + b1**2)
+    c2 = np.sqrt(a2**2 + b2**2)
+    cbar = 0.5*(c1 + c2)
+    c7 = cbar**7
+    G = 0.5 * (1 - np.sqrt(c7/(c7 + 25**7)))
+
+    dL_prime = L2 - L1
+    Lbar = 0.5*(L1 + L2)
+
+    a1_prime = a1 * (1 + G)
+    a2_prime = a2 * (1 + G)
+
+    c1_prime = np.sqrt(a1_prime**2 + b1**2)
+    c2_prime = np.sqrt(a2_prime**2 + b2**2)
+    cbar_prime = 0.5*(c1_prime + c2_prime)
+    dC_prime = c2_prime - c1_prime
+
+    h1_prime = _arctan2pi(b1, a1_prime)
+    h2_prime = _arctan2pi(b2, a2_prime)
+
+    dh_prime = h2_prime - h1_prime
+
+    cc = c1_prime * c2_prime
+    mask1 = cc == 0.
+    mask2 = (-mask1) * (dh_prime > np.pi)
+    mask3 = (-mask1) * (dh_prime < -np.pi)
+    dh_prime[mask1] = 0.
+    dh_prime[mask2] += 2*np.pi
+    dh_prime[mask3] -= 2*np.pi
+
+    dH_prime = 2 * np.sqrt(cc) * np.sin(dh_prime/2)
+
+    Hbar_prime = h1_prime + h2_prime
+    mask0 = np.logical_and(np.abs(h1_prime - h2_prime) > np.pi, cc != 0.)
+    mask1 = np.logical_and(mask0, Hbar_prime < 2*np.pi)
+    mask2 = np.logical_and(mask0, Hbar_prime >= 2*np.pi)
+    Hbar_prime[mask1] += 2*np.pi
+    Hbar_prime[mask2] -= 2*np.pi
+    Hbar_prime[cc == 0.] *= 2
+    Hbar_prime *= 0.5
+
+    deg = np.pi/180.
+    T = (1 -
+         0.17 * np.cos(Hbar_prime - 30*deg) +
+         0.24 * np.cos(2*Hbar_prime) +
+         0.32 * np.cos(3*Hbar_prime + 6*deg) -
+         0.20 * np.cos(4*Hbar_prime - 63*deg)
+         )
+    dTheta = 30*deg * np.exp(-((Hbar_prime/deg - 275)/25)**2)
+    c7 = cbar_prime**7
+    Rc = 2 * np.sqrt(c7 / (c7 + 25**7))
+
+    term = (Lbar - 50)**2
+    SL = 1 + 0.015*term/np.sqrt(20 + term)
+    SC = 1 + 0.045*cbar_prime
+    SH = 1 + 0.015*cbar_prime * T
+
+    RT = -np.sin(2*dTheta) * Rc
+
+    l_term = dL_prime / (kL * SL)
+    c_term = dC_prime / (kC * SC)
+    h_term = dH_prime / (kH * SH)
+    r_term = RT * c_term * h_term
+
+    dE2 = l_term**2
+    dE2 += c_term**2
+    dE2 += h_term**2
+    dE2 += r_term
+    return np.sqrt(dE2)
+
+
+def deltaE_cmc(lab1, lab2):
+    """
+    indistinguishable if < 1
+    usual value for "different" is > 2
+
+    Note: deltaE_cmc the defines the scales for the lightness, hue, and chroma
+    in terms of the first color.  Consequently
+    deltaE_cmc(lab1, lab2) != deltaE_cmc(lab2, lab1)
+    """
+    l1, c1, h1 = _unpack_last(lab2lch(lab1))
+    l2, c2, h2 = _unpack_last(lab2lch(lab2))
+
+    sl = np.where(l1 < 16, 0.511, 0.040975*l1 / (1 + 0.01765*l1))
+    sc = 0.638 + 0.0638*c1 / (1 + 0.0131*c1)
+
+    c1_4 = c1**4
+    f = np.sqrt(c1_4 / (c1_4 + 1900))
+    t = np.where(np.logical_and(h1 >= 2.862, h1 <= 6.021),
+                 0.56 * 0.2 * np.abs(np.cos(h1 + 2.93)),
+                 0.36 + 0.4 * np.abs(np.cos(h1 + 0.611))
+                 )
+    sh = sc * (f*t + 1-f)
+
+    l, c = 1, 1
+    ans = ((l2 - l1)/(l * sl))**2
+    ans += ((c2 - c1)/(c * sc))**2
+    deg = np.pi/180.
+    ans += ((h2 - h1)*deg/sh)**2  # metric defines h in terms of degrees
+
+    return np.sqrt(ans)

@@ -26,10 +26,13 @@ Supported color spaces
         Derived from the RGB CIE color space. Chosen such that
         ``x == y == z == 1/3`` at the whitepoint, and all color matching
         functions are greater than zero everywhere.
+* LAB CIE : Lightness, a, b
+* LCH CIE : Lightness, Chroma, Hue
 
 :author: Nicolas Pinto (rgb2hsv)
 :author: Ralf Gommers (hsv2rgb)
 :author: Travis Oliphant (XYZ and RGB CIE functions)
+:author: Matt Terry (lab2lch)
 
 :license: modified BSD
 
@@ -1026,3 +1029,94 @@ def combine_stains(stains, conv_matrix):
     logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
     rgb2 = np.exp(logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape), in_range=(-1, 1))
+
+
+def lab2lch(lab):
+    """CIE-LAB to LCH color space conversion.
+    TODO: something about cylindrical representation
+
+    Parameters
+    ----------
+    lab : array_like
+        The image in CIE-LAB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in LCH format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+
+    Notes
+    -----
+    The Hue is expressed as an angle between (0, 2*pi)
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lab2lch
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    """
+    shape = lab.shape
+    if len(shape) != 3 or shape[2] != 3:
+        raise ValueError("Input image expected to be LAB")
+
+    lab = _prepare_colorarray(lab)
+    lch = np.empty_like(lab)
+
+    a, b = lab[:, :, 1], lab[:, :, 2]
+    lch[:, :, 0] = lab[:, :, 0]
+    lch[:, :, 1] = np.sqrt(a**2 + b**2)  # C
+
+    H = lch[:, :, 2] = np.arctan2(b, a)
+    H[H < 0] += 2*np.pi  # (-pi, pi) -> (0, 2*pi)
+    return lch
+
+
+def lch2lab(lch):
+    """CIE-LCH to CIE-LAB color space conversion.
+    TODO: something about cylindrical representation
+
+    Parameters
+    ----------
+    lab : array_like
+        The image in CIE-LCH format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in LAB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lch2lab
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    >>> lena_lab2 = lch2lab(lena_lch)
+    """
+    lch = _prepare_colorarray(lch)
+    lab = np.empty_like(lch)
+
+    c, h = lch[:, :, 1], lch[:, :, 2]
+    lab[:, :, 0] = lch[:, :, 0]
+    lab[:, :, 1] = c*np.cos(h)
+    lab[:, :, 2] = c*np.sin(h)
+    return lab
