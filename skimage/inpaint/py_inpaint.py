@@ -48,46 +48,28 @@ def grad_func(i, j, flag, array, channel=1):
         u = np.array(array, float)
         factor = 0.5
 
-    if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
-        gradUx = np.subtract(u[i, j + 1], u[i, j - 1]) * factor
-    elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
-        gradUx = np.subtract(u[i, j + 1], u[i, j])
-    elif flag[i, j + 1] == INSIDE and flag[i, j - 1] != INSIDE:
-        gradUx = np.subtract(u[i, j], u[i, j - 1])
-    elif flag[i, j + 1] == INSIDE and flag[i, j - 1] == INSIDE:
-        gradUx = 0
+    if flag_view[i, j + 1] != INSIDE and flag_view[i, j - 1] != INSIDE:
+        gradU[0] = (array_view[i, j + 1] - array_view[i, j - 1]) * factor
+    elif flag_view[i, j + 1] != INSIDE and flag_view[i, j - 1] == INSIDE:
+        gradU[0] = (array_view[i, j + 1] - array_view[i, j])
+    elif flag_view[i, j + 1] == INSIDE and flag_view[i, j - 1] != INSIDE:
+        gradU[0] = (array_view[i, j] - array_view[i, j - 1])
+    elif flag_view[i, j + 1] == INSIDE and flag_view[i, j - 1] == INSIDE:
+        gradU[0] = 0
 
-    if flag[i + 1, j] != INSIDE and flag[i - 1, j] != INSIDE:
-        gradUy = np.subtract(u[i + 1, j], u[i - 1, j]) * factor
-    elif flag[i + 1, j] != INSIDE and flag[i - 1, j] == INSIDE:
-        gradUy = np.subtract(u[i + 1, j], u[i, j])
-    elif flag[i + 1, j] == INSIDE and flag[i - 1, j] != INSIDE:
-        gradUy = np.subtract(u[i, j], u[i - 1, j])
-    elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
-        gradUy = 0
+    if flag_view[i + 1, j] != INSIDE and flag_view[i - 1, j] != INSIDE:
+        gradU[1] = (array_view[i + 1, j] - array_view[i - 1, j]) * factor
+    elif flag_view[i + 1, j] != INSIDE and flag_view[i - 1, j] == INSIDE:
+        gradU[1] = (array_view[i + 1, j] - array_view[i, j])
+    elif flag_view[i + 1, j] == INSIDE and flag_view[i - 1, j] != INSIDE:
+        gradU[1] = (array_view[i, j] - array_view[i - 1, j])
+    elif flag_view[i + 1, j] == INSIDE and flag_view[i - 1, j] == INSIDE:
+        gradU[1] = 0
 
-    # if flag[i, j + 1] != INSIDE and flag[i, j - 1] != INSIDE:
-    #     gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl - 1]) * factor
-    # elif flag[i, j + 1] != INSIDE and flag[i, j - 1] == INSIDE:
-    #     gradUx = np.subtract(u[i_nbl, j_nbh + 1], u[i_nbl, j_nbl])
-    # elif flag[i, j + 1] == INSIDE and flag[i, j - 1] != INSIDE:
-    #     gradUx = np.subtract(u[i_nbl, j_nbh], u[i_nbl, j_nbl - 1])
-    # elif flag[i, j + 1] == INSIDE and flag[i, j - 1] == INSIDE:
-    #     gradUx = 0
-
-    # if flag[i + 1, j] != INSIDE and flag[i - 1, j] != INSIDE:
-    #     gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl - 1, j_nbl]) * factor
-    # elif flag[i + 1, j] != INSIDE and flag[i - 1, j] == INSIDE:
-    #     gradUy = np.subtract(u[i_nbh + 1, j_nbl], u[i_nbl, j_nbl])
-    # elif flag[i + 1, j] == INSIDE and flag[i - 1, j] != INSIDE:
-    #     gradUy = np.subtract(u[i_nbh, j_nbl], u[i_nbl - 1, j_nbl])
-    # elif flag[i + 1, j] == INSIDE and flag[i - 1, j] == INSIDE:
-    #     gradUy = 0
-
-    return gradUx, gradUy
+    return gradU
 
 
-def ep_neighbor(i, j, size, epsilon):
+cdef cnp.uint8_t[:, ::1] ep_neighbor(cnp.int8_t[:, ::1] center_ind_view, Py_ssize_t h, Py_ssize_t w):
     """This computes the epsilon neighbourhood of the `(i, j)` pixel.
 
     Parameters
@@ -106,12 +88,16 @@ def ep_neighbor(i, j, size, epsilon):
         List of indices whose cartesian distance to the input pixel index is
         less than epsilon
     """
+
+    cdef:
+        Py_ssize_t i_ep, j_ep
+
     nb = []
-    indices = np.transpose(np.where(disk(epsilon)))
-    center_ind = indices - [epsilon, epsilon] + [i, j]
-    for ind in center_ind:
-        if (ind > [0, 0]).all() and (ind < np.array(size) - [1, 1]).all():
-            nb.append(ind)
+
+    for i_ep, j_ep in center_ind_view:
+        if i_ep > 0 and j_ep > 0:
+            if i_ep < h - 1 and j_ep < w - 1:
+                nb.append([i_ep, j_ep])
 
     return nb
 
@@ -150,12 +136,28 @@ def inpaint_point(i, j, image, flag, u, epsilon):
 
     """
 
-    Ia, Jx, Jy, norm = 0, 0, 0, 0
-    gradUx, gradUy = grad_func(i, j, flag, u, channel=1)
-    nb = ep_neighbor(i, j, image.shape, epsilon)
+    cdef:
+        cnp.uint8_t[:, ::1] image_view = image
+        cnp.uint8_t[:, ::1] flag_view = flag
+        cnp.float_t[:, ::1] u_view = u
+        cnp.uint8_t[:, ::1] nb_view
+        cnp.int8_t[:, ::1] center_ind_view
+        cnp.uint8_t i_nb, j_nb
+        cnp.int8_t rx, ry
+        cnp.float_t dst, lev, dirc, Ia, Jx, Jy, norm, weight
+        cnp.float_t[:] gradU
+        cnp.float_t[:] gradI
 
-    for [i_nb, j_nb] in nb:
-        if flag[i_nb, j_nb] == KNOWN:
+    Ia, Jx, Jy, norm = 0, 0, 0, 0
+    gradU = grad_func(i, j, flag_view, u_view, channel=1)
+
+    indices = np.transpose(np.where(disk(epsilon)))
+    center_ind_view = (indices - [epsilon, epsilon] + [i, j]).astype(np.int8, order='C')
+
+    nb_view = ep_neighbor(center_ind_view, image.shape[0], image.shape[1])
+
+    for i_nb, j_nb in nb_view:
+        if flag_view[i_nb, j_nb] == KNOWN:
             rx = i - i_nb
             ry = j - j_nb
 
