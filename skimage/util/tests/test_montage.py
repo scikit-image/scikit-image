@@ -58,7 +58,7 @@ def test_grid_shape():
     height, width = 2, 2
     arr_in = np.arange(n_images * height * width, dtype=np.float32)
     arr_in = arr_in.reshape(n_images, height, width)
-    arr_out = montage.montage2d(arr_in, grid_shape=(3,2))
+    arr_out = montage2d(arr_in, grid_shape=(3,2))
     correct_arr_out = np.array(
 	[[  0.,   1.,   4.,   5.],
 	 [  2.,   3.,   6.,   7.],
