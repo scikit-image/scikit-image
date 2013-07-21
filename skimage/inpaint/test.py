@@ -15,6 +15,17 @@ def demo_inpaint(image, mask):
     # painted = fmm.inpaint(image, mask)
     painted = inpaint(image, mask)
 
+
+def start():
+    image = data.camera()
+    paint_region = (slice(20, 30), slice(40, 70))
+    image[paint_region] = 0
+
+    mask = np.zeros_like(image, dtype=np.uint8)
+    mask[paint_region] = 1
+
+    painted = demo_inpaint(image, mask)
+
     fig, (ax0, ax1) = plt.subplots(ncols=2)
     plt.gray()
     ax0.imshow(image)
