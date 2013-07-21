@@ -3,8 +3,9 @@ import numpy as np
 from libc.math cimport sqrt
 from skimage.morphology import disk
 
-print "Cython file"
+
 __all__ = ['grad_func', 'ep_neighbor', 'inpaint_point']
+
 
 cdef:
     cnp.uint8_t KNOWN = 0
@@ -73,7 +74,7 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] fl
     return gradU
 
 
-cdef ep_neighbor(indices, Py_ssize_t i, Py_ssize_t j, h, w, epsilon):
+cdef cnp.uint8_t[:, ::1] ep_neighbor(cnp.int8_t[:, ::1] center_ind_view, Py_ssize_t h, Py_ssize_t w):
     """This computes the epsilon neighbourhood of the `(i, j)` pixel.
 
     Parameters
@@ -95,12 +96,11 @@ cdef ep_neighbor(indices, Py_ssize_t i, Py_ssize_t j, h, w, epsilon):
     """
 
     cdef:
-        cnp.int8_t[:, ::1] center_ind
         Py_ssize_t i_ep, j_ep
 
     nb = []
-    center_ind = (indices - [epsilon, epsilon] + [i, j]).astype(np.int8, order='C')
-    for i_ep, j_ep in center_ind:
+
+    for i_ep, j_ep in center_ind_view:
         if i_ep > 0 and j_ep > 0:
             if i_ep < h - 1 and j_ep < w - 1:
                 nb.append([i_ep, j_ep])
@@ -147,6 +147,7 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
         cnp.uint8_t[:, ::1] flag_view = flag
         cnp.float_t[:, ::1] u_view = u
         cnp.uint8_t[:, ::1] nb_view
+        cnp.int8_t[:, ::1] center_ind_view
         cnp.uint8_t i_nb, j_nb
         cnp.int8_t rx, ry
         cnp.float_t dst, lev, dirc, Ia, Jx, Jy, norm, weight
@@ -154,12 +155,14 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
         cnp.float_t[:] gradI
 
     Ia, Jx, Jy, norm = 0, 0, 0, 0
-    gradU = grad_func(i, j, flag_view.base, u_view.base, channel=1)
-    indices = np.transpose(np.where(disk(epsilon)))
-    nb = ep_neighbor(indices, i, j, image.shape[0], image.shape[1], epsilon)
-    nb_view = nb.view(np.uint8)
+    gradU = grad_func(i, j, flag_view, u_view, channel=1)
 
-    for [i_nb, j_nb] in nb:
+    indices = np.transpose(np.where(disk(epsilon)))
+    center_ind_view = (indices - [epsilon, epsilon] + [i, j]).astype(np.int8, order='C')
+
+    nb_view = ep_neighbor(center_ind_view, image.shape[0], image.shape[1])
+
+    for i_nb, j_nb in nb_view:
         if flag_view[i_nb, j_nb] == KNOWN:
             rx = i - i_nb
             ry = j - j_nb
