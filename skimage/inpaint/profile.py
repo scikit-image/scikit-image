@@ -4,7 +4,7 @@
 
 import pstats, cProfile
 
-from py_test import start
+from test import start
 
 cProfile.runctx("start()", globals(), locals(), "Profile.prof")
 
