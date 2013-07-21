@@ -36,6 +36,7 @@ def start():
     mask[paint_region] = 1
 
     painted = demo_inpaint(image, mask)
+
     fig, (ax0, ax1) = plt.subplots(ncols=2)
     plt.gray()
     ax0.imshow(image)
