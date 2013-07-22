@@ -23,7 +23,6 @@ Reference
 from __future__ import division
 
 import numpy as np
-from .colorconv import lab2lch
 
 DEG = np.pi/180
 
