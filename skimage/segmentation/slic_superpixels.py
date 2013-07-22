@@ -122,11 +122,11 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     means = np.ascontiguousarray(means)
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    ratio = (ratio / float(max((step_z, step_y, step_x)))) ** 2
+    ratio = float(max((step_z, step_y, step_x))) / ratio
     image_zyx = np.concatenate([grid_z[..., np.newaxis],
                                 grid_y[..., np.newaxis],
                                 grid_x[..., np.newaxis],
-                                image / ratio], axis=-1).copy("C")
+                                image * ratio], axis=-1).copy("C")
     nearest_mean = np.zeros((depth, height, width), dtype=np.intp)
     distance = np.empty((depth, height, width), dtype=np.float)
     segment_map = _slic_cython(image_zyx, nearest_mean, distance, means,
