@@ -234,13 +234,17 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     return np.sqrt(dE2)
 
 
-def deltaE_cmc(lab1, lab2):
+def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     """Color difference from the  CMC l:c standard.
 
     This color difference developed by the Colour Measurement Committee of the
     Socieity of Dyes and Colourists of Great Britian (CMC).  It is intended for
-    use in the textile industry.  Color differences less than 1.0 are
-    officially indistiguisable, but 2.0 is the usual threshold.
+    use in the textile industry.
+
+    The scale factors kL, kC set the weight given to differences in lightness
+    and chroma relative to differences in hue.  The usual values are kL=2, kC=1
+    for "acceptability" and kL=1, kC=1 for "imperceptability".  Colors with
+    dE > 1 are "different" for the given scale factors.
 
     Parameters
     ----------
@@ -260,24 +264,33 @@ def deltaE_cmc(lab1, lab2):
     in terms of the first color.  Consequently
     deltaE_cmc(lab1, lab2) != deltaE_cmc(lab2, lab1)
     """
-    l1, c1, h1 = _unpack_last(lab2lch(lab1))
-    l2, c2, h2 = _unpack_last(lab2lch(lab2))
+    l1, a1, b1 = _unpack_last(lab1)
+    l2, a2, b2 = _unpack_last(lab2)
 
-    sl = np.where(l1 < 16, 0.511, 0.040975*l1 / (1 + 0.01765*l1))
-    sc = 0.638 + 0.0638*c1 / (1 + 0.0131*c1)
+    c1 = np.sqrt(a1**2 + b1**2)
+    c2 = np.sqrt(a2**2 + b2**2)
+    dC = c1 - c2
 
-    c1_4 = c1**4
-    f = np.sqrt(c1_4 / (c1_4 + 1900))
-    t = np.where(np.logical_and(h1 >= 2.862, h1 <= 6.021),
-                 0.56 * 0.2 * np.abs(np.cos(h1 + 2.93)),
-                 0.36 + 0.4 * np.abs(np.cos(h1 + 0.611))
+    da = a1 - a2
+    db = b1 - b2
+    dH = np.sqrt(da**2 + db**2 - dC**2)
+
+    dL = l1 - l2
+
+    h1 = _arctan2pi(b1, a1)
+    T = np.where(np.logical_and(h1 >= 164*DEG, h1 <= 345*DEG),
+                 0.56 + 0.2 * np.abs(np.cos(h1 + 168*DEG)),
+                 0.36 + 0.4 * np.abs(np.cos(h1 + 35*DEG))
                  )
-    sh = sc * (f*t + 1-f)
+    c1_4 = c1**4
+    F = np.sqrt(c1_4 / (c1_4 + 1900))
 
-    l, c = 1, 1
-    ans = ((l2 - l1)/(l * sl))**2
-    ans += ((c2 - c1)/(c * sc))**2
-    deg = np.pi/180.
-    ans += ((h2 - h1)*deg/sh)**2  # metric defines h in terms of degrees
+    SL = np.where(l1 < 16, 0.511, 0.040975*l1 / (1. + 0.01765*l1))
+    SC = 0.638 + 0.0638 * c1 / (1. + 0.0131*c1)
+    SH = SC * (F*T + 1 - F)
 
-    return np.sqrt(ans)
+    dE2 = (dL / (kL*SL))**2
+    dE2 += (dC/(kC*SC))**2
+    dE2 += (dH/SH)**2
+
+    return np.sqrt(dE2)
