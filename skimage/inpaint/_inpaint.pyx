@@ -119,8 +119,8 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
         cnp.uint8_t[:, ::1] flag_view = flag
         cnp.float_t[:, ::1] u_view = u
         cnp.uint8_t[:, ::1] nb_view
-        cnp.int8_t[:, ::1] center_ind_view
-        cnp.int8_t i_nb, j_nb
+        cnp.int16_t[:, ::1] center_ind_view
+        cnp.int16_t i_nb, j_nb
         cnp.int8_t rx, ry
         cnp.float_t dst, lev, dirc, Ia, Jx, Jy, norm, weight
         cnp.float_t[:] gradU
@@ -133,7 +133,7 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
     gradU = grad_func(i, j, flag_view, u_view, channel=1)
 
     indices = np.transpose(np.where(disk(epsilon)))
-    center_ind_view = (indices - [epsilon, epsilon] + [i, j]).astype(np.int8, order='C')
+    center_ind_view = (indices - [epsilon, epsilon] + [i, j]).astype(np.int16, order='C')
 
     for x in range(center_ind_view.shape[0]):
         i_nb = center_ind_view[x, 0]
