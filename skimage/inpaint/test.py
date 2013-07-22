@@ -1,15 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
-import _heap
-import fmm
+import inpaint
+import _inpaint
 
 
 __all__ = ['demo_inpaint', 'demo_time_fill']
 
 
 def demo_inpaint(image, mask):
-    return fmm.inpaint(image, mask)
+    return inpaint.inpaint(image, mask)
 
 
 def demo_time_fill():
@@ -20,9 +20,9 @@ def demo_time_fill():
     mask = np.zeros_like(image, dtype=np.uint8)
     mask[fill_region] = 1
 
-    flag, u, heap = _heap.initialise(mask)
-    time_map = fmm.fast_marching_method(image, flag, u, heap,
-                                        _run_inpaint=False, epsilon=5)
+    flag, u, heap = inpaint.initialise(mask)
+    time_map = _inpaint.fast_marching_method(image, flag, u, heap,
+                                             _run_inpaint=False, epsilon=5)
 
     return image, np.round(time_map, 1)
 
