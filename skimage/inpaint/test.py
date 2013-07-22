@@ -29,11 +29,14 @@ def demo_time_fill():
 
 def start():
     image = data.camera()
-    paint_region = (slice(20, 30), slice(40, 70))
+    paint_region = (slice(120, 130), slice(440, 470))
+    paint_region1 = (slice(220, 230), slice(440, 470))
     image[paint_region] = 0
+    image[paint_region1] = 0
 
     mask = np.zeros_like(image, dtype=np.uint8)
     mask[paint_region] = 1
+    mask[paint_region1] = 1
 
     painted = demo_inpaint(image, mask)
 
