@@ -2,12 +2,9 @@ import numpy as np
 import heapq
 from skimage.morphology import dilation, disk
 
-import pyximport
-pyximport.install(setup_args={"include_dirs": np.get_include()},
-                  reload_support=True)
 from _inpaint import fast_marching_method
 
-__all__ = ['initialise', 'inpaint']
+__all__ = ['inpaint_fmm']
 
 
 KNOWN = 0
@@ -15,7 +12,7 @@ BAND = 1
 INSIDE = 2
 
 
-def initialise(_mask):
+def _init_fmm(_mask):
     """Initialisation for Image Inpainting technique based on Fast Marching
     Method as outined in [1]_. Each pixel has 2 new values assigned to it
     stored in `flag` and `u` arrays.
@@ -52,6 +49,24 @@ def initialise(_mask):
     heap : list of tuples
         BAND points with heap element as mentioned above
 
+    Notes
+    -----
+    ``flag`` Initialisation:
+    All pixels are classified into 1 of the following flags:
+    # 0 = KNOWN - intensity and u values are known.
+    # 1 = BAND - u value undergoes an update.
+    # 2 = INSIDE - intensity and u values unkown
+
+    ``u`` Initialisation:
+    u <- 0 : ``flag`` equal to BAND or KNOWN
+    u <- 1.0e6 (arbitrarily large value) : ``flag`` equal to INSIDE
+
+    ``heap`` Initialisation:
+    Contains all the pixels marked as BAND in ``flag``. The heap element is
+    a tuple with 2 elements, first being the ``u`` value corresponding to the
+    tuple of index which is stored as the second element.
+    Heap Element : (u[(i, j)], (i, j))
+
     References
     ----------
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
@@ -76,7 +91,7 @@ def initialise(_mask):
     return flag, u, heap
 
 
-def inpaint(input_image, inpaint_mask, epsilon=5):
+def inpaint_fmm(input_image, inpaint_mask, epsilon=5):
     """Inpaint image in areas specified by a mask.
 
     Parameters
@@ -96,8 +111,8 @@ def inpaint(input_image, inpaint_mask, epsilon=5):
     References
     ---------
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
-           Method", Journal of Graphic Tools (2004).
-           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+            Method", Journal of Graphic Tools (2004).
+            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
     # TODO: Error checks. Image either 3 or 1 channel. All dims same
@@ -108,7 +123,7 @@ def inpaint(input_image, inpaint_mask, epsilon=5):
     image[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
-    flag, u, heap = initialise(mask)
+    flag, u, heap = _init_fmm(mask)
 
     fast_marching_method(image, flag, u, heap, epsilon=epsilon)
 
