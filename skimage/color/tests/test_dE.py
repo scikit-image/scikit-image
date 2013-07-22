@@ -62,7 +62,7 @@ def load_ciede2000_data():
              ]
 
     # note: ciede_test_data.txt contains several intermediate quantities
-    path = pjoin(dirname(abspath(__file__)), 'ciede_test_data.txt')
+    path = pjoin(dirname(abspath(__file__)), 'ciede2000_test_data.txt')
     return np.loadtxt(path, dtype=dtype)
 
 
