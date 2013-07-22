@@ -15,7 +15,7 @@ INSIDE = 2
 def _init_fmm(_mask):
     """Initialisation for Image Inpainting technique based on Fast Marching
     Method as outined in [1]_. Each pixel has 2 new values assigned to it
-    stored in `flag` and `u` arrays.
+    stored in ``flag`` and ``u`` arrays.
 
     `flag` Initialisation:
 
@@ -36,8 +36,8 @@ def _init_fmm(_mask):
 
     Parameters
     ----------
-    _mask : (M, N) array
-        `True` values are to be inpainted.
+    _mask : 2D array of bool
+        ``True`` values are to be inpainted.
 
     Returns
     ------
@@ -96,17 +96,17 @@ def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, neighbor=5):
 
     Parameters
     ---------
-    input_image : array
+    input_image : ndarray, np.uint8
         This can be either a single channel or three channel image.
-    inpaint_mask : array, bool
-        Mask containing pixels to be inpainted. `True` values are inpainted.
+    inpaint_mask : ndarray, bool
+        Mask containing pixels to be inpainted. ``True`` values are inpainted.
     neighbor : int
         Determining the range of the neighbourhood for inpainting a pixel
 
     Returns
     ------
-    painted : array
-        The inpainted image.
+    painted : ndarray, np.uint8
+        The inpainted image of same dimensions.
 
     References
     ---------
@@ -118,13 +118,14 @@ def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, neighbor=5):
     # TODO: Error checks. Image either 3 or 1 channel. All dims same
 
     h, w = input_image.shape
-    image = np.zeros((h + 2, w + 2), np.uint8)
+    painted = np.zeros((h + 2, w + 2), np.uint8)
     mask = np.zeros((h + 2, w + 2), np.uint8)
-    image[1: -1, 1: -1] = input_image
+    painted[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
     flag, u, heap = _init_fmm(mask)
 
-    fast_marching_method(image, flag, u, heap, _run_inpaint, neighbor=neighbor)
+    fast_marching_method(painted, flag, u, heap, _run_inpaint,
+                         neighbor=neighbor)
 
-    return image[1:-1, 1:-1]
+    return painted[1:-1, 1:-1]

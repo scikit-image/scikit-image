@@ -26,28 +26,27 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
     is computed using Central Differences method.
 
     This function is used to compute the gradient of intensity value, I and
-    also the `u` value.
+    also the ``u`` value.
 
     Parameters
     ---------
     i, j : int
         Row and column index value of the pixel whose gradient is to be
         calculated
-    flag_view : memory view
+    flag_view : memory view, cnp.uint8_t
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
     array_view : memory view
-        Either `image_view` or `u_view`
+        Either ``image_view`` or ``u_view``
     channel : integer
-        If channel == 1 then the gradient of `u` is calculated
-        If channel == 0 then the gradient of `image` is calculated
+        If channel == 1 then the gradient of ``u`` is calculated
+        If channel == 0 then the gradient of ``image`` is calculated
 
     Returns
     -------
-    gradUx : float
-        The signed gradient of `image` or `u` in X direction
-    gradUy : float
-        The signed gradient of `image` or `u` in Y direction
+    gradU : array, float
+        The signed gradient of `image` or `u` depending on ``channel``.
+        shape = (1, 2)
 
     """
 
