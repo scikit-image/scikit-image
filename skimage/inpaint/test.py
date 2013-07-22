@@ -2,6 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
 
+import inpaint
+import _inpaint
+
 # import _heap
 # import fmm
 
@@ -11,9 +14,22 @@ __all__ = ['demo_inpaint', 'demo_time_fill']
 
 
 def demo_inpaint(image, mask):
-    print np.sum(mask)
-    # painted = fmm.inpaint(image, mask)
-    painted = inpaint(image, mask)
+    return inpaint.inpaint(image, mask)
+
+
+def demo_time_fill():
+    image = np.ones((15, 15), np.uint8)
+    fill_region = (slice(3, 12), slice(3, 12))
+    image[fill_region] = 0
+
+    mask = np.zeros_like(image, dtype=np.uint8)
+    mask[fill_region] = 1
+
+    flag, u, heap = inpaint.initialise(mask)
+    time_map = _inpaint.fast_marching_method(image, flag, u, heap,
+                                             _run_inpaint=False, epsilon=5)
+
+    return image, np.round(time_map, 1)
 
 
 def start():
@@ -35,13 +51,3 @@ def start():
     ax1.imshow(painted)
     plt.show()
     return painted
-
-
-def demo_time_fill():
-    image = np.ones((100, 100))
-    fill_region = (slice(30, 40), slice(50, 70))
-
-    image[fill_region] = 0
-
-    mask = np.zeros_like(image, dtype=np.uint8)
-    mask[fill_region] = 1
