@@ -7,6 +7,11 @@ percieve different colors.  Humans are more sensitive to certain colors than
 others, which different deltaE metrics correct for this with varying degrees of
 sophistication.
 
+The literature often mentions 1 as the minimum distance for visual
+differentiation, but more recent studies (Mahy 1994) peg JND at 2.3
+
+The delta-E notation comes from the German word for "Sensation" (Empfindung).
+
 :author: Matt Terry
 
 :license: modified BSD
@@ -39,25 +44,68 @@ def _arctan2pi(b, a):
 
 
 def deltaE_cie76(lab1, lab2):
-    """
-    "just noticible difference" ~ 2.3
+    """Euclidian distance between two points in in Lab color space
+
+    Parameters
+    ----------
+    lab1 : array_like
+        reference color (Lab colorspace)
+    lab2 : array_like
+        comparision color (Lab colorspace)
+
+    Returns
+    -------
+    dE : array_like
+        distance between colors `lab1` and `lab2`
     """
     l1, a1, b1 = _unpack_last(lab1)
     l2, a2, b2 = _unpack_last(lab2)
     return np.sqrt((l2-l1)**2 + (a2-a1)**2 + (b2-b1)**2)
 
 
-def deltaE_ciede94(lab1, lab2, kC=1, kH=1, kL=1, k1=0.045, k2=0.015):
-    """
-    kC, kH are weighting factors, usually unity (default)
+def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
+    """Color difference according to CIEDE 94 standard
 
-    kL, k1, k2 depend on the application.  Sample values are:
-    kL, k1, k2 = 1, 0.045, 0.015 (graphic arts, default)
-    kL, k1, k2 = 2, 0.048, 0.014 (textiles)
+    Accomodates perceptual non-uniformites through the use of application
+    specific scale factors (kH, kC, kL, k1, and k2).
 
-    Note: deltaE_ciede94 the defines the scales for the lightness, hue, and
-    chroma in terms of the first color.  Consequently
-    deltaE_ciede94(lab1, lab2) != deltaE_ciede94(lab2, lab1)
+    Parameters
+    ----------
+    lab1 : array_like
+        reference color (Lab colorspace)
+    lab2 : array_like
+        comparision color (Lab colorspace)
+    kH : float, optional
+        Hue scale
+    kC : float, optional
+        Chroma scale
+    kL : float, optional
+        Lightness scale
+    k1 : float, optional
+        first scale parameter
+    k2 : float, optional
+        second scale parameter
+
+    Returns
+    -------
+    dE : array_like
+        color difference between `lab1` and `lab2`
+
+    Notes
+    -----
+    deltaE_ciede94 is not symmetric with respect to lab1 and lab2.  CIEDE94
+    defines the scales for the lightness, hue, and chroma in terms of the first
+    color.  Consequently, the first color should be regarded as the "reference"
+    color.
+
+    kL, k1, k2 depend on the application and default to the values suggested
+    for graphic arts
+
+    Parameter   Graphic Arts    Textiles
+    ----------  -------------   --------
+    kL          1.000           2.000
+    k1          0.045           0.048
+    k2          0.015           0.014
     """
     l1, a1, b1 = _unpack_last(lab1)
     l2, a2, b2 = _unpack_last(lab2)
@@ -79,13 +127,17 @@ def deltaE_ciede94(lab1, lab2, kC=1, kH=1, kL=1, k1=0.045, k2=0.015):
 
 
 def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
-    """
+    """Color difference as given by the CIEDE 2000 standard.
+
+    CIEDE 2000 is a major revision of CIDE94.  The perceptual calibaration is
+    largely based on experience with automotive paint on smooth surfaces.
+
     Parameters
     ----------
     lab1 : array_like
-        pass
+        reference color (Lab colorspace)
     lab2 : array_like
-        pass
+        comparision color (Lab colorspace)
     kL : float (range), optional
         pass
     kC : float (range), optional
@@ -101,13 +153,12 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     Notes
     -----
     CIEDE 2000 assumes parametric weighting factors for the luminance, chroma,
-    and hue (kL, kC, kH respectively).
-    kL = 1  # graphic arts
-    kL = 2  # textiles
+    and hue (kL, kC, kH respectively).  These default to 1.
 
     References
     ----------
-    http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
+    http://en.wikipedia.org/wiki/Color_difference
+    http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf (doi:10.1364/AO.33.008069)
     """
     L1, a1, b1 = _unpack_last(lab1)
     L2, a2, b2 = _unpack_last(lab2)
@@ -184,11 +235,28 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
 
 
 def deltaE_cmc(lab1, lab2):
-    """
-    indistinguishable if < 1
-    usual value for "different" is > 2
+    """Color difference from the  CMC l:c standard.
 
-    Note: deltaE_cmc the defines the scales for the lightness, hue, and chroma
+    This color difference developed by the Colour Measurement Committee of the
+    Socieity of Dyes and Colourists of Great Britian (CMC).  It is intended for
+    use in the textile industry.  Color differences less than 1.0 are
+    officially indistiguisable, but 2.0 is the usual threshold.
+
+    Parameters
+    ----------
+    lab1 : array_like
+        reference color (Lab colorspace)
+    lab2 : array_like
+        comparision color (Lab colorspace)
+
+    Returns
+    -------
+    dE : array_like
+        distance between colors `lab1` and `lab2`
+
+    Notes
+    -----
+    deltaE_cmc the defines the scales for the lightness, hue, and chroma
     in terms of the first color.  Consequently
     deltaE_cmc(lab1, lab2) != deltaE_cmc(lab2, lab1)
     """
