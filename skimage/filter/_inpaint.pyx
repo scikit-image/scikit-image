@@ -11,9 +11,6 @@ from heapq import heappop, heappush
 from skimage.morphology import disk
 
 
-__all__ = ['grad_func', 'inpaint_point', 'eikonal', 'fast_marching_method']
-
-
 cdef:
     cnp.uint8_t KNOWN = 0
     cnp.uint8_t BAND = 1
