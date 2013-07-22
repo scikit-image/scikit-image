@@ -11,7 +11,7 @@ from heapq import heappop, heappush
 from skimage.morphology import disk
 
 
-__all__ = ['grad_func', 'ep_neighbor', 'inpaint_point']
+__all__ = ['grad_func', 'inpaint_point', 'eikonal', 'fast_marching_method']
 
 
 cdef:
