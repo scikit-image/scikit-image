@@ -17,23 +17,6 @@ def _init_fmm(mask):
     Method as outined in [1]_. Each pixel has 2 new values assigned to it
     stored in ``flag`` and ``u`` arrays.
 
-    `flag` Initialisation:
-
-    All pixels are classified into 1 of the following flags:
-    # 0 = KNOWN - intensity and u values are known.
-    # 1 = BAND - u value undergoes an update.
-    # 2 = INSIDE - intensity and u values unkown
-
-    `u` Initialisation:
-    u <- 0 : `flag` equal to BAND or KNOWN
-    u <- 1.0e6 (arbitrarily large value) : `flag` equal to INSIDE
-
-    `heap` Initialisation:
-    Contains all the pixels marked as BAND in `flag`. The heap element is
-    a tuple with 2 elements, first being the `u` value corresponding to the
-    tuple of index which is stored as the second element.
-    Heap Element : (u[(i, j)], (i, j))
-
     Parameters
     ----------
     _mask : 2D array of bool
@@ -148,7 +131,6 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
         - Select the ``min`` value and assign it as ``u`` value of the pixel
         - Insert this new value in the ``heap``
 
-    For further details, see [1]_
 
     References
     ---------

@@ -25,14 +25,20 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
     depending on the value of the flag of its neighbours. The gradient
     is computed using Central Differences method.
 
+<<<<<<< HEAD
     This function is used to compute the gradient of intensity value, ``image``
     and also the ``u`` value.
+=======
+    This function is used to compute the gradient of intensity value, I and
+    also the ``u`` value.
+>>>>>>> Double ticks
 
     Parameters
     ---------
     i, j : int
         Row and column index value of the pixel whose gradient is to be
         calculated
+<<<<<<< HEAD
     flag : array, cnp.uint8_t
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
@@ -41,13 +47,28 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
     factor : float
         ``factor`` = 0.5 for the gradient of ``u``
         ``factor`` = 2.0 for the gradient of ``image``
+=======
+    flag_view : memory view, cnp.uint8_t
+        Array marking pixels as known, along the boundary to be solved, or
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+    array_view : memory view
+        Either ``image_view`` or ``u_view``
+    channel : integer
+        If channel == 1 then the gradient of ``u`` is calculated
+        If channel == 0 then the gradient of ``image`` is calculated
+>>>>>>> Double ticks
 
     Returns
     -------
     gradU : array, float
+<<<<<<< HEAD
         The signed gradient of ``image`` or ``u`` depending on ``factor``.
         1D array with 2 elements. First element represents gradient in X
         direction and second in the Y direction.
+=======
+        The signed gradient of `image` or `u` depending on ``channel``.
+        shape = (1, 2)
+>>>>>>> Double ticks
 
     """
 
