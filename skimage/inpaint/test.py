@@ -35,6 +35,7 @@ def demo_inpaint(image, mask):
     return painted
 
 
+<<<<<<< HEAD
 def demo_time_fill():
     image = np.ones((100, 100))
     fill_region = (slice(30, 40), slice(50, 70))
@@ -42,6 +43,18 @@ def demo_time_fill():
 
     mask = np.zeros_like(image, dtype=np.uint8)
     mask[fill_region] = 1
+=======
+def start():
+    image = data.camera()
+    paint_region = (slice(120, 130), slice(440, 470))
+    paint_region1 = (slice(220, 230), slice(440, 470))
+    image[paint_region] = 0
+    image[paint_region1] = 0
+
+    mask = np.zeros_like(image, dtype=np.uint8)
+    mask[paint_region] = 1
+    mask[paint_region1] = 1
+>>>>>>> Rewrite `grad_func` and `inpaint_point` to avoid highly indented code
 
     # flag, u, heap = _heap.initialise(mask)
     # time_map = fmm.fast_marching_method(image, flag, u, heap,
