@@ -1032,8 +1032,8 @@ def combine_stains(stains, conv_matrix):
 
 
 def lab2lch(lab):
-    """CIE-LAB to LCH color space conversion.
-    TODO: something about cylindrical representation
+    """CIE-LAB to CIE-LCH color space conversion.
+    LCH is the cylindrical representation of the LAB (cartesian) colorspace
 
     Parameters
     ----------
@@ -1065,25 +1065,19 @@ def lab2lch(lab):
     >>> lena_lab = rgb2lab(lena)
     >>> lena_lch = lab2lch(lena_lab)
     """
-    shape = lab.shape
-    if len(shape) != 3 or shape[2] != 3:
-        raise ValueError("Input image expected to be LAB")
+    lch = _prepare_colorarray(lab).copy()
 
-    lab = _prepare_colorarray(lab)
-    lch = np.empty_like(lab)
+    a, b = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = np.sqrt(a**2 + b**2), np.arctan2(b, a)
 
-    a, b = lab[:, :, 1], lab[:, :, 2]
-    lch[:, :, 0] = lab[:, :, 0]
-    lch[:, :, 1] = np.sqrt(a**2 + b**2)  # C
-
-    H = lch[:, :, 2] = np.arctan2(b, a)
+    H = lch[..., 2]
     H[H < 0] += 2*np.pi  # (-pi, pi) -> (0, 2*pi)
     return lch
 
 
 def lch2lab(lch):
     """CIE-LCH to CIE-LAB color space conversion.
-    TODO: something about cylindrical representation
+    LCH is the cylindrical representation of the LAB (cartesian) colorspace
 
     Parameters
     ----------
@@ -1112,11 +1106,8 @@ def lch2lab(lch):
     >>> lena_lch = lab2lch(lena_lab)
     >>> lena_lab2 = lch2lab(lena_lch)
     """
-    lch = _prepare_colorarray(lch)
-    lab = np.empty_like(lch)
+    lch = _prepare_colorarray(lch).copy()
 
-    c, h = lch[:, :, 1], lch[:, :, 2]
-    lab[:, :, 0] = lch[:, :, 0]
-    lab[:, :, 1] = c*np.cos(h)
-    lab[:, :, 2] = c*np.sin(h)
-    return lab
+    c, h = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = c*np.cos(h), c*np.sin(h)
+    return lch
