@@ -72,7 +72,7 @@ Follow the `Bento installation instructions
 
 Tell Bento where to find WAF by setting the ``WAFLIB`` environment variable::
 
-    export WAFLIB=<path/to/waf>
+    export WAFDIR=<path/to/waf>
 
 From the ``scikit-image`` source directory::
 
