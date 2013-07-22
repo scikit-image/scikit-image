@@ -67,10 +67,10 @@ Building with bento
 <https://code.google.com/p/waf/>`__ for compilation.
 
 Follow the `Bento installation instructions
-<http://cournape.github.io/Bento/html/install.html>`__ and `download WAF
-<http://code.google.com/p/waf/downloads/list>`__.
+<http://cournape.github.io/Bento/html/install.html>`__ and `download the WAF
+source <http://code.google.com/p/waf/downloads/list>`__.
 
-Tell Bento where to find WAF by setting the ``WAFLIB`` environment variable::
+Tell Bento where to find WAF by setting the ``WAFDIR`` environment variable::
 
     export WAFDIR=<path/to/waf>
 
