@@ -2,8 +2,12 @@ import numpy as np
 import heapq
 from skimage.morphology import dilation, disk
 
+import pyximport
+pyximport.install(setup_args={"include_dirs": np.get_include()},
+                  reload_support=True)
+from _inpaint import fast_marching_method
 
-__all__ = ['initialise']
+__all__ = ['initialise', 'inpaint']
 
 
 KNOWN = 0
@@ -70,3 +74,42 @@ def initialise(_mask):
         heapq.heappush(heap, (u[tuple(z)], tuple(z)))
 
     return flag, u, heap
+
+
+def inpaint(input_image, inpaint_mask, epsilon=5):
+    """Inpaint image in areas specified by a mask.
+
+    Parameters
+    ---------
+    input_image : array
+        This can be either a single channel or three channel image.
+    inpaint_mask : array, bool
+        Mask containing pixels to be inpainted. `True` values are inpainted.
+    epsilon : int
+        Determining the range of the neighbourhood for inpainting a pixel
+
+    Returns
+    ------
+    painted : array
+        The inpainted image.
+
+    References
+    ---------
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+           Method", Journal of Graphic Tools (2004).
+           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+
+    """
+    # TODO: Error checks. Image either 3 or 1 channel. All dims same
+
+    h, w = input_image.shape
+    image = np.zeros((h + 2, w + 2), np.uint8)
+    mask = np.zeros((h + 2, w + 2), np.uint8)
+    image[1: -1, 1: -1] = input_image
+    mask[1: -1, 1: -1] = inpaint_mask
+
+    flag, u, heap = initialise(mask)
+
+    fast_marching_method(image, flag, u, heap, epsilon=epsilon)
+
+    return image[1:-1, 1:-1]
