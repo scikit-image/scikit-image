@@ -38,6 +38,15 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('rank._crank16', sources=['rank/_crank16.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
+        'rank._crank16_percentiles', sources=['rank/_crank16_percentiles.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank._crank16_bilateral', sources=['rank/_crank16_bilateral.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
+        'rank.percentile_rank', sources=['rank/percentile_rank.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension(
         'rank.bilateral_cy', sources=['rank/bilateral_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
 
