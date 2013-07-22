@@ -112,10 +112,8 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     dl = l1 - l2
     c1 = np.sqrt(a1**2 + b1**2)
     c2 = np.sqrt(a2**2 + b2**2)
-    da = a1 - a2
-    db = b1 - b2
     dc = c1 - c2
-    dh_ab = np.sqrt(da**2 + db**2 + dc**2)
+    dh_ab = np.sqrt(deltaE_cie76(lab1, lab2)**2 - dl**2 - dc**2)
 
     SL = 1
     SC = 1 + k1*c1
@@ -186,11 +184,11 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
 
     cc = c1_prime * c2_prime
     mask1 = cc == 0.
-    mask2 = (-mask1) * (dh_prime > np.pi)
-    mask3 = (-mask1) * (dh_prime < -np.pi)
-    dh_prime[mask1] = 0.
-    dh_prime[mask2] += 2*np.pi
-    dh_prime[mask3] -= 2*np.pi
+    mask2 = np.logical_and(-mask1, dh_prime > np.pi)
+    mask3 = np.logical_and(-mask1, dh_prime < -np.pi)
+    dh_prime = np.where(mask1, 0., dh_prime)
+    dh_prime += np.where(mask2, 2*np.pi, 0)
+    dh_prime -= np.where(mask3, 2*np.pi, 0)
 
     dH_prime = 2 * np.sqrt(cc) * np.sin(dh_prime/2)
 
@@ -198,9 +196,10 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     mask0 = np.logical_and(np.abs(h1_prime - h2_prime) > np.pi, cc != 0.)
     mask1 = np.logical_and(mask0, Hbar_prime < 2*np.pi)
     mask2 = np.logical_and(mask0, Hbar_prime >= 2*np.pi)
-    Hbar_prime[mask1] += 2*np.pi
-    Hbar_prime[mask2] -= 2*np.pi
-    Hbar_prime[cc == 0.] *= 2
+
+    Hbar_prime += np.where(mask1, 2*np.pi, 0)
+    Hbar_prime -= np.where(mask2, 2*np.pi, 0)
+    Hbar_prime *= np.where(cc == 0., 2, 1)
     Hbar_prime *= 0.5
 
     deg = np.pi/180.
@@ -269,10 +268,8 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     c1 = np.sqrt(a1**2 + b1**2)
     c2 = np.sqrt(a2**2 + b2**2)
     dC = c1 - c2
-
-    da = a1 - a2
-    db = b1 - b2
-    dH = np.sqrt(da**2 + db**2 - dC**2)
+    dl = l1 - l2
+    dH = np.sqrt(deltaE_cie76(lab1, lab2)**2 - dl**2 - dC**2)
 
     dL = l1 - l2
 

@@ -96,5 +96,8 @@ __all__ = ['convert_colorspace',
            'is_gray',
            'color_dict',
            'label2rgb',
+           'deltaE_cie76',
+           'deltaE_ciede94',
            'deltaE_ciede2000',
+           'deltaE_cmc',
            ]

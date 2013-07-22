@@ -1,5 +1,6 @@
 # input, intermediate, and output values for CIEDE2000 dE function
 # data taken from "The CIEDE2000 Color-Difference Formula: Implementation Notes, ..." http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
+# tab delimited data
 # pair	1	L1	a1	b1	ap1	cp1	hp1	hbar1	G	T	SL	SC	SH	RT	dE 2	L2	a2	b2	ap2	cp2	hp2
 1	1	50.0000	2.6772	-79.7751	2.6774	79.8200	271.9222	270.9611	0.0001	0.6907	1.0000	4.6578	1.8421	-1.7042	2.0425 2	50.0000	0.0000	-82.7485	0.0000	82.7485	270.0000
 2	1	50.0000	3.1571	-77.2803	3.1573	77.3448	272.3395	271.1698	0.0001	0.6843	1.0000	4.6021	1.8216	-1.7070	2.8615 2	50.0000	0.0000	-82.7485	0.0000	82.7485	270.0000
