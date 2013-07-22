@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal
-from inpaint import inpaint, initialise
-from _inpaint import fast_marching_method
+from skimage.filter.inpaint import inpaint
 
 
 def test_basic():
@@ -114,9 +113,8 @@ def test_fmm():
          [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.]],
         dtype=np.float)
 
-    flag, u, heap = initialise(mask)
-    time_map = fast_marching_method(image, flag, u, heap,
-                                    _run_inpaint=False, epsilon=5)
+    time_map = inpaint(image, mask, _run_inpaint=False, epsilon=5)
+
     assert_array_equal(np.round(time_map, 1), expected)
 
 if __name__ == "__main__":
