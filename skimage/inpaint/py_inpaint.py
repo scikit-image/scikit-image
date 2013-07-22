@@ -69,40 +69,7 @@ def grad_func(i, j, flag, array, channel=1):
     return gradU
 
 
-cdef cnp.uint8_t[:, ::1] ep_neighbor(cnp.int8_t[:, ::1] center_ind_view, Py_ssize_t h, Py_ssize_t w):
-    """This computes the epsilon neighbourhood of the `(i, j)` pixel.
-
-    Parameters
-    ---------
-    i, j : int
-        Row and column index value of the pixel whose neighbourhood
-        is to be calculated
-    size : tuple of integers
-        Shape of the padded input image
-    epsilon : integer
-        Neighbourhood of (i, j) to be considered for inpainting
-
-    Returns
-    ------
-    nb : list of tuples
-        List of indices whose cartesian distance to the input pixel index is
-        less than epsilon
-    """
-
-    cdef:
-        Py_ssize_t i_ep, j_ep
-
-    nb = []
-
-    for i_ep, j_ep in center_ind_view:
-        if i_ep > 0 and j_ep > 0:
-            if i_ep < h - 1 and j_ep < w - 1:
-                nb.append([i_ep, j_ep])
-
-    return nb
-
-
-def inpaint_point(i, j, image, flag, u, epsilon):
+cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
     """This function performs the actual inpainting operation. Inpainting
     involves "filling in" color in regions with unkown intensity values using
     the intensity and gradient information of surrounding known region.
@@ -115,7 +82,7 @@ def inpaint_point(i, j, image, flag, u, epsilon):
         Row and column index value of the pixel to be Inpainted
     image : array
         Padded single channel input image
-    flag_view : array
+    flag : array
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
     u : array
@@ -142,41 +109,46 @@ def inpaint_point(i, j, image, flag, u, epsilon):
         cnp.float_t[:, ::1] u_view = u
         cnp.uint8_t[:, ::1] nb_view
         cnp.int8_t[:, ::1] center_ind_view
-        cnp.uint8_t i_nb, j_nb
+        cnp.int8_t i_nb, j_nb
         cnp.int8_t rx, ry
         cnp.float_t dst, lev, dirc, Ia, Jx, Jy, norm, weight
         cnp.float_t[:] gradU
         cnp.float_t[:] gradI
 
+    cdef cnp.uint16_t h = image.shape[0], w = image.shape[1]
     Ia, Jx, Jy, norm = 0, 0, 0, 0
+    image_asfloat = image.astype(np.float, order='C')
+
     gradU = grad_func(i, j, flag_view, u_view, channel=1)
 
     indices = np.transpose(np.where(disk(epsilon)))
     center_ind_view = (indices - [epsilon, epsilon] + [i, j]).astype(np.int8, order='C')
 
-    nb_view = ep_neighbor(center_ind_view, image.shape[0], image.shape[1])
+    for x in xrange(center_ind_view.shape[0]):
+        i_nb = center_ind_view[x, 0]
+        j_nb = center_ind_view[x, 1]
+        if i_nb > 0 and j_nb > 0:
+            if i_nb < h - 1 and j_nb < w - 1:
+                if flag_view[i_nb, j_nb] == KNOWN:
+                    rx = i - i_nb
+                    ry = j - j_nb
 
-    for i_nb, j_nb in nb_view:
-        if flag_view[i_nb, j_nb] == KNOWN:
-            rx = i - i_nb
-            ry = j - j_nb
+                    dst = 1. / ((rx * rx + ry * ry) *
+                                sqrt((rx * rx + ry * ry)))
+                    lev = 1. / (1 + abs(u_view[i_nb, j_nb] - u_view[i, j]))
+                    dirc = abs(rx * gradU[0] + ry * gradU[1])
 
-            dst = 1. / ((rx * rx + ry * ry) *
-                        np.sqrt((rx * rx + ry * ry)))
-            lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
-            dirc = rx * gradUx + ry * gradUy
+                    if dirc <= 0.01:
+                        dirc = 1.0e-6
+                    weight = dst * lev * dirc
 
-            if abs(dirc) <= 0.01:
-                dirc = 1.0e-6
-            weight = abs(dst * lev * dirc)
+                    gradI = grad_func(i_nb, j_nb, flag_view, image_asfloat,
+                                                channel=0)
 
-            gradIx, gradIy = grad_func(i_nb, j_nb, flag, image,
-                                       channel=0)
-
-            Ia += weight * image[i_nb, j_nb]
-            Jx -= weight * gradIx * rx
-            Jy -= weight * gradIy * ry
-            norm += weight
+                    Ia += weight * image_view[i_nb, j_nb]
+                    Jx -= weight * gradI[0] * rx
+                    Jy -= weight * gradI[1] * ry
+                    norm += weight
 
     sat = (Ia / norm + (Jx + Jy) / (np.sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
            + 0.5)

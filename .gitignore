@@ -26,3 +26,4 @@ doc/source/_static/random.js
 *.log
 *.html
 *.sh
+*.prof
