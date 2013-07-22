@@ -15,7 +15,10 @@ cdef:
     cnp.uint8_t INSIDE = 2
 
 
-cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] flag_view, cnp.float_t[:, ::1] array_view, Py_ssize_t channel=1):
+cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
+                              cnp.uint8_t[:, ::1] flag_view,
+                              cnp.float_t[:, ::1] array_view,
+                              Py_ssize_t channel=1):
     """This function calculates the gradient of the distance/image of a pixel
     depending on the value of the flag of its neighbours. The gradient
     is computed using Central Differences method.
@@ -28,17 +31,17 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] fl
     i, j : int
         Row and column index value of the pixel whose gradient is to be
         calculated
-    flag_view : array
+    flag_view : memory view
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    array_view : array
+    array_view : memory view
         Either `image_view` or `u_view`
     channel : integer
         If channel == 1 then the gradient of `u` is calculated
         If channel == 0 then the gradient of `image` is calculated
 
     Returns
-    ------
+    -------
     gradUx : float
         The signed gradient of `image` or `u` in X direction
     gradUy : float
@@ -80,7 +83,9 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] fl
     return gradU
 
 
-cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
+cdef inpaint_point(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] image_view,
+                   cnp.uint8_t[:, ::1] flag_view, cnp.float_t[:, ::1] u_view,
+                   Py_ssize_t neighbor):
     """This function performs the actual inpainting operation. Inpainting
     involves "filling in" color in regions with unkown intensity values using
     the intensity and gradient information of surrounding known region.
@@ -97,17 +102,17 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
     u : array
-            The distance/time map from the boundary to each pixel.
-    epsilon : integer
-            Neighbourhood of (i, j) to be considered for inpainting
+        The distance/time map from the boundary to each pixel.
+    neighbor : integer
+        Neighbourhood of (i, j) to be considered for inpainting
 
     Returns
-    ------
+    -------
     image[i, j] : integer
         Inpainted intensity value
 
     References
-    ----------
+    ---------
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
             Method", Journal of Graphic Tools (2004).
             http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
@@ -132,8 +137,9 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
 
     gradU = grad_func(i, j, flag_view, u_view, channel=1)
 
-    indices = np.transpose(np.where(disk(epsilon)))
-    center_ind_view = (indices - [epsilon, epsilon] + [i, j]).astype(np.int16, order='C')
+    indices = np.transpose(np.where(disk(neighbor)))
+    center_ind_view = (indices - [neighbor, neighbor] + [i, j]).astype(np.int16,
+                                                                     order='C')
 
     for x in range(center_ind_view.shape[0]):
         i_nb = center_ind_view[x, 0]
@@ -167,3 +173,153 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
     sat = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
 
     image_view[i, j] = int(round(sat))
+
+
+cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
+                         Py_ssize_t j2, cnp.uint8_t[:, ::1] flag_view,
+                         cnp.float_t[:, ::1] u_view):
+    """Solve a step of the Eikonal equation.
+
+    The `u` values of known pixels (marked by `flag`) are considered for
+    computing the `u` value of the neighbouring pixel.
+
+    See Equation 4 and Figure 4 in [1]_ for implementation details.
+
+    Parameters
+    ----------
+    i1, j1, i2, j2 : int
+        Row and column indices of two diagonally-adjacent pixels.
+    flag : array
+        Array marking pixels as known, along the boundary to be solved, or
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+    u : array
+        The distance/time map from the boundary to each pixel.
+
+    Returns
+    -------
+    u_out : float
+        The `u` value for the pixel `(i2, j1)`.
+
+    Notes
+    -----
+    The boundary is assumed to move with a constant speed in a direction normal
+    to the boundary at all pixels, such that the time of arrival `u` must be
+    monotonically increasing. Note that `u` is often denoted `T`.
+
+    References
+    ----------
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+            Method", Journal of Graphic Tools (2004).
+            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+
+    """
+
+    cdef cnp.float_t u_out, u1, u2, r, s
+
+    u_out = 1.0e6
+    u1 = u_view[i1, j1]
+    u2 = u_view[i2, j2]
+
+    if flag_view[i1, j1] == KNOWN:
+        if flag_view[i2, j2] == KNOWN:
+            r = sqrt(2 - (u1 - u2) ** 2)
+            s = (u1 + u2 - r) * 0.5
+            if s >= u1 and s >= u2:
+                u_out = s
+            else:
+                s += r
+                if s >= u1 and s >= u2:
+                    u_out = s
+        else:
+            u_out = 1 + u1
+    elif flag_view[i2, j2] == KNOWN:
+        u_out = 1 + u2
+
+    return u_out
+
+
+cpdef fast_marching_method(cnp.uint8_t[:, ::1] image_view,
+                           cnp.uint8_t[:, ::1] flag_view,
+                           cnp.float_t[:, ::1] u_view, heap,
+                           _run_inpaint=True, Py_ssize_t neighbor=5):
+    """Inpaint an image using the Fast Marching Method (FMM).
+
+    Image Inpainting technique based on the Fast Marching Method implementation
+    as described in [1]_. FMM is used for computing the evolution of
+    boundary moving in a direction *normal* to itself.
+
+    Parameters
+    ---------
+    image : array
+        Input image padded by a single row/column on all sides
+    flag : array
+        Array marking pixels as known, along the boundary to be solved, or
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+    u : array
+        The distance/time map from the boundary to each pixel.
+    heap : list of tuples
+        Priority heap which stores pixels for processing.
+    _run_inpaint : bool
+        If `True` then inpaint the image
+        If `False` then only compute the distance/time map, ``u``
+    neighbor : integer
+        Neighbourhood of the pixel of interest
+
+    Returns
+    ------
+    image or u : array
+        The inpainted image or distance/time map depending on `_run_inpaint`.
+
+    Notes
+    -----
+    The steps of the algorithm are as follows:
+    - Extract the pixel with the smallest `u` value in the BAND pixels
+    - Update its `flag` value as KNOWN
+    - March the boundary inwards by adding new points.
+        - If they are either INSIDE or BAND, compute its `u` value using the
+          `eikonal` function for all the 4 quadrants
+        - If `flag` is INSIDE
+            - Change it to BAND
+            - Inpaint the pixel
+        - Select the `min` value and assign it as the `u` value of the pixel
+        - Insert this new value in the `heap`
+
+    For further details, see [1]_
+
+    References
+    ----------
+    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
+            Method", Journal of Graphic Tools (2004).
+            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+
+    """
+
+    cdef Py_ssize_t i, j, i_nb, j_nb
+
+    while len(heap):
+        i, j = heappop(heap)[1]
+        flag_view[i, j] = KNOWN
+
+        if ((i <= 1) or (j <= 1) or (i >= image_view.shape[0] - 2)
+                or (j >= image_view.shape[1] - 2)):
+            continue
+
+        for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
+
+            if not flag_view[i_nb, j_nb] == KNOWN:
+                u_view[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb, i_nb,
+                                                 j_nb - 1, flag_view, u_view),
+                                         eikonal(i_nb + 1, j_nb, i_nb,
+                                                 j_nb - 1, flag_view, u_view),
+                                         eikonal(i_nb - 1, j_nb, i_nb,
+                                                 j_nb + 1, flag_view, u_view),
+                                         eikonal(i_nb + 1, j_nb, i_nb,
+                                                 j_nb + 1, flag_view, u_view))
+
+                if flag_view[i_nb, j_nb] == INSIDE:
+                    flag_view[i_nb, j_nb] = BAND
+                    heappush(heap, (u_view[i_nb, j_nb], (i_nb, j_nb)))
+
+                    if _run_inpaint:
+                        inpaint_point(i_nb, j_nb, image_view, flag_view,
+                                      u_view, neighbor)
