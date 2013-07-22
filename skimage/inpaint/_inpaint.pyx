@@ -1,3 +1,5 @@
+#
+
 cimport numpy as cnp
 import numpy as np
 from libc.math cimport sqrt
@@ -45,7 +47,7 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] fl
     """
 
     cdef:
-        cnp.float_t factor,
+        cnp.float_t factor
         cnp.float_t[:] gradU = np.zeros(2, dtype=np.float)
 
     if channel == 0:
@@ -53,23 +55,27 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] fl
     elif channel == 1:
         factor = 0.5
 
-    if flag_view[i, j + 1] != INSIDE and flag_view[i, j - 1] != INSIDE:
-        gradU[0] = (array_view[i, j + 1] - array_view[i, j - 1]) * factor
-    elif flag_view[i, j + 1] != INSIDE and flag_view[i, j - 1] == INSIDE:
-        gradU[0] = (array_view[i, j + 1] - array_view[i, j])
-    elif flag_view[i, j + 1] == INSIDE and flag_view[i, j - 1] != INSIDE:
-        gradU[0] = (array_view[i, j] - array_view[i, j - 1])
-    elif flag_view[i, j + 1] == INSIDE and flag_view[i, j - 1] == INSIDE:
-        gradU[0] = 0
+    if flag_view[i, j + 1] != INSIDE:
+        if flag_view[i, j - 1] != INSIDE:
+            gradU[0] = (array_view[i, j + 1] - array_view[i, j - 1]) * factor
+        else:
+            gradU[0] = (array_view[i, j + 1] - array_view[i, j])
+    else:
+        if flag_view[i, j - 1] != INSIDE:
+            gradU[0] = (array_view[i, j] - array_view[i, j - 1])
+        else:
+            gradU[0] = 0
 
-    if flag_view[i + 1, j] != INSIDE and flag_view[i - 1, j] != INSIDE:
-        gradU[1] = (array_view[i + 1, j] - array_view[i - 1, j]) * factor
-    elif flag_view[i + 1, j] != INSIDE and flag_view[i - 1, j] == INSIDE:
-        gradU[1] = (array_view[i + 1, j] - array_view[i, j])
-    elif flag_view[i + 1, j] == INSIDE and flag_view[i - 1, j] != INSIDE:
-        gradU[1] = (array_view[i, j] - array_view[i - 1, j])
-    elif flag_view[i + 1, j] == INSIDE and flag_view[i - 1, j] == INSIDE:
-        gradU[1] = 0
+    if flag_view[i + 1, j] != INSIDE:
+        if flag_view[i - 1, j] != INSIDE:
+            gradU[1] = (array_view[i + 1, j] - array_view[i - 1, j]) * factor
+        else:
+            gradU[1] = (array_view[i + 1, j] - array_view[i, j])
+    else:
+        if flag_view[i - 1, j] != INSIDE:
+            gradU[1] = (array_view[i, j] - array_view[i - 1, j])
+        else:
+            gradU[1] = 0
 
     return gradU
 
@@ -129,33 +135,35 @@ cpdef inpaint_point(Py_ssize_t i, Py_ssize_t j, image, flag, u, epsilon):
     indices = np.transpose(np.where(disk(epsilon)))
     center_ind_view = (indices - [epsilon, epsilon] + [i, j]).astype(np.int8, order='C')
 
-    for x in xrange(center_ind_view.shape[0]):
+    for x in range(center_ind_view.shape[0]):
         i_nb = center_ind_view[x, 0]
         j_nb = center_ind_view[x, 1]
-        if i_nb > 0 and j_nb > 0:
-            if i_nb < h - 1 and j_nb < w - 1:
-                if flag_view[i_nb, j_nb] == KNOWN:
-                    rx = i - i_nb
-                    ry = j - j_nb
 
-                    dst = 1. / ((rx * rx + ry * ry) *
-                                sqrt((rx * rx + ry * ry)))
-                    lev = 1. / (1 + abs(u_view[i_nb, j_nb] - u_view[i, j]))
-                    dirc = abs(rx * gradU[0] + ry * gradU[1])
+        if i_nb <= 1 or i_nb >= h - 1 or j_nb <= 1 or j_nb >= w - 1:
+            continue
+        if flag_view[i_nb, j_nb] != KNOWN:
+            continue
 
-                    if dirc <= 0.01:
-                        dirc = 1.0e-6
-                    weight = dst * lev * dirc
+        rx = i - i_nb
+        ry = j - j_nb
 
-                    gradI = grad_func(i_nb, j_nb, flag_view, image_asfloat,
-                                                channel=0)
+        dst = 1. / ((rx * rx + ry * ry) *
+                    sqrt((rx * rx + ry * ry)))
+        lev = 1. / (1 + abs(u_view[i_nb, j_nb] - u_view[i, j]))
+        dirc = abs(rx * gradU[0] + ry * gradU[1])
 
-                    Ia += weight * image_view[i_nb, j_nb]
-                    Jx -= weight * gradI[0] * rx
-                    Jy -= weight * gradI[1] * ry
-                    norm += weight
+        if dirc <= 0.01:
+            dirc = 1.0e-6
+        weight = dst * lev * dirc
 
+        gradI = grad_func(i_nb, j_nb, flag_view, image_asfloat,
+                                    channel=0)
 
-    sat = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
-           + 0.5)
+        Ia += weight * image_view[i_nb, j_nb]
+        Jx -= weight * gradI[0] * rx
+        Jy -= weight * gradI[1] * ry
+        norm += weight
+
+    sat = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
+
     image_view[i, j] = int(round(sat))
