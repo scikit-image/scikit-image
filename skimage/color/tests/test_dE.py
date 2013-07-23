@@ -9,7 +9,7 @@ Matt Terry
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np
-from numpy.testing import assert_array_almost_equal
+from numpy.testing import assert_allclose
 
 from skimage.color import (deltaE_cie76,
                            deltaE_ciede94,
@@ -32,7 +32,7 @@ def test_ciede2000_dE():
 
     dE2 = deltaE_ciede2000(lab1, lab2)
 
-    assert_array_almost_equal(dE2, data['dE'])
+    assert_allclose(dE2, data['dE'], rtol=1.e-4)
 
 
 def load_ciede2000_data():
@@ -89,7 +89,7 @@ def test_cie76():
         2.21334297, 1.53890382, 4.60630929, 6.58467989, 3.88641412,
         1.50514845, 2.3237848, 0.94413208, 1.31910843
     ])
-    assert_array_almost_equal(dE2, oracle)
+    assert_allclose(dE2, oracle, rtol=1.e-8)
 
 
 def test_ciede94():
@@ -115,7 +115,7 @@ def test_ciede94():
         1.24808929, 1.29795787, 1.82045088, 2.55613309, 1.42491303,
         1.41945261, 2.3225685, 0.93853308, 1.30654464
     ])
-    assert_array_almost_equal(dE2, oracle)
+    assert_allclose(dE2, oracle, rtol=1.e-8)
 
 
 def test_cmc():
@@ -142,4 +142,4 @@ def test_cmc():
         1.90095165, 1.70258148, 1.80317207, 2.44934417
     ])
 
-    assert_array_almost_equal(dE2, oracle)
+    assert_allclose(dE2, oracle, rtol=1.e-8)
