@@ -81,7 +81,7 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
 
 cdef inpaint_point(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] image,
                    cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u,
-                   Py_ssize_t radius):
+                   cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
     """This function performs the actual inpainting operation. Inpainting
     involves "filling in" color in regions with unkown intensity values using
     the intensity and gradient information of surrounding known region.
@@ -117,43 +117,38 @@ cdef inpaint_point(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] image,
 
     cdef:
         cnp.uint8_t[:, ::1] nb
-        cnp.int16_t[:, ::1] center_ind
         cnp.int16_t i_nb, j_nb
         cnp.int8_t rx, ry
-        cnp.float_t dst, lev, dirc, Ia, Jx, Jy, norm, weight
+        cnp.float_t geometric_dst, levelset_dst, direction, Ia, Jx, Jy, norm, weight
         cnp.float_t[:] gradU
         cnp.float_t[:] gradI
-
+        Py_ssize_t k
     cdef cnp.uint16_t h = image.shape[0], w = image.shape[1]
+
     Ia, Jx, Jy, norm = 0, 0, 0, 0
     image_asfloat = np.asarray(image, dtype=np.float)
 
     gradU = grad_func(i, j, flag, u, factor=0.5)
 
-    indices = np.transpose(np.where(disk(radius)))
-    center_ind = (indices - [radius, radius] + [i, j]).astype(np.int16,
-                                                                     order='C')
-
-    for x in range(center_ind.shape[0]):
-        i_nb = center_ind[x, 0]
-        j_nb = center_ind[x, 1]
+    for k in range(shifted_indices.shape[0]):
+        i_nb = shifted_indices[k, 0]
+        j_nb = shifted_indices[k, 1]
 
         if i_nb <= 1 or i_nb >= h - 1 or j_nb <= 1 or j_nb >= w - 1:
             continue
         if flag[i_nb, j_nb] != KNOWN:
             continue
 
-        rx = i - i_nb
-        ry = j - j_nb
+        ry = i - i_nb
+        rx = j - j_nb
 
-        dst = 1. / ((rx * rx + ry * ry) *
-                    sqrt((rx * rx + ry * ry)))
-        lev = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
-        dirc = abs(rx * gradU[0] + ry * gradU[1])
+        geometric_dst = 1. / ((rx * rx + ry * ry) * sqrt((rx * rx + ry * ry)))
+        levelset_dst = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
+        direction = abs(rx * gradU[0] + ry * gradU[1])
 
-        if dirc <= 0.01:
-            dirc = 1.0e-6
-        weight = dst * lev * dirc
+        if direction <= 0.01:
+            direction = 1.0e-6
+        weight = geometric_dst * levelset_dst * direction
 
         gradI = grad_func(i_nb, j_nb, flag, image_asfloat, factor=2.0)
 
@@ -162,9 +157,10 @@ cdef inpaint_point(Py_ssize_t i, Py_ssize_t j, cnp.uint8_t[:, ::1] image,
         Jy -= weight * gradI[1] * ry
         norm += weight
 
-    sat = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20) + 0.5)
+    painted_pix = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
+                        + 0.5)
 
-    image[i, j] = int(round(sat))
+    image[i, j] = int(round(painted_pix))
 
 
 cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
@@ -273,7 +269,7 @@ cpdef fast_marching_method(cnp.uint8_t[:, ::1] image,
         - If ``flag`` is INSIDE
             - Change it to BAND
             - Inpaint the pixel
-        - Select the ``min`` value and assign it as the ``u`` value of the pixel
+        - Select the ``min`` value and assign it as ``u`` value of the pixel
         - Insert this new value in the ``heap``
 
     For further details, see [1]_
@@ -286,7 +282,13 @@ cpdef fast_marching_method(cnp.uint8_t[:, ::1] image,
 
     """
 
-    cdef Py_ssize_t i, j, i_nb, j_nb
+    cdef:
+        Py_ssize_t i, j, i_nb, j_nb
+        cnp.int16_t[:, ::1] indices_centered
+        cnp.int16_t[:, ::1] shifted_indices
+
+    indices = np.transpose(np.where(disk(radius)))
+    indices_centered = (indices - [radius, radius]).astype(np.int16, order='C')
 
     while len(heap):
         i, j = heappop(heap)[1]
@@ -313,5 +315,6 @@ cpdef fast_marching_method(cnp.uint8_t[:, ::1] image,
                     heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
                     if _run_inpaint:
+                        shifted_indices = indices_centered.base + [i_nb, j_nb]
                         inpaint_point(i_nb, j_nb, image, flag,
-                                      u, radius)
+                                      u, shifted_indices, radius)
