@@ -74,7 +74,10 @@ def _init_fmm(mask):
 
 
 def inpaint_fmm(input_image, inpaint_mask, radius=5):
-    """Inpaint image in areas specified by a mask.
+    """Inpaint image in areas specified by a mask. Image Inpainting technique
+    based on the Fast Marching Method implementation as described in [1]_.
+    FMM is used for computing the evolution of boundary moving in a direction
+    *normal* to itself.
 
     Parameters
     ---------
@@ -128,6 +131,7 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
         - Select the ``min`` value and assign it as ``u`` value of the pixel
         - Insert this new value in the ``heap``
 
+    For further details, see [1]_
 
     References
     ---------
