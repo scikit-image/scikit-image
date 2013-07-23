@@ -18,6 +18,7 @@ The delta-E notation comes from the German word for "Sensation" (Empfindung).
 
 Reference
 ---------
+http://en.wikipedia.org/wiki/Color_difference
 
 """
 from __future__ import division
