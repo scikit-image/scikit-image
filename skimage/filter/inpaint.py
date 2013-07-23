@@ -74,7 +74,7 @@ def _init_fmm(_mask):
     return flag, u, heap
 
 
-def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, radius=5):
+def inpaint_fmm(input_image, inpaint_mask, radius=5):
     """Inpaint image in areas specified by a mask.
 
     Parameters
@@ -108,7 +108,6 @@ def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, radius=5):
 
     flag, u, heap = _init_fmm(mask)
 
-    fast_marching_method(painted, flag, u, heap, _run_inpaint,
-                         radius=radius)
+    fast_marching_method(painted, flag, u, heap, radius=radius)
 
     return painted[1:-1, 1:-1]
