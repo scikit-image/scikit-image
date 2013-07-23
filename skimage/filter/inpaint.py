@@ -12,7 +12,7 @@ BAND = 1
 INSIDE = 2
 
 
-def _init_fmm(_mask):
+def _init_fmm(mask):
     """Initialisation for Image Inpainting technique based on Fast Marching
     Method as outined in [1]_. Each pixel has 2 new values assigned to it
     stored in ``flag`` and ``u`` arrays.
@@ -75,7 +75,6 @@ def _init_fmm(_mask):
 
     """
 
-    mask = _mask.astype(np.uint8)
     outside = dilation(mask, disk(1))
     band = np.logical_xor(mask, outside).astype(np.uint8)
 
@@ -118,7 +117,7 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     # TODO: Error checks. Image either 3 or 1 channel. All dims same
 
     h, w = input_image.shape
-    painted = np.zeros((h + 2, w + 2), np.uint8)
+    painted = np.zeros((h + 2, w + 2), np.float)
     mask = np.zeros((h + 2, w + 2), np.uint8)
     painted[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
