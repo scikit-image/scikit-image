@@ -286,7 +286,8 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
         cnp.int16_t[:, ::1] shifted_indices
 
     indices = np.transpose(np.where(disk(radius)))
-    indices_centered = (indices - [radius, radius]).astype(np.int16, order='C')
+    indices_centered = np.ascontiguousarray((indices - [radius, radius]),
+                                            np.int16)
 
     while len(heap):
         i, j = heappop(heap)[1]
