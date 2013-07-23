@@ -73,11 +73,8 @@ def _init_fmm(mask):
     return flag, u, heap
 
 
-def inpaint_fmm(input_image, inpaint_mask, radius=5):
-    """Inpaint image in areas specified by a mask. Image Inpainting technique
-    based on the Fast Marching Method implementation as described in [1]_.
-    FMM is used for computing the evolution of boundary moving in a direction
-    *normal* to itself.
+def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, radius=5):
+    """Inpaint image in areas specified by a mask.
 
     Parameters
     ---------
@@ -149,6 +146,7 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
 
     flag, u, heap = _init_fmm(mask)
 
-    fast_marching_method(painted, flag, u, heap, radius=radius)
+    fast_marching_method(painted, flag, u, heap, _run_inpaint,
+                         radius=radius)
 
     return painted[1:-1, 1:-1]
