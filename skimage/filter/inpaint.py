@@ -91,7 +91,10 @@ def _init_fmm(mask):
 
 
 def inpaint_fmm(input_image, inpaint_mask, radius=5):
-    """Inpaint image in areas specified by a mask.
+    """Inpaint image in areas specified by a mask. Image Inpainting technique
+    based on the Fast Marching Method implementation as described in [1]_.
+    FMM is used for computing the evolution of boundary moving in a direction
+    *normal* to itself.
 
     Parameters
     ---------
@@ -106,6 +109,46 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     ------
     painted : ndarray, np.uint8
         The inpainted image of same dimensions.
+
+    Notes
+    -----
+    There are two main phases involved:
+    - Initialisation
+    - Marching
+
+    Initialisation Phase:
+    Implementaiton under ``skimage.filter.inpaint._init_fmm``.
+    - ``flag`` Initialisation:
+        All pixels are classified into 1 of the following flags:
+        # 0 = KNOWN - intensity and u values are known.
+        # 1 = BAND - u value undergoes an update.
+        # 2 = INSIDE - intensity and u values unkown
+
+    - ``u`` Initialisation:
+        u <- 0 : ``flag`` equal to BAND or KNOWN
+        u <- 1.0e6 (arbitrarily large value) : ``flag`` equal to INSIDE
+
+    - ``heap`` Initialisation:
+        Contains all the pixels marked as BAND in ``flag``. The heap element is
+        a tuple with 2 elements, first being the ``u`` value corresponding to
+        the tuple of index which is stored as the second element.
+        Heap Element : (u[(i, j)], (i, j))
+
+    Marching Phase:
+    Implementation under ``skimage.filter._inpaint.fast_marching_method``.
+    The steps of the algorithm are as follows:
+    - Extract the pixel with the smallest ``u`` value in the BAND pixels
+    - Update its ``flag`` value as KNOWN
+    - March the boundary inwards by adding new points.
+        - If they are either INSIDE or BAND, compute its ``u`` value using the
+          ``eikonal`` function for all the 4 quadrants
+        - If ``flag`` is INSIDE
+            - Change it to BAND
+            - Inpaint the pixel
+        - Select the ``min`` value and assign it as ``u`` value of the pixel
+        - Insert this new value in the ``heap``
+
+    For further details, see [1]_
 
     References
     ---------
