@@ -56,6 +56,10 @@ def deltaE_cie76(lab1, lab2):
     -------
     dE : array_like
         distance between colors `lab1` and `lab2`
+
+    References
+    ----------
+    http://en.wikipedia.org/wiki/Color_difference
     """
     l1, a1, b1 = _unpack_last(lab1)
     l2, a2, b2 = _unpack_last(lab2)
@@ -105,6 +109,11 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     kL          1.000           2.000
     k1          0.045           0.048
     k2          0.015           0.014
+
+    References
+    ----------
+    http://en.wikipedia.org/wiki/Color_difference
+    http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
     l1, a1, b1 = _unpack_last(lab1)
     l2, a2, b2 = _unpack_last(lab2)
@@ -261,6 +270,11 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     deltaE_cmc the defines the scales for the lightness, hue, and chroma
     in terms of the first color.  Consequently
     deltaE_cmc(lab1, lab2) != deltaE_cmc(lab2, lab1)
+
+    References
+    ----------
+    http://en.wikipedia.org/wiki/Color_difference
+    http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
     l1, a1, b1 = _unpack_last(lab1)
     l2, a2, b2 = _unpack_last(lab2)
