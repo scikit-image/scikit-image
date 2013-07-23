@@ -91,7 +91,7 @@ def _init_fmm(_mask):
     return flag, u, heap
 
 
-def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, neighbor=5):
+def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, radius=5):
     """Inpaint image in areas specified by a mask.
 
     Parameters
@@ -100,7 +100,7 @@ def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, neighbor=5):
         This can be either a single channel or three channel image.
     inpaint_mask : ndarray, bool
         Mask containing pixels to be inpainted. ``True`` values are inpainted.
-    neighbor : int
+    radius : int
         Determining the range of the neighbourhood for inpainting a pixel
 
     Returns
@@ -126,6 +126,6 @@ def inpaint_fmm(input_image, inpaint_mask, _run_inpaint=True, neighbor=5):
     flag, u, heap = _init_fmm(mask)
 
     fast_marching_method(painted, flag, u, heap, _run_inpaint,
-                         neighbor=neighbor)
+                         radius=radius)
 
     return painted[1:-1, 1:-1]
