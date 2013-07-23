@@ -158,7 +158,7 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         norm += weight
 
     image[i, j] = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
-                   + 0.5)
+                        + 0.5)
 
 
 cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
@@ -314,7 +314,6 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
                     heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
                     if _run_inpaint:
-                        shifted_indices = indices_centered + np.asarray([
-                            i_nb, j_nb], np.int16)
+                        shifted_indices = indices_centered + np.asarray([i_nb, j_nb], np.int16)
                         inpaint_point(i_nb, j_nb, image, flag,
                                       u, shifted_indices, radius)
