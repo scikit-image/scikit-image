@@ -236,9 +236,9 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
 
     Parameters
     ---------
-    image : array
+    image : array, np.float
         Initial input image padded by a single row/column on all sides
-    flag : array
+    flag : array, np.uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
     u : array, np.float
@@ -250,11 +250,6 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
         If``False`` then only compute the distance/time map,``u``
     radius : integer
         Neighbourhood of the pixel of interest
-
-    Returns
-    ------
-    image or u : array
-        The inpainted image or distance/time map depending on ``_run_inpaint``.
 
     Notes
     -----
