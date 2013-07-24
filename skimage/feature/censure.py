@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter
 from skimage.transform import integral_image
+from skimage.feature import _compute_auto_correlation
 import time
 
 def _get_filtered_image(image, n, mode='DoB'):
@@ -13,15 +14,23 @@ def _get_filtered_image(image, n, mode='DoB'):
         start = time.time()
         for i in range(2 * n, image.shape[0] - 2 * n):
             for j in range(2 * n, image.shape[1] - 2 * n):
-                inner = integral_img[i + n, j + n] + integral_img[i - n, j - n] - integral_img[i + n, j - n] - integral_img[i - n, j + n]
-                outer = integral_img[i + 2 * n, j + 2 * n] + integral_img[i - 2 * n, j - 2 * n] - integral_img[i + 2 * n, j - 2 * n] - integral_img[i - 2 * n, j + 2 * n]
+                inner = integral_img[i + n, j + n] + integral_img[i - n - 1, j - n - 1] - integral_img[i + n, j - n - 1] - integral_img[i - n - 1, j + n]
+                outer = integral_img[i + 2 * n, j + 2 * n] + integral_img[i - 2 * n - 1, j - 2 * n - 1] - integral_img[i + 2 * n, j - 2 * n - 1] - integral_img[i - 2 * n - 1, j + 2 * n]
                 filtered_image[i, j] = outer_wt * outer - (inner_wt + outer_wt) * inner
         print time.time() - start
         return filtered_image
 
 
-def censure_keypoints(image, mode='DoB', threshold=0.1):
-    # TODO : Decide mode for convolve function
+def _suppress_line(response, sigma):
+    Axx, Axy, Ayy = _compute_auto_correlation(response, sigma)
+    detA = Axx * Ayy - Axy**2
+    traceA = Axx + Ayy
+    # ratio of principal curvatures
+    rpc = traceA / detA
+    rpc[rpc > 10] = 0
+    return rpc
+
+def censure_keypoints(image, mode='DoB', threshold=0.03):
     # TODO : Decide number of scales. Image-size dependent?
     image = np.squeeze(image)
     if image.ndim != 2:
@@ -44,4 +53,9 @@ def censure_keypoints(image, mode='DoB', threshold=0.1):
     minimas[np.abs(minimas) < threshold] = 0
     maximas[np.abs(maximas) < threshold] = 0
     response = maximas + np.abs(minimas)
+    response[:, :, 1] = _suppress_line(response[:, :, 1], 1.33)
+    response[:, :, 2] = _suppress_line(response[:, :, 2], 1.33)
+    response[:, :, 3] = _suppress_line(response[:, :, 3], 1.33)
+    response[:, :, 4] = _suppress_line(response[:, :, 4], 1.33)
+    response[:, :, 5] = _suppress_line(response[:, :, 5], 1.33)
     return response
