@@ -4,6 +4,7 @@ from skimage.morphology import dilation, disk
 
 from skimage.filter._inpaint import fast_marching_method
 
+
 __all__ = ['inpaint_fmm']
 
 
