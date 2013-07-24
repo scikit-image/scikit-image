@@ -19,18 +19,18 @@ def _init_fmm(mask):
 
     Parameters
     ----------
-    _mask : 2D array of bool
+    mask : 2D array of bool
         ``True`` values are to be inpainted.
 
     Returns
     ------
-    flag : array of int
+    flag : array, np.uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : array of float
+    u : array, np.float
         The distance/time map from the boundary to each pixel.
     heap : list of tuples
-        BAND points with heap element as mentioned above
+        BAND points with heap element as mentioned below
 
     Notes
     -----
@@ -81,17 +81,17 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
 
     Parameters
     ---------
-    input_image : ndarray, np.uint8
-        This can be either a single channel or three channel image.
-    inpaint_mask : ndarray, bool
-        Mask containing pixels to be inpainted. ``True`` values are inpainted.
+    input_image : (M, N) ndarray
+        Grayscale image to be inpainted of type ``np.uint8``
+    inpaint_mask : (M, N) ndarray
+        Mask containing pixels to be inpainted. ``True`` values are inpainted
     radius : int
         Determining the range of the neighbourhood for inpainting a pixel
 
     Returns
     ------
-    painted : ndarray, np.uint8
-        The inpainted image of same dimensions.
+    painted : (M, N) ndarray
+        The inpainted grayscale image of same dimensions but ytpe ``np.float``
 
     Notes
     -----

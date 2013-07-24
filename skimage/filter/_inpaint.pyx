@@ -33,11 +33,11 @@ cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
     i, j : int
         Row and column index value of the pixel whose gradient is to be
         calculated
-    flag : array, cnp.uint8_t
+    flag : array, np.uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
     array : array
-        Either ``image`` or ``u``
+        Either ``image`` or ``u``, whose gradient is to be computed
     factor : float
         ``factor`` = 0.5 for the gradient of ``u``
         ``factor`` = 2.0 for the gradient of ``image``
@@ -93,18 +93,18 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
     i, j : int
         Row and column index value of the pixel to be Inpainted
     image : array
-        Padded single channel input image
-    flag : array
+        Already padded single channel input image
+    flag : array, np.uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : array
+    u : array, np.float
         The distance/time map from the boundary to each pixel.
-    radius : integer
+    radius : int
         Neighbourhood of (i, j) to be considered for inpainting
 
     Returns
     -------
-    image[i, j] : integer
+    image[i, j] : float
         Inpainted intensity value
 
     References
@@ -178,7 +178,7 @@ cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
     flag : array
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : array
+    u : array, np.float
         The distance/time map from the boundary to each pixel.
 
     Returns
@@ -237,11 +237,11 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
     Parameters
     ---------
     image : array
-        Input image padded by a single row/column on all sides
+        Initial input image padded by a single row/column on all sides
     flag : array
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : array
+    u : array, np.float
         The distance/time map from the boundary to each pixel.
     heap : list of tuples
         Priority heap which stores pixels for processing.
