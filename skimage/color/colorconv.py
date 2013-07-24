@@ -1072,10 +1072,10 @@ def lab2lch(lab):
     lch = _prepare_colorarray(lab).copy()
 
     a, b = lch[..., 1], lch[..., 2]
-    lch[..., 1], lch[..., 2] = np.sqrt(a**2 + b**2), np.arctan2(b, a)
+    lch[..., 1], lch[..., 2] = np.sqrt(a ** 2 + b ** 2), np.arctan2(b, a)
 
     H = lch[..., 2]
-    H[H < 0] += 2*np.pi  # (-pi, pi) -> (0, 2*pi)
+    H[H < 0] += 2 * np.pi  # (-pi, pi) -> (0, 2*pi)
     return lch
 
 
@@ -1113,5 +1113,5 @@ def lch2lab(lch):
     lch = _prepare_colorarray(lch).copy()
 
     c, h = lch[..., 1], lch[..., 2]
-    lch[..., 1], lch[..., 2] = c*np.cos(h), c*np.sin(h)
+    lch[..., 1], lch[..., 2] = c * np.cos(h), c * np.sin(h)
     return lch
