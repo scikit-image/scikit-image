@@ -34,6 +34,7 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            xyz2lab, lab2xyz,
                            lab2rgb, rgb2lab,
                            is_rgb, is_gray,
+                           lab2lch, lch2lab,
                            guess_spatial_dimensions
                            )
 
@@ -248,6 +249,13 @@ class TestColorconv(TestCase):
     def test_lab_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
+
+    def test_lab_lch_roundtrip(self):
+        rgb = img_as_float(self.img_rgb)
+        lab = rgb2lab(rgb)
+        lab2 = lch2lab(lab2lch(lab))
+        assert_array_almost_equal(lab2, lab)
+
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
