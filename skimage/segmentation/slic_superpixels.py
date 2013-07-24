@@ -130,7 +130,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     nearest_mean = np.zeros((depth, height, width), dtype=np.intp)
     distance = np.empty((depth, height, width), dtype=np.float)
     segment_map = _slic_cython(image_zyx, nearest_mean, distance, means,
-                               ratio, max_iter, n_segments)
+                               max_iter, n_segments)
     if segment_map.shape[0] == 1:
         segment_map = segment_map[0]
     return segment_map
