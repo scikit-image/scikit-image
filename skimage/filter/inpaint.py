@@ -183,8 +183,7 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     """
 
     if inpaint_mask.ndim != 2:
-        raise TypeError("The 'inpaint_mask' must be a two-dimensional array"
-                "with region to be inpainted marked as 1 and 0 otherwise.")
+        raise TypeError("The 'inpaint_mask' must be a two-dimensional array")
 
     h, w = input_image.shape
     painted = np.zeros((h + 2, w + 2), np.float)
