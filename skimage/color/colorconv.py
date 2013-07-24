@@ -27,7 +27,11 @@ Supported color spaces
         ``x == y == z == 1/3`` at the whitepoint, and all color matching
         functions are greater than zero everywhere.
 * LAB CIE : Lightness, a, b
+        Colorspace derived from XYZ CIE that is intented to be more
+        perceptually uniform
 * LCH CIE : Lightness, Chroma, Hue
+        Defined in terms of LAB CIE.  C and H are the polar representation of
+        a and b.  The polar angle C is defined to be on (0, 2*pi)
 
 :author: Nicolas Pinto (rgb2hsv)
 :author: Ralf Gommers (hsv2rgb)
