@@ -78,8 +78,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             # squaring itself. mine can't (with O2)
                             tmp = image_zyx[z, y, x, c] - means[k, c]
                             dist_mean += tmp * tmp
-                        # some precision issue here. Doesnt work if testing ">"
-                        if distance[z, y, x] - dist_mean > 1e-10:
+                        if distance[z, y, x] > dist_mean:
                             nearest_mean[z, y, x] = k
                             distance[z, y, x] = dist_mean
                             changes = 1
