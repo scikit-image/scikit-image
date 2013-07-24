@@ -52,8 +52,9 @@ def deltaE_cie76(lab1, lab2):
 
     References
     ----------
-    http://en.wikipedia.org/wiki/Color_difference
-    A. R. Robertson, "The CIE 1976 color-difference formulae," Color Res. Appl. 2, 7-11 (1977).
+    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [2] A. R. Robertson, "The CIE 1976 color-difference formulae,"
+           Color Res. Appl. 2, 7-11 (1977).
     """
     l1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
@@ -106,8 +107,8 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
 
     References
     ----------
-    http://en.wikipedia.org/wiki/Color_difference
-    http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
+    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
     l1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
@@ -160,9 +161,12 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
 
     References
     ----------
-    http://en.wikipedia.org/wiki/Color_difference
-    http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf (doi:10.1364/AO.33.008069)
-    M. Melgosa, J. Quesada, and E. Hita, "Uniformity of some recent color metrics tested with an accurate color-difference tolerance dataset," Appl. Opt. 33, 8069-8077 (1994).
+    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [2] http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
+           (doi:10.1364/AO.33.008069)
+    .. [3] M. Melgosa, J. Quesada, and E. Hita, "Uniformity of some recent
+           color metrics tested with an accurate color-difference tolerance
+           dataset," Appl. Opt. 33, 8069-8077 (1994).
     """
     L1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     L2, a2, b2 = np.rollaxis(lab2, -1)[:3]
@@ -270,9 +274,11 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
 
     References
     ----------
-    http://en.wikipedia.org/wiki/Color_difference
-    http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
-    F. J. J. Clarke, R. McDonald, and B. Rigg, "Modification to the JPC79 colour-difference formula," J. Soc. Dyers Colour. 100, 128-132 (1984).
+    .. [1] http://en.wikipedia.org/wiki/Color_difference
+    .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
+    .. [3] F. J. J. Clarke, R. McDonald, and B. Rigg, "Modification to the
+           JPC79 colour-difference formula," J. Soc. Dyers Colour. 100, 128-132
+           (1984).
     """
     l1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
