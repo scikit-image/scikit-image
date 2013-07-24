@@ -139,8 +139,52 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
             Method", Journal of Graphic Tools (2004).
             http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> from skimage.filter.inpaint import inpaint_fmm
+    >>> image = np.arange(64).reshape(8,8)
+    >>> image[2:-2, 2:-2] = 0
+    >>> image
+    array([[ 0,  1,  2,  3,  4,  5,  6,  7],
+           [ 8,  9, 10, 11, 12, 13, 14, 15],
+           [16, 17,  0,  0,  0,  0, 22, 23],
+           [24, 25,  0,  0,  0,  0, 30, 31],
+           [32, 33,  0,  0,  0,  0, 38, 39],
+           [40, 41,  0,  0,  0,  0, 46, 47],
+           [48, 49, 50, 51, 52, 53, 54, 55],
+           [56, 57, 58, 59, 60, 61, 62, 63]])
+    >>> mask = np.zeros((8,8), np.uint8)
+    >>> mask[2:-2, 2:-2] = 1
+    >>> mask
+    array([[0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+    >>> from skimage.filter.inpaint import inpaint_fmm
+    >>> painted = inpaint_fmm(image, mask)
+    >>> np.round(painted)
+    array([[  0.,   1.,   2.,   3.,   4.,   5.,   6.,   7.],
+           [  8.,   9.,  10.,  11.,  12.,  13.,  14.,  15.],
+           [ 16.,  17.,  11.,  14.,  15.,  15.,  22.,  23.],
+           [ 24.,  25.,  24.,  23.,  26.,  27.,  30.,  31.],
+           [ 32.,  33.,  32.,  34.,  35.,  35.,  38.,  39.],
+           [ 40.,  41.,  41.,  44.,  46.,  45.,  46.,  47.],
+           [ 48.,  49.,  50.,  51.,  52.,  53.,  54.,  55.],
+           [ 56.,  57.,  58.,  59.,  60.,  61.,  62.,  63.]])
+    >>> plt.imshow(image); plt.show()
+    >>> plt.imshow(painted); plt.show()
+
     """
-    # TODO: Error checks. Image either 3 or 1 channel. All dims same
+
+    if inpaint_mask.ndim != 2:
+        raise TypeError("The 'inpaint_mask' must be a two-dimensional array"
+                "with region to be inpainted marked as 1 and 0 otherwise.")
 
     h, w = input_image.shape
     painted = np.zeros((h + 2, w + 2), np.float)
