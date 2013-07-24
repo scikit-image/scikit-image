@@ -2,7 +2,7 @@ import numpy as np
 import heapq
 from skimage.morphology import dilation, disk
 
-from _inpaint import fast_marching_method
+from . import fast_marching_method
 
 __all__ = ['inpaint_fmm']
 
