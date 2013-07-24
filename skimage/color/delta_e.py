@@ -28,12 +28,6 @@ import numpy as np
 DEG = np.pi / 180
 
 
-def _unpack_last(x):
-    x = np.asarray(x)
-    shape = x.shape
-    return [x[..., i] for i in range(shape[-1])]
-
-
 def _arctan2pi(b, a):
     """np.arctan2 mapped to (0, 2 * pi)"""
     ans = np.arctan2(b, a)
@@ -61,8 +55,8 @@ def deltaE_cie76(lab1, lab2):
     http://en.wikipedia.org/wiki/Color_difference
     A. R. Robertson, "The CIE 1976 color-difference formulae," Color Res. Appl. 2, 7-11 (1977).
     """
-    l1, a1, b1 = _unpack_last(lab1)
-    l2, a2, b2 = _unpack_last(lab2)
+    l1, a1, b1 = np.rollaxis(lab1, -1)[:3]
+    l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
     return np.sqrt((l2 - l1) ** 2 + (a2 - a1) ** 2 + (b2 - b1) ** 2)
 
 
@@ -115,8 +109,8 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     http://en.wikipedia.org/wiki/Color_difference
     http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
-    l1, a1, b1 = _unpack_last(lab1)
-    l2, a2, b2 = _unpack_last(lab2)
+    l1, a1, b1 = np.rollaxis(lab1, -1)[:3]
+    l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
 
     dl = l1 - l2
     c1 = np.sqrt(a1 ** 2 + b1 ** 2)
@@ -170,8 +164,8 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf (doi:10.1364/AO.33.008069)
     M. Melgosa, J. Quesada, and E. Hita, "Uniformity of some recent color metrics tested with an accurate color-difference tolerance dataset," Appl. Opt. 33, 8069-8077 (1994).
     """
-    L1, a1, b1 = _unpack_last(lab1)
-    L2, a2, b2 = _unpack_last(lab2)
+    L1, a1, b1 = np.rollaxis(lab1, -1)[:3]
+    L2, a2, b2 = np.rollaxis(lab2, -1)[:3]
 
     c1 = np.sqrt(a1 ** 2 + b1 ** 2)
     c2 = np.sqrt(a2 ** 2 + b2 ** 2)
@@ -280,8 +274,8 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     F. J. J. Clarke, R. McDonald, and B. Rigg, "Modification to the JPC79 colour-difference formula," J. Soc. Dyers Colour. 100, 128-132 (1984).
     """
-    l1, a1, b1 = _unpack_last(lab1)
-    l2, a2, b2 = _unpack_last(lab2)
+    l1, a1, b1 = np.rollaxis(lab1, -1)[:3]
+    l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
 
     c1 = np.sqrt(a1 ** 2 + b1 ** 2)
     c2 = np.sqrt(a2 ** 2 + b2 ** 2)
