@@ -311,7 +311,7 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
                     heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
                     if _run_inpaint:
-                        shifted_indices = indices_centered
-                        + np.asarray([i_nb, j_nb], np.int16)
+                        shifted_indices = indices_centered + np.asarray([
+                            i_nb, j_nb], np.int16)
                         inpaint_point(i_nb, j_nb, image, flag,
                                       u, shifted_indices, radius)
