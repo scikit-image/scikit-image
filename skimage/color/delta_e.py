@@ -25,8 +25,6 @@ from __future__ import division
 
 import numpy as np
 
-DEG = np.pi / 180
-
 
 def _arctan2pi(b, a):
     """np.arctan2 mapped to (0, 2 * pi)"""
@@ -114,8 +112,8 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
 
     dl = l1 - l2
-    c1 = np.sqrt(a1 ** 2 + b1 ** 2)
-    c2 = np.sqrt(a2 ** 2 + b2 ** 2)
+    c1 = np.hypot(a1, b1)
+    c2 = np.hypot(a2, b2)
     dc = c1 - c2
     dh_ab = np.sqrt(deltaE_cie76(lab1, lab2) ** 2 - dl ** 2 - dc ** 2)
 
@@ -171,8 +169,8 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     L1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     L2, a2, b2 = np.rollaxis(lab2, -1)[:3]
 
-    c1 = np.sqrt(a1 ** 2 + b1 ** 2)
-    c2 = np.sqrt(a2 ** 2 + b2 ** 2)
+    c1 = np.hypot(a1, b1)
+    c2 = np.hypot(a2, b2)
     cbar = 0.5 * (c1 + c2)
     c7 = cbar ** 7
     G = 0.5 * (1 - np.sqrt(c7 / (c7 + 25 ** 7)))
@@ -183,8 +181,8 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     a1_prime = a1 * (1 + G)
     a2_prime = a2 * (1 + G)
 
-    c1_prime = np.sqrt(a1_prime ** 2 + b1 ** 2)
-    c2_prime = np.sqrt(a2_prime ** 2 + b2 ** 2)
+    c1_prime = np.hypot(a1_prime, b1)
+    c2_prime = np.hypot(a2_prime, b2)
     cbar_prime = 0.5 * (c1_prime + c2_prime)
     dC_prime = c2_prime - c1_prime
 
@@ -214,12 +212,14 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     Hbar_prime *= 0.5
 
     T = (1 -
-         0.17 * np.cos(Hbar_prime - 30 * DEG) +
+         0.17 * np.cos(Hbar_prime - np.deg2rad(30)) +
          0.24 * np.cos(2 * Hbar_prime) +
-         0.32 * np.cos(3 * Hbar_prime + 6 * DEG) -
-         0.20 * np.cos(4 * Hbar_prime - 63 * DEG)
+         0.32 * np.cos(3 * Hbar_prime + np.deg2rad(6)) -
+         0.20 * np.cos(4 * Hbar_prime - np.deg2rad(63))
          )
-    dTheta = 30 * DEG * np.exp(-((Hbar_prime / DEG - 275) / 25) ** 2)
+    dTheta = (np.deg2rad(30) *
+              np.exp(-((np.rad2deg(Hbar_prime) - 275) / 25) ** 2)
+              )
     c7 = cbar_prime ** 7
     Rc = 2 * np.sqrt(c7 / (c7 + 25 ** 7))
 
@@ -283,8 +283,8 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     l1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     l2, a2, b2 = np.rollaxis(lab2, -1)[:3]
 
-    c1 = np.sqrt(a1 ** 2 + b1 ** 2)
-    c2 = np.sqrt(a2 ** 2 + b2 ** 2)
+    c1 = np.hypot(a1, b1)
+    c2 = np.hypot(a2, b2)
     dC = c1 - c2
     dl = l1 - l2
     dH = np.sqrt(deltaE_cie76(lab1, lab2) ** 2 - dl ** 2 - dC ** 2)
@@ -292,9 +292,9 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     dL = l1 - l2
 
     h1 = _arctan2pi(b1, a1)
-    T = np.where(np.logical_and(h1 >= 164 * DEG, h1 <= 345 * DEG),
-                 0.56 + 0.2 * np.abs(np.cos(h1 + 168 * DEG)),
-                 0.36 + 0.4 * np.abs(np.cos(h1 + 35 * DEG))
+    T = np.where(np.logical_and(np.rad2deg(h1) >= 164, np.rad2deg(h1) <= 345),
+                 0.56 + 0.2 * np.abs(np.cos(h1 + np.deg2rad(168))),
+                 0.36 + 0.4 * np.abs(np.cos(h1 + np.deg2rad(35)))
                  )
     c1_4 = c1 ** 4
     F = np.sqrt(c1_4 / (c1_4 + 1900))
