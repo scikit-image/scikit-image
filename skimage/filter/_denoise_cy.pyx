@@ -200,7 +200,8 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     return np.squeeze(out)
 
 
-def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3, isotropic=True):
+def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3,
+                       isotropic=True):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
