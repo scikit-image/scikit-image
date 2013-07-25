@@ -24,8 +24,7 @@ def growImage(input_image, synth_mask, window):
 
     """
 
-    MAX_THRESH = 0.3
-    ERR_THRESH = 0.1
+    MAX_THRESH = 0.2
 
     # Padding
     pad_size = tuple(np.array(input_image.shape) + np.array(window) - 1)
@@ -70,11 +69,9 @@ def growImage(input_image, synth_mask, window):
             # Remove the case where sample == template
             ssd[i_b - window / 2, j_b - window / 2] = 1.
 
-            best_matches = np.transpose(np.where(ssd <= ssd.min() * (
-                                        1 + ERR_THRESH)))
+            best_matches = np.transpose(np.where(ssd == ssd.min()))
 
-            rand = np.random.randint(best_matches.shape[0])
-            matched_index = best_matches[rand, :]
+            matched_index = best_matches[0, :]
 
             if ssd[tuple(matched_index)] < MAX_THRESH:
                 image[i_b, j_b] = image[tuple(matched_index + [window / 2,
@@ -86,20 +83,6 @@ def growImage(input_image, synth_mask, window):
             MAX_THRESH = 1.1 * MAX_THRESH
 
     return image[i0:-i0, j0:-j0]
-
-
-# def find_matches(template, valid_mask, image, window):
-
-#     for i in xrange(template.shape[0], image.shape[0] - template.shape[0]):
-#         for j in xrange(template.shape[1], image.shape[1] - template.shape[1]):
-#             sample = image[(i - window):(i + window),
-#                            (j - window):(j + window)]
-#             dist = (template - sample) ** 2
-#             ssd[i, j] = np.sum(dist * valid_mask) / total_weight
-
-#     best_matches = np.transpose(np.where(ssd <= ssd.min() * (1 + ERR_THRESH)))
-
-#     return best_matches
 
 
 def _gaussian(sigma=0.5, size=None):
