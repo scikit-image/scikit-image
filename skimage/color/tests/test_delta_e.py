@@ -136,3 +136,8 @@ def test_cmc():
     ])
 
     assert_allclose(dE2, oracle, rtol=1.e-8)
+
+
+if __name__ == "__main__":
+    from numpy.testing import run_module_suite
+    run_module_suite()
