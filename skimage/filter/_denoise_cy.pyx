@@ -223,9 +223,9 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3,
 
             SUM((u(n) - u(n-1))**2) < eps
 
-    max_iter: int, optional
+    max_iter : int, optional
         Maximal number of iterations used for the optimization.
-    isotropic: boolean, optional
+    isotropic : boolean, optional
         Switch between isotropic and anisotropic TV denoising.
 
     Returns
