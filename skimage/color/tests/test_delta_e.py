@@ -1,11 +1,4 @@
-"""Test for correctness of color distance functions
-
-Authors
--------
-Matt Terry
-
-:license: modified BSD
-"""
+"""Test for correctness of color distance functions"""
 from os.path import abspath, dirname, join as pjoin
 
 import numpy as np

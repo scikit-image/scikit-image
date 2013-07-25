@@ -145,3 +145,6 @@
 - Jostein Bø Fløystad
   Reconstruction circle mode for Radon transform
   Simultaneous Algebraic Reconstruction Technique for inverse Radon transform
+
+- Matt Terry
+  Color difference functions
