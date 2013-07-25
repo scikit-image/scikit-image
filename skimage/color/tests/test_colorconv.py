@@ -256,6 +256,14 @@ class TestColorconv(TestCase):
         lab2 = lch2lab(lab2lch(lab))
         assert_array_almost_equal(lab2, lab)
 
+    def test_rgb_lch_roundtrip(self):
+        rgb = img_as_float(self.img_rgb)
+        lab = rgb2lab(rgb)
+        lch = lab2lch(lab)
+        lab2 = lch2lab(lch)
+        rgb2 = lab2rgb(lab2)
+        assert_array_almost_equal(rgb, rgb2)
+
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
