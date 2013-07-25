@@ -137,11 +137,12 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     lab2 : array_like
         comparision color (Lab colorspace)
     kL : float (range), optional
-        pass
+        luminance scale factor, 1 for "acceptably close"; 2 for "impercievable"
+        see deltaE_cmc
     kC : float (range), optional
-        pass
+        chroma scale factor, usually 1
     kH : float (range), optional
-        pass
+        hue scale factor, usually 1
 
     Returns
     -------
