@@ -1,8 +1,9 @@
 import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter
 from skimage.transform import integral_image
-from skimage.feature import _compute_auto_correlation
+from skimage.feature.corner import _compute_auto_correlation
 import time
+
 
 def _get_filtered_image(image, n, mode='DoB'):
     if mode == 'DoB':
@@ -21,14 +22,15 @@ def _get_filtered_image(image, n, mode='DoB'):
         return filtered_image
 
 
-def _suppress_line(response, sigma):
+def _suppress_line(response, sigma, rpc_threshold):
     Axx, Axy, Ayy = _compute_auto_correlation(response, sigma)
     detA = Axx * Ayy - Axy**2
     traceA = Axx + Ayy
     # ratio of principal curvatures
-    rpc = traceA / detA
-    rpc[rpc > 10] = 0
-    return rpc
+    rpc = traceA / (detA + 0.001)
+    response[rpc > rpc_threshold] = 0
+    return response
+
 
 def censure_keypoints(image, mode='DoB', threshold=0.03):
     # TODO : Decide number of scales. Image-size dependent?
@@ -53,9 +55,9 @@ def censure_keypoints(image, mode='DoB', threshold=0.03):
     minimas[np.abs(minimas) < threshold] = 0
     maximas[np.abs(maximas) < threshold] = 0
     response = maximas + np.abs(minimas)
-    response[:, :, 1] = _suppress_line(response[:, :, 1], 1.33)
-    response[:, :, 2] = _suppress_line(response[:, :, 2], 1.33)
-    response[:, :, 3] = _suppress_line(response[:, :, 3], 1.33)
-    response[:, :, 4] = _suppress_line(response[:, :, 4], 1.33)
-    response[:, :, 5] = _suppress_line(response[:, :, 5], 1.33)
+    response[:, :, 1] = _suppress_line(response[:, :, 1], 1.33, 10)
+    response[:, :, 2] = _suppress_line(response[:, :, 2], 1.33, 10)
+    response[:, :, 3] = _suppress_line(response[:, :, 3], 1.33, 10)
+    response[:, :, 4] = _suppress_line(response[:, :, 4], 1.33, 10)
+    response[:, :, 5] = _suppress_line(response[:, :, 5], 1.33, 10)
     return response
