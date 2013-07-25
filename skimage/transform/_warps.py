@@ -3,7 +3,7 @@ from scipy import ndimage
 
 from skimage.transform._geometric import (warp, SimilarityTransform,
                                           AffineTransform)
-from skimage.measure.local import _local_func
+from skimage.measure import block_reduce
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
@@ -264,7 +264,7 @@ def downscale_local_mean(image, factors, cval=0):
            [5.5, 4.5]])
 
     """
-    return _local_func(image, factors, np.mean, cval)
+    return block_reduce(image, factors, np.mean, cval)
 
 
 def _swirl_mapping(xy, center, rotation, strength, radius):
