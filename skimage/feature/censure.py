@@ -6,6 +6,7 @@ import time
 
 
 def _get_filtered_image(image, n, mode='DoB'):
+    # TODO : Implement the STAR and Octagon mode
     if mode == 'DoB':
         inner_wt = (1.0 / (2*n + 1)**2)
         outer_wt = (1.0 / (12*n**2 + 4*n))
@@ -32,7 +33,7 @@ def _suppress_line(response, sigma, rpc_threshold):
     return response
 
 
-def censure_keypoints(image, mode='DoB', threshold=0.03):
+def censure_keypoints(image, mode='DoB', threshold=0.03, rpc_threshold=10):
     # TODO : Decide number of scales. Image-size dependent?
     image = np.squeeze(image)
     if image.ndim != 2:
@@ -55,9 +56,12 @@ def censure_keypoints(image, mode='DoB', threshold=0.03):
     minimas[np.abs(minimas) < threshold] = 0
     maximas[np.abs(maximas) < threshold] = 0
     response = maximas + np.abs(minimas)
-    response[:, :, 1] = _suppress_line(response[:, :, 1], 1.33, 10)
-    response[:, :, 2] = _suppress_line(response[:, :, 2], 1.33, 10)
-    response[:, :, 3] = _suppress_line(response[:, :, 3], 1.33, 10)
-    response[:, :, 4] = _suppress_line(response[:, :, 4], 1.33, 10)
-    response[:, :, 5] = _suppress_line(response[:, :, 5], 1.33, 10)
+    # TODO : Decide the rpc_threshold and sigma for all the scales. The paper only discusses
+    # values for scale2 i.e. response[:, :, 1]
+    response[:, :, 1] = _suppress_line(response[:, :, 1], 1.33, rpc_threshold)
+    response[:, :, 2] = _suppress_line(response[:, :, 2], 1.33, rpc_threshold)
+    response[:, :, 3] = _suppress_line(response[:, :, 3], 1.33, rpc_threshold)
+    response[:, :, 4] = _suppress_line(response[:, :, 4], 1.33, rpc_threshold)
+    response[:, :, 5] = _suppress_line(response[:, :, 5], 1.33, rpc_threshold)
+    # TODO : Return key-points from all the scales?
     return response
