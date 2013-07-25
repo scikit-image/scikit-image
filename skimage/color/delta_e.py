@@ -36,7 +36,7 @@ def _arctan2pi(b, a):
 
 
 def deltaE_cie76(lab1, lab2):
-    """Euclidian distance between two points in in Lab color space
+    """Euclidian distance between two points in Lab color space
 
     Parameters
     ----------

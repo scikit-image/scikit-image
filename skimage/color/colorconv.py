@@ -1037,6 +1037,7 @@ def combine_stains(stains, conv_matrix):
 
 def lab2lch(lab):
     """CIE-LAB to CIE-LCH color space conversion.
+
     LCH is the cylindrical representation of the LAB (cartesian) colorspace
 
     Parameters
@@ -1081,6 +1082,7 @@ def lab2lch(lab):
 
 def lch2lab(lch):
     """CIE-LCH to CIE-LAB color space conversion.
+
     LCH is the cylindrical representation of the LAB (cartesian) colorspace
 
     Parameters
