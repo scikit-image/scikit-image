@@ -200,7 +200,7 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     return np.squeeze(out)
 
 
-def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
+def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3, isotropic=True):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -224,6 +224,8 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
 
     max_iter: int, optional
         Maximal number of iterations used for the optimization.
+    isotropic: boolean, optimal
+        Switch between isotropic and anisotropic tv denoising
 
     Returns
     -------
@@ -239,6 +241,7 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
     .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
            using Split Bregman" in Image Processing On Line on 2012–05–19,
            http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
+    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf 
 
     """
 
@@ -325,9 +328,27 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
                     bxx = bx[r, c, k]
                     byy = by[r, c, k]
 
-                    s = sqrt((ux + bxx)**2 + (uy + byy)**2)
-                    dxx = s * lam * (ux + bxx) / (s * lam + 1)
-                    dyy = s * lam * (uy + byy) / (s * lam + 1)
+                    # d_subproblem after reference [4]
+                    if isotropic:
+                        s = sqrt((ux + bxx)**2 + (uy + byy)**2)
+                        dxx = s * lam * (ux + bxx) / (s * lam + 1)
+                        dyy = s * lam * (uy + byy) / (s * lam + 1)
+
+                    else:
+                        s = ux + bxx
+                        if s > 1 / lam:
+                            dxx = s - 1/lam
+                        elif s < -1 / lam:
+                            dxx = s + 1 / lam
+                        else:
+                            dxx = 0
+                        s = uy + byy
+                        if s > 1 / lam:
+                            dyy = s - 1 / lam
+                        elif s < -1 / lam:
+                            dyy = s + 1 / lam
+                        else:
+                            dyy = 0
 
                     dx[r, c, k] = dxx
                     dy[r, c, k] = dyy
