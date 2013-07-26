@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
-from tex_temp import growImage
-# from tex import growImage
+# from tex_temp import growImage
+from tex import growImage
 plt.gray()
 
 
@@ -27,9 +27,9 @@ def start():
 
     image, painted = demo_syn()
 
-    fig, (ax0, ax1) = plt.subplots(ncols=2)
-    ax0.imshow(image)
-    ax1.imshow(painted)
-    plt.show()
+    # fig, (ax0, ax1) = plt.subplots(ncols=2)
+    # ax0.imshow(image)
+    # ax1.imshow(painted)
+    # plt.show()
 
 start()
