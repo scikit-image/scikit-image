@@ -95,7 +95,7 @@ def censure_keypoints(image, mode='DoB', threshold=0.03, rpc_threshold=10):
     scale5 = _filter_using_convolve(image, 5, mode)
     scale6 = _filter_using_convolve(image, 6, mode)
     scale7 = _filter_using_convolve(image, 7, mode)
-    print time.time - start
+    print time.time() - start
     # Stacking all the scales in the 3rd dimension
     scales = np.dstack((scale1, scale2, scale3, scale4, scale5, scale6, scale7))
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
