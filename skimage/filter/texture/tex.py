@@ -22,6 +22,13 @@ def grow_image(input_image, synth_mask, window):
     image : array, float
         Texture synthesised input_image.
 
+    References
+    ---------
+    .. [1] Criminisi, A., Pe ́rez, P., and Toyama, K. (2004). "Region filling
+            and object removal by exemplar-based inpainting". IEEE Transactions
+            on Image Processing, 13(9):1200–1212.
+            http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
+
     """
 
     max_thresh = 0.2
