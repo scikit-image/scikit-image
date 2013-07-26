@@ -4,7 +4,7 @@ from skimage.feature import match_template
 from skimage.util import img_as_float
 
 
-def growImage(image, syn_mask, window):
+def grow_image(image, syn_mask, window):
     """This function performs constrained synthesis. It grows the texture
     of surrounding region into the unknown pixels.
 
@@ -24,7 +24,7 @@ def growImage(image, syn_mask, window):
 
     """
 
-    MAX_THRESH = 0.2
+    max_thresh = 0.2
 
     image = img_as_float(image)
 
@@ -57,13 +57,13 @@ def growImage(image, syn_mask, window):
 
             matched_index = tuple(best_matches)
 
-            if corr[matched_index] < MAX_THRESH:
+            if corr[matched_index] < max_thresh:
                 image[i_b, j_b] = image[matched_index]
                 syn_mask[i_b, j_b] = False
                 progress = 1
 
         if progress == 0:
-            MAX_THRESH = 1.1 * MAX_THRESH
+            max_thresh = 1.1 * max_thresh
 
     return image
 

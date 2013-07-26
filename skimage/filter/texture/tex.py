@@ -4,7 +4,7 @@ from skimage.morphology import erosion, disk
 from skimage.util import img_as_float
 
 
-def growImage(input_image, synth_mask, window):
+def grow_image(input_image, synth_mask, window):
     """This function performs constrained synthesis. It grows the texture
     of surrounding region into the unknown pixels.
 
@@ -24,7 +24,7 @@ def growImage(input_image, synth_mask, window):
 
     """
 
-    MAX_THRESH = 0.2
+    max_thresh = 0.2
 
     # Padding
     pad_size = tuple(np.array(input_image.shape) + np.array(window) - 1)
@@ -73,14 +73,14 @@ def growImage(input_image, synth_mask, window):
 
             matched_index = best_matches[0, :]
 
-            if ssd[tuple(matched_index)] < MAX_THRESH:
+            if ssd[tuple(matched_index)] < max_thresh:
                 image[i_b, j_b] = image[tuple(matched_index + [window / 2,
                                                                window / 2])]
                 mask[i_b, j_b] = False
                 progress = 1
 
         if progress == 0:
-            MAX_THRESH = 1.1 * MAX_THRESH
+            max_thresh = 1.1 * max_thresh
 
     return image[i0:-i0, j0:-j0]
 
