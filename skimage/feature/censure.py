@@ -1,10 +1,12 @@
 import numpy as np
-from scipy.ndimage.filters import maximum_filter, minimum_filter
+from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 from skimage.transform import integral_image
 from skimage.feature.corner import _compute_auto_correlation
+from skimage.morphology import convex_hull_image
 import time
 
 
+"""
 def _get_filtered_image(image, n, mode='DoB'):
     # TODO : Implement the STAR and Octagon mode
     if mode == 'DoB':
@@ -21,6 +23,52 @@ def _get_filtered_image(image, n, mode='DoB'):
                 filtered_image[i, j] = outer_wt * outer - (inner_wt + outer_wt) * inner
         print time.time() - start
         return filtered_image
+    elif mode == 'Octagon':
+        outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
+        inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
+"""
+
+
+def _oct(m, n):
+    f = np.zeros((m + 2*n, m + 2*n))
+    f[0, n] = 1
+    f[n, 0] = 1
+    f[0, m + n -1] = 1
+    f[m + n - 1, 0] = 1
+    f[-1, n] = 1 
+    f[n, -1] = 1
+    f[-1, m + n - 1] = 1
+    f[m + n - 1, -1] = 1
+    return convex_hull_image(f).astype(int)
+
+
+def _octagon_filter(mo, no, mi, ni):
+    outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
+    inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
+    outer_wt = 1.0 / (outer - inner)
+    inner_wt = 1.0 / inner
+    c = ((mo + 2 * no) - (mi + 2 * ni)) / 2
+    outer_oct = _oct(mo, no)
+    inner_oct = np.zeros((mo + 2 * no, mo + 2 * no))
+    inner_oct[c:-c, c:-c] = _oct(mi, ni)
+    bfilter = outer_wt * outer_oct - (outer_wt + inner_wt) * inner_oct
+    return bfilter
+
+
+def _filter_using_convolve(image, n, mode='DoB'):
+
+    if mode == 'DoB':
+        inner_wt = (1.0 / (2*n + 1)**2)
+        outer_wt = (1.0 / (12*n**2 + 4*n))
+        dob_filter = np.zeros((4 * n + 1, 4 * n + 1))
+        dob_filter[:] = outer_wt
+        dob_filter[n : 3 * n + 1, n : 3 * n + 1] = - inner_wt
+        return convolve(image, dob_filter)
+
+    elif mode == 'Octagon':
+        outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
+        inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
+        return convolve(image, _octagon_filter(outer_shape[n - 1][0], outer_shape[n - 1][1], inner_shape[n - 1][0], inner_shape[n - 1][1]))
 
 
 def _suppress_line(response, sigma, rpc_threshold):
@@ -39,13 +87,15 @@ def censure_keypoints(image, mode='DoB', threshold=0.03, rpc_threshold=10):
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
     # Generating all the scales
-    scale1 = _get_filtered_image(image, 1, mode)
-    scale2 = _get_filtered_image(image, 2, mode)
-    scale3 = _get_filtered_image(image, 3, mode)
-    scale4 = _get_filtered_image(image, 4, mode)
-    scale5 = _get_filtered_image(image, 5, mode)
-    scale6 = _get_filtered_image(image, 6, mode)
-    scale7 = _get_filtered_image(image, 7, mode)
+    start = time.time()
+    scale1 = _filter_using_convolve(image, 1, mode)
+    scale2 = _filter_using_convolve(image, 2, mode)
+    scale3 = _filter_using_convolve(image, 3, mode)
+    scale4 = _filter_using_convolve(image, 4, mode)
+    scale5 = _filter_using_convolve(image, 5, mode)
+    scale6 = _filter_using_convolve(image, 6, mode)
+    scale7 = _filter_using_convolve(image, 7, mode)
+    print time.time - start
     # Stacking all the scales in the 3rd dimension
     scales = np.dstack((scale1, scale2, scale3, scale4, scale5, scale6, scale7))
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
