@@ -98,7 +98,7 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     """
 
     image = np.atleast_3d(img_as_float(image))
-    
+
     # if image.max() is 0, then dist_scale can have an unverified value
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
@@ -112,7 +112,7 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
         Py_ssize_t window_ext = (win_size - 1) / 2
 
         double max_value
-        
+
         cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] cimage
         cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] out
 
@@ -136,12 +136,12 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
         csigma_range = sigma_range
 
     max_value = image.max()
-    
+
     if max_value == 0.0:
         raise ValueError("The maximum value found in the image was 0.")
 
     cimage = np.ascontiguousarray(image)
-    
+
     out = np.zeros((rows, cols, dims), dtype=np.double)
     image_data = <double*>cimage.data
     out_data = <double*>out.data
@@ -200,7 +200,8 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     return np.squeeze(out)
 
 
-def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3, isotropic=True):
+def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3,
+                       isotropic=True):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -222,10 +223,10 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3, 
 
             SUM((u(n) - u(n-1))**2) < eps
 
-    max_iter: int, optional
+    max_iter : int, optional
         Maximal number of iterations used for the optimization.
-    isotropic: boolean, optimal
-        Switch between isotropic and anisotropic tv denoising
+    isotropic : boolean, optional
+        Switch between isotropic and anisotropic TV denoising.
 
     Returns
     -------
@@ -241,7 +242,7 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3, 
     .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
            using Split Bregman" in Image Processing On Line on 2012–05–19,
            http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
-    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf 
+    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
 
     """
 
