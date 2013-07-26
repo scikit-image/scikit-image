@@ -49,7 +49,7 @@ def growImage(input_image, synth_mask, window):
         if not boundary.any():  # If the remaining region is 1-pixel thick
             boundary = mask
 
-        bound_list = np.transpose(np.where(boundary == 1))
+        bound_list = np.where(boundary == 1).T
 
         for i_b, j_b in bound_list:
             template = image[(i_b - window / 2):(i_b + window / 2 + 1),
@@ -59,17 +59,17 @@ def growImage(input_image, synth_mask, window):
             valid_mask = gauss_mask * (1 - mask_template)
 
             # best_matches = find_matches(template, valid_mask, image, window)
-            total_weight = np.sum(valid_mask)
+            total_weight = valid_mask.sum()
             for i in xrange(input_image.shape[0]):
                 for j in xrange(input_image.shape[1]):
                     sample = image[i:i + window, j:j + window]
                     dist = (template - sample) ** 2
-                    ssd[i, j] = np.sum(dist * valid_mask) / total_weight
+                    ssd[i, j] = (dist * valid_mask).sum() / total_weight
 
             # Remove the case where sample == template
             ssd[i_b - window / 2, j_b - window / 2] = 1.
 
-            best_matches = np.transpose(np.where(ssd == ssd.min()))
+            best_matches = np.where(ssd == ssd.min()).T
 
             matched_index = best_matches[0, :]
 
@@ -96,4 +96,4 @@ def _gaussian(sigma=0.5, size=None):
     Kx = np.exp(-x ** 2 / (2 * sigma ** 2))
     Ky = np.exp(-y ** 2 / (2 * sigma ** 2))
     ans = np.outer(Kx, Ky) / (2.0 * np.pi * sigma ** 2)
-    return ans / sum(sum(ans))
+    return ans / ans.sum()
