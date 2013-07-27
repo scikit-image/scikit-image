@@ -1,5 +1,6 @@
 import numpy as np
 from skimage.morphology import erosion, disk
+from numpy.lib.stride_tricks import as_strided
 # from skimage.feature import match_template
 from skimage.util import img_as_float
 
@@ -24,9 +25,9 @@ def grow_image(input_image, synth_mask, window):
 
     References
     ---------
-    .. [1] Criminisi, A., Pe ́rez, P., and Toyama, K. (2004). "Region filling
-            and object removal by exemplar-based inpainting". IEEE Transactions
-            on Image Processing, 13(9):1200–1212.
+    .. [1] A. Efros and T. Leung. "Texture Synthesis by Non-Parametric
+            Sampling". In Proc. Int. Conf. Computer Vision, pages 1033–1038,
+            Kerkyra, Greece, September 1999.
             http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
 
     """
@@ -56,7 +57,7 @@ def grow_image(input_image, synth_mask, window):
         if not boundary.any():  # If the remaining region is 1-pixel thick
             boundary = mask
 
-        bound_list = np.where(boundary == 1).T
+        bound_list = np.transpose(np.where(boundary == 1))
 
         for i_b, j_b in bound_list:
             template = image[(i_b - window / 2):(i_b + window / 2 + 1),
@@ -76,7 +77,7 @@ def grow_image(input_image, synth_mask, window):
             # Remove the case where sample == template
             ssd[i_b - window / 2, j_b - window / 2] = 1.
 
-            best_matches = np.where(ssd == ssd.min()).T
+            best_matches = np.transpose(np.where(ssd == ssd.min()))
 
             matched_index = best_matches[0, :]
 
@@ -90,6 +91,21 @@ def grow_image(input_image, synth_mask, window):
             max_thresh = 1.1 * max_thresh
 
     return image[i0:-i0, j0:-j0]
+
+
+def sumsqdiff3(input_image, template):
+    window_size = template.shape
+    y = as_strided(input_image,
+                   shape=(input_image.shape[0] - window_size[0] + 1,
+                          input_image.shape[1] - window_size[1] + 1,) +
+                   window_size,
+                   strides=input_image.strides * 2)
+    ssd = np.einsum('ijkl,kl->ij', y, template)
+    ssd *= - 2
+    ssd += np.einsum('ijkl, ijkl->ij', y, y)
+    ssd += np.einsum('ij, ij', template, template)
+
+    return ssd
 
 
 def _gaussian(sigma=0.5, size=None):
