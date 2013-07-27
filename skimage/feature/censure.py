@@ -50,6 +50,7 @@ def _octagon_filter(mo, no, mi, ni):
     return bfilter
 
 
+"""
 def _filter_using_convolve(image, n, mode='DoB'):
 
     if mode == 'DoB':
@@ -64,7 +65,7 @@ def _filter_using_convolve(image, n, mode='DoB'):
         outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
         return convolve(image, _octagon_filter(outer_shape[n - 1][0], outer_shape[n - 1][1], inner_shape[n - 1][0], inner_shape[n - 1][1]))
-
+"""
 
 def _suppress_line(response, sigma, rpc_threshold):
     Axx, Axy, Ayy = _compute_auto_correlation(response, sigma)
