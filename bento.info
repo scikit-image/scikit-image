@@ -90,6 +90,9 @@ Library:
     Extension: skimage.morphology._greyreconstruct
         Sources:
             skimage/morphology/_greyreconstruct.pyx
+    Extension: skimage.feature.censure_cy
+        Sources:
+            skimage/feature/censure_cy.pyx
     Extension: skimage.feature._brief_cy
         Sources:
             skimage/feature/_brief_cy.pyx
