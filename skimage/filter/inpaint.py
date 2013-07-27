@@ -143,7 +143,6 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     --------
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
-    >>> from skimage.filter.inpaint import inpaint_fmm
     >>> image = np.arange(64).reshape(8,8)
     >>> image[2:-2, 2:-2] = 0
     >>> image
