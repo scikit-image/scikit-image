@@ -31,7 +31,19 @@ def inpaint_efros(input_image, synth_mask, window=3, max_thresh=0.2):
 
     Notes
     -----
-    The algorithm for the Texture Synthesis is as follows:
+    Outline of the algorithm for Texture Synthesis is as follows:
+    - Loop: Generate the boundary pixels of the region to be inpainted
+        - Loop: Generate a template of (window, window), center: boundary pixel
+            - Compute the SSD between template and similar sized patches across
+               the image
+            - Find the pixel with smallest SSD, such that patch isn't where
+               template is located (False positive)
+            - Update the intensity value of center pixel of template as the
+               value of the center of the matched patch
+        - Repeat for all pixels of the boundary
+    - Repeat until all pixels are inpainted
+
+    For further information refer to [1]_
 
     References
     ---------
@@ -39,6 +51,18 @@ def inpaint_efros(input_image, synth_mask, window=3, max_thresh=0.2):
             Sampling". In Proc. Int. Conf. Computer Vision, pages 1033-1038,
             Kerkyra, Greece, September 1999.
             http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
+
+    Example
+    -------
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> from skimage.filter.inpaint_texture import inpaint_efros
+    >>> image[90:110, 90:110] = 0
+    >>> mask = np.zeros(image.shape, np.uint8)
+    >>> mask[90:110, 90:110] = 1
+    >>> plt.imshow(image); plt.show()
+    >>> painted = inpaint_efros(image, mask, window=3)
+    >>> plt.imshow(painted); plt.show()
 
     """
 
