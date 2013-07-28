@@ -24,3 +24,5 @@ doc/source/auto_examples/applications/
 doc/source/_static/random.js
 .idea/
 *.log
+
+*.prof
