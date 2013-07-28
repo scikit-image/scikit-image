@@ -10,8 +10,8 @@ from ..color import rgb2lab, gray2rgb, guess_spatial_dimensions
 from ._slic import _slic_cython
 
 
-def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
-         multichannel=None, convert2lab=True):
+def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
+         multichannel=None, convert2lab=True, ratio=None):
     """Segments image using k-means clustering in Color-(x,y) space.
 
     Parameters
@@ -21,9 +21,10 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         (see `multichannel` parameter).
     n_segments : int, optional (default: 100)
         The (approximate) number of labels in the segmented output image.
-    ratio: float, optional (default: 10)
-        Balances color-space proximity and image-space proximity.
-        Higher values give more weight to color-space.
+    compactness: float, optional (default: 10)
+        Balances color-space proximity and image-space proximity. Higher
+        values give more weight to image-space. As `compactness` tends to
+        infinity, superpixel shapes become square/cubic.
     max_iter : int, optional (default: 10)
         Maximum number of iterations of k-means.
     sigma : float, optional (default: 1)
@@ -38,6 +39,8 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
         Whether the input should be converted to Lab colorspace prior to
         segmentation.  For this purpose, the input is assumed to be RGB. Highly
         recommended.
+    ratio : float, optional
+        Synonym for `compactness`. This keyword is deprecated.
 
     Returns
     -------
@@ -79,6 +82,10 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     >>> # Increasing the ratio parameter yields more square regions
     >>> segments = slic(img, n_segments=100, ratio=20)
     """
+    if ratio is not None:
+        msg = 'Keyword `ratio` is deprecated. Use `compactness` instead.'
+        warnings.warn(msg)
+        compactness = ratio
     spatial_dims = guess_spatial_dimensions(image)
     if spatial_dims is None and multichannel is None:
         msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB" +
@@ -122,7 +129,7 @@ def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
     means = np.ascontiguousarray(means)
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    ratio = float(max((step_z, step_y, step_x))) / ratio
+    ratio = float(max((step_z, step_y, step_x))) / compactness
     image_zyx = np.concatenate([grid_z[..., np.newaxis],
                                 grid_y[..., np.newaxis],
                                 grid_x[..., np.newaxis],
