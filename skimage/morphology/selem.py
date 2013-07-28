@@ -4,7 +4,6 @@
 """
 
 import numpy as np
-from . import convex_hull_image
 
 
 def square(width, dtype=np.uint8):
@@ -235,6 +234,7 @@ def octagon(m, n, dtype=np.uint8):
        The structuring element where elements of the neighborhood
        are 1 and 0 otherwise.
     """
+    from . import convex_hull_image
     selem = np.zeros((m + 2*n, m + 2*n))
     selem[0, n] = 1
     selem[n, 0] = 1
