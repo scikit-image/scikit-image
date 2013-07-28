@@ -1,10 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
-# from tex_temp import grow_image
-# from tex import grow_image
-from inpaint_exemplar import inpaint_exemplar
-# plt.gray()
+from tex import inpaint_texture
+# from inpaint_exemplar import inpaint_exemplar
+plt.gray()
 
 
 __all__ = ['demo_syn']
@@ -21,7 +20,8 @@ def demo_syn():
     image[paint_region] = 0
     mask[paint_region] = 1
 
-    return image, inpaint_exemplar(image, mask, 9)
+    return image, inpaint_texture(image, mask, 9)
+    # return image, inpaint_exemplar(image, mask, 9)
 
 
 def start():

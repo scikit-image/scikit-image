@@ -1,11 +1,10 @@
 import numpy as np
 from skimage.morphology import erosion, disk
 from numpy.lib.stride_tricks import as_strided
-# from skimage.feature import match_template
 from skimage.util import img_as_float
 
 
-def grow_image(input_image, synth_mask, window):
+def inpaint_texture(input_image, synth_mask, window=3, max_thresh=0.2):
     """This function performs constrained synthesis. It grows the texture
     of surrounding region into the unknown pixels.
 
@@ -26,28 +25,29 @@ def grow_image(input_image, synth_mask, window):
     References
     ---------
     .. [1] A. Efros and T. Leung. "Texture Synthesis by Non-Parametric
-            Sampling". In Proc. Int. Conf. Computer Vision, pages 1033–1038,
+            Sampling". In Proc. Int. Conf. Computer Vision, pages 1033-1038,
             Kerkyra, Greece, September 1999.
             http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
 
     """
 
-    max_thresh = 0.2
+    input_image[synth_mask] = 0
+
+    h, w = input_image.shape
+    offset = window / 2
 
     # Padding
-    pad_size = tuple(np.array(input_image.shape) + np.array(window) - 1)
-    image = np.mean(input_image) * np.ones(pad_size, dtype=np.float32)
-    mask = np.zeros(pad_size, bool)
-    h, w = input_image.shape
-    i0, j0 = window, window
-    i0 /= 2
-    j0 /= 2
-    image[i0:i0 + h, j0:j0 + w] = img_as_float(input_image)
-    mask[i0:i0 + h, j0:j0 + w] = synth_mask
+    pad_size = (h + window - 1, w + window - 1)
+    image = (np.mean(input_image) / 255.) * np.ones(pad_size, dtype=np.uint8)
+    mask = np.zeros(pad_size, np.uint8)
 
+    image[offset:offset + h, offset:offset + w] = img_as_float(input_image)
+    mask[offset:offset + h, offset:offset + w] = synth_mask
+    ssd = np.zeros(input_image.shape, np.float)
+
+    t_row, t_col = np.ogrid[(-offset):(offset + 1), (-offset):(offset + 1)]
     sigma = window / 6.4
     gauss_mask = _gaussian(sigma, (window, window))
-    ssd = np.zeros(input_image.shape, np.float)
 
     while mask.any():
         progress = 0
@@ -60,26 +60,16 @@ def grow_image(input_image, synth_mask, window):
         bound_list = np.transpose(np.where(boundary == 1))
 
         for i_b, j_b in bound_list:
-            template = image[(i_b - window / 2):(i_b + window / 2 + 1),
-                             (j_b - window / 2):(j_b + window / 2 + 1)]
-            mask_template = mask[(i_b - window / 2):(i_b + window / 2 + 1),
-                                 (j_b - window / 2):(j_b + window / 2 + 1)]
+            template = image[i_b + t_row, j_b + t_col]
+            mask_template = mask[i_b + t_row, j_b + t_col]
             valid_mask = gauss_mask * (1 - mask_template)
 
-            # best_matches = find_matches(template, valid_mask, image, window)
-            total_weight = valid_mask.sum()
-            for i in xrange(input_image.shape[0]):
-                for j in xrange(input_image.shape[1]):
-                    sample = image[i:i + window, j:j + window]
-                    dist = (template - sample) ** 2
-                    ssd[i, j] = (dist * valid_mask).sum() / total_weight
+            ssd = sum_sq_diff(image, template, valid_mask)
 
             # Remove the case where sample == template
-            ssd[i_b - window / 2, j_b - window / 2] = 1.
+            ssd[i_b - offset, j_b - offset] = 1.
 
-            best_matches = np.transpose(np.where(ssd == ssd.min()))
-
-            matched_index = best_matches[0, :]
+            matched_index = np.transpose(np.where(ssd == ssd.min()))[0]
 
             if ssd[tuple(matched_index)] < max_thresh:
                 image[i_b, j_b] = image[tuple(matched_index + [window / 2,
@@ -90,22 +80,22 @@ def grow_image(input_image, synth_mask, window):
         if progress == 0:
             max_thresh = 1.1 * max_thresh
 
-    return image[i0:-i0, j0:-j0]
+    return image[offset:-offset, offset:-offset]
 
 
-def sumsqdiff3(input_image, template):
+def sum_sq_diff(input_image, template, valid_mask):
+    total_weight = valid_mask.sum()
     window_size = template.shape
     y = as_strided(input_image,
                    shape=(input_image.shape[0] - window_size[0] + 1,
                           input_image.shape[1] - window_size[1] + 1,) +
                    window_size,
                    strides=input_image.strides * 2)
-    ssd = np.einsum('ijkl,kl->ij', y, template)
+    ssd = np.einsum('ijkl, kl, kl->ij', y, template, valid_mask, dtype=np.float)
     ssd *= - 2
-    ssd += np.einsum('ijkl, ijkl->ij', y, y)
-    ssd += np.einsum('ij, ij', template, template)
-
-    return ssd
+    ssd += np.einsum('ijkl, ijkl, kl->ij', y, y, valid_mask)
+    ssd += np.einsum('ij, ij, ij', template, template, valid_mask)
+    return ssd / total_weight
 
 
 def _gaussian(sigma=0.5, size=None):
