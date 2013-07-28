@@ -69,7 +69,7 @@ def _suppress_line(response, sigma, rpc_threshold):
     detA = Axx * Ayy - Axy**2
     traceA = Axx + Ayy
     # ratio of principal curvatures
-    rpc = traceA / (detA + 0.001)
+    rpc = traceA**2 / (detA + 0.001)
     response[rpc > rpc_threshold] = 0
     return response
 
