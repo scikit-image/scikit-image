@@ -2,7 +2,7 @@ import numpy as np
 from skimage.morphology import erosion, disk
 
 
-def inpaint_exemplar(input_image, synth_mask, window=9):
+def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
     """This function performs constrained synthesis. It grows the texture
     of surrounding region into the unknown pixels.
 
@@ -28,7 +28,6 @@ def inpaint_exemplar(input_image, synth_mask, window=9):
 
     """
 
-    max_thresh = 0.2
     input_image[synth_mask] = 0
 
     h, w = input_image.shape
