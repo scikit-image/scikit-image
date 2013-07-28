@@ -9,7 +9,7 @@ cimport numpy as cnp
 def _censure_dob_loop(double[:, ::1] image, cnp.int16_t n,
 	                  double[:, ::1] integral_img,
 	                  double[:, ::1] filtered_image,
-	                  cnp.float_t inner_wt, cnp.float_t outer_wt):
+	                  double inner_wt, double outer_wt):
 
     cdef Py_ssize_t i, j
     cdef double inner, outer

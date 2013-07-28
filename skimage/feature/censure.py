@@ -7,7 +7,6 @@ from ..morphology import convex_hull_image
 from ..util import img_as_float
 
 from .censure_cy import _censure_dob_loop
-import time
 
 
 def _get_filtered_image(image, n, mode='DoB'):
@@ -17,10 +16,8 @@ def _get_filtered_image(image, n, mode='DoB'):
         outer_wt = (1.0 / (12 * n**2 + 4 * n))
         integral_img = integral_image(image)
         filtered_image = np.zeros(image.shape)
-        # TODO : Outsource to Cython
-        start = time.time()
         _censure_dob_loop(image, n, integral_img, filtered_image, inner_wt, outer_wt)
-        print time.time() - start
+
         return filtered_image
 
 
@@ -83,9 +80,10 @@ def censure_keypoints(image, mode='DoB', threshold=0.03, rpc_threshold=10):
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
     image = img_as_float(image)
-    # Generating all the scales
+
     image = np.ascontiguousarray(image)
-    start = time.time()
+
+    # Generating all the scales
     scale1 = _get_filtered_image(image, 1, mode)
     scale2 = _get_filtered_image(image, 2, mode)
     scale3 = _get_filtered_image(image, 3, mode)
@@ -93,7 +91,7 @@ def censure_keypoints(image, mode='DoB', threshold=0.03, rpc_threshold=10):
     scale5 = _get_filtered_image(image, 5, mode)
     scale6 = _get_filtered_image(image, 6, mode)
     scale7 = _get_filtered_image(image, 7, mode)
-    print time.time() - start
+
     # Stacking all the scales in the 3rd dimension
     scales = np.dstack((scale1, scale2, scale3, scale4, scale5, scale6, scale7))
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
