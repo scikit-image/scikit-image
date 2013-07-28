@@ -95,7 +95,7 @@ def censure_keypoints(image, mode='DoB', no_of_scales=7, threshold=0.03, rpc_thr
     # Suppressing minimas and maximas weaker than threshold
     minimas[np.abs(minimas) < threshold] = 0
     maximas[np.abs(maximas) < threshold] = 0
-    response = maximas + np.abs(minimas)
+    response = maximas + minimas
 
     for i in xrange(1, no_of_scales - 1):
         response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0), rpc_threshold)
