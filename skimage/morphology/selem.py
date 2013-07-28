@@ -4,6 +4,7 @@
 """
 
 import numpy as np
+from . import convex_hull_image
 
 
 def square(width, dtype=np.uint8):
@@ -15,18 +16,18 @@ def square(width, dtype=np.uint8):
     Parameters
     ----------
     width : int
-       The width and height of the square
+        The width and height of the square
 
     Other Parameters
     ----------------
     dtype : data-type
-       The data type of the structuring element.
+        The data type of the structuring element.
 
     Returns
     -------
     selem : ndarray
-       A structuring element consisting only of ones, i.e. every
-       pixel belongs to the neighborhood.
+        A structuring element consisting only of ones, i.e. every
+        pixel belongs to the neighborhood.
 
     """
     return np.ones((width, width), dtype=dtype)
@@ -41,21 +42,20 @@ def rectangle(width, height, dtype=np.uint8):
     Parameters
     ----------
     width : int
-       The width of the rectangle
-
+        The width of the rectangle
     height : int
-       The height of the rectangle
+        The height of the rectangle
 
     Other Parameters
     ----------------
     dtype : data-type
-       The data type of the structuring element.
+        The data type of the structuring element.
 
     Returns
     -------
     selem : ndarray
-       A structuring element consisting only of ones, i.e. every
-       pixel belongs to the neighborhood.
+        A structuring element consisting only of ones, i.e. every
+        pixel belongs to the neighborhood.
 
     """
     return np.ones((width, height), dtype=dtype)
@@ -71,17 +71,19 @@ def diamond(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-       The radius of the diamond-shaped structuring element.
+        The radius of the diamond-shaped structuring element.
 
+    Other Parameters
+    ----------------
     dtype : data-type
-       The data type of the structuring element.
+        The data type of the structuring element.
 
     Returns
     -------
 
     selem : ndarray
-       The structuring element where elements of the neighborhood
-       are 1 and 0 otherwise.
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
     """
     half = radius
     (I, J) = np.meshgrid(range(0, radius * 2 + 1), range(0, radius * 2 + 1))
@@ -98,16 +100,18 @@ def disk(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-       The radius of the disk-shaped structuring element.
+        The radius of the disk-shaped structuring element.
 
+    Other Parameters
+    ----------------
     dtype : data-type
-       The data type of the structuring element.
+        The data type of the structuring element.
 
     Returns
     -------
     selem : ndarray
-       The structuring element where elements of the neighborhood
-       are 1 and 0 otherwise.
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
     """
     L = np.linspace(-radius, radius, 2 * radius + 1)
     (X, Y) = np.meshgrid(L, L)
@@ -125,18 +129,18 @@ def cube(width, dtype=np.uint8):
     Parameters
     ----------
     width : int
-       The width, height and depth of the cube
+        The width, height and depth of the cube
 
     Other Parameters
     ----------------
     dtype : data-type
-       The data type of the structuring element.
+        The data type of the structuring element.
 
     Returns
     -------
     selem : ndarray
-       A structuring element consisting only of ones, i.e. every
-       pixel belongs to the neighborhood.
+        A structuring element consisting only of ones, i.e. every
+        pixel belongs to the neighborhood.
 
     """
     return np.ones((width, width, width), dtype=dtype)
@@ -153,17 +157,19 @@ def octahedron(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-       The radius of the octahedron-shaped structuring element.
+        The radius of the octahedron-shaped structuring element.
 
+    Other Parameters
+    ----------------
     dtype : data-type
-       The data type of the structuring element.
+        The data type of the structuring element.
 
     Returns
     -------
 
     selem : ndarray
-       The structuring element where elements of the neighborhood
-       are 1 and 0 otherwise.
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
     """
     # note that in contrast to diamond(), this method allows non-integer radii
     n = 2 * radius + 1
@@ -184,16 +190,18 @@ def ball(radius, dtype=np.uint8):
     Parameters
     ----------
     radius : int
-       The radius of the ball-shaped structuring element.
+        The radius of the ball-shaped structuring element.
 
+    Other Parameters
+    ----------------
     dtype : data-type
-       The data type of the structuring element.
+        The data type of the structuring element.
 
     Returns
     -------
     selem : ndarray
-       The structuring element where elements of the neighborhood
-       are 1 and 0 otherwise.
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
     """
     n = 2 * radius + 1
     Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
@@ -201,3 +209,40 @@ def ball(radius, dtype=np.uint8):
                         -radius:radius:n*1j]
     s = X**2 + Y**2 + Z**2
     return np.array(s <= radius * radius, dtype=dtype)
+
+
+def octagon(m, n, dtype=np.uint8):
+    """
+    Generates a octagon shaped structuring element with a given size of
+    horizontal and vertical sides and a given height of slanted sides.
+    The slanted sides are 45 or 135 degrees to the horizontal axis.
+
+    Parameters
+    ----------
+    m : int
+        The size of the horizontal and vertical sides.
+    n : int
+        The vertical height of the slanted sides.
+
+    Other Parameters
+    ----------------
+    dtype : data-type
+        The data type of the structuring element.
+
+    Returns
+    -------
+    selem : ndarray
+       The structuring element where elements of the neighborhood
+       are 1 and 0 otherwise.
+    """
+    selem = np.zeros((m + 2*n, m + 2*n))
+    selem[0, n] = 1
+    selem[n, 0] = 1
+    selem[0, m + n -1] = 1
+    selem[m + n - 1, 0] = 1
+    selem[-1, n] = 1 
+    selem[n, -1] = 1
+    selem[-1, m + n - 1] = 1
+    selem[m + n - 1, -1] = 1
+    selem = convex_hull_image(selem).astype(dtype)
+    return selem
