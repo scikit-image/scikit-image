@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.morphology import erosion, disk
-from numpy.lib.stride_tricks import as_strided
 from skimage.util import img_as_float
+from numpy.lib.stride_tricks import as_strided
 
 __all__ = ['inpaint_efros']
 
@@ -14,9 +14,9 @@ def inpaint_efros(input_image, synth_mask, window=3, max_thresh=0.2):
 
     Parameters
     ---------
-    input_image : (M, N) array, np.float
+    input_image : (M, N) array, np.uint8
         Input image whose texture is to be calculated
-    synth_mask : (M, N) array, bool
+    synth_mask : (M, N) array, np.bool
         Texture for ``True`` values are to be synthesised
     window : int
         Size of the neighborhood window, (window, window)
@@ -42,7 +42,7 @@ def inpaint_efros(input_image, synth_mask, window=3, max_thresh=0.2):
 
     """
 
-    input_image[synth_mask] = 0
+    input_image[synth_mask == 1] = 0
     input_image = img_as_float(input_image)
 
     h, w = input_image.shape
@@ -85,15 +85,15 @@ def inpaint_efros(input_image, synth_mask, window=3, max_thresh=0.2):
             matched_index = np.transpose(np.where(ssd == ssd.min()))[0]
 
             if ssd[tuple(matched_index)] < max_thresh:
-                image[i_b, j_b] = image[tuple(matched_index + [window / 2,
-                                                               window / 2])]
+                image[i_b, j_b] = image[tuple(matched_index + [
+                    offset, offset])]
                 mask[i_b, j_b] = False
                 progress = 1
 
         if progress == 0:
             max_thresh = 1.1 * max_thresh
 
-    return image[offset:-offset, offset:-offset]
+    return (image[offset:-offset, offset:-offset] * 255)
 
 
 def _sum_sq_diff(input_image, template, valid_mask):
