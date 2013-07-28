@@ -66,7 +66,7 @@ def inpaint_texture(input_image, synth_mask, window=3, max_thresh=0.2):
 
             ssd = sum_sq_diff(image, template, valid_mask)
 
-            # Remove the case where sample == template
+            # Remove the case where `sample` == `template`
             ssd[i_b - offset, j_b - offset] = 1.
 
             matched_index = np.transpose(np.where(ssd == ssd.min()))[0]
