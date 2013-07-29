@@ -28,9 +28,13 @@ def _get_filtered_image(image, no_of_scales, mode):
         scales = np.zeros((image.shape[0], image.shape[1], no_of_scales))
         integral_img = integral_image(image)
         integral_img1 = _slanted_integral_image_modes(image, 1)
+        print '8'
         integral_img2 = _slanted_integral_image_modes(image, 2)
+        print '9'
         integral_img3 = _slanted_integral_image_modes(image, 3)
+        print '10'
         integral_img4 = _slanted_integral_image_modes(image, 4)
+        print '11'
         for k in range(no_of_scales):
             n = k + 1
             filtered_image = np.zeros(image.shape)
@@ -54,7 +58,8 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img)
         mode1 = np.zeros((image.shape[0] + 1, image.shape[1]))
         _slanted_integral_image(image, mode1)
-        return mode1[1:, :mode1.shape[1]]
+        print '7'
+        return mode1[1:, :]
 
     elif mode == 2:
         image = np.copy(img)
@@ -62,7 +67,8 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.flipud(image)
         mode2 = np.zeros((image.shape[0] + 1, image.shape[1]))
         _slanted_integral_image(image, mode2)
-        mode2 = mode2[1:, :mode2.shape[1]]
+        print '7'
+        mode2 = mode2[1:, :]
         mode2 = np.fliplr(mode2)
         mode2 = np.flipud(mode2)
         return mode2
@@ -73,7 +79,8 @@ def _slanted_integral_image_modes(img, mode=1):
         image = image.T
         mode3 = np.zeros((image.shape[0] + 1, image.shape[1]))
         _slanted_integral_image(image, mode3)
-        mode3 = mode3[1:, :mode3.shape[1]]
+        print '7'
+        mode3 = mode3[1:, :]
         mode3 = np.flipud(mode3.T)
         return mode3
 
@@ -83,7 +90,8 @@ def _slanted_integral_image_modes(img, mode=1):
         image = image.T
         mode4 = np.zeros((image.shape[0] + 1, image.shape[1]))
         _slanted_integral_image(image, mode4)
-        mode4 = mode4[1:, :mode4.shape[1]]
+        print '7'
+        mode4 = mode4[1:, :]
         mode4 = np.fliplr(mode4.T)
         return mode4
 
