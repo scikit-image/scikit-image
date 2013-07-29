@@ -22,23 +22,23 @@ def _censure_dob_loop(double[:, ::1] image, cnp.int16_t n,
             filtered_image[i, j] = outer_wt * outer - (inner_wt + outer_wt) * inner
 
 
-def _slanted_integral_image(double[:, :] image):
+def _slanted_integral_image(double[:, ::1] image):
 
     cdef Py_ssize_t i, j
-    cdef double[:, :] flipped_lr = np.fliplr(image)
     cdef double[:] left_sum = np.zeros(image.shape[0], dtype=np.float)
-    cdef double[:] right_sum
     cdef double[:, :] integral_img = np.zeros((image.shape[0] + 1, image.shape[1]), dtype=np.float)
 
-    flipped_lr = np.fliplr(image)
+    flipped_lr = np.asarray(image[:, ::-1])
     for i in range(image.shape[1] - image.shape[0], image.shape[1]):
         left_sum[image.shape[1] - 1 - i] = np.sum(flipped_lr.diagonal(i))
-    left_sum = left_sum.cumsum(0)
+    left_sum_np = np.asarray(left_sum)
+    #image = np.asarray(image)
+    left_sum_np = left_sum_np.cumsum(0)
+    #right_sum_np = np.asarray()
+    right_sum_np = np.sum(image, 1).cumsum(0)
 
-    right_sum = np.sum(image, 1).cumsum(0)
-
-    image[:, 0] = left_sum
-    image[:, -1] = right_sum
+    image[:, 0] = left_sum_np
+    image[:, -1] = right_sum_np
 
     integral_img[1:, :] = image
 
