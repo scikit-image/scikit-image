@@ -3,7 +3,6 @@ from scipy.ndimage.filters import maximum_filter, minimum_filter
 
 from ..transform import integral_image
 from ..feature.corner import _compute_auto_correlation
-from ..morphology import convex_hull_image
 from ..util import img_as_float
 
 from .censure_cy import _censure_dob_loop, _slanted_integral_image
@@ -57,11 +56,9 @@ def _get_filtered_image(image, n, mode='DoB'):
 
                 filtered_image[i, j] = outer_wt * outer - (outer_wt + inner_wt) * inner
         return filtered_image
-def _censure_octagon_loop():
 
 
 # Outsource to Cython
-
 def _slanted_integral_image(image):
     flipped_lr = np.fliplr(image)
     left_sum = np.zeros(image.shape[0])
@@ -82,14 +79,14 @@ def _slanted_integral_image(image):
 def _slanted_integral_image_modes(img, mode=1):
     if mode == 1:
         image = np.copy(img)
-        mode1 = _slanted_integral_image(image)
+        mode1 = _slanted_integral_image(image, 1)
         return mode1
 
     elif mode == 2:
         image = np.copy(img)
         image = np.fliplr(image)
         image = np.flipud(image)
-        mode2 = _slanted_integral_image(image)
+        mode2 = _slanted_integral_image(image, 2)
         mode2 = np.fliplr(mode2)
         mode2 = np.flipud(mode2)
         return mode2
@@ -98,7 +95,7 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img)
         image = np.flipud(image)
         image = image.T
-        mode3 = _slanted_integral_image(image)
+        mode3 = _slanted_integral_image(image, 3)
         mode3 = np.flipud(mode3.T)
         return mode3
 
@@ -106,7 +103,7 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img)
         image = np.fliplr(image)
         image = image.T
-        mode4 = _slanted_integral_image(image)
+        mode4 = _slanted_integral_image(image, 4)
         mode4 = np.fliplr(mode4.T)
         return mode4
 
