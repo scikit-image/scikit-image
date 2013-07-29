@@ -1,12 +1,12 @@
 import numpy as np
-from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
+from scipy.ndimage.filters import maximum_filter, minimum_filter
 
 from ..transform import integral_image
 from ..feature.corner import _compute_auto_correlation
 from ..morphology import convex_hull_image
 from ..util import img_as_float
 
-from .censure_cy import _censure_dob_loop
+from .censure_cy import _censure_dob_loop, _slanted_integral_image
 
 
 def _get_filtered_image(image, n, mode='DoB'):
@@ -17,52 +17,99 @@ def _get_filtered_image(image, n, mode='DoB'):
         integral_img = integral_image(image)
         filtered_image = np.zeros(image.shape)
         _censure_dob_loop(image, n, integral_img, filtered_image, inner_wt, outer_wt)
-
         return filtered_image
-
-
-def _oct(m, n):
-    f = np.zeros((m + 2*n, m + 2*n))
-    f[0, n] = 1
-    f[n, 0] = 1
-    f[0, m + n -1] = 1
-    f[m + n - 1, 0] = 1
-    f[-1, n] = 1 
-    f[n, -1] = 1
-    f[-1, m + n - 1] = 1
-    f[m + n - 1, -1] = 1
-    return convex_hull_image(f).astype(int)
-
-
-def _octagon_filter(mo, no, mi, ni):
-    outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
-    inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
-    outer_wt = 1.0 / (outer - inner)
-    inner_wt = 1.0 / inner
-    c = ((mo + 2 * no) - (mi + 2 * ni)) / 2
-    outer_oct = _oct(mo, no)
-    inner_oct = np.zeros((mo + 2 * no, mo + 2 * no))
-    inner_oct[c:-c, c:-c] = _oct(mi, ni)
-    bfilter = outer_wt * outer_oct - (outer_wt + inner_wt) * inner_oct
-    return bfilter
-
-
-"""
-def _filter_using_convolve(image, n, mode='DoB'):
-
-    if mode == 'DoB':
-        inner_wt = (1.0 / (2*n + 1)**2)
-        outer_wt = (1.0 / (12*n**2 + 4*n))
-        dob_filter = np.zeros((4 * n + 1, 4 * n + 1))
-        dob_filter[:] = outer_wt
-        dob_filter[n : 3 * n + 1, n : 3 * n + 1] = - inner_wt
-        return convolve(image, dob_filter)
-
     elif mode == 'Octagon':
         outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
-        return convolve(image, _octagon_filter(outer_shape[n - 1][0], outer_shape[n - 1][1], inner_shape[n - 1][0], inner_shape[n - 1][1]))
-"""
+        # Take these out of the loop. No need to compute again for different scales.
+        integral_img = integral_image(image)
+        integral_img1 = _slanted_integral_image_modes(image, 1)
+        integral_img2 = _slanted_integral_image_modes(image, 2)
+        integral_img3 = _slanted_integral_image_modes(image, 3)
+        integral_img4 = _slanted_integral_image_modes(image, 4)
+        filtered_image = np.zeros(image.shape)
+        mo = outer_shape[n - 1][0]
+        no = outer_shape[n - 1][1]
+        mi = inner_shape[n - 1][0]
+        ni = inner_shape[n - 1][1]
+        outer_pixels = (mo + 2 * no)**2 - 2 * no * (no + 1)
+        inner_pixels = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
+        outer_wt = 1.0 / (outer_pixels - inner_pixels)
+        inner_wt = 1.0 / inner_pixels
+        o_m = (mo - 1) / 2
+        i_m = (mi - 1) / 2
+        o_set = o_m + no
+        i_set = i_m + ni
+        # Outsource to Cython
+        for i in range(o_set + 1, image.shape[0] - o_set - 1):
+            for j in range(o_set + 1, image.shape[1] - o_set - 1):
+                outer = integral_img1[i + o_set, j + o_m] - integral_img1[i + o_m, j + o_set] - integral_img[i + o_set, j - o_m] + integral_img[i + o_m, j - o_m]
+                outer += integral_img[i + (mo - 3) / 2, j + (mo - 3) / 2] - integral_img[i - o_m, j + (mo - 3) / 2] - integral_img[i + (mo - 3) / 2, j - o_m] + integral_img[i - o_m, j - o_m]
+                outer += integral_img4[i + o_m, j - o_set] - integral_img4[i + o_set, j - o_m] - integral_img[i - o_m, j - (mo + 1) / 2] + integral_img[i - o_m, j - o_set - 1]
+                outer += integral_img2[i - o_set, j - o_m] - integral_img2[i - o_m, j - o_set] - integral_img[i - (mo + 1) / 2, -1] - integral_img[i - o_set - 1, j + (mo - 3) / 2] + integral_img[i - (mo + 1) / 2, j + (mo - 3) / 2] + integral_img[i - o_set - 1, -1]
+                outer += integral_img3[i - o_m, j + o_set] - integral_img3[i - o_set, j + o_m] - integral_img[-1, j + o_set + 1] - integral_img[i + (mo - 3) / 2, j + o_m] + integral_img[-1, j + o_m] + integral_img[i + (mo - 3) / 2, j + o_set + 1]
+
+                inner = integral_img1[i + i_set, j + i_m] - integral_img1[i + i_m, j + i_set] - integral_img[i + i_set, j - i_m] + integral_img[i + i_m, j - i_m]
+                inner += integral_img[i + (mi - 3) / 2, j + (mi - 3) / 2] - integral_img[i - i_m, j + (mi - 3) / 2] - integral_img[i + (mi - 3) / 2, j - i_m] + integral_img[i - i_m, j - i_m]
+                inner += integral_img4[i + i_m, j - i_set] - integral_img4[i + i_set, j - i_m] - integral_img[i - i_m, j - (mi + 1) / 2] + integral_img[i - i_m, j - i_set - 1]
+                inner += integral_img2[i - i_set, j - i_m] - integral_img2[i - i_m, j - i_set] - integral_img[i - (mi + 1) / 2, -1] - integral_img[i - i_set - 1, j + (mi - 3) / 2] + integral_img[i - (mi + 1) / 2, j + (mi - 3) / 2] + integral_img[i - i_set - 1, -1]
+                inner += integral_img3[i - i_m, j + i_set] - integral_img3[i - i_set, j + i_m] - integral_img[-1, j + i_set + 1] - integral_img[i + (mi - 3) / 2, j + i_m] + integral_img[-1, j + i_m] + integral_img[i + (mi - 3) / 2, j + i_set + 1]
+
+                filtered_image[i, j] = outer_wt * outer - (outer_wt + inner_wt) * inner
+        return filtered_image
+def _censure_octagon_loop():
+
+
+# Outsource to Cython
+
+def _slanted_integral_image(image):
+    flipped_lr = np.fliplr(image)
+    left_sum = np.zeros(image.shape[0])
+    for i in range(image.shape[1] - image.shape[0], image.shape[1]):
+        left_sum[image.shape[1] - 1 - i] = np.sum(flipped_lr.diagonal(i))
+    left_sum = left_sum.cumsum(0)
+    right_sum = np.sum(image, 1).cumsum(0)
+    image[:, 0] = left_sum
+    image[:, -1] = right_sum
+    integral_img = np.zeros((image.shape[0] + 1, image.shape[1]))
+    integral_img[1:, :] = image
+    for i in range(1, integral_img.shape[0]):
+        for j in range(1, integral_img.shape[1] - 1):
+            integral_img[i, j] += integral_img[i, j - 1] + integral_img[i - 1, j + 1] - integral_img[i - 1, j]
+    return integral_img[1:, :integral_img.shape[1]]
+
+
+def _slanted_integral_image_modes(img, mode=1):
+    if mode == 1:
+        image = np.copy(img)
+        mode1 = _slanted_integral_image(image)
+        return mode1
+
+    elif mode == 2:
+        image = np.copy(img)
+        image = np.fliplr(image)
+        image = np.flipud(image)
+        mode2 = _slanted_integral_image(image)
+        mode2 = np.fliplr(mode2)
+        mode2 = np.flipud(mode2)
+        return mode2
+
+    elif mode == 3:
+        image = np.copy(img)
+        image = np.flipud(image)
+        image = image.T
+        mode3 = _slanted_integral_image(image)
+        mode3 = np.flipud(mode3.T)
+        return mode3
+
+    else:
+        image = np.copy(img)
+        image = np.fliplr(image)
+        image = image.T
+        mode4 = _slanted_integral_image(image)
+        mode4 = np.fliplr(mode4.T)
+        return mode4
+
 
 def _suppress_line(response, sigma, rpc_threshold):
     Axx, Axy, Ayy = _compute_auto_correlation(response, sigma)
@@ -85,7 +132,7 @@ def censure_keypoints(image, mode='DoB', no_of_scales=7, threshold=0.03, rpc_thr
 
     # Generating all the scales
     scales = np.zeros((image.shape[0], image.shape[1], no_of_scales))
-    for i in xrange(no_of_scales):
+    for i in range(no_of_scales):
         scales[:, :, i] = _get_filtered_image(image, i + 1, mode)
 
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
@@ -97,7 +144,7 @@ def censure_keypoints(image, mode='DoB', no_of_scales=7, threshold=0.03, rpc_thr
     maximas[np.abs(maximas) < threshold] = 0
     response = maximas + minimas
 
-    for i in xrange(1, no_of_scales - 1):
+    for i in range(1, no_of_scales - 1):
         response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0), rpc_threshold)
 
     # Returning keypoints with its scale
