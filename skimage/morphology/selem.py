@@ -213,15 +213,16 @@ def ball(radius, dtype=np.uint8):
 def octagon(m, n, dtype=np.uint8):
     """
     Generates an octagon shaped structuring element with a given size of
-    horizontal and vertical sides and a given height of slanted sides.
-    The slanted sides are 45 or 135 degrees to the horizontal axis.
+    horizontal and vertical sides and a given height or width of slanted
+    sides. The slanted sides are 45 or 135 degrees to the horizontal axis
+    and hence the widths and heights are equal.
 
     Parameters
     ----------
     m : int
         The size of the horizontal and vertical sides.
     n : int
-        The vertical height of the slanted sides.
+        The height or width of the slanted sides.
 
     Other Parameters
     ----------------
