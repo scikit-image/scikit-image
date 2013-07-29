@@ -22,30 +22,37 @@ def _censure_dob_loop(double[:, ::1] image, cnp.int16_t n,
             filtered_image[i, j] = outer_wt * outer - (inner_wt + outer_wt) * inner
 
 
-def _slanted_integral_image(double[:, ::1] image):
+def _slanted_integral_image(double[:, ::1] image,
+                            double[:, ::1] integral_img):
 
     cdef Py_ssize_t i, j
     cdef double[:] left_sum = np.zeros(image.shape[0], dtype=np.float)
-    cdef double[:, :] integral_img = np.zeros((image.shape[0] + 1, image.shape[1]), dtype=np.float)
 
     flipped_lr = np.asarray(image[:, ::-1])
     for i in range(image.shape[1] - image.shape[0], image.shape[1]):
         left_sum[image.shape[1] - 1 - i] = np.sum(flipped_lr.diagonal(i))
     left_sum_np = np.asarray(left_sum)
-    #image = np.asarray(image)
+
     left_sum_np = left_sum_np.cumsum(0)
-    #right_sum_np = np.asarray()
+
     right_sum_np = np.sum(image, 1).cumsum(0)
 
-    image[:, 0] = left_sum_np
-    image[:, -1] = right_sum_np
+    print '1'
+    for i in range(image.shape[0]):
+        image[i, 0] = left_sum_np[i]
+        image[i, -1] = right_sum_np[i]
 
-    integral_img[1:, :] = image
+    print '2'
+    for i in range(1, integral_img.shape[0]):
+        for j in range(integral_img.shape[1]):
+            integral_img[i, j] = image[i - 1, j]
 
+    print '3'
     for i in range(1, integral_img.shape[0]):
         for j in range(1, integral_img.shape[1] - 1):
             integral_img[i, j] += integral_img[i, j - 1] + integral_img[i - 1, j + 1] - integral_img[i - 1, j]
-    return integral_img[1:, :integral_img.shape[1]]
+    print '4'
+
 
 
 def _censure_octagon_loop(double[:, ::1] image, double[:, ::1] integral_img,
@@ -63,7 +70,7 @@ def _censure_octagon_loop(double[:, ::1] image, double[:, ::1] integral_img,
     i_m = (mi - 1) / 2
     o_set = o_m + no
     i_set = i_m + ni
-
+    print '5'
     for i in range(o_set + 1, image.shape[0] - o_set - 1):
         for j in range(o_set + 1, image.shape[1] - o_set - 1):
             outer = integral_img1[i + o_set, j + o_m] - integral_img1[i + o_m, j + o_set] - integral_img[i + o_set, j - o_m] + integral_img[i + o_m, j - o_m]
@@ -79,3 +86,4 @@ def _censure_octagon_loop(double[:, ::1] image, double[:, ::1] integral_img,
             inner += integral_img3[i - i_m, j + i_set] - integral_img3[i - i_set, j + i_m] - integral_img[-1, j + i_set + 1] - integral_img[i + i_m - 1, j + i_m] + integral_img[-1, j + i_m] + integral_img[i + i_m - 1, j + i_set + 1]
 
             filtered_image[i, j] = outer_wt * outer - (outer_wt + inner_wt) * inner
+    print '6'

@@ -6,7 +6,7 @@ from ..feature.corner import _compute_auto_correlation
 from ..util import img_as_float
 
 from .censure_cy import _censure_dob_loop, _slanted_integral_image, _censure_octagon_loop
-from time import time
+
 
 def _get_filtered_image(image, no_of_scales, mode):
     # TODO : Implement the STAR mode
@@ -52,14 +52,17 @@ def _get_filtered_image(image, no_of_scales, mode):
 def _slanted_integral_image_modes(img, mode=1):
     if mode == 1:
         image = np.copy(img)
-        mode1 = _slanted_integral_image(image)
-        return mode1
+        mode1 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        _slanted_integral_image(image, mode1)
+        return mode1[1:, :mode1.shape[1]]
 
     elif mode == 2:
         image = np.copy(img)
         image = np.fliplr(image)
         image = np.flipud(image)
-        mode2 = _slanted_integral_image(image)
+        mode2 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        _slanted_integral_image(image, mode2)
+        mode2 = mode2[1:, :mode2.shape[1]]
         mode2 = np.fliplr(mode2)
         mode2 = np.flipud(mode2)
         return mode2
@@ -68,7 +71,9 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img)
         image = np.flipud(image)
         image = image.T
-        mode3 = _slanted_integral_image(image)
+        mode3 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        _slanted_integral_image(image, mode3)
+        mode3 = mode3[1:, :mode3.shape[1]]
         mode3 = np.flipud(mode3.T)
         return mode3
 
@@ -76,7 +81,9 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img)
         image = np.fliplr(image)
         image = image.T
-        mode4 = _slanted_integral_image(image)
+        mode4 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        _slanted_integral_image(image, mode4)
+        mode4 = mode4[1:, :mode4.shape[1]]
         mode4 = np.fliplr(mode4.T)
         return mode4
 
@@ -144,24 +151,22 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
     image = np.ascontiguousarray(image)
 
     # Generating all the scales
-    start = time()
     scales = np.zeros((image.shape[0], image.shape[1], no_of_scales))
     scales = _get_filtered_image(image, no_of_scales, mode)
-    print time() - start
 
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
     # neighbourhood to zero
     minimas = (minimum_filter(scales, (3, 3, 3)) == scales).astype(int) * scales
     maximas = (maximum_filter(scales, (3, 3, 3)) == scales).astype(int) * scales
-    print time() - start
+
     # Suppressing minimas and maximas weaker than threshold
     minimas[np.abs(minimas) < threshold] = 0
     maximas[np.abs(maximas) < threshold] = 0
     response = maximas + minimas
-    print time() - start
+
     for i in range(1, no_of_scales - 1):
         response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0), rpc_threshold)
-    print time() - start
+
     # Returning keypoints with its scale
     keypoints = np.transpose(np.nonzero(response[:, :, 1:no_of_scales])) + [0, 0, 1]
     return keypoints
