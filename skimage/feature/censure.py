@@ -92,7 +92,50 @@ def _suppress_line(response, sigma, rpc_threshold):
 
 
 def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_threshold=10):
-    # TODO : Decide number of scales. Image-size dependent?
+    """
+    Extracts Censure keypoints along with the corresponding scale using
+    either Difference of Boxes, Octagon or STAR bilevel filter.
+
+    Parameters
+    ----------
+    image : 2D ndarray
+        Input image.
+
+    no_of_scales : positive integer
+        Number of scales to extract keypoints from. Default is 7.
+
+    mode : 'DoB'
+        Type of bilevel filter used to get the scales of input image. Possible
+        values are 'DoB', 'Octagon' and 'STAR'. Default is 'DoB'.
+
+    threshold :
+        Threshold value used to suppress maximas and minimas with a weak
+        magnitude response obtained after Non-Maximal Suppression. Default
+        is 0.03.
+
+    rpc_threshold :
+        Threshold for rejecting interest points which have ratio of principal
+        curvatures greater than this value. Default is 10.
+
+    Returns
+    -------
+    keypoints : (N, 3) array
+        Location of extracted keypoints along with the corresponding scale.
+
+    References
+    ----------
+    .. [1] Motilal Agrawal, Kurt Konolige and Morten Rufus Blas
+           "CenSurE: Center Surround Extremas for Realtime Feature
+           Detection and Matching",
+           http://link.springer.com/content/pdf/10.1007%2F978-3-540-88693-8_8.pdf
+
+    .. [2] Adam Schmidt, Marek Kraft, Michal Fularz and Zuzanna Domagala
+           "Comparative Assessment of Point Feature Detectors and
+           Descriptors in the Context of Robot Navigation" 
+           http://www.jamris.org/01_2013/saveas.php?QUEST=JAMRIS_No01_2013_P_11-20.pdf
+
+    """
+
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
