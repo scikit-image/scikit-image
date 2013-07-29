@@ -212,7 +212,7 @@ def ball(radius, dtype=np.uint8):
 
 def octagon(m, n, dtype=np.uint8):
     """
-    Generates a octagon shaped structuring element with a given size of
+    Generates an octagon shaped structuring element with a given size of
     horizontal and vertical sides and a given height of slanted sides.
     The slanted sides are 45 or 135 degrees to the horizontal axis.
 
