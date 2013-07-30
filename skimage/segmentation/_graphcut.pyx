@@ -15,6 +15,48 @@ LAMBA = 60
 cdef cnp.ndarray img
 
 cdef class GraphCut:
+    """GraphCut(img, src, sink, weight_lambda=None)
+
+    A class for performing image segmentation using graph-cuts.
+
+    Given an image array, along with n-d foreground- and background negative
+    log- liklihood arrays, this class determines the global optimal segmentation
+    by calculating the minimum of a Gibbs energy function.
+
+    The cut is performed using the standard push-reabel algorithm as well as
+    the global relabel heuristic. In each iteration excess flow is pushed
+    'downhill' from the source to the sink. A height array is maintained which
+    provides a upper bound on the distance of each each node in the image graph
+    to the sink.
+
+    Over time the height array can becomes inaccurate quickly when solely using
+    the standard relabel heuristic. The global relabel scheme uses a backwards
+    breath-first search to calculate the exact distance array, however it is
+    computationally intensive and performed infrequently.
+
+    A weighting parameter weight_lambda determines balances a pixels affinity
+    for it's preferred label, based on the log-liklihood arrays, and its
+    coherence to the labels of it's neighbours.
+
+    The minimum cut is returned by GraphCutcut(int global_relabel_interval).
+
+
+    Parameters
+    ----------
+    img : array
+      The image to segment
+
+    src : array
+      The foreground negative log-liklihood
+
+    sink : array
+      The background negative log-liklihood
+
+    weight_lambda
+      The data term, neighboorhood term weighting. Lower values give preference
+      to the data term.
+
+    """
     cdef:
         readonly double[:] excess, up, down, left, right
         Py_ssize_t[:] height
@@ -28,6 +70,10 @@ cdef class GraphCut:
         int i
 
     def __init__(self, img, src, sink, weight_lambda=None):
+        """__init__(img, src, sink, weight_lambda=None)
+
+        See class documentation.
+        """
         if weight_lambda == None:
             weight_lambda = LAMBA
 
@@ -70,14 +116,6 @@ cdef class GraphCut:
             if self.excess[i] > 0:
                 self.active[i] = None
 
-    cdef int index_up(self, int i):
-        return i - self.w
-    cdef int index_down(self, int i):
-        return i + self.w
-    cdef int index_left(self, int i):
-        return i - 1
-    cdef int index_right(self, int i):
-        return i + 1
 
     cdef push(self):
         cdef:
@@ -240,6 +278,17 @@ cdef class GraphCut:
             fifo_to = fifo_temp
 
     def cut(self, int global_relabel_interval):
+        """
+        Calculates the optimal segmentation for the class
+
+        Parameters
+        ----------
+        global_relabel_interval : int
+          The number of standard push/relabel iterations between a global
+          relabel to calculate the exact distance to sink for each element in
+          the height array
+
+        """
         cdef:
             int i
 
@@ -254,7 +303,49 @@ cdef class GraphCut:
 
             i += 1
 
+    cdef int index_up(self, int i):
+        return i - self.w
+
+    cdef int index_down(self, int i):
+        return i + self.w
+
+    cdef int index_left(self, int i):
+        return i - 1
+
+    cdef int index_right(self, int i):
+        return i + 1
+
+
 def graphcut(img, src, sink, global_relabel_interval, weight_lambda=None):
+    """
+    Performs a graph-cut on an image to return a globally optimal segmentation.
+
+    Parameters
+    ----------
+    img : array
+      The image to segment
+
+    src : array
+      The foreground negative log-liklihood
+
+    sink : array
+      The background negative log-liklihood
+
+    global_relabel_interval : int
+      The number of standard push/relabel iterations between a global
+      relabel to calculate the exact distance to sink for each element in
+      the height array
+
+    weight_lambda
+      The data term, neighboorhood term weighting. Lower values give preference
+      to the data term.
+
+    Returns
+    -------
+    cut : ndarray
+      A binary array of the optimal segmentation
+
+    """
     gc = GraphCut(img, src, sink, weight_lambda)
     gc.cut(global_relabel_interval)
 
