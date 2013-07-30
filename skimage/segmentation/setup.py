@@ -20,6 +20,9 @@ def configuration(parent_package='', top_path=None):
     cython(['_slic.pyx'], working_path=base_path)
     config.add_extension('_slic', sources=['_slic.c'],
                          include_dirs=[get_numpy_include_dirs()])
+    cython(['_graphcut.pyx'], working_path=base_path)
+    config.add_extension('_graphcut', sources=['_graphcut.c'],
+                         include_dirs=[get_numpy_include_dirs()])
 
     return config
 
