@@ -1,10 +1,10 @@
 """
 Functions for calculating the "distance" between colors.
 
-Implicit in these definitions of "distance" is the notion of "Just Noticible
+Implicit in these definitions of "distance" is the notion of "Just Noticeable
 Distance" (JND).  This represents the distance between colors where a human can
-percieve different colors.  Humans are more sensitive to certain colors than
-others, which different deltaE metrics correct for this with varying degrees of
+perceive different colors.  Humans are more sensitive to certain colors than
+others, which different deltaE metrics correct for with varying degrees of
 sophistication.
 
 The literature often mentions 1 as the minimum distance for visual
@@ -30,14 +30,14 @@ def _arctan2pi(b, a):
 
 
 def deltaE_cie76(lab1, lab2):
-    """Euclidian distance between two points in Lab color space
+    """Euclidean distance between two points in Lab color space
 
     Parameters
     ----------
     lab1 : array_like
         reference color (Lab colorspace)
     lab2 : array_like
-        comparision color (Lab colorspace)
+        comparison color (Lab colorspace)
 
     Returns
     -------
@@ -58,7 +58,7 @@ def deltaE_cie76(lab1, lab2):
 def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     """Color difference according to CIEDE 94 standard
 
-    Accomodates perceptual non-uniformites through the use of application
+    Accommodates perceptual non-uniformities through the use of application
     specific scale factors (kH, kC, kL, k1, and k2).
 
     Parameters
@@ -66,7 +66,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     lab1 : array_like
         reference color (Lab colorspace)
     lab2 : array_like
-        comparision color (Lab colorspace)
+        comparison color (Lab colorspace)
     kH : float, optional
         Hue scale
     kC : float, optional
@@ -127,7 +127,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
 def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     """Color difference as given by the CIEDE 2000 standard.
 
-    CIEDE 2000 is a major revision of CIDE94.  The perceptual calibaration is
+    CIEDE 2000 is a major revision of CIDE94.  The perceptual calibration is
     largely based on experience with automotive paint on smooth surfaces.
 
     Parameters
@@ -135,9 +135,9 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     lab1 : array_like
         reference color (Lab colorspace)
     lab2 : array_like
-        comparision color (Lab colorspace)
+        comparison color (Lab colorspace)
     kL : float (range), optional
-        luminance scale factor, 1 for "acceptably close"; 2 for "impercievable"
+        luminance scale factor, 1 for "acceptably close"; 2 for "imperceivable"
         see deltaE_cmc
     kC : float (range), optional
         chroma scale factor, usually 1
@@ -242,13 +242,13 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
 def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     """Color difference from the  CMC l:c standard.
 
-    This color difference developed by the Colour Measurement Committee of the
-    Socieity of Dyes and Colourists of Great Britian (CMC).  It is intended for
-    use in the textile industry.
+    This color difference was developed by the Colour Measurement Committee
+    (CMC) of the Society of Dyers and Colourists (United Kingdom).0 It is
+    intended for use in the textile industry.
 
     The scale factors kL, kC set the weight given to differences in lightness
     and chroma relative to differences in hue.  The usual values are kL=2, kC=1
-    for "acceptability" and kL=1, kC=1 for "imperceptability".  Colors with
+    for "acceptability" and kL=1, kC=1 for "imperceptibility".  Colors with
     dE > 1 are "different" for the given scale factors.
 
     Parameters
@@ -256,7 +256,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     lab1 : array_like
         reference color (Lab colorspace)
     lab2 : array_like
-        comparision color (Lab colorspace)
+        comparison color (Lab colorspace)
 
     Returns
     -------

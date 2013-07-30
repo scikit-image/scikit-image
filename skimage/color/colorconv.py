@@ -27,7 +27,7 @@ Supported color spaces
         ``x == y == z == 1/3`` at the whitepoint, and all color matching
         functions are greater than zero everywhere.
 * LAB CIE : Lightness, a, b
-        Colorspace derived from XYZ CIE that is intented to be more
+        Colorspace derived from XYZ CIE that is intended to be more
         perceptually uniform
 * LCH CIE : Lightness, Chroma, Hue
         Defined in terms of LAB CIE.  C and H are the polar representation of
@@ -1038,7 +1038,7 @@ def combine_stains(stains, conv_matrix):
 def lab2lch(lab):
     """CIE-LAB to CIE-LCH color space conversion.
 
-    LCH is the cylindrical representation of the LAB (cartesian) colorspace
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
 
     Parameters
     ----------
@@ -1083,7 +1083,7 @@ def lab2lch(lab):
 def lch2lab(lch):
     """CIE-LCH to CIE-LAB color space conversion.
 
-    LCH is the cylindrical representation of the LAB (cartesian) colorspace
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
 
     Parameters
     ----------
