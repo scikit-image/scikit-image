@@ -55,17 +55,17 @@ def _get_filtered_image(image, no_of_scales, mode):
 
 def _slanted_integral_image_modes(img, mode=1):
     if mode == 1:
-        image = np.copy(img)
-        mode1 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        image = np.copy(img, order='C')
+        mode1 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode1)
         print '7'
         return mode1[1:, :]
 
     elif mode == 2:
-        image = np.copy(img)
+        image = np.copy(img, order='C')
         image = np.fliplr(image)
         image = np.flipud(image)
-        mode2 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        mode2 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode2)
         print '7'
         mode2 = mode2[1:, :]
@@ -74,10 +74,10 @@ def _slanted_integral_image_modes(img, mode=1):
         return mode2
 
     elif mode == 3:
-        image = np.copy(img)
+        image = np.copy(img, order='C')
         image = np.flipud(image)
         image = image.T
-        mode3 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        mode3 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode3)
         print '7'
         mode3 = mode3[1:, :]
@@ -85,10 +85,10 @@ def _slanted_integral_image_modes(img, mode=1):
         return mode3
 
     else:
-        image = np.copy(img)
+        image = np.copy(img, order='C')
         image = np.fliplr(image)
         image = image.T
-        mode4 = np.zeros((image.shape[0] + 1, image.shape[1]))
+        mode4 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode4)
         print '7'
         mode4 = mode4[1:, :]
