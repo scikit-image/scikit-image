@@ -1043,7 +1043,9 @@ def lab2lch(lab):
     Parameters
     ----------
     lab : array_like
-        The image in CIE-LAB format, in a 3-D array of shape (.., .., 3).
+        The N-D image in CIE-LAB format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the `L`, `a`, and `b` color
+        channels.  Subsequent elements are copied.
 
     Returns
     -------
@@ -1070,13 +1072,13 @@ def lab2lch(lab):
     >>> lena_lab = rgb2lab(lena)
     >>> lena_lch = lab2lch(lena_lab)
     """
-    lch = _prepare_colorarray(lab).copy()
+    lch = _prepare_lab_array(lab)
 
     a, b = lch[..., 1], lch[..., 2]
     lch[..., 1], lch[..., 2] = np.sqrt(a ** 2 + b ** 2), np.arctan2(b, a)
 
     H = lch[..., 2]
-    H[H < 0] += 2 * np.pi  # (-pi, pi) -> (0, 2*pi)
+    H += np.where(H < 0, 2*np.pi, 0)  # (-pi, pi) -> (0, 2*pi)
     return lch
 
 
@@ -1088,7 +1090,9 @@ def lch2lab(lch):
     Parameters
     ----------
     lab : array_like
-        The image in CIE-LCH format, in a 3-D array of shape (.., .., 3).
+        The N-D image in CIE-LCH format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the `L`, `a`, and `b` color
+        channels.  Subsequent elements are copied.
 
     Returns
     -------
@@ -1112,8 +1116,19 @@ def lch2lab(lch):
     >>> lena_lch = lab2lch(lena_lab)
     >>> lena_lab2 = lch2lab(lena_lch)
     """
-    lch = _prepare_colorarray(lch).copy()
+    lch = _prepare_lab_array(lch)
 
     c, h = lch[..., 1], lch[..., 2]
     lch[..., 1], lch[..., 2] = c * np.cos(h), c * np.sin(h)
     return lch
+
+
+def _prepare_lab_array(arr):
+    """Ensure input for lab2lch, lch2lab are well-posed.
+
+    Arrays must be in floating point and have at least 3 elements in
+    last dimension.  Return a new array.
+    """
+    shape = arr.shape
+    assert shape[-1] >= 3
+    return dtype.img_as_float(arr, force_copy=True)

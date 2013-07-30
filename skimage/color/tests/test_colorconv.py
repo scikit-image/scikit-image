@@ -264,6 +264,28 @@ class TestColorconv(TestCase):
         rgb2 = lab2rgb(lab2)
         assert_array_almost_equal(rgb, rgb2)
 
+    def test_lab_lch_0d(self):
+        lab0 = self._get_lab0()
+        lch0 = lab2lch(lab0)
+        lch2 = lab2lch(lab0[None, None, :])
+        assert_array_almost_equal(lch0, lch2[0, 0, :])
+
+    def test_lab_lch_1d(self):
+        lab0 = self._get_lab0()
+        lch0 = lab2lch(lab0)
+        lch1 = lab2lch(lab0[None, :])
+        assert_array_almost_equal(lch0, lch1[0, :])
+
+    def test_lab_lch_3d(self):
+        lab0 = self._get_lab0()
+        lch0 = lab2lch(lab0)
+        lch3 = lab2lch(lab0[None, None, None, :])
+        assert_array_almost_equal(lch0, lch3[0, 0, 0, :])
+
+    def _get_lab0(self):
+        rgb = img_as_float(self.img_rgb[:1, :1, :])
+        return rgb2lab(rgb)[0, 0, :]
+
 
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
