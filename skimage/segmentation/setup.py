@@ -11,6 +11,9 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('segmentation', parent_package, top_path)
 
+    cython(['_growcut.pyx'], working_path=base_path)
+    config.add_extension('_growcut', sources=['_growcut.c'],
+        include_dirs=[get_numpy_include_dirs()])
     cython(['_felzenszwalb_cy.pyx'], working_path=base_path)
     config.add_extension('_felzenszwalb_cy', sources=['_felzenszwalb_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
