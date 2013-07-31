@@ -1,7 +1,7 @@
 #cython: cdivision=True
-#cython: boundscheck=True
-#cython: nonecheck=True
-#cython: wraparound=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
 
 cimport numpy as cnp
 import numpy as np
