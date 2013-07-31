@@ -37,21 +37,18 @@ def _slanted_integral_image(double[:, ::1] image,
 
     right_sum_np = np.sum(image, 1).cumsum(0)
 
-    print '1'
     for i in range(image.shape[0]):
         image[i, 0] = left_sum_np[i]
         image[i, -1] = right_sum_np[i]
 
-    print '2'
     for i in range(1, integral_img.shape[0]):
         for j in range(integral_img.shape[1]):
             integral_img[i, j] = image[i - 1, j]
 
-    print '3'
     for i in range(1, integral_img.shape[0]):
         for j in range(1, integral_img.shape[1] - 1):
             integral_img[i, j] += integral_img[i, j - 1] + integral_img[i - 1, j + 1] - integral_img[i - 1, j]
-    print '4'
+
 
 
 
@@ -70,20 +67,19 @@ def _censure_octagon_loop(double[:, ::1] image, double[:, ::1] integral_img,
     i_m = (mi - 1) / 2
     o_set = o_m + no
     i_set = i_m + ni
-    print '5'
+
     for i in range(o_set + 1, image.shape[0] - o_set - 1):
         for j in range(o_set + 1, image.shape[1] - o_set - 1):
-            outer = integral_img1[i + o_set, j + o_m] - integral_img1[i + o_m, j + o_set] - integral_img[i + o_set, j - o_m] + integral_img[i + o_m, j - o_m]
+            outer = integral_img1[i + o_set, j + o_m] - integral_img1[i + o_m - 1, j + o_set + 1] - integral_img[i + o_set, j - o_m] + integral_img[i + o_m - 1, j - o_m]
             outer += integral_img[i + o_m - 1, j + o_m - 1] - integral_img[i - o_m, j + o_m - 1] - integral_img[i + o_m - 1, j - o_m] + integral_img[i - o_m, j - o_m]
-            outer += integral_img4[i + o_m, j - o_set] - integral_img4[i + o_set, j - o_m] - integral_img[i - o_m, j - o_m + 1] + integral_img[i - o_m, j - o_set - 1]
-            outer += integral_img2[i - o_set, j - o_m] - integral_img2[i - o_m, j - o_set] - integral_img[i - o_m + 1, -1] - integral_img[i - o_set - 1, j + o_m - 1] + integral_img[i - o_m + 1, j + o_m - 1] + integral_img[i - o_set - 1, -1]
-            outer += integral_img3[i - o_m, j + o_set] - integral_img3[i - o_set, j + o_m] - integral_img[-1, j + o_set + 1] - integral_img[i + o_m - 1, j + o_m] + integral_img[-1, j + o_m] + integral_img[i + o_m - 1, j + o_set + 1]
+            outer += integral_img4[i + o_m, j - o_set] - integral_img4[i + o_set + 1, j - o_m + 1] - integral_img[i - o_m, j - o_m] + integral_img[i - o_m, j - o_set - 1]
+            outer += integral_img2[i - o_set, j - o_m] - integral_img2[i - o_m + 1, j - o_set - 1] - integral_img[i - o_m, -1] - integral_img[i - o_set - 1, j + o_m - 1] + integral_img[i - o_m, j + o_m - 1] + integral_img[i - o_set - 1, -1]
+            outer += integral_img3[i - o_m, j + o_set] - integral_img3[i - o_set - 1, j + o_m - 1] - integral_img[-1, j + o_set] - integral_img[i + o_m - 1, j + o_m - 1] + integral_img[-1, j + o_m - 1] + integral_img[i + o_m - 1, j + o_set]
 
-            inner = integral_img1[i + i_set, j + i_m] - integral_img1[i + i_m, j + i_set] - integral_img[i + i_set, j - i_m] + integral_img[i + i_m, j - i_m]
+            inner = integral_img1[i + i_set, j + i_m] - integral_img1[i + i_m - 1, j + i_set + 1] - integral_img[i + i_set, j - i_m] + integral_img[i + i_m - 1, j - i_m]
             inner += integral_img[i + i_m - 1, j + i_m - 1] - integral_img[i - i_m, j + i_m - 1] - integral_img[i + i_m - 1, j - i_m] + integral_img[i - i_m, j - i_m]
-            inner += integral_img4[i + i_m, j - i_set] - integral_img4[i + i_set, j - i_m] - integral_img[i - i_m, j - i_m + 1] + integral_img[i - i_m, j - i_set - 1]
-            inner += integral_img2[i - i_set, j - i_m] - integral_img2[i - i_m, j - i_set] - integral_img[i - i_m + 1, -1] - integral_img[i - i_set - 1, j + i_m - 1] + integral_img[i - i_m + 1, j + i_m - 1] + integral_img[i - i_set - 1, -1]
-            inner += integral_img3[i - i_m, j + i_set] - integral_img3[i - i_set, j + i_m] - integral_img[-1, j + i_set + 1] - integral_img[i + i_m - 1, j + i_m] + integral_img[-1, j + i_m] + integral_img[i + i_m - 1, j + i_set + 1]
+            inner += integral_img4[i + i_m, j - i_set] - integral_img4[i + i_set + 1, j - i_m + 1] - integral_img[i - i_m, j - i_m] + integral_img[i - i_m, j - i_set - 1]
+            inner += integral_img2[i - i_set, j - i_m] - integral_img2[i - i_m + 1, j - i_set - 1] - integral_img[i - i_m, -1] - integral_img[i - i_set - 1, j + i_m - 1] + integral_img[i - i_m, j + i_m - 1] + integral_img[i - i_set - 1, -1]
+            inner += integral_img3[i - i_m, j + i_set] - integral_img3[i - i_set - 1, j + i_m - 1] - integral_img[-1, j + i_set] - integral_img[i + i_m - 1, j + i_m - 1] + integral_img[-1, j + i_m - 1] + integral_img[i + i_m - 1, j + i_set]
 
             filtered_image[i, j] = outer_wt * outer - (outer_wt + inner_wt) * inner
-    print '6'
