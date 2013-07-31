@@ -137,7 +137,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     lab2 : array_like
         comparison color (Lab colorspace)
     kL : float (range), optional
-        luminance scale factor, 1 for "acceptably close"; 2 for "imperceivable"
+        luminance scale factor, 1 for "acceptably close"; 2 for "imperceptible"
         see deltaE_cmc
     kC : float (range), optional
         chroma scale factor, usually 1
@@ -243,7 +243,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     """Color difference from the  CMC l:c standard.
 
     This color difference was developed by the Colour Measurement Committee
-    (CMC) of the Society of Dyers and Colourists (United Kingdom).0 It is
+    (CMC) of the Society of Dyers and Colourists (United Kingdom). It is
     intended for use in the textile industry.
 
     The scale factors kL, kC set the weight given to differences in lightness
