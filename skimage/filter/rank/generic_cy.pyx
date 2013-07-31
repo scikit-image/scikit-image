@@ -318,7 +318,7 @@ cdef inline double _kernel_otsu(Py_ssize_t* histo, double pop, dtype_t g,
     # maximizing the between class variance
     max_i = 0
     q1 = histo[0] / pop
-    m1 = 0.
+    mu1 = 0.
     max_sigma_b = 0.
 
     for i in range(1, max_bin):
