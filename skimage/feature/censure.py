@@ -199,7 +199,6 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
     image = np.ascontiguousarray(image)
 
     # Generating all the scales
-    scales = np.zeros((image.shape[0], image.shape[1], no_of_scales))
     scales = _get_filtered_image(image, no_of_scales, mode)
 
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
