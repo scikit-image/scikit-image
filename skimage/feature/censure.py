@@ -1,17 +1,18 @@
 import numpy as np
-from scipy.ndimage.filters import maximum_filter, minimum_filter
+from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 
 from ..transform import integral_image
 from ..feature.corner import _compute_auto_correlation
 from ..util import img_as_float
+from ..morphology import convex_hull_image
 
 from .censure_cy import _censure_dob_loop, _slanted_integral_image, _censure_octagon_loop
 
 
 def _get_filtered_image(image, n_scales, mode):
     # TODO : Implement the STAR mode
+    scales = np.zeros((image.shape[0], image.shape[1], n_scales), dtype=np.double)
     if mode == 'DoB':
-        scales = np.zeros((image.shape[0], image.shape[1], n_scales))
         for i in range(n_scales):
             n = i + 1
             # Constant multipliers for the outer region and the inner region
@@ -23,13 +24,15 @@ def _get_filtered_image(image, n_scales, mode):
             filtered_image = np.zeros(image.shape)
             _censure_dob_loop(image, n, integral_img, filtered_image, inner_weight, outer_weight)
             scales[:, :, i] = filtered_image
-        return scales
+
 
     elif mode == 'Octagon':
         # TODO : Decide the shapes of Octagon filters for scales > 7
         outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
-        scales = np.zeros((image.shape[0], image.shape[1], n_scales))
+        for i in range(n_scales):
+            scales[:, :, i] = convolve(image, _octagon_filter(outer_shape[i][0], outer_shape[i][1], inner_shape[i][0], inner_shape[i][1]))
+        """
         integral_img = integral_image(image)
         integral_img1 = _slanted_integral_image_modes(image, 1)
         integral_img2 = _slanted_integral_image_modes(image, 2)
@@ -51,7 +54,50 @@ def _get_filtered_image(image, n_scales, mode):
             _censure_octagon_loop(image, integral_img, integral_img1, integral_img2, integral_img3, integral_img4, filtered_image, outer_weight, inner_weight, mo, no, mi, ni)
 
             scales[:, :, k] = filtered_image
-        return scales
+            """
+    return scales
+
+
+def _oct(m, n):
+    f = np.zeros((m + 2*n, m + 2*n))
+    f[0, n] = 1
+    f[n, 0] = 1
+    f[0, m + n -1] = 1
+    f[m + n - 1, 0] = 1
+    f[-1, n] = 1 
+    f[n, -1] = 1
+    f[-1, m + n - 1] = 1
+    f[m + n - 1, -1] = 1
+    return convex_hull_image(f).astype(int)
+
+
+def _octagon_filter(mo, no, mi, ni):
+    outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
+    inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
+    outer_wt = 1.0 / (outer - inner)
+    inner_wt = 1.0 / inner
+    c = ((mo + 2 * no) - (mi + 2 * ni)) / 2
+    outer_oct = _oct(mo, no)
+    inner_oct = np.zeros((mo + 2 * no, mo + 2 * no))
+    inner_oct[c:-c, c:-c] = _oct(mi, ni)
+    bfilter = outer_wt * outer_oct - (outer_wt + inner_wt) * inner_oct
+    return bfilter
+
+
+def _filter_using_convolve(image, n, mode='DoB'):
+
+    if mode == 'DoB':
+        inner_wt = (1.0 / (2*n + 1)**2)
+        outer_wt = (1.0 / (12*n**2 + 4*n))
+        dob_filter = np.zeros((4 * n + 1, 4 * n + 1))
+        dob_filter[:] = outer_wt
+        dob_filter[n : 3 * n + 1, n : 3 * n + 1] = - inner_wt
+        return convolve(image, dob_filter)
+
+    elif mode == 'Octagon':
+        outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
+        inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
+        return convolve(image, _octagon_filter(outer_shape[n - 1][0], outer_shape[n - 1][1], inner_shape[n - 1][0], inner_shape[n - 1][1]))
 
 
 def _slanted_integral_image_modes(img, mode=1):
