@@ -8,9 +8,9 @@ import numpy as np
 
 
 def _censure_dob_loop(double[:, ::1] image, Py_ssize_t n,
-	                  double[:, ::1] integral_img,
-	                  double[:, ::1] filtered_image,
-	                  double inner_weight, double outer_weight):
+                      double[:, ::1] integral_img,
+                      double[:, ::1] filtered_image,
+                      double inner_weight, double outer_weight):
 
     cdef Py_ssize_t i, j
     cdef double inner, outer
