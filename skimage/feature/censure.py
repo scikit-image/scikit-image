@@ -213,6 +213,9 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
     response = maximas + minimas
 
     for i in range(1, no_of_scales - 1):
+        # sigma = (window_size - 1) / 6.0
+        # window_size = 7 + 2 * i
+        # Hence sigma = 1 + i / 3.0
         response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0), rpc_threshold)
 
     # Returning keypoints with its scale
