@@ -51,7 +51,7 @@ def test_compare_with_cmorph_dilate():
     for r in range(1, 20, 1):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.maximum(image=image, selem=elem, out=out, mask=mask)
-        cm = cmorph.dilate(image=image, selem=elem)
+        cm = cmorph._dilate(image=image, selem=elem)
         assert_array_equal(out, cm)
 
 
@@ -65,7 +65,7 @@ def test_compare_with_cmorph_erode():
     for r in range(1, 20, 1):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.minimum(image=image, selem=elem, out=out, mask=mask)
-        cm = cmorph.erode(image=image, selem=elem)
+        cm = cmorph._erode(image=image, selem=elem)
         assert_array_equal(out, cm)
 
 
@@ -452,6 +452,51 @@ def test_bilateral():
     assert rank.pop_bilateral(image, selem, s0=1, s1=1)[10, 10] == 1
     assert rank.mean_bilateral(image, selem, s0=11, s1=11)[10, 10] == 1005
     assert rank.pop_bilateral(image, selem, s0=11, s1=11)[10, 10] == 2
+
+
+def test_percentile_min():
+    # check that percentile p0 = 0 is identical to local min
+    img = data.camera()
+    img16 = img.astype(np.uint16)
+    selem = disk(15)
+    # check for 8bit
+    img_p0 = rank.percentile(img, selem=selem, p0=0)
+    img_min = rank.minimum(img, selem=selem)
+    assert_array_equal(img_p0, img_min)
+    # check for 16bit
+    img_p0 = rank.percentile(img16, selem=selem, p0=0)
+    img_min = rank.minimum(img16, selem=selem)
+    assert_array_equal(img_p0, img_min)
+
+
+def test_percentile_max():
+    # check that percentile p0 = 1 is identical to local max
+    img = data.camera()
+    img16 = img.astype(np.uint16)
+    selem = disk(15)
+    # check for 8bit
+    img_p0 = rank.percentile(img, selem=selem, p0=1.)
+    img_max = rank.maximum(img, selem=selem)
+    assert_array_equal(img_p0, img_max)
+    # check for 16bit
+    img_p0 = rank.percentile(img16, selem=selem, p0=1.)
+    img_max = rank.maximum(img16, selem=selem)
+    assert_array_equal(img_p0, img_max)
+
+
+def test_percentile_median():
+    # check that percentile p0 = 0.5 is identical to local median
+    img = data.camera()
+    img16 = img.astype(np.uint16)
+    selem = disk(15)
+    # check for 8bit
+    img_p0 = rank.percentile(img, selem=selem, p0=.5)
+    img_max = rank.median(img, selem=selem)
+    assert_array_equal(img_p0, img_max)
+    # check for 16bit
+    img_p0 = rank.percentile(img16, selem=selem, p0=.5)
+    img_max = rank.median(img16, selem=selem)
+    assert_array_equal(img_p0, img_max)
 
 
 if __name__ == "__main__":
