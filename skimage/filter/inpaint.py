@@ -40,16 +40,6 @@ def _init_fmm(mask):
     - 1 = BAND - u value undergoes an update.
     - 2 = INSIDE - intensity and u values unkown
 
-    ``u`` Initialisation:
-    u <- 0 : ``flag`` equal to BAND or KNOWN
-    u <- 1.0e6 (arbitrarily large value) : ``flag`` equal to INSIDE
-
-    ``heap`` Initialisation:
-    Contains all the pixels marked as BAND in ``flag``. The heap element is
-    a tuple with 2 elements, first being the ``u`` value corresponding to the
-    tuple of index which is stored as the second element.
-    Heap Element : (u[(i, j)], (i, j))
-
     References
     ----------
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
@@ -62,10 +52,13 @@ def _init_fmm(mask):
     band = np.logical_xor(mask, outside).astype(np.uint8)
 
     flag = (2 * outside) - band
-
+    
+    # u <- 0 : ``flag`` equal to BAND or KNOWN
+    # u <- 1.0e6 (arbitrarily large value) : ``flag`` equal to INSIDE
     u = np.where(flag == INSIDE, 1.0e6, 0)
 
     heap = []
+    # Store the ``u`` and indices of pixels marked as BAND points
     indices = np.transpose(np.where(flag == BAND))
     for z in indices:
         heapq.heappush(heap, (u[tuple(z)], tuple(z)))
@@ -74,10 +67,13 @@ def _init_fmm(mask):
 
 
 def inpaint_fmm(input_image, inpaint_mask, radius=5):
-    """Inpaint image in areas specified by a mask. Image Inpainting technique
-    based on the Fast Marching Method implementation as described in [1]_.
-    FMM is used for computing the evolution of boundary moving in a direction
-    *normal* to itself.
+    """This function reconstructs masked regions of an image using the fast 
+    marching method to propagate information across the boundary between 
+    known and unknown regions. 
+    
+    Image Inpainting technique based on the Fast Marching Method implementation 
+    as described in [1]_. FMM is used for computing the evolution of boundary 
+    moving in a direction *normal* to itself.
 
     Parameters
     ---------
@@ -103,19 +99,9 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     Implementaiton under ``skimage.filter.inpaint._init_fmm``.
     - ``flag`` Initialisation:
         All pixels are classified into 1 of the following flags:
-        - 0 = KNOWN - intensity and u values are known.
-        - 1 = BAND - u value undergoes an update.
-        - 2 = INSIDE - intensity and u values unkown
-
-    - ``u`` Initialisation:
-        u <- 0 : ``flag`` equal to BAND or KNOWN
-        u <- 1.0e6 (arbitrarily large value) : ``flag`` equal to INSIDE
-
-    - ``heap`` Initialisation:
-        Contains all the pixels marked as BAND in ``flag``. The heap element is
-        a tuple with 2 elements, first being the ``u`` value corresponding to
-        the tuple of index which is stored as the second element.
-        Heap Element : (u[(i, j)], (i, j))
+        - 0 = KNOWN - intensity and ``u``values are known.
+        - 1 = BAND - ``u`` value undergoes an update.
+        - 2 = INSIDE - intensity and ``u`` values unkown
 
     Marching Phase:
     Implementation under ``skimage.filter._inpaint.fast_marching_method``.
@@ -184,6 +170,7 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     h, w = input_image.shape
     painted = np.zeros((h + 2, w + 2), np.float)
     mask = np.zeros((h + 2, w + 2), np.uint8)
+    
     painted[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
