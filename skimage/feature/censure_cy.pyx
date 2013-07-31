@@ -22,8 +22,8 @@ def _censure_dob_loop(double[:, ::1] image, Py_ssize_t n,
             filtered_image[i, j] = outer_weight * outer - (inner_weight + outer_weight) * inner
 
 
-def _slanted_integral_image(double[:, ::1] image,
-                            double[:, ::1] integral_img):
+def _slanted_integral_image(double[:, :] image,
+                            double[:, :] integral_img):
 
     cdef Py_ssize_t i, j
     cdef double[:] left_sum = np.zeros(image.shape[0], dtype=np.float)
@@ -33,8 +33,10 @@ def _slanted_integral_image(double[:, ::1] image,
         left_sum[image.shape[1] - 1 - i] = np.sum(flipped_lr.diagonal(i))
     left_sum_np = np.asarray(left_sum)
 
+    # Initializing the leftmost column of the slanted integral image
     left_sum_np = left_sum_np.cumsum(0)
 
+    # Initializing the rightmost column of the slanted integral image
     right_sum_np = np.sum(image, 1).cumsum(0)
 
     for i in range(image.shape[0]):
@@ -50,32 +52,51 @@ def _slanted_integral_image(double[:, ::1] image,
             integral_img[i, j] += integral_img[i, j - 1] + integral_img[i - 1, j + 1] - integral_img[i - 1, j]
 
 
-
-
-def _censure_octagon_loop(double[:, ::1] image, double[:, ::1] integral_img,
-                          double[:, ::1] integral_img1,
-                          double[:, ::1] integral_img2,
-                          double[:, ::1] integral_img3,
-                          double[:, ::1] integral_img4,
-                          double[:, ::1] filtered_image,
+def _censure_octagon_loop(double[:, :] image, double[:, :] integral_img,
+                          double[:, :] integral_img1,
+                          double[:, :] integral_img2,
+                          double[:, :] integral_img3,
+                          double[:, :] integral_img4,
+                          double[:, :] filtered_image,
                           double outer_weight, double inner_weight,
                           int mo, int no, int mi, int ni):
                     
     cdef Py_ssize_t i, j, o_m, i_m, o_set, i_set
 
+    """
+    For a (5, 2) octagon, i.e. mo = 5 and no = 2,
+
+                 |---o_set---|
+    [0, 0, 1, 1, 1, 1, 1, 0, 0]
+    [0, 1, 1, 1, 1, 1, 1, 1, 0]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [0, 1, 1, 1, 1, 1, 1, 1, 0]
+    [0, 0, 1, 1, 1, 1, 1, 0, 0]
+                 |-o_m-|
+    """
     o_m = (mo - 1) / 2
     i_m = (mi - 1) / 2
+
+    # o_set and i_set are the distances of the center of the octagon
+    # from the horizontal or vertical sides of the octagon,
+    # for outer and inner octagon respectively
     o_set = o_m + no
     i_set = i_m + ni
 
     for i in range(o_set + 1, image.shape[0] - o_set - 1):
         for j in range(o_set + 1, image.shape[1] - o_set - 1):
+            # Calculating the sum of pixels in the outer octagon
             outer = integral_img1[i + o_set, j + o_m] - integral_img1[i + o_m - 1, j + o_set + 1] - integral_img[i + o_set, j - o_m] + integral_img[i + o_m - 1, j - o_m]
             outer += integral_img[i + o_m - 1, j + o_m - 1] - integral_img[i - o_m, j + o_m - 1] - integral_img[i + o_m - 1, j - o_m] + integral_img[i - o_m, j - o_m]
             outer += integral_img4[i + o_m, j - o_set] - integral_img4[i + o_set + 1, j - o_m + 1] - integral_img[i - o_m, j - o_m] + integral_img[i - o_m, j - o_set - 1]
             outer += integral_img2[i - o_set, j - o_m] - integral_img2[i - o_m + 1, j - o_set - 1] - integral_img[i - o_m, -1] - integral_img[i - o_set - 1, j + o_m - 1] + integral_img[i - o_m, j + o_m - 1] + integral_img[i - o_set - 1, -1]
             outer += integral_img3[i - o_m, j + o_set] - integral_img3[i - o_set - 1, j + o_m - 1] - integral_img[-1, j + o_set] - integral_img[i + o_m - 1, j + o_m - 1] + integral_img[-1, j + o_m - 1] + integral_img[i + o_m - 1, j + o_set]
 
+            # Calculating the sum of pixels in the inner octagon
             inner = integral_img1[i + i_set, j + i_m] - integral_img1[i + i_m - 1, j + i_set + 1] - integral_img[i + i_set, j - i_m] + integral_img[i + i_m - 1, j - i_m]
             inner += integral_img[i + i_m - 1, j + i_m - 1] - integral_img[i - i_m, j + i_m - 1] - integral_img[i + i_m - 1, j - i_m] + integral_img[i - i_m, j - i_m]
             inner += integral_img4[i + i_m, j - i_set] - integral_img4[i + i_set + 1, j - i_m + 1] - integral_img[i - i_m, j - i_m] + integral_img[i - i_m, j - i_set - 1]

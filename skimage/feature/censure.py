@@ -24,6 +24,7 @@ def _get_filtered_image(image, n_scales, mode):
             _censure_dob_loop(image, n, integral_img, filtered_image, inner_weight, outer_weight)
             scales[:, :, i] = filtered_image
         return scales
+
     elif mode == 'Octagon':
         # TODO : Decide the shapes of Octagon filters for scales > 7
         outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
@@ -32,11 +33,9 @@ def _get_filtered_image(image, n_scales, mode):
         integral_img = integral_image(image)
         integral_img1 = _slanted_integral_image_modes(image, 1)
         integral_img2 = _slanted_integral_image_modes(image, 2)
-        integral_img2 = np.ascontiguousarray(integral_img2)
         integral_img3 = _slanted_integral_image_modes(image, 3)
-        integral_img3 = np.ascontiguousarray(integral_img3)
         integral_img4 = _slanted_integral_image_modes(image, 4)
-        integral_img4 = np.ascontiguousarray(integral_img4)
+
         for k in range(n_scales):
             n = k + 1
             filtered_image = np.zeros(image.shape)
@@ -59,7 +58,11 @@ def _slanted_integral_image_modes(img, mode=1):
     if mode == 1:
         """
         The following figures describe area that is summed up to calculate
-        the value at point @ in slanted integral image.
+        the value at point @ in slanted integral image. The subtended at @ is
+        135 degrees.
+
+        censure_cy._slanted_integral_image performs the mode1
+        _slanted_integral_image
          _________________
         |********/        |  
         |*******/         |
@@ -70,12 +73,17 @@ def _slanted_integral_image_modes(img, mode=1):
         |_________________|
         """
         image = np.copy(img, order='C')
+
         mode1 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode1)
         return mode1[1:, :]
 
     elif mode == 2:
         """
+        For mode2, the image can be first flipped left-right and then up-down.
+        Then we can use censure_cy._slanted_integral_image and the returned
+        result can be flipped left-right and then up-down to get the following
+        mode.
          _________________
         |                 |
         |                 |
@@ -88,9 +96,10 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img, order='C')
         image = np.fliplr(image)
         image = np.flipud(image)
-        image = np.ascontiguousarray(image)
+
         mode2 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode2)
+
         mode2 = mode2[1:, :]
         mode2 = np.fliplr(mode2)
         mode2 = np.flipud(mode2)
@@ -110,9 +119,10 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img, order='C')
         image = np.flipud(image)
         image = image.T
-        image = np.ascontiguousarray(image)
+
         mode3 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode3)
+
         mode3 = mode3[1:, :]
         mode3 = np.flipud(mode3.T)
         return mode3
@@ -131,9 +141,10 @@ def _slanted_integral_image_modes(img, mode=1):
         image = np.copy(img, order='C')
         image = np.fliplr(image)
         image = image.T
-        image = np.ascontiguousarray(image)
+
         mode4 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode4)
+
         mode4 = mode4[1:, :]
         mode4 = np.fliplr(mode4.T)
         return mode4
@@ -143,6 +154,7 @@ def _suppress_line(response, sigma, rpc_threshold):
     Axx, Axy, Ayy = _compute_auto_correlation(response, sigma)
     detA = Axx * Ayy - Axy**2
     traceA = Axx + Ayy
+
     # ratio of principal curvatures
     rpc = traceA**2 / (detA + 0.001)
     response[rpc > rpc_threshold] = 0
