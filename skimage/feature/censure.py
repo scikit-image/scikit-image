@@ -11,26 +11,38 @@ from .censure_cy import _censure_dob_loop
 
 def _get_filtered_image(image, n_scales, mode):
     # TODO : Implement the STAR mode
-    scales = np.zeros((image.shape[0], image.shape[1], n_scales), dtype=np.double)
+    scales = np.zeros((image.shape[0], image.shape[1], n_scales),
+                      dtype=np.double)
+
     if mode == 'DoB':
         for i in range(n_scales):
             n = i + 1
+
             # Constant multipliers for the outer region and the inner region
-            # of the bilevel filters with the constraint of keeping the DC bias
-            # 0.
+            # of the bilevel filters with the constraint of keeping the
+            # DC bias 0.
             inner_weight = (1.0 / (2 * n + 1)**2)
             outer_weight = (1.0 / (12 * n**2 + 4 * n))
+
             integral_img = integral_image(image)
+
             filtered_image = np.zeros(image.shape)
-            _censure_dob_loop(image, n, integral_img, filtered_image, inner_weight, outer_weight)
+            _censure_dob_loop(image, n, integral_img, filtered_image,
+                              inner_weight, outer_weight)
+
             scales[:, :, i] = filtered_image
 
     elif mode == 'Octagon':
         # TODO : Decide the shapes of Octagon filters for scales > 7
-        outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
+        outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7),
+                       (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
+
         for i in range(n_scales):
-            scales[:, :, i] = convolve(image, _octagon_filter(outer_shape[i][0], outer_shape[i][1], inner_shape[i][0], inner_shape[i][1]))
+            scales[:, :, i] = convolve(image,
+                                       _octagon_filter(outer_shape[i][0],
+                                       outer_shape[i][1], inner_shape[i][0],
+                                       inner_shape[i][1]))
 
     return scales
 
@@ -73,7 +85,8 @@ def _suppress_line(response, sigma, rpc_threshold):
     return response
 
 
-def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03, rpc_threshold=10):
+def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03,
+                      rpc_threshold=10):
     """
     Extracts Censure keypoints along with the corresponding scale using
     either Difference of Boxes, Octagon or STAR bilevel filter.
@@ -142,8 +155,10 @@ def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03, rpc_thresho
         # sigma = (window_size - 1) / 6.0
         # window_size = 7 + 2 * i
         # Hence sigma = 1 + i / 3.0
-        response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0), rpc_threshold)
+        response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0),
+                                           rpc_threshold)
 
     # Returning keypoints with its scale
-    keypoints = np.transpose(np.nonzero(response[:, :, 1:n_scales - 1])) + [0, 0, 2]
+    keypoints = (np.transpose(np.nonzero(response[:, :, 1:n_scales - 1]))
+                 + [0, 0, 2])
     return keypoints
