@@ -6,7 +6,7 @@ from ..feature.corner import _compute_auto_correlation
 from ..util import img_as_float
 from ..morphology import convex_hull_image
 
-from .censure_cy import _censure_dob_loop, _slanted_integral_image, _censure_octagon_loop
+from .censure_cy import _censure_dob_loop
 
 
 def _get_filtered_image(image, n_scales, mode):
@@ -25,39 +25,17 @@ def _get_filtered_image(image, n_scales, mode):
             _censure_dob_loop(image, n, integral_img, filtered_image, inner_weight, outer_weight)
             scales[:, :, i] = filtered_image
 
-
     elif mode == 'Octagon':
         # TODO : Decide the shapes of Octagon filters for scales > 7
         outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
         for i in range(n_scales):
             scales[:, :, i] = convolve(image, _octagon_filter(outer_shape[i][0], outer_shape[i][1], inner_shape[i][0], inner_shape[i][1]))
-        """
-        integral_img = integral_image(image)
-        integral_img1 = _slanted_integral_image_modes(image, 1)
-        integral_img2 = _slanted_integral_image_modes(image, 2)
-        integral_img3 = _slanted_integral_image_modes(image, 3)
-        integral_img4 = _slanted_integral_image_modes(image, 4)
 
-        for k in range(n_scales):
-            n = k + 1
-            filtered_image = np.zeros(image.shape)
-            mo = outer_shape[n - 1][0]
-            no = outer_shape[n - 1][1]
-            mi = inner_shape[n - 1][0]
-            ni = inner_shape[n - 1][1]
-            outer_pixels = (mo + 2 * no)**2 - 2 * no * (no + 1)
-            inner_pixels = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
-            outer_weight = 1.0 / (outer_pixels - inner_pixels)
-            inner_weight = 1.0 / inner_pixels
-
-            _censure_octagon_loop(image, integral_img, integral_img1, integral_img2, integral_img3, integral_img4, filtered_image, outer_weight, inner_weight, mo, no, mi, ni)
-
-            scales[:, :, k] = filtered_image
-            """
     return scales
 
 
+# TODO : Import from selem after getting #669 merged.
 def _oct(m, n):
     f = np.zeros((m + 2*n, m + 2*n))
     f[0, n] = 1
@@ -82,118 +60,6 @@ def _octagon_filter(mo, no, mi, ni):
     inner_oct[c:-c, c:-c] = _oct(mi, ni)
     bfilter = outer_wt * outer_oct - (outer_wt + inner_wt) * inner_oct
     return bfilter
-
-
-def _filter_using_convolve(image, n, mode='DoB'):
-
-    if mode == 'DoB':
-        inner_wt = (1.0 / (2*n + 1)**2)
-        outer_wt = (1.0 / (12*n**2 + 4*n))
-        dob_filter = np.zeros((4 * n + 1, 4 * n + 1))
-        dob_filter[:] = outer_wt
-        dob_filter[n : 3 * n + 1, n : 3 * n + 1] = - inner_wt
-        return convolve(image, dob_filter)
-
-    elif mode == 'Octagon':
-        outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
-        inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
-        return convolve(image, _octagon_filter(outer_shape[n - 1][0], outer_shape[n - 1][1], inner_shape[n - 1][0], inner_shape[n - 1][1]))
-
-
-def _slanted_integral_image_modes(img, mode=1):
-    if mode == 1:
-        """
-        The following figures describe area that is summed up to calculate
-        the value at point @ in slanted integral image. The subtended at @ is
-        135 degrees.
-
-        censure_cy._slanted_integral_image performs the mode1
-        _slanted_integral_image
-         _________________
-        |********/        |  
-        |*******/         |
-        |******/          |
-        |-----@           |
-        |                 |
-        |                 |
-        |_________________|
-        """
-        image = np.copy(img, order='C')
-
-        mode1 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
-        _slanted_integral_image(image, mode1)
-        return mode1[1:, :]
-
-    elif mode == 2:
-        """
-        For mode2, the image can be first flipped left-right and then up-down.
-        Then we can use censure_cy._slanted_integral_image and the returned
-        result can be flipped left-right and then up-down to get the following
-        mode.
-         _________________
-        |                 |
-        |                 |
-        |                 |
-        |           @_____|
-        |          /******|
-        |         /*******|
-        |________/________| 
-        """
-        image = np.copy(img, order='C')
-        image = np.fliplr(image)
-        image = np.flipud(image)
-
-        mode2 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
-        _slanted_integral_image(image, mode2)
-
-        mode2 = mode2[1:, :]
-        mode2 = np.fliplr(mode2)
-        mode2 = np.flipud(mode2)
-        return mode2
-
-    elif mode == 3:
-        """
-         _________________
-        |                 |
-        |\\               |
-        |*\\              |
-        |**\\             |
-        |***@             |
-        |***|             |
-        |___|_____________| 
-        """
-        image = np.copy(img, order='C')
-        image = np.flipud(image)
-        image = image.T
-
-        mode3 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
-        _slanted_integral_image(image, mode3)
-
-        mode3 = mode3[1:, :]
-        mode3 = np.flipud(mode3.T)
-        return mode3
-
-    else:
-        """
-         ________________
-        |           |****|
-        |           |****|
-        |           @****|
-        |            \\**|
-        |             \\*|
-        |              \\|
-        |________________|
-        """
-        image = np.copy(img, order='C')
-        image = np.fliplr(image)
-        image = image.T
-
-        mode4 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
-        _slanted_integral_image(image, mode4)
-
-        mode4 = mode4[1:, :]
-        mode4 = np.fliplr(mode4.T)
-        return mode4
 
 
 def _suppress_line(response, sigma, rpc_threshold):
