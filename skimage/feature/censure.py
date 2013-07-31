@@ -14,11 +14,14 @@ def _get_filtered_image(image, n_scales, mode):
         scales = np.zeros((image.shape[0], image.shape[1], n_scales))
         for i in range(n_scales):
             n = i + 1
-            inner_wt = (1.0 / (2 * n + 1)**2)
-            outer_wt = (1.0 / (12 * n**2 + 4 * n))
+            # Constant multipliers for the outer region and the inner region
+            # of the bilevel filters with the constraint of keeping the DC bias
+            # 0.
+            inner_weight = (1.0 / (2 * n + 1)**2)
+            outer_weight = (1.0 / (12 * n**2 + 4 * n))
             integral_img = integral_image(image)
             filtered_image = np.zeros(image.shape)
-            _censure_dob_loop(image, n, integral_img, filtered_image, inner_wt, outer_wt)
+            _censure_dob_loop(image, n, integral_img, filtered_image, inner_weight, outer_weight)
             scales[:, :, i] = filtered_image
         return scales
     elif mode == 'Octagon':
@@ -43,10 +46,10 @@ def _get_filtered_image(image, n_scales, mode):
             ni = inner_shape[n - 1][1]
             outer_pixels = (mo + 2 * no)**2 - 2 * no * (no + 1)
             inner_pixels = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
-            outer_wt = 1.0 / (outer_pixels - inner_pixels)
-            inner_wt = 1.0 / inner_pixels
+            outer_weight = 1.0 / (outer_pixels - inner_pixels)
+            inner_weight = 1.0 / inner_pixels
 
-            _censure_octagon_loop(image, integral_img, integral_img1, integral_img2, integral_img3, integral_img4, filtered_image, outer_wt, inner_wt, mo, no, mi, ni)
+            _censure_octagon_loop(image, integral_img, integral_img1, integral_img2, integral_img3, integral_img4, filtered_image, outer_weight, inner_weight, mo, no, mi, ni)
 
             scales[:, :, k] = filtered_image
         return scales

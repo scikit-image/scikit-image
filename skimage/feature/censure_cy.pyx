@@ -7,10 +7,10 @@ cimport numpy as cnp
 import numpy as np
 
 
-def _censure_dob_loop(double[:, ::1] image, cnp.int16_t n,
+def _censure_dob_loop(double[:, ::1] image, Py_ssize_t n,
 	                  double[:, ::1] integral_img,
 	                  double[:, ::1] filtered_image,
-	                  double inner_wt, double outer_wt):
+	                  double inner_weight, double outer_weight):
 
     cdef Py_ssize_t i, j
     cdef double inner, outer
@@ -19,7 +19,7 @@ def _censure_dob_loop(double[:, ::1] image, cnp.int16_t n,
         for j in range(2 * n, image.shape[1] - 2 * n):
             inner = integral_img[i + n, j + n] + integral_img[i - n - 1, j - n - 1] - integral_img[i + n, j - n - 1] - integral_img[i - n - 1, j + n]
             outer = integral_img[i + 2 * n, j + 2 * n] + integral_img[i - 2 * n - 1, j - 2 * n - 1] - integral_img[i + 2 * n, j - 2 * n - 1] - integral_img[i - 2 * n - 1, j + 2 * n]
-            filtered_image[i, j] = outer_wt * outer - (inner_wt + outer_wt) * inner
+            filtered_image[i, j] = outer_weight * outer - (inner_weight + outer_weight) * inner
 
 
 def _slanted_integral_image(double[:, ::1] image,
@@ -58,7 +58,7 @@ def _censure_octagon_loop(double[:, ::1] image, double[:, ::1] integral_img,
                           double[:, ::1] integral_img3,
                           double[:, ::1] integral_img4,
                           double[:, ::1] filtered_image,
-                          double outer_wt, double inner_wt,
+                          double outer_weight, double inner_weight,
                           int mo, int no, int mi, int ni):
                     
     cdef Py_ssize_t i, j, o_m, i_m, o_set, i_set
@@ -82,4 +82,4 @@ def _censure_octagon_loop(double[:, ::1] image, double[:, ::1] integral_img,
             inner += integral_img2[i - i_set, j - i_m] - integral_img2[i - i_m + 1, j - i_set - 1] - integral_img[i - i_m, -1] - integral_img[i - i_set - 1, j + i_m - 1] + integral_img[i - i_m, j + i_m - 1] + integral_img[i - i_set - 1, -1]
             inner += integral_img3[i - i_m, j + i_set] - integral_img3[i - i_set - 1, j + i_m - 1] - integral_img[-1, j + i_set] - integral_img[i + i_m - 1, j + i_m - 1] + integral_img[-1, j + i_m - 1] + integral_img[i + i_m - 1, j + i_set]
 
-            filtered_image[i, j] = outer_wt * outer - (outer_wt + inner_wt) * inner
+            filtered_image[i, j] = outer_weight * outer - (outer_weight + inner_weight) * inner
