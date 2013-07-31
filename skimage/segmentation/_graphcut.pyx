@@ -23,23 +23,22 @@ cdef class GraphCut:
     log- liklihood arrays, this class determines the global optimal segmentation
     by calculating the minimum of a Gibbs energy function.
 
-    The cut is performed using the standard push-reabel algorithm as well as
+    The cut is performed using the standard push-relabel algorithm as well as
     the global relabel heuristic. In each iteration excess flow is pushed
     'downhill' from the source to the sink. A height array is maintained which
     provides a upper bound on the distance of each each node in the image graph
     to the sink.
 
-    Over time the height array can becomes inaccurate quickly when solely using
-    the standard relabel heuristic. The global relabel scheme uses a backwards
+    Over time the height array can quickly become inaccurate when solely using
+    the standard relabel. The global relabel scheme uses a backwards
     breath-first search to calculate the exact distance array, however it is
     computationally intensive and performed infrequently.
 
     A weighting parameter weight_lambda determines balances a pixels affinity
-    for it's preferred label, based on the log-liklihood arrays, and its
-    coherence to the labels of it's neighbours.
+    for its preferred label, based on the log-liklihood arrays, and its
+    coherence to the labels of its neighbours.
 
-    The minimum cut is returned by GraphCutcut(int global_relabel_interval).
-
+    The minimum cut is returned by GraphCut.cut(int global_relabel_interval).
 
     Parameters
     ----------
@@ -55,6 +54,10 @@ cdef class GraphCut:
     weight_lambda
       The data term, neighboorhood term weighting. Lower values give preference
       to the data term.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Push - relabel_maximum_flow_algorithm
 
     """
     cdef:
@@ -85,6 +88,8 @@ cdef class GraphCut:
         self.size = img.shape[0]*img.shape[1]
         self.max_label = self.size
 
+        # determine edge weights (aka capacities in flow network literature)
+        # using the L2 Norm in RGB space
         _down = img.copy()
         _up = img.copy()
         _right = img.copy()
@@ -95,20 +100,20 @@ cdef class GraphCut:
         _right[:,:(self.w-1)] = np.diff(img, axis=1)**2
         _left[:,1:] = np.diff(img, axis=1)**2
 
-        _up = weight_lambda*(1.0 / (BETA * np.sqrt(np.sum(_up, 2)) + EPSILON))
-        _down = weight_lambda*(1.0 / (BETA * np.sqrt(np.sum(_down, 2)) + EPSILON))
-        _left = weight_lambda*(1.0 / (BETA * np.sqrt(np.sum(_left, 2)) + EPSILON))
-        _right = weight_lambda*(1.0 / (BETA * np.sqrt(np.sum(_right, 2)) + EPSILON))
+        _up = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_up, 2)) +
+                                      EPSILON))
+        _down = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_down, 2)) +
+                                        EPSILON))
+        _left = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_left, 2)) +
+                                        EPSILON))
+        _right = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_right, 2)) +
+                                         EPSILON))
 
+        # ensure that flow cannot be pushed beyond the image boundaries
         _up[0] = 0
         _down[-1] = 0
         _left[:, 0] = 0
         _right[:, -1] = 0
-
-        self.up = _up.ravel()
-        self.down = _down.ravel()
-        self.left = _left.ravel()
-        self.right = _right.ravel()
 
         self.active = {}
 
