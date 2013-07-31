@@ -54,12 +54,34 @@ def _get_filtered_image(image, no_of_scales, mode):
 
 def _slanted_integral_image_modes(img, mode=1):
     if mode == 1:
+        """
+        The following figures describe area that is summed up to calculate
+        the value at point @ in slanted integral image.
+         _________________
+        |********/        |  
+        |*******/         |
+        |******/          |
+        |-----@           |
+        |                 |
+        |                 |
+        |_________________|
+        """
         image = np.copy(img, order='C')
         mode1 = np.zeros((image.shape[0] + 1, image.shape[1]), order='C')
         _slanted_integral_image(image, mode1)
         return mode1[1:, :]
 
     elif mode == 2:
+        """
+         _________________
+        |                 |
+        |                 |
+        |                 |
+        |           @_____|
+        |          /******|
+        |         /*******|
+        |________/________| 
+        """
         image = np.copy(img, order='C')
         image = np.fliplr(image)
         image = np.flipud(image)
@@ -72,6 +94,16 @@ def _slanted_integral_image_modes(img, mode=1):
         return mode2
 
     elif mode == 3:
+        """
+         _________________
+        |                 |
+        |\\               |
+        |*\\              |
+        |**\\             |
+        |***@             |
+        |***|             |
+        |___|_____________| 
+        """
         image = np.copy(img, order='C')
         image = np.flipud(image)
         image = image.T
@@ -83,6 +115,16 @@ def _slanted_integral_image_modes(img, mode=1):
         return mode3
 
     else:
+        """
+         ________________
+        |           |****|
+        |           |****|
+        |           @****|
+        |            \\**|
+        |             \\*|
+        |              \\|
+        |________________|
+        """
         image = np.copy(img, order='C')
         image = np.fliplr(image)
         image = image.T
