@@ -161,11 +161,15 @@ cdef inline double _kernel_percentile(Py_ssize_t* histo, double pop, dtype_t g,
     cdef Py_ssize_t sum = 0
 
     if pop:
-        for i in range(max_bin):
-            sum += histo[i]
-            if sum >= p0 * pop:
-                break
-
+        if p0 == 0:  # make sure p0 == 0 returns the minimum filter
+            for i in range(max_bin):
+                if histo[i]:
+                    break
+        else:
+            for i in range(max_bin):
+                sum += histo[i]
+                if sum >= p0 * pop:
+                    break
         return i
     else:
         return 0
