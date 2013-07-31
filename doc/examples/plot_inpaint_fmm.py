@@ -2,15 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filter import inpaint
-from skimage.filter import _inpaint
+plt.gray()
 
 
 def demo_inpaint():
     image = data.camera()
-    paint_region = (slice(120, 130), slice(440, 470))
-    paint_region1 = (slice(220, 230), slice(440, 470))
-    image[paint_region] = 0
-    image[paint_region1] = 0
+    paint_region = (slice(240, 260), slice(360, 420))
+    paint_region1 = (slice(430, 450), slice(360, 410))
 
     mask = np.zeros_like(image, dtype=np.uint8)
     mask[paint_region] = 1
