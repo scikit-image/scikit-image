@@ -46,7 +46,7 @@ cdef cnp.float_t grad_func(Py_ssize_t i, Py_ssize_t j,
         The local gradient of array.
 
     """
-    
+
     cdef:
         cnp.float_t grad
 
@@ -130,12 +130,12 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         # geometric_dst : more weightage to geometrically closer pixels
         # levelset_dst : more weightage to points with nearly same time map, ``u``
         # direction : dot product, displacement vector and gradient vector
-        
+
         geometric_dst = 1. / ((rx * rx + ry * ry) * sqrt((rx * rx + ry * ry)))
         levelset_dst = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
         direction = abs(rx * gradx_u + ry * grady_u)
 
-        # Small values of ``direction``, implies displacement vector and 
+        # Small values of ``direction``, implies displacement vector and
         # gradient vector nearly perpendicular, hence force low contribution
         if direction <= 0.01:
             direction = 1.0e-6
@@ -289,11 +289,11 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
             if not flag[i_nb, j_nb] == KNOWN:
                 u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb, i_nb,
                                             j_nb - 1, flag, u),
-                                    eikonal(i_nb + 1, j_nb, i_nb, 
+                                    eikonal(i_nb + 1, j_nb, i_nb,
                                             j_nb - 1, flag, u),
-                                    eikonal(i_nb - 1, j_nb, i_nb, 
+                                    eikonal(i_nb - 1, j_nb, i_nb,
                                             j_nb + 1, flag, u),
-                                    eikonal(i_nb + 1, j_nb, i_nb, 
+                                    eikonal(i_nb + 1, j_nb, i_nb,
                                             j_nb + 1, flag, u))
 
                 if flag[i_nb, j_nb] == INSIDE:
@@ -301,8 +301,8 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
                     heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
                     if _run_inpaint:
-                        shifted_indices[:, 0] = indices_centered[:, 0] + i_nb
-                        shifted_indices[:, 1] = indices_centered[:, 1] + j_nb
-                        
+                        shifted_indices = indices_centered + np.array([
+                            i_nb, j_nb], np.int16)
+
                         inpaint_point(i_nb, j_nb, image, flag,
                                       u, shifted_indices, radius)
