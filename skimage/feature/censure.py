@@ -8,11 +8,11 @@ from ..util import img_as_float
 from .censure_cy import _censure_dob_loop, _slanted_integral_image, _censure_octagon_loop
 
 
-def _get_filtered_image(image, no_of_scales, mode):
+def _get_filtered_image(image, n_scales, mode):
     # TODO : Implement the STAR mode
     if mode == 'DoB':
-        scales = np.zeros((image.shape[0], image.shape[1], no_of_scales))
-        for i in range(no_of_scales):
+        scales = np.zeros((image.shape[0], image.shape[1], n_scales))
+        for i in range(n_scales):
             n = i + 1
             inner_wt = (1.0 / (2 * n + 1)**2)
             outer_wt = (1.0 / (12 * n**2 + 4 * n))
@@ -25,7 +25,7 @@ def _get_filtered_image(image, no_of_scales, mode):
         # TODO : Decide the shapes of Octagon filters for scales > 7
         outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7), (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
-        scales = np.zeros((image.shape[0], image.shape[1], no_of_scales))
+        scales = np.zeros((image.shape[0], image.shape[1], n_scales))
         integral_img = integral_image(image)
         integral_img1 = _slanted_integral_image_modes(image, 1)
         integral_img2 = _slanted_integral_image_modes(image, 2)
@@ -34,7 +34,7 @@ def _get_filtered_image(image, no_of_scales, mode):
         integral_img3 = np.ascontiguousarray(integral_img3)
         integral_img4 = _slanted_integral_image_modes(image, 4)
         integral_img4 = np.ascontiguousarray(integral_img4)
-        for k in range(no_of_scales):
+        for k in range(n_scales):
             n = k + 1
             filtered_image = np.zeros(image.shape)
             mo = outer_shape[n - 1][0]
@@ -146,7 +146,7 @@ def _suppress_line(response, sigma, rpc_threshold):
     return response
 
 
-def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_threshold=10):
+def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03, rpc_threshold=10):
     """
     Extracts Censure keypoints along with the corresponding scale using
     either Difference of Boxes, Octagon or STAR bilevel filter.
@@ -156,7 +156,7 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
     image : 2D ndarray
         Input image.
 
-    no_of_scales : positive integer
+    n_scales : positive integer
         Number of scales to extract keypoints from. The keypoints will be
         extracted from all the scales except the first and the last.
 
@@ -199,7 +199,7 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
     image = np.ascontiguousarray(image)
 
     # Generating all the scales
-    scales = _get_filtered_image(image, no_of_scales, mode)
+    scales = _get_filtered_image(image, n_scales, mode)
 
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
     # neighbourhood to zero
@@ -211,12 +211,12 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
     maximas[np.abs(maximas) < threshold] = 0
     response = maximas + minimas
 
-    for i in range(1, no_of_scales - 1):
+    for i in range(1, n_scales - 1):
         # sigma = (window_size - 1) / 6.0
         # window_size = 7 + 2 * i
         # Hence sigma = 1 + i / 3.0
         response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0), rpc_threshold)
 
     # Returning keypoints with its scale
-    keypoints = np.transpose(np.nonzero(response[:, :, 1:no_of_scales - 1])) + [0, 0, 2]
+    keypoints = np.transpose(np.nonzero(response[:, :, 1:n_scales - 1])) + [0, 0, 2]
     return keypoints
