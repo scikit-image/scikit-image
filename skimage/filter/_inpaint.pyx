@@ -17,66 +17,50 @@ cdef:
     cnp.uint8_t INSIDE = 2
 
 
-cdef cnp.float_t[:] grad_func(Py_ssize_t i, Py_ssize_t j,
-                              cnp.uint8_t[:, ::1] flag,
-                              cnp.float_t[:, ::1] array,
-                              cnp.float_t factor=0.5):
-    """This function calculates the gradient of the distance/image of a pixel
-    depending on the value of the flag of its neighbours. The gradient
-    is computed using Central Differences method.
+cdef cnp.float_t grad_func(Py_ssize_t i, Py_ssize_t j,
+                           cnp.uint8_t[:, :] flag,
+                           cnp.float_t[:, :] array,
+                           cnp.float_t factor=0.5):
+    """Return the x-gradient of the input array at a pixel.
 
-    This function is used to compute the gradient of intensity value, ``image``
-    and also the ``u`` value.
+    This gradient is structured to ignore inner, unknown regions as specified
+    by the `flag` array. By default, this returns the gradient in the
+    x-direction. To get the y-gradient, switch the order of `i`, `j`, and
+    transpose `flag` and `array`.
 
     Parameters
     ---------
     i, j : int
-        Row and column index value of the pixel whose gradient is to be
-        calculated
-    flag : array, np.uint8
+        Row and column index of the pixel whose gradient is to be calculated.
+    flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    array : array
+    array : array, float
         Either ``image`` or ``u``, whose gradient is to be computed
     factor : float
-        ``factor`` = 0.5 for the gradient of ``u``
-        ``factor`` = 2.0 for the gradient of ``image``
+        0.5 for ``array = u``, 2.0 for ``array = image``
 
     Returns
     -------
-    gradU : array, float
-        The signed gradient of ``image`` or ``u`` depending on ``factor``.
-        1D array with 2 elements. First element represents gradient in X
-        direction and second in the Y direction.
+    grad : float
+        The local gradient of array.
 
     """
-
     cdef:
-        cnp.float_t[:] gradU = np.zeros(2, dtype=np.float)
+        cnp.float_t grad
 
     if flag[i, j + 1] != INSIDE:
         if flag[i, j - 1] != INSIDE:
-            gradU[0] = (array[i, j + 1] - array[i, j - 1]) * factor
+            grad = (array[i, j + 1] - array[i, j - 1]) * factor
         else:
-            gradU[0] = (array[i, j + 1] - array[i, j])
+            grad = (array[i, j + 1] - array[i, j])
     else:
         if flag[i, j - 1] != INSIDE:
-            gradU[0] = (array[i, j] - array[i, j - 1])
+            grad = (array[i, j] - array[i, j - 1])
         else:
-            gradU[0] = 0
+            grad = 0
 
-    if flag[i + 1, j] != INSIDE:
-        if flag[i - 1, j] != INSIDE:
-            gradU[1] = (array[i + 1, j] - array[i - 1, j]) * factor
-        else:
-            gradU[1] = (array[i + 1, j] - array[i, j])
-    else:
-        if flag[i - 1, j] != INSIDE:
-            gradU[1] = (array[i, j] - array[i - 1, j])
-        else:
-            gradU[1] = 0
-
-    return gradU
+    return grad
 
 
 cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
@@ -121,14 +105,14 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         cnp.int8_t rx, ry
         cnp.float_t geometric_dst, levelset_dst, direction
         cnp.float_t Ia, Jx, Jy, norm, weight
-        cnp.float_t[:] gradU
-        cnp.float_t[:] gradI
+        cnp.float_t gradx_u, grady_u, gradx_img, grady_img
         Py_ssize_t k
     cdef cnp.uint16_t h = image.shape[0], w = image.shape[1]
 
     Ia, Jx, Jy, norm = 0, 0, 0, 0
 
-    gradU = grad_func(i, j, flag, u, factor=0.5)
+    gradx_u = grad_func(i, j, flag, u, factor=0.5)
+    grady_u = grad_func(j, i, flag.T, u.T, factor=0.5)
 
     for k in range(shifted_indices.shape[0]):
         i_nb = shifted_indices[k, 0]
@@ -144,17 +128,18 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
 
         geometric_dst = 1. / ((rx * rx + ry * ry) * sqrt((rx * rx + ry * ry)))
         levelset_dst = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
-        direction = abs(rx * gradU[0] + ry * gradU[1])
+        direction = abs(rx * gradx_u + ry * grady_u)
 
         if direction <= 0.01:
             direction = 1.0e-6
         weight = geometric_dst * levelset_dst * direction
 
-        gradI = grad_func(i_nb, j_nb, flag, image, factor=2.0)
+        gradx_img = grad_func(i_nb, j_nb, flag, image, factor=2.0)
+        grady_img = grad_func(j_nb, i_nb, flag.T, image.T, factor=2.0)
 
         Ia += weight * image[i_nb, j_nb]
-        Jx -= weight * gradI[0] * rx
-        Jy -= weight * gradI[1] * ry
+        Jx -= weight * gradx_img * rx
+        Jy -= weight * grady_img * ry
         norm += weight
 
     image[i, j] = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
