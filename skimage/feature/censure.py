@@ -157,20 +157,20 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
         Input image.
 
     no_of_scales : positive integer
-        Number of scales to extract keypoints from. Default is 7.
+        Number of scales to extract keypoints from. The keypoints will be
+        extracted from all the scales except the first and the last.
 
-    mode : 'DoB'
+    mode : {'DoB', 'Octagon', 'STAR'}
         Type of bilevel filter used to get the scales of input image. Possible
-        values are 'DoB', 'Octagon' and 'STAR'. Default is 'DoB'.
+        values are 'DoB', 'Octagon' and 'STAR'.
 
-    threshold :
+    threshold : float
         Threshold value used to suppress maximas and minimas with a weak
-        magnitude response obtained after Non-Maximal Suppression. Default
-        is 0.03.
+        magnitude response obtained after Non-Maximal Suppression.
 
-    rpc_threshold :
+    rpc_threshold : float
         Threshold for rejecting interest points which have ratio of principal
-        curvatures greater than this value. Default is 10.
+        curvatures greater than this value.
 
     Returns
     -------
