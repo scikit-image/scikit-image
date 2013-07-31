@@ -32,12 +32,18 @@ def _get_filtered_image(image, n_scales, mode):
 
             scales[:, :, i] = filtered_image
 
+    # NOTE : For the Octagon shaped filter, we implemented and evaluated the
+    # slanted integral image based image filtering but the performance was
+    # more or less equal to image filtering using
+    # scipy.ndimage.filters.convolve(). Hence we have decided to use the
+    # later for a much cleaner implementation.
     elif mode == 'Octagon':
         # TODO : Decide the shapes of Octagon filters for scales > 7
         outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7),
                        (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
 
+        # 
         for i in range(n_scales):
             scales[:, :, i] = convolve(image,
                                        _octagon_filter(outer_shape[i][0],
