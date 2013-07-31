@@ -46,6 +46,7 @@ cdef cnp.float_t grad_func(Py_ssize_t i, Py_ssize_t j,
         The local gradient of array.
 
     """
+
     cdef:
         cnp.float_t grad
 
@@ -66,7 +67,7 @@ cdef cnp.float_t grad_func(Py_ssize_t i, Py_ssize_t j,
 cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
                    cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u,
                    cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
-   """This function performs the actual inpainting operation. Inpainting
+    """This function performs the actual inpainting operation. Inpainting
     involves "filling in" color in regions with unkown intensity values using
     the intensity and gradient information of surrounding known region.
 
@@ -78,10 +79,10 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         Row and column index value of the pixel to be Inpainted
     image : array
         Already padded single channel input image
-    flag : array, np.uint8
+    flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : array, np.float
+    u : array, float
         The distance/time map from the boundary to each pixel.
     radius : int
         Neighbourhood of (i, j) to be considered for inpainting
@@ -94,8 +95,8 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
     References
     ---------
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
-            Method", Journal of Graphic Tools (2004).
-            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+           Method", Journal of Graphic Tools (2004).
+           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
 
@@ -126,10 +127,16 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         ry = i - i_nb
         rx = j - j_nb
 
+        # geometric_dst : more weightage to geometrically closer pixels
+        # levelset_dst : more weightage to points with nearly same time map, u
+        # direction : dot product, displacement vector and gradient vector
+
         geometric_dst = 1. / ((rx * rx + ry * ry) * sqrt((rx * rx + ry * ry)))
         levelset_dst = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
         direction = abs(rx * gradx_u + ry * grady_u)
 
+        # Small values of ``direction``, implies displacement vector and
+        # gradient vector nearly perpendicular, hence force low contribution
         if direction <= 0.01:
             direction = 1.0e-6
         weight = geometric_dst * levelset_dst * direction
@@ -142,6 +149,7 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         Jy -= weight * grady_img * ry
         norm += weight
 
+    # Inpainted value considering the effect of gradient of intensity value
     image[i, j] = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
                    + 0.5)
 
@@ -163,7 +171,7 @@ cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
     flag : array
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : array, np.float
+    u : array, float
         The distance/time map from the boundary to each pixel.
 
     Returns
@@ -180,8 +188,8 @@ cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
     References
     ----------
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
-            Method", Journal of Graphic Tools (2004).
-            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+           Method", Journal of Graphic Tools (2004).
+           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
 
@@ -221,19 +229,19 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
 
     Parameters
     ---------
-    image : array, np.float
+    image : array, float
         Initial input image padded by a single row/column on all sides
-    flag : array, np.uint8
+    flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : array, np.float
+    u : array, float
         The distance/time map from the boundary to each pixel.
     heap : list of tuples
         Priority heap which stores pixels for processing.
     _run_inpaint : bool
         If``True`` then inpaint the image
         If``False`` then only compute the distance/time map,``u``
-    radius : integer
+    radius : int
         Neighbourhood of the pixel of interest
 
     Notes
@@ -255,8 +263,8 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
     References
     ----------
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
-            Method", Journal of Graphic Tools (2004).
-            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+           Method", Journal of Graphic Tools (2004).
+           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
 
     """
 
@@ -266,8 +274,7 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
         cnp.int16_t[:, ::1] shifted_indices
 
     indices = np.transpose(np.where(disk(radius)))
-    indices_centered = np.ascontiguousarray((indices - [radius, radius]),
-                                            np.int16)
+    indices_centered = np.ascontiguousarray((indices - radius), np.int16)
 
     while len(heap):
         i, j = heappop(heap)[1]
@@ -282,19 +289,20 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
             if not flag[i_nb, j_nb] == KNOWN:
                 u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb, i_nb,
                                             j_nb - 1, flag, u),
-                                         eikonal(i_nb + 1, j_nb, i_nb,
-                                                 j_nb - 1, flag, u),
-                                         eikonal(i_nb - 1, j_nb, i_nb,
-                                                 j_nb + 1, flag, u),
-                                         eikonal(i_nb + 1, j_nb, i_nb,
-                                                 j_nb + 1, flag, u))
+                                    eikonal(i_nb + 1, j_nb, i_nb,
+                                            j_nb - 1, flag, u),
+                                    eikonal(i_nb - 1, j_nb, i_nb,
+                                            j_nb + 1, flag, u),
+                                    eikonal(i_nb + 1, j_nb, i_nb,
+                                            j_nb + 1, flag, u))
 
                 if flag[i_nb, j_nb] == INSIDE:
                     flag[i_nb, j_nb] = BAND
                     heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
                     if _run_inpaint:
-                        shifted_indices = indices_centered + np.asarray([
-                            i_nb, j_nb], np.int16)
+                        shifted_indices[0] = indices_centered[0] + i_nb
+                        shifted_indices[1] = indices_centered[1] + j_nb
+
                         inpaint_point(i_nb, j_nb, image, flag,
                                       u, shifted_indices, radius)
