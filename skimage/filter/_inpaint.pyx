@@ -17,10 +17,10 @@ cdef:
     cnp.uint8_t INSIDE = 2
 
 
-cdef cnp.float_t grad_func(Py_ssize_t i, Py_ssize_t j,
-                           cnp.uint8_t[:, :] flag,
-                           cnp.float_t[:, :] array,
-                           cnp.float_t factor=0.5):
+cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
+                            Py_ssize_t i, Py_ssize_t j,
+                            cnp.uint8_t[:, :] flag,
+                            cnp.float_t factor=0.5):
     """Return the x-gradient of the input array at a pixel.
 
     This gradient is structured to ignore inner, unknown regions as specified
@@ -29,14 +29,14 @@ cdef cnp.float_t grad_func(Py_ssize_t i, Py_ssize_t j,
     transpose `flag` and `array`.
 
     Parameters
-    ---------
+    ----------
+    array : array, float
+        Either ``image`` or ``u``, whose gradient is to be computed
     i, j : int
         Row and column index of the pixel whose gradient is to be calculated.
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    array : array, float
-        Either ``image`` or ``u``, whose gradient is to be computed
     factor : float
         0.5 for ``array = u``, 2.0 for ``array = image``
 
@@ -64,9 +64,9 @@ cdef cnp.float_t grad_func(Py_ssize_t i, Py_ssize_t j,
     return grad
 
 
-cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
-                   cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u,
-                   cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
+cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
+                    cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u,
+                    cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
     """This function performs the actual inpainting operation. Inpainting
     involves "filling in" color in regions with unkown intensity values using
     the intensity and gradient information of surrounding known region.
@@ -108,12 +108,14 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         cnp.float_t Ia, Jx, Jy, norm, weight
         cnp.float_t gradx_u, grady_u, gradx_img, grady_img
         Py_ssize_t k
-    cdef cnp.uint16_t h = image.shape[0], w = image.shape[1]
+    cdef cnp.uint16_t h, w
 
+    h = image.shape[0]
+    w = image.shape[1]
     Ia, Jx, Jy, norm = 0, 0, 0, 0
 
-    gradx_u = grad_func(i, j, flag, u, factor=0.5)
-    grady_u = grad_func(j, i, flag.T, u.T, factor=0.5)
+    gradx_u = _grad_func(u, i, j, flag, factor=0.5)
+    grady_u = _grad_func(u.T, j, i, flag.T, factor=0.5)
 
     for k in range(shifted_indices.shape[0]):
         i_nb = shifted_indices[k, 0]
@@ -141,8 +143,8 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
             direction = 1.0e-6
         weight = geometric_dst * levelset_dst * direction
 
-        gradx_img = grad_func(i_nb, j_nb, flag, image, factor=2.0)
-        grady_img = grad_func(j_nb, i_nb, flag.T, image.T, factor=2.0)
+        gradx_img = _grad_func(image, i_nb, j_nb, flag, factor=2.0)
+        grady_img = _grad_func(image.T, j_nb, i_nb, flag.T, factor=2.0)
 
         Ia += weight * image[i_nb, j_nb]
         Jx -= weight * gradx_img * rx
@@ -154,9 +156,9 @@ cdef inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
                    + 0.5)
 
 
-cdef cnp.float_t eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
-                         Py_ssize_t j2, cnp.uint8_t[:, ::1] flag,
-                         cnp.float_t[:, ::1] u):
+cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
+                          Py_ssize_t j2, cnp.uint8_t[:, ::1] flag,
+                          cnp.float_t[:, ::1] u):
     """Solve a step of the Eikonal equation.
 
     The``u`` values of known pixels (marked by``flag``) are considered for
@@ -287,21 +289,22 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
         for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
 
             if not flag[i_nb, j_nb] == KNOWN:
-                u[i_nb, j_nb] = min(eikonal(i_nb - 1, j_nb, i_nb,
-                                            j_nb - 1, flag, u),
-                                    eikonal(i_nb + 1, j_nb, i_nb,
-                                            j_nb - 1, flag, u),
-                                    eikonal(i_nb - 1, j_nb, i_nb,
-                                            j_nb + 1, flag, u),
-                                    eikonal(i_nb + 1, j_nb, i_nb,
-                                            j_nb + 1, flag, u))
+                u[i_nb, j_nb] = min(_eikonal(i_nb - 1, j_nb, i_nb,
+                                             j_nb - 1, flag, u),
+                                    _eikonal(i_nb + 1, j_nb, i_nb,
+                                             j_nb - 1, flag, u),
+                                    _eikonal(i_nb - 1, j_nb, i_nb,
+                                             j_nb + 1, flag, u),
+                                    _eikonal(i_nb + 1, j_nb, i_nb,
+                                             j_nb + 1, flag, u))
 
                 if flag[i_nb, j_nb] == INSIDE:
                     flag[i_nb, j_nb] = BAND
                     heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
                     if _run_inpaint:
-                        shifted_indices = indices_centered + np.array([
-                            i_nb, j_nb], np.int16)
-                        inpaint_point(i_nb, j_nb, image, flag,
-                                      u, shifted_indices, radius)
+                        shifted_indices = (indices_centered +
+                                           np.array([i_nb, j_nb], np.int16))
+
+                        _inpaint_point(i_nb, j_nb, image, flag,
+                                       u, shifted_indices, radius)
