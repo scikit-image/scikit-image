@@ -204,8 +204,8 @@ def censure_keypoints(image, no_of_scales=7, mode='DoB', threshold=0.03, rpc_thr
 
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
     # neighbourhood to zero
-    minimas = (minimum_filter(scales, (3, 3, 3)) == scales).astype(int) * scales
-    maximas = (maximum_filter(scales, (3, 3, 3)) == scales).astype(int) * scales
+    minimas = (minimum_filter(scales, (3, 3, 3)) == scales) * scales
+    maximas = (maximum_filter(scales, (3, 3, 3)) == scales) * scales
 
     # Suppressing minimas and maximas weaker than threshold
     minimas[np.abs(minimas) < threshold] = 0
