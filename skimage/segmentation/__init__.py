@@ -1,5 +1,4 @@
 from .random_walker_segmentation import random_walker
-from ._growcut import growcut
 from ._felzenszwalb import felzenszwalb
 from ._slic import slic
 from ._quickshift import quickshift
