@@ -11,16 +11,15 @@ from heapq import heappop, heappush
 from skimage.morphology import disk
 
 
-cdef:
-    cnp.uint8_t KNOWN = 0
-    cnp.uint8_t BAND = 1
-    cnp.uint8_t INSIDE = 2
+LARGE_VALUE = 1.0e6
+KNOWN = 0
+BAND = 1
+INSIDE = 2
 
 
 cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
                             Py_ssize_t i, Py_ssize_t j,
-                            cnp.uint8_t[:, :] flag,
-                            cnp.float_t factor=0.5):
+                            cnp.uint8_t[:, :] flag):
     """Return the x-gradient of the input array at a pixel.
 
     This gradient is structured to ignore inner, unknown regions as specified
@@ -37,8 +36,6 @@ cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
         inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    factor : float
-        0.5 for ``array = u``, 2.0 for ``array = image``
 
     Returns
     -------
@@ -52,7 +49,7 @@ cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
 
     if flag[i, j + 1] != INSIDE:
         if flag[i, j - 1] != INSIDE:
-            grad = (array[i, j + 1] - array[i, j - 1]) * factor
+            grad = (array[i, j + 1] - array[i, j - 1]) * 0.5
         else:
             grad = (array[i, j + 1] - array[i, j])
     else:
@@ -114,8 +111,8 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
     w = image.shape[1]
     Ia, Jx, Jy, norm = 0, 0, 0, 0
 
-    gradx_u = _grad_func(u, i, j, flag, factor=0.5)
-    grady_u = _grad_func(u.T, j, i, flag.T, factor=0.5)
+    gradx_u = _grad_func(u, i, j, flag)
+    grady_u = _grad_func(u.T, j, i, flag.T)
 
     for k in range(shifted_indices.shape[0]):
         i_nb = shifted_indices[k, 0]
@@ -129,22 +126,17 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         ry = i - i_nb
         rx = j - j_nb
 
-        # geometric_dst : more weightage to geometrically closer pixels
-        # levelset_dst : more weightage to points with nearly same time map, u
-        # direction : dot product, displacement vector and gradient vector
-
+        # Weight pixel contribution based on geometric distance.
         geometric_dst = 1. / ((rx * rx + ry * ry) * sqrt((rx * rx + ry * ry)))
+        # Weight pixel contribution based on distance from boundary.
         levelset_dst = 1. / (1 + abs(u[i_nb, j_nb] - u[i, j]))
+        # Dot product of displacement and gradient vectors.
         direction = abs(rx * gradx_u + ry * grady_u)
 
-        # Small values of ``direction``, implies displacement vector and
-        # gradient vector nearly perpendicular, hence force low contribution
-        if direction <= 0.01:
-            direction = 1.0e-6
         weight = geometric_dst * levelset_dst * direction
 
-        gradx_img = _grad_func(image, i_nb, j_nb, flag, factor=2.0)
-        grady_img = _grad_func(image.T, j_nb, i_nb, flag.T, factor=2.0)
+        gradx_img = _grad_func(image, i_nb, j_nb, flag)
+        grady_img = _grad_func(image.T, j_nb, i_nb, flag.T)
 
         Ia += weight * image[i_nb, j_nb]
         Jx -= weight * gradx_img * rx
@@ -152,8 +144,7 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         norm += weight
 
     # Inpainted value considering the effect of gradient of intensity value
-    image[i, j] = (Ia / norm + (Jx + Jy) / (sqrt(Jx * Jx + Jy * Jy) + 1.0e-20)
-                   + 0.5)
+    image[i, j] = (Ia / norm + (Jx + Jy) / sqrt(Jx * Jx + Jy * Jy))
 
 
 cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
@@ -197,7 +188,7 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 
     cdef cnp.float_t u_out, u1, u2, r, s
 
-    u_out = 1.0e6
+    u_out = LARGE_VALUE
     u1 = u[i1, j1]
     u2 = u[i2, j2]
 
@@ -304,7 +295,7 @@ cpdef fast_marching_method(cnp.float_t[:, ::1] image,
 
                     if _run_inpaint:
                         shifted_indices = (indices_centered +
-                                           np.array([i_nb, j_nb], np.int16))\
+                                           np.array([i_nb, j_nb], np.int16))
 
                         _inpaint_point(i_nb, j_nb, image, flag,
                                        u, shifted_indices, radius)
