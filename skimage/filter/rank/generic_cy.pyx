@@ -321,7 +321,7 @@ cdef inline double _kernel_otsu(Py_ssize_t* histo, double pop, dtype_t g,
     mu1 = 0.
     max_sigma_b = 0.
 
-    for i in range(max_bin):
+    for i in range(1, max_bin):
         P = histo[i] / pop
         new_q1 = q1 + P
         if new_q1 > 0:
