@@ -115,6 +115,11 @@ cdef class GraphCut:
         _left[:, 0] = 0
         _right[:, -1] = 0
 
+        self.up = _up.ravel()
+        self.down = _down.ravel()
+        self.left = _left.ravel()
+        self.right = _right.ravel()
+
         self.active = {}
 
         for i in range(self.size):
