@@ -96,7 +96,9 @@ def inpaint_efros(input_image, synth_mask, window=3, max_thresh=0.2):
 
         bound_list = np.transpose(np.where(boundary == 1))
 
-        for i_b, j_b in bound_list:
+        for k in xrange(bound_list.shape[0]):
+            i_b = bound_list[k, 0]
+            j_b = bound_list[k, 1]
             template = image[i_b + t_row, j_b + t_col]
             mask_template = mask[i_b + t_row, j_b + t_col]
             valid_mask = gauss_mask * (1 - mask_template)
