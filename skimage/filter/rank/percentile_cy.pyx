@@ -17,7 +17,7 @@ cdef inline double _kernel_autolevel(Py_ssize_t* histo, double pop, dtype_t g,
     if pop:
         sum = 0
         p1 = 1.0 - p1
-        for i in range(max_bin - 1):
+        for i in range(max_bin):
             sum += histo[i]
             if sum > p0 * pop:
                 imin = i
@@ -55,7 +55,7 @@ cdef inline double _kernel_gradient(Py_ssize_t* histo, double pop, dtype_t g,
                 imin = i
                 break
         sum = 0
-        for i in range((max_bin - 1), -1, -1):
+        for i in range(max_bin - 1, -1, -1):
             sum += histo[i]
             if sum >= p1 * pop:
                 imax = i
@@ -135,7 +135,7 @@ cdef inline double _kernel_enhance_contrast(Py_ssize_t* histo, double pop,
                 imin = i
                 break
         sum = 0
-        for i in range((max_bin - 1), -1, -1):
+        for i in range(max_bin - 1, -1, -1):
             sum += histo[i]
             if sum > p1 * pop:
                 imax = i
