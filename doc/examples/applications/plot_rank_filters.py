@@ -38,9 +38,10 @@ from `skimage.data` for all comparisons.
 import numpy as np
 import matplotlib.pyplot as plt
 
+from skimage import img_as_ubyte
 from skimage import data
 
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 
 plt.figure(figsize=(8, 3))
@@ -72,7 +73,7 @@ from skimage.filter.rank import median
 from skimage.morphology import disk
 
 noise = np.random.random(noisy_image.shape)
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
@@ -150,7 +151,7 @@ the central one.
 
 from skimage.filter.rank import bilateral_mean
 
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 selem = disk(10)
 
 bilat = bilateral_mean(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
@@ -200,7 +201,7 @@ equalization emphasizes every local gray-level variations.
 from skimage import exposure
 from skimage.filter import rank
 
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 
 # equalize globally and locally
 glob = exposure.equalize(noisy_image) * 255
@@ -252,7 +253,7 @@ picture.
 
 from skimage.filter.rank import autolevel
 
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 selem = disk(10)
 
 auto = autolevel(noisy_image.astype(np.uint16), disk(20))
@@ -323,7 +324,7 @@ otherwise by the minimum local.
 
 from skimage.filter.rank import enhance_contrast
 
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
@@ -357,7 +358,7 @@ percentile *p0* and *p1* instead of the local minimum and maximum.
 
 from skimage.filter.rank import enhance_contrast_percentile
 
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 
 penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
@@ -495,7 +496,7 @@ closing and morphological gradient.
 
 from skimage.filter.rank import maximum, minimum, gradient
 
-noisy_image = data.camera()
+noisy_image = img_as_ubyte(data.camera())
 
 closing = maximum(minimum(noisy_image, disk(5)), disk(5))
 opening = minimum(maximum(noisy_image, disk(5)), disk(5))
