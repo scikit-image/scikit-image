@@ -23,10 +23,10 @@ size. This implementation gives better results for large structuring elements.
 The local histogram is updated at each pixel as the structuring element window
 moves by, i.e. only those pixels entering and leaving the structuring element
 update the local histogram. The histogram size is 8-bit (256 bins) for 8-bit
-images and 2 to 12-bit (up to 4096 bins) for 16-bit images depending on the
-maximum value of the image. Pixel values higher than 4095 raise a ValueError.
+images and 2 to 16-bit for 16-bit images depending on the maximum value of the
+image.
 
-The filter is applied up to the image border, the neighboorhood used is adjusted
-accordingly. The user may provide a mask image (same size as input image) where
-non zero values are the part of the image participating in the histogram
-computation. By default the entire image is filtered.
+The filter is applied up to the image border, the neighboorhood used is
+adjusted accordingly. The user may provide a mask image (same size as input
+image) where non zero values are the part of the image participating in the
+histogram computation. By default the entire image is filtered.

@@ -3,19 +3,16 @@
 The local histogram is computed using a sliding window similar to the method
 described in [1]_.
 
-Input image must be 16-bit with a value < 4096 (i.e. 12 bit),
-the number of histogram bins is determined from the
-maximum value present in the image.
-
 The pixel neighborhood is defined by:
 
 * the given structuring element
-* an interval [g-s0,g+s1] in greylevel around g the processed pixel greylevel
+* an interval [g-s0, g+s1] in greylevel around g the processed pixel greylevel
 
 The kernel is flat (i.e. each pixel belonging to the neighborhood contributes
 equally).
 
-Result image is 16-bit with respect to the input image.
+Result image is 8-/16-bit or double with respect to the input image and the
+rank filter operation.
 
 References
 ----------
@@ -28,50 +25,27 @@ References
 
 import numpy as np
 from skimage import img_as_ubyte
-from skimage.filter.rank import _crank16_bilateral
-from skimage.filter.rank.generic import find_bitdepth
+
+from . import bilateral_cy
+from .generic import _handle_input
 
 
-__all__ = ['bilateral_mean', 'bilateral_pop']
+__all__ = ['mean_bilateral', 'pop_bilateral']
 
 
-def _apply(func8, func16, image, selem, out, mask, shift_x, shift_y, s0, s1):
-    selem = img_as_ubyte(selem > 0)
-    image = np.ascontiguousarray(image)
+def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
+           out_dtype=None):
 
-    if mask is None:
-        mask = np.ones(image.shape, dtype=np.uint8)
-    else:
-        mask = np.ascontiguousarray(mask)
-        mask = img_as_ubyte(mask)
+    image, selem, out, mask, max_bin = _handle_input(image, selem, out, mask,
+                                                     out_dtype)
 
-    if image is out:
-        raise NotImplementedError("Cannot perform rank operation in place.")
-
-    if image.dtype == np.uint8:
-        if func8 is None:
-            raise TypeError("Not implemented for uint8 image.")
-        if out is None:
-            out = np.zeros(image.shape, dtype=np.uint8)
-        func8(image, selem, shift_x=shift_x, shift_y=shift_y,
-              mask=mask, out=out, s0=s0, s1=s1)
-    elif image.dtype == np.uint16:
-        if func16 is None:
-            raise TypeError("Not implemented for uint16 image.")
-        if out is None:
-            out = np.zeros(image.shape, dtype=np.uint16)
-        bitdepth = find_bitdepth(image)
-        if bitdepth > 11:
-            raise ValueError("Only uint16 <4096 image (12bit) supported.")
-        func16(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
-               bitdepth=bitdepth + 1, out=out, s0=s0, s1=s1)
-    else:
-        raise TypeError("Only uint8 and uint16 image supported.")
+    func(image, selem, shift_x=shift_x, shift_y=shift_y, mask=mask,
+         out=out, max_bin=max_bin, s0=s0, s1=s1)
 
     return out
 
 
-def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
+def mean_bilateral(image, selem, out=None, mask=None, shift_x=False,
                    shift_y=False, s0=10, s1=10):
     """Apply a flat kernel bilateral filter.
 
@@ -81,43 +55,38 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     Spatial closeness is measured by considering only the local pixel
     neighborhood given by a structuring element (selem).
 
-    Radiometric similarity is defined by the greylevel interval [g-s0,g+s1]
+    Radiometric similarity is defined by the greylevel interval [g-s0, g+s1]
     where g is the current pixel greylevel. Only pixels belonging to the
     structuring element AND having a greylevel inside this interval are
     averaged. Return greyscale local bilateral_mean of an image.
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint16). As the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : (int)
+    shift_x, shift_y : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        define the [s0, s1] interval to be considered for computing the value.
+        Define the [s0, s1] interval around the greyvalue of the center pixel
+        to be considered for computing the value.
 
     Returns
     -------
-    out : uint16 array
-        The result of the local bilateral mean.
+    out : ndarray (same dtype as input image)
+        Output image.
 
     See also
     --------
-    skimage.filter.denoise_bilateral() for a gaussian bilateral filter.
-
-    Notes
-    -----
-
-    * input image are 16-bit only
+    skimage.filter.denoise_bilateral for a gaussian bilateral filter.
 
     Examples
     --------
@@ -128,13 +97,14 @@ def bilateral_mean(image, selem, out=None, mask=None, shift_x=False,
     >>> ima = data.camera().astype(np.uint16)
     >>> # bilateral filtering of cameraman image using a flat kernel
     >>> bilat_ima = bilateral_mean(ima, disk(20), s0=10,s1=10)
+
     """
 
-    return _apply(None, _crank16_bilateral.mean, image, selem, out=out,
+    return _apply(bilateral_cy._mean, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
 
 
-def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
+def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=False, s0=10, s1=10):
     """Return the number (population) of pixels actually inside the bilateral
     neighborhood, i.e. being inside the structuring element AND having a gray
@@ -142,32 +112,27 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
 
     Parameters
     ----------
-    image : ndarray
-        Image array (uint16). As the algorithm uses max. 12bit histogram,
-        an exception will be raised if image has a value > 4095
+    image : ndarray (uint8, uint16)
+        Image array.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray (same dtype as input)
         If None, a new array will be allocated.
-    mask : ndarray (uint8)
+    mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
-    shift_x, shift_y : (int)
+    shift_x, shift_y : int
         Offset added to the structuring element center point. Shift is bounded
         to the structuring element sizes (center must be inside the given
         structuring element).
     s0, s1 : int
-        define the [s0, s1] interval to be considered for computing the value.
+        Define the [s0, s1] interval around the greyvalue of the center pixel
+        to be considered for computing the value.
 
     Returns
     -------
-    out : uint16 array
-        the local number of pixels inside the bilateral neighborhood
-
-    Notes
-    -----
-
-    * input image are 16-bit only
+    out : ndarray (same dtype as input image)
+        Output image.
 
     Examples
     --------
@@ -175,10 +140,10 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
     >>> ima16 = 255 * np.array([[0, 0, 0, 0, 0],
-    ...                        [0, 1, 1, 1, 0],
-    ...                        [0, 1, 1, 1, 0],
-    ...                        [0, 1, 1, 1, 0],
-    ...                        [0, 0, 0, 0, 0]], dtype=np.uint16)
+    ...                         [0, 1, 1, 1, 0],
+    ...                         [0, 1, 1, 1, 0],
+    ...                         [0, 1, 1, 1, 0],
+    ...                         [0, 0, 0, 0, 0]], dtype=np.uint16)
     >>> rank.bilateral_pop(ima16, square(3), s0=10,s1=10)
     array([[3, 4, 3, 4, 3],
            [4, 4, 6, 4, 4],
@@ -188,5 +153,5 @@ def bilateral_pop(image, selem, out=None, mask=None, shift_x=False,
 
     """
 
-    return _apply(None, _crank16_bilateral.pop, image, selem, out=out,
+    return _apply(bilateral_cy._pop, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
