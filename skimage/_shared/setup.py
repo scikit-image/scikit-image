@@ -16,12 +16,21 @@ def configuration(parent_package='', top_path=None):
     cython(['geometry.pyx'], working_path=base_path)
     cython(['interpolation.pyx'], working_path=base_path)
     cython(['transform.pyx'], working_path=base_path)
+    cython(['PrefixSum.pyx'], working_path=base_path)
+    cython(['StreamCompact.pyx'], working_path=base_path)
+    cython(['IncrementalTileList.pyx'], working_path=base_path)
 
     config.add_extension('geometry', sources=['geometry.c'])
     config.add_extension('interpolation', sources=['interpolation.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('transform', sources=['transform.c'],
                          include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('PrefixSum', sources=['PrefixSum.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('StreamCompact', sources=['StreamCompact.c'],
+        include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('IncrementalTileList', sources=['IncrementalTileList.c'],
+        include_dirs=[get_numpy_include_dirs()])
 
     return config
 
