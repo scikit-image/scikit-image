@@ -12,6 +12,7 @@ paint_region1 = (slice(430, 450), slice(360, 410))
 mask = np.zeros_like(image, dtype=np.uint8)
 mask[paint_region] = 1
 mask[paint_region1] = 1
+image[mask == 1] = 0
 
 painted = inpaint.inpaint_fmm(image, mask)
 

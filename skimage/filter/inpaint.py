@@ -3,13 +3,9 @@ import heapq
 from skimage.morphology import dilation, disk
 
 from skimage.filter._inpaint import fast_marching_method
+from skimage.filter._inpaint import BAND, INSIDE, LARGE_VALUE
 
 __all__ = ['inpaint_fmm']
-
-
-KNOWN = 0
-BAND = 1
-INSIDE = 2
 
 
 def _init_fmm(mask):
@@ -52,10 +48,8 @@ def _init_fmm(mask):
     band = np.logical_xor(mask, outside).astype(np.uint8)
 
     flag = (2 * outside) - band
-    
-    # u <- 0 : ``flag`` equal to BAND or KNOWN
-    # u <- 1.0e6 (arbitrarily large value) : ``flag`` equal to INSIDE
-    u = np.where(flag == INSIDE, 1.0e6, 0)
+
+    u = np.where(flag == INSIDE, LARGE_VALUE, 0)
 
     heap = []
     # Store the ``u`` and indices of pixels marked as BAND points
@@ -67,12 +61,12 @@ def _init_fmm(mask):
 
 
 def inpaint_fmm(input_image, inpaint_mask, radius=5):
-    """This function reconstructs masked regions of an image using the fast 
-    marching method to propagate information across the boundary between 
-    known and unknown regions. 
-    
-    Image Inpainting technique based on the Fast Marching Method implementation 
-    as described in [1]_. FMM is used for computing the evolution of boundary 
+    """This function reconstructs masked regions of an image using the fast
+    marching method to propagate information across the boundary between
+    known and unknown regions.
+
+    Image Inpainting technique based on the Fast Marching Method implementation
+    as described in [1]_. FMM is used for computing the evolution of boundary
     moving in a direction *normal* to itself.
 
     Parameters
@@ -128,17 +122,17 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     Examples
     --------
     >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
     >>> mask = np.zeros((8,8), np.uint8)
     >>> mask[2:-2, 2:-2] = 1
     >>> image = np.arange(64).reshape(8,8)
+    >>> image[mask == 1] = 0
     >>> image
     array([[ 0,  1,  2,  3,  4,  5,  6,  7],
            [ 8,  9, 10, 11, 12, 13, 14, 15],
-           [16, 17, 18, 19, 20, 21, 22, 23],
-           [24, 25, 26, 27, 28, 29, 30, 31],
-           [32, 33, 34, 35, 36, 37, 38, 39],
-           [40, 41, 42, 43, 44, 45, 46, 47],
+           [16, 17,  0,  0,  0,  0, 22, 23],
+           [24, 25,  0,  0,  0,  0, 30, 31],
+           [32, 33,  0,  0,  0,  0, 38, 39],
+           [40, 41,  0,  0,  0,  0, 46, 47],
            [48, 49, 50, 51, 52, 53, 54, 55],
            [56, 57, 58, 59, 60, 61, 62, 63]])
     >>> from skimage.filter.inpaint import inpaint_fmm
@@ -152,8 +146,6 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
            [ 40.,  41.,  41.,  44.,  46.,  45.,  46.,  47.],
            [ 48.,  49.,  50.,  51.,  52.,  53.,  54.,  55.],
            [ 56.,  57.,  58.,  59.,  60.,  61.,  62.,  63.]])
-    >>> plt.imshow(image); plt.show()
-    >>> plt.imshow(painted); plt.show()
 
     """
 
@@ -165,12 +157,10 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
             raise TypeError("The second dimension of 'inpaint_mask' and "
                             "'input_image' do not match. ")
 
-    input_image[inpaint_mask == 1] = 0
-    
     h, w = input_image.shape
     painted = np.zeros((h + 2, w + 2), np.float)
     mask = np.zeros((h + 2, w + 2), np.uint8)
-    
+
     painted[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
