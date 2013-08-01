@@ -82,7 +82,9 @@ def inpaint_efros(input_image, synth_mask, window=3, max_thresh=0.2):
     image[offset:offset + h, offset:offset + w] = input_image
     mask[offset:offset + h, offset:offset + w] = synth_mask
 
-    t_row, t_col = np.ogrid[(-offset):(offset + 1), (-offset):(offset + 1)]
+    t_col = np.arange(-offset, offset + 1, 1, dtype=np.int16)
+    t_row = np.arange(-offset, offset + 1, 1, dtype=np.int16)[:, np.newaxis]
+
     sigma = window / 6.4
     gauss_mask = _gaussian(sigma, (window, window))
 
