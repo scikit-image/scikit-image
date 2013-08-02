@@ -49,6 +49,15 @@ def _get_filtered_image(image, n_scales, mode):
                                        _octagon_filter(outer_shape[i][0],
                                        outer_shape[i][1], inner_shape[i][0],
                                        inner_shape[i][1]))
+    else:
+        shape = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90,
+                  128]
+        filter_shape = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
+                        (9, 6),(11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
+        for i in range(n_scales):
+            scales[:, :, i] = convolve(image,
+                                       _star_filter(shape[filter_shape[i][0]],
+                                                    shape[filter_shape[i][1]]))
 
     return scales
 
@@ -70,13 +79,46 @@ def _oct(m, n):
 def _octagon_filter(mo, no, mi, ni):
     outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
     inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
-    outer_wt = 1.0 / (outer - inner)
-    inner_wt = 1.0 / inner
+    outer_weight = 1.0 / (outer - inner)
+    inner_weight = 1.0 / inner
     c = ((mo + 2 * no) - (mi + 2 * ni)) / 2
     outer_oct = _oct(mo, no)
     inner_oct = np.zeros((mo + 2 * no, mo + 2 * no))
-    inner_oct[c:-c, c:-c] = _oct(mi, ni)
-    bfilter = outer_wt * outer_oct - (outer_wt + inner_wt) * inner_oct
+    inner_oct[c: -c, c: -c] = _oct(mi, ni)
+    bfilter = (outer_weight * outer_oct -
+               (outer_weight + inner_weight) * inner_oct)
+    return bfilter
+
+
+def _star(a):
+    if a == 1:
+        bfilter = np.zeros((3, 3))
+        bfilter[:] = 1
+        return bfilter
+    m = 2 * a + 1
+    n = a / 2
+    selem_square = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
+    selem_square[n: m + n, n: m + n] = 1
+    selem_triangle = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
+    selem_triangle[(m + 2 * n - 1) / 2, 0] = 1
+    selem_triangle[(m + 1) / 2, n - 1] = 1
+    selem_triangle[(m + 4 * n - 3) / 2, n - 1] = 1
+    selem_triangle = convex_hull_image(selem_triangle).astype(int)
+    selem_triangle += selem_triangle[:, ::-1] + selem_triangle.T + selem_triangle.T[::-1, :]
+    return selem_square + selem_triangle
+
+
+def _star_filter(m, n):
+    outer = 4 * m**2 + 4 * m + 1 + 4 * (m / 2)**2
+    inner = 4 * n**2 + 4 * n + 1 + 4 * (n / 2)**2
+    outer_weight = 1.0 / (outer - inner)
+    inner_weight = 1.0 / inner
+    c = m + m / 2 - n - n / 2
+    outer_star = _star(m)
+    inner_star = np.zeros((outer_star.shape))
+    inner_star[c: -c, c: -c] = _star(n)
+    bfilter = (outer_weight * outer_star -
+               (outer_weight + inner_weight) * inner_star)
     return bfilter
 
 
@@ -106,7 +148,7 @@ def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03,
         Number of scales to extract keypoints from. The keypoints will be
         extracted from all the scales except the first and the last.
 
-    mode : {'DoB', 'Octagon', 'STAR'}
+    mode : ('DoB', 'Octagon', 'STAR')
         Type of bilevel filter used to get the scales of input image. Possible
         values are 'DoB', 'Octagon' and 'STAR'.
 
