@@ -109,14 +109,12 @@ def _star(a):
 
 
 def _star_filter(m, n):
-    outer = 4 * m**2 + 4 * m + 1 + 4 * (m / 2)**2
-    inner = 4 * n**2 + 4 * n + 1 + 4 * (n / 2)**2
-    outer_weight = 1.0 / (outer - inner)
-    inner_weight = 1.0 / inner
     c = m + m / 2 - n - n / 2
     outer_star = _star(m)
     inner_star = np.zeros((outer_star.shape))
     inner_star[c: -c, c: -c] = _star(n)
+    outer_weight = 1.0 / (np.sum(outer_star - inner_star))
+    inner_weight = 1.0 / np.sum(inner_star)
     bfilter = (outer_weight * outer_star -
                (outer_weight + inner_weight) * inner_star)
     return bfilter
