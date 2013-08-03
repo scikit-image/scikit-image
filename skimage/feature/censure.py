@@ -51,7 +51,7 @@ def _get_filtered_image(image, n_scales, mode):
                                        inner_shape[i][1]))
     else:
         shape = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90,
-                  128]
+                 128]
         filter_shape = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
                         (9, 6),(11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
         for i in range(n_scales):
@@ -104,7 +104,8 @@ def _star(a):
     selem_triangle[(m + 1) / 2, n - 1] = 1
     selem_triangle[(m + 4 * n - 3) / 2, n - 1] = 1
     selem_triangle = convex_hull_image(selem_triangle).astype(int)
-    selem_triangle += selem_triangle[:, ::-1] + selem_triangle.T + selem_triangle.T[::-1, :]
+    selem_triangle += (selem_triangle[:, ::-1] + selem_triangle.T +
+                       selem_triangle.T[::-1, :])
     return selem_square + selem_triangle
 
 
