@@ -154,6 +154,9 @@ def _sum_sq_diff(input_image, template, valid_mask):
                           input_image.shape[1] - window_size[1] + 1,) +
                    window_size,
                    strides=input_image.strides * 2)
+    # `(y-template)**2` followed by reduction -> 4D array intermediate.
+    # For einsum, labels are used to iterate through axes, order is imp: 'ij',
+    # row wise iteration. Term after `->` represents the order for output array
     ssd = np.einsum('ijkl, kl, kl->ij', y, template, valid_mask,
                     dtype=np.float)
     ssd *= - 2
