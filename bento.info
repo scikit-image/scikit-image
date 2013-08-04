@@ -153,9 +153,9 @@ Library:
     Extension: skimage.filter.rank._crank16_bilateral
         Sources:
             skimage/filter/rank/_crank16_bilateral.pyx
-    Extension: skimage.filter._inpaint
+    Extension: skimage.filter._inpaint_fmm
         Sources:
-            skimage/filter/_inpaint.pyx
+            skimage/filter/_inpaint_fmm.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

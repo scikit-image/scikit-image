@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal
 from skimage.filter.inpaint import inpaint_fmm, _init_fmm
-from skimage.filter._inpaint import fast_marching_method
+from skimage.filter._inpaint_fmm import fast_marching_method
 
 
 def test_basic():

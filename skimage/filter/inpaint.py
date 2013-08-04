@@ -2,8 +2,8 @@ import numpy as np
 import heapq
 from skimage.morphology import dilation, disk
 
-from skimage.filter._inpaint import fast_marching_method
-from skimage.filter._inpaint import BAND, INSIDE, LARGE_VALUE
+from skimage.filter._inpaint_fmm import fast_marching_method
+from skimage.filter._inpaint_fmm import BAND, INSIDE, LARGE_VALUE
 
 __all__ = ['inpaint_fmm']
 
