@@ -4,6 +4,7 @@ import numpy as np
 from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
 from skimage.morphology import label
+from skimage.util import unique_rows
 
 
 def convex_hull_image(image):
@@ -35,6 +36,9 @@ def convex_hull_image(image):
     # limits the number of coordinates to examine for the virtual
     # hull.
     coords = possible_hull(image.astype(np.uint8))
+    # repeated coordinates can *sometimes* cause problems in 
+    # scipy.spatial.Delaunay, so we remove them.
+    coords = unique_rows(coords)
     N = len(coords)
 
     # Add a vertex for the middle of each pixel edge
