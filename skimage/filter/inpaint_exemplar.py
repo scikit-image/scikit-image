@@ -28,8 +28,6 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
 
     """
 
-    input_image[synth_mask] = 0
-
     h, w = input_image.shape
     offset = window / 2
 
@@ -37,11 +35,6 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
     pad_size = (h + window - 1, w + window - 1)
     image = input_image.mean() * np.ones(pad_size, dtype=np.uint8)
     mask = np.zeros(pad_size, np.uint8)
-    image_grad_y = np.zeros((h + window - 3, w + window - 3), np.int16)
-    image_grad_x = np.zeros((h + window - 3, w + window - 3), np.int16)
-    nx = np.zeros((h + window - 3, w + window - 3), np.int8)
-    ny = np.zeros((h + window - 3, w + window - 3), np.int8)
-    ssd = np.zeros((h, w), np.float)
 
     image[offset:offset + h, offset:offset + w] = input_image
     mask[offset:offset + h, offset:offset + w] = synth_mask
@@ -81,8 +74,8 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
             temp_grad_x = image_grad_x[(i - 1) + t_row, (j - 1) + t_col]
             temp_grad_y = image_grad_y[(i - 1) + t_row, (j - 1) + t_col]
             mod_grad = (temp_grad_x ** 2 + temp_grad_y ** 2)
-            ind_max = tuple(np.transpose(np.where(
-                mod_grad == mod_grad.max()))[0])
+            ind_max = tuple(np.transpose(
+                np.where(mod_grad == mod_grad.max()))[0])
             data_term = abs(temp_grad_x[ind_max] * nx[ind_max] - temp_grad_y[
                 ind_max] * ny[ind_max])
             data_term /= mod_grad[ind_max] * (nx[ind_max] ** 2 + ny[
@@ -99,12 +92,7 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
         mask_template = mask[i_max + t_row, j_max + t_col]
         valid_mask = gauss_mask * (1 - mask_template)
 
-        total_weight = valid_mask.sum()
-        for i in xrange(h):
-            for j in xrange(w):
-                patch = image[i + t_row, j + t_col]
-                dist = (template - patch) ** 2
-                ssd[i, j] = (dist * valid_mask).sum() / total_weight
+        ssd = _sum_sq_diff(image, template, valid_mask)
 
         # Remove the case where sample == template
         ssd[i_max - offset, j_max - offset] = 1.
@@ -123,8 +111,60 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
     return image[offset:-offset, offset:-offset]
 
 
+def _sum_sq_diff(input_image, template, valid_mask):
+    """This function performs template matching. The metric used is Sum of
+    Squared Difference (SSD). The input taken is the template who's match is
+    to be found in image.
+
+    Parameters
+    ---------
+    input_image : array, np.float
+        Input image of shape (M, N)
+    template : array, np.float
+        (window, window) Template who's match is to be found in input_image.
+    valid_mask : array, np.float
+        (window, window), governs differences which are to be considered for
+        SSD computation. Masks out the unknown or unfilled pixels and gives a
+        higher weightage to the center pixel, decreasing as the distance from
+        center pixel increases.
+
+    Returns
+    ------
+    ssd : array, np.float
+        (M - window +1, N - window + 1) The desired SSD values for all
+        positions in the input_image
+
+    """
+    total_weight = valid_mask.sum()
+    window_size = template.shape
+    y = as_strided(input_image,
+                   shape=(input_image.shape[0] - window_size[0] + 1,
+                          input_image.shape[1] - window_size[1] + 1,) +
+                   window_size,
+                   strides=input_image.strides * 2)
+    ssd = np.einsum('ijkl, kl, kl->ij', y, template, valid_mask,
+                    dtype=np.float)
+    ssd *= - 2
+    ssd += np.einsum('ijkl, ijkl, kl->ij', y, y, valid_mask)
+    ssd += np.einsum('ij, ij, ij', template, template, valid_mask)
+    return ssd / total_weight
+
+
 def _gaussian(sigma=0.5, size=None):
-    """Gaussian kernel numpy array with given sigma and shape.
+    """Gaussian kernel array with given sigma and shape about the center pixel.
+
+    Parameters
+    ---------
+    sigma : float
+        Standard deviation
+    size : tuple
+        Shape of the output kernel
+
+    Returns
+    ------
+    gauss_mask : array, np.float
+        Gaussian kernel of shape ``size``
+
     """
     sigma = max(abs(sigma), 1e-10)
 
@@ -133,5 +173,6 @@ def _gaussian(sigma=0.5, size=None):
 
     Kx = np.exp(-x ** 2 / (2 * sigma ** 2))
     Ky = np.exp(-y ** 2 / (2 * sigma ** 2))
-    ans = np.outer(Kx, Ky) / (2.0 * np.pi * sigma ** 2)
-    return ans / ans.sum()
+    gauss_mask = np.outer(Kx, Ky) / (2.0 * np.pi * sigma ** 2)
+
+    return gauss_mask / gauss_mask.sum()
