@@ -1,5 +1,5 @@
-from PyQt5.QtOpenGL import QGLWidget
-from PyQt5.QtCore import QSize, Qt, QEvent
+from PyQt4.QtOpenGL import QGLWidget
+from PyQt4.QtCore import QSize, Qt, QEvent
 
 import os, sys
 import numpy as np

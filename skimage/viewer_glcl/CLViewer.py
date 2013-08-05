@@ -1,12 +1,11 @@
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QVBoxLayout, QScrollArea, QMainWindow, QSlider,\
+from PyQt4 import QtCore
+from PyQt4.QtGui import QVBoxLayout, QScrollArea, QMainWindow, QSlider,\
     QListWidget, QAbstractItemView, QWidget, QGridLayout, QSplitter,\
-    QPushButton, QListWidgetItem, QLabel, QApplication
-from PyQt5.QtGui import QImage, QPixmap, QCursor
+    QPushButton, QListWidgetItem, QLabel, QApplication, QImage, QPixmap, QCursor
 
 import pyopencl as cl
 
-from PyQt5.QtCore import Qt as CLViewerEnum
+from PyQt4.QtCore import Qt as CLViewerEnum
 
 from skimage.viewer_glcl.CLCanvas import CLCanvas
 
