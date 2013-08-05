@@ -66,6 +66,21 @@ class TestSElem():
     def test_selem_octahedron(self):
         self.strel_worker_3d("diamond-matlab-output.npz", selem.octahedron)
 
+    def test_selem_octagon(self):
+        expected_mask = array([[0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                               [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                               [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                               [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                               [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                               [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                               [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0]], dtype=uint8)
+        actual_mask = selem.octagon(5, 3)
+        assert_equal(expected_mask, actual_mask)
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
