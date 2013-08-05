@@ -10,7 +10,7 @@ from .censure_cy import _censure_dob_loop
 
 
 def _get_filtered_image(image, n_scales, mode):
-    # TODO : Implement the STAR mode
+
     scales = np.zeros((image.shape[0], image.shape[1], n_scales),
                       dtype=np.double)
 
@@ -132,7 +132,7 @@ def _suppress_line(response, sigma, rpc_threshold):
     return response
 
 
-def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.03,
+def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.15,
                       rpc_threshold=10):
     """
     Extracts Censure keypoints along with the corresponding scale using
@@ -161,8 +161,11 @@ def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.03,
 
     Returns
     -------
-    keypoints : (N, 3) array
-        Location of extracted keypoints along with the corresponding scale.
+    keypoints : (N, 2) array
+        Location of extracted keypoints.
+
+    scale : (N, 1) array
+        The corresponding scale of the N extracted keypoints.
 
     References
     ----------
@@ -206,6 +209,10 @@ def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.03,
                                            rpc_threshold)
 
     # Returning keypoints with its scale
-    keypoints = (np.transpose(np.nonzero(response[:, :, 1:n_scales - 1]))
+    keypoints_with_scale = (np.transpose(np.nonzero(response[:, :, 1:n_scales - 1]))
                  + [0, 0, 2])
-    return keypoints
+
+    keypoints = keypoints_with_scale[:, :2]
+    scale = keypoints_with_scale[:, -1]
+
+    return keypoints, scale
