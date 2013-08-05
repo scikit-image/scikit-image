@@ -44,6 +44,11 @@ def test_chelsea():
     data.chelsea()
 
 
+def test_coffee():
+    """ Test that "coffee" image can be loaded. """
+    data.coffee()
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
