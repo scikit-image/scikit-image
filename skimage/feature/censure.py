@@ -132,7 +132,7 @@ def _suppress_line(response, sigma, rpc_threshold):
     return response
 
 
-def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03,
+def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.03,
                       rpc_threshold=10):
     """
     Extracts Censure keypoints along with the corresponding scale using
@@ -151,7 +151,7 @@ def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03,
         Type of bilevel filter used to get the scales of input image. Possible
         values are 'DoB', 'Octagon' and 'STAR'.
 
-    threshold : float
+    nms_threshold : float
         Threshold value used to suppress maximas and minimas with a weak
         magnitude response obtained after Non-Maximal Suppression.
 
@@ -193,9 +193,9 @@ def censure_keypoints(image, n_scales=7, mode='DoB', threshold=0.03,
     minimas = (minimum_filter(scales, (3, 3, 3)) == scales) * scales
     maximas = (maximum_filter(scales, (3, 3, 3)) == scales) * scales
 
-    # Suppressing minimas and maximas weaker than threshold
-    minimas[np.abs(minimas) < threshold] = 0
-    maximas[np.abs(maximas) < threshold] = 0
+    # Suppressing minimas and maximas weaker than nms_threshold
+    minimas[np.abs(minimas) < nms_threshold] = 0
+    maximas[np.abs(maximas) < nms_threshold] = 0
     response = maximas + minimas
 
     for i in range(1, n_scales - 1):
