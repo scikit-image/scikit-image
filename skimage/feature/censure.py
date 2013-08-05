@@ -1,12 +1,12 @@
 import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 
-from ..transform import integral_image
-from ..feature.corner import _compute_auto_correlation
-from ..util import img_as_float
-from ..morphology import convex_hull_image
+from skimage.transform import integral_image
+from skimage.feature.corner import _compute_auto_correlation
+from skimage.util import img_as_float
+from skimage.morphology import convex_hull_image
 
-from .censure_cy import _censure_dob_loop
+from skimage.feature.censure_cy import _censure_dob_loop
 
 
 def _get_filtered_image(image, n_scales, mode):
@@ -43,15 +43,13 @@ def _get_filtered_image(image, n_scales, mode):
                        (15, 10)]
         inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
 
-        # 
         for i in range(n_scales):
             scales[:, :, i] = convolve(image,
                                        _octagon_filter(outer_shape[i][0],
                                        outer_shape[i][1], inner_shape[i][0],
                                        inner_shape[i][1]))
     else:
-        shape = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90,
-                 128]
+        shape = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90, 128]
         filter_shape = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
                         (9, 6),(11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
         for i in range(n_scales):
@@ -69,7 +67,7 @@ def _oct(m, n):
     f[n, 0] = 1
     f[0, m + n -1] = 1
     f[m + n - 1, 0] = 1
-    f[-1, n] = 1 
+    f[-1, n] = 1
     f[n, -1] = 1
     f[-1, m + n - 1] = 1
     f[m + n - 1, -1] = 1
@@ -121,19 +119,15 @@ def _star_filter(m, n):
     return bfilter
 
 
-def _suppress_line(response, sigma, rpc_threshold):
-    Axx, Axy, Ayy = _compute_auto_correlation(response, sigma)
-    detA = Axx * Ayy - Axy**2
-    traceA = Axx + Ayy
-
-    # ratio of principal curvatures
-    rpc = traceA**2 / (detA + 0.001)
-    response[rpc > rpc_threshold] = 0
-    return response
+def _suppress_lines(feature_mask, image, sigma, line_threshold):
+    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+    feature_mask[(Axx + Ayy) * (Axx + Ayy)
+                 < line_threshold * (Axx * Ayy - Axy * Axy)] = 0
+    return feature_mask
 
 
-def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.15,
-                      rpc_threshold=10):
+def censure_keypoints(image, n_scales=7, mode='DoB', non_max_threshold=0.15,
+                      line_threshold=10):
     """
     Extracts Censure keypoints along with the corresponding scale using
     either Difference of Boxes, Octagon or STAR bilevel filter.
@@ -151,11 +145,11 @@ def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.15,
         Type of bilevel filter used to get the scales of input image. Possible
         values are 'DoB', 'Octagon' and 'STAR'.
 
-    nms_threshold : float
+    non_max_threshold : float
         Threshold value used to suppress maximas and minimas with a weak
         magnitude response obtained after Non-Maximal Suppression.
 
-    rpc_threshold : float
+    line_threshold : float
         Threshold for rejecting interest points which have ratio of principal
         curvatures greater than this value.
 
@@ -176,7 +170,7 @@ def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.15,
 
     .. [2] Adam Schmidt, Marek Kraft, Michal Fularz and Zuzanna Domagala
            "Comparative Assessment of Point Feature Detectors and
-           Descriptors in the Context of Robot Navigation" 
+           Descriptors in the Context of Robot Navigation"
            http://www.jamris.org/01_2013/saveas.php?QUEST=JAMRIS_No01_2013_P_11-20.pdf
 
     """
@@ -189,30 +183,25 @@ def censure_keypoints(image, n_scales=7, mode='DoB', nms_threshold=0.15,
     image = np.ascontiguousarray(image)
 
     # Generating all the scales
-    scales = _get_filtered_image(image, n_scales, mode)
+    filter_response = _get_filtered_image(image, n_scales, mode)
 
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
     # neighbourhood to zero
-    minimas = (minimum_filter(scales, (3, 3, 3)) == scales) * scales
-    maximas = (maximum_filter(scales, (3, 3, 3)) == scales) * scales
+    minimas = minimum_filter(filter_response, (3, 3, 3)) == filter_response
+    maximas = maximum_filter(filter_response, (3, 3, 3)) == filter_response
 
-    # Suppressing minimas and maximas weaker than nms_threshold
-    minimas[np.abs(minimas) < nms_threshold] = 0
-    maximas[np.abs(maximas) < nms_threshold] = 0
-    response = maximas + minimas
+    feature_mask = minimas | maximas
+    feature_mask[filter_response < non_max_threshold] = False
 
     for i in range(1, n_scales - 1):
         # sigma = (window_size - 1) / 6.0
         # window_size = 7 + 2 * i
         # Hence sigma = 1 + i / 3.0
-        response[:, :, i] = _suppress_line(response[:, :, i], (1 + i / 3.0),
-                                           rpc_threshold)
+        feature_mask[:, :, i] = _suppress_lines(feature_mask[:, :, i], image,
+                                                (1 + i / 3.0), line_threshold)
 
-    # Returning keypoints with its scale
-    keypoints_with_scale = (np.transpose(np.nonzero(response[:, :, 1:n_scales - 1]))
-                 + [0, 0, 2])
+    rows, cols, scales = np.nonzero(feature_mask[..., 1:n_scales - 1])
+    keypoints = np.column_stack([rows, cols])
+    scales = scales + 2
 
-    keypoints = keypoints_with_scale[:, :2]
-    scale = keypoints_with_scale[:, -1]
-
-    return keypoints, scale
+    return keypoints, scales
