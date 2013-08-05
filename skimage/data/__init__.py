@@ -184,3 +184,16 @@ def chelsea():
 
     """
     return load("chelsea.png")
+
+
+def coffee():
+    """Coffee cup.
+
+    An example with several shapes (including an ellipse).
+
+    Notes
+    -----
+    No copyright restrictions.  CC0 by the photographer.
+
+    """
+    return load("coffee.png")
