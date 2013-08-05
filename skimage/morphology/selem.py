@@ -276,18 +276,17 @@ def star(a, dtype=np.uint8):
     """
     from . import convex_hull_image
     if a == 1:
-        bfilter = np.zeros((3, 3))
+        bfilter = np.zeros((3, 3), dtype)
         bfilter[:] = 1
         return bfilter
     m = 2 * a + 1
     n = a / 2
-    selem_square = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
+    selem_square = np.zeros((m + 2 * n, m + 2 * n))
     selem_square[n: m + n, n: m + n] = 1
-    selem_triangle = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
-    selem_triangle[(m + 2 * n - 1) / 2, 0] = 1
-    selem_triangle[(m + 1) / 2, n - 1] = 1
-    selem_triangle[(m + 4 * n - 3) / 2, n - 1] = 1
-    selem_triangle = convex_hull_image(selem_triangle).astype(int)
-    selem_triangle += (selem_triangle[:, ::-1] + selem_triangle.T +
-                       selem_triangle.T[::-1, :])
-    return selem_square + selem_triangle
+    c = (m + 2 * n - 1) / 2
+    selem_rotated = np.zeros((m + 2 * n, m + 2 * n))
+    selem_rotated[0, c] = selem_rotated[-1, c] = selem_rotated[c, 0] = selem_rotated[c, -1] = 1
+    selem_rotated = convex_hull_image(selem_rotated).astype(int)
+    selem = selem_square + selem_rotated
+    selem[selem > 0] = 1
+    return selem.astype(dtype)
