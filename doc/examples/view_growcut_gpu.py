@@ -11,7 +11,7 @@ from skimage._shared.Image2D import Image2D
 from skimage.util.clutil import roundUp, padArray2D
 from skimage.segmentation import GrowCut_GPU
 
-from PyQt5.QtCore import QTimer
+from PyQt4.QtCore import QTimer
 
 from skimage import data_dir
 
