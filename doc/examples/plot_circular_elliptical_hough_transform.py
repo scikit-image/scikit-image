@@ -110,27 +110,28 @@ from skimage.transform import hough_ellipse
 from skimage.draw import ellipse_perimeter
 
 # Load picture, convert to grayscale and detect edges
-image_rgb = data.load('coffee.png')[100:240, 110:250]
+image_rgb = data.load('coffee.png')[0:220, 100:450]
 image_gray = color.rgb2gray(image_rgb)
 edges = filter.canny(image_gray, sigma=2.0,
-                     low_threshold=0.1, high_threshold=0.6)
+                     low_threshold=0.55, high_threshold=0.8)
 
 # Perform a Hough Transform
 # The accuracy corresponds to the bin size of a major axis.
 # The value is chosen in order to get a single high accumulator.
 # The threshold eliminates low accumulators
-accum = hough_ellipse(edges, accuracy=7, threshold=93)
+accum = hough_ellipse(edges, accuracy=10, threshold=170, min_size=50)
+accum.sort(key=lambda x:x[5])
 # Estimated parameters for the ellipse
-center_y = int(accum[0][1])
-center_x = int(accum[0][2])
-xradius = int(accum[0][3])
-yradius = int(accum[0][4])
-angle = accum[0][5]
+center_y = int(accum[-1][0])
+center_x = int(accum[-1][1])
+xradius = int(accum[-1][2])
+yradius = int(accum[-1][3])
+angle = np.pi - accum[-1][4]
 
 # Draw the ellipse on the original image
 cx, cy = ellipse_perimeter(center_y, center_x,
                            yradius, xradius, orientation=angle)
-image_rgb[cy, cx] = (0, 0, 220)
+image_rgb[cy, cx] = (0, 0, 1)
 # Draw the edge (white) and the resulting ellipse (red)
 edges = color.gray2rgb(edges)
 edges[cy, cx] = (250, 0, 0)

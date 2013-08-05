@@ -189,13 +189,11 @@ def chelsea():
 def coffee():
     """Coffee cup.
 
-    An example with several shapes (including an ellipse). The background
-    is composed of stripes.
+    An example with several shapes (including an ellipse).
 
     Notes
     -----
-    This image was downloaded on
-    `Flickr <https://secure.flickr.com/photos/free-stock/4999821195>`__
-    No copyright restrictions.
+    No copyright restrictions.  CC0 by the photographer.
+
     """
     return load("coffee.png")
