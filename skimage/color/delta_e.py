@@ -103,22 +103,21 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     """
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
-    L1, C1, h1 = np.rollaxis(lab2lch(lab1), -1)[:3]
-    L2, C2, h2 = np.rollaxis(lab2lch(lab2), -1)[:3]
+    L1, C1 = np.rollaxis(lab2lch(lab1), -1)[:2]
+    L2, C2 = np.rollaxis(lab2lch(lab2), -1)[:2]
 
     dL = L1 - L2
     dC = C1 - C2
-    dH_ab = np.sqrt(deltaE_cie76(lab1, lab2) ** 2 - dL ** 2 - dC ** 2)
+    dH = np.sqrt(deltaE_cie76(lab1, lab2) ** 2 - dL ** 2 - dC ** 2)
 
     SL = 1
     SC = 1 + k1 * C1
     SH = 1 + k2 * C1
 
-    ans = ((dL / (kL * SL)) ** 2 +
-           (dC / (kC * SC)) ** 2 +
-           (dH_ab / (kH * SH)) ** 2
-           )
-    return np.sqrt(ans)
+    dE2 = (dL / (kL * SL)) ** 2
+    dE2 += (dC / (kC * SC)) ** 2
+    dE2 += (dH / (kH * SH)) ** 2
+    return np.sqrt(dE2)
 
 
 def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
@@ -305,5 +304,4 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     dE2 = (dL / (kL * SL)) ** 2
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += (dH / SH) ** 2
-
     return np.sqrt(dE2)
