@@ -151,7 +151,7 @@ class TestDTypes():
         self._test_image(image)
 
     def test_uint(self):
-        image = skimage.img_as_uint(lena)
+        image = skimage.img_as_ubyte(lena)
         self._test_image(image)
 
 
