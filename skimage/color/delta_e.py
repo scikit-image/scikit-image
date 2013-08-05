@@ -45,6 +45,8 @@ def deltaE_cie76(lab1, lab2):
     .. [2] A. R. Robertson, "The CIE 1976 color-difference formulae,"
            Color Res. Appl. 2, 7-11 (1977).
     """
+    lab1 = np.asarray(lab1)
+    lab2 = np.asarray(lab2)
     L1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     L2, a2, b2 = np.rollaxis(lab2, -1)[:3]
     return np.sqrt((L2 - L1) ** 2 + (a2 - a1) ** 2 + (b2 - b1) ** 2)
@@ -99,6 +101,8 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     .. [1] http://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
+    lab1 = np.asarray(lab1)
+    lab2 = np.asarray(lab2)
     L1, C1, h1 = np.rollaxis(lab2lch(lab1), -1)[:3]
     L2, C2, h2 = np.rollaxis(lab2lch(lab2), -1)[:3]
 
@@ -156,6 +160,15 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
            color metrics tested with an accurate color-difference tolerance
            dataset," Appl. Opt. 33, 8069-8077 (1994).
     """
+    lab1 = np.asarray(lab1)
+    lab2 = np.asarray(lab2)
+    unroll = False
+    if lab1.ndim == 1 and lab2.ndim == 1:
+        unroll = True
+        if lab1.ndim == 1:
+            lab1 = lab1[None, :]
+        if lab2.ndim == 1:
+            lab2 = lab2[None, :]
     L1, a1, b1 = np.rollaxis(lab1, -1)[:3]
     L2, a2, b2 = np.rollaxis(lab2, -1)[:3]
 
@@ -227,7 +240,10 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     dE2 += C_term ** 2
     dE2 += H_term ** 2
     dE2 += R_term
-    return np.sqrt(dE2)
+    ans = np.sqrt(dE2)
+    if unroll:
+        ans = ans[0]
+    return ans
 
 
 def deltaE_cmc(lab1, lab2, kL=1, kC=1):

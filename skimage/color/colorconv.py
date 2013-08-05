@@ -1136,6 +1136,7 @@ def _prepare_lab_array(arr):
     Arrays must be in floating point and have at least 3 elements in
     last dimension.  Return a new array.
     """
+    arr = np.asarray(arr)
     shape = arr.shape
     assert shape[-1] >= 3
     return dtype.img_as_float(arr, force_copy=True)

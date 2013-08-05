@@ -138,6 +138,30 @@ def test_cmc():
     assert_allclose(dE2, oracle, rtol=1.e-8)
 
 
+def test_single_color_cie76():
+    lab1 = (0.5, 0.5, 0.5)
+    lab2 = (0.4, 0.4, 0.4)
+    deltaE_cie76(lab1, lab2)
+
+
+def test_single_color_cidede94():
+    lab1 = (0.5, 0.5, 0.5)
+    lab2 = (0.4, 0.4, 0.4)
+    deltaE_ciede94(lab1, lab2)
+
+
+def test_single_color_ciede2000():
+    lab1 = (0.5, 0.5, 0.5)
+    lab2 = (0.4, 0.4, 0.4)
+    deltaE_ciede2000(lab1, lab2)
+
+
+def test_single_color_cmc():
+    lab1 = (0.5, 0.5, 0.5)
+    lab2 = (0.4, 0.4, 0.4)
+    deltaE_cmc(lab1, lab2)
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
