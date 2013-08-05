@@ -14,6 +14,13 @@ def _get_filtered_image(image, n_scales, mode):
     scales = np.zeros((image.shape[0], image.shape[1], n_scales),
                       dtype=np.double)
 
+    OCTAGON_OUTER_SHAPE = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7),
+                       (15, 10)]
+    OCTAGON_INNER_SHAPE = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
+
+    STAR_SHAPE = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90, 128]
+    STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
+                         (9, 6),(11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
     if mode == 'DoB':
         for i in range(n_scales):
             n = i + 1
@@ -39,23 +46,18 @@ def _get_filtered_image(image, n_scales, mode):
     # later for a much cleaner implementation.
     elif mode == 'Octagon':
         # TODO : Decide the shapes of Octagon filters for scales > 7
-        outer_shape = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7),
-                       (15, 10)]
-        inner_shape = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
 
         for i in range(n_scales):
             scales[:, :, i] = convolve(image,
-                                       _octagon_filter(outer_shape[i][0],
-                                       outer_shape[i][1], inner_shape[i][0],
-                                       inner_shape[i][1]))
+                                       _octagon_filter_kernel(OCTAGON_OUTER_SHAPE[i][0],
+                                       OCTAGON_OUTER_SHAPE[i][1], OCTAGON_INNER_SHAPE[i][0],
+                                       OCTAGON_INNER_SHAPE[i][1]))
     else:
-        shape = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90, 128]
-        filter_shape = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
-                        (9, 6),(11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
+
         for i in range(n_scales):
             scales[:, :, i] = convolve(image,
-                                       _star_filter(shape[filter_shape[i][0]],
-                                                    shape[filter_shape[i][1]]))
+                                       _star_filter_kernel(STAR_SHAPE[STAR_FILTER_SHAPE[i][0]],
+                                                           STAR_SHAPE[STAR_FILTER_SHAPE[i][1]]))
 
     return scales
 
@@ -74,7 +76,7 @@ def _oct(m, n):
     return convex_hull_image(f).astype(int)
 
 
-def _octagon_filter(mo, no, mi, ni):
+def _octagon_filter_kernel(mo, no, mi, ni):
     outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
     inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
     outer_weight = 1.0 / (outer - inner)
@@ -107,7 +109,7 @@ def _star(a):
     return selem_square + selem_triangle
 
 
-def _star_filter(m, n):
+def _star_filter_kernel(m, n):
     c = m + m / 2 - n - n / 2
     outer_star = _star(m)
     inner_star = np.zeros((outer_star.shape))
