@@ -81,6 +81,23 @@ class TestSElem():
         actual_mask = selem.octagon(5, 3)
         assert_equal(expected_mask, actual_mask)
 
+    def test_selem_star(self):
+        expected_mask = array([[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                               [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                               [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                               [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                               [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]], dtype=uint8)
+        actual_mask = selem.star(4)
+        assert_equal(expected_mask, actual_mask)
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
