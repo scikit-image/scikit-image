@@ -232,8 +232,9 @@ def octagon(m, n, dtype=np.uint8):
     Returns
     -------
     selem : ndarray
-       The structuring element where elements of the neighborhood
-       are 1 and 0 otherwise.
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
+
     """
     from . import convex_hull_image
     selem = np.zeros((m + 2*n, m + 2*n))
@@ -247,3 +248,46 @@ def octagon(m, n, dtype=np.uint8):
     selem[m + n - 1, -1] = 1
     selem = convex_hull_image(selem).astype(dtype)
     return selem
+
+
+def star(a, dtype=np.uint8):
+    """
+    Generates a star shaped structuring element that is an overlap of square
+    of size `2*a + 1` with its 45 degree rotated version. The slanted sides
+    are 45 or 135 degrees to the horizontal axis.
+
+    Parameters
+    ----------
+    a : int
+        Parameter deciding the size of the star structural element. The side
+        of the square array returned is `2*a + 1 + 2*floor(a / 2)`.
+
+    Other Parameters
+    ----------------
+    dtype : data-type
+        The data type of the structuring element.
+
+    Returns
+    -------
+    selem : ndarray
+        The structuring element where elements of the neighborhood
+        are 1 and 0 otherwise.
+
+    """
+    from . import convex_hull_image
+    if a == 1:
+        bfilter = np.zeros((3, 3))
+        bfilter[:] = 1
+        return bfilter
+    m = 2 * a + 1
+    n = a / 2
+    selem_square = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
+    selem_square[n: m + n, n: m + n] = 1
+    selem_triangle = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
+    selem_triangle[(m + 2 * n - 1) / 2, 0] = 1
+    selem_triangle[(m + 1) / 2, n - 1] = 1
+    selem_triangle[(m + 4 * n - 3) / 2, n - 1] = 1
+    selem_triangle = convex_hull_image(selem_triangle).astype(int)
+    selem_triangle += (selem_triangle[:, ::-1] + selem_triangle.T +
+                       selem_triangle.T[::-1, :])
+    return selem_square + selem_triangle
