@@ -1075,11 +1075,18 @@ def lab2lch(lab):
     lch = _prepare_lab_array(lab)
 
     a, b = lch[..., 1], lch[..., 2]
-    lch[..., 1], lch[..., 2] = np.sqrt(a ** 2 + b ** 2), np.arctan2(b, a)
-
-    H = lch[..., 2]
-    H += np.where(H < 0, 2*np.pi, 0)  # (-pi, pi) -> (0, 2*pi)
+    lch[..., 1], lch[..., 2] = _cart2polar_2pi(a, b)
     return lch
+
+
+def _cart2polar_2pi(x, y):
+    """convert cartesian coordiantes to polar (uses non-standard theta range!)
+
+    NON-STANDARD RANGE! Maps to (0, 2*pi) rather than usual (-pi, +pi)
+    """
+    r, t = np.hypot(x, y), np.arctan2(y, x)
+    t += np.where(t < 0., 2 * np.pi, 0)
+    return r, t
 
 
 def lch2lab(lch):
