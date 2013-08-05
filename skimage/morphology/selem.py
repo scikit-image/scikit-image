@@ -252,9 +252,9 @@ def octagon(m, n, dtype=np.uint8):
 
 def star(a, dtype=np.uint8):
     """
-    Generates a star shaped structuring element that is an overlap of square
-    of size `2*a + 1` with its 45 degree rotated version. The slanted sides
-    are 45 or 135 degrees to the horizontal axis.
+    Generates a star shaped structuring element that has 8 vertices and is an
+    overlap of square of size `2*a + 1` with its 45 degree rotated version.
+    The slanted sides are 45 or 135 degrees to the horizontal axis.
 
     Parameters
     ----------
