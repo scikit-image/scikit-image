@@ -36,8 +36,6 @@ def convex_hull_image(image):
     # limits the number of coordinates to examine for the virtual
     # hull.
     coords = possible_hull(image.astype(np.uint8))
-    # repeated coordinates can *sometimes* cause problems in 
-    # scipy.spatial.Delaunay, so we remove them.
     N = len(coords)
 
     # Add a vertex for the middle of each pixel edge
@@ -46,6 +44,8 @@ def convex_hull_image(image):
                                                  (-0.5, 0.5, 0, 0))):
         coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
 
+    # repeated coordinates can *sometimes* cause problems in 
+    # scipy.spatial.Delaunay, so we remove them.
     coords = unique_rows(coords_corners)
 
     try:
