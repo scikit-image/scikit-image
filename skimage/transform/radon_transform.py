@@ -15,7 +15,7 @@ References:
 """
 from __future__ import division
 import numpy as np
-from scipy.fftpack import fftshift, fft, ifft
+from scipy.fftpack import fft, ifft, fftfreq
 from scipy.interpolate import interp1d
 from ._warps_cy import _warp_fast
 from ._radon_transform import sart_projection_update
@@ -33,7 +33,8 @@ def radon(image, theta=None, circle=False):
     Parameters
     ----------
     image : array_like, dtype=float
-        Input image.
+        Input image. The rotation axis will be located in the pixel with
+        indices ``(image.shape[0] // 2, image.shape[1] // 2)``.
     theta : array_like, dtype=float, optional (default np.arange(180))
         Projection angles (in degrees).
     circle : boolean, optional
@@ -43,8 +44,10 @@ def radon(image, theta=None, circle=False):
 
     Returns
     -------
-    output : ndarray
-        Radon transform (sinogram).
+    radon_image : ndarray
+        Radon transform (sinogram).  The tomography rotation axis will lie
+        at the pixel index ``radon_image.shape[0] // 2`` along the 0th
+        dimension of ``radon_image``.
 
     Raises
     ------
@@ -61,10 +64,11 @@ def radon(image, theta=None, circle=False):
         radius = min(image.shape) // 2
         c0, c1 = np.ogrid[0:image.shape[0], 0:image.shape[1]]
         reconstruction_circle = ((c0 - image.shape[0] // 2)**2
-                                 + (c1 - image.shape[1] // 2)**2) < radius**2
+                                 + (c1 - image.shape[1] // 2)**2) <= radius**2
         if not np.all(reconstruction_circle | (image == 0)):
             raise ValueError('Image must be zero outside the reconstruction'
                              ' circle')
+        # Crop image to make it square
         slices = []
         for d in (0, 1):
             if image.shape[d] > min(image.shape):
@@ -76,24 +80,25 @@ def radon(image, theta=None, circle=False):
                 slices.append(slice(None))
         slices = tuple(slices)
         padded_image = image[slices]
-        out = np.zeros((min(padded_image.shape), len(theta)))
-        dh = padded_image.shape[0] // 2
-        dw = padded_image.shape[1] // 2
     else:
         diagonal = np.sqrt(2) * max(image.shape)
         pad = [int(np.ceil(diagonal - s)) for s in image.shape]
-        pad_width = [(p // 2, p - p // 2) for p in pad]
+        new_center = [(s + p) // 2 for s, p in zip(image.shape, pad)]
+        old_center = [s // 2 for s in image.shape]
+        pad_before = [nc - oc for oc, nc in zip(old_center, new_center)]
+        pad_width = [(pb, p - pb) for pb, p in zip(pad_before, pad)]
         padded_image = util.pad(image, pad_width, mode='constant',
                                 constant_values=0)
-        out = np.zeros((max(padded_image.shape), len(theta)))
-        dh = pad[0] // 2 + image.shape[0] // 2
-        dw = pad[1] // 2 + image.shape[1] // 2
+    # padded_image is always square
+    assert padded_image.shape[0] == padded_image.shape[1]
+    radon_image = np.zeros((padded_image.shape[0], len(theta)))
+    center = padded_image.shape[0] // 2
 
-    shift0 = np.array([[1, 0, -dw],
-                       [0, 1, -dh],
+    shift0 = np.array([[1, 0, -center],
+                       [0, 1, -center],
                        [0, 0, 1]])
-    shift1 = np.array([[1, 0, dw],
-                       [0, 1, dh],
+    shift1 = np.array([[1, 0, center],
+                       [0, 1, center],
                        [0, 0, 1]])
 
     def build_rotation(theta):
@@ -105,14 +110,17 @@ def radon(image, theta=None, circle=False):
 
     for i in range(len(theta)):
         rotated = _warp_fast(padded_image, build_rotation(theta[i]))
-        out[:, i] = rotated.sum(0)
-    return out
+        radon_image[:, i] = rotated.sum(0)
+    return radon_image
 
 
 def _sinogram_circle_to_square(sinogram):
     diagonal = int(np.ceil(np.sqrt(2) * sinogram.shape[0]))
     pad = diagonal - sinogram.shape[0]
-    pad_width = ((pad // 2, pad - pad // 2), (0, 0))
+    old_center = sinogram.shape[0] // 2
+    new_center = diagonal // 2
+    pad_before = new_center - old_center
+    pad_width = ((pad_before, pad - pad_before), (0, 0))
     return util.pad(sinogram, pad_width, mode='constant', constant_values=0)
 
 
@@ -128,7 +136,10 @@ def iradon(radon_image, theta=None, output_size=None,
     ----------
     radon_image : array_like, dtype=float
         Image containing radon transform (sinogram). Each column of
-        the image corresponds to a projection along a different angle.
+        the image corresponds to a projection along a different angle. The
+        tomography rotation axis should lie at the pixel index
+        ``radon_image.shape[0] // 2`` along the 0th dimension of
+        ``radon_image``.
     theta : array_like, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
@@ -148,8 +159,10 @@ def iradon(radon_image, theta=None, output_size=None,
 
     Returns
     -------
-    output : ndarray
-      Reconstructed image.
+    reconstructed : ndarray
+        Reconstructed image. The rotation axis will be located in the pixel
+        with indices
+        ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
 
     Notes
     -----
@@ -190,39 +203,35 @@ def iradon(radon_image, theta=None, output_size=None,
     img = util.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
-    f = fftshift(abs(np.mgrid[-1:1:2 / projection_size_padded])).reshape(-1, 1)
-    w = 2 * np.pi * f
-    # Start from first element to avoid divide by zero
+    f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency
+    omega = 2 * np.pi * f                                # angular frequency
+    fourier_filter = 2 * np.abs(f)                       # ramp filter
     if filter == "ramp":
         pass
     elif filter == "shepp-logan":
-        f[1:] = f[1:] * np.sin(w[1:] / 2) / (w[1:] / 2)
+        # Start from first element to avoid divide by zero
+        fourier_filter[1:] = fourier_filter[1:] * np.sin(omega[1:]) / omega[1:]
     elif filter == "cosine":
-        f[1:] = f[1:] * np.cos(w[1:] / 2)
+        fourier_filter *= np.cos(omega)
     elif filter == "hamming":
-        f[1:] = f[1:] * (0.54 + 0.46 * np.cos(w[1:]))
+        fourier_filter *= (0.54 + 0.46 * np.cos(omega / 2))
     elif filter == "hann":
-        f[1:] = f[1:] * (1 + np.cos(w[1:])) / 2
+        fourier_filter *= (1 + np.cos(omega / 2)) / 2
     elif filter is None:
-        f[1:] = 1
+        fourier_filter[:] = 1
     else:
         raise ValueError("Unknown filter: %s" % filter)
-    filter_ft = np.tile(f, (1, len(theta)))
     # Apply filter in Fourier domain
-    projection = fft(img, axis=0) * filter_ft
+    projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0))
 
     # Resize filtered image back to original size
     radon_filtered = radon_filtered[:radon_image.shape[0], :]
     reconstructed = np.zeros((output_size, output_size))
     # Determine the center of the projections (= center of sinogram)
-    circle_size = int(np.floor(radon_image.shape[0] / np.sqrt(2)))
-    square_size = radon_image.shape[0]
-    mid_index = (square_size - circle_size) // 2 + circle_size // 2
+    mid_index = radon_image.shape[0] // 2
 
-    x = output_size
-    y = output_size
-    [X, Y] = np.mgrid[0.0:x, 0.0:y]
+    [X, Y] = np.mgrid[0:output_size, 0:output_size]
     xpr = X - int(output_size) // 2
     ypr = Y - int(output_size) // 2
 
@@ -239,8 +248,8 @@ def iradon(radon_image, theta=None, output_size=None,
             backprojected = interpolant(t)
         reconstructed += backprojected
     if circle:
-        radius = (output_size - 1) // 2
-        reconstruction_circle = (xpr**2 + ypr**2) < radius**2
+        radius = output_size // 2
+        reconstruction_circle = (xpr**2 + ypr**2) <= radius**2
         reconstructed[~reconstruction_circle] = 0.
 
     return reconstructed * np.pi / (2 * len(th))
@@ -258,9 +267,11 @@ def order_angles_golden_ratio(theta):
 
     Returns
     -------
-    indices : 1D array of unsigned integers
-        Indices into ``theta`` such that ``theta[indices]`` gives the
-        approximate golden ratio ordering of the projections.
+    indices_generator : generator yielding unsigned integers
+        The returned generator yields indices into ``theta`` such that
+        ``theta[indices]`` gives the approximate golden ratio ordering
+        of the projections. In total, ``len(theta)`` indices are yielded.
+        All non-negative integers < ``len(theta)`` are yielded exactly once.
 
     Notes
     -----
@@ -314,7 +325,10 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     ----------
     radon_image : 2D array, dtype=float
         Image containing radon transform (sinogram). Each column of
-        the image corresponds to a projection along a different angle.
+        the image corresponds to a projection along a different angle. The
+        tomography rotation axis should lie at the pixel index
+        ``radon_image.shape[0] // 2`` along the 0th dimension of
+        ``radon_image``.
     theta : 1D array, dtype=float, optional
         Reconstruction angles (in degrees). Default: m angles evenly spaced
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
@@ -336,8 +350,10 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
 
     Returns
     -------
-    output : ndarray
-        Reconstructed image.
+    reconstructed : ndarray
+        Reconstructed image. The rotation axis will be located in the pixel
+        with indices
+        ``(reconstructed.shape[0] // 2, reconstructed.shape[1] // 2)``.
 
     Notes
     -----
@@ -358,9 +374,9 @@ def iradon_sart(radon_image, theta=None, image=None, projection_shifts=None,
     ----------
     .. [1] AC Kak, M Slaney, "Principles of Computerized Tomographic
            Imaging", IEEE Press 1988.
-    .. [2] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
-           (SART): a superior implementation of the ART algorithm", Ultrasonic
-           Imaging 6 pp 81--94 (1984)
+    .. [2] AH Andersen, AC Kak, "Simultaneous algebraic reconstruction
+           technique (SART): a superior implementation of the ART algorithm",
+           Ultrasonic Imaging 6 pp 81--94 (1984)
     .. [3] S Kaczmarz, "Angenäherte auflösung von systemen linearer
            gleichungen", Bulletin International de l’Academie Polonaise des
            Sciences et des Lettres 35 pp 355--357 (1937)
