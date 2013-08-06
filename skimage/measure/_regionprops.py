@@ -5,7 +5,7 @@ import numpy as np
 from scipy import ndimage
 
 from skimage.morphology import convex_hull_image
-from . import _moments
+from skimage.measure import _moments
 
 
 __all__ = ['regionprops']
