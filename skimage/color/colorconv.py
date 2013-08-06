@@ -1044,21 +1044,18 @@ def lab2lch(lab):
     ----------
     lab : array_like
         The N-D image in CIE-LAB format. The last (`N+1`th) dimension must have
-        at least 3 elements, corresponding to the `L`, `a`, and `b` color
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
         channels.  Subsequent elements are copied.
 
     Returns
     -------
     out : ndarray
-        The image in LCH format, in a 3-D array of shape (.., .., 3).
+        The image in LCH format, in a N-D array with same shape as input `lab`.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
-
-    References
-    ----------
+        If `lch` does not have at least 3 color channels (i.e. l, a, b).
 
     Notes
     -----
@@ -1096,23 +1093,20 @@ def lch2lab(lch):
 
     Parameters
     ----------
-    lab : array_like
+    lch : array_like
         The N-D image in CIE-LCH format. The last (`N+1`th) dimension must have
-        at least 3 elements, corresponding to the `L`, `a`, and `b` color
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
         channels.  Subsequent elements are copied.
 
     Returns
     -------
     out : ndarray
-        The image in LAB format, in a 3-D array of shape (.., .., 3).
+        The image in LAB format, with same shape as input `lch`.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
-
-    References
-    ----------
+        If `lch` does not have at least 3 color channels (i.e. l, c, h).
 
     Examples
     --------
@@ -1138,5 +1132,6 @@ def _prepare_lab_array(arr):
     """
     arr = np.asarray(arr)
     shape = arr.shape
-    assert shape[-1] >= 3
+    if shape[-1] < 3:
+        raise ValueError('Input array has less than 3 color channels')
     return dtype.img_as_float(arr, force_copy=True)

@@ -56,7 +56,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     """Color difference according to CIEDE 94 standard
 
     Accommodates perceptual non-uniformities through the use of application
-    specific scale factors (kH, kC, kL, k1, and k2).
+    specific scale factors (`kH`, `kC`, `kL`, `k1`, and `k2`).
 
     Parameters
     ----------
@@ -87,14 +87,14 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     color.  Consequently, the first color should be regarded as the "reference"
     color.
 
-    kL, k1, k2 depend on the application and default to the values suggested
-    for graphic arts
+    `kL`, `k1`, `k2` depend on the application and default to the values
+    suggested for graphic arts
 
     Parameter   Graphic Arts    Textiles
     ----------  -------------   --------
-    kL          1.000           2.000
-    k1          0.045           0.048
-    k2          0.015           0.014
+    `kL`         1.000           2.000
+    `k1`         0.045           0.048
+    `k2`         0.015           0.014
 
     References
     ----------
@@ -131,7 +131,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     lab2 : array_like
         comparison color (Lab colorspace)
     kL : float (range), optional
-        luminance scale factor, 1 for "acceptably close"; 2 for "imperceptible"
+        lightness scale factor, 1 for "acceptably close"; 2 for "imperceptible"
         see deltaE_cmc
     kC : float (range), optional
         chroma scale factor, usually 1
@@ -145,8 +145,8 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
 
     Notes
     -----
-    CIEDE 2000 assumes parametric weighting factors for the luminance, chroma,
-    and hue (kL, kC, kH respectively).  These default to 1.
+    CIEDE 2000 assumes parametric weighting factors for the lightness, chroma,
+    and hue (`kL`, `kC`, `kH` respectively).  These default to 1.
 
     References
     ----------
@@ -187,7 +187,7 @@ def deltaE_ciede2000(lab1, lab2, kL=1, kC=1, kH=1):
     # 3) Chroma term
     # 4) hue Rotation term
 
-    # luminance term
+    # lightness term
     Lbar = 0.5 * (L1 + L2)
     tmp = (Lbar - 50) ** 2
     SL = 1 + 0.015 * tmp / np.sqrt(20 + tmp)
@@ -250,10 +250,11 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     (CMC) of the Society of Dyers and Colourists (United Kingdom). It is
     intended for use in the textile industry.
 
-    The scale factors kL, kC set the weight given to differences in lightness
-    and chroma relative to differences in hue.  The usual values are kL=2, kC=1
-    for "acceptability" and kL=1, kC=1 for "imperceptibility".  Colors with
-    dE > 1 are "different" for the given scale factors.
+    The scale factors `kL`, `kC` set the weight given to differences in
+    lightness and chroma relative to differences in hue.  The usual values are
+    ``kL=2``, ``kC=1`` for "acceptability" and ``kL=1``, ``kC=1`` for
+    "imperceptibility".  Colors with ``dE > 1`` are "different" for the given
+    scale factors.
 
     Parameters
     ----------
@@ -271,7 +272,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     -----
     deltaE_cmc the defines the scales for the lightness, hue, and chroma
     in terms of the first color.  Consequently
-    deltaE_cmc(lab1, lab2) != deltaE_cmc(lab2, lab1)
+    ``deltaE_cmc(lab1, lab2) != deltaE_cmc(lab2, lab1)``
 
     References
     ----------
