@@ -160,7 +160,7 @@ def censure_keypoints(image, n_scales=7, mode='DoB', non_max_threshold=0.15,
     Returns
     -------
     keypoints : (N, 2) array
-        Location of extracted keypoints.
+        Location of the extracted keypoints in the (row, col) format.
 
     scale : (N, 1) array
         The corresponding scale of the N extracted keypoints.
