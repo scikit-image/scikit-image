@@ -10,6 +10,7 @@ import os
 import re
 import tempfile
 from io import BytesIO
+import collections
 
 import numpy as np
 
@@ -39,7 +40,7 @@ class Image(np.ndarray):
 
     tags = {'filename': '',
             'EXIF': {},
-            'info': {}}
+            'info': collections.OrderedDict()}
 
     def __new__(cls, arr, **kwargs):
         """Set the image data and tags according to given parameters.
