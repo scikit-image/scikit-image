@@ -123,8 +123,8 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     Returns
     -------
-    res : list of tuples [(accumulator, x0, y0, a, b, angle)]
-          Where (x0, y0) is the center, (a, b) major and minor axis.
+    res : list of tuples [(accumulator, y0, x0, ry, rx, angle)]
+          Where (y0, x0) is the center, (ry, rx) main axis.
           The angle value follows `draw.ellipse_perimeter()` convention.
 
     Examples
@@ -135,7 +135,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     >>> result = hough_ellipse(img, threshold=4)
     >>> # extract the highest accumulator
     >>> heapq.nlargest(1, result)
-    [(10, 10.0, 10.0, 8.0, 6.0, 0.0)]
+    [(10, 10.0, 10.0, 6.0, 8.0, 0.0)]
     >>> # To sort them all
     >>> results = [heappop(results) for i in range(len(results))]
 
@@ -211,6 +211,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                     hist_max = np.max(hist)
                     if hist_max > threshold:
                         angle = np.arctan2(p1x - p2x, p1y - p2y)
+                        b = sqrt(bin_edges[hist.argmax()])
                         # to keep ellipse_perimeter() convention
                         if angle != 0:
                             angle = np.pi - angle
@@ -219,13 +220,11 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                             # that a < b. But we keep a > b.
                             if angle > np.pi:
                                 angle = angle - np.pi / 2.
-                            elif angle < - np.pi:
-                                angle = angle + np.pi / 2.
-                        b = sqrt(bin_edges[hist.argmax()])
+                                a, b = b, a
                         heapq.heappush(results,
                                        (hist_max,  # Accumulator
-                                        x0,
                                         y0,
+                                        x0,
                                         a,
                                         b,
                                         angle,
