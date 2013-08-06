@@ -165,9 +165,9 @@ def test_hough_ellipse_zero_angle():
 
 
 def test_hough_ellipse_non_zero_angle():
-    img = np.zeros((30, 20), dtype=int)
+    img = np.zeros((30, 24), dtype=int)
     a = 6
-    b = 9
+    b = 12
     x0 = 10
     y0 = 15
     angle = np.pi / 1.35
@@ -176,8 +176,25 @@ def test_hough_ellipse_non_zero_angle():
     result = tf.hough_ellipse(img, threshold=15, accuracy=3)
     assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
     assert_almost_equal(result[0][1] / 100., y0 / 100., decimal=1)
-    assert_almost_equal(result[0][2] / 100., b / 100., decimal=1)
+    assert_almost_equal(result[0][2] / 10., b / 10., decimal=1)
     assert_almost_equal(result[0][3] / 100., a / 100., decimal=1)
+    assert_almost_equal(result[0][4], angle, decimal=1)
+
+
+def test_hough_ellipse_non_zero_angle2():
+    img = np.zeros((30, 24), dtype=int)
+    b = 6
+    a = 12
+    x0 = 10
+    y0 = 15
+    angle = np.pi / 1.35
+    rr, cc = ellipse_perimeter(y0, x0, b, a, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
+    assert_almost_equal(result[0][1] / 100., y0 / 100., decimal=1)
+    assert_almost_equal(result[0][2] / 100., a / 100., decimal=1)
+    assert_almost_equal(result[0][3] / 100., b / 100., decimal=1)
     assert_almost_equal(result[0][4], angle, decimal=1)
 
 

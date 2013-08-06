@@ -206,9 +206,16 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                     hist_max = np.max(hist)
                     if hist_max > threshold:
                         angle = np.arctan2(p1x - p2x, p1y - p2y)
-                        # pi - angle to keep ellipse_perimeter() convention
+                        # to keep ellipse_perimeter() convention
                         if angle != 0:
                             angle = np.pi - angle
+                            # When angle is not in [-pi:pi]
+                            # it would mean in ellipse_perimeter()
+                            # that a < b. But we keep a > b.
+                            if angle > np.pi:
+                                angle = angle - np.pi / 2.
+                            elif angle < - np.pi:
+                                angle = angle + np.pi / 2.
                         b = sqrt(bin_edges[hist.argmax()])
                         results.append((x0,
                                         y0,
