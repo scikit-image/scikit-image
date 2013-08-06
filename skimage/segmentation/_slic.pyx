@@ -17,7 +17,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  long[:, :, ::1] nearest_mean,
                  double[:, :, ::1] distance,
                  double[:, ::1] means,
-                 float ratio, int max_iter, int n_segments):
+                 int max_iter, int n_segments):
     """Helper function for SLIC segmentation.
     
     Parameters
@@ -32,8 +32,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         The (initially infinity) array of distances to the nearest centroid.
     means : 2D np.ndarray of double, shape (n_segments, 6)
         The centroids obtained by SLIC.
-    ratio : float
-        The ratio of xyz-space and colorspace in the clustering.
     max_iter : int
         The maximum number of k-means iterations.
     n_segments : int
@@ -58,7 +56,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef Py_ssize_t i, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max, \
             changes
     cdef double dist_mean
-
     cdef double tmp
     for i in range(max_iter):
         changes = 0
@@ -81,8 +78,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             # squaring itself. mine can't (with O2)
                             tmp = image_zyx[z, y, x, c] - means[k, c]
                             dist_mean += tmp * tmp
-                        # some precision issue here. Doesnt work if testing ">"
-                        if distance[z, y, x] - dist_mean > 1e-10:
+                        if distance[z, y, x] > dist_mean:
                             nearest_mean[z, y, x] = k
                             distance[z, y, x] = dist_mean
                             changes = 1
@@ -92,7 +88,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         nearest_mean_ravel = np.asarray(nearest_mean).ravel()
         means_list = []
         for j in range(6):
-            image_zyx_ravel = np.ascontiguousarray(image_zyx[:, :, :, j]).ravel()
+            image_zyx_ravel = (
+                        np.ascontiguousarray(image_zyx[:, :, :, j]).ravel())
             means_list.append(np.bincount(nearest_mean_ravel,
                                           image_zyx_ravel))
         in_mean = np.bincount(nearest_mean_ravel)
