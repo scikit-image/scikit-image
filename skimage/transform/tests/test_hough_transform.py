@@ -157,11 +157,11 @@ def test_hough_ellipse_zero_angle():
     rr, cc = ellipse_perimeter(y0, x0, b, a)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=9)
-    assert_equal(result[0][0], x0)
-    assert_equal(result[0][1], y0)
-    assert_almost_equal(result[0][2], b, decimal=1)
-    assert_almost_equal(result[0][3], a, decimal=1)
-    assert_equal(result[0][4], angle)
+    assert_equal(result[0][1], x0)
+    assert_equal(result[0][2], y0)
+    assert_almost_equal(result[0][3], b, decimal=1)
+    assert_almost_equal(result[0][4], a, decimal=1)
+    assert_equal(result[0][5], angle)
 
 
 def test_hough_ellipse_non_zero_angle():
@@ -174,11 +174,11 @@ def test_hough_ellipse_non_zero_angle():
     rr, cc = ellipse_perimeter(y0, x0, b, a, orientation=angle)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=15, accuracy=3)
-    assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
-    assert_almost_equal(result[0][1] / 100., y0 / 100., decimal=1)
-    assert_almost_equal(result[0][2] / 10., b / 10., decimal=1)
-    assert_almost_equal(result[0][3] / 100., a / 100., decimal=1)
-    assert_almost_equal(result[0][4], angle, decimal=1)
+    assert_almost_equal(result[0][1] / 100., x0 / 100., decimal=1)
+    assert_almost_equal(result[0][2] / 100., y0 / 100., decimal=1)
+    assert_almost_equal(result[0][3] / 10., b / 10., decimal=1)
+    assert_almost_equal(result[0][4] / 100., a / 100., decimal=1)
+    assert_almost_equal(result[0][5], angle, decimal=1)
 
 
 def test_hough_ellipse_non_zero_angle2():
@@ -191,11 +191,11 @@ def test_hough_ellipse_non_zero_angle2():
     rr, cc = ellipse_perimeter(y0, x0, b, a, orientation=angle)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=15, accuracy=3)
-    assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
-    assert_almost_equal(result[0][1] / 100., y0 / 100., decimal=1)
-    assert_almost_equal(result[0][2] / 100., a / 100., decimal=1)
+    assert_almost_equal(result[0][1] / 100., x0 / 100., decimal=1)
+    assert_almost_equal(result[0][2] / 100., y0 / 100., decimal=1)
+    assert_almost_equal(result[0][3] / 100., a / 100., decimal=1)
     assert_almost_equal(result[0][3] / 100., b / 100., decimal=1)
-    assert_almost_equal(result[0][4], angle, decimal=1)
+    assert_almost_equal(result[0][5], angle, decimal=1)
 
 
 if __name__ == "__main__":

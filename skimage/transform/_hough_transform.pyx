@@ -122,7 +122,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     Returns
     -------
-    res : list of tuples [(x0, y0, a, b, angle, accumulator)]
+    res : list of tuples [(accumulator, x0, y0, a, b, angle)]
           Where (x0, y0) is the center, (a, b) major and minor axis.
           The angle value follows `draw.ellipse_perimeter()` convention.
 
@@ -132,7 +132,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     >>> rr, cc = draw.ellipse_perimeter(10, 10, 6, 8)
     >>> img[cc, rr] = 1
     >>> result = hough_ellipse(img, threshold=8)
-    [(10.0, 10.0, 8.0, 6.0, 0.0, 10)]
+    [(10, 10.0, 10.0, 8.0, 6.0, 0.0)]
 
     Notes
     -----
@@ -217,12 +217,12 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                             elif angle < - np.pi:
                                 angle = angle + np.pi / 2.
                         b = sqrt(bin_edges[hist.argmax()])
-                        results.append((x0,
+                        results.append((hist_max,  # Accumulator
+                                        x0,
                                         y0,
                                         a,
                                         b,
                                         angle,
-                                        hist_max,  # Accumulator
                                         ))
                     acc = []
 
