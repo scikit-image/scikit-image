@@ -101,8 +101,6 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     .. [1] http://en.wikipedia.org/wiki/Color_difference
     .. [2] http://www.brucelindbloom.com/index.html?Eqn_DeltaE_CIE94.html
     """
-    lab1 = np.asarray(lab1)
-    lab2 = np.asarray(lab2)
     L1, C1 = np.rollaxis(lab2lch(lab1), -1)[:2]
     L2, C2 = np.rollaxis(lab2lch(lab2), -1)[:2]
 
