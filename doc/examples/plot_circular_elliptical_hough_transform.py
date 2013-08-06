@@ -104,6 +104,7 @@ References
        Conference on. Vol. 2. IEEE, 2002
 """
 import matplotlib.pyplot as plt
+import heapq
 
 from skimage import data, filter, color
 from skimage.transform import hough_ellipse
