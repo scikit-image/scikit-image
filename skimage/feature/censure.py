@@ -124,7 +124,7 @@ def _star_filter_kernel(m, n):
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
     Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
     feature_mask[(Axx + Ayy) * (Axx + Ayy)
-                 < line_threshold * (Axx * Ayy - Axy * Axy)] = 0
+                 > line_threshold * (Axx * Ayy - Axy * Axy)] = 0
     return feature_mask
 
 
