@@ -152,9 +152,9 @@ def test_hough_ellipse_zero_angle():
     a = 6
     b = 8
     x0 = 12
-    y0 = 12
+    y0 = 15
     angle = 0
-    rr, cc = ellipse_perimeter(x0, x0, b, a)
+    rr, cc = ellipse_perimeter(y0, x0, b, a)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=9)
     assert_equal(result[0][0], x0)
@@ -165,13 +165,13 @@ def test_hough_ellipse_zero_angle():
 
 
 def test_hough_ellipse_non_zero_angle():
-    img = np.zeros((20, 20), dtype=int)
+    img = np.zeros((30, 20), dtype=int)
     a = 6
     b = 9
     x0 = 10
-    y0 = 10
+    y0 = 15
     angle = np.pi / 1.35
-    rr, cc = ellipse_perimeter(x0, x0, b, a, orientation=angle)
+    rr, cc = ellipse_perimeter(y0, x0, b, a, orientation=angle)
     img[rr, cc] = 1
     result = tf.hough_ellipse(img, threshold=15, accuracy=3)
     assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
