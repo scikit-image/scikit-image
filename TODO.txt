@@ -3,6 +3,7 @@ Version 0.10
 * Remove deprecated functions:
     - ``skimage.filter.rank.*``
 * Remove deprecated parameter ``epsilon`` of ``skimage.viewer.LineProfile``
+* Remove backwards-compatability of ``skimage.measure.regionprops``
 
 Version 0.9
 -----------
