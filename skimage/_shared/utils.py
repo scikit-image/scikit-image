@@ -5,7 +5,7 @@ import sys
 from . import six
 
 
-__all__ = ['deprecated', 'get_bound_method_class']
+__all__ = ['deprecated', 'cached_property', 'get_bound_method_class']
 
 
 class deprecated(object):
@@ -55,6 +55,38 @@ class deprecated(object):
             wrapped.__doc__ = doc + '\n\n    ' + wrapped.__doc__
 
         return wrapped
+
+
+class cached_property(object):
+    """Decorator to use a function as a cached property.
+
+    The function is only called the first time and each successive call returns
+    the cached result of the first call.
+
+        class Foo(object):
+
+            @cached_property
+            def foo(self):
+                return "Cached"
+
+    Adapted from <http://wiki.python.org/moin/PythonDecoratorLibrary>.
+
+    """
+
+    def __init__(self, func, name=None, doc=None):
+        self.__name__ = name or func.__name__
+        self.__module__ = func.__module__
+        self.__doc__ = doc or func.__doc__
+        self.func = func
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return self
+        value = obj.__dict__.get(self.__name__, _missing)
+        if value is _missing:
+            value = self.func(obj)
+            obj.__dict__[self.__name__] = value
+        return value
 
 
 def get_bound_method_class(m):
