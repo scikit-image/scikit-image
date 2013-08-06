@@ -114,14 +114,10 @@ class _RegionProperties(object):
 
     @cached_property
     def area(self):
-        """Number of pixels of region."""
-
         return self.moments[0, 0]
 
     @cached_property
     def bbox(self):
-        """Bounding box `(min_row, min_col, max_row, max_col)`"""
-
         return (self._slice[0].start, self._slice[1].start,
                 self._slice[0].stop, self._slice[1].stop)
 
