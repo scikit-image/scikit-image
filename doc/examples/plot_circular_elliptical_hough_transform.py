@@ -126,12 +126,12 @@ best = heapq.nlargest(1, accum)[0]
 # Estimated parameters for the ellipse
 center_y = int(best[1])
 center_x = int(best[2])
-xradius = int(best[3])
-yradius = int(best[4])
-angle = np.pi - best[5]
+yradius = int(best[3])
+xradius = int(best[4])
+angle = best[5]
 
 # Draw the ellipse on the original image
-cx, cy = ellipse_perimeter(center_y, center_x,
+cy, cx = ellipse_perimeter(center_y, center_x,
                            yradius, xradius, orientation=angle)
 image_rgb[cy, cx] = (0, 0, 1)
 # Draw the edge (white) and the resulting ellipse (red)
