@@ -198,7 +198,7 @@ def test_hough_ellipse_non_zero_angle2():
     assert_almost_equal(best[1] / 100., x0 / 100., decimal=1)
     assert_almost_equal(best[2] / 100., y0 / 100., decimal=1)
     assert_almost_equal(best[3] / 10., a / 10., decimal=1)
-    assert_almost_equal(best[3] / 100., b / 100., decimal=1)
+    assert_almost_equal(best[4] / 100., b / 100., decimal=1)
     assert_almost_equal(best[5], angle, decimal=1)
 
 
