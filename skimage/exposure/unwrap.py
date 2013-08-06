@@ -272,22 +272,23 @@ def find_phase_residues(image, wrap_around=False):
         raise ValueError('Residues cannot be determined for images with one '
                          'or more dimensions of length less than 2')
 
-    # Calculate residues assuming wrap around and no image mask
+    # Calculate residues assuming wrap around on all axes and no image mask
     residues = find_phase_residues_cy(np.asarray(image, dtype=np.float64,
                                                  order='C'))
 
+    # Account for axes without wrap around and image mask
     if (not all(wrap_around)) or np.ma.isMaskedArray(image):
         residues = np.ma.array(residues, mask=False)
     for i in range(image.ndim):
         # Roll border residues to last element along their axis
         residues = np.roll(residues, -1, axis=i)
+        # Mask residues on boundaries that do not have wrap around
         if not wrap_around[i]:
-            # Mask residues on boundaries that do not have wrap around
             slice_ = tuple([-1 if j == i else slice(None)
                             for j in range(image.ndim)])
             residues.mask[slice_] = True
     if np.ma.isMaskedArray(image):
-        # Mask residues that are calculated based on one or more masked pixel
+        # Mask residues that are calculated based on one or more masked pixels
         mask = (image.mask
                 | np.roll(image.mask, 1, axis=0)
                 | np.roll(image.mask, 1, axis=1)
