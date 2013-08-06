@@ -119,14 +119,15 @@ edges = filter.canny(image_gray, sigma=2.0,
 # The accuracy corresponds to the bin size of a major axis.
 # The value is chosen in order to get a single high accumulator.
 # The threshold eliminates low accumulators
-accum = hough_ellipse(edges, accuracy=10, threshold=170, min_size=50)
-accum.sort(key=lambda x:x[5])
+accum = hough_ellipse(edges, accuracy=10, threshold=150, min_size=50)
+# Select the highest accumulator
+best = heapq.nlargest(1, accum)[0]
 # Estimated parameters for the ellipse
-center_y = int(accum[-1][1])
-center_x = int(accum[-1][2])
-xradius = int(accum[-1][3])
-yradius = int(accum[-1][4])
-angle = np.pi - accum[-1][5]
+center_y = int(best[1])
+center_x = int(best[2])
+xradius = int(best[3])
+yradius = int(best[4])
+angle = np.pi - best[5]
 
 # Draw the ellipse on the original image
 cx, cy = ellipse_perimeter(center_y, center_x,
