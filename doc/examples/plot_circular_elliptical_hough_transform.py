@@ -120,7 +120,7 @@ edges = filter.canny(image_gray, sigma=2.0,
 # The value is chosen in order to get a single high accumulator.
 # The threshold eliminates low accumulators
 accum = hough_ellipse(edges, accuracy=10, threshold=150, min_size=50)
-# Select the highest accumulator
+# Select the highest accumulator
 best = heapq.nlargest(1, accum)[0]
 # Estimated parameters for the ellipse
 center_y = int(best[1])
