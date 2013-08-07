@@ -54,7 +54,7 @@ PROPS = {
 }
 
 
-class cached_property(object):
+class _cached_property(object):
     """Decorator to use a function as a cached property.
 
     The function is only called the first time and each successive call returns
@@ -62,16 +62,16 @@ class cached_property(object):
 
         class Foo(object):
 
-            @cached_property
+            @_cached_property
             def foo(self):
                 return "Cached"
 
         class Foo(object):
 
             def __init__(self):
-                self.cache_active = False
+                self._cache_active = False
 
-            @cached_property
+            @_cached_property
             def foo(self):
                 return "Not cached"
 
@@ -90,7 +90,7 @@ class cached_property(object):
             return self
 
         # call every time, if cache is not active
-        if not obj.__dict__.get('cache_active', True):
+        if not obj.__dict__.get('_cache_active', True):
             return self.func(obj)
 
         # try to retrieve from cache or call and store result in cache
@@ -106,88 +106,88 @@ class _RegionProperties(object):
 
     def __init__(self, slice, label, label_image, intensity_image,
                  cache_active):
-        self._slice = slice
         self.label = label
+        self._slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
-        self.cache_active = cache_active
+        self._cache_active = cache_active
 
-    @cached_property
+    @_cached_property
     def area(self):
         return self.moments[0, 0]
 
-    @cached_property
+    @_cached_property
     def bbox(self):
         return (self._slice[0].start, self._slice[1].start,
                 self._slice[0].stop, self._slice[1].stop)
 
-    @cached_property
+    @_cached_property
     def centroid(self):
         row, col = self.local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @cached_property
+    @_cached_property
     def central_moments(self):
         row, col = self.local_centroid
         return _moments.central_moments(self._image_double, row, col, 3)
 
-    @cached_property
+    @_cached_property
     def convex_area(self):
         return np.sum(self.convex_image)
 
-    @cached_property
+    @_cached_property
     def convex_image(self):
         return convex_hull_image(self.image)
 
-    @cached_property
+    @_cached_property
     def coords(self):
         rr, cc = np.nonzero(self.image)
         return np.vstack((rr + self._slice[0].start,
                           cc + self._slice[1].start)).T
 
-    @cached_property
+    @_cached_property
     def eccentricity(self):
         l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
             return 0
         return sqrt(1 - l2 / l1)
 
-    @cached_property
+    @_cached_property
     def equivalent_diameter(self):
         return sqrt(4 * self.moments[0, 0] / PI)
 
-    @cached_property
+    @_cached_property
     def euler_number(self):
         euler_array = self.filled_image != self.image
         _, num = ndimage.label(euler_array, STREL_8)
         return -num
 
-    @cached_property
+    @_cached_property
     def extent(self):
         rows, cols = self.image.shape
         return self.moments[0, 0] / (rows * cols)
 
-    @cached_property
+    @_cached_property
     def filled_area(self):
         return np.sum(self.filled_image)
 
-    @cached_property
+    @_cached_property
     def filled_image(self):
         return ndimage.binary_fill_holes(self.image, STREL_8)
 
-    @cached_property
+    @_cached_property
     def hu_moments(self):
         return _moments.hu_moments(self.normalized_moments)
 
-    @cached_property
+    @_cached_property
     def image(self):
         return self._label_image[self._slice] == self.label
 
-    @cached_property
+    @_cached_property
     def _image_double(self):
         return self.image.astype(np.double)
 
-    @cached_property
+    @_cached_property
     def inertia_tensor(self):
         mu = self.central_moments
         a = mu[2, 0] / mu[0, 0]
@@ -195,7 +195,7 @@ class _RegionProperties(object):
         c = mu[0, 2] / mu[0, 0]
         return np.array([[a, b], [b, c]])
 
-    @cached_property
+    @_cached_property
     def inertia_tensor_eigvals(self):
         a, b, b, c = self.inertia_tensor.flat
         # eigen values of inertia tensor
@@ -203,54 +203,54 @@ class _RegionProperties(object):
         l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
         return l1, l2
 
-    @cached_property
+    @_cached_property
     def intensity_image(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
         return self._intensity_image[self._slice] * self.image
 
-    @cached_property
+    @_cached_property
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
-    @cached_property
+    @_cached_property
     def moments(self):
         return _moments.central_moments(self._image_double, 0, 0, 3)
 
-    @cached_property
+    @_cached_property
     def local_centroid(self):
         m = self.moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
         return row, col
 
-    @cached_property
+    @_cached_property
     def max_intensity(self):
         return np.max(self.intensity_image[self.image])
 
-    @cached_property
+    @_cached_property
     def mean_intensity(self):
         return np.mean(self.intensity_image[self.image])
 
-    @cached_property
+    @_cached_property
     def min_intensity(self):
         return np.min(self.intensity_image[self.image])
 
-    @cached_property
+    @_cached_property
     def major_axis_length(self):
         l1, _ = self.inertia_tensor_eigvals
         return 4 * sqrt(l1)
 
-    @cached_property
+    @_cached_property
     def minor_axis_length(self):
         _, l2 = self.inertia_tensor_eigvals
         return 4 * sqrt(l2)
 
-    @cached_property
+    @_cached_property
     def normalized_moments(self):
         return _moments.normalized_moments(self.central_moments, 3)
 
-    @cached_property
+    @_cached_property
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
         b = -b
@@ -262,41 +262,41 @@ class _RegionProperties(object):
         else:
             return - 0.5 * atan2(2 * b, (a - c))
 
-    @cached_property
+    @_cached_property
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    @cached_property
+    @_cached_property
     def solidity(self):
         return self.moments[0, 0] / np.sum(self.convex_image)
 
-    @cached_property
+    @_cached_property
     def weighted_central_moments(self):
         row, col = self.weighted_local_centroid
         return _moments.central_moments(self._intensity_image_double,
                                         row, col, 3)
 
-    @cached_property
+    @_cached_property
     def weighted_centroid(self):
         row, col = self.weighted_local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @cached_property
+    @_cached_property
     def weighted_local_centroid(self):
         m = self.weighted_moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
         return row, col
 
-    @cached_property
+    @_cached_property
     def weighted_hu_moments(self):
         return _moments.hu_moments(self.weighted_normalized_moments)
 
-    @cached_property
+    @_cached_property
     def weighted_moments(self):
         return _moments.central_moments(self._intensity_image_double, 0, 0, 3)
 
-    @cached_property
+    @_cached_property
     def weighted_normalized_moments(self):
         return _moments.normalized_moments(self.weighted_central_moments, 3)
 
