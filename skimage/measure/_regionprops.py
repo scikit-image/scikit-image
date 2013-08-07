@@ -342,80 +342,84 @@ def regionprops(label_image, properties=None,
     -----
     The following properties can be accessed as attributes or keys:
 
-    area : int
+    **area** : int
         Number of pixels of region.
-    bbox : tuple
+    **bbox** : tuple
        Bounding box `(min_row, min_col, max_row, max_col)`
-    central_moments : (3, 3) ndarray
+    **central_moments** : (3, 3) ndarray
         Central moments (translation invariant) up to 3rd order::
 
             mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
 
         where the sum is over the `x`, `y` coordinates of the region,
         and `x_c` and `y_c` are the coordinates of the region's centroid.
-    centroid : array
+    **centroid** : array
         Centroid coordinate tuple `(row, col)`.
-    convex_area : int
+    **convex_area** : int
         Number of pixels of convex hull image.
-    convex_image : (H, J) ndarray
+    **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
-    coords : (N, 2) ndarray
+    **coords** : (N, 2) ndarray
         Coordinate list `(row, col)` of the region.
-    eccentricity : float
+    **eccentricity** : float
         Eccentricity of the ellipse that has the same second-moments as the
         region. The eccentricity is the ratio of the distance between its
         minor and major axis length. The value is between 0 and 1.
-    equivalent_diameter : float
+    **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
-    euler_number : int
+    **euler_number** : int
         Euler number of region. Computed as number of objects (= 1)
         subtracted by number of holes (8-connectivity).
-    extent : float
+    **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as `Area / (rows*cols)`
-    filled_area : int
+    **filled_area** : int
         Number of pixels of filled region.
-    filled_image : (H, J) ndarray
+    **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
-    hu_moments : tuple
+    **hu_moments** : tuple
         Hu moments (translation, scale and rotation invariant).
-    image : (H, J) ndarray
+    **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
-    major_axis_length : float
+    **inertia_tensor** : (2, 2) ndarray
+        Inertia tensor of the region for the rotation around its masss.
+    **inertia_tensor_eigvals** : tuple
+        The two eigen values of the inertia tensor in decreasing order.
+    **major_axis_length** : float
         The length of the major axis of the ellipse that has the same
         normalized second central moments as the region.
-    min_intensity : float
+    **min_intensity** : float
         Value with the greatest intensity in the region.
-    mean_intensity : float
+    **mean_intensity** : float
         Value with the mean intensity in the region.
-    min_intensity : float
+    **min_intensity** : float
         Value with the least intensity in the region.
-    minor_axis_length : float
+    **minor_axis_length** : float
         The length of the minor axis of the ellipse that has the same
         normalized second central moments as the region.
-    moments : (3, 3) ndarray
+    **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
             m_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    normalized_moments : (3, 3) ndarray
+    **normalized_moments** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
 
             nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
 
         where `m_00` is the zeroth spatial moment.
-    orientation : float
+    **orientation** : float
         Angle between the X-axis and the major axis of the ellipse that has
         the same second-moments as the region. Ranging from `-pi/2` to
         `pi/2` in counter-clockwise direction.
-    perimeter : float
+    **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
-    solidity : float
+    **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
-    weighted_central_moments : (3, 3) ndarray
+    **weighted_central_moments** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
@@ -423,19 +427,19 @@ def regionprops(label_image, properties=None,
 
         where the sum is over the `x`, `y` coordinates of the region,
         and `x_c` and `y_c` are the coordinates of the region's centroid.
-    weighted_centroid : array
+    **weighted_centroid** : array
         Centroid coordinate tuple `(row, col)` weighted with intensity
         image.
-    weighted_hu_moments : tuple
+    **weighted_hu_moments** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
         image.
-    weighted_moments : (3, 3) ndarray
+    **weighted_moments** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
 
             wm_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    weighted_normalized_moments : (3, 3) ndarray
+    **weighted_normalized_moments** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
 
