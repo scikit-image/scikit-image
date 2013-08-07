@@ -1,5 +1,6 @@
 import numpy as np
 from skimage.morphology import erosion, disk
+from numpy.lib.stride_tricks import as_strided
 
 
 def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
@@ -35,9 +36,9 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
     pad_size = (h + window - 1, w + window - 1)
     image = input_image.mean() * np.ones(pad_size, dtype=np.uint8)
     mask = np.zeros(pad_size, np.uint8)
-
     image[offset:offset + h, offset:offset + w] = input_image
     mask[offset:offset + h, offset:offset + w] = synth_mask
+
     confidence = 1. - mask
 
     t_row, t_col = np.ogrid[(-offset):(offset + 1), (-offset):(offset + 1)]
@@ -53,8 +54,8 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
         # Generate the image gradient and normal vector to the boundary
         image_grad_y = image[2:, 1:-1] - image[:-2, 1:-1]
         image_grad_x = image[1:-1, 2:] - image[1:-1, :-2]
-        ny = fill_front[2:, 1:-1] - fill_front[:-2, 1:-1]
-        nx = fill_front[1:-1, 2:] - fill_front[1:-1, :-2]
+        ny = fill_front[2:, 1:-1] + (-1 * fill_front[:-2, 1:-1])
+        nx = fill_front[1:-1, 2:] + (-1 * fill_front[1:-1, :-2])
 
         # Generate the indices of the pixels in fill_front
         fill_front_indices = np.transpose(np.where(fill_front == 1))
@@ -62,7 +63,7 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
         max_priority, max_conf, i_max, j_max = 0, 0, 0, 0
 
         # Determine the priority of pixels on the boundary, hence the order
-        for k in xrange(fill_front_indices.shape[0]):
+        for k in range(fill_front_indices.shape[0]):
             i = fill_front_indices[k, 0]
             j = fill_front_indices[k, 1]
 
