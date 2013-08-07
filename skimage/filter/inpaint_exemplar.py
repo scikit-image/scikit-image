@@ -67,8 +67,8 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
             j = fill_front_indices[k, 1]
 
             # Compute the confidence term
-            confidence_term = confidence[i + t_row, j + t_col].sum() / (
-                window ** 2)
+            confidence_term = (confidence[i + t_row, j + t_col].sum() /
+                               window ** 2)
 
             # Compute the data term
             temp_grad_x = image_grad_x[(i - 1) + t_row, (j - 1) + t_col]
@@ -76,10 +76,10 @@ def inpaint_exemplar(input_image, synth_mask, window=9, max_thresh=0.2):
             mod_grad = (temp_grad_x ** 2 + temp_grad_y ** 2)
             ind_max = tuple(np.transpose(
                 np.where(mod_grad == mod_grad.max()))[0])
-            data_term = abs(temp_grad_x[ind_max] * nx[ind_max] - temp_grad_y[
-                ind_max] * ny[ind_max])
-            data_term /= mod_grad[ind_max] * (nx[ind_max] ** 2 + ny[
-                ind_max] ** 2)
+            data_term = abs(temp_grad_x[ind_max] * nx[ind_max] -
+                            temp_grad_y[ind_max] * ny[ind_max])
+            data_term /= (mod_grad[ind_max] *
+                          (nx[ind_max] ** 2 + ny[ind_max] ** 2))
 
             # Compute the priority for determining the order for inpainting
             priority = data_term * confidence_term
