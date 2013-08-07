@@ -204,6 +204,22 @@ def censure_keypoints(image, n_scales=7, mode='DoB', non_max_threshold=0.15,
         feature_mask[:, :, i] = _suppress_lines(feature_mask[:, :, i], image,
                                                 (1 + i / 3.0), line_threshold)
 
+    if mode == 'Octagon':
+        for i in range(1, n_scales - 1):
+            c = (OCTAGON_OUTER_SHAPE[i][0] - 1) / 2 + OCTAGON_OUTER_SHAPE[i][1]
+            feature_mask[:c, :, i] = False
+            feature_mask[:, :c, i] = False
+            feature_mask[-c:, :, i] = False
+            feature_mask[:, -c:, i] = False
+
+    elif mode == 'STAR':
+        for i in range(1, n_scales - 1):
+            c = STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] + STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] / 2
+            feature_mask[:c, :, i] = False
+            feature_mask[:, :c, i] = False
+            feature_mask[-c:, :, i] = False
+            feature_mask[:, -c:, i] = False
+
     rows, cols, scales = np.nonzero(feature_mask[..., 1:n_scales - 1])
     keypoints = np.column_stack([rows, cols])
     scales = scales + 2
