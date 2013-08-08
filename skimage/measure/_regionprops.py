@@ -54,7 +54,7 @@ PROPS = {
 }
 
 
-class cached_property(object):
+class _cached_property(object):
     """Decorator to use a function as a cached property.
 
     The function is only called the first time and each successive call returns
@@ -62,16 +62,16 @@ class cached_property(object):
 
         class Foo(object):
 
-            @cached_property
+            @_cached_property
             def foo(self):
                 return "Cached"
 
         class Foo(object):
 
             def __init__(self):
-                self.cache_active = False
+                self._cache_active = False
 
-            @cached_property
+            @_cached_property
             def foo(self):
                 return "Not cached"
 
@@ -90,7 +90,7 @@ class cached_property(object):
             return self
 
         # call every time, if cache is not active
-        if not obj.__dict__.get('cache_active', True):
+        if not obj.__dict__.get('_cache_active', True):
             return self.func(obj)
 
         # try to retrieve from cache or call and store result in cache
@@ -106,88 +106,88 @@ class _RegionProperties(object):
 
     def __init__(self, slice, label, label_image, intensity_image,
                  cache_active):
-        self._slice = slice
         self.label = label
+        self._slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
-        self.cache_active = cache_active
+        self._cache_active = cache_active
 
-    @cached_property
+    @_cached_property
     def area(self):
         return self.moments[0, 0]
 
-    @cached_property
+    @_cached_property
     def bbox(self):
         return (self._slice[0].start, self._slice[1].start,
                 self._slice[0].stop, self._slice[1].stop)
 
-    @cached_property
+    @_cached_property
     def centroid(self):
         row, col = self.local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @cached_property
+    @_cached_property
     def central_moments(self):
         row, col = self.local_centroid
         return _moments.central_moments(self._image_double, row, col, 3)
 
-    @cached_property
+    @_cached_property
     def convex_area(self):
         return np.sum(self.convex_image)
 
-    @cached_property
+    @_cached_property
     def convex_image(self):
         return convex_hull_image(self.image)
 
-    @cached_property
+    @_cached_property
     def coords(self):
         rr, cc = np.nonzero(self.image)
         return np.vstack((rr + self._slice[0].start,
                           cc + self._slice[1].start)).T
 
-    @cached_property
+    @_cached_property
     def eccentricity(self):
         l1, l2 = self.inertia_tensor_eigvals
         if l1 == 0:
             return 0
         return sqrt(1 - l2 / l1)
 
-    @cached_property
+    @_cached_property
     def equivalent_diameter(self):
         return sqrt(4 * self.moments[0, 0] / PI)
 
-    @cached_property
+    @_cached_property
     def euler_number(self):
         euler_array = self.filled_image != self.image
         _, num = ndimage.label(euler_array, STREL_8)
         return -num
 
-    @cached_property
+    @_cached_property
     def extent(self):
         rows, cols = self.image.shape
         return self.moments[0, 0] / (rows * cols)
 
-    @cached_property
+    @_cached_property
     def filled_area(self):
         return np.sum(self.filled_image)
 
-    @cached_property
+    @_cached_property
     def filled_image(self):
         return ndimage.binary_fill_holes(self.image, STREL_8)
 
-    @cached_property
+    @_cached_property
     def hu_moments(self):
         return _moments.hu_moments(self.normalized_moments)
 
-    @cached_property
+    @_cached_property
     def image(self):
         return self._label_image[self._slice] == self.label
 
-    @cached_property
+    @_cached_property
     def _image_double(self):
         return self.image.astype(np.double)
 
-    @cached_property
+    @_cached_property
     def inertia_tensor(self):
         mu = self.central_moments
         a = mu[2, 0] / mu[0, 0]
@@ -195,7 +195,7 @@ class _RegionProperties(object):
         c = mu[0, 2] / mu[0, 0]
         return np.array([[a, b], [b, c]])
 
-    @cached_property
+    @_cached_property
     def inertia_tensor_eigvals(self):
         a, b, b, c = self.inertia_tensor.flat
         # eigen values of inertia tensor
@@ -203,54 +203,54 @@ class _RegionProperties(object):
         l2 = (a + c) / 2 - sqrt(4 * b ** 2 + (a - c) ** 2) / 2
         return l1, l2
 
-    @cached_property
+    @_cached_property
     def intensity_image(self):
         if self._intensity_image is None:
             raise AttributeError('No intensity image specified.')
         return self._intensity_image[self._slice] * self.image
 
-    @cached_property
+    @_cached_property
     def _intensity_image_double(self):
         return self.intensity_image.astype(np.double)
 
-    @cached_property
+    @_cached_property
     def moments(self):
         return _moments.central_moments(self._image_double, 0, 0, 3)
 
-    @cached_property
+    @_cached_property
     def local_centroid(self):
         m = self.moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
         return row, col
 
-    @cached_property
+    @_cached_property
     def max_intensity(self):
         return np.max(self.intensity_image[self.image])
 
-    @cached_property
+    @_cached_property
     def mean_intensity(self):
         return np.mean(self.intensity_image[self.image])
 
-    @cached_property
+    @_cached_property
     def min_intensity(self):
         return np.min(self.intensity_image[self.image])
 
-    @cached_property
+    @_cached_property
     def major_axis_length(self):
         l1, _ = self.inertia_tensor_eigvals
         return 4 * sqrt(l1)
 
-    @cached_property
+    @_cached_property
     def minor_axis_length(self):
         _, l2 = self.inertia_tensor_eigvals
         return 4 * sqrt(l2)
 
-    @cached_property
+    @_cached_property
     def normalized_moments(self):
         return _moments.normalized_moments(self.central_moments, 3)
 
-    @cached_property
+    @_cached_property
     def orientation(self):
         a, b, b, c = self.inertia_tensor.flat
         b = -b
@@ -262,41 +262,41 @@ class _RegionProperties(object):
         else:
             return - 0.5 * atan2(2 * b, (a - c))
 
-    @cached_property
+    @_cached_property
     def perimeter(self):
         return perimeter(self.image, 4)
 
-    @cached_property
+    @_cached_property
     def solidity(self):
         return self.moments[0, 0] / np.sum(self.convex_image)
 
-    @cached_property
+    @_cached_property
     def weighted_central_moments(self):
         row, col = self.weighted_local_centroid
         return _moments.central_moments(self._intensity_image_double,
                                         row, col, 3)
 
-    @cached_property
+    @_cached_property
     def weighted_centroid(self):
         row, col = self.weighted_local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
 
-    @cached_property
+    @_cached_property
     def weighted_local_centroid(self):
         m = self.weighted_moments
         row = m[0, 1] / m[0, 0]
         col = m[1, 0] / m[0, 0]
         return row, col
 
-    @cached_property
+    @_cached_property
     def weighted_hu_moments(self):
         return _moments.hu_moments(self.weighted_normalized_moments)
 
-    @cached_property
+    @_cached_property
     def weighted_moments(self):
         return _moments.central_moments(self._intensity_image_double, 0, 0, 3)
 
-    @cached_property
+    @_cached_property
     def weighted_normalized_moments(self):
         return _moments.normalized_moments(self.weighted_central_moments, 3)
 
@@ -342,80 +342,84 @@ def regionprops(label_image, properties=None,
     -----
     The following properties can be accessed as attributes or keys:
 
-    area : int
+    **area** : int
         Number of pixels of region.
-    bbox : tuple
+    **bbox** : tuple
        Bounding box `(min_row, min_col, max_row, max_col)`
-    central_moments : (3, 3) ndarray
+    **central_moments** : (3, 3) ndarray
         Central moments (translation invariant) up to 3rd order::
 
             mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
 
         where the sum is over the `x`, `y` coordinates of the region,
         and `x_c` and `y_c` are the coordinates of the region's centroid.
-    centroid : array
+    **centroid** : array
         Centroid coordinate tuple `(row, col)`.
-    convex_area : int
+    **convex_area** : int
         Number of pixels of convex hull image.
-    convex_image : (H, J) ndarray
+    **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
-    coords : (N, 2) ndarray
+    **coords** : (N, 2) ndarray
         Coordinate list `(row, col)` of the region.
-    eccentricity : float
+    **eccentricity** : float
         Eccentricity of the ellipse that has the same second-moments as the
         region. The eccentricity is the ratio of the distance between its
         minor and major axis length. The value is between 0 and 1.
-    equivalent_diameter : float
+    **equivalent_diameter** : float
         The diameter of a circle with the same area as the region.
-    euler_number : int
+    **euler_number** : int
         Euler number of region. Computed as number of objects (= 1)
         subtracted by number of holes (8-connectivity).
-    extent : float
+    **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
         Computed as `Area / (rows*cols)`
-    filled_area : int
+    **filled_area** : int
         Number of pixels of filled region.
-    filled_image : (H, J) ndarray
+    **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
-    hu_moments : tuple
+    **hu_moments** : tuple
         Hu moments (translation, scale and rotation invariant).
-    image : (H, J) ndarray
+    **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
-    major_axis_length : float
+    **inertia_tensor** : (2, 2) ndarray
+        Inertia tensor of the region for the rotation around its masss.
+    **inertia_tensor_eigvals** : tuple
+        The two eigen values of the inertia tensor in decreasing order.
+    **major_axis_length** : float
         The length of the major axis of the ellipse that has the same
         normalized second central moments as the region.
-    min_intensity : float
+    **min_intensity** : float
         Value with the greatest intensity in the region.
-    mean_intensity : float
+    **mean_intensity** : float
         Value with the mean intensity in the region.
-    min_intensity : float
+    **min_intensity** : float
         Value with the least intensity in the region.
-    minor_axis_length : float
+    **minor_axis_length** : float
         The length of the minor axis of the ellipse that has the same
         normalized second central moments as the region.
-    moments : (3, 3) ndarray
+    **moments** : (3, 3) ndarray
         Spatial moments up to 3rd order::
 
             m_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    normalized_moments : (3, 3) ndarray
+    **normalized_moments** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
 
             nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
 
         where `m_00` is the zeroth spatial moment.
-    orientation : float
+    **orientation** : float
         Angle between the X-axis and the major axis of the ellipse that has
         the same second-moments as the region. Ranging from `-pi/2` to
         `pi/2` in counter-clockwise direction.
-    perimeter : float
+    **perimeter** : float
         Perimeter of object which approximates the contour as a line
         through the centers of border pixels using a 4-connectivity.
-    solidity : float
+    **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
-    weighted_central_moments : (3, 3) ndarray
+    **weighted_central_moments** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
@@ -423,19 +427,19 @@ def regionprops(label_image, properties=None,
 
         where the sum is over the `x`, `y` coordinates of the region,
         and `x_c` and `y_c` are the coordinates of the region's centroid.
-    weighted_centroid : array
+    **weighted_centroid** : array
         Centroid coordinate tuple `(row, col)` weighted with intensity
         image.
-    weighted_hu_moments : tuple
+    **weighted_hu_moments** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
         image.
-    weighted_moments : (3, 3) ndarray
+    **weighted_moments** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
 
             wm_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    weighted_normalized_moments : (3, 3) ndarray
+    **weighted_normalized_moments** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
 
