@@ -363,38 +363,4 @@ def unwrap_phase_branch_cuts(image, wrap_around=False):
                                        mask=image_mask)
     else:
         image_unwrapped = image_unmasked + 2 * np.pi * periods
-
-    print('Residue count: %d' % np.sum(np.abs(residues)))
-    if image.size < 50:
-        print('image')
-        print(image / (2 * np.pi) + 0.5)
-        print('residues')
-        print(residues)
-        print('cut_vertical')
-        print(cut_vertical)
-        print('cut_horizontal')
-        print(cut_horizontal)
-        print('periods')
-        print(periods)
-        print('image_unwrapped')
-        print(image_unwrapped / (2 * np.pi) + 0.5)
-    else:
-        from matplotlib import pyplot as plt
-        plt.figure()
-        plt.subplot(221)
-        plt.imshow(image_unwrapped, cmap='gray')
-        plt.imshow(np.ma.array(residues, mask=(residues == 0)))
-        plt.subplot(222)
-        plt.imshow(image_unwrapped, cmap='gray')
-        plt.imshow(np.ma.array(cut_vertical, mask=(cut_vertical == 0)),
-                               vmin=0, vmax=1)
-        plt.subplot(223)
-        plt.imshow(image_unwrapped, cmap='gray')
-        plt.imshow(np.ma.array(cut_horizontal, mask=(cut_horizontal == 0)),
-                               vmin=0, vmax=1)
-        plt.subplot(224)
-        plt.imshow(image_unwrapped, cmap='gray')
-        #plt.show()
-
-
     return image_unwrapped
