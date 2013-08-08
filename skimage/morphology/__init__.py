@@ -4,7 +4,8 @@ from .grey import (erosion, dilation, opening, closing, white_tophat,
                    black_tophat, greyscale_erode, greyscale_dilate,
                    greyscale_open, greyscale_close, greyscale_white_top_hat,
                    greyscale_black_top_hat)
-from .selem import square, rectangle, diamond, disk, cube, octahedron, ball
+from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
+                    octagon, star)
 from .ccomp import label
 from .watershed import watershed, is_local_maximum
 from ._skeletonize import skeletonize, medial_axis
@@ -36,6 +37,7 @@ __all__ = ['binary_erosion',
            'cube',
            'octahedron',
            'ball',
+           'octagon',
            'label',
            'watershed',
            'is_local_maximum',
