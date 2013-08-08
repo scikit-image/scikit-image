@@ -5,6 +5,7 @@ from skimage.transform import integral_image
 from skimage.feature.corner import _compute_auto_correlation
 from skimage.util import img_as_float
 from skimage.morphology import convex_hull_image
+from skimage.feature.util import _remove_border_keypoints
 
 from skimage.feature.censure_cy import _censure_dob_loop
 
@@ -204,24 +205,28 @@ def censure_keypoints(image, n_scales=7, mode='DoB', non_max_threshold=0.15,
         feature_mask[:, :, i] = _suppress_lines(feature_mask[:, :, i], image,
                                                 (1 + i / 3.0), line_threshold)
 
-    if mode == 'Octagon':
-        for i in range(1, n_scales - 1):
-            c = (OCTAGON_OUTER_SHAPE[i][0] - 1) // 2 + OCTAGON_OUTER_SHAPE[i][1]
-            feature_mask[:c, :, i] = False
-            feature_mask[:, :c, i] = False
-            feature_mask[-c:, :, i] = False
-            feature_mask[:, -c:, i] = False
-
-    elif mode == 'STAR':
-        for i in range(1, n_scales - 1):
-            c = STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] + STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] // 2
-            feature_mask[:c, :, i] = False
-            feature_mask[:, :c, i] = False
-            feature_mask[-c:, :, i] = False
-            feature_mask[:, -c:, i] = False
-
     rows, cols, scales = np.nonzero(feature_mask[..., 1:n_scales - 1])
     keypoints = np.column_stack([rows, cols])
     scales = scales + 2
 
-    return keypoints, scales
+    if mode == 'DoB':
+        return keypoints, scales
+
+    filtered_keypoints = np.empty((0, 2), dtype=np.int32)
+    filtered_scales = np.empty((0), dtype=np.int32)
+
+    if mode == 'Octagon':
+        for i in range(2, n_scales):
+            c = (OCTAGON_OUTER_SHAPE[i - 1][0] - 1) // 2 + OCTAGON_OUTER_SHAPE[i - 1][1]
+            filtered_keypoints_for_scale = _remove_border_keypoints(image, keypoints[scales == i], c)
+            filtered_keypoints = np.vstack((filtered_keypoints, filtered_keypoints_for_scale))
+            filtered_scales = np.hstack((filtered_scales, np.asarray(len(filtered_keypoints_for_scale) * [i], dtype=np.int32)))
+
+    elif mode == 'STAR':
+        for i in range(2, n_scales):
+            c = STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] + STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] // 2
+            filtered_keypoints_for_scale = _remove_border_keypoints(image, keypoints[scales == i], c)
+            filtered_keypoints = np.vstack((filtered_keypoints, filtered_keypoints_for_scale))
+            filtered_scales = np.hstack((filtered_scales, np.asarray(len(filtered_keypoints_for_scale) * [i], dtype=np.int32)))
+
+    return filtered_keypoints, filtered_scales
