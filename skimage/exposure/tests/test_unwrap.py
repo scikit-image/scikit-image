@@ -257,5 +257,12 @@ def test_unwrap_branch_cuts_chelsea():
         plt.show()
 
 
+def test_unwrap_naive_1d():
+    image = np.linspace(0, 12 * np.pi, 100)
+    image_wrapped = np.angle(np.exp(1j * image))
+    image_unwrapped = unwrap_phase(image)
+    assert_array_almost_equal(image_unwrapped, image)
+
+
 if __name__ == "__main__":
     run_module_suite()
