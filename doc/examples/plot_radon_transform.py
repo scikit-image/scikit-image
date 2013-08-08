@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 ===============
 Radon transform
@@ -190,8 +189,8 @@ plt.show()
         IEEE Press 1988. http://www.slaney.org/pct/pct-toc.html
 .. [2]  Wikipedia, Radon transform,
         http://en.wikipedia.org/wiki/Radon_transform#Relationship_with_the_Fourier_transform
-.. [3]  S Kaczmarz, "Angenäherte auflösung von systemen linearer
-        gleichungen", Bulletin International de l’Academie Polonaise des
+.. [3]  S Kaczmarz, "Angenaeherte Aufloesung von Systemen linearer
+        Gleichungen", Bulletin International de l'Academie Polonaise des
         Sciences et des Lettres 35 pp 355--357 (1937)
 .. [4]  AH Andersen, AC Kak, "Simultaneous algebraic reconstruction technique
         (SART): a superior implementation of the ART algorithm", Ultrasonic
