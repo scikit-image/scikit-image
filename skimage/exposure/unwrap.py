@@ -152,7 +152,6 @@ def _prepare_branch_cuts(residues):
     for l in range(number_of_masked_regions):
         region = labelled_mask == l
         residue = np.sum(residues_unmasked[region])
-        print('Found residue of net value %d in a masked region' % residue)
         residue_no = l + 1
         residue_storage[residue_no] = residue
         branch_cuts['residue_no'][region] = residue_no

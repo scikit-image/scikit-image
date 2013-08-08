@@ -142,7 +142,6 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
         QueuedLocation *l
     i = normalize_coordinate(i, branch_cuts.shape[0])
     j = normalize_coordinate(j, branch_cuts.shape[1])
-    #print('\t\tNew location: [%d, %d]' % (i, j))
     if branch_cuts[i, j].visit_code == visit_code:
         # We've seen this location before, don't add it
         return location_index
@@ -153,32 +152,17 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
         l.j = j
         l.came_from = coming_from
         # Add the location to the queue
-        #if edge_is_set(branch_cuts, l, coming_from):
-            # The edge between these locations is already set, so we schedule
-            # the new location for immediate processing
-            #queue_push_head(queue, <QueueValue> l)
-
-            # We try the standard version here
-            #queue_push_tail(queue, <QueueValue> l)
-            #print('\t\t\tAdding location to head of queue: [%d, %d]' % (i, j))
         if (residues_mask[l.i, l.j]
             and residues_mask[coming_from.i, coming_from.j]):
-            # We are moving between two masked residues, so we fast-skip ahead
+            # We are moving between two masked intersections, the edge between
+            # two such intersections should always have a cut between them.
+            # Adding this edge is therefore cost-free, so we skip ahead
+            # using a DFS-like strategy
             queue_push_head(queue, <QueueValue> l)
-            #print('\t\t\tAdding location to head of queue: [%d, %d] '
-                  #'(coming from [%d, %d])' % (i, j, coming_from.i,
-                                              #coming_from.j))
-
         else:
             # The between these locations was not set, so we schedule the
             # new location as in an ordinary BFS
             queue_push_tail(queue, <QueueValue> l)
-            #print('\t\t\tAdding location to tail of queue: [%d, %d] '
-                  #'(coming from [%d, %d])' % (i, j, coming_from.i,
-                                              #coming_from.j))
-        #print('\t\t\t\tResidue masks: %d and %d'
-              #% (residues_mask[l.i, l.j], residues_mask[coming_from.i,
-                                                         #coming_from.j]))
         # Mark this location as visited
         branch_cuts[i, j].visit_code = visit_code
         return location_index + 1
@@ -195,7 +179,7 @@ cdef inline long edge_index(long a, long b):
 
 cdef inline cnp.uint8_t edge_is_set(branch_cut[:, ::1] branch_cuts,
                                   QueuedLocation *la, QueuedLocation *lb):
-    # Is the edge set between to residues?
+    # Is the edge set between two residues?
     if la.i != lb.i:
         # Edge along 0th dimension (vertical)
         return branch_cuts[edge_index(la.i, lb.i), la.j].vcut
@@ -206,13 +190,9 @@ cdef inline cnp.uint8_t edge_is_set(branch_cut[:, ::1] branch_cuts,
 
 cdef void set_edges_to_root(QueuedLocation *location,
                             branch_cut[:, ::1] branch_cuts):
-    #print('\t\t\tSetting edges to root')
     cdef Py_ssize_t num_edges = 0
     cdef QueuedLocation *l = location
     while l.came_from != NULL:
-        #print('\t\t\t\t%x -> %x' % (<long> l, <long> l.came_from))
-        #print('\t\t\t\tSetting edge %d from [%d, %d] to [%d, %d]'
-              #% (num_edges, l.i, l.j, l.came_from.i, l.came_from.j))
         if l.i != l.came_from.i:
             # Edge along 0th dimension (vertical)
             branch_cuts[edge_index(l.i, l.came_from.i), l.j].vcut = 1
@@ -241,16 +221,12 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
     queue = NULL
     visit_code = 1
     location_buffer = <QueuedLocation *> malloc(size * sizeof(QueuedLocation))
-    #print('bytes for location_buffer: %d' % (size * sizeof(QueuedLocation)))
-    #print('location_buffer: %x' % (<long> location_buffer))
 
     # Scan for residues
     for i in range(branch_cuts.shape[0]):
         for j in range(branch_cuts.shape[1]):
-            #print('Scan reached [%d, %d]' %  (i, j))
             if (branch_cuts[i, j].residue_no != 0
                 and residue_storage[branch_cuts[i, j].residue_no] != 0):
-                #print('\tFound unmatched residue')
                 # Found a residue that has not yet been matched
                 # Initialize a queue
                 queue = queue_new()
@@ -273,16 +249,11 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                     residue_no = branch_cuts[l.i, l.j].residue_no
                     residue = residue_storage[residue_no]
                     if residue != 0:
-                        #print('\t\tFound residue at [%d, %d] with value %d'
-                              #% (l.i, l.j, residue))
                         set_edges_to_root(l, branch_cuts)
                         net_residue += residue
-                        #print('\t\tNet residue: %d' % (net_residue,))
                         residue_storage[residue_no] = 0
                         if net_residue == 0:
-                            #print('\t\tMatched the residue found; '
-                                  #'continuing scan for more residues')
-                            break    # All residues matched, success!
+                            break    # Total residue matched; resume search
 
                     # Add all neighbors that have not been seen
                     location_index = maybe_add_location(l.i - 1, l.j, l,
@@ -291,28 +262,24 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                                                         location_index, queue,
                                                         visit_code,
                                                         residues_mask)
-                    #print('\t\t\tlocation_index = %d' % location_index)
                     location_index = maybe_add_location(l.i + 1, l.j, l,
                                                         branch_cuts,
                                                         location_buffer,
                                                         location_index, queue,
                                                         visit_code,
                                                         residues_mask)
-                    #print('\t\t\tlocation_index = %d' % location_index)
                     location_index = maybe_add_location(l.i, l.j - 1, l,
                                                         branch_cuts,
                                                         location_buffer,
                                                         location_index, queue,
                                                         visit_code,
                                                         residues_mask)
-                    #print('\t\t\tlocation_index = %d' % location_index)
                     location_index = maybe_add_location(l.i, l.j + 1, l,
                                                         branch_cuts,
                                                         location_buffer,
                                                         location_index, queue,
                                                         visit_code,
                                                         residues_mask)
-                    #print('\t\t\tlocation_index = %d' % location_index)
 
                 if queue != NULL:
                     queue_free(queue)
@@ -321,13 +288,15 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                     branch_cuts[...].visit_code = 0
                     visit_code = 1
                 else:
+                    # The visit code could have been a boolean, but since
+                    # we have plenty of bits to spare, we just use a new
+                    # visit_code value to mark visited intersections on the
+                    # next iteration
                     visit_code += 1
 
-    #print('freeing location_buffer')
     if location_buffer != NULL:
         free(<void *> location_buffer)
         location_buffer = NULL
-    #print('free\'d: location_buffer')
     return np.asarray(branch_cuts)
 
 
@@ -367,31 +336,22 @@ cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
         QueuedLocation *l
     i = normalize_coordinate(i, image.shape[0])
     j = normalize_coordinate(j, image.shape[1])
-    #print('\tConsidering [%d, %d]' % (i, j))
-    #print('\t\tperiods = %d' % periods[i, j])
-    #print('\t\tCut between pixels? %d' % cut_between_pixels(vcut, hcut, i, j,
-                                                            #coming_from.i,
-                                                            #coming_from.j))
+
     if periods[i, j] != UNDEFINED:
         # Pixel has already been visited
-        #print('\t\tAlready processed')
         return location_index
     elif image_mask[i, j] == 1:
         # Masked pixel
-        #print('\t\tMasked')
         return location_index
     elif cut_between_pixels(vcut, hcut, i, j, coming_from.i, coming_from.j):
         # Cut between these pixels, unreachable
-        #print('\t\tCut between pixels')
         return location_index
     else:
         # Unwrap phase of the new location
-        #print('\t\tAdding at location_index = %d' % location_index)
         periods[i, j] = (periods[coming_from.i, coming_from.j]
                          + _phase_period_increment(image[coming_from.i,
                                                          coming_from.j],
                                                    image[i, j]))
-        #print('\t\tPhase periods at [%d, %d]: %d' % (i, j, periods[i, j]))
         # Add the new location to the queue
         if location_index >= (image.shape[0] * image.shape[1]):
             print('Illegal location_index: %d' % location_index)
@@ -413,15 +373,10 @@ def integrate_phase(cnp.float64_t[:, ::1] image, cnp.uint8_t[:, ::1] image_mask,
         QueuedLocation *location_buffer
         QueuedLocation *l
 
-
-    #print('Code for UNDEFINED in periods: %d' % UNDEFINED)
-    #print('Code for UINT16_MAX in periods: %d' % UINT16_MAX)
     size = image.shape[0] * image.shape[1]
     queue = NULL
     queue = queue_new()
-    #print('queue: %x' % (<long> queue))
     location_buffer = <QueuedLocation *> malloc(size * sizeof(QueuedLocation))
-    #print('location_buffer: %x' % (<long> location_buffer))
     location_index = 0
 
     # Push start point into queue
@@ -434,7 +389,6 @@ def integrate_phase(cnp.float64_t[:, ::1] image, cnp.uint8_t[:, ::1] image_mask,
     # Unwrap all reachable pixels
     while not queue_is_empty(queue):
         l = <QueuedLocation *> queue_pop_head(queue)
-        #print('At pixel [%d, %d]' % (l.i, l.j))
         location_index = maybe_add_pixel(image, image_mask, periods, vcut, hcut,
                                          queue, location_buffer, location_index,
                                          l, l.i, l.j - 1)
@@ -448,7 +402,7 @@ def integrate_phase(cnp.float64_t[:, ::1] image, cnp.uint8_t[:, ::1] image_mask,
                                          queue, location_buffer, location_index,
                                          l, l.i - 1, l.j)
 
-    # Cleanup
+    # Teardown
     if location_buffer != NULL:
         free(location_buffer)
         location_buffer = NULL
