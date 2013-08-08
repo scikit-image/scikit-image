@@ -4,9 +4,9 @@ import warnings
 from ._unwrap_naive import unwrap_naive_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
-from ._goldstein import (find_phase_residues_cy, branch_cut_dtype,
-                         find_branch_cuts_cy, _prepare_branch_cuts_cy,
-                         PERIODS_UNDEFINED, integrate_phase)
+from ._branch_cuts import (find_phase_residues_cy, branch_cut_dtype,
+                           find_branch_cuts_cy, _prepare_branch_cuts_cy,
+                           PERIODS_UNDEFINED, integrate_phase)
 from .._shared.six import string_types
 from ..morphology import label
 

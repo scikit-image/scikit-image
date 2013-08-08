@@ -16,7 +16,7 @@ def configuration(parent_package='', top_path=None):
     cython(['_unwrap_naive.pyx'], working_path=base_path)
     cython(['_unwrap_2d.pyx'], working_path=base_path)
     cython(['_unwrap_3d.pyx'], working_path=base_path)
-    cython(['_goldstein.pyx'], working_path=base_path)
+    cython(['_branch_cuts.pyx'], working_path=base_path)
 
     config.add_extension('_unwrap_naive', sources=['_unwrap_naive.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -26,7 +26,7 @@ def configuration(parent_package='', top_path=None):
     unwrap_sources_3d = ['_unwrap_3d.c', 'unwrap_3d_ljmu.c']
     config.add_extension('_unwrap_3d', sources=unwrap_sources_3d,
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_goldstein', sources=['_goldstein.c', 'queue.c'],
+    config.add_extension('_branch_cuts', sources=['_branch_cuts.c', 'queue.c'],
                          include_dirs=[get_numpy_include_dirs()])
 
     return config

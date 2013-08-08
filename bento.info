@@ -153,9 +153,9 @@ Library:
     Extension: skimage.exposure._unwrap_naive
         Sources:
             skimage/exposure/_unwrap_naive.pyx
-    Extension: skimage.exposure._goldstein
+    Extension: skimage.exposure._branch_cuts
         Sources:
-            skimage/exposure/_goldstein.pyx, skimage/exposure/queue.c
+            skimage/exposure/_branch_cuts.pyx, skimage/exposure/queue.c
 
 Executable: skivi
     Module: skimage.scripts.skivi
