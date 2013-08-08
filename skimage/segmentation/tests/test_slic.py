@@ -94,7 +94,8 @@ def test_sigma():
     img[:, 2] = 1
     seg1 = slic(img, sigma=1, n_segments=2, multichannel=False)
     seg2 = slic(img, sigma=[1, 1], n_segments=2, multichannel=False)
-    seg3 = slic(img, sigma=np.array([1.0, 1.0]), multichannel=False)
+    seg3 = slic(img, sigma=np.array([1.0, 1.0]), n_segments=2,
+                multichannel=False)
     assert_equal(seg1, seg2)
     assert_equal(seg2, seg3)
 
