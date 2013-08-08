@@ -44,7 +44,7 @@ def test_censure_keypoints_moon_image_Octagon():
                                     [356, 239],
                                     [463, 116]])
 
-    expected_scale = np.array([3, 4, 2, 2, 2], dtype=np.int32)
+    expected_scale = np.array([3, 4, 2, 2, 2], dtype=np.intp)
 
     assert_array_equal(expected_kp_Octagon, actual_kp_Octagon)
     assert_array_equal(expected_scale, actual_scale)
