@@ -27,7 +27,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
         infinity, superpixel shapes become square/cubic.
     max_iter : int, optional (default: 10)
         Maximum number of iterations of k-means.
-    sigma : float, optional (default: 1)
+    sigma : float, or list or array of float, optional (default: 1)
         Width of Gaussian smoothing kernel for preprocessing. Zero means no
         smoothing.
     spacing : iterable of float, of length image.ndim, optional
@@ -104,10 +104,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     image = img_as_float(image)
     if not multichannel:
         image = gray2rgb(image)
+    sigma = _sanitize_sigma(sigma, image)
     if image.ndim == 3:
         # See 2D RGB image as 3D RGB image with Z = 1
         image = image[np.newaxis, ...]
-    sigma = _sanitize_sigma(sigma, image)
+        sigma = np.concatenate(([0.0], sigma))
     if (sigma > 0).any():
         image = ndimage.gaussian_filter(image, sigma)
     if convert2lab:
@@ -157,15 +158,16 @@ def _sanitize_sigma(sigma, image):
         Any expression that could be interpreted as the standard
         deviation for a Gaussian filter.
     image : np.ndarray, shape (..., 3)
-        A color image to be filtered.
+        A color image to be filtered. It is assumed that the last
+        dimension is the channel dimension and will not be filtered.
 
     Returns
     -------
     sigma : np.array of float, shape `(image.ndim,)`
     """
     if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma, 0])
-    elif type(sigma) == list:
+        sigma = [sigma] * (image.ndim - 1)
+    if type(sigma) == list:
         sigma = np.array(sigma, dtype=np.float)
     if len(sigma) != image.ndim:
         sigma = np.concatenate((sigma, [0]))
