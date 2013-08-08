@@ -118,8 +118,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     depth, height, width = image.shape[:3]
     if spacing is None:
         spacing = np.ones(image.ndim - 1)
+    # artificially create a spacing of 1 for color-space
+    spacing = np.concatenate((spacing, np.ones_like(spacing)))
     grids = np.mgrid[:depth, :height, :width]
-    grids = [grid * sp for grid, sp in zip(grids, spacing)]
     # approximate grid size for desired n_segments
     slices = regular_grid(image.shape[:3], n_segments)
     means_space = [grid[slices][..., np.newaxis] for grid in grids]
@@ -136,7 +137,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     nearest_mean = np.zeros((depth, height, width), dtype=np.intp)
     distance = np.empty((depth, height, width), dtype=np.float)
     segment_map = _slic_cython(image_zyx, nearest_mean, distance, means,
-                               max_iter, n_segments)
+                               spacing, max_iter, n_segments)
     if segment_map.shape[0] == 1:
         segment_map = segment_map[0]
     return segment_map
