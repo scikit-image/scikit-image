@@ -55,8 +55,7 @@ plt.show()
 References
 ----------
 
-.. [1] Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
-       and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
-       algorithm based on sorting by reliability following a noncontinuous
-       path", Journal Applied Optics, Vol. 41, No. 35, pp. 7437, 2002
+.. [1] R. M. Goldstein, H. A. Zebker, C. L. Werner, "Satellite radar
+       interferometry: Two-dimensional phase unwrapping", Radio Science 23
+       (1988) 4, pp 713--720.
 """
