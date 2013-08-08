@@ -1,7 +1,7 @@
 import numpy as np
 import warnings
 
-from ._unwrap_1d import unwrap_1d
+from ._unwrap_naive import unwrap_naive_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 from ._goldstein import (find_phase_residues_cy, branch_cut_dtype,
@@ -473,10 +473,11 @@ def phase_unwrap_naive(image):
     image_unwrapped : array_like, float64
         Unwrapped image of the same shape as the input.
     '''
-    if image.ndim == 1:
-        if np.ma.isMaskedArray(image):
-            raise ValueError('1D masked images cannot be unwrapped')
+    if image.ndim != 1:
+        raise ValueError('image must be 1 dimensional')
+    if np.ma.isMaskedArray(image):
+        raise ValueError('1D masked images cannot be unwrapped')
     image_not_masked = np.asarray(image, dtype=np.float64, order='C')
     image_unwrapped = np.empty_like(image, dtype=np.float64, order='C')
-    unwrap_1d(image_not_masked, image_unwrapped)
+    unwrap_naive_1d(image_not_masked, image_unwrapped)
     return image_unwrapped
