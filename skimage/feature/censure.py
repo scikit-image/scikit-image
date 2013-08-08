@@ -83,7 +83,7 @@ def _octagon_filter_kernel(mo, no, mi, ni):
     inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
     outer_weight = 1.0 / (outer - inner)
     inner_weight = 1.0 / inner
-    c = ((mo + 2 * no) - (mi + 2 * ni)) / 2
+    c = ((mo + 2 * no) - (mi + 2 * ni)) // 2
     outer_oct = _oct(mo, no)
     inner_oct = np.zeros((mo + 2 * no, mo + 2 * no))
     inner_oct[c: -c, c: -c] = _oct(mi, ni)
@@ -98,13 +98,13 @@ def _star(a):
         bfilter[:] = 1
         return bfilter
     m = 2 * a + 1
-    n = a / 2
+    n = a // 2
     selem_square = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
     selem_square[n: m + n, n: m + n] = 1
     selem_triangle = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
-    selem_triangle[(m + 2 * n - 1) / 2, 0] = 1
-    selem_triangle[(m + 1) / 2, n - 1] = 1
-    selem_triangle[(m + 4 * n - 3) / 2, n - 1] = 1
+    selem_triangle[(m + 2 * n - 1) // 2, 0] = 1
+    selem_triangle[(m + 1) // 2, n - 1] = 1
+    selem_triangle[(m + 4 * n - 3) // 2, n - 1] = 1
     selem_triangle = convex_hull_image(selem_triangle).astype(int)
     selem_triangle += (selem_triangle[:, ::-1] + selem_triangle.T +
                        selem_triangle.T[::-1, :])
@@ -112,7 +112,7 @@ def _star(a):
 
 
 def _star_filter_kernel(m, n):
-    c = m + m / 2 - n - n / 2
+    c = m + m // 2 - n - n // 2
     outer_star = _star(m)
     inner_star = np.zeros((outer_star.shape))
     inner_star[c: -c, c: -c] = _star(n)
@@ -206,7 +206,7 @@ def censure_keypoints(image, n_scales=7, mode='DoB', non_max_threshold=0.15,
 
     if mode == 'Octagon':
         for i in range(1, n_scales - 1):
-            c = (OCTAGON_OUTER_SHAPE[i][0] - 1) / 2 + OCTAGON_OUTER_SHAPE[i][1]
+            c = (OCTAGON_OUTER_SHAPE[i][0] - 1) // 2 + OCTAGON_OUTER_SHAPE[i][1]
             feature_mask[:c, :, i] = False
             feature_mask[:, :c, i] = False
             feature_mask[-c:, :, i] = False
@@ -214,7 +214,7 @@ def censure_keypoints(image, n_scales=7, mode='DoB', non_max_threshold=0.15,
 
     elif mode == 'STAR':
         for i in range(1, n_scales - 1):
-            c = STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] + STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] / 2
+            c = STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] + STAR_SHAPE[STAR_FILTER_SHAPE[i][0]] // 2
             feature_mask[:c, :, i] = False
             feature_mask[:, :c, i] = False
             feature_mask[-c:, :, i] = False
