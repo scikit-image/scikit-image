@@ -107,8 +107,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     if image.ndim == 3:
         # See 2D RGB image as 3D RGB image with Z = 1
         image = image[np.newaxis, ...]
-    if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma, 0])
+    sigma = _sanitize_sigma(sigma, image)
     if (sigma > 0).any():
         image = ndimage.gaussian_filter(image, sigma)
     if convert2lab:
@@ -140,3 +139,34 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     if segment_map.shape[0] == 1:
         segment_map = segment_map[0]
     return segment_map
+
+
+def _sanitize_sigma(sigma, image):
+    """Prepare `sigma` for use to Gaussian-filter `image`.
+
+    When Gaussian filtering an image, one may want a uniform sigma,
+    but not over the image channels (assumed to be the last dimension
+    of `image`). Typically, one does not provide the [0] parameter as
+    the sigma for the last dimension. This function adds the 0 when
+    required, as well as converts single numeric sigmas to np.arrays
+    of appropriate dimension.
+
+    Parameters
+    ----------
+    sigma : int, float, list, or np.array
+        Any expression that could be interpreted as the standard
+        deviation for a Gaussian filter.
+    image : np.ndarray, shape (..., 3)
+        A color image to be filtered.
+
+    Returns
+    -------
+    sigma : np.array of float, shape `(image.ndim,)`
+    """
+    if not isinstance(sigma, coll.Iterable):
+        sigma = np.array([sigma, sigma, sigma, 0])
+    elif type(sigma) == list:
+        sigma = np.array(sigma, dtype=np.float)
+    if len(sigma) != image.ndim:
+        sigma = np.concatenate((sigma, [0]))
+    return sigma
