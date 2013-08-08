@@ -1,4 +1,3 @@
-import numpy as np
 
 
 def _remove_border_keypoints(image, keypoints, dist):
@@ -6,14 +5,12 @@ def _remove_border_keypoints(image, keypoints, dist):
     width = image.shape[0]
     height = image.shape[1]
 
-    try:
-        keypoints = keypoints[(dist - 1 < keypoints[:, 0])
-                              & (keypoints[:, 0] < width - dist + 1)
-                              & (dist - 1 < keypoints[:, 1])
-                              & (keypoints[:, 1] < height - dist + 1)]
-    except IndexError:
-        return np.empty((0, 2), dtype=np.int32)
-    return keypoints
+    keypoints_filtering_mask = (dist - 1 < keypoints[:, 0]
+                                & keypoints[:, 0] < width - dist + 1
+                                & dist - 1 < keypoints[:, 1]
+                                & keypoints[:, 1] < height - dist + 1)
+
+    return keypoints_filtering_mask
 
 
 def pairwise_hamming_distance(array1, array2):
