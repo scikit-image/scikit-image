@@ -199,7 +199,7 @@ def find_branch_cuts(residues):
     '''
     branch_cuts, residue_storage = _prepare_branch_cuts(residues)
     if np.ma.isMaskedArray(residues):
-        residues_mask = np.require(residues, np.uint8, ['C'])
+        residues_mask = np.require(residues.mask, np.uint8, ['C'])
     else:
         residues_mask = np.zeros_like(residues, dtype=np.uint8, order='C')
     branch_cuts = find_branch_cuts_cy(branch_cuts, residue_storage,

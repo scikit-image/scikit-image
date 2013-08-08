@@ -167,6 +167,31 @@ def test_find_residues():
     assert np.sum(find_phase_residues(chelsea_wrapped, wrap_around=True)) == 0
 
 
+def test_unwrap_branch_cuts_mask_sneak():
+    from skimage.exposure.unwrap import find_branch_cuts
+    image = (2 * np.pi *
+             (np.array([[0.0, 0.0, 0.0, 0.3, 0.3, 0.3, 0.4, 0.0, 0.0],
+                        [0.9, 0.9, 0.8, 0.6, 0.6, 0.6, 0.5, 0.9, 0.9],
+                        [0.8, 0.8, 0.8, 0.7, 0.7, 0.7, 0.6, 0.8, 0.8]]) - 0.5))
+    reference_cuts_vertical = np.array([[0, 0, 1, 0, 0, 0, 1, 0, 0],
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                        [0, 0, 0, 0, 0, 0, 0, 0, 0]],
+                                       dtype=np.uint8)
+    reference_cuts_horizontal = np.array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                          [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                                          [1, 1, 1, 1, 1, 1, 1, 1, 1]],
+                                         dtype=np.uint8)
+
+    residues = find_phase_residues(image, wrap_around=(False, True))
+    print(image / (2 * np.pi) + 0.5)
+    print(residues)
+    cuts_vertical, cuts_horizontal = find_branch_cuts(residues)
+    print(cuts_vertical)
+    print(cuts_horizontal)
+    assert_array_equal(cuts_horizontal, reference_cuts_horizontal)
+    assert_array_equal(cuts_vertical, reference_cuts_vertical)
+
+
 def test_unwrap_branch_cuts():
     from skimage.exposure.unwrap import unwrap_phase_branch_cuts
 

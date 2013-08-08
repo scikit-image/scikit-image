@@ -165,11 +165,20 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
             and residues_mask[coming_from.i, coming_from.j]):
             # We are moving between two masked residues, so we fast-skip ahead
             queue_push_head(queue, <QueueValue> l)
+            #print('\t\t\tAdding location to head of queue: [%d, %d] '
+                  #'(coming from [%d, %d])' % (i, j, coming_from.i,
+                                              #coming_from.j))
+
         else:
             # The between these locations was not set, so we schedule the
             # new location as in an ordinary BFS
             queue_push_tail(queue, <QueueValue> l)
-            #print('\t\t\tAdding location to tail of queue: [%d, %d]' % (i, j))
+            #print('\t\t\tAdding location to tail of queue: [%d, %d] '
+                  #'(coming from [%d, %d])' % (i, j, coming_from.i,
+                                              #coming_from.j))
+        #print('\t\t\t\tResidue masks: %d and %d'
+              #% (residues_mask[l.i, l.j], residues_mask[coming_from.i,
+                                                         #coming_from.j]))
         # Mark this location as visited
         branch_cuts[i, j].visit_code = visit_code
         return location_index + 1
