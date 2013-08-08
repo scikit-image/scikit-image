@@ -212,21 +212,16 @@ def censure_keypoints(image, n_scales=7, mode='DoB', non_max_threshold=0.15,
     if mode == 'DoB':
         return keypoints, scales
 
-    filtered_keypoints = np.empty((0, 2), dtype=np.int32)
-    filtered_scales = np.empty((0), dtype=np.int32)
+    cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
 
     if mode == 'Octagon':
         for i in range(2, n_scales):
             c = (OCTAGON_OUTER_SHAPE[i - 1][0] - 1) // 2 + OCTAGON_OUTER_SHAPE[i - 1][1]
-            filtered_keypoints_for_scale = _remove_border_keypoints(image, keypoints[scales == i], c)
-            filtered_keypoints = np.vstack((filtered_keypoints, filtered_keypoints_for_scale))
-            filtered_scales = np.hstack((filtered_scales, np.asarray(len(filtered_keypoints_for_scale) * [i], dtype=np.int32)))
+            cumulative_mask = cumulative_mask | (_remove_border_keypoints(image, keypoints, c) & (scales == i))
 
     elif mode == 'STAR':
         for i in range(2, n_scales):
             c = STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] + STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] // 2
-            filtered_keypoints_for_scale = _remove_border_keypoints(image, keypoints[scales == i], c)
-            filtered_keypoints = np.vstack((filtered_keypoints, filtered_keypoints_for_scale))
-            filtered_scales = np.hstack((filtered_scales, np.asarray(len(filtered_keypoints_for_scale) * [i], dtype=np.int32)))
+            cumulative_mask = cumulative_mask | (_remove_border_keypoints(image, keypoints, c) & (scales == i))
 
-    return filtered_keypoints, filtered_scales
+    return keypoints[cumulative_mask], scales[cumulative_mask]
