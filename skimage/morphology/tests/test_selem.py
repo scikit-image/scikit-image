@@ -66,6 +66,48 @@ class TestSElem():
     def test_selem_octahedron(self):
         self.strel_worker_3d("diamond-matlab-output.npz", selem.octahedron)
 
+    def test_selem_octagon(self):
+        expected_mask1 = np.array([[0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0]], dtype=np.uint8)
+        actual_mask1 = selem.octagon(5, 3)
+        expected_mask2 = np.array([[0, 1, 0],
+                                   [1, 1, 1],
+                                   [0, 1, 0]], dtype=np.uint8)
+        actual_mask2 = selem.octagon(1, 1)
+        assert_equal(expected_mask1, actual_mask1)
+        assert_equal(expected_mask2, actual_mask2)
+
+    def test_selem_star(self):
+        expected_mask1 = np.array([[0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                                   [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                                   [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                                   [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+                                   [0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+                                   [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]], dtype=np.uint8)
+        actual_mask1 = selem.star(4)
+        expected_mask2 = np.array([[1, 1, 1],
+                                   [1, 1, 1],
+                                   [1, 1, 1]], dtype=np.uint8)
+        actual_mask2 = selem.star(1)
+        assert_equal(expected_mask1, actual_mask1)
+        assert_equal(expected_mask2, actual_mask2)
+
 
 if __name__ == '__main__':
     np.testing.run_module_suite()
