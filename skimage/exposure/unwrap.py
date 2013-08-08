@@ -11,7 +11,7 @@ from .._shared.six import string_types
 from ..morphology import label
 
 
-def unwrap_phase(image, wrap_around=False):
+def unwrap_phase(image, wrap_around=False, method=None):
     '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
     original, unwrapped image.
 
@@ -29,10 +29,126 @@ def unwrap_phase(image, wrap_around=False):
         connected and use this connectivity to guide the phase unwrapping
         process. If only a single boolean is given, it will apply to all axes.
         Wrap around is not supported for 1D arrays.
+    method : string or ``None``
+        Which unwrapping algorithm to use. One of ``None`` (default; will
+        choose the default algorithm depending on the dimensionality of
+        ``image``), ``'reliability'``, ``'branch_cuts'`` and ``'naive'``.
+        Which algorithms are available depends on the dimensionality of
+        ``image``, see below.
 
     Returns
     -------
-    image_unwrapped : array_like, float32
+    image_unwrapped : array_like, float
+        Unwrapped image of the same shape as the input. If the input ``image``
+        was a masked array, the mask will be preserved.
+
+    Raises
+    ------
+    ValueError
+        If called with a masked 1D array or called with a 1D array and
+        ``wrap_around=True``.
+
+    Notes
+    -----
+    For a nice introduction to phase unwrapping, see [1]_.
+
+    Algorithms
+    ----------
+    This section gives an overview of the algorithms
+
+    Naive (``method='naive'``; 1D only)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    The default in 1D. This algorithm scans the array starting from ``image[0]``
+    and proceeding towards higher indices, adding multiples of two pi to
+    minimize the difference of neighboring pixels. Masked arrays are not
+    supported, as masked data in 1D results in a problem with multiple
+    solutions.
+
+    Reliability (``method='reliability'``; 2D and 3D)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    The default in 2D and 3D. The algorithm is described by Gdeisat et al.
+    in [2]_ and [3]_. Masked arrays are supported.
+
+    Branch cuts (``method='branch_cuts'``; 2D only)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    This is the classical algorithm described by Goldstein [1]_, augmented to
+    allow masked arrays.
+
+    Examples
+    --------
+    >>> c0, c1 = np.ogrid[-1:1:128j, -1:1:128j]
+    >>> image = 12 * np.pi * np.exp(-(c0**2 + c1**2))
+    >>> image_wrapped = np.angle(np.exp(1j * image))
+    >>> image_unwrapped = unwrap_phase(image_wrapped)
+    >>> np.std(image_unwrapped - image) < 1e-6   # A constant offset is normal
+    True
+
+    References
+    ----------
+    .. [1] R. M. Goldstein, H. A. Zebker, C. L. Werner, "Satellite radar
+           interferometry: Two-dimensional phase unwrapping", Radio Science 23
+           (1988) 4, pp 713--720.
+    .. [2] Miguel Arevallilo Herraez, David R. Burton, Michael J. Lalor,
+           and Munther A. Gdeisat, "Fast two-dimensional phase-unwrapping
+           algorithm based on sorting by reliability following a noncontinuous
+           path", Journal Applied Optics, Vol. 41, No. 35 (2002) 7437,
+    .. [3] Abdul-Rahman, H., Gdeisat, M., Burton, D., & Lalor, M., "Fast
+           three-dimensional phase-unwrapping algorithm based on sorting by
+           reliability following a non-continuous path. In W. Osten,
+           C. Gorecki, & E. L. Novak (Eds.), Optical Metrology (2005) 32--40,
+           International Society for Optics and Photonics.
+    '''
+    if image.ndim not in (1, 2, 3):
+        raise ValueError('image must be 1, 2 or 3 dimensional')
+    wrap_around = _normalize_wrap_around(wrap_around, image.ndim)
+    if image.ndim > 1 and 1 in image.shape:
+        warnings.warn('image has a length 1 dimension; consider using an '
+                      'array of lower dimensionality to use a more efficient '
+                      'algorithm')
+
+    if method is None:
+        if image.ndim == 1:
+            method = 'naive'
+        else:
+            method = 'reliability'
+    if method == 'naive':
+        if wrap_around[0]:
+            raise ValueError('wrap_around is not supported for 1D images')
+        image_unwrapped = phase_unwrap_naive(image)
+    elif method == 'reliability':
+        image_unwrapped = unwrap_phase_reliability(image, wrap_around)
+    elif method == 'branch_cuts':
+        image_unwrapped = unwrap_phase_branch_cuts(image, wrap_around)
+    else:
+        raise ValueError('Unsupported method: %r' % method)
+
+    if np.ma.isMaskedArray(image):
+        image_unwrapped = np.ma.array(image_unwrapped, mask=image.mask)
+    return image_unwrapped
+
+
+def unwrap_phase_reliability(image, wrap_around=False):
+    '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
+    original, unwrapped image.
+
+    Parameters
+    ----------
+    image : 2D or 3D ndarray of floats, optionally a masked array
+        The values should be in the range ``[-pi, pi)``. If a masked array is
+        provided, the masked entries will not be changed, and their values
+        will not be used to guide the unwrapping of neighboring, unmasked
+        values. Masked 1D arrays are not allowed, and will raise a
+        ``ValueError``.
+    wrap_around : bool or sequence of bool
+        When an element of the sequence is  ``True``, the unwrapping process
+        will regard the edges along the corresponding axis of the image to be
+        connected and use this connectivity to guide the phase unwrapping
+        process. If only a single boolean is given, it will apply to all axes.
+        Wrap around is not supported for 1D arrays.
+
+    Returns
+    -------
+    image_unwrapped : array_like, float
         Unwrapped image of the same shape as the input. If the input ``image``
         was a masked array, the mask will be preserved.
 
@@ -63,28 +179,9 @@ def unwrap_phase(image, wrap_around=False):
            C. Gorecki, & E. L. Novak (Eds.), Optical Metrology (2005) 32--40,
            International Society for Optics and Photonics.
     '''
-    if image.ndim not in (1, 2, 3):
-        raise ValueError('image must be 1, 2 or 3 dimensional')
-    if isinstance(wrap_around, bool):
-        wrap_around = [wrap_around] * image.ndim
-    elif (hasattr(wrap_around, '__getitem__')
-          and not isinstance(wrap_around, string_types)):
-        if len(wrap_around) != image.ndim:
-            raise ValueError('Length of wrap_around must equal the '
-                             'dimensionality of image')
-        wrap_around = [bool(wa) for wa in wrap_around]
-    else:
-        raise ValueError('wrap_around must be a bool or a sequence with '
-                         'length equal to the dimensionality of image')
-    if image.ndim == 1:
-        if np.ma.isMaskedArray(image):
-            raise ValueError('1D masked images cannot be unwrapped')
-        if wrap_around[0]:
-            raise ValueError('wrap_around is not supported for 1D images')
-    if image.ndim in (2, 3) and 1 in image.shape:
-        warnings.warn('image has a length 1 dimension; consider using an '
-                      'array of lower dimensionality to use a more efficient '
-                      'algorithm')
+    if image.ndim not in (2, 3):
+        raise ValueError('image must be 2 or 3 dimensional')
+    wrap_around = _normalize_wrap_around(wrap_around, image.ndim)
 
     if np.ma.isMaskedArray(image):
         mask = np.require(image.mask, np.uint8, ['C'])
@@ -93,9 +190,7 @@ def unwrap_phase(image, wrap_around=False):
     image_not_masked = np.asarray(image, dtype=np.float64, order='C')
     image_unwrapped = np.empty_like(image, dtype=np.float64, order='C')
 
-    if image.ndim == 1:
-        unwrap_1d(image_not_masked, image_unwrapped)
-    elif image.ndim == 2:
+    if image.ndim == 2:
         unwrap_2d(image_not_masked, mask, image_unwrapped,
                   wrap_around)
     elif image.ndim == 3:
@@ -317,7 +412,7 @@ def unwrap_phase_branch_cuts(image, wrap_around=False):
 
     Returns
     -------
-    image_unwrapped : array_like, float32
+    image_unwrapped : array_like, float
         Unwrapped image of the same shape as the input. If the input ``image``
         was a masked array, the mask will be preserved.
 
@@ -362,4 +457,26 @@ def unwrap_phase_branch_cuts(image, wrap_around=False):
                                        mask=image_mask)
     else:
         image_unwrapped = image_unmasked + 2 * np.pi * periods
+    return image_unwrapped
+
+
+def phase_unwrap_naive(image):
+    '''Naive phase unwrapping of 1D arrays.
+
+    Parameters
+    ----------
+    image : 1D ndarray of floats
+        The values should be in the range ``[-pi, pi)``.
+
+    Returns
+    -------
+    image_unwrapped : array_like, float64
+        Unwrapped image of the same shape as the input.
+    '''
+    if image.ndim == 1:
+        if np.ma.isMaskedArray(image):
+            raise ValueError('1D masked images cannot be unwrapped')
+    image_not_masked = np.asarray(image, dtype=np.float64, order='C')
+    image_unwrapped = np.empty_like(image, dtype=np.float64, order='C')
+    unwrap_1d(image_not_masked, image_unwrapped)
     return image_unwrapped

@@ -3,8 +3,7 @@ from .exposure import histogram, equalize, equalize_hist, \
                       adjust_gamma, adjust_sigmoid, adjust_log
 
 from ._adapthist import equalize_adapthist
-from .unwrap import unwrap_phase, find_phase_residues, unwrap_phase_branch_cuts
-
+from .unwrap import find_phase_residues, unwrap_phase
 
 __all__ = ['histogram',
            'equalize',

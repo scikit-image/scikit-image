@@ -8,8 +8,8 @@ import warnings
 
 from skimage import data, img_as_float
 from skimage.color import rgb2gray
-from skimage.exposure import (unwrap_phase_branch_cuts, find_phase_residues,
-                              unwrap_phase, rescale_intensity)
+from skimage.exposure import (find_phase_residues, unwrap_phase,
+                              rescale_intensity)
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
@@ -193,8 +193,6 @@ def test_unwrap_branch_cuts_mask_sneak():
 
 
 def test_unwrap_branch_cuts():
-    from skimage.exposure.unwrap import unwrap_phase_branch_cuts
-
     image = 2 * np.pi * (np.array([[0.0, 0.1, 0.2, 0.2, 0.3],
                                    [0.0, 0.0, 0.3, 0.3, 0.4],
                                    [0.9, 0.8, 0.6, 0.6, 0.5],
@@ -212,7 +210,8 @@ def test_unwrap_branch_cuts():
                                               [ 0.8,  0.8,  0.7,  0.7,  0.6],
                                               [ 0.8,  0.8,  0.7,  0.7,  0.6]])
 
-    image_unwrapped = unwrap_phase_branch_cuts(image, wrap_around=True)
+    image_unwrapped = unwrap_phase(image, wrap_around=True,
+                                   method='branch_cuts')
     image_unwrapped = image_unwrapped / (2 * np.pi) + 0.5
     print()
     print(image_unwrapped)
@@ -220,7 +219,8 @@ def test_unwrap_branch_cuts():
     print(image_unwrapped - reference_with_wrap_around)
     assert_array_almost_equal(image_unwrapped, reference_with_wrap_around)
 
-    image_unwrapped = unwrap_phase_branch_cuts(image, wrap_around=False)
+    image_unwrapped = unwrap_phase(image, wrap_around=False,
+                                   method='branch_cuts')
     image_unwrapped = image_unwrapped / (2 * np.pi) + 0.5
     print()
     print(image_unwrapped)
@@ -230,17 +230,13 @@ def test_unwrap_branch_cuts():
     assert_array_almost_equal(image_unwrapped, reference_without_wrap_around)
 
 
-#def test_unwrap_branch_cut_chelsea():
-    #from skimage.exposure.unwrap import unwrap_phase_branch_cuts
-    #from matplotlib import pyplot as plt
-
 def test_unwrap_branch_cuts_chelsea():
     debug = False
 
     image = rgb2gray(img_as_float(data.chelsea()))
     image = rescale_intensity(image, out_range=(0, 4 * np.pi))
     image_wrapped = np.angle(np.exp(1j * image))
-    image_unwrapped = unwrap_phase_branch_cuts(image_wrapped)
+    image_unwrapped = unwrap_phase(image_wrapped, method='branch_cuts')
 
     # Differences between wrapped and unwrapped should always be n*2*pi
     periods = (image_unwrapped - image_wrapped) / (2 * np.pi)
