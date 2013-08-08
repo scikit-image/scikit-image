@@ -28,8 +28,7 @@ def test_censure_keypoints_moon_image_DoB():
                                 [464, 132],
                                 [467, 260]])
     expected_scale = np.array([2, 4, 6, 3, 4, 4, 2, 2, 3, 2, 2, 2])
-    print actual_scale
-    print actual_kp_DoB
+
     assert_array_equal(expected_kp_DoB, actual_kp_DoB)
     assert_array_equal(expected_scale, actual_scale)
 
@@ -46,8 +45,7 @@ def test_censure_keypoints_moon_image_Octagon():
                                     [ 35,  46]])
 
     expected_scale = np.array([2, 2, 2, 3, 4], dtype=np.int32)
-    print actual_scale
-    print actual_kp_Octagon
+
     assert_array_equal(expected_kp_Octagon, actual_kp_Octagon)
     assert_array_equal(expected_scale, actual_scale)
 
@@ -68,8 +66,7 @@ def test_censure_keypoints_moon_image_STAR():
                                  [451, 281],
                                  [117, 356]])
     expected_scale = np.array([2, 2, 2, 2, 3, 3, 3, 3, 5, 6], dtype=np.int32)
-    print actual_scale
-    print actual_kp_STAR
+
     assert_array_equal(expected_kp_STAR, actual_kp_STAR)
     assert_array_equal(expected_scale, actual_scale)
 
