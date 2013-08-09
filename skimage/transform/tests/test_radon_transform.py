@@ -313,15 +313,19 @@ def test_order_angles_golden_ratio():
             assert len(indices) == len(set(indices))
 
 
-def test_iradon_sart():
+def _load_shepp_logan():
     from skimage.io import imread
     from skimage import data_dir
-    from skimage.transform import rescale, radon, iradon_sart
+    from skimage.transform import rescale
+    shepp_logan = imread(os.path.join(data_dir, "phantom.png"), as_grey=True)
+    return rescale(shepp_logan, scale=0.4)
 
+
+def test_iradon_sart():
+    from skimage.transform import radon, iradon_sart
     debug = False
 
-    shepp_logan = imread(os.path.join(data_dir, "phantom.png"), as_grey=True)
-    image = rescale(shepp_logan, scale=0.4)
+    image = _load_shepp_logan()
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),
