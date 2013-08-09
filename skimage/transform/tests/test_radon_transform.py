@@ -413,6 +413,53 @@ def test_iradon_shifted():
     yield check_iradon_shifted, 'fbp', image
 
 
+def _sinogram_derivative(sinogram):
+    sinogram_padded = np.pad(sinogram, ((1, 1), (0, 0)), mode='constant',
+                             constant_values=0)
+    central = (sinogram_padded[:-1, :] + sinogram_padded[1:, :]) / 2.
+    derivative = central[1:, :] - central[:-1, :]
+    return derivative
+
+
+def check_iradon_derivatives(image):
+    from skimage.transform import radon, iradon
+    debug = False
+
+    theta = np.linspace(0., 180., image.shape[0], endpoint=False)
+    sinogram = radon(image, theta, circle=True)
+    sinogram_derivative = _sinogram_derivative(sinogram)
+
+    def ramp_integration(f):
+        '''Ramp filter which simultaneously integrates the sinogram in
+        Fourier space'''
+        return np.sign(f) / (1j * np.pi)
+
+    reconstructed = iradon(sinogram_derivative, theta, circle=True,
+                           filter=ramp_integration)
+
+    if debug:
+        from matplotlib import pyplot as plt
+        plt.figure()
+        plt.subplot(221)
+        plt.imshow(image, interpolation='nearest')
+        plt.subplot(222)
+        plt.imshow(sinogram_derivative, interpolation='nearest')
+        plt.subplot(223)
+        plt.imshow(reconstructed, interpolation='nearest')
+        plt.subplot(224)
+        plt.imshow(reconstructed - image, interpolation='nearest')
+        plt.show()
+
+    delta = np.mean(np.abs(reconstructed - image))
+    print('delta (1 iteration, shifted sinogram) =', delta)
+    assert delta < 0.021
+
+
+def test_iradon_derivatives():
+    image = _load_shepp_logan()
+    yield check_iradon_derivatives, image
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()

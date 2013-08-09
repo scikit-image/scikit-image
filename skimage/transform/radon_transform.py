@@ -146,10 +146,13 @@ def iradon(radon_image, theta=None, output_size=None,
         between 0 and 180 (if the shape of `radon_image` is (N, M)).
     output_size : int
         Number of rows and columns in the reconstruction.
-    filter : str, optional (default ramp)
+    filter : str or callable, optional (default ramp)
         Filter used in frequency domain filtering. Ramp filter used by default.
         Filters available: ramp, shepp-logan, cosine, hamming, hann.
-        Assign None to use no filter.
+        Assign None to use no filter. Pass a callable to use a user-defined
+        filter; the callable should take a single argument, a 1D array
+        of floats containing digital frequencies, and return a numpy array
+        containing the filter values.
     interpolation : str, optional (default 'linear')
         Interpolation method used in reconstruction. Methods available:
         'linear', 'nearest', and 'cubic' ('cubic' is slow).
@@ -214,10 +217,12 @@ def iradon(radon_image, theta=None, output_size=None,
     img = util.pad(radon_image, pad_width, mode='constant', constant_values=0)
 
     # Construct the Fourier filter
-    f = fftfreq(projection_size_padded).reshape(-1, 1)   # digital frequency
+    f = fftfreq(projection_size_padded)                  # digital frequency
     omega = 2 * np.pi * f                                # angular frequency
     fourier_filter = 2 * np.abs(f)                       # ramp filter
-    if filter == "ramp":
+    if callable(filter):
+        fourier_filter = filter(f)
+    elif filter == "ramp":
         pass
     elif filter == "shepp-logan":
         # Start from first element to avoid divide by zero
@@ -233,6 +238,7 @@ def iradon(radon_image, theta=None, output_size=None,
     else:
         raise ValueError("Unknown filter: %s" % filter)
     # Apply filter in Fourier domain
+    fourier_filter.shape = (-1, 1)
     projection = fft(img, axis=0) * fourier_filter
     radon_filtered = np.real(ifft(projection, axis=0))
 
