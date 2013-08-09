@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
 from ..util import img_as_float
-from .util import _remove_border_keypoints, pairwise_hamming_distance
+from .util import _mask_border_keypoints, pairwise_hamming_distance
 
 from ._brief_cy import _brief_loop
 
@@ -142,7 +142,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     # Removing keypoints that are within (patch_size / 2) distance from the
     # image border
-    keypoints = keypoints[_remove_border_keypoints(image, keypoints, patch_size // 2)]
+    keypoints = keypoints[_mask_border_keypoints(image, keypoints, patch_size // 2)]
     keypoints = np.ascontiguousarray(keypoints)
 
     descriptors = np.zeros((keypoints.shape[0], descriptor_size), dtype=bool,
