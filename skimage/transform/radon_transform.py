@@ -125,7 +125,8 @@ def _sinogram_circle_to_square(sinogram):
 
 
 def iradon(radon_image, theta=None, output_size=None,
-           filter="ramp", interpolation="linear", circle=False):
+           filter="ramp", interpolation="linear", circle=False,
+           projection_shifts=None):
     """
     Inverse radon transform.
 
@@ -156,6 +157,10 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
+    projection_shifts : 1D array, dtype=float
+        Shift the projections contained in ``radon_image`` (the sinogram) by
+        this many pixels before reconstructing the image. The i'th value
+        defines the shift of the i'th column of ``radon_image``.
 
     Returns
     -------
@@ -193,6 +198,12 @@ def iradon(radon_image, theta=None, output_size=None,
                                                / 2.0)))
     if circle:
         radon_image = _sinogram_circle_to_square(radon_image)
+    if projection_shifts is None:
+        projection_shifts = np.zeros((radon_image.shape[1],), dtype=np.float)
+    elif projection_shifts.shape != (radon_image.shape[1],):
+        raise ValueError('Shape of projection_shifts (%s) does not match the '
+                         'number of projections (%d)'
+                         % (projection_shifts.shape, radon_image.shape[1]))
 
     th = (np.pi / 180.0) * theta
     # resize image to next power of two (but no less than 64) for
@@ -237,7 +248,7 @@ def iradon(radon_image, theta=None, output_size=None,
 
     # Reconstruct image by interpolation
     for i in range(len(theta)):
-        t = ypr * np.cos(th[i]) - xpr * np.sin(th[i])
+        t = ypr * np.cos(th[i]) - xpr * np.sin(th[i]) - projection_shifts[i]
         x = np.arange(radon_filtered.shape[0]) - mid_index
         if interpolation == 'linear':
             backprojected = np.interp(t, x, radon_filtered[:, i],

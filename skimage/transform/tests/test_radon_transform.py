@@ -363,8 +363,8 @@ def test_iradon_sart():
         assert delta < 0.018 * error_factor
 
 
-def check_iradon_shifted(image):
-    from skimage.transform import radon, iradon_sart
+def check_iradon_shifted(method, image):
+    from skimage.transform import radon, iradon_sart, iradon
     debug = False
 
     theta = np.linspace(0., 180., image.shape[0], endpoint=False)
@@ -377,8 +377,14 @@ def check_iradon_shifted(image):
                                             sinogram[:, i])
                                     for i in range(sinogram.shape[1])).T
 
-    reconstructed = iradon_sart(sinogram_shifted, theta,
-                                projection_shifts=shifts)
+    if method == 'sart':
+        reconstructed = iradon_sart(sinogram_shifted, theta,
+                                    projection_shifts=shifts)
+    elif method == 'fbp':
+        reconstructed = iradon(sinogram_shifted, theta, circle=True,
+                               filter='ramp', projection_shifts=shifts)
+    else:
+        raise ValueError('incorrect method: %s (programming error)' % method)
 
     if debug:
         from matplotlib import pyplot as plt
@@ -395,12 +401,16 @@ def check_iradon_shifted(image):
 
     delta = np.mean(np.abs(reconstructed - image))
     print('delta (1 iteration, shifted sinogram) =', delta)
-    assert delta < 0.018
+    if method == 'sart':
+        assert delta < 0.018
+    elif method == 'fbp':
+        assert delta < 0.019
 
 
 def test_iradon_shifted():
     image = _load_shepp_logan()
-    yield check_iradon_shifted, image
+    yield check_iradon_shifted, 'sart', image
+    yield check_iradon_shifted, 'fbp', image
 
 
 if __name__ == "__main__":
