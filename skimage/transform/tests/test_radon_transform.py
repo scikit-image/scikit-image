@@ -8,6 +8,7 @@ import os.path
 from skimage.transform import radon, iradon
 from skimage.io import imread
 from skimage import data_dir
+from skimage.util import pad
 
 
 __PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
@@ -414,7 +415,7 @@ def test_iradon_shifted():
 
 
 def _sinogram_derivative(sinogram):
-    sinogram_padded = np.pad(sinogram, ((1, 1), (0, 0)), mode='constant',
+    sinogram_padded = pad(sinogram, ((1, 1), (0, 0)), mode='constant',
                              constant_values=0)
     central = (sinogram_padded[:-1, :] + sinogram_padded[1:, :]) / 2.
     derivative = central[1:, :] - central[:-1, :]
