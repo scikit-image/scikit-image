@@ -358,30 +358,50 @@ def test_iradon_sart():
         print('delta (1 iteration, clip) =', delta)
         assert delta < 0.015 * error_factor
 
-        np.random.seed(1239867)
-        shifts = np.random.uniform(-3, 3, sinogram.shape[1])
-        x = np.arange(sinogram.shape[0])
-        sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
-                                               sinogram[:, i])
-                                     for i in range(sinogram.shape[1])).T
-        reconstructed = iradon_sart(sinogram_shifted, theta,
-                                    projection_shifts=shifts)
-        if debug:
-            from matplotlib import pyplot as plt
-            plt.figure()
-            plt.subplot(221)
-            plt.imshow(image, interpolation='nearest')
-            plt.subplot(222)
-            plt.imshow(sinogram_shifted, interpolation='nearest')
-            plt.subplot(223)
-            plt.imshow(reconstructed, interpolation='nearest')
-            plt.subplot(224)
-            plt.imshow(reconstructed - image, interpolation='nearest')
-            plt.show()
-
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, shifted sinogram) =', delta)
         assert delta < 0.018 * error_factor
+
+
+def check_iradon_shifted(image):
+    from skimage.transform import radon, iradon_sart
+    debug = False
+
+    theta = np.linspace(0., 180., image.shape[0], endpoint=False)
+    sinogram = radon(image, theta, circle=True)
+
+    np.random.seed(1239867)
+    shifts = np.random.uniform(-3, 3, sinogram.shape[1])
+    x = np.arange(sinogram.shape[0])
+    sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
+                                            sinogram[:, i])
+                                    for i in range(sinogram.shape[1])).T
+
+    reconstructed = iradon_sart(sinogram_shifted, theta,
+                                projection_shifts=shifts)
+
+    if debug:
+        from matplotlib import pyplot as plt
+        plt.figure()
+        plt.subplot(221)
+        plt.imshow(image, interpolation='nearest')
+        plt.subplot(222)
+        plt.imshow(sinogram_shifted, interpolation='nearest')
+        plt.subplot(223)
+        plt.imshow(reconstructed, interpolation='nearest')
+        plt.subplot(224)
+        plt.imshow(reconstructed - image, interpolation='nearest')
+        plt.show()
+
+    delta = np.mean(np.abs(reconstructed - image))
+    print('delta (1 iteration, shifted sinogram) =', delta)
+    assert delta < 0.018
+
+
+def test_iradon_shifted():
+    image = _load_shepp_logan()
+    yield check_iradon_shifted, image
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
