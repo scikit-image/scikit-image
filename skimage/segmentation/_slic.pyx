@@ -14,10 +14,10 @@ from ..color import rgb2lab, gray2rgb
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
-                 long[:, :, ::1] nearest_mean,
+                 Py_ssize_t[:, :, ::1] nearest_mean,
                  double[:, :, ::1] distance,
                  double[:, ::1] means,
-                 int max_iter, int n_segments):
+                 Py_ssize_t max_iter, Py_ssize_t n_segments):
     """Helper function for SLIC segmentation.
     
     Parameters
@@ -26,7 +26,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         The image with embedded coordinates, that is, `image_zyx[i, j, k]` is
         `array([i, j, k, r, g, b])` or `array([i, j, k, L, a, b])`, depending
         on the colorspace.
-    nearest_mean : 3D np.ndarray of long, shape (Z, Y, X)
+    nearest_mean : 3D np.ndarray of int, shape (Z, Y, X)
         The (initially empty) label field.
     distance : 3D np.ndarray of double, shape (Z, Y, X)
         The (initially infinity) array of distances to the nearest centroid.
@@ -39,7 +39,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     Returns
     -------
-    nearest_mean : 3D np.ndarray of long, shape (Z, Y, X)
+    nearest_mean : 3D np.ndarray of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
     """
 
