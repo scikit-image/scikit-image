@@ -39,7 +39,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     Returns
     -------
-    nearest_mean : 3D np.ndarray of long, shape (Z, Y, X)
+    nearest_mean : 3D np.ndarray of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
     """
 
