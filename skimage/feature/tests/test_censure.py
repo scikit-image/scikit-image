@@ -14,7 +14,7 @@ def test_keypoints_censure_moon_image_dob():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for DoB filter."""
     img = moon()
-    actual_kp_dob, actual_scale = keypoints_censure(img, 7, 'DoB', 0.15)
+    actual_kp_dob, actual_scale = keypoints_censure(img, 1, 7, 'DoB', 0.15)
     expected_kp_dob = np.array([[ 21, 497],
                                 [ 36,  46],
                                 [119, 350],
@@ -30,11 +30,11 @@ def test_keypoints_censure_moon_image_dob():
     assert_array_equal(expected_scale, actual_scale)
 
 
-def test_keypoints_censure_moon_image_Octagon():
+def test_keypoints_censure_moon_image_octagon():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for Octagon filter."""
     img = moon()
-    actual_kp_octagon, actual_scale = keypoints_censure(img, 7, 'Octagon',
+    actual_kp_octagon, actual_scale = keypoints_censure(img, 1, 7, 'Octagon',
                                                         0.15)
     expected_kp_octagon = np.array([[ 21, 496],
                                     [ 35,  46],
@@ -48,11 +48,11 @@ def test_keypoints_censure_moon_image_Octagon():
     assert_array_equal(expected_scale, actual_scale)
 
 
-def test_keypoints_censure_moon_image_STAR():
+def test_keypoints_censure_moon_image_star():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for STAR filter."""
     img = moon()
-    actual_kp_star, actual_scale = keypoints_censure(img, 7, 'STAR', 0.15)
+    actual_kp_star, actual_scale = keypoints_censure(img, 1, 7, 'STAR', 0.15)
     expected_kp_star = np.array([[ 21, 497],
                                  [ 36,  46],
                                  [117, 356],
