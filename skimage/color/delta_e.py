@@ -90,11 +90,13 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
     `kL`, `k1`, `k2` depend on the application and default to the values
     suggested for graphic arts
 
-    Parameter   Graphic Arts    Textiles
-    ----------  -------------   --------
+    ==========  ==============  ==========
+    Parameter    Graphic Arts    Textiles
+    ==========  ==============  ==========
     `kL`         1.000           2.000
     `k1`         0.045           0.048
     `k2`         0.015           0.014
+    ==========  ==============  ==========
 
     References
     ----------
