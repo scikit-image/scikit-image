@@ -10,6 +10,20 @@ def test_keypoints_censure_color_image_unsupported_error():
     assert_raises(ValueError, keypoints_censure, img)
 
 
+def test_keypoints_censure_mode_validity_error():
+    """Mode argument in keypoints_censure can be either DoB, Octagon or
+    STAR."""
+    img = np.zeros((20, 20))
+    assert_raises(ValueError, keypoints_censure, img, mode='dummy')
+
+
+def test_keypoints_censure_scale_range_error():
+    """Difference between the the max_scale and min_scale parameters in
+    keypoints_censure should be greater than or equal to two."""
+    img = np.zeros((20, 20))
+    assert_raises(ValueError, keypoints_censure, img, min_scale=1, max_scale=2)
+
+
 def test_keypoints_censure_moon_image_dob():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for DoB filter."""

@@ -192,17 +192,16 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
 
-    image = img_as_float(image)
-    image = np.ascontiguousarray(image)
-
     mode = mode.lower()
-
     if mode not in ('dob', 'octagon', 'star'):
         raise ValueError('Mode must be one of "DoB", "Octagon", "STAR".')
 
     if max_scale - min_scale < 2:
         raise ValueError('The number of scales should be greater than or'
                          'equal to 3.')
+
+    image = img_as_float(image)
+    image = np.ascontiguousarray(image)
 
     # Generating all the scales
     filter_response = _get_filtered_image(image, min_scale, max_scale, mode)
