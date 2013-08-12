@@ -12,7 +12,7 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('filter', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_inpaint.pyx'], working_path=base_path)
+    cython(['_inpaint_fmm.pyx'], working_path=base_path)
     cython(['_ctmf.pyx'], working_path=base_path)
     cython(['_denoise_cy.pyx'], working_path=base_path)
     cython(['rank/core_cy.pyx'], working_path=base_path)
@@ -20,7 +20,7 @@ def configuration(parent_package='', top_path=None):
     cython(['rank/percentile_cy.pyx'], working_path=base_path)
     cython(['rank/bilateral_cy.pyx'], working_path=base_path)
 
-    config.add_extension('_inpaint', sources=['_inpaint.c'],
+    config.add_extension('_inpaint_fmm', sources=['_inpaint_fmm.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_ctmf', sources=['_ctmf.c'],
                          include_dirs=[get_numpy_include_dirs()])

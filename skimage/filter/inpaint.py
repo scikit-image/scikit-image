@@ -2,8 +2,8 @@ import numpy as np
 import heapq
 from skimage.morphology import dilation, disk
 
-from skimage.filter._inpaint import fast_marching_method
-from skimage.filter._inpaint import BAND, INSIDE, LARGE_VALUE
+from skimage.filter._inpaint_fmm import fast_marching_method
+from skimage.filter._inpaint_fmm import BAND, INSIDE, LARGE_VALUE
 
 __all__ = ['inpaint_fmm']
 
@@ -49,13 +49,7 @@ def _init_fmm(mask):
 
     flag = (2 * outside) - band
 
-<<<<<<< HEAD
-    # u <- 0 : ``flag`` equal to BAND or KNOWN
-    # u <- 1.0e6 (arbitrarily large value) : ``flag`` equal to INSIDE
-    u = np.where(flag == INSIDE, 1.0e6, 0)
-=======
     u = np.where(flag == INSIDE, LARGE_VALUE, 0)
->>>>>>> Getting rid of all magic values and reusing BAND, INSIDE and LARGE_VAlUE from _inpaint.pyx
 
     heap = []
     # Store the ``u`` and indices of pixels marked as BAND points
@@ -163,11 +157,6 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
             raise TypeError("The second dimension of 'inpaint_mask' and "
                             "'input_image' do not match. ")
 
-<<<<<<< HEAD
-    input_image[inpaint_mask == 1] = 0
-
-=======
->>>>>>> Getting rid of all magic values and reusing BAND, INSIDE and LARGE_VAlUE from _inpaint.pyx
     h, w = input_image.shape
     painted = np.zeros((h + 2, w + 2), np.float)
     mask = np.zeros((h + 2, w + 2), np.uint8)
