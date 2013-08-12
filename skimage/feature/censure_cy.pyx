@@ -8,6 +8,10 @@ def _censure_dob_loop(Py_ssize_t n,
                       double[:, ::1] integral_img,
                       double[:, ::1] filtered_image,
                       double inner_weight, double outer_weight):
+    # This function calculates the value in the DoB filtered image using
+    # integral images. If r = right. l = left, u = up, d = down, the sum of
+    # pixel values in the rectangle formed by (u, l), (u, r), (d, r), (d, l)
+    # is calculated as I(d, r) + I(u - 1, l - 1) - I(u - 1, r) - I(d, l - 1).
 
     cdef Py_ssize_t i, j
     cdef double inner, outer

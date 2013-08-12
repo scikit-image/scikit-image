@@ -149,8 +149,14 @@ def keypoints_censure(image, max_scale=7, mode='DoB', non_max_threshold=0.15,
         Number of scales to extract keypoints from. The keypoints will be
         extracted from all the scales except the first and the last.
     mode : ('DoB', 'Octagon', 'STAR')
-        Type of bilevel filter used to get the scales of input image. Possible
-        values are 'DoB', 'Octagon' and 'STAR'.
+        Type of bilevel filter used to get the scales of the input image.
+        Possible values are 'DoB', 'Octagon' and 'STAR'. The three modes
+        represent the shape of the bilevel filters i.e. box(square), octagon
+        and star respectively. For instance, a bilevel octagon filter consists
+        of a smaller inner octagon and a larger outer octagon with the filter
+        weights being uniformly negative in both the inner octagon while
+        uniformly positive in the difference region. Use STAR and Octagon for
+        better features and DoB for better performance.
     non_max_threshold : float
         Threshold value used to suppress maximas and minimas with a weak
         magnitude response obtained after Non-Maximal Suppression.
