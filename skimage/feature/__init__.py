@@ -9,7 +9,7 @@ from .corner_cy import corner_moravec
 from .template import match_template
 from ._brief import brief, match_keypoints_brief
 from .util import pairwise_hamming_distance
-from .censure import censure_keypoints
+from .censure import keypoints_censure
 
 __all__ = ['daisy',
            'hog',
@@ -28,4 +28,4 @@ __all__ = ['daisy',
            'brief',
            'pairwise_hamming_distance',
            'match_keypoints_brief',
-           'censure_keypoints']
+           'keypoints_censure']
