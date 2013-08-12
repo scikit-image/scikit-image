@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
 from skimage.filter import inpaint
-plt.gray()
 
 
 image = data.camera()
@@ -17,6 +16,6 @@ image[mask == 1] = 0
 painted = inpaint.inpaint_fmm(image, mask)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2)
-ax0.imshow(image)
-ax1.imshow(painted)
+ax0.imshow(image, cmap=plt.cm.gray)
+ax1.imshow(painted, cmap=plt.cm.gray)
 plt.show()

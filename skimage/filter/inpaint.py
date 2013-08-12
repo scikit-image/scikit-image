@@ -1,63 +1,8 @@
 import numpy as np
-import heapq
-from skimage.morphology import dilation, disk
+from skimage.filter._inpaint_fmm import _fast_marching_method
 
-from skimage.filter._inpaint_fmm import fast_marching_method
-from skimage.filter._inpaint_fmm import BAND, INSIDE, LARGE_VALUE
 
 __all__ = ['inpaint_fmm']
-
-
-def _init_fmm(mask):
-    """Initialisation for Image Inpainting technique based on Fast Marching
-    Method as outined in [1]_. Each pixel has 2 new values assigned to it
-    stored in ``flag`` and ``u`` arrays.
-
-    Parameters
-    ----------
-    mask : array, bool
-        ``True`` values are to be inpainted.
-
-    Returns
-    ------
-    flag : (M + 2, N + 2) array of int
-        Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
-    u : (M + 2, N + 2) array of float
-        The distance/time map from the boundary to each pixel.
-    heap : list of tuples
-        BAND points with heap element as mentioned below
-
-    Notes
-    -----
-    ``flag`` Initialisation:
-    All pixels are classified into 1 of the following flags:
-    - 0 = KNOWN - intensity and u values are known.
-    - 1 = BAND - u value undergoes an update.
-    - 2 = INSIDE - intensity and u values unkown
-
-    References
-    ----------
-    .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
-           Method", Journal of Graphic Tools (2004).
-           http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
-
-    """
-
-    outside = dilation(mask, disk(1))
-    band = np.logical_xor(mask, outside).astype(np.uint8)
-
-    flag = (2 * outside) - band
-
-    u = np.where(flag == INSIDE, LARGE_VALUE, 0)
-
-    heap = []
-    # Store the ``u`` and indices of pixels marked as BAND points
-    indices = np.transpose(np.where(flag == BAND))
-    for z in indices:
-        heapq.heappush(heap, (u[tuple(z)], tuple(z)))
-
-    return flag, u, heap
 
 
 def inpaint_fmm(input_image, inpaint_mask, radius=5):
@@ -72,33 +17,25 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     Parameters
     ---------
     input_image : (M, N) array, unit8
-        Grayscale image to be inpainted.
+        Grayscale image to be inpainted
     inpaint_mask : (M, N) array, bool
-        Mask containing pixels to be inpainted. ``True`` values are inpainted.
+        Mask containing pixels to be inpainted. True values are inpainted
     radius : int
         Determining the range of the neighbourhood for inpainting a pixel
 
     Returns
     ------
     painted : (M, N) array, float
-        The inpainted grayscale image.
+        The inpainted grayscale image
 
     Notes
     -----
     There are two main phases involved:
-    - Initialisation
+    - Initialisation - Refer to ``_init_fmm`` under the _inpaint_fmm.pyx file
     - Marching
 
-    Initialisation Phase:
-    Implementaiton under ``skimage.filter.inpaint._init_fmm``.
-    - ``flag`` Initialisation:
-        All pixels are classified into 1 of the following flags:
-        - 0 = KNOWN - intensity and ``u``values are known.
-        - 1 = BAND - ``u`` value undergoes an update.
-        - 2 = INSIDE - intensity and ``u`` values unkown
-
     Marching Phase:
-    Implementation under ``skimage.filter._inpaint.fast_marching_method``.
+    Implementation under ``skimage.filter._inpaint._fast_marching_method``.
     The steps of the algorithm are as follows:
     - Extract the pixel with the smallest ``u`` value in the BAND pixels
     - Update its ``flag`` value as KNOWN
@@ -164,8 +101,6 @@ def inpaint_fmm(input_image, inpaint_mask, radius=5):
     painted[1: -1, 1: -1] = input_image
     mask[1: -1, 1: -1] = inpaint_mask
 
-    flag, u, heap = _init_fmm(mask)
-
-    fast_marching_method(painted, flag, u, heap, radius=radius)
+    _fast_marching_method(painted, mask, radius=radius)
 
     return painted[1:-1, 1:-1]
