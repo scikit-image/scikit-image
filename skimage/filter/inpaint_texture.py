@@ -1,14 +1,13 @@
 from __future__ import division
 import numpy as np
-from skimage.morphology import erosion, disk
 from skimage.util import img_as_float
-from numpy.lib.stride_tricks import as_strided
+from skimage.filter._inpaint_texture import _inpaint_efros
 
 
-__all__ = ['inpaint_efros']
+__all__ = ['inpaint_texture']
 
 
-def inpaint_efros(source_image, synth_mask, window=3, max_thresh=0.2):
+def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
     """This function performs constrained texture synthesis. It grows the
     texture of surrounding region into the unknown pixels. This implementation
     is pixel-based. Check the Notes Section for a brief overview of the
@@ -76,118 +75,10 @@ def inpaint_efros(source_image, synth_mask, window=3, max_thresh=0.2):
     # Padding
     pad_size = (h + window - 1, w + window - 1)
 
-    painted = source_image.mean() * np.ones(pad_size, dtype=np.float)
+    image = np.zeros(pad_size, dtype=np.float)
     mask = np.zeros(pad_size, np.uint8)
-    ssd = np.zeros(painted.shape, np.float)
 
-    painted[offset:offset + h, offset:offset + w] = painted
+    image[offset:offset + h, offset:offset + w] = source_image
     mask[offset:offset + h, offset:offset + w] = synth_mask
 
-    t_row, t_col = np.ogrid[-offset:offset + 1, -offset:offset + 1]
-
-    sigma = window / 6.4
-    gauss_mask = _gaussian(sigma, (window, window))
-
-    while mask.any():
-        progress = 0
-
-        # Generate the boundary of ROI (region to be synthesised)
-        boundary = mask - erosion(mask, disk(1))
-        if not boundary.any():  # If the remaining region is 1-pixel thick
-            boundary = mask
-
-        bound_list = np.transpose(np.where(boundary == 1))
-
-        for k in range(bound_list.shape[0]):
-            i_b = bound_list[k, 0].astype(np.int16)
-            j_b = bound_list[k, 1].astype(np.int16)
-            template = painted[i_b + t_row, j_b + t_col]
-            mask_template = mask[i_b + t_row, j_b + t_col]
-            valid_mask = gauss_mask * (1 - mask_template)
-
-            ssd = _sum_sq_diff(source_image, template, valid_mask)
-
-            # Remove the case where `sample` == `template`
-            ssd[i_b - offset, j_b - offset] = 1.
-
-            matched_index = np.transpose(np.where(ssd == ssd.min()))[0]
-
-            if ssd[tuple(matched_index)] < max_thresh:
-                painted[i_b, j_b] = source_image[tuple(matched_index + offset)]
-                mask[i_b, j_b] = False
-                progress = 1
-
-        if progress == 0:
-            max_thresh = 1.1 * max_thresh
-
-    return (painted[offset:-offset, offset:-offset])
-
-
-def _sum_sq_diff(image, template, valid_mask):
-    """This function performs template matching. The metric used is Sum of
-    Squared Difference (SSD). The input taken is the template who's match is
-    to be found in image.
-
-    Parameters
-    ---------
-    image : array, np.float
-        Input image of shape (M, N)
-    template : array, np.float
-        (window, window) Template who's match is to be found in image
-    valid_mask : array, np.float
-        (window, window), governs differences which are to be considered for
-        SSD computation. Masks out the unknown or unfilled pixels and gives a
-        higher weightage to the center pixel, decreasing as the distance from
-        center pixel increases
-
-    Returns
-    ------
-    ssd : array, np.float
-        (M - window +1, N - window + 1) The desired SSD values for all
-        positions in the image
-
-    """
-    total_weight = valid_mask.sum()
-    window_size = template.shape
-    y = as_strided(image,
-                   shape=(image.shape[0] - window_size[0] + 1,
-                          image.shape[1] - window_size[1] + 1,) +
-                   window_size,
-                   strides=image.strides * 2)
-    # `(y-template)**2` followed by reduction -> 4D array intermediate
-    # For einsum, labels are used to iterate through axes, order is imp: 'ij',
-    # row wise iteration. Term after `->` represents the order for output array
-    ssd = np.einsum('ijkl, kl, kl->ij', y, template, valid_mask,
-                    dtype=np.float)
-    ssd *= - 2
-    ssd += np.einsum('ijkl, ijkl, kl->ij', y, y, valid_mask)
-    ssd += np.einsum('ij, ij, ij', template, template, valid_mask)
-    return ssd / total_weight
-
-
-def _gaussian(sigma=0.5, size=None):
-    """Gaussian kernel array with given sigma and shape about the center pixel.
-
-    Parameters
-    ---------
-    sigma : float
-        Standard deviation
-    size : tuple
-        Shape of the output kernel
-
-    Returns
-    ------
-    gauss_mask : array, np.float
-        Gaussian kernel of shape ``size``
-
-    """
-    sigma = max(abs(sigma), 1e-10)
-
-    x = np.arange(-(size[0] - 1) / 2.0, (size[0] - 1) / 2.0 + 1e-8)
-    y = np.arange(-(size[1] - 1) / 2.0, (size[1] - 1) / 2.0 + 1e-8)
-
-    Kx = np.exp(-x ** 2 / (2 * sigma ** 2))
-    Ky = np.exp(-y ** 2 / (2 * sigma ** 2))
-    gauss_mask = np.outer(Kx, Ky) / (2.0 * np.pi * sigma ** 2)
-
-    return gauss_mask / gauss_mask.sum()
+    return _inpaint_efros(image, mask, window, max_thresh)
