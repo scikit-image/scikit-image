@@ -3,7 +3,7 @@ from skimage import data
 from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import history
 from skimage.viewer.plugins.labelplugin import LabelPainter
-from skimage.filter.inpaint_texture import inpaint_efros
+from skimage.filter.inpaint_texture import inpaint_texture
 
 
 class OKCancelButtons(history.OKCancelButtons):
@@ -26,12 +26,12 @@ class InpaintPlugin(LabelPainter):
 
     def _show_inpaint(self):
         viewer = self.image_viewer
-        painted = inpaint_efros(viewer.image, self.paint_tool.overlay)
+        painted = inpaint_texture(viewer.image, self.paint_tool.overlay)
         viewer.ax.imshow(painted)
         viewer.redraw()
 
 
-image = data.camera()
+image = data.checkerboard()
 plugin = InpaintPlugin()
 plugin += OKCancelButtons()
 plt.gray()
