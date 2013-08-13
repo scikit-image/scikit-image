@@ -149,6 +149,11 @@ def test_image():
     assert_array_equal(img, SAMPLE)
 
 
+def test_label():
+    label = regionprops(SAMPLE)[0].label
+    assert_array_equal(label, 1)
+
+
 def test_filled_area():
     area = regionprops(SAMPLE)[0].filled_area
     assert area == np.sum(SAMPLE)
