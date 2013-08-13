@@ -138,7 +138,6 @@ Library:
     Extension: skimage.filter.rank.bilateral_cy
         Sources:
             skimage/filter/rank/bilateral_cy.pyx
-            skimage/filter/rank/_crank16_bilateral.pyx
     Extension: skimage.filter._inpaint_fmm
         Sources:
             skimage/filter/_inpaint_fmm.pyx
