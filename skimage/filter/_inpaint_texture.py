@@ -151,10 +151,10 @@ def _gaussian(sigma=0.5, size=None):
         Gaussian kernel of shape ``size``
 
     """
-    sigma = max(abs(sigma), 1e-10)
+    sigma = abs(sigma)
 
-    x = np.arange(-(size[0] - 1) / 2.0, (size[0] - 1) / 2.0)
-    y = np.arange(-(size[1] - 1) / 2.0, (size[1] - 1) / 2.0)
+    x = np.arange(-(size[0] - 1) / 2.0, (size[0] - 1) / 2.0 + 0.1)
+    y = np.arange(-(size[1] - 1) / 2.0, (size[1] - 1) / 2.0 + 0.1)
 
     Kx = np.exp(-x ** 2 / (2 * sigma ** 2))
     Ky = np.exp(-y ** 2 / (2 * sigma ** 2))
