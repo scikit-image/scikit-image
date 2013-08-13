@@ -33,6 +33,7 @@ PROPS = {
     'FilledImage': 'filled_image',
     'HuMoments': 'hu_moments',
     'Image': 'image',
+    'Label': 'label',
     'MajorAxisLength': 'major_axis_length',
     'MaxIntensity': 'max_intensity',
     'MeanIntensity': 'mean_intensity',
@@ -386,6 +387,8 @@ def regionprops(label_image, properties=None,
         Inertia tensor of the region for the rotation around its masss.
     **inertia_tensor_eigvals** : tuple
         The two eigen values of the inertia tensor in decreasing order.
+    **label** : int
+        The label in the labelled input image.
     **major_axis_length** : float
         The length of the major axis of the ellipse that has the same
         normalized second central moments as the region.
