@@ -36,11 +36,11 @@ def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
     - Loop: Generate the boundary pixels of the region to be inpainted
         - Loop: Generate a template of (window, window), center: boundary pixel
             - Compute the SSD between template and similar sized patches across
-               the image
+              the image
             - Find the pixel with smallest SSD, such that patch isn't where
-               template is located (False positive)
+              template is located (False positive)
             - Update the intensity value of center pixel of template as the
-               value of the center of the matched patch
+              value of the center of the matched patch
         - Repeat for all pixels of the boundary
     - Repeat until all pixels are inpainted
 
@@ -49,9 +49,9 @@ def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
     References
     ---------
     .. [1] A. Efros and T. Leung. "Texture Synthesis by Non-Parametric
-            Sampling". In Proc. Int. Conf. Computer Vision, pages 1033-1038,
-            Kerkyra, Greece, September 1999.
-            http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
+           Sampling". In Proc. Int. Conf. Computer Vision, pages 1033-1038,
+           Kerkyra, Greece, September 1999.
+           http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
 
     Example
     -------

@@ -33,11 +33,11 @@ def _inpaint_efros(painted, mask, window, max_thresh):
     - Loop: Generate the boundary pixels of the region to be inpainted
         - Loop: Generate a template of (window, window), center: boundary pixel
             - Compute the SSD between template and similar sized patches across
-               the image
+              the image
             - Find the pixel with smallest SSD, such that patch isn't where
-               template is located (False positive)
+              template is located (False positive)
             - Update the intensity value of center pixel of template as the
-               value of the center of the matched patch
+              value of the center of the matched patch
         - Repeat for all pixels of the boundary
     - Repeat until all pixels are inpainted
 
@@ -46,9 +46,9 @@ def _inpaint_efros(painted, mask, window, max_thresh):
     References
     ---------
     .. [1] A. Efros and T. Leung. "Texture Synthesis by Non-Parametric
-            Sampling". In Proc. Int. Conf. Computer Vision, pages 1033-1038,
-            Kerkyra, Greece, September 1999.
-            http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
+           Sampling". In Proc. Int. Conf. Computer Vision, pages 1033-1038,
+           Kerkyra, Greece, September 1999.
+           http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
 
     """
 
@@ -124,9 +124,9 @@ def _sum_sq_diff(image, template, valid_mask):
                           image.shape[1] - window_size[1] + 1,) +
                    window_size,
                    strides=image.strides * 2)
-    # `(y-template)**2` followed by reduction -> 4D array intermediate
+    # ``(y-template)**2`` followed by reduction -> 4D array intermediate
     # For einsum, labels are used to iterate through axes, order is imp: 'ij',
-    # row wise iteration. Term after `->` represents the order for output array
+    # row wise iteration. Term after '->' represents the order for output array
     ssd = np.einsum('ijkl, kl, kl->ij', y, template, valid_mask,
                     dtype=np.float)
     ssd *= - 2
@@ -153,8 +153,8 @@ def _gaussian(sigma=0.5, size=None):
     """
     sigma = max(abs(sigma), 1e-10)
 
-    x = np.arange(-(size[0] - 1) / 2.0, (size[0] - 1) / 2.0 + 1e-8)
-    y = np.arange(-(size[1] - 1) / 2.0, (size[1] - 1) / 2.0 + 1e-8)
+    x = np.arange(-(size[0] - 1) / 2.0, (size[0] - 1) / 2.0)
+    y = np.arange(-(size[1] - 1) / 2.0, (size[1] - 1) / 2.0)
 
     Kx = np.exp(-x ** 2 / (2 * sigma ** 2))
     Ky = np.exp(-y ** 2 / (2 * sigma ** 2))
