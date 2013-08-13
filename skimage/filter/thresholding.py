@@ -1,4 +1,4 @@
-__all__ = ['threshold_otsu', 'threshold_adaptive']
+__all__ = ['threshold_otsu', 'threshold_adaptive', 'threshold_yen']
 
 import numpy as np
 import scipy.ndimage
@@ -170,10 +170,10 @@ def threshold_yen(image, nbins=256):
     >>> binary = image > thresh
     """
     hist, bin_centers = histogram(img, nbins)
-    hist = hist.astype(float)
-    norm_histo = hist / hist.sum() # Probability mass function
+    norm_histo = hist.astype(float) / hist.sum() # Probability mass function
     P1 = np.cumsum(norm_histo) # Cumulative normalized histogram
     P1_sq = np.cumsum(norm_histo ** 2)
+    # Get cumsum calculated from end of squared array:
     P2_sq = np.cumsum(norm_histo[::-1] ** 2)[::-1]
     # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf' in crit.
     # In ImageJ Yen implementation, all invalid values replaced by zero.
