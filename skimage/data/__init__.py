@@ -23,7 +23,8 @@ __all__ = ['load',
            'horse',
            'clock',
            'immunohistochemistry',
-           'chelsea']
+           'chelsea',
+           'coffee']
 
 
 def load(f):
@@ -189,11 +190,14 @@ def chelsea():
 def coffee():
     """Coffee cup.
 
-    An example with several shapes (including an ellipse).
+    This photograph is courtesy of Pikolo Espresso Bar.
+    It shows several shapes (including an ellipse).  It may be used to
+    illustrate ellipse detection (using the Hough transform).
 
     Notes
     -----
-    No copyright restrictions.  CC0 by the photographer.
+    No copyright restrictions.  CC0 by the photographer (Rachel Michetti).
 
     """
     return load("coffee.png")
+
