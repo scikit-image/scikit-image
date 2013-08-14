@@ -12,9 +12,9 @@ def _inpaint_efros(painted, mask, window, max_thresh):
 
     Parameters
     ---------
-    painted : (M, N) array, np.uint8
+    painted : (M, N) array, uint8
         Input image whose texture is to be calculated
-    mask : (M, N) array, np.bool
+    mask : (M, N) array, bool
         Texture for True values are to be synthesised
     window : int
         Size of the neighborhood window, (window, window)
@@ -24,7 +24,7 @@ def _inpaint_efros(painted, mask, window, max_thresh):
 
     Returns
     -------
-    painted : array, np.float
+    painted : array, float
         Texture synthesised image
 
     Notes

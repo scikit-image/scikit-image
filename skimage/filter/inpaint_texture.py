@@ -15,9 +15,9 @@ def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
 
     Parameters
     ---------
-    source_image : (M, N) array, np.uint8
+    source_image : (M, N) array, uint8
         Input image whose texture is to be calculated
-    synth_mask : (M, N) array, np.bool
+    synth_mask : (M, N) array, bool
         Texture for True values are to be synthesised
     window : int
         Size of the neighborhood window, (window, window)
