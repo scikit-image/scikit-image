@@ -70,27 +70,27 @@ def _inpaint_efros(painted, mask, window, max_thresh):
         bound_list = np.transpose(np.where(boundary == 1))
 
         for k in range(bound_list.shape[0]):
-            i_b = bound_list[k, 0].astype(np.int16)
-            j_b = bound_list[k, 1].astype(np.int16)
+            i_b = bound_list[k, 0]
+            j_b = bound_list[k, 1]
             template = painted[i_b + t_row, j_b + t_col]
-            mask_template = mask[i_b + t_row, j_b + t_col]
-            valid_mask = gauss_mask * (1 - mask_template)
+            valid_mask = gauss_mask * (1 - mask[i_b + t_row, j_b + t_col])
 
             ssd = _sum_sq_diff(source_image, template, valid_mask)
             # Remove the case where `sample` == `template`
             ssd[i_b - offset, j_b - offset] = 1.
 
-            matched_index = np.transpose(np.where(ssd == ssd.min()))[0]
+            i_match, j_match = np.transpose(np.where(ssd == ssd.min()))[0]
 
-            if ssd[tuple(matched_index)] < max_thresh:
-                painted[i_b, j_b] = source_image[tuple(matched_index + offset)]
+            if ssd[i_match, j_match] < max_thresh:
+                painted[i_b, j_b] = source_image[i_match + offset,
+                                                 j_match + offset]
                 mask[i_b, j_b] = False
                 progress = 1
 
         if progress == 0:
             max_thresh = 1.1 * max_thresh
 
-    return (painted[offset:-offset, offset:-offset])
+    return painted[offset:-offset, offset:-offset]
 
 
 def _sum_sq_diff(image, template, valid_mask):
