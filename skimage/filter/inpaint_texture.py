@@ -56,14 +56,12 @@ def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
     Example
     -------
     >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> from skimage.filter.inpaint_texture import inpaint_efros
-    >>> image[90:110, 90:110] = 0
-    >>> mask = np.zeros(image.shape, np.uint8)
-    >>> mask[90:110, 90:110] = 1
-    >>> plt.imshow(image); plt.show()
-    >>> painted = inpaint_efros(image, mask, window=3)
-    >>> plt.imshow(painted); plt.show()
+    >>> from skimage.filter.inpaint_texture import inpaint_texture
+    >>> image = np.round(checkerboard()[92:108, 92:108])
+    >>> mask = np.zeros_like(image, np.uint8)
+    >>> mask[5:-5, 5:-5] = 1
+    >>> image[mask == 1] = 0
+    >>> painted = inpaint_texture(image, mask, window=5)
 
     """
 
