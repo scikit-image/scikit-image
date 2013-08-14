@@ -16,13 +16,13 @@ OCTAGON_INNER_SHAPE = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5)]
 
 STAR_SHAPE = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90, 128]
 STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
-                     (9, 6),(11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
+                     (9, 6), (11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
 
 
 def _get_filtered_image(image, min_scale, max_scale, mode):
 
     scales = np.zeros((image.shape[0], image.shape[1],
-                       max_scale - min_scale +1), dtype=np.double)
+                       max_scale - min_scale + 1), dtype=np.double)
 
     if mode == 'dob':
 
@@ -75,7 +75,7 @@ def _oct(m, n):
     f = np.zeros((m + 2*n, m + 2*n))
     f[0, n] = 1
     f[n, 0] = 1
-    f[0, m + n -1] = 1
+    f[0, m + n - 1] = 1
     f[m + n - 1, 0] = 1
     f[-1, n] = 1
     f[n, -1] = 1
@@ -198,6 +198,7 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
     # principal curvatures greater than `line_threshold`.
     # (4) Finally, we remove the border keypoints and return the keypoints
     # along with its corresponding scale.
+
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
@@ -230,7 +231,7 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
         # window_size = 7 + 2 * (min_scale - 1 + i)
         # Hence sigma = 1 + (min_scale - 1 + i)/ 3.0
         _suppress_lines(feature_mask[:, :, i], image,
-                        (1 + (min_scale +  i - 1) / 3.0), line_threshold)
+                        (1 + (min_scale + i - 1) / 3.0), line_threshold)
 
     rows, cols, scales = np.nonzero(feature_mask[..., 1:max_scale - min_scale])
     keypoints = np.column_stack([rows, cols])

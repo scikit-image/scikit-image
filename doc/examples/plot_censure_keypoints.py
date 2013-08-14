@@ -20,17 +20,16 @@ max_scale = 7
 nms_threshold = 0.15
 rpc_threshold = 10
 
-
-# Plotting features for the following modes
+# Detecting Censure keypoints for the following filters
 for mode in ['dob', 'octagon', 'star']:
 
     kp_censure, scale = keypoints_censure(gray_img, min_scale, max_scale,
-                                          mode, nms_threshold,rpc_threshold)
+                                          mode, nms_threshold, rpc_threshold)
     f, axarr = plt.subplots((max_scale - min_scale + 1) // 3, 3)
 
     # Plotting Censure features at all the scales
     for i in range(max_scale - min_scale - 1):
-        keypoints = kp_censure[scale ==  i + min_scale + 1]
+        keypoints = kp_censure[scale == i + min_scale + 1]
         num = len(keypoints)
         x = keypoints[:, 1]
         y = keypoints[:, 0]
@@ -42,5 +41,6 @@ for mode in ['dob', 'octagon', 'star']:
                                                   'scale %d' % (num, mode, i +
                                                                 min_scale + 1))
 
-    plt.suptitle('NMS threshold = %f, RPC threshold = %d' % (nms_threshold, rpc_threshold))
+    plt.suptitle('NMS threshold = %f, RPC threshold = %d'
+                 % (nms_threshold, rpc_threshold))
 plt.show()
