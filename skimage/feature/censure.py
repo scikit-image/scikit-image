@@ -187,7 +187,17 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
            http://www.jamris.org/01_2013/saveas.php?QUEST=JAMRIS_No01_2013_P_11-20.pdf
 
     """
-
+    # (1) First we generate the required scales on the input grayscale image
+    # using a bilevel filter and stack them up in `filter_response`.
+    # (2) We then perform Non-Maximal suppression in 3 x 3 x 3 window on the
+    # filter_response to suppress points that are neither minima or maxima in
+    # 3 x 3 x 3 neighbourhood. We obtain a boolean ndarray `feature_mask`
+    # containing all the minimas and maximas in `filter_response` as True.
+    # (3) Then we suppress all the points in the `feature_mask` for which the
+    # corresponding point in the image at a particular scale has the ratio of
+    # principal curvatures greater than `line_threshold`.
+    # (4) Finally, we remove the border keypoints and return the keypoints
+    # along with its corresponding scale.
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
