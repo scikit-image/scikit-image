@@ -100,11 +100,11 @@ def _sum_sq_diff(image, template, valid_mask):
 
     Parameters
     ---------
-    image : array, np.float
+    image : array, float
         Input image of shape (M, N)
-    template : array, np.float
+    template : array, float
         (window, window) Template who's match is to be found in image
-    valid_mask : array, np.float
+    valid_mask : array, float
         (window, window), governs differences which are to be considered for
         SSD computation. Masks out the unknown or unfilled pixels and gives a
         higher weightage to the center pixel, decreasing as the distance from
@@ -112,7 +112,7 @@ def _sum_sq_diff(image, template, valid_mask):
 
     Returns
     ------
-    ssd : array, np.float
+    ssd : array, float
         (M - window +1, N - window + 1) The desired SSD values for all
         positions in the image
 
@@ -128,7 +128,7 @@ def _sum_sq_diff(image, template, valid_mask):
     # For einsum, labels are used to iterate through axes, order is imp: 'ij',
     # row wise iteration. Term after '->' represents the order for output array
     ssd = np.einsum('ijkl, kl, kl->ij', y, template, valid_mask,
-                    dtype=np.float)
+                    dtype=float)
     ssd *= - 2
     ssd += np.einsum('ijkl, ijkl, kl->ij', y, y, valid_mask)
     ssd += np.einsum('ij, ij, ij', template, template, valid_mask)
@@ -147,7 +147,7 @@ def _gaussian(sigma=0.5, size=None):
 
     Returns
     ------
-    gauss_mask : array, np.float
+    gauss_mask : array, float
         Gaussian kernel of shape ``size``
 
     """
