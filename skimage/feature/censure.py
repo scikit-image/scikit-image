@@ -19,18 +19,17 @@ STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
                      (9, 6), (11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]
 
 
-def _get_filtered_image(image, min_scale, max_scale, mode):
+def _filter_image(image, min_scale, max_scale, mode):
 
-    scales = np.zeros((image.shape[0], image.shape[1],
-                       max_scale - min_scale + 1), dtype=np.double)
+    response = np.zeros((image.shape[0], image.shape[1],
+                        max_scale - min_scale + 1), dtype=np.double)
 
     if mode == 'dob':
 
-        # make scales[:, :, i] contiguous memory block
-        item_size = scales.itemsize
-        scales.strides = (item_size * scales.shape[0],
-                          item_size,
-                          item_size * scales.shape[0] * scales.shape[1])
+        # make response[:, :, i] contiguous memory block
+        item_size = response.itemsize
+        response.strides = (item_size * response.shape[0], item_size,
+                            item_size * response.shape[0] * response.shape[1])
 
         integral_img = integral_image(image)
 
@@ -38,12 +37,12 @@ def _get_filtered_image(image, min_scale, max_scale, mode):
             n = min_scale + i
 
             # Constant multipliers for the outer region and the inner region
-            # of the bilevel filters with the constraint of keeping the
+            # of the bi-level filters with the constraint of keeping the
             # DC bias 0.
             inner_weight = (1.0 / (2 * n + 1)**2)
             outer_weight = (1.0 / (12 * n**2 + 4 * n))
 
-            _censure_dob_loop(n, integral_img, scales[:, :, i],
+            _censure_dob_loop(n, integral_img, response[:, :, i],
                               inner_weight, outer_weight)
 
     # NOTE : For the Octagon shaped filter, we implemented and evaluated the
@@ -57,17 +56,17 @@ def _get_filtered_image(image, min_scale, max_scale, mode):
         for i in range(max_scale - min_scale + 1):
             mo, no = OCTAGON_OUTER_SHAPE[min_scale + i - 1]
             mi, ni = OCTAGON_INNER_SHAPE[min_scale + i - 1]
-            scales[:, :, i] = convolve(image,
-                                       _octagon_filter_kernel(mo, no, mi, ni))
+            response[:, :, i] = convolve(image,
+                                         _octagon_filter_kernel(mo, no, mi, ni))
+
     elif mode == 'star':
 
         for i in range(max_scale - min_scale + 1):
             m = STAR_SHAPE[STAR_FILTER_SHAPE[min_scale + i - 1][0]]
             n = STAR_SHAPE[STAR_FILTER_SHAPE[min_scale + i - 1][1]]
-            scales[:, :, i] = convolve(image,
-                                       _star_filter_kernel(m, n))
+            response[:, :, i] = convolve(image, _star_filter_kernel(m, n))
 
-    return scales
+    return response
 
 
 # TODO : Import from selem after getting #669 merged.
@@ -138,24 +137,24 @@ def _suppress_lines(feature_mask, image, sigma, line_threshold):
 def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
                       non_max_threshold=0.15, line_threshold=10):
     """
-    Extracts Censure keypoints along with the corresponding scale using
-    either Difference of Boxes, Octagon or STAR bilevel filter.
+    Extracts CenSurE keypoints along with the corresponding scale using
+    either Difference of Boxes, Octagon or STAR bi-level filter.
 
     Parameters
     ----------
     image : 2D ndarray
         Input image.
-    min_scale : positive integer
+    min_scale : int
         Minimum scale to extract keypoints from.
-    max_scale : positive integer
+    max_scale : int
         Maximum scale to extract keypoints from. The keypoints will be
         extracted from all the scales except the first and the last i.e.
         from the scales in the range [min_scale + 1, max_scale - 1].
-    mode : ('DoB', 'Octagon', 'STAR')
-        Type of bilevel filter used to get the scales of the input image.
+    mode : {'DoB', 'Octagon', 'STAR'}
+        Type of bi-level filter used to get the scales of the input image.
         Possible values are 'DoB', 'Octagon' and 'STAR'. The three modes
-        represent the shape of the bilevel filters i.e. box(square), octagon
-        and star respectively. For instance, a bilevel octagon filter consists
+        represent the shape of the bi-level filters i.e. box(square), octagon
+        and star respectively. For instance, a bi-level octagon filter consists
         of a smaller inner octagon and a larger outer octagon with the filter
         weights being uniformly negative in both the inner octagon while
         uniformly positive in the difference region. Use STAR and Octagon for
@@ -170,7 +169,7 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
     Returns
     -------
     keypoints : (N, 2) array
-        Location of the extracted keypoints in the (row, col) format.
+        Location of the extracted keypoints in the ``(row, col)`` format.
     scales : (N, 1) array
         The corresponding scale of the N extracted keypoints.
 
@@ -187,8 +186,9 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
            http://www.jamris.org/01_2013/saveas.php?QUEST=JAMRIS_No01_2013_P_11-20.pdf
 
     """
+
     # (1) First we generate the required scales on the input grayscale image
-    # using a bilevel filter and stack them up in `filter_response`.
+    # using a bi-level filter and stack them up in `filter_response`.
     # (2) We then perform Non-Maximal suppression in 3 x 3 x 3 window on the
     # filter_response to suppress points that are neither minima or maxima in
     # 3 x 3 x 3 neighbourhood. We obtain a boolean ndarray `feature_mask`
@@ -207,15 +207,15 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
     if mode not in ('dob', 'octagon', 'star'):
         raise ValueError('Mode must be one of "DoB", "Octagon", "STAR".')
 
-    if max_scale - min_scale < 2:
-        raise ValueError('The number of scales should be greater than or'
-                         'equal to 3.')
+    if min_scale < 1 or max_scale < 1 or max_scale - min_scale < 2:
+        raise ValueError('The scales must be >= 1 and the number of scales '
+                         'should be >= 3.')
 
     image = img_as_float(image)
     image = np.ascontiguousarray(image)
 
     # Generating all the scales
-    filter_response = _get_filtered_image(image, min_scale, max_scale, mode)
+    filter_response = _filter_image(image, min_scale, max_scale, mode)
 
     # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
     # neighbourhood to zero
