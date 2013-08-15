@@ -10,11 +10,18 @@ from skimage.feature.util import _mask_border_keypoints
 from skimage.feature.censure_cy import _censure_dob_loop
 
 
+# The paper(Reference [1]) mentions the sizes of the Octagon shaped filter
+# kernel for the first seven scales only. The sizes of the later scales
+# have been extrapolated based on the following statement in the paper.
+# "These octagons scale linearly and were experimentally chosen to correspond
+# to the seven DOBs described in the previous section."
 OCTAGON_OUTER_SHAPE = [(5, 2), (5, 3), (7, 3), (9, 4), (9, 7), (13, 7),
                        (15, 10), (15, 11), (15, 12), (17, 13), (17, 14)]
 OCTAGON_INNER_SHAPE = [(3, 0), (3, 1), (3, 2), (5, 2), (5, 3), (5, 4), (5, 5),
                        (7, 5), (7, 6), (9, 6), (9, 7)]
 
+# The sizes for the STAR shaped filter kernel for different scales have been
+# taken from the OpenCV implementation.
 STAR_SHAPE = [1, 2, 3, 4, 6, 8, 11, 12, 16, 22, 23, 32, 45, 46, 64, 90, 128]
 STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
                      (9, 6), (11, 8), (13, 10), (14, 11), (15, 12), (16, 14)]

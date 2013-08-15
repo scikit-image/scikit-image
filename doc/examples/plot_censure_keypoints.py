@@ -40,8 +40,8 @@ for col, mode in enumerate(['dob', 'octagon', 'star']):
     # Plotting Censure features at all the scales
     for row, scale in enumerate(range(min_scale + 1, max_scale)):
         mask = scales == scale
-        x = keypoints[mask][:, 1]
-        y = keypoints[mask][:, 0]
+        x = keypoints[mask, 1]
+        y = keypoints[mask, 0]
         s = 0.5 * 2 ** (scale + min_scale + 1)
         ax[row, col].imshow(img)
         ax[row, col].scatter(x, y, s, facecolors='none', edgecolors='b')
