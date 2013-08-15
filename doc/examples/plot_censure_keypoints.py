@@ -23,7 +23,7 @@ non_max_threshold = 0.15
 line_threshold = 10
 
 
-f, ax = plt.subplots(nrows=(max_scale - min_scale - 1), ncols=3,
+_, ax = plt.subplots(nrows=(max_scale - min_scale - 1), ncols=3,
                      figsize=(6, 6))
 plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.94,
                     bottom=0.02, left=0.06, right=0.98)
@@ -39,10 +39,9 @@ for col, mode in enumerate(['dob', 'octagon', 'star']):
 
     # Plotting Censure features at all the scales
     for row, scale in enumerate(range(min_scale + 1, max_scale)):
-        keypoints_i = keypoints[scales == scale]
-        num = len(keypoints_i)
-        x = keypoints_i[:, 1]
-        y = keypoints_i[:, 0]
+        mask = scales == scale
+        x = keypoints[mask][:, 1]
+        y = keypoints[mask][:, 0]
         s = 0.5 * 2 ** (scale + min_scale + 1)
         ax[row, col].imshow(img)
         ax[row, col].scatter(x, y, s, facecolors='none', edgecolors='b')
