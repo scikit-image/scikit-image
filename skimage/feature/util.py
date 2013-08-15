@@ -1,16 +1,16 @@
 
 
-def _remove_border_keypoints(image, keypoints, dist):
+def _mask_border_keypoints(image, keypoints, dist):
     """Removes keypoints that are within dist pixels from the image border."""
     width = image.shape[0]
     height = image.shape[1]
 
-    keypoints = keypoints[(dist - 1 < keypoints[:, 0])
-                          & (keypoints[:, 0] < width - dist + 1)
-                          & (dist - 1 < keypoints[:, 1])
-                          & (keypoints[:, 1] < height - dist + 1)]
+    keypoints_filtering_mask = ((dist - 1 < keypoints[:, 0]) &
+                                (keypoints[:, 0] < width - dist + 1) &
+                                (dist - 1 < keypoints[:, 1]) &
+                                (keypoints[:, 1] < height - dist + 1))
 
-    return keypoints
+    return keypoints_filtering_mask
 
 
 def pairwise_hamming_distance(array1, array2):
