@@ -144,7 +144,7 @@ def test_single_color_cie76():
     deltaE_cie76(lab1, lab2)
 
 
-def test_single_color_cidede94():
+def test_single_color_ciede94():
     lab1 = (0.5, 0.5, 0.5)
     lab2 = (0.4, 0.4, 0.4)
     deltaE_ciede94(lab1, lab2)
