@@ -108,7 +108,7 @@ def deltaE_ciede94(lab1, lab2, kH=1, kC=1, kL=1, k1=0.045, k2=0.015):
 
     dL = L1 - L2
     dC = C1 - C2
-    dH = np.sqrt(deltaE_cie76(lab1, lab2) ** 2 - dL ** 2 - dC ** 2)
+    dH = get_dH(lab1, lab2)
 
     SL = 1
     SC = 1 + k1 * C1
@@ -289,7 +289,7 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
 
     dC = C1 - C2
     dL = L1 - L2
-    dH = np.sqrt(deltaE_cie76(lab1, lab2) ** 2 - dL ** 2 - dC ** 2)
+    dH = get_dH(lab1, lab2)
 
     T = np.where(np.logical_and(np.rad2deg(h1) >= 164, np.rad2deg(h1) <= 345),
                  0.56 + 0.2 * np.abs(np.cos(h1 + np.deg2rad(168))),
@@ -306,3 +306,27 @@ def deltaE_cmc(lab1, lab2, kL=1, kC=1):
     dE2 += (dC / (kC * SC)) ** 2
     dE2 += (dH / SH) ** 2
     return np.sqrt(dE2)
+
+
+def get_dH(lab1, lab2):
+    """numerically well behaved calculation of dH
+
+    Given a1, b1, a2, b2
+    c1 = sqrt(a1**2 + b1**2)
+    c2 = sqrt(a2**2 + b2**2)
+    term = (a1-a2)**2 + (b1-b2)**2 - (c1-c2)**2
+    dH = sqrt(term)
+    """
+    lab1 = np.asarray(lab1)
+    lab2 = np.asarray(lab2)
+
+    r1 = np.rollaxis(lab1, -1)[1:3]
+    r2 = np.rollaxis(lab2, -1)[1:3]
+
+    C1 = np.hypot(r1[0], r1[1])
+    C2 = np.hypot(r2[0], r2[1])
+
+    term = C1 * C2
+    term -= (r1 * r2).sum(0)
+    term *= 2
+    return np.sqrt(term)
