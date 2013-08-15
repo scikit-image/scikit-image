@@ -117,9 +117,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         #create new integral image for this orientation
         # isolate orientations in this range
 
-        temp_ori = np.where(orientation < 180 / orientations * (i + 1),
+        temp_ori = np.where(orientation < 180.0 / orientations * (i + 1),
                             orientation, -1)
-        temp_ori = np.where(orientation >= 180 / orientations * i,
+        temp_ori = np.where(orientation >= 180.0 / orientations * i,
                             temp_ori, -1)
         # select magnitudes for those orientations
         cond2 = temp_ori > -1
