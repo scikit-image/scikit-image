@@ -95,14 +95,15 @@ def threshold_otsu(image, nbins=256):
     ----------
     image : array
         Input image.
-    nbins : int
+    nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
 
     Returns
     -------
     threshold : float
-        Threshold value.
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
 
     References
     ----------
@@ -113,7 +114,7 @@ def threshold_otsu(image, nbins=256):
     >>> from skimage.data import camera
     >>> image = camera()
     >>> thresh = threshold_otsu(image)
-    >>> binary = image > thresh
+    >>> binary = image <= thresh
     """
     hist, bin_centers = histogram(image, nbins)
     hist = hist.astype(float)
@@ -142,14 +143,15 @@ def threshold_yen(image, nbins=256):
     ----------
     image : array
         Input image.
-    nbins : int
+    nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
     
     Returns
     -------
     threshold : float
-        Threshold value.
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
 
     References
     ----------
@@ -167,7 +169,7 @@ def threshold_yen(image, nbins=256):
     >>> from skimage.data import camera
     >>> image = camera()
     >>> thresh = threshold_yen(image)
-    >>> binary = image > thresh
+    >>> binary = image <= thresh
     """
     hist, bin_centers = histogram(img, nbins)
     norm_histo = hist.astype(float) / hist.sum() # Probability mass function
@@ -175,9 +177,10 @@ def threshold_yen(image, nbins=256):
     P1_sq = np.cumsum(norm_histo ** 2)
     # Get cumsum calculated from end of squared array:
     P2_sq = np.cumsum(norm_histo[::-1] ** 2)[::-1]
-    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf' in crit.
-    # In ImageJ Yen implementation, all invalid values replaced by zero.
-    crit = -1*np.log(P1_sq[:-1]*P2_sq[1:]) + 2.0*np.log(P1[:-1]*(1.0-P1[:-1]))
+    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
+    # in crit. ImageJ Yen implementation replaces those values by zero.
+    crit = -1 * np.log(P1_sq[:-1] * P2_sq[1:]) + \
+            2.0 * np.log(P1[:-1] * (1.0 - P1[:-1]))
     max_crit = np.argmax(crit)
     threshold = bin_centers[:-1][max_crit]
     return threshold
