@@ -4,7 +4,7 @@ from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 from skimage.transform import integral_image
 from skimage.feature.corner import _compute_auto_correlation
 from skimage.util import img_as_float
-from skimage.morphology import convex_hull_image
+from skimage.morphology import convex_hull_image, octagon, star
 from skimage.feature.util import _mask_border_keypoints
 
 from skimage.feature.censure_cy import _censure_dob_loop
@@ -71,58 +71,25 @@ def _get_filtered_image(image, min_scale, max_scale, mode):
     return scales
 
 
-# TODO : Import from selem after getting #669 merged.
-def _oct(m, n):
-    f = np.zeros((m + 2*n, m + 2*n))
-    f[0, n] = 1
-    f[n, 0] = 1
-    f[0, m + n - 1] = 1
-    f[m + n - 1, 0] = 1
-    f[-1, n] = 1
-    f[n, -1] = 1
-    f[-1, m + n - 1] = 1
-    f[m + n - 1, -1] = 1
-    return convex_hull_image(f).astype(int)
-
-
 def _octagon_filter_kernel(mo, no, mi, ni):
     outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
     inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
     outer_weight = 1.0 / (outer - inner)
     inner_weight = 1.0 / inner
     c = ((mo + 2 * no) - (mi + 2 * ni)) // 2
-    outer_oct = _oct(mo, no)
+    outer_oct = octagon(mo, no)
     inner_oct = np.zeros((mo + 2 * no, mo + 2 * no))
-    inner_oct[c: -c, c: -c] = _oct(mi, ni)
+    inner_oct[c: -c, c: -c] = octagon(mi, ni)
     bfilter = (outer_weight * outer_oct -
                (outer_weight + inner_weight) * inner_oct)
     return bfilter
 
 
-def _star(a):
-    if a == 1:
-        bfilter = np.zeros((3, 3))
-        bfilter[:] = 1
-        return bfilter
-    m = 2 * a + 1
-    n = a // 2
-    selem_square = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
-    selem_square[n: m + n, n: m + n] = 1
-    selem_triangle = np.zeros((m + 2 * n, m + 2 * n), dtype=np.uint8)
-    selem_triangle[(m + 2 * n - 1) // 2, 0] = 1
-    selem_triangle[(m + 1) // 2, n - 1] = 1
-    selem_triangle[(m + 4 * n - 3) // 2, n - 1] = 1
-    selem_triangle = convex_hull_image(selem_triangle).astype(int)
-    selem_triangle += (selem_triangle[:, ::-1] + selem_triangle.T +
-                       selem_triangle.T[::-1, :])
-    return selem_square + selem_triangle
-
-
 def _star_filter_kernel(m, n):
     c = m + m // 2 - n - n // 2
-    outer_star = _star(m)
+    outer_star = star(m)
     inner_star = np.zeros_like(outer_star)
-    inner_star[c: -c, c: -c] = _star(n)
+    inner_star[c: -c, c: -c] = star(n)
     outer_weight = 1.0 / (np.sum(outer_star - inner_star))
     inner_weight = 1.0 / np.sum(inner_star)
     bfilter = (outer_weight * outer_star -
