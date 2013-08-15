@@ -2,9 +2,9 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_raises
 from skimage import data
 from skimage import transform as tf
-from skimage.feature.corner import corner_peaks, corner_harris
 from skimage.color import rgb2gray
-from skimage.feature import brief, match_keypoints_brief
+from skimage.feature import (brief, match_keypoints_brief, corner_peaks,
+                             corner_harris)
 
 
 def test_brief_color_image_unsupported_error():

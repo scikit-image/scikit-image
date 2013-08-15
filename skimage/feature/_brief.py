@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
 from ..util import img_as_float
-from .util import _remove_border_keypoints, pairwise_hamming_distance
+from .util import _mask_border_keypoints, pairwise_hamming_distance
 
 from ._brief_cy import _brief_loop
 
@@ -16,7 +16,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     image : 2D ndarray
         Input image.
     keypoints : (P, 2) ndarray
-        Array of keypoint locations.
+        Array of keypoint locations in the format (row, col).
     descriptor_size : int
         Size of BRIEF descriptor about each keypoint. Sizes 128, 256 and 512
         preferred by the authors. Default is 256.
@@ -44,8 +44,8 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
         (i, j) either being True or False representing the outcome
         of Intensity comparison about ith keypoint on jth decision pixel-pair.
     keypoints : (Q, 2) ndarray
-        Keypoints after removing out those that are near border.
-        Returned only if return_keypoints is True.
+        Location i.e. (row, col) of keypoints after removing out those that
+        are near border.
 
     References
     ----------
@@ -142,7 +142,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     # Removing keypoints that are within (patch_size / 2) distance from the
     # image border
-    keypoints = _remove_border_keypoints(image, keypoints, patch_size // 2)
+    keypoints = keypoints[_mask_border_keypoints(image, keypoints, patch_size // 2)]
     keypoints = np.ascontiguousarray(keypoints)
 
     descriptors = np.zeros((keypoints.shape[0], descriptor_size), dtype=bool,
