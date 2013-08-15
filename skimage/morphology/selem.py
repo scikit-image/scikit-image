@@ -280,10 +280,10 @@ def star(a, dtype=np.uint8):
         bfilter[:] = 1
         return bfilter
     m = 2 * a + 1
-    n = a / 2
+    n = a // 2
     selem_square = np.zeros((m + 2 * n, m + 2 * n))
     selem_square[n: m + n, n: m + n] = 1
-    c = (m + 2 * n - 1) / 2
+    c = (m + 2 * n - 1) // 2
     selem_rotated = np.zeros((m + 2 * n, m + 2 * n))
     selem_rotated[0, c] = selem_rotated[-1, c] = selem_rotated[c, 0] = selem_rotated[c, -1] = 1
     selem_rotated = convex_hull_image(selem_rotated).astype(int)
