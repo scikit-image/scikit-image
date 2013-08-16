@@ -23,7 +23,8 @@ __all__ = ['load',
            'horse',
            'clock',
            'immunohistochemistry',
-           'chelsea']
+           'chelsea',
+           'coffee']
 
 
 def load(f):
@@ -189,11 +190,14 @@ def chelsea():
 def coffee():
     """Coffee cup.
 
-    An example with several shapes (including an ellipse).
+    This photograph is courtesy of Pikolo Espresso Bar.
+    It contains several elliptical shapes as well as varying texture (smooth
+    porcelain to course wood grain).
 
     Notes
     -----
-    No copyright restrictions.  CC0 by the photographer.
+    No copyright restrictions.  CC0 by the photographer (Rachel Michetti).
 
     """
     return load("coffee.png")
+
