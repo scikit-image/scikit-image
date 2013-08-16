@@ -191,8 +191,8 @@ def coffee():
     """Coffee cup.
 
     This photograph is courtesy of Pikolo Espresso Bar.
-    It shows several shapes (including an ellipse).  It may be used to
-    illustrate ellipse detection (using the Hough transform).
+    It contains several elliptical shapes as well as varying texture (smooth
+    porcelain to course wood grain).
 
     Notes
     -----
