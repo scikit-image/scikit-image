@@ -1,4 +1,4 @@
-__all__ = ['threshold_otsu', 'threshold_adaptive', 'threshold_yen']
+__all__ = ['threshold_adaptive', 'threshold_otsu', 'threshold_yen']
 
 import numpy as np
 import scipy.ndimage
@@ -171,7 +171,7 @@ def threshold_yen(image, nbins=256):
     >>> thresh = threshold_yen(image)
     >>> binary = image <= thresh
     """
-    hist, bin_centers = histogram(img, nbins)
+    hist, bin_centers = histogram(image, nbins)
     norm_histo = hist.astype(float) / hist.sum() # Probability mass function
     P1 = np.cumsum(norm_histo) # Cumulative normalized histogram
     P1_sq = np.cumsum(norm_histo ** 2)
