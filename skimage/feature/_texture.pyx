@@ -8,15 +8,9 @@ from libc.math cimport sin, cos, abs
 from skimage._shared.interpolation cimport bilinear_interpolation
 
 
-def _glcm_loop(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
-                           negative_indices=False, mode='c'] image,
-               cnp.ndarray[dtype=cnp.float64_t, ndim=1,
-                           negative_indices=False, mode='c'] distances,
-               cnp.ndarray[dtype=cnp.float64_t, ndim=1,
-                           negative_indices=False, mode='c'] angles,
-               int levels,
-               cnp.ndarray[dtype=cnp.uint32_t, ndim=4,
-                           negative_indices=False, mode='c'] out):
+def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
+               double[:] angles, Py_ssize_t levels,
+               cnp.uint32_t[:, :, :, ::1] out):
     """Perform co-occurrence matrix accumulation.
 
     Parameters
@@ -81,7 +75,7 @@ cdef inline int _bit_rotate_right(int value, int length):
     return (value >> 1) | ((value & 1) << (length - 1))
 
 
-def _local_binary_pattern(cnp.ndarray[double, ndim=2] image,
+def _local_binary_pattern(double[:, ::1] image,
                           int P, float R, char method='D'):
     """Gray scale and rotation invariant LBP (Local Binary Patterns).
 
@@ -92,8 +86,8 @@ def _local_binary_pattern(cnp.ndarray[double, ndim=2] image,
     image : (N, M) double array
         Graylevel image.
     P : int
-        Number of circularly symmetric neighbour set points (quantization of the
-        angular space).
+        Number of circularly symmetric neighbour set points (quantization of
+        the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
     method : {'D', 'R', 'U', 'V'}
@@ -111,19 +105,20 @@ def _local_binary_pattern(cnp.ndarray[double, ndim=2] image,
     """
 
     # texture weights
-    cdef cnp.ndarray[int, ndim=1] weights = 2 ** np.arange(P, dtype=np.int32)
+    cdef int[:] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
-    rp = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.double) / P)
-    cp = R * np.cos(2 * np.pi * np.arange(P, dtype=np.double) / P)
-    cdef cnp.ndarray[double, ndim=2] coords = np.round(np.vstack([rp, cp]).T, 5)
+    rr = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.double) / P)
+    cc = R * np.cos(2 * np.pi * np.arange(P, dtype=np.double) / P)
+    cdef double[:] rp = np.round(rr, 5)
+    cdef double[:] cp = np.round(cc, 5)
 
-    # pre allocate arrays for computation
-    cdef cnp.ndarray[double, ndim=1] texture = np.zeros(P, np.double)
-    cdef cnp.ndarray[char, ndim=1] signed_texture = np.zeros(P, np.int8)
-    cdef cnp.ndarray[int, ndim=1] rotation_chain = np.zeros(P, np.int32)
+    # pre-allocate arrays for computation
+    cdef double[:] texture = np.zeros(P, dtype=np.double)
+    cdef char[:] signed_texture = np.zeros(P, dtype=np.int8)
+    cdef int[:] rotation_chain = np.zeros(P, dtype=np.int32)
 
     output_shape = (image.shape[0], image.shape[1])
-    cdef cnp.ndarray[double, ndim=2] output = np.zeros(output_shape, np.double)
+    cdef double[:, ::1] output = np.zeros(output_shape, dtype=np.double)
 
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
@@ -133,8 +128,9 @@ def _local_binary_pattern(cnp.ndarray[double, ndim=2] image,
     for r in range(image.shape[0]):
         for c in range(image.shape[1]):
             for i in range(P):
-                texture[i] = bilinear_interpolation(<double*>image.data,
-                    rows, cols, r + coords[i, 0], c + coords[i, 1], 'C', 0)
+                texture[i] = bilinear_interpolation(&image[0, 0], rows, cols,
+                                                    r + rp[i], c + cp[i],
+                                                    'C', 0)
             # signed / thresholded texture
             for i in range(P):
                 if texture[i] - image[r, c] >= 0:
@@ -181,4 +177,4 @@ def _local_binary_pattern(cnp.ndarray[double, ndim=2] image,
 
             output[r, c] = lbp
 
-    return output
+    return np.asarray(output)

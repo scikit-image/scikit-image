@@ -59,16 +59,8 @@ def corner_moravec(image, Py_ssize_t window_size=1):
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
 
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode='c'] cimage, out
-
-    if image.ndim == 3:
-        cimage = rgb2grey(image)
-    cimage = np.ascontiguousarray(img_as_float(image))
-
-    out = np.zeros(image.shape, dtype=np.double)
-
-    cdef double* image_data = <double*>cimage.data
-    cdef double* out_data = <double*>out.data
+    cdef double[:, ::1] cimage = np.ascontiguousarray(img_as_float(image))
+    cdef double[:, ::1] out = np.zeros(image.shape, dtype=np.double)
 
     cdef double msum, min_msum
     cdef Py_ssize_t r, c, br, bc, mr, mc, a, b
@@ -81,11 +73,10 @@ def corner_moravec(image, Py_ssize_t window_size=1):
                         msum = 0
                         for mr in range(- window_size, window_size + 1):
                             for mc in range(- window_size, window_size + 1):
-                                a = (r + mr) * cols + c + mc
-                                b = (br + mr) * cols + bc + mc
-                                msum += (image_data[a] - image_data[b]) ** 2
+                                msum += (cimage[r + mr, c + mc]
+                                         - cimage[br + mr, bc + mc]) ** 2
                         min_msum = min(msum, min_msum)
 
-            out_data[r * cols + c] = min_msum
+            out[r, c] = min_msum
 
-    return out
+    return np.asarray(out)
