@@ -128,11 +128,6 @@ class _RegionProperties(object):
         return row + self._slice[0].start, col + self._slice[1].start
 
     @_cached_property
-    def moments_central(self):
-        row, col = self.local_centroid
-        return _moments.moments_central(self._image_double, row, col, 3)
-
-    @_cached_property
     def convex_area(self):
         return np.sum(self.convex_image)
 
@@ -177,10 +172,6 @@ class _RegionProperties(object):
         return ndimage.binary_fill_holes(self.image, STREL_8)
 
     @_cached_property
-    def moments_hu(self):
-        return _moments.moments_hu(self.moments_normalized)
-
-    @_cached_property
     def image(self):
         return self._label_image[self._slice] == self.label
 
@@ -215,10 +206,6 @@ class _RegionProperties(object):
         return self.intensity_image.astype(np.double)
 
     @_cached_property
-    def moments(self):
-        return _moments.moments(self._image_double, 3)
-
-    @_cached_property
     def local_centroid(self):
         m = self.moments
         row = m[0, 1] / m[0, 0]
@@ -248,6 +235,19 @@ class _RegionProperties(object):
         return 4 * sqrt(l2)
 
     @_cached_property
+    def moments(self):
+        return _moments.moments(self._image_double, 3)
+
+    @_cached_property
+    def moments_central(self):
+        row, col = self.local_centroid
+        return _moments.moments_central(self._image_double, row, col, 3)
+
+    @_cached_property
+    def moments_hu(self):
+        return _moments.moments_hu(self.moments_normalized)
+
+    @_cached_property
     def moments_normalized(self):
         return _moments.moments_normalized(self.moments_central, 3)
 
@@ -272,12 +272,6 @@ class _RegionProperties(object):
         return self.moments[0, 0] / np.sum(self.convex_image)
 
     @_cached_property
-    def weighted_central_moments(self):
-        row, col = self.weighted_local_centroid
-        return _moments.moments_central(self._intensity_image_double,
-                                        row, col, 3)
-
-    @_cached_property
     def weighted_centroid(self):
         row, col = self.weighted_local_centroid
         return row + self._slice[0].start, col + self._slice[1].start
@@ -290,12 +284,18 @@ class _RegionProperties(object):
         return row, col
 
     @_cached_property
-    def weighted_moments_hu(self):
-        return _moments.moments_hu(self.weighted_moments_normalized)
-
-    @_cached_property
     def weighted_moments(self):
         return _moments.moments_central(self._intensity_image_double, 0, 0, 3)
+
+    @_cached_property
+    def weighted_central_moments(self):
+        row, col = self.weighted_local_centroid
+        return _moments.moments_central(self._intensity_image_double,
+                                        row, col, 3)
+
+    @_cached_property
+    def weighted_moments_hu(self):
+        return _moments.moments_hu(self.weighted_moments_normalized)
 
     @_cached_property
     def weighted_moments_normalized(self):
@@ -347,13 +347,6 @@ def regionprops(label_image, properties=None,
         Number of pixels of region.
     **bbox** : tuple
        Bounding box `(min_row, min_col, max_row, max_col)`
-    **moments_central** : (3, 3) ndarray
-        Central moments (translation invariant) up to 3rd order::
-
-            mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
-
-        where the sum is over the `x`, `y` coordinates of the region,
-        and `x_c` and `y_c` are the coordinates of the region's centroid.
     **centroid** : array
         Centroid coordinate tuple `(row, col)`.
     **convex_area** : int
@@ -379,8 +372,6 @@ def regionprops(label_image, properties=None,
     **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
-    **moments_hu** : tuple
-        Hu moments (translation, scale and rotation invariant).
     **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
     **inertia_tensor** : (2, 2) ndarray
@@ -407,6 +398,15 @@ def regionprops(label_image, properties=None,
             m_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
+    **moments_central** : (3, 3) ndarray
+        Central moments (translation invariant) up to 3rd order::
+
+            mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
+
+        where the sum is over the `x`, `y` coordinates of the region,
+        and `x_c` and `y_c` are the coordinates of the region's centroid.
+    **moments_hu** : tuple
+        Hu moments (translation, scale and rotation invariant).
     **moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
 
@@ -422,6 +422,15 @@ def regionprops(label_image, properties=None,
         through the centers of border pixels using a 4-connectivity.
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
+    **weighted_centroid** : array
+        Centroid coordinate tuple `(row, col)` weighted with intensity
+        image.
+    **weighted_moments** : (3, 3) ndarray
+        Spatial moments of intensity image up to 3rd order::
+
+            wm_ji = sum{ array(x, y) * x^j * y^i }
+
+        where the sum is over the `x`, `y` coordinates of the region.
     **weighted_central_moments** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
@@ -430,18 +439,9 @@ def regionprops(label_image, properties=None,
 
         where the sum is over the `x`, `y` coordinates of the region,
         and `x_c` and `y_c` are the coordinates of the region's centroid.
-    **weighted_centroid** : array
-        Centroid coordinate tuple `(row, col)` weighted with intensity
-        image.
     **weighted_moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
         image.
-    **weighted_moments** : (3, 3) ndarray
-        Spatial moments of intensity image up to 3rd order::
-
-            wm_ji = sum{ array(x, y) * x^j * y^i }
-
-        where the sum is over the `x`, `y` coordinates of the region.
     **weighted_moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
