@@ -122,9 +122,9 @@ def moments_normalized(double[:, :] mu, Py_ssize_t order=3):
     for p in range(order + 1):
         for q in range(order + 1):
             if p + q >= 2:
-                nu[p,q] = mu[p, q] / mu[0, 0] ** (<double>(p + q) / 2 + 1)
+                nu[p, q] = mu[p, q] / mu[0, 0] ** (<double>(p + q) / 2 + 1)
             else:
-                nu[p,q] = np.nan
+                nu[p, q] = np.nan
     return np.asarray(nu)
 
 

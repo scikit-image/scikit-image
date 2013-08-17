@@ -311,7 +311,6 @@ class _RegionProperties(object):
             return getattr(self, PROPS[key])
 
 
-
 def regionprops(label_image, properties=None,
                 intensity_image=None, cache=True):
     """Measure properties of labelled image regions.
@@ -346,15 +345,15 @@ def regionprops(label_image, properties=None,
     **area** : int
         Number of pixels of region.
     **bbox** : tuple
-       Bounding box `(min_row, min_col, max_row, max_col)`
+       Bounding box ``(min_row, min_col, max_row, max_col)``
     **centroid** : array
-        Centroid coordinate tuple `(row, col)`.
+        Centroid coordinate tuple ``(row, col)``.
     **convex_area** : int
         Number of pixels of convex hull image.
     **convex_image** : (H, J) ndarray
         Binary convex hull image which has the same size as bounding box.
     **coords** : (N, 2) ndarray
-        Coordinate list `(row, col)` of the region.
+        Coordinate list ``(row, col)`` of the region.
     **eccentricity** : float
         Eccentricity of the ellipse that has the same second-moments as the
         region. The eccentricity is the ratio of the distance between its
@@ -366,7 +365,7 @@ def regionprops(label_image, properties=None,
         subtracted by number of holes (8-connectivity).
     **extent** : float
         Ratio of pixels in the region to pixels in the total bounding box.
-        Computed as `Area / (rows*cols)`
+        Computed as ``area / (rows * cols)``
     **filled_area** : int
         Number of pixels of filled region.
     **filled_image** : (H, J) ndarray
@@ -375,11 +374,11 @@ def regionprops(label_image, properties=None,
     **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
     **inertia_tensor** : (2, 2) ndarray
-        Inertia tensor of the region for the rotation around its masss.
+        Inertia tensor of the region for the rotation around its mass.
     **inertia_tensor_eigvals** : tuple
         The two eigen values of the inertia tensor in decreasing order.
     **label** : int
-        The label in the labelled input image.
+        The label in the labeled input image.
     **major_axis_length** : float
         The length of the major axis of the ellipse that has the same
         normalized second central moments as the region.
@@ -423,7 +422,7 @@ def regionprops(label_image, properties=None,
     **solidity** : float
         Ratio of pixels in the region to pixels of the convex hull image.
     **weighted_centroid** : array
-        Centroid coordinate tuple `(row, col)` weighted with intensity
+        Centroid coordinate tuple ``(row, col)`` weighted with intensity
         image.
     **weighted_moments** : (3, 3) ndarray
         Spatial moments of intensity image up to 3rd order::
