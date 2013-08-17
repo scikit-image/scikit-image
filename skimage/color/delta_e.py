@@ -320,11 +320,11 @@ def get_dH2(lab1, lab2):
         dH = sqrt(term)
 
     However, this has poor roundoff properties when a or b is dominant.
-    Instead, r is a vector with elements a and b.  The same dH term can be
+    Instead, ab is a vector with elements a and b.  The same dH term can be
     re-written as:
-        |r1-r2|**2 - (|r1| - |r2|)**2
+        |ab1-ab2|**2 - (|ab1| - |ab2|)**2
     and then simplified to:
-        2*|r1|*|r2| - 2*dot(r1, r2)
+        2*|ab1|*|ab2| - 2*dot(ab1, ab2)
     """
     lab1 = np.asarray(lab1)
     lab2 = np.asarray(lab2)
