@@ -177,4 +177,4 @@ def _local_binary_pattern(double[:, ::1] image,
 
             output[r, c] = lbp
 
-    return output
+    return np.asarray(output)
