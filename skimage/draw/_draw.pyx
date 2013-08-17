@@ -47,8 +47,6 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
 
     """
 
-    cdef cnp.ndarray[cnp.intp_t, ndim=1, mode="c"] rr, cc
-
     cdef char steep = 0
     cdef Py_ssize_t dx = abs(x2 - x)
     cdef Py_ssize_t dy = abs(y2 - y)
@@ -69,8 +67,8 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
         sx, sy = sy, sx
     d = (2 * dy) - dx
 
-    rr = np.zeros(int(dx) + 1, dtype=np.intp)
-    cc = np.zeros(int(dx) + 1, dtype=np.intp)
+    cdef Py_ssize_t[:] rr = np.zeros(int(dx) + 1, dtype=np.intp)
+    cdef Py_ssize_t[:] cc = np.zeros(int(dx) + 1, dtype=np.intp)
 
     for i in range(dx):
         if steep:
@@ -88,7 +86,7 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     rr[dx] = y2
     cc[dx] = x2
 
-    return rr, cc
+    return np.asarray(rr), np.asarray(cc)
 
 
 def polygon(y, x, shape=None):
@@ -149,8 +147,8 @@ def polygon(y, x, shape=None):
 
     # make contigous arrays for r, c coordinates
     cdef cnp.ndarray contiguous_rdata, contiguous_cdata
-    contiguous_rdata = np.ascontiguousarray(y, 'double')
-    contiguous_cdata = np.ascontiguousarray(x, 'double')
+    contiguous_rdata = np.ascontiguousarray(y, dtype=np.double)
+    contiguous_cdata = np.ascontiguousarray(x, dtype=np.double)
     cdef cnp.double_t* rptr = <cnp.double_t*>contiguous_rdata.data
     cdef cnp.double_t* cptr = <cnp.double_t*>contiguous_cdata.data
 
