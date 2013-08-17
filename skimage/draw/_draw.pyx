@@ -86,7 +86,7 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     rr[dx] = y2
     cc[dx] = x2
 
-    return rr, cc
+    return np.asarray(rr), np.asarray(cc)
 
 
 def polygon(y, x, shape=None):
