@@ -18,7 +18,7 @@ STREL_8 = np.ones((3, 3), 'int8')
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
-    'CentralMoments': 'central_moments',
+    'CentralMoments': 'moments_central',
     'Centroid': 'centroid',
     'ConvexArea': 'convex_area',
 #    'ConvexHull',
@@ -31,7 +31,7 @@ PROPS = {
 #    'Extrema',
     'FilledArea': 'filled_area',
     'FilledImage': 'filled_image',
-    'HuMoments': 'hu_moments',
+    'HuMoments': 'moments_hu',
     'Image': 'image',
     'Label': 'label',
     'MajorAxisLength': 'major_axis_length',
@@ -40,7 +40,7 @@ PROPS = {
     'MinIntensity': 'min_intensity',
     'MinorAxisLength': 'minor_axis_length',
     'Moments': 'moments',
-    'NormalizedMoments': 'normalized_moments',
+    'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
 #    'PixelIdxList',
@@ -49,9 +49,9 @@ PROPS = {
 #    'SubarrayIdx'
     'WeightedCentralMoments': 'weighted_central_moments',
     'WeightedCentroid': 'weighted_centroid',
-    'WeightedHuMoments': 'weighted_hu_moments',
+    'WeightedHuMoments': 'weighted_moments_hu',
     'WeightedMoments': 'weighted_moments',
-    'WeightedNormalizedMoments': 'weighted_normalized_moments'
+    'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
 
 
@@ -128,9 +128,9 @@ class _RegionProperties(object):
         return row + self._slice[0].start, col + self._slice[1].start
 
     @_cached_property
-    def central_moments(self):
+    def moments_central(self):
         row, col = self.local_centroid
-        return _moments.central_moments(self._image_double, row, col, 3)
+        return _moments.moments_central(self._image_double, row, col, 3)
 
     @_cached_property
     def convex_area(self):
@@ -177,8 +177,8 @@ class _RegionProperties(object):
         return ndimage.binary_fill_holes(self.image, STREL_8)
 
     @_cached_property
-    def hu_moments(self):
-        return _moments.hu_moments(self.normalized_moments)
+    def moments_hu(self):
+        return _moments.moments_hu(self.moments_normalized)
 
     @_cached_property
     def image(self):
@@ -190,7 +190,7 @@ class _RegionProperties(object):
 
     @_cached_property
     def inertia_tensor(self):
-        mu = self.central_moments
+        mu = self.moments_central
         a = mu[2, 0] / mu[0, 0]
         b = -mu[1, 1] / mu[0, 0]
         c = mu[0, 2] / mu[0, 0]
@@ -248,8 +248,8 @@ class _RegionProperties(object):
         return 4 * sqrt(l2)
 
     @_cached_property
-    def normalized_moments(self):
-        return _moments.normalized_moments(self.central_moments, 3)
+    def moments_normalized(self):
+        return _moments.moments_normalized(self.moments_central, 3)
 
     @_cached_property
     def orientation(self):
@@ -274,7 +274,7 @@ class _RegionProperties(object):
     @_cached_property
     def weighted_central_moments(self):
         row, col = self.weighted_local_centroid
-        return _moments.central_moments(self._intensity_image_double,
+        return _moments.moments_central(self._intensity_image_double,
                                         row, col, 3)
 
     @_cached_property
@@ -290,16 +290,16 @@ class _RegionProperties(object):
         return row, col
 
     @_cached_property
-    def weighted_hu_moments(self):
-        return _moments.hu_moments(self.weighted_normalized_moments)
+    def weighted_moments_hu(self):
+        return _moments.moments_hu(self.weighted_moments_normalized)
 
     @_cached_property
     def weighted_moments(self):
-        return _moments.central_moments(self._intensity_image_double, 0, 0, 3)
+        return _moments.moments_central(self._intensity_image_double, 0, 0, 3)
 
     @_cached_property
-    def weighted_normalized_moments(self):
-        return _moments.normalized_moments(self.weighted_central_moments, 3)
+    def weighted_moments_normalized(self):
+        return _moments.moments_normalized(self.weighted_central_moments, 3)
 
     def __getitem__(self, key):
         value = getattr(self, key, None)
@@ -347,7 +347,7 @@ def regionprops(label_image, properties=None,
         Number of pixels of region.
     **bbox** : tuple
        Bounding box `(min_row, min_col, max_row, max_col)`
-    **central_moments** : (3, 3) ndarray
+    **moments_central** : (3, 3) ndarray
         Central moments (translation invariant) up to 3rd order::
 
             mu_ji = sum{ array(x, y) * (x - x_c)^j * (y - y_c)^i }
@@ -379,7 +379,7 @@ def regionprops(label_image, properties=None,
     **filled_image** : (H, J) ndarray
         Binary region image with filled holes which has the same size as
         bounding box.
-    **hu_moments** : tuple
+    **moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant).
     **image** : (H, J) ndarray
         Sliced binary region image which has the same size as bounding box.
@@ -407,7 +407,7 @@ def regionprops(label_image, properties=None,
             m_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    **normalized_moments** : (3, 3) ndarray
+    **moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) up to 3rd order::
 
             nu_ji = mu_ji / m_00^[(i+j)/2 + 1]
@@ -433,7 +433,7 @@ def regionprops(label_image, properties=None,
     **weighted_centroid** : array
         Centroid coordinate tuple `(row, col)` weighted with intensity
         image.
-    **weighted_hu_moments** : tuple
+    **weighted_moments_hu** : tuple
         Hu moments (translation, scale and rotation invariant) of intensity
         image.
     **weighted_moments** : (3, 3) ndarray
@@ -442,7 +442,7 @@ def regionprops(label_image, properties=None,
             wm_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    **weighted_normalized_moments** : (3, 3) ndarray
+    **weighted_moments_normalized** : (3, 3) ndarray
         Normalized moments (translation and scale invariant) of intensity
         image up to 3rd order::
 
