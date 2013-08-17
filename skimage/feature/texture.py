@@ -271,6 +271,6 @@ def local_binary_pattern(image, P, R, method='default'):
         'uniform': ord('U'),
         'var': ord('V')
     }
-    image = np.array(image, dtype='double', copy=True)
+    image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output
