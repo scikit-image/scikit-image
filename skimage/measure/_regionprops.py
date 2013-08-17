@@ -216,7 +216,7 @@ class _RegionProperties(object):
 
     @_cached_property
     def moments(self):
-        return _moments.central_moments(self._image_double, 0, 0, 3)
+        return _moments.moments(self._image_double, 3)
 
     @_cached_property
     def local_centroid(self):
