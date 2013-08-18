@@ -1,4 +1,4 @@
-__all__ = ['threshold_adaptive', 'threshold_otsu', 'threshold_yen']
+__all__ = ['threshold_otsu', 'threshold_adaptive', 'threshold_yen']
 
 import numpy as np
 import scipy.ndimage
@@ -179,8 +179,8 @@ def threshold_yen(image, nbins=256):
     P2_sq = np.cumsum(norm_histo[::-1] ** 2)[::-1]
     # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
     # in crit. ImageJ Yen implementation replaces those values by zero.
-    crit = -1 * np.log(P1_sq[:-1] * P2_sq[1:]) + \
-            2.0 * np.log(P1[:-1] * (1.0 - P1[:-1]))
+    crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) * \
+                  (P1[:-1] * (1.0 - P1[:-1])) ** 2)
     max_crit = np.argmax(crit)
     threshold = bin_centers[:-1][max_crit]
     return threshold
