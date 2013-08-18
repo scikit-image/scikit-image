@@ -26,10 +26,17 @@ Supported color spaces
         Derived from the RGB CIE color space. Chosen such that
         ``x == y == z == 1/3`` at the whitepoint, and all color matching
         functions are greater than zero everywhere.
+* LAB CIE : Lightness, a, b
+        Colorspace derived from XYZ CIE that is intended to be more
+        perceptually uniform
+* LCH CIE : Lightness, Chroma, Hue
+        Defined in terms of LAB CIE.  C and H are the polar representation of
+        a and b.  The polar angle C is defined to be on (0, 2*pi)
 
 :author: Nicolas Pinto (rgb2hsv)
 :author: Ralf Gommers (hsv2rgb)
 :author: Travis Oliphant (XYZ and RGB CIE functions)
+:author: Matt Terry (lab2lch)
 
 :license: modified BSD
 
@@ -1026,3 +1033,105 @@ def combine_stains(stains, conv_matrix):
     logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
     rgb2 = np.exp(logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape), in_range=(-1, 1))
+
+
+def lab2lch(lab):
+    """CIE-LAB to CIE-LCH color space conversion.
+
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+
+    Parameters
+    ----------
+    lab : array_like
+        The N-D image in CIE-LAB format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
+        channels.  Subsequent elements are copied.
+
+    Returns
+    -------
+    out : ndarray
+        The image in LCH format, in a N-D array with same shape as input `lab`.
+
+    Raises
+    ------
+    ValueError
+        If `lch` does not have at least 3 color channels (i.e. l, a, b).
+
+    Notes
+    -----
+    The Hue is expressed as an angle between (0, 2*pi)
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lab2lch
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    """
+    lch = _prepare_lab_array(lab)
+
+    a, b = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = _cart2polar_2pi(a, b)
+    return lch
+
+
+def _cart2polar_2pi(x, y):
+    """convert cartesian coordiantes to polar (uses non-standard theta range!)
+
+    NON-STANDARD RANGE! Maps to (0, 2*pi) rather than usual (-pi, +pi)
+    """
+    r, t = np.hypot(x, y), np.arctan2(y, x)
+    t += np.where(t < 0., 2 * np.pi, 0)
+    return r, t
+
+
+def lch2lab(lch):
+    """CIE-LCH to CIE-LAB color space conversion.
+
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+
+    Parameters
+    ----------
+    lch : array_like
+        The N-D image in CIE-LCH format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
+        channels.  Subsequent elements are copied.
+
+    Returns
+    -------
+    out : ndarray
+        The image in LAB format, with same shape as input `lch`.
+
+    Raises
+    ------
+    ValueError
+        If `lch` does not have at least 3 color channels (i.e. l, c, h).
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lch2lab
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    >>> lena_lab2 = lch2lab(lena_lch)
+    """
+    lch = _prepare_lab_array(lch)
+
+    c, h = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = c * np.cos(h), c * np.sin(h)
+    return lch
+
+
+def _prepare_lab_array(arr):
+    """Ensure input for lab2lch, lch2lab are well-posed.
+
+    Arrays must be in floating point and have at least 3 elements in
+    last dimension.  Return a new array.
+    """
+    arr = np.asarray(arr)
+    shape = arr.shape
+    if shape[-1] < 3:
+        raise ValueError('Input array has less than 3 color channels')
+    return dtype.img_as_float(arr, force_copy=True)
