@@ -15,6 +15,8 @@ from .colorconv import (convert_colorspace,
                         rgb2lab,
                         rgb2hed,
                         hed2rgb,
+                        lab2lch,
+                        lch2lab,
                         separate_stains,
                         combine_stains,
                         rgb_from_hed,
@@ -44,6 +46,12 @@ from .colorconv import (convert_colorspace,
 
 from .colorlabel import color_dict, label2rgb
 
+from .delta_e import (deltaE_cie76,
+                      deltaE_ciede94,
+                      deltaE_ciede2000,
+                      deltaE_cmc,
+                      )
+
 
 __all__ = ['convert_colorspace',
            'guess_spatial_dimensions',
@@ -62,6 +70,8 @@ __all__ = ['convert_colorspace',
            'rgb2lab',
            'rgb2hed',
            'hed2rgb',
+           'lab2lch',
+           'lch2lab',
            'separate_stains',
            'combine_stains',
            'rgb_from_hed',
@@ -89,4 +99,9 @@ __all__ = ['convert_colorspace',
            'is_rgb',
            'is_gray',
            'color_dict',
-           'label2rgb']
+           'label2rgb',
+           'deltaE_cie76',
+           'deltaE_ciede94',
+           'deltaE_ciede2000',
+           'deltaE_cmc',
+           ]
