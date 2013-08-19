@@ -99,6 +99,9 @@ Library:
     Extension: skimage.feature.corner_cy
         Sources:
             skimage/feature/corner_cy.pyx
+    Extension: skimage.feature.fast_cy
+        Sources:
+            skimage/feature/fast_cy.pyx
     Extension: skimage.feature._texture
         Sources:
             skimage/feature/_texture.pyx
