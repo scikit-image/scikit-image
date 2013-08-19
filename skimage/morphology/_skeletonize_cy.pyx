@@ -20,7 +20,7 @@ cimport numpy as cnp
 
 
 def _skeletonize_loop(cnp.uint8_t[:, ::1] result,
-                      cnp.uint8_t[:] i, cnp.uint8_t[:] j,
+                      Py_ssize_t[:] i, Py_ssize_t[:] j,
                       cnp.int32_t[:] order, cnp.uint8_t[:] table):
     """
     Inner loop of skeletonize function
@@ -207,4 +207,4 @@ def _table_lookup_index(cnp.uint8_t[:, ::1] image):
             indexer[i - 1, j_shape - 1] += 128
             indexer[i, j_shape - 1] += 16
             indexer[i + 1, j_shape - 1] += 2
-    return indexer
+    return np.asarray(indexer)

@@ -123,4 +123,4 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
             out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
                                         mode_c, cval)
 
-    return out
+    return np.asarray(out)
