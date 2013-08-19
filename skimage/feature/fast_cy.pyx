@@ -8,7 +8,7 @@ import numpy as np
 from ..util import img_as_float
 
 
-def _corner_response_fast(double[:, ::1] image, int n, double threshold):
+def _corner_fast(double[:, ::1] image, int n, double threshold):
     
     cdef int[:] rp = (np.round(3 * np.sin(2 * np.pi * np.arange(16, dtype=np.double) / 16))).astype(np.int32)
     cdef int[:] cp = (np.round(3 * np.cos(2 * np.pi * np.arange(16, dtype=np.double) / 16))).astype(np.int32)
@@ -19,7 +19,8 @@ def _corner_response_fast(double[:, ::1] image, int n, double threshold):
     cdef Py_ssize_t i, j, k, l, m
 
     cdef char[:] bins
-    cdef int consecutive_count = 0
+    cdef int consecutive_count, speed_sum_b, speed_sum_d
+    cdef int sp
     cdef double sum_b
     cdef double sum_d
     cdef double[:, ::1] corner_response = np.zeros((rows, cols), dtype=np.double)
@@ -30,6 +31,8 @@ def _corner_response_fast(double[:, ::1] image, int n, double threshold):
         for j in range(3, cols - 3):
 
             bins = np.zeros(16, dtype='S1')
+            speed_sum_b = 0
+            speed_sum_d = 0
             sum_b = 0
             sum_d = 0
 
@@ -44,6 +47,16 @@ def _corner_response_fast(double[:, ::1] image, int n, double threshold):
                 else:
                     # Similar pixel
                     bins[k] = 's'
+
+            # High speed test for n>=12
+            if n >= 12:
+                for k in range(4):
+                    if bins[4 * k] == 'b':
+                        speed_sum_b += 1
+                    elif bins[4 * k] == 'd':
+                        speed_sum_d += 1
+                if speed_sum_d < 3 and speed_sum_b < 3:
+                    continue
 
             consecutive_count = 0
             for l in range(15 + n):
