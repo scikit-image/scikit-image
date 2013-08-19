@@ -312,7 +312,7 @@ def get_dH2(lab1, lab2):
     """squared hue difference term occurring in deltaE_cmc and deltaE_ciede94
 
     Despite its name "dH" is not a simple difference of hue values.  We avoid
-    working directly with the hue value directly since differencing angles is
+    working directly with the hue value since differencing angles is
     troublesome.  The hue term is usually written as:
         c1 = sqrt(a1**2 + b1**2)
         c2 = sqrt(a2**2 + b2**2)
