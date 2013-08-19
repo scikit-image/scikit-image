@@ -10,7 +10,7 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
 
     Parameters
     ---------
-    painted : (M, N) array, uint8
+    painted : (M, N) array, float
         Input image whose texture is to be calculated
     synth_mask : (M, N) array, bool
         Texture for True values are to be synthesised
@@ -19,7 +19,7 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
 
     Returns
     -------
-    image : (M, N) array, float
+    painted : (M, N) array, float
         Texture synthesised image
 
     References
@@ -33,7 +33,7 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
     source_image = painted.copy()
     offset = window // 2
 
-    t_row, t_col = np.ogrid[(-offset):(offset + 1), (-offset):(offset + 1)]
+    t_row, t_col = np.ogrid[-offset:offset + 1, -offset:offset + 1]
     sigma = window / 6.4
     gauss_mask = _gaussian(sigma, (window, window))
     confidence = 1. - mask
@@ -46,10 +46,8 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
             fill_front = mask
 
         # Generate the image gradient and normal vector to the boundary
-        image_grad_y = image[2:, 1:-1] - image[:-2, 1:-1]
-        image_grad_x = image[1:-1, 2:] - image[1:-1, :-2]
-        ny = fill_front[2:, 1:-1] + (-1 * fill_front[:-2, 1:-1])
-        nx = fill_front[1:-1, 2:] + (-1 * fill_front[1:-1, :-2])
+        im_grad_y, im_grad_x = np.gradient(painted)
+        ny, nx = np.gradient(mask.astype(np.float))
 
         # Generate the indices of the pixels in fill_front
         fill_front_indices = np.transpose(np.where(fill_front == 1))
@@ -66,15 +64,16 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
                                window ** 2)
 
             # Compute the data term
-            temp_grad_x = image_grad_x[(i - 1) + t_row, (j - 1) + t_col]
-            temp_grad_y = image_grad_y[(i - 1) + t_row, (j - 1) + t_col]
-            mod_grad = (temp_grad_x ** 2 + temp_grad_y ** 2)
-            ind_max = tuple(np.transpose(
-                np.where(mod_grad == mod_grad.max()))[0])
-            data_term = abs(temp_grad_x[ind_max] * nx[ind_max] -
-                            temp_grad_y[ind_max] * ny[ind_max])
-            data_term /= (mod_grad[ind_max] *
-                          (nx[ind_max] ** 2 + ny[ind_max] ** 2))
+            mod_grad = im_grad_x[i + t_row, j + t_col] ** 2
+            mod_grad += im_grad_y[i + t_row, j + t_col] ** 2
+            ind_max = np.array([i, j], dtype=np.uint8)
+            ind_max += np.transpose(np.where(mod_grad == mod_grad.max()))[0]
+            ind_max = tuple(ind_max - offset)
+
+            data_term = abs(im_grad_x[ind_max] * nx[i, j] +
+                            im_grad_y[ind_max] * ny[i, j])
+            data_term /= np.sqrt(mod_grad.max() *
+                                (nx[i, j] ** 2 + ny[i, j] ** 2))
 
             # Compute the priority for determining the order for inpainting
             priority = data_term * confidence_term
@@ -83,19 +82,20 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
                 max_conf = confidence_term
                 i_max, j_max = i, j
 
-        template = image[i_max + t_row, j_max + t_col]
+        template = painted[i_max + t_row, j_max + t_col]
         mask_template = mask[i_max + t_row, j_max + t_col]
         valid_mask = gauss_mask * (1 - mask_template)
 
-        ssd = _sum_sq_diff(image, template, valid_mask)
-
+        ssd = _sum_sq_diff(source_image, template, valid_mask)
         # Remove the case where sample == template
         ssd[i_max - offset, j_max - offset] = 1.
-        i_match, j_match = np.transpose(np.where(ssd == ssd.min()))[0]
 
-        if ssd[i_match, j_match] < max_thresh:
-            image[i_max + t_row, j_max + t_col] += image[
-                i_match + t_row, j_match + t_col] * mask_template
+        i_match, j_match = np.transpose(np.where(ssd == ssd.min()))[0] + offset
+
+        if ssd[i_match - offset, j_match - offset] < max_thresh:
+            painted[i_max + t_row, j_max + t_col] += (painted[i_match + t_row,
+                                                              j_match + t_col]
+                                                      * mask_template)
             confidence[i_max + t_row, j_max + t_col] += (max_conf *
                                                          mask_template)
             mask[i_max + t_row, j_max + t_col] = 0
@@ -104,7 +104,7 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
         if progress == 0:
             max_thresh = 1.1 * max_thresh
 
-    return image[offset:-offset, offset:-offset]
+    return painted[offset:-offset, offset:-offset]
 
 
 def _sum_sq_diff(painted, template, valid_mask):
