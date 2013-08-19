@@ -8,7 +8,7 @@ import numpy as np
 from ..util import img_as_float
 
 
-def _corner_fast(double[:, ::1] image, int n, double threshold):
+def _corner_response_fast(double[:, ::1] image, int n, double threshold):
     
     cdef int[:] rp = (np.round(3 * np.sin(2 * np.pi * np.arange(16, dtype=np.double) / 16))).astype(np.int32)
     cdef int[:] cp = (np.round(3 * np.cos(2 * np.pi * np.arange(16, dtype=np.double) / 16))).astype(np.int32)
@@ -22,7 +22,7 @@ def _corner_fast(double[:, ::1] image, int n, double threshold):
     cdef int consecutive_count = 0
     cdef double sum_b
     cdef double sum_d
-    cdef double[:, ::1] corner = np.zeros((rows, cols), dtype=np.double)
+    cdef double[:, ::1] corner_response = np.zeros((rows, cols), dtype=np.double)
 
     cdef double circle_intensity
 
@@ -36,10 +36,13 @@ def _corner_fast(double[:, ::1] image, int n, double threshold):
             for k in range(16):
                 circle_intensity = image[i + rp[k], j + cp[k]]
                 if circle_intensity > image[i, j] + threshold:
+                    # Brighter pixel
                     bins[k] = 'b'
                 elif circle_intensity < image[i, j] - threshold:
+                    # Darker pixel
                     bins[k] = 'd'
                 else:
+                    # Similar pixel
                     bins[k] = 's'
 
             consecutive_count = 0
@@ -52,15 +55,16 @@ def _corner_fast(double[:, ::1] image, int n, double threshold):
                                 sum_b += image[i + rp[m], j + cp[m]] - image[i, j] - threshold
                             elif bins[m] == 'd':
                                 sum_d += image[i, j] - image[i + rp[m], j + cp[m]] - threshold
+                        # Finding the response of the corner
                         if sum_d > sum_b:
-                            corner[i, j] = sum_d
+                            corner_response[i, j] = sum_d
                         else:
-                            corner[i, j] = sum_b
+                            corner_response[i, j] = sum_b
                         break
                 else:
                     consecutive_count = 0
 
-            if corner[i, j] == 0:
+            if corner_response[i, j] == 0:
                 consecutive_count = 0
                 for l in range(15 + n):
                     if bins[l % 16] == 'd':
@@ -71,12 +75,13 @@ def _corner_fast(double[:, ::1] image, int n, double threshold):
                                     sum_b += image[i + rp[m], j + cp[m]] - image[i, j] - threshold
                                 elif bins[m] == 'd':
                                     sum_d += image[i, j] - image[i + rp[m], j + cp[m]] - threshold
+                            # Finding the response of the corner
                             if sum_d > sum_b:
-                                corner[i, j] = sum_d
+                                corner_response[i, j] = sum_d
                             else:
-                                corner[i, j] = sum_b
+                                corner_response[i, j] = sum_b
                             break
                     else:
                         consecutive_count = 0
 
-    return np.asarray(corner)
+    return np.asarray(corner_response)
