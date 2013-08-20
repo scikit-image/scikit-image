@@ -1,7 +1,8 @@
 from __future__ import division
 import numpy as np
-from skimage.morphology import erosion, disk
+from skimage.morphology import erosion, dilation, disk
 from numpy.lib.stride_tricks import as_strided
+from scipy.ndimage.filters import gaussian_filter
 
 
 def _inpaint_criminisi(painted, mask, window, max_thresh):
@@ -46,7 +47,11 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
             fill_front = mask
 
         # Generate the image gradient and normal vector to the boundary
-        im_grad_y, im_grad_x = np.gradient(painted)
+        im_grad_y, im_grad_x = (np.gradient(gaussian_filter(painted, sigma=1))
+                                * (1 - dilation(mask, disk(1))))
+        im_grad_x = abs(im_grad_x)
+        im_grad_y = abs(im_grad_y)
+        mod_im_grad = np.hypot(im_grad_y, im_grad_x)
         ny, nx = np.gradient(mask.astype(np.float))
 
         # Generate the indices of the pixels in fill_front
@@ -64,8 +69,7 @@ def _inpaint_criminisi(painted, mask, window, max_thresh):
                                window ** 2)
 
             # Compute the data term
-            mod_grad = im_grad_x[i + t_row, j + t_col] ** 2
-            mod_grad += im_grad_y[i + t_row, j + t_col] ** 2
+            mod_grad = mod_im_grad[i + t_row, j + t_col]
             ind_max = np.array([i, j], dtype=np.uint8)
             ind_max += np.transpose(np.where(mod_grad == mod_grad.max()))[0]
             ind_max = tuple(ind_max - offset)
