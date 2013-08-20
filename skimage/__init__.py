@@ -88,9 +88,7 @@ test_verbose = _functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
 
 
-from exceptions import Warning as _Warning
-
-class _Log(_Warning):
+class _Log(Warning):
     pass
 
 class _FakeLog(object):

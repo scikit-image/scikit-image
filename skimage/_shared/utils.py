@@ -1,7 +1,6 @@
 import warnings
 import functools
 import sys
-from exceptions import Warning
 
 from . import six
 
