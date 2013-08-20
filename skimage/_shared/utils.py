@@ -1,11 +1,20 @@
 import warnings
 import functools
 import sys
+from exceptions import Warning
 
 from . import six
 
 
 __all__ = ['deprecated', 'get_bound_method_class']
+
+
+class skimage_deprecation(Warning):
+    """Create our own deprecation class, since Python >= 2.7
+    silences deprecations by default.
+
+    """
+    pass
 
 
 class deprecated(object):
@@ -39,12 +48,14 @@ class deprecated(object):
         def wrapped(*args, **kwargs):
             if self.behavior == 'warn':
                 func_code = six.get_function_code(func)
+                warnings.simplefilter('always', skimage_deprecation)
+                warnings.warn(msg, category=skimage_deprecation)
                 warnings.warn_explicit(msg,
-                    category=DeprecationWarning,
+                    category=skimage_deprecation,
                     filename=func_code.co_filename,
                     lineno=func_code.co_firstlineno + 1)
             elif self.behavior == 'raise':
-                raise DeprecationWarning(msg)
+                raise skimage_deprecation(msg)
             return func(*args, **kwargs)
 
         # modify doc string to display deprecation warning
