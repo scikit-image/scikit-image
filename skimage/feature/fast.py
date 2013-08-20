@@ -12,15 +12,15 @@ def corner_fast(image, n=12, threshold=0.15):
     ----------
     image : 2D ndarray
         Input image.
-    n : integer
+    n : int
         Number of consecutive pixels out of 16 pixels on the circle that
         should be brighter or darker with respect to test pixel above the
         `threshold` so as to classify the test pixel as a FAST corner. Also
         stands for the n in `FAST-n` corner detector.
     threshold : float
         Threshold used in deciding whether the pixels on the circle are
-        brighter, darker or similar to the test pixel. Decrease the threshold
-        when more corners are desired and vice-versa.
+        brighter, darker or similar w.r.t. the test pixel. Decrease the
+        threshold when more corners are desired and vice-versa.
 
     Returns
     -------
