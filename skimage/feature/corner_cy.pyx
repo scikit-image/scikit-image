@@ -82,7 +82,6 @@ def corner_moravec(image, Py_ssize_t window_size=1):
     return np.asarray(out)
 
 
-<<<<<<< HEAD
 cdef inline double _corner_fast_response(double curr_pixel,
                                          double* circle_intensities,
                                          char* bins, char state, char n):
@@ -112,8 +111,9 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
     cdef char speed_sum_b, speed_sum_d
     cdef double curr_pixel
     cdef double lower_threshold, upper_threshold
-    cdef double[:, ::1] corner_response = np.empty((rows, cols),
+    cdef double[:, ::1] corner_response = np.zeros((rows, cols),
                                                    dtype=np.double)
+
     cdef char *rp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1]
     cdef char *cp = [3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1, 0, 1, 2, 3]
     cdef char bins[16]
@@ -150,7 +150,6 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
                     elif bins[k] == 'd':
                         speed_sum_d += 1
                 if speed_sum_d < 3 and speed_sum_b < 3:
-                    corner_response[i, j] = 0
                     continue
 
             curr_response = \
