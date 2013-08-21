@@ -48,7 +48,6 @@ class deprecated(object):
             if self.behavior == 'warn':
                 func_code = six.get_function_code(func)
                 warnings.simplefilter('always', skimage_deprecation)
-                warnings.warn(msg, category=skimage_deprecation)
                 warnings.warn_explicit(msg,
                     category=skimage_deprecation,
                     filename=func_code.co_filename,
