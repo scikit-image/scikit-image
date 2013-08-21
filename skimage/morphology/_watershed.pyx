@@ -23,17 +23,12 @@ include "heap_watershed.pxi"
 
 
 @cython.boundscheck(False)
-def watershed(np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False,
-                         mode='c'] image,
-              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False,
-                         mode='c'] pq,
+def watershed(DTYPE_INT32_t[:] image,
+              DTYPE_INT32_t[:, ::1] pq,
               Py_ssize_t age,
-              np.ndarray[DTYPE_INT32_t, ndim=2, negative_indices=False,
-                         mode='c'] structure,
-              np.ndarray[DTYPE_BOOL_t, ndim=1, negative_indices=False,
-                         mode='c'] mask,
-              np.ndarray[DTYPE_INT32_t, ndim=1, negative_indices=False,
-                         mode='c'] output):
+              DTYPE_INT32_t[:, ::1] structure,
+              DTYPE_BOOL_t[:] mask,
+              DTYPE_INT32_t[:] output):
     """Do heavy lifting of watershed algorithm
 
     Parameters

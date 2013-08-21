@@ -2,15 +2,11 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import collections as coll
 import numpy as np
-from time import time
 from scipy import ndimage
 
-cimport numpy as cnp
-
-from ..util import img_as_float, regular_grid
-from ..color import rgb2lab, gray2rgb
+from skimage.util import img_as_float, regular_grid
+from skimage.color import rgb2lab, gray2rgb
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
@@ -19,18 +15,18 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  double[:, ::1] means,
                  Py_ssize_t max_iter, Py_ssize_t n_segments):
     """Helper function for SLIC segmentation.
-    
+
     Parameters
     ----------
-    image_zyx : 4D np.ndarray of double, shape (Z, Y, X, 6)
+    image_zyx : 4D array of double, shape (Z, Y, X, 6)
         The image with embedded coordinates, that is, `image_zyx[i, j, k]` is
         `array([i, j, k, r, g, b])` or `array([i, j, k, L, a, b])`, depending
         on the colorspace.
-    nearest_mean : 3D np.ndarray of int, shape (Z, Y, X)
+    nearest_mean : 3D array of int, shape (Z, Y, X)
         The (initially empty) label field.
-    distance : 3D np.ndarray of double, shape (Z, Y, X)
+    distance : 3D array of double, shape (Z, Y, X)
         The (initially infinity) array of distances to the nearest centroid.
-    means : 2D np.ndarray of double, shape (n_segments, 6)
+    means : 2D array of double, shape (n_segments, 6)
         The centroids obtained by SLIC.
     max_iter : int
         The maximum number of k-means iterations.
@@ -39,7 +35,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     Returns
     -------
-    nearest_mean : 3D np.ndarray of int, shape (Z, Y, X)
+    nearest_mean : 3D array of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
     """
 

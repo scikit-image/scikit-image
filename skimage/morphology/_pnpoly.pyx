@@ -29,7 +29,7 @@ def grid_points_inside_poly(shape, verts):
         True where the grid falls inside the polygon.
 
     """
-    cdef cnp.ndarray[cnp.double_t, ndim=1, mode="c"] vx, vy
+    cdef double[:] vx, vy
     verts = np.asarray(verts)
 
     vx = verts[:, 0].astype(np.double)
@@ -45,8 +45,7 @@ def grid_points_inside_poly(shape, verts):
 
     for m in range(M):
         for n in range(N):
-            out[m, n] = point_in_polygon(V, <double*>vx.data, <double*>vy.data,
-                                         m, n)
+            out[m, n] = point_in_polygon(V, &vx[0], &vy[0], m, n)
 
     return out.view(bool)
 
@@ -57,18 +56,18 @@ def points_inside_poly(points, verts):
     Parameters
     ----------
     points : (N, 2) array
-     Input points, ``(x, y)``.
+        Input points, ``(x, y)``.
     verts : (M, 2) array
-     Vertices of the polygon, sorted either clockwise or anti-clockwise.
-     The first point may (but does not need to be) duplicated.
+        Vertices of the polygon, sorted either clockwise or anti-clockwise.
+        The first point may (but does not need to be) duplicated.
 
     Returns
     -------
     mask : (N,) array of bool
-     True if corresponding point is inside the polygon.
+        True if corresponding point is inside the polygon.
 
     """
-    cdef cnp.ndarray[cnp.double_t, ndim=1, mode="c"] x, y, vx, vy
+    cdef double[:] x, y, vx, vy
 
     points = np.asarray(points)
     verts = np.asarray(verts)
@@ -82,8 +81,8 @@ def points_inside_poly(points, verts):
     cdef cnp.ndarray[cnp.uint8_t, ndim=1] out = \
          np.zeros(x.shape[0], dtype=np.uint8)
 
-    points_in_polygon(vx.shape[0], <double*>vx.data, <double*>vy.data,
-                      x.shape[0], <double*>x.data, <double*>y.data,
+    points_in_polygon(vx.shape[0], &vx[0], &vy[0],
+                      x.shape[0], &x[0], &y[0],
                       <unsigned char*>out.data)
 
     return out.astype(bool)

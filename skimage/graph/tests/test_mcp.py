@@ -152,4 +152,4 @@ def _test_random(shape):
 
 
 if __name__ == "__main__":
-    run_module_suite()
+    np.testing.run_module_suite()

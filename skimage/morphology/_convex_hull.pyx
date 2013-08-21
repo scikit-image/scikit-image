@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 
 
-def possible_hull(cnp.ndarray[dtype=cnp.uint8_t, ndim=2, mode="c"] img):
+def possible_hull(cnp.uint8_t[:, ::1] img):
     """Return positions of pixels that possibly belong to the convex hull.
 
     Parameters
@@ -30,31 +30,43 @@ def possible_hull(cnp.ndarray[dtype=cnp.uint8_t, ndim=2, mode="c"] img):
     #         cols storage slots for top boundary pixels
     #         rows storage slots for right boundary pixels
     #         cols storage slots for bottom boundary pixels
-    cdef cnp.ndarray[dtype=cnp.intp_t, ndim=2] nonzero = \
-         np.ones((2 * (rows + cols), 2), dtype=np.intp)
-    nonzero *= -1
+    coords = np.ones((2 * (rows + cols), 2), dtype=np.intp)
+    coords *= -1
+
+    cdef Py_ssize_t[:, ::1] nonzero = coords
+    cdef Py_ssize_t rows_cols = rows + cols
+    cdef Py_ssize_t rows_2_cols = 2 * rows + cols
+    cdef Py_ssize_t rows_cols_r, rows_c
 
     for r in range(rows):
+
+        rows_cols_r = rows_cols + r
+
         for c in range(cols):
+
             if img[r, c] != 0:
+
+                rows_c = rows + c
+                rows_2_cols_c = rows_2_cols + c
+
                 # Left check
                 if nonzero[r, 1] == -1:
                     nonzero[r, 0] = r
                     nonzero[r, 1] = c
 
                 # Right check
-                elif nonzero[rows + cols + r, 1] < c:
-                    nonzero[rows + cols + r, 0] = r
-                    nonzero[rows + cols + r, 1] = c
+                elif nonzero[rows_cols_r, 1] < c:
+                    nonzero[rows_cols_r, 0] = r
+                    nonzero[rows_cols_r, 1] = c
 
                 # Top check
-                if nonzero[rows + c, 1] == -1:
-                    nonzero[rows + c, 0] = r
-                    nonzero[rows + c, 1] = c
+                if nonzero[rows_c, 1] == -1:
+                    nonzero[rows_c, 0] = r
+                    nonzero[rows_c, 1] = c
 
                 # Bottom check
-                elif nonzero[2 * rows + cols + c, 0] < r:
-                    nonzero[2 * rows + cols + c, 0] = r
-                    nonzero[2 * rows + cols + c, 1] = c
+                elif nonzero[rows_2_cols_c, 0] < r:
+                    nonzero[rows_2_cols_c, 0] = r
+                    nonzero[rows_2_cols_c, 1] = c
 
-    return nonzero[nonzero[:, 0] != -1]
+    return coords[coords[:, 0] != -1]
