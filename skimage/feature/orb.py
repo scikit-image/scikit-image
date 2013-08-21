@@ -34,7 +34,7 @@ def descriptor_orb(image, keypoints, keypoints_angle):
             pr2 = steered_pos2[j][0]
             pc2 = steered_pos2[j][1]
             descriptors[i, j] = (image[pr1, pc1] < image[pr2, pc2])
-        return descriptors
+    return descriptors
 
 
 # Learned 256 decision pairs for binary tests in rBRIEF. Taken from OpenCV.
