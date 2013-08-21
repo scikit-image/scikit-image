@@ -1,9 +1,14 @@
+Version 0.9
+-----------
+- No longer wrap ``imread`` output in an ``Image`` class.
+
+Version 0.4
+-----------
+- Switch mask and radius arguments for ``median_filter``
+
 Version 0.3
 -----------
 - Remove ``as_grey``, ``dtype`` keyword from ImageCollection
 - Remove ``dtype`` from imread
 - Generalise ImageCollection to accept a load_func
 
-Version 0.4
------------
-- Switch mask and radius arguments for median_filter

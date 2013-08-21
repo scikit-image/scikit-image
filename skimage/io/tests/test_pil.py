@@ -6,7 +6,8 @@ from numpy.testing.decorators import skipif
 from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
-from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage.io import (imread, imsave, use_plugin, reset_plugins,
+                        Image as ioImage)
 from skimage._shared.six.moves import StringIO
 
 
@@ -83,7 +84,7 @@ def test_imread_uint16():
 @skipif(not PIL_available)
 def test_repr_png():
     img_path = os.path.join(data_dir, 'camera.png')
-    original_img = imread(img_path)
+    original_img = ioImage(imread(img_path))
     original_img_str = original_img._repr_png_()
 
     with NamedTemporaryFile(suffix='.png') as temp_png:
