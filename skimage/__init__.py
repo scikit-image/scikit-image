@@ -38,8 +38,6 @@ util
 
 Utility Functions
 -----------------
-get_log
-    Returns the ``skimage`` log.  Use this to print debug output.
 img_as_float
     Convert an image to floating point format, with values in [0, 1].
 img_as_uint
@@ -54,6 +52,7 @@ img_as_ubyte
 import os.path as _osp
 import imp as _imp
 import functools as _functools
+from skimage._shared.utils import deprecated as _deprecated
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
 data_dir = _osp.join(pkg_dir, 'data')
@@ -62,6 +61,7 @@ try:
     from .version import version as __version__
 except ImportError:
     __version__ = "unbuilt-dev"
+del version
 
 
 try:
@@ -88,6 +88,55 @@ test_verbose = _functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
 
 
+class _Log(Warning):
+    pass
+
+class _FakeLog(object):
+    def __init__(self, name):
+        """
+        Parameters
+        ----------
+        name : str
+            Name of the log.
+        repeat : bool
+            Whether to print repeating messages more than once (False by
+            default).
+        """
+        self._name = name
+
+        import warnings
+        warnings.simplefilter("always", _Log)
+
+        self._warnings = warnings
+
+    def _warn(self, msg, wtype):
+        self._warnings.warn('%s: %s' % (wtype, msg), _Log)
+
+    def debug(self, msg):
+        self._warn(msg, 'DEBUG')
+
+    def info(self, msg):
+        self._warn(msg, 'INFO')
+
+    def warning(self, msg):
+        self._warn(msg, 'WARNING')
+
+    warn = warning
+
+    def error(self, msg):
+        self._warn(msg, 'ERROR')
+
+    def critical(self, msg):
+        self._warn(msg, 'CRITICAL')
+
+    def addHandler(*args):
+        pass
+
+    def setLevel(*args):
+        pass
+
+
+@_deprecated()
 def get_log(name=None):
     """Return a console logger.
 
@@ -105,39 +154,12 @@ def get_log(name=None):
            http://docs.python.org/library/logging.html
 
     """
-    import logging
-
     if name is None:
         name = 'skimage'
     else:
         name = 'skimage.' + name
 
-    log = logging.getLogger(name)
-    return log
+    return _FakeLog(name)
 
-
-def _setup_log():
-    """Configure root logger.
-
-    """
-    import logging
-    import sys
-
-    formatter = logging.Formatter(
-        '%(name)s: %(levelname)s: %(message)s'
-        )
-
-    try:
-        handler = logging.StreamHandler(stream=sys.stdout)
-    except TypeError:
-        handler = logging.StreamHandler(strm=sys.stdout)
-    handler.setFormatter(formatter)
-
-    log = get_log()
-    log.addHandler(handler)
-    log.setLevel(logging.WARNING)
-    log.propagate = False
-
-_setup_log()
 
 from .util.dtype import *
