@@ -57,7 +57,7 @@ class TestImageCollection():
     def test_getitem(self):
         num = len(self.collection)
         for i in range(-num, num):
-            assert type(self.collection[i]) is ioImage
+            assert type(self.collection[i]) is np.ndarray
         assert_array_almost_equal(self.collection[0],
                                   self.collection[-num])
 
