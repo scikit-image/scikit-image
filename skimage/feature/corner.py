@@ -583,4 +583,5 @@ def corner_fast(image, n=12, threshold=0.15):
 
     image = img_as_float(image)
     image = np.ascontiguousarray(image)
+
     return _corner_fast(image, n, threshold)
