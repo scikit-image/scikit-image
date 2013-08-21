@@ -35,27 +35,32 @@ class Image(np.ndarray):
 
     These objects have tags for image metadata and IPython display protocol
     methods for image display.
-    """
 
-    tags = {'filename': '',
-            'EXIF': {},
-            'info': {}}
+    Parameters
+    ----------
+    arr : ndarray
+        Image data.
+    kwargs : Image tags as keywords
+        Specified in the form ``tag0=value``, ``tag1=value``.
+
+    Attributes
+    ----------
+    tags : dict
+        Meta-data.
+
+    """
 
     def __new__(cls, arr, **kwargs):
         """Set the image data and tags according to given parameters.
 
-        Parameters
-        ----------
-        arr : ndarray
-            Image data.
-        kwargs : Image tags as keywords
-            Specified in the form ``tag0=value``, ``tag1=value``.
-
         """
         x = np.asarray(arr).view(cls)
-        for tag, value in Image.tags.items():
-            setattr(x, tag, kwargs.get(tag, getattr(arr, tag, value)))
+        x.tags = kwargs
+
         return x
+
+    def __array_finalize__(self, obj):
+        self.tags = getattr(obj, 'tags', {})
 
     def _repr_png_(self):
         return self._repr_image_format('png')
@@ -147,7 +152,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if as_grey and getattr(img, 'ndim', 0) >= 3:
         img = rgb2grey(img)
 
-    return Image(img)
+    return img
 
 
 def imread_collection(load_pattern, conserve_memory=True,
