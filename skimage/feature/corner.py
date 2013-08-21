@@ -581,7 +581,8 @@ def corner_fast(image, n=12, threshold=0.15):
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
 
-    image = np.ascontiguousarray(image, dtype=np.double)
+    image = img_as_float(image)
+    image = np.ascontiguousarray(image)
     corner_response = _corner_fast(image, n, threshold)
 
     # Non-maximal Suppression
