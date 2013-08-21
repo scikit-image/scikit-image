@@ -1,4 +1,4 @@
-__all__ = ['threshold_otsu', 'threshold_adaptive', 'threshold_yen']
+__all__ = ['threshold_adaptive', 'threshold_otsu', 'threshold_yen'] 
 
 import numpy as np
 import scipy.ndimage
