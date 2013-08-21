@@ -83,10 +83,8 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     """
 
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode="c"] img = \
-         np.ascontiguousarray(image, dtype=np.double)
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode="c"] M = \
-         np.ascontiguousarray(H)
+    cdef double[:, ::1] img = np.ascontiguousarray(image, dtype=np.double)
+    cdef double[:, ::1] M = np.ascontiguousarray(H)
 
     if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
         raise ValueError("Invalid mode specified.  Please use "
@@ -101,8 +99,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         out_r = output_shape[0]
         out_c = output_shape[1]
 
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2] out = \
-         np.zeros((out_r, out_c), dtype=np.double)
+    cdef double[:, ::1] out = np.zeros((out_r, out_c), dtype=np.double)
 
     cdef Py_ssize_t tfr, tfc
     cdef double r, c
@@ -122,8 +119,8 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     for tfr in range(out_r):
         for tfc in range(out_c):
-            _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
-            out[tfr, tfc] = interp_func(<double*>img.data, rows, cols, r, c,
+            _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
+            out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
                                         mode_c, cval)
 
-    return out
+    return np.asarray(out)

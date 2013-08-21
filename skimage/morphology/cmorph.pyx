@@ -8,9 +8,9 @@ cimport numpy as np
 from libc.stdlib cimport malloc, free
 
 
-def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
-            np.ndarray[np.uint8_t, ndim=2] selem,
-            np.ndarray[np.uint8_t, ndim=2] out=None,
+def _dilate(np.uint8_t[:, :] image,
+            np.uint8_t[:, :] selem,
+            np.uint8_t[:, :] out=None,
             char shift_x=0, char shift_y=0):
     """Return greyscale morphological dilation of an image.
 
@@ -52,12 +52,9 @@ def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
     else:
         out = np.ascontiguousarray(out)
 
-    cdef np.uint8_t* out_data = <np.uint8_t*>out.data
-    cdef np.uint8_t* image_data = <np.uint8_t*>image.data
-
     cdef Py_ssize_t r, c, rr, cc, s, value, local_max
 
-    cdef Py_ssize_t selem_num = np.sum(selem != 0)
+    cdef Py_ssize_t selem_num = np.sum(np.asarray(selem) != 0)
     cdef Py_ssize_t* sr = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
     cdef Py_ssize_t* sc = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
 
@@ -76,21 +73,21 @@ def _dilate(np.ndarray[np.uint8_t, ndim=2] image,
                 rr = r + sr[s]
                 cc = c + sc[s]
                 if 0 <= rr < rows and 0 <= cc < cols:
-                    value = image_data[rr * cols + cc]
+                    value = image[rr, cc]
                     if value > local_max:
                         local_max = value
 
-            out_data[r * cols + c] = local_max
+            out[r, c] = local_max
 
     free(sr)
     free(sc)
 
-    return out
+    return np.asarray(out)
 
 
-def _erode(np.ndarray[np.uint8_t, ndim=2] image,
-           np.ndarray[np.uint8_t, ndim=2] selem,
-           np.ndarray[np.uint8_t, ndim=2] out=None,
+def _erode(np.uint8_t[:, :] image,
+           np.uint8_t[:, :] selem,
+           np.uint8_t[:, :] out=None,
            char shift_x=0, char shift_y=0):
     """Return greyscale morphological erosion of an image.
 
@@ -131,12 +128,9 @@ def _erode(np.ndarray[np.uint8_t, ndim=2] image,
     else:
         out = np.ascontiguousarray(out)
 
-    cdef np.uint8_t* out_data = <np.uint8_t*>out.data
-    cdef np.uint8_t* image_data = <np.uint8_t*>image.data
-
     cdef int r, c, rr, cc, s, value, local_min
 
-    cdef Py_ssize_t selem_num = np.sum(selem != 0)
+    cdef Py_ssize_t selem_num = np.sum(np.asarray(selem) != 0)
     cdef Py_ssize_t* sr = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
     cdef Py_ssize_t* sc = <Py_ssize_t*>malloc(selem_num * sizeof(Py_ssize_t))
 
@@ -155,13 +149,13 @@ def _erode(np.ndarray[np.uint8_t, ndim=2] image,
                 rr = r + sr[s]
                 cc = c + sc[s]
                 if 0 <= rr < rows and 0 <= cc < cols:
-                    value = image_data[rr * cols + cc]
+                    value = image[rr, cc]
                     if value < local_min:
                         local_min = value
 
-            out_data[r * cols + c] = local_min
+            out[r, c] = local_min
 
     free(sr)
     free(sc)
 
-    return out
+    return np.asarray(out)
