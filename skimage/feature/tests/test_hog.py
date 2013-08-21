@@ -8,6 +8,44 @@ from numpy.testing import (assert_raises,
                            assert_almost_equal,
                            )
 
+def test_gradient():
+    # No duplication of the border
+    image = np.array([[-1, 0, 1, 1],
+                      [1, 0, 1, 1],
+                      [1, 1, 1, 1],
+                      [-1, 0, 1, 1],
+                      [-1, 0, 1, 1]])
+    gradx = np.array([[0, 1], [0, 0], [2, 1]])
+    grady = np.array([[1, 0], [0, 0], [-1, 0]])
+    resx, resy = feature._hog.gradient(image, same_size=False)
+    assert_array_equal(gradx, resx)
+    assert_array_equal(grady, resy)
+    # With duplication of the border
+    image = np.array([[1, 1],
+                      [-1, 1]])
+    gradx = np.array([[0, 0], [2, 2]])
+    grady = np.array([[-2, 0], [-2, 0]])
+    resx, resy = gradient(image, same_size=True)
+    assert_array_equal(gradx, resx)
+    assert_array_equal(grady, resy)
+
+
+def test_magnitude_orientation():
+    gx = np.array([[1, 0],
+                  [0, 1]])
+    gy = np.array([[0, 1],
+                  [0, 1]])
+    magnitude, orientation = feature._hog.magnitude_orientation(gx, gy)
+    res_orientation = np.array([[0, 90], [0, 45]])
+    res_magnitude = np.array([[1, 1], [0, sqrt(2)]])
+    assert_array_equal(res_orientation, orientation)
+    assert_array_equal(res_magnitude, magnitude)
+    
+    gx = np.array([[0]])
+    gy = np.array([[-1]])
+    magnitude, orientation = magnitude_orientation(gx, gy, max_angle=360)
+    assert orientation[0, 0] == 270
+
 
 def test_histogram_of_oriented_gradients():
     img = img_as_float(data.lena()[:256, :].mean(axis=2))
