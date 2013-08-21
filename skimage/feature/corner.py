@@ -547,7 +547,7 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
         return peaks
 
 
-def corner_fast(image, n=12, threshold=0.15):
+def corner_fast(image, n=12, threshold=0.15, non_max_shape=(3, 3)):
 
     """Extract FAST corners for a given image.
 
@@ -564,6 +564,9 @@ def corner_fast(image, n=12, threshold=0.15):
         Threshold used in deciding whether the pixels on the circle are
         brighter, darker or similar w.r.t. the test pixel. Decrease the
         threshold when more corners are desired and vice-versa.
+    non_max_shape : tuple of two odd int
+        Represents the area in which Non-maximal suppression is applied.
+        By default, a 3 x 3 area is used.
 
     Returns
     -------
@@ -583,5 +586,4 @@ def corner_fast(image, n=12, threshold=0.15):
 
     image = img_as_float(image)
     image = np.ascontiguousarray(image)
-
     return _corner_fast(image, n, threshold)
