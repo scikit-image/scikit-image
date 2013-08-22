@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import pi, arctan2, cos, sin
-from scipy.ndimage import uniform_filter
 
 
 def gradient(image, same_size=False):
@@ -136,7 +135,7 @@ def build_histogram(magnitude, orientation, cell_size=(8, 8), cells_per_block=(2
     coefs[:dx, -dy:] = 1 - distance
     coefs[-dx:, :dy] = 1 - distance
     coefs[-dx:, -dy:] = 1 - distance
-    coefs = np.tile(coefs, (n_cells_x, n_cells_y))[:-dx, :-dy]
+    coefs = np.tile(coefs, (n_cells_x - 1, n_cells_y - 1))
     
     b_step = max_angle/nbins
     b0 = orientation // b_step
@@ -161,16 +160,16 @@ def build_histogram(magnitude, orientation, cell_size=(8, 8), cells_per_block=(2
     temp[:, -dy:, :] += temp_coefs[:, -dy:, :]*magnitude[:, -dy:, np.newaxis]
 
     # hist(x0, y0)
-    temp[:-dx, :-dy, :] += temp_coefs[dx:, dy:, :]*(magnitude[dx:, dy:]*coefs)[:, :, np.newaxis]
+    temp[:-csx, :-csy, :] += temp_coefs[dx:-dx, dy:-dy, :]*(magnitude[dx:-dx, dy:-dy]*coefs)[:, :, np.newaxis]
     coefs = np.flipud(coefs)
     # hist(x1, y0)
-    temp[dx:, :-dy, :] += temp_coefs[:-dx, dy:, :]*(magnitude[:-dx, dy:]*coefs)[:, :, np.newaxis]
+    temp[csx:, :-csy, :] += temp_coefs[dx:-dx, dy:-dy, :]*(magnitude[dx:-dx, dy:-dy]*coefs)[:, :, np.newaxis]
     coefs = np.fliplr(coefs)
     # hist(x1, y1)
-    temp[dx:, dy:, :] += temp_coefs[:-dx, :-dy, :]*(magnitude[:-dx, :-dy]*coefs)[:, :, np.newaxis]
+    temp[csx:, csy:, :] += temp_coefs[dx:-dx, dy:-dy, :]*(magnitude[dx:-dx, dy:-dy]*coefs)[:, :, np.newaxis]
     coefs = np.flipud(coefs)
     # hist(x0, y1)
-    temp[:-dx, dy:, :] += temp_coefs[dx:, :-dy, :]*(magnitude[dx:, :-dy]*coefs)[:, :, np.newaxis]
+    temp[:-csx, csy:, :] += temp_coefs[dx:-dx, dy:-dy, :]*(magnitude[dx:-dx, dy:-dy]*coefs)[:, :, np.newaxis]
     
     # Compute the histogram: sum over the cells
     orientation_histogram = temp.reshape((n_cells_x, csx, n_cells_y, csy, nbins)).sum(axis=3).sum(axis=1)
@@ -195,13 +194,13 @@ def build_histogram(magnitude, orientation, cell_size=(8, 8), cells_per_block=(2
     
     n_blocksx = (n_cells_x - bx) + 1
     n_blocksy = (n_cells_y - by) + 1
-    normalised_blocks = np.zeros((n_blocksy, n_blocksx, by, bx, nbins))
+    normalised_blocks = np.zeros((n_blocksx, n_blocksy, bx, by, nbins))
 
     for x in range(n_blocksx):
         for y in range(n_blocksy):
             block = orientation_histogram[x:x + bx, y:y + by, :]
             eps = 1e-5
-            normalised_blocks[x, y, :] = block / sqrt(block.sum()**2 + eps)
+            normalised_blocks[x, y, :] = block / np.sqrt(block.sum()**2 + eps)
 
     if flatten:
         orientation_histogram = orientation_histogram.reshape(orientation_histogram.shape[0], -1)
