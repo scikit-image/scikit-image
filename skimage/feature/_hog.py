@@ -203,12 +203,12 @@ def build_histogram(magnitude, orientation, cell_size=(8, 8), cells_per_block=(2
             normalised_blocks[x, y, :] = block / np.sqrt(block.sum()**2 + eps)
 
     if flatten:
-        orientation_histogram = orientation_histogram.reshape(orientation_histogram.shape[0], -1)
+        normalised_blocks = normalised_blocks.flatten()
 
     if visualise:
-        return orientation_histogram, hog_image
+        return normalised_blocks, hog_image
     else:
-        return orientation_histogram
+        return normalised_blocks
 
 
 
@@ -220,7 +220,7 @@ def histogram_from_gradient(gx, gy, cell_size=(8, 8), max_angle=180, nbins=9):
 
 
 
-def hog(image, cell_size=(8, 8), cells_per_blocks=(2, 2), max_angle=180, nbins=9, visualise=False):
+def hog(image, cell_size=(8, 8), cells_per_block=(2, 2), max_angle=180, nbins=9, visualise=False):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -263,5 +263,6 @@ def hog(image, cell_size=(8, 8), cells_per_blocks=(2, 2), max_angle=180, nbins=9
     gx, gy = gradient(image)
     magnitude, orientation = magnitude_orientation(gx, gy, max_angle)
     return build_histogram(magnitude, orientation, cell_size=cell_size,
-         max_angle=max_angle, nbins=nbins, visualise=visualise)
+         max_angle=max_angle, cells_per_block=cells_per_block,
+         nbins=nbins, visualise=visualise)
 
