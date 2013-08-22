@@ -126,7 +126,7 @@ def _local_binary_pattern(double[:, ::1] image,
 
     cdef double lbp
     cdef Py_ssize_t r, c, changes, i
-    cdef Py_ssize_t r, c, changes, i, rot_index, n_ones
+    cdef Py_ssize_t rot_index, n_ones
     cdef cnp.int8_t first_zero, first_one
 
     for r in range(image.shape[0]):
@@ -145,7 +145,7 @@ def _local_binary_pattern(double[:, ::1] image,
             lbp = 0
 
             # if method == 'uniform' or method == 'var':
-            if method == 'U' or method == 'V':
+            if method == 'U' or method == 'N' or method == 'V':
                 # determine number of 0 - 1 changes
                 changes = 0
                 for i in range(P - 1):
@@ -181,15 +181,16 @@ def _local_binary_pattern(double[:, ::1] image,
                         elif n_ones == P:
                             lbp = P * (P - 1) + 1
                         else:
-                            # There are (P - n_ones) patterns starting with 0.
+                            # There are (P - n_ones) patterns starting with 0
+                            # followed by n_ones patterns starting with 1.
                             # This patterns are indexed starting from the
                             # position where all zeros are on the right and
                             # applying circular right shifts.
                             if first_zero == 0:
-                                var_index = P - n_ones - first_one
+                                rot_index = P - n_ones - first_one
                             else:
-                                var_index = P - first_zero
-                            lbp = 1 + (n_ones - 1) * P + var_index
+                                rot_index = P - first_zero
+                            lbp = 1 + (n_ones - 1) * P + rot_index
                     else:  # changes > 2
                         lbp = P * (P - 1) + 2
                 else:  # method != 'N'
