@@ -1,3 +1,30 @@
+"""This is an example for constrained texture synthesis. An unknown region in
+the image is filled using texture of surrounding region. This implementation
+is pixel-based.
+
+Outline of the algorithm for Texture Synthesis is as follows:
+- Loop: Generate the boundary pixels of the region to be inpainted
+    - Loop: Generate a template of (window, window), center: boundary pixel
+        - Compute the SSD between template and similar sized patches across
+          the image
+        - Find the pixel with smallest SSD, such that patch isn't where
+          template is located (False positive)
+        - Update the intensity value of center pixel of template as the
+          value of the center of the matched patch
+    - Repeat for all pixels of the boundary
+- Repeat until all pixels are inpainted
+
+For further information refer to [1]_
+
+References
+---------
+.. [1] A. Efros and T. Leung. "Texture Synthesis by Non-Parametric
+       Sampling". In Proc. Int. Conf. Computer Vision, pages 1033-1038,
+       Kerkyra, Greece, September 1999.
+       http://graphics.cs.cmu.edu/people/efros/research/EfrosLeung.html
+
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
