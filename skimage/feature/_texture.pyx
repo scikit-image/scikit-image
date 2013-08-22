@@ -90,12 +90,13 @@ def _local_binary_pattern(double[:, ::1] image,
         the angular space).
     R : float
         Radius of circle (spatial resolution of the operator).
-    method : {'D', 'R', 'U', 'V'}
+    method : {'D', 'R', 'U', 'N', 'V'}
         Method to determine the pattern.
 
         * 'D': 'default'
         * 'R': 'ror'
         * 'U': 'uniform'
+        * 'N': 'nri_uniform'
         * 'V': 'var'
 
     Returns
@@ -125,6 +126,9 @@ def _local_binary_pattern(double[:, ::1] image,
 
     cdef double lbp
     cdef Py_ssize_t r, c, changes, i
+    cdef Py_ssize_t r, c, changes, i, rot_index, n_ones
+    cdef cnp.int8_t first_zero, first_one
+
     for r in range(image.shape[0]):
         for c in range(image.shape[1]):
             for i in range(P):
@@ -146,19 +150,61 @@ def _local_binary_pattern(double[:, ::1] image,
                 changes = 0
                 for i in range(P - 1):
                     changes += abs(signed_texture[i] - signed_texture[i + 1])
-
-                if changes <= 2:
-                    for i in range(P):
-                        lbp += signed_texture[i]
-                else:
-                    lbp = P + 1
-
-                if method == 'V':
-                    var = np.var(texture)
-                    if var != 0:
-                        lbp /= var
+                if method == 'N':
+                    # Non rotation invariant LBP.
+                    # for P there are P + 1 ror and uniform patterns
+                    # ex: P = 4
+                    # 1: 0 0 0 0
+                    # 2: 0 0 0 1 -> 0 0 1 0, 0 1 0 0, 1 0 0 0
+                    # 3: 0 0 1 1 -> 0 1 1 0, 1 1 0 0, 1 0 0 1
+                    # 4: 0 1 1 1 -> 1 1 1 0, 1 1 0 1, 1 0 1 1
+                    # 5: 1 1 1 1
+                    # The first and last patterns are always invariant under
+                    # rotation. The (P - 1) remaining patterns have P rotated
+                    # variants hence we have P * (P - 1) + 2 uniform patterns
+                    # to which we add the non uniform pattern.
+                    if changes <= 2:
+                        # We have a uniform pattern
+                        n_ones = 0  # determies the number of ones
+                        first_one = -1  # position was the first one
+                        first_zero = -1  # position of the first zero
+                        for i in range(P):
+                            if signed_texture[i]:
+                                n_ones += 1
+                                if first_one == -1:
+                                    first_one = i
+                            else:
+                                if first_zero == -1:
+                                    first_zero = i
+                        if n_ones == 0:
+                            lbp = 0
+                        elif n_ones == P:
+                            lbp = P * (P - 1) + 1
+                        else:
+                            # There are (P - n_ones) patterns starting with 0.
+                            # This patterns are indexed starting from the
+                            # position where all zeros are on the right and
+                            # applying circular right shifts.
+                            if first_zero == 0:
+                                var_index = P - n_ones - first_one
+                            else:
+                                var_index = P - first_zero
+                            lbp = 1 + (n_ones - 1) * P + var_index
+                    else:  # changes > 2
+                        lbp = P * (P - 1) + 2
+                else:  # method != 'N'
+                    if changes <= 2:
+                        for i in range(P):
+                            lbp += signed_texture[i]
                     else:
-                        lbp = np.nan
+                        lbp = P + 1
+    
+                    if method == 'V':
+                        var = np.var(texture)
+                        if var != 0:
+                            lbp /= var
+                        else:
+                            lbp = np.nan
             else:
                 # method == 'default'
                 for i in range(P):

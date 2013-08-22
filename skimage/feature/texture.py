@@ -248,6 +248,8 @@ def local_binary_pattern(image, P, R, method='default'):
         * 'uniform': improved rotation invariance with uniform patterns and
             finer quantization of the angular space which is gray scale and
             rotation invariant.
+        * 'nri_uniform': non rotation-invariant uniform patterns variant
+            which is only gray scale invariant.
         * 'var': rotation invariant variance measures of the contrast of local
             image texture which is rotation but not gray scale invariant.
 
@@ -269,6 +271,7 @@ def local_binary_pattern(image, P, R, method='default'):
         'default': ord('D'),
         'ror': ord('R'),
         'uniform': ord('U'),
+        'nri_uniform': ord('N'),
         'var': ord('V')
     }
     image = np.ascontiguousarray(image, dtype=np.double)
