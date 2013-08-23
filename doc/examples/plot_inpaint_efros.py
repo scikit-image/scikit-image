@@ -1,6 +1,6 @@
 """This is an example for constrained texture synthesis. An unknown region in
 the image is filled using texture of surrounding region. This implementation
-is pixel-based.
+updates pixel-by-pixel.
 
 Outline of the algorithm for Texture Synthesis is as follows:
 - Loop: Generate the boundary pixels of the region to be inpainted
@@ -41,6 +41,8 @@ mask[paint_region] = 1
 painted = inpaint_texture(image, mask, 7)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2)
+ax0.set_title('Input image')
 ax0.imshow(image, cmap=plt.cm.gray)
+ax1.set_title('Inpainted image')
 ax1.imshow(painted, cmap=plt.cm.gray)
 plt.show()

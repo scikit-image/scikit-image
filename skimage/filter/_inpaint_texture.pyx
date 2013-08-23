@@ -1,10 +1,11 @@
 from __future__ import division
 import numpy as np
 from skimage.morphology import erosion, disk
-from numpy.lib.stride_tricks import as_strided
+
+cimport numpy as cnp
 
 
-def _inpaint_efros(painted, mask, window, max_thresh):
+cpdef _inpaint_efros(painted, mask, window, max_thresh):
     """This function performs constrained texture synthesis. It grows the
     texture of surrounding region into the unknown pixels. This implementation
     is pixel-based. Check the Notes Section for a brief overview of the
@@ -56,86 +57,120 @@ def _inpaint_efros(painted, mask, window, max_thresh):
     offset = window // 2
     t_row, t_col = np.ogrid[-offset:offset + 1, -offset:offset + 1]
 
-    sigma = window / 6.4
+    sigma = window / 3
+    # Sigma definition is as in there pseudo code:
+    # http://graphics.cs.cmu.edu/people/efros/research/NPS/alg.html
     gauss_mask = _gaussian(sigma, (window, window))
 
     while mask.any():
-        progress = 0
-
         # Generate the boundary of ROI (region to be synthesised)
         boundary = mask - erosion(mask, disk(1))
-        if not boundary.any():  # If the remaining region is 1-pixel thick
+        if not boundary.any() and mask.any():
+            # If the remaining region is 1-pixel thick
             boundary = mask
 
         bound_list = np.transpose(np.where(boundary == 1))
 
-        for k in range(bound_list.shape[0]):
-            i_b = bound_list[k, 0]
-            j_b = bound_list[k, 1]
+        for (i_b, j_b) in bound_list:
             template = painted[i_b + t_row, j_b + t_col]
             valid_mask = gauss_mask * (1 - mask[i_b + t_row, j_b + t_col])
 
-            ssd = _sum_sq_diff(source_image, template, valid_mask)
-            # Remove the case where `sample` == `template`
-            ssd[i_b - offset, j_b - offset] = 1.
+            i_m, j_m = _sum_sq_diff(source_image[offset:-offset,
+                                                 offset:-offset],
+                                    mask[offset:-offset, offset:-offset],
+                                    template, valid_mask, max_thresh, i_b, j_b)
 
-            i_match, j_match = np.transpose(np.where(ssd == ssd.min()))[0]
-
-            if ssd[i_match, j_match] < max_thresh:
-                painted[i_b, j_b] = source_image[i_match + offset,
-                                                 j_match + offset]
+            if i_m != -1 and j_m != -1:
+                painted[i_b, j_b] = source_image[i_m + offset,
+                                                 j_m + offset]
                 mask[i_b, j_b] = False
-                progress = 1
-
-        if progress == 0:
-            max_thresh = 1.1 * max_thresh
 
     return painted[offset:-offset, offset:-offset]
 
 
-def _sum_sq_diff(image, template, valid_mask):
+cdef _sum_sq_diff(cnp.float_t[:, ::] image,
+                  cnp.uint8_t[:, ::] mask,
+                  cnp.float_t[:, ::] template,
+                  cnp.float_t[:, ::] valid_mask,
+                  cnp.float_t max_thresh,
+                  Py_ssize_t i_b, Py_ssize_t j_b):
     """This function performs template matching. The metric used is Sum of
-    Squared Difference (SSD). The input taken is the template who's match is
-    to be found in image.
+    Squared Difference (SSD). The input taken is the ``template`` who's match
+    is to be found in image. See the section below on Notes.
 
     Parameters
     ---------
     image : array, float
-        Input image of shape (M, N)
+        Initial unpadded input image of shape (M, N)
+    mask : (M, N) array, bool
+        Texture for True values are to be synthesised; unpadded
     template : array, float
         (window, window) Template who's match is to be found in image
     valid_mask : array, float
         (window, window), governs differences which are to be considered for
         SSD computation. Masks out the unknown or unfilled pixels and gives a
-        higher weightage to the center pixel, decreasing as the distance from
+        higher weight to the center pixel, decreasing as the distance from
         center pixel increases
+    max_thresh : float
+        Maximum tolerable SSD (Sum of Squared Difference) between the template
+        around a pixel to be filled and an equal size image sample
+    i_b, j_b : int
+        Template matching for this index value
 
     Returns
     ------
     ssd : array, float
-        (M - window +1, N - window + 1) The desired SSD values for all
+        (M - window + 1, N - window + 1) The desired SSD values for all
         positions in the image
 
+    Notes
+    -----
+    The valid samples from the image are those which completely lie in the
+    known region of the image, i.e. not belonging to the padded boundary and
+    not having any pixel from the region to be inpainted.
+
     """
-    total_weight = valid_mask.sum()
-    window_size = template.shape
-    y = as_strided(image,
-                   shape=(image.shape[0] - window_size[0] + 1,
-                          image.shape[1] - window_size[1] + 1,) +
-                   window_size,
-                   strides=image.strides * 2)
-    # ``(y-template)**2`` followed by reduction -> 4D array intermediate
-    # For einsum, labels are used to iterate through axes, order is imp: 'ij',
-    # row wise iteration. Term after '->' represents the order for output array
-    ssd = np.einsum('ijkl, kl, kl->ij', y, template, valid_mask,
-                    dtype=float)
-    ssd *= - 2
-    ssd += np.einsum('ijkl, ijkl, kl->ij', y, y, valid_mask)
-    ssd += np.einsum('ij, ij, ij', template, template, valid_mask)
-    return ssd / total_weight
+    cdef:
+        Py_ssize_t i, j, k, l, i_min, j_min
+        cnp.float_t ssd, min_ssd = 0, total_weight
+        cnp.uint8_t window, offset, flag
+
+    min_ssd = 1.
+    window = template.shape[0]
+    offset = (window // 2)
+    total_weight = valid_mask.base.sum()
+    for i in range(image.shape[0] - window + 1):
+        for j in range(image.shape[1] - window + 1):
+            if i == i_b - offset and j == j_b - offset:
+                continue
+            flag = 0
+            for k in range(window):
+                for l in range(window):
+                    if mask[i + k, j + l]:
+                        flag = 1
+                        break
+                if flag == 1:
+                    break
+
+            if flag == 1:
+                continue
+            ssd = 0
+            for k in range(window):
+                for l in range(window):
+                    ssd += ((template[k, l] - image[i + k, j + l]) ** 2
+                            * valid_mask[k, l])
+            ssd /= total_weight
+            if ssd < min_ssd:
+                min_ssd = ssd
+                i_min = i + offset
+                j_min = j + offset
+    if min_ssd < max_thresh:
+        return i_min, j_min
+    else:
+        return -1, -1
 
 
-def _gaussian(sigma=0.5, size=None):
+cdef _gaussian(sigma=0.5, size=None):
     """Gaussian kernel array with given sigma and shape about the center pixel.
 
     Parameters
@@ -151,13 +186,13 @@ def _gaussian(sigma=0.5, size=None):
         Gaussian kernel of shape ``size``
 
     """
-    sigma = abs(sigma)
+    sigma2 = sigma ** 2
 
     x = np.arange(-(size[0] - 1) / 2.0, (size[0] - 1) / 2.0 + 0.1)
     y = np.arange(-(size[1] - 1) / 2.0, (size[1] - 1) / 2.0 + 0.1)
 
-    Kx = np.exp(-x ** 2 / (2 * sigma ** 2))
-    Ky = np.exp(-y ** 2 / (2 * sigma ** 2))
-    gauss_mask = np.outer(Kx, Ky) / (2.0 * np.pi * sigma ** 2)
+    Kx = np.exp(-x ** 2 / (2 * sigma2))
+    Ky = np.exp(-y ** 2 / (2 * sigma2))
+    gauss_mask = np.outer(Kx, Ky) / (2.0 * np.pi * sigma2)
 
     return gauss_mask / gauss_mask.sum()
