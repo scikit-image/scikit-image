@@ -61,8 +61,8 @@ def test_basic():
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]],
         dtype=np.float)
 
-    assert_array_equal(np.round(inpaint_texture(image, mask, window=5)),
-                       expected)
+    painted = inpaint_texture(image, mask, window=5, max_thresh=0.5)
+    assert_array_equal(painted, expected)
 
 
 if __name__ == "__main__":

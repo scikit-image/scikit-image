@@ -18,8 +18,20 @@ def configuration(parent_package='', top_path=None):
     cython(['rank/generic_cy.pyx'], working_path=base_path)
     cython(['rank/percentile_cy.pyx'], working_path=base_path)
     cython(['rank/bilateral_cy.pyx'], working_path=base_path)
+    cython(['_inpaint_texture.pyx'], working_path=base_path)
+    cython(['rank/_core8.pyx'], working_path=base_path)
+    cython(['rank/_core16.pyx'], working_path=base_path)
+    cython(['rank/_crank8.pyx'], working_path=base_path)
+    cython(['rank/_crank8_percentiles.pyx'], working_path=base_path)
+    cython(['rank/_crank16.pyx'], working_path=base_path)
+    cython(['rank/_crank16_percentiles.pyx'], working_path=base_path)
+    cython(['rank/_crank16_bilateral.pyx'], working_path=base_path)
+    cython(['rank/percentile_rank.pyx'], working_path=base_path)
+    cython(['rank/bilateral_rank.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
+                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_inpaint_texture', sources=['_inpaint_texture.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_denoise_cy', sources=['_denoise_cy.c'],
         include_dirs=[get_numpy_include_dirs(), '../_shared'])

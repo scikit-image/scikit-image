@@ -10,7 +10,7 @@ __all__ = ['inpaint_texture']
 def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
     """This function performs constrained texture synthesis. It grows the
     texture of surrounding region into the unknown pixels. This implementation
-    is pixel-based. Check the Notes Section for a brief overview of the
+    updates pixel-by-pixel. Check the Notes Section for a brief overview of the
     algorithm.
 
     Parameters
@@ -19,9 +19,9 @@ def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
         Input image whose texture is to be calculated
     synth_mask : (M, N) array, bool
         Texture for True values are to be synthesised
-    window : int
+    window : int, optional
         Size of the neighborhood window, (window, window)
-    max_thresh : float
+    max_thresh : float, optional
         Maximum tolerable SSD (Sum of Squared Difference) between the template
         around a pixel to be filled and an equal size image sample
 
@@ -57,6 +57,7 @@ def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
     -------
     >>> import numpy as np
     >>> from skimage.filter.inpaint_texture import inpaint_texture
+    >>> from skimage.data import checkerboard
     >>> image = np.round(checkerboard()[92:108, 92:108])
     >>> mask = np.zeros_like(image, np.uint8)
     >>> mask[5:-5, 5:-5] = 1
