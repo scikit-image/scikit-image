@@ -82,22 +82,18 @@ def corner_moravec(image, Py_ssize_t window_size=1):
     return np.asarray(out)
 
 
-cdef int[:] RP = (np.round(3 * np.sin(2 * np.pi * np.arange(16, dtype=np.double) / 16))).astype(np.int32)
-cdef int[:] CP = (np.round(3 * np.cos(2 * np.pi * np.arange(16, dtype=np.double) / 16))).astype(np.int32)
-
-
-cdef inline _get_fast_corner_response(double[:, ::1] image, Py_ssize_t i,
-                                      Py_ssize_t j, char[:] bins,
-                                      char check_state, int n,
-                                      double threshold,
-                                      double[:] circle_intensities):
+cdef inline double _get_fast_corner_response(double[:, ::1] image,
+                                             Py_ssize_t i, Py_ssize_t j,
+                                             char[:] bins, char state, int n,
+                                             double threshold,
+                                             double[:] circle_intensities):
     cdef int consecutive_count = 0
     cdef double sum_b = 0
     cdef double sum_d = 0
     cdef double curr_pixel = image[i, j]
     cdef Py_ssize_t l, m
     for l in range(15 + n):
-        if bins[l % 16] == check_state:
+        if bins[l % 16] == state:
             consecutive_count += 1
             if consecutive_count == n:
                 for m in range(16):
@@ -132,6 +128,10 @@ def _corner_fast(double[:, ::1] image, int n, double threshold):
     cdef double[:, ::1] corner_response = np.zeros((rows, cols),
                                                     dtype=np.double)
 
+    cdef char[:] rp = np.array([-3, -3, -2, -1, 0, 1, 2, 3, 3, 3, 2, 1, 0,
+                                -1, -2, -1, -3], dtype=np.int8)
+    cdef char[:] cp = np.array([0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3,
+                                -3, -3, -2, -3], dtype=np.int8)
     cdef double[:] circle_intensities = np.zeros(16, dtype=np.double)
 
     for i in range(3, rows - 3):
@@ -144,7 +144,7 @@ def _corner_fast(double[:, ::1] image, int n, double threshold):
             upper_threshold = current_pixel + threshold
 
             for k in range(16):
-                circle_intensities[k] = image[i + RP[k], j + CP[k]]
+                circle_intensities[k] = image[i + rp[k], j + cp[k]]
                 if circle_intensities[k] > upper_threshold:
                     # Brighter pixel
                     bins[k] = 'b'
@@ -165,15 +165,13 @@ def _corner_fast(double[:, ::1] image, int n, double threshold):
                 if speed_sum_d < 3 and speed_sum_b < 3:
                     continue
 
-            corner_response[i, j] = _get_fast_corner_response(image, i, j,
-                                                              bins, 'b', n,
-                                                              threshold,
-                                                              circle_intensities)
+            corner_response[i, j] = \
+                _get_fast_corner_response(image, i, j, bins, 'b', n,
+                                          threshold, circle_intensities)
 
             if corner_response[i, j] == 0:
-                corner_response[i, j] = _get_fast_corner_response(image, i, j,
-                                                                  bins, 'd',
-                                                                  n, threshold,
-                                                                  circle_intensities)
+                corner_response[i, j] = \
+                    _get_fast_corner_response(image, i, j, bins, 'd', n,
+                                              threshold, circle_intensities)
 
     return np.asarray(corner_response)
