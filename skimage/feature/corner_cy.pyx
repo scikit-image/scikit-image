@@ -179,7 +179,6 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
                     elif bins[k] == 'd':
                         speed_sum_d += 1
                 if speed_sum_d < 3 and speed_sum_b < 3:
-                    corner_response[i, j] = 0
                     continue
 
             curr_response = \
