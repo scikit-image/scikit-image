@@ -111,7 +111,7 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
     cdef char speed_sum_b, speed_sum_d
     cdef double curr_pixel
     cdef double lower_threshold, upper_threshold
-    cdef double[:, ::1] corner_response = np.empty((rows, cols),
+    cdef double[:, ::1] corner_response = np.zeros((rows, cols),
                                                    dtype=np.double)
 
     cdef char *rp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1]
