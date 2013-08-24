@@ -106,6 +106,35 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
     cdef Py_ssize_t rows = image.shape[0]
     cdef Py_ssize_t cols = image.shape[1]
 
+<<<<<<< HEAD
+=======
+    return out
+
+
+cdef inline double _corner_fast_response(double curr_pixel,
+                                         double* circle_intensities,
+                                         char* bins, char state, char n):
+    cdef char consecutive_count = 0
+    cdef double curr_response
+    cdef Py_ssize_t l, m
+    for l in range(15 + n):
+        if bins[l % 16] == state:
+            consecutive_count += 1
+            if consecutive_count == n:
+                curr_response = 0
+                for m in range(16):
+                    curr_response += abs(circle_intensities[m] - curr_pixel)
+                return curr_response
+        else:
+            consecutive_count = 0
+    return 0
+
+
+def _corner_fast(double[:, ::1] image, char n, double threshold):
+
+    cdef Py_ssize_t rows = image.shape[0]
+    cdef Py_ssize_t cols = image.shape[1]
+
     cdef Py_ssize_t i, j, k
 
     cdef char speed_sum_b, speed_sum_d
