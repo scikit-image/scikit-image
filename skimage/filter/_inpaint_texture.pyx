@@ -1,6 +1,7 @@
 from __future__ import division
 import numpy as np
-from skimage.morphology import erosion, disk
+from skimage.filter.rank import minimum
+from skimage.morphology import disk
 
 cimport numpy as cnp
 
@@ -64,7 +65,7 @@ cpdef _inpaint_efros(painted, mask, window, max_thresh):
 
     while mask.any():
         # Generate the boundary of ROI (region to be synthesised)
-        boundary = mask - erosion(mask, disk(1))
+        boundary = mask - minimum(mask, disk(1))
         if not boundary.any() and mask.any():
             # If the remaining region is 1-pixel thick
             boundary = mask
@@ -131,8 +132,8 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
 
     """
     cdef:
-        Py_ssize_t i, j, k, l, i_min, j_min
-        cnp.float_t ssd, min_ssd = 0, total_weight
+        Py_ssize_t i, j, k, l, i_min = -1, j_min = -1
+        cnp.float_t ssd, total_weight
         cnp.uint8_t window, offset, flag
 
     min_ssd = 1.
@@ -160,14 +161,12 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
                     ssd += ((template[k, l] - image[i + k, j + l]) ** 2
                             * valid_mask[k, l])
             ssd /= total_weight
-            if ssd < min_ssd:
-                min_ssd = ssd
+            if ssd < max_thresh:
+                max_thresh = ssd
                 i_min = i + offset
                 j_min = j + offset
-    if min_ssd < max_thresh:
-        return i_min, j_min
-    else:
-        return -1, -1
+
+    return i_min, j_min
 
 
 cdef _gaussian(sigma=0.5, size=None):
@@ -175,8 +174,8 @@ cdef _gaussian(sigma=0.5, size=None):
 
     Parameters
     ---------
-    sigma : float
-        Standard deviation
+    sigma : float, optional
+        Standard deviation (default: 0.5)
     size : tuple
         Shape of the output kernel
 

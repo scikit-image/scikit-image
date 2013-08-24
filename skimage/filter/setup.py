@@ -13,21 +13,12 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['_ctmf.pyx'], working_path=base_path)
+    cython(['_inpaint_texture.pyx'], working_path=base_path)
     cython(['_denoise_cy.pyx'], working_path=base_path)
     cython(['rank/core_cy.pyx'], working_path=base_path)
     cython(['rank/generic_cy.pyx'], working_path=base_path)
     cython(['rank/percentile_cy.pyx'], working_path=base_path)
     cython(['rank/bilateral_cy.pyx'], working_path=base_path)
-    cython(['_inpaint_texture.pyx'], working_path=base_path)
-    cython(['rank/_core8.pyx'], working_path=base_path)
-    cython(['rank/_core16.pyx'], working_path=base_path)
-    cython(['rank/_crank8.pyx'], working_path=base_path)
-    cython(['rank/_crank8_percentiles.pyx'], working_path=base_path)
-    cython(['rank/_crank16.pyx'], working_path=base_path)
-    cython(['rank/_crank16_percentiles.pyx'], working_path=base_path)
-    cython(['rank/_crank16_bilateral.pyx'], working_path=base_path)
-    cython(['rank/percentile_rank.pyx'], working_path=base_path)
-    cython(['rank/bilateral_rank.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
                          include_dirs=[get_numpy_include_dirs()])
