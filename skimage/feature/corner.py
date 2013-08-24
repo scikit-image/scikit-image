@@ -556,9 +556,10 @@ def corner_fast(image, n=12, threshold=0.15):
     image : 2D ndarray
         Input image.
     n : int
-        Number of consecutive pixels out of 16 pixels on the circle that
-        should be brighter or darker with respect to test pixel above the
-        `threshold` so as to classify the test pixel as a FAST corner. Also
+        Minimum number of consecutive pixels out of 16 pixels on the circle
+        that should all be either brighter or darker w.r.t testpixel.
+        A point c on the circle is darker w.r.t test pixel p if
+        `Ic < Ip - threshold` and brighter if `Ic > Ip + threshold`. Also
         stands for the n in `FAST-n` corner detector.
     threshold : float
         Threshold used in deciding whether the pixels on the circle are
@@ -575,6 +576,8 @@ def corner_fast(image, n=12, threshold=0.15):
     .. [1] Edward Rosten and Tom Drummond
            "Machine Learning for high-speed corner detection",
            http://www.edwardrosten.com/work/rosten_2006_machine.pdf
+    .. [2] Wikipedia, "Features from accelerated segment test",
+           https://en.wikipedia.org/wiki/Features_from_accelerated_segment_test
 
     """
     image = np.squeeze(image)
