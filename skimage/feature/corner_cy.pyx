@@ -123,8 +123,8 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
     cdef double[:, ::1] corner_response = np.empty((rows, cols),
                                                    dtype=np.double)
 
-    cdef char *rp = [-3, -3, -2, -1, 0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -1, -3]
-    cdef char *cp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -3]
+    cdef char *rp = [0, 1, 2, 3, 3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1]
+    cdef char *cp = [3, 3, 2, 1, 0, -1, -2, -3, -3, -3, -2, -1, 0, 1, 2, 3]
     cdef char bins[16]
     cdef double circle_intensities[16]
 
