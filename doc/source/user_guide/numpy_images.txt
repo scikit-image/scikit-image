@@ -30,8 +30,9 @@ modify pixel values: ::
     >>> # Turn to black pixel on 3rd line and 10th column
     >>> camera[3, 10] = 0
 
-Be careful that the first dimension corresponds to lines, while the
-second dimension (fastest varying dimension) stands for columns.
+Be careful that the first dimension (``camera.shape[0]``) corresponds to
+lines, while the second dimension (``camera.shape[1]``) stands for
+columns.
 
 Beyond individual pixels, it is possible to access / modify values of
 whole sets of pixels, using the different indexing possibilities of
