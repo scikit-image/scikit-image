@@ -13,7 +13,7 @@ cpdef _inpaint_efros(painted, mask, window, max_thresh):
     algorithm.
 
     Parameters
-    ---------
+    ----------
     painted : (M, N) array, uint8
         Input image whose texture is to be calculated
     mask : (M, N) array, bool
@@ -100,7 +100,7 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
     is to be found in image. See the section below on Notes.
 
     Parameters
-    ---------
+    ----------
     image : array, float
         Initial unpadded input image of shape (M, N)
     mask : (M, N) array, bool
@@ -119,7 +119,7 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
         Template matching for this index value
 
     Returns
-    ------
+    -------
     ssd : array, float
         (M - window + 1, N - window + 1) The desired SSD values for all
         positions in the image
@@ -173,14 +173,14 @@ cdef _gaussian(sigma=0.5, size=None):
     """Gaussian kernel array with given sigma and shape about the center pixel.
 
     Parameters
-    ---------
+    ----------
     sigma : float, optional
         Standard deviation (default: 0.5)
     size : tuple
         Shape of the output kernel
 
     Returns
-    ------
+    -------
     gauss_mask : array, float
         Gaussian kernel of shape ``size``
 
