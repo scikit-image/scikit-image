@@ -165,4 +165,3 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
             corner_response[i, j] = curr_response
 
     return np.asarray(corner_response)
->>>>>>> Transferring all the FAST code to corner.py and corner_cy.pyx
