@@ -104,11 +104,18 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     image = img_as_float(image)
     if not multichannel:
         image = gray2rgb(image)
+    if spacing is None:
+        spacing = np.ones(image.ndim - 1)
+    # artificially create a spacing of 1 for color-space
+    spacing = np.array(spacing, dtype=np.float)
+    spacing = np.concatenate((spacing, np.ones(3)))
     sigma = _sanitize_sigma(sigma, image)
     if image.ndim == 3:
         # See 2D RGB image as 3D RGB image with Z = 1
         image = image[np.newaxis, ...]
         sigma = np.concatenate(([0.0], sigma))
+        spacing = np.concatenate(([1.0], spacing))
+    sigma /= spacing[:sigma.ndim]
     if (sigma > 0).any():
         image = ndimage.gaussian_filter(image, sigma)
     if convert2lab:
@@ -116,10 +123,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
 
     # initialize on grid:
     depth, height, width = image.shape[:3]
-    if spacing is None:
-        spacing = np.ones(image.ndim - 1)
-    # artificially create a spacing of 1 for color-space
-    spacing = np.concatenate((spacing, np.ones_like(spacing)))
     grids = np.mgrid[:depth, :height, :width]
     # approximate grid size for desired n_segments
     slices = regular_grid(image.shape[:3], n_segments)
