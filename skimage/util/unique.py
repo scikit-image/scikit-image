@@ -18,6 +18,12 @@ def unique_rows(ar):
     ------
     ValueError : if `ar` is not two-dimensional.
 
+    Notes
+    -----
+    The function will generate a copy of `ar` if it is not
+    C-contiguous, which will negatively affect performance for large
+    input arrays.
+
     Examples
     --------
     >>> ar = np.array([[1, 0, 1],
