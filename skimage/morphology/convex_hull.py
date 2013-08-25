@@ -4,6 +4,7 @@ import numpy as np
 from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
 from skimage.morphology import label
+from skimage.util import unique_rows
 
 
 def convex_hull_image(image):
@@ -43,7 +44,9 @@ def convex_hull_image(image):
                                                  (-0.5, 0.5, 0, 0))):
         coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
 
-    coords = coords_corners
+    # repeated coordinates can *sometimes* cause problems in 
+    # scipy.spatial.Delaunay, so we remove them.
+    coords = unique_rows(coords_corners)
 
     try:
         from scipy.spatial import Delaunay
