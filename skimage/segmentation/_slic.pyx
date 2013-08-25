@@ -29,7 +29,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         The (initially infinity) array of distances to the nearest centroid.
     means : 2D array of double, shape (n_segments, 6)
         The centroids obtained by SLIC.
-    spacing : np.ndarray of float, shape (6,)
+    spacing : array of float, shape (6,)
         The pixel spacing along the z, y and x directions, plus along color
         space. (The latter should usually just be 1.)
     max_iter : int
