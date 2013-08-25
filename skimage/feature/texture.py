@@ -267,7 +267,7 @@ def local_binary_pattern(image, P, R, method='default'):
            Articoliriferimento/LBP.pdf, 2002.
     .. [2] Face recognition with local binary patterns.
            Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
-           http://masters.donntu.edu.ua/2011/frt/dyrul/library/article8.pdf,
+           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
            2004.
     """
 
