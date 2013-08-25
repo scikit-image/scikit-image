@@ -13,7 +13,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  Py_ssize_t[:, :, ::1] nearest_mean,
                  double[:, :, ::1] distance,
                  double[:, ::1] means,
-                 double[::1] spacing,
+                 double[:] spacing,
                  Py_ssize_t max_iter, Py_ssize_t n_segments):
     """Helper function for SLIC segmentation.
 
