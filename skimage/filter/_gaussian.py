@@ -31,9 +31,8 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
         is 0.0
     multichannel : bool, optional (default: False)
         Whether the last axis of the image is to be interpreted as multiple
-        channels. Only 3 channels are supported. If `None`, the function will
-        attempt to guess this, and raise a warning if ambiguous, when the
-        array has shape (M, N, 3).
+        channels. If True, each channel is filtered separately (channels are
+        not mixed together).
 
 
     Returns
