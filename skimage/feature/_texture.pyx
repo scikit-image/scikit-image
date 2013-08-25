@@ -151,18 +151,39 @@ def _local_binary_pattern(double[:, ::1] image,
                 for i in range(P - 1):
                     changes += abs(signed_texture[i] - signed_texture[i + 1])
                 if method == 'N':
-                    # Non rotation invariant LBP.
-                    # for P there are P + 1 ror and uniform patterns
-                    # ex: P = 4
-                    # 1: 0 0 0 0
-                    # 2: 0 0 0 1 -> 0 0 1 0, 0 1 0 0, 1 0 0 0
-                    # 3: 0 0 1 1 -> 0 1 1 0, 1 1 0 0, 1 0 0 1
-                    # 4: 0 1 1 1 -> 1 1 1 0, 1 1 0 1, 1 0 1 1
-                    # 5: 1 1 1 1
-                    # The first and last patterns are always invariant under
-                    # rotation. The (P - 1) remaining patterns have P rotated
-                    # variants hence we have P * (P - 1) + 2 uniform patterns
-                    # to which we add the non uniform pattern.
+                    # Uniform local binary patterns are defined as patterns
+                    # with at most 2 value changes (from 0 to 1 or from 1 to
+                    # 0). Uniform patterns can be caraterized by their number
+                    # `n_ones` of 1.  The possible values for `n_ones` range
+                    # from 0 to P.
+                    # Here is an example for P = 4:
+                    # n_ones=0: 0000
+                    # n_ones=1: 0001, 1000, 0100, 0010
+                    # n_ones=2: 0011, 1001, 1100, 0110
+                    # n_ones=3: 0111, 1011, 1101, 1110
+                    # n_ones=4: 1111
+                    # 
+                    # For a pattern of size P there are 2 constant patterns
+                    # corresponding to n_ones=0 and n_ones=P. For each other
+                    # value of `n_ones` , i.e n_ones=[1..P-1], there are P
+                    # possible patterns which are related to each other through
+                    # circular permutations. The total number of uniform
+                    # patterns is thus (2 + P * (P - 1)).                    
+                    # Given any pattern (uniform or not) we must be able to
+                    # associate a unique code:                    
+                    # 1. Constant patterns patterns (with n_ones=0 and
+                    #    n_ones=P) and non uniform patterns are given fixed
+                    #    code values.
+                    # 2. Other uniform patterns are indexed considering the
+                    #    value of n_ones, and an index called 'rot_index'
+                    #    reprenting the number of circular right shifts 
+                    #    required to obtain the pattern starting from a
+                    #    reference position (corresponding to all zeros stacked
+                    #    on the right). This number of rotations (or circular
+                    #    right shifts) 'rot_index' is efficiently computed by
+                    #    considering the positions of the first 1 and the first
+                    #    0 found in the pattern.
+
                     if changes <= 2:
                         # We have a uniform pattern
                         n_ones = 0  # determies the number of ones
@@ -181,15 +202,10 @@ def _local_binary_pattern(double[:, ::1] image,
                         elif n_ones == P:
                             lbp = P * (P - 1) + 1
                         else:
-                            # There are (P - n_ones) patterns starting with 0
-                            # followed by n_ones patterns starting with 1.
-                            # This patterns are indexed starting from the
-                            # position where all zeros are on the right and
-                            # applying circular right shifts.
-                            if first_zero == 0:
-                                rot_index = P - n_ones - first_one
+                            if first_one == 0:
+                                rot_index = n_ones - first_zero
                             else:
-                                rot_index = P - first_zero
+                                rot_index = P - first_one
                             lbp = 1 + (n_ones - 1) * P + rot_index
                     else:  # changes > 2
                         lbp = P * (P - 1) + 2
