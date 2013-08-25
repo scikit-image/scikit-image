@@ -154,3 +154,6 @@
 
 - Riaan van den Dool
   skimage.io plugin: GDAL
+
+- Fedor Morozov
+  Drawing: Wu's anti-aliased circle
