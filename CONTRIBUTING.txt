@@ -154,6 +154,26 @@ detailing the test coverage::
   skimage/filter/__init__                              1      1   100%
   ...
 
+Activate Travis-CI for your fork (optional)
+-------------------------------------------
+
+Travis-CI checks all unittests in the project to prevent breakage.
+
+Before sending a pull request, you may want to check that Travis-CI
+successfully passes all tests. To do so,
+
+   * Go to `Travis-CI <http://travis-ci.org/>`__ and follow the Sign In link at the top
+
+   * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
+   scikit-image fork
+
+It corresponds to steps one and two in
+`Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__
+(Step three is already done in scikit-image).
+
+Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
+and you will receive an email notification when the process is done.
+
 Bugs
 ----
 
