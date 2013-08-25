@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.filter.inpaint_exemplar import inpaint_exemplar
+from skimage.filter.inpaint_exemplar import inpaint_criminisi
 from numpy.testing import assert_equal
 
 
@@ -61,7 +61,7 @@ def test_basic():
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]],
         dtype=np.float)
 
-    painted = inpaint_exemplar(image, mask, window=5, max_thresh=0.2)
+    painted = inpaint_criminisi(image, mask, window=5, max_thresh=0.2)
     assert_equal(painted, expected)
 
 

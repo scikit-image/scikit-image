@@ -1,28 +1,31 @@
 from __future__ import division
 import numpy as np
 from skimage.util import img_as_float
-from skimage.filter._inpaint_exemplar import _inpaint_criminisi
+from skimage.filter._inpaint_criminisi import _inpaint_criminisi
 
 
-__all__ = ['inpaint_exemplar']
+__all__ = ['inpaint_criminisi']
 
 
-def inpaint_exemplar(source_image, synth_mask, window, max_thresh=0.2):
+def inpaint_criminisi(source_image, synth_mask, window, max_thresh=0.2):
     """This function performs constrained synthesis using Criminisi et al.
-    algorithm. It grows the texture of surrounding region into the unknown
-    pixels. See Notes for an outline of the algorithm.
+    algorithm. It grows the texture of the surrounding region to fill in
+    unknown pixels. See Notes for an outline of the algorithm.
 
     Parameters
-    ---------
+    ----------
     source_image : (M, N) array, uint8
-        Input image whose texture is to be calculated
+        Input image whose texture is to be calculated.
     synth_mask : (M, N) array, bool
-        Texture for True values are to be synthesised
+        Texture for True values are to be synthesised.
     window : int
-        Size of the neighborhood window, refer to Notes below for details on
-        choice of value
+        Width of the neighborhood window. (window, window) patch with centre at
+        the pixel to be inpainted. Refer to Notes below for details on
+        choice of value. Preferably odd, for symmetry.
     max_thresh : float, optional
-        Amount of threshold allowed for template matching
+        Maximum tolerable SSD (Sum of Squared Difference) between the template
+        around a pixel to be filled and an equal size image sample for
+        template matching.
 
     Returns
     -------
@@ -48,33 +51,34 @@ def inpaint_exemplar(source_image, synth_mask, window, max_thresh=0.2):
         - Repeat for all boundary pixels and chose the pixel with max priority
         - Template matching of the pixel with max priority
             - Generate a template of (window, window) around this pixel
-            - Compute the SSD between template and similar sized patches across
-              the image
+            - Compute the Sum of Squared Difference (SSD) between template and
+              similar sized patches across the image
             - Find the pixel with smallest SSD, such that patch isn't where
               template is located (False positive)
             - Update the intensity value of the unknown region of template as
               the corresponding value from matched patch
     - Repeat until all pixels are inpainted
 
-    For further information refer to [1]_
+    For further information refer to [1]_.
 
     References
-    ---------
-    .. [1] Criminisi, A., Pe ' ez, P., and Toyama, K. (2004). "Region filling
-           and object removal by exemplar-based inpainting". IEEE Transactions
-           on Image Processing, 13(9):1200-1212
+    ----------
+    .. [1] Criminisi, Antonio; Perez, P.; Toyama, K., "Region filling and
+           object removal by exemplar-based image inpainting," Image
+           Processing, IEEE Transactions on , vol.13, no.9, pp.1200,1212, Sept.
+           2004 doi: 10.1109/TIP.2004.833105.
 
     Example
     -------
     >>> import numpy as np
     >>> from skimage.data import checkerboard
-    >>> from skimage.filter.inpaint_exemplar import inpaint_exemplar
+    >>> from skimage.filter.inpaint_exemplar import inpaint_criminisi
     >>> image = checkerboard().astype(np.uint8)
     >>> mask = np.zeros_like(image, dtype=np.uint8)
     >>> paint_region = (slice(75, 125), slice(75, 125))
     >>> image[paint_region] = 0
     >>> mask[paint_region] = 1
-    >>> painted = inpaint_exemplar(image, mask, window=27, max_thresh=0.2)
+    >>> painted = inpaint_criminisi(image, mask, window=27, max_thresh=0.2)
 
     """
 

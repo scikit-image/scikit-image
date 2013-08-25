@@ -13,7 +13,7 @@ def configuration(parent_package='', top_path=None):
     config.add_data_dir('tests')
 
     cython(['_ctmf.pyx'], working_path=base_path)
-    cython(['_inpaint_exemplar.pyx'], working_path=base_path)
+    cython(['_inpaint_criminisi.pyx'], working_path=base_path)
     cython(['_denoise_cy.pyx'], working_path=base_path)
     cython(['rank/core_cy.pyx'], working_path=base_path)
     cython(['rank/generic_cy.pyx'], working_path=base_path)
@@ -22,7 +22,8 @@ def configuration(parent_package='', top_path=None):
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_inpaint_exemplar', sources=['_inpaint_exemplar.c'],
+    config.add_extension('_inpaint_criminisi',
+                         sources=['_inpaint_criminisi.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_denoise_cy', sources=['_denoise_cy.c'],
         include_dirs=[get_numpy_include_dirs(), '../_shared'])

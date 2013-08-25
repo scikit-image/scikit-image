@@ -12,26 +12,26 @@ Outline of the algorithm for Texture Synthesis is as follows:
     - Repeat for all boundary pixels and chose the pixel with max priority
     - Template matching of the pixel with max priority
         - Generate a template of (window, window) around this pixel
-        - Compute the SSD between template and similar sized patches across
-          the image
+        - Compute the Sum of Squared Difference (SSD) between template and
+          similar sized patches across the image
         - Find the pixel with smallest SSD, such that patch isn't where
           template is located (False positive)
         - Update the intensity value of the unknown region of template as
           the corresponding value from matched patch
 - Repeat until all pixels are inpainted
 
-For further information refer to [1]_
+For further information refer to [1]_.
 
 References
----------
-.. [1] Criminisi, A., Pe ' ez, P., and Toyama, K. (2004). "Region filling
-       and object removal by exemplar-based inpainting". IEEE Transactions
-       on Image Processing, 13(9):1200-1212
+----------
+.. [1] Criminisi, Antonio; Perez, P.; Toyama, K., "Region filling and object
+       removal by exemplar-based image inpainting," Image Processing, IEEE
+       Transactions on , vol.13, no.9, pp.1200,1212, Sept. 2004 doi: 10.
+       1109/TIP.2004.833105.
 
 """
-from __future__ import print_function
 import numpy as np
-from skimage.filter.inpaint_exemplar import inpaint_exemplar
+from skimage.filter.inpaint_exemplar import inpaint_criminisi
 import matplotlib.pyplot as plt
 from skimage.data import checkerboard
 
@@ -43,13 +43,12 @@ paint_region = (slice(75, 125), slice(75, 125))
 image[paint_region] = 0
 mask[paint_region] = 1
 
-print("Please be a little patient")
 # For best results, `window` should be larger in size than the texel (texture
 # element) being inpainted. For example, in this case, the single white/black
 # square is the texel which is of `(25, 25)` shape. A value larger than this
 # yields perfect reconstruction, but a value smaller than this, may have couple
 # of pixels off.
-painted = inpaint_exemplar(image, mask, window=27, max_thresh=0.2)
+painted = inpaint_criminisi(image, mask, window=27, max_thresh=0.2)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2)
 ax0.set_title('Input image')

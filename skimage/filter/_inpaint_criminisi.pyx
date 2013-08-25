@@ -5,27 +5,32 @@ from skimage.filter.rank import minimum
 from scipy.ndimage import gaussian_filter, sobel
 
 cimport numpy as cnp
+from libc.math cimport sqrt
 
 
 cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
-    """This function performs constrained synthesis. It grows the texture
-    of surrounding region into the unknown pixels.
+    """This function performs constrained synthesis using Criminisi et al.
+    algorithm. It grows the texture of the surrounding region to fill in
+    unknown pixels. See Notes for an outline of the algorithm.
 
     Parameters
-    ---------
+    ----------
     painted : (M, N) array, float
-        Input image whose texture is to be calculated
+        Input image whose texture is to be calculated.
     synth_mask : (M, N) array, bool
-        Texture for True values are to be synthesised
+        Texture for True values are to be synthesised.
     window : int
-        Size of the neighborhood window
+        Width of the neighborhood window. (window, window) patch with centre at
+        the pixel to be inpainted. Preferably odd, for symmetry.
     max_thresh : float
-        Amount of threshold allowed for template matching
+        Maximum tolerable SSD (Sum of Squared Difference) between the template
+        around a pixel to be filled and an equal size image sample for
+        template matching.
 
     Returns
     -------
     painted : (M, N) array, float
-        Texture synthesised image
+        Final texture synthesised image.
 
     Notes
     -----
@@ -46,21 +51,22 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
         - Repeat for all boundary pixels and chose the pixel with max priority
         - Template matching of the pixel with max priority
             - Generate a template of (window, window) around this pixel
-            - Compute the SSD between template and similar sized patches across
-              the image
+            - Compute the Sum of Squared Difference (SSD) between template and
+              similar sized patches across the image
             - Find the pixel with smallest SSD, such that patch isn't where
               template is located (False positive)
             - Update the intensity value of the unknown region of template as
               the corresponding value from matched patch
     - Repeat until all pixels are inpainted
 
-    For further information refer to [1]_
+    For further information refer to [1]_.
 
     References
-    ---------
-    .. [1] Criminisi, A., Pe ' ez, P., and Toyama, K. (2004). "Region filling
-           and object removal by exemplar-based inpainting". IEEE Transactions
-           on Image Processing, 13(9):1200-1212
+    ----------
+    .. [1] Criminisi, Antonio; Perez, P.; Toyama, K., "Region filling and
+           object removal by exemplar-based image inpainting," Image
+           Processing, IEEE Transactions on , vol.13, no.9, pp.1200,1212, Sept.
+           2004 doi: 10.1109/TIP.2004.833105.
 
     """
 
@@ -128,32 +134,33 @@ cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
     Parameters
     ----------
     fill_front : array, bool
-        Boundary of the region to be inpainted
+        Boundary of the region to be inpainted.
     confidence : array, float
-        Array containing the confidence value of the pixels
+        Array containing the confidence value of the pixels.
     dx : array, float
-        90 degree rotated gradient of the image in the X direction
+        90 degree rotated gradient of the image in the X direction.
     dy : array, float
-        90 degree rotated gradient of the image in the Y direction
+        90 degree rotated gradient of the image in the Y direction.
     nx : array, float
         X component of the unit vector at a pixel, perpendicular to the path of
-        boundary of the region to be inpainted through this pixel
+        boundary of the region to be inpainted through this pixel.
     ny : array, float
         Y component of the unit vector at a pixel, perpendicular to the path of
-        boundary of the region to be inpainted through this pixel
+        boundary of the region to be inpainted through this pixel.
     window : int
-        Size of the template
+        Size of the neighborhood window. (window, window) patch with centre at
+        the pixel to be inpainted.
 
     Returns
     -------
     i_max, j_max : tuple, int
-        Index value of the pixel with the maximum priority value
+        Index value of the pixel with the maximum priority value.
 
     """
     cdef:
         Py_ssize_t i, j, z, k, l, i_data, j_data, i_max = -1, j_max = -1
         Py_ssize_t[::] fill_front_x, fill_front_y
-        cnp.float_t max_priority = 0, conf, data_term, max_mod, priority
+        cnp.float_t max_priority = 0, conf, data_term, mod, max_mod, priority
         cnp.uint8_t offset
 
     offset = window // 2
@@ -173,7 +180,7 @@ cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
         i_data, j_data = 0, 0
         for k in range(-offset, offset + 1):
             for l in range(-offset, offset + 1):
-                mod = np.hypot(dx[i + k, j + l], dy[i + k, j + l])
+                mod = dx[i + k, j + l] ** 2 + dy[i + k, j + l] ** 2
                 if mod > max_mod:
                     max_mod = mod
                     i_data = i + k
@@ -181,14 +188,14 @@ cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
 
         if i_data == 0 and j_data == 0:
             continue
-        if np.hypot(nx[i, j], ny[i, j]) == 0:
+        if sqrt(nx[i, j] ** 2 + ny[i, j] ** 2) == 0:
             # Single pixel unpainted in the middle
             continue
 
         data_term = abs(dx[i_data, j_data] * nx[i, j] +
                         dy[i_data, j_data] * ny[i, j])
-        data_term /= (np.hypot(dx[i_data, j_data], dy[i_data, j_data]) *
-                      np.hypot(nx[i, j], ny[i, j]))
+        data_term /= (sqrt(dx[i_data, j_data] ** 2 + dy[i_data, j_data] ** 2) *
+                      sqrt(nx[i, j] ** 2 + ny[i, j] ** 2))
         # data[i, j] = data_term
 
         # Compute the confidence terms
@@ -219,29 +226,30 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
     is to be found in image. See the section below on Notes.
 
     Parameters
-    ---------
+    ----------
     image : array, float
-        Initial unpadded input image of shape (M, N)
+        Initial unpadded input image of shape (M, N).
     mask : (M, N) array, bool
-        Texture for True values are to be synthesised; unpadded
+        Texture for True values are to be synthesised.
     template : array, float
-        (window, window) Template who's match is to be found in image
+        (window, window) Template who's match is to be found in image.
     valid_mask : array, float
         (window, window), governs differences which are to be considered for
         SSD computation. Masks out the unknown or unfilled pixels and gives a
         higher weight to the center pixel, decreasing as the distance from
-        center pixel increases
+        center pixel increases.
     max_thresh : float
         Maximum tolerable SSD (Sum of Squared Difference) between the template
-        around a pixel to be filled and an equal size image sample
+        around a pixel to be filled and an equal size image sample for
+        template matching.
     i_b, j_b : int
-        Template matching for this index value
+        Template matching done for this index value.
 
     Returns
-    ------
+    -------
     ssd : array, float
         (M - window + 1, N - window + 1) The desired SSD values for all
-        positions in the image
+        positions in the image.
 
     Notes
     -----
@@ -292,16 +300,16 @@ cdef _gaussian(sigma=0.5, size=None):
     """Gaussian kernel array with given sigma and shape about the center pixel.
 
     Parameters
-    ---------
+    ----------
     sigma : float, optional
         Standard deviation (default: 0.5)
     size : tuple
-        Shape of the output kernel
+        Shape of the output kernel.
 
     Returns
-    ------
+    -------
     gauss_mask : array, float
-        Gaussian kernel of shape ``size``
+        Gaussian kernel of shape ``size``.
 
     """
     sigma2 = sigma ** 2
