@@ -42,6 +42,10 @@ functionality is only available with the following installed:
    The ``freeimage`` plugin provides support for reading various types of
    image file formats, including multi-page TIFFs.
 
+* `PyAMG <http://pyamg.org/>`__
+   The ``pyamg`` module is used for the fast `cg_mg` mode of random
+   walker segmentation.
+
 Testing requirements
 --------------------
 * `Nose <https://nose.readthedocs.org/en/latest/>`__

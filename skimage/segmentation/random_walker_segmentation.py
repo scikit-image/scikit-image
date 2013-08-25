@@ -214,7 +214,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         - 'cg_mg' (conjugate gradient with multigrid preconditioner): a
           preconditioner is computed using a multigrid solver, then the
           solution is computed with the Conjugate Gradient method.  This mode
-          requires that the pyamg module (http://code.google.com/p/pyamg/) is
+          requires that the pyamg module (http://pyamg.org/) is
           installed. For images of size > 512x512, this is the recommended
           (fastest) mode.
 
@@ -379,7 +379,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if mode == 'cg_mg':
         if not amg_loaded:
             warnings.warn(
-                """pyamg (http://code.google.com/p/pyamg/)) is needed to use
+                """pyamg (http://pyamg.org/)) is needed to use
                 this mode, but is not installed. The 'cg' mode will be used
                 instead.""")
             X = _solve_cg(lap_sparse, B, tol=tol,
