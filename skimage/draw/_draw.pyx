@@ -178,7 +178,6 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     method : {'bresenham', 'andres', 'wu'}, optional
         bresenham : Bresenham method (default)
         andres : Andres method
-        wu : Wu's method
 
     Returns
     -------
@@ -188,19 +187,13 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
-    rr, cc, val : (N,) ndarray of int
-        Wu's method:
-        Indices of pixels and intensity values.
-        ``img[rr, cc] = val``.
-
     Notes
     -----
     Andres method presents the advantage that concentric
     circles create a disc whereas Bresenham can make holes. There
     is also less distortions when Andres circles are rotated.
     Bresenham method is also known as midpoint circle algorithm.
-    Wu's method draws anti-aliased circle. This implementation doesn't use
-    lookup table optimization.
+    Anti-aliased circle generator is available with `circle_perimeter_aa`.
 
     References
     ----------
@@ -208,8 +201,6 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
            plotter", IBM Systems journal, 4 (1965) 25-30.
     .. [2] E. Andres, "Discrete circles, rings and spheres", Computers &
            Graphics, 18 (1994) 695-706.
-    .. [3] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
-           Computer Graphics, 25 (1991) 143-152.
 
     Examples
     --------
@@ -233,7 +224,6 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
 
     cdef list rr = list()
     cdef list cc = list()
-    cdef list val = list()
 
     cdef Py_ssize_t x = 0
     cdef Py_ssize_t y = radius
@@ -249,62 +239,97 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     elif method == 'andres':
         d = radius - 1
         cmethod = 'a'
-    elif method == 'wu':
-        cmethod = 'w'
     else:
         raise ValueError('Wrong method')
 
-    if cmethod == 'a' or cmethod == 'b':
-        while y >= x:
-            rr.extend([y, -y, y, -y, x, -x, x, -x])
-            cc.extend([x, x, -x, -x, y, y, -y, -y])
+    while y >= x:
+        rr.extend([y, -y, y, -y, x, -x, x, -x])
+        cc.extend([x, x, -x, -x, y, y, -y, -y])
 
-            if cmethod == 'b':
-                if d < 0:
-                    d += 4 * x + 6
-                else:
-                    d += 4 * (x - y) + 10
-                    y -= 1
-                x += 1
-            elif cmethod == 'a':
-                if d >= 2 * (x - 1):
-                    d = d - 2 * x
-                    x = x + 1
-                elif d <= 2 * (radius - y):
-                    d = d + 2 * y - 1
-                    y = y - 1
-                else:
-                    d = d + 2 * (y - x - 1)
-                    y = y - 1
-                    x = x + 1
-        return (np.array(rr, dtype=np.intp) + cy,
-                np.array(cc, dtype=np.intp) + cx)
-
-    elif cmethod == 'w':
-        dceil_prev = 0
-
-        rr.extend([y, x,  y,  x, -y, -x, -y, -x])
-        cc.extend([x, y, -x, -y,  x,  y, -x, -y])
-        val.extend([1] * 8)
-
-        while y > x + 1:
-            x += 1
-            dceil = math.sqrt(radius**2 - x**2)
-            dceil = math.ceil(dceil) - dceil
-            if dceil < dceil_prev:
+        if cmethod == 'b':
+            if d < 0:
+                d += 4 * x + 6
+            else:
+                d += 4 * (x - y) + 10
                 y -= 1
-            rr.extend([y, y - 1, x, x, y, y - 1, x, x])
-            cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
+            x += 1
+        elif cmethod == 'a':
+            if d >= 2 * (x - 1):
+                d = d - 2 * x
+                x = x + 1
+            elif d <= 2 * (radius - y):
+                d = d + 2 * y - 1
+                y = y - 1
+            else:
+                d = d + 2 * (y - x - 1)
+                y = y - 1
+                x = x + 1
+    return (np.array(rr, dtype=np.intp) + cy,
+            np.array(cc, dtype=np.intp) + cx)
 
-            rr.extend([-y, 1 - y, -x, -x, -y, 1 - y, -x, -x])
-            cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
 
-            val.extend([1 - dceil, dceil] * 8)
-            dceil_prev = dceil
+def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
+    """Generate anti-aliased circle perimeter coordinates.
 
-        return (np.array(rr, dtype=np.intp) + cy,
-                np.array(cc, dtype=np.intp) + cx,
-                np.array(val, dtype=np.float))
+    Parameters
+    ----------
+    cy, cx : int
+        Centre coordinate of circle.
+    radius: int
+        Radius of circle.
+
+    Returns
+    -------
+    rr, cc, val : (N,) ndarray of int
+        Indices of pixels (`rr`, `cc`) and intensity values (`val`).
+        ``img[rr, cc] = val``.
+
+    Notes
+    -----
+    Wu's method draws anti-aliased circle. This implementation doesn't use
+    lookup table optimization.
+
+    References
+    ----------
+    .. [1] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
+           Computer Graphics, 25 (1991) 143-152.
+
+    """
+
+    cdef list rr = list()
+    cdef list cc = list()
+    cdef list val = list()
+
+    cdef Py_ssize_t x = 0
+    cdef Py_ssize_t y = radius
+    cdef Py_ssize_t d = 0
+
+    cdef double dceil = 0
+
+    dceil_prev = 0
+
+    rr.extend([y, x,  y,  x, -y, -x, -y, -x])
+    cc.extend([x, y, -x, -y,  x,  y, -x, -y])
+    val.extend([1] * 8)
+
+    while y > x + 1:
+        x += 1
+        dceil = math.sqrt(radius**2 - x**2)
+        dceil = math.ceil(dceil) - dceil
+        if dceil < dceil_prev:
+            y -= 1
+        rr.extend([y, y - 1, x, x, y, y - 1, x, x])
+        cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
+
+        rr.extend([-y, 1 - y, -x, -x, -y, 1 - y, -x, -x])
+        cc.extend([x, x, y, y - 1, -x, -x, -y, 1 - y])
+
+        val.extend([1 - dceil, dceil] * 8)
+        dceil_prev = dceil
+
+    return (np.array(rr, dtype=np.intp) + cy,
+            np.array(cc, dtype=np.intp) + cx,
+            np.array(val, dtype=np.float))
 
 
 def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,

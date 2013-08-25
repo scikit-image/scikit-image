@@ -14,7 +14,8 @@ This example shows how to fill several different shapes:
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.draw import line, polygon, circle, circle_perimeter, \
+from skimage.draw import line, polygon, circle, \
+                         circle_perimeter, circle_perimeter_aa, \
                          ellipse, ellipse_perimeter
 import numpy as np
 import math
@@ -49,7 +50,7 @@ rr, cc = circle_perimeter(120, 400, 15)
 img[rr, cc, :] = (255, 0, 0)
 
 # anti-aliased circle
-rr, cc, val = circle_perimeter(120, 400, 70, 'wu')
+rr, cc, val = circle_perimeter_aa(120, 400, 70)
 img[rr, cc, 1] = val * 255
 
 # ellipses

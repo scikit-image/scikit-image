@@ -1,8 +1,10 @@
 from numpy.testing import assert_array_equal
 import numpy as np
 
-from skimage.draw import line, polygon, circle, circle_perimeter, \
-                         ellipse, ellipse_perimeter, bezier_segment
+from skimage.draw import (line, polygon, circle, circle_perimeter,
+                          circle_perimeter_aa, ellipse,
+                          ellipse_perimeter, bezier_segment,
+                          )
 
 
 def test_line_horizontal():
@@ -215,15 +217,15 @@ def test_circle_perimeter_andres():
     assert_array_equal(img, img_)
 
 
-def test_circle_perimeter_wu():
+def test_circle_perimeter_aa():
     img = np.zeros((15, 15), 'uint8')
-    rr, cc, val = circle_perimeter(7, 7, 0, method='wu')
+    rr, cc, val = circle_perimeter_aa(7, 7, 0)
     img[rr, cc] = 1
     assert(np.sum(img) == 1)
     assert(img[7][7] == 1)
 
     img = np.zeros((17, 17), 'uint8')
-    rr, cc, val = circle_perimeter(8, 8, 7, method='wu')
+    rr, cc, val = circle_perimeter_aa(8, 8, 7)
     img[rr, cc] = val * 255
     img_ = np.array(
         [[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
