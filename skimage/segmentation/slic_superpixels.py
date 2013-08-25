@@ -115,7 +115,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
         image = image[np.newaxis, ...]
         sigma = np.concatenate(([0.0], sigma))
         spacing = np.concatenate(([1.0], spacing))
-    sigma /= spacing[:sigma.ndim]
+    sigma /= spacing[:len(sigma)]
     if (sigma > 0).any():
         image = ndimage.gaussian_filter(image, sigma)
     if convert2lab:
