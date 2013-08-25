@@ -4,6 +4,9 @@ import numpy as np
 def unique_rows(ar):
     """Remove repeated rows from a 2D array.
 
+    In particular, if given an array of coordinates of shape
+    (Npoints, Ndim), it will remove repeated points.
+
     Parameters
     ----------
     ar : 2D np.ndarray
