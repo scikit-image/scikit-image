@@ -100,6 +100,21 @@ def test_sigma():
     assert_equal(seg2, seg3)
 
 
+def test_spacing():
+    rnd = np.random.RandomState(0)
+    img = np.array([[1, 1, 1, 0, 0],
+                    [1, 1, 0, 0, 0]], np.float)
+    result_non_spaced = np.array([[0, 0, 0, 1, 1],
+                                  [0, 0, 1, 1, 1]], np.int)
+    result_spaced = np.array([[0, 0, 0, 0, 0],
+                              [1, 1, 1, 1, 1]], np.int)
+    img += 0.1 * rnd.normal(size=img.shape)
+    seg_non_spaced = slic(img, n_segments=2, sigma=0)
+    seg_spaced = slic(img, n_segments=2, sigma=0, spacing=[500, 1])
+    assert_equal(seg_non_spaced, result_non_spaced)
+    assert_equal(seg_spaced, result_spaced)
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
