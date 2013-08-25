@@ -189,7 +189,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         ``img[rr, cc] = 1``.
 
     rr, cc, val : (N,) ndarray of int
-        Wu' method:
+        Wu's method:
         Indices of pixels and intensity values.
         ``img[rr, cc] = val``.
 
@@ -205,10 +205,11 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     References
     ----------
     .. [1] J.E. Bresenham, "Algorithm for computer control of a digital
-           plotter", 4 (1965) 25-30.
-    .. [2] E. Andres, "Discrete circles, rings and spheres",
-           18 (1994) 695-706.
-    .. [3] X. Wu, "Fast anti-aliased circle generation", 2 (1995) 446-450.
+           plotter", IBM Systems journal, 4 (1965) 25-30.
+    .. [2] E. Andres, "Discrete circles, rings and spheres", Computers &
+           Graphics, 18 (1994) 695-706.
+    .. [3] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
+           Computer Graphics, 25 (1991) 143-152.
 
     Examples
     --------
