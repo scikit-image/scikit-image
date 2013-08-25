@@ -5,7 +5,7 @@ from .peak import peak_local_max
 from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
                      corner_peaks, corner_fast)
-from .corner_cy import corner_moravec
+from .corner_cy import corner_moravec, corner_fast_orientation
 from .template import match_template
 from ._brief import brief, match_keypoints_brief
 from .util import pairwise_hamming_distance
@@ -29,4 +29,5 @@ __all__ = ['daisy',
            'pairwise_hamming_distance',
            'match_keypoints_brief',
            'keypoints_censure',
-           'corner_fast']
+           'corner_fast',
+           'corner_fast_orientation']
