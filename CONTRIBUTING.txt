@@ -167,6 +167,8 @@ successfully passes all tests. To do so,
    * Go to your `profile page <https://travis-ci.org/profile>`__ and switch on your
    scikit-image fork
 
+   * Go to your scikit-image fork on github, and activate the travis-ci's hook in settings.
+
 It corresponds to steps one and two in
 `Travis-CI documentation <http://about.travis-ci.org/docs/user/getting-started/>`__
 (Step three is already done in scikit-image).
