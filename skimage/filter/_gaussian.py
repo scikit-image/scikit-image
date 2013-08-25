@@ -1,3 +1,5 @@
+import collections as coll
+import numpy as np
 from scipy import ndimage
 from skimage.util import img_as_float
 
@@ -13,7 +15,8 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     ----------
 
     image : array-like
-        input image to filter
+        input image (grayscale or color) to filter. If color channels are
+        to be filtered separately, use ``multichannel=True``.
     sigma : scalar or sequence of scalars
         standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
@@ -22,18 +25,17 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     output : array, optional
         The ``output`` parameter passes an array in which to store the
         filter output.
-    mode : {'reflect','constant','nearest','mirror', 'wrap'}, optional
-        The ``mode`` parameter determines how the array borders are
-        handled, where ``cval`` is the value when mode is equal to
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        The `mode` parameter determines how the array borders are
+        handled, where `cval` is the value when mode is equal to
         'constant'. Default is 'nearest'.
     cval : scalar, optional
-        Value to fill past edges of input if ``mode`` is 'constant'. Default
+        Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0
     multichannel : bool, optional (default: False)
         Whether the last axis of the image is to be interpreted as multiple
         channels. If True, each channel is filtered separately (channels are
         not mixed together).
-
 
     Returns
     -------
@@ -84,7 +86,9 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     """
     if multichannel:
         # do not filter across channels
-        ndim = image.ndim
-        sigma = [sigma] * (ndim - 1) + [0]
+        if not isinstance(sigma, coll.Iterable):
+            sigma = [sigma] * (image.ndim - 1)
+        if len(sigma) != image.ndim:
+            sigma = np.concatenate((np.asarray(sigma), [0]))
     image = img_as_float(image)
     return ndimage.gaussian_filter(image, sigma, mode=mode, cval=cval)
