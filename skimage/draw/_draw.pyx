@@ -183,9 +183,15 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
     Returns
     -------
     rr, cc : (N,) ndarray of int
+        Bresenham and Andres' method:
         Indices of pixels that belong to the circle perimeter.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
+
+    rr, cc, val : (N,) ndarray of int
+        Wu' method:
+        Indices of pixels and intensity values.
+        ``img[rr, cc] = val``.
 
     Notes
     -----
