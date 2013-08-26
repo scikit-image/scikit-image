@@ -1,7 +1,7 @@
 import numpy as np
 import Image
 from skimage import data_dir
-from skimage.segmentation import graphcut
+from skimage.segmentation import graphcut2d
 import matplotlib.pyplot as plt
 import time
 
@@ -35,7 +35,7 @@ else:
 img = img.astype(np.double)
 
 t0 = time.clock()
-out = graphcut(img, src, sink, affinity=60)
+out = graphcut2d(img, src, sink, affinity=60)
 dt = (time.clock() - t0) * 1000
 print "completed in %.2f milliseconds" % dt
 

@@ -8,14 +8,15 @@ import numpy as np
 cimport cython
 cimport numpy as cnp
 
-BETA = (1.0/10)
-EPSILON = 0.05
-LAMBA = 60
+DEF BETA = (1.0/10)
+DEF EPSILON = 0.05
+DEF AFFINITY = 60.0
+DEF GLOBAL_RELABEL_INTERVAL = 8
 
 cdef cnp.ndarray img
 
 cdef class GraphCut:
-    """GraphCut(img, src, sink, weight_lambda=None)
+    """GraphCut(img, src, sink, affinity=None)
 
     A class for performing image segmentation using graph-cuts.
 
@@ -34,7 +35,7 @@ cdef class GraphCut:
     breath-first search to calculate the exact distance array, however it is
     computationally intensive and performed infrequently.
 
-    A weighting parameter weight_lambda determines balances a pixels affinity
+    A weighting parameter affinity determines balances a pixels affinity
     for its preferred label, based on the log-liklihood arrays, and its
     coherence to the labels of its neighbours.
 
@@ -51,7 +52,7 @@ cdef class GraphCut:
     sink : array
       The background negative log-liklihood
 
-    weight_lambda
+    affinity
       The data term, neighboorhood term weighting. Lower values give preference
       to the data term.
 
@@ -72,13 +73,13 @@ cdef class GraphCut:
         list active_remove
         int i
 
-    def __init__(self, img, src, sink, weight_lambda=None):
-        """__init__(img, src, sink, weight_lambda=None)
+    def __init__(self, img, src, sink, affinity=None):
+        """__init__(img, src, sink, affinity=None)
 
         See class documentation.
         """
-        if weight_lambda == None:
-            weight_lambda = LAMBA
+        if affinity == None:
+            affinity = AFFINITY
 
         self.excess = (sink - src).astype(np.double).ravel()
         self.height = np.zeros((600, 800), np.int).ravel()
@@ -100,13 +101,13 @@ cdef class GraphCut:
         _right[:,:(self.w-1)] = np.diff(img, axis=1)**2
         _left[:,1:] = np.diff(img, axis=1)**2
 
-        _up = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_up, 2)) +
+        _up = affinity * (1.0 / (BETA * np.sqrt(np.sum(_up, 2)) +
                                       EPSILON))
-        _down = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_down, 2)) +
+        _down = affinity * (1.0 / (BETA * np.sqrt(np.sum(_down, 2)) +
                                         EPSILON))
-        _left = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_left, 2)) +
+        _left = affinity * (1.0 / (BETA * np.sqrt(np.sum(_left, 2)) +
                                         EPSILON))
-        _right = weight_lambda * (1.0 / (BETA * np.sqrt(np.sum(_right, 2)) +
+        _right = affinity * (1.0 / (BETA * np.sqrt(np.sum(_right, 2)) +
                                          EPSILON))
 
         # ensure that flow cannot be pushed beyond the image boundaries
@@ -328,7 +329,10 @@ cdef class GraphCut:
         return i + 1
 
 
-def graphcut(img, src, sink, global_relabel_interval, weight_lambda=None):
+def graphcut(img, src, sink, global_relabel_interval=GLOBAL_RELABEL_INTERVAL,
+            affinity=AFFINITY):
+
+
     """
     Performs a graph-cut on an image to return a globally optimal segmentation.
 
@@ -348,7 +352,7 @@ def graphcut(img, src, sink, global_relabel_interval, weight_lambda=None):
       relabel to calculate the exact distance to sink for each element in
       the height array
 
-    weight_lambda
+    affinity
       The data term, neighboorhood term weighting. Lower values give preference
       to the data term.
 
@@ -358,7 +362,7 @@ def graphcut(img, src, sink, global_relabel_interval, weight_lambda=None):
       A binary array of the optimal segmentation
 
     """
-    gc = GraphCut(img, src, sink, weight_lambda)
+    gc = GraphCut(img, src, sink, affinity)
     gc.cut(global_relabel_interval)
 
     shape = (img.shape[0], img.shape[1])
