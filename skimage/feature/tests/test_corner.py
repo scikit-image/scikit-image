@@ -3,10 +3,12 @@ from numpy.testing import assert_array_equal, assert_almost_equal
 
 from skimage import data
 from skimage import img_as_float
+from skimage.color import rgb2gray
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
-                             corner_kitchen_rosenfeld, corner_foerstner)
+                             corner_kitchen_rosenfeld, corner_foerstner,
+                             corner_fast, corner_fast_orientation)
 
 
 def test_square_image():
@@ -94,8 +96,8 @@ def test_rotated_lena():
 
 def test_subpix():
     img = np.zeros((50, 50))
-    img[:25,:25] = 255
-    img[25:,25:] = 255
+    img[:25, :25] = 255
+    img[25:, 25:] = 255
     corner = peak_local_max(corner_harris(img), num_peaks=1)
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (24.5, 24.5))
@@ -154,6 +156,41 @@ def test_blank_image_nans():
     for det in detectors:
         response = det(constant_image)
         assert np.all(np.isfinite(response))
+
+
+def test_corner_fast_image_unsupported_error():
+    img = np.zeros((20, 20, 3))
+    assert_raises(ValueError, corner_fast, img)
+
+
+def test_corner_fast_lena():
+    img = rgb2gray(data.lena())
+    expected = np.array([[ 67, 157],
+                         [204, 261],
+                         [247, 146],
+                         [269, 111],
+                         [318, 158],
+                         [386,  73],
+                         [413,  70],
+                         [435, 180],
+                         [455, 177],
+                         [461, 160]])
+    actual = corner_peaks(corner_fast(img, 12, 0.3))
+    assert_array_equal(actual, expected)
+
+
+def test_corner_fast_orientation_image_unsupported_error():
+    img = np.zeros((20, 20, 3))
+    assert_raises(ValueError, corner_fast_orientation, img, [[7, 7]])
+
+
+def test_corner_fast_orientation_lena():
+    img = rgb2gray(data.lena())
+    corners = corner_peaks(corner_fast(img, 11, 0.35))
+    expected = np.array([-2.79279928, -1.68079274,  2.63070795, -1.81665159,
+                         -2.09631254, -1.41580527])
+    actual = corner_fast_orientation(img, corners)
+    assert_array_equal(actual, expected)
 
 
 if __name__ == '__main__':
