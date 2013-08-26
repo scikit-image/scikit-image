@@ -10,8 +10,8 @@ if data.mode != 'RGBA':
     data = data.convert('RGBA')
 
 img = np.array(data)
-src = np.load(data_dir+'/'+'trolls_fg.npy').reshape((608, 800))[0:600, :]
-sink = np.load(data_dir+'/'+'/trolls_bg.npy').reshape((608, 800))[0:600, :]
+src = np.load(data_dir+'/'+'trolls_fg.npy')
+sink = np.load(data_dir+'/'+'/trolls_bg.npy')
 
 gc = graphcut(img, src, sink, 10, 60)
 plt.imshow(gc, interpolation='nearest')
