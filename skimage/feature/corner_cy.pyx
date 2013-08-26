@@ -208,7 +208,7 @@ def corner_fast_orientation(image, fast_corners):
                               [0, 1, 1, 1, 1, 1, 0],
                               [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
 
-    cdef int[:, ::1] cfast_corners = np.ascontiguousarray(fast_corners, dtype=np.int32)
+    cdef Py_ssize_t[:, :] cfast_corners = np.ascontiguousarray(fast_corners, dtype=np.intp)
 
     cdef Py_ssize_t n_fast_corners = fast_corners.shape[0]
     cdef Py_ssize_t i, p, q, r, c, x, y
