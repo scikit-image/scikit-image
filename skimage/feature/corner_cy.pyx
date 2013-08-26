@@ -167,7 +167,7 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
     return np.asarray(corner_response)
 
 
-def corner_fast_orientation(image, fast_corners):
+def corner_fast_orientation(image, Py_ssize_t[:, :] fast_corners):
     """Compute the orientation of FAST corners using the first order central
     moment i.e. the center of mass approach. The corner orientation is the
     angle of the vector from the keypoint to the intensity centroid calculated
@@ -199,35 +199,46 @@ def corner_fast_orientation(image, fast_corners):
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
 
+    cdef double[:, :] cimage = np.ascontiguousarray(img_as_float(image))
     # Essentially skimage.morphology.octagon(3, 2)
-    cdef char[:, :] circular_mask = np.array([[0, 0, 1, 1, 1, 0, 0],
-                                              [0, 1, 1, 1, 1, 1, 0],
-                                              [1, 1, 1, 1, 1, 1, 1],
-                                              [1, 1, 1, 1, 1, 1, 1],
-                                              [1, 1, 1, 1, 1, 1, 1],
-                                              [0, 1, 1, 1, 1, 1, 0],
-                                              [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
-
-    cdef Py_ssize_t[:, :] cfast_corners = np.ascontiguousarray(fast_corners, dtype=np.intp)
+    cdef char[:, ::1] circular_mask = np.array([[0, 0, 1, 1, 1, 0, 0],
+                                                [0, 1, 1, 1, 1, 1, 0],
+                                                [1, 1, 1, 1, 1, 1, 1],
+                                                [1, 1, 1, 1, 1, 1, 1],
+                                                [1, 1, 1, 1, 1, 1, 1],
+                                                [0, 1, 1, 1, 1, 1, 0],
+                                                [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
 
     cdef Py_ssize_t n_fast_corners = fast_corners.shape[0]
-    cdef Py_ssize_t i, p, q, r, c, x, y
+    cdef Py_ssize_t i, r, c, x_top, y_left
     cdef double[:, ::1] kp_circular_patch, mu
     cdef double[:] kp_orientation = np.zeros(fast_corners.shape[0], dtype=np.double)
+    cdef double m00, m01, m10
 
     for i in range(n_fast_corners):
-        x = cfast_corners[i, 0]
-        y = cfast_corners[i, 1]
+        x_top = fast_corners[i, 0] - 3
+        y_left = fast_corners[i, 1] - 3
 
-        kp_circular_patch = np.ascontiguousarray(image[x - 3:x + 4, y - 3:y + 4])
-        mu = np.zeros((2, 2), dtype=np.double)
+        m00 = 0
+        m01 = 0
+        m10 = 0
+        #kp_circular_patch = np.ascontiguousarray(image[x - 3:x + 4, y - 3:y + 4])
+        #mu = np.zeros((2, 2), dtype=np.double)
         for r in range(7):
             for c in range(7):
                 if circular_mask[r, c]:
-                    for p in range(2):
-                        for q in range(2):
-                            mu[p, q] += kp_circular_patch[r, c] * (r - 3) ** q * (c - 3) ** p
+                    m00 += cimage[x_top + r, y_left + c]
 
-        kp_orientation[i] = atan2(mu[1, 0] / mu[0, 0], mu[0, 1] / mu[0, 0])
+        for r in range(7):
+            for c in range(7):
+                if circular_mask[r, c]:
+                    m01 += cimage[x_top + r, y_left + c] * (c - 3)
+
+        for r in range(7):
+            for c in range(7):
+                if circular_mask[r, c]:
+                    m10 += cimage[x_top + r, y_left + c] * (r - 3)
+
+        kp_orientation[i] = atan2(m10 / m00, m01 / m00)
 
     return np.asarray(kp_orientation)
