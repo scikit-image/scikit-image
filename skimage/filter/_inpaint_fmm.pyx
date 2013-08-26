@@ -14,7 +14,7 @@ from skimage.morphology import disk, dilation
 LARGE_VALUE = 1.0e6
 KNOWN = 0
 BAND = 1
-INSIDE = 2
+UNKNOWN = 2
 
 
 cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
@@ -28,16 +28,16 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
     Parameters
     ---------
     image : array, float
-        Initial input image padded by a single row/column on all sides
+        Initial input image padded by a single row/column on all sides.
     mask : array, bool
-        Initial mask padded as the image, True values are inpainted
+        Initial mask padded as the image, True values are inpainted.
     radius : int
-        Neighbourhood of the pixel of interest
+        Neighbourhood of the pixel of interest.
 
     Returns
     ------
     painted : array, float
-        The inpainted grayscale image
+        The inpainted grayscale image.
 
     Notes
     -----
@@ -45,15 +45,15 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
     - Extract the pixel with the smallest ``u`` value in the BAND pixels
     - Update its ``flag`` value as KNOWN
     - March the boundary inwards by adding new points.
-        - If they are either INSIDE or BAND, compute its ``u`` value using the
+        - If they are either UNKNOWN or BAND, compute its ``u`` value using the
           ``eikonal`` function for all the 4 quadrants
-        - If ``flag`` is INSIDE
+        - If ``flag`` is UNKNOWN
             - Change it to BAND
             - Inpaint the pixel
         - Select the ``min`` value and assign it as ``u`` value of the pixel
         - Insert this new value in the ``heap``
 
-    For further details, see [1]_
+    For further details, see [1]_.
 
     References
     ----------
@@ -96,7 +96,7 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
                                     _eikonal(i_nb + 1, j_nb, i_nb,
                                              j_nb + 1, flag, u))
 
-                if flag[i_nb, j_nb] == INSIDE:
+                if flag[i_nb, j_nb] == UNKNOWN:
                     flag[i_nb, j_nb] = BAND
                     heappush(heap, (u[i_nb, j_nb], (i_nb, j_nb)))
 
@@ -121,7 +121,7 @@ cdef _init_fmm(mask):
     ------
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
     u : array, float
         The distance/time map from the boundary to each pixel
     heap : list of tuples
@@ -133,7 +133,7 @@ cdef _init_fmm(mask):
     All pixels are classified into 1 of the following flags:
     - 0 = KNOWN - intensity and u values are known
     - 1 = BAND - u value undergoes an update
-    - 2 = INSIDE - intensity and u values unkown
+    - 2 = UNKNOWN - intensity and u values unkown
 
     References
     ----------
@@ -148,7 +148,7 @@ cdef _init_fmm(mask):
 
     flag = (2 * outside) - band
 
-    u = np.where(flag == INSIDE, LARGE_VALUE, 0)
+    u = np.where(flag == UNKNOWN, LARGE_VALUE, 0)
 
     heap = []
     # Store the ``u`` and indices of pixels marked as BAND points
@@ -175,7 +175,7 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
         Row and column indices of two diagonally-adjacent pixels
     flag : array
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
     u : array, float
         The distance/time map from the boundary to each pixel
 
@@ -239,7 +239,7 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         Already padded single channel input image
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
     u : array, float
         The distance/time map from the boundary to each pixel
     radius : int
@@ -326,7 +326,7 @@ cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
         Row and column index of the pixel whose gradient is to be calculated
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = INSIDE
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
 
     Returns
     -------
@@ -338,13 +338,13 @@ cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
     cdef:
         cnp.float_t grad
 
-    if flag[i, j + 1] != INSIDE:
-        if flag[i, j - 1] != INSIDE:
+    if flag[i, j + 1] != UNKNOWN:
+        if flag[i, j - 1] != UNKNOWN:
             grad = (array[i, j + 1] - array[i, j - 1]) * 0.5
         else:
             grad = (array[i, j + 1] - array[i, j])
     else:
-        if flag[i, j - 1] != INSIDE:
+        if flag[i, j - 1] != UNKNOWN:
             grad = (array[i, j] - array[i, j - 1])
         else:
             grad = 0
