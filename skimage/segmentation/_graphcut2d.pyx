@@ -150,20 +150,6 @@ cdef class GraphCut:
                 if self.excess[self.index_up(i)] > 0:
                     active_add.append(self.index_up(i))
 
-            flow = min(self.excess[i], self.down[i])
-            if flow > 0 and self.height[i] > self.height[self.index_down(i)]:
-                self.excess[i] -= flow
-                self.excess[self.index_down(i)] += flow
-
-                self.down[i] -= flow
-                self.up[self.index_down(i)] += flow
-
-                if self.excess[i] == 0:
-                    active_remove.append(i)
-
-                if self.excess[self.index_down(i)] > 0:
-                    active_add.append(self.index_down(i))
-
             flow = min(self.excess[i], self.left[i])
             if flow > 0 and self.height[i] > self.height[self.index_left(i)]:
                 self.excess[i] -= flow
@@ -177,6 +163,20 @@ cdef class GraphCut:
 
                 if self.excess[self.index_left(i)] > 0:
                     active_add.append(self.index_left(i))
+
+            flow = min(self.excess[i], self.down[i])
+            if flow > 0 and self.height[i] > self.height[self.index_down(i)]:
+                self.excess[i] -= flow
+                self.excess[self.index_down(i)] += flow
+
+                self.down[i] -= flow
+                self.up[self.index_down(i)] += flow
+
+                if self.excess[i] == 0:
+                    active_remove.append(i)
+
+                if self.excess[self.index_down(i)] > 0:
+                    active_add.append(self.index_down(i))
 
             flow = min(self.excess[i], self.right[i])
             if flow > 0 and self.height[i] > self.height[self.index_right(i)]:
@@ -209,10 +209,10 @@ cdef class GraphCut:
 
             if self.up[i] > 0:
                 min_height = min(min_height, self.height[self.index_up(i)] + 1)
-            if self.down[i] > 0:
-                min_height = min(min_height, self.height[self.index_down(i)] + 1)
             if self.left[i] > 0:
                 min_height = min(min_height, self.height[self.index_left(i)] + 1)
+            if self.down[i] > 0:
+                min_height = min(min_height, self.height[self.index_down(i)] + 1)
             if self.right[i] > 0:
                 min_height = min(min_height, self.height[self.index_right(i)] + 1)
 
@@ -254,15 +254,6 @@ cdef class GraphCut:
                         if self.excess[self.index_up(i)] > 0:
                             self.active[self.index_up(i)] = None
 
-                if i/self.w < self.h-1:
-                    if  self.up[self.index_down(i)] > 0 and self.height[self.index_down(i)] == self.max_label:
-                        self.height[self.index_down(i)] = distance
-
-                        fifo_to.append(self.index_down(i))
-
-                        if self.excess[self.index_down(i)] > 0:
-                            self.active[self.index_down(i)] = None
-
                 if i%self.w > 0:
                     if  self.right[self.index_left(i)] > 0 and self.height[self.index_left(i)] == self.max_label:
                         self.height[self.index_left(i)] = distance
@@ -271,6 +262,15 @@ cdef class GraphCut:
 
                         if self.excess[self.index_left(i)] > 0:
                             self.active[self.index_left(i)] = None
+
+                if i/self.w < self.h-1:
+                    if  self.up[self.index_down(i)] > 0 and self.height[self.index_down(i)] == self.max_label:
+                        self.height[self.index_down(i)] = distance
+
+                        fifo_to.append(self.index_down(i))
+
+                        if self.excess[self.index_down(i)] > 0:
+                            self.active[self.index_down(i)] = None
 
                 if i%self.w < self.w-1:
                     if  self.left[self.index_right(i)] > 0 and self.height[self.index_right(i)] == self.max_label:
@@ -304,6 +304,8 @@ cdef class GraphCut:
 
         i = 0
         while len(self.active) > 0:
+            print i, len(self.active)
+
             self.push()
 
             if i%global_relabel_interval == 0:
