@@ -167,25 +167,29 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
     return np.asarray(corner_response)
 
 
-def corner_fast_orientation(image, Py_ssize_t[:, :] fast_corners):
-    """Compute the orientation of FAST corners.
+def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
+    """Compute the orientation of corners.
 
-    The orientation of corners is computed using the first order central
-    moment i.e. the center of mass approach. The corner orientation is the
-    angle of the vector from the keypoint to the intensity centroid calculated
-    using first order central moment.
+    The orientation of corners is computed using the first order central moment
+    i.e. the center of mass approach. The corner orientation is the angle of
+    the vector from the corner coordinate to the intensity centroid  in the
+    local neighborhood around the corner calculated using first order central
+    moment.
 
     Parameters
     ----------
     image : 2D array
         Input grayscale image.
-    fast_corners : (N, 2) array
-        FAST corners extracted from the corresponding image.
+    corners : (N, 2) array
+        Corner coordinates as ``(row, col)``.
+    mask : 2D array
+        Mask defining the local neighborhood of the corner used for the
+        calculation of the central moment.
 
     Returns
     -------
-    orientation : (N, 1) array
-        Orientation of the input FAST corners in the range [-pi, pi].
+    orientations : (N, 1) array
+        Orientations of corners in the range [-pi, pi].
 
     References
     ----------
@@ -195,41 +199,72 @@ def corner_fast_orientation(image, Py_ssize_t[:, :] fast_corners):
     ..[2] Paul L. Rosin, "Measuring Corner Properties"
           http://users.cs.cf.ac.uk/Paul.Rosin/corner2.pdf
 
+    Examples
+    --------
+    >>> from skimage.morphology import octagon
+    >>> from skimage.feature import corner_fast, corner_peaks, \
+    ...                             corner_orientations
+    >>> square = np.zeros((12, 12))
+    >>> square[3:9, 3:9] = 1
+    >>> square
+    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    array([[3, 3],
+           [3, 8],
+           [8, 3],
+           [8, 8]])
+    >>> orientations = corner_orientations(square, corners, octagon(3, 2))
+    >>> np.rad2deg(orientations)
+    array([  45.,  135.,  -45., -135.])
+
     """
 
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
 
-    cdef double[:, :] cimage = img_as_float(image)
-    # Essentially skimage.morphology.octagon(3, 2)
-    cdef char[:, ::1] circular_mask = np.array([[0, 0, 1, 1, 1, 0, 0],
-                                                [0, 1, 1, 1, 1, 1, 0],
-                                                [1, 1, 1, 1, 1, 1, 1],
-                                                [1, 1, 1, 1, 1, 1, 1],
-                                                [1, 1, 1, 1, 1, 1, 1],
-                                                [0, 1, 1, 1, 1, 1, 0],
-                                                [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
+    if mask.shape[0] % 2 != 1 or mask.shape[1] % 2 != 1:
+        raise ValueError("Size of mask must be uneven.")
 
-    cdef Py_ssize_t n_fast_corners = fast_corners.shape[0]
-    cdef Py_ssize_t i, r, c, y_top, x_left
-    cdef double[:] kp_orientation = np.zeros(fast_corners.shape[0], dtype=np.double)
+    cdef double[:, :] cimage = img_as_float(image)
+    cdef char[:, ::1] cmask = np.ascontiguousarray(mask != 0, dtype=np.uint8)
+
+    cdef Py_ssize_t i, r, c, r0, c0
+    cdef Py_ssize_t mrows = mask.shape[0]
+    cdef Py_ssize_t mcols = mask.shape[1]
+    cdef Py_ssize_t mrows2 = (mrows - 1) / 2
+    cdef Py_ssize_t mcols2 = (mcols - 1) / 2
+    cdef double[:] orientations = np.zeros(corners.shape[0], dtype=np.double)
+    cdef double curr_pixel
     cdef double m00, m01, m10
 
-    for i in range(n_fast_corners):
-        y_top = fast_corners[i, 0] - 3
-        x_left = fast_corners[i, 1] - 3
+    for i in range(corners.shape[0]):
+        r0 = corners[i, 0] - mrows2
+        c0 = corners[i, 1] - mcols2
 
         m00 = 0
         m01 = 0
         m10 = 0
-        for r in range(7):
-            for c in range(7):
-                if circular_mask[r, c]:
-                    m00 += cimage[y_top + r, x_left + c]
-                    m01 += cimage[y_top + r, x_left + c] * (c - 3)
-                    m10 += cimage[y_top + r, x_left + c] * (r - 3)
 
-        kp_orientation[i] = atan2(m10 / m00, m01 / m00)
+        for r in range(mrows):
+            for c in range(mcols):
+                if cmask[r, c]:
+                    curr_pixel = cimage[r0 + r, c0 + c]
+                    m00 += curr_pixel
+                    m01 += curr_pixel * (c - mcols2)
+                    m10 += curr_pixel * (r - mrows2)
 
-    return np.asarray(kp_orientation)
+        orientations[i] = atan2(m10 / m00, m01 / m00)
+
+    return np.asarray(orientations)
