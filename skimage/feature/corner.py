@@ -581,7 +581,6 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.feature import corner_fast, corner_peaks
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
