@@ -125,7 +125,7 @@ def test_num_peaks():
     peak_local_max returns exactly the right amount of peaks. Test
     is run on Lena in order to produce a sufficient number of corners"""
 
-    lena_corners = corner_harris(data.lena())
+    lena_corners = corner_harris(rgb2gray(data.lena()))
 
     for i in range(20):
         n = np.random.random_integers(20)
