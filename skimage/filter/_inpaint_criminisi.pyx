@@ -64,10 +64,9 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
 
     References
     ----------
-    .. [1] Criminisi, Antonio; Perez, P.; Toyama, K., "Region filling and
-           object removal by exemplar-based image inpainting," Image
-           Processing, IEEE Transactions on, vol. 13, no. 9, pp. 1200, 1212,
-           Sept. 2004 doi: 10.1109/TIP.2004.833105.
+    .. [1] A. Criminisi, P. Perez, and K. Toyama. 2004. Region filling and
+           object removal by exemplar-based image inpainting. Trans. Img. Proc.
+           13, 9 (September 2004), 1200-1212. DOI=10.1109/TIP.2004.833105.
 
     """
 
