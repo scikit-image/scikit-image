@@ -1,7 +1,6 @@
 import numpy as np
 from scipy import ndimage
 from scipy import stats
-from scipy.ndimage.filters import maximum_filter
 from skimage.color import rgb2grey
 from skimage.util import img_as_float
 from skimage.feature import peak_local_max
