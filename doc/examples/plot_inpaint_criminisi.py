@@ -6,12 +6,15 @@ Structural and Textural Image Inpainting
 Image Inpainting is the process of reconstructing lost or deteriorated parts
 of an image.
 
-In this example we wll show Linear structural and Textural inpainting. The
-order in which the unknown region is filled is determined by the amount of
-reliable information (values already known are denoted as 1 - completely
-certain, decreasing as we inpaint further) and amount of data (gradient
-strength) surrounding the pixel in question. This implementation updates 1
-patch at a time.
+In this example we wll show linear structural and textural inpainting. There
+are two terms which play a role in determining the order of inpainting:
+``confidence`` and ``data`` term.
+
+- ``confidence`` signifies the amount of reliable information in the
+neighbourhood. Already known pixels have ``confidence = 1`` and unknown
+pixels ``0``.
+- ``data`` term represents the presence of strong edges hitting the mask
+boundary. This implementation updates 1 patch at a time.
 
 """
 import numpy as np
@@ -27,11 +30,14 @@ paint_region = (slice(50, 150), slice(50, 150))
 image[paint_region] = 0
 mask[paint_region] = 1
 
-# For best results, `window` should be larger in size than the texel (texture
-# element) being inpainted. For example, in this case, the single white/black
-# square is the texel which is of `(25, 25)` shape. A value larger than this
-# yields perfect reconstruction, but a value smaller than this, may have couple
-# of pixels off.
+# For best results, `window` should be larger in size than the largest texel
+# (texture element) being inpainted. A texel is the smallest repeating block
+# of pixels in a texture or pattern. For example, in the case below of the
+# `skimage.data.checkerboard` image, the single white/black square is the
+# largest texel which is of shape `(25, 25)`. A value larger than this yields
+# perfect reconstruction, but in case of a value smaller than this perfect
+# reconstruction may not be possible.
+
 painted = inpaint_criminisi(image, mask, window=27, max_thresh=0.2)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2)

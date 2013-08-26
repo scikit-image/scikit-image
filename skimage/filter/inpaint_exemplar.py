@@ -8,9 +8,10 @@ __all__ = ['inpaint_criminisi']
 
 
 def inpaint_criminisi(source_image, synth_mask, window, max_thresh=0.2):
-    """This function performs constrained synthesis using Criminisi et al.
-    algorithm. It grows the texture of the surrounding region to fill in
-    unknown pixels. See Notes for an outline of the algorithm.
+    """Returns the image with masked pixels reconstructed.
+
+    This function performs constrained synthesis using Criminisi et al. [1]_.
+    It grows the texture of the surrounding region to fill in unknown pixels.
 
     Parameters
     ----------
@@ -30,17 +31,17 @@ def inpaint_criminisi(source_image, synth_mask, window, max_thresh=0.2):
     Returns
     -------
     image : (M, N) array, float
-        Texture synthesised input_image
+        Texture synthesised source_image.
 
     Notes
     -----
     For best results, `window` should be larger in size than the largest texel
-    (texture element) being inpainted. Texel is the smallest repeating block
-    of pixels in a texture or pattern. For example, in the case below of
+    (texture element) being inpainted. A texel is the smallest repeating block
+    of pixels in a texture or pattern. For example, in the case below of the
     `skimage.data.checkerboard` image, the single white/black square is the
-    largest texel which is of `(25, 25)` shape. A value larger than this yields
-    perfect reconstruction, but a value smaller than this, may have couple of
-    pixels off.
+    largest texel which is of shape `(25, 25)`. A value larger than this yields
+    perfect reconstruction, but in case of a value smaller than this perfect
+    reconstruction may not be possible.
 
     References
     ----------

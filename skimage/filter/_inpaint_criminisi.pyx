@@ -66,13 +66,14 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
     ----------
     .. [1] Criminisi, Antonio; Perez, P.; Toyama, K., "Region filling and
            object removal by exemplar-based image inpainting," Image
-           Processing, IEEE Transactions on , vol.13, no.9, pp.1200,1212, Sept.
-           2004 doi: 10.1109/TIP.2004.833105.
+           Processing, IEEE Transactions on, vol. 13, no. 9, pp. 1200, 1212,
+           Sept. 2004 doi: 10.1109/TIP.2004.833105.
 
     """
 
     offset = window // 2
-    source_image = painted[offset:-offset, offset:-offset].copy()
+    inner = (slice(offset, -offset), slice(offset, -offset))
+    source_image = painted[inner].copy()
 
     t_row, t_col = np.ogrid[-offset:offset + 1, -offset:offset + 1]
     sigma = window / 3
@@ -99,7 +100,7 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
         ny = sobel(mask.astype(np.float), axis=0)
         nx = sobel(mask.astype(np.float), axis=1)
 
-        # Priority calculation; pixel who's inpainting is done first
+        # Priority calculation; pixel for which inpainting is done first
         i_max, j_max = _priority_calc(fill_front, confidence,
                                       dx, dy, nx, ny, window)
 
@@ -108,9 +109,8 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
         valid_mask = gauss_mask * (1 - mask_template)
 
         # Template matching
-        i_m, j_m = _sum_sq_diff(source_image,
-                                mask[offset:-offset, offset:-offset],
-                                template, valid_mask, max_thresh, i_max, j_max)
+        i_m, j_m = _sum_sq_diff(source_image, mask[inner], template,
+                                valid_mask, max_thresh, i_max, j_max)
 
         if i_m != -1 and j_m != -1:
             painted[i_max + t_row, j_max + t_col] += (mask_template *
@@ -121,7 +121,7 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
                                                                     j_max])
             mask[i_max + t_row, j_max + t_col] = 0
 
-    return painted[offset:-offset, offset:-offset]
+    return painted[inner]
 
 
 cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
@@ -187,6 +187,7 @@ cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
                     i_data = i + k
                     j_data = j + l
 
+        # If no variation in intensity (grad == 0), priority = 0
         if i_data == 0 and j_data == 0:
             continue
         if sqrt(nx[i, j] ** 2 + ny[i, j] ** 2) == 0:
@@ -223,8 +224,8 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
                   cnp.float_t max_thresh,
                   Py_ssize_t i_b, Py_ssize_t j_b):
     """This function performs template matching. The metric used is Sum of
-    Squared Difference (SSD). The input taken is the ``template`` who's match
-    is to be found in image. See the section below on Notes.
+    Squared Difference (SSD). The input taken is the ``template`` to be found
+    in ``image``.
 
     Parameters
     ----------
@@ -232,29 +233,27 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
         Initial unpadded input image of shape (M, N).
     mask : (M, N) array, bool
         Texture for True values are to be synthesised.
-    template : array, float
-        (window, window) Template who's match is to be found in image.
-    valid_mask : array, float
-        (window, window), governs differences which are to be considered for
-        SSD computation. Masks out the unknown or unfilled pixels and gives a
-        higher weight to the center pixel, decreasing as the distance from
-        center pixel increases.
+    template : ``(window, window)`` array, float
+        Template for which match is to be found in image.
+    valid_mask : ``(window, window)`` array, float
+        Masks out the unknown or unfilled pixels and gives a higher weight to
+        the center pixel, decreasing as the distance from center pixel
+        increases.
     max_thresh : float
         Maximum tolerable SSD (Sum of Squared Difference) between the template
         around a pixel to be filled and an equal size image sample for
         template matching.
     i_b, j_b : int
-        Template matching done for this index value.
+        Template matching is done for this index value.
 
     Returns
     -------
-    ssd : array, float
-        (M - window + 1, N - window + 1) The desired SSD values for all
-        positions in the image.
+    ssd : ``(M - window + 1, N - window + 1)`` array, float
+        The desired SSD values for all positions in the image.
 
     Notes
     -----
-    The valid samples from the image are those which completely lie in the
+    The Valid samples from the image are those which completely lie in the
     known region of the image, i.e. not belonging to the padded boundary and
     not having any pixel from the region to be inpainted.
 
@@ -278,8 +277,9 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
                     if mask[i + k, j + l]:
                         flag = 1
                         break
-                if flag == 1:
-                    break
+                else:
+                    continue
+                break
 
             if flag == 1:
                 continue
