@@ -28,7 +28,7 @@ References
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import data
-from skimage.filter.inpaint_texture import inpaint_texture
+from skimage.filter.inpaint_texture import inpaint_efros
 
 
 image = data.camera()[300:500, 350:550]
@@ -38,7 +38,7 @@ paint_region = (slice(125, 145), slice(20, 50))
 image[paint_region] = 0
 mask[paint_region] = 1
 
-painted = inpaint_texture(image, mask, 7)
+painted = inpaint_efros(image, mask, window=7)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2)
 ax0.set_title('Input image')

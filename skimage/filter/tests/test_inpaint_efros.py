@@ -1,6 +1,6 @@
 import numpy as np
 from numpy.testing import assert_array_equal
-from skimage.filter.inpaint_texture import inpaint_texture
+from skimage.filter.inpaint_texture import inpaint_efros
 
 
 def test_basic():
@@ -61,7 +61,7 @@ def test_basic():
          [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]],
         dtype=np.float)
 
-    painted = inpaint_texture(image, mask, window=5, max_thresh=0.5)
+    painted = inpaint_efros(image, mask, window=5, max_thresh=0.5)
     assert_array_equal(painted, expected)
 
 

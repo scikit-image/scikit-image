@@ -1,50 +1,36 @@
 from __future__ import division
 import numpy as np
 from skimage.util import img_as_float
-from skimage.filter._inpaint_texture import _inpaint_efros
+from skimage.filter._inpaint_efros import _inpaint_efros
 
 
-__all__ = ['inpaint_texture']
+__all__ = ['inpaint_efros']
 
 
-def inpaint_texture(source_image, synth_mask, window=5, max_thresh=0.2):
-    """This function performs constrained texture synthesis. It grows the
+def inpaint_efros(source_image, synth_mask, window=5, max_thresh=0.2):
+    """Returns the image with the masked region painted in.
+
+    This function performs constrained texture synthesis. It grows the
     texture of surrounding region into the unknown pixels. This implementation
-    updates pixel-by-pixel. Check the Notes Section for a brief overview of the
-    algorithm.
+    updates pixel-by-pixel.
 
     Parameters
     ---------
     source_image : (M, N) array, uint8
-        Input image whose texture is to be calculated
+        Input image whose texture is to be calculated.
     synth_mask : (M, N) array, bool
-        Texture for True values are to be synthesised
+        Texture for True values are to be synthesised.
     window : int, optional
-        Size of the neighborhood window, (window, window)
+        Width of the neighborhood window. (window, window) patch about the
+        pixel to be inpainted. Preferably odd, for symmetry.
     max_thresh : float, optional
         Maximum tolerable SSD (Sum of Squared Difference) between the template
-        around a pixel to be filled and an equal size image sample
+        around a pixel to be filled and an equal size image sample.
 
     Returns
     -------
-    painted : array, np.float
-        Texture synthesised image
-
-    Notes
-    -----
-    Outline of the algorithm for Texture Synthesis is as follows:
-    - Loop: Generate the boundary pixels of the region to be inpainted
-        - Loop: Generate a template of (window, window), center: boundary pixel
-            - Compute the SSD between template and similar sized patches across
-              the image
-            - Find the pixel with smallest SSD, such that patch isn't where
-              template is located (False positive)
-            - Update the intensity value of center pixel of template as the
-              value of the center of the matched patch
-        - Repeat for all pixels of the boundary
-    - Repeat until all pixels are inpainted
-
-    For further information refer to [1]_
+    painted : array, float
+        Texture synthesised image.
 
     References
     ---------

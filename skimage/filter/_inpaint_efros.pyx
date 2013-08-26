@@ -15,19 +15,20 @@ cpdef _inpaint_efros(painted, mask, window, max_thresh):
     Parameters
     ----------
     painted : (M, N) array, uint8
-        Input image whose texture is to be calculated
+        Input image whose texture is to be calculated.
     mask : (M, N) array, bool
-        Texture for True values are to be synthesised
+        Texture for True values are to be synthesised.
     window : int
-        Size of the neighborhood window, (window, window)
+        Width of the neighborhood window. (window, window) patch about the
+        pixel to be inpainted. Preferably odd, for symmetry.
     max_thresh : float
         Maximum tolerable SSD (Sum of Squared Difference) between the template
-        around a pixel to be filled and an equal size image sample
+        around a pixel to be filled and an equal size image sample.
 
     Returns
     -------
     painted : array, float
-        Texture synthesised image
+        Texture synthesised image.
 
     Notes
     -----
@@ -43,7 +44,7 @@ cpdef _inpaint_efros(painted, mask, window, max_thresh):
         - Repeat for all pixels of the boundary
     - Repeat until all pixels are inpainted
 
-    For further information refer to [1]_
+    For further information refer to [1]_.
 
     References
     ---------
@@ -102,27 +103,27 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
     Parameters
     ----------
     image : array, float
-        Initial unpadded input image of shape (M, N)
+        Initial unpadded input image of shape (M, N).
     mask : (M, N) array, bool
-        Texture for True values are to be synthesised; unpadded
+        Texture for True values are to be synthesised; unpadded.
     template : array, float
-        (window, window) Template who's match is to be found in image
+        (window, window) Template who's match is to be found in image.
     valid_mask : array, float
         (window, window), governs differences which are to be considered for
         SSD computation. Masks out the unknown or unfilled pixels and gives a
         higher weight to the center pixel, decreasing as the distance from
-        center pixel increases
+        center pixel increases.
     max_thresh : float
         Maximum tolerable SSD (Sum of Squared Difference) between the template
-        around a pixel to be filled and an equal size image sample
+        around a pixel to be filled and an equal size image sample.
     i_b, j_b : int
-        Template matching for this index value
+        Template matching for this index value.
 
     Returns
     -------
     ssd : array, float
         (M - window + 1, N - window + 1) The desired SSD values for all
-        positions in the image
+        positions in the image.
 
     Notes
     -----
@@ -175,14 +176,14 @@ cdef _gaussian(sigma=0.5, size=None):
     Parameters
     ----------
     sigma : float, optional
-        Standard deviation (default: 0.5)
+        Standard deviation. (default: 0.5)
     size : tuple
-        Shape of the output kernel
+        Shape of the output kernel.
 
     Returns
     -------
     gauss_mask : array, float
-        Gaussian kernel of shape ``size``
+        Gaussian kernel of shape ``size``.
 
     """
     sigma2 = sigma ** 2
