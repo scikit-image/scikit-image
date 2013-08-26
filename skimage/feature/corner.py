@@ -53,8 +53,9 @@ def _compute_auto_correlation(image, sigma):
 
     """
 
-    if image.ndim == 3:
-        image = img_as_float(rgb2grey(image))
+    image = np.squeeze(image)
+    if image.ndim != 2:
+        raise ValueError("Only 2-D gray-scale images supported.")
 
     imx, imy = _compute_derivatives(image)
 
@@ -537,8 +538,8 @@ def corner_fast(image, n=12, threshold=0.15):
 
     Returns
     -------
-    corners : (N, 2) ndarray
-        Location i.e. (row, col) of extracted FAST corners.
+    response : ndarray
+        FAST corner response image.
 
     References
     ----------
@@ -548,6 +549,31 @@ def corner_fast(image, n=12, threshold=0.15):
     .. [2] Wikipedia, "Features from accelerated segment test",
            https://en.wikipedia.org/wiki/Features_from_accelerated_segment_test
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.feature import corner_fast, corner_peaks
+    >>> square = np.zeros((12, 12))
+    >>> square[3:9, 3:9] = 1
+    >>> square
+    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    array([[3, 3],
+           [3, 8],
+           [8, 3],
+           [8, 8]])
+
     """
     image = np.squeeze(image)
     if image.ndim != 2:
@@ -555,4 +581,5 @@ def corner_fast(image, n=12, threshold=0.15):
 
     image = img_as_float(image)
     image = np.ascontiguousarray(image)
-    return _corner_fast(image, n, threshold)
+    response = _corner_fast(image, n, threshold)
+    return response
