@@ -34,32 +34,13 @@ def inpaint_criminisi(source_image, synth_mask, window, max_thresh=0.2):
 
     Notes
     -----
-    For best results, `window` should be larger in size than the texel (texture
-    element) being inpainted. For example, in the case below of
+    For best results, `window` should be larger in size than the largest texel
+    (texture element) being inpainted. Texel is the smallest repeating block
+    of pixels in a texture or pattern. For example, in the case below of
     `skimage.data.checkerboard` image, the single white/black square is the
-    texel which is of `(25, 25)` shape. A value larger than this yields
+    largest texel which is of `(25, 25)` shape. A value larger than this yields
     perfect reconstruction, but a value smaller than this, may have couple of
     pixels off.
-
-    Outline of the algorithm for Texture Synthesis is as follows:
-    - Loop: Generate the boundary pixels of the region to be inpainted
-        - Loop: Compute the priority of each pixel
-            - Generate a template of (window, window), center: boundary pixel
-            - confidence_term: avg amount of reliable information in template
-            - data_term: strength of the isophote hitting this boundary pixel
-            - priority = data_term * confidence_term
-        - Repeat for all boundary pixels and chose the pixel with max priority
-        - Template matching of the pixel with max priority
-            - Generate a template of (window, window) around this pixel
-            - Compute the Sum of Squared Difference (SSD) between template and
-              similar sized patches across the image
-            - Find the pixel with smallest SSD, such that patch isn't where
-              template is located (False positive)
-            - Update the intensity value of the unknown region of template as
-              the corresponding value from matched patch
-    - Repeat until all pixels are inpainted
-
-    For further information refer to [1]_.
 
     References
     ----------

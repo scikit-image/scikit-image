@@ -1,45 +1,29 @@
-"""This is an example for constrained texture synthesis using Criminisi et al.
-algorithm. An unknown region in the image is filled using texture of
-surrounding region. This implementation updates 1 patch at a time.
+"""
+========================================
+Structural and Textural Image Inpainting
+========================================
 
-Outline of the algorithm for Texture Synthesis is as follows:
-- Loop: Generate the boundary pixels of the region to be inpainted
-    - Loop: Compute the priority of each pixel
-        - Generate a template of (window, window), center: boundary pixel
-        - confidence_term: avg amount of reliable information in template
-        - data_term: strength of the isophote hitting this boundary pixel
-        - priority = data_term * confidence_term
-    - Repeat for all boundary pixels and chose the pixel with max priority
-    - Template matching of the pixel with max priority
-        - Generate a template of (window, window) around this pixel
-        - Compute the Sum of Squared Difference (SSD) between template and
-          similar sized patches across the image
-        - Find the pixel with smallest SSD, such that patch isn't where
-          template is located (False positive)
-        - Update the intensity value of the unknown region of template as
-          the corresponding value from matched patch
-- Repeat until all pixels are inpainted
+Image Inpainting is the process of reconstructing lost or deteriorated parts
+of an image.
 
-For further information refer to [1]_.
-
-References
-----------
-.. [1] Criminisi, Antonio; Perez, P.; Toyama, K., "Region filling and object
-       removal by exemplar-based image inpainting," Image Processing, IEEE
-       Transactions on , vol.13, no.9, pp.1200,1212, Sept. 2004 doi: 10.
-       1109/TIP.2004.833105.
+In this example we wll show Linear structural and Textural inpainting. The
+order in which the unknown region is filled is determined by the amount of
+reliable information (values already known are denoted as 1 - completely
+certain, decreasing as we inpaint further) and amount of data (gradient
+strength) surrounding the pixel in question. This implementation updates 1
+patch at a time.
 
 """
 import numpy as np
 from skimage.filter.inpaint_exemplar import inpaint_criminisi
 import matplotlib.pyplot as plt
 from skimage.data import checkerboard
+from skimage.util import img_as_ubyte
 
 
-image = checkerboard().astype(np.uint8)
+image = img_as_ubyte(checkerboard())
 mask = np.zeros_like(image, dtype=np.uint8)
-paint_region = (slice(75, 125), slice(75, 125))
-
+paint_region = (slice(50, 150), slice(50, 150))
 image[paint_region] = 0
 mask[paint_region] = 1
 

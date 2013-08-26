@@ -34,10 +34,11 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
 
     Notes
     -----
-    For best results, `window` should be larger in size than the texel (texture
-    element) being inpainted. For example, in the case below of
+    For best results, `window` should be larger in size than the largest texel
+    (texture element) being inpainted. Texel is the smallest repeating block
+    of pixels in a texture or pattern. For example, in the case below of
     `skimage.data.checkerboard` image, the single white/black square is the
-    texel which is of `(25, 25)` shape. A value larger than this yields
+    largest texel which is of `(25, 25)` shape. A value larger than this yields
     perfect reconstruction, but a value smaller than this, may have couple of
     pixels off.
 
