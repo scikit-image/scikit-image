@@ -200,13 +200,13 @@ def corner_fast_orientation(image, fast_corners):
         raise ValueError("Only 2-D gray-scale images supported.")
 
     # Essentially skimage.morphology.octagon(3, 2)
-    circular_mask = np.array([[0, 0, 1, 1, 1, 0, 0],
-                              [0, 1, 1, 1, 1, 1, 0],
-                              [1, 1, 1, 1, 1, 1, 1],
-                              [1, 1, 1, 1, 1, 1, 1],
-                              [1, 1, 1, 1, 1, 1, 1],
-                              [0, 1, 1, 1, 1, 1, 0],
-                              [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
+    cdef char[:, :] circular_mask = np.array([[0, 0, 1, 1, 1, 0, 0],
+                                              [0, 1, 1, 1, 1, 1, 0],
+                                              [1, 1, 1, 1, 1, 1, 1],
+                                              [1, 1, 1, 1, 1, 1, 1],
+                                              [1, 1, 1, 1, 1, 1, 1],
+                                              [0, 1, 1, 1, 1, 1, 0],
+                                              [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
 
     cdef Py_ssize_t[:, :] cfast_corners = np.ascontiguousarray(fast_corners, dtype=np.intp)
 
@@ -219,13 +219,14 @@ def corner_fast_orientation(image, fast_corners):
         x = cfast_corners[i, 0]
         y = cfast_corners[i, 1]
 
-        kp_circular_patch = image[x - 3:x + 4, y - 3:y + 4] * circular_mask
+        kp_circular_patch = np.ascontiguousarray(image[x - 3:x + 4, y - 3:y + 4])
         mu = np.zeros((2, 2), dtype=np.double)
-        for p in range(2):
-            for q in range(2):
-                for r in range(7):
-                    for c in range(7):
-                        mu[p, q] += kp_circular_patch[r, c] * (r - 3) ** q * (c - 3) ** p
+        for r in range(7):
+            for c in range(7):
+                if circular_mask[r, c]:
+                    for p in range(2):
+                        for q in range(2):
+                            mu[p, q] += kp_circular_patch[r, c] * (r - 3) ** q * (c - 3) ** p
 
         kp_orientation[i] = atan2(mu[1, 0] / mu[0, 0], mu[0, 1] / mu[0, 0])
 
