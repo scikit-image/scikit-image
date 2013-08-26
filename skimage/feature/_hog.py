@@ -4,7 +4,7 @@ from scipy.ndimage import uniform_filter
 
 
 def hog(image, orientations=9, pixels_per_cell=(8, 8),
-        cells_per_block=(3, 3), visualise=False, normalise=False):
+        cells_per_block=(3, 3), signed=False, visualise=False, normalise=False):
     """Extract Histogram of Oriented Gradients (HOG) for a given image.
 
     Compute a Histogram of Oriented Gradients (HOG) by
@@ -25,6 +25,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         Size (in pixels) of a cell.
     cells_per_block  : 2 tuple (int,int)
         Number of cells in each block.
+    signed    : bool, optional
+        Compute "signed" orientations, 
+        where 90 and 270 degree orientation are NOT the same
     visualise : bool, optional
         Also return an image of the HOG.
     normalise : bool, optional
@@ -100,8 +103,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
     cell are used to vote into the orientation histogram.
     """
 
+    angle_max = 360.0 if signed else 180.0
     magnitude = sqrt(gx**2 + gy**2)
-    orientation = arctan2(gy, gx) * (180 / pi) % 180
+    orientation = arctan2(gy, gx) * (180 / pi) % angle_max
 
     sy, sx = image.shape
     cx, cy = pixels_per_cell
@@ -117,9 +121,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         #create new integral image for this orientation
         # isolate orientations in this range
 
-        temp_ori = np.where(orientation < 180.0 / orientations * (i + 1),
+        temp_ori = np.where(orientation < angle_max / orientations * (i + 1),
                             orientation, -1)
-        temp_ori = np.where(orientation >= 180.0 / orientations * i,
+        temp_ori = np.where(orientation >= angle_max / orientations * i,
                             temp_ori, -1)
         # select magnitudes for those orientations
         cond2 = temp_ori > -1
