@@ -1,8 +1,10 @@
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_equal
 import numpy as np
 
-from skimage.draw import (line, polygon, circle, circle_perimeter,
-                          circle_perimeter_aa, ellipse,
+from skimage.draw import (line, line_aa,
+                          polygon, circle,
+                          circle_perimeter, circle_perimeter_aa,
+                          ellipse,
                           ellipse_perimeter, bezier_segment,
                           )
 
@@ -52,6 +54,43 @@ def test_line_diag():
     img_ = np.eye(5)
 
     assert_array_equal(img, img_)
+
+
+def test_line_aa_horizontal():
+    img = np.zeros((10, 10))
+
+    rr, cc, val = line_aa(0, 0, 0, 9)
+    img[rr, cc] = val
+
+    img_ = np.zeros((10, 10))
+    img_[0, :] = 255
+
+    assert_array_equal(img, img_)
+
+
+def test_line_aa_vertical():
+    img = np.zeros((10, 10))
+
+    rr, cc, val = line_aa(0, 0, 9, 0)
+    img[rr, cc] = val
+
+    img_ = np.zeros((10, 10))
+    img_[:, 0] = 255
+
+    assert_array_equal(img, img_)
+
+
+def test_line_aa_diagonal():
+    img = np.zeros((10, 10))
+
+    rr, cc, val = line_aa(0, 0, 9, 6)
+    img[rr, cc] = 1
+
+    # Check that each pixel belonging to line,
+    # also belongs to line_aa
+    r, c = line(0, 0, 9, 6)
+    for x, y in zip(r, c):
+        assert_equal(img[r, c], 1)
 
 
 def test_polygon_rectangle():

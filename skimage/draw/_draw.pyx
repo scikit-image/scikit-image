@@ -27,6 +27,10 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = 1``.
 
+    Notes
+    -----
+    Anti-aliased line generator is available with `line_aa`.
+
     Examples
     --------
     >>> from skimage.draw import line
@@ -87,6 +91,83 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
     cc[dx] = x2
 
     return np.asarray(rr), np.asarray(cc)
+
+
+def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
+    """Generate line pixel coordinates.
+
+    Parameters
+    ----------
+    y1, x1 : int
+        Starting position (row, column).
+    y2, x2 : int
+        End position (row, column).
+
+    Returns
+    -------
+    rr, cc, val : (N,) ndarray of int
+        Indices of pixels that belong to the line.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = val``.
+
+    References
+    ----------
+    .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
+           http://members.chello.at/easyfilter/Bresenham.pdf
+
+    """
+    cdef list rr = list()
+    cdef list cc = list()
+    cdef list val = list()
+
+    cdef int dx = abs(x1 - x2)
+    cdef int dy = abs(y1 - y2)
+    cdef int err = dx - dy
+    cdef int x, y, e, ed, sign_x, sign_y
+
+    if x1 < x2:
+        sign_x = 1
+    else:
+        sign_x = -1
+
+    if y1 < y2:
+        sign_y = 1
+    else:
+        sign_y = -1
+
+    if dx + dy == 0:
+        ed = 1
+    else:
+        ed = <int>(sqrt(dx*dx + dy*dy))
+
+    x, y = x1, y1
+    while True:
+        cc.append(x)
+        rr.append(y)
+        val.append(255 * abs(err - dx + dy) / ed)
+        e = err
+        if 2 * e >= -dx:
+            if x == x2:
+                break
+            if e + dy < ed:
+                cc.append(x)
+                rr.append(y + sign_y)
+                val.append(255 * abs(e + dy) / ed)
+            err -= dy
+            x += sign_x
+        if 2 * e <= dy:
+            if y == y2:
+                break
+            if dx - e < ed:
+                cc.append(x)
+                rr.append(y)
+                val.append(255 * abs(dx - e) / ed)
+            err += dx
+            y += sign_y
+
+    return (np.array(rr, dtype=np.intp),
+            np.array(cc, dtype=np.intp),
+            255 - np.array(val, dtype=np.intp))
 
 
 def polygon(y, x, shape=None):
