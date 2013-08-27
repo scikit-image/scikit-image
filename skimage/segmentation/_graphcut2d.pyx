@@ -62,6 +62,8 @@ cdef class GraphCut:
 
     """
     cdef:
+        #cnp.ndarray _src, _sink
+        #cnp.ndarray _up, _down, _left, _right
         readonly double[:] excess, up, down, left, right
         Py_ssize_t[:] height
         int w, h
@@ -81,7 +83,7 @@ cdef class GraphCut:
         if affinity == None:
             affinity = AFFINITY
 
-        self.excess = (sink - src).astype(np.double).ravel()
+        self.excess = (src - sink).astype(np.double).ravel()
         self.height = np.zeros((600, 800), np.int).ravel()
 
         self.w = img.shape[1]
@@ -121,12 +123,19 @@ cdef class GraphCut:
         self.left = _left.ravel()
         self.right = _right.ravel()
 
+        #self._up = _up.copy().ravel()
+        #self._down = _down.copy().ravel()
+        #self._left = _left.copy().ravel()
+        #self._right = _right.copy().ravel()
+
+        #self._sink = sink.ravel()
+        #self._src = src.ravel()
+
         self.active = {}
 
         for i in range(self.size):
             if self.excess[i] > 0:
                 self.active[i] = None
-
 
     cdef push(self):
         cdef:
@@ -305,8 +314,6 @@ cdef class GraphCut:
 
         i = 0
         while len(self.active) > 0:
-            print i, len(self.active)
-
             self.push()
 
             if i%global_relabel_interval == 0:
@@ -328,6 +335,37 @@ cdef class GraphCut:
     cdef int index_right(self, int i):
         return i + 1
 
+
+    cdef cost(self):
+        cdef:
+            double c
+            int i
+            int h
+
+        c = 0
+
+        for i in range(self.size):
+            h = self.height[i]
+
+            if h == self.max_label:
+                c += self._sink[i]
+            else:
+                c += self._src[i]
+
+            if i/self.w > 0:
+                if h != self.height[self.index_up(i)]:
+                    c += self._up[i]
+            if i/self.w < self.h-1:
+                if h != self.height[self.index_left(i)]:
+                    c += self._left[i]
+            if i%self.w > 0:
+                if h != self.height[self.index_down(i)]:
+                    c += self._down[i]
+            if i%self.w < self.w-1:
+                if h != self.height[self.index_right(i)]:
+                    c += self._right[i]
+
+        return c
 
 def graphcut(img, src, sink, global_relabel_interval=GLOBAL_RELABEL_INTERVAL,
             affinity=AFFINITY):
@@ -370,6 +408,8 @@ def graphcut(img, src, sink, global_relabel_interval=GLOBAL_RELABEL_INTERVAL,
     height = np.array(gc.height).reshape(shape)
 
     cut[height == gc.max_label] = 1
+
+    #print gc.cost()
 
     return cut
 

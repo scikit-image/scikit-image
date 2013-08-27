@@ -2,7 +2,7 @@ import numpy as np
 from cython cimport view
 cimport numpy as cnp
 
-DEF BETA = (1.0/5)
+DEF BETA = (1.0/10)
 DEF EPSILON = 0.05
 DEF AFFINITY = 60.0
 DEF GLOBAL_RELABEL_INTERVAL = 8
@@ -49,6 +49,7 @@ cdef class Node:
         double excess
         tuple coord
         double[:] edges
+        #double _src, _sink
         list neighbours
         object value #is either double (Grayscale) or ndarray (RGB)
 
@@ -71,6 +72,7 @@ cdef class GraphCut:
             tuple index
             x2, y2
             Node node, neighbour
+            Node node1, node2
 
         if affinity == None:
             affinity = AFFINITY
@@ -117,6 +119,8 @@ cdef class GraphCut:
             node.value = img[y][x]
             node.height = 0
             node.excess = src[y][x] - sink[y][x]
+            #node._src = src[y][x]
+            #node._sink = sink[y][x]
 
             if node.excess > 0:
                 self.active.append(node)
@@ -263,6 +267,34 @@ cdef class GraphCut:
 
             i += 1
 
+    cdef cost(self):
+        cdef:
+            double c
+            int i
+            int h
+            Node node, neighbour
+
+        c = 0
+
+        for node in self.nodes:
+            h = node.height
+
+            if h == self.size:
+                c += node._sink
+            else:
+                c += node._src
+
+            for i in range(self.structure.cardinality):
+                neighbour = node.neighbours[i]
+
+                if neighbour == None:
+                    continue
+
+                if h != neighbour.height:
+                    c += weight(node, neighbour)
+
+        return c
+
 def graphcut(img, src, sink, dim=Structure.DIM_2D_4,
              global_relabel_interval=GLOBAL_RELABEL_INTERVAL,
              affinity=AFFINITY):
@@ -304,5 +336,7 @@ def graphcut(img, src, sink, dim=Structure.DIM_2D_4,
     height = np.array(gc.getHeight()).reshape(shape)
 
     cut[height == gc.size] = 1
+
+    #print gc.cost()
 
     return cut
