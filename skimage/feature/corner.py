@@ -147,6 +147,86 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     return Hxx, Hxy, Hyy
 
 
+def _image_orthogonal_matrix22_eigvals(M00, M01, M11):
+    l1 = (M00 + M11) / 2 + np.sqrt(4 * M01 ** 2 + (M00 - M11) ** 2) / 2
+    l2 = (M00 + M11) / 2 - np.sqrt(4 * M01 ** 2 + (M00 - M11) ** 2) / 2
+    return l1, l2
+
+
+def structure_tensor_eigvals(Axx, Axy, Ayy):
+    """Compute Eigen values of structure tensor.
+
+    Parameters
+    ----------
+    Axx : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Axy : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Ayy : ndarray
+        Element of the structure tensor for each pixel in the input image.
+
+    Returns
+    -------
+    l1 : ndarray
+        Larger eigen value for each input matrix.
+    l2 : ndarray
+        Smaller eigen value for each input matrix.
+
+    Examples
+    --------
+    >>> from skimage.feature import structure_tensor, structure_tensor_eigvals
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 1
+    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
+    >>> structure_tensor_eigvals(Axx, Axy, Ayy)[0]
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  2.,  4.,  2.,  0.],
+           [ 0.,  4.,  0.,  4.,  0.],
+           [ 0.,  2.,  4.,  2.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
+
+    """
+
+    return _image_orthogonal_matrix22_eigvals(Axx, Axy, Ayy)
+
+
+def hessian_matrix_eigvals(Hxx, Hxy, Hyy):
+    """Compute Eigen values of Hessian matrix.
+
+    Parameters
+    ----------
+    Hxx : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+    Hxy : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+    Hyy : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+
+    Returns
+    -------
+    l1 : ndarray
+        Larger eigen value for each input matrix.
+    l2 : ndarray
+        Smaller eigen value for each input matrix.
+
+    Examples
+    --------
+    >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 1
+    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
+    >>> hessian_matrix_eigvals(Hxx, Hxy, Hyy)[0]
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  1.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
+
+    """
+
+    return _image_orthogonal_matrix22_eigvals(Hyy, Hxy, Hyy)
+
+
 def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     """Compute Kitchen and Rosenfeld corner measure response image.
 
