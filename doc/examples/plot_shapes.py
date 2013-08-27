@@ -1,9 +1,9 @@
 """
-===========
-Fill shapes
-===========
+======
+Shapes
+======
 
-This example shows how to fill several different shapes:
+This example shows how to draw several different shapes:
 
 * line
 * polygon
@@ -49,10 +49,6 @@ img[rr,cc,2] = 255
 rr, cc = circle_perimeter(120, 400, 15)
 img[rr, cc, :] = (255, 0, 0)
 
-# anti-aliased circle
-rr, cc, val = circle_perimeter_aa(120, 400, 70)
-img[rr, cc, 1] = val * 255
-
 # ellipses
 rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 4.)
 img[rr, cc, :] = (255, 0, 255)
@@ -62,4 +58,34 @@ rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 2.)
 img[rr, cc, :] = (255, 255, 255)
 
 plt.imshow(img)
+plt.show()
+
+"""
+
+Anti-aliasing drawing for:
+* line
+* circle
+
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from skimage.draw import line_aa, \
+                         circle_perimeter_aa
+import numpy as np
+
+img = np.zeros((100, 100), dtype=np.uint8)
+
+# anti-aliased line
+rr, cc, val = line_aa(12, 12, 20, 50)
+img[rr, cc] = val * 255
+
+# anti-aliased circle
+rr, cc, val = circle_perimeter_aa(60, 40, 30)
+img[rr, cc] = val * 255
+
+
+plt.imshow(img, cmap=plt.cm.gray, interpolation='nearest')
+plt.title('Anti-aliasing')
 plt.show()
