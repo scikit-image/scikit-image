@@ -126,7 +126,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
 
     # window extent to the left and right, which covers > 99% of the normal
     # distribution
-    window_ext = np.ceil(3 * sigma)
+    window_ext = max(1, np.ceil(3 * sigma))
 
     ky, kx = np.mgrid[-window_ext:window_ext + 1, -window_ext:window_ext + 1]
 
@@ -134,8 +134,10 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     gaussian_exp = np.exp(-(kx ** 2 + ky ** 2) / (2 * sigma ** 2))
     kernel_xx = 1 / (2 * np.pi * sigma ** 4) * (kx ** 2 / sigma ** 2 - 1)
     kernel_xx *= gaussian_exp
+    kernel_xx /= kernel_xx.sum()
     kernel_xy = 1 / (2 * np.pi * sigma ** 6) * (kx * ky)
     kernel_xy *= gaussian_exp
+    kernel_xy /= kernel_xx.sum()
     kernel_yy = kernel_xx.transpose()
 
     Hxx = ndimage.convolve(image, kernel_xx, mode=mode, cval=cval)
