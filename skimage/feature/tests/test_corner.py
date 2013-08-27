@@ -10,7 +10,85 @@ from skimage.morphology import octagon
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
                              corner_kitchen_rosenfeld, corner_foerstner,
-                             corner_fast, corner_orientations)
+                             corner_fast, corner_orientations,
+                             structure_tensor, structure_tensor_eigvals,
+                             hessian_matrix, hessian_matrix_eigvals)
+
+
+def test_structure_tensor():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
+    assert_array_equal(Axx, np.array([[ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  0,  1,  0],
+                                      [ 0,  4,  0,  4,  0],
+                                      [ 0,  1,  0,  1,  0],
+                                      [ 0,  0,  0,  0,  0]]))
+    assert_array_equal(Axy, np.array([[ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  0, -1,  0],
+                                      [ 0,  0,  0, -0,  0],
+                                      [ 0, -1, -0,  1,  0],
+                                      [ 0,  0,  0,  0,  0]]))
+    assert_array_equal(Ayy, np.array([[ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  4,  1,  0],
+                                      [ 0,  0,  0,  0,  0],
+                                      [ 0,  1,  4,  1,  0],
+                                      [ 0,  0,  0,  0,  0]]))
+
+
+def test_structure_tensor():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
+    assert_array_equal(Hxx, np.array([[0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 0, 1, 0, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(Hxy, np.array([[0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0]]))
+    assert_array_equal(Hyy, np.array([[0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 0, 1, 0, 0],
+                                      [0, 0, 0, 0, 0],
+                                      [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_eigvals():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
+    l1, l2 = structure_tensor_eigvals(Axx, Axy, Ayy)
+    assert_array_equal(l1, np.array([[0, 0, 0, 0, 0],
+                                     [0, 2, 4, 2, 0],
+                                     [0, 4, 0, 4, 0],
+                                     [0, 2, 4, 2, 0],
+                                     [0, 0, 0, 0, 0]]))
+    assert_array_equal(l2, np.array([[0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0]]))
+
+
+def test_structure_tensor_eigvals():
+    square = np.zeros((5, 5))
+    square[2, 2] = 1
+    Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
+    l1, l2 = hessian_matrix_eigvals(Hxx, Hxy, Hyy)
+    assert_array_equal(l1, np.array([[0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0],
+                                     [0, 0, 1, 0, 0],
+                                     [0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0]]))
+    assert_array_equal(l2, np.array([[0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0],
+                                     [0, 0, 1, 0, 0],
+                                     [0, 0, 0, 0, 0],
+                                     [0, 0, 0, 0, 0]]))
 
 
 def test_square_image():

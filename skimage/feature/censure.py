@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 
 from skimage.transform import integral_image
-from skimage.feature.corner import _compute_auto_correlation
+from skimage.feature import structure_tensor
 from skimage.util import img_as_float
 from skimage.morphology import octagon, star
 from skimage.feature.util import _mask_border_keypoints
@@ -104,7 +104,7 @@ def _star_filter_kernel(m, n):
 
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
-    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+    Axx, Axy, Ayy = structure_tensor(image, sigma)
     feature_mask[(Axx + Ayy) * (Axx + Ayy)
                  > line_threshold * (Axx * Ayy - Axy * Axy)] = False
 
