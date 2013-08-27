@@ -175,7 +175,7 @@ def circle_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius,
         Centre coordinate of circle.
     radius: int
         Radius of circle.
-    method : {'bresenham', 'andres', 'wu'}, optional
+    method : {'bresenham', 'andres'}, optional
         bresenham : Bresenham method (default)
         andres : Andres method
 
