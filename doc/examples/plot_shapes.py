@@ -6,6 +6,7 @@ Shapes
 This example shows how to draw several different shapes:
 
 * line
+* Bezier curve
 * polygon
 * circle
 * ellipse
@@ -16,7 +17,8 @@ import matplotlib.pyplot as plt
 
 from skimage.draw import line, polygon, circle, \
                          circle_perimeter, \
-                         ellipse, ellipse_perimeter
+                         ellipse, ellipse_perimeter, \
+                         bezier_curve
 import math
 
 img = np.zeros((500, 500, 3), dtype=np.uint8)
@@ -46,6 +48,10 @@ img[rr, cc, 2] = 255
 
 # circle
 rr, cc = circle_perimeter(120, 400, 15)
+img[rr, cc, :] = (255, 0, 0)
+
+# Bezier curve
+rr, cc = bezier_curve(70, 100, 10, 10, 150, 100, 1)
 img[rr, cc, :] = (255, 0, 0)
 
 # ellipses
