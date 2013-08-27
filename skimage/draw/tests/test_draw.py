@@ -1,11 +1,10 @@
 from numpy.testing import assert_array_equal, assert_equal
 import numpy as np
 
-from skimage.draw import (line, line_aa,
-                          polygon, circle,
-                          circle_perimeter, circle_perimeter_aa,
-                          ellipse,
-                          ellipse_perimeter, _bezier_segment,
+from skimage.draw import (line, line_aa, polygon,
+                          circle, circle_perimeter, circle_perimeter_aa,
+                          ellipse, ellipse_perimeter,
+                          _bezier_segment, bezier_curve,
                           )
 
 
@@ -444,7 +443,10 @@ def test_bezier_segment_straight():
 
 def test_bezier_segment_curved():
     img = np.zeros((25, 25), 'uint8')
-    rr, cc = _bezier_segment(20, 20, 20, 2, 2, 2, 1)
+    x1, y1 = 20, 20
+    x2, y2 = 20, 2
+    x3, y3 = 2, 2
+    rr, cc = _bezier_segment(x1, y1, x2, y2, x3, y3, 1)
     img[rr, cc] = 1
     img_ = np.array(
            [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -473,8 +475,100 @@ def test_bezier_segment_curved():
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
             )
+    assert_equal(img[x1, y1], 1)
+    assert_equal(img[x3, y3], 1)
     assert_array_equal(img, img_)
 
+
+def test_bezier_curve_straight():
+    image = np.zeros((200, 200), dtype=int)
+    x0 = 50
+    y0 = 50
+    x1 = 150
+    y1 = 50
+    x2 = 150
+    y2 = 150
+    rr, cc = bezier_curve(x0, y0, x1, y1, x2, y2, 0)
+    image [rr, cc] = 1
+
+    image2 = np.zeros((200, 200), dtype=int)
+    rr, cc = line(x0, y0, x2, y2)
+    image2 [rr, cc] = 1
+    assert_array_equal(image, image2)
+
+
+def test_bezier_curved_weight_eq_1():
+    img = np.zeros((23, 8), 'uint8')
+    x1, y1 = (1, 1)
+    x2, y2 = (11, 11)
+    x3, y3 = (21, 1)
+    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 1)
+    img[rr, cc] = 1
+    assert_equal(img[x1, y1], 1)
+    assert_equal(img[x3, y3], 1)
+    img_ = np.array(
+           [[0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0],
+            [0, 0, 0, 1, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0]]
+            )
+    assert_equal(img, img_)
+
+
+def test_bezier_curved_weight_neq_1():
+    img = np.zeros((23, 10), 'uint8')
+    x1, y1 = (1, 1)
+    x2, y2 = (11, 11)
+    x3, y3 = (21, 1)
+    rr, cc = bezier_curve(x1, y1, x2, y2, x3, y3, 2)
+    img[rr, cc] = 1
+    assert_equal(img[x1, y1], 1)
+    assert_equal(img[x3, y3], 1)
+    img_ = np.array(
+            [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+             [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+             [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+             [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+             [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+             [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+             [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+            )
+    assert_equal(img, img_)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

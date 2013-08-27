@@ -677,6 +677,118 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
     return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
 
 
+def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
+                 Py_ssize_t y1, Py_ssize_t x1,
+                 Py_ssize_t y2, Py_ssize_t x2,
+                 double weight):
+    """Generate Bezier curve coordinates.
+
+    Parameters
+    ----------
+    y0, x0 : int
+        Coordinates of the first point
+    y1, x1 : int
+        Coordinates of the middle point
+    y2, x2 : int
+        Coordinates of the last point
+    weight : double
+        Middle point weight, it describes the line tension.
+
+    Returns
+    -------
+    rr, cc : (N,) ndarray of int
+        Indices of pixels that belong to the Bezier curve.
+        May be used to directly index into an array, e.g.
+        ``img[rr, cc] = 1``.
+
+    Notes
+    -----
+    The algorithm is the rational quadratic algorithm presented in
+    reference [1].
+
+    References
+    ----------
+    .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
+           http://members.chello.at/easyfilter/Bresenham.pdf
+    """
+    # Pixels
+    cdef list px = list()
+    cdef list py = list()
+
+    cdef int x, y
+    cdef double xx, yy, ww, t, q
+    x = x0 - 2 * x1 + x2
+    y = y0 - 2 * y1 + y2
+
+    xx = x0 - x1
+    yy = y0 - y1
+
+    if xx * (x2 - x1) > 0:
+        if yy * (y2 - y1):
+            if abs(xx * y) > abs(yy * x):
+                x0 = x2
+                x2 = <Py_ssize_t>(xx + x1)
+                y0 = y2
+                y2 = <Py_ssize_t>(yy + y1)
+        if (x0 == x2) or (weight == 1.):
+            t = <double>(x0 - x1) / x
+        else:
+            q = sqrt(4. * weight * weight * (x0 - x1) * (x2 - x1) + (x2 - x0) * floor(x2 - x0))
+            if (x1 < x0):
+                q = -q
+            t = (2. * weight * (x0 - x1) - x0 + x2 + q) / (2. * (1. - weight) * (x2 - x0))
+
+        q = 1. / (2. * t * (1. - t) * (weight - 1.) + 1.0)
+        xx = (t * t * (x0 - 2. * weight * x1 + x2) + 2. * t * (weight * x1 - x0) + x0) * q
+        yy = (t * t * (y0 - 2. * weight * y1 + y2) + 2. * t * (weight * y1 - y0) + y0) * q
+        ww = t * (weight - 1.) + 1.
+        ww *= ww * q
+        weight = ((1. - t) * (weight - 1.) + 1.) * sqrt(q)
+        x = <int>(xx + 0.5)
+        y = <int>(yy + 0.5)
+        yy = (xx - x0) * (y1 - y0) / (x1 - x0) + y0
+
+        rr, cc = _bezier_segment(y0, x0, <int>(yy + 0.5), x, y, x, ww)
+        px.extend(rr)
+        py.extend(cc)
+
+        yy = (xx - x2) * (y1 - y2) / (x1 - x2) + y2
+        y1 = <int>(yy + 0.5)
+        x0 = x1 = x
+        y0 = y
+    if (y0 - y1) * floor(y2 - y1) > 0:
+        if (y0 == y2) or (weight == 1):
+            t = (y0 - y1) / (y0 - 2. * y1 + y2)
+        else:
+            q = sqrt(4. * weight * weight * (y0 - y1) * (y2 - y1) + (y2 - y0) * floor(y2 - y0))
+            if y1 < y0:
+                q = -q
+            t = (2. * weight * (y0 - y1) - y0 + y2 + q) / (2. * (1. - weight) * (y2 - y0))
+        q = 1. / (2. * t * (1. - t) * (weight - 1.) + 1.)
+        xx = (t * t * (x0 - 2. * weight * x1 + x2) + 2. * t * (weight * x1 - x0) + x0) * q
+        yy = (t * t * (y0 - 2. * weight * y1 + y2) + 2. * t * (weight * y1 - y0) + y0) * q
+        ww = t * (weight - 1.) + 1.
+        ww *= ww * q
+        weight = ((1. - t) * (weight - 1.) + 1.) * sqrt(q)
+        x = <int>(xx + 0.5)
+        y = <int>(yy + 0.5)
+        xx = (x1 - x0) * (yy - y0) / (y1 - y0) + x0
+
+        rr, cc = _bezier_segment(y0, x0, y, <int>(xx + 0.5), y, x, ww)
+        px.extend(rr)
+        py.extend(cc)
+
+        xx = (x1 - x2) * (yy - y2) / (y1 - y2) + x2
+        x1 = <int>(xx + 0.5)
+        x0 = x
+        y0 = y1 = y
+
+    rr, cc = _bezier_segment(y0, x0, y1, x1, y2, x2, weight * weight)
+    px.extend(rr)
+    py.extend(cc)
+    return np.array(px, dtype=np.intp), np.array(py, dtype=np.intp)
+
+
 def set_color(img, coords, color):
     """Set pixel color in the image at the given coordinates.
 
