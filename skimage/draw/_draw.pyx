@@ -533,23 +533,23 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
         iyd = int(floor(ya * w + 0.5))
 
         # Draw the 4 quadrants
-        rr, cc = bezier_segment(iy0 + iyd, ix0, iy0, ix0, iy0, ix0 + ixd, 1-w)
+        rr, cc = _bezier_segment(iy0 + iyd, ix0, iy0, ix0, iy0, ix0 + ixd, 1-w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_segment(iy0 + iyd, ix0, iy1, ix0, iy1, ix1 - ixd, w)
+        rr, cc = _bezier_segment(iy0 + iyd, ix0, iy1, ix0, iy1, ix1 - ixd, w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_segment(iy1 - iyd, ix1, iy1, ix1, iy1, ix1 - ixd, 1-w)
+        rr, cc = _bezier_segment(iy1 - iyd, ix1, iy1, ix1, iy1, ix1 - ixd, 1-w)
         py.extend(rr)
         px.extend(cc)
-        rr, cc = bezier_segment(iy1 - iyd, ix1, iy0, ix1, iy0, ix0 + ixd,  w)
+        rr, cc = _bezier_segment(iy1 - iyd, ix1, iy0, ix1, iy0, ix0 + ixd,  w)
         py.extend(rr)
         px.extend(cc)
 
     return np.array(py, dtype=np.intp), np.array(px, dtype=np.intp)
 
 
-def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
+def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
                    Py_ssize_t y1, Py_ssize_t x1,
                    Py_ssize_t y2, Py_ssize_t x2,
                    double weight):
@@ -643,7 +643,7 @@ def bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
             sy = floor((y0 + 2 * weight * y1 + y2) * xy * 0.5 + 0.5)
             dx = floor((weight * x1 + x0) * xy + 0.5)
             dy = floor((y1 * weight + y0) * xy + 0.5)
-            return bezier_segment(y0, x0, <Py_ssize_t>(dy), <Py_ssize_t>(dx),
+            return _bezier_segment(y0, x0, <Py_ssize_t>(dy), <Py_ssize_t>(dx),
                                   <Py_ssize_t>(sy), <Py_ssize_t>(sx), cur)
 
         err = dx + dy - xy

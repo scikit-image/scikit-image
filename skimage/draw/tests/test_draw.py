@@ -5,7 +5,7 @@ from skimage.draw import (line, line_aa,
                           polygon, circle,
                           circle_perimeter, circle_perimeter_aa,
                           ellipse,
-                          ellipse_perimeter, bezier_segment,
+                          ellipse_perimeter, _bezier_segment,
                           )
 
 
@@ -433,7 +433,7 @@ def test_bezier_segment_straight():
     y1 = 50
     x2 = 150
     y2 = 150
-    rr, cc = bezier_segment(x0, y0, x1, y1, x2, y2, 0)
+    rr, cc = _bezier_segment(x0, y0, x1, y1, x2, y2, 0)
     image [rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
@@ -444,7 +444,7 @@ def test_bezier_segment_straight():
 
 def test_bezier_segment_curved():
     img = np.zeros((25, 25), 'uint8')
-    rr, cc = bezier_segment(20, 20, 20, 2, 2, 2, 1)
+    rr, cc = _bezier_segment(20, 20, 20, 2, 2, 2, 1)
     img[rr, cc] = 1
     img_ = np.array(
            [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
