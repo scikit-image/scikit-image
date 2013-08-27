@@ -31,4 +31,6 @@ __all__ = ['daisy',
            'match_keypoints_brief',
            'keypoints_censure',
            'corner_fast',
-           'corner_orientations']
+           'corner_orientations',
+           'structure_tensor',
+           'hessian_matrix']
