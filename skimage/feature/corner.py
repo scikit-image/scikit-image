@@ -8,13 +8,18 @@ from skimage.feature import peak_local_max
 from corner_cy import _corner_fast
 
 
-def _compute_derivatives(image):
+def _compute_derivatives(image, mode='constant', cval=0):
     """Compute derivatives in x and y direction using the Sobel operator.
 
     Parameters
     ----------
     image : ndarray
         Input image.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -25,14 +30,71 @@ def _compute_derivatives(image):
 
     """
 
-    imy = ndimage.sobel(image, axis=0, mode='constant', cval=0)
-    imx = ndimage.sobel(image, axis=1, mode='constant', cval=0)
+    imy = ndimage.sobel(image, axis=0, mode=mode, cval=cval)
+    imx = ndimage.sobel(image, axis=1, mode=mode, cval=cval)
 
     return imx, imy
 
 
-def _compute_auto_correlation(image, sigma):
-    """Compute auto-correlation matrix using sum of squared differences.
+def structure_tensor(image, sigma=1, mode='constant', cval=0):
+    """Compute structure tensor using sum of squared differences.
+
+    The structure tensor A is defined as::
+
+        A = [Axx Axy]
+            [Axy Ayy]
+
+    which is approximated by the weighted sum of squared differences in a local
+    window around each pixel in the image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    sigma : float
+        Standard deviation used for the Gaussian kernel, which is used as a
+        weighting function for the local summation of squared differences.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    Returns
+    -------
+    Axx : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Axy : ndarray
+        Element of the structure tensor for each pixel in the input image.
+    Ayy : ndarray
+        Element of the structure tensor for each pixel in the input image.
+
+    """
+
+    image = np.squeeze(image)
+    if image.ndim != 2:
+        raise ValueError("Only 2-D gray-scale images supported.")
+
+    imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
+
+    # structure tensore
+    Axx = ndimage.gaussian_filter(imx * imx, sigma, mode=mode, cval=cval)
+    Axy = ndimage.gaussian_filter(imx * imy, sigma, mode=mode, cval=cval)
+    Ayy = ndimage.gaussian_filter(imy * imy, sigma, mode=mode, cval=cval)
+
+    return Axx, Axy, Ayy
+
+
+def hessian_matrix(image, sigma=1, mode='constant', cval=0):
+    """Compute Hessian matrix.
+
+    The Hessian matrix is defined as::
+
+        H = [Hxx Hxy]
+            [Hxy Hyy]
+
+    which is computed by convolving the image with the second derivatives
+    of the Gaussian kernel in the respective x- and y-directions.
 
     Parameters
     ----------
@@ -41,15 +103,20 @@ def _compute_auto_correlation(image, sigma):
     sigma : float
         Standard deviation used for the Gaussian kernel, which is used as
         weighting function for the auto-correlation matrix.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
-    Axx : ndarray
-        Element of the auto-correlation matrix for each pixel in input image.
-    Axy : ndarray
-        Element of the auto-correlation matrix for each pixel in input image.
-    Ayy : ndarray
-        Element of the auto-correlation matrix for each pixel in input image.
+    Hxx : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+    Hxy : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
+    Hyy : ndarray
+        Element of the Hessian matrix for each pixel in the input image.
 
     """
 
@@ -57,17 +124,28 @@ def _compute_auto_correlation(image, sigma):
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
 
-    imx, imy = _compute_derivatives(image)
+    # window extent to the left and right, which covers > 99% of the normal
+    # distribution
+    window_ext = np.ceil(3 * sigma)
 
-    # structure tensore
-    Axx = ndimage.gaussian_filter(imx * imx, sigma, mode='constant', cval=0)
-    Axy = ndimage.gaussian_filter(imx * imy, sigma, mode='constant', cval=0)
-    Ayy = ndimage.gaussian_filter(imy * imy, sigma, mode='constant', cval=0)
+    ky, kx = np.mgrid[-window_ext:window_ext + 1, -window_ext:window_ext + 1]
 
-    return Axx, Axy, Ayy
+    # second derivative Gaussian kernels
+    gaussian_exp = np.exp(-(kx ** 2 + ky ** 2) / (2 * sigma ** 2))
+    kernel_xx = 1 / (2 * np.pi * sigma ** 4) * (kx ** 2 / sigma ** 2 - 1)
+    kernel_xx *= gaussian_exp
+    kernel_xy = 1 / (2 * np.pi * sigma ** 6) * (kx * ky)
+    kernel_xy *= gaussian_exp
+    kernel_yy = kernel_xx.transpose()
+
+    Hxx = ndimage.convolve(image, kernel_xx, mode=mode, cval=cval)
+    Hxy = ndimage.convolve(image, kernel_xy, mode=mode, cval=cval)
+    Hyy = ndimage.convolve(image, kernel_yy, mode=mode, cval=cval)
+
+    return Hxx, Hxy, Hyy
 
 
-def corner_kitchen_rosenfeld(image):
+def corner_kitchen_rosenfeld(image, mode='constant', cval=0):
     """Compute Kitchen and Rosenfeld corner measure response image.
 
     The corner measure is calculated as follows::
@@ -82,6 +160,11 @@ def corner_kitchen_rosenfeld(image):
     ----------
     image : ndarray
         Input image.
+    mode : {'constant', 'reflect', 'wrap', 'nearest', 'mirror'}, optional
+        How to handle values outside the image borders.
+    cval : float, optional
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
 
     Returns
     -------
@@ -90,9 +173,9 @@ def corner_kitchen_rosenfeld(image):
 
     """
 
-    imx, imy = _compute_derivatives(image)
-    imxx, imxy = _compute_derivatives(imx)
-    imyx, imyy = _compute_derivatives(imy)
+    imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
+    imxx, imxy = _compute_derivatives(imx, mode=mode, cval=cval)
+    imyx, imyy = _compute_derivatives(imy, mode=mode, cval=cval)
 
     numerator = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy)
     denominator = (imx**2 + imy**2)
@@ -171,7 +254,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+    Axx, Axy, Ayy = structure_tensor(image, sigma)
 
     # determinant
     detA = Axx * Ayy - Axy**2
@@ -241,7 +324,7 @@ def corner_shi_tomasi(image, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+    Axx, Axy, Ayy = structure_tensor(image, sigma)
 
     # minimum eigenvalue of A
     response = ((Axx + Ayy) - np.sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
@@ -311,7 +394,7 @@ def corner_foerstner(image, sigma=1):
 
     """
 
-    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+    Axx, Axy, Ayy = structure_tensor(image, sigma)
 
     # determinant
     detA = Axx * Ayy - Axy**2
@@ -330,7 +413,6 @@ def corner_foerstner(image, sigma=1):
 
 
 def corner_fast(image, n=12, threshold=0.15):
-
     """Extract FAST corners for a given image.
 
     Parameters
@@ -478,7 +560,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
         maxx = x0 + wext + 2
         window = image[miny:maxy, minx:maxx]
 
-        winx, winy = _compute_derivatives(window)
+        winx, winy = _compute_derivatives(window, mode='constant', cval=0)
 
         # compute gradient suares and remove border
         winx_winx = (winx * winx)[1:-1, 1:-1]

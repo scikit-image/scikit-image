@@ -4,7 +4,8 @@ from .texture import greycomatrix, greycoprops, local_binary_pattern
 from .peak import peak_local_max
 from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
-                     corner_peaks, corner_fast)
+                     corner_peaks, corner_fast, structure_tensor,
+                     hessian_matrix)
 from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
 from ._brief import brief, match_keypoints_brief
