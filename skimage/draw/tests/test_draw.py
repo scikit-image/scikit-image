@@ -434,11 +434,11 @@ def test_bezier_segment_straight():
     x2 = 150
     y2 = 150
     rr, cc = _bezier_segment(x0, y0, x1, y1, x2, y2, 0)
-    image [rr, cc] = 1
+    image[rr, cc] = 1
 
     image2 = np.zeros((200, 200), dtype=int)
     rr, cc = line(x0, y0, x2, y2)
-    image2 [rr, cc] = 1
+    image2[rr, cc] = 1
     assert_array_equal(image, image2)
 
 

@@ -550,9 +550,9 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
 
 
 def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
-                   Py_ssize_t y1, Py_ssize_t x1,
-                   Py_ssize_t y2, Py_ssize_t x2,
-                   double weight):
+                    Py_ssize_t y1, Py_ssize_t x1,
+                    Py_ssize_t y2, Py_ssize_t x2,
+                    double weight):
     """Generate Bezier segment coordinates.
 
     Parameters
@@ -644,7 +644,7 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
             dx = floor((weight * x1 + x0) * xy + 0.5)
             dy = floor((y1 * weight + y0) * xy + 0.5)
             return _bezier_segment(y0, x0, <Py_ssize_t>(dy), <Py_ssize_t>(dx),
-                                  <Py_ssize_t>(sy), <Py_ssize_t>(sx), cur)
+                                   <Py_ssize_t>(sy), <Py_ssize_t>(sx), cur)
 
         err = dx + dy - xy
         while dy <= xy and dx >= xy:
