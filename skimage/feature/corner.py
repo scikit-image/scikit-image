@@ -69,6 +69,19 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
     Ayy : ndarray
         Element of the structure tensor for each pixel in the input image.
 
+    Examples
+    --------
+    >>> from skimage.feature import structure_tensor
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 1
+    >>> Axx, Axy, Ayy = structure_tensor(square, sigma=0.1)
+    >>> Axx
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  1.,  0.,  1.,  0.],
+           [ 0.,  4.,  0.,  4.,  0.],
+           [ 0.,  1.,  0.,  1.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
+
     """
 
     image = np.squeeze(image)
@@ -117,6 +130,19 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
         Element of the Hessian matrix for each pixel in the input image.
     Hyy : ndarray
         Element of the Hessian matrix for each pixel in the input image.
+
+    Examples
+    --------
+    >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+    >>> square = np.zeros((5, 5))
+    >>> square[2, 2] = 1
+    >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
+    >>> Hxx
+    array([[ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  1.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.],
+           [ 0.,  0.,  0.,  0.,  0.]])
 
     """
 
