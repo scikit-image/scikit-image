@@ -144,7 +144,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
     while True:
         cc.append(x)
         rr.append(y)
-        val.append(abs(err - dx + dy) / ed)
+        val.append(1. * abs(err - dx + dy) / <float>(ed))
         e = err
         if 2 * e >= -dx:
             if x == x2:
@@ -152,7 +152,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
             if e + dy < ed:
                 cc.append(x)
                 rr.append(y + sign_y)
-                val.append(abs(e + dy) / ed)
+                val.append(1. * abs(e + dy) / <float>(ed))
             err -= dy
             x += sign_x
         if 2 * e <= dy:
@@ -161,13 +161,13 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
             if dx - e < ed:
                 cc.append(x)
                 rr.append(y)
-                val.append(abs(dx - e) / ed)
+                val.append(abs(dx - e) / <float>(ed))
             err += dx
             y += sign_y
 
     return (np.array(rr, dtype=np.intp),
             np.array(cc, dtype=np.intp),
-            1 - np.array(val, dtype=np.float))
+            1. - np.array(val, dtype=np.float))
 
 
 def polygon(y, x, shape=None):
