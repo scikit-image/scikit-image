@@ -5,11 +5,12 @@ from numpy.testing import (assert_array_equal, assert_raises,
 from skimage import data
 from skimage import img_as_float
 from skimage.color import rgb2gray
+from skimage.morphology import octagon
 
 from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_subpix, peak_local_max, corner_peaks,
                              corner_kitchen_rosenfeld, corner_foerstner,
-                             corner_fast, corner_fast_orientation)
+                             corner_fast, corner_orientations)
 
 
 def test_square_image():
@@ -164,18 +165,24 @@ def test_corner_fast_lena():
     assert_array_equal(actual, expected)
 
 
-def test_corner_fast_orientation_image_unsupported_error():
+def test_corner_orientations_image_unsupported_error():
     img = np.zeros((20, 20, 3))
-    assert_raises(ValueError, corner_fast_orientation, img,
-                  np.asarray([[7, 7]]))
+    assert_raises(ValueError, corner_orientations, img,
+                  np.asarray([[7, 7]]), np.ones((3, 3)))
 
 
-def test_corner_fast_orientation_lena():
+def test_corner_orientations_even_shape_error():
+    img = np.zeros((20, 20))
+    assert_raises(ValueError, corner_orientations, img,
+                  np.asarray([[7, 7]]), np.ones((4, 4)))
+
+
+def test_corner_orientations_lena():
     img = rgb2gray(data.lena())
     corners = corner_peaks(corner_fast(img, 11, 0.35))
     expected = np.array([-1.9195897 , -3.03159624, -1.05991162, -2.89573739,
                          -2.61607644, 2.98660159])
-    actual = corner_fast_orientation(img, corners)
+    actual = corner_orientations(img, corners, octagon(3, 2))
     assert_almost_equal(actual, expected)
 
 
