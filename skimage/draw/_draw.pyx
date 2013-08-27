@@ -105,7 +105,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
 
     Returns
     -------
-    rr, cc, val : (N,) ndarray of int
+    rr, cc, val : (N,) ndarray of (int, int, float)
         Indices of pixels that belong to the line.
         May be used to directly index into an array, e.g.
         ``img[rr, cc] = val``.
@@ -144,7 +144,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
     while True:
         cc.append(x)
         rr.append(y)
-        val.append(255 * abs(err - dx + dy) / ed)
+        val.append(abs(err - dx + dy) / ed)
         e = err
         if 2 * e >= -dx:
             if x == x2:
@@ -152,7 +152,7 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
             if e + dy < ed:
                 cc.append(x)
                 rr.append(y + sign_y)
-                val.append(255 * abs(e + dy) / ed)
+                val.append(abs(e + dy) / ed)
             err -= dy
             x += sign_x
         if 2 * e <= dy:
@@ -161,13 +161,13 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
             if dx - e < ed:
                 cc.append(x)
                 rr.append(y)
-                val.append(255 * abs(dx - e) / ed)
+                val.append(abs(dx - e) / ed)
             err += dx
             y += sign_y
 
     return (np.array(rr, dtype=np.intp),
             np.array(cc, dtype=np.intp),
-            255 - np.array(val, dtype=np.intp))
+            1 - np.array(val, dtype=np.float))
 
 
 def polygon(y, x, shape=None):
@@ -361,7 +361,7 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
 
     Returns
     -------
-    rr, cc, val : (N,) ndarray of int
+    rr, cc, val : (N,) ndarray (int, int, float)
         Indices of pixels (`rr`, `cc`) and intensity values (`val`).
         ``img[rr, cc] = val``.
 

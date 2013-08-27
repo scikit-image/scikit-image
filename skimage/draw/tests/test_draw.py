@@ -63,7 +63,7 @@ def test_line_aa_horizontal():
     img[rr, cc] = val
 
     img_ = np.zeros((10, 10))
-    img_[0, :] = 255
+    img_[0, :] = 1
 
     assert_array_equal(img, img_)
 
@@ -75,7 +75,7 @@ def test_line_aa_vertical():
     img[rr, cc] = val
 
     img_ = np.zeros((10, 10))
-    img_[:, 0] = 255
+    img_[:, 0] = 1
 
     assert_array_equal(img, img_)
 
