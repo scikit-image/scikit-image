@@ -569,7 +569,8 @@ def corner_fast(image, n=12, threshold=0.15):
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners
     array([[3, 3],
            [3, 8],
            [8, 3],
