@@ -219,7 +219,8 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    >>> corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    >>> corners
     array([[3, 3],
            [3, 8],
            [8, 3],
