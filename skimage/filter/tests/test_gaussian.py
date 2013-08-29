@@ -16,10 +16,16 @@ def test_energy_decrease():
 
 
 def test_multichannel():
-    a = np.zeros((3, 3, 3))
+    a = np.zeros((5, 5, 3))
     a[1, 1] = np.arange(1, 4)
     gaussian_rgb_a = gaussian_filter(a, sigma=1, mode='reflect',
                                      multichannel=True)
+    # Check that the mean value is conserved in each channel
+    # (color channels are not mixed together)
+    assert np.allclose([a[..., i].mean() for i in range(3)],
+                        [gaussian_rgb_a[..., i].mean() for i in range(3)])
+    # Test multichannel = None
+    gaussian_rgb_a = gaussian_filter(a, sigma=1, mode='reflect')
     # Check that the mean value is conserved in each channel
     # (color channels are not mixed together)
     assert np.allclose([a[..., i].mean() for i in range(3)],

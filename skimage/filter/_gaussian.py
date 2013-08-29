@@ -1,13 +1,16 @@
 import collections as coll
 import numpy as np
 from scipy import ndimage
-from skimage.util import img_as_float
+import warnings
+
+from ..util import img_as_float
+from ..color import guess_spatial_dimensions
 
 __all__ = ['gaussian_filter']
 
 
 def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
-                    multichannel=False):
+                    multichannel=None):
     """
     Multi-dimensional Gaussian filter
 
@@ -15,8 +18,7 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     ----------
 
     image : array-like
-        input image (grayscale or color) to filter. If color channels are
-        to be filtered separately, use ``multichannel=True``.
+        input image (grayscale or color) to filter.
     sigma : scalar or sequence of scalars
         standard deviation for Gaussian kernel. The standard
         deviations of the Gaussian filter are given for each axis as a
@@ -32,10 +34,12 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     cval : scalar, optional
         Value to fill past edges of input if `mode` is 'constant'. Default
         is 0.0
-    multichannel : bool, optional (default: False)
+    multichannel : bool, optional (default: None)
         Whether the last axis of the image is to be interpreted as multiple
         channels. If True, each channel is filtered separately (channels are
-        not mixed together).
+        not mixed together). Only 3 channels are supported. If `None`,
+        the function will attempt to guess this, and raise a warning if
+        ambiguous, when the array has shape (M, N, 3).
 
     Returns
     -------
@@ -84,6 +88,13 @@ def gaussian_filter(image, sigma, output=None, mode='nearest', cval=0,
     >>> image = lena()
     >>> filtered_lena = gaussian_filter(image, sigma=1, multichannel=True)
     """
+    spatial_dims = guess_spatial_dimensions(image)
+    if spatial_dims is None and multichannel is None:
+        msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB" +
+                   " by default. Use `multichannel=False` to interpret as " +
+                   " 3D image with last dimension of length 3.")
+        warnings.warn(RuntimeWarning(msg))
+        multichannel = True
     if multichannel:
         # do not filter across channels
         if not isinstance(sigma, coll.Iterable):
