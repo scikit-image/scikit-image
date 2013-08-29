@@ -15,25 +15,29 @@ LWORKGROUP = (16, 16)
 
 class NPCanvas(QGLWidget):
     class Layer:
-        def __init__(self, parent, arr, pos=None, enabled=True, opacity=1.0,
+        def __init__(self, parent, data, pos=None, enabled=True, opacity=1.0,
                      filters=[]):
             self.parent = parent
-            self.arr = arr
+            self.data = data
             self.opacity = opacity if opacity != None else 1.0
             self.enabled = enabled
             self.pos = pos
             self.filters = filters
-            self.size = arr.shape[1]*arr.shape[0]
+            self.size = data.shape[1]*data.shape[0]
 
             self.tex = glGenTextures(1)
             self.pbo = glGenBuffers(1)
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, self.pbo)
-            glBufferData(GL_PIXEL_UNPACK_BUFFER, self.size * 4, None, GL_STATIC_DRAW)
+            glBufferData(GL_PIXEL_UNPACK_BUFFER, self.size * 4, None,
+                GL_STATIC_DRAW)
 
+            self.setData(data)
+
+        def updateData(self):
             glBindTexture(GL_TEXTURE_2D, self.tex)
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, arr.shape[1], arr.shape[0],
-                0, GL_RGBA, GL_UNSIGNED_BYTE, None)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, self.data.shape[1],
+                self.data.shape[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
@@ -41,23 +45,17 @@ class NPCanvas(QGLWidget):
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, self.pbo)
-            glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, arr)
-
-        def update(self):
-            glBindTexture(GL_TEXTURE_2D, self.tex)
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, self.arr.shape[1],
-                self.arr.shape[0], 0, GL_RGBA, GL_UNSIGNED_BYTE, None)
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST)
-
-            glBindBuffer(GL_PIXEL_UNPACK_BUFFER, self.pbo)
-            glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, self.arr)
+            glBufferSubData(GL_PIXEL_UNPACK_BUFFER, 0, self.data)
 
             self.parent.update()
 
+        def setOpacity(self, opacity):
+            self.opacity = opacity
+            self.parent.update()
+
+        def setData(self, data):
+            self.data = data
+            self.updateData()
 
     def __init__(self, shape, parent=None):
         super(NPCanvas, self).__init__(parent)
@@ -95,11 +93,11 @@ class NPCanvas(QGLWidget):
         self.layers = []
 
         glFinish()
-    def addLayer(self, arr, opacity=None, filters=[]):
+    def addLayer(self, data, opacity=None, filters=[]):
         if opacity == None:
             opacity = 1.0
 
-        layer = NPCanvas.Layer(self, arr, opacity=opacity, filters=filters)
+        layer = NPCanvas.Layer(self, data, opacity=opacity, filters=filters)
         self.layers.append(layer)
 
         return layer
@@ -180,7 +178,8 @@ class NPCanvas(QGLWidget):
 
             glBindBuffer(GL_PIXEL_UNPACK_BUFFER, layer.pbo)
             glBindTexture(GL_TEXTURE_2D, layer.tex)
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE, None)
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, self.width, self.height,
+                GL_RGBA, GL_UNSIGNED_BYTE, None)
 
             glBegin(GL_QUADS)
             glVertex2i(0,0)
@@ -196,12 +195,11 @@ class NPCanvas(QGLWidget):
         glDisable(GL_BLEND)
 
     def eventFilter(self, object, event):
-        if hasattr(self, 'mouseDrag') and\
-           (
-               event.type() == QEvent.MouseMove and event.buttons() == Qt.LeftButton):
-            point = (
-                int(event.pos().x() / self.zoom),
-                int(event.pos().y() / self.zoom))
+        if hasattr(self, 'mouseDrag') and (event.type() == QEvent.MouseMove
+                                           and event.buttons() == Qt.LeftButton):
+            point = (int(event.pos().x() / self.zoom),
+                     int(event.pos().y() / self.zoom)
+                    )
 
             self.mouseDrag(self.lastMousePos, point)
 
@@ -210,9 +208,9 @@ class NPCanvas(QGLWidget):
             return True
         if hasattr(self,
             'mousePress') and event.type() == QEvent.MouseButtonPress:
-            point = (
-                int(event.pos().x() / self.zoom),
-                int(event.pos().y() / self.zoom))
+            point = (int(event.pos().x() / self.zoom),
+                     int(event.pos().y() / self.zoom)
+                    )
 
             self.mousePress(point)
 

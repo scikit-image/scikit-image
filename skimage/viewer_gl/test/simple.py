@@ -1,7 +1,22 @@
+"""
+===============
+Simple NumPy Viewer Demo
+===============
+
+Steps the run and test
+ipython --pylab=qt4 -i skimage/viewer_gl/test/simple.py
+
+To dynamically update the contents of a layer:
+l2.data[:] = 0xFF00FFFF
+l2.updateData()
+
+To set the opacity
+l2.setOpacity(0.25)
+"""
+
 import numpy as np
 import Image
 from skimage.viewer_gl.NPViewer import NPViewer, NPViewerEnum
-
 from skimage import data_dir
 
 img = Image.open(data_dir+'/'+'lena.png')
