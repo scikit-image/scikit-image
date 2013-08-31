@@ -182,13 +182,22 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
     Returns
     -------
     u_out : float
-        The``u`` value for the pixel``(i2, j1)``
+        The``u`` value for the pixel ``(i2, j1)``
 
     Notes
     -----
-    The boundary is assumed to move with a constant speed in a direction normal
+    The boundary is assumed to move with unit speed in a direction **normal**
     to the boundary at all pixels, such that the time of arrival``u`` must be
-    monotonically increasing. Note that``u`` is often denoted``T``.
+    monotonically increasing. Note that``u`` is often denoted``T`` and
+    represent the distance/time map.
+
+    In order to calulate ``u`` we find the perpendicular distance to the
+    boundary (curve) from ``(i2, j1)`` using the difference in ``u[i1, j1]``
+    and ``u[i2, j2]``. Since the curve always travels normal to itself and
+    with unit speed, the perpendicular distance also represents the time taken.
+    This is represented by ``perp`` variable below. Add to this distance the
+    time it has taken to reach the neighbouring KNOWN pixels. Represented by
+    below ``s``. Hence, the time map always progresses ahead in time.
 
     References
     ----------
@@ -198,7 +207,7 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 
     """
 
-    cdef cnp.float_t u_out, u1, u2, r, s
+    cdef cnp.float_t u_out, u1, u2, perp, s
 
     u_out = LARGE_VALUE
     u1 = u[i1, j1]
@@ -206,12 +215,14 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 
     if flag[i1, j1] == KNOWN:
         if flag[i2, j2] == KNOWN:
-            r = sqrt(2 - (u1 - u2) ** 2)
-            s = (u1 + u2 - r) * 0.5
+            # Find the perpendicular distance of (i2, j1) to the curve
+            perp = sqrt(2 - (u1 - u2) ** 2)
+            # Add the average distance taken to reach ``u1`` and ``u2``
+            s = (u1 + u2 - perp) * 0.5
             if s >= u1 and s >= u2:
                 u_out = s
             else:
-                s += r
+                s += perp
                 if s >= u1 and s >= u2:
                     u_out = s
         else:
