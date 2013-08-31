@@ -84,8 +84,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 for y in range(y_min, y_max):
                     dy = (cy - y) ** 2
                     for x in range(x_min, x_max):
-                        # you would think the compiler can optimize the
-                        # squaring itself. mine can't (with O2)
                         dist_mean = dz + dy + (cx - x) ** 2
                         for c in range(3, n_features):
                             dist_mean += (image_zyx[z, y, x, c - 3]
