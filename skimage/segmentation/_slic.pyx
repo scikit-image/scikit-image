@@ -32,8 +32,9 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     # initialize on grid
     cdef Py_ssize_t depth, height, width
-    depth, height, width = (image_zyx.shape[0], image_zyx.shape[1],
-                            image_zyx.shape[2])
+    depth = image_zyx.shape[0]
+    height = image_zyx.shape[1]
+    width = image_zyx.shape[2]
 
     cdef Py_ssize_t n_clusters = clusters.shape[0]
     # number of features [X, Y, Z, ...]
@@ -48,16 +49,11 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         = np.empty((depth, height, width), dtype=np.intp)
     cdef double[:, :, ::1] distance \
         = np.empty((depth, height, width), dtype=np.double)
-
-    cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, \
-                    z_max
-    cdef double dist_mean
-
-    cdef char change
-
-    cdef double cx, cy, cz, dy, dz
-
     cdef Py_ssize_t[:] n_cluster_elems = np.zeros(n_clusters, dtype=np.intp)
+
+    cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
+    cdef char change
+    cdef double dist_mean, cx, cy, cz, dy, dz
 
     for i in range(max_iter):
         change = 0
