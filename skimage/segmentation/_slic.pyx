@@ -46,8 +46,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     cdef Py_ssize_t[:, :, ::1] nearest_clusters \
         = np.empty((depth, height, width), dtype=np.intp)
-    cdef float[:, :, ::1] distance \
-        = np.empty((depth, height, width), dtype=np.float32)
+    cdef double[:, :, ::1] distance \
+        = np.empty((depth, height, width), dtype=np.double)
 
     cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, \
                     z_max
