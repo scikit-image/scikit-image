@@ -137,14 +137,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
     ratio = float(max((step_z, step_y, step_x))) / compactness
-    image_zyx = np.concatenate([grid_z[..., np.newaxis],
-                                grid_y[..., np.newaxis],
-                                grid_x[..., np.newaxis],
-                                image * ratio], axis=-1).copy("C")
+    image = image * ratio
+
     nearest_cluster = np.empty((depth, height, width), dtype=np.intp)
     distance = np.empty((depth, height, width), dtype=np.float)
-    segment_map = _slic_cython(image_zyx, nearest_cluster, distance, clusters,
+
+    segment_map = _slic_cython(image, nearest_cluster, distance, clusters,
                                max_iter, n_segments)
+
     if segment_map.shape[0] == 1:
         segment_map = segment_map[0]
+
     return segment_map
