@@ -28,7 +28,7 @@ def test_color_2d():
 
 def test_gray_2d():
     rnd = np.random.RandomState(0)
-    img = np.zeros((20, 21))
+    img = np.zeros((20, 20))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
     img[10:, 10:] = 1.00

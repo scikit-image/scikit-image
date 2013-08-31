@@ -21,7 +21,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
         (see `multichannel` parameter).
     n_segments : int, optional (default: 100)
         The (approximate) number of labels in the segmented output image.
-    compactness: float, optional (default: 10)
+    compactness : float, optional (default: 10)
         Balances color-space proximity and image-space proximity. Higher
         values give more weight to image-space. As `compactness` tends to
         infinity, superpixel shapes become square/cubic.
@@ -37,14 +37,14 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
         array has shape (M, N, 3).
     convert2lab : bool, optional (default: True)
         Whether the input should be converted to Lab colorspace prior to
-        segmentation.  For this purpose, the input is assumed to be RGB. Highly
+        segmentation. For this purpose, the input is assumed to be RGB. Highly
         recommended.
     ratio : float, optional
         Synonym for `compactness`. This keyword is deprecated.
 
     Returns
     -------
-    segment_mask : (width, height) ndarray
+    segment_mask : (width, height, depth) array
         Integer mask indicating segment labels.
 
     Raises
@@ -99,34 +99,41 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
             (multichannel and image.ndim not in [3, 4]) or
             (multichannel and image.shape[-1] != 3)):
         ValueError("Only 1- or 3-channel 2- or 3-D images are supported.")
+
     image = img_as_float(image)
-    if not multichannel:
-        image = gray2rgb(image)
+    image = np.atleast_3d(image)
+
     if image.ndim == 3:
         # See 2D RGB image as 3D RGB image with Z = 1
         image = image[np.newaxis, ...]
+
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma, sigma, sigma, 0])
     if (sigma > 0).any():
         image = ndimage.gaussian_filter(image, sigma)
-    if convert2lab:
+
+    if image.shape[3] == 3 and convert2lab:
         image = rgb2lab(image)
 
-    # initialize on grid:
+    # initialize on grid
     depth, height, width = image.shape[:3]
+
     # approximate grid size for desired n_segments
     grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
     slices = regular_grid(image.shape[:3], n_segments)
     step_z, step_y, step_x = [int(s.step) for s in slices]
-    means_z = grid_z[slices]
-    means_y = grid_y[slices]
-    means_x = grid_x[slices]
+    clusters_z = grid_z[slices]
+    clusters_y = grid_y[slices]
+    clusters_x = grid_x[slices]
 
-    means_color = np.zeros(means_z.shape + (3,))
-    means = np.concatenate([means_z[..., np.newaxis], means_y[..., np.newaxis],
-                            means_x[..., np.newaxis], means_color
-                           ], axis=-1).reshape(-1, 6)
-    means = np.ascontiguousarray(means)
+    clusters_color = np.zeros(clusters_z.shape + (image.shape[3],))
+    clusters = np.concatenate([clusters_z[..., np.newaxis],
+                               clusters_y[..., np.newaxis],
+                               clusters_x[..., np.newaxis],
+                               clusters_color
+                              ], axis=-1).reshape(-1, 3 + image.shape[3])
+    clusters = np.ascontiguousarray(clusters)
+
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
     ratio = float(max((step_z, step_y, step_x))) / compactness
@@ -134,9 +141,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
                                 grid_y[..., np.newaxis],
                                 grid_x[..., np.newaxis],
                                 image * ratio], axis=-1).copy("C")
-    nearest_mean = np.zeros((depth, height, width), dtype=np.intp)
+    nearest_cluster = np.empty((depth, height, width), dtype=np.intp)
     distance = np.empty((depth, height, width), dtype=np.float)
-    segment_map = _slic_cython(image_zyx, nearest_mean, distance, means,
+    segment_map = _slic_cython(image_zyx, nearest_cluster, distance, clusters,
                                max_iter, n_segments)
     if segment_map.shape[0] == 1:
         segment_map = segment_map[0]
