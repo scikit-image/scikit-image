@@ -11,27 +11,18 @@ from skimage.util import regular_grid
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
-                 Py_ssize_t[:, :, ::1] nearest_clusters,
-                 double[:, :, ::1] distance,
                  double[:, ::1] clusters,
-                 Py_ssize_t max_iter, Py_ssize_t n_segments):
+                 Py_ssize_t max_iter):
     """Helper function for SLIC segmentation.
 
     Parameters
     ----------
     image_zyx : 4D array of double, shape (Z, Y, X, C)
-        The image with embedded coordinates, that is, `image_zyx[i, j, k]` is
-        `array([i, j, k, c])`, depending on the colorspace.
-    nearest_clusters : 3D array of int, shape (Z, Y, X)
-        The (initially empty) label field.
-    distance : 3D array of double, shape (Z, Y, X)
-        The (initially infinity) array of distances to the nearest centroid.
-    clusters : 2D array of double, shape (n_segments, 3 + C)
-        The centroids obtained by SLIC.
+        The input image.
+    clusters : 2D array of double, shape (N, 3 + C)
+        The initial centroids obtained by SLIC as [Z, Y, X, C...].
     max_iter : int
         The maximum number of k-means iterations.
-    n_segments : int
-        The approximate/desired number of segments.
 
     Returns
     -------
@@ -39,7 +30,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         The label field/superpixels found by SLIC.
     """
 
-    # initialize on grid:
+    # initialize on grid
     cdef Py_ssize_t depth, height, width
     depth, height, width = (image_zyx.shape[0], image_zyx.shape[1],
                             image_zyx.shape[2])
@@ -50,8 +41,13 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
     # approximate grid size for desired n_segments
     cdef Py_ssize_t step_z, step_y, step_x
-    slices = regular_grid((depth, height, width), n_segments)
+    slices = regular_grid((depth, height, width), n_clusters)
     step_z, step_y, step_x = [int(s.step) for s in slices]
+
+    cdef Py_ssize_t[:, :, ::1] nearest_clusters \
+        = np.empty((depth, height, width), dtype=np.intp)
+    cdef float[:, :, ::1] distance \
+        = np.empty((depth, height, width), dtype=np.float32)
 
     cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, \
                     z_max

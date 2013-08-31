@@ -44,7 +44,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
 
     Returns
     -------
-    segment_mask : (width, height, depth) array
+    labels : (width, height, depth) array
         Integer mask indicating segment labels.
 
     Raises
@@ -82,6 +82,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     >>> # Increasing the ratio parameter yields more square regions
     >>> segments = slic(img, n_segments=100, ratio=20)
     """
+
     if ratio is not None:
         msg = 'Keyword `ratio` is deprecated. Use `compactness` instead.'
         warnings.warn(msg)
@@ -115,10 +116,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     if image.shape[3] == 3 and convert2lab:
         image = rgb2lab(image)
 
-    # initialize on grid
     depth, height, width = image.shape[:3]
 
-    # approximate grid size for desired n_segments
+    # initialize cluster centroids for desired number of segments
     grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
     slices = regular_grid(image.shape[:3], n_segments)
     step_z, step_y, step_x = [int(s.step) for s in slices]
@@ -139,13 +139,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
     ratio = float(max((step_z, step_y, step_x))) / compactness
     image = image * ratio
 
-    nearest_cluster = np.empty((depth, height, width), dtype=np.intp)
-    distance = np.empty((depth, height, width), dtype=np.float)
+    labels = _slic_cython(image, clusters, max_iter)
 
-    segment_map = _slic_cython(image, nearest_cluster, distance, clusters,
-                               max_iter, n_segments)
+    if labels.shape[0] == 1:
+        labels = labels[0]
 
-    if segment_map.shape[0] == 1:
-        segment_map = segment_map[0]
-
-    return segment_map
+    return labels
