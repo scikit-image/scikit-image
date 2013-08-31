@@ -66,18 +66,18 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         # assign pixels to clusters
         for k in range(n_clusters):
 
-            # compute windows
-            z_min = int(max(clusters[k, 0] - 2 * step_z, 0))
-            z_max = int(min(clusters[k, 0] + 2 * step_z, depth))
-            y_min = int(max(clusters[k, 1] - 2 * step_y, 0))
-            y_max = int(min(clusters[k, 1] + 2 * step_y, height))
-            x_min = int(max(clusters[k, 2] - 2 * step_x, 0))
-            x_max = int(min(clusters[k, 2] + 2 * step_x, width))
-
             # cluster coordinate centers
             cz = clusters[k, 0]
             cy = clusters[k, 1]
             cx = clusters[k, 2]
+
+            # compute windows
+            z_min = <Py_ssize_t>max(cz - 2 * step_z, 0)
+            z_max = <Py_ssize_t>min(cz + 2 * step_z + 1, depth)
+            y_min = <Py_ssize_t>max(cy - 2 * step_y, 0)
+            y_max = <Py_ssize_t>min(cy + 2 * step_y + 1, height)
+            x_min = <Py_ssize_t>max(cx - 2 * step_x, 0)
+            x_max = <Py_ssize_t>min(cx + 2 * step_x + 1, width)
 
             for z in range(z_min, z_max):
                 dz = (cz - z) ** 2
