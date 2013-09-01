@@ -5,8 +5,8 @@ import numpy as np
 from scipy import ndimage
 import warnings
 
-from ..util import img_as_float, regular_grid
-from ._slic import _slic_cython
+from skimage.util import img_as_float, regular_grid
+from skimage.segmentation._slic import _slic_cython
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=20, sigma=1,
