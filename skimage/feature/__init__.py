@@ -12,6 +12,7 @@ from .template import match_template
 from ._brief import brief, match_keypoints_brief
 from .util import pairwise_hamming_distance
 from .censure import keypoints_censure
+from .orb import keypoints_orb, descriptor_orb
 
 __all__ = ['daisy',
            'hog',
@@ -36,4 +37,6 @@ __all__ = ['daisy',
            'structure_tensor',
            'structure_tensor_eigvals',
            'hessian_matrix',
-           'hessian_matrix_eigvals']
+           'hessian_matrix_eigvals',
+           'keypoints_orb',
+           'descriptor_orb']
