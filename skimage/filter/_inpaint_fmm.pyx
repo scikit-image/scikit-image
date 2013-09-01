@@ -316,6 +316,9 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         norm += weight
 
     # Inpainted value considering the effect of gradient of intensity value
+    # More accurate pixel value calculation refer to the OpenCV
+    # implementation:
+    # https://github.com/Itseez/opencv/blob/master/modules/photo/src/inpaint.cpp#L386
     image[i, j] = (Ia / norm + (Jx + Jy) / sqrt(Jx * Jx + Jy * Jy))
 
 
