@@ -7,6 +7,7 @@ import warnings
 
 from skimage.util import img_as_float, regular_grid
 from skimage.segmentation._slic import _slic_cython
+from skimage.color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=20, sigma=1,
