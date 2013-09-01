@@ -27,9 +27,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
         infinity, superpixel shapes become square/cubic.
     max_iter : int, optional (default: 10)
         Maximum number of iterations of k-means.
-    sigma : float, optional (default: 1)
-        Width of Gaussian smoothing kernel for preprocessing. Zero means no
-        smoothing.
+    sigma : float or array of floats, optional (default: 1)
+        Width of Gaussian smoothing kernel for pre-processing for each
+        dimension of the image. The same sigma is applied to each dimension in
+        case of a scalar value. Zero means no smoothing.
     multichannel : bool, optional (default: None)
         Whether the last axis of the image is to be interpreted as multiple
         channels. Only 3 channels are supported. If `None`, the function will
