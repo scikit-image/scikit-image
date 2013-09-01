@@ -152,7 +152,6 @@ the central one.
 from skimage.filter.rank import bilateral_mean
 
 noisy_image = img_as_ubyte(data.camera())
-selem = disk(10)
 
 bilat = bilateral_mean(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
@@ -254,7 +253,6 @@ picture.
 from skimage.filter.rank import autolevel
 
 noisy_image = img_as_ubyte(data.camera())
-selem = disk(10)
 
 auto = autolevel(noisy_image.astype(np.uint16), disk(20))
 
