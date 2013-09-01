@@ -6,37 +6,34 @@ from scipy import ndimage
 import warnings
 
 from ..util import img_as_float, regular_grid
-from ..color import rgb2lab, gray2rgb, guess_spatial_dimensions
 from ._slic import _slic_cython
 
 
-def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
-         multichannel=None, convert2lab=True, ratio=None):
-    """Segments image using k-means clustering in Color-(x,y) space.
+def slic(image, n_segments=100, compactness=10., max_iter=20, sigma=1,
+         multichannel=True, convert2lab=True, ratio=None):
+    """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
     ----------
-    image : (width, height [, depth] [, 3]) ndarray
-        Input image, which can be 2D or 3D, and grayscale or multi-channel
+    image : 2D, 3D or 4D ndarray
+        Input image, which can be 2D or 3D, and grayscale or multichannel
         (see `multichannel` parameter).
-    n_segments : int, optional (default: 100)
+    n_segments : int
         The (approximate) number of labels in the segmented output image.
-    compactness : float, optional (default: 10)
+    compactness : float
         Balances color-space proximity and image-space proximity. Higher
         values give more weight to image-space. As `compactness` tends to
         infinity, superpixel shapes become square/cubic.
-    max_iter : int, optional (default: 10)
+    max_iter : int
         Maximum number of iterations of k-means.
-    sigma : float or array of floats, optional (default: 1)
+    sigma : float or (3,) array of floats
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
-    multichannel : bool, optional (default: None)
+    multichannel : bool
         Whether the last axis of the image is to be interpreted as multiple
-        channels. Only 3 channels are supported. If `None`, the function will
-        attempt to guess this, and raise a warning if ambiguous, when the
-        array has shape (M, N, 3).
-    convert2lab : bool, optional (default: True)
+        channels or another spatial dimension.
+    convert2lab : bool
         Whether the input should be converted to Lab colorspace prior to
         segmentation. For this purpose, the input is assumed to be RGB. Highly
         recommended.
@@ -45,7 +42,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
 
     Returns
     -------
-    labels : (width, height, depth) array
+    labels : 2D or 3D array
         Integer mask indicating segment labels.
 
     Raises
@@ -88,33 +85,28 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=1,
         msg = 'Keyword `ratio` is deprecated. Use `compactness` instead.'
         warnings.warn(msg)
         compactness = ratio
-    spatial_dims = guess_spatial_dimensions(image)
-    if spatial_dims is None and multichannel is None:
-        msg = ("Images with dimensions (M, N, 3) are interpreted as 2D+RGB" +
-                   " by default. Use `multichannel=False` to interpret as " +
-                   " 3D image with last dimension of length 3.")
-        warnings.warn(RuntimeWarning(msg))
-        multichannel = True
-    elif multichannel is None:
-        multichannel = (spatial_dims + 1 == image.ndim)
-    if ((not multichannel and image.ndim not in [2, 3]) or
-            (multichannel and image.ndim not in [3, 4]) or
-            (multichannel and image.shape[-1] != 3)):
-        ValueError("Only 1- or 3-channel 2- or 3-D images are supported.")
 
     image = img_as_float(image)
     image = np.atleast_3d(image)
 
     if image.ndim == 3:
-        # See 2D RGB image as 3D RGB image with Z = 1
-        image = image[np.newaxis, ...]
+        if multichannel:
+            # Make 2D image 3D with depth = 1
+            image = image[np.newaxis, ...]
+        else:
+            # Add channel as single last dimension
+            image = image[..., np.newaxis]
 
     if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma, 0])
+        sigma = np.array([sigma, sigma, sigma])
     if (sigma > 0).any():
+        sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
 
-    if image.shape[3] == 3 and convert2lab:
+    if convert2lab:
+
+        if not multichannel or image.shape[3] != 3:
+            raise ValueError("Lab colorspace conversion requires a RGB image.")
         image = rgb2lab(image)
 
     depth, height, width = image.shape[:3]

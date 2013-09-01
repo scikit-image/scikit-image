@@ -28,15 +28,15 @@ def test_color_2d():
 
 def test_gray_2d():
     rnd = np.random.RandomState(0)
-    img = np.zeros((20, 20))
+    img = np.zeros((20, 21))
     img[:10, :10] = 0.33
     img[10:, :10] = 0.67
     img[10:, 10:] = 1.00
     img += 0.0033 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=4, compactness=20.0,
-               multichannel=False)
+    seg = slic(img, sigma=0, n_segments=4, compactness=1,
+               multichannel=False, convert2lab=False)
 
     assert_equal(len(np.unique(seg)), 4)
     assert_array_equal(seg[:10, :10], 0)
@@ -80,8 +80,8 @@ def test_gray_3d():
     img += 0.001 * rnd.normal(size=img.shape)
     img[img > 1] = 1
     img[img < 0] = 0
-    seg = slic(img, sigma=0, n_segments=8, compactness=20.0,
-               multichannel=False)
+    seg = slic(img, sigma=0, n_segments=8, compactness=1,
+               multichannel=False, convert2lab=False)
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
