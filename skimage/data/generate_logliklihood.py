@@ -57,13 +57,13 @@ src_max = np.exp(-src).max()
 sink_min = np.exp(-sink).min()
 sink_max = np.exp(-sink).max()
 
-#for area in areas_bg:
-#    src[area] = -np.log(0)
-#    sink[area] = -np.log(1)
-#
-#for area in areas_fg:
-#    src[area] = -np.log(1)
-#    sink[area] = -np.log(0)
+for area in areas_bg:
+    src[area] = -np.log(0)
+    sink[area] = -np.log(1)
+
+for area in areas_fg:
+    src[area] = -np.log(1)
+    sink[area] = -np.log(0)
 
 #for point in points_fg:
 #    src[tuple(point)] = -np.log(0)

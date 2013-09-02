@@ -13,10 +13,12 @@ cmap_jet.set_over(color='w')
 
 test_gray = False
 
-#src = np.load(data_dir+'/'+'trolls_prob_fg_gen.npy')
-#sink = np.load(data_dir+'/'+'trolls_prob_bg_gen.npy')
 src = np.load(data_dir+'/'+'trolls_prob_fg_01.npy')
 sink = np.load(data_dir+'/'+'trolls_prob_bg_01.npy')
+
+#uncomment to use output from skimage/data/generate_logliklihood.py
+#src = np.load(data_dir+'/'+'trolls_prob_fg_gen.npy')
+#sink = np.load(data_dir+'/'+'trolls_prob_bg_gen.npy')
 
 data = Image.open(data_dir+'/'+'trolls.png')
 if test_gray:
