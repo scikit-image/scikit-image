@@ -79,8 +79,8 @@ def test_ellipsoid_levelset():
                        [ 1.25,  0.5 ,  0.25,  0.5 ,  1.25],
                        [ 2.  ,  1.25,  1.  ,  1.25,  2.  ]]]]
 
-    assert_array_equal(test, expected.astype(bool))
-    assert_array_equal(test_anisotropic, expected.astype(bool))
+    assert_array_equal(test, expected)
+    assert_array_equal(test_anisotropic, expected)
 
 
 def test_ellipsoid_stats():

@@ -7,7 +7,7 @@ from skimage.measure import marching_cubes, mesh_surface_area
 
 def test_marching_cubes_isotropic():
     ellipsoid_isotropic = ellipsoid(6, 10, 16, levelset=True)
-    _, surf = ellipsoid_stats(6, 10, 16, levelset=True)
+    _, surf = ellipsoid_stats(6, 10, 16)
     verts, faces = marching_cubes(ellipsoid_isotropic, 0.)
     surf_calc = mesh_surface_area(verts, faces)
 
@@ -17,9 +17,9 @@ def test_marching_cubes_isotropic():
 
 def test_marching_cubes_anisotropic():
     sampling = (1., 10 / 6., 16 / 6.)
-    ellipsoid_anisotropic, _, surf = ellipsoid(6, 10, 16, sampling=sampling,
-                                               levelset=True)
-    _, surf = ellipsoid_stats(6, 10, 16, sampling=sampling, levelset=True)
+    ellipsoid_anisotropic = ellipsoid(6, 10, 16, sampling=sampling,
+                                      levelset=True)
+    _, surf = ellipsoid_stats(6, 10, 16, sampling=sampling)
     verts, faces = marching_cubes(ellipsoid_anisotropic, 0.,
                                   sampling=sampling)
     surf_calc = mesh_surface_area(verts, faces)
