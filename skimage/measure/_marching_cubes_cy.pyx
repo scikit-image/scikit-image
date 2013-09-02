@@ -94,8 +94,8 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
     #         /  |      /  |        ^  z
     #       v4 ------ v3   |        | /
     #        |  v5 ----|- v6        |/          (note: NOT right handed!)
-    #        | /       |  /          ----> x
-    #        |/        | /
+    #        |  /      |  /          ----> x
+    #        | /       | /
     #       v1 ------ v2
     #
     # We also maintain the current 2D coordinates for v1, and ensure the array

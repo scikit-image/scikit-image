@@ -41,8 +41,8 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
          /  |      /  |        ^  z
        v4 ------ v3   |        | /
         |  v5 ----|- v6        |/          (note: NOT right handed!)
-        | /       |  /          ----> x
-        |/        | /
+        |  /      |  /          ----> x
+        | /       | /
        v1 ------ v2
 
     Most notably, if v4, v8, v2, and v6 are all >= `level` (or any
@@ -153,5 +153,5 @@ def mesh_surface_area(verts, tris):
     b = actual_verts[:, 0, :] - actual_verts[:, 2, :]
     del actual_verts
 
-    # Area of triangle = 1/2 * Euclidean norm of cross product
+    # Area of triangle in 3D = 1/2 * Euclidean norm of cross product
     return ((np.cross(a, b) ** 2).sum(axis=1) ** 0.5).sum() / 2.
