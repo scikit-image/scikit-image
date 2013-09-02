@@ -1,12 +1,16 @@
 """
 ===============
-Simple NumPy Viewer Demo
+Simple GLViewer Demo
 ===============
 
 Steps the run and test
 ipython --pylab=qt4 -i skimage/viewer_gl/test/simple.py
 
 To dynamically update the contents of a layer:
+arr = np.zeros_like(img, dtype=np.int32)
+arr[:] = 0xFF0000FF
+l2.setData(arr)
+
 l2.data[:] = 0xFF00FFFF
 l2.updateData()
 
@@ -16,14 +20,14 @@ l2.setOpacity(0.25)
 
 import numpy as np
 import Image
-from skimage.viewer_gl.NPViewer import NPViewer, NPViewerEnum
+from skimage.viewer_gl.GLViewer import GLViewer, GLViewerEnum
 from skimage import data_dir
 
 img = Image.open(data_dir+'/'+'lena.png')
 if img.mode != 'RGBA':
     img = img.convert('RGBA')
 
-viewer = NPViewer(img.size)
+viewer = GLViewer(img.size)
 
 img = np.array(img).view(np.uint32).squeeze()
 dim = (img.shape[1], img.shape[0])
@@ -47,7 +51,7 @@ def mousePress(pos):
     mouseDrag(pos, None)
 
 def keyPress(key):
-    if key >= NPViewerEnum.Key_1 and key <= NPViewerEnum.Key_8:
+    if key >= GLViewerEnum.Key_1 and key <= GLViewerEnum.Key_8:
         print key
 
 l1 = viewer.addLayer('layer1', layer1, 0.5)

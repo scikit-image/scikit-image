@@ -3,11 +3,11 @@ from PyQt4.QtGui import QVBoxLayout, QScrollArea, QMainWindow, QSlider,\
     QListWidget, QAbstractItemView, QWidget, QGridLayout, QSplitter,\
     QPushButton, QListWidgetItem, QLabel, QApplication, QImage, QPixmap, QCursor
 
-from skimage.viewer_gl.NPCanvas import NPCanvas
+from skimage.viewer_gl.GLCanvas import GLCanvas
 
-from PyQt4.QtCore import Qt as NPViewerEnum
+from PyQt4.QtCore import Qt as GLViewerEnum
 
-class NPViewer(QApplication):
+class GLViewer(QApplication):
     class CenteredScrollArea(QScrollArea):
         def __init__(self, parent=None):
             QScrollArea.__init__(self, parent)
@@ -23,7 +23,7 @@ class NPViewer(QApplication):
     def __init__(self, dim):
         super(QApplication, self).__init__([])
 
-        self.canvas = NPCanvas(dim)
+        self.canvas = GLCanvas(dim)
         self.window = QMainWindow()
 
         self.slider = QSlider(QtCore.Qt.Horizontal)

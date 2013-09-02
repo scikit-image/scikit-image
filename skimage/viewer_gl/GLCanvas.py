@@ -13,7 +13,7 @@ szInt = np.dtype(np.int32).itemsize
 
 LWORKGROUP = (16, 16)
 
-class NPCanvas(QGLWidget):
+class GLCanvas(QGLWidget):
     class Layer:
         def __init__(self, parent, data, pos=None, enabled=True, opacity=1.0,
                      filters=[]):
@@ -58,7 +58,7 @@ class NPCanvas(QGLWidget):
             self.updateData()
 
     def __init__(self, shape, parent=None):
-        super(NPCanvas, self).__init__(parent)
+        super(GLCanvas, self).__init__(parent)
 
         self.w = 0
 
@@ -97,7 +97,7 @@ class NPCanvas(QGLWidget):
         if opacity == None:
             opacity = 1.0
 
-        layer = NPCanvas.Layer(self, data, opacity=opacity, filters=filters)
+        layer = GLCanvas.Layer(self, data, opacity=opacity, filters=filters)
         self.layers.append(layer)
 
         return layer
