@@ -23,7 +23,7 @@ voxel spacing is not equal for every spatial dimension, through use of the
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-import mpl_toolkits.mplot3d as a3
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 from skimage import measure
 from skimage.draw import ellipsoid
@@ -41,8 +41,8 @@ verts, faces = measure.marching_cubes(ellip_double, 0)
 fig = plt.figure(figsize=(10, 12))
 ax = fig.add_subplot(111, projection='3d')
 
-# Fancy indexing: `verts[faces]` to generate a Poly3DCollection
-mesh = a3.art3d.Poly3DCollection(verts[faces])
+# Fancy indexing: `verts[faces]` to generate a collection of triangles
+mesh = Poly3DCollection(verts[faces])
 ax.add_collection3d(mesh)
 
 ax.set_xlabel("x-axis: a = 6 per ellipsoid")
