@@ -83,9 +83,9 @@ def ellipsoid_stats(a, b, c, sampling=(1., 1., 1.)):
     Returns
     -------
     vol : float
-        Analytically calculated volume of ellipsoid.
+        Calculated volume of ellipsoid.
     surf : float
-        Analytically calculated surface area of ellipsoid.
+        Calculated surface area of ellipsoid.
 
     """
     if (a <= 0) or (b <= 0) or (c <= 0):
