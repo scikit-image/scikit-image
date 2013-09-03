@@ -11,7 +11,7 @@ from skimage.util import regular_grid
 
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
-                 double[:, ::1] clusters,
+                 double[:, ::1] segments,
                  Py_ssize_t max_iter):
     """Helper function for SLIC segmentation.
 
@@ -19,14 +19,14 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     ----------
     image_zyx : 4D array of double, shape (Z, Y, X, C)
         The input image.
-    clusters : 2D array of double, shape (N, 3 + C)
+    segments : 2D array of double, shape (N, 3 + C)
         The initial centroids obtained by SLIC as [Z, Y, X, C...].
     max_iter : int
         The maximum number of k-means iterations.
 
     Returns
     -------
-    nearest_clusters : 3D array of int, shape (Z, Y, X)
+    nearest_segments : 3D array of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
     """
 
@@ -36,36 +36,36 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     height = image_zyx.shape[1]
     width = image_zyx.shape[2]
 
-    cdef Py_ssize_t n_clusters = clusters.shape[0]
+    cdef Py_ssize_t n_segments = segments.shape[0]
     # number of features [X, Y, Z, ...]
-    cdef Py_ssize_t n_features = clusters.shape[1]
+    cdef Py_ssize_t n_features = segments.shape[1]
 
     # approximate grid size for desired n_segments
     cdef Py_ssize_t step_z, step_y, step_x
-    slices = regular_grid((depth, height, width), n_clusters)
+    slices = regular_grid((depth, height, width), n_segments)
     step_z, step_y, step_x = [int(s.step) for s in slices]
 
-    cdef Py_ssize_t[:, :, ::1] nearest_clusters \
+    cdef Py_ssize_t[:, :, ::1] nearest_segments \
         = np.empty((depth, height, width), dtype=np.intp)
     cdef double[:, :, ::1] distance \
         = np.empty((depth, height, width), dtype=np.double)
-    cdef Py_ssize_t[:] n_cluster_elems = np.zeros(n_clusters, dtype=np.intp)
+    cdef Py_ssize_t[:] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
 
     cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
     cdef char change
-    cdef double dist_mean, cx, cy, cz, dy, dz
+    cdef double dist_center, cx, cy, cz, dy, dz
 
     for i in range(max_iter):
         change = 0
         distance[:, :, :] = DBL_MAX
 
-        # assign pixels to clusters
-        for k in range(n_clusters):
+        # assign pixels to segments
+        for k in range(n_segments):
 
-            # cluster coordinate centers
-            cz = clusters[k, 0]
-            cy = clusters[k, 1]
-            cx = clusters[k, 2]
+            # segment coordinate centers
+            cz = segments[k, 0]
+            cy = segments[k, 1]
+            cx = segments[k, 2]
 
             # compute windows
             z_min = <Py_ssize_t>max(cz - 2 * step_z, 0)
@@ -80,38 +80,38 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 for y in range(y_min, y_max):
                     dy = (cy - y) ** 2
                     for x in range(x_min, x_max):
-                        dist_mean = dz + dy + (cx - x) ** 2
+                        dist_center = dz + dy + (cx - x) ** 2
                         for c in range(3, n_features):
-                            dist_mean += (image_zyx[z, y, x, c - 3]
-                                          - clusters[k, c]) ** 2
-                        if distance[z, y, x] > dist_mean:
-                            nearest_clusters[z, y, x] = k
-                            distance[z, y, x] = dist_mean
+                            dist_center += (image_zyx[z, y, x, c - 3]
+                                          - segments[k, c]) ** 2
+                        if distance[z, y, x] > dist_center:
+                            nearest_segments[z, y, x] = k
+                            distance[z, y, x] = dist_center
                             change = 1
 
-        # stop if no pixel changed its cluster
+        # stop if no pixel changed its segment
         if change == 0:
             break
 
-        # recompute clusters
+        # recompute segment centers
 
-        # sum features for all clusters
-        n_cluster_elems[:] = 0
-        clusters[:, :] = 0
+        # sum features for all segments
+        n_segment_elems[:] = 0
+        segments[:, :] = 0
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
-                    k = nearest_clusters[z, y, x]
-                    n_cluster_elems[k] += 1
-                    clusters[k, 0] += z
-                    clusters[k, 1] += y
-                    clusters[k, 2] += x
+                    k = nearest_segments[z, y, x]
+                    n_segment_elems[k] += 1
+                    segments[k, 0] += z
+                    segments[k, 1] += y
+                    segments[k, 2] += x
                     for c in range(3, n_features):
-                        clusters[k, c] += image_zyx[z, y, x, c - 3]
+                        segments[k, c] += image_zyx[z, y, x, c - 3]
 
-        # divide by number of elements per cluster to obtain mean
-        for k in range(n_clusters):
+        # divide by number of elements per segment to obtain mean
+        for k in range(n_segments):
             for c in range(n_features):
-                clusters[k, c] /= n_cluster_elems[k]
+                segments[k, c] /= n_segment_elems[k]
 
-    return np.asarray(nearest_clusters)
+    return np.asarray(nearest_segments)

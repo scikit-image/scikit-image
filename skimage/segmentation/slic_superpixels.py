@@ -116,24 +116,24 @@ def slic(image, n_segments=100, compactness=10., max_iter=20, sigma=1,
     grid_z, grid_y, grid_x = np.mgrid[:depth, :height, :width]
     slices = regular_grid(image.shape[:3], n_segments)
     step_z, step_y, step_x = [int(s.step) for s in slices]
-    clusters_z = grid_z[slices]
-    clusters_y = grid_y[slices]
-    clusters_x = grid_x[slices]
+    segments_z = grid_z[slices]
+    segments_y = grid_y[slices]
+    segments_x = grid_x[slices]
 
-    clusters_color = np.zeros(clusters_z.shape + (image.shape[3],))
-    clusters = np.concatenate([clusters_z[..., np.newaxis],
-                               clusters_y[..., np.newaxis],
-                               clusters_x[..., np.newaxis],
-                               clusters_color
+    segments_color = np.zeros(segments_z.shape + (image.shape[3],))
+    segments = np.concatenate([segments_z[..., np.newaxis],
+                               segments_y[..., np.newaxis],
+                               segments_x[..., np.newaxis],
+                               segments_color
                               ], axis=-1).reshape(-1, 3 + image.shape[3])
-    clusters = np.ascontiguousarray(clusters)
+    segments = np.ascontiguousarray(segments)
 
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
     ratio = float(max((step_z, step_y, step_x))) / compactness
     image = np.ascontiguousarray(image * ratio)
 
-    labels = _slic_cython(image, clusters, max_iter)
+    labels = _slic_cython(image, segments, max_iter)
 
     if labels.shape[0] == 1:
         labels = labels[0]
