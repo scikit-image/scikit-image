@@ -19,22 +19,22 @@ def slic(image, n_segments=100, compactness=10., max_iter=20, sigma=1,
     image : 2D, 3D or 4D ndarray
         Input image, which can be 2D or 3D, and grayscale or multichannel
         (see `multichannel` parameter).
-    n_segments : int
+    n_segments : int, optional
         The (approximate) number of labels in the segmented output image.
-    compactness : float
+    compactness : float, optional
         Balances color-space proximity and image-space proximity. Higher
         values give more weight to image-space. As `compactness` tends to
         infinity, superpixel shapes become square/cubic.
-    max_iter : int
+    max_iter : int, optional
         Maximum number of iterations of k-means.
-    sigma : float or (3,) array of floats
+    sigma : float or (3,) array of floats, optional
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
-    multichannel : bool
+    multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
-    convert2lab : bool
+    convert2lab : bool, optional
         Whether the input should be converted to Lab colorspace prior to
         segmentation. For this purpose, the input is assumed to be RGB. Highly
         recommended.
