@@ -3,12 +3,13 @@ import numpy as np
 from ..util import img_as_float
 from .util import _mask_border_keypoints
 
-from skimage.feature import corner_fast, corner_orientations, corner_peaks
+from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
+                             corner_harris)
 from skimage.transform import pyramid_gaussian
 
 
-def keypoints_orb(image, n=9, threshold=0.20, downscale_factor=1.414,
-                  n_scales=5):
+def keypoints_orb(image, fast_n=9, fast_threshold=0.20, n_keypoints=200, 
+                  harris_k=0.05,  downscale_factor=1.414, n_scales=5):
 
     image = np.squeeze(image)
     if image.ndim != 2:
@@ -27,14 +28,21 @@ def keypoints_orb(image, n=9, threshold=0.20, downscale_factor=1.414,
     keypoints = np.empty((0, 2), dtype=np.intp)
     orientations = np.empty((0), dtype=np.double)
     scales = np.empty((0), dtype=np.intp)
+    harris_measure = np.empty((0), dtype=np.double)
 
     for i in range(n_scales):
-        corners = corner_peaks(corner_fast(pyramid[i], n, threshold), min_distance=1)
+        harris_response = corner_harris(pyramid[i], method='k', k=harris_k)
+        corners = corner_peaks(corner_fast(pyramid[i], fast_n, fast_threshold), min_distance=1)
         keypoints = np.vstack((keypoints, corners))
         orientations = np.hstack((orientations, corner_orientations(pyramid[i], corners, ofast_mask)))
         scales = np.hstack((scales, i * np.ones((corners.shape[0]), dtype=np.intp)))
+        harris_measure = np.hstack((harris_measure, harris_response[corners[:, 0], corners[:, 1]]))
 
-    return keypoints, orientations, scales
+    if keypoints.shape[0] < n_keypoints:
+        return keypoints, orientations, scales
+    else:
+        best_indices = harris_measure.argsort()[::-1][:n_keypoints]
+        return keypoints[best_indices], orientations[best_indices], scales[best_indices]
 
 
 def descriptor_orb(image, keypoints, keypoints_angle):
