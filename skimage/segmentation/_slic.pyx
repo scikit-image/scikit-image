@@ -83,7 +83,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         dist_center = dz + dy + (cx - x) ** 2
                         for c in range(3, n_features):
                             dist_center += (image_zyx[z, y, x, c - 3]
-                                          - segments[k, c]) ** 2
+                                            - segments[k, c]) ** 2
                         if distance[z, y, x] > dist_center:
                             nearest_segments[z, y, x] = k
                             distance[z, y, x] = dist_center
