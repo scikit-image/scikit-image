@@ -8,9 +8,58 @@ from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
 from skimage.transform import pyramid_gaussian
 
 
-def keypoints_orb(image, fast_n=9, fast_threshold=0.20, n_keypoints=200, 
-                  harris_k=0.05,  downscale_factor=1.414, n_scales=5):
+def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
+                  harris_k=0.05,  downscale_factor=np.sqrt(2), n_scales=5):
 
+    """Compute Oriented Fast keypoints.
+
+    Parameters
+    ----------
+    image : 2D ndarray
+        Input grayscale image.
+    n_keypoints : int
+        Number of keypoints to be returned from this function. The function
+        will return best `n_keypoints` if more than n_keypoints are detected
+        based on the values of other parameters. If not, then all the detected
+        keypoints are returned.
+    fast_n : int
+        The `n` parameter in `feature.corner_fast`. Minimum number of
+        consecutive pixels out of 16 pixels on the circle that should all be
+        either brighter or darker w.r.t testpixel. A point c on the circle is
+        darker w.r.t test pixel p if `Ic < Ip - threshold` and brighter if
+        `Ic > Ip + threshold`. Also stands for the n in `FAST-n` corner
+        detector.
+    fast_threshold : float
+        The `threshold` parameter in `feature.corner_fast`. Threshold used to
+        decide whether the pixels on the circle are brighter, darker or
+        similar w.r.t. the test pixel. Decrease the threshold when more
+        corners are desired and vice-versa.
+    harris_k : float
+        The `k` parameter in `feature.corner_harris`. Sensitivity factor to
+        separate corners from edges, typically in range `[0, 0.2]`. Small
+        values of k result in detection of sharp corners.
+    downscale_factor : float
+        Downscale factor for the image pyramid.
+    n_scales : int
+        Number of scales from the bottom of the image pyramid to extract
+        the features from. 
+
+    Returns
+    -------
+    keypoints : (N, 2) ndarray
+        The oFAST keypoints.
+    orientations : (N,) ndarray
+        The orientations of the N extracted keypoints.
+    scales : (N,) ndarray
+        The scales of the N extracted keypoints.
+
+    References
+    ----------
+    ..[1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+          "ORB : An efficient alternative to SIFT and SURF"
+          http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
+
+    """ 
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
@@ -25,18 +74,23 @@ def keypoints_orb(image, fast_n=9, fast_threshold=0.20, n_keypoints=200,
                            [0, 1, 1, 1, 1, 1, 0],
                            [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
 
-    keypoints = np.empty((0, 2), dtype=np.intp)
-    orientations = np.empty((0), dtype=np.double)
-    scales = np.empty((0), dtype=np.intp)
-    harris_measure = np.empty((0), dtype=np.double)
+    keypoints_list = []
+    orientations_list = []
+    scales_list = []
+    harris_measure_list = []
 
     for i in range(n_scales):
         harris_response = corner_harris(pyramid[i], method='k', k=harris_k)
         corners = corner_peaks(corner_fast(pyramid[i], fast_n, fast_threshold), min_distance=1)
-        keypoints = np.vstack((keypoints, corners))
-        orientations = np.hstack((orientations, corner_orientations(pyramid[i], corners, ofast_mask)))
-        scales = np.hstack((scales, i * np.ones((corners.shape[0]), dtype=np.intp)))
-        harris_measure = np.hstack((harris_measure, harris_response[corners[:, 0], corners[:, 1]]))
+        keypoints_list.append(corners)
+        orientations_list.append(corner_orientations(pyramid[i], corners, ofast_mask))
+        scales_list.append(i * np.ones((corners.shape[0]), dtype=np.intp))
+        harris_measure_list.append(harris_response[corners[:, 0], corners[:, 1]])
+
+    keypoints = np.vstack(keypoints_list)
+    orientations = np.hstack(orientations_list)
+    scales = np.hstack(scales_list)
+    harris_measure = np.hstack(harris_measure_list)
 
     if keypoints.shape[0] < n_keypoints:
         return keypoints, orientations, scales
