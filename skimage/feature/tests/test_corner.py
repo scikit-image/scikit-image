@@ -280,6 +280,17 @@ def test_corner_orientations_lena():
     assert_almost_equal(actual, expected)
 
 
+def test_corner_orientations_square():
+    square = np.zeros((12, 12))
+    square[3:9, 3:9] = 1
+    corners = corner_peaks(corner_fast(square, 9), min_distance=1)
+    actual_orientations = corner_orientations(square, corners, octagon(3, 2))
+    actual_orientations_degrees = np.rad2deg(actual_orientations)
+    expected_orientations_degree = np.array([  45.,  135.,  -45., -135.])
+    assert_array_equal(actual_orientations_degrees,
+                       expected_orientations_degree)
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
