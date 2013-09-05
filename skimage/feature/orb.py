@@ -184,6 +184,6 @@ def descriptor_orb(image, keypoints, orientations, scales,
         descriptors_list.append(curr_scale_descriptors)
         filtered_keypoints_list.append(curr_scale_kpts)
 
-    descriptors = np.vstack(descriptors_list)
+    descriptors = np.vstack(descriptors_list).astype(np.bool)
     filtered_keypoints = np.vstack(filtered_keypoints_list)
     return descriptors, filtered_keypoints
