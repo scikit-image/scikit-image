@@ -9,6 +9,7 @@ from skimage.transform import pyramid_gaussian
 
 from .orb_cy import _orb_loop
 
+
 def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
                   harris_k=0.05,  downscale_factor=np.sqrt(2), n_scales=5):
 
@@ -102,7 +103,42 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
 
 def descriptor_orb(image, keypoints, keypoints_orientations,
                    keypoints_scales, downscale_factor=np.sqrt(2), n_scales=5):
+    """Compute Oriented Fast keypoints.
 
+    Parameters
+    ----------
+    image : 2D ndarray
+        Input grayscale image.
+    keypoints : (N, 2) ndarray
+        Array of N keypoint locations in the format (row, col).
+    keypoints_orientations : (N,) ndarray
+        The orientations of the corresponding N keypoints.
+    keypoints_scales : (N,) ndarray
+        The scales of the corresponding N keypoints.
+    downscale_factor : float
+        Downscale factor for the image pyramid. Should be the same as that
+        used in `keypoints_orb`.
+    n_scales : int
+        Number of scales from the bottom of the image pyramid to extract
+        the features from.
+
+    Returns
+    -------
+    descriptors : (P, 256) bool ndarray
+        2darray of type bool describing the P keypoints obtained after
+        filtering out those near the image border. Size of each descriptor
+        is 32 bytes or 256 bits.
+    filtered_keypoints : (P, 2) ndarray
+        Location i.e. (row, col) of P keypoints after removing out those that
+        are near border.
+
+    References
+    ----------
+    ..[1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+          "ORB : An efficient alternative to SIFT and SURF"
+          http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
+
+    """
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
@@ -136,6 +172,7 @@ def descriptor_orb(image, keypoints, keypoints_orientations,
         _orb_loop(curr_image, curr_scale_descriptors.view(np.uint8), curr_scale_kpts, curr_scale_kpts_orientation, pos0, pos1)
 
         descriptors = np.vstack((descriptors, curr_scale_descriptors))
+        filtered_keypoints = np.vstack((filtered_keypoints, curr_scale_kpts))
 
     for i in range(keypoints.shape[0]):
         angle = keypoints_angle[i]
