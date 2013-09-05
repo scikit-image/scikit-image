@@ -11,7 +11,7 @@ from .orb_cy import _orb_loop
 
 
 def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
-                  harris_k=0.05,  downscale_factor=np.sqrt(2), n_scales=5):
+                  harris_k=0.05,  downscale=np.sqrt(2), n_scales=5):
 
     """Compute Oriented Fast keypoints.
 
@@ -40,7 +40,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         The `k` parameter in `feature.corner_harris`. Sensitivity factor to
         separate corners from edges, typically in range `[0, 0.2]`. Small
         values of k result in detection of sharp corners.
-    downscale_factor : float
+    downscale : float
         Downscale factor for the image pyramid.
     n_scales : int
         Number of scales from the bottom of the image pyramid to extract
@@ -66,7 +66,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
 
-    pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale_factor))
+    pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
 
     ofast_mask = np.array([[0, 0, 1, 1, 1, 0, 0],
                            [0, 1, 1, 1, 1, 1, 0],
@@ -101,8 +101,8 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         return keypoints[best_indices], orientations[best_indices], scales[best_indices]
 
 
-def descriptor_orb(image, keypoints, keypoints_orientations,
-                   keypoints_scales, downscale_factor=np.sqrt(2), n_scales=5):
+def descriptor_orb(image, keypoints, orientations, scales,
+                   downscale=np.sqrt(2), n_scales=5):
     """Compute rBRIEF descriptors of input keypoints.
 
     Parameters
@@ -111,11 +111,11 @@ def descriptor_orb(image, keypoints, keypoints_orientations,
         Input grayscale image.
     keypoints : (N, 2) ndarray
         Array of N input keypoint locations in the format (row, col).
-    keypoints_orientations : (N,) ndarray
+    orientations : (N,) ndarray
         The orientations of the corresponding N keypoints.
-    keypoints_scales : (N,) ndarray
+    scales : (N,) ndarray
         The scales of the corresponding N keypoints.
-    downscale_factor : float
+    downscale : float
         Downscale factor for the image pyramid. Should be the same as that
         used in `keypoints_orb`.
     n_scales : int
@@ -145,7 +145,7 @@ def descriptor_orb(image, keypoints, keypoints_orientations,
 
     image = img_as_float(image)
 
-    pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale_factor))
+    pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
 
     pos0 = binary_tests[:, :2].astype(np.int32)
     pos1 = binary_tests[:, 2:].astype(np.int32)
@@ -158,11 +158,11 @@ def descriptor_orb(image, keypoints, keypoints_orientations,
     for k in range(n_scales):
         curr_image = np.ascontiguousarray(pyramid[k])
 
-        curr_scale_mask = keypoints_scales == k
+        curr_scale_mask = scales == k
         curr_scale_kpts = keypoints[curr_scale_mask]
-        curr_scale_kpts_orientation = keypoints_orientations[curr_scale_mask]
+        curr_scale_kpts_orientation = orientations[curr_scale_mask]
 
-        border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts, 13)
+        border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts, dist=13)
         curr_scale_kpts = curr_scale_kpts[border_mask]
         curr_scale_kpts_orientation = curr_scale_kpts_orientation[border_mask]
 
