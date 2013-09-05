@@ -9,7 +9,7 @@ import numpy as np
 from libc.math cimport sin, cos, M_PI, round
 
 
-def _orb_loop(double[:, ::1] image, char[:, ::1] descriptors, Py_ssize_t[:, ::1] keypoints,
+def _orb_loop(double[:, ::1] image, Py_ssize_t[:, ::1] keypoints,
               double[:] orientations):
 
     cdef Py_ssize_t i, d, kr, kc, pr0, pr1, pc0, pc1, spr0, spc0, spr1, spc1
@@ -17,6 +17,7 @@ def _orb_loop(double[:, ::1] image, char[:, ::1] descriptors, Py_ssize_t[:, ::1]
     cdef char[:, ::1] pos1 = binary_tests[:, 2:]
     cdef int[:, ::1] steered_pos0, steered_pos1
     cdef double angle
+    cdef char[:, ::1] descriptors = np.zeros((keypoints.shape[0], 256), dtype=np.uint8)
 
     for i in range(keypoints.shape[0]):
         angle = orientations[i]
@@ -39,6 +40,8 @@ def _orb_loop(double[:, ::1] image, char[:, ::1] descriptors, Py_ssize_t[:, ::1]
 
             if image[kr + spr0, kc + spc0] < image[kr + spr1, kc + spc1]:
                 descriptors[i, j] = True
+
+    return np.asarray(descriptors)
 
 
 # Learned 256 decision pairs for binary tests in rBRIEF. Taken from OpenCV.

@@ -147,6 +147,8 @@ def descriptor_orb(image, keypoints, orientations, scales,
 
     pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
 
+    descriptors_list = []
+    filtered_keypoints_list = []
     descriptors = np.empty((0, 256), dtype=np.bool)
     filtered_keypoints = np.empty((0, 2), dtype=np.int32)
 
@@ -161,12 +163,13 @@ def descriptor_orb(image, keypoints, orientations, scales,
         curr_scale_kpts = curr_scale_kpts[border_mask]
         curr_scale_kpts_orientation = curr_scale_kpts_orientation[border_mask]
 
-        curr_scale_descriptors = np.zeros((curr_scale_kpts.shape[0], 256), dtype=np.bool)
         curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts)
         curr_scale_kpts_orientation = np.ascontiguousarray(curr_scale_kpts_orientation)
-        _orb_loop(curr_image, curr_scale_descriptors.view(np.uint8), curr_scale_kpts, curr_scale_kpts_orientation)
+        curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts, curr_scale_kpts_orientation)
 
-        descriptors = np.vstack((descriptors, curr_scale_descriptors))
-        filtered_keypoints = np.vstack((filtered_keypoints, curr_scale_kpts))
+        descriptors_list.append(curr_scale_descriptors)
+        filtered_keypoints_list.append(curr_scale_kpts)
 
+    descriptors = np.vstack(descriptors_list)
+    filtered_keypoints = np.vstack(filtered_keypoints_list)
     return descriptors, filtered_keypoints
