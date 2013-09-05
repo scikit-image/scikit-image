@@ -138,6 +138,21 @@ def descriptor_orb(image, keypoints, orientations, scales,
           "ORB : An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
 
+    Examples
+    --------
+    >>> from skimage.data import lena
+    >>> from skimage.color import rgb2gray
+    >>> from skimage.feature import keypoints_orb, descriptor_orb
+    >>> img = rgb2gray(lena())
+    >>> keypoints, orientations, scales = keypoints_orb(img, n_keypoints=250)
+    >>> keypoints.shape
+    (250, 2)
+    >>> descriptors, filtered_keypoints = descriptor_orb(img, keypoints, orientations, scales)
+    >>> filtered_keypoints.shape
+    (246, 2)
+    >>> descriptors.shape
+    (246, 256)
+
     """ 
     image = np.squeeze(image)
     if image.ndim != 2:
