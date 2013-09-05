@@ -1,3 +1,9 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
+#cython: initializedcheck=False
+
 import numpy as np
 from cython cimport view
 cimport numpy as cnp
@@ -15,7 +21,7 @@ cdef class Structure:
 
     cdef:
         list indices
-        int cardinality
+        char cardinality
 
     def __init__(self, shape, case=DIM_2D_4):
         if case == Structure.DIM_2D_4:
@@ -49,12 +55,9 @@ cdef class Node:
         double excess
         tuple coord
         double[:] edges
-        #double _src, _sink
+        double src, sink
         list neighbours
         object value #is either double (Grayscale) or ndarray (RGB)
-
-    def __init__(self):
-        pass
 
 cdef class GraphCut:
     cdef:
@@ -74,7 +77,7 @@ cdef class GraphCut:
             Node node, neighbour
             Node node1, node2
 
-        if affinity == None:
+        if affinity is None:
             affinity = AFFINITY
 
         self.structure = Structure(case)
@@ -101,10 +104,10 @@ cdef class GraphCut:
                     y2 = y + index[0]
                     x2 = x + index[1]
 
-                    if y2 < 0 or\
-                       x2 < 0 or\
-                       y2 > self.shape[0] - 1 or\
-                       x2 > self.shape[1] - 1:
+                    if (y2 < 0 or
+                        x2 < 0 or
+                        y2 > self.shape[0] - 1 or
+                        x2 > self.shape[1] - 1):
                         node.neighbours[i] = None
 
                     else:
@@ -119,8 +122,8 @@ cdef class GraphCut:
             node.value = img[y][x]
             node.height = 0
             node.excess = src[y][x] - sink[y][x]
-            #node._src = src[y][x]
-            #node._sink = sink[y][x]
+            node.src = src[y][x]
+            node.sink = sink[y][x]
 
             if node.excess > 0:
                 self.active.append(node)
@@ -131,15 +134,15 @@ cdef class GraphCut:
             for i in range(self.structure.cardinality):
                 neighbour = node.neighbours[i]
 
-                if neighbour == None:
+                if neighbour is None:
                     continue
 
                 node.edges[i] = affinity * weight(node, neighbour)
 
-    def relabel(self):
+    cdef relabel(self):
         cdef:
             Node node, neighbour
-            int i
+            char i
             int min_height
 
         for node in self.active:
@@ -148,19 +151,19 @@ cdef class GraphCut:
             for i in range(self.structure.cardinality):
                 neighbour = node.neighbours[i]
 
-                if neighbour == None:
-                    continue;
+                if neighbour is None:
+                    continue
 
                 if node.edges[i] > 0:
                     min_height = min(min_height, neighbour.height + 1)
 
             node.height = min_height
 
-    def push(self):
+    cdef push(self):
         cdef:
             list active_new
             Node node, neighbour
-            int i
+            char i
             double flow
             int reverse_index
 
@@ -170,7 +173,7 @@ cdef class GraphCut:
             for i in range(self.structure.cardinality):
                 neighbour = node.neighbours[i]
 
-                if neighbour == None:
+                if neighbour is None:
                     continue;
 
                 flow = min(node.excess, node.edges[i])
@@ -198,6 +201,7 @@ cdef class GraphCut:
             list fifo_from, fifo_to
             int distance
             int reverse_index
+            char i
 
         self.active = []
 
@@ -220,7 +224,7 @@ cdef class GraphCut:
                 for i in range(self.structure.cardinality):
                     neighbour = node.neighbours[i]
 
-                    if neighbour == None:
+                    if neighbour is None:
                         continue;
 
                     neighbour = node.neighbours[i]
@@ -239,7 +243,7 @@ cdef class GraphCut:
 
             fifo_from = fifo_to
 
-    def getHeight(self):
+    cdef getHeight(self):
         cdef:
             Node node
 
@@ -270,7 +274,7 @@ cdef class GraphCut:
     cdef cost(self):
         cdef:
             double c
-            int i
+            char i
             int h
             Node node, neighbour
 
@@ -287,7 +291,7 @@ cdef class GraphCut:
             for i in range(self.structure.cardinality):
                 neighbour = node.neighbours[i]
 
-                if neighbour == None:
+                if neighbour is None:
                     continue
 
                 if h != neighbour.height:
