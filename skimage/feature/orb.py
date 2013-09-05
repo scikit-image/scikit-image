@@ -103,14 +103,14 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
 
 def descriptor_orb(image, keypoints, keypoints_orientations,
                    keypoints_scales, downscale_factor=np.sqrt(2), n_scales=5):
-    """Compute Oriented Fast keypoints.
+    """Compute rBRIEF descriptors of input keypoints.
 
     Parameters
     ----------
     image : 2D ndarray
         Input grayscale image.
     keypoints : (N, 2) ndarray
-        Array of N keypoint locations in the format (row, col).
+        Array of N input keypoint locations in the format (row, col).
     keypoints_orientations : (N,) ndarray
         The orientations of the corresponding N keypoints.
     keypoints_scales : (N,) ndarray
