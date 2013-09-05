@@ -261,9 +261,9 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
             for c in range(mcols):
                 if cmask[r, c]:
                     curr_pixel = cimage[r0 + r, c0 + c]
-                    m01 += curr_pixel * (c - mcols2)
-                    m10 += curr_pixel * (r - mrows2)
+                    m10 += curr_pixel * (c - mcols2)
+                    m01 += curr_pixel * (r - mrows2)
 
-        orientations[i] = atan2(m10, m01)
+        orientations[i] = atan2(m01, m10)
 
     return np.asarray(orientations)
