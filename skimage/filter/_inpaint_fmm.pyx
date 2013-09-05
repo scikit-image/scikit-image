@@ -186,18 +186,16 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
 
     Notes
     -----
-    The boundary is assumed to move with unit speed in a direction **normal**
-    to the boundary at all pixels, such that the time of arrival``u`` must be
-    monotonically increasing. Note that``u`` is often denoted``T`` and
-    represent the distance/time map.
-
-    In order to calulate ``u`` we find the perpendicular distance to the
+    Note that``u`` is often denoted``T`` and represents the distance/time map.
+    The progression of the curve (boundary) follows an **upwind scheme** and
+    in order to calulate ``u`` we find the perpendicular distance to the
     boundary (curve) from ``(i2, j1)`` using the difference in ``u[i1, j1]``
     and ``u[i2, j2]``. Since the curve always travels normal to itself and
     with unit speed, the perpendicular distance also represents the time taken.
+
     This is represented by ``perp`` variable below. Add to this distance the
-    time it has taken to reach the neighbouring KNOWN pixels. Represented by
-    below ``s``. Hence, the time map always progresses ahead in time.
+    time it has taken to reach the neighbouring KNOWN pixels. Represented
+    below by ``s``. Hence, the time map always progresses ahead in time.
 
     References
     ----------
