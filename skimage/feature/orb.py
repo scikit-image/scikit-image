@@ -7,6 +7,7 @@ from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
 from skimage.transform import pyramid_gaussian
 
+from .orb_cy import _orb_loop
 
 def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
                   harris_k=0.05,  downscale_factor=np.sqrt(2), n_scales=5):
@@ -42,7 +43,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         Downscale factor for the image pyramid.
     n_scales : int
         Number of scales from the bottom of the image pyramid to extract
-        the features from. 
+        the features from.
 
     Returns
     -------
@@ -59,7 +60,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
           "ORB : An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
 
-    """ 
+    """
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
@@ -99,7 +100,8 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         return keypoints[best_indices], orientations[best_indices], scales[best_indices]
 
 
-def descriptor_orb(image, keypoints, keypoints_angle):
+def descriptor_orb(image, keypoints, keypoints_orientations,
+                   keypoints_scales, downscale_factor=np.sqrt(2), n_scales=5):
 
     image = np.squeeze(image)
     if image.ndim != 2:
@@ -107,14 +109,33 @@ def descriptor_orb(image, keypoints, keypoints_angle):
 
     image = img_as_float(image)
 
-    mask = _mask_border_keypoints(image, keypoints, 13)
-    keypoints = keypoints[mask]
-    keypoints_angle = keypoints_angle[mask]
+    pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale_factor))
 
-    pos1 = binary_tests[:, :2]
-    pos2 = binary_tests[:, 2:]
+    pos0 = binary_tests[:, :2].astype(np.int32)
+    pos1 = binary_tests[:, 2:].astype(np.int32)
 
-    descriptors = np.zeros((keypoints.shape[0], 256), dtype=bool)
+    pos0 = np.ascontiguousarray(pos0)
+    pos1 = np.ascontiguousarray(pos1)
+
+    descriptors = np.empty((0, 256), dtype=np.bool)
+
+    for k in range(n_scales):
+        curr_image = np.ascontiguousarray(pyramid[k])
+
+        curr_scale_mask = keypoints_scales == k
+        curr_scale_kpts = keypoints[curr_scale_mask]
+        curr_scale_kpts_orientation = keypoints_orientations[curr_scale_mask]
+
+        border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts, 13)
+        curr_scale_kpts = curr_scale_kpts[border_mask]
+        curr_scale_kpts_orientation = curr_scale_kpts_orientation[border_mask]
+
+        curr_scale_descriptors = np.zeros((curr_scale_kpts.shape[0], 256), dtype=np.bool, order='C')
+        curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts)
+        curr_scale_kpts_orientation = np.ascontiguousarray(curr_scale_kpts_orientation)
+        _orb_loop(curr_image, curr_scale_descriptors.view(np.uint8), curr_scale_kpts, curr_scale_kpts_orientation, pos0, pos1)
+
+        descriptors = np.vstack((descriptors, curr_scale_descriptors))
 
     for i in range(keypoints.shape[0]):
         angle = keypoints_angle[i]
