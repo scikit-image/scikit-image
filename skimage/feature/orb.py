@@ -1,7 +1,6 @@
 import numpy as np
 
-from ..util import img_as_float
-from .util import _mask_border_keypoints
+from .util import _mask_border_keypoints, _prepare_grayscale_input_2D
 
 from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
@@ -85,9 +84,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
     array([0, 0, 0, 0, 1, 1, 1, 1])
 
     """
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
     pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
 
@@ -184,9 +181,7 @@ def descriptor_orb(image, keypoints, orientations, scales,
     (8, 256)
 
     """
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
     image = img_as_float(image)
 

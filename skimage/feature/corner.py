@@ -5,6 +5,8 @@ from skimage.color import rgb2grey
 from skimage.util import img_as_float, pad
 from skimage.feature import peak_local_max
 
+from .util import _prepare_grayscale_input_2D
+
 from corner_cy import _corner_fast
 
 
@@ -84,9 +86,7 @@ def structure_tensor(image, sigma=1, mode='constant', cval=0):
 
     """
 
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
     imx, imy = _compute_derivatives(image, mode=mode, cval=cval)
 
@@ -146,9 +146,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
 
     """
 
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
     # window extent to the left and right, which covers > 99% of the normal
     # distribution
@@ -576,11 +574,8 @@ def corner_fast(image, n=12, threshold=0.15):
            [8, 8]])
 
     """
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
-    image = img_as_float(image)
     image = np.ascontiguousarray(image)
     response = _corner_fast(image, n, threshold)
     return response

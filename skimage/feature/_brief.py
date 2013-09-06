@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-from ..util import img_as_float
-from .util import _mask_border_keypoints, pairwise_hamming_distance
+from .util import (_mask_border_keypoints, pairwise_hamming_distance,
+                _prepare_grayscale_input_2D)
 
 from ._brief_cy import _brief_loop
 
@@ -129,11 +129,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     np.random.seed(sample_seed)
 
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
-
-    image = img_as_float(image)
+    image = _prepare_grayscale_input_2D(image)
 
     # Gaussian Low pass filtering to alleviate noise
     # sensitivity
