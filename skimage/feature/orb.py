@@ -61,6 +61,29 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
           "ORB : An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
 
+    Examples
+    --------
+    >>> from skimage.feature import keypoints_orb, descriptor_orb
+    >>> square = np.zeros((50, 50))
+    >>> square[20:30, 20:30] = 1
+    >>> keypoints, orientations, scales = keypoints_orb(square, n_keypoints=8, n_scales=2)
+    >>> keypoints.shape
+    (8, 2)
+    >>> keypoints
+    array([[29, 29],
+           [29, 20],
+           [20, 29],
+           [20, 20],
+           [15, 15],
+           [15, 20],
+           [20, 15],
+           [20, 20]])
+    >>> orientations
+    array([-2.35619449, -0.78539816,  2.35619449,  0.78539816,  0.78539816,
+           2.35619449, -0.78539816, -2.35619449])
+    >>> scales
+    array([0, 0, 0, 0, 1, 1, 1, 1])
+
     """ 
     image = np.squeeze(image)
     if image.ndim != 2:
@@ -144,18 +167,21 @@ def descriptor_orb(image, keypoints, orientations, scales,
 
     Examples
     --------
-    >>> from skimage.data import lena
-    >>> from skimage.color import rgb2gray
+    >>> import numpy as np
     >>> from skimage.feature import keypoints_orb, descriptor_orb
-    >>> img = rgb2gray(lena())
-    >>> keypoints, orientations, scales = keypoints_orb(img, n_keypoints=250)
+    >>> square = np.zeros((50, 50))
+    >>> square[20:30, 20:30] = 1
+    >>> keypoints, orientations, scales = keypoints_orb(square, n_keypoints=8, \
+                                                        n_scales=2)
     >>> keypoints.shape
-    (250, 2)
-    >>> descriptors, filtered_keypoints = descriptor_orb(img, keypoints, orientations, scales)
+    (8, 2)
+    >>> descriptors, filtered_keypoints = descriptor_orb(square, keypoints, \
+                                                         orientations, scales, \
+                                                         n_scales=2)
     >>> filtered_keypoints.shape
-    (246, 2)
+    (8, 2)
     >>> descriptors.shape
-    (246, 256)
+    (8, 256)
 
     """ 
     image = np.squeeze(image)
