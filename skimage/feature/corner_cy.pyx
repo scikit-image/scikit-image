@@ -31,8 +31,8 @@ def corner_moravec(image, Py_ssize_t window_size=1):
 
     References
     ----------
-    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/moravec.htm
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -193,10 +193,10 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
 
     References
     ----------
-    ..[1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+    .. [1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
           "ORB : An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
-    ..[2] Paul L. Rosin, "Measuring Corner Properties"
+    .. [2] Paul L. Rosin, "Measuring Corner Properties"
           http://users.cs.cf.ac.uk/Paul.Rosin/corner2.pdf
 
     Examples

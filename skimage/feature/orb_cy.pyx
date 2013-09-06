@@ -17,7 +17,8 @@ def _orb_loop(double[:, ::1] image, Py_ssize_t[:, ::1] keypoints,
     cdef char[:, ::1] pos1 = binary_tests[:, 2:]
     cdef int[:, ::1] steered_pos0, steered_pos1
     cdef double angle
-    cdef char[:, ::1] descriptors = np.zeros((keypoints.shape[0], 256), dtype=np.uint8)
+    cdef char[:, ::1] descriptors = np.zeros((keypoints.shape[0], 256),
+                                             dtype=np.uint8)
 
     for i in range(keypoints.shape[0]):
         angle = orientations[i]
@@ -28,10 +29,10 @@ def _orb_loop(double[:, ::1] image, Py_ssize_t[:, ::1] keypoints,
         kc = keypoints[i, 1]
 
         for j in range(256):
-            pr0 = pos0[j][0]
-            pc0 = pos0[j][1]
-            pr1 = pos1[j][0]
-            pc1 = pos1[j][1]
+            pr0 = pos0[j, 0]
+            pc0 = pos0[j, 1]
+            pr1 = pos1[j, 0]
+            pc1 = pos1[j, 1]
 
             spr0 = <Py_ssize_t>round(sin_a * pr0 + cos_a * pc0)
             spc0 = <Py_ssize_t>round(cos_a * pr0 - sin_a * pc0)
