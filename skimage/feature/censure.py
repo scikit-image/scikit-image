@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 
+from .util import _prepare_grayscale_input_2D
+
 from skimage.transform import integral_image
 from skimage.feature import structure_tensor
-from skimage.util import img_as_float
 from skimage.morphology import octagon, star
 from skimage.feature.util import _mask_border_keypoints
 
@@ -174,9 +175,7 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
     # (4) Finally, we remove the border keypoints and return the keypoints
     # along with its corresponding scale.
 
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
     mode = mode.lower()
     if mode not in ('dob', 'octagon', 'star'):
@@ -186,7 +185,6 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
         raise ValueError('The scales must be >= 1 and the number of scales '
                          'should be >= 3.')
 
-    image = img_as_float(image)
     image = np.ascontiguousarray(image)
 
     # Generating all the scales

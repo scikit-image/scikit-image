@@ -8,7 +8,8 @@ from libc.float cimport DBL_MAX
 from libc.math cimport atan2
 
 from skimage.color import rgb2grey
-from skimage.util import img_as_float
+
+from .util import _prepare_grayscale_input_2D
 
 
 def corner_moravec(image, Py_ssize_t window_size=1):
@@ -231,14 +232,12 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
 
     """
 
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
     if mask.shape[0] % 2 != 1 or mask.shape[1] % 2 != 1:
         raise ValueError("Size of mask must be uneven.")
 
-    cdef double[:, :] cimage = img_as_float(image)
+    cdef double[:, :] cimage = image
     cdef char[:, ::1] cmask = np.ascontiguousarray(mask != 0, dtype=np.uint8)
 
     cdef Py_ssize_t i, r, c, r0, c0
