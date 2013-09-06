@@ -13,7 +13,7 @@ from .orb_cy import _orb_loop
 def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
                   harris_k=0.05,  downscale=np.sqrt(2), n_scales=5):
 
-    """Compute Oriented Fast keypoints.
+    """Detect Oriented Fast keypoints.
 
     Parameters
     ----------
@@ -57,7 +57,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
 
     References
     ----------
-    ..[1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+    .. [1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
           "ORB : An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
 
@@ -83,11 +83,14 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
 
     for i in range(n_scales):
         harris_response = corner_harris(pyramid[i], method='k', k=harris_k)
-        corners = corner_peaks(corner_fast(pyramid[i], fast_n, fast_threshold), min_distance=1)
+        corners = corner_peaks(corner_fast(pyramid[i], fast_n, fast_threshold),
+                               min_distance=1)
         keypoints_list.append(corners)
-        orientations_list.append(corner_orientations(pyramid[i], corners, ofast_mask))
-        scales_list.append(i * np.ones((corners.shape[0]), dtype=np.intp))
-        harris_measure_list.append(harris_response[corners[:, 0], corners[:, 1]])
+        orientations_list.append(corner_orientations(pyramid[i], corners,
+                                                     ofast_mask))
+        scales_list.append(i * np.ones(corners.shape[0], dtype=np.intp))
+        harris_measure_list.append(harris_response[corners[:, 0],
+                                   corners[:, 1]])
 
     keypoints = np.vstack(keypoints_list)
     orientations = np.hstack(orientations_list)
@@ -98,7 +101,8 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         return keypoints, orientations, scales
     else:
         best_indices = harris_measure.argsort()[::-1][:n_keypoints]
-        return keypoints[best_indices], orientations[best_indices], scales[best_indices]
+        return keypoints[best_indices], orientations[best_indices], \
+               scales[best_indices]
 
 
 def descriptor_orb(image, keypoints, orientations, scales,
@@ -134,7 +138,7 @@ def descriptor_orb(image, keypoints, orientations, scales,
 
     References
     ----------
-    ..[1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
+    .. [1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
           "ORB : An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
 
@@ -164,27 +168,27 @@ def descriptor_orb(image, keypoints, orientations, scales,
 
     descriptors_list = []
     filtered_keypoints_list = []
-    descriptors = np.empty((0, 256), dtype=np.bool)
-    filtered_keypoints = np.empty((0, 2), dtype=np.int32)
 
     for k in range(n_scales):
         curr_image = np.ascontiguousarray(pyramid[k])
 
         curr_scale_mask = scales == k
         curr_scale_kpts = keypoints[curr_scale_mask]
-        curr_scale_kpts_orientation = orientations[curr_scale_mask]
+        curr_scale_orientation = orientations[curr_scale_mask]
 
-        border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts, dist=13)
+        border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts,
+                                             dist=13)
         curr_scale_kpts = curr_scale_kpts[border_mask]
-        curr_scale_kpts_orientation = curr_scale_kpts_orientation[border_mask]
+        curr_scale_orientation = curr_scale_orientation[border_mask]
 
         curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts)
-        curr_scale_kpts_orientation = np.ascontiguousarray(curr_scale_kpts_orientation)
-        curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts, curr_scale_kpts_orientation)
+        curr_scale_orientation = np.ascontiguousarray(curr_scale_orientation)
+        curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts,
+                                           curr_scale_orientation)
 
         descriptors_list.append(curr_scale_descriptors)
         filtered_keypoints_list.append(curr_scale_kpts)
 
-    descriptors = np.vstack(descriptors_list).astype(np.bool)
+    descriptors = np.vstack(descriptors_list).view(np.bool)
     filtered_keypoints = np.vstack(filtered_keypoints_list)
     return descriptors, filtered_keypoints
