@@ -32,10 +32,10 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
     var : float
         Variance of random distribution. Used in 'gaussian' and 'speckle'.
         Note: variance = (standard deviation) ** 2. Default : 0.01
-    prop_replace : float
+    amount : float
         Proportion of image pixels to replace with noise on range [0, 1].
         Used in 'salt', 'pepper', and 'salt & pepper'. Default : 0.05
-    prop_salt : float
+    salt_vs_pepper : float
         Proportion of salt vs. pepper noise for 's&p' on range [0, 1].
         Higher values represent more salt. Default : 0.5 (equal amounts)
 
@@ -61,13 +61,13 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
     kwdefaults = {
         'mean': 0.,
         'var': 0.01,
-        'prop_replace': 0.05,
-        'prop_salt': 0.5}
+        'amount': 0.05,
+        'salt_vs_pepper': 0.5}
 
     allowedkwargs = {
         'gaussian_values': ['mean', 'var'],
-        'sp_values': ['prop_replace'],
-        's&p_values': ['prop_replace', 'prop_salt']}
+        'sp_values': ['amount'],
+        's&p_values': ['amount', 'salt_vs_pepper']}
 
     for key in kwargs:
         if key not in allowedkwargs[allowedtypes[mode]]:
@@ -95,12 +95,12 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)
         out = random_noise(image, mode='s&p', seed=seed,
-                           prop_replace=kwargs['prop_replace'], prop_salt=1.)
+                           amount=kwargs['amount'], salt_vs_pepper=1.)
 
     elif mode == 'pepper':
         # Re-call function with mode='s&p' and p=1 (all pepper noise)
         out = random_noise(image, mode='s&p', seed=seed,
-                           prop_replace=kwargs['prop_replace'], prop_salt=0.)
+                           amount=kwargs['amount'], salt_vs_pepper=0.)
 
     elif mode == 's&p':
         # This mode makes no effort to avoid repeat sampling. Thus, the
@@ -109,14 +109,14 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
 
         # Salt mode
         num_salt = np.ceil(
-            kwargs['prop_replace'] * image.size * kwargs['prop_salt'])
+            kwargs['amount'] * image.size * kwargs['salt_vs_pepper'])
         coords = [np.random.randint(0, i - 1, int(num_salt))
                   for i in image.shape]
         out[coords] = 1
 
         # Pepper mode
         num_pepper = np.ceil(
-            kwargs['prop_replace'] * image.size * (1. - kwargs['prop_salt']))
+            kwargs['amount'] * image.size * (1. - kwargs['salt_vs_pepper']))
         coords = [np.random.randint(0, i - 1, int(num_pepper))
                   for i in image.shape]
         out[coords] = 0

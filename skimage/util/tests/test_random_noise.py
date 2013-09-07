@@ -15,7 +15,7 @@ def test_set_seed():
 def test_salt():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='salt', prop_replace=0.15)
+    cam_noisy = random_noise(cam, seed=seed, mode='salt', amount=0.15)
     saltmask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
@@ -29,7 +29,7 @@ def test_salt():
 def test_pepper():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='pepper', prop_replace=0.15)
+    cam_noisy = random_noise(cam, seed=seed, mode='pepper', amount=0.15)
     peppermask = cam != cam_noisy
 
     # Ensure all changes are to 1.0
@@ -43,8 +43,8 @@ def test_pepper():
 def test_salt_and_pepper():
     seed = 42
     cam = img_as_float(camera())
-    cam_noisy = random_noise(cam, seed=seed, mode='s&p', prop_replace=0.15,
-                             prop_salt=0.25)
+    cam_noisy = random_noise(cam, seed=seed, mode='s&p', amount=0.15,
+                             salt_vs_pepper=0.25)
     saltmask = np.logical_and(cam != cam_noisy, cam_noisy == 1.)
     peppermask = np.logical_and(cam != cam_noisy, cam_noisy == 0.)
 
