@@ -160,7 +160,7 @@ def iradon(radon_image, theta=None, output_size=None,
         Assume the reconstructed image is zero outside the inscribed circle.
         Also changes the default output_size to match the behaviour of
         ``radon`` called with ``circle=True``.
-    projection_shifts : 1D array, dtype=float
+    projection_shifts : 1D array, dtype=float, optional
         Shift the projections contained in ``radon_image`` (the sinogram) by
         this many pixels before reconstructing the image. The i'th value
         defines the shift of the i'th column of ``radon_image``.
