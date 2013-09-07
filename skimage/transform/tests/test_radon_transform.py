@@ -8,6 +8,7 @@ import os.path
 from skimage.transform import radon, iradon
 from skimage.io import imread
 from skimage import data_dir
+from skimage.util import pad
 
 
 __PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
@@ -313,15 +314,19 @@ def test_order_angles_golden_ratio():
             assert len(indices) == len(set(indices))
 
 
-def test_iradon_sart():
+def _load_shepp_logan():
     from skimage.io import imread
     from skimage import data_dir
-    from skimage.transform import rescale, radon, iradon_sart
+    from skimage.transform import rescale
+    shepp_logan = imread(os.path.join(data_dir, "phantom.png"), as_grey=True)
+    return rescale(shepp_logan, scale=0.4)
 
+
+def test_iradon_sart():
+    from skimage.transform import radon, iradon_sart
     debug = False
 
-    shepp_logan = imread(os.path.join(data_dir, "phantom.png"), as_grey=True)
-    image = rescale(shepp_logan, scale=0.4)
+    image = _load_shepp_logan()
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),
@@ -354,30 +359,107 @@ def test_iradon_sart():
         print('delta (1 iteration, clip) =', delta)
         assert delta < 0.015 * error_factor
 
-        np.random.seed(1239867)
-        shifts = np.random.uniform(-3, 3, sinogram.shape[1])
-        x = np.arange(sinogram.shape[0])
-        sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
-                                               sinogram[:, i])
-                                     for i in range(sinogram.shape[1])).T
-        reconstructed = iradon_sart(sinogram_shifted, theta,
-                                    projection_shifts=shifts)
-        if debug:
-            from matplotlib import pyplot as plt
-            plt.figure()
-            plt.subplot(221)
-            plt.imshow(image, interpolation='nearest')
-            plt.subplot(222)
-            plt.imshow(sinogram_shifted, interpolation='nearest')
-            plt.subplot(223)
-            plt.imshow(reconstructed, interpolation='nearest')
-            plt.subplot(224)
-            plt.imshow(reconstructed - image, interpolation='nearest')
-            plt.show()
-
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, shifted sinogram) =', delta)
         assert delta < 0.018 * error_factor
+
+
+def check_iradon_shifted(method, image):
+    from skimage.transform import radon, iradon_sart, iradon
+    debug = False
+
+    theta = np.linspace(0., 180., image.shape[0], endpoint=False)
+    sinogram = radon(image, theta, circle=True)
+
+    np.random.seed(1239867)
+    shifts = np.random.uniform(-3, 3, sinogram.shape[1])
+    x = np.arange(sinogram.shape[0])
+    sinogram_shifted = np.vstack(np.interp(x + shifts[i], x,
+                                            sinogram[:, i])
+                                    for i in range(sinogram.shape[1])).T
+
+    if method == 'sart':
+        reconstructed = iradon_sart(sinogram_shifted, theta,
+                                    projection_shifts=shifts)
+    elif method == 'fbp':
+        reconstructed = iradon(sinogram_shifted, theta, circle=True,
+                               filter='ramp', projection_shifts=shifts)
+    else:
+        raise ValueError('incorrect method: %s (programming error)' % method)
+
+    if debug:
+        from matplotlib import pyplot as plt
+        plt.figure()
+        plt.subplot(221)
+        plt.imshow(image, interpolation='nearest')
+        plt.subplot(222)
+        plt.imshow(sinogram_shifted, interpolation='nearest')
+        plt.subplot(223)
+        plt.imshow(reconstructed, interpolation='nearest')
+        plt.subplot(224)
+        plt.imshow(reconstructed - image, interpolation='nearest')
+        plt.show()
+
+    delta = np.mean(np.abs(reconstructed - image))
+    print('delta (1 iteration, shifted sinogram) =', delta)
+    if method == 'sart':
+        assert delta < 0.018
+    elif method == 'fbp':
+        assert delta < 0.019
+
+
+def test_iradon_shifted():
+    image = _load_shepp_logan()
+    yield check_iradon_shifted, 'sart', image
+    yield check_iradon_shifted, 'fbp', image
+
+
+def _sinogram_derivative(sinogram):
+    sinogram_padded = pad(sinogram, ((1, 1), (0, 0)), mode='constant',
+                             constant_values=0)
+    central = (sinogram_padded[:-1, :] + sinogram_padded[1:, :]) / 2.
+    derivative = central[1:, :] - central[:-1, :]
+    return derivative
+
+
+def check_iradon_derivatives(image):
+    from skimage.transform import radon, iradon
+    debug = False
+
+    theta = np.linspace(0., 180., image.shape[0], endpoint=False)
+    sinogram = radon(image, theta, circle=True)
+    sinogram_derivative = _sinogram_derivative(sinogram)
+
+    def ramp_integration(f):
+        '''Ramp filter which simultaneously integrates the sinogram in
+        Fourier space'''
+        return np.sign(f) / (1j * np.pi)
+
+    reconstructed = iradon(sinogram_derivative, theta, circle=True,
+                           filter=ramp_integration)
+
+    if debug:
+        from matplotlib import pyplot as plt
+        plt.figure()
+        plt.subplot(221)
+        plt.imshow(image, interpolation='nearest')
+        plt.subplot(222)
+        plt.imshow(sinogram_derivative, interpolation='nearest')
+        plt.subplot(223)
+        plt.imshow(reconstructed, interpolation='nearest')
+        plt.subplot(224)
+        plt.imshow(reconstructed - image, interpolation='nearest')
+        plt.show()
+
+    delta = np.mean(np.abs(reconstructed - image))
+    print('delta (1 iteration, shifted sinogram) =', delta)
+    assert delta < 0.021
+
+
+def test_iradon_derivatives():
+    image = _load_shepp_logan()
+    yield check_iradon_derivatives, image
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
