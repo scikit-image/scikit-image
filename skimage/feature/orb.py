@@ -183,8 +183,6 @@ def descriptor_orb(image, keypoints, orientations, scales,
     """
     image = _prepare_grayscale_input_2D(image)
 
-    image = img_as_float(image)
-
     pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
 
     descriptors_list = []
