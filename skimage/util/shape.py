@@ -70,13 +70,8 @@ def view_as_blocks(arr_in, block_shape):
            [[[76, 77],
              [82, 83]]]])
     """
-
-    # -- basic checks on arguments
-    if not isinstance(block_shape, tuple):
-        raise TypeError('block needs to be a tuple')
-
-    block_shape = np.array(block_shape)
-    if (block_shape <= 0).any():
+    block_shape = np.asarray(block_shape)
+    if np.any(block_shape <= 0):
         raise ValueError("'block_shape' elements must be strictly positive")
 
     if block_shape.size != arr_in.ndim:
@@ -84,7 +79,7 @@ def view_as_blocks(arr_in, block_shape):
                          "as 'arr_in.shape'")
 
     arr_shape = np.array(arr_in.shape)
-    if (arr_shape % block_shape).sum() != 0:
+    if np.sum(arr_shape % block_shape) != 0:
         raise ValueError("'block_shape' is not compatible with 'arr_in'")
 
     # -- restride the array to build the block view
@@ -205,26 +200,20 @@ def view_as_windows(arr_in, window_shape, step=1):
              [13, 14, 15],
              [17, 18, 19]]]])
     """
+    arr_in = np.asarray(arr_in)
 
-    # -- basic checks on arguments
-    if not isinstance(arr_in, np.ndarray):
-        raise TypeError("'arr_in' must be a numpy ndarray")
-    if not isinstance(window_shape, tuple):
-        raise TypeError("'window_shape' must be a tuple")
+    window_shape = np.asarray(window_shape)
     if not (len(window_shape) == arr_in.ndim):
         raise ValueError("'window_shape' is incompatible with 'arr_in.shape'")
+    if ((window_shape - 1) < 0).any():
+        raise ValueError("'window_shape' is too small")
+
+    arr_shape = np.array(arr_in.shape)
+    if np.any((arr_shape - window_shape) < 0):
+        raise ValueError("'window_shape' is too large")
 
     if step < 1:
         raise ValueError("`step` must be >= 1")
-
-    arr_shape = np.array(arr_in.shape)
-    window_shape = np.array(window_shape, dtype=arr_shape.dtype)
-
-    if ((arr_shape - window_shape) < 0).any():
-        raise ValueError("'window_shape' is too large")
-
-    if ((window_shape - 1) < 0).any():
-        raise ValueError("'window_shape' is too small")
 
     # -- build rolling window view
     arr_in = np.ascontiguousarray(arr_in)
