@@ -148,3 +148,6 @@
 
 - Matt Terry
   Color difference functions
+
+- Riaan van den Dool
+  skimage.io plugin: GDAL
