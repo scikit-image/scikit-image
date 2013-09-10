@@ -87,6 +87,15 @@ class GLViewer(QApplication):
 
         btn.clicked.connect(action)
 
+    def addSlider(self, name):
+        slider = QSlider(QtCore.Qt.Horizontal)
+        slider.setTickPosition(QSlider.TicksBelow)
+
+        self.widgetButtons.layout().addWidget(QLabel(name))
+        self.widgetButtons.layout().addWidget(slider)
+
+        return slider
+
     def setLayerMap(self, name, func):
         item = self.layerList.findItems(name, QtCore.Qt.MatchExactly)[0]
 

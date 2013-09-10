@@ -62,6 +62,16 @@ viewer.setMousePress(mousePress)
 viewer.setMouseDrag(mouseDrag)
 viewer.setKeyPress(keyPress)
 
+def slidevalue(value):
+    print value
+
+slider = viewer.addSlider('kernel_size')
+slider.setRange(1, 50)
+slider.setSingleStep(1)
+slider.setTickInterval(100)
+slider.valueChanged.connect(slidevalue)
+slider.setValue(100)
+
 viewer.window.resize(1000, 700)
 viewer.window.show()
 
