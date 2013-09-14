@@ -4,6 +4,10 @@ Version 0.10
     - ``skimage.filter.rank.*``
 * Remove deprecated parameter ``epsilon`` of ``skimage.viewer.LineProfile``
 * Remove backwards-compatability of ``skimage.measure.regionprops``
+* Remove deprecation of ``skimage.morphology.erosion`` and
+  ``skimage.morphology.dilation`` and simply set as alias:
+  ``erosion = skimage.filter.rank.minimum`` and
+  ``dilation = skimage.filter.rank.maximum``
 
 Version 0.9
 -----------

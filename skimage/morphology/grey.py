@@ -1,7 +1,7 @@
 import warnings
 from skimage import img_as_ubyte
-
-from . import cmorph
+from skimage._shared.utils import deprecated
+from skimage.filter import rank
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
@@ -10,6 +10,7 @@ __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
            'greyscale_black_top_hat']
 
 
+@deprecated('filter.rank.minimum')
 def erosion(image, selem, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological erosion of an image.
 
@@ -54,14 +55,14 @@ def erosion(image, selem, out=None, shift_x=False, shift_y=False):
 
     """
 
-    if image is out:
-        raise NotImplementedError("In-place erosion not supported!")
-    image = img_as_ubyte(image)
-    selem = img_as_ubyte(selem)
-    return cmorph._erode(image, selem, out=out,
-                         shift_x=shift_x, shift_y=shift_y)
+    shift_x = -1 if shift_x else 0
+    shift_y = -1 if shift_y else 0
+
+    return rank.minimum(image, selem, out=out, shift_x=shift_x,
+                        shift_y=shift_y)
 
 
+@deprecated('filter.rank.maximum')
 def dilation(image, selem, out=None, shift_x=False, shift_y=False):
     """Return greyscale morphological dilation of an image.
 
@@ -107,12 +108,11 @@ def dilation(image, selem, out=None, shift_x=False, shift_y=False):
 
     """
 
-    if image is out:
-        raise NotImplementedError("In-place dilation not supported!")
-    image = img_as_ubyte(image)
-    selem = img_as_ubyte(selem)
-    return cmorph._dilate(image, selem, out=out,
-                          shift_x=shift_x, shift_y=shift_y)
+    shift_x = -1 if shift_x else 0
+    shift_y = -1 if shift_y else 0
+
+    return rank.maximum(image, selem, out=out, shift_x=shift_x,
+                        shift_y=shift_y)
 
 
 def opening(image, selem, out=None):
