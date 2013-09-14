@@ -148,3 +148,6 @@
 
 - Matt Terry
   Color difference functions
+
+- Eugene Dvoretsky
+  Yen threshold implementation.
