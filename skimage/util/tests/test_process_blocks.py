@@ -42,6 +42,7 @@ def test_process_windows_2D_array_args_with_overlap():
         (3,2)
         
     """
+    assert_equal(B.shape, (3,2))
     
     
 
@@ -49,6 +50,11 @@ def test_process_windows_2D_array_args_with_2D_overlap():
     A = np.arange(5 * 6).reshape((5, 6))
     print "Allow n-dimensional overlap specifications?"
     B = process_blocks(A, (3, 4), np.sum, overlap=(2,2))
+    assert_equal(B.shape, (3,2))
+
+
+def test_process_windows_synchronous_execution():
+    pass
     
 
 
