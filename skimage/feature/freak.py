@@ -21,6 +21,10 @@ pattern = np.asarray(pattern)
 pattern = np.round(pattern)
 
 
+def _get_freak_orientation(image, keypoint):
+
+
+
 def descriptor_freak(image, keypoints):
 
     # Prepare the input image
@@ -32,7 +36,58 @@ def descriptor_freak(image, keypoints):
 
     # Generate pattern of 43 points
     # Orientation of the keypoints
+    # Rotate the pattern
+    # Mean / Gaussian intensity at 43 points
     # make descriptor
+
+
+# 45 pairs for calculating keypoint orientation. Taken from OpenCV.
+orientation_pairs = np.array([[ 0,  3],
+       [ 1,  4],
+       [ 2,  5],
+       [ 0,  2],
+       [ 1,  3],
+       [ 2,  4],
+       [ 3,  5],
+       [ 4,  0],
+       [ 5,  1],
+       [ 6,  9],
+       [ 7, 10],
+       [ 8, 11],
+       [ 6,  8],
+       [ 7,  9],
+       [ 8, 10],
+       [ 9, 11],
+       [10,  6],
+       [11,  7],
+       [12, 15],
+       [13, 16],
+       [14, 17],
+       [12, 14],
+       [13, 15],
+       [14, 16],
+       [15, 17],
+       [16, 12],
+       [17, 13],
+       [18, 21],
+       [19, 22],
+       [20, 23],
+       [18, 20],
+       [19, 21],
+       [20, 22],
+       [21, 23],
+       [22, 18],
+       [23, 19],
+       [24, 27],
+       [25, 28],
+       [26, 29],
+       [30, 33],
+       [31, 34],
+       [32, 35],
+       [36, 39],
+       [37, 40],
+       [38, 41]], dtype=np.uint8)
+
 
 # Best 512 pairs out 903 ppossible pairs. Taken from OpenCV
 best_pairs = np.array([[28, 26],
