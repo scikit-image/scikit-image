@@ -1,12 +1,38 @@
 import numpy as np
 
+# Constants
 n = [6, 6, 6, 6, 6, 6, 6, 1]
 big_radius = 2./3
 small_radius = 2./24
 unit_space = (big_radius - small_radius) / 21
-radius = [big_radius, big_radius - 6*unit_space, big_radius - 11*unit_space, big_radius - 15*unit_space, big_radius - 18*unit_space, big_radius - 20*unit_space, small_radius, 0.0]
+radius = np.asarray([big_radius, big_radius - 6 * unit_space, big_radius - 11*unit_space, big_radius - 15*unit_space, big_radius - 18*unit_space, big_radius - 20*unit_space, small_radius, 0.0])
+sigma = radius / 2
 
-#def descriptor_freak():
+
+pattern = []
+
+for i in range(8):
+    for j in range(n[i]):
+        beta = (np.pi / n[i]) * (i % 2)
+        alpha = j * 2 * np.pi / n[i] + beta 
+        pattern.append([radius[i] * np.cos(alpha) * 22, radius[i] * np.sin(alpha) * 22])
+
+pattern = np.asarray(pattern)
+pattern = np.round(pattern)
+
+
+def descriptor_freak(image, keypoints):
+
+    # Prepare the input image
+    image = np.squeeze(image)
+    if image.ndim != 2:
+        raise ValueError("Only 2-D gray-scale images supported.")
+
+    image = img_as_float(image)
+
+    # Generate pattern of 43 points
+    # Orientation of the keypoints
+    # make descriptor
 
 # Best 512 pairs out 903 ppossible pairs. Taken from OpenCV
 best_pairs = np.array([[28, 26],
