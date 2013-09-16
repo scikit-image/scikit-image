@@ -27,7 +27,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         infinity, superpixel shapes become square/cubic.
     max_iter : int, optional
         Maximum number of iterations of k-means.
-    sigma : float or (3,) array of floats, optional
+    sigma : float or (3,) array-like of floats, optional
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
@@ -104,7 +104,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         image = image[..., np.newaxis]
 
     if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma])
+        sigma = np.array([sigma, sigma, sigma], float)
+    elif type(sigma) in [list, tuple]:
+        sigma = np.array(sigma, float)
     if (sigma > 0).any():
         sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
