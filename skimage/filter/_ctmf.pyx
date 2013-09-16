@@ -731,13 +731,8 @@ cdef int c_median_filter(Py_ssize_t rows,
     return 0
 
 
-def median_filter(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
-                              negative_indices=False, mode='c'] data,
-                  cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
-                              negative_indices=False, mode='c'] mask,
-                  cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
-                              negative_indices=False, mode='c'] output,
-                  int radius,
+def median_filter(cnp.uint8_t[:, ::1] data, cnp.uint8_t[:, ::1] mask,
+                  cnp.uint8_t[:, ::1] output, int radius,
                   cnp.int32_t percent):
     """Median filter with octagon shape and masking.
 
@@ -773,12 +768,10 @@ def median_filter(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
         raise ValueError('Data shape (%d, %d) is not output shape (%d, %d)' %
                          (data.shape[0], data.shape[1],
                           output.shape[0], output.shape[1]))
-    if c_median_filter(<cnp.int32_t>data.shape[0],
-                       <cnp.int32_t>data.shape[1],
-                       <cnp.int32_t>data.strides[0],
-                       <cnp.int32_t>data.strides[1],
+    if c_median_filter(data.shape[0], data.shape[1],
+                       data.strides[0], data.strides[1],
                        radius, percent,
-                       <cnp.uint8_t*>data.data,
-                       <cnp.uint8_t*>mask.data,
-                       <cnp.uint8_t*>output.data):
+                       &data[0, 0],
+                       &mask[0, 0],
+                       &output[0, 0]):
         raise MemoryError('Failed to allocate scratchpad memory')

@@ -66,9 +66,10 @@ class LPIFilter2D(object):
         --------
 
         Gaussian filter:
-
-        >>> def filt_func(r, c):
-        ...     return np.exp(-np.hypot(r, c)/1)
+	    Use a 1-D gaussian in each direction without normalization
+	    coefficients.
+        >>> def filt_func(r, c, sigma = 1):
+        ...     return np.exp(-np.hypot(r, c)/sigma)
         >>> filter = LPIFilter2D(filt_func)
 
         """

@@ -14,27 +14,46 @@ Authors
 import os.path
 
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_equal,
+                           assert_almost_equal,
+                           assert_array_almost_equal,
+                           assert_raises,
+                           TestCase,
+                           )
 
 from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
-from skimage.color import (
-    rgb2hsv, hsv2rgb,
-    rgb2xyz, xyz2rgb,
-    rgb2hed, hed2rgb,
-    separate_stains,
-    combine_stains,
-    rgb2rgbcie, rgbcie2rgb,
-    convert_colorspace,
-    rgb2grey, gray2rgb,
-    xyz2lab, lab2xyz,
-    lab2rgb, rgb2lab,
-    is_rgb, is_gray
-    )
+from skimage.color import (rgb2hsv, hsv2rgb,
+                           rgb2xyz, xyz2rgb,
+                           rgb2hed, hed2rgb,
+                           separate_stains,
+                           combine_stains,
+                           rgb2rgbcie, rgbcie2rgb,
+                           convert_colorspace,
+                           rgb2grey, gray2rgb,
+                           xyz2lab, lab2xyz,
+                           lab2rgb, rgb2lab,
+                           is_rgb, is_gray,
+                           lab2lch, lch2lab,
+                           guess_spatial_dimensions
+                           )
 
 from skimage import data_dir, data
 
 import colorsys
+
+
+def test_guess_spatial_dimensions():
+    im1 = np.zeros((5, 5))
+    im2 = np.zeros((5, 5, 5))
+    im3 = np.zeros((5, 5, 3))
+    im4 = np.zeros((5, 5, 5, 3))
+    im5 = np.zeros((5,))
+    assert_equal(guess_spatial_dimensions(im1), 2)
+    assert_equal(guess_spatial_dimensions(im2), 3)
+    assert_equal(guess_spatial_dimensions(im3), None)
+    assert_equal(guess_spatial_dimensions(im4), 3)
+    assert_raises(ValueError, guess_spatial_dimensions, im5)
 
 
 class TestColorconv(TestCase):
@@ -126,7 +145,7 @@ class TestColorconv(TestCase):
 
     # RGB<->HED roundtrip with ubyte image
     def test_hed_rgb_roundtrip(self):
-        img_rgb = self.img_rgb
+        img_rgb = img_as_ubyte(self.img_rgb)
         assert_equal(img_as_ubyte(hed2rgb(rgb2hed(img_rgb))), img_rgb)
 
     # RGB<->HED roundtrip with float image
@@ -231,6 +250,43 @@ class TestColorconv(TestCase):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
 
+    def test_lab_lch_roundtrip(self):
+        rgb = img_as_float(self.img_rgb)
+        lab = rgb2lab(rgb)
+        lab2 = lch2lab(lab2lch(lab))
+        assert_array_almost_equal(lab2, lab)
+
+    def test_rgb_lch_roundtrip(self):
+        rgb = img_as_float(self.img_rgb)
+        lab = rgb2lab(rgb)
+        lch = lab2lch(lab)
+        lab2 = lch2lab(lch)
+        rgb2 = lab2rgb(lab2)
+        assert_array_almost_equal(rgb, rgb2)
+
+    def test_lab_lch_0d(self):
+        lab0 = self._get_lab0()
+        lch0 = lab2lch(lab0)
+        lch2 = lab2lch(lab0[None, None, :])
+        assert_array_almost_equal(lch0, lch2[0, 0, :])
+
+    def test_lab_lch_1d(self):
+        lab0 = self._get_lab0()
+        lch0 = lab2lch(lab0)
+        lch1 = lab2lch(lab0[None, :])
+        assert_array_almost_equal(lch0, lch1[0, :])
+
+    def test_lab_lch_3d(self):
+        lab0 = self._get_lab0()
+        lch0 = lab2lch(lab0)
+        lch3 = lab2lch(lab0[None, None, None, :])
+        assert_array_almost_equal(lch0, lch3[0, 0, 0, :])
+
+    def _get_lab0(self):
+        rgb = img_as_float(self.img_rgb[:1, :1, :])
+        return rgb2lab(rgb)[0, 0, :]
+
+
 def test_gray2rgb():
     x = np.array([0, 0.5, 1])
     assert_raises(ValueError, gray2rgb, x)
@@ -267,4 +323,5 @@ def test_is_rgb():
 
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

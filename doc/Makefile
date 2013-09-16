@@ -2,9 +2,10 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-PAPER         =
+PYTHON        ?= python
+SPHINXOPTS    ?=
+SPHINXBUILD   ?= sphinx-build
+PAPER         ?=
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -36,14 +37,14 @@ clean:
 	-find ./source/auto_examples/* -type f | grep -v blank | xargs rm -f
 api:
 	@mkdir -p source/api
-	python tools/build_modref_templates.py
+	$(PYTHON) tools/build_modref_templates.py
 	@echo "Build API docs...done."
 
 random_gallery:
-	@cd source && python random_gallery.py
+	@cd source && $(PYTHON) random_gallery.py
 
 coveragetable:
-	@cd source && python coverage_generator.py
+	@cd source && $(PYTHON) coverage_generator.py
 
 html: api coveragetable random_gallery
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(DEST)/html
@@ -120,10 +121,10 @@ doctest:
 	      "results in build/doctest/output.txt."
 
 gh-pages:
-	python gh-pages.py
+	$(PYTHON) gh-pages.py
 
 gitwash:
-	python tools/gitwash/gitwash_dumper.py source scikit-image \
+	$(PYTHON) tools/gitwash/gitwash_dumper.py source scikit-image \
 	--project-url=http://scikit-image.org \
 	--project-ml-url=http://groups.google.com/group/scikit-image \
 	--repo-name=scikit-image \

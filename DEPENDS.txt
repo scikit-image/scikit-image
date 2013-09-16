@@ -2,10 +2,14 @@ Build Requirements
 ------------------
 * `Python >= 2.5 <http://python.org>`__
 * `Numpy >= 1.6 <http://numpy.scipy.org/>`__
-* `Cython >= 0.15 <http://www.cython.org/>`__
+* `Cython >= 0.17 <http://www.cython.org/>`__
 
 `Matplotlib >= 1.0 <http://matplotlib.sf.net>`__ is needed to generate the
 examples in the documentation.
+
+You can use pip to automatically install the base dependencies as follows::
+
+    $ pip install -r requirements.txt
 
 Runtime requirements
 --------------------
@@ -31,10 +35,20 @@ Optional Requirements
 You can use this scikit with the basic requirements listed above, but some
 functionality is only available with the following installed:
 
-`PyQt4 <http://wiki.python.org/moin/PyQt>`__
+* `PyQt4 <http://wiki.python.org/moin/PyQt>`__
    The ``qt`` plugin that provides ``imshow(x, fancy=True)`` and `skivi`.
 
-`FreeImage <http://freeimage.sf.net>`__
+* `FreeImage <http://freeimage.sf.net>`__
    The ``freeimage`` plugin provides support for reading various types of
    image file formats, including multi-page TIFFs.
 
+* `PyAMG <http://pyamg.org/>`__
+   The ``pyamg`` module is used for the fast `cg_mg` mode of random
+   walker segmentation.
+
+Testing requirements
+--------------------
+* `Nose <https://nose.readthedocs.org/en/latest/>`__
+      A Python Unit Testing Framework
+* `Coverage.py <http://nedbatchelder.com/code/coverage/>`__
+      A tool that generates a unit test code coverage report

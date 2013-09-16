@@ -19,16 +19,9 @@ import numpy as np
 cimport numpy as cnp
 
 
-def _skeletonize_loop(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
-                                  negative_indices=False, mode='c'] result,
-                      cnp.ndarray[dtype=cnp.intp_t, ndim=1,
-                                  negative_indices=False, mode='c'] i,
-                      cnp.ndarray[dtype=cnp.intp_t, ndim=1,
-                                  negative_indices=False, mode='c'] j,
-                      cnp.ndarray[dtype=cnp.int32_t, ndim=1,
-                                  negative_indices=False, mode='c'] order,
-                      cnp.ndarray[dtype=cnp.uint8_t, ndim=1,
-                                  negative_indices=False, mode='c'] table):
+def _skeletonize_loop(cnp.uint8_t[:, ::1] result,
+                      Py_ssize_t[:] i, Py_ssize_t[:] j,
+                      cnp.int32_t[:] order, cnp.uint8_t[:] table):
     """
     Inner loop of skeletonize function
 
@@ -65,9 +58,11 @@ def _skeletonize_loop(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
     pixels.
     """
     cdef:
-        cnp.int32_t accumulator
+        Py_ssize_t accumulator
         Py_ssize_t index, order_index
         Py_ssize_t ii, jj
+        Py_ssize_t rows = result.shape[0]
+        Py_ssize_t cols = result.shape[1]
 
     for index in range(order.shape[0]):
         accumulator = 16
@@ -80,26 +75,25 @@ def _skeletonize_loop(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
                 accumulator += 1
             if result[ii - 1, jj]:
                 accumulator += 2
-            if jj < result.shape[1] - 1 and result[ii - 1, jj + 1]:
+            if jj < cols - 1 and result[ii - 1, jj + 1]:
                     accumulator += 4
             if jj > 0 and result[ii, jj - 1]:
                 accumulator += 8
-            if jj < result.shape[1] - 1 and result[ii, jj + 1]:
+            if jj < cols - 1 and result[ii, jj + 1]:
                 accumulator += 32
-            if ii < result.shape[0]-1:
+            if ii < rows - 1:
                 if jj > 0 and result[ii + 1, jj - 1]:
                     accumulator += 64
                 if result[ii + 1, jj]:
                     accumulator += 128
-                if jj < result.shape[1] - 1 and result[ii + 1, jj + 1]:
+                if jj < cols - 1 and result[ii + 1, jj + 1]:
                     accumulator += 256
             # Assign the value of table corresponding to the configuration
             result[ii, jj] = table[accumulator]
 
 
 
-def _table_lookup_index(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
-                                    negative_indices=False, mode='c'] image):
+def _table_lookup_index(cnp.uint8_t[:, ::1] image):
     """
     Return an index into a table per pixel of a binary image
 
@@ -120,9 +114,8 @@ def _table_lookup_index(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
     hardwired kernel.
     """
     cdef:
-        cnp.ndarray[dtype=cnp.int32_t, ndim=2,
-                    negative_indices=False, mode='c'] indexer
-        cnp.int32_t *p_indexer
+        Py_ssize_t[:, ::1] indexer
+        Py_ssize_t *p_indexer
         cnp.uint8_t *p_image
         Py_ssize_t i_stride
         Py_ssize_t i_shape
@@ -133,9 +126,9 @@ def _table_lookup_index(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
 
     i_shape   = image.shape[0]
     j_shape   = image.shape[1]
-    indexer = np.zeros((i_shape, j_shape), np.int32)
-    p_indexer = <cnp.int32_t *>indexer.data
-    p_image   = <cnp.uint8_t *>image.data
+    indexer = np.zeros((i_shape, j_shape), dtype=np.intp)
+    p_indexer = &indexer[0, 0]
+    p_image   = &image[0, 0]
     i_stride  = image.strides[0]
     assert i_shape >= 3 and j_shape >= 3, \
         "Please use the slow method for arrays < 3x3"
@@ -214,4 +207,4 @@ def _table_lookup_index(cnp.ndarray[dtype=cnp.uint8_t, ndim=2,
             indexer[i - 1, j_shape - 1] += 128
             indexer[i, j_shape - 1] += 16
             indexer[i + 1, j_shape - 1] += 2
-    return indexer
+    return np.asarray(indexer)

@@ -1,11 +1,9 @@
 from __future__ import division
 import numpy as np
+from warnings import warn
 
 __all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
            'img_as_bool', 'dtype_limits']
-
-from .. import get_log
-log = get_log('dtype_converter')
 
 dtype_range = {np.bool_: (False, True),
                np.bool8: (False, True),
@@ -101,12 +99,12 @@ def convert(image, dtype, force_copy=False, uniform=False):
         raise ValueError("can not convert %s to %s." % (dtypeobj_in, dtypeobj))
 
     def sign_loss():
-        log.warn("Possible sign loss when converting negative image of type "
-                 "%s to positive image of type %s." % (dtypeobj_in, dtypeobj))
+        warn("Possible sign loss when converting negative image of type "
+             "%s to positive image of type %s." % (dtypeobj_in, dtypeobj))
 
     def prec_loss():
-        log.warn("Possible precision loss when converting from "
-                 "%s to %s" % (dtypeobj_in, dtypeobj))
+        warn("Possible precision loss when converting from "
+             "%s to %s" % (dtypeobj_in, dtypeobj))
 
     def _dtype(itemsize, *dtypes):
         # Return first of `dtypes` with itemsize greater than `itemsize`

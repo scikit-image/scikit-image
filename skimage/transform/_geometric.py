@@ -4,6 +4,9 @@ from scipy import ndimage, spatial
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
 
+from skimage._shared.utils import get_bound_method_class
+from skimage._shared import six
+
 
 class GeometricTransform(object):
     """Perform geometric transformations on a set of coordinates.
@@ -40,6 +43,28 @@ class GeometricTransform(object):
 
         """
         raise NotImplementedError()
+
+    def residuals(self, src, dst):
+        """Determine residuals of transformed destination coordinates.
+
+        For each transformed source coordinate the euclidean distance to the
+        respective destination coordinate is determined.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Residual for coordinate.
+
+        """
+
+        return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
     def __add__(self, other):
         """Combine this transformation with another.
@@ -200,14 +225,14 @@ class ProjectiveTransform(GeometricTransform):
         A[rows:, 8] = yd
 
         # Select relevant columns, depending on params
-        A = A[:, self._coeffs + [8]]
+        A = A[:, list(self._coeffs) + [8]]
 
         _, _, V = np.linalg.svd(A)
 
         H = np.zeros((3, 3))
         # solution is right singular vector that corresponds to smallest
         # singular value
-        H.flat[self._coeffs + [8]] = - V[-1, :-1] / V[-1, -1]
+        H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
         self._matrix = H
@@ -471,8 +496,8 @@ class SimilarityTransform(ProjectiveTransform):
                      for param in (scale, rotation, translation))
 
         if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and "
-                             "the implicit parameters at the same time.")
+            raise ValueError("You cannot specify the transformation matrix and"
+                             " the implicit parameters at the same time.")
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
@@ -994,7 +1019,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     Parameters
     ----------
-    image : 2-D array
+    image : 2-D or 3-D array
         Input image.
     inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``
         Inverse coordinate map. A function that transforms a (N, 2) array of
@@ -1003,15 +1028,16 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         inverse).
     map_args : dict, optional
         Keyword arguments passed to `inverse_map`.
-    output_shape : tuple (rows, cols)
-        Shape of the output image generated.
-    order : int
-        Order of splines used in interpolation. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : float
+    output_shape : tuple (rows, cols), optional
+        Shape of the output image generated. By default the shape of the input
+        image is preserved.
+    order : int, optional
+        The order of the spline interpolation, default is 3. The order has to
+        be in the range 0-5.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
@@ -1019,6 +1045,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     --------
     Shift an image to the right:
 
+    >>> from skimage.transform import warp
     >>> from skimage import data
     >>> image = data.camera()
     >>>
@@ -1027,6 +1054,12 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ...     return xy
     >>>
     >>> warp(image, shift_right)
+
+    Use a geometric transform to warp an image:
+
+    >>> from skimage.transform import SimilarityTransform
+    >>> tform = SimilarityTransform(scale=0.1, rotation=0.1)
+    >>> warp(image, tform)
 
     """
     # Backward API compatibility
@@ -1046,12 +1079,16 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     # use fast Cython version for specific interpolation orders
     if order in range(4) and not map_args:
         matrix = None
+
         if inverse_map in HOMOGRAPHY_TRANSFORMS:
             matrix = inverse_map._matrix
+
         elif hasattr(inverse_map, '__name__') \
-                and inverse_map.__name__ == 'inverse' \
-                and inverse_map.im_class in HOMOGRAPHY_TRANSFORMS:
-            matrix = np.linalg.inv(inverse_map.im_self._matrix)
+             and inverse_map.__name__ == 'inverse' \
+             and get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS:
+
+            matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
+
         if matrix is not None:
             # transform all bands
             dims = []

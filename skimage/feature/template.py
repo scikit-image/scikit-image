@@ -34,14 +34,14 @@ def match_template(image, template, pad_input=False):
     --------
     >>> template = np.zeros((3, 3))
     >>> template[1, 1] = 1
-    >>> print template
+    >>> print(template)
     [[ 0.  0.  0.]
      [ 0.  1.  0.]
      [ 0.  0.  0.]]
     >>> image = np.zeros((6, 6))
     >>> image[1, 1] = 1
     >>> image[4, 4] = -1
-    >>> print image
+    >>> print(image)
     [[ 0.  0.  0.  0.  0.  0.]
      [ 0.  1.  0.  0.  0.  0.]
      [ 0.  0.  0.  0.  0.  0.]
@@ -49,13 +49,13 @@ def match_template(image, template, pad_input=False):
      [ 0.  0.  0.  0. -1.  0.]
      [ 0.  0.  0.  0.  0.  0.]]
     >>> result = match_template(image, template)
-    >>> print np.round(result, 3)
+    >>> print(np.round(result, 3))
     [[ 1.    -0.125  0.     0.   ]
      [-0.125 -0.125  0.     0.   ]
      [ 0.     0.     0.125  0.125]
      [ 0.     0.     0.125 -1.   ]]
     >>> result = match_template(image, template, pad_input=True)
-    >>> print np.round(result, 3)
+    >>> print(np.round(result, 3))
     [[-0.125 -0.125 -0.125  0.     0.     0.   ]
      [-0.125  1.    -0.125  0.     0.     0.   ]
      [-0.125 -0.125 -0.125  0.     0.     0.   ]

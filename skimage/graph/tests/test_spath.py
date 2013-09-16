@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import *
+from numpy.testing import assert_equal, assert_array_equal
 
 import skimage.graph.spath as spath
 
@@ -33,4 +33,4 @@ def test_non_square():
 
 
 if __name__ == "__main__":
-    run_module_suite()
+    np.testing.run_module_suite()

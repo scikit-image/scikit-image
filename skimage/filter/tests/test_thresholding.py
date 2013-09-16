@@ -3,7 +3,9 @@ from numpy.testing import assert_array_equal
 
 import skimage
 from skimage import data
-from skimage.filter.thresholding import threshold_otsu, threshold_adaptive
+from skimage.filter.thresholding import (threshold_adaptive,
+                                         threshold_otsu,
+                                         threshold_yen)
 
 
 class TestSimpleImage():
@@ -24,6 +26,26 @@ class TestSimpleImage():
     def test_otsu_float_image(self):
         image = np.float64(self.image)
         assert 2 <= threshold_otsu(image) < 3
+
+    def test_yen(self):
+        assert threshold_yen(self.image) == 2
+
+    def test_yen_negative_int(self):
+        image = self.image - 2
+        assert threshold_yen(image) == 0
+
+    def test_yen_float_image(self):
+        image = np.float64(self.image)
+        assert 2 <= threshold_yen(image) < 3
+
+    def test_yen_arange(self):
+        image = np.arange(256)
+        assert threshold_yen(image) == 127
+
+    def test_yen_binary(self):
+        image = np.zeros([2,256], dtype='uint8')
+        image[0] = 255
+        assert threshold_yen(image) < 1
 
     def test_threshold_adaptive_generic(self):
         def func(arr):
@@ -90,6 +112,16 @@ def test_otsu_coins_image_as_float():
 def test_otsu_lena_image():
     lena = skimage.img_as_ubyte(data.lena())
     assert 140 < threshold_otsu(lena) < 142
+
+
+def test_yen_coins_image():
+    coins = skimage.img_as_ubyte(data.coins())
+    assert 109 < threshold_yen(coins) < 111
+
+
+def test_yen_coins_image_as_float():
+    coins = skimage.img_as_float(data.coins())
+    assert 0.43 < threshold_yen(coins) < 0.44
 
 
 if __name__ == '__main__':

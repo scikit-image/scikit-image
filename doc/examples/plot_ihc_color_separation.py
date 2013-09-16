@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 from skimage import data
 from skimage.color import rgb2hed
 
+
 ihc_rgb = data.immunohistochemistry()
 ihc_hed = rgb2hed(ihc_rgb)
 

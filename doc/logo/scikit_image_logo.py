@@ -8,7 +8,7 @@ Original snake image from pixabay [1]_
 """
 import sys
 if len(sys.argv) != 2 or sys.argv[1] != '--no-plot':
-    print "Run with '--no-plot' flag to generate logo silently."
+    print("Run with '--no-plot' flag to generate logo silently.")
 else:
     import matplotlib as mpl
     mpl.use('Agg')
@@ -23,7 +23,6 @@ from skimage.exposure import rescale_intensity
 from skimage.filter import sobel
 
 import scipy_logo
-
 
 # Utility functions
 # =================
@@ -49,7 +48,7 @@ def prepare_axes(ax):
     plt.sca(ax)
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
-    for spine in ax.spines.itervalues():
+    for spine in ax.spines.values():
         spine.set_visible(False)
 
 

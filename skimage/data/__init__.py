@@ -23,7 +23,8 @@ __all__ = ['load',
            'horse',
            'clock',
            'immunohistochemistry',
-           'chelsea']
+           'chelsea',
+           'coffee']
 
 
 def load(f):
@@ -169,7 +170,7 @@ def immunohistochemistry():
     No known copyright restrictions.
 
     """
-    return load("ihc.jpg")
+    return load("ihc.png")
 
 
 def chelsea():
@@ -183,4 +184,20 @@ def chelsea():
     No copyright restrictions.  CC0 by the photographer (Stefan van der Walt).
 
     """
-    return load("chelsea.jpg")
+    return load("chelsea.png")
+
+
+def coffee():
+    """Coffee cup.
+
+    This photograph is courtesy of Pikolo Espresso Bar.
+    It contains several elliptical shapes as well as varying texture (smooth
+    porcelain to course wood grain).
+
+    Notes
+    -----
+    No copyright restrictions.  CC0 by the photographer (Rachel Michetti).
+
+    """
+    return load("coffee.png")
+

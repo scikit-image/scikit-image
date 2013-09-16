@@ -15,14 +15,9 @@ parameter type specified by its `ptype` attribute, which can be:
         property of the same name that updates the display.
 
 """
-try:
-    from PyQt4.QtCore import Qt
-    from PyQt4 import QtGui
-    from PyQt4 import QtCore
-    from PyQt4.QtGui import QWidget
-except ImportError:
-    QWidget = object  # hack to prevent nosetest and autodoc errors
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
+from ..qt import QtCore
+from ..qt.QtCore import Qt
 
 from ..utils import RequiredAttr
 
@@ -30,7 +25,7 @@ from ..utils import RequiredAttr
 __all__ = ['BaseWidget', 'Slider', 'ComboBox', 'Text']
 
 
-class BaseWidget(QWidget):
+class BaseWidget(QtGui.QWidget):
 
     plugin = RequiredAttr("Widget is not attached to a Plugin.")
 
@@ -86,7 +81,7 @@ class Slider(BaseWidget):
         Range of slider values.
     value : float
         Default slider value. If None, use midpoint between `low` and `high`.
-    value : {'float' | 'int'}
+    value_type : {'float' | 'int'}
         Numeric type of slider value.
     ptype : {'arg' | 'kwarg' | 'plugin'}
         Parameter type.
@@ -95,12 +90,12 @@ class Slider(BaseWidget):
         is typically set when the widget is added to a plugin.
     orientation : {'horizontal' | 'vertical'}
         Slider orientation.
-    update_on : {'move' | 'release'}
+    update_on : {'release' | 'move'}
         Control when callback function is called: on slider move or release.
     """
     def __init__(self, name, low=0.0, high=1.0, value=None, value_type='float',
                  ptype='kwarg', callback=None, max_edit_width=60,
-                 orientation='horizontal', update_on='move'):
+                 orientation='horizontal', update_on='release'):
         super(Slider, self).__init__(name, ptype, callback)
 
         if value is None:
@@ -165,9 +160,9 @@ class Slider(BaseWidget):
         self.editbox.setAlignment(align_value)
         self.editbox.editingFinished.connect(self._on_editbox_changed)
 
-        self.layout.addWidget(self.name_label, alignment=align_text)
-        self.layout.addWidget(self.slider, alignment=alignment)
-        self.layout.addWidget(self.editbox, alignment=align_value)
+        self.layout.addWidget(self.name_label)
+        self.layout.addWidget(self.slider)
+        self.layout.addWidget(self.editbox)
 
     def _on_slider_changed(self):
         """Call callback function with slider's name and value as parameters"""
@@ -241,7 +236,7 @@ class ComboBox(BaseWidget):
 
         self.layout = QtGui.QHBoxLayout(self)
         self.layout.addWidget(self.name_label)
-        self.layout.addWidget(self._combo_box, alignment=QtCore.Qt.AlignLeft)
+        self.layout.addWidget(self._combo_box)
 
         self._combo_box.currentIndexChanged.connect(self._value_changed)
         # self.connect(self._combo_box,
