@@ -5,24 +5,46 @@ n = [6, 6, 6, 6, 6, 6, 6, 1]
 big_radius = 2./3
 small_radius = 2./24
 unit_space = (big_radius - small_radius) / 21
-radius = np.asarray([big_radius, big_radius - 6 * unit_space, big_radius - 11*unit_space, big_radius - 15*unit_space, big_radius - 18*unit_space, big_radius - 20*unit_space, small_radius, 0.0])
-sigma = radius / 2
+radius = [big_radius, big_radius - 6 * unit_space, big_radius - 11*unit_space, big_radius - 15*unit_space, big_radius - 18*unit_space, big_radius - 20*unit_space, small_radius, 0.0]
 
-
-pattern = []
-
+sigma_stretched = []
 for i in range(8):
-    for j in range(n[i]):
-        beta = (np.pi / n[i]) * (i % 2)
-        alpha = j * 2 * np.pi / n[i] + beta 
-        pattern.append([radius[i] * np.cos(alpha) * 22, radius[i] * np.sin(alpha) * 22])
+    sigma_stretched = sigma_stretched + [radius[i] / 2] * n[i]
 
-pattern = np.asarray(pattern)
-pattern = np.round(pattern)
+
+def _get pattern():
+    pattern = []
+    for i in range(8):
+        for j in range(n[i]):
+            beta = (np.pi / n[i]) * (i % 2)
+            alpha = j * 2 * np.pi / n[i] + beta 
+            pattern.append([radius[i] * np.cos(alpha) * 22, radius[i] * np.sin(alpha) * 22])
+
+    pattern = np.asarray(pattern)
+    pattern = np.round(pattern)
+    return pattern
 
 
 def _get_freak_orientation(image, keypoint):
+    opos0 = pattern[orientation_pairs[:, 0]] + keypoint
+    opos1 = pattern[orientation_pairs[:, 1]] + keypoint
+    intensity_diff = image[opos0] - image[opos1]
+    directions = opos0 - opos1
+    directions_abs = np.sqrt(directions[:, 0] ** 2 + directions[:, 1] ** 2)
+    x_dir, y_dir = np.sum(directions * (intensity_diff / directions_abs)[:, None], axis=0)
+    return np.arctan2(y_dir, x_dir)
 
+
+def _get_mean_intensity(integral_image, keypoint, rot_pattern):
+    x = keypoint[0]
+    y = keypoint[1]
+    pattern_intensities = []
+    for i in range(len(rot_pattern)):
+        x_p = x + rot_pattern[i, 0]
+        y_p = y + rot_pattern[i, 1]
+        t = sigma_stretched[i]
+        pattern_intensities.append(integral_image[x_p + t, y_p + t] + integral_image[x_p - t - 1, y_p - t] - integral_image[x_p - t - 1, y_p + t] - integral_image[x_p + t, y_p - t - 1])
+    return pattern_intensities
 
 
 def descriptor_freak(image, keypoints):
@@ -335,6 +357,18 @@ best_pairs = np.array([[28, 26],
        [32, 28],
        [13, 12],
        [20,  4],
+
+
+
+
+
+
+
+
+
+
+
+
        [17,  7],
        [16, 15],
        [20,  2],
