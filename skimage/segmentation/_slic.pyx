@@ -25,6 +25,9 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     max_iter : int
         The maximum number of k-means iterations.
     spacing : 1D array of double, shape (3,)
+        The voxel spacing along each image dimension. This parameter
+        controls the weights of the distances along z, y, and x during
+        k-means clustering.
 
     Returns
     -------

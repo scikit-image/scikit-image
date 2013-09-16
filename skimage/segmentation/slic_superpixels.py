@@ -34,6 +34,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     spacing : (3,) array-like of floats, optional
         The voxel spacing along each image dimension. By default, `slic`
         assumes uniform spacing (same voxel resolution along z, y and x).
+        This parameter controls the weights of the distances along z, y,
+        and x during k-means clustering.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
@@ -60,6 +62,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     -----
     If `sigma > 0`, the image is smoothed using a Gaussian kernel prior to
     segmentation.
+
+    If `sigma > 0` and `spacing` is provided, the kernel width is divided
+    along each dimension by the spacing. For example, if `sigma=1` and
+    `spacing=[5, 1, 1]`, the effective `sigma` is `[0.2, 1, 1]`. This
+    ensures sensible smoothing for anisotropic images.
 
     The image is rescaled to be in [0, 1] prior to processing.
 
@@ -108,14 +115,14 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
 
     if spacing is None:
         spacing = np.ones(3)
-    elif type(spacing) in [list, tuple]:
-        spacing = np.array(spacing, float)
+    elif isinstance(spacing, (list, tuple)):
+        spacing = np.array(spacing, np.double)
     if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma], float)
-    elif type(sigma) in [list, tuple]:
-        sigma = np.array(sigma, float)
+        sigma = np.array([sigma, sigma, sigma], np.double)
+    elif isinstance(spacing, (list, tuple)):
+        sigma = np.array(sigma, np.double)
     if (sigma > 0).any():
-        sigma /= spacing.astype(float)
+        sigma /= spacing.astype(np.double)
         sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
 
