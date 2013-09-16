@@ -12,7 +12,8 @@ from skimage.util import regular_grid
 
 def _slic_cython(double[:, :, :, ::1] image_zyx,
                  double[:, ::1] segments,
-                 Py_ssize_t max_iter):
+                 Py_ssize_t max_iter,
+                 double[:] spacing):
     """Helper function for SLIC segmentation.
 
     Parameters
@@ -23,6 +24,10 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         The initial centroids obtained by SLIC as [Z, Y, X, C...].
     max_iter : int
         The maximum number of k-means iterations.
+    spacing : 1D array of double, shape (3,)
+        The voxel spacing along each image dimension. This parameter
+        controls the weights of the distances along z, y, and x during
+        k-means clustering.
 
     Returns
     -------
@@ -55,6 +60,11 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef char change
     cdef double dist_center, cx, cy, cz, dy, dz
 
+    cdef double sz, sy, sx
+    sz = spacing[0]
+    sy = spacing[1]
+    sx = spacing[2]
+
     for i in range(max_iter):
         change = 0
         distance[:, :, :] = DBL_MAX
@@ -76,11 +86,11 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
             x_max = <Py_ssize_t>min(cx + 2 * step_x + 1, width)
 
             for z in range(z_min, z_max):
-                dz = (cz - z) ** 2
+                dz = (sz * (cz - z)) ** 2
                 for y in range(y_min, y_max):
-                    dy = (cy - y) ** 2
+                    dy = (sy * (cy - y)) ** 2
                     for x in range(x_min, x_max):
-                        dist_center = dz + dy + (cx - x) ** 2
+                        dist_center = dz + dy + (sx * (cx - x)) ** 2
                         for c in range(3, n_features):
                             dist_center += (image_zyx[z, y, x, c - 3]
                                             - segments[k, c]) ** 2

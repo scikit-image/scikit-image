@@ -11,7 +11,7 @@ from skimage.color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
-         multichannel=True, convert2lab=True, ratio=None):
+         spacing=None, multichannel=True, convert2lab=True, ratio=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -27,10 +27,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         infinity, superpixel shapes become square/cubic.
     max_iter : int, optional
         Maximum number of iterations of k-means.
-    sigma : float or (3,) array of floats, optional
+    sigma : float or (3,) array-like of floats, optional
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
+    spacing : (3,) array-like of floats, optional
+        The voxel spacing along each image dimension. By default, `slic`
+        assumes uniform spacing (same voxel resolution along z, y and x).
+        This parameter controls the weights of the distances along z, y,
+        and x during k-means clustering.
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
@@ -58,6 +63,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     If `sigma > 0`, the image is smoothed using a Gaussian kernel prior to
     segmentation.
 
+    If `sigma > 0` and `spacing` is provided, the kernel width is divided
+    along each dimension by the spacing. For example, if `sigma=1` and
+    `spacing=[5, 1, 1]`, the effective `sigma` is `[0.2, 1, 1]`. This
+    ensures sensible smoothing for anisotropic images.
+
     The image is rescaled to be in [0, 1] prior to processing.
 
     Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
@@ -75,9 +85,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     >>> from skimage.segmentation import slic
     >>> from skimage.data import lena
     >>> img = lena()
-    >>> segments = slic(img, n_segments=100, ratio=10)
-    >>> # Increasing the ratio parameter yields more square regions
-    >>> segments = slic(img, n_segments=100, ratio=20)
+    >>> segments = slic(img, n_segments=100, compactness=10)
+    >>> # Increasing the compactness parameter yields more square regions
+    >>> segments = slic(img, n_segments=100, compactness=20)
     """
 
     if sigma is None:
@@ -103,15 +113,21 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         # Add channel as single last dimension
         image = image[..., np.newaxis]
 
+    if spacing is None:
+        spacing = np.ones(3)
+    elif isinstance(spacing, (list, tuple)):
+        spacing = np.array(spacing, np.double)
     if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma])
+        sigma = np.array([sigma, sigma, sigma], np.double)
+    elif isinstance(sigma, (list, tuple)):
+        sigma = np.array(sigma, np.double)
     if (sigma > 0).any():
+        sigma /= spacing.astype(np.double)
         sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
 
-    if convert2lab:
-
-        if not multichannel or image.shape[3] != 3:
+    if convert2lab and multichannel:
+        if image.shape[3] != 3:
             raise ValueError("Lab colorspace conversion requires a RGB image.")
         image = rgb2lab(image)
 
@@ -138,7 +154,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     ratio = float(max((step_z, step_y, step_x))) / compactness
     image = np.ascontiguousarray(image * ratio)
 
-    labels = _slic_cython(image, segments, max_iter)
+    labels = _slic_cython(image, segments, max_iter, spacing)
 
     if is2d:
         labels = labels[0]
