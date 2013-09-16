@@ -10,7 +10,7 @@ from skimage.segmentation._slic import _slic_cython
 from skimage.color import rgb2lab
 
 
-def slic(image, n_segments=100, compactness=10., max_iter=20, sigma=0,
+def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
          multichannel=True, convert2lab=True, ratio=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
