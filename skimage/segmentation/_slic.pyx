@@ -13,6 +13,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  Py_ssize_t[:, :, ::1] nearest_mean,
                  double[:, :, ::1] distance,
                  double[:, ::1] means,
+                 double[:] spacing,
                  Py_ssize_t max_iter, Py_ssize_t n_segments):
     """Helper function for SLIC segmentation.
 
@@ -28,6 +29,9 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         The (initially infinity) array of distances to the nearest centroid.
     means : 2D array of double, shape (n_segments, 6)
         The centroids obtained by SLIC.
+    spacing : array of float, shape (6,)
+        The pixel spacing along the z, y and x directions, plus along color
+        space. (The latter should usually just be 1.)
     max_iter : int
         The maximum number of k-means iterations.
     n_segments : int
@@ -72,7 +76,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         for c in range(6):
                             # you would think the compiler can optimize the
                             # squaring itself. mine can't (with O2)
-                            tmp = image_zyx[z, y, x, c] - means[k, c]
+                            tmp = (spacing[c] *
+                                  (image_zyx[z, y, x, c] - means[k, c]))
                             dist_mean += tmp * tmp
                         if distance[z, y, x] > dist_mean:
                             nearest_mean[z, y, x] = k
