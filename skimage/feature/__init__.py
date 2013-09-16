@@ -10,6 +10,7 @@ from .template import match_template
 from ._brief import brief, match_keypoints_brief
 from .util import pairwise_hamming_distance
 from .censure import keypoints_censure
+from .freak import descriptor_freak
 
 __all__ = ['daisy',
            'hog',
@@ -28,4 +29,5 @@ __all__ = ['daisy',
            'brief',
            'pairwise_hamming_distance',
            'match_keypoints_brief',
-           'keypoints_censure']
+           'keypoints_censure',
+           'descriptor_freak']

@@ -1,18 +1,23 @@
 import numpy as np
 
+from skimage.transform import integral_image
+from skimage.feature.util import _mask_border_keypoints
+from skimage.util import img_as_float
+
+
 # Constants
 n = [6, 6, 6, 6, 6, 6, 6, 1]
-big_radius = 2./3
-small_radius = 2./24
-unit_space = (big_radius - small_radius) / 21
-radius = [big_radius, big_radius - 6 * unit_space, big_radius - 11*unit_space, big_radius - 15*unit_space, big_radius - 18*unit_space, big_radius - 20*unit_space, small_radius, 0.0]
+BIG_RADIUS = 2./3
+SMALL_RADIUS = 2./24
+unit_space = (BIG_RADIUS - SMALL_RADIUS) / 21
+radius = [BIG_RADIUS, BIG_RADIUS - 6 * unit_space, BIG_RADIUS - 11 * unit_space, BIG_RADIUS - 15 * unit_space, BIG_RADIUS - 18 * unit_space, BIG_RADIUS - 20 * unit_space, SMALL_RADIUS, 0.0]
 
-sigma_stretched = []
+radius_stretched = []
 for i in range(8):
-    sigma_stretched = sigma_stretched + [radius[i] / 2] * n[i]
+    radius_stretched = radius_stretched + [radius[i]] * n[i]
 
 
-def _get pattern():
+def _get_pattern():
     pattern = []
     for i in range(8):
         for j in range(n[i]):
@@ -20,47 +25,75 @@ def _get pattern():
             alpha = j * 2 * np.pi / n[i] + beta 
             pattern.append([radius[i] * np.cos(alpha) * 22, radius[i] * np.sin(alpha) * 22])
 
-    pattern = np.asarray(pattern)
+    pattern = np.asarray(pattern, dtype=np.intp)
     pattern = np.round(pattern)
     return pattern
 
 
-def _get_freak_orientation(image, keypoint):
+def _get_freak_orientation(image, keypoint, pattern):
     opos0 = pattern[orientation_pairs[:, 0]] + keypoint
     opos1 = pattern[orientation_pairs[:, 1]] + keypoint
-    intensity_diff = image[opos0] - image[opos1]
+    intensity_diff = image[opos0[:, 0], opos0[:, 1]] - image[opos1[:, 0], opos1[:, 1]]
     directions = opos0 - opos1
     directions_abs = np.sqrt(directions[:, 0] ** 2 + directions[:, 1] ** 2)
     x_dir, y_dir = np.sum(directions * (intensity_diff / directions_abs)[:, None], axis=0)
-    return np.arctan2(y_dir, x_dir)
+    return np.arctan2(x_dir, y_dir)
 
 
-def _get_mean_intensity(integral_image, keypoint, rot_pattern):
+# TODO : Cythonize.
+def _get_mean_intensity(integral_img, keypoint, rot_pattern):
     x = keypoint[0]
     y = keypoint[1]
     pattern_intensities = []
     for i in range(len(rot_pattern)):
         x_p = x + rot_pattern[i, 0]
         y_p = y + rot_pattern[i, 1]
-        t = sigma_stretched[i]
-        pattern_intensities.append(integral_image[x_p + t, y_p + t] + integral_image[x_p - t - 1, y_p - t] - integral_image[x_p - t - 1, y_p + t] - integral_image[x_p + t, y_p - t - 1])
-    return pattern_intensities
+        t = radius_stretched[i]
+        pattern_intensities.append(integral_img[x_p + t, y_p + t] + integral_img[x_p - t - 1, y_p - t] - integral_img[x_p - t - 1, y_p + t] - integral_img[x_p + t, y_p - t - 1])
+    return np.asarray(pattern_intensities)
 
 
 def descriptor_freak(image, keypoints):
-
-    # Prepare the input image
+    # Prepare the input image. Use the util function once #669  is merged.
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")
 
     image = img_as_float(image)
 
-    # Generate pattern of 43 points
-    # Orientation of the keypoints
-    # Rotate the pattern
-    # Mean / Gaussian intensity at 43 points
-    # make descriptor
+    # Remove border keypoints
+    keypoints = keypoints[_mask_border_keypoints(image, keypoints, 30)]
+
+    # Generate the FREAK pattern of 43 points
+    pattern = _get_pattern()
+
+    # Orientation of the keypoints.
+    # TODO : Cythonize.
+    orientations = np.zeros(keypoints.shape[0])
+    for i in range(len(keypoints)):
+        orientations[i] = _get_freak_orientation(image, keypoints[i], pattern)
+
+    # Integral image for mean intensities about FREAK pattern points
+    integral_img = integral_image(image)
+
+    # Initialize descriptor
+    descriptors = np.zeros((keypoints.shape[0], 512), dtype=bool)
+
+    # Computing descriptor around each keypoint
+    # TODO : Cythonize.
+    for i in range(len(keypoints)):
+        # Rotate the pattern
+        a = np.cos(orientations[i])
+        b = np.sin(orientations[i])
+        rot_matrix = [[b, a], [a, -b]]
+        rot_pattern = np.dot(pattern, rot_matrix)
+
+        # Mean / Gaussian intensity at 43 points
+        pattern_intensities = _get_mean_intensity(integral_img, keypoints[i], rot_pattern)
+        pos0 = best_pairs[:, 0]
+        pos1 = best_pairs[:, 1]
+        descriptors[i, :] = pattern_intensities[pos0] < pattern_intensities[pos1]
+    return descriptors, keypoints
 
 
 # 45 pairs for calculating keypoint orientation. Taken from OpenCV.
@@ -357,18 +390,6 @@ best_pairs = np.array([[28, 26],
        [32, 28],
        [13, 12],
        [20,  4],
-
-
-
-
-
-
-
-
-
-
-
-
        [17,  7],
        [16, 15],
        [20,  2],
