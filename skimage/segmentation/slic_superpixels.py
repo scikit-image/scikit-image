@@ -11,7 +11,7 @@ from skimage.color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
-         multichannel=True, convert2lab=True, ratio=None):
+         spacing=None, multichannel=True, convert2lab=True, ratio=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -31,6 +31,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
+    spacing : (3,) array-like of floats, optional
+        The voxel spacing along each image dimension. By default, `slic`
+        assumes uniform spacing (same voxel resolution along z, y and x).
     multichannel : bool, optional
         Whether the last axis of the image is to be interpreted as multiple
         channels or another spatial dimension.
@@ -103,11 +106,16 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         # Add channel as single last dimension
         image = image[..., np.newaxis]
 
+    if spacing is None:
+        spacing = np.ones(3)
+    elif type(spacing) in [list, tuple]:
+        spacing = np.array(spacing, float)
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma, sigma, sigma], float)
     elif type(sigma) in [list, tuple]:
         sigma = np.array(sigma, float)
     if (sigma > 0).any():
+        sigma /= spacing.astype(float)
         sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
 
@@ -139,7 +147,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     ratio = float(max((step_z, step_y, step_x))) / compactness
     image = np.ascontiguousarray(image * ratio)
 
-    labels = _slic_cython(image, segments, max_iter)
+    labels = _slic_cython(image, segments, max_iter, spacing)
 
     if is2d:
         labels = labels[0]
