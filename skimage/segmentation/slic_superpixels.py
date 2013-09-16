@@ -109,9 +109,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
 
-    if convert2lab:
-
-        if not multichannel or image.shape[3] != 3:
+    if convert2lab and multichannel:
+        if image.shape[3] != 3:
             raise ValueError("Lab colorspace conversion requires a RGB image.")
         image = rgb2lab(image)
 
