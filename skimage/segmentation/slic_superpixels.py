@@ -10,7 +10,7 @@ from skimage.segmentation._slic import _slic_cython
 from skimage.color import rgb2lab
 
 
-def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
+def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
          multichannel=True, convert2lab=True, ratio=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
@@ -80,9 +80,13 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
     >>> segments = slic(img, n_segments=100, ratio=20)
     """
 
+    if sigma is None:
+        warnings.warn('Default value of keyword `sigma` changed from ``1`` '
+                      'to ``0``.')
+        sigma = 0
     if ratio is not None:
-        msg = 'Keyword `ratio` is deprecated. Use `compactness` instead.'
-        warnings.warn(msg)
+        warnings.warn('Keyword `ratio` is deprecated. Use `compactness` '
+                      'instead.')
         compactness = ratio
 
     image = img_as_float(image)
