@@ -75,9 +75,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     >>> from skimage.segmentation import slic
     >>> from skimage.data import lena
     >>> img = lena()
-    >>> segments = slic(img, n_segments=100, ratio=10)
-    >>> # Increasing the ratio parameter yields more square regions
-    >>> segments = slic(img, n_segments=100, ratio=20)
+    >>> segments = slic(img, n_segments=100, compactness=10)
+    >>> # Increasing the compactness parameter yields more square regions
+    >>> segments = slic(img, n_segments=100, compactness=20)
     """
 
     if sigma is None:
