@@ -98,7 +98,7 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     """
 
     image = np.atleast_3d(img_as_float(image))
-    
+
     # if image.max() is 0, then dist_scale can have an unverified value
     # and color_lut[<int>(dist * dist_scale)] may cause a segmentation fault
     # so we verify we have a positive image and that the max is not 0.0.
@@ -112,12 +112,9 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
         Py_ssize_t window_ext = (win_size - 1) / 2
 
         double max_value
-        
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] cimage
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] out
 
-        double* image_data
-        double* out_data
+        double[:, :, ::1] cimage
+        double[:, :, ::1] out
 
         double* color_lut
         double* range_lut
@@ -136,15 +133,13 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
         csigma_range = sigma_range
 
     max_value = image.max()
-    
+
     if max_value == 0.0:
         raise ValueError("The maximum value found in the image was 0.")
 
     cimage = np.ascontiguousarray(image)
-    
+
     out = np.zeros((rows, cols, dims), dtype=np.double)
-    image_data = <double*>cimage.data
-    out_data = <double*>out.data
     color_lut = _compute_color_lut(bins, csigma_range, max_value)
     range_lut = _compute_range_lut(win_size, sigma_spatial)
     dist_scale = bins / dims / max_value
@@ -159,11 +154,10 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
 
     for r in range(rows):
         for c in range(cols):
-            pixel_addr = r * cols * dims + c * dims
             total_weight = 0
             for d in range(dims):
                 total_values[d] = 0
-                centres[d] = image_data[pixel_addr + d]
+                centres[d] = cimage[r, c, d]
             for wr in range(-window_ext, window_ext + 1):
                 rr = wr + r
                 kr = wr + window_ext
@@ -175,7 +169,7 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
                     # distance between centre stack and current position
                     dist = 0
                     for d in range(dims):
-                        value = get_pixel3d(image_data, rows, cols, dims,
+                        value = get_pixel3d(&cimage[0, 0, 0], rows, cols, dims,
                                             rr, cc, d, cmode, cval)
                         values[d] = value
                         dist += (centres[d] - value)**2
@@ -189,7 +183,7 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
                         total_values[d] += values[d] * weight
                     total_weight += weight
             for d in range(dims):
-                out_data[pixel_addr + d] = total_values[d] / total_weight
+                out[r, c, d] = total_values[d] / total_weight
 
     free(color_lut)
     free(range_lut)
@@ -197,10 +191,11 @@ def denoise_bilateral(image, Py_ssize_t win_size=5, sigma_range=None,
     free(centres)
     free(total_values)
 
-    return np.squeeze(out)
+    return np.squeeze(np.asarray(out))
 
 
-def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
+def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3,
+                       char isotropic=True):
     """Perform total-variation denoising using split-Bregman optimization.
 
     Total-variation denoising (also know as total-variation regularization)
@@ -222,8 +217,10 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
 
             SUM((u(n) - u(n-1))**2) < eps
 
-    max_iter: int, optional
+    max_iter : int, optional
         Maximal number of iterations used for the optimization.
+    isotropic : boolean, optional
+        Switch between isotropic and anisotropic TV denoising.
 
     Returns
     -------
@@ -239,6 +236,7 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
     .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
            using Split Bregman" in Image Processing On Line on 2012–05–19,
            http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
+    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
 
     """
 
@@ -254,21 +252,17 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
 
         Py_ssize_t total = rows * cols * dims
 
-        shape_ext = (rows2, cols2, dims)
+    shape_ext = (rows2, cols2, dims)
+    u = np.zeros(shape_ext, dtype=np.double)
 
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] cimage = \
-            np.ascontiguousarray(image)
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] u = \
-            np.zeros(shape_ext, dtype=np.double)
+    cdef:
+        double[:, :, ::1] cimage = np.ascontiguousarray(image)
+        double[:, :, ::1] cu = u
 
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] dx = \
-            np.zeros(shape_ext, dtype=np.double)
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] dy = \
-            np.zeros(shape_ext, dtype=np.double)
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] bx = \
-            np.zeros(shape_ext, dtype=np.double)
-        cnp.ndarray[dtype=cnp.double_t, ndim=3, mode='c'] by = \
-            np.zeros(shape_ext, dtype=np.double)
+        double[:, :, ::1] dx = np.zeros(shape_ext, dtype=np.double)
+        double[:, :, ::1] dy = np.zeros(shape_ext, dtype=np.double)
+        double[:, :, ::1] bx = np.zeros(shape_ext, dtype=np.double)
+        double[:, :, ::1] by = np.zeros(shape_ext, dtype=np.double)
 
         double ux, uy, uprev, unew, bxx, byy, dxx, dyy, s
         int i = 0
@@ -292,19 +286,19 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
             for r in range(1, rows + 1):
                 for c in range(1, cols + 1):
 
-                    uprev = u[r, c, k]
+                    uprev = cu[r, c, k]
 
                     # forward derivatives
-                    ux = u[r, c + 1, k] - uprev
-                    uy = u[r + 1, c, k] - uprev
+                    ux = cu[r, c + 1, k] - uprev
+                    uy = cu[r + 1, c, k] - uprev
 
                     # Gauss-Seidel method
                     unew = (
                         lam * (
-                            + u[r + 1, c, k]
-                            + u[r - 1, c, k]
-                            + u[r, c + 1, k]
-                            + u[r, c - 1, k]
+                            + cu[r + 1, c, k]
+                            + cu[r - 1, c, k]
+                            + cu[r, c + 1, k]
+                            + cu[r, c - 1, k]
 
                             + dx[r, c - 1, k]
                             - dx[r, c, k]
@@ -317,7 +311,7 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
                             + by[r, c, k]
                         ) + weight * cimage[r - 1, c - 1, k]
                     ) / norm
-                    u[r, c, k] = unew
+                    cu[r, c, k] = unew
 
                     # update root mean square error
                     rmse += (unew - uprev)**2
@@ -325,9 +319,27 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
                     bxx = bx[r, c, k]
                     byy = by[r, c, k]
 
-                    s = sqrt((ux + bxx)**2 + (uy + byy)**2)
-                    dxx = s * lam * (ux + bxx) / (s * lam + 1)
-                    dyy = s * lam * (uy + byy) / (s * lam + 1)
+                    # d_subproblem after reference [4]
+                    if isotropic:
+                        s = sqrt((ux + bxx)**2 + (uy + byy)**2)
+                        dxx = s * lam * (ux + bxx) / (s * lam + 1)
+                        dyy = s * lam * (uy + byy) / (s * lam + 1)
+
+                    else:
+                        s = ux + bxx
+                        if s > 1 / lam:
+                            dxx = s - 1/lam
+                        elif s < -1 / lam:
+                            dxx = s + 1 / lam
+                        else:
+                            dxx = 0
+                        s = uy + byy
+                        if s > 1 / lam:
+                            dyy = s - 1 / lam
+                        elif s < -1 / lam:
+                            dyy = s + 1 / lam
+                        else:
+                            dyy = 0
 
                     dx[r, c, k] = dxx
                     dy[r, c, k] = dyy
@@ -338,4 +350,4 @@ def denoise_tv_bregman(image, double weight, int max_iter=100, double eps=1e-3):
         rmse = sqrt(rmse / total)
         i += 1
 
-    return np.squeeze(u[1:-1, 1:-1])
+    return np.squeeze(np.asarray(u[1:-1, 1:-1]))

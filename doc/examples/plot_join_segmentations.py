@@ -13,11 +13,11 @@ segmentations.
 import numpy as np
 from scipy import ndimage as nd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 from skimage.filter import sobel
 from skimage.segmentation import slic, join_segmentations
 from skimage.morphology import watershed
+from skimage.color import label2rgb
 from skimage import data
 
 
@@ -43,24 +43,21 @@ seg2 = slic(coins_colour, n_segments=30, max_iter=160, sigma=1, ratio=9,
 # combine the two
 segj = join_segmentations(seg1, seg2)
 
-### Display the result ###
-
-# make a random colormap for a set number of values
-def random_cmap(im):
-    np.random.seed(9)
-    cmap_array = np.concatenate(
-        (np.zeros((1, 3)), np.random.rand(np.ceil(im.max()), 3)))
-    return mpl.colors.ListedColormap(cmap_array)
-
 # show the segmentations
 fig, axes = plt.subplots(ncols=4, figsize=(9, 2.5))
 axes[0].imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 axes[0].set_title('Image')
-axes[1].imshow(seg1, cmap=random_cmap(seg1), interpolation='nearest')
+
+color1 = label2rgb(seg1, image=coins, bg_label=0)
+axes[1].imshow(color1, interpolation='nearest')
 axes[1].set_title('Sobel+Watershed')
-axes[2].imshow(seg2, cmap=random_cmap(seg2), interpolation='nearest')
+
+color2 = label2rgb(seg2, image=coins, image_alpha=0.5)
+axes[2].imshow(color2, interpolation='nearest')
 axes[2].set_title('SLIC superpixels')
-axes[3].imshow(segj, cmap=random_cmap(segj), interpolation='nearest')
+
+color3 = label2rgb(segj, image=coins, image_alpha=0.5)
+axes[3].imshow(color3, interpolation='nearest')
 axes[3].set_title('Join')
 
 for ax in axes:

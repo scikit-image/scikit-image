@@ -24,7 +24,6 @@ from skimage.filter import sobel
 
 import scipy_logo
 
-
 # Utility functions
 # =================
 
@@ -49,7 +48,7 @@ def prepare_axes(ax):
     plt.sca(ax)
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
-    for spine in ax.spines.itervalues():
+    for spine in ax.spines.values():
         spine.set_visible(False)
 
 

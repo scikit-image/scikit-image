@@ -139,3 +139,23 @@ def test_view_as_windows_2D():
                                 [9, 10, 11],
                                 [13, 14, 15],
                                 [17, 18, 19]]]]))
+
+
+def test_view_as_windows_With_skip():
+    A = np.arange(20).reshape((5, 4))
+    B = view_as_windows(A, (2, 2), step=2)
+    assert_equal(B, [[[[0, 1],
+                       [4, 5]],
+                      [[2, 3],
+                       [6, 7]]],
+                     [[[8, 9],
+                       [12, 13]],
+                      [[10, 11],
+                       [14, 15]]]])
+
+    C = view_as_windows(A, (2, 2), step=4)
+    assert_equal(C.shape, (1, 1, 2, 2))
+
+
+if __name__ == '__main__':
+    np.testing.run_module_suite()

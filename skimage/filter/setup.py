@@ -14,49 +14,28 @@ def configuration(parent_package='', top_path=None):
 
     cython(['_ctmf.pyx'], working_path=base_path)
     cython(['_denoise_cy.pyx'], working_path=base_path)
-    cython(['rank/_core8.pyx'], working_path=base_path)
-    cython(['rank/_core16.pyx'], working_path=base_path)
-    cython(['rank/_crank8.pyx'], working_path=base_path)
-    cython(['rank/_crank8_percentiles.pyx'], working_path=base_path)
-    cython(['rank/_crank16.pyx'], working_path=base_path)
-    cython(['rank/_crank16_percentiles.pyx'], working_path=base_path)
-    cython(['rank/_crank16_bilateral.pyx'], working_path=base_path)
-    cython(['rank/rank.pyx'], working_path=base_path)
-    cython(['rank/percentile_rank.pyx'], working_path=base_path)
-    cython(['rank/bilateral_rank.pyx'], working_path=base_path)
+    cython(['rank/core_cy.pyx'], working_path=base_path)
+    cython(['rank/generic_cy.pyx'], working_path=base_path)
+    cython(['rank/percentile_cy.pyx'], working_path=base_path)
+    cython(['rank/bilateral_cy.pyx'], working_path=base_path)
 
     config.add_extension('_ctmf', sources=['_ctmf.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_denoise_cy', sources=['_denoise_cy.c'],
         include_dirs=[get_numpy_include_dirs(), '../_shared'])
-    config.add_extension('rank._core8', sources=['rank/_core8.c'],
+    config.add_extension('rank.core_cy', sources=['rank/core_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('rank._core16', sources=['rank/_core16.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('rank._crank8', sources=['rank/_crank8.c'],
+    config.add_extension('rank.generic_cy', sources=['rank/generic_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
-        'rank._crank8_percentiles', sources=['rank/_crank8_percentiles.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('rank._crank16', sources=['rank/_crank16.c'],
+        'rank.percentile_cy', sources=['rank/percentile_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
     config.add_extension(
-        'rank._crank16_percentiles', sources=['rank/_crank16_percentiles.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension(
-        'rank._crank16_bilateral', sources=['rank/_crank16_bilateral.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension(
-        'rank.rank', sources=['rank/rank.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension(
-        'rank.percentile_rank', sources=['rank/percentile_rank.c'],
-        include_dirs=[get_numpy_include_dirs()])
-    config.add_extension(
-        'rank.bilateral_rank', sources=['rank/bilateral_rank.c'],
+        'rank.bilateral_cy', sources=['rank/bilateral_cy.c'],
         include_dirs=[get_numpy_include_dirs()])
 
     return config
+
 
 if __name__ == '__main__':
     from numpy.distutils.core import setup

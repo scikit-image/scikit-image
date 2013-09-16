@@ -1,6 +1,6 @@
 import os
 
-from numpy.testing import *
+from numpy.testing import assert_array_equal, raises, run_module_suite
 import numpy as np
 
 import skimage.io as io

@@ -1,8 +1,10 @@
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_almost_equal,
+                           assert_equal,
+                           )
 
 import skimage.transform as tf
-from skimage.draw import circle_perimeter, line
+from skimage.draw import line, circle_perimeter, ellipse_perimeter
 
 
 def append_desc(func, description):
@@ -126,6 +128,7 @@ def test_hough_circle():
     assert_equal(x[0], x_0)
     assert_equal(y[0], y_0)
 
+
 def test_hough_circle_extended():
     # Prepare picture
     # The circle center is outside the image
@@ -133,7 +136,7 @@ def test_hough_circle_extended():
     radius = 20
     x_0, y_0 = (-5, 50)
     y, x = circle_perimeter(y_0, x_0, radius)
-    img[x[np.where(x>0)], y[np.where(x>0)]] = 1
+    img[x[np.where(x > 0)], y[np.where(x > 0)]] = 1
 
     out = tf.hough_circle(img, np.array([radius]), full_output=True)
 
@@ -142,5 +145,40 @@ def test_hough_circle_extended():
     assert_equal(x[0], x_0 + radius)
     assert_equal(y[0], y_0 + radius)
 
+
+def test_hough_ellipse_zero_angle():
+    img = np.zeros((25, 25), dtype=int)
+    a = 6
+    b = 8
+    x0 = 12
+    y0 = 12
+    angle = 0
+    rr, cc = ellipse_perimeter(x0, x0, b, a)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=9)
+    assert_equal(result[0][0], x0)
+    assert_equal(result[0][1], y0)
+    assert_almost_equal(result[0][2], b, decimal=1)
+    assert_almost_equal(result[0][3], a, decimal=1)
+    assert_equal(result[0][4], angle)
+
+
+def test_hough_ellipse_non_zero_angle():
+    img = np.zeros((20, 20), dtype=int)
+    a = 6
+    b = 9
+    x0 = 10
+    y0 = 10
+    angle = np.pi / 1.35
+    rr, cc = ellipse_perimeter(x0, x0, b, a, orientation=angle)
+    img[rr, cc] = 1
+    result = tf.hough_ellipse(img, threshold=15, accuracy=3)
+    assert_almost_equal(result[0][0] / 100., x0 / 100., decimal=1)
+    assert_almost_equal(result[0][1] / 100., y0 / 100., decimal=1)
+    assert_almost_equal(result[0][2] / 100., b / 100., decimal=1)
+    assert_almost_equal(result[0][3] / 100., a / 100., decimal=1)
+    assert_almost_equal(result[0][4], angle, decimal=1)
+
+
 if __name__ == "__main__":
-    run_module_suite()
+    np.testing.run_module_suite()

@@ -10,8 +10,9 @@ from ..canvastools import RectangleTool
 class ColorHistogram(PlotPlugin):
     name = 'Color Histogram'
 
-    def __init__(self, **kwargs):
+    def __init__(self, max_pct=0.99, **kwargs):
         super(ColorHistogram, self).__init__(height=400, **kwargs)
+        self.max_pct = max_pct
 
         print(self.help())
 
@@ -30,7 +31,7 @@ class ColorHistogram(PlotPlugin):
                                                 normed=True)
 
         # Clip bin heights that dominate a-b histogram
-        max_val = pct_total_area(hist, percentile=99)
+        max_val = pct_total_area(hist, percentile=self.max_pct)
         hist = exposure.rescale_intensity(hist, in_range=(0, max_val))
         self.ax.imshow(hist, extent=ab_extents, cmap=plt.cm.gray)
 
@@ -55,12 +56,12 @@ class ColorHistogram(PlotPlugin):
         self.image_viewer.image = color.lab2rgb(lab_masked)
 
 
-def pct_total_area(image, percentile=80):
+def pct_total_area(image, percentile=0.80):
     """Return threshold value based on percentage of total area.
 
     The specified percent of pixels less than the given intensity threshold.
     """
-    idx = int((image.size - 1) * percentile / 100.0)
+    idx = int((image.size - 1) * percentile)
     sorted_pixels = np.sort(image.flat)
     return sorted_pixels[idx]
 

@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.testing import run_module_suite, assert_array_equal, assert_raises
 
-from skimage import data
+from skimage import img_as_ubyte, img_as_uint, img_as_float
+from skimage import data, util
 from skimage.morphology import cmorph, disk
 from skimage.filter import rank
 
@@ -32,10 +33,10 @@ def test_random_sizes():
                   shift_x=+1, shift_y=+1)
         assert_array_equal(image16.shape, out16.shape)
 
-        rank.percentile_mean(image=image16, mask=mask, out=out16,
+        rank.mean_percentile(image=image16, mask=mask, out=out16,
                              selem=elem, shift_x=0, shift_y=0, p0=.1, p1=.9)
         assert_array_equal(image16.shape, out16.shape)
-        rank.percentile_mean(image=image16, mask=mask, out=out16,
+        rank.mean_percentile(image=image16, mask=mask, out=out16,
                              selem=elem, shift_x=+1, shift_y=+1, p0=.1, p1=.9)
         assert_array_equal(image16.shape, out16.shape)
 
@@ -50,7 +51,7 @@ def test_compare_with_cmorph_dilate():
     for r in range(1, 20, 1):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.maximum(image=image, selem=elem, out=out, mask=mask)
-        cm = cmorph.dilate(image=image, selem=elem)
+        cm = cmorph._dilate(image=image, selem=elem)
         assert_array_equal(out, cm)
 
 
@@ -64,7 +65,7 @@ def test_compare_with_cmorph_erode():
     for r in range(1, 20, 1):
         elem = np.ones((r, r), dtype=np.uint8)
         rank.minimum(image=image, selem=elem, out=out, mask=mask)
-        cm = cmorph.erode(image=image, selem=elem)
+        cm = cmorph._erode(image=image, selem=elem)
         assert_array_equal(out, cm)
 
 
@@ -77,7 +78,7 @@ def test_bitdepth():
 
     for i in range(5):
         image = np.ones((100, 100), dtype=np.uint16) * 255 * 2 ** i
-        r = rank.percentile_mean(image=image, selem=elem, mask=mask,
+        r = rank.mean_percentile(image=image, selem=elem, mask=mask,
                                  out=out, shift_x=0, shift_y=0, p0=.1, p1=.9)
 
 
@@ -129,17 +130,6 @@ def test_structuring_element8():
     assert_array_equal(r, out)
 
 
-def test_fail_on_bitdepth():
-    # should fail because data bitdepth is too high for the function
-
-    image = np.ones((100, 100), dtype=np.uint16) * 2 ** 12
-    elem = np.ones((3, 3), dtype=np.uint8)
-    out = np.empty_like(image)
-    mask = np.ones(image.shape, dtype=np.uint8)
-    assert_raises(ValueError, rank.percentile_mean, image=image,
-                  selem=elem, out=out, mask=mask, shift_x=0, shift_y=0)
-
-
 def test_pass_on_bitdepth():
     # should pass because data bitdepth is not too high for the function
 
@@ -162,41 +152,80 @@ def test_compare_autolevels():
     # compare autolevel and percentile autolevel with p0=0.0 and p1=1.0
     # should returns the same arrays
 
-    image = data.camera()
+    image = util.img_as_ubyte(data.camera())
 
     selem = disk(20)
     loc_autolevel = rank.autolevel(image, selem=selem)
-    loc_perc_autolevel = rank.percentile_autolevel(image, selem=selem,
+    loc_perc_autolevel = rank.autolevel_percentile(image, selem=selem,
                                                    p0=.0, p1=1.)
 
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
 def test_compare_autolevels_16bit():
-    # compare autolevel(16-bit) and percentile autolevel(16-bit) with p0=0.0 and
-    # p1=1.0 should returns the same arrays
+    # compare autolevel(16-bit) and percentile autolevel(16-bit) with p0=0.0
+    # and p1=1.0 should returns the same arrays
 
     image = data.camera().astype(np.uint16) * 4
 
     selem = disk(20)
     loc_autolevel = rank.autolevel(image, selem=selem)
-    loc_perc_autolevel = rank.percentile_autolevel(image, selem=selem,
+    loc_perc_autolevel = rank.autolevel_percentile(image, selem=selem,
                                                    p0=.0, p1=1.)
 
     assert_array_equal(loc_autolevel, loc_perc_autolevel)
 
 
-def test_compare_8bit_vs_16bit():
-    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit of
-    # dynamic) should be identical
+def test_compare_ubyte_vs_float():
 
-    image8 = data.camera()
+    # Create signed int8 image that and convert it to uint8
+    image_uint = img_as_ubyte(data.camera()[:50, :50])
+    image_float = img_as_float(image_uint)
+
+    methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'threshold',
+               'subtract_mean', 'enhance_contrast', 'pop', 'tophat']
+
+    for method in methods:
+        func = getattr(rank, method)
+        out_u = func(image_uint, disk(3))
+        out_f = func(image_float, disk(3))
+        assert_array_equal(out_u, out_f)
+
+
+def test_compare_8bit_unsigned_vs_signed():
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
+    # of dynamic) should be identical
+
+    # Create signed int8 image that and convert it to uint8
+    image = img_as_ubyte(data.camera())
+    image[image > 127] = 0
+    image_s = image.astype(np.int8)
+    image_u = img_as_ubyte(image_s)
+
+    assert_array_equal(image_u, img_as_ubyte(image_s))
+
+    methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
+               'mean', 'subtract_mean', 'median', 'minimum', 'modal',
+               'enhance_contrast', 'pop', 'threshold', 'tophat']
+
+    for method in methods:
+        func = getattr(rank, method)
+        out_u = func(image_u, disk(3))
+        out_s = func(image_s, disk(3))
+        assert_array_equal(out_u, out_s)
+
+
+def test_compare_8bit_vs_16bit():
+    # filters applied on 8-bit image ore 16-bit image (having only real 8-bit
+    # of dynamic) should be identical
+
+    image8 = util.img_as_ubyte(data.camera())
     image16 = image8.astype(np.uint16)
     assert_array_equal(image8, image16)
 
     methods = ['autolevel', 'bottomhat', 'equalize', 'gradient', 'maximum',
-               'mean', 'meansubtraction', 'median', 'minimum', 'modal',
-               'morph_contr_enh', 'pop', 'threshold', 'tophat']
+               'mean', 'subtract_mean', 'median', 'minimum', 'modal',
+               'enhance_contrast', 'pop', 'threshold', 'tophat']
 
     for method in methods:
         func = getattr(rank, method)
@@ -298,7 +327,8 @@ def test_smallest_selem16():
 
 
 def test_empty_selem():
-    # check that min, max and mean returns zeros if structuring element is empty
+    # check that min, max and mean returns zeros if structuring element is
+    # empty
 
     image = np.zeros((5, 5), dtype=np.uint16)
     out = np.zeros_like(image)
@@ -325,13 +355,11 @@ def test_otsu():
     # test the local Otsu segmentation on a synthetic image
     # (left to right ramp * sinus)
 
-    test = np.tile(
-        [128, 145, 103, 127, 165, 83, 127, 185, 63, 127, 205, 43,
-            127, 225, 23, 127],
-        (16, 1))
+    test = np.tile([128, 145, 103, 127, 165, 83, 127, 185, 63, 127, 205, 43,
+                    127, 225, 23, 127],
+                   (16, 1))
     test = test.astype(np.uint8)
-    res = np.tile([1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-                 (16, 1))
+    res = np.tile([1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1], (16, 1))
     selem = np.ones((6, 6), dtype=np.uint8)
     th = 1 * (test >= rank.otsu(test, selem))
     assert_array_equal(th, res)
@@ -343,37 +371,41 @@ def test_entropy():
     selem = np.ones((16, 16), dtype=np.uint8)
     # 1 bit per pixel
     data = np.tile(np.asarray([0, 1]), (100, 100)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 10)
+    assert(np.max(rank.entropy(data, selem)) == 1)
 
     # 2 bit per pixel
     data = np.tile(np.asarray([[0, 1], [2, 3]]), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 20)
+    assert(np.max(rank.entropy(data, selem)) == 2)
 
     # 3 bit per pixel
     data = np.tile(
         np.asarray([[0, 1, 2, 3], [4, 5, 6, 7]]), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 30)
+    assert(np.max(rank.entropy(data, selem)) == 3)
 
     # 4 bit per pixel
     data = np.tile(
         np.reshape(np.arange(16), (4, 4)), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 40)
+    assert(np.max(rank.entropy(data, selem)) == 4)
 
     # 6 bit per pixel
     data = np.tile(
         np.reshape(np.arange(64), (8, 8)), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 60)
+    assert(np.max(rank.entropy(data, selem)) == 6)
 
     # 8-bit per pixel
     data = np.tile(
         np.reshape(np.arange(256), (16, 16)), (10, 10)).astype(np.uint8)
-    assert(np.max(rank.entropy(data, selem)) == 80)
+    assert(np.max(rank.entropy(data, selem)) == 8)
 
     # 12 bit per pixel
     selem = np.ones((64, 64), dtype=np.uint8)
     data = np.tile(
         np.reshape(np.arange(4096), (64, 64)), (2, 2)).astype(np.uint16)
-    assert(np.max(rank.entropy(data, selem)) == 12000)
+    assert(np.max(rank.entropy(data, selem)) == 12)
+
+    # make sure output is of dtype double
+    out = rank.entropy(data, np.ones((16, 16), dtype=np.uint8))
+    assert out.dtype == np.double
 
 
 def test_selem_dtypes():
@@ -391,9 +423,80 @@ def test_selem_dtypes():
         rank.mean(image=image, selem=elem, out=out, mask=mask,
                   shift_x=0, shift_y=0)
         assert_array_equal(image, out)
-        rank.percentile_mean(image=image, selem=elem, out=out, mask=mask,
+        rank.mean_percentile(image=image, selem=elem, out=out, mask=mask,
                              shift_x=0, shift_y=0)
         assert_array_equal(image, out)
+
+
+def test_16bit():
+    image = np.zeros((21, 21), dtype=np.uint16)
+    selem = np.ones((3, 3), dtype=np.uint8)
+
+    for bitdepth in range(17):
+        value = 2 ** bitdepth - 1
+        image[10, 10] = value
+        assert rank.minimum(image, selem)[10, 10] == 0
+        assert rank.maximum(image, selem)[10, 10] == value
+        assert rank.mean(image, selem)[10, 10] == value / selem.size
+
+
+def test_bilateral():
+    image = np.zeros((21, 21), dtype=np.uint16)
+    selem = np.ones((3, 3), dtype=np.uint8)
+
+    image[10, 10] = 1000
+    image[10, 11] = 1010
+    image[10, 9] = 900
+
+    assert rank.mean_bilateral(image, selem, s0=1, s1=1)[10, 10] == 1000
+    assert rank.pop_bilateral(image, selem, s0=1, s1=1)[10, 10] == 1
+    assert rank.mean_bilateral(image, selem, s0=11, s1=11)[10, 10] == 1005
+    assert rank.pop_bilateral(image, selem, s0=11, s1=11)[10, 10] == 2
+
+
+def test_percentile_min():
+    # check that percentile p0 = 0 is identical to local min
+    img = data.camera()
+    img16 = img.astype(np.uint16)
+    selem = disk(15)
+    # check for 8bit
+    img_p0 = rank.percentile(img, selem=selem, p0=0)
+    img_min = rank.minimum(img, selem=selem)
+    assert_array_equal(img_p0, img_min)
+    # check for 16bit
+    img_p0 = rank.percentile(img16, selem=selem, p0=0)
+    img_min = rank.minimum(img16, selem=selem)
+    assert_array_equal(img_p0, img_min)
+
+
+def test_percentile_max():
+    # check that percentile p0 = 1 is identical to local max
+    img = data.camera()
+    img16 = img.astype(np.uint16)
+    selem = disk(15)
+    # check for 8bit
+    img_p0 = rank.percentile(img, selem=selem, p0=1.)
+    img_max = rank.maximum(img, selem=selem)
+    assert_array_equal(img_p0, img_max)
+    # check for 16bit
+    img_p0 = rank.percentile(img16, selem=selem, p0=1.)
+    img_max = rank.maximum(img16, selem=selem)
+    assert_array_equal(img_p0, img_max)
+
+
+def test_percentile_median():
+    # check that percentile p0 = 0.5 is identical to local median
+    img = data.camera()
+    img16 = img.astype(np.uint16)
+    selem = disk(15)
+    # check for 8bit
+    img_p0 = rank.percentile(img, selem=selem, p0=.5)
+    img_max = rank.median(img, selem=selem)
+    assert_array_equal(img_p0, img_max)
+    # check for 16bit
+    img_p0 = rank.percentile(img16, selem=selem, p0=.5)
+    img_max = rank.median(img16, selem=selem)
+    assert_array_equal(img_p0, img_max)
 
 
 if __name__ == "__main__":

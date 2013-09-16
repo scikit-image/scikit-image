@@ -1,10 +1,18 @@
 import numpy as np
 from scipy import ndimage
-from ._geometric import warp, SimilarityTransform, AffineTransform
+
+from skimage.transform._geometric import (warp, SimilarityTransform,
+                                          AffineTransform)
+from skimage.measure import block_reduce
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
     """Resize image to match a certain size.
+
+    Performs interpolation to up-size or down-size images. For down-sampling
+    N-dimensional images by applying the arithmetic sum or mean, see
+    `skimage.measure.local_sum` and `skimage.transform.downscale_local_mean`,
+    respectively.
 
     Parameters
     ----------
@@ -86,6 +94,11 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
 def rescale(image, scale, order=1, mode='constant', cval=0.):
     """Scale image by a certain factor.
+
+    Performs interpolation to upscale or down-scale images. For down-sampling
+    N-dimensional images with integer factors by applying the arithmetic sum or
+    mean, see `skimage.measure.local_sum` and
+    `skimage.transform.downscale_local_mean`, respectively.
 
     Parameters
     ----------
@@ -211,6 +224,47 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
 
     return warp(image, tform, output_shape=output_shape, order=order,
                 mode=mode, cval=cval)
+
+
+def downscale_local_mean(image, factors, cval=0):
+    """Down-sample N-dimensional image by local averaging.
+
+    The image is padded with `cval` if it is not perfectly divisible by the
+    integer factors.
+
+    In contrast to the 2-D interpolation in `skimage.transform.resize` and
+    `skimage.transform.rescale` this function may be applied to N-dimensional
+    images and calculates the local mean of elements in each block of size
+    `factors` in the input image.
+
+    Parameters
+    ----------
+    image : ndarray
+        N-dimensional input image.
+    factors : array_like
+        Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        integer factors.
+
+    Returns
+    -------
+    image : ndarray
+        Down-sampled image with same number of dimensions as input image.
+
+    Example
+    -------
+    >>> a = np.arange(15).reshape(3, 5)
+    >>> a
+    array([[ 0,  1,  2,  3,  4],
+           [ 5,  6,  7,  8,  9],
+           [10, 11, 12, 13, 14]])
+    >>> downscale_local_mean(a, (2, 3))
+    array([[3.5, 4.],
+           [5.5, 4.5]])
+
+    """
+    return block_reduce(image, factors, np.mean, cval)
 
 
 def _swirl_mapping(xy, center, rotation, strength, radius):

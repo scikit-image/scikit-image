@@ -1,6 +1,8 @@
 How to make a new release of ``skimage``
 ========================================
 
+- Check ``TODO.txt`` for any outstanding tasks.
+
 - Update release notes.
 
   - To show a list contributors, run ``doc/release/contributors.sh <commit>``,

@@ -6,7 +6,10 @@ from numpy.testing.decorators import skipif
 from tempfile import NamedTemporaryFile
 
 from skimage import data_dir
-from skimage.io import imread, imsave, use_plugin, reset_plugins
+from skimage.io import (imread, imsave, use_plugin, reset_plugins,
+                        Image as ioImage)
+from skimage._shared.six.moves import StringIO
+
 
 try:
     from PIL import Image
@@ -55,7 +58,6 @@ def test_imread_palette():
 
 @skipif(not PIL_available)
 def test_palette_is_gray():
-    from PIL import Image
     gray = Image.open(os.path.join(data_dir, 'palette_gray.png'))
     assert _palette_is_grayscale(gray)
     color = Image.open(os.path.join(data_dir, 'palette_color.png'))
@@ -82,7 +84,7 @@ def test_imread_uint16():
 @skipif(not PIL_available)
 def test_repr_png():
     img_path = os.path.join(data_dir, 'camera.png')
-    original_img = imread(img_path)
+    original_img = ioImage(imread(img_path))
     original_img_str = original_img._repr_png_()
 
     with NamedTemporaryFile(suffix='.png') as temp_png:
@@ -124,6 +126,23 @@ class TestSave:
                 else:
                     x = (x * 255).astype(dtype)
                     yield self.roundtrip, dtype, x
+
+
+@skipif(not PIL_available)
+def test_imsave_filelike():
+    shape = (2, 2)
+    image = np.zeros(shape)
+    s = StringIO()
+
+    # save to file-like object
+    imsave(s, image)
+
+    # read from file-like object
+    s.seek(0)
+    out = imread(s)
+    assert out.shape == shape
+    assert_allclose(out, image)
+
 
 if __name__ == "__main__":
     run_module_suite()

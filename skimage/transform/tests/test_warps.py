@@ -1,11 +1,12 @@
-from numpy.testing import assert_array_almost_equal, run_module_suite
+from numpy.testing import assert_array_almost_equal, run_module_suite, assert_array_equal
 import numpy as np
 from scipy.ndimage import map_coordinates
 
 from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
-                               SimilarityTransform)
+                               SimilarityTransform,
+                               downscale_local_mean)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
@@ -192,6 +193,20 @@ def test_warp_coords_example():
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
     map_coordinates(image[:, :, 0], coords[:2])
+
+
+def test_downscale_local_mean():
+    image1 = np.arange(4 * 6).reshape(4, 6)
+    out1 = downscale_local_mean(image1, (2, 3))
+    expected1 = np.array([[  4.,   7.],
+                          [ 16.,  19.]])
+    assert_array_equal(expected1, out1)
+
+    image2 = np.arange(5 * 8).reshape(5, 8)
+    out2 = downscale_local_mean(image2, (4, 5))
+    expected2 = np.array([[ 14. ,  10.8],
+                          [  8.5,   5.7]])
+    assert_array_equal(expected2, out2)
 
 
 if __name__ == "__main__":

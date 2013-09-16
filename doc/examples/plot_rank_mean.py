@@ -6,9 +6,9 @@ Mean filters
 This example compares the following mean filters of the rank filter package:
 
  * **local mean**: all pixels belonging to the structuring element to compute
-   average gray level
+   average gray level.
  * **percentile mean**: only use values between percentiles p0 and p1
-   (here 10% and 90%)
+   (here 10% and 90%).
  * **bilateral mean**: only use pixels of the structuring element having a gray
    level situated inside g-s0 and g+s1 (here g-500 and g+500)
 
@@ -23,23 +23,30 @@ import matplotlib.pyplot as plt
 
 from skimage import data
 from skimage.morphology import disk
-import skimage.filter.rank as rank
+from skimage.filter import rank
 
-a16 = (data.coins()).astype(np.uint16) * 16
+
+image = (data.coins()).astype(np.uint16) * 16
 selem = disk(20)
 
-f1 = rank.percentile_mean(a16, selem=selem, p0=.1, p1=.9)
-f2 = rank.bilateral_mean(a16, selem=selem, s0=500, s1=500)
-f3 = rank.mean(a16, selem=selem)
+percentile_result = rank.mean_percentile(image, selem=selem, p0=.1, p1=.9)
+bilateral_result = rank.mean_bilateral(image, selem=selem, s0=500, s1=500)
+normal_result = rank.mean(image, selem=selem)
 
-# display results
-fig, axes = plt.subplots(nrows=3, figsize=(15, 10))
+
+fig, axes = plt.subplots(nrows=3, figsize=(8, 10))
 ax0, ax1, ax2 = axes
 
-ax0.imshow(np.hstack((a16, f1)))
-ax0.set_title('percentile mean')
-ax1.imshow(np.hstack((a16, f2)))
-ax1.set_title('bilateral mean')
-ax2.imshow(np.hstack((a16, f3)))
-ax2.set_title('local mean')
+ax0.imshow(np.hstack((image, percentile_result)))
+ax0.set_title('Percentile mean')
+ax0.axis('off')
+
+ax1.imshow(np.hstack((image, bilateral_result)))
+ax1.set_title('Bilateral mean')
+ax1.axis('off')
+
+ax2.imshow(np.hstack((image, normal_result)))
+ax2.set_title('Local mean')
+ax2.axis('off')
+
 plt.show()

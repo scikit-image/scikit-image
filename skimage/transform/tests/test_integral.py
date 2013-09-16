@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import *
+from numpy.testing import assert_equal
 
 from skimage.transform import integral_image, integrate
 
@@ -43,4 +43,5 @@ def test_vectorized_integrate():
 
 
 if __name__ == '__main__':
+    from numpy.testing import run_module_suite
     run_module_suite()
