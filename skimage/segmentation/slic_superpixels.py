@@ -119,7 +119,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         spacing = np.array(spacing, np.double)
     if not isinstance(sigma, coll.Iterable):
         sigma = np.array([sigma, sigma, sigma], np.double)
-    elif isinstance(spacing, (list, tuple)):
+    elif isinstance(sigma, (list, tuple)):
         sigma = np.array(sigma, np.double)
     if (sigma > 0).any():
         sigma /= spacing.astype(np.double)
