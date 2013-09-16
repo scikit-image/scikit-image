@@ -20,6 +20,7 @@ def test_color_2d():
 
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
+    assert_equal(seg.shape, img.shape[:-1])
     assert_array_equal(seg[:10, :10], 0)
     assert_array_equal(seg[10:, :10], 2)
     assert_array_equal(seg[:10, 10:], 1)
@@ -39,6 +40,7 @@ def test_gray_2d():
                multichannel=False, convert2lab=False)
 
     assert_equal(len(np.unique(seg)), 4)
+    assert_equal(seg.shape, img.shape)
     assert_array_equal(seg[:10, :10], 0)
     assert_array_equal(seg[10:, :10], 2)
     assert_array_equal(seg[:10, 10:], 1)
