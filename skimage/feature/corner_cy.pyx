@@ -7,6 +7,7 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2
 
+from skimage.util import img_as_float
 from skimage.color import rgb2grey
 
 from .util import _prepare_grayscale_input_2D
