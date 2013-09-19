@@ -9,8 +9,17 @@ from skimage.transform import pyramid_gaussian
 from .orb_cy import _orb_loop
 
 
+OFAST_MASK = np.array([[0, 0, 1, 1, 1, 0, 0],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [1, 1, 1, 1, 1, 1, 1],
+                       [1, 1, 1, 1, 1, 1, 1],
+                       [1, 1, 1, 1, 1, 1, 1],
+                       [0, 1, 1, 1, 1, 1, 0],
+                       [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
+
+
 def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
-                  harris_k=0.05,  downscale=np.sqrt(2), n_scales=5):
+                  harris_k=0.05,  downscale=np.sqrt(2), n_scales=3):
 
     """Detect Oriented Fast keypoints.
 
@@ -20,24 +29,24 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         Input grayscale image.
     n_keypoints : int
         Number of keypoints to be returned from this function. The function
-        will return best `n_keypoints` if more than n_keypoints are detected
+        will return best ``n_keypoints`` if more than n_keypoints are detected
         based on the values of other parameters. If not, then all the detected
         keypoints are returned.
     fast_n : int
-        The `n` parameter in `feature.corner_fast`. Minimum number of
+        The ``n`` parameter in ``feature.corner_fast``. Minimum number of
         consecutive pixels out of 16 pixels on the circle that should all be
         either brighter or darker w.r.t testpixel. A point c on the circle is
-        darker w.r.t test pixel p if `Ic < Ip - threshold` and brighter if
-        `Ic > Ip + threshold`. Also stands for the n in `FAST-n` corner
+        darker w.r.t test pixel p if ``Ic < Ip - threshold`` and brighter if
+        ``Ic > Ip + threshold``. Also stands for the n in ``FAST-n`` corner
         detector.
     fast_threshold : float
-        The `threshold` parameter in `feature.corner_fast`. Threshold used to
+        The ``threshold`` parameter in ``feature.corner_fast``. Threshold used to
         decide whether the pixels on the circle are brighter, darker or
         similar w.r.t. the test pixel. Decrease the threshold when more
         corners are desired and vice-versa.
     harris_k : float
-        The `k` parameter in `feature.corner_harris`. Sensitivity factor to
-        separate corners from edges, typically in range `[0, 0.2]`. Small
+        The ``k`` parameter in ``feature.corner_harris``. Sensitivity factor to
+        separate corners from edges, typically in range ``[0, 0.2]``. Small
         values of k result in detection of sharp corners.
     downscale : float
         Downscale factor for the image pyramid.
@@ -80,21 +89,16 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
     >>> orientations
     array([-2.35619449, -0.78539816,  2.35619449,  0.78539816,  0.78539816,
            2.35619449, -0.78539816, -2.35619449])
+    >>> np.rad2deg(orientations)
+    array([-135.,  -45.,  135.,   45.,   45.,  135.,  -45., -135.])
     >>> scales
     array([0, 0, 0, 0, 1, 1, 1, 1])
 
     """
+
     image = _prepare_grayscale_input_2D(image)
 
     pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
-
-    ofast_mask = np.array([[0, 0, 1, 1, 1, 0, 0],
-                           [0, 1, 1, 1, 1, 1, 0],
-                           [1, 1, 1, 1, 1, 1, 1],
-                           [1, 1, 1, 1, 1, 1, 1],
-                           [1, 1, 1, 1, 1, 1, 1],
-                           [0, 1, 1, 1, 1, 1, 0],
-                           [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
 
     keypoints_list = []
     orientations_list = []
@@ -121,8 +125,8 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         return keypoints, orientations, scales
     else:
         best_indices = harris_measure.argsort()[::-1][:n_keypoints]
-        return keypoints[best_indices], orientations[best_indices], \
-               scales[best_indices]
+        return (keypoints[best_indices], orientations[best_indices],
+               scales[best_indices])
 
 
 def descriptor_orb(image, keypoints, orientations, scales,
@@ -141,7 +145,7 @@ def descriptor_orb(image, keypoints, orientations, scales,
         The scales of the corresponding N keypoints.
     downscale : float
         Downscale factor for the image pyramid. Should be the same as that
-        used in `keypoints_orb`.
+        used in ``keypoints_orb``.
     n_scales : int
         Number of scales from the bottom of the image pyramid to extract
         the features from.
@@ -168,13 +172,13 @@ def descriptor_orb(image, keypoints, orientations, scales,
     >>> from skimage.feature import keypoints_orb, descriptor_orb
     >>> square = np.zeros((50, 50))
     >>> square[20:30, 20:30] = 1
-    >>> keypoints, orientations, scales = keypoints_orb(square, n_keypoints=8, \
-                                                        n_scales=2)
+    >>> keypoints, orientations, scales = keypoints_orb(square, n_keypoints=8,
+        ... n_scales=2)
     >>> keypoints.shape
     (8, 2)
-    >>> descriptors, filtered_keypoints = descriptor_orb(square, keypoints, \
-                                                         orientations, scales, \
-                                                         n_scales=2)
+    >>> descriptors, filtered_keypoints = descriptor_orb(square, keypoints,
+        ... orientations, scales,
+        ... n_scales=2)
     >>> filtered_keypoints.shape
     (8, 2)
     >>> descriptors.shape
