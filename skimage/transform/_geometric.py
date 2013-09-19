@@ -515,7 +515,7 @@ class SimilarityTransform(ProjectiveTransform):
                 [math.sin(rotation),   math.cos(rotation), 0],
                 [                 0,                    0, 1]
             ])
-            self._matrix *= scale
+            self._matrix[0:2, 0:2] *= scale
             self._matrix[0:2, 2] = translation
         else:
             # default to an identity transform
