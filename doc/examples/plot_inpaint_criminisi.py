@@ -8,13 +8,12 @@ of an image.
 
 In this example we wll show linear structural and textural inpainting. There
 are two terms which play a role in determining the order of inpainting:
-``confidence`` and ``data`` term.
 
 - ``confidence`` signifies the amount of reliable information in the
-neighbourhood. Already known pixels have ``confidence = 1`` and unknown
-pixels ``0``.
+  neighbourhood. Already known pixels have ``confidence = 1`` and unknown
+  pixels ``0``.
 - ``data`` term represents the presence of strong edges hitting the mask
-boundary. This implementation updates 1 patch at a time.
+  boundary. This implementation updates 1 patch at a time.
 
 """
 import numpy as np
@@ -30,11 +29,11 @@ paint_region = (slice(50, 150), slice(50, 150))
 image[paint_region] = 0
 mask[paint_region] = 1
 
-# For best results, `window` should be larger in size than the largest texel
+# For best results, ``window`` should be larger in size than the largest texel
 # (texture element) being inpainted. A texel is the smallest repeating block
 # of pixels in a texture or pattern. For example, in the case below of the
-# `skimage.data.checkerboard` image, the single white/black square is the
-# largest texel which is of shape `(25, 25)`. A value larger than this yields
+# ``skimage.data.checkerboard`` image, the single white/black square is the
+# largest texel which is of shape ``(25, 25)``. A value larger than this yields
 # perfect reconstruction, but in case of a value smaller than this perfect
 # reconstruction may not be possible.
 

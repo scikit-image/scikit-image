@@ -82,7 +82,7 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
     while mask.any():
         # Generate the fill_front, boundary of ROI (region to be synthesised)
         fill_front = mask - minimum(mask, disk(1))
-        if not fill_front.any() and mask.any():
+        if not fill_front.any():
             # If the remaining region is 1-pixel thick
             fill_front = mask
 
@@ -197,7 +197,6 @@ cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
                         dy[i_data, j_data] * ny[i, j])
         data_term /= (sqrt(dx[i_data, j_data] ** 2 + dy[i_data, j_data] ** 2) *
                       sqrt(nx[i, j] ** 2 + ny[i, j] ** 2))
-        # data[i, j] = data_term
 
         # Compute the confidence terms
         conf = 0
