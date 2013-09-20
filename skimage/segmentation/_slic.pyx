@@ -33,6 +33,27 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     -------
     nearest_segments : 3D array of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
+
+    Notes
+    -----
+    The image is considered to be in (z, y, x) order, which can be
+    surprising. More commonly, the order (x, y, z) is used. However,
+    in 3D image analysis, 'z' is usually the "special" dimension, with,
+    for example, a different effective resolution than the other two
+    axes. Therefore, x and y are often processed together, or viewed as
+    a cut-plane through the volume. So, if the order was (x, y, z) and
+    we wanted to look at the 5th cut plane, we would write::
+
+        my_z_plane = img3d[:, :, 5]
+
+    but, assuming a C-contiguous array, this would grab a discontiguous
+    slice of memory, which is bad for performance. In contrast, if we
+    see the image as (z, y, x) ordered, we would do::
+
+        my_z_plane = img3d[5]
+
+    and get back a contiguous block of memory. This is better both for
+    performance and for readability.
     """
 
     # initialize on grid
