@@ -93,6 +93,9 @@ Library:
     Extension: skimage.feature.censure_cy
         Sources:
             skimage/feature/censure_cy.pyx
+    Extension: skimage.feature.match_cy
+        Sources:
+            skimage/feature/match_cy.pyx
     Extension: skimage.feature.orb_cy
         Sources:
             skimage/feature/orb_cy.pyx
