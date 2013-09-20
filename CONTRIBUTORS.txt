@@ -151,3 +151,6 @@
 
 - Eugene Dvoretsky
   Yen threshold implementation.
+
+- Riaan van den Dool
+  skimage.io plugin: GDAL
