@@ -434,7 +434,7 @@ cdef class MCP:
             else:
                 costs_heap.push_fast(0, start)
 
-        cdef FLOAT_T cost, new_cost
+        cdef FLOAT_T cost, new_cost, cumcost, new_cumcost
         cdef INDEX_T index, new_index
         cdef BOOL_T is_at_edge, use_offset
         cdef INDEX_T d, i
@@ -442,7 +442,7 @@ cdef class MCP:
         cdef EDGE_T pos_edge_val, neg_edge_val
         cdef int num_ends_found = 0
         cdef FLOAT_T inf = np.inf
-        cdef FLOAT_T travel_cost
+        
         while 1:
             # Find the point with the minimum cost in the heap. Once
             # popped, this point's minimum cost path has been found.
@@ -450,12 +450,13 @@ cdef class MCP:
                 # nothing in the heap: we've found paths to every
                 # point in the array
                 break
-
-            cost = costs_heap.pop_fast()
+            
+            # Get current cumulative cost and index from the heap
+            cumcost = costs_heap.pop_fast()
             index = costs_heap._popped_ref
 
             # Record the cost we found to this point
-            flat_cumulative_costs[index] = cost
+            flat_cumulative_costs[index] = cumcost
 
             if use_ends:
                 # If we're only tracing out a path to one or more
@@ -512,27 +513,31 @@ cdef class MCP:
                 # ignore this point
                 if flat_cumulative_costs[new_index] != inf:
                     continue
-                # If the cost at this point is negative or infinite, ignore it
+                
+                # Get cost and new cost
+                cost = flat_costs[index]
                 new_cost = flat_costs[new_index]
+                
+                # If the cost at this point is negative or infinite, ignore it
                 if new_cost < 0 or new_cost == inf:
                     continue
-
+                
+                # Calculate new cumulative cost
+                new_cumcost = cumcost + self._travel_cost(cost, new_cost,
+                                                offset_lengths[i])
+                
                 # Now we ask the heap to append or update the cost to
                 # this new point, but only if that point isn't already
                 # in the heap, or it is but the new cost is lower.
-                travel_cost = self._travel_cost(flat_costs[index],
-                                                new_cost,
-                                                offset_lengths[i])
                 # don't push infs into the heap though!
-                new_cost = cost + travel_cost
-                if new_cost != inf:
-                    costs_heap.push_if_lower_fast(new_cost, new_index)
+                if new_cumcost != inf:
+                    costs_heap.push_if_lower_fast(new_cumcost, new_index)
                     # If we did perform an append or update, we should
                     # record the offset from the predecessor to this new
                     # point
                     if costs_heap._pushed:
                         traceback_offsets[new_index] = i
-
+        
         # Un-flatten the costs and traceback arrays for human consumption.
         cumulative_costs = flat_cumulative_costs.reshape(self.costs_shape,
                                                          order='F')
