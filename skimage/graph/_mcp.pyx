@@ -290,7 +290,7 @@ cdef class MCP:
         self.flat_cumulative_costs.fill(np.inf)
         self.dim = len(costs.shape)
         self.costs_shape = costs.shape
-        self.costs_heap = heap.FastUpdateBinaryHeap(initial_capacity=size,
+        self.costs_heap = heap.FastUpdateBinaryHeap(initial_capacity=128,
                                                     max_reference=size-1)
 
         # This array stores, for each point, the index into the offset
