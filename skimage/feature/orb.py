@@ -52,7 +52,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
         Downscale factor for the image pyramid.
     n_scales : int
         Number of scales from the bottom of the image pyramid to extract
-        the features from. 
+        the features from.
 
     Returns
     -------
@@ -103,30 +103,34 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
     keypoints_list = []
     orientations_list = []
     scales_list = []
-    harris_measure_list = []
+    harris_response_list = []
 
-    for i in range(n_scales):
-        harris_response = corner_harris(pyramid[i], method='k', k=harris_k)
-        corners = corner_peaks(corner_fast(pyramid[i], fast_n, fast_threshold),
-                               min_distance=1)
-        keypoints_list.append(corners)
-        orientations_list.append(corner_orientations(pyramid[i], corners,
-                                                     ofast_mask))
-        scales_list.append(i * np.ones(corners.shape[0], dtype=np.intp))
-        harris_measure_list.append(harris_response[corners[:, 0],
-                                   corners[:, 1]])
+    for scale in range(n_scales):
 
-    keypoints = np.vstack(keypoints_list)
+        corners = corner_peaks(corner_fast(pyramid[scale], fast_n,
+                                           fast_threshold), min_distance=1)
+        keypoints_list.append(corners * downscale ** scale)
+
+        orientations_list.append(corner_orientations(pyramid[scale], corners,
+                                                     OFAST_MASK))
+
+        scales_list.append(scale * np.ones(corners.shape[0], dtype=np.intp))
+
+        harris_response = corner_harris(pyramid[scale], method='k', k=harris_k)
+        harris_response_list.append(harris_response[corners[:, 0],
+                                                    corners[:, 1]])
+
+    keypoints = np.round(np.vstack(keypoints_list)).astype(np.intp)
     orientations = np.hstack(orientations_list)
     scales = np.hstack(scales_list)
-    harris_measure = np.hstack(harris_measure_list)
+    harris_measure = np.hstack(harris_response_list)
 
     if keypoints.shape[0] < n_keypoints:
         return keypoints, orientations, scales
     else:
         best_indices = harris_measure.argsort()[::-1][:n_keypoints]
         return (keypoints[best_indices], orientations[best_indices],
-               scales[best_indices])
+                scales[best_indices])
 
 
 def descriptor_orb(image, keypoints, orientations, scales,
@@ -148,7 +152,7 @@ def descriptor_orb(image, keypoints, orientations, scales,
         used in ``keypoints_orb``.
     n_scales : int
         Number of scales from the bottom of the image pyramid to extract
-        the features from. 
+        the features from.
 
     Returns
     -------
@@ -184,7 +188,7 @@ def descriptor_orb(image, keypoints, orientations, scales,
     >>> descriptors.shape
     (8, 256)
 
-    """ 
+    """
     image = _prepare_grayscale_input_2D(image)
 
     pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
@@ -192,11 +196,12 @@ def descriptor_orb(image, keypoints, orientations, scales,
     descriptors_list = []
     filtered_keypoints_list = []
 
-    for k in range(n_scales):
-        curr_image = np.ascontiguousarray(pyramid[k])
+    for scale in range(n_scales):
+        curr_image = np.ascontiguousarray(pyramid[scale])
 
-        curr_scale_mask = scales == k
-        curr_scale_kpts = keypoints[curr_scale_mask]
+        curr_scale_mask = scales == scale
+        curr_scale_kpts = keypoints[curr_scale_mask] / (downscale ** scale)
+        curr_scale_kpts = np.round(curr_scale_kpts).astype(np.intp)
         curr_scale_orientation = orientations[curr_scale_mask]
 
         border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts,
@@ -210,8 +215,9 @@ def descriptor_orb(image, keypoints, orientations, scales,
                                            curr_scale_orientation)
 
         descriptors_list.append(curr_scale_descriptors)
-        filtered_keypoints_list.append(curr_scale_kpts)
+        filtered_keypoints_list.append(curr_scale_kpts * downscale ** scale)
 
     descriptors = np.vstack(descriptors_list).view(np.bool)
     filtered_keypoints = np.vstack(filtered_keypoints_list)
+    filtered_keypoints = np.round(filtered_keypoints).astype(np.intp)
     return descriptors, filtered_keypoints
