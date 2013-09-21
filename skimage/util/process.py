@@ -1,9 +1,76 @@
-__all__ = ['process_blocks']
+__all__ = ['process_blocks', 'FuncExec']
 
 import numpy as np
 from skimage.util import view_as_windows
 from multiprocessing import Pool
-from functools import partial
+from Queue import Queue
+
+class FuncExec(object):
+    """FuncExec is a function execution helper class.
+    It is a base class that allows for synchronous execution of a function
+    that operates on views of an input array that was typically
+    passed to the view_as_windows or view_as_blocks functions.
+    """
+    def __init__(self, func, func_args={}, callback=None):
+        self.func = func
+        self.func_args = func_args
+        self.cb_done = callback
+        self.queue = None
+        self.ready = None
+        self.out_shape = None
+        self.arr_in = None
+
+    def __call__(self, views, dims=None):
+        if dims is None:
+            dims = len(views.shape)/2
+        elif dims > len(views.shape):
+            raise ValueError("Parameter 'dims' must not be larger than\
+                    the number of dimensions of the 'views' parameter.")
+        self.views = views
+        self.ready = {}
+        self.queue = Queue()
+        self.out_shape = views.shape[:dims]
+        for index in np.ndindex(*self.out_shape):
+            self.ready[index] = None
+            self._exec(views[index], index, self._callback)
+        return self
+
+    def _callback(self, index, result):
+        self.ready[index] = result
+        self.queue.put((index,result))
+        if self.cb_done is not None:
+            if self.all_ready():
+                self.cb_done(self.ready)
+
+    def _exec(self, view, index, callback):
+        result = self.func(view, **self.func_args)
+        callback(index, result)
+
+    def all_ready(self):
+        if len(self.ready.keys()) == np.prod(self.out_shape):
+            # Execution for all views have been started
+            if None in self.ready.values():
+                # Some results are not ready yet
+                return False
+            else:
+                # All results are ready
+                return True
+        return False
+
+    def as_ready(self, timeout=0):
+        count = 0
+        while count < np.prod(self.out_shape):
+            yield self.queue.get(True, timeout)
+            count += 1
+
+    def result(self):
+        while not self.all_ready():
+            pass
+        result = np.zeros(self.out_shape).astype(np.object)
+        for idx, value in self.ready.items():
+            result[idx] = value
+        return np.array(result.tolist())
+
 
 
 def process_blocks(image, block_shape, func, func_args={},
