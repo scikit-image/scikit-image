@@ -19,7 +19,7 @@ OFAST_MASK = np.array([[0, 0, 1, 1, 1, 0, 0],
 
 
 def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
-                  harris_k=0.05,  downscale=np.sqrt(2), n_scales=3):
+                  harris_k=0.05,  downscale=np.sqrt(2), n_scales=4):
 
     """Detect Oriented Fast keypoints.
 
@@ -134,7 +134,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
 
 
 def descriptor_orb(image, keypoints, orientations, scales,
-                   downscale=np.sqrt(2), n_scales=5):
+                   downscale=np.sqrt(2), n_scales=4):
     """Compute rBRIEF descriptors of input keypoints.
 
     Parameters
@@ -205,7 +205,7 @@ def descriptor_orb(image, keypoints, orientations, scales,
         curr_scale_orientation = orientations[curr_scale_mask]
 
         border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts,
-                                             dist=13)
+                                             dist=14)
         curr_scale_kpts = curr_scale_kpts[border_mask]
         curr_scale_orientation = curr_scale_orientation[border_mask]
 
