@@ -16,7 +16,8 @@ class FuncExec(object):
         self.func_args = func_args
         self.cb_done = callback
         self.queue = None
-        self.ready = None
+        self.num_busy = None
+        self.num_ready = None
         self.out_shape = None
         self.arr_in = None
 
@@ -27,47 +28,36 @@ class FuncExec(object):
             raise ValueError("Parameter 'dims' must not be larger than\
                     the number of dimensions of the 'views' parameter.")
         self.views = views
-        self.ready = {}
+        self.num_busy = 0
+        self.num_ready = 0
         self.queue = Queue()
-        self.out_shape = views.shape[:dims]
+        self.out_shape = self.views.shape[:dims]
         for index in np.ndindex(*self.out_shape):
-            self.ready[index] = None
             self._exec(views[index], index, self._callback)
+            self.num_busy += 1
         return self
 
     def _callback(self, index, result):
-        self.ready[index] = result
         self.queue.put((index,result))
+        self.num_busy -= 1
+        self.num_ready += 1
         if self.cb_done is not None:
-            if self.all_ready():
-                self.cb_done(self.ready)
+            if self.num_ready == np.prod(self.out_shape):
+                self.cb_done(self)
 
     def _exec(self, view, index, callback):
         result = self.func(view, **self.func_args)
         callback(index, result)
 
-    def all_ready(self):
-        if len(self.ready.keys()) == np.prod(self.out_shape):
-            # Execution for all views have been started
-            if None in self.ready.values():
-                # Some results are not ready yet
-                return False
-            else:
-                # All results are ready
-                return True
-        return False
-
-    def as_ready(self, timeout=0):
+    def ready(self, timeout=0):
         count = 0
         while count < np.prod(self.out_shape):
             yield self.queue.get(True, timeout)
             count += 1
 
-    def result(self):
-        while not self.all_ready():
-            pass
+    def result(self, timeout=0):
         result = np.zeros(self.out_shape).astype(np.object)
-        for idx, value in self.ready.items():
+        for idx, value in self.ready(timeout):
             result[idx] = value
         return np.array(result.tolist())
 
