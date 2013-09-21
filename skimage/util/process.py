@@ -19,7 +19,7 @@ class FuncExec(object):
         self.num_busy = None
         self.num_ready = None
         self.out_shape = None
-        self.arr_in = None
+        self.views = None
 
     def __call__(self, views, dims=None):
         if dims is None:
