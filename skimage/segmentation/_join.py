@@ -72,8 +72,8 @@ def relabel_from_one(label_field):
     -----
     The forward map can be extremely big for some inputs, since its
     length is given by the maximum of the label field. However, in most
-    situations, `label_field.max()` is much smaller than
-    `label_field.size`, and in these cases the forward map is
+    situations, ``label_field.max()`` is much smaller than
+    ``label_field.size``, and in these cases the forward map is
     guaranteed to be smaller than either the input or output images.
 
     Examples
