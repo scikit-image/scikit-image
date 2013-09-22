@@ -32,9 +32,7 @@ class FuncExec(object):
         self.num_ready = 0
         self.queue = Queue()
         self.out_shape = self.views.shape[:dims]
-        for index in np.ndindex(*self.out_shape):
-            self._exec(views[index], index, self._callback)
-            self.num_busy += 1
+        self._map(np.ndindex(*self.out_shape), )
         return self
 
     def _callback(self, index, result):
@@ -45,14 +43,22 @@ class FuncExec(object):
             if self.num_ready == np.prod(self.out_shape):
                 self.cb_done(self)
 
-    def _exec(self, view, index, callback):
+    def _map(self, indices):
+        index_arr = [index for index in indices]
+        map(self._exec, [self.views[index] for index in index_arr], index_arr)
+
+    def _exec(self, view, index):
         result = self.func(view, **self.func_args)
-        callback(index, result)
+        self._callback(index, result)
 
     def ready(self, timeout=0):
         count = 0
         while count < np.prod(self.out_shape):
-            yield self.queue.get(True, timeout)
+            idx, value = self.queue.get(True, timeout)
+            if isinstance(value, np.ndarray):
+                yield idx, value.astype(None)
+            else:
+                yield idx, value
             count += 1
 
     def result(self, timeout=0):
