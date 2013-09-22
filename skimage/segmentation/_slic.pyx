@@ -13,7 +13,7 @@ from skimage.util import regular_grid
 def _slic_cython(double[:, :, :, ::1] image_zyx,
                  double[:, ::1] segments,
                  Py_ssize_t max_iter,
-                 double[:] spacing):
+                 double[::1] spacing):
     """Helper function for SLIC segmentation.
 
     Parameters
@@ -75,7 +75,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         = np.empty((depth, height, width), dtype=np.intp)
     cdef double[:, :, ::1] distance \
         = np.empty((depth, height, width), dtype=np.double)
-    cdef Py_ssize_t[:] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
+    cdef Py_ssize_t[::1] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
 
     cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
     cdef char change
