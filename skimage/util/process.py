@@ -2,22 +2,31 @@ __all__ = ['process_blocks', 'FuncExec']
 
 import numpy as np
 from skimage.util import view_as_windows
-from multiprocessing import Pool
+from multiprocessing import Pool, Manager
 from Queue import Queue
+from functools import partial
+
+def _exec(func, queue, index_and_view=(True,False), **kwargs):
+    """A simple wrapper function to put the result from a function operating
+    on a view of an np.ndarray into a result queue. Needed to overcome
+    limitations with regards to mapping of a class method using
+    multiprocessing.pool.map. Also multiprocessing.pool.map does not allow
+    for multiple iterable arguments, so index_and_view is a workaround. 
+    """
+    index, view = index_and_view
+    result = func(view, **kwargs)
+    queue.put((index,result))
 
 class FuncExec(object):
     """FuncExec is a function execution helper class.
     It is a base class that allows for synchronous execution of a function
-    that operates on views of an input array that was typically
-    passed to the view_as_windows or view_as_blocks functions.
+    that operates on views that was typically returned from the
+    view_as_windows or view_as_blocks functions.
     """
-    def __init__(self, func, func_args={}, callback=None):
+    def __init__(self, func, func_args={}):
         self.func = func
         self.func_args = func_args
-        self.cb_done = callback
-        self.queue = None
-        self.num_busy = None
-        self.num_ready = None
+        self.queue = Queue()
         self.out_shape = None
         self.views = None
 
@@ -28,30 +37,19 @@ class FuncExec(object):
             raise ValueError("Parameter 'dims' must not be larger than\
                     the number of dimensions of the 'views' parameter.")
         self.views = views
-        self.num_busy = 0
-        self.num_ready = 0
-        self.queue = Queue()
         self.out_shape = self.views.shape[:dims]
         self._map(np.ndindex(*self.out_shape), )
         return self
 
-    def _callback(self, index, result):
-        self.queue.put((index,result))
-        self.num_busy -= 1
-        self.num_ready += 1
-        if self.cb_done is not None:
-            if self.num_ready == np.prod(self.out_shape):
-                self.cb_done(self)
-
     def _map(self, indices):
-        index_arr = [index for index in indices]
-        map(self._exec, [self.views[index] for index in index_arr], index_arr)
+        map_func = partial(_exec, self.func, self.queue, **self.func_args)
+        map(map_func, [(index, self.views[index]) for index in indices])
 
-    def _exec(self, view, index):
-        result = self.func(view, **self.func_args)
-        self._callback(index, result)
+    #def _exec(self, index):
+    #    result = self.func(self.views[index], **self.func_args)
+    #    self._callback(index, result)
 
-    def ready(self, timeout=0):
+    def ready(self, timeout=None):
         count = 0
         while count < np.prod(self.out_shape):
             idx, value = self.queue.get(True, timeout)
@@ -61,16 +59,30 @@ class FuncExec(object):
                 yield idx, value
             count += 1
 
-    def result(self, timeout=0):
+    def result(self, timeout=None):
         result = np.zeros(self.out_shape).astype(np.object)
         for idx, value in self.ready(timeout):
             result[idx] = value
         return np.array(result.tolist())
 
+class AsyncPoolExec(FuncExec):
+    """AsyncPoolExec is a function execution helper class.
+    It allows for multiprocess execution of a function
+    that operates on views that was typically returned from the
+    view_as_windows or view_as_blocks functions.
+    """
+    def __init__(self, func, func_args={}, pool_size=2):
+        super(AsyncPoolExec, self).__init__(func, func_args=func_args)
+        self.manager = Manager()
+        self.queue = self.manager.Queue()
+        self.pool = Pool(processes=pool_size)
 
+    def _map(self, indices):
+        map_func = partial(_exec, self.func, self.queue, **self.func_args)
+        results = self.pool.map(map_func, [(index, self.views[index]) for index in indices])
 
 def process_blocks(image, block_shape, func, func_args={},
-                   overlap=0, n_jobs=1):
+                   overlap=0, executor=FuncExec, executor_args={}):
     """Apply a function to distinct or overlapping blocks in the image.
 
     Parameters
@@ -112,16 +124,7 @@ def process_blocks(image, block_shape, func, func_args={},
 
     image_views = view_as_windows(image, block_shape, step)
     out_shape = image_views.shape[:-block_shape.size]
-    indicies = np.ndindex(*out_shape)
 
-    if n_jobs > 1:
-        func_map = partial(func, **func_args)
-        pool = Pool(processes=n_jobs)
-        output = np.array(pool.map(func_map,
-                                   [image_views[idx] for idx in indicies]))
-    else:
-        output = np.array([func(image_views[idx], **func_args)
-                           for idx in indicies])
-
-    return output.reshape(out_shape + output.shape[1:])
+    execute = executor(func, func_args, **executor_args)
+    return execute(image_views, len(out_shape))
 
