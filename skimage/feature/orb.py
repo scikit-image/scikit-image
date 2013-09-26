@@ -9,17 +9,15 @@ from skimage.transform import pyramid_gaussian
 from .orb_cy import _orb_loop
 
 
-OFAST_MASK = np.array([[0, 0, 1, 1, 1, 0, 0],
-                       [0, 1, 1, 1, 1, 1, 0],
-                       [1, 1, 1, 1, 1, 1, 1],
-                       [1, 1, 1, 1, 1, 1, 1],
-                       [1, 1, 1, 1, 1, 1, 1],
-                       [0, 1, 1, 1, 1, 1, 0],
-                       [0, 0, 1, 1, 1, 0, 0]], dtype=np.uint8)
+OFAST_MASK = np.zeros((31, 31))
+umax = [15, 15, 15, 15, 14, 14, 14, 13, 13, 12, 11, 10, 9, 8, 6, 3]
+for i in range(-15, 16):
+    for j in range(-umax[np.abs(i)], umax[np.abs(i)] + 1):
+        OFAST_MASK[15 + j, 15 + i]  = 1
 
 
-def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
-                  harris_k=0.05,  downscale=np.sqrt(2), n_scales=4):
+def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
+                  harris_k=0.04,  downscale=1.2, n_scales=8):
 
     """Detect Oriented Fast keypoints.
 
@@ -134,7 +132,7 @@ def keypoints_orb(image, n_keypoints=200, fast_n=9, fast_threshold=0.20,
 
 
 def descriptor_orb(image, keypoints, orientations, scales,
-                   downscale=np.sqrt(2), n_scales=4):
+                   downscale=1.2, n_scales=8):
     """Compute rBRIEF descriptors of input keypoints.
 
     Parameters
@@ -205,7 +203,7 @@ def descriptor_orb(image, keypoints, orientations, scales,
         curr_scale_orientation = orientations[curr_scale_mask]
 
         border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts,
-                                             dist=14)
+                                             dist=16)
         curr_scale_kpts = curr_scale_kpts[border_mask]
         curr_scale_orientation = curr_scale_orientation[border_mask]
 
