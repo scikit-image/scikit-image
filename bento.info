@@ -69,6 +69,9 @@ Library:
     Extension: skimage.filter._denoise_cy
         Sources:
             skimage/filter/_denoise_cy.pyx
+    Extension: skimage.filter._inpaint_efros
+        Sources:
+            skimage/filter/_inpaint_efros.pyx
     Extension: skimage.morphology.ccomp
         Sources:
             skimage/morphology/ccomp.pyx
