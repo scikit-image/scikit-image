@@ -1,6 +1,7 @@
 import numpy as np
 
-from .util import _mask_border_keypoints, _prepare_grayscale_input_2D
+from skimage.feature.util import (_mask_border_keypoints,
+                                  _prepare_grayscale_input_2D)
 
 from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
