@@ -65,14 +65,14 @@ class FuncExec(object):
             result[idx] = value
         return np.array(result.tolist())
 
-class AsyncPoolExec(FuncExec):
-    """AsyncPoolExec is a function execution helper class.
+class MultiProcExec(FuncExec):
+    """MultiProcExec is a function execution helper class.
     It allows for multiprocess execution of a function
     that operates on views that was typically returned from the
     view_as_windows or view_as_blocks functions.
     """
     def __init__(self, func, func_args={}, pool_size=2):
-        super(AsyncPoolExec, self).__init__(func, func_args=func_args)
+        super(MultiProcExec, self).__init__(func, func_args=func_args)
         self.manager = Manager()
         self.queue = self.manager.Queue()
         self.pool = Pool(processes=pool_size)
@@ -97,8 +97,11 @@ def process_blocks(image, block_shape, func, func_args={},
         Additional arguments for `func`.
     overlap : int
         The amount of overlap between blocks.
-    jobs : int
-        The number of jobs to launch in parallel.
+    executor : class
+        Helper class that conforms to the default FuncExec class.
+        Determines the execution plan (sync, multiprocess, etc).
+    executor_args : dict
+        Additional arguments for executor.__init__.
 
     Returns
     -------
@@ -109,7 +112,7 @@ def process_blocks(image, block_shape, func, func_args={},
     --------
     >>> from skimage.data import camera
     >>> image = camera()
-    >>> output = process_windows(image, (8, 8), np.sum)
+    >>> output = process_blocks(image, (8, 8), np.sum)
     >>>
     >>> from skimage.color import gray2rgb
     >>> output2 = process_windows(gray2rgb(image), (8, 8, 3),
