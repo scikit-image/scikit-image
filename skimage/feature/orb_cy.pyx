@@ -6,7 +6,7 @@
 cimport numpy as cnp
 import numpy as np
 
-from libc.math cimport sin, cos, M_PI, round
+from libc.math cimport sin, cos, round
 
 
 pos = np.loadtxt("orb_descriptor_positions.txt", dtype=np.int8)
@@ -28,8 +28,8 @@ def _orb_loop(double[:, ::1] image, Py_ssize_t[:, ::1] keypoints,
 
     for i in range(descriptors.shape[0]):
         angle = orientations[i]
-        sin_a = sin(angle * M_PI / 180.)
-        cos_a = cos(angle * M_PI / 180.)
+        sin_a = sin(angle)
+        cos_a = cos(angle)
 
         kr = keypoints[i, 0]
         kc = keypoints[i, 1]
