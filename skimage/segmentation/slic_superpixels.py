@@ -31,6 +31,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         Width of Gaussian smoothing kernel for pre-processing for each
         dimension of the image. The same sigma is applied to each dimension in
         case of a scalar value. Zero means no smoothing.
+        Note, that `sigma` is automatically scaled if it is scalar and a
+        manual voxel spacing is provided (see Notes section).
     spacing : (3,) array-like of floats, optional
         The voxel spacing along each image dimension. By default, `slic`
         assumes uniform spacing (same voxel resolution along z, y and x).
@@ -60,19 +62,19 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
 
     Notes
     -----
-    If `sigma > 0`, the image is smoothed using a Gaussian kernel prior to
-    segmentation.
+    * If `sigma > 0`, the image is smoothed using a Gaussian kernel prior to
+      segmentation.
 
-    If `sigma > 0` and `spacing` is provided, the kernel width is divided
-    along each dimension by the spacing. For example, if `sigma=1` and
-    `spacing=[5, 1, 1]`, the effective `sigma` is `[0.2, 1, 1]`. This
-    ensures sensible smoothing for anisotropic images.
+    * If `sigma` is scalar and `spacing` is provided, the kernel width is
+      divided along each dimension by the spacing. For example, if ``sigma=1``
+      and ``spacing=[5, 1, 1]``, the effective `sigma` is ``[0.2, 1, 1]``. This
+      ensures sensible smoothing for anisotropic images.
 
-    The image is rescaled to be in [0, 1] prior to processing.
+    * The image is rescaled to be in [0, 1] prior to processing.
 
-    Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
-    interpret them as 3D with the last dimension having length 3, use
-    `multichannel=False`.
+    * Images of shape (M, N, 3) are interpreted as 2D RGB images by default. To
+      interpret them as 3D with the last dimension having length 3, use
+      `multichannel=False`.
 
     References
     ----------
@@ -100,15 +102,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         compactness = ratio
 
     image = img_as_float(image)
-    is2d = False
+    is_2d = False
     if image.ndim == 2:
         # 2D grayscale image
         image = image[np.newaxis, ..., np.newaxis]
-        is2d = True
+        is_2d = True
     elif image.ndim == 3 and multichannel:
         # Make 2D multichannel image 3D with depth = 1
         image = image[np.newaxis, ...]
-        is2d = True
+        is_2d = True
     elif image.ndim == 3 and not multichannel:
         # Add channel as single last dimension
         image = image[..., np.newaxis]
@@ -116,13 +118,15 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     if spacing is None:
         spacing = np.ones(3)
     elif isinstance(spacing, (list, tuple)):
-        spacing = np.array(spacing, np.double)
+        spacing = np.array(spacing, dtype=np.double)
+
     if not isinstance(sigma, coll.Iterable):
-        sigma = np.array([sigma, sigma, sigma], np.double)
-    elif isinstance(sigma, (list, tuple)):
-        sigma = np.array(sigma, np.double)
-    if (sigma > 0).any():
+        sigma = np.array([sigma, sigma, sigma], dtype=np.double)
         sigma /= spacing.astype(np.double)
+    elif isinstance(sigma, (list, tuple)):
+        sigma = np.array(sigma, dtype=np.double)
+    if (sigma > 0).any():
+        # add zero smoothing for multichannel dimension
         sigma = list(sigma) + [0]
         image = ndimage.gaussian_filter(image, sigma)
 
@@ -156,7 +160,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
 
     labels = _slic_cython(image, segments, max_iter, spacing)
 
-    if is2d:
+    if is_2d:
         labels = labels[0]
 
     return labels
