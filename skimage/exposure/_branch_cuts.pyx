@@ -10,22 +10,7 @@ import numpy as np
 from libc.math cimport M_PI, lround
 from libc.stdlib cimport malloc, free, abort
 cimport numpy as cnp
-
-
-ctypedef void * QueueValue
-
-cdef extern from "queue.h":
-    ctypedef struct Queue:
-        pass
-    Queue *queue_new()
-    void queue_free(Queue *queue)
-    int queue_push_head(Queue *queue, QueueValue data)
-    QueueValue queue_pop_head(Queue *queue)
-    QueueValue queue_peek_head(Queue *queue)
-    int queue_push_tail(Queue *queue, QueueValue data)
-    QueueValue queue_pop_tail(Queue *queue)
-    QueueValue queue_peek_tail(Queue *queue)
-    int queue_is_empty(Queue *queue)
+from skimage._shared.queue cimport Queue
 
 
 cdef enum:
@@ -135,7 +120,7 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
                                           branch_cut[:, ::1] branch_cuts,
                                           QueuedLocation * location_buffer,
                                           Py_ssize_t location_index,
-                                          Queue *queue,
+                                          Queue queue,
                                           cnp.uint16_t visit_code,
                                           cnp.uint8_t[:, ::1] residues_mask):
     cdef:
@@ -158,11 +143,11 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
             # two such intersections should always have a cut between them.
             # Adding this edge is therefore cost-free, so we skip ahead
             # using a DFS-like strategy
-            queue_push_head(queue, <QueueValue> l)
+            queue.push_head(<void *> l)
         else:
             # The between these locations was not set, so we schedule the
             # new location as in an ordinary BFS
-            queue_push_tail(queue, <QueueValue> l)
+            queue.push_tail(<void *> l)
         # Mark this location as visited
         branch_cuts[i, j].visit_code = visit_code
         return location_index + 1
@@ -211,14 +196,14 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                      cnp.uint8_t[:, ::1] residues_mask):
     cdef:
         Py_ssize_t i, j, size, residue_no, vi, vj
-        Queue *queue
+        Queue queue
         Py_ssize_t location_index
         QueuedLocation *location_buffer
         QueuedLocation *l
         int residue, net_residue
         cnp.uint16_t visit_code
     size = branch_cuts.shape[0] * branch_cuts.shape[1]
-    queue = NULL
+    queue = None
     visit_code = 1
     location_buffer = <QueuedLocation *> malloc(size * sizeof(QueuedLocation))
 
@@ -229,7 +214,7 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                 and residue_storage[branch_cuts[i, j].residue_no] != 0):
                 # Found a residue that has not yet been matched
                 # Initialize a queue
-                queue = queue_new()
+                queue = Queue()
                 location_index = 0
                 net_residue = 0
 
@@ -238,14 +223,14 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                 l.i = i
                 l.j = j
                 l.came_from = NULL
-                queue_push_tail(queue, <QueueValue> l)
+                queue.push_tail(<void *> l)
                 branch_cuts[l.i, l.j].visit_code = visit_code
                 location_index += 1
 
                 # Breadth first search for residues
-                while not queue_is_empty(queue):
+                while not queue.is_empty():
                     # Process next location in the queue
-                    l = <QueuedLocation *> queue_pop_head(queue)
+                    l = <QueuedLocation *> queue.pop_head()
                     residue_no = branch_cuts[l.i, l.j].residue_no
                     residue = residue_storage[residue_no]
                     if residue != 0:
@@ -281,9 +266,6 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                                                         visit_code,
                                                         residues_mask)
 
-                if queue != NULL:
-                    queue_free(queue)
-                    queue = NULL
                 if visit_code == UINT16_MAX:
                     branch_cuts[...].visit_code = 0
                     visit_code = 1
@@ -327,7 +309,7 @@ cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
                                        cnp.int64_t[:, ::1] periods,
                                        cnp.uint8_t[:, ::1] vcut,
                                        cnp.uint8_t[:, ::1] hcut,
-                                       Queue * queue,
+                                       Queue queue,
                                        QueuedLocation * location_buffer,
                                        Py_ssize_t location_index,
                                        QueuedLocation * coming_from,
@@ -359,7 +341,7 @@ cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
         l = &location_buffer[location_index]
         l.i = i
         l.j = j
-        queue_push_tail(queue, <QueueValue> l)
+        queue.push_tail(<void *> l)
         return location_index + 1
 
 
@@ -369,13 +351,12 @@ def integrate_phase(cnp.float64_t[:, ::1] image, cnp.uint8_t[:, ::1] image_mask,
                     Py_ssize_t initial_i, Py_ssize_t initial_j):
     cdef:
         Py_ssize_t i, j, location_index
-        Queue * queue
+        Queue queue
         QueuedLocation *location_buffer
         QueuedLocation *l
 
     size = image.shape[0] * image.shape[1]
-    queue = NULL
-    queue = queue_new()
+    queue = Queue()
     location_buffer = <QueuedLocation *> malloc(size * sizeof(QueuedLocation))
     location_index = 0
 
@@ -385,10 +366,10 @@ def integrate_phase(cnp.float64_t[:, ::1] image, cnp.uint8_t[:, ::1] image_mask,
     l.j = initial_j
     location_index += 1
     periods[l.i, l.j] = 0
-    queue_push_tail(queue, <QueueValue> l)
+    queue.push_tail(<void *> l)
     # Unwrap all reachable pixels
-    while not queue_is_empty(queue):
-        l = <QueuedLocation *> queue_pop_head(queue)
+    while not queue.is_empty():
+        l = <QueuedLocation *> queue.pop_head()
         location_index = maybe_add_pixel(image, image_mask, periods, vcut, hcut,
                                          queue, location_buffer, location_index,
                                          l, l.i, l.j - 1)
@@ -406,8 +387,5 @@ def integrate_phase(cnp.float64_t[:, ::1] image, cnp.uint8_t[:, ::1] image_mask,
     if location_buffer != NULL:
         free(location_buffer)
         location_buffer = NULL
-    if queue != NULL:
-        queue_free(queue)
-        queue = NULL
 
     return np.asarray(periods)

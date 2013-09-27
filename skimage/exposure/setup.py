@@ -26,8 +26,10 @@ def configuration(parent_package='', top_path=None):
     unwrap_sources_3d = ['_unwrap_3d.c', 'unwrap_3d_ljmu.c']
     config.add_extension('_unwrap_3d', sources=unwrap_sources_3d,
                          include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('_branch_cuts', sources=['_branch_cuts.c', 'queue.c'],
-                         include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_branch_cuts', sources=['_branch_cuts.c'],
+                         include_dirs=[get_numpy_include_dirs(),
+                                       os.path.join(base_path,
+                                                    '..', '_shared')])
 
     return config
 
