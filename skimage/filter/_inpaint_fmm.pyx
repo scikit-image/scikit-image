@@ -22,8 +22,8 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
     """Inpaint an image using the Fast Marching Method (FMM).
 
     Image Inpainting technique based on the Fast Marching Method implementation
-    as described in [1]_. FMM is used for computing the evolution of
-    boundary moving in a direction *normal* to itself.
+    as described in [1]_. FMM is used for computing the evolution of boundary
+    moving in a direction *normal* to itself.
 
     Parameters
     ---------
@@ -42,16 +42,17 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
     Notes
     -----
     The steps of the algorithm are as follows:
-    - Extract the pixel with the smallest ``u`` value in the BAND pixels
-    - Update its ``flag`` value as KNOWN
+    - Extract the pixel with the smallest distance value (``u``) in the BAND
+      pixels.
+    - Update its ``flag`` value as KNOWN.
     - March the boundary inwards by adding new points.
         - If they are either UNKNOWN or BAND, compute its ``u`` value using the
-          ``eikonal`` function for all the 4 quadrants
-        - If ``flag`` is UNKNOWN
-            - Change it to BAND
-            - Inpaint the pixel
-        - Select the ``min`` value and assign it as ``u`` value of the pixel
-        - Insert this new value in the ``heap``
+          ``eikonal`` function for all the 4 quadrants.
+        - If ``flag`` is UNKNOWN:
+            - Change it to BAND.
+            - Inpaint the pixel.
+        - Select the ``min`` value and assign it as ``u`` value of the pixel.
+        - Insert this new value in the ``heap``.
 
     For further details, see [1]_.
 
@@ -86,7 +87,7 @@ cpdef _fast_marching_method(cnp.float_t[:, ::1] image, mask,
 
         for (i_nb, j_nb) in (i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1):
 
-            if not flag[i_nb, j_nb] == KNOWN:
+            if flag[i_nb, j_nb] != KNOWN:
                 u[i_nb, j_nb] = min(_eikonal(i_nb - 1, j_nb, i_nb,
                                              j_nb - 1, flag, u),
                                     _eikonal(i_nb + 1, j_nb, i_nb,
@@ -115,25 +116,25 @@ cdef _init_fmm(mask):
     Parameters
     ----------
     mask : array, bool
-        True values are to be inpainted
+        True values are to be inpainted.
 
     Returns
     ------
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN.
     u : array, float
-        The distance/time map from the boundary to each pixel
+        The distance/time map from the boundary to each pixel.
     heap : list of tuples
-        Priority heap with ``u`` and indices of BAND points
+        Priority heap with ``u`` and indices of BAND points.
 
     Notes
     -----
     ``flag`` Initialisation:
     All pixels are classified into 1 of the following flags:
-    - 0 = KNOWN - intensity and u values are known
-    - 1 = BAND - u value undergoes an update
-    - 2 = UNKNOWN - intensity and u values unkown
+    - 0 = KNOWN - intensity and u values are known.
+    - 1 = BAND - u value undergoes an update.
+    - 2 = UNKNOWN - intensity and u values unkown.
 
     References
     ----------
@@ -164,34 +165,35 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
                           cnp.float_t[:, ::1] u):
     """Solve a step of the Eikonal equation.
 
-    The``u`` values of known pixels (marked by``flag``) are considered for
-    computing the``u`` value of the neighbouring pixel.
+    The ``u`` values of known pixels (marked by ``flag``) are considered for
+    computing the ``u`` value of the neighbouring pixel.
 
     See Equation 4 and Figure 4 in [1]_ for implementation details.
 
     Parameters
     ----------
     i1, j1, i2, j2 : int
-        Row and column indices of two diagonally-adjacent pixels
+        Row and column indices of two diagonally-adjacent pixels.
     flag : array
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN.
     u : array, float
-        The distance/time map from the boundary to each pixel
+        The distance/time map from the boundary to each pixel.
 
     Returns
     -------
     u_out : float
-        The``u`` value for the pixel ``(i2, j1)``
+        The ``u`` value for the pixel ``(i2, j1)``.
 
     Notes
     -----
-    Note that``u`` is often denoted``T`` and represents the distance/time map.
-    The progression of the curve (boundary) follows an **upwind scheme** and
-    in order to calulate ``u`` we find the perpendicular distance to the
-    boundary (curve) from ``(i2, j1)`` using the difference in ``u[i1, j1]``
-    and ``u[i2, j2]``. Since the curve always travels normal to itself and
-    with unit speed, the perpendicular distance also represents the time taken.
+    Often ``u`` is denoted as ``T`` and represents the distance/time map.
+    The progression of the curve (boundary) follows an **upwind scheme**
+    (refer [2]_) and in order to calulate ``u`` we find the perpendicular
+    distance to the boundary (curve) from ``(i2, j1)`` using the difference in
+    ``u[i1, j1]`` and ``u[i2, j2]``. Since the curve always travels normal to
+    itself and with unit speed, the perpendicular distance also represents the
+    time taken.
 
     This is represented by ``perp`` variable below. Add to this distance the
     time it has taken to reach the neighbouring KNOWN pixels. Represented
@@ -202,6 +204,7 @@ cdef cnp.float_t _eikonal(Py_ssize_t i1, Py_ssize_t j1, Py_ssize_t i2,
     .. [1] Telea, A., "An Image Inpainting Technique based on the Fast Marching
            Method", Journal of Graphic Tools (2004).
            http://iwi.eldoc.ub.rug.nl/FILES/root/2004/JGraphToolsTelea/2004JGraphToolsTelea.pdf
+    .. [2] http://en.wikipedia.org/wiki/Upwind_scheme
 
     """
 
@@ -235,29 +238,29 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
                     cnp.uint8_t[:, ::1] flag, cnp.float_t[:, ::1] u,
                     cnp.int16_t[:, ::1] shifted_indices, Py_ssize_t radius):
     """This function performs the actual inpainting operation. Inpainting
-    involves "filling in" color in regions with unkown intensity values using
-    the intensity and gradient information of surrounding known region.
+    involves "filling in" regions with unknown intensity values using the
+    intensity and gradient information of surrounding known region.
 
     For further implementation details, see Section 2.3 and Figure 5 in [1]_
 
     Parameters
     ---------
     i, j : int
-        Row and column index value of the pixel to be Inpainted
+        Row and column index value of the pixel to be Inpainted.
     image : array
-        Already padded single channel input image
+        Already padded single channel input image.
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN.
     u : array, float
-        The distance/time map from the boundary to each pixel
+        The distance/time map from the boundary to each pixel.
     radius : int
-        Neighbourhood of (i, j) to be considered for inpainting
+        Neighbourhood of (i, j) to be considered for inpainting.
 
     Returns
     -------
     image[i, j] : float
-        Inpainted intensity value
+        Inpainted intensity value.
 
     References
     ---------
@@ -313,11 +316,11 @@ cdef _inpaint_point(cnp.int16_t i, cnp.int16_t j, cnp.float_t[:, ::1] image,
         Jy -= weight * grady_img * ry
         norm += weight
 
-    # Inpainted value considering the effect of gradient of intensity value
-    # More accurate pixel value calculation refer to the OpenCV
-    # implementation:
+    # Inpainted value considering the effect of gradient of intensity value.
+    # Note here that the implementation as is, in the paper cited above does
+    # not yield completely accurate results. We refer to OpenCV implementation:
     # https://github.com/Itseez/opencv/blob/master/modules/photo/src/inpaint.cpp#L386
-    image[i, j] = (Ia / norm + (Jx + Jy) / sqrt(Jx * Jx + Jy * Jy))
+    image[i, j] = Ia / norm + (Jx + Jy) / sqrt(Jx * Jx + Jy * Jy)
 
 
 cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
@@ -326,24 +329,24 @@ cdef cnp.float_t _grad_func(cnp.float_t[:, :] array,
     """Return the x-gradient of the input array at a pixel.
 
     This gradient is structured to ignore inner, unknown regions as specified
-    by the `flag` array. By default, this returns the gradient in the
-    x-direction. To get the y-gradient, switch the order of `i`, `j`, and
-    transpose `flag` and `array`.
+    by the ``flag`` array. By default, this returns the gradient in the
+    x-direction. To get the y-gradient, switch the order of ``i``, ``j``, and
+    transpose ``flag`` and ``array``.
 
     Parameters
     ----------
     array : array, float
-        Either ``image`` or ``u``, whose gradient is to be computed
+        Either ``image`` or ``u``, whose gradient is to be computed.
     i, j : int
-        Row and column index of the pixel whose gradient is to be calculated
+        Row and column index of the pixel whose gradient is to be calculated.
     flag : array, uint8
         Array marking pixels as known, along the boundary to be solved, or
-        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN
+        inside the unknown region: 0 = KNOWN, 1 = BAND, 2 = UNKNOWN.
 
     Returns
     -------
     grad : float
-        The local gradient of array
+        The local gradient of array.
 
     """
 
