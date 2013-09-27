@@ -132,6 +132,9 @@ Library:
     Extension: skimage._shared.geometry
         Sources:
             skimage/_shared/geometry.pyx
+    Extension: skimage._shared.queue
+        Sources:
+            skimage/_shared/queue.pyx, skimage/_shared/libcalg/queue.c
     Extension: skimage.filter.rank.generic_cy
         Sources:
             skimage/filter/rank/generic_cy.pyx
