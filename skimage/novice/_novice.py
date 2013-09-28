@@ -383,18 +383,14 @@ class Picture(object):
 
     @size.setter
     def size(self, value):
-        try:
-            # Don't resize if no change in size
-            if (value[0] != self.width) or (value[1] != self.height):
-                # skimage dimensions are flipped: y, x
-                new_size = (int(value[1]), int(value[0]))
-                new_array = resize(self.array, new_size, order=0)
-                self.array = img_as_ubyte(new_array)
+        # Don't resize if no change in size
+        if (value[0] != self.width) or (value[1] != self.height):
+            # skimage dimensions are flipped: y, x
+            new_size = (int(value[1]), int(value[0]))
+            new_array = resize(self.array, new_size, order=0)
+            self.array = img_as_ubyte(new_array)
 
-                self._array_modified()
-        except TypeError:
-            msg = "Expected (width, height), but got {0} instead!"
-            raise TypeError(msg.format(value))
+            self._array_modified()
 
     @property
     def width(self):
