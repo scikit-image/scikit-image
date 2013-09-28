@@ -180,11 +180,8 @@ def test_slicing():
     pic[:rest, :] = pic[cut:, :]
     pic[rest:, :] = temp
 
-    for pixel, pixel_orig in zip(pic[rest:, :], pic_orig[:cut, :]):
-        assert pixel.rgb == pixel_orig.rgb
-
-    for pixel, pixel_orig in zip(pic[:rest, :], pic_orig[cut:, :]):
-        assert pixel.rgb == pixel_orig.rgb
+    assert pic[rest:, :] == pic_orig[:cut, :]
+    assert pic[:rest, :] == pic_orig[cut:, :]
 
 
 @raises(IndexError)

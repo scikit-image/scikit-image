@@ -355,13 +355,13 @@ class Picture(object):
         new_size = (self.height * self.scale, self.width * self.scale)
         return img_as_ubyte(resize(array, new_size, order=0))
 
-    def _get_channel(self, dim):
+    def _get_channel(self, channel):
         """Return a specific dimension out of the raw image data slice."""
-        return self._array[:, :, dim]
+        return self._array[:, :, channel]
 
-    def _set_channel(self, dim, value):
+    def _set_channel(self, channel, value):
         """Set a specific dimension in the raw image data slice."""
-        self._array[:, :, dim] = value
+        self._array[:, :, channel] = value
 
     @property
     def red(self):
@@ -393,11 +393,11 @@ class Picture(object):
     @property
     def rgb(self):
         """The RGB color components of the pixel (3 values 0-255)."""
-        return self._get_channel(None)
+        return self.xy_array
 
     @rgb.setter
     def rgb(self, value):
-        self._set_channel(None, value)
+        self.xy_array[:] = value
 
     def __iter__(self):
         """Iterates over all pixels in the image."""
@@ -424,6 +424,11 @@ class Picture(object):
         else:
             raise TypeError("Invalid value type")
         self._array_modified()
+
+    def __eq__(self, other):
+        if not isinstance(other, Picture):
+            raise NotImplementedError()
+        return np.all(self.array == other.array)
 
     def __repr__(self):
         return "Picture({0} x {1})".format(*self.size)
