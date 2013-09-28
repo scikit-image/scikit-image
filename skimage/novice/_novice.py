@@ -180,15 +180,11 @@ class PixelGroup(object):
         self.size = (shape[1], shape[0])
 
     def _getdim(self, dim):
-        """Gets a specific dimension out of the raw image data slice.
-
-        """
+        """Return a specific dimension out of the raw image data slice."""
         return self._array[:, :, dim]
 
     def _setdim(self, dim, value):
-        """ Sets a specific dimension in the raw image data slice.
-
-        """
+        """Set a specific dimension in the raw image data slice."""
         self._array[:, :, dim] = value
 
     @property
@@ -310,7 +306,6 @@ class Picture(object):
         else:
             ValueError("Must provide path or array.")
 
-        # Common setup.
         self._modified = False
         self.scale = 1
 
@@ -417,32 +412,16 @@ class Picture(object):
         return io.Image(self._rescale(self.array))
 
     def show(self):
-        """Displays the image in a separate window.
-
-        """
+        """Display the image."""
         io.imshow(self._rescale(self.array))
 
     def _makepixel(self, x, y):
-        """ Creates a Pixel object for a given x, y location.
-
-        Parameters
-        ----------
-        x, y : int
-            Cartesian coordinates of the Pixel object.
-
-        """
+        """Create a Pixel object for a given x, y location."""
         rgb = self._xy_array[x, y]
         return Pixel(self, self.array, x, y, rgb)
 
     def _rescale(self, array):
-        """Inflates image according to scale factor.
-
-        Parameters
-        ----------
-        array : array
-            Raw RGB image data to rescale using nearest neighbor algorithm.
-
-        """
+        """Rescale image according to scale factor."""
         if self.scale == 1:
             return array
         new_size = (self.height * self.scale, self.width * self.scale)
