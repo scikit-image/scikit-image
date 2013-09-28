@@ -202,7 +202,7 @@ class Picture(object):
 
     Get the top row of the picture
     >>> pic[:, pic.height-1]
-    PixelGroup (100 pixels)
+    Picture (100 pixels)
 
     Set the bottom-left pixel to black
     >>> pic[0, 0] = (0, 0, 0)
@@ -211,22 +211,24 @@ class Picture(object):
     >>> pic[:, pic.height-1] = (255, 0, 0)
 
     """
-    def __init__(self, path=None, array=None):
-        if path is not None and array is not None:
-            ValueError("Only provide path or array not both.")
+    def __init__(self, path=None, array=None, xy_array=None):
+        self._modified = False
+        self.scale = 1
+        self._path = None
+        self._format = None
+
+        n_args = len([a for a in [path, array, xy_array] if a is not None])
+        if n_args != 1:
+            msg = "Must provide a single keyword arg (path, array, xy_array)."
+            ValueError(msg)
         elif path is not None:
             self.array = img_as_ubyte(io.imread(path))
             self._path = path
             self._format = imghdr.what(path)
         elif array is not None:
             self.array = array
-            self._path = None
-            self._format = None
-        else:
-            ValueError("Must provide path or array.")
-
-        self._modified = False
-        self.scale = 1
+        elif xy_array is not None:
+            self.xy_array = xy_array
 
     @staticmethod
     def from_size(size, color='black'):
@@ -404,20 +406,20 @@ class Picture(object):
                 yield self._makepixel(x, y)
 
     def __getitem__(self, xy_index):
-        """Return `PixelGroup`s for slices and `Pixel`s for indexes."""
+        """Return `Picture`s for slices and `Pixel`s for indexes."""
         xy_index = _verify_picture_index(xy_index)
         if all(isinstance(index, int) for index in xy_index):
             if any(index < 0 for index in xy_index):
                 raise IndexError("Negative indices not supported")
             return self._makepixel(*xy_index)
         else:
-            return PixelGroup(self, xy_index)
+            return Picture(xy_array=self.xy_array[xy_index])
 
     def __setitem__(self, xy_index, value):
         xy_index = _verify_picture_index(xy_index)
         if isinstance(value, tuple):
             self[xy_index].rgb = value
-        elif isinstance(value, PixelGroup):
+        elif isinstance(value, Picture):
             self.xy_array[xy_index] = value.xy_array
         else:
             raise TypeError("Invalid value type")
@@ -426,29 +428,3 @@ class Picture(object):
     def __repr__(self):
         args = self.format, self.path, self.modified
         return "Picture (format: {0}, path: {1}, modified: {2})".format(*args)
-
-
-class PixelGroup(Picture):
-    """A group of Pixel objects that can be manipulated together.
-
-    Attributes
-    ----------
-    pic : Picture
-        The Picture object that this pixel group references.
-    xy_slice : tuple
-        2D slice of `pic` in Cartesian coordinates.
-    """
-    def __init__(self, pic, xy_slice):
-        self.xy_array = pic.xy_array[xy_slice]
-
-    def __iter__(self):
-        """Iterates through all pixels in the pixel group.
-
-        """
-        height, width, channels = self.array.shape
-        for x in range(width):
-            for y in range(height):
-                yield self._makepixel(x, y)
-
-    def __repr__(self):
-        return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])

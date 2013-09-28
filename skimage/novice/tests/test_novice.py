@@ -155,13 +155,13 @@ def test_indexing():
             assert_equal(p.blue, 255)
 
 
-def test_pixel_group():
+def test_picture_slice():
     array = _array_2d_to_RGB(np.arange(0, 10)[np.newaxis, :])
     pic = novice.Picture(array=array)
 
     x_slice = slice(3, 8)
-    pixel_group = pic[:, x_slice]
-    assert_allclose(pixel_group.array, array[x_slice, :])
+    subpic = pic[:, x_slice]
+    assert_allclose(subpic.array, array[x_slice, :])
 
 
 def test_slicing():
