@@ -250,6 +250,7 @@ class Picture(object):
 
     @property
     def array(self):
+        """Image data stored as numpy array."""
         return self._array
 
     @array.setter
@@ -259,6 +260,7 @@ class Picture(object):
 
     @property
     def xy_array(self):
+        """Image data stored as numpy array with origin at the bottom-left."""
         return self._xy_array
 
     @xy_array.setter
