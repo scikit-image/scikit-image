@@ -22,6 +22,12 @@ def open(path):
     return Picture(path=os.path.abspath(path))
 
 
+def _verify_picture_index(index):
+    """Raise error if picture index is not a 2D index/slice."""
+    if not (isinstance(index, tuple) and len(index) == 2):
+        raise IndexError("Expected 2D index but got {!r}".format(index))
+
+
 class Pixel(object):
     """A single pixel in a Picture.
 
@@ -41,7 +47,6 @@ class Pixel(object):
     """
     def __init__(self, pic, array, x, y, rgb):
         self._picture = pic
-        self._array = array
         self._x = x
         self._y = y
         self._red = self._validate(rgb[0])
@@ -116,8 +121,7 @@ class Pixel(object):
         NOTE: Using Cartesian coordinate system!
 
         """
-        row = self._picture.height - self._y - 1
-        self._picture._array[row, self._x] = self.rgb
+        self._picture._xy_array[self._x, self._y] = self.rgb
         self._picture._array_modified()
 
     def __repr__(self):
@@ -169,11 +173,8 @@ class PixelGroup(object):
 
         # array dimensions are row, column (i.e. y, x)
         self._key = (key[1], key[0])
-        self._array = pic._array
 
-        # Save slice for _getdim operations.
-        # This allows you to swap parts of an array.
-        self._slice = self._array[self._key[0], self._key[1]]
+        self._array = pic._array[self._key]
 
         shape = self._getdim(0).shape
         self.size = (shape[1], shape[0])
@@ -182,13 +183,17 @@ class PixelGroup(object):
         """Gets a specific dimension out of the raw image data slice.
 
         """
-        return self._slice[:, :, dim]
+        return self._array[:, :, dim]
 
     def _setdim(self, dim, value):
         """ Sets a specific dimension in the raw image data slice.
 
         """
-        self._array[self._key[0], self._key[1], dim] = value
+        self._array[:, :, dim] = value
+
+    @property
+    def array(self):
+        return self._array
 
     @property
     def red(self):
@@ -235,7 +240,7 @@ class PixelGroup(object):
 
         for x in x_idx:
             for y in y_idx:
-                yield self._pic._makepixel((x, y))
+                yield self._pic._makepixel(x, y)
 
     def __repr__(self):
         return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
@@ -295,11 +300,11 @@ class Picture(object):
         if path is not None and array is not None:
             ValueError("Only provide path or array not both.")
         elif path is not None:
-            self._array = img_as_ubyte(io.imread(path))
+            self.array = img_as_ubyte(io.imread(path))
             self._path = path
             self._format = imghdr.what(path)
         elif array is not None:
-            self._array = array
+            self.array = array
             self._path = None
             self._format = None
         else:
@@ -327,6 +332,17 @@ class Picture(object):
         array = np.ones(rgb_size, dtype=np.uint8) * color
         return Picture(array=array)
 
+    @property
+    def array(self):
+        return self._array
+
+    @array.setter
+    def array(self, array):
+        self._array = array
+        # Keep a view of the array with origin at lower-right corner.
+        # Transpose axis 0 and 1, and leave RGB channels unchanged.
+        self._xy_array = np.transpose(array[::-1], (1, 0, 2))
+
     def save(self, path):
         """Saves the picture to the given path.
 
@@ -336,7 +352,7 @@ class Picture(object):
             Path to save the picture (with file extension).
 
         """
-        io.imsave(path, self._rescale(self._array))
+        io.imsave(path, self._rescale(self.array))
         self._modified = False
         self._path = os.path.abspath(path)
         self._format = imghdr.what(path)
@@ -363,8 +379,7 @@ class Picture(object):
     @property
     def size(self):
         """The size (width, height) of the picture."""
-        # array dimensions are flipped: y, x
-        return (self._array.shape[1], self._array.shape[0])
+        return self._xy_array.shape[:2]
 
     @size.setter
     def size(self, value):
@@ -372,8 +387,9 @@ class Picture(object):
             # Don't resize if no change in size
             if (value[0] != self.width) or (value[1] != self.height):
                 # skimage dimensions are flipped: y, x
-                self._array = img_as_ubyte(resize(self._array,
-                    (int(value[1]), int(value[0])), order=0))
+                new_size = (int(value[1]), int(value[0]))
+                new_array = resize(self.array, new_size, order=0)
+                self.array = img_as_ubyte(new_array)
 
                 self._array_modified()
         except TypeError:
@@ -399,29 +415,28 @@ class Picture(object):
         self.size = (self.width, value)
 
     def _repr_html_(self):
-        return io.Image(self._rescale(self._array))
+        return io.Image(self._rescale(self.array))
 
     def _repr_png_(self):
-        return io.Image(self._rescale(self._array))
+        return io.Image(self._rescale(self.array))
 
     def show(self):
         """Displays the image in a separate window.
 
         """
-        io.imshow(self._rescale(self._array))
+        io.imshow(self._rescale(self.array))
 
-    def _makepixel(self, xy):
+    def _makepixel(self, x, y):
         """ Creates a Pixel object for a given x, y location.
 
         Parameters
         ----------
-        xy : tuple
-            Cartesian coordinates to create a Pixel object for.
+        x, y : int
+            Cartesian coordinates of the Pixel object.
 
         """
-        # skimage dimensions are flipped: y, x
-        rgb = self._array[self.height - xy[1] - 1, xy[0]]
-        return Pixel(self, self._array, xy[0], xy[1], rgb)
+        rgb = self._xy_array[x, y]
+        return Pixel(self, self.array, x, y, rgb)
 
     def _rescale(self, array):
         """Inflates image according to scale factor.
@@ -441,31 +456,27 @@ class Picture(object):
         """Iterates over all pixels in the image."""
         for x in xrange(self.width):
             for y in xrange(self.height):
-                yield self._makepixel((x, y))
+                yield self._makepixel(x, y)
 
     def __getitem__(self, key):
-        if isinstance(key, tuple) and len(key) == 2:
-            if isinstance(key[0], int) and isinstance(key[1], int):
-                if key[0] < 0 or key[1] < 0:
-                    raise IndexError("Negative indices not supported")
-
-                return self._makepixel((key[0], key[1]))
-            else:
-                return PixelGroup(self, key)
+        """Return `PixelGroup`s for slices and `Pixel`s for indexes."""
+        _verify_picture_index(key)
+        if all(isinstance(index, int) for index in key):
+            if any(index < 0 for index in key):
+                raise IndexError("Negative indices not supported")
+            return self._makepixel(*key)
         else:
-            raise TypeError("Invalid key type")
+            return PixelGroup(self, key)
 
     def __setitem__(self, key, value):
-        if isinstance(key, tuple) and len(key) == 2:
-            if isinstance(value, tuple):
-                self[key[0], key[1]].rgb = value
-            elif isinstance(value, PixelGroup):
-                src_key = self[key[0], key[1]]._key
-                self._array[src_key] = value._array[value._key]
-            else:
-                raise TypeError("Invalid value type")
+        _verify_picture_index(key)
+        if isinstance(value, tuple):
+            self[key].rgb = value
+        elif isinstance(value, PixelGroup):
+            src_key = self[key]._key
+            self.array[src_key] = value._array
         else:
-            raise TypeError("Invalid key type")
+            raise TypeError("Invalid value type")
         self._array_modified()
 
     def __repr__(self):

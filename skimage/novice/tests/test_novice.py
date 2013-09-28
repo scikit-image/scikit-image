@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import numpy as np
-from numpy.testing import assert_equal, assert_raises, raises
+from numpy.testing import assert_equal, assert_raises, raises, assert_allclose
 from skimage import novice
 from skimage import data_dir
 
@@ -117,7 +117,7 @@ def test_modified_on_set_pixel():
 
 
 def test_update_on_save():
-    pic = novice.Picture(array=np.zeros((3, 3)))
+    pic = novice.Picture(array=np.zeros((3, 3, 3)))
     pic.size = (6, 6)
     assert pic.modified
     assert pic.path is None
@@ -167,6 +167,14 @@ def test_indexing():
             assert_equal(p.blue, 255)
 
 
+def test_pixel_group():
+    array = np.tile(np.arange(0, 10)[np.newaxis, :, np.newaxis], (1, 1, 3))
+    pic = novice.Picture(array=array)
+    index = (slice(None), slice(3, 8))
+    pixel_group = pic[index[::-1]]
+    assert_allclose(pixel_group.array, array[index])
+
+
 def test_indexing_bounds():
     pic = novice.open(SMALL_IMAGE_PATH)
 
@@ -179,6 +187,10 @@ def test_indexing_bounds():
 
     # Step sizes > 1 not supported
     assert_raises(IndexError, lambda: pic[::2, ::2])
+
+    # Only 2D indexes supported
+    assert_raises(IndexError, lambda: pic[1])
+    assert_raises(IndexError, lambda: pic[1, 2, 3])
 
 
 def test_slicing():
