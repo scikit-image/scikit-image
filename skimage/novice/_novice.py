@@ -148,11 +148,6 @@ class Pixel(object):
         return value
 
     def _setpixel(self):
-        """Sets the actual pixel value in the picture.
-
-        NOTE: Using Cartesian coordinate system!
-
-        """
         self._picture.xy_array[self._x, self._y] = self.rgb
         self._picture._array_modified()
 
@@ -169,16 +164,9 @@ class Picture(object):
     path : str
         Path to an image file to load.
     array : array
-        Raw RGB image data [0-255]
-    size : tuple
-        Size of the empty array to create (width, height).
-    color : tuple
-        Color to fill empty array if size is given (red, green, blue) [0-255].
-
-    Notes
-    -----
-    Cannot provide more than one of 'path' and 'size' and 'array'.
-    Can only provide 'color' if 'size' provided.
+        Raw RGB image data [0-255], with origin at top-left.
+    xy_array : array
+        Raw RGB image data [0-255], with origin at bottom-left.
 
     Examples
     --------
@@ -274,8 +262,7 @@ class Picture(object):
         Parameters
         ----------
         path : str
-            Path to save the picture (with file extension).
-
+            Path (with file extension) where the picture is saved.
         """
         io.imsave(path, self._rescale(self.array))
         self._modified = False
