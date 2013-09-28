@@ -129,119 +129,6 @@ class Pixel(object):
         return "Pixel (red: {0}, green: {1}, blue: {2})".format(*args)
 
 
-class PixelGroup(object):
-    """A group of Pixel objects that can be manipulated together.
-
-    Attributes
-    ----------
-    pic : Picture
-        The Picture object that this pixel group references.
-    key : tuple
-        tuple with x and y slices or ints for extracting part of raw image data.
-
-    """
-    def __init__(self, pic, key):
-        self._pic = pic
-
-        # Use a slice so that the _get_channel and _set_channel functions can
-        # index consistently.
-        if isinstance(key[0], int):
-            key = (slice(key[0], key[0] + 1), key[1])
-
-        if isinstance(key[1], int):
-            key = (key[0], slice(key[1], key[1] + 1))
-
-        for dim_slice in key:
-            if dim_slice.start is not None and dim_slice.start < 0:
-                raise IndexError("Negative slicing not supported")
-
-            if dim_slice.stop is not None and dim_slice.stop < 0:
-                raise IndexError("Negative slicing not supported")
-
-            if dim_slice.step is not None and dim_slice.step != 1:
-                raise IndexError("Only a step size of 1 is supported")
-
-        # Flip y axis
-        y_slice = key[1]
-        start = y_slice.start if y_slice.start is not None else 0
-        stop = y_slice.stop if y_slice.stop is not None else pic.height
-
-        start = pic.height - start - 1
-        stop = pic.height - stop
-
-        key = (key[0], slice(stop, start + 1, y_slice.step))
-
-        # array dimensions are row, column (i.e. y, x)
-        self._key = (key[1], key[0])
-
-        self._array = pic._array[self._key]
-
-        shape = self._get_channel(0).shape
-        self.size = (shape[1], shape[0])
-
-    def _get_channel(self, dim):
-        """Return a specific dimension out of the raw image data slice."""
-        return self._array[:, :, dim]
-
-    def _set_channel(self, dim, value):
-        """Set a specific dimension in the raw image data slice."""
-        self._array[:, :, dim] = value
-
-    @property
-    def array(self):
-        return self._array
-
-    @property
-    def red(self):
-        """The red component of the pixel (0-255)."""
-        return self._get_channel(0).ravel()
-
-    @red.setter
-    def red(self, value):
-        self._set_channel(0, value)
-
-    @property
-    def green(self):
-        """The green component of the pixel (0-255)."""
-        return self._get_channel(1).ravel()
-
-    @green.setter
-    def green(self, value):
-        self._set_channel(1, value)
-
-    @property
-    def blue(self):
-        """The blue component of the pixel (0-255)."""
-        return self._get_channel(2).ravel()
-
-    @blue.setter
-    def blue(self, value):
-        self._set_channel(2, value)
-
-    @property
-    def rgb(self):
-        """The RGB color components of the pixel (3 values 0-255)."""
-        return self._get_channel(None)
-
-    @rgb.setter
-    def rgb(self, value):
-        self._set_channel(None, value)
-
-    def __iter__(self):
-        """Iterates through all pixels in the pixel group.
-
-        """
-        x_idx = range(self._pic.width)[self._key[0]]
-        y_idx = range(self._pic.height)[self._key[1]]
-
-        for x in x_idx:
-            for y in y_idx:
-                yield self._pic._makepixel(x, y)
-
-    def __repr__(self):
-        return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
-
-
 class Picture(object):
     """A 2-D picture made up of pixels.
 
@@ -456,3 +343,109 @@ class Picture(object):
     def __repr__(self):
         args = self.format, self.path, self.modified
         return "Picture (format: {0}, path: {1}, modified: {2})".format(*args)
+
+
+class PixelGroup(Picture):
+    """A group of Pixel objects that can be manipulated together.
+
+    Attributes
+    ----------
+    pic : Picture
+        The Picture object that this pixel group references.
+    key : tuple
+        tuple with x and y slices or ints for extracting part of raw image data.
+
+    """
+    def __init__(self, pic, key):
+        self._pic = pic
+
+        # Use a slice so that the _get_channel and _set_channel functions can
+        # index consistently.
+        if isinstance(key[0], int):
+            key = (slice(key[0], key[0] + 1), key[1])
+
+        if isinstance(key[1], int):
+            key = (key[0], slice(key[1], key[1] + 1))
+
+        for dim_slice in key:
+            if dim_slice.start is not None and dim_slice.start < 0:
+                raise IndexError("Negative slicing not supported")
+
+            if dim_slice.stop is not None and dim_slice.stop < 0:
+                raise IndexError("Negative slicing not supported")
+
+            if dim_slice.step is not None and dim_slice.step != 1:
+                raise IndexError("Only a step size of 1 is supported")
+
+        # Flip y axis
+        y_slice = key[1]
+        start = y_slice.start if y_slice.start is not None else 0
+        stop = y_slice.stop if y_slice.stop is not None else pic.height
+
+        start = pic.height - start - 1
+        stop = pic.height - stop
+
+        key = (key[0], slice(stop, start + 1, y_slice.step))
+
+        # array dimensions are row, column (i.e. y, x)
+        self._key = (key[1], key[0])
+
+        self._array = pic._array[self._key]
+
+    def _get_channel(self, dim):
+        """Return a specific dimension out of the raw image data slice."""
+        return self._array[:, :, dim]
+
+    def _set_channel(self, dim, value):
+        """Set a specific dimension in the raw image data slice."""
+        self._array[:, :, dim] = value
+
+    @property
+    def red(self):
+        """The red component of the pixel (0-255)."""
+        return self._get_channel(0).ravel()
+
+    @red.setter
+    def red(self, value):
+        self._set_channel(0, value)
+
+    @property
+    def green(self):
+        """The green component of the pixel (0-255)."""
+        return self._get_channel(1).ravel()
+
+    @green.setter
+    def green(self, value):
+        self._set_channel(1, value)
+
+    @property
+    def blue(self):
+        """The blue component of the pixel (0-255)."""
+        return self._get_channel(2).ravel()
+
+    @blue.setter
+    def blue(self, value):
+        self._set_channel(2, value)
+
+    @property
+    def rgb(self):
+        """The RGB color components of the pixel (3 values 0-255)."""
+        return self._get_channel(None)
+
+    @rgb.setter
+    def rgb(self, value):
+        self._set_channel(None, value)
+
+    def __iter__(self):
+        """Iterates through all pixels in the pixel group.
+
+        """
+        x_idx = range(self._pic.width)[self._key[0]]
+        y_idx = range(self._pic.height)[self._key[1]]
+
+        for x in x_idx:
+            for y in y_idx:
+                yield self._pic._makepixel(x, y)
+
+    def __repr__(self):
+        return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
