@@ -962,8 +962,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Shape of the output image generated. By default the shape of the input
         image is preserved.
     order : int, optional
-        The order of the spline interpolation, default is 3. The order has to
-        be in the range 0-5.
+        The order of interpolation. The order has to be in the range 0-5:
+        * 0: Nearest-neighbor
+        * 1: Bi-linear (default)
+        * 2: Bi-quadratic
+        * 3: Bi-cubic
+        * 4: Bi-quartic
+        * 5: Bi-quintic
     mode : string, optional
         Points outside the boundaries of the input are filled according
         to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
