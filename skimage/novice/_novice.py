@@ -13,7 +13,7 @@ from skimage._shared import six
 # Convert colors from `skimage.color` to uint8 and allow access through
 # dict or a named tuple.
 color_dict = dict((name, tuple(int(255 * c + 0.5) for c in rgb))
-                  for name, rgb in color_dict.iteritems())
+                  for name, rgb in six.iteritems(color_dict))
 colors = namedtuple('colors', color_dict.keys())(**color_dict)
 
 
