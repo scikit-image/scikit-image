@@ -50,6 +50,15 @@ def _verify_picture_index(index):
     return tuple(index)
 
 
+def cartesian_image_transform(image):
+    """Return image transformed between array origin and Cartesian origin.
+
+    This transform converts an RGB image's origin from the top-left to the
+    bottom-left, and switches from (row, column)-indexes to (x, y)-indexes.
+    """
+    return np.transpose(image[::-1], (1, 0, 2))
+
+
 class Pixel(object):
     """A single pixel in a Picture.
 
@@ -143,7 +152,7 @@ class Pixel(object):
         NOTE: Using Cartesian coordinate system!
 
         """
-        self._picture._xy_array[self._x, self._y] = self.rgb
+        self._picture.xy_array[self._x, self._y] = self.rgb
         self._picture._array_modified()
 
     def __repr__(self):
@@ -243,9 +252,16 @@ class Picture(object):
     @array.setter
     def array(self, array):
         self._array = array
-        # Keep a view of the array with origin at lower-right corner.
-        # Transpose axis 0 and 1, and leave RGB channels unchanged.
-        self._xy_array = np.transpose(array[::-1], (1, 0, 2))
+        self._xy_array = cartesian_image_transform(array)
+
+    @property
+    def xy_array(self):
+        return self._xy_array
+
+    @xy_array.setter
+    def xy_array(self, array):
+        self._xy_array = array
+        self._array = cartesian_image_transform(array)
 
     def save(self, path):
         """Saves the picture to the given path.
@@ -283,7 +299,7 @@ class Picture(object):
     @property
     def size(self):
         """The size (width, height) of the picture."""
-        return self._xy_array.shape[:2]
+        return self.xy_array.shape[:2]
 
     @size.setter
     def size(self, value):
@@ -326,7 +342,7 @@ class Picture(object):
 
     def _makepixel(self, x, y):
         """Create a Pixel object for a given x, y location."""
-        rgb = self._xy_array[x, y]
+        rgb = self.xy_array[x, y]
         return Pixel(self, self.array, x, y, rgb)
 
     def _rescale(self, array):
