@@ -158,7 +158,7 @@ class Pixel(object):
 
     def __repr__(self):
         args = self.red, self.green, self.blue
-        return "Pixel (red: {0}, green: {1}, blue: {2})".format(*args)
+        return "Pixel(red={0}, green={1}, blue={2})".format(*args)
 
 
 class Picture(object):
@@ -188,7 +188,7 @@ class Picture(object):
     >>> picture = novice.open(data.data_dir + '/elephant.png')
 
     Create a blank 100 pixel wide, 200 pixel tall white image
-    >>> pic = Picture(size=(100, 200), color=(255, 255, 255))
+    >>> pic = Picture.from_size((100, 200), color=(255, 255, 255))
 
     Use numpy to make an RGB byte array (shape is height x width x 3)
     >>> import numpy as np
@@ -198,11 +198,11 @@ class Picture(object):
 
     Get the bottom-left pixel
     >>> pic[0, 0]
-    Pixel (red: 255, green: 0, blue: 0)
+    Pixel(red=255, green=0, blue=0)
 
     Get the top row of the picture
     >>> pic[:, pic.height-1]
-    Picture (100 pixels)
+    Picture(100 x 1)
 
     Set the bottom-left pixel to black
     >>> pic[0, 0] = (0, 0, 0)
@@ -426,5 +426,9 @@ class Picture(object):
         self._array_modified()
 
     def __repr__(self):
-        args = self.format, self.path, self.modified
-        return "Picture (format: {0}, path: {1}, modified: {2})".format(*args)
+        return "Picture({0} x {1})".format(*self.size)
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
