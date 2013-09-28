@@ -60,8 +60,8 @@ Pictures can be indexed like arrays
 >>> picture[0:20, 0:20] = (0, 0, 0)
 
 Saving the picture updates the path attribute, format, and modified state.
->>> picture.save('sample-bluegreen.jpg')
->>> print picture.path.endswith('sample-bluegreen.jpg')
+>>> picture.save('save-demo.jpg')
+>>> print picture.path.endswith('save-demo.jpg')
 True
 >>> print picture.format
 jpeg
