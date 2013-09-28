@@ -200,3 +200,4 @@ def coffee():
 
     """
     return load("coffee.png")
+
