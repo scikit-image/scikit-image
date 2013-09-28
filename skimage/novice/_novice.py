@@ -50,13 +50,14 @@ def _verify_picture_index(index):
     return tuple(index)
 
 
-def cartesian_image_transform(image):
-    """Return image transformed between array origin and Cartesian origin.
-
-    This transform converts an RGB image's origin from the top-left to the
-    bottom-left, and switches from (row, column)-indexes to (x, y)-indexes.
-    """
+def array_to_xy_origin(image):
+    """Return view of image transformed from array to Cartesian origin."""
     return np.transpose(image[::-1], (1, 0, 2))
+
+
+def xy_to_array_origin(image):
+    """Return view of image transformed from Cartesian to array origin."""
+    return np.transpose(image[:, ::-1], (1, 0, 2))
 
 
 class Pixel(object):
@@ -252,7 +253,7 @@ class Picture(object):
     @array.setter
     def array(self, array):
         self._array = array
-        self._xy_array = cartesian_image_transform(array)
+        self._xy_array = array_to_xy_origin(array)
 
     @property
     def xy_array(self):
@@ -261,7 +262,7 @@ class Picture(object):
     @xy_array.setter
     def xy_array(self, array):
         self._xy_array = array
-        self._array = cartesian_image_transform(array)
+        self._array = xy_to_array_origin(array)
 
     def save(self, path):
         """Saves the picture to the given path.
@@ -434,22 +435,11 @@ class PixelGroup(Picture):
     ----------
     pic : Picture
         The Picture object that this pixel group references.
-    key : tuple
-        tuple with x and y slices or ints for extracting part of raw image data.
-
+    xy_slice : tuple
+        2D slice of `pic` in Cartesian coordinates.
     """
-    def __init__(self, pic, key):
-        # Flip y axis
-        y_slice = key[1]
-        start = y_slice.start if y_slice.start is not None else 0
-        stop = y_slice.stop if y_slice.stop is not None else pic.height
-
-        start = pic.height - start - 1
-        stop = pic.height - stop
-
-        key = (key[0], slice(stop, start + 1, y_slice.step))
-
-        self.array = pic._array[(key[1], key[0])]
+    def __init__(self, pic, xy_slice):
+        self.xy_array = pic.xy_array[xy_slice]
 
     def __iter__(self):
         """Iterates through all pixels in the pixel group.

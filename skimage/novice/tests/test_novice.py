@@ -4,6 +4,7 @@ import tempfile
 import numpy as np
 from numpy.testing import assert_equal, raises, assert_allclose
 from skimage import novice
+from skimage.novice._novice import array_to_xy_origin, xy_to_array_origin
 from skimage import data_dir
 
 
@@ -13,6 +14,13 @@ SMALL_IMAGE_PATH = os.path.join(data_dir, "block.png")
 
 def _array_2d_to_RGB(array):
     return np.tile(array[:, :, np.newaxis], (1, 1, 3))
+
+
+def test_xy_to_array_origin():
+    h, w = 3, 5
+    array = np.arange(h * w).reshape(h, w, 1)
+    out = xy_to_array_origin(array_to_xy_origin(array.copy()))
+    assert np.allclose(out, array)
 
 
 def test_pic_info():
