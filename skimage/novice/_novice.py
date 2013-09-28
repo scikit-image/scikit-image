@@ -331,6 +331,7 @@ class Picture(object):
     def show(self):
         """Display the image."""
         io.imshow(self._rescale(self.array))
+        io.show()
 
     def _makepixel(self, x, y):
         """Create a Pixel object for a given x, y location."""
