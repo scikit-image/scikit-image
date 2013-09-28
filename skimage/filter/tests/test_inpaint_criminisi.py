@@ -1,5 +1,5 @@
 import numpy as np
-from skimage.filter.inpaint_exemplar import inpaint_criminisi
+from skimage.filter import inpaint_criminisi
 from numpy.testing import assert_equal
 
 
@@ -29,7 +29,7 @@ def test_basic():
     image = expected.copy()
     image[mask == 1] = 0
 
-    painted = inpaint_criminisi(image, mask, window=5, max_thresh=0.2)
+    painted = inpaint_criminisi(image, mask, window=5, ssd_thresh=0.2)
     assert_equal(painted, expected)
 
 
