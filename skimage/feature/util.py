@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..util import img_as_float
+from skimage.util import img_as_float
 
 
 def _prepare_grayscale_input_2D(image):
