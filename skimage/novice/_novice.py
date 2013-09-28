@@ -448,8 +448,7 @@ class Picture(object):
         if isinstance(value, tuple):
             self[key].rgb = value
         elif isinstance(value, PixelGroup):
-            src_key = self[key]._key
-            self.array[src_key] = value._array
+            self.array[key[::-1]] = value._array
         else:
             raise TypeError("Invalid value type")
         self._array_modified()
