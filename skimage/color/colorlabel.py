@@ -17,7 +17,7 @@ DEFAULT_COLORS = ('red', 'blue', 'yellow', 'magenta', 'green',
                   'indigo', 'darkorange', 'cyan', 'pink', 'yellowgreen')
 
 
-color_dict = dict((k, v) for k, v in rgb_colors.__dict__.iteritems()
+color_dict = dict((k, v) for k, v in six.iteritems(rgb_colors.__dict__)
                   if isinstance(v, tuple))
 
 
