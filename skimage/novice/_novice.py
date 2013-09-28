@@ -27,6 +27,28 @@ def _verify_picture_index(index):
     if not (isinstance(index, tuple) and len(index) == 2):
         raise IndexError("Expected 2D index but got {!r}".format(index))
 
+    if all(isinstance(i, int) for i in index):
+        return index
+
+    # In case we need to fix the array index, convert tuple to list.
+    index = list(index)
+
+    for i, dim_slice in enumerate(index):
+        # If either index is a slice, ensure index object returns 2D array.
+        if isinstance(dim_slice, int):
+            index[i] = dim_slice = slice(dim_slice, dim_slice + 1)
+
+        if dim_slice.start is not None and dim_slice.start < 0:
+            raise IndexError("Negative slicing not supported")
+
+        if dim_slice.stop is not None and dim_slice.stop < 0:
+            raise IndexError("Negative slicing not supported")
+
+        if dim_slice.step is not None and dim_slice.step != 1:
+            raise IndexError("Only a step size of 1 is supported")
+
+    return tuple(index)
+
 
 class Pixel(object):
     """A single pixel in a Picture.
@@ -366,7 +388,7 @@ class Picture(object):
 
     def __getitem__(self, key):
         """Return `PixelGroup`s for slices and `Pixel`s for indexes."""
-        _verify_picture_index(key)
+        key = _verify_picture_index(key)
         if all(isinstance(index, int) for index in key):
             if any(index < 0 for index in key):
                 raise IndexError("Negative indices not supported")
@@ -375,7 +397,7 @@ class Picture(object):
             return PixelGroup(self, key)
 
     def __setitem__(self, key, value):
-        _verify_picture_index(key)
+        key = _verify_picture_index(key)
         if isinstance(value, tuple):
             self[key].rgb = value
         elif isinstance(value, PixelGroup):
@@ -402,24 +424,6 @@ class PixelGroup(Picture):
     """
     def __init__(self, pic, key):
         self._pic = pic
-
-        # Use a slice so that the _get_channel and _set_channel functions can
-        # index consistently.
-        if isinstance(key[0], int):
-            key = (slice(key[0], key[0] + 1), key[1])
-
-        if isinstance(key[1], int):
-            key = (key[0], slice(key[1], key[1] + 1))
-
-        for dim_slice in key:
-            if dim_slice.start is not None and dim_slice.start < 0:
-                raise IndexError("Negative slicing not supported")
-
-            if dim_slice.stop is not None and dim_slice.stop < 0:
-                raise IndexError("Negative slicing not supported")
-
-            if dim_slice.step is not None and dim_slice.step != 1:
-                raise IndexError("Only a step size of 1 is supported")
 
         # Flip y axis
         y_slice = key[1]
