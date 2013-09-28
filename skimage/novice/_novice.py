@@ -143,8 +143,8 @@ class PixelGroup(object):
     def __init__(self, pic, key):
         self._pic = pic
 
-        # Use a slice so that the _getdim and _setdim functions can index
-        # consistently.
+        # Use a slice so that the _get_channel and _set_channel functions can
+        # index consistently.
         if isinstance(key[0], int):
             key = (slice(key[0], key[0] + 1), key[1])
 
@@ -176,14 +176,14 @@ class PixelGroup(object):
 
         self._array = pic._array[self._key]
 
-        shape = self._getdim(0).shape
+        shape = self._get_channel(0).shape
         self.size = (shape[1], shape[0])
 
-    def _getdim(self, dim):
+    def _get_channel(self, dim):
         """Return a specific dimension out of the raw image data slice."""
         return self._array[:, :, dim]
 
-    def _setdim(self, dim, value):
+    def _set_channel(self, dim, value):
         """Set a specific dimension in the raw image data slice."""
         self._array[:, :, dim] = value
 
@@ -194,38 +194,38 @@ class PixelGroup(object):
     @property
     def red(self):
         """The red component of the pixel (0-255)."""
-        return self._getdim(0).ravel()
+        return self._get_channel(0).ravel()
 
     @red.setter
     def red(self, value):
-        self._setdim(0, value)
+        self._set_channel(0, value)
 
     @property
     def green(self):
         """The green component of the pixel (0-255)."""
-        return self._getdim(1).ravel()
+        return self._get_channel(1).ravel()
 
     @green.setter
     def green(self, value):
-        self._setdim(1, value)
+        self._set_channel(1, value)
 
     @property
     def blue(self):
         """The blue component of the pixel (0-255)."""
-        return self._getdim(2).ravel()
+        return self._get_channel(2).ravel()
 
     @blue.setter
     def blue(self, value):
-        self._setdim(2, value)
+        self._set_channel(2, value)
 
     @property
     def rgb(self):
         """The RGB color components of the pixel (3 values 0-255)."""
-        return self._getdim(None)
+        return self._get_channel(None)
 
     @rgb.setter
     def rgb(self, value):
-        self._setdim(None, value)
+        self._set_channel(None, value)
 
     def __iter__(self):
         """Iterates through all pixels in the pixel group.
