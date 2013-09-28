@@ -322,11 +322,8 @@ class Picture(object):
     def height(self, value):
         self.size = (self.width, value)
 
-    def _repr_html_(self):
-        return io.Image(self._rescale(self.array))
-
     def _repr_png_(self):
-        return io.Image(self._rescale(self.array))
+        return io.Image(self._rescale(self.array))._repr_png_()
 
     def show(self):
         """Display the image."""
