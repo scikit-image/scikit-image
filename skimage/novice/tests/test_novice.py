@@ -11,6 +11,10 @@ IMAGE_PATH = os.path.join(data_dir, "elephant.png")
 SMALL_IMAGE_PATH = os.path.join(data_dir, "block.png")
 
 
+def _array_2d_to_RGB(array):
+    return np.tile(array[:, :, np.newaxis], (1, 1, 3))
+
+
 def test_pic_info():
     pic = novice.open(IMAGE_PATH)
     assert_equal(pic.format, "png")
@@ -144,32 +148,35 @@ def test_indexing():
 
 
 def test_pixel_group():
-    array = np.tile(np.arange(0, 10)[np.newaxis, :, np.newaxis], (1, 1, 3))
+    array = _array_2d_to_RGB(np.arange(0, 10)[np.newaxis, :])
     pic = novice.Picture(array=array)
-    index = (slice(None), slice(3, 8))
-    pixel_group = pic[index[::-1]]
-    assert_allclose(pixel_group.array, array[index])
+
+    x_slice = slice(3, 8)
+    pixel_group = pic[:, x_slice]
+    assert_allclose(pixel_group.array, array[x_slice, :])
 
 
 def test_slicing():
-    cut = 40
-    pic = novice.open(IMAGE_PATH)
+    h, w = 3, 12
+    array = _array_2d_to_RGB(np.linspace(0, 255, h * w).reshape(h, w))
+    array = array.astype(np.uint8)
+
+    pic = novice.Picture(array=array)
+    pic_orig = novice.Picture(array=array.copy())
+
+    # Move left cut of image to the right side.
+    cut = 5
     rest = pic.width - cut
     temp = pic[:cut, :]
+    temp.array = temp.array.copy()
     pic[:rest, :] = pic[cut:, :]
     pic[rest:, :] = temp
 
-    pic_orig = novice.open(IMAGE_PATH)
+    for pixel, pixel_orig in zip(pic[rest:, :], pic_orig[:cut, :]):
+        assert pixel.rgb == pixel_orig.rgb
 
-    # Check center line
-    half_height = int(pic.height/2)
-    for p1 in pic_orig[rest:, half_height]:
-        for p2 in pic[:cut, half_height]:
-            assert p1.rgb == p2.rgb
-
-    for p1 in pic_orig[:cut, half_height]:
-        for p2 in pic[rest:, half_height]:
-            assert p1.rgb == p2.rgb
+    for pixel, pixel_orig in zip(pic[:rest, :], pic_orig[cut:, :]):
+        assert pixel.rgb == pixel_orig.rgb
 
 
 @raises(IndexError)

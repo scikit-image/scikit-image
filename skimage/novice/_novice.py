@@ -439,8 +439,6 @@ class PixelGroup(Picture):
 
     """
     def __init__(self, pic, key):
-        self._pic = pic
-
         # Flip y axis
         y_slice = key[1]
         start = y_slice.start if y_slice.start is not None else 0
@@ -451,21 +449,16 @@ class PixelGroup(Picture):
 
         key = (key[0], slice(stop, start + 1, y_slice.step))
 
-        # array dimensions are row, column (i.e. y, x)
-        self._key = (key[1], key[0])
-
-        self._array = pic._array[self._key]
+        self.array = pic._array[(key[1], key[0])]
 
     def __iter__(self):
         """Iterates through all pixels in the pixel group.
 
         """
-        x_idx = range(self._pic.width)[self._key[0]]
-        y_idx = range(self._pic.height)[self._key[1]]
-
-        for x in x_idx:
-            for y in y_idx:
-                yield self._pic._makepixel(x, y)
+        height, width, channels = self.array.shape
+        for x in range(width):
+            for y in range(height):
+                yield self._makepixel(x, y)
 
     def __repr__(self):
         return "PixelGroup ({0} pixels)".format(self.size[0] * self.size[1])
