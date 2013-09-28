@@ -403,22 +403,22 @@ class Picture(object):
             for y in xrange(self.height):
                 yield self._makepixel(x, y)
 
-    def __getitem__(self, key):
+    def __getitem__(self, xy_index):
         """Return `PixelGroup`s for slices and `Pixel`s for indexes."""
-        key = _verify_picture_index(key)
-        if all(isinstance(index, int) for index in key):
-            if any(index < 0 for index in key):
+        xy_index = _verify_picture_index(xy_index)
+        if all(isinstance(index, int) for index in xy_index):
+            if any(index < 0 for index in xy_index):
                 raise IndexError("Negative indices not supported")
-            return self._makepixel(*key)
+            return self._makepixel(*xy_index)
         else:
-            return PixelGroup(self, key)
+            return PixelGroup(self, xy_index)
 
-    def __setitem__(self, key, value):
-        key = _verify_picture_index(key)
+    def __setitem__(self, xy_index, value):
+        xy_index = _verify_picture_index(xy_index)
         if isinstance(value, tuple):
-            self[key].rgb = value
+            self[xy_index].rgb = value
         elif isinstance(value, PixelGroup):
-            self.array[key[::-1]] = value._array
+            self.xy_array[xy_index] = value.xy_array
         else:
             raise TypeError("Invalid value type")
         self._array_modified()
