@@ -314,6 +314,50 @@ class Picture(object):
         new_size = (self.height * self.scale, self.width * self.scale)
         return img_as_ubyte(resize(array, new_size, order=0))
 
+    def _get_channel(self, dim):
+        """Return a specific dimension out of the raw image data slice."""
+        return self._array[:, :, dim]
+
+    def _set_channel(self, dim, value):
+        """Set a specific dimension in the raw image data slice."""
+        self._array[:, :, dim] = value
+
+    @property
+    def red(self):
+        """The red component of the pixel (0-255)."""
+        return self._get_channel(0).ravel()
+
+    @red.setter
+    def red(self, value):
+        self._set_channel(0, value)
+
+    @property
+    def green(self):
+        """The green component of the pixel (0-255)."""
+        return self._get_channel(1).ravel()
+
+    @green.setter
+    def green(self, value):
+        self._set_channel(1, value)
+
+    @property
+    def blue(self):
+        """The blue component of the pixel (0-255)."""
+        return self._get_channel(2).ravel()
+
+    @blue.setter
+    def blue(self, value):
+        self._set_channel(2, value)
+
+    @property
+    def rgb(self):
+        """The RGB color components of the pixel (3 values 0-255)."""
+        return self._get_channel(None)
+
+    @rgb.setter
+    def rgb(self, value):
+        self._set_channel(None, value)
+
     def __iter__(self):
         """Iterates over all pixels in the image."""
         for x in xrange(self.width):
@@ -391,50 +435,6 @@ class PixelGroup(Picture):
         self._key = (key[1], key[0])
 
         self._array = pic._array[self._key]
-
-    def _get_channel(self, dim):
-        """Return a specific dimension out of the raw image data slice."""
-        return self._array[:, :, dim]
-
-    def _set_channel(self, dim, value):
-        """Set a specific dimension in the raw image data slice."""
-        self._array[:, :, dim] = value
-
-    @property
-    def red(self):
-        """The red component of the pixel (0-255)."""
-        return self._get_channel(0).ravel()
-
-    @red.setter
-    def red(self, value):
-        self._set_channel(0, value)
-
-    @property
-    def green(self):
-        """The green component of the pixel (0-255)."""
-        return self._get_channel(1).ravel()
-
-    @green.setter
-    def green(self, value):
-        self._set_channel(1, value)
-
-    @property
-    def blue(self):
-        """The blue component of the pixel (0-255)."""
-        return self._get_channel(2).ravel()
-
-    @blue.setter
-    def blue(self, value):
-        self._set_channel(2, value)
-
-    @property
-    def rgb(self):
-        """The RGB color components of the pixel (3 values 0-255)."""
-        return self._get_channel(None)
-
-    @rgb.setter
-    def rgb(self, value):
-        self._set_channel(None, value)
 
     def __iter__(self):
         """Iterates through all pixels in the pixel group.
