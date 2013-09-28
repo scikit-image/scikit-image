@@ -2,7 +2,7 @@ import os
 import tempfile
 
 import numpy as np
-from numpy.testing import assert_equal, assert_raises, raises, assert_allclose
+from numpy.testing import assert_equal, raises, assert_allclose
 from skimage import novice
 from skimage import data_dir
 
@@ -74,30 +74,6 @@ def test_pixel_rgb_float():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.rgb = (1.1, 1.1, 1.1)
     assert_equal(pixel.rgb, (1, 1, 1))
-
-
-@raises(ValueError)
-def test_pixel_rgb_raises():
-    pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.rgb = (-1, -1, -1)
-
-
-@raises(ValueError)
-def test_pixel_red_raises():
-    pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.red = 256
-
-
-@raises(ValueError)
-def test_pixel_green_raises():
-    pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.green = 256
-
-
-@raises(ValueError)
-def test_pixel_blue_raises():
-    pixel = novice.Picture.from_size((1, 1))[0, 0]
-    pixel.blue = 256
 
 
 def test_modified_on_set():
@@ -175,24 +151,6 @@ def test_pixel_group():
     assert_allclose(pixel_group.array, array[index])
 
 
-def test_indexing_bounds():
-    pic = novice.open(SMALL_IMAGE_PATH)
-
-    # Outside bounds
-    assert_raises(IndexError, lambda: pic[pic.width, pic.height])
-
-    # Negative indexing not supported
-    assert_raises(IndexError, lambda: pic[-1, -1])
-    assert_raises(IndexError, lambda: pic[-1:, -1:])
-
-    # Step sizes > 1 not supported
-    assert_raises(IndexError, lambda: pic[::2, ::2])
-
-    # Only 2D indexes supported
-    assert_raises(IndexError, lambda: pic[1])
-    assert_raises(IndexError, lambda: pic[1, 2, 3])
-
-
 def test_slicing():
     cut = 40
     pic = novice.open(IMAGE_PATH)
@@ -212,6 +170,78 @@ def test_slicing():
     for p1 in pic_orig[:cut, half_height]:
         for p2 in pic[rest:, half_height]:
             assert p1.rgb == p2.rgb
+
+
+@raises(IndexError)
+def test_1d_getitem_raises():
+    pic = novice.Picture.from_size((1, 1))
+    pic[1]
+
+
+@raises(IndexError)
+def test_3d_getitem_raises():
+    pic = novice.Picture.from_size((1, 1))
+    pic[1, 2, 3]
+
+
+@raises(IndexError)
+def test_1d_setitem_raises():
+    pic = novice.Picture.from_size((1, 1))
+    pic[1] = 0
+
+
+@raises(IndexError)
+def test_3d_setitem_raises():
+    pic = novice.Picture.from_size((1, 1))
+    pic[1, 2, 3] = 0
+
+
+@raises(IndexError)
+def test_getitem_with_step_raises():
+    pic = novice.Picture.from_size((3, 3))
+    pic[::2, ::2]
+
+
+@raises(IndexError)
+def test_negative_index_raises():
+    pic = novice.Picture.from_size((1, 1))
+    pic[-1, -1]
+
+
+@raises(IndexError)
+def test_negative_slice_raises():
+    pic = novice.Picture.from_size((1, 1))
+    pic[-1:, -1:]
+
+
+@raises(IndexError)
+def test_out_of_bounds_indexing():
+    pic = novice.open(SMALL_IMAGE_PATH)
+    pic[pic.width, pic.height]
+
+
+@raises(ValueError)
+def test_pixel_rgb_raises():
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
+    pixel.rgb = (-1, -1, -1)
+
+
+@raises(ValueError)
+def test_pixel_red_raises():
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
+    pixel.red = 256
+
+
+@raises(ValueError)
+def test_pixel_green_raises():
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
+    pixel.green = 256
+
+
+@raises(ValueError)
+def test_pixel_blue_raises():
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
+    pixel.blue = 256
 
 
 if __name__ == '__main__':
