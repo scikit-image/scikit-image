@@ -185,7 +185,7 @@ class Picture(object):
     Load an image from a file
     >>> from skimage import novice
     >>> from skimage import data
-    >>> picture = novice.open(data.data_dir + '/elephant.png')
+    >>> picture = novice.open(data.data_dir + '/chelsea.png')
 
     Create a blank 100 pixel wide, 200 pixel tall white image
     >>> pic = Picture.from_size((100, 200), color=(255, 255, 255))

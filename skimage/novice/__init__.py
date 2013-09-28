@@ -25,21 +25,21 @@ Example
 We can create a Picture object open opening an image file
 >>> from skimage import novice
 >>> from skimage import data
->>> picture = novice.open(data.data_dir + '/elephant.png')
+>>> picture = novice.open(data.data_dir + '/chelsea.png')
 
 Pictures know their format
 >>> print picture.format
 png
 
 ... and where they came from
->>> print picture.path.endswith('elephant.png')
+>>> print picture.path.endswith('chelsea.png')
 True
 
 ... and their size
 >>> print picture.size
-(665, 500)
+(451, 300)
 >>> print picture.width
-665
+451
 
 Changing `size` resizes the picture.
 >>> picture.size = (200, 250)

@@ -8,7 +8,7 @@ from skimage.novice._novice import array_to_xy_origin, xy_to_array_origin
 from skimage import data_dir
 
 
-IMAGE_PATH = os.path.join(data_dir, "elephant.png")
+IMAGE_PATH = os.path.join(data_dir, "chelsea.png")
 SMALL_IMAGE_PATH = os.path.join(data_dir, "block.png")
 
 
@@ -27,9 +27,9 @@ def test_pic_info():
     pic = novice.open(IMAGE_PATH)
     assert_equal(pic.format, "png")
     assert_equal(pic.path, os.path.abspath(IMAGE_PATH))
-    assert_equal(pic.size, (665, 500))
-    assert_equal(pic.width, 665)
-    assert_equal(pic.height, 500)
+    assert_equal(pic.size, (451, 300))
+    assert_equal(pic.width, 451)
+    assert_equal(pic.height, 300)
     assert not pic.modified
     assert_equal(pic.scale, 1)
 
