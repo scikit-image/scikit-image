@@ -1,4 +1,5 @@
 from .random_walker_segmentation import random_walker
+from ._graphcut2d import graphcut as graphcut2d
 from ._growcut import growcut
 from ._felzenszwalb import felzenszwalb
 from ._slic import slic
