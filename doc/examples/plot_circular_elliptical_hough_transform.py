@@ -104,7 +104,6 @@ References
        Conference on. Vol. 2. IEEE, 2002
 """
 import matplotlib.pyplot as plt
-import heapq
 
 from skimage import data, filter, color
 from skimage.transform import hough_ellipse
@@ -120,9 +119,9 @@ edges = filter.canny(image_gray, sigma=2.0,
 # The accuracy corresponds to the bin size of a major axis.
 # The value is chosen in order to get a single high accumulator.
 # The threshold eliminates low accumulators
-accum = hough_ellipse(edges, accuracy=10, threshold=150, min_size=50)
-# Select the highest accumulator
-best = heapq.nlargest(1, accum)[0]
+accum = hough_ellipse(edges, accuracy=10, threshold=170, min_size=50)
+accum.sort(key=lambda x:x[0])
+best = accum[-1]
 # Estimated parameters for the ellipse
 center_y = int(best[1])
 center_x = int(best[2])
