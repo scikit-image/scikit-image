@@ -34,6 +34,26 @@ def binary_find_boundaries(image):
 
 
 def hausdorff_distance(a, b):
+    """
+    Calculate the Hausdorff distance [1]_ between two sets.
+
+    Parameters
+    ----------
+    a, b : ndarray, shape ``(N, M)``,dtype=float
+        Array containing the coordinates of ``N`` points in an
+        ``M`` dimensional space.
+
+    Returns
+    -------
+    distance : float
+        The Hausdorff distance between sets ``a`` and ``b``, using
+        Euclidian distance to calculate the distance between points in ``a``
+        and ``b``.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Hausdorff_distance
+    """
     if a.ndim != 2 or b.ndim != 2:
         raise ValueError('Both input arrays must be two-dimensional')
     if a.shape[1] != b.shape[1]:
@@ -55,6 +75,31 @@ def hausdorff_distance(a, b):
 
 
 def hausdorff_distance_region(a, b):
+    """
+    Calculate the Hausdorff distance [1]_ between two binary images.
+
+    Parameters
+    ----------
+    a, b : ndarray, dtype=bool
+        Arrays where ``True`` represents a point that is included in a
+        set of points. Both arrays must have the same shape.
+
+    Returns
+    -------
+    distance : float
+        The Hausdorff distance between the sets represented by ``a`` and ``b``
+        using Euclidian distance to calculate the distance between members of
+        the sets.
+
+    See also
+    --------
+    hausdorff_distance : Function calculating the Hausdorff distance operating
+        directly on sets of points.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Hausdorff_distance
+    """
     if a.dtype != np.bool or b.dtype != np.bool:
         raise ValueError('Arrays must have dtype = \'bool\'')
     if a.shape != b.shape:
