@@ -388,8 +388,8 @@ class Picture(object):
 
     def __iter__(self):
         """Iterates over all pixels in the image."""
-        for x in xrange(self.width):
-            for y in xrange(self.height):
+        for x in range(self.width):
+            for y in range(self.height):
                 yield self._makepixel(x, y)
 
     def __getitem__(self, xy_index):

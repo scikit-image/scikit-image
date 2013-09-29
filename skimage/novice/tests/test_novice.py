@@ -67,9 +67,9 @@ def test_modify():
 def test_pixel_rgb():
     pic = novice.Picture.from_size((3, 3), color=(10, 10, 10))
     pixel = pic[0, 0]
-    pixel.rgb = range(3)
+    pixel.rgb = np.arange(3)
 
-    assert_equal(pixel.rgb, range(3))
+    assert_equal(pixel.rgb, np.arange(3))
     for i, channel in enumerate((pixel.red, pixel.green, pixel.blue)):
         assert_equal(channel, i)
 
