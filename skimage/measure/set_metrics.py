@@ -38,6 +38,16 @@ def hausdorff_distance(a, b):
         raise ValueError('Both input arrays must be two-dimensional')
     if a.shape[1] != b.shape[1]:
         raise ValueError('Second dimension of the arrays must be equal')
+
+    # Handle empty sets properly
+    if a.shape[0] == 0 or b.shape[0] == 0:
+        if a.shape[0] == b.shape[0]:
+            # Both sets are empty and thus the distance is zero
+            return 0.
+        else:
+            # Exactly one set is empty; the distance is infinite
+            return np.inf
+
     a = np.require(a, np.float64, ['C'])
     b = np.require(b, np.float64, ['C'])
     return max(hausdorff_distance_onesided(a, b),
