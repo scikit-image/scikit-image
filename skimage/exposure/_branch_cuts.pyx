@@ -108,6 +108,7 @@ def _prepare_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
 
 
 cdef inline Py_ssize_t normalize_coordinate(int c, Py_ssize_t dim):
+    '''Wrap ``c`` around an axis of length ``dim``.'''
     if c < 0:
         c += dim
     elif c >= dim:
