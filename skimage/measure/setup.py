@@ -17,7 +17,8 @@ def configuration(parent_package='', top_path=None):
             '_moments_cy.pyx',
             '_marching_cubes_classic_cy.pyx',
             '_marching_cubes_lewiner_cy.pyx',
-            '_pnpoly.pyx'], working_path=base_path)
+            '_pnpoly.pyx',
+            '_set_metrics.pyx'], working_path=base_path)
 
     config.add_extension('_ccomp', sources=['_ccomp.c'],
                          include_dirs=[get_numpy_include_dirs()])
@@ -33,6 +34,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_pnpoly', sources=['_pnpoly.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
+    config.add_extension('_set_metrics', sources=['_set_metrics.c'],
+                         include_dirs=[get_numpy_include_dirs()])
 
     return config
 
