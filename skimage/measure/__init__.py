@@ -6,6 +6,7 @@ from ._polygon import approximate_polygon, subdivide_polygon
 from ._moments import moments, moments_central, moments_normalized, moments_hu
 from .fit import LineModel, CircleModel, EllipseModel, ransac
 from .block import block_reduce
+from .set_metrics import hausdorff_distance, hausdorff_distance_region
 
 
 __all__ = ['find_contours',
