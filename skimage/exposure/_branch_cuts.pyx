@@ -153,7 +153,7 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
         return location_index + 1
 
 
-cdef inline long edge_index(long a, long b):
+cdef inline Py_ssize_t edge_index(Py_ssize_t a, Py_ssize_t b):
     if abs(a - b) == 1:
         return a if a > b else b
     else:
