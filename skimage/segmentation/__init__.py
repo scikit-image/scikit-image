@@ -5,3 +5,4 @@ from ._quickshift import quickshift
 from .boundaries import find_boundaries, visualize_boundaries, mark_boundaries
 from ._clear_border import clear_border
 from ._join import join_segmentations, relabel_from_one
+from ._graphcut2d import graphcut as graphcut2d
