@@ -77,9 +77,9 @@ def find_phase_residues_cy(double[:, ::1] image):
 
 
 def _prepare_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
-                         cnp.int_t[::1] residue_storage, Py_ssize_t index,
-                         cnp.int8_t[:, ::1] residues,
-                         cnp.uint8_t[:, ::1] mask):
+                            cnp.int_t[::1] residue_storage, Py_ssize_t index,
+                            cnp.int8_t[:, ::1] residues,
+                            cnp.uint8_t[:, ::1] mask):
     '''Prepare the branch_cuts structures for branch cut finding.
 
     Parameters
@@ -163,7 +163,7 @@ cdef inline Py_ssize_t edge_index(Py_ssize_t a, Py_ssize_t b):
 
 
 cdef inline cnp.uint8_t edge_is_set(branch_cut[:, ::1] branch_cuts,
-                                  QueuedLocation *la, QueuedLocation *lb):
+                                    QueuedLocation *la, QueuedLocation *lb):
     # Is the edge set between two residues?
     if la.i != lb.i:
         # Edge along 0th dimension (vertical)
@@ -192,8 +192,8 @@ cdef void set_edges_to_root(QueuedLocation *location,
 
 
 def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
-                     cnp.int_t[::1] residue_storage,
-                     cnp.uint8_t[:, ::1] residues_mask):
+                        cnp.int_t[::1] residue_storage,
+                        cnp.uint8_t[:, ::1] residues_mask):
     cdef:
         Py_ssize_t i, j, size, residue_no, vi, vj
         Queue queue
