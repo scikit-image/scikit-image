@@ -40,7 +40,7 @@ branch_cut_dtype = np.dtype([('vcut', np.uint8), ('hcut', np.uint8),
                              ('residue_no', np.uint32)])
 
 
-cdef inline double _phase_difference(double from_, double to):
+cdef inline double phase_difference(double from_, double to):
     cdef double d = to - from_
     if d > M_PI:
         d -= 2 * M_PI
@@ -49,7 +49,7 @@ cdef inline double _phase_difference(double from_, double to):
     return d
 
 
-cdef inline int _phase_period_increment(double from_, double to):
+cdef inline int phase_period_increment(double from_, double to):
     cdef double d = to - from_
     if d > M_PI:
         return -1
@@ -68,15 +68,15 @@ def find_phase_residues_cy(double[:, ::1] image):
         double s
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            s = (_phase_difference(image[i - 1, j - 1], image[i - 1, j])
-                 + _phase_difference(image[i - 1, j], image[i, j])
-                 + _phase_difference(image[i, j], image[i, j - 1])
-                 + _phase_difference(image[i, j - 1], image[i - 1, j - 1]))
+            s = (phase_difference(image[i - 1, j - 1], image[i - 1, j])
+                 + phase_difference(image[i - 1, j], image[i, j])
+                 + phase_difference(image[i, j], image[i, j - 1])
+                 + phase_difference(image[i, j - 1], image[i - 1, j - 1]))
             residues[i, j] = lround(s / (2 * M_PI))
     return residues_array
 
 
-def _prepare_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
+def prepare_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
                             cnp.int_t[::1] residue_storage, Py_ssize_t index,
                             cnp.int8_t[:, ::1] residues,
                             cnp.uint8_t[:, ::1] mask):
@@ -338,7 +338,7 @@ cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
     else:
         # Unwrap phase of the new location
         periods[i, j] = (periods[coming_from.i, coming_from.j]
-                         + _phase_period_increment(image[coming_from.i,
+                         + phase_period_increment(image[coming_from.i,
                                                          coming_from.j],
                                                    image[i, j]))
         # Add the new location to the queue

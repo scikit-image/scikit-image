@@ -5,7 +5,7 @@ from ._unwrap_naive import unwrap_naive_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
 from ._branch_cuts import (find_phase_residues_cy, branch_cut_dtype,
-                           find_branch_cuts_cy, _prepare_branch_cuts_cy,
+                           find_branch_cuts_cy, prepare_branch_cuts_cy,
                            PERIODS_UNDEFINED, integrate_phase)
 from .._shared.six import string_types
 from ..morphology import label
@@ -252,10 +252,10 @@ def _prepare_branch_cuts(residues):
         branch_cuts['residue_no'][region] = residue_no
 
     # Save normal (=not masked) residues to the branch cut array
-    _prepare_branch_cuts_cy(branch_cuts,
-                            residue_storage, number_of_masked_regions + 1,
-                            np.asarray(residues, dtype=np.int8, order='C'),
-                            np.require(residues.mask, np.uint8, ['C']))
+    prepare_branch_cuts_cy(branch_cuts,
+                           residue_storage, number_of_masked_regions + 1,
+                           np.asarray(residues, dtype=np.int8, order='C'),
+                           np.require(residues.mask, np.uint8, ['C']))
 
     return branch_cuts, residue_storage
 
