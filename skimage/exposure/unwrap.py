@@ -261,9 +261,7 @@ def _prepare_branch_cuts(residues):
 
 
 def find_branch_cuts(residues):
-    '''Connect residues with branch cuts such that the length of the cuts
-    is small subject to the constraint that the net residue of intersections
-    along a cut should be zero.
+    '''Connect phase residues with branch cuts in preparation for unwrapping.
 
     Parameters
     ----------
@@ -290,6 +288,12 @@ def find_branch_cuts(residues):
         element ``(i, j)`` can be interpreted as the presence or absence
         of a cut between the intersections (potential residues) at
         ``(i, j)`` and ``(i, j-1)``.
+
+    Notes
+    -----
+    The branch cuts are chosen such that the length of the cuts
+    is small subject to the constraint that the net residue of intersections
+    along a cut should be zero.
     '''
     branch_cuts, residue_storage = _prepare_branch_cuts(residues)
     if np.ma.isMaskedArray(residues):
@@ -393,8 +397,7 @@ def find_phase_residues(image, wrap_around=False):
 
 
 def unwrap_phase_branch_cuts(image, wrap_around=False):
-    '''From ``image``, wrapped to lie in the interval [-pi, pi), recover the
-    original, unwrapped image using a method based on branch cuts [1]_.
+    '''Perform phase unwrapping of ``image`` using the branch cut method [1]_.
 
     Parameters
     ----------
