@@ -154,7 +154,9 @@ cdef inline Py_ssize_t maybe_add_location(int i, int j,
         return location_index + 1
 
 
-cdef inline Py_ssize_t edge_index(Py_ssize_t a, Py_ssize_t b):
+cdef inline Py_ssize_t edge_index_intersection(Py_ssize_t a, Py_ssize_t b):
+    '''Given indices of two *intersections*, return the index of the cut/edge
+    between them.'''
     if abs(a - b) == 1:
         return a if a > b else b
     else:
@@ -163,15 +165,39 @@ cdef inline Py_ssize_t edge_index(Py_ssize_t a, Py_ssize_t b):
         return a if a < b else b
 
 
+cdef inline long edge_index_pixel(long a, long b):
+    '''Given indices of two *pixels*, return the index of the cut/edge between
+    them.'''
+    if abs(a - b) == 1:
+        return a if a < b else b
+    else:
+        # We are at the boundary of the image and wrapping around; return the
+        # largest index
+        return a if a > b else b
+
+
+cdef inline cnp.uint8_t cut_between_pixels(cnp.uint8_t[:, ::1] vcut,
+                                           cnp.uint8_t[:, ::1] hcut,
+                                           Py_ssize_t ia, Py_ssize_t ja,
+                                           Py_ssize_t ib, Py_ssize_t jb):
+    # Is there a cut between two pixels?
+    if ia != ib:
+        # Cut normal to 0th dimension; horizontal cut
+        return hcut[edge_index_pixel(ia, ib), ja]
+    else:
+        # Cut normal to 1st dimension: vertical cut
+        return vcut[ia, edge_index_pixel(ja, jb)]
+
+
 cdef inline cnp.uint8_t edge_is_set(branch_cut[:, ::1] branch_cuts,
                                     QueuedLocation *la, QueuedLocation *lb):
     # Is the edge set between two residues?
     if la.i != lb.i:
         # Edge along 0th dimension (vertical)
-        return branch_cuts[edge_index(la.i, lb.i), la.j].vcut
+        return branch_cuts[edge_index_intersection(la.i, lb.i), la.j].vcut
     else:
         # Edge along 1st dimension (horizontal)
-        return branch_cuts[la.i, edge_index(la.j, lb.j)].hcut
+        return branch_cuts[la.i, edge_index_intersection(la.j, lb.j)].hcut
 
 
 cdef void set_edges_to_root(QueuedLocation *location,
@@ -181,10 +207,12 @@ cdef void set_edges_to_root(QueuedLocation *location,
     while l.came_from != NULL:
         if l.i != l.came_from.i:
             # Edge along 0th dimension (vertical)
-            branch_cuts[edge_index(l.i, l.came_from.i), l.j].vcut = 1
+            branch_cuts[edge_index_intersection(l.i, l.came_from.i),
+                        l.j].vcut = 1
         else:
             # Edge along 1st dimension (horizontal)
-            branch_cuts[l.i, edge_index(l.j, l.came_from.j)].hcut = 1
+            branch_cuts[l.i,
+                        edge_index_intersection(l.j, l.came_from.j)].hcut = 1
         num_edges += 1
         if num_edges > branch_cuts.shape[0] + branch_cuts.shape[1]:
             print('Programming error: Traversed too many edges')
@@ -281,28 +309,6 @@ def find_branch_cuts_cy(branch_cut[:, ::1] branch_cuts,
         free(<void *> location_buffer)
         location_buffer = NULL
     return np.asarray(branch_cuts)
-
-
-cdef inline long cut_index(long a, long b):
-    if abs(a - b) == 1:
-        return a if a < b else b
-    else:
-        # We are at the boundary of the image and wrapping around; return the
-        # largest index
-        return a if a > b else b
-
-
-cdef inline cnp.uint8_t cut_between_pixels(cnp.uint8_t[:, ::1] vcut,
-                                           cnp.uint8_t[:, ::1] hcut,
-                                           Py_ssize_t ia, Py_ssize_t ja,
-                                           Py_ssize_t ib, Py_ssize_t jb):
-    # Is there a cut between two pixels?
-    if ia != ib:
-        # Cut normal to 0th dimension; horizontal cut
-        return hcut[cut_index(ia, ib), ja]
-    else:
-        # Cut normal to 1st dimension: vertical cut
-        return vcut[ia, cut_index(ja, jb)]
 
 
 cdef inline Py_ssize_t maybe_add_pixel(cnp.float64_t[:, ::1] image,
