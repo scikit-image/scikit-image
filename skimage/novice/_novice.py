@@ -38,9 +38,6 @@ def _verify_picture_index(index):
         if isinstance(dim_slice, int):
             index[i] = dim_slice = slice(dim_slice, dim_slice + 1)
 
-        if dim_slice.step is not None and dim_slice.step != 1:
-            raise IndexError("Only a step size of 1 is supported")
-
     return tuple(index)
 
 

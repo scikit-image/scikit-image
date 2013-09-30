@@ -205,6 +205,14 @@ def test_negative_slice():
     assert pic[0, -3:] == pic[0, n - 3:]
 
 
+def test_getitem_with_step():
+    h, w = 5, 5
+    array = _array_2d_to_RGB(np.linspace(0, 255, h * w).reshape(h, w))
+    pic = novice.Picture(array=array)
+    sliced_pic = pic[::2, ::2]
+    assert sliced_pic == novice.Picture(array=array[::2, ::2])
+
+
 @raises(IndexError)
 def test_1d_getitem_raises():
     pic = novice.Picture.from_size((1, 1))
@@ -227,12 +235,6 @@ def test_1d_setitem_raises():
 def test_3d_setitem_raises():
     pic = novice.Picture.from_size((1, 1))
     pic[1, 2, 3] = 0
-
-
-@raises(IndexError)
-def test_getitem_with_step_raises():
-    pic = novice.Picture.from_size((3, 3))
-    pic[::2, ::2]
 
 
 @raises(IndexError)
