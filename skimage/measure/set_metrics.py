@@ -6,20 +6,6 @@ from ..morphology import binary_erosion, disk, ball
 from ._set_metrics import hausdorff_distance_onesided
 
 
-def coordinates(shape):
-    for i, s in enumerate(shape):
-        c = np.ones(shape, dtype=np.int)
-        c *= np.arange(s).reshape(tuple([s if i == j else 1
-                                         for j in range(len(shape))]))
-        yield c
-
-
-def find_coordinate_list(image):
-    if image.dtype != np.bool:
-        raise ValueError('image must have dtype = \'bool\'')
-    return np.vstack(c[image] for c in coordinates(image.shape)).T
-
-
 def binary_find_boundaries(image):
     if image.dtype != np.bool:
         raise ValueError('image must have dtype = \'bool\'')
@@ -105,6 +91,6 @@ def hausdorff_distance_region(a, b):
     if a.shape != b.shape:
         raise ValueError('Array shapes must be identical')
 
-    a_points = find_coordinate_list(binary_find_boundaries(a))
-    b_points = find_coordinate_list(binary_find_boundaries(b))
+    a_points = np.transpose(np.nonzero(a))
+    b_points = np.transpose(np.nonzero(b))
     return hausdorff_distance(a_points, b_points)
