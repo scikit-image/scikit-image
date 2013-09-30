@@ -38,26 +38,25 @@ def _verify_picture_index(index):
         if isinstance(dim_slice, int):
             index[i] = dim_slice = slice(dim_slice, dim_slice + 1)
 
-        if dim_slice.start is not None and dim_slice.start < 0:
-            raise IndexError("Negative slicing not supported")
-
-        if dim_slice.stop is not None and dim_slice.stop < 0:
-            raise IndexError("Negative slicing not supported")
-
         if dim_slice.step is not None and dim_slice.step != 1:
             raise IndexError("Only a step size of 1 is supported")
 
     return tuple(index)
 
 
+def rgb_transpose(array):
+    """Return RGB array with first 2 axes transposed."""
+    return np.transpose(array, (1, 0, 2))
+
+
 def array_to_xy_origin(image):
     """Return view of image transformed from array to Cartesian origin."""
-    return np.transpose(image[::-1], (1, 0, 2))
+    return rgb_transpose(image[::-1])
 
 
 def xy_to_array_origin(image):
     """Return view of image transformed from Cartesian to array origin."""
-    return np.transpose(image[:, ::-1], (1, 0, 2))
+    return rgb_transpose(image[:, ::-1])
 
 
 class Pixel(object):
@@ -150,6 +149,10 @@ class Pixel(object):
     def _setpixel(self):
         self._picture.xy_array[self._x, self._y] = self.rgb
         self._picture._array_modified()
+
+    def __eq__(self, other):
+        if isinstance(other, Pixel):
+            return self.rgb == other.rgb
 
     def __repr__(self):
         args = self.red, self.green, self.blue
@@ -396,8 +399,6 @@ class Picture(object):
         """Return `Picture`s for slices and `Pixel`s for indexes."""
         xy_index = _verify_picture_index(xy_index)
         if all(isinstance(index, int) for index in xy_index):
-            if any(index < 0 for index in xy_index):
-                raise IndexError("Negative indices not supported")
             return self._makepixel(*xy_index)
         else:
             return Picture(xy_array=self.xy_array[xy_index])

@@ -4,7 +4,8 @@ import tempfile
 import numpy as np
 from numpy.testing import assert_equal, raises, assert_allclose
 from skimage import novice
-from skimage.novice._novice import array_to_xy_origin, xy_to_array_origin
+from skimage.novice._novice import (array_to_xy_origin, xy_to_array_origin,
+                                    rgb_transpose)
 from skimage import data_dir
 
 
@@ -164,7 +165,7 @@ def test_picture_slice():
     assert_allclose(subpic.array, array[x_slice, :])
 
 
-def test_slicing():
+def test_move_slice():
     h, w = 3, 12
     array = _array_2d_to_RGB(np.linspace(0, 255, h * w).reshape(h, w))
     array = array.astype(np.uint8)
@@ -182,6 +183,26 @@ def test_slicing():
 
     assert pic[rest:, :] == pic_orig[:cut, :]
     assert pic[:rest, :] == pic_orig[cut:, :]
+
+
+def test_negative_index():
+    n = 10
+    array = _array_2d_to_RGB(np.arange(0, n)[np.newaxis, :])
+    # Test both x and y indices.
+    pic = novice.Picture(array=array)
+    assert pic[-1, 0] == pic[n - 1, 0]
+    pic = novice.Picture(array=rgb_transpose(array))
+    assert pic[0, -1] == pic[0, n - 1]
+
+
+def test_negative_slice():
+    n = 10
+    array = _array_2d_to_RGB(np.arange(0, n)[np.newaxis, :])
+    # Test both x and y slices.
+    pic = novice.Picture(array=array)
+    assert pic[-3:, 0] == pic[n - 3:, 0]
+    pic = novice.Picture(array=rgb_transpose(array))
+    assert pic[0, -3:] == pic[0, n - 3:]
 
 
 @raises(IndexError)
@@ -212,18 +233,6 @@ def test_3d_setitem_raises():
 def test_getitem_with_step_raises():
     pic = novice.Picture.from_size((3, 3))
     pic[::2, ::2]
-
-
-@raises(IndexError)
-def test_negative_index_raises():
-    pic = novice.Picture.from_size((1, 1))
-    pic[-1, -1]
-
-
-@raises(IndexError)
-def test_negative_slice_raises():
-    pic = novice.Picture.from_size((1, 1))
-    pic[-1:, -1:]
 
 
 @raises(IndexError)
