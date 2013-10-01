@@ -517,24 +517,25 @@ def perimeter(image, neighbourhood=4):
         strel = STREL_4
     else:
         strel = STREL_8
+    image = image.astype(np.uint8)
     eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
-    # perimeter contribution: corresponding values in convolved image
-    perimeter_weights = {
-        1:                 (5, 7, 15, 17, 25, 27),
-        sqrt(2):           (21, 33),
-        (1 + sqrt(2)) / 2: (13, 23)
-    }
+    perimeter_weights = np.zeros(50, float)
+    perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
+    perimeter_weights[[21, 33]] = sqrt(2)
+    perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
+
+
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
                                                                [ 2, 1,  2],
                                                                [10, 2, 10]]),
                                        mode='constant', cval=0)
-    total_perimeter = 0
-    for weight, values in perimeter_weights.items():
-        num_values = 0
-        for value in values:
-            num_values += np.sum(perimeter_image == value)
-        total_perimeter += num_values * weight
 
+    # You can also write
+    # return perimeter_weights[perimeter_image].sum()
+    # but that was measured as taking much longer than bincount + np.dot (5x
+    # as much time)
+    perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
+    total_perimeter = np.dot(perimeter_histogram, perimeter_weights)
     return total_perimeter
