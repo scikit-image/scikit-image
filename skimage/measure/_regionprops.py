@@ -513,7 +513,6 @@ def perimeter(image, neighbourhood=4):
            a Perimeter Estimator. The Queen's University of Belfast.
            http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
     """
-    from skimage.exposure import histogram
     if neighbourhood == 4:
         strel = STREL_4
     else:
@@ -522,19 +521,11 @@ def perimeter(image, neighbourhood=4):
     eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
-    # perimeter contribution: corresponding values in convolved image
-    perimeter_weights_matrix = {
-        1:                 (5, 7, 15, 17, 25, 27),
-        sqrt(2):           (21, 33),
-        (1 + sqrt(2)) / 2: (13, 23)
-    }
+    perimeter_weights = np.zeros(50, float)
+    perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
+    perimeter_weights[[21, 33]] = sqrt(2)
+    perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
-    # specifying the perimeter_weights array inline did not make a measurable
-    # difference in execution time (for a 640x640 image), but made the code
-    # harder to follow, so we build it everytime:
-    perimeter_weights = np.zeros(34, float)
-    for v,indices in perimeter_weights_matrix.items():
-        for i in indices: perimeter_weights[i] = v
 
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
                                                                [ 2, 1,  2],
@@ -543,10 +534,8 @@ def perimeter(image, neighbourhood=4):
 
     # You can also write
     # return perimeter_weights[perimeter_image].sum()
-    # but that was measured as taking much longer than histogram + np.dot (5x
+    # but that was measured as taking much longer than bincount + np.dot (5x
     # as much time)
-
-    perimeter_histogram,_ = histogram(perimeter_image, nbins=50)
-    size = min(len(perimeter_histogram), len(perimeter_weights))
-    total_perimeter = np.dot(perimeter_histogram[:size], perimeter_weights[:size])
+    perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
+    total_perimeter = np.dot(perimeter_histogram, perimeter_weights)
     return total_perimeter
