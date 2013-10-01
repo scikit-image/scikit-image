@@ -47,3 +47,9 @@ def pairwise_hamming_distance(array1, array2):
     """
     distance = (array1[:, None] != array2[None]).mean(axis=2)
     return distance
+
+
+def _create_keypoint_recarray(row, col, octave=None, orientation=None,
+                              response=None):
+    kpt_recarray = np.recarray()
+

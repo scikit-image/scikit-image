@@ -73,7 +73,7 @@ def match_binary_descriptors(keypoints1, descriptors1, keypoints2,
                                           dtype=np.intp)
         matches[:, 0, :] = keypoints1[row_check]
         matches[:, 1, :] = matched_keypoints2[row_check]
-        mask1 = np.where(row_check == True)
+        mask1 = np.where(row_check == True)[0]
         mask2 = np.argmin(distance, axis=1)[row_check]
 
     return matches, mask1, mask2

@@ -9,7 +9,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      hessian_matrix_eigvals)
 from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
-from ._brief import brief
+from ._brief import descriptor_brief
 from .match import match_binary_descriptors
 from .util import pairwise_hamming_distance
 from .censure import keypoints_censure
@@ -29,7 +29,7 @@ __all__ = ['daisy',
            'corner_peaks',
            'corner_moravec',
            'match_template',
-           'brief',
+           'descriptor_brief',
            'pairwise_hamming_distance',
            'match_binary_descriptors',
            'keypoints_censure',
