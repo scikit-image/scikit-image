@@ -49,7 +49,7 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
         values of k result in detection of sharp corners.
     downscale : float
         Downscale factor for the image pyramid. Default value 1.2 is chosen so
-        that we have more scales per octave i.e. log1.2(2) in this case.
+        that we have more dense scales that enable robust scale invariance.
     n_scales : int
         Number of scales from the bottom of the image pyramid to extract
         the features from.
