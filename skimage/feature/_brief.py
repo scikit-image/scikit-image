@@ -2,13 +2,13 @@ import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
 from .util import (_mask_border_keypoints, pairwise_hamming_distance,
-                _prepare_grayscale_input_2D)
+                   _prepare_grayscale_input_2D)
 
 from ._brief_cy import _brief_loop
 
 
-def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
-          sample_seed=1, variance=2):
+def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
+                     patch_size=49, sample_seed=1, variance=2):
     """Extract BRIEF Descriptor about given keypoints for a given image.
 
     Parameters
@@ -57,7 +57,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     --------
     >>> import numpy as np
     >>> from skimage.feature.corner import corner_peaks, corner_harris
-    >>> from skimage.feature import pairwise_hamming_distance, brief, match_keypoints_brief
+    >>> from skimage.feature import pairwise_hamming_distance, descriptor_brief, match_binary_descriptors
     >>> square1 = np.zeros([8, 8], dtype=np.int32)
     >>> square1[2:6, 2:6] = 1
     >>> square1
@@ -75,7 +75,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size=5)
+    >>> descriptors1, keypoints1 = descriptor_brief(square1, keypoints1, patch_size=5)
     >>> keypoints1
     array([[2, 2],
            [2, 5],
@@ -99,7 +99,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 6],
            [6, 2],
            [6, 6]])
-    >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size=5)
+    >>> descriptors2, keypoints2 = descriptor_brief(square2, keypoints2, patch_size=5)
     >>> keypoints2
     array([[2, 2],
            [2, 6],
@@ -110,7 +110,11 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [ 0.3203125,  0.03125  ,  0.640625 ,  0.375    ],
            [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
            [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
-    >>> match_keypoints_brief(keypoints1, descriptors1, keypoints2, descriptors2)
+    >>> matched_kpts, mask1, mask2 = match_binary_descriptors(keypoints1,
+                                                              descriptors1,
+                                                              keypoints2,
+                                                              descriptors2)
+    >>> matched_kpts
     array([[[ 2,  2],
             [ 2,  2]],
 
@@ -162,6 +166,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
         samples = np.random.randint(-(patch_size - 2) // 2,
                                     (patch_size // 2) + 1,
                                     (descriptor_size * 2, 2))
+        samples = np.array(samples, dtype=np.int32)
         pos1, pos2 = np.split(samples, 2)
 
     pos1 = np.ascontiguousarray(pos1)
