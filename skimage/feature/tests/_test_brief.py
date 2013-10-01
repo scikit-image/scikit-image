@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal, assert_raises
 from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
-from skimage.feature import (brief, match_keypoints_brief, corner_peaks,
+from skimage.feature import (brief, match_binary_descriptors, corner_peaks,
                              corner_harris)
 
 
@@ -14,7 +14,7 @@ def test_brief_color_image_unsupported_error():
     assert_raises(ValueError, brief, img, keypoints)
 
 
-def test_match_keypoints_brief_lena_translation():
+def test_matching_brief_descriptors_lena_translation():
     """Test matched keypoints between lena image and its translated version."""
     img = data.lena()
     img = rgb2gray(img)
@@ -29,15 +29,17 @@ def test_match_keypoints_brief_lena_translation():
     descriptors2, keypoints2 = brief(translated_img, keypoints2,
                                      descriptor_size=512)
 
-    matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
-                                              keypoints2, descriptors2,
-                                              threshold=0.10)
+    matched_keypoints, m1, m2 = match_binary_descriptors(keypoints1,
+                                                         descriptors1,
+                                                         keypoints2,
+                                                         descriptors2,
+                                                         threshold=0.10)
 
     assert_array_equal(matched_keypoints[:, 0, :], matched_keypoints[:, 1, :] +
                        [20, 15])
 
 
-def test_match_keypoints_brief_lena_rotation():
+def test_matching_brief_descriptors_lena_rotation():
     """Verify matched keypoints result between lena image and its rotated
     version with the expected keypoint pairs."""
     img = data.lena()
@@ -53,9 +55,11 @@ def test_match_keypoints_brief_lena_rotation():
     descriptors2, keypoints2 = brief(rotated_img, keypoints2,
                                      descriptor_size=512)
 
-    matched_keypoints = match_keypoints_brief(keypoints1, descriptors1,
-                                              keypoints2, descriptors2,
-                                              threshold=0.07)
+    matched_keypoints, m1, m2 = match_binary_descriptors(keypoints1,
+                                                         descriptors1,
+                                                         keypoints2,
+                                                         descriptors2,
+                                                         threshold=0.07)
 
     expected = np.array([[[263, 272],
                           [234, 298]],
@@ -75,6 +79,7 @@ def test_match_keypoints_brief_lena_rotation():
                          [[454, 176],
                           [435, 221]]])
 
+    print matched_keypoints
     assert_array_equal(matched_keypoints, expected)
 
 
