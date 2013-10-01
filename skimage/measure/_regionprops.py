@@ -513,28 +513,40 @@ def perimeter(image, neighbourhood=4):
            a Perimeter Estimator. The Queen's University of Belfast.
            http://www.cs.qub.ac.uk/~d.crookes/webpubs/papers/perimeter.doc
     """
+    from skimage.exposure import histogram
     if neighbourhood == 4:
         strel = STREL_4
     else:
         strel = STREL_8
+    image = image.astype(np.uint8)
     eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
     # perimeter contribution: corresponding values in convolved image
-    perimeter_weights = {
+    perimeter_weights_matrix = {
         1:                 (5, 7, 15, 17, 25, 27),
         sqrt(2):           (21, 33),
         (1 + sqrt(2)) / 2: (13, 23)
     }
+
+    # specifying the perimeter_weights array inline did not make a measurable
+    # difference in execution time (for a 640x640 image), but made the code
+    # harder to follow, so we build it everytime:
+    perimeter_weights = np.zeros(34, float)
+    for v,indices in perimeter_weights_matrix.items():
+        for i in indices: perimeter_weights[i] = v
+
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
                                                                [ 2, 1,  2],
                                                                [10, 2, 10]]),
                                        mode='constant', cval=0)
-    total_perimeter = 0
-    for weight, values in perimeter_weights.items():
-        num_values = 0
-        for value in values:
-            num_values += np.sum(perimeter_image == value)
-        total_perimeter += num_values * weight
 
+    # You can also write
+    # return perimeter_weights[perimeter_image].sum()
+    # but that was measured as taking much longer than histogram + np.dot (5x
+    # as much time)
+
+    perimeter_histogram,_ = histogram(perimeter_image, nbins=50)
+    size = min(len(perimeter_histogram), len(perimeter_weights))
+    total_perimeter = np.dot(perimeter_histogram[:size], perimeter_weights[:size])
     return total_perimeter
