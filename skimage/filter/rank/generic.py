@@ -249,8 +249,8 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Note
     ----
-    * the lower algorithm complexity makes the rank.maximum() more efficient for
-      larger images and structuring elements
+    * the lower algorithm complexity makes the rank.maximum() more efficient
+    for larger images and structuring elements
 
     """
 
@@ -299,7 +299,7 @@ def mean(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def subtract_mean(image, selem, out=None, mask=None, shift_x=False,
-                     shift_y=False):
+                  shift_y=False):
     """Return image subtracted from its local mean.
 
     Parameters
@@ -439,7 +439,7 @@ def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
 
 def enhance_contrast(image, selem, out=None, mask=None, shift_x=False,
-                    shift_y=False):
+                     shift_y=False):
     """Enhance an image replacing each pixel by the local maximum if pixel
     greylevel is closest to maximimum than local minimum OR local minimum
     otherwise.
