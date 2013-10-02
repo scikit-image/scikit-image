@@ -15,10 +15,10 @@ This example shows how to draw several different shapes:
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.draw import line, polygon, circle, \
-                         circle_perimeter, \
-                         ellipse, ellipse_perimeter, \
-                         bezier_curve
+from skimage.draw import (line, polygon, circle,
+                          circle_perimeter,
+                          ellipse, ellipse_perimeter,
+                          bezier_curve)
 import math
 
 img = np.zeros((500, 500, 3), dtype=np.uint8)
@@ -67,7 +67,7 @@ plt.show()
 
 """
 
-Anti-aliasing drawing for:
+Anti-aliased drawing for:
 * line
 * circle
 
@@ -76,8 +76,8 @@ Anti-aliasing drawing for:
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.draw import line_aa, \
-                         circle_perimeter_aa
+from skimage.draw import (line_aa,
+                          circle_perimeter_aa)
 
 img = np.zeros((100, 100), dtype=np.uint8)
 

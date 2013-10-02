@@ -105,9 +105,8 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
 
     Returns
     -------
-    rr, cc, val : (N,) ndarray of (int, int, float)
-        Indices of pixels that belong to the line.
-        May be used to directly index into an array, e.g.
+    rr, cc, val : (N,) ndarray (int, int, float)
+        Indices of pixels (`rr`, `cc`) and intensity values (`val`).
         ``img[rr, cc] = val``.
 
     References
@@ -115,6 +114,23 @@ def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
     .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
            http://members.chello.at/easyfilter/Bresenham.pdf
 
+    Examples
+    --------
+    >>> from skimage.draw import line_aa
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc, val = line_aa(1, 1, 8, 8)
+    >>> img[rr, cc] = val * 255
+    >>> img
+    array([[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+           [  0, 255,  56,   0,   0,   0,   0,   0,   0,   0],
+           [  0,  56, 255,  56,   0,   0,   0,   0,   0,   0],
+           [  0,   0,  56, 255,  56,   0,   0,   0,   0,   0],
+           [  0,   0,   0,  56, 255,  56,   0,   0,   0,   0],
+           [  0,   0,   0,   0,  56, 255,  56,   0,   0,   0],
+           [  0,   0,   0,   0,   0,  56, 255,  56,   0,   0],
+           [  0,   0,   0,   0,   0,   0,  56, 255,  56,   0],
+           [  0,   0,   0,   0,   0,   0,   0,  56, 255,   0],
+           [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
     cdef list rr = list()
     cdef list cc = list()
@@ -375,11 +391,28 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
     .. [1] X. Wu, "An efficient antialiasing technique", In ACM SIGGRAPH
            Computer Graphics, 25 (1991) 143-152.
 
+    Examples
+    --------
+    >>> from skimage.draw import circle_perimeter_aa
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc, val = circle_perimeter_aa(4, 4, 3)
+    >>> img[rr, cc] = val * 255
+    >>> img
+    array([[  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+           [  0,   0,  60, 211, 255, 211,  60,   0,   0,   0],
+           [  0,  60, 194,  43,   0,  43, 194,  60,   0,   0],
+           [  0, 211,  43,   0,   0,   0,  43, 211,   0,   0],
+           [  0, 255,   0,   0,   0,   0,   0, 255,   0,   0],
+           [  0, 211,  43,   0,   0,   0,  43, 211,   0,   0],
+           [  0,  60, 194,  43,   0,  43, 194,  60,   0,   0],
+           [  0,   0,  60, 211, 255, 211,  60,   0,   0,   0],
+           [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0],
+           [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
 
-    cdef list rr = list()
-    cdef list cc = list()
-    cdef list val = list()
+    cdef list rr = [y, x,  y,  x, -y, -x, -y, -x]
+    cdef list cc = [x, y, -x, -y,  x,  y, -x, -y]
+    cdef list val = [1] * 8
 
     cdef Py_ssize_t x = 0
     cdef Py_ssize_t y = radius
@@ -388,10 +421,6 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
     cdef double dceil = 0
 
     dceil_prev = 0
-
-    rr.extend([y, x,  y,  x, -y, -x, -y, -x])
-    cc.extend([x, y, -x, -y,  x,  y, -x, -y])
-    val.extend([1] * 8)
 
     while y > x + 1:
         x += 1
@@ -558,13 +587,13 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
     Parameters
     ----------
     y0, x0 : int
-        Coordinates of the first point
+        Coordinates of the first control point.
     y1, x1 : int
-        Coordinates of the middle point
+        Coordinates of the middle control point.
     y2, x2 : int
-        Coordinates of the last point
+        Coordinates of the last control point.
     weight : double
-        Middle point weight, it describes the line tension.
+        Middle control point weight, it describes the line tension.
 
     Returns
     -------
@@ -686,13 +715,13 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     Parameters
     ----------
     y0, x0 : int
-        Coordinates of the first point
+        Coordinates of the first control point.
     y1, x1 : int
-        Coordinates of the middle point
+        Coordinates of the middle control point.
     y2, x2 : int
-        Coordinates of the last point
+        Coordinates of the last control point.
     weight : double
-        Middle point weight, it describes the line tension.
+        Middle control point weight, it describes the line tension.
 
     Returns
     -------
@@ -710,6 +739,25 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     ----------
     .. [1] A Rasterizing Algorithm for Drawing Curves, A. Zingl, 2012
            http://members.chello.at/easyfilter/Bresenham.pdf
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from skimage.draw import bezier_curve
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = bezier_curve(1, 5, 5, -2, 8, 8, 2)
+    >>> img[rr, cc] = 1
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
     """
     # Pixels
     cdef list px = list()
