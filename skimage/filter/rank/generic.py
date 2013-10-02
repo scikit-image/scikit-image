@@ -250,7 +250,7 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     Note
     ----
     * the lower algorithm complexity makes the rank.maximum() more efficient
-    for larger images and structuring elements
+      for larger images and structuring elements
 
     """
 
