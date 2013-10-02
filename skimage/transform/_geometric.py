@@ -979,28 +979,41 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     Notes
     -----
     In case of a `SimilarityTransform`, `AffineTransform` and
-    `ProjectiveTransform` this function uses the underlying transformation
-    matrix to warp the image with a much faster routine.
+    `ProjectiveTransform` and `order` in [0, 3] this function uses the
+    underlying transformation matrix to warp the image with a much faster
+    routine.
 
     Examples
     --------
-    Shift an image to the right:
-
     >>> from skimage.transform import warp
     >>> from skimage import data
     >>> image = data.camera()
-    >>>
-    >>> def shift_right(xy):
-    ...     xy[:, 0] -= 10
-    ...     return xy
-    >>>
-    >>> warp(image, shift_right)
 
-    Use a geometric transform to warp an image:
+    The following image warps are all equal but differ substantially in
+    execution time.
+
+    Use a geometric transform to warp an image (fast):
 
     >>> from skimage.transform import SimilarityTransform
-    >>> tform = SimilarityTransform(scale=0.1, rotation=0.1)
+    >>> tform = SimilarityTransform(translation=(0, -10))
     >>> warp(image, tform)
+
+    Shift an image to the right with a callable (slow):
+
+    >>> def shift(xy):
+    ...     xy[:, 1] -= 10
+    ...     return xy
+    >>> warp(image, shift_right)
+
+    Use a transformation matrix to warp an image (fast):
+
+    >>> matrix = np.array([[1, 0, 0], [0, 1, -10], [0, 0, 1]])
+    >>> warp(image, matrix)
+    >>> from skimage.transform import ProjectiveTransform
+    >>> warp(image, ProjectiveTransform(matrix=matrix))
+
+    You can also use the inverse of a geometric transformation (fast):
+
     >>> warp(image, tform.inverse)
 
     """
