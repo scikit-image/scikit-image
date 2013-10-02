@@ -951,7 +951,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ----------
     image : 2-D or 3-D array
         Input image.
-    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``
+    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``, (3, 3) array
         Inverse coordinate map. A function that transforms a (N, 2) array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
         coordinates in the *source image* (e.g. a transformation object or its
@@ -1022,16 +1022,21 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if order in range(4) and not map_args:
         matrix = None
 
-        if inverse_map in HOMOGRAPHY_TRANSFORMS:
+        if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
+            matrix = inverse_map
+
+        elif inverse_map in HOMOGRAPHY_TRANSFORMS:
             matrix = inverse_map._matrix
 
-        elif hasattr(inverse_map, '__name__') \
-             and inverse_map.__name__ == 'inverse' \
-             and get_bound_method_class(inverse_map) in HOMOGRAPHY_TRANSFORMS:
+        elif (hasattr(inverse_map, '__name__')
+              and inverse_map.__name__ == 'inverse'
+              and get_bound_method_class(inverse_map)
+                  in HOMOGRAPHY_TRANSFORMS):
 
             matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
 
         if matrix is not None:
+            matrix = matrix.astype(np.double)
             # transform all bands
             dims = []
             for dim in range(image.shape[2]):
@@ -1049,12 +1054,15 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         rows, cols = output_shape[:2]
 
+        if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
+            inverse_map = ProjectiveTransform(matrix=inverse_map)
+
         def coord_map(*args):
             return inverse_map(*args, **map_args)
 
         coords = warp_coords(coord_map, (rows, cols, bands))
 
-        # Prefilter not necessary for order 1 interpolation
+        # Prefilter not necessary for order 0, 1 interpolation
         prefilter = order > 1
         out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
