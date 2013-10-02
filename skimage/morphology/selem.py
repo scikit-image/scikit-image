@@ -172,10 +172,10 @@ def octahedron(radius, dtype=np.uint8):
     """
     # note that in contrast to diamond(), this method allows non-integer radii
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
-                        -radius:radius:n*1j,
-                        -radius:radius:n*1j]
-    s = np.abs(X) + np.abs(Y) + np.abs(Z) 
+    Z, Y, X = np.mgrid[-radius:radius:n*1j,
+                       -radius:radius:n*1j,
+                       -radius:radius:n*1j]
+    s = np.abs(X) + np.abs(Y) + np.abs(Z)
     return np.array(s <= radius, dtype=dtype)
 
 
@@ -203,9 +203,9 @@ def ball(radius, dtype=np.uint8):
         are 1 and 0 otherwise.
     """
     n = 2 * radius + 1
-    Z, Y, X = np.mgrid[ -radius:radius:n*1j, 
-                        -radius:radius:n*1j, 
-                        -radius:radius:n*1j]
+    Z, Y, X = np.mgrid[-radius:radius:n*1j,
+                       -radius:radius:n*1j,
+                       -radius:radius:n*1j]
     s = X**2 + Y**2 + Z**2
     return np.array(s <= radius * radius, dtype=dtype)
 
@@ -240,9 +240,9 @@ def octagon(m, n, dtype=np.uint8):
     selem = np.zeros((m + 2*n, m + 2*n))
     selem[0, n] = 1
     selem[n, 0] = 1
-    selem[0, m + n -1] = 1
+    selem[0, m + n - 1] = 1
     selem[m + n - 1, 0] = 1
-    selem[-1, n] = 1 
+    selem[-1, n] = 1
     selem[n, -1] = 1
     selem[-1, m + n - 1] = 1
     selem[m + n - 1, -1] = 1
