@@ -28,7 +28,9 @@ def test_all_props():
         regions[prop]
 
 
-def test_unsupported_dtype():
+def test_dtype():
+    regionprops(np.zeros((10, 10), dtype=np.int))
+    regionprops(np.zeros((10, 10), dtype=np.uint))
     assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
 
 

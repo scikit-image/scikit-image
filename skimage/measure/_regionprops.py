@@ -470,8 +470,6 @@ def regionprops(label_image, properties=None,
     >>> props[0].centroid # centroid of first labelled object
     >>> props[0]['centroid'] # centroid of first labelled object
     """
-    if not np.issubdtype(label_image.dtype, 'int'):
-        raise TypeError('Labelled image must be of integer dtype.')
 
     if properties is not None:
         warnings.warn('The ``properties`` argument is deprecated and is '
