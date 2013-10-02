@@ -153,7 +153,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     cdef Py_ssize_t num_pixels = pixels.shape[0]
     cdef list acc = list()
     cdef list results = list()
-    cdef bin_size = accuracy**2
+    cdef double bin_size = accuracy**2
 
     cdef int max_b_squared
     if max_size is None:
