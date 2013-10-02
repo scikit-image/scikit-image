@@ -955,7 +955,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Inverse coordinate map. A function that transforms a (N, 2) array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
         coordinates in the *source image* (e.g. a transformation object or its
-        inverse).
+        inverse). See example section for usage.
     map_args : dict, optional
         Keyword arguments passed to `inverse_map`.
     output_shape : tuple (rows, cols), optional
@@ -976,6 +976,12 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
+    Notes
+    -----
+    In case of a `SimilarityTransform`, `AffineTransform` and
+    `ProjectiveTransform` this function uses the underlying transformation
+    matrix to warp the image with a much faster routine.
+
     Examples
     --------
     Shift an image to the right:
@@ -995,6 +1001,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> from skimage.transform import SimilarityTransform
     >>> tform = SimilarityTransform(scale=0.1, rotation=0.1)
     >>> warp(image, tform)
+    >>> warp(image, tform.inverse)
 
     """
     # Backward API compatibility
