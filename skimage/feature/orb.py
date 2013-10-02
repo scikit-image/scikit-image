@@ -18,7 +18,7 @@ for i in range(-15, 16):
 
 
 def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
-                  harris_k=0.04,  downscale=1.2, n_scales=8):
+                  harris_k=0.04, downscale=1.2, n_scales=8):
 
     """Detect Oriented Fast keypoints.
 
@@ -200,22 +200,24 @@ def descriptor_orb(image, keypoints, orientations, scales,
         curr_image = np.ascontiguousarray(pyramid[scale])
 
         curr_scale_mask = scales == scale
-        curr_scale_kpts = keypoints[curr_scale_mask] / (downscale ** scale)
-        curr_scale_kpts = np.round(curr_scale_kpts).astype(np.intp)
-        curr_scale_orientation = orientations[curr_scale_mask]
+        if np.sum(curr_scale_mask) > 0:
+            curr_scale_kpts = keypoints[curr_scale_mask] / (downscale ** scale)
+            curr_scale_kpts = np.round(curr_scale_kpts).astype(np.intp)
+            curr_scale_orientation = orientations[curr_scale_mask]
 
-        border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts,
-                                             dist=16)
-        curr_scale_kpts = curr_scale_kpts[border_mask]
-        curr_scale_orientation = curr_scale_orientation[border_mask]
+            border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts,
+                                                 dist=16)
 
-        curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts)
-        curr_scale_orientation = np.ascontiguousarray(curr_scale_orientation)
-        curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts,
-                                           curr_scale_orientation)
+            curr_scale_kpts = curr_scale_kpts[border_mask]
+            curr_scale_orientation = curr_scale_orientation[border_mask]
 
-        descriptors_list.append(curr_scale_descriptors)
-        filtered_keypoints_list.append(curr_scale_kpts * downscale ** scale)
+            curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts)
+            curr_scale_orientation = np.ascontiguousarray(curr_scale_orientation)
+            curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts,
+                                               curr_scale_orientation)
+
+            descriptors_list.append(curr_scale_descriptors)
+            filtered_keypoints_list.append(curr_scale_kpts * downscale ** scale)
 
     descriptors = np.vstack(descriptors_list).view(np.bool)
     filtered_keypoints = np.vstack(filtered_keypoints_list)
