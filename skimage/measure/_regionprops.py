@@ -524,7 +524,7 @@ def perimeter(image, neighbourhood=4):
     eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
-    perimeter_weights = np.zeros(50, dtype=np.float32)
+    perimeter_weights = np.zeros(50, dtype=np.double)
     perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
     perimeter_weights[[21, 33]] = sqrt(2)
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
