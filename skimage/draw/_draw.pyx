@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 cimport numpy as cnp
-from libc.math cimport sqrt, sin, cos, floor
+from libc.math cimport sqrt, sin, cos, floor, ceil
 from skimage._shared.geometry cimport point_in_polygon
 
 
@@ -94,7 +94,7 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
 
 
 def line_aa(Py_ssize_t y1, Py_ssize_t x1, Py_ssize_t y2, Py_ssize_t x2):
-    """Generate line pixel coordinates.
+    """Generate anti-aliased line pixel coordinates.
 
     Parameters
     ----------
@@ -231,9 +231,9 @@ def polygon(y, x, shape=None):
 
     cdef Py_ssize_t nr_verts = x.shape[0]
     cdef Py_ssize_t minr = int(max(0, y.min()))
-    cdef Py_ssize_t maxr = int(math.ceil(y.max()))
+    cdef Py_ssize_t maxr = int(ceil(y.max()))
     cdef Py_ssize_t minc = int(max(0, x.min()))
-    cdef Py_ssize_t maxc = int(math.ceil(x.max()))
+    cdef Py_ssize_t maxc = int(ceil(x.max()))
 
     # make sure output coordinates do not exceed image size
     if shape is not None:
@@ -423,8 +423,8 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
 
     while y > x + 1:
         x += 1
-        dceil = math.sqrt(radius**2 - x**2)
-        dceil = math.ceil(dceil) - dceil
+        dceil = sqrt(radius**2 - x**2)
+        dceil = ceil(dceil) - dceil
         if dceil < dceil_prev:
             y -= 1
         rr.extend([y, y - 1, x, x, y, y - 1, x, x])
@@ -604,7 +604,7 @@ def _bezier_segment(Py_ssize_t y0, Py_ssize_t x0,
     Notes
     -----
     The algorithm is the rational quadratic algorithm presented in
-    reference [1].
+    reference [1]_.
 
     References
     ----------
@@ -732,7 +732,7 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     Notes
     -----
     The algorithm is the rational quadratic algorithm presented in
-    reference [1].
+    reference [1]_.
 
     References
     ----------
