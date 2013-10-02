@@ -10,7 +10,7 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
     """Create a 2-dimensional 'montage' from a 3-dimensional input array
     representing an ensemble of equally shaped 2-dimensional images.
 
-    For example, montage2d(arr_in, fill) with the following `arr_in`
+    For example, ``montage2d(arr_in, fill)`` with the following `arr_in`
 
     +---+---+---+
     | 1 | 2 | 3 |
@@ -37,7 +37,8 @@ def montage2d(arr_in, fill='mean', rescale_intensity=False, grid_shape=None):
     rescale_intensity: bool, optional
         Whether to rescale the intensity of each image to [0, 1].
     grid_shape: tuple, optional
-        The desired grid shape for the montage (tiles_y, tiles_x). Tthe default aspect ratio is square.
+        The desired grid shape for the montage (tiles_y, tiles_x).
+        The default aspect ratio is square.
 
     Returns
     -------

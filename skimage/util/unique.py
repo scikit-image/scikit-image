@@ -9,12 +9,12 @@ def unique_rows(ar):
 
     Parameters
     ----------
-    ar : 2D np.ndarray
+    ar : 2-D ndarray
         The input array.
 
     Returns
     -------
-    ar_out : 2D np.ndarray
+    ar_out : 2-D ndarray
         A copy of the input array with repeated rows removed.
 
     Raises

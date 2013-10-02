@@ -3,7 +3,7 @@ import numpy as np
 
 def regular_grid(ar_shape, n_points):
     """Find `n_points` regularly spaced along `ar_shape`.
-    
+
     The returned points (as slices) should be as close to cubically-spaced as
     possible. Essentially, the points are spaced by the Nth root of the input
     array size, where N is the number of dimensions. However, if an array
@@ -13,7 +13,7 @@ def regular_grid(ar_shape, n_points):
     Parameters
     ----------
     ar_shape : array-like of ints
-        The shape of the space embedding the grid. `len(ar_shape)` is the
+        The shape of the space embedding the grid. ``len(ar_shape)`` is the
         number of dimensions.
     n_points : int
         The (approximate) number of points to embed in the space.
@@ -66,7 +66,7 @@ def regular_grid(ar_shape, n_points):
                 break
     starts = stepsizes // 2
     stepsizes = np.round(stepsizes)
-    slices = [slice(start, None, step) for 
+    slices = [slice(start, None, step) for
               start, step in zip(starts, stepsizes)]
     slices = [slices[i] for i in unsort_dim_idxs]
     return slices

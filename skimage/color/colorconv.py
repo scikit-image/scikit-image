@@ -684,9 +684,9 @@ def gray2rgb(image):
     """
     if np.squeeze(image).ndim == 3 and image.shape[2] in (3, 4):
         return image
-    elif is_gray(image):
+    elif image.ndim != 1 and np.squeeze(image).ndim in (1, 2, 3):
         image = image[..., np.newaxis]
-        return np.concatenate((image,)*3, axis=-1)
+        return np.concatenate(3 * (image,), axis=-1)
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
