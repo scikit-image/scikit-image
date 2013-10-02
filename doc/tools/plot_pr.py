@@ -25,7 +25,9 @@ releases = OrderedDict([
     ('0.3', u'2011-10-10 03:28:47 -0700'),
     ('0.4', u'2011-12-03 14:31:32 -0800'),
     ('0.5', u'2012-02-26 21:00:51 -0800'),
-    ('0.6', u'2012-06-24 21:37:05 -0700')])
+    ('0.6', u'2012-06-24 21:37:05 -0700'),
+    ('0.7', u'2012-09-29 18:08:49 -0700'),
+    ('0.8', u'2013-03-04 20:46:09 +0100')])
 
 
 month_duration = 24
@@ -106,7 +108,7 @@ this_month = datetime(year=now.year, month=now.month, day=1,
 bins = [this_month - relativedelta(months=i) \
         for i in reversed(range(-1, month_duration))]
 bins = seconds_from_epoch(bins)
-plt.hist(dates_f, bins=bins)
+n, bins, _ = plt.hist(dates_f, bins=bins)
 
 ax = plt.gca()
 ax.xaxis.set_major_formatter(FuncFormatter(date_formatter))
@@ -124,9 +126,14 @@ for version, date in releases.items():
 
 plt.title('Pull request activity').set_y(1.05)
 plt.xlabel('Date')
-plt.ylabel('PRs created')
+plt.ylabel('PRs per month')
 plt.legend(loc=2, title='Release')
 plt.subplots_adjust(top=0.875, bottom=0.225)
+
+import numpy as np
+ax2 = plt.twinx()
+ax2.plot(bins[:-1], np.cumsum(n), 'black', linewidth=2)
+ax2.set_ylabel('Total PRs')
 
 plt.savefig('PRs.png')
 
