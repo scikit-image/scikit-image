@@ -471,6 +471,11 @@ def regionprops(label_image, properties=None,
     >>> props[0]['centroid'] # centroid of first labelled object
     """
 
+    label_image = np.squeeze(label_image)
+
+    if label_image.ndim != 2:
+        raise TypeError('Only 2-D images supported.')
+
     if properties is not None:
         warnings.warn('The ``properties`` argument is deprecated and is '
                       'not needed any more as properties are '

@@ -34,6 +34,13 @@ def test_dtype():
     assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
 
 
+def test_ndim():
+    regionprops(np.zeros((10, 10), dtype=np.int))
+    regionprops(np.zeros((10, 10, 1), dtype=np.int))
+    regionprops(np.zeros((10, 10, 1, 1), dtype=np.int))
+    assert_raises(TypeError, regionprops, np.zeros((10, 10, 2), dtype=np.int))
+
+
 def test_area():
     area = regionprops(SAMPLE)[0].area
     assert area == np.sum(SAMPLE)
