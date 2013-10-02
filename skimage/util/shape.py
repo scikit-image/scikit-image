@@ -208,11 +208,11 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     # -- basic checks on arguments
     if not isinstance(arr_in, np.ndarray):
-        raise TypeError("'arr_in' must be a numpy ndarray")
+        raise TypeError("`arr_in` must be a numpy ndarray")
     if not isinstance(window_shape, tuple):
-        raise TypeError("'window_shape' must be a tuple")
+        raise TypeError("`window_shape` must be a tuple")
     if not (len(window_shape) == arr_in.ndim):
-        raise ValueError("'window_shape' is incompatible with 'arr_in.shape'")
+        raise ValueError("`window_shape` is incompatible with `arr_in.shape`")
 
     if step < 1:
         raise ValueError("`step` must be >= 1")
@@ -221,10 +221,10 @@ def view_as_windows(arr_in, window_shape, step=1):
     window_shape = np.array(window_shape, dtype=arr_shape.dtype)
 
     if ((arr_shape - window_shape) < 0).any():
-        raise ValueError("'window_shape' is too large")
+        raise ValueError("`window_shape` is too large")
 
     if ((window_shape - 1) < 0).any():
-        raise ValueError("'window_shape' is too small")
+        raise ValueError("`window_shape` is too small")
 
     # -- build rolling window view
     arr_in = np.ascontiguousarray(arr_in)
