@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 cimport cython
 
-from libc.math cimport abs, fabs, sqrt, ceil
+from libc.math cimport abs, fabs, sqrt, ceil, M_PI
 from libc.stdlib cimport rand
 
 from skimage.draw import circle_perimeter
