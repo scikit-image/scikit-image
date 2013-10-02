@@ -37,7 +37,7 @@ mask[paint_region] = 1
 # perfect reconstruction, but in case of a value smaller than this perfect
 # reconstruction may not be possible.
 
-painted = inpaint_criminisi(image, mask, window=27, max_thresh=0.2)
+painted = inpaint_criminisi(image, mask, window=27, ssd_thresh=0.2)
 
 fig, (ax0, ax1) = plt.subplots(ncols=2)
 ax0.set_title('Input image')
