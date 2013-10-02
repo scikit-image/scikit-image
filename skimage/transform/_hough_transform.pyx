@@ -209,12 +209,12 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                         b = sqrt(bin_edges[hist.argmax()])
                         # to keep ellipse_perimeter() convention
                         if angle != 0:
-                            angle = np.pi - angle
+                            angle = M_PI - angle
                             # When angle is not in [-pi:pi]
                             # it would mean in ellipse_perimeter()
                             # that a < b. But we keep a > b.
-                            if angle > np.pi:
-                                angle = angle - np.pi / 2.
+                            if angle > M_PI:
+                                angle = angle - M_PI / 2.
                                 a, b = b, a
                         results.append((hist_max, # Accumulator
                                         y0,
