@@ -13,8 +13,8 @@ __all__ = ['regionprops']
 
 STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
-                    [0, 1, 0]])
-STREL_8 = np.ones((3, 3), 'int8')
+                    [0, 1, 0]], dtype=np.uint8)
+STREL_8 = np.ones((3, 3), dtype=np.uint8)
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
@@ -470,8 +470,11 @@ def regionprops(label_image, properties=None,
     >>> props[0].centroid # centroid of first labelled object
     >>> props[0]['centroid'] # centroid of first labelled object
     """
-    if not np.issubdtype(label_image.dtype, 'int'):
-        raise TypeError('Labelled image must be of integer dtype.')
+
+    label_image = np.squeeze(label_image)
+
+    if label_image.ndim != 2:
+        raise TypeError('Only 2-D images supported.')
 
     if properties is not None:
         warnings.warn('The ``properties`` argument is deprecated and is '
@@ -498,14 +501,14 @@ def perimeter(image, neighbourhood=4):
     Parameters
     ----------
     image : array
-        binary image
+        Binary image.
     neighbourhood : 4 or 8, optional
-        neighbourhood connectivity for border pixel determination, default 4
+        Neighborhood connectivity for border pixel determination.
 
     Returns
     -------
     perimeter : float
-        total perimeter of all objects in binary image
+        Total perimeter of all objects in binary image.
 
     References
     ----------
@@ -521,7 +524,7 @@ def perimeter(image, neighbourhood=4):
     eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
-    perimeter_weights = np.zeros(50, float)
+    perimeter_weights = np.zeros(50, dtype=np.double)
     perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
     perimeter_weights[[21, 33]] = sqrt(2)
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
