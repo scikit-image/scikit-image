@@ -410,17 +410,16 @@ def circle_perimeter_aa(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t radius):
            [  0,   0,   0,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
     """
 
-    cdef list rr = [y, x,  y,  x, -y, -x, -y, -x]
-    cdef list cc = [x, y, -x, -y,  x,  y, -x, -y]
-    cdef list val = [1] * 8
-
     cdef Py_ssize_t x = 0
     cdef Py_ssize_t y = radius
     cdef Py_ssize_t d = 0
 
     cdef double dceil = 0
+    cdef double dceil_prev = 0
 
-    dceil_prev = 0
+    cdef list rr = [y, x,  y,  x, -y, -x, -y, -x]
+    cdef list cc = [x, y, -x, -y,  x,  y, -x, -y]
+    cdef list val = [1] * 8
 
     while y > x + 1:
         x += 1
