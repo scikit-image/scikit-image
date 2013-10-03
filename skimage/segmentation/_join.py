@@ -93,7 +93,7 @@ def relabel_sequential(label_field, offset=1):
 
     Examples
     --------
-    >>> from skimage.segmentation import relabel_from_one
+    >>> from skimage.segmentation import relabel_sequential
     >>> label_field = array([1, 1, 5, 5, 8, 99, 42])
     >>> relab, fw, inv = relabel_sequential(label_field)
     >>> relab
