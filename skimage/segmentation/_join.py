@@ -5,9 +5,9 @@ from skimage._shared.utils import deprecated
 def join_segmentations(s1, s2):
     """Return the join of the two input segmentations.
 
-    The join J of S1 and S2 is defined as the segmentation in which two voxels
-    are in the same segment in J if and only if they are in the same segment
-    in *both* S1 and S2.
+    The join J of S1 and S2 is defined as the segmentation in which two
+    voxels are in the same segment if and only if they are in the same
+    segment in *both* S1 and S2.
 
     Parameters
     ----------
@@ -36,10 +36,10 @@ def join_segmentations(s1, s2):
     if s1.shape != s2.shape:
         raise ValueError("Cannot join segmentations of different shape. " +
                          "s1.shape: %s, s2.shape: %s" % (s1.shape, s2.shape))
-    s1 = relabel_from_one(s1)[0]
-    s2 = relabel_from_one(s2)[0]
+    s1 = relabel_sequential(s1)[0]
+    s2 = relabel_sequential(s2)[0]
     j = (s2.max() + 1) * s1 + s2
-    j = relabel_from_one(j)[0]
+    j = relabel_sequential(j)[0]
     return j
 
 
