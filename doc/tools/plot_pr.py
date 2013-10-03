@@ -131,8 +131,11 @@ plt.legend(loc=2, title='Release')
 plt.subplots_adjust(top=0.875, bottom=0.225)
 
 import numpy as np
+cumulative = np.cumsum(n)
+cumulative += len(dates) - cumulative[-1]
+
 ax2 = plt.twinx()
-ax2.plot(bins[:-1], np.cumsum(n), 'black', linewidth=2)
+ax2.plot(bins[:-1], cumulative, 'black', linewidth=2)
 ax2.set_ylabel('Total PRs')
 
 plt.savefig('PRs.png')
