@@ -315,7 +315,8 @@ def interpolate(image, xslice, yslice,
                                  np.arange(yslice.size))
     x_inv_coef, y_inv_coef = x_coef[:, ::-1] + 1, y_coef[::-1] + 1
 
-    view = image[yslice[0]: yslice[-1] + 1, xslice[0]: xslice[-1] + 1]
+    view = image[int(yslice[0]): int(yslice[-1]) + 1,
+                 int(xslice[0]): int(xslice[-1]) + 1]
     im_slice = aLUT[view]
     new = ((y_inv_coef * (x_inv_coef * mapLU[im_slice]
                           + x_coef * mapRU[im_slice])

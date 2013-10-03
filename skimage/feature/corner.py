@@ -73,7 +73,7 @@ def corner_kitchen_rosenfeld(image):
         ------------------------------------------------------
                         (imx**2 + imy**2)
 
-    Where imx and imy are the first and imxx, imxy, imyy the second derivatives.
+    Where imx and imy are first and imxx, imxy, imyy are second derivatives.
 
     Parameters
     ----------
@@ -110,7 +110,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
         A = [(imx**2)   (imx*imy)] = [Axx Axy]
             [(imx*imy)   (imy**2)]   [Axy Ayy]
 
-    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    Where imx and imy are first derivatives averaged with a gaussian filter.
     The corner measure is then defined as::
 
         det(A) - k * trace(A)**2
@@ -191,7 +191,7 @@ def corner_shi_tomasi(image, sigma=1):
         A = [(imx**2)   (imx*imy)] = [Axx Axy]
             [(imx*imy)   (imy**2)]   [Axy Ayy]
 
-    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    Where imx and imy are first derivatives averaged with a gaussian filter.
     The corner measure is then defined as the smaller eigenvalue of A::
 
         ((Axx + Ayy) - sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
@@ -254,7 +254,7 @@ def corner_foerstner(image, sigma=1):
         A = [(imx**2)   (imx*imy)] = [Axx Axy]
             [(imx*imy)   (imy**2)]   [Axy Ayy]
 
-    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    Where imx and imy are first derivatives averaged with a gaussian filter.
     The corner measure is then defined as::
 
         w = det(A) / trace(A)           (size of error ellipse)
@@ -354,7 +354,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     """
 
     # window extent in one direction
-    wext = (window_size - 1) / 2
+    wext = (window_size - 1) // 2
 
     # normal equation arrays
     N_dot = np.zeros((2, 2), dtype=np.double)
@@ -372,7 +372,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     corners_subpix = np.zeros_like(corners, dtype=np.double)
 
-    for i, (y0, x0) in enumerate(corners):
+    for i, (y0, x0) in enumerate(corners.astype(np.int64)):
 
         # crop window around corner + border for sobel operator
         miny = y0 - wext - 1
