@@ -2,13 +2,14 @@ from __future__ import division
 import numpy as np
 from skimage.morphology import disk
 from skimage.filter.rank import minimum
+from skimage.util import img_as_ubyte
 from scipy.ndimage import gaussian_filter, sobel
 
 cimport numpy as cnp
 from libc.math cimport sqrt
 
 
-cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
+cpdef _inpaint_criminisi(painted, mask, window, ssd_thresh):
     """This function performs constrained synthesis using Criminisi et al.
     algorithm. It grows the texture of the surrounding region to fill in
     unknown pixels. See Notes for an outline of the algorithm.
@@ -17,12 +18,12 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
     ----------
     painted : (M, N) array, float
         Input image whose texture is to be calculated.
-    synth_mask : (M, N) array, bool
+    mask : (M, N) array, int8
         Texture for True values are to be synthesised.
     window : int
         Width of the neighborhood window. (window, window) patch with centre at
         the pixel to be inpainted. Preferably odd, for symmetry.
-    max_thresh : float
+    ssd_thresh : float
         Maximum tolerable SSD (Sum of Squared Difference) between the template
         around a pixel to be filled and an equal size image sample for
         template matching.
@@ -78,13 +79,17 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
     sigma = window / 3
     gauss_mask = _gaussian(sigma, (window, window))
     confidence = 1. - mask
+    mask_ubyte = mask.astype(np.uint8)
 
-    while mask.any():
+    while True:
         # Generate the fill_front, boundary of ROI (region to be synthesised)
-        fill_front = mask - minimum(mask, disk(1))
+        fill_front = mask - minimum(mask_ubyte, disk(1))
         if not fill_front.any():
-            # If the remaining region is 1-pixel thick
-            fill_front = mask
+            if mask.any():
+                # If the remaining region is 1-pixel thick
+                fill_front = mask
+            else:
+                break
 
         smooth_painted = gaussian_filter(painted, sigma=1)
         smooth_painted[mask == 1] = np.nan
@@ -96,8 +101,8 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
         dx[np.isnan(dx)] = 0
         dy[np.isnan(dy)] = 0
         smooth_painted[np.isnan(smooth_painted)] = 0
-        ny = sobel(mask.astype(np.float), axis=0)
-        nx = sobel(mask.astype(np.float), axis=1)
+        ny = sobel(mask, axis=0)
+        nx = sobel(mask, axis=1)
 
         # Priority calculation; pixel for which inpainting is done first
         i_max, j_max = _priority_calc(fill_front, confidence,
@@ -109,7 +114,7 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
 
         # Template matching
         i_m, j_m = _sum_sq_diff(source_image, mask[inner], template,
-                                valid_mask, max_thresh, i_max, j_max)
+                                valid_mask, ssd_thresh, i_max, j_max)
 
         if i_m != -1 and j_m != -1:
             painted[i_max + t_row, j_max + t_col] += (mask_template *
@@ -118,22 +123,23 @@ cpdef _inpaint_criminisi(painted, mask, window, max_thresh):
             confidence[i_max + t_row, j_max + t_col] += (mask_template *
                                                          confidence[i_max,
                                                                     j_max])
+            mask_ubyte[i_max + t_row, j_max + t_col] = 0
             mask[i_max + t_row, j_max + t_col] = 0
 
     return painted[inner]
 
 
-cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
+cdef _priority_calc(cnp.int16_t[:, ::] fill_front,
                     cnp.float_t[:, ::] confidence,
                     cnp.float_t[:, ::] dx, cnp.float_t[:, ::] dy,
-                    cnp.float_t[:, ::] nx, cnp.float_t[:, ::] ny,
+                    cnp.int16_t[:, ::] nx, cnp.int16_t[:, ::] ny,
                     cnp.uint8_t window):
     """Calculation of the priority term for the region of interest boundary
     pixels to determine the order of filling.
 
     Parameters
     ----------
-    fill_front : array, bool
+    fill_front : array, int8
         Boundary of the region to be inpainted.
     confidence : array, float
         Array containing the confidence value of the pixels.
@@ -216,10 +222,10 @@ cdef _priority_calc(cnp.uint8_t[:, ::] fill_front,
 
 
 cdef _sum_sq_diff(cnp.float_t[:, ::] image,
-                  cnp.uint8_t[:, ::] mask,
+                  cnp.int16_t[:, ::] mask,
                   cnp.float_t[:, ::] template,
                   cnp.float_t[:, ::] valid_mask,
-                  cnp.float_t max_thresh,
+                  cnp.float_t ssd_thresh,
                   Py_ssize_t i_b, Py_ssize_t j_b):
     """This function performs template matching. The metric used is Sum of
     Squared Difference (SSD). The input taken is the ``template`` to be found
@@ -229,15 +235,15 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
     ----------
     image : array, float
         Initial unpadded input image of shape (M, N).
-    mask : (M, N) array, bool
-        Texture for True values are to be synthesised.
+    mask : (M, N) array, int8
+        Texture for ``1`` values are to be synthesised.
     template : ``(window, window)`` array, float
         Template for which match is to be found in image.
     valid_mask : ``(window, window)`` array, float
         Masks out the unknown or unfilled pixels and gives a higher weight to
         the center pixel, decreasing as the distance from center pixel
         increases.
-    max_thresh : float
+    ssd_thresh : float
         Maximum tolerable SSD (Sum of Squared Difference) between the template
         around a pixel to be filled and an equal size image sample for
         template matching.
@@ -287,8 +293,8 @@ cdef _sum_sq_diff(cnp.float_t[:, ::] image,
                     ssd += ((template[k, l] - image[i + k, j + l]) ** 2
                             * valid_mask[k, l])
             ssd /= total_weight
-            if ssd < max_thresh:
-                max_thresh = ssd
+            if ssd < ssd_thresh:
+                ssd_thresh = ssd
                 i_min = i + offset
                 j_min = j + offset
 
