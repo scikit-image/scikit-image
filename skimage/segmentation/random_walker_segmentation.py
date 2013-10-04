@@ -324,7 +324,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     """
 
-    if UmfpackContext is None:
+    if UmfpackContext is None and mode == 'cg':
         warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
                       'SciPy with UMFPACK, this will greatly speed up the '
                       'random walker functions. You may also install pyamg '
