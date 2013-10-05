@@ -11,7 +11,6 @@ representations.
 In this example a limited number of DAISY descriptors are extracted at a large
 scale for illustrative purposes.
 """
-
 from skimage.feature import daisy
 from skimage import data
 import matplotlib.pyplot as plt

@@ -98,7 +98,7 @@ def view_as_blocks(arr_in, block_shape):
     return arr_out
 
 
-def view_as_windows(arr_in, window_shape):
+def view_as_windows(arr_in, window_shape, step=1):
     """Rolling window view of the input n-dimensional array.
 
     Windows are overlapping views of the input array, with adjacent windows
@@ -108,10 +108,12 @@ def view_as_windows(arr_in, window_shape):
     ----------
     arr_in: ndarray
         The n-dimensional input array.
-
     window_shape: tuple
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
+    step : int
+        Number of elements to skip when moving the window forward (by
+        default, move forward by one).
 
     Returns
     -------
@@ -206,26 +208,34 @@ def view_as_windows(arr_in, window_shape):
 
     # -- basic checks on arguments
     if not isinstance(arr_in, np.ndarray):
-        raise TypeError("'arr_in' must be a numpy ndarray")
+        raise TypeError("`arr_in` must be a numpy ndarray")
     if not isinstance(window_shape, tuple):
-        raise TypeError("'window_shape' must be a tuple")
+        raise TypeError("`window_shape` must be a tuple")
     if not (len(window_shape) == arr_in.ndim):
-        raise ValueError("'window_shape' is incompatible with 'arr_in.shape'")
+        raise ValueError("`window_shape` is incompatible with `arr_in.shape`")
+
+    if step < 1:
+        raise ValueError("`step` must be >= 1")
 
     arr_shape = np.array(arr_in.shape)
     window_shape = np.array(window_shape, dtype=arr_shape.dtype)
 
     if ((arr_shape - window_shape) < 0).any():
-        raise ValueError("'window_shape' is too large")
+        raise ValueError("`window_shape` is too large")
 
     if ((window_shape - 1) < 0).any():
-        raise ValueError("'window_shape' is too small")
+        raise ValueError("`window_shape` is too small")
 
     # -- build rolling window view
     arr_in = np.ascontiguousarray(arr_in)
 
-    new_shape = tuple(arr_shape - window_shape + 1) + tuple(window_shape)
-    new_strides = arr_in.strides + arr_in.strides
+    new_shape = tuple((arr_shape - window_shape) // step + 1) + \
+                tuple(window_shape)
+
+    arr_strides = np.array(arr_in.strides)
+    new_strides = np.concatenate(
+                  (arr_strides * step, arr_strides)
+                  )
 
     arr_out = as_strided(arr_in, shape=new_shape, strides=new_strides)
 

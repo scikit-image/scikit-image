@@ -4,8 +4,8 @@ Piecewise Affine Transformation
 ===============================
 
 This example shows how to use the Piecewise Affine Transformation.
-"""
 
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage.transform import PiecewiseAffineTransform, warp

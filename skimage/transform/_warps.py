@@ -1,11 +1,18 @@
 import numpy as np
 from scipy import ndimage
-from ._geometric import (warp, SimilarityTransform, AffineTransform,
-                         ProjectiveTransform)
+
+from skimage.transform._geometric import (warp, SimilarityTransform,
+                                          AffineTransform)
+from skimage.measure import block_reduce
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
     """Resize image to match a certain size.
+
+    Performs interpolation to up-size or down-size images. For down-sampling
+    N-dimensional images by applying the arithmetic sum or mean, see
+    `skimage.measure.local_sum` and `skimage.transform.downscale_local_mean`,
+    respectively.
 
     Parameters
     ----------
@@ -13,7 +20,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
         Input image.
     output_shape : tuple or ndarray
         Size of the generated output image `(rows, cols[, dim])`. If `dim` is
-        not provided, the number of channels are preserved. In case the number
+        not provided, the number of channels is preserved. In case the number
         of input channels does not equal the number of output channels a
         3-dimensional interpolation is applied.
 
@@ -24,15 +31,23 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 
     Other parameters
     ----------------
-    order : int
-        Order of splines used in interpolation.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : string
+    order : int, optional
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.transform import resize
+    >>> image = data.camera()
+    >>> resize(image, (100, 100)).shape
+    (100, 100)
 
     """
 
@@ -59,7 +74,7 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
         out = ndimage.map_coordinates(image, coord_map, order=order, mode=mode,
                                       cval=cval)
 
-    else: # 2-dimensional interpolation
+    else:  # 2-dimensional interpolation
 
         # 3 control points necessary to estimate exact AffineTransform
         src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
@@ -80,6 +95,11 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
 def rescale(image, scale, order=1, mode='constant', cval=0.):
     """Scale image by a certain factor.
 
+    Performs interpolation to upscale or down-scale images. For down-sampling
+    N-dimensional images with integer factors by applying the arithmetic sum or
+    mean, see `skimage.measure.local_sum` and
+    `skimage.transform.downscale_local_mean`, respectively.
+
     Parameters
     ----------
     image : ndarray
@@ -95,15 +115,25 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
 
     Other parameters
     ----------------
-    order : int
-        Order of splines used in interpolation.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : string
+    order : int, optional
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.transform import rescale
+    >>> image = data.camera()
+    >>> rescale(image, 0.1).shape
+    (51, 51)
+    >>> rescale(image, 0.5).shape
+    (256, 256)
 
     """
 
@@ -129,7 +159,7 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
         Input image.
     angle : float
         Rotation angle in degrees in counter-clockwise direction.
-    resize: bool, optional
+    resize : bool, optional
         Determine whether the shape of the output image will be automatically
         calculated, so the complete rotated image exactly fits. Default is
         False.
@@ -141,15 +171,27 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
 
     Other parameters
     ----------------
-    order : int
-        Order of splines used in interpolation.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : string
+    order : int, optional
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.transform import rotate
+    >>> image = data.camera()
+    >>> rotate(image, 2).shape
+    (512, 512)
+    >>> rotate(image, 2, resize=True).shape
+    (530, 530)
+    >>> rotate(image, 90, resize=True).shape
+    (512, 512)
 
     """
 
@@ -184,6 +226,47 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
                 mode=mode, cval=cval)
 
 
+def downscale_local_mean(image, factors, cval=0):
+    """Down-sample N-dimensional image by local averaging.
+
+    The image is padded with `cval` if it is not perfectly divisible by the
+    integer factors.
+
+    In contrast to the 2-D interpolation in `skimage.transform.resize` and
+    `skimage.transform.rescale` this function may be applied to N-dimensional
+    images and calculates the local mean of elements in each block of size
+    `factors` in the input image.
+
+    Parameters
+    ----------
+    image : ndarray
+        N-dimensional input image.
+    factors : array_like
+        Array containing down-sampling integer factor along each axis.
+    cval : float, optional
+        Constant padding value if image is not perfectly divisible by the
+        integer factors.
+
+    Returns
+    -------
+    image : ndarray
+        Down-sampled image with same number of dimensions as input image.
+
+    Example
+    -------
+    >>> a = np.arange(15).reshape(3, 5)
+    >>> a
+    array([[ 0,  1,  2,  3,  4],
+           [ 5,  6,  7,  8,  9],
+           [10, 11, 12, 13, 14]])
+    >>> downscale_local_mean(a, (2, 3))
+    array([[3.5, 4.],
+           [5.5, 4.5]])
+
+    """
+    return block_reduce(image, factors, np.mean, cval)
+
+
 def _swirl_mapping(xy, center, rotation, strength, radius):
     x, y = xy.T
     x0, y0 = center
@@ -211,14 +294,14 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
     ----------
     image : ndarray
         Input image.
-    center : (x,y) tuple or (2,) ndarray
+    center : (x,y) tuple or (2,) ndarray, optional
         Center coordinate of transformation.
-    strength : float
+    strength : float, optional
         The amount of swirling applied.
-    radius : float
+    radius : float, optional
         The extent of the swirl in pixels.  The effect dies out
         rapidly beyond `radius`.
-    rotation : float
+    rotation : float, optional
         Additional rotation applied to the image.
 
     Returns
@@ -228,15 +311,16 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
 
     Other parameters
     ----------------
-    output_shape : tuple or ndarray
-        Size of the generated output image.
-    order : int
-        Order of splines used in interpolation.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : string
+    output_shape : tuple (rows, cols), optional
+        Shape of the output image generated. By default the shape of the input
+        image is preserved.
+    order : int, optional
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 

@@ -26,8 +26,25 @@ sys.path.append(os.path.join(curpath, '..', 'ext'))
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.pngmath', 'numpydoc',
-              'sphinx.ext.autosummary', 'plot_directive', 'plot2rst',
+              'sphinx.ext.autosummary', 'plot2rst',
               'sphinx.ext.intersphinx']
+
+# Determine if the matplotlib has a recent enough version of the
+# plot_directive, otherwise use the local fork.
+try:
+    from matplotlib.sphinxext import plot_directive
+except ImportError:
+    use_matplotlib_plot_directive = False
+else:
+    try:
+        use_matplotlib_plot_directive = (plot_directive.__version__ >= 2)
+    except AttributeError:
+        use_matplotlib_plot_directive = False
+
+if use_matplotlib_plot_directive:
+    extensions.append('matplotlib.sphinxext.plot_directive')
+else:
+    extensions.append('plot_directive')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -42,8 +59,8 @@ source_suffix = '.txt'
 master_doc = 'index'
 
 # General information about the project.
-project = u'skimage'
-copyright = u'2011, the scikit-image team'
+project = 'skimage'
+copyright = '2013, the scikit-image team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -185,13 +202,13 @@ htmlhelp_basename = 'scikitimagedoc'
 #latex_paper_size = 'letter'
 
 # The font size ('10pt', '11pt' or '12pt').
-#latex_font_size = '10pt'
+latex_font_size = '10pt'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('contents', 'scikitimage.tex', u'The Image Scikit Documentation',
-   u'SciPy Developers', 'manual'),
+  ('contents', 'scikit-image.tex', u'The scikit-image Documentation',
+   u'scikit-image development team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -203,13 +220,32 @@ latex_documents = [
 #latex_use_parts = False
 
 # Additional stuff for the LaTeX preamble.
-#latex_preamble = ''
+latex_preamble = r'''
+\usepackage{enumitem}
+\setlistdepth{100}
+
+\usepackage{amsmath}
+\DeclareUnicodeCharacter{00A0}{\nobreakspace}
+
+% In the parameters section, place a newline after the Parameters header
+\usepackage{expdlist}
+\let\latexdescription=\description
+\def\description{\latexdescription{}{} \breaklabel}
+
+% Make Examples/etc section headers smaller and more compact
+\makeatletter
+\titleformat{\paragraph}{\normalsize\py@HeaderFamily}%
+            {\py@TitleColor}{0em}{\py@TitleColor}{\py@NormalColor}
+\titlespacing*{\paragraph}{0pt}{1ex}{0pt}
+\makeatother
+
+'''
 
 # Documents to append as an appendix to all manuals.
 #latex_appendices = []
 
 # If false, no module index is generated.
-#latex_use_modindex = True
+latex_use_modindex = False
 
 # -----------------------------------------------------------------------------
 # Numpy extensions
@@ -243,7 +279,7 @@ matplotlib.rcParams.update({
 
 """
 plot_include_source = True
-plot_formats = [('png', 100)]
+plot_formats = [('png', 100), ('pdf', 100)]
 
 plot2rst_index_name = 'README'
 plot2rst_rcparams = {'image.cmap' : 'gray',

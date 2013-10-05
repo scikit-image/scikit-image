@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def join_segmentations(s1, s2):
     """Return the join of the two input segmentations.
 
@@ -19,7 +20,6 @@ def join_segmentations(s1, s2):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.segmentation import join_segmentations
     >>> s1 = np.array([[0, 0, 1, 1],
     ...                [0, 2, 1, 1],
@@ -41,6 +41,7 @@ def join_segmentations(s1, s2):
     j = relabel_from_one(j)[0]
     return j
 
+
 def relabel_from_one(label_field):
     """Convert labels in an arbitrary label field to {1, ... number_of_labels}.
 
@@ -50,18 +51,32 @@ def relabel_from_one(label_field):
 
     Parameters
     ----------
-    label_field : numpy ndarray (integer type)
+    label_field : numpy array of int, arbitrary shape
 
     Returns
     -------
-    relabeled : numpy array of same shape as ar
-    forward_map : 1d numpy array of length np.unique(ar) + 1
-    inverse_map : 1d numpy array of length len(np.unique(ar))
-        The length is len(np.unique(ar)) + 1 if 0 is not in np.unique(ar)
+    relabeled : numpy array of int, same shape as `label_field`
+        The input label field with labels mapped to
+        {1, ..., number_of_labels}.
+    forward_map : numpy array of int, shape ``(label_field.max() + 1,)``
+        The map from the original label space to the returned label
+        space. Can be used to re-apply the same mapping. See examples
+        for usage.
+    inverse_map : numpy array of int, shape ``(len(np.unique(label_field)),)``
+        The map from the new label space to the original space. This
+        can be used to reconstruct the original label field from the
+        relabeled one.
+
+    Notes
+    -----
+    The forward map can be extremely big for some inputs, since its
+    length is given by the maximum of the label field. However, in most
+    situations, ``label_field.max()`` is much smaller than
+    ``label_field.size``, and in these cases the forward map is
+    guaranteed to be smaller than either the input or output images.
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.segmentation import relabel_from_one
     >>> label_field = array([1, 1, 5, 5, 8, 99, 42])
     >>> relab, fw, inv = relabel_from_one(label_field)
@@ -91,3 +106,4 @@ def relabel_from_one(label_field):
         labels = np.concatenate(([0], labels))
     inverse_map = labels
     return forward_map[label_field], forward_map, inverse_map
+

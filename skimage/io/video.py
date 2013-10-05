@@ -256,7 +256,7 @@ class Video(object):
         Backend to use.
     """
     def __init__(self, source=None, size=None, sync=False, backend=None):
-        if backend == None:
+        if backend is None:
             # select backend that is available
             if gstreamer_available:
                 self.video = GstVideo(source, size, sync)

@@ -1,8 +1,10 @@
-__all__ = ['convex_hull_image']
+__all__ = ['convex_hull_image', 'convex_hull_object']
 
 import numpy as np
 from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
+from skimage.morphology import label
+from skimage.util import unique_rows
 
 
 def convex_hull_image(image):
@@ -14,12 +16,12 @@ def convex_hull_image(image):
     Parameters
     ----------
     image : ndarray
-        Binary input image.  This array is cast to bool before processing.
+        Binary input image. This array is cast to bool before processing.
 
     Returns
     -------
-    hull : ndarray of uint8
-        Binary image with pixels in convex hull set to 255.
+    hull : ndarray of bool
+        Binary image with pixels in convex hull set to True.
 
     References
     ----------
@@ -42,7 +44,9 @@ def convex_hull_image(image):
                                                  (-0.5, 0.5, 0, 0))):
         coords_corners[i * N:(i + 1) * N] = coords + [x_offset, y_offset]
 
-    coords = coords_corners
+    # repeated coordinates can *sometimes* cause problems in 
+    # scipy.spatial.Delaunay, so we remove them.
+    coords = unique_rows(coords_corners)
 
     try:
         from scipy.spatial import Delaunay
@@ -64,3 +68,45 @@ def convex_hull_image(image):
     mask = grid_points_inside_poly(image.shape[:2], v)
 
     return mask
+
+
+def convex_hull_object(image, neighbors=8):
+    """Compute the convex hull image of individual objects in a binary image.
+
+    The convex hull is the set of pixels included in the smallest convex
+    polygon that surround all white pixels in the input image.
+
+    Parameters
+    ----------
+    image : ndarray
+        Binary input image.
+    neighbors : {4, 8}, int
+        Whether to use 4- or 8-connectivity.
+
+    Returns
+    -------
+    hull : ndarray of bool
+        Binary image with pixels in convex hull set to True.
+
+    Note
+    ----
+    This function uses skimage.morphology.label to define unique objects,
+    finds the convex hull of each using convex_hull_image, and combines
+    these regions with logical OR. Be aware the convex hulls of unconnected
+    objects may overlap in the result. If this is suspected, consider using
+    convex_hull_image separately on each object.
+
+    """
+
+    if neighbors != 4 and neighbors != 8:
+        raise ValueError('Neighbors must be either 4 or 8.')
+
+    labeled_im = label(image, neighbors, background=0)
+    convex_obj = np.zeros(image.shape, dtype=bool)
+    convex_img = np.zeros(image.shape, dtype=bool)
+
+    for i in range(0, labeled_im.max() + 1):
+        convex_obj = convex_hull_image(labeled_im == i)
+        convex_img = np.logical_or(convex_img, convex_obj)
+
+    return convex_img

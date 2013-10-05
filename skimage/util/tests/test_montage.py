@@ -51,6 +51,23 @@ def test_shape():
 
     arr_out = montage2d(arr_in)
     assert_equal(arr_out.shape, (alpha * height, alpha * width))
+    
+    
+def test_grid_shape():
+    n_images = 6
+    height, width = 2, 2
+    arr_in = np.arange(n_images * height * width, dtype=np.float32)
+    arr_in = arr_in.reshape(n_images, height, width)
+    arr_out = montage2d(arr_in, grid_shape=(3,2))
+    correct_arr_out = np.array(
+	[[  0.,   1.,   4.,   5.],
+	 [  2.,   3.,   6.,   7.],
+	 [  8.,   9.,  12.,  13.],
+	 [ 10.,  11.,  14.,  15.],
+	 [ 16.,  17.,  20.,  21.],
+	 [ 18.,  19.,  22.,  23.]]
+    )
+    assert_array_equal(arr_out, correct_arr_out)
 
 
 def test_rescale_intensity():
@@ -79,3 +96,7 @@ def test_rescale_intensity():
 def test_error_ndim():
     arr_error = np.random.randn(1, 2, 3, 4)
     montage2d(arr_error)
+
+
+if __name__ == '__main__':
+    np.testing.run_module_suite()

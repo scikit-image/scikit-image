@@ -3,8 +3,6 @@
 Gabors / Primary Visual Cortex "Simple Cells" from Lena
 =======================================================
 
-(under construction)
-
 How to build a (bio-plausible) "sparse" dictionary (or 'codebook', or
 'filterbank') for e.g. image classification without any fancy math and
 with just standard python scientific libraries?
@@ -37,7 +35,6 @@ is not rocket science.
        Interaction, and Functional Architecture in the Cat's Visual Cortex,
        J. Physiol. 160 pp.  106-154 1962
 """
-
 import numpy as np
 from scipy.cluster.vq import kmeans2
 from scipy import ndimage as ndi

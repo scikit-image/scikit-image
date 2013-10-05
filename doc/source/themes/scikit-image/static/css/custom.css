@@ -41,6 +41,12 @@ h6 {
     font-size: 13px;
     line-height: 15px;
 }
+blockquote {
+    border-left: 0;
+}
+dt {
+    font-weight: normal;
+}
 
 .logo {
     float: left;
@@ -71,6 +77,10 @@ h6 {
 }
 .sidebar-box-heading {
     padding-left: 15px;
+}
+
+#current {
+    font-weight: bold;
 }
 
 .headerlink {
@@ -221,4 +231,9 @@ p.admonition-title {
 .figure .caption {
     width: 200px;
     text-align: center !important;
+}
+
+/* misc */
+div.math {
+    text-align: center;
 }

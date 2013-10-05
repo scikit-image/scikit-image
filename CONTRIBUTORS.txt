@@ -48,7 +48,7 @@
   Incorporating CellProfiler's Sobel edge detector, build and bug fixes.
   Radon transform, template matching.
 
-- Emmanuelle Guillart
+- Emmanuelle Gouillart
   Total variation noise filtering, integration of CellProfiler's
   mathematical morphology tools, random walker segmentation,
   tutorials, and more.
@@ -113,7 +113,8 @@
   Fixes and tests for Histograms of Oriented Gradients.
 
 - Joshua Warner
-  Multichannel random walker segmentation.
+  Multichannel random walker segmentation, unified peak finder backend,
+  n-dimensional array padding, marching cubes, bug and doc fixes.
 
 - Petter Strandmark
   Perimeter calculation in regionprops.
@@ -131,8 +132,25 @@
   Dense DAISY feature description, circle perimeter drawing.
 
 - François Boulogne
-  Andres Method for circle perimeter, ellipse perimeter drawing.
-  Circular Hough Transform
+  Drawing: Andres Method for circle perimeter, ellipse perimeter drawing, Bezier curve.
+  Circular and elliptical Hough Transforms
+  Various fixes
 
 - Thouis Jones
   Vectorized operators for arrays of 16-bit ints.
+
+- Xavier Moles Lopez
+  Color separation (color deconvolution) for several stainings.
+
+- Jostein Bø Fløystad
+  Reconstruction circle mode for Radon transform
+  Simultaneous Algebraic Reconstruction Technique for inverse Radon transform
+
+- Matt Terry
+  Color difference functions
+
+- Eugene Dvoretsky
+  Yen threshold implementation.
+
+- Riaan van den Dool
+  skimage.io plugin: GDAL

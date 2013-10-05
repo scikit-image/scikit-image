@@ -21,8 +21,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
     Raises
     ------
-    ValueError
+    TypeError
         If the input array is of an invalid type, such as float or string.
+    ValueError
+        If the input array contains negative values.
 
     Returns
     -------
@@ -32,7 +34,6 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     Examples
     --------
     >>> from skimage import morphology
-    >>> from scipy import ndimage as nd
     >>> a = np.array([[0, 0, 0, 1, 0],
     ...               [1, 1, 1, 0, 0],
     ...               [1, 1, 1, 0, 1]], bool)
@@ -50,10 +51,10 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> d is a
     True
     """
-    # Should use `issubdtype` below, but there's a bug in numpy 1.7
-    if not (ar.dtype == bool or np.issubdtype(ar.dtype, int)):
-        raise ValueError("Only bool or integer image types are supported. "
-                         "Got %s." % ar.dtype)
+    # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
+    if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
+        raise TypeError("Only bool or integer image types are supported. "
+                        "Got %s." % ar.dtype)
 
     if in_place:
         out = ar
@@ -65,7 +66,8 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
     if out.dtype == bool:
         selem = nd.generate_binary_structure(ar.ndim, connectivity)
-        ccs = nd.label(ar, selem)[0]
+        ccs = np.zeros_like(ar, dtype=np.int32)
+        nd.label(ar, selem, output=ccs)
     else:
         ccs = out
 

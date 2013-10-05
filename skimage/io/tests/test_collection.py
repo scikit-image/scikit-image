@@ -2,13 +2,17 @@ import sys
 import os.path
 
 import numpy as np
-from numpy.testing import *
+from numpy.testing import (assert_raises,
+                           assert_equal,
+                           assert_array_almost_equal,
+                           )
 from numpy.testing.decorators import skipif
 
 from skimage import data_dir
 from skimage.io import ImageCollection, MultiImage
 from skimage.io.collection import alphanumeric_key
 from skimage.io import Image as ioImage
+from skimage._shared import six
 
 
 try:
@@ -18,8 +22,6 @@ except ImportError:
 else:
     PIL_available = True
 
-if sys.version_info[0] > 2:
-    basestring = str
 
 class TestAlphanumericKey():
     def setUp(self):
@@ -55,7 +57,7 @@ class TestImageCollection():
     def test_getitem(self):
         num = len(self.collection)
         for i in range(-num, num):
-            assert type(self.collection[i]) is ioImage
+            assert type(self.collection[i]) is np.ndarray
         assert_array_almost_equal(self.collection[0],
                                   self.collection[-num])
 
@@ -126,7 +128,7 @@ class TestMultiImage():
 
     @skipif(not PIL_available)
     def test_files_property(self):
-        assert isinstance(self.img.filename, basestring)
+        assert isinstance(self.img.filename, six.string_types)
 
         def set_filename(f):
             self.img.filename = f
@@ -148,4 +150,5 @@ class TestMultiImage():
 
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

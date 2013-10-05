@@ -34,9 +34,19 @@ def test_page():
     data.page()
 
 
-def test_page():
+def test_clock():
     """ Test that "clock" image can be loaded. """
     data.clock()
+
+
+def test_chelsea():
+    """ Test that "chelsea" image can be loaded. """
+    data.chelsea()
+
+
+def test_coffee():
+    """ Test that "coffee" image can be loaded. """
+    data.coffee()
 
 
 if __name__ == "__main__":
