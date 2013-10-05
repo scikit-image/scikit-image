@@ -1,6 +1,7 @@
 skimage (0.9.0-1) UNRELEASED; urgency=low
 
   * New upstream release (Closes: #693523).
+  * Replace mentions of old package name.
 
  -- Stefan van der Walt <stefan@sun.ac.za>  Sat, 05 Oct 2013 13:21:19 +0200
 

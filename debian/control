@@ -16,9 +16,9 @@ Build-Depends: debhelper (>= 7.0.50),
                python-support
 Standards-Version: 3.9.4
 XS-Python-Version: >= 2.6
-Homepage: http://scikits-image.org
-Vcs-Browser: https://github.com/scikits-image/scikits-image
-Vcs-Git: git://github.com/scikits-image/scikits-image.git
+Homepage: http://scikit-image.org
+Vcs-Browser: https://github.com/scikit-image/scikit-image
+Vcs-Git: git://github.com/scikit-image/scikit-image.git
 
 Package: python-skimage
 Architecture: all
@@ -31,7 +31,7 @@ Provides: ${python:Provides}
 Recommends: python-nose, python-matplotlib (>= 1.0), python-imaging, python-qt4
 Suggests: python-skimage-doc, python-opencv
 Description: Python modules for image processing
- scikits-image is a collection of image processing algorithms for
+ scikit-image is a collection of image processing algorithms for
  Python.  It performs tasks such as image loading, filtering,
  morphology, segmentation, color conversions, and transformations.
 
@@ -40,7 +40,7 @@ Architecture: all
 Section: doc
 Depends: ${misc:Depends}, libjs-jquery
 Suggests: python-skimage
-Description: Documentation and examples for scikits-image
+Description: Documentation and examples for scikit-image
  This package contains documentation and example scripts for
  python-skimage.
 
@@ -50,6 +50,6 @@ Depends: ${misc:Depends}, ${shlibs:Depends}, ${python:Depends}, python-numpy
 Recommends: python-skimage
 Provides: ${python:Provides}
 XB-Python-Version: ${python:Versions}
-Description: Optimized low-level algorithms for scikits-image
+Description: Optimized low-level algorithms for scikit-image
  This is an add-on package for python-skimage. It provides
  optimized, low-level implementations of algorithms.
