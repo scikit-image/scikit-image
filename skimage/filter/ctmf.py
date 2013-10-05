@@ -23,7 +23,7 @@ def median_filter(image, radius=2, mask=None, percent=50):
 
     Parameters
     ----------
-    image : (M,N) ndarray
+    image : (M, N) ndarray
         Input image.
     radius : int
         Radius (in pixels) of a circle inscribed into the filtering
@@ -38,7 +38,7 @@ def median_filter(image, radius=2, mask=None, percent=50):
 
     Returns
     -------
-    out : (M,N) ndarray
+    out : (M, N) ndarray
         Filtered array. In areas where the median filter does
         not overlap the mask, the filtered result is undefined, but
         in practice, it will be the lowest value in the valid area.
@@ -103,3 +103,4 @@ def median_filter(image, radius=2, mask=None, percent=50):
     else:
         result = output
     return result
+
