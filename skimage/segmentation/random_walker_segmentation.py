@@ -9,14 +9,25 @@ significantly the performance.
 """
 
 import warnings
+import sys
+import os
 
 import numpy as np
 from scipy import sparse, ndimage
+
 try:
     from scipy.sparse.linalg.dsolve import umfpack
+    old_del = umfpack.UmfpackContext.__del__
+    def new_del(self):
+        try:
+            old_del(self)
+        except AttributeError:
+            pass
+    umfpack.UmfpackContext.__del__ = new_del
     UmfpackContext = umfpack.UmfpackContext()
 except:
     UmfpackContext = None
+
 try:
     from pyamg import ruge_stuben_solver
     amg_loaded = True
