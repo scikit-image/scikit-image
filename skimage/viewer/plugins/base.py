@@ -182,7 +182,12 @@ class Plugin(QtGui.QDialog):
         This method is called by the viewer when the original image is updated.
         """
         self.arguments[0] = image
+        self._on_new_image(image)
         self.filter_image()
+
+    def _on_new_image(self, image):
+        """Override this method to update your plugin for new images."""
+        pass
 
     @property
     def filtered_image(self):
