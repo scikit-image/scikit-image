@@ -57,16 +57,17 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
 
     Examples
     --------
-    >>> from scipy.misc import lena
-    >>> A = lena()
-    >>> # 1-level db4 transform, soft threshold all detail subbands at t=10.
-    >>> B = wavelet_filter(A, "db4", 10.)
-    >>> # 3-level Haar transform, hard threshold each level with its own value
-    >>> t = [10., 8., 3.]
-    >>> B = wavelet_filter(A, "haar", t, thresh_type="hard", level=3)
-    >>> # 2-level sym14 transform, with each subband getting its own threshold
-    >>> t = [[10., 80., 30.], [80., 17., 19.]]
-    >>> B = wavelet_filter(A, "sym14", t, level=2)
+
+    from scipy.misc import lena
+    A = lena()
+    # 1-level db4 transform, soft threshold all detail subbands at t=10.
+    B = wavelet_filter(A, 10.,  wavelet="db4")
+    # 3-level Haar transform, hard threshold each level with its own value
+    t = [10., 8., 3.]
+    B = wavelet_filter(A, t, thresh_type="hard", level=3)
+    # 2-level sym14 transform, with each subband getting its own threshold
+    t = [[10., 80., 30.], [80., 17., 19.]]
+    B = wavelet_filter(A, t, wavelet="sym14", level=2)
     """
 
     if isinstance(thresholds, float) or isinstance(thresholds, int):
