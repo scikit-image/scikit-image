@@ -52,7 +52,7 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
     dc = 1 / float(xradius)
 
     r, c = np.ogrid[-1:1:dr, -1:1:dc]
-    rr, cc = np.nonzero(r ** 2  + c ** 2 < 1)
+    rr, cc = np.nonzero(r ** 2 + c ** 2 < 1)
 
     rr.flags.writeable = True
     cc.flags.writeable = True

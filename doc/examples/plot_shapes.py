@@ -1,11 +1,12 @@
 """
-===========
-Fill shapes
-===========
+======
+Shapes
+======
 
-This example shows how to fill several different shapes:
+This example shows how to draw several different shapes:
 
 * line
+* Bezier curve
 * polygon
 * circle
 * ellipse
@@ -14,16 +15,17 @@ This example shows how to fill several different shapes:
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage.draw import line, polygon, circle, circle_perimeter, \
-                         ellipse, ellipse_perimeter
-import numpy as np
+from skimage.draw import (line, polygon, circle,
+                          circle_perimeter,
+                          ellipse, ellipse_perimeter,
+                          bezier_curve)
 import math
 
 img = np.zeros((500, 500, 3), dtype=np.uint8)
 
 # draw line
 rr, cc = line(120, 123, 20, 400)
-img[rr,cc,0] = 255
+img[rr, cc, 0] = 255
 
 # fill polygon
 poly = np.array((
@@ -33,19 +35,23 @@ poly = np.array((
     (220, 590),
     (300, 300),
 ))
-rr, cc = polygon(poly[:,0], poly[:,1], img.shape)
-img[rr,cc,1] = 255
+rr, cc = polygon(poly[:, 0], poly[:, 1], img.shape)
+img[rr, cc, 1] = 255
 
 # fill circle
 rr, cc = circle(200, 200, 100, img.shape)
-img[rr,cc,:] = (255, 255, 0)
+img[rr, cc, :] = (255, 255, 0)
 
 # fill ellipse
 rr, cc = ellipse(300, 300, 100, 200, img.shape)
-img[rr,cc,2] = 255
+img[rr, cc, 2] = 255
 
 # circle
 rr, cc = circle_perimeter(120, 400, 15)
+img[rr, cc, :] = (255, 0, 0)
+
+# Bezier curve
+rr, cc = bezier_curve(70, 100, 10, 10, 150, 100, 1)
 img[rr, cc, :] = (255, 0, 0)
 
 # ellipses
@@ -57,4 +63,33 @@ rr, cc = ellipse_perimeter(120, 400, 60, 20, orientation=math.pi / 2.)
 img[rr, cc, :] = (255, 255, 255)
 
 plt.imshow(img)
+plt.show()
+
+"""
+
+Anti-aliased drawing for:
+* line
+* circle
+
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from skimage.draw import (line_aa,
+                          circle_perimeter_aa)
+
+img = np.zeros((100, 100), dtype=np.uint8)
+
+# anti-aliased line
+rr, cc, val = line_aa(12, 12, 20, 50)
+img[rr, cc] = val * 255
+
+# anti-aliased circle
+rr, cc, val = circle_perimeter_aa(60, 40, 30)
+img[rr, cc] = val * 255
+
+
+plt.imshow(img, cmap=plt.cm.gray, interpolation='nearest')
+plt.title('Anti-aliasing')
 plt.show()
