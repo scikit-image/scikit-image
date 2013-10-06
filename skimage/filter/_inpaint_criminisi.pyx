@@ -80,6 +80,7 @@ cpdef _inpaint_criminisi(painted, mask, window, ssd_thresh):
     gauss_mask = _gaussian(sigma, (window, window))
     confidence = 1. - mask
     mask_ubyte = mask.astype(np.uint8)
+    mask_contig = np.ascontiguousarray(mask[inner])
 
     while True:
         # Generate the fill_front, boundary of ROI (region to be synthesised)
@@ -113,7 +114,7 @@ cpdef _inpaint_criminisi(painted, mask, window, ssd_thresh):
         valid_mask = gauss_mask * (1 - mask_template)
 
         # Template matching
-        i_m, j_m = _sum_sq_diff(source_image, mask[inner], template,
+        i_m, j_m = _sum_sq_diff(source_image, mask_contig, template,
                                 valid_mask, ssd_thresh, i_max, j_max)
 
         if i_m != -1 and j_m != -1:
@@ -129,10 +130,10 @@ cpdef _inpaint_criminisi(painted, mask, window, ssd_thresh):
     return painted[inner]
 
 
-cdef _priority_calc(cnp.int16_t[:, ::] fill_front,
-                    cnp.float_t[:, ::] confidence,
-                    cnp.float_t[:, ::] dx, cnp.float_t[:, ::] dy,
-                    cnp.int16_t[:, ::] nx, cnp.int16_t[:, ::] ny,
+cdef _priority_calc(cnp.int16_t[:, ::1] fill_front,
+                    cnp.float_t[:, ::1] confidence,
+                    cnp.float_t[:, ::1] dx, cnp.float_t[:, ::1] dy,
+                    cnp.int8_t[:, ::1] nx, cnp.int8_t[:, ::1] ny,
                     cnp.uint8_t window):
     """Calculation of the priority term for the region of interest boundary
     pixels to determine the order of filling.
@@ -165,7 +166,7 @@ cdef _priority_calc(cnp.int16_t[:, ::] fill_front,
     """
     cdef:
         Py_ssize_t i, j, z, k, l, i_data, j_data, i_max = -1, j_max = -1
-        Py_ssize_t[::] fill_front_x, fill_front_y
+        Py_ssize_t[::1] fill_front_x, fill_front_y
         cnp.float_t max_priority = 0, conf, data_term, mod, max_mod, priority
         cnp.uint8_t offset
 
@@ -221,10 +222,10 @@ cdef _priority_calc(cnp.int16_t[:, ::] fill_front,
     return i_max, j_max
 
 
-cdef _sum_sq_diff(cnp.float_t[:, ::] image,
-                  cnp.int16_t[:, ::] mask,
-                  cnp.float_t[:, ::] template,
-                  cnp.float_t[:, ::] valid_mask,
+cdef _sum_sq_diff(cnp.float_t[:, ::1] image,
+                  cnp.int8_t[:, ::1] mask,
+                  cnp.float_t[:, ::1] template,
+                  cnp.float_t[:, ::1] valid_mask,
                   cnp.float_t ssd_thresh,
                   Py_ssize_t i_b, Py_ssize_t j_b):
     """This function performs template matching. The metric used is Sum of

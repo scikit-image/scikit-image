@@ -74,7 +74,7 @@ def inpaint_criminisi(image, mask, window, ssd_thresh=0.2):
     # Padding
     pad_size = (h + window - 1, w + window - 1)
     image_padded = np.zeros(pad_size, dtype=np.float)
-    mask_padded = np.zeros(pad_size, np.int16)
+    mask_padded = np.zeros(pad_size, dtype=np.int8)
 
     image_padded[offset:offset + h, offset:offset + w] = image
     mask_padded[offset:offset + h, offset:offset + w] = mask
