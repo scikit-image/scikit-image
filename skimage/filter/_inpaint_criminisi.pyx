@@ -1,3 +1,8 @@
+#cython: cdivision=True
+#cython: boundscheck=False
+#cython: nonecheck=False
+#cython: wraparound=False
+
 from __future__ import division
 import numpy as np
 from skimage.morphology import disk
