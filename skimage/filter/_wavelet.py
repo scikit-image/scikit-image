@@ -99,12 +99,3 @@ def _filt(bands, vals, thresh_type):
     _thresh = _thresh_func[thresh_type]
     return [_thresh(band, t) for band, t in zip(bands, vals)]
 
-if __name__ == "__main__":
-    from qimshow import qimshow
-    from scipy.misc import lena
-    A = lena()
-    print A.std()
-    t = [[10., 80., 30.], [80., 17., 19.]]
-    B = wavelet_filter(A, "sym14", t, thresh_type="hard", level=2)
-    print B.std()
-    qimshow(B)

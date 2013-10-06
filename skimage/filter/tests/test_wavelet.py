@@ -1,9 +1,9 @@
 import numpy as np
 
-from _wavelet import wavelet_filter
+from skimage.filter._wavelet import wavelet_filter
 
 
-def test_null_sigma():
+def test_null():
     a = np.zeros((4, 4))
     assert np.all(wavelet_filter(a, 1) == a)
 
