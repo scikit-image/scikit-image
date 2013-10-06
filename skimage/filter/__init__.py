@@ -1,5 +1,6 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
 from .ctmf import median_filter
+from ._wavelet import wavelet_filter
 from ._gaussian import gaussian_filter
 from ._canny import canny
 from .edges import (sobel, hsobel, vsobel, scharr, hscharr, vscharr, prewitt,
@@ -17,6 +18,7 @@ __all__ = ['inverse',
            'wiener',
            'LPIFilter2D',
            'median_filter',
+           'wavelet_filter',
            'gaussian_filter',
            'canny',
            'sobel',
