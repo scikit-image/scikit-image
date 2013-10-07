@@ -9,8 +9,6 @@ significantly the performance.
 """
 
 import warnings
-import sys
-import os
 
 import numpy as np
 from scipy import sparse, ndimage
