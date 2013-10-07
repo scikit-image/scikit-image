@@ -10,10 +10,8 @@ def _convolve(image, selem, out, cval):
     selem_sum = np.sum(selem)
     if selem_sum < 2 ** 8:
         out_dtype = np.uint8
-    elif selem_sum < 2 ** 16:
-        out_dtype = np.uint16
     else:
-        out_dtype = np.uint32
+        out_dtype = np.intp
 
     if out is None:
         out = np.zeros_like(image, dtype=out_dtype)
