@@ -1,5 +1,36 @@
 import numpy as np
+import warnings
 from scipy import ndimage
+
+
+def _convolve(image, selem, out, cval):
+
+    # determine the smallest integer dtype which does not overflow
+    selem = selem != 0
+    selem_sum = np.sum(selem)
+    if selem_sum < 2 ** 8:
+        out_dtype = np.uint8
+    elif selem_sum < 2 ** 16:
+        out_dtype = np.uint16
+    else:
+        out_dtype = np.uint32
+
+    if out is None:
+        out = np.zeros_like(image, dtype=out_dtype)
+    else:
+        iinfo = np.iinfo(out.dtype)
+        if iinfo.max - iinfo.min < selem_sum:
+            raise ValueError('Sum of structuring (=%d) element results in '
+                             'overflow for dtype of `out`. You must raise the '
+                             'bit-depth.')
+
+    conv = ndimage.convolve(image > 0, selem, output=out,
+                            mode='constant', cval=cval)
+
+    if conv is not None:
+        out = conv
+
+    return out, selem_sum
 
 
 def binary_erosion(image, selem, out=None):
@@ -29,11 +60,8 @@ def binary_erosion(image, selem, out=None):
 
     """
 
-    conv = ndimage.convolve((image > 0).view(np.uint8), selem, output=out,
-                            mode='constant', cval=1)
-    if conv is not None:
-        out = conv
-    return np.equal(out, np.sum(selem), out=out)
+    out, selem_sum = _convolve(image, selem, out, 1)
+    return np.equal(out, selem_sum, out=out).astype(np.bool, copy=False)
 
 
 def binary_dilation(image, selem, out=None):
@@ -64,11 +92,8 @@ def binary_dilation(image, selem, out=None):
 
     """
 
-    conv = ndimage.convolve((image > 0).view(np.uint8), selem, output=out,
-                            mode='constant', cval=0)
-    if conv is not None:
-        out = conv
-    return np.not_equal(out, 0, out=out)
+    out, _ = _convolve(image, selem, out, 0)
+    return np.not_equal(out, 0, out=out).astype(np.bool, copy=False)
 
 
 def binary_opening(image, selem, out=None):
