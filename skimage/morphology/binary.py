@@ -1,5 +1,4 @@
 import numpy as np
-import warnings
 from scipy import ndimage
 
 
