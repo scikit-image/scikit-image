@@ -20,9 +20,9 @@ def inpaint_criminisi(image, mask, window, ssd_thresh=0.2):
     mask : (M, N) array, bool
         True values are to be reconstructed.
     window : int
-        Width of the neighborhood window. (window, window) patch with centre at
-        the pixel to be inpainted. Refer to Notes below for details on
-        choice of value. Preferably odd, for symmetry.
+        Width of the neighborhood window. ``(window, window)`` patch with
+        centre at the pixel to be inpainted. Refer to Notes below for details
+        on choice of value. Odd, for symmetry.
     ssd_thresh : float, optional
         Maximum tolerable SSD (Sum of Squared Difference) between the template
         around a pixel to be filled and an equal size image sample for
@@ -35,13 +35,13 @@ def inpaint_criminisi(image, mask, window, ssd_thresh=0.2):
 
     Notes
     -----
-    For best results, `window` should be larger in size than the largest texel
-    (texture element) being inpainted. A texel is the smallest repeating block
-    of pixels in a texture or pattern. For example, in the case below of the
-    `skimage.data.checkerboard` image, the single white/black square is the
-    largest texel which is of shape `(25, 25)`. A value larger than this yields
-    perfect reconstruction, but in case of a value smaller than this perfect
-    reconstruction may not be possible.
+    For best results, ``window`` should be larger in size than the largest
+    texel (texture element) being inpainted. A texel is the smallest repeating
+    block of pixels in a texture or pattern. For example, in the case below of
+    the ``skimage.data.checkerboard`` image, the single white/black square is
+    the largest texel which is of shape ``(25, 25)``. A value larger than this
+    yields perfect reconstruction, but in case of a value smaller than this
+    perfect reconstruction may not be possible.
 
     References
     ----------

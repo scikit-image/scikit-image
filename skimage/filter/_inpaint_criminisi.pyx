@@ -26,8 +26,8 @@ cpdef _inpaint_criminisi(painted, mask, window, ssd_thresh):
     mask : (M, N) array, int8
         Texture for True values are to be synthesised.
     window : int
-        Width of the neighborhood window. (window, window) patch with centre at
-        the pixel to be inpainted. Preferably odd, for symmetry.
+        Width of the neighborhood window. ``(window, window)`` patch with
+        centre at the pixel to be inpainted. Odd, for symmetry.
     ssd_thresh : float
         Maximum tolerable SSD (Sum of Squared Difference) between the template
         around a pixel to be filled and an equal size image sample for
@@ -40,31 +40,32 @@ cpdef _inpaint_criminisi(painted, mask, window, ssd_thresh):
 
     Notes
     -----
-    For best results, `window` should be larger in size than the largest texel
-    (texture element) being inpainted. Texel is the smallest repeating block
-    of pixels in a texture or pattern. For example, in the case below of
-    `skimage.data.checkerboard` image, the single white/black square is the
-    largest texel which is of `(25, 25)` shape. A value larger than this yields
-    perfect reconstruction, but a value smaller than this, may have couple of
-    pixels off.
+    For best results, ``window`` should be larger in size than the largest
+    texel (texture element) being inpainted. A texel is the smallest repeating
+    block of pixels in a texture or pattern. For example, in the case below of
+    the ``skimage.data.checkerboard`` image, the single white/black square is
+    the largest texel which is of shape ``(25, 25)``. A value larger than this
+    yields perfect reconstruction, but in case of a value smaller than this
+    perfect reconstruction may not be possible.
 
     Outline of the algorithm for Texture Synthesis is as follows:
     - Loop: Generate the boundary pixels of the region to be inpainted
-        - Loop: Compute the priority of each pixel
-            - Generate a template of (window, window), center: boundary pixel
-            - confidence_term: avg amount of reliable information in template
-            - data_term: strength of the isophote hitting this boundary pixel
-            - priority = data_term * confidence_term
-        - Repeat for all boundary pixels and chose the pixel with max priority
-        - Template matching of the pixel with max priority
-            - Generate a template of (window, window) around this pixel
+        - Loop: Compute the priority of each pixel.
+            - Generate a template of ``(window, window)``, center: boundary
+              pixel.
+            - confidence_term: avg amount of reliable information in template.
+            - data_term: strength of the isophote hitting this boundary pixel.
+            - ``priority = data_term * confidence_term``.
+        - Repeat for all boundary pixels and chose the pixel with max priority.
+        - Template matching of the pixel with max priority.
+            - Generate a template of ``(window, window)`` around this pixel.
             - Compute the Sum of Squared Difference (SSD) between template and
-              similar sized patches across the image
+              similar sized patches across the image.
             - Find the pixel with smallest SSD, such that patch isn't where
-              template is located (False positive)
+              template is located (False positive).
             - Update the intensity value of the unknown region of template as
-              the corresponding value from matched patch
-    - Repeat until all pixels are inpainted
+              the corresponding value from matched patch.
+    - Repeat until all pixels are inpainted.
 
     For further information refer to [1]_.
 
@@ -160,8 +161,8 @@ cdef _priority_calc(cnp.int16_t[:, ::1] fill_front,
         Y component of the unit vector at a pixel, perpendicular to the path of
         boundary of the region to be inpainted through this pixel.
     window : int
-        Size of the neighborhood window. (window, window) patch with centre at
-        the pixel to be inpainted.
+        Size of the neighborhood window. ``(window, window)`` patch with
+        centre at the pixel to be inpainted.
 
     Returns
     -------
