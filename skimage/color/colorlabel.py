@@ -101,6 +101,9 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
             bg_color = _rgb_vector(bg_color)
             color_cycle = itertools.chain(bg_color, color_cycle)
 
+    if len(labels) == 0:
+        return img_layer
+
     label_to_color = np.zeros((max(labels) + 1, 3))
     for lab, c in zip(labels, color_cycle):
         label_to_color[lab] = c
