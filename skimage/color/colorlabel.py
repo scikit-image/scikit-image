@@ -79,11 +79,15 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         image = img_as_float(rgb2gray(image))
         img_layer = gray2rgb(image) * image_alpha + (1 - image_alpha)
 
-    # need to ensure that all labels are >= 0
+    # need to ensure that all labels are ints >= 0
     offset = label.min()
-    if offset < 0:
-        label += abs(offset)
-        bg_label += offset
+    if offset != 0:
+        label -= offset
+        bg_label -= offset
+    new_type = np.min_scalar_type(label.max())
+    if new_type == np.bool:
+        new_type = np.uint8
+    label = label.astype(new_type)
 
     labels = list(set(label.flat))
     color_cycle = itertools.cycle(colors)
@@ -100,7 +104,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     label_to_color = np.zeros((max(labels) + 1, 3))
     for lab, c in zip(labels, color_cycle):
         label_to_color[lab] = c
-    
+
     label_layer = label_to_color[label]
     result = label_layer * alpha + img_layer * (1 - alpha)
 
