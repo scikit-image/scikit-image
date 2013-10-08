@@ -187,7 +187,7 @@ def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
 #----------- Random walker algorithm --------------------------------
 
 
-def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
+def random_walker(data, labels, beta=130, mode=None, tol=1.e-3, copy=True,
                   multichannel=False, return_full_prob=False, depth=1.):
     """Random walker algorithm for segmentation from markers.
 
@@ -338,6 +338,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=int32)
 
     """
+
+    if mode is None:
+        mode = 'bf'
+        warnings.warn("Default mode will change in the next release from 'bf' "
+                      "to 'cg_mg' if pyamg is installed, else to 'cg' if "
+                      "SciPy was built with UMFPACK, or to 'bf' otherwise.")
 
     if UmfpackContext is None and mode == 'cg':
         warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
