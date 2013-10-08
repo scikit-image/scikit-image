@@ -20,7 +20,6 @@ from skimage.morphology import watershed
 from skimage.color import label2rgb
 from skimage import data
 
-
 coins = data.coins()
 
 # make segmentation using edge-detection and watershed
@@ -34,11 +33,8 @@ ws = watershed(edges, markers)
 seg1 = nd.label(ws == foreground)[0]
 
 # make segmentation using SLIC superpixels
-
-# make the RGB equivalent of `coins`
-coins_colour = np.tile(coins[..., np.newaxis], (1, 1, 3))
-seg2 = slic(coins_colour, n_segments=30, max_iter=160, sigma=1, ratio=9,
-            convert2lab=False)
+seg2 = slic(coins, n_segments=117, max_iter=160, sigma=1, compactness=0.75,
+            multichannel=False)
 
 # combine the two
 segj = join_segmentations(seg1, seg2)
