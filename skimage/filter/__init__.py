@@ -1,6 +1,6 @@
 from .lpi_filter import inverse, wiener, LPIFilter2D
 from .ctmf import median_filter
-from ._wavelet import wavelet_filter, wavelet_coefficient_array
+from ._wavelet import wavelet_filter, wavelet_coefficient_array, wavelet_list
 from ._gaussian import gaussian_filter
 from ._canny import canny
 from .edges import (sobel, hsobel, vsobel, scharr, hscharr, vscharr, prewitt,
@@ -20,6 +20,7 @@ __all__ = ['inverse',
            'median_filter',
            'wavelet_filter',
            'wavelet_coefficient_array',
+           'wavelet_list',
            'gaussian_filter',
            'canny',
            'sobel',

@@ -6,10 +6,28 @@ except ImportError:
     raise ImportError("pwavelets must be installed to use wavelet filter \
                       functions")
 
-__all__ = ['wavelet_filter', 'wavelet_coefficient_array']
+__all__ = ['wavelet_filter', 'wavelet_coefficient_array', 'wavelet_list']
 
 _thresh_func = {"soft": pywt.thresholding.soft,
                 "hard": pywt.thresholding.hard}
+
+
+def wavelet_list():
+    """
+    Returns list of all wavelet functions currently implemented in pywt
+
+    Parameters
+    ----------
+    (None)
+
+    Returns
+    -------
+    wavelet_list: list
+        List of names of all wavelet functions currently implemented by pywt
+    """
+    wavelets = [pywt.wavelist(family) for family in pywt.families()]
+    wavelet_list = reduce(lambda x, y: x + y, wavelets)
+    return wavelet_list
 
 
 def wavelet_coefficient_array(image, coeffs=None, wavelet="haar", level=1):
@@ -66,7 +84,7 @@ def wavelet_coefficient_array(image, coeffs=None, wavelet="haar", level=1):
 
 
 def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
-                   level=1, mode='sym', coeffs = None):
+                   level=1, mode='sym', coeffs=None):
     """
     Filter based on the multi-level discrete wavelet transform
 

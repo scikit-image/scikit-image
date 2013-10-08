@@ -46,11 +46,13 @@ from skimage.filter import wavelet_filter, wavelet_coefficient_array
 
 img = data.lena().mean(axis=2)
 
-# Add some noise
+# Next, we add some noise
 m, n, = img.shape
 noisy = img + 15 * np.random.randn(m, n)
 
 # Select a wavelet function and number of levels to visualize
+# a list of all usable wavelet functions are available by calling
+# wavelet_list() from skimage.filter
 wavelet = "bior5.5"
 
 # Visualize 1st and 2nd level wavelet coefficients, clean image vs. noisy
