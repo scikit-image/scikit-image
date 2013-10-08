@@ -1,9 +1,10 @@
 """
-======================
-Wavelet Denoising
-======================
+=============================================
+Wavelet Coefficient Visualization & Denoising
+=============================================
 
-This example shows the results of a simple wavelet denoising filter.
+This example shows the results of a simple denoising filter using the discrete
+wavelet transform[1].
 
 An n-level discrete wavelet transform decomposes a digital image into 1 + 3*n
 coefficient matrices. The first is called the approximation subband, which
@@ -13,7 +14,7 @@ and is essentially a down-sampled representation of it.
 The remaining coefficient matrices are called the detail subbands. Thresholding
 functions are applied to these matrices. The wavelet transform is then
 reversed, to give the denoised result.
-Thresholding can either be soft or hard[1].
+Thresholding can either be soft or hard[2].
 
 The main variation between the wavelet denoising methods that are out there in
 the literature are in how the thresholding values for each detail subband is
@@ -38,7 +39,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import data
-from skimage.filter import wavelet_filter
+from skimage.filter import wavelet_filter, wavelet_coefficient_array
 
 
 # Load an example image & project to grayscale
@@ -49,33 +50,52 @@ img = data.lena().mean(axis=2)
 m, n, = img.shape
 noisy = img + 15 * np.random.randn(m, n)
 
-# Select wavelet, number of levels, and level-specific thresholds
+# Select a wavelet function and number of levels to visualize
 wavelet = "bior5.5"
+
+# Visualize 1st and 2nd level wavelet coefficients, clean image vs. noisy
+cExact = wavelet_coefficient_array(img, wavelet=wavelet, level=2)
+cNoisy = wavelet_coefficient_array(noisy, wavelet=wavelet, level=2)
+plt.figure()
+plt.subplot(121)
+plt.title("Exact")
+plt.imshow(cExact, cmap=plt.cm.gray)
+plt.subplot(122)
+plt.title("Noisy")
+plt.imshow(cNoisy, cmap=plt.cm.gray)
+
+# As we can see, the wavelet transform domain becomes more "energetic" and
+# less sparse across levels when contaminated with additive noise.
+# We can denoise the image by applying thresholding functions
+# to each of the wavelet subbands, and then inverting the wavelet
+# transform. The `wavelet_filter` function will handle this all for us
+# automatically.
+
+# Select number of levels, and level-specific coefficient thresholds
 level = 4
 t = [30, 30, 15, 15]
 
 # Perform wavelet denoising
 denoised = wavelet_filter(noisy, t, wavelet=wavelet, level=level)
 
+# Visualize the results
 f1 = plt.figure()
 ax = f1.add_subplot(111)
 ax.set_axis_off()
-ax.autoscale_view(True, True, True)
 plt.title("Exact")
 plt.imshow(img, cmap=plt.cm.gray)
 
 f2 = plt.figure()
 ax = f2.add_subplot(111)
 ax.set_axis_off()
-ax.autoscale_view(True, True, True)
 plt.title("Noisy")
 plt.imshow(noisy, cmap=plt.cm.gray)
 
 f3 = plt.figure()
 ax = f3.add_subplot(111)
 ax.set_axis_off()
-ax.autoscale_view(True, True, True)
 description = "(%s, %s levels)" % (wavelet, level)
 plt.title("Denoised " + description)
 plt.imshow(denoised, cmap=plt.cm.gray)
+
 plt.show()

@@ -1,18 +1,18 @@
 import numpy as np
 from scipy.misc import imresize, bytescale
-
 try:
     import pywt
 except ImportError:
-    raise ImportError("pwavelets must be installed to use wavelet filter")
+    raise ImportError("pwavelets must be installed to use wavelet filter \
+                      functions")
 
-__all__ = ['wavelet_filter']
+__all__ = ['wavelet_filter', 'wavelet_coefficient_array']
 
 _thresh_func = {"soft": pywt.thresholding.soft,
                 "hard": pywt.thresholding.hard}
 
 
-def wavelet_coefficient_array(image, wavelet="haar", level=1):
+def wavelet_coefficient_array(image, coeffs=None, wavelet="haar", level=1):
     """
     Computer the coefficients of the dicrete wavelet transform, and
     arrange them canonically into a single array for visualization.
@@ -28,6 +28,13 @@ def wavelet_coefficient_array(image, wavelet="haar", level=1):
 
     image: array-like
         input grayscale image
+
+    Optional
+    --------
+    coeffs: list of wavelet coefficients (same format as wavedec2 output)
+        if wavelet coefficients are provided by the user, they will be
+        plotted directly and not computed. This can be used to visualize the
+        effect of thresholding functions used in denoising applications.
     wavelet: string
         name of wavelet filter to use
     level: int
@@ -40,7 +47,8 @@ def wavelet_coefficient_array(image, wavelet="haar", level=1):
     """
     m, n = image.shape
 
-    coeffs = pywt.wavedec2(image, wavelet, level=level)
+    if not coeffs:
+        coeffs = pywt.wavedec2(image, wavelet, level=level)
 
     cA = coeffs[0]
     sh = cA.shape
@@ -58,7 +66,7 @@ def wavelet_coefficient_array(image, wavelet="haar", level=1):
 
 
 def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
-                   level=1, mode='sym'):
+                   level=1, mode='sym', coeffs = None):
     """
     Filter based on the multi-level discrete wavelet transform
 
@@ -84,6 +92,9 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
         Level-dependent thresholds are specified in increasing order, i.e.
         the first element applies to the first level, second element to the
         second level, etc.
+
+    Optional
+    --------
     wavelet : string
               name of the wavelet filter to use. defaults to "haar"
     level : int
@@ -91,6 +102,9 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
             default:  1
     mode: string
           signal extension mode for the wavelet decompostion. default: `sym`
+    coeffs: list of wavelet coefficients (same format as wavedec2 output)
+        if wavelet coefficients are provided by the user, they will be
+        used directly and not computed.
 
     Returns
     -------
@@ -120,20 +134,21 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
     """
 
     if isinstance(thresholds, float) or isinstance(thresholds, int):
-        thresholds = [3 * [thresholds] for i in xrange(level)]
+        thresholds = [3 * [thresholds] for i in range(level)]
 
-    elif isinstance(thresholds, list) and len(thresholds) == level:
+    elif hasattr(thresholds, '__iter__') and len(thresholds) == level:
         if isinstance(thresholds[0], float) or isinstance(thresholds[0], int):
-            thresholds = [3 * [thresholds[i]] for i in xrange(level)]
+            thresholds = [3 * [thresholds[i]] for i in range(level)]
 
-        elif isinstance(thresholds[0], list) and len(thresholds[0]) == 3:
+        elif hasattr(thresholds, '__iter__') and len(thresholds[0]) == 3:
             pass
         else:
             raise Exception("Wavelet threshold values not set correctly.")
     else:
         raise Exception("Wavelet threshold values not set correctly.")
 
-    coeffs = pywt.wavedec2(image, wavelet, level=level, mode=mode)
+    if not coeffs:
+        coeffs = pywt.wavedec2(image, wavelet, level=level, mode=mode)
 
     new_coeffs = [coeffs[0]] + [_filt(bands, vals, thresh_type) for bands,
                                 vals in zip(coeffs[1:], thresholds[::-1])]
