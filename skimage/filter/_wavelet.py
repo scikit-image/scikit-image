@@ -1,6 +1,6 @@
 import numpy as np
-from scipy import ndimage
-import warnings
+from scipy.misc import imresize, bytescale
+
 try:
     import pywt
 except ImportError:
@@ -10,6 +10,51 @@ __all__ = ['wavelet_filter']
 
 _thresh_func = {"soft": pywt.thresholding.soft,
                 "hard": pywt.thresholding.hard}
+
+
+def wavelet_coefficient_array(image, wavelet="haar", level=1):
+    """
+    Computer the coefficients of the dicrete wavelet transform, and
+    arrange them canonically into a single array for visualization.
+
+    This function should be used for visualization purposes only; the returned
+    wavelet coefficients should not be used for analysis.
+
+    If wavelet coefficients are needed for analysis, wavedec2 should be
+    called directly.
+
+    Parameters
+    ----------
+
+    image: array-like
+        input grayscale image
+    wavelet: string
+        name of wavelet filter to use
+    level: int
+        number of decomposition levels
+
+    Returns
+    -------
+    cA: array-like
+        wavelet transform coefficient array
+    """
+    m, n = image.shape
+
+    coeffs = pywt.wavedec2(image, wavelet, level=level)
+
+    cA = coeffs[0]
+    sh = cA.shape
+    for cH, cV, cD in coeffs[1:]:
+        sh = cA.shape
+        cH_, cV_, cD_ = imresize(cH, sh), imresize(cV, sh), imresize(cD, sh)
+        temp = np.empty((2 * sh[0], 2 * sh[1]))
+        temp[:sh[0], :sh[1]] = cA
+        temp[sh[0]:, :sh[1]] = bytescale(cH_, low=cH.min(), high=cH.max())
+        temp[:sh[0], sh[1]:] = bytescale(cV_, low=cV.min(), high=cV.max())
+        temp[sh[0]:, sh[1]:] = bytescale(cD_, low=cD.min(), high=cD.max())
+        cA = temp
+    cA = bytescale(imresize(cA, (m, n)), low=cA.min(), high=cA.max())
+    return cA
 
 
 def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
@@ -35,6 +80,10 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
         3, then there will be one threshold applied to each detail subband.
 
         Any other format for `threshold` will result in an exception.
+
+        Level-dependent thresholds are specified in increasing order, i.e.
+        the first element applies to the first level, second element to the
+        second level, etc.
     wavelet : string
               name of the wavelet filter to use. defaults to "haar"
     level : int
@@ -74,7 +123,7 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
         thresholds = [3 * [thresholds] for i in xrange(level)]
 
     elif isinstance(thresholds, list) and len(thresholds) == level:
-        if isinstance(thresholds[0], float):
+        if isinstance(thresholds[0], float) or isinstance(thresholds[0], int):
             thresholds = [3 * [thresholds[i]] for i in xrange(level)]
 
         elif isinstance(thresholds[0], list) and len(thresholds[0]) == 3:
@@ -87,7 +136,7 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
     coeffs = pywt.wavedec2(image, wavelet, level=level, mode=mode)
 
     new_coeffs = [coeffs[0]] + [_filt(bands, vals, thresh_type) for bands,
-                                vals in zip(coeffs[1:], thresholds)]
+                                vals in zip(coeffs[1:], thresholds[::-1])]
 
     return pywt.waverec2(new_coeffs, wavelet, mode=mode)
 
@@ -99,4 +148,3 @@ def _filt(bands, vals, thresh_type):
     """
     _thresh = _thresh_func[thresh_type]
     return [_thresh(band, t) for band, t in zip(bands, vals)]
-
