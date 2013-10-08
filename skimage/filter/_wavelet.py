@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.misc import imresize, bytescale
+from functools import reduce
+
 try:
     import pywt
 except ImportError:
@@ -15,7 +17,7 @@ _thresh_func = {"soft": pywt.thresholding.soft,
 
 def _universal_threshold(coeffs):
     """
-    Implementation of Donoho and Johnstone's `universal` wavelet
+    Calculation of Donoho and Johnstone's `universal` wavelet
     coefficient threshold[1]. Used in various denoising methods such as
     BayesShrink and VisuShrink.
 
@@ -28,7 +30,7 @@ def _universal_threshold(coeffs):
 def visu_shrink(image, wavelet="haar", thresh_type="soft", level=1,
                 mode='sym', coeffs=None):
     """
-    VisuShrink[1] image denoising filter
+    VisuShrink[1] image denoising filter.
 
     Parameters
     ----------
@@ -74,6 +76,7 @@ def bayes_shrink(image, wavelet="haar", thresh_type="soft", level=1,
                  mode='sym', coeffs=None):
     """
     BayesShrink image denoising filter.
+
     BayesShrink is a subband-adaptive data-driven method for image denoising
     via wavelet coefficient thresholding. The threshold is determined via
     Bayesian inference[1].
@@ -149,7 +152,7 @@ def wavelet_coefficient_array(image, coeffs=None, wavelet="haar", level=1):
     This function should be used for visualization purposes only; the returned
     wavelet coefficients should not be used for analysis.
 
-    If wavelet coefficients are needed for analysis, wavedec2 should be
+    If wavelet coefficients are needed for analysis, pywt.wavedec2 should be
     called directly.
 
     Parameters
@@ -261,6 +264,10 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
     t = [[10., 80., 30.], [80., 17., 19.]]
     B = wavelet_filter(A, t, wavelet="sym14", level=2)
     """
+    if not coeffs:
+        coeffs = pywt.wavedec2(image, wavelet, level=level, mode=mode)
+    else:
+        level = len(coeffs) - 1
 
     if isinstance(thresholds, float) or isinstance(thresholds, int):
         thresholds = [3 * [thresholds] for i in range(level)]
@@ -275,9 +282,6 @@ def wavelet_filter(image, thresholds, wavelet="haar", thresh_type="soft",
             raise Exception("Wavelet threshold values not set correctly.")
     else:
         raise Exception("Wavelet threshold values not set correctly.")
-
-    if not coeffs:
-        coeffs = pywt.wavedec2(image, wavelet, level=level, mode=mode)
 
     new_coeffs = [coeffs[0]] + [_filt(bands, vals, thresh_type) for bands,
                                 vals in zip(coeffs[1:], thresholds[::-1])]

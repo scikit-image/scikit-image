@@ -8,8 +8,9 @@ class TestWaveletFilter(unittest.TestCase):
 
     def test_wavelet_names(self):
         """
-        Number of supported wavelets could conceivably increase, don't
-        want to hardcode them or the test
+        Tests wavelet_list().
+        Number of supported wavelets could conceivably increase, so don't
+        want to hardcode a fixed list into the test
         """
         wavelist = wavelet_list()
         assert len(wavelist) >= 76
