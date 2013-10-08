@@ -1,9 +1,19 @@
 import numpy as np
 import unittest
 from skimage.filter._wavelet import wavelet_filter, wavelet_coefficient_array
+from skimage.filter._wavelet import wavelet_list, bayes_shrink, visu_shrink
 
 
 class TestWaveletFilter(unittest.TestCase):
+
+    def test_wavelet_names(self):
+        """
+        Number of supported wavelets could conceivably increase, don't
+        want to hardcode them or the test
+        """
+        wavelist = wavelet_list()
+        assert len(wavelist) >= 76
+        assert "haar" in wavelist
 
     def test_filter_null(self):
         """
@@ -27,6 +37,11 @@ class TestWaveletFilter(unittest.TestCase):
         t = [0., 3.]
         with self.assertRaises(Exception) as context:
             wavelet_filter(a, t, level=3)
+        self.assertEqual(context.exception.message, message)
+
+        t = [[0., 3.]]
+        with self.assertRaises(Exception) as context:
+            wavelet_filter(a, t, level=1)
         self.assertEqual(context.exception.message, message)
 
     def test_filter_good_thresholds(self):
@@ -72,6 +87,17 @@ class TestWaveletFilter(unittest.TestCase):
         c[1, 0:2] = 76.
         assert np.all(np.array(c == b))
 
+    def test_bayesshrink(self):
+        a = np.random.randn(10, 10)
+        s = a.std()
+        bs = bayes_shrink(a, level=2).std()
+        assert s > bs
+
+    def test_visushrink(self):
+        a = np.random.randn(10, 10)
+        s = a.std()
+        bs = visu_shrink(a, level=2).std()
+        assert s > bs
 
 if __name__ == '__main__':
     unittest.main()

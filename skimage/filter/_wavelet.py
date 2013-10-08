@@ -6,10 +6,121 @@ except ImportError:
     raise ImportError("pwavelets must be installed to use wavelet filter \
                       functions")
 
-__all__ = ['wavelet_filter', 'wavelet_coefficient_array', 'wavelet_list']
+__all__ = ['wavelet_filter', 'wavelet_coefficient_array', 'wavelet_list',
+           'bayes_shrink', 'visu_shrink']
 
 _thresh_func = {"soft": pywt.thresholding.soft,
                 "hard": pywt.thresholding.hard}
+
+
+def _universal_threshold(coeffs):
+    """
+    Implementation of Donoho and Johnstone's `universal` wavelet
+    coefficient threshold[1]. Used in various denoising methods such as
+    BayesShrink and VisuShrink.
+
+    [1] Donoho, David L., and Jain M. Johnstone. "Ideal spatial adaptation by
+        wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+    """
+    return np.median(abs(coeffs[-1][2])) / 0.6745
+
+
+def visu_shrink(image, wavelet="haar", thresh_type="soft", level=1,
+                mode='sym', coeffs=None):
+    """
+    VisuShrink[1] image denoising filter
+
+    Parameters
+    ----------
+
+    image : array-like
+        input grayscale image to filter.
+
+    Optional
+    --------
+    wavelet : string
+              name of the wavelet filter to use. defaults to "haar"
+    level : int
+            the number of wavelet decomposition levels to perform
+            default:  1
+    mode: string
+          signal extension mode for the wavelet decompostion. default: `sym`
+    coeffs: list of wavelet coefficients (same format as wavedec2 output)
+        if wavelet coefficients are provided by the user, they will be
+        used directly and not computed.
+
+    Returns
+    -------
+
+    filtered_image : ndarray
+        the filtered array
+
+    References
+    ----------
+    [1] Donoho, David L., and Jain M. Johnstone. "Ideal spatial adaptation by
+        wavelet shrinkage." Biometrika 81.3 (1994): 425-455.
+    """
+    if not coeffs:
+        coeffs = pywt.wavedec2(image, wavelet, level=level, mode=mode)
+
+    s_hat = _universal_threshold(coeffs)
+    threshold = s_hat * np.sqrt(2 * np.log10(image.size))
+    return wavelet_filter(image, threshold, wavelet=wavelet,
+                          thresh_type=thresh_type, level=level, mode=mode,
+                          coeffs=coeffs)
+
+
+def bayes_shrink(image, wavelet="haar", thresh_type="soft", level=1,
+                 mode='sym', coeffs=None):
+    """
+    BayesShrink image denoising filter.
+    BayesShrink is a subband-adaptive data-driven method for image denoising
+    via wavelet coefficient thresholding. The threshold is determined via
+    Bayesian inference[1].
+
+    Parameters
+    ----------
+
+    image : array-like
+        input grayscale image to filter.
+
+    Optional
+    --------
+    wavelet : string
+              name of the wavelet filter to use. defaults to "haar"
+    level : int
+            the number of wavelet decomposition levels to perform
+            default:  1
+    mode: string
+          signal extension mode for the wavelet decompostion. default: `sym`
+    coeffs: list of wavelet coefficients (same format as wavedec2 output)
+        if wavelet coefficients are provided by the user, they will be
+        used directly and not computed.
+
+    Returns
+    -------
+
+    filtered_image : ndarray
+        the filtered array
+
+    References
+    ----------
+    [1] Chang, S. Grace, Bin Yu, and Martin Vetterli. "Adaptive wavelet
+        thresholding for image denoising and compression." Image Processing,
+        IEEE Transactions on 9.9 (2000): 1532-1546.
+    """
+    if not coeffs:
+        coeffs = pywt.wavedec2(image, wavelet, level=level, mode=mode)
+
+    s_hat = _universal_threshold(coeffs)
+    thresholds = []
+    for level_bands in coeffs[1:]:
+        thresholds.append([s_hat ** 2 / np.sqrt(max([1e-16,
+                           C.std() ** 2 - s_hat ** 2])) for C in level_bands])
+
+    return wavelet_filter(image, thresholds[::-1], wavelet=wavelet,
+                          thresh_type=thresh_type, level=level, mode=mode,
+                          coeffs=coeffs)
 
 
 def wavelet_list():
