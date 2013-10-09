@@ -18,16 +18,16 @@ from skimage.filter import sobel
 from skimage.segmentation import slic, join_segmentations
 from skimage.morphology import watershed
 from skimage.color import label2rgb
-from skimage import data
+from skimage import data, img_as_float
 
-coins = data.coins()
+coins = img_as_float(data.coins())
 
 # make segmentation using edge-detection and watershed
 edges = sobel(coins)
 markers = np.zeros_like(coins)
 foreground, background = 1, 2
-markers[coins < 30] = background
-markers[coins > 150] = foreground
+markers[coins < 30.0 / 255] = background
+markers[coins > 150.0 / 255] = foreground
 
 ws = watershed(edges, markers)
 seg1 = nd.label(ws == foreground)[0]
@@ -60,3 +60,4 @@ for ax in axes:
     ax.axis('off')
 plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
 plt.show()
+
