@@ -66,7 +66,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     colors = [_rgb_vector(c) for c in colors]
 
     if image is None:
-        colorized = np.zeros(label.shape + (3,), dtype=np.float64)
+        img_layer = np.zeros(label.shape + (3,), dtype=np.float64)
         # Opacity doesn't make sense if no image exists.
         alpha = 1
     else:
@@ -77,10 +77,22 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
             warnings.warn("Negative intensities in `image` are not supported")
 
         image = img_as_float(rgb2gray(image))
-        colorized = gray2rgb(image) * image_alpha + (1 - image_alpha)
+        img_layer = gray2rgb(image) * image_alpha + (1 - image_alpha)
+
+    # need to ensure that all labels are ints >= 0
+    offset = label.min()
+    if offset != 0:
+        label -= offset
+        bg_label -= offset
+    new_type = np.min_scalar_type(label.max())
+    if new_type == np.bool:
+        new_type = np.uint8
+    label = label.astype(new_type)
 
     labels = list(set(label.flat))
     color_cycle = itertools.cycle(colors)
+
+    remove_background = bg_label in labels and bg_color is None
 
     if bg_label in labels:
         labels.remove(bg_label)
@@ -89,8 +101,18 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
             bg_color = _rgb_vector(bg_color)
             color_cycle = itertools.chain(bg_color, color_cycle)
 
-    for c, i in zip(color_cycle, labels):
-        mask = (label == i)
-        colorized[mask] = c * alpha + colorized[mask] * (1 - alpha)
+    if len(labels) == 0:
+        return img_layer
 
-    return colorized
+    label_to_color = np.zeros((max(labels) + 1, 3))
+    for lab, c in zip(labels, color_cycle):
+        label_to_color[lab] = c
+
+    label_layer = label_to_color[label]
+    result = label_layer * alpha + img_layer * (1 - alpha)
+
+    # remove background label if its color was not specified
+    if remove_background:
+        result[label == bg_label] = img_layer[label == bg_label]
+
+    return result
