@@ -15,6 +15,7 @@ build
 dist
 skimage/version.py
 *.swp
+.DS_store
 .coverage
 doc/source/auto_examples/*.py
 doc/source/auto_examples/*.txt

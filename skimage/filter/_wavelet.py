@@ -15,6 +15,24 @@ _thresh_func = {"soft": pywt.thresholding.soft,
                 "hard": pywt.thresholding.hard}
 
 
+def wavelet_thresholding_based_filter(func):
+    """
+    Decorator for wavelet filtering methods based on
+    coefficient thresholding.
+
+    Calls decorated function to get threshold levels, then passes
+    them (along with pre-calculated wavelet coefficients) to wavelet_filter().
+
+    Decorated functions need only implement the way that they
+    calculate thresholds.
+    """
+    def perform_filter(image, *args, **kw):
+        thresholds, coeffs = func(image, *args, **kw)
+        return wavelet_filter(image, thresholds, coeffs=coeffs, *args, **kw)
+
+    return perform_filter
+
+
 def _universal_threshold(coeffs):
     """
     Calculation of Donoho and Johnstone's `universal` wavelet
@@ -27,6 +45,7 @@ def _universal_threshold(coeffs):
     return np.median(abs(coeffs[-1][2])) / 0.6745
 
 
+@wavelet_thresholding_based_filter
 def visu_shrink(image, wavelet="haar", thresh_type="soft", level=1,
                 mode='sym', coeffs=None):
     """
@@ -67,11 +86,11 @@ def visu_shrink(image, wavelet="haar", thresh_type="soft", level=1,
 
     s_hat = _universal_threshold(coeffs)
     threshold = s_hat * np.sqrt(2 * np.log10(image.size))
-    return wavelet_filter(image, threshold, wavelet=wavelet,
-                          thresh_type=thresh_type, level=level, mode=mode,
-                          coeffs=coeffs)
+
+    return threshold, coeffs
 
 
+@wavelet_thresholding_based_filter
 def bayes_shrink(image, wavelet="haar", thresh_type="soft", level=1,
                  mode='sym', coeffs=None):
     """
@@ -121,9 +140,7 @@ def bayes_shrink(image, wavelet="haar", thresh_type="soft", level=1,
         thresholds.append([s_hat ** 2 / np.sqrt(max([1e-16,
                            C.std() ** 2 - s_hat ** 2])) for C in level_bands])
 
-    return wavelet_filter(image, thresholds[::-1], wavelet=wavelet,
-                          thresh_type=thresh_type, level=level, mode=mode,
-                          coeffs=coeffs)
+    return thresholds, coeffs
 
 
 def wavelet_list():
