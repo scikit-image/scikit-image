@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from scipy import ndimage
 
@@ -15,6 +16,9 @@ def _convolve(image, selem, out, cval):
     if out is None:
         out = np.zeros_like(image, dtype=out_dtype)
     else:
+        warnings.warn('Parameter `out` is deprecated and it does not equal '
+                      'the output image if the sum of the structuring element '
+                      'overflows the dtype of `out`.')
         iinfo = np.iinfo(out.dtype)
         if iinfo.max - iinfo.min < selem_sum:
             raise ValueError('Sum of structuring (=%d) element results in '
