@@ -3,6 +3,11 @@ import unittest
 from skimage.filter._wavelet import wavelet_filter, wavelet_coefficient_array
 from skimage.filter._wavelet import wavelet_list, bayes_shrink, visu_shrink
 
+try:
+    from scipy.misc import imresize
+except:
+    imresize = False
+
 
 class TestWaveletFilter(unittest.TestCase):
 
@@ -72,9 +77,10 @@ class TestWaveletFilter(unittest.TestCase):
         """
         Tests coefficient array on small test case
         """
-        a = np.array([[1, 0], [0, 1]])
-        b = wavelet_coefficient_array(a)
-        assert np.all(np.array([[255., 0], [0, 0]]) == b)
+        if imresize:
+            a = np.array([[1, 0], [0, 1]])
+            b = wavelet_coefficient_array(a)
+            assert np.all(np.array([[255., 0], [0, 0]]) == b)
 
     def test_coefficient_array_odd(self):
         """

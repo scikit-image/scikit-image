@@ -1,6 +1,9 @@
 import numpy as np
-from scipy.misc import imresize, bytescale
 from functools import reduce
+try:
+    from scipy.misc import imresize, bytescale
+except:
+    pass
 
 try:
     import pywt
