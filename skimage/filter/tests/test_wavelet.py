@@ -33,17 +33,17 @@ class TestWaveletFilter(unittest.TestCase):
         t = [0., [1.]]
         with self.assertRaises(Exception) as context:
             wavelet_filter(a, t)
-        self.assertEqual(context.exception.message, message)
+        self.assertEqual(str(context.exception), message)
 
         t = [0., 3.]
         with self.assertRaises(Exception) as context:
             wavelet_filter(a, t, level=3)
-        self.assertEqual(context.exception.message, message)
+        self.assertEqual(str(context.exception), message)
 
         t = [[0., 3.]]
         with self.assertRaises(Exception) as context:
             wavelet_filter(a, t, level=1)
-        self.assertEqual(context.exception.message, message)
+        self.assertEqual(str(context.exception), message)
 
     def test_filter_good_thresholds(self):
         """
