@@ -33,8 +33,32 @@ def _rgb_vector(color):
     """
     if isinstance(color, six.string_types):
         color = color_dict[color]
-    # slice to handle RGBA colors
-    return np.array(color[:3]).reshape(1, 3)
+    # Slice to handle RGBA colors.
+    return np.array(color[:3])
+
+
+def _match_label_with_color(label, colors, bg_label, bg_color):
+    """Return `unique_labels` and `color_cycle` for label array and color list.
+
+    Colors are cycled for normal labels, but the background color should only
+    be used for the background.
+    """
+    # Temporarily set background color; it will be removed later.
+    if bg_color is None:
+        bg_color = (0, 0, 0)
+    bg_color = _rgb_vector([bg_color])
+
+    unique_labels = list(set(label.flat))
+    # Ensure that the background label is in front to match call to `chain`.
+    if bg_label in unique_labels:
+        unique_labels.remove(bg_label)
+    unique_labels.insert(0, bg_label)
+
+    # Modify labels and color cycle so background color is used only once.
+    color_cycle = itertools.cycle(colors)
+    color_cycle = itertools.chain(bg_color, color_cycle)
+
+    return unique_labels, color_cycle
 
 
 def label2rgb(label, image=None, colors=None, alpha=0.3,
@@ -66,7 +90,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
     colors = [_rgb_vector(c) for c in colors]
 
     if image is None:
-        img_layer = np.zeros(label.shape + (3,), dtype=np.float64)
+        image = np.zeros(label.shape + (3,), dtype=np.float64)
         # Opacity doesn't make sense if no image exists.
         alpha = 1
     else:
@@ -77,42 +101,34 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
             warnings.warn("Negative intensities in `image` are not supported")
 
         image = img_as_float(rgb2gray(image))
-        img_layer = gray2rgb(image) * image_alpha + (1 - image_alpha)
+        image = gray2rgb(image) * image_alpha + (1 - image_alpha)
 
-    # need to ensure that all labels are ints >= 0
-    offset = label.min()
+    # Ensure that all labels are non-negative so we can index into
+    # `label_to_color` correctly.
+    offset = min(label.min(), bg_label)
     if offset != 0:
-        label -= offset
+        label = label - offset  # Make sure you don't modify the input array.
         bg_label -= offset
+
     new_type = np.min_scalar_type(label.max())
     if new_type == np.bool:
         new_type = np.uint8
     label = label.astype(new_type)
 
-    labels = list(set(label.flat))
-    color_cycle = itertools.cycle(colors)
+    unique_labels, color_cycle = _match_label_with_color(label, colors,
+                                                         bg_label, bg_color)
 
-    remove_background = bg_label in labels and bg_color is None
+    if len(unique_labels) == 0:
+        return image
 
-    if bg_label in labels:
-        labels.remove(bg_label)
-        if bg_color is not None:
-            labels.insert(0, bg_label)
-            bg_color = _rgb_vector(bg_color)
-            color_cycle = itertools.chain(bg_color, color_cycle)
+    dense_labels = range(max(unique_labels) + 1)
+    label_to_color = np.array([c for i, c in zip(dense_labels, color_cycle)])
 
-    if len(labels) == 0:
-        return img_layer
+    result = label_to_color[label] * alpha + image * (1 - alpha)
 
-    label_to_color = np.zeros((max(labels) + 1, 3))
-    for lab, c in zip(labels, color_cycle):
-        label_to_color[lab] = c
-
-    label_layer = label_to_color[label]
-    result = label_layer * alpha + img_layer * (1 - alpha)
-
-    # remove background label if its color was not specified
+    # Remove background label if its color was not specified.
+    remove_background = bg_label in unique_labels and bg_color is None
     if remove_background:
-        result[label == bg_label] = img_layer[label == bg_label]
+        result[label == bg_label] = image[label == bg_label]
 
     return result

@@ -69,6 +69,18 @@ def test_bg_and_color_cycle():
         assert_close(pixel, color)
 
 
+def test_label_consistency():
+    """Assert that the same labels map to the same colors."""
+    label_1 = np.arange(5).reshape(1, -1)
+    label_2 = np.array([2, 4])
+    colors = [(1, 0, 0), (0, 1, 0), (0, 0, 1), (1, 1, 0), (1, 0, 1)]
+    # Set alphas just in case the defaults change
+    rgb_1 = label2rgb(label_1, colors=colors)
+    rgb_2 = label2rgb(label_2, colors=colors)
+    for label_id in label_2.flat:
+        assert_close(rgb_1[label_1 == label_id], rgb_2[label_2 == label_id])
+
+
 if __name__ == '__main__':
     testing.run_module_suite()
 
