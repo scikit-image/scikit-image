@@ -5,25 +5,6 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
-def _next_pow2(n):
-    """
-    Returns next integer power of two.
-    """
-
-    next_pow = 0
-    if n == np.inf:
-        return np.inf
-
-    if n < 1:
-        raise ValueError("Unable to determine next power of two for %i" % (n))
-
-    while True:
-        if 2 ** next_pow >= n:
-            return next_pow
-        else:
-            next_pow += 1
-
-
 def random_noise(image, mode='gaussian', seed=None, **kwargs):
     """
     Function to add random noise of various types to a floating-point image.
@@ -108,7 +89,7 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
         vals = len(np.unique(image))
 
         # Calculate the next lowest power of two
-        vals = 2 ** _next_pow2(vals)
+        vals = 2 ** np.ceil(np.log2(vals))
 
         # Generating noise for each unique value in image.
         out = np.random.poisson(image * vals) / float(vals)
