@@ -12,11 +12,26 @@ import warnings
 
 import numpy as np
 from scipy import sparse, ndimage
+
+# executive summary for next code block: try to import umfpack from
+# scipy, but make sure not to raise a fuss if it fails since it's only
+# needed to speed up a few cases.
+# See discussions at:
+# https://groups.google.com/d/msg/scikit-image/FrM5IGP6wh4/1hp-FtVZmfcJ
+# http://stackoverflow.com/questions/13977970/ignore-exceptions-printed-to-stderr-in-del/13977992?noredirect=1#comment28386412_13977992
 try:
     from scipy.sparse.linalg.dsolve import umfpack
+    old_del = umfpack.UmfpackContext.__del__
+    def new_del(self):
+        try:
+            old_del(self)
+        except AttributeError:
+            pass
+    umfpack.UmfpackContext.__del__ = new_del
     UmfpackContext = umfpack.UmfpackContext()
 except:
     UmfpackContext = None
+
 try:
     from pyamg import ruge_stuben_solver
     amg_loaded = True
@@ -172,7 +187,7 @@ def _build_laplacian(data, mask=None, beta=50, depth=1., multichannel=False):
 #----------- Random walker algorithm --------------------------------
 
 
-def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
+def random_walker(data, labels, beta=130, mode=None, tol=1.e-3, copy=True,
                   multichannel=False, return_full_prob=False, depth=1.):
     """Random walker algorithm for segmentation from markers.
 
@@ -324,7 +339,13 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     """
 
-    if UmfpackContext is None:
+    if mode is None:
+        mode = 'bf'
+        warnings.warn("Default mode will change in the next release from 'bf' "
+                      "to 'cg_mg' if pyamg is installed, else to 'cg' if "
+                      "SciPy was built with UMFPACK, or to 'bf' otherwise.")
+
+    if UmfpackContext is None and mode == 'cg':
         warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
                       'SciPy with UMFPACK, this will greatly speed up the '
                       'random walker functions. You may also install pyamg '
