@@ -449,9 +449,9 @@ def ellipse_perimeter(Py_ssize_t cy, Py_ssize_t cx, Py_ssize_t yradius,
     ----------
     cy, cx : int
         Centre coordinate of ellipse.
-    yradius, xradius: int
+    yradius, xradius : int
         Minor and major semi-axes. ``(x/xradius)**2 + (y/yradius)**2 = 1``.
-    orientation: double, optional (default 0)
+    orientation : double, optional (default 0)
         Major axis orientation in clockwise direction as radians.
 
     Returns

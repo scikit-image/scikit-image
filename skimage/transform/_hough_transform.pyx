@@ -122,14 +122,15 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
 
     Returns
     -------
-    res : list of tuples [(accumulator, y0, x0, ry, rx, angle)]
-          Where (y0, x0) is the center, (ry, rx) main axis.
-          The angle value follows `draw.ellipse_perimeter()` convention.
+    result : ndarray with fields [(accumulator, y0, x0, a, b, orientation)]
+          Where ``(yc, xc)`` is the center, ``(a, b)`` the major and minor
+          axes, respectively. The `orientation` value follows
+          `skimage.draw.ellipse_perimeter` convention.
 
     Examples
     --------
-    >>> img = np.zeros((25, 25), dtype=int)
-    >>> rr, cc = draw.ellipse_perimeter(10, 10, 6, 8)
+    >>> img = np.zeros((25, 25), dtype=np.uint8)
+    >>> rr, cc = ellipse_perimeter(10, 10, 6, 8)
     >>> img[cc, rr] = 1
     >>> result = hough_ellipse(img, threshold=8)
     [(10, 10.0, 8.0, 6.0, 0.0, 10.0)]
@@ -149,47 +150,47 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
     if img.ndim != 2:
             raise ValueError('The input image must be 2D.')
 
-    cdef Py_ssize_t[:, :] pixels = np.transpose(np.nonzero(img))
-    cdef Py_ssize_t num_pixels = pixels.shape[0]
+    cdef Py_ssize_t[:, ::1] pixels = np.row_stack(np.nonzero(img))
+    cdef Py_ssize_t num_pixels = pixels.shape[1]
     cdef list acc = list()
     cdef list results = list()
-    cdef double bin_size = accuracy**2
+    cdef double bin_size = accuracy ** 2
 
     cdef int max_b_squared
     if max_size is None:
         if img.shape[0] < img.shape[1]:
-            max_b_squared = np.round(0.5 * img.shape[0])**2
+            max_b_squared = np.round(0.5 * img.shape[0]) ** 2
         else:
-            max_b_squared = np.round(0.5 * img.shape[1])**2
+            max_b_squared = np.round(0.5 * img.shape[1]) ** 2
     else:
         max_b_squared = max_size**2
 
     cdef Py_ssize_t p1, p2, p3, p1x, p1y, p2x, p2y, p3x, p3y
-    cdef double x0, y0, a, b, d, k
-    cdef double cos_tau_squared, b_squared, f_squared, angle
+    cdef double xc, yc, a, b, d, k
+    cdef double cos_tau_squared, b_squared, f_squared, orientation
 
     for p1 in range(num_pixels):
-        p1x = pixels[p1, 1]
-        p1y = pixels[p1, 0]
+        p1x = pixels[1, p1]
+        p1y = pixels[0, p1]
 
         for p2 in range(p1):
-            p2x = pixels[p2, 1]
-            p2y = pixels[p2, 0]
+            p2x = pixels[1, p2]
+            p2y = pixels[0, p2]
 
-            # Candidate: center (x0, y0) and main axis a
+            # Candidate: center (xc, yc) and main axis a
             a = 0.5 * sqrt((p1x - p2x)**2 + (p1y - p2y)**2)
             if a > 0.5 * min_size:
-                x0 = 0.5 * (p1x + p2x)
-                y0 = 0.5 * (p1y + p2y)
+                xc = 0.5 * (p1x + p2x)
+                yc = 0.5 * (p1y + p2y)
 
                 for p3 in range(num_pixels):
-                    p3x = pixels[p3, 1]
-                    p3y = pixels[p3, 0]
+                    p3x = pixels[1, p3]
+                    p3y = pixels[0, p3]
 
-                    d = sqrt((p3x - x0)**2 + (p3y - y0)**2)
+                    d = sqrt((p3x - xc)**2 + (p3y - yc)**2)
                     if d > min_size:
                         f_squared = (p3x - p1x)**2 + (p3y - p1y)**2
-                        cos_tau_squared = ((a**2 + d**2 - f_squared) \
+                        cos_tau_squared = ((a**2 + d**2 - f_squared)
                                            / (2 * a * d))**2
                         # Consider b2 > 0 and avoid division by zero
                         k = a**2 - d**2 * cos_tau_squared
@@ -205,27 +206,29 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                     hist, bin_edges = np.histogram(acc, bins=bins)
                     hist_max = np.max(hist)
                     if hist_max > threshold:
-                        angle = atan2(p1x - p2x, p1y - p2y)
+                        orientation = atan2(p1x - p2x, p1y - p2y)
                         b = sqrt(bin_edges[hist.argmax()])
                         # to keep ellipse_perimeter() convention
-                        if angle != 0:
-                            angle = M_PI - angle
-                            # When angle is not in [-pi:pi]
+                        if orientation != 0:
+                            orientation = M_PI - orientation
+                            # When orientation is not in [-pi:pi]
                             # it would mean in ellipse_perimeter()
                             # that a < b. But we keep a > b.
-                            if angle > M_PI:
-                                angle = angle - M_PI / 2.
+                            if orientation > M_PI:
+                                orientation = orientation - M_PI / 2.
                                 a, b = b, a
                         results.append((hist_max, # Accumulator
-                                        y0,
-                                        x0,
-                                        a,
-                                        b,
-                                        angle,
-                                        ))
+                                        yc, xc,
+                                        a, b,
+                                        orientation))
                     acc = []
 
-    return results
+    return np.array(results, dtype=[('accumulator', np.intp),
+                                    ('yc', np.double),
+                                    ('xc', np.double),
+                                    ('a', np.double),
+                                    ('b', np.double),
+                                    ('orientation', np.double)])
 
 
 def hough_line(cnp.ndarray img,
