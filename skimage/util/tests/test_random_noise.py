@@ -23,12 +23,14 @@ def test_salt():
 
     # Ensure approximately correct amount of noise was added
     proportion = float(saltmask.sum()) / (cam.shape[0] * cam.shape[1])
-    assert 0.11 < proportion <= 0.18
+    assert 0.11 < proportion <= 0.15
 
 
 def test_pepper():
     seed = 42
     cam = img_as_float(camera())
+    data_signed = (cam / 255.) * 2. - 1.   # Same image, on range [-1, 1]
+
     cam_noisy = random_noise(cam, seed=seed, mode='pepper', amount=0.15)
     peppermask = cam != cam_noisy
 
@@ -37,7 +39,16 @@ def test_pepper():
 
     # Ensure approximately correct amount of noise was added
     proportion = float(peppermask.sum()) / (cam.shape[0] * cam.shape[1])
-    assert 0.11 < proportion <= 0.18
+    assert 0.11 < proportion <= 0.15
+
+    # Check to make sure pepper gets added properly to signed images
+    orig_zeros = (data_signed == -1).sum()
+    cam_noisy_signed = random_noise(data_signed, seed=seed, mode='pepper',
+                                    amount=.15)
+
+    proportion = (float((cam_noisy_signed == -1).sum() - orig_zeros) /
+                  (cam.shape[0] * cam.shape[1]))
+    assert 0.11 < proportion <= 0.15
 
 
 def test_salt_and_pepper():
@@ -88,10 +99,12 @@ def test_poisson():
     seed = 42
     data = camera()  # 512x512 grayscale uint8
     cam_noisy = random_noise(data, mode='poisson', seed=seed)
+    cam_noisy2 = random_noise(data, mode='poisson', seed=seed, clip=False)
 
     np.random.seed(seed=seed)
     expected = np.random.poisson(img_as_float(data) * 256) / 256.
-    assert_allclose(cam_noisy, expected)
+    assert_allclose(cam_noisy, np.clip(expected, 0., 1.))
+    assert_allclose(cam_noisy2, expected)
 
 
 def test_clip_poisson():

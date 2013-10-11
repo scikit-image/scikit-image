@@ -165,7 +165,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
             kwargs['amount'] * image.size * (1. - kwargs['salt_vs_pepper']))
         coords = [np.random.randint(0, i - 1, int(num_pepper))
                   for i in image.shape]
-        out[coords] = 0
+        out[coords] = low_clip
 
     elif mode == 'speckle':
         noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
