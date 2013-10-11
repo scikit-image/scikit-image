@@ -8,7 +8,7 @@ from skimage.morphology import convex_hull_image, label
 from skimage.measure import _moments
 
 
-__all__ = ['regionprops']
+__all__ = ['regionprops', 'perimeter']
 
 
 STREL_4 = np.array([[0, 1, 0],
