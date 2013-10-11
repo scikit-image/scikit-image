@@ -4,11 +4,11 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
-from skimage.morphology import convex_hull_image
+from skimage.morphology import convex_hull_image, label
 from skimage.measure import _moments
 
 
-__all__ = ['regionprops']
+__all__ = ['regionprops', 'perimeter']
 
 
 STREL_4 = np.array([[0, 1, 0],
@@ -155,8 +155,8 @@ class _RegionProperties(object):
     @_cached_property
     def euler_number(self):
         euler_array = self.filled_image != self.image
-        _, num = ndimage.label(euler_array, STREL_8)
-        return -num
+        _, num = label(euler_array, neighbors=8, return_num=True)
+        return -num + 1
 
     @_cached_property
     def extent(self):
