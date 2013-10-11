@@ -122,7 +122,7 @@ def test_hough_circle():
     y, x = circle_perimeter(y_0, x_0, radius)
     img[x, y] = 1
 
-    out = tf.hough_circle(img, np.array([radius]))
+    out = tf.hough_circle(img, np.array([radius], dtype=np.intp))
 
     x, y = np.where(out[0] == out[0].max())
     assert_equal(x[0], x_0)
@@ -138,7 +138,8 @@ def test_hough_circle_extended():
     y, x = circle_perimeter(y_0, x_0, radius)
     img[x[np.where(x > 0)], y[np.where(x > 0)]] = 1
 
-    out = tf.hough_circle(img, np.array([radius]), full_output=True)
+    out = tf.hough_circle(img, np.array([radius], dtype=np.intp),
+                          full_output=True)
 
     x, y = np.where(out[0] == out[0].max())
     # Offset for x_0, y_0
