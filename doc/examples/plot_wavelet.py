@@ -40,8 +40,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import data
-from skimage.filter import (wavelet_filter, wavelet_coefficient_array,
-                            bayes_shrink, visu_shrink)
+from skimage.filter import (
+    wavelet_filter, wavelet_coefficient_array, bayes_shrink, visu_shrink)
 
 """
 First, we load an example image & project it to gray-scale

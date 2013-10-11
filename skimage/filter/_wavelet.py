@@ -1,7 +1,6 @@
 import numpy as np
-from scipy.misc import imresize, bytescale
 from functools import reduce
-
+from scipy.interpolate import RectBivariateSpline
 try:
     import pywt
 except ImportError:
@@ -13,6 +12,20 @@ __all__ = ['wavelet_filter', 'wavelet_coefficient_array', 'wavelet_list',
 
 _thresh_func = {"soft": pywt.thresholding.soft,
                 "hard": pywt.thresholding.hard}
+
+
+def ca_resize(image, size):
+    """
+    Resizes coefficient arrays using bivariate spline approximation.
+    """
+    m, n = image.shape
+    X = np.linspace(0, m - 1, size[0])
+    Y = np.linspace(0, n - 1, size[1])
+    kx, ky = min([m - 1, 3]), min([n - 1, 3])
+    interp = RectBivariateSpline(
+        np.arange(m), np.arange(n), image, kx=kx, ky=ky)
+    resized = interp(X, Y)
+    return resized
 
 
 def wavelet_thresholding_based_filter(func):
@@ -28,6 +41,8 @@ def wavelet_thresholding_based_filter(func):
     """
     def perform_filter(image, *args, **kw):
         thresholds, coeffs = func(image, *args, **kw)
+        if hasattr(thresholds, "__iter__"):
+            thresholds = thresholds[::-1]
         return wavelet_filter(image, thresholds, coeffs=coeffs, *args, **kw)
 
     return perform_filter
@@ -203,14 +218,14 @@ def wavelet_coefficient_array(image, coeffs=None, wavelet="haar", level=1):
     sh = cA.shape
     for cH, cV, cD in coeffs[1:]:
         sh = cA.shape
-        cH_, cV_, cD_ = imresize(cH, sh), imresize(cV, sh), imresize(cD, sh)
+        cH_, cV_, cD_ = ca_resize(cH, sh), ca_resize(cV, sh), ca_resize(cD, sh)
         temp = np.empty((2 * sh[0], 2 * sh[1]))
         temp[:sh[0], :sh[1]] = cA
-        temp[sh[0]:, :sh[1]] = bytescale(cH_, low=cH.min(), high=cH.max())
-        temp[:sh[0], sh[1]:] = bytescale(cV_, low=cV.min(), high=cV.max())
-        temp[sh[0]:, sh[1]:] = bytescale(cD_, low=cD.min(), high=cD.max())
+        temp[sh[0]:, :sh[1]] = cH_
+        temp[:sh[0], sh[1]:] = cV_
+        temp[sh[0]:, sh[1]:] = cD_
         cA = temp
-    cA = bytescale(imresize(cA, (m, n)), low=cA.min(), high=cA.max())
+    cA = ca_resize(cA, (m, n))
     return cA
 
 
