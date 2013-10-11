@@ -94,6 +94,66 @@ def test_poisson():
     assert_allclose(cam_noisy, expected)
 
 
+def test_clip_poisson():
+    seed = 42
+    data = camera()                         # 512x512 grayscale uint8
+    data_signed = (data / 255.) * 2. - 1.   # Same image, on range [-1, 1]
+
+    # Signed and unsigned, clipped
+    cam_poisson = random_noise(data, mode='poisson', seed=seed, clip=True)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', seed=seed,
+                                clip=True)
+    assert (cam_poisson.max() == 1.) and (cam_poisson.min() == 0.)
+    assert (cam_poisson2.max() == 1.) and (cam_poisson2.min() == -1.)
+
+    # Signed and unsigned, unclipped
+    cam_poisson = random_noise(data, mode='poisson', seed=seed, clip=False)
+    cam_poisson2 = random_noise(data_signed, mode='poisson', seed=seed,
+                                clip=False)
+    assert (cam_poisson.max() > 1.15) and (cam_poisson.min() == 0.)
+    assert (cam_poisson2.max() > 1.3) and (cam_poisson2.min() == -1.)
+
+
+def test_clip_gaussian():
+    seed = 42
+    data = camera()                         # 512x512 grayscale uint8
+    data_signed = (data / 255.) * 2. - 1.   # Same image, on range [-1, 1]
+
+    # Signed and unsigned, clipped
+    cam_gauss = random_noise(data, mode='gaussian', seed=seed, clip=True)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
+                              clip=True)
+    assert (cam_gauss.max() == 1.) and (cam_gauss.min() == 0.)
+    assert (cam_gauss2.max() == 1.) and (cam_gauss2.min() == -1.)
+
+    # Signed and unsigned, unclipped
+    cam_gauss = random_noise(data, mode='gaussian', seed=seed, clip=False)
+    cam_gauss2 = random_noise(data_signed, mode='gaussian', seed=seed,
+                              clip=False)
+    assert (cam_gauss.max() > 1.22) and (cam_gauss.min() < -0.36)
+    assert (cam_gauss2.max() > 1.219) and (cam_gauss2.min() < -1.337)
+
+
+def test_clip_speckle():
+    seed = 42
+    data = camera()                         # 512x512 grayscale uint8
+    data_signed = (data / 255.) * 2. - 1.   # Same image, on range [-1, 1]
+
+    # Signed and unsigned, clipped
+    cam_speckle = random_noise(data, mode='speckle', seed=seed, clip=True)
+    cam_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
+                                clip=True)
+    assert (cam_speckle.max() == 1.) and (cam_speckle.min() == 0.)
+    assert (cam_speckle2.max() == 1.) and (cam_speckle2.min() == -1.)
+
+    # Signed and unsigned, unclipped
+    cam_speckle = random_noise(data, mode='speckle', seed=seed, clip=False)
+    cam_speckle2 = random_noise(data_signed, mode='speckle', seed=seed,
+                                clip=False)
+    assert (cam_speckle.max() > 1.219) and (cam_speckle.min() == 0.)
+    assert (cam_speckle2.max() > 1.219) and (cam_speckle2.min() < -1.306)
+
+
 def test_bad_mode():
     data = np.zeros((64, 64))
     assert_raises(KeyError, random_noise, data, 'perlin')
