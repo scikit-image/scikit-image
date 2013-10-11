@@ -3,7 +3,8 @@ import itertools
 import numpy as np
 from numpy import testing
 from skimage.color.colorlabel import label2rgb
-from numpy.testing import assert_array_almost_equal as assert_close
+from numpy.testing import (assert_array_almost_equal as assert_close,
+                           assert_array_equal)
 
 
 def test_shape_mismatch():
@@ -79,6 +80,14 @@ def test_label_consistency():
     rgb_2 = label2rgb(label_2, colors=colors)
     for label_id in label_2.flat:
         assert_close(rgb_1[label_1 == label_id], rgb_2[label_2 == label_id])
+
+def test_leave_labels_alone():
+    labels = np.array([-1, 0, 1])
+    labels_saved = labels.copy()
+
+    label2rgb(labels)
+    label2rgb(labels, bg_label=1)
+    assert_array_equal(labels, labels_saved)
 
 
 if __name__ == '__main__':
