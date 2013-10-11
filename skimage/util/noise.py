@@ -5,6 +5,25 @@ from .dtype import img_as_float
 __all__ = ['random_noise']
 
 
+def _next_pow2(n):
+    """
+    Returns next integer power of two.
+    """
+
+    next_pow = 0
+    if n == np.inf:
+        return np.inf
+
+    if n < 1:
+        raise ValueError("Unable to determine next power of two for %i" % (n))
+
+    while True:
+        if 2 ** next_pow >= n:
+            return next_pow
+        else:
+            next_pow += 1
+
+
 def random_noise(image, mode='gaussian', seed=None, **kwargs):
     """
     Function to add random noise of various types to a floating-point image.
@@ -52,7 +71,7 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
 
     allowedtypes = {
         'gaussian': 'gaussian_values',
-        'poisson': '',
+        'poisson': 'poisson_values',
         'salt': 'sp_values',
         'pepper': 'sp_values',
         's&p': 's&p_values',
@@ -67,7 +86,8 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
     allowedkwargs = {
         'gaussian_values': ['mean', 'var'],
         'sp_values': ['amount'],
-        's&p_values': ['amount', 'salt_vs_pepper']}
+        's&p_values': ['amount', 'salt_vs_pepper'],
+        'poisson_values': []}
 
     for key in kwargs:
         if key not in allowedkwargs[allowedtypes[mode]]:
@@ -84,13 +104,14 @@ def random_noise(image, mode='gaussian', seed=None, **kwargs):
         out = np.clip(image + noise, 0., 1.)
 
     elif mode == 'poisson':
+        # Determine unique values present in image
+        vals = len(np.unique(image))
+
+        # Calculate the next lowest power of two
+        vals = 2 ** _next_pow2(vals)
+
         # Generating noise for each unique value in image.
-        out = np.zeros_like(image)
-        for val in np.unique(image):
-            # Generate mask for a unique value, replace w/values drawn from
-            # Poisson distribution about the unique value
-            mask = image == val
-            out[mask] = np.poisson(val, mask.sum())
+        out = np.random.poisson(image * vals) / float(vals)
 
     elif mode == 'salt':
         # Re-call function with mode='s&p' and p=1 (all salt noise)

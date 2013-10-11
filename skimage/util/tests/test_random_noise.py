@@ -75,13 +75,23 @@ def test_gaussian():
 def test_speckle():
     seed = 42
     data = np.zeros((128, 128)) + 0.1
-    np.random.seed(seed=42)
+    np.random.seed(seed=seed)
     noise = np.random.normal(0.1, 0.02 ** 0.5, (128, 128))
     expected = np.clip(data + data * noise, 0, 1)
 
     data_speckle = random_noise(data, mode='speckle', seed=seed, mean=0.1,
                                 var=0.02)
     assert_allclose(expected, data_speckle)
+
+
+def test_poisson():
+    seed = 42
+    data = camera()  # 512x512 grayscale uint8
+    cam_noisy = random_noise(data, mode='poisson', seed=seed)
+
+    np.random.seed(seed=seed)
+    expected = np.random.poisson(img_as_float(data) * 256) / 256.
+    assert_allclose(cam_noisy, expected)
 
 
 def test_bad_mode():
