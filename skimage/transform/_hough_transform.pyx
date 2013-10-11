@@ -7,7 +7,7 @@ import numpy as np
 cimport numpy as cnp
 cimport cython
 
-from libc.math cimport abs, fabs, sqrt, ceil, M_PI
+from libc.math cimport abs, fabs, sqrt, ceil, atan2, M_PI
 from libc.stdlib cimport rand
 
 from skimage.draw import circle_perimeter
@@ -205,7 +205,7 @@ def hough_ellipse(cnp.ndarray img, int threshold=4, double accuracy=1,
                     hist, bin_edges = np.histogram(acc, bins=bins)
                     hist_max = np.max(hist)
                     if hist_max > threshold:
-                        angle = np.arctan2(p1x - p2x, p1y - p2y)
+                        angle = atan2(p1x - p2x, p1y - p2y)
                         b = sqrt(bin_edges[hist.argmax()])
                         # to keep ellipse_perimeter() convention
                         if angle != 0:
