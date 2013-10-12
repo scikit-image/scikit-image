@@ -10,7 +10,7 @@ import os
 from libc.math cimport sin, cos, round
 
 
-pos = np.loadtxt(os.path.join(os.path.dirname(__file__),
+pos = np.loadtxt(os.path.join(os.path.dirname(os.path.abspath(__file__)),
                  "orb_descriptor_positions.txt"), dtype=np.int8)
 pos0 = np.ascontiguousarray(pos[:, :2])
 pos1 = np.ascontiguousarray(pos[:, 2:])
