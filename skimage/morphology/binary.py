@@ -16,7 +16,7 @@ def binary_erosion(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of bool
@@ -33,9 +33,9 @@ def binary_erosion(image, selem, out=None):
     selem_sum = np.sum(selem)
 
     if selem_sum <= 255:
-        binary = (image != 0).view(np.uint8)
+        binary = (image > 0).view(np.uint8)
     else:
-        binary = (image != 0).astype(np.intp)
+        binary = (image > 0).astype(np.intp)
 
     conv = ndimage.convolve(binary, selem, mode='constant', cval=1)
 
@@ -50,15 +50,15 @@ def binary_dilation(image, selem, out=None):
     This function returns the same result as greyscale dilation but performs
     faster for binary images.
 
-    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
-    in the neighborhood centered at (i,j). Dilation enlarges bright regions
-    and shrinks dark regions.
+    Morphological dilation sets a pixel at ``(i,j)`` to the maximum over all
+    pixels in the neighborhood centered at ``(i,j)``. Dilation enlarges bright
+    regions and shrinks dark regions.
 
     Parameters
     ----------
 
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of bool
@@ -73,9 +73,9 @@ def binary_dilation(image, selem, out=None):
     """
     selem = (selem != 0)
     if np.sum(selem) <= 255:
-        binary = (image != 0).view(np.uint8)
+        binary = (image > 0).view(np.uint8)
     else:
-        binary = (image != 0).astype(np.intp)
+        binary = (image > 0).astype(np.intp)
 
     conv = ndimage.convolve(binary, selem, mode='constant', cval=0)
 
@@ -98,7 +98,7 @@ def binary_opening(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of bool
@@ -130,7 +130,7 @@ def binary_closing(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
     out : ndarray of bool
