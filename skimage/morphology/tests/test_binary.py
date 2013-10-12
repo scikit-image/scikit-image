@@ -62,6 +62,7 @@ def test_out_argument():
         out_saved = out.copy()
         func(img, strel, out=out)
         testing.assert_(np.any(out != out_saved))
+        testing.assert_array_equal(out, func(img, strel))
 
 if __name__ == '__main__':
     testing.run_module_suite()
