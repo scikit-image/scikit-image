@@ -54,5 +54,14 @@ def test_selem_overflow():
     testing.assert_array_equal(binary_res, grey_res)
 
 
+def test_out_argument():
+    for func in (binary.binary_erosion, binary.binary_dilation):
+        strel = np.ones((3, 3), dtype=np.uint8)
+        img = np.ones((10, 10))
+        out = np.zeros_like(img)
+        out_saved = out.copy()
+        func(img, strel, out=out)
+        testing.assert_(np.any(out != out_saved))
+
 if __name__ == '__main__':
     testing.run_module_suite()
