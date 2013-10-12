@@ -1,14 +1,15 @@
-import urllib
 import json
-import copy
+import urllib
+import dateutil.parser
 from collections import OrderedDict
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+from matplotlib.transforms import blended_transform_factory
 
-import dateutil.parser
-from dateutil.relativedelta import relativedelta
-from datetime import datetime, timedelta
 
 cache = '_pr_cache.txt'
 
@@ -32,8 +33,6 @@ releases = OrderedDict([
 
 month_duration = 24
 
-for r in releases:
-    releases[r] = dateutil.parser.parse(releases[r])
 
 def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
     params = {'state': state,
@@ -48,12 +47,12 @@ def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
                   'repo': repo,
                   'params': urllib.urlencode(params)}
 
-        fetch_status = 'Fetching page %(page)d (state=%(state)s)' % params + \
-                       ' from %(user)s/%(repo)s...' % config
+        fetch_status = ('Fetching page %(page)d (state=%(state)s)' % params +
+                        ' from %(user)s/%(repo)s...' % config)
         print(fetch_status)
 
         f = urllib.urlopen(
-            'https://api.github.com/repos/%(user)s/%(repo)s/pulls?%(params)s' \
+            'https://api.github.com/repos/%(user)s/%(repo)s/pulls?%(params)s'
             % config
         )
 
@@ -68,6 +67,31 @@ def fetch_PRs(user='scikit-image', repo='scikit-image', state='open'):
             data.extend(page_data)
 
     return data
+
+
+def seconds_from_epoch(dates):
+    seconds = [(dt - epoch).total_seconds() for dt in dates]
+    return seconds
+
+
+def get_month_bins(dates):
+    now = datetime.now(tz=dates[0].tzinfo)
+    this_month = datetime(year=now.year, month=now.month, day=1,
+                          tzinfo=dates[0].tzinfo)
+
+    bins = [this_month - relativedelta(months=i)
+            for i in reversed(range(-1, month_duration))]
+    return seconds_from_epoch(bins)
+
+
+def date_formatter(value, _):
+    dt = epoch + timedelta(seconds=value)
+    return dt.strftime('%Y/%m')
+
+
+for r in releases:
+    releases[r] = dateutil.parser.parse(releases[r])
+
 
 try:
     PRs = json.loads(open(cache, 'r').read())
@@ -89,56 +113,41 @@ dates = [dateutil.parser.parse(pr['created_at']) for pr in PRs]
 
 epoch = datetime(2009, 1, 1, tzinfo=dates[0].tzinfo)
 
-def seconds_from_epoch(dates):
-    seconds = [(dt - epoch).total_seconds() for dt in dates]
-    return seconds
-
 dates_f = seconds_from_epoch(dates)
+bins = get_month_bins(dates)
 
-def date_formatter(value, _):
-    dt = epoch + timedelta(seconds=value)
-    return dt.strftime('%Y/%m')
+fig, ax = plt.subplots(figsize=(7, 5))
 
-plt.figure(figsize=(7, 5))
+n, bins, _ = ax.hist(dates_f, bins=bins, color='blue', alpha=0.6)
 
-now = datetime.now(tz=dates[0].tzinfo)
-this_month = datetime(year=now.year, month=now.month, day=1,
-                      tzinfo=dates[0].tzinfo)
-
-bins = [this_month - relativedelta(months=i) \
-        for i in reversed(range(-1, month_duration))]
-bins = seconds_from_epoch(bins)
-n, bins, _ = plt.hist(dates_f, bins=bins)
-
-ax = plt.gca()
 ax.xaxis.set_major_formatter(FuncFormatter(date_formatter))
-ax.set_xticks(bins[:-1])
+ax.set_xticks(bins[2:-1:3])  # Date label every 3 months.
 
 labels = ax.get_xticklabels()
 for l in labels:
     l.set_rotation(40)
     l.set_size(10)
 
+mixed_transform = blended_transform_factory(ax.transData, ax.transAxes)
 
 for version, date in releases.items():
     date = seconds_from_epoch([date])[0]
-    plt.axvline(date, color='r', label=version)
-    plt.text(date, n.max() * 0.9, version, color='orange', rotation=90,
-             fontsize=16)
+    ax.axvline(date, color='black', linestyle=':', label=version)
+    ax.text(date, 1, version, color='r', va='bottom', ha='center',
+            transform=mixed_transform)
 
-plt.title('Pull request activity').set_y(1.05)
-plt.xlabel('Date')
-plt.ylabel('PRs per month')
-plt.subplots_adjust(top=0.875, bottom=0.225)
+ax.set_title('Pull request activity').set_y(1.05)
+ax.set_xlabel('Date')
+ax.set_ylabel('PRs per month', color='blue')
+fig.subplots_adjust(top=0.875, bottom=0.225)
 
-import numpy as np
 cumulative = np.cumsum(n)
 cumulative += len(dates) - cumulative[-1]
 
-ax2 = plt.twinx()
-ax2.plot(bins[:-1], cumulative, 'black', linewidth=2)
-ax2.set_ylabel('Total PRs')
+ax2 = ax.twinx()
+ax2.plot(bins[1:], cumulative, color='black', linewidth=2)
+ax2.set_ylabel('Total PRs', color='black')
 
-plt.savefig('PRs.png')
+fig.savefig('PRs.png')
 
 plt.show()
