@@ -101,7 +101,7 @@ def _compute_gradients_3d(data, spacing):
     gr_deep = np.abs(data[:, :, :-1] - data[:, :, 1:]).ravel() / spacing[2]
     gr_right = np.abs(data[:, :-1] - data[:, 1:]).ravel() / spacing[1]
     gr_down = np.abs(data[:-1] - data[1:]).ravel() / spacing[0]
-    return np.r_[gr_down, gr_right, gr_deep]
+    return np.r_[gr_deep, gr_right, gr_down]
 
 
 def _make_laplacian_sparse(edges, weights):
