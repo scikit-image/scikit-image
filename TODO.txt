@@ -6,6 +6,7 @@ Version 0.10
 * Remove {`ratio`, `sigma`} deprecation warnings of `skimage.segmentation.slic`
 * Change default mode of random_walker segmentation to 'cg_mg' > 'cg' > 'bf',
   depending on which optional dependencies are available.
+* Remove deprecated `out` parameter of `skimage.morphology.binary_*`
 
 Version 0.9
 -----------
