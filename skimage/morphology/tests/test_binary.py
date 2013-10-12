@@ -45,5 +45,14 @@ def test_binary_opening():
     testing.assert_array_equal(binary_res, grey_res)
 
 
+def test_selem_overflow():
+    strel = np.ones((17, 17), dtype=np.uint8)
+    img = np.zeros((20, 20))
+    img[2:19, 2:19] = 1
+    binary_res = binary.binary_erosion(img, strel)
+    grey_res = img_as_bool(grey.erosion(img, strel))
+    testing.assert_array_equal(binary_res, grey_res)
+
+
 if __name__ == '__main__':
     testing.run_module_suite()

@@ -32,13 +32,16 @@ def binary_erosion(image, selem, out=None):
     selem = (selem != 0)
     selem_sum = np.sum(selem)
 
-    if selem_sum > 255:
+    if selem_sum <= 255:
         binary = (image != 0).view(np.uint8)
     else:
         binary = (image != 0).astype(np.intp)
 
-    out = ndimage.convolve(binary, selem, mode='constant', cval=1)
-    return np.equal(out, selem_sum, out=out)
+    conv = ndimage.convolve(binary, selem, mode='constant', cval=1)
+
+    if out is None:
+        out = np.zeros_like(binary, dtype=bool)
+    return np.equal(conv, selem_sum, out=out)
 
 
 def binary_dilation(image, selem, out=None):
@@ -69,13 +72,16 @@ def binary_dilation(image, selem, out=None):
 
     """
     selem = (selem != 0)
-    if np.sum(selem) > 255:
+    if np.sum(selem) <= 255:
         binary = (image != 0).view(np.uint8)
     else:
         binary = (image != 0).astype(np.intp)
 
-    out = ndimage.convolve(binary, selem, mode='constant', cval=0)
-    return np.not_equal(out, 0, out=out)
+    conv = ndimage.convolve(binary, selem, mode='constant', cval=0)
+
+    if out is None:
+        out = np.zeros_like(binary, dtype=bool)
+    return np.not_equal(conv, 0, out=out)
 
 
 def binary_opening(image, selem, out=None):
