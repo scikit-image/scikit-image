@@ -5,6 +5,7 @@
 
 cimport numpy as cnp
 import numpy as np
+import os
 
 from libc.math cimport sin, cos, round
 
