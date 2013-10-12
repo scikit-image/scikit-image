@@ -14,7 +14,9 @@ def _mask_border_keypoints(image, keypoints, dist):
 
 
 def pairwise_hamming_distance(array1, array2):
-    """Calculate hamming dissimilarity measure between two sets of
+    """**Experimental function**.
+
+    Calculate hamming dissimilarity measure between two sets of
     vectors.
 
     Parameters

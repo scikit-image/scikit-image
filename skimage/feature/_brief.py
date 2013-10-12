@@ -9,7 +9,9 @@ from ._brief_cy import _brief_loop
 
 def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
           sample_seed=1, variance=2):
-    """Extract BRIEF Descriptor about given keypoints for a given image.
+    """**Experimental function**.
+
+    Extract BRIEF Descriptor about given keypoints for a given image.
 
     Parameters
     ----------
@@ -178,7 +180,9 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
 def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
                           descriptors2, threshold=0.15):
-    """Match keypoints described using BRIEF descriptors in one image to
+    """**Experimental function**.
+
+    Match keypoints described using BRIEF descriptors in one image to
     those in second image.
 
     Parameters
