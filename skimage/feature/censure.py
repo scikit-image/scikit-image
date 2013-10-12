@@ -111,7 +111,8 @@ def _suppress_lines(feature_mask, image, sigma, line_threshold):
 
 def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
                       non_max_threshold=0.15, line_threshold=10):
-    """
+    """**Experimental function**.
+
     Extracts CenSurE keypoints along with the corresponding scale using
     either Difference of Boxes, Octagon or STAR bi-level filter.
 
