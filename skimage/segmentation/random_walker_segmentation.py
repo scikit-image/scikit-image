@@ -169,13 +169,13 @@ def _mask_edges_weights(edges, weights, mask):
     # Reassign edges labels to 0, 1, ... edges_number - 1
     order = np.searchsorted(np.unique(edges.ravel()),
                             np.arange(max_node_index + 1))
-    edges = order[edges]
+    edges = order[edges.astype(np.int64)]
     return edges, weights
 
 
 def _build_laplacian(data, spacing, mask=None, beta=50,
                      multichannel=False):
-    l_x, l_y, l_z = tuple(data.shape[i] * spacing[i] for i in range(3))
+    l_x, l_y, l_z = tuple(data.shape[i] for i in range(3))
     edges = _make_graph_edges_3d(l_x, l_y, l_z)
     weights = _compute_weights_3d(data, spacing, beta=beta, eps=1.e-10,
                                   multichannel=multichannel)
@@ -257,7 +257,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         out-of-plane voxel spacing represents the third spatial dimension.
         `depth` is deprecated as of 0.9, in favor of `spacing`.
     spacing : iterable of floats
-        spacing between voxels in each spatial dimension. If `None`, then
+        Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
 
     Returns
@@ -357,9 +357,17 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                       '(see the docstrings)')
     if depth != 1.:
         warnings.warn('`depth` kwarg is deprecated, and will be removed in the'
-                      ' next major version. Use `spacing` instead.')
+                      ' next major release. Use `spacing` instead.')
+
+    # Spacing kwarg checks
     if spacing is None:
-            spacing = (1., 1.) + (depth, )
+        spacing = (1., 1.) + (depth, )
+    elif len(spacing) == 2:
+        spacing = tuple(spacing) + (depth, )
+    elif len(spacing) == 3:
+        pass
+    else:
+        raise ValueError('Input argument `spacing` incorrect, see docstring.')
 
     # Parse input data
     if not multichannel:

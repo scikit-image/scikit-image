@@ -8,16 +8,16 @@ def make_2d_syntheticdata(lx, ly=None):
         ly = lx
     np.random.seed(1234)
     data = np.zeros((lx, ly)) + 0.1 * np.random.randn(lx, ly)
-    small_l = int(lx / 5)
-    data[lx / 2 - small_l:lx / 2 + small_l,
-         ly / 2 - small_l:ly / 2 + small_l] = 1
-    data[lx / 2 - small_l + 1:lx / 2 + small_l - 1,
-         ly / 2 - small_l + 1:ly / 2 + small_l - 1] = \
-                        0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2)
-    data[lx / 2 - small_l, ly / 2 - small_l / 8:ly / 2 + small_l / 8] = 0
+    small_l = int(lx // 5)
+    data[lx // 2 - small_l:lx // 2 + small_l,
+         ly // 2 - small_l:ly // 2 + small_l] = 1
+    data[lx // 2 - small_l + 1:lx // 2 + small_l - 1,
+         ly // 2 - small_l + 1:ly // 2 + small_l - 1] = (
+            0.1 * np.random.randn(2 * small_l - 2, 2 * small_l - 2))
+    data[lx // 2 - small_l, ly // 2 - small_l // 8:ly // 2 + small_l // 8] = 0
     seeds = np.zeros_like(data)
-    seeds[lx / 5, ly / 5] = 1
-    seeds[lx / 2 + small_l / 4, ly / 2 - small_l / 4] = 2
+    seeds[lx // 5, ly // 5] = 1
+    seeds[lx // 2 + small_l // 4, ly // 2 - small_l // 4] = 2
     return data, seeds
 
 
@@ -28,21 +28,23 @@ def make_3d_syntheticdata(lx, ly=None, lz=None):
         lz = lx
     np.random.seed(1234)
     data = np.zeros((lx, ly, lz)) + 0.1 * np.random.randn(lx, ly, lz)
-    small_l = int(lx / 5)
-    data[lx / 2 - small_l:lx / 2 + small_l,
-         ly / 2 - small_l:ly / 2 + small_l,
-         lz / 2 - small_l:lz / 2 + small_l] = 1
-    data[lx / 2 - small_l + 1:lx / 2 + small_l - 1,
-         ly / 2 - small_l + 1:ly / 2 + small_l - 1,
-         lz / 2 - small_l + 1:lz / 2 + small_l - 1] = 0
+    small_l = int(lx // 5)
+    data[lx // 2 - small_l:lx // 2 + small_l,
+         ly // 2 - small_l:ly // 2 + small_l,
+         lz // 2 - small_l:lz // 2 + small_l] = 1
+    data[lx // 2 - small_l + 1:lx // 2 + small_l - 1,
+         ly // 2 - small_l + 1:ly // 2 + small_l - 1,
+         lz // 2 - small_l + 1:lz // 2 + small_l - 1] = 0
     # make a hole
-    hole_size = np.max([1, small_l / 8])
-    data[lx / 2 - small_l,
-         ly / 2 - hole_size:ly / 2 + hole_size,
-         lz / 2 - hole_size:lz / 2 + hole_size] = 0
+    hole_size = np.max([1, small_l // 8])
+    data[lx // 2 - small_l,
+         ly // 2 - hole_size:ly // 2 + hole_size,
+         lz // 2 - hole_size:lz // 2 + hole_size] = 0
     seeds = np.zeros_like(data)
-    seeds[lx / 5, ly / 5, lz / 5] = 1
-    seeds[lx / 2 + small_l / 4, ly / 2 - small_l / 4, lz / 2 - small_l / 4] = 2
+    seeds[lx // 5, ly // 5, lz // 5] = 1
+    seeds[lx // 2 + small_l // 4,
+          ly // 2 - small_l // 4,
+          lz // 2 - small_l // 4] = 2
     return data, seeds
 
 
@@ -102,7 +104,7 @@ def test_types():
     lx = 70
     ly = 100
     data, labels = make_2d_syntheticdata(lx, ly)
-    data = 255 * (data - data.min()) / (data.max() - data.min())
+    data = 255 * (data - data.min()) // (data.max() - data.min())
     data = data.astype(np.uint8)
     labels_cg_mg = random_walker(data, labels, beta=90, mode='cg_mg')
     assert (labels_cg_mg[25:45, 40:60] == 2).all()
@@ -236,19 +238,19 @@ def test_spacing():
     # `resize` is not yet 3D capable, so this must be done by looping in 2D.
     data_aniso = np.zeros((n, n * 2, n))
     for i in range(data.shape[1]):
-        data_aniso[i, :, :] = resize(data[:, 1, :], (n * 1.5, n))
+        data_aniso[i, :, :] = resize(data[:, 1, :], (n * 2, n))
 
     # Generate new labels
     small_l = int(lx // 5)
-    labels_aniso = np.zeros_like(data_aniso)
-    labels_aniso[lx // 5, ly // 5, lz // 5] = 1
-    labels_aniso[lx - small_l // 2,
-                 ly // 2 + small_l // 4,
-                 lz // 2 - small_l // 4] = 2
+    labels_aniso2 = np.zeros_like(data_aniso)
+    labels_aniso2[lx // 5, ly // 5, lz // 5] = 1
+    labels_aniso2[lx - small_l // 2,
+                  ly // 2 + small_l // 4,
+                  lz // 2 - small_l // 4] = 2
 
     # Anisotropic along X
-    labels_aniso2 = random_walker(np.rollaxis(data_aniso, 1).copy(),
-                                  np.rollaxis(labels_aniso, 1).copy(),
+    labels_aniso2 = random_walker(data_aniso,
+                                  labels_aniso2,
                                   mode='cg', spacing=(2., 1., 1.))
     assert (labels_aniso2[26:34, 13:17, 13:17] == 2).all()
 
