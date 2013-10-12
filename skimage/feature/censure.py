@@ -1,9 +1,10 @@
 import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 
+from .util import _prepare_grayscale_input_2D
+
 from skimage.transform import integral_image
-from skimage.feature.corner import _compute_auto_correlation
-from skimage.util import img_as_float
+from skimage.feature import structure_tensor
 from skimage.morphology import octagon, star
 from skimage.feature.util import _mask_border_keypoints
 
@@ -104,7 +105,7 @@ def _star_filter_kernel(m, n):
 
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
-    Axx, Axy, Ayy = _compute_auto_correlation(image, sigma)
+    Axx, Axy, Ayy = structure_tensor(image, sigma)
     feature_mask[(Axx + Ayy) * (Axx + Ayy)
                  > line_threshold * (Axx * Ayy - Axy * Axy)] = False
 
@@ -124,7 +125,9 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
     max_scale : int
         Maximum scale to extract keypoints from. The keypoints will be
         extracted from all the scales except the first and the last i.e.
-        from the scales in the range [min_scale + 1, max_scale - 1].
+        from the scales in the range [min_scale + 1, max_scale - 1]. The filter
+        sizes for different scales is such that the two adjacent scales
+        comprise of an octave.
     mode : {'DoB', 'Octagon', 'STAR'}
         Type of bi-level filter used to get the scales of the input image.
         Possible values are 'DoB', 'Octagon' and 'STAR'. The three modes
@@ -174,9 +177,7 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
     # (4) Finally, we remove the border keypoints and return the keypoints
     # along with its corresponding scale.
 
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
+    image = _prepare_grayscale_input_2D(image)
 
     mode = mode.lower()
     if mode not in ('dob', 'octagon', 'star'):
@@ -186,7 +187,6 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
         raise ValueError('The scales must be >= 1 and the number of scales '
                          'should be >= 3.')
 
-    image = img_as_float(image)
     image = np.ascontiguousarray(image)
 
     # Generating all the scales

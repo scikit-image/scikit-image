@@ -1,3 +1,14 @@
+import numpy as np
+
+from skimage.util import img_as_float
+
+
+def _prepare_grayscale_input_2D(image):
+    image = np.squeeze(image)
+    if image.ndim != 2:
+        raise ValueError("Only 2-D gray-scale images supported.")
+
+    return img_as_float(image)
 
 
 def _mask_border_keypoints(image, keypoints, dist):

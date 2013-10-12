@@ -1,14 +1,14 @@
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter
 
-from ..util import img_as_float
-from .util import _mask_border_keypoints, pairwise_hamming_distance
+from .util import (_mask_border_keypoints, pairwise_hamming_distance,
+                   _prepare_grayscale_input_2D)
 
 from ._brief_cy import _brief_loop
 
 
-def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
-          sample_seed=1, variance=2):
+def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
+                     patch_size=49, sample_seed=1, variance=2):
     """Extract BRIEF Descriptor about given keypoints for a given image.
 
     Parameters
@@ -57,7 +57,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     --------
     >>> import numpy as np
     >>> from skimage.feature.corner import corner_peaks, corner_harris
-    >>> from skimage.feature import pairwise_hamming_distance, brief, match_keypoints_brief
+    >>> from skimage.feature import pairwise_hamming_distance, descriptor_brief, match_binary_descriptors
     >>> square1 = np.zeros([8, 8], dtype=np.int32)
     >>> square1[2:6, 2:6] = 1
     >>> square1
@@ -75,7 +75,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size=5)
+    >>> descriptors1, keypoints1 = descriptor_brief(square1, keypoints1, patch_size=5)
     >>> keypoints1
     array([[2, 2],
            [2, 5],
@@ -99,7 +99,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [2, 6],
            [6, 2],
            [6, 6]])
-    >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size=5)
+    >>> descriptors2, keypoints2 = descriptor_brief(square2, keypoints2, patch_size=5)
     >>> keypoints2
     array([[2, 2],
            [2, 6],
@@ -110,7 +110,11 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [ 0.3203125,  0.03125  ,  0.640625 ,  0.375    ],
            [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
            [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
-    >>> match_keypoints_brief(keypoints1, descriptors1, keypoints2, descriptors2)
+    >>> matched_kpts, mask1, mask2 = match_binary_descriptors(keypoints1,
+                                                              descriptors1,
+                                                              keypoints2,
+                                                              descriptors2)
+    >>> matched_kpts
     array([[[ 2,  2],
             [ 2,  2]],
 
@@ -126,11 +130,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     """
     np.random.seed(sample_seed)
 
-    image = np.squeeze(image)
-    if image.ndim != 2:
-        raise ValueError("Only 2-D gray-scale images supported.")
-
-    image = img_as_float(image)
+    image = _prepare_grayscale_input_2D(image)
 
     # Gaussian Low pass filtering to alleviate noise
     # sensitivity
@@ -166,6 +166,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
         samples = np.random.randint(-(patch_size - 2) // 2,
                                     (patch_size // 2) + 1,
                                     (descriptor_size * 2, 2))
+        samples = np.array(samples, dtype=np.int32)
         pos1, pos2 = np.split(samples, 2)
 
     pos1 = np.ascontiguousarray(pos1)
@@ -174,51 +175,3 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
     _brief_loop(image, descriptors.view(np.uint8), keypoints, pos1, pos2)
 
     return descriptors, keypoints
-
-
-def match_keypoints_brief(keypoints1, descriptors1, keypoints2,
-                          descriptors2, threshold=0.15):
-    """Match keypoints described using BRIEF descriptors in one image to
-    those in second image.
-
-    Parameters
-    ----------
-    keypoints1 : (M, 2) ndarray
-        M Keypoints from the first image described using skimage.feature.brief
-    descriptors1 : (M, P) ndarray
-        BRIEF descriptors of size P about M keypoints in the first image.
-    keypoints2 : (N, 2) ndarray
-        N Keypoints from the second image described using skimage.feature.brief
-    descriptors2 : (N, P) ndarray
-        BRIEF descriptors of size P about N keypoints in the second image.
-    threshold : float in range [0, 1]
-        Maximum allowable hamming distance between descriptors of two keypoints
-        in separate images to be regarded as a match. Default is 0.15.
-
-    Returns
-    -------
-    match_keypoints_brief : (Q, 2, 2) ndarray
-        Location of Q matched keypoint pairs from two images.
-
-    """
-    if (keypoints1.shape[0] != descriptors1.shape[0]
-    or keypoints2.shape[0] != descriptors2.shape[0]):
-        raise ValueError("The number of keypoints and number of described "
-                         "keypoints do not match. Make the optional parameter "
-                         "return_keypoints True to get described keypoints.")
-
-    if descriptors1.shape[1] != descriptors2.shape[1]:
-        raise ValueError("Descriptor sizes for matching keypoints in both "
-                         "the images should be equal.")
-
-    # Get hamming distances between keeypoints1 and keypoints2
-    distance = pairwise_hamming_distance(descriptors1, descriptors2)
-
-    temp = distance > threshold
-    row_check = np.any(~temp, axis=1)
-    matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
-    matched_keypoint_pairs = np.zeros((np.sum(row_check), 2, 2), dtype=np.intp)
-    matched_keypoint_pairs[:, 0, :] = keypoints1[row_check]
-    matched_keypoint_pairs[:, 1, :] = matched_keypoints2[row_check]
-
-    return matched_keypoint_pairs
