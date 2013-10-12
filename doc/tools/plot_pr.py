@@ -121,7 +121,7 @@ fig, ax = plt.subplots(figsize=(7, 5))
 n, bins, _ = ax.hist(dates_f, bins=bins, color='blue', alpha=0.6)
 
 ax.xaxis.set_major_formatter(FuncFormatter(date_formatter))
-ax.set_xticks(bins[:-1])
+ax.set_xticks(bins[2:-1:3])  # Date label every 3 months.
 
 labels = ax.get_xticklabels()
 for l in labels:
