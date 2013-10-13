@@ -17,7 +17,7 @@ def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
     c : float
         Length of semimajor axis aligned with z-axis.
     spacing : tuple of floats, length 3
-        spacing in (x, y, z) spatial dimensions.
+        Spacing in (x, y, z) spatial dimensions.
     levelset : bool
         If True, returns the level set for this ellipsoid (signed level
         set about zero, with positive denoting interior) as np.float64.
