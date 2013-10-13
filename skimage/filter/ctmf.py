@@ -1,5 +1,4 @@
-"""
-ctmf.py - constant time per pixel median filtering with an octagonal shape
+"""ctmf.py - constant time per pixel median filtering with an octagonal shape
 
 Reference: S. Perreault and P. Hebert, "Median Filtering in Constant Time",
 IEEE Transactions on Image Processing, September 2007.
@@ -16,8 +15,10 @@ import warnings
 import numpy as np
 from . import _ctmf
 from ._rank_order import rank_order
+from .._shared.utils import deprecated
 
 
+@deprecated('filter.rank.median')
 def median_filter(image, radius=2, mask=None, percent=50):
     """Masked median filter with octagon shape.
 
@@ -28,7 +29,7 @@ def median_filter(image, radius=2, mask=None, percent=50):
     radius : int
         Radius (in pixels) of a circle inscribed into the filtering
         octagon. Must be at least 2. Default radius is 2.
-    mask : (M,N) ndarray
+    mask : (M, N) ndarray
         Mask with 1's for significant pixels, 0's for masked pixels.
         By default, all pixels are considered significant.
     percent : int
@@ -42,6 +43,11 @@ def median_filter(image, radius=2, mask=None, percent=50):
         Filtered array. In areas where the median filter does
         not overlap the mask, the filtered result is undefined, but
         in practice, it will be the lowest value in the valid area.
+
+    Notes
+    -----
+    Because of the histogram implementation, the number of unique values
+    for the output is limited to 256.
 
     Examples
     --------
@@ -65,10 +71,7 @@ def median_filter(image, radius=2, mask=None, percent=50):
     if np.all(~ mask):
         warnings.warn('Mask is all over image! Returning copy of input image.')
         return image.copy()
-    #
-    # Some manipulation to handle float images and integer values outside
-    # range(256).
-    #
+    
     if (not np.issubdtype(image.dtype, np.int) or
         np.min(image) < 0 or np.max(image) > 255):
         ranked_values, translation = rank_order(image[mask])
