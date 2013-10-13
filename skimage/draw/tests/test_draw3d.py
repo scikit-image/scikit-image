@@ -6,7 +6,7 @@ from skimage.draw import ellipsoid, ellipsoid_stats
 
 def test_ellipsoid_bool():
     test = ellipsoid(2, 2, 2)[1:-1, 1:-1, 1:-1]
-    test_anisotropic = ellipsoid(2, 2, 4, sampling=(1., 1., 2.))
+    test_anisotropic = ellipsoid(2, 2, 4, spacing=(1., 1., 2.))
     test_anisotropic = test_anisotropic[1:-1, 1:-1, 1:-1]
 
     expected = np.array([[[0, 0, 0, 0, 0],
@@ -45,7 +45,7 @@ def test_ellipsoid_bool():
 
 def test_ellipsoid_levelset():
     test = ellipsoid(2, 2, 2, levelset=True)[1:-1, 1:-1, 1:-1]
-    test_anisotropic = ellipsoid(2, 2, 4, sampling=(1., 1., 2.),
+    test_anisotropic = ellipsoid(2, 2, 4, spacing=(1., 1., 2.),
                                  levelset=True)
     test_anisotropic = test_anisotropic[1:-1, 1:-1, 1:-1]
 
