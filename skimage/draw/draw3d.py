@@ -3,10 +3,10 @@ import numpy as np
 from scipy.special import (ellipkinc as ellip_F, ellipeinc as ellip_E)
 
 
-def ellipsoid(a, b, c, sampling=(1., 1., 1.), levelset=False):
+def ellipsoid(a, b, c, spacing=(1., 1., 1.), levelset=False):
     """
     Generates ellipsoid with semimajor axes aligned with grid dimensions
-    on grid with specified `sampling`.
+    on grid with specified `spacing`.
 
     Parameters
     ----------
@@ -16,8 +16,8 @@ def ellipsoid(a, b, c, sampling=(1., 1., 1.), levelset=False):
         Length of semimajor axis aligned with y-axis.
     c : float
         Length of semimajor axis aligned with z-axis.
-    sampling : tuple of floats, length 3
-        Sampling in (x, y, z) spatial dimensions.
+    spacing : tuple of floats, length 3
+        spacing in (x, y, z) spatial dimensions.
     levelset : bool
         If True, returns the level set for this ellipsoid (signed level
         set about zero, with positive denoting interior) as np.float64.
@@ -26,7 +26,7 @@ def ellipsoid(a, b, c, sampling=(1., 1., 1.), levelset=False):
     Returns
     -------
     ellip : (N, M, P) array
-        Ellipsoid centered in a correctly sized array for given `sampling`.
+        Ellipsoid centered in a correctly sized array for given `spacing`.
         Boolean dtype unless `levelset=True`, in which case a float array is
         returned with the level set above 0.0 representing the ellipsoid.
 
@@ -34,7 +34,7 @@ def ellipsoid(a, b, c, sampling=(1., 1., 1.), levelset=False):
     if (a <= 0) or (b <= 0) or (c <= 0):
         raise ValueError('Parameters a, b, and c must all be > 0')
 
-    offset = np.r_[1, 1, 1] * np.r_[sampling]
+    offset = np.r_[1, 1, 1] * np.r_[spacing]
 
     # Calculate limits, and ensure output volume is odd & symmetric
     low = np.ceil((- np.r_[a, b, c] - offset))
@@ -43,14 +43,14 @@ def ellipsoid(a, b, c, sampling=(1., 1., 1.), levelset=False):
     for dim in range(3):
         if (high[dim] - low[dim]) % 2 == 0:
             low[dim] -= 1
-        num = np.arange(low[dim], high[dim], sampling[dim])
+        num = np.arange(low[dim], high[dim], spacing[dim])
         if 0 not in num:
             low[dim] -= np.max(num[num < 0])
 
     # Generate (anisotropic) spatial grid
-    x, y, z = np.mgrid[low[0]:high[0]:sampling[0],
-                       low[1]:high[1]:sampling[1],
-                       low[2]:high[2]:sampling[2]]
+    x, y, z = np.mgrid[low[0]:high[0]:spacing[0],
+                       low[1]:high[1]:spacing[1],
+                       low[2]:high[2]:spacing[2]]
 
     if not levelset:
         arr = ((x / float(a)) ** 2 +
@@ -64,10 +64,10 @@ def ellipsoid(a, b, c, sampling=(1., 1., 1.), levelset=False):
     return arr
 
 
-def ellipsoid_stats(a, b, c, sampling=(1., 1., 1.)):
+def ellipsoid_stats(a, b, c):
     """
     Calculates analytical surface area and volume for ellipsoid with
-    semimajor axes aligned with grid dimensions of specified `sampling`.
+    semimajor axes aligned with grid dimensions of specified `spacing`.
 
     Parameters
     ----------
@@ -77,8 +77,6 @@ def ellipsoid_stats(a, b, c, sampling=(1., 1., 1.)):
         Length of semimajor axis aligned with y-axis.
     c : float
         Length of semimajor axis aligned with z-axis.
-    sampling : tuple of floats, length 3
-        Sampling in (x, y, z) spatial dimensions.
 
     Returns
     -------
