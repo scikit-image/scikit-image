@@ -7,6 +7,7 @@ Version 0.10
 * Change default mode of random_walker segmentation to 'cg_mg' > 'cg' > 'bf',
   depending on which optional dependencies are available.
 * Remove deprecated `out` parameter of `skimage.morphology.binary_*`
+* Remove deprecated parameter `depth` in `skimage.segmentation.random_walker`
 
 Version 0.9
 -----------
