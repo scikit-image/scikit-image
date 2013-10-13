@@ -2,7 +2,7 @@ import numpy as np
 from . import _marching_cubes_cy
 
 
-def marching_cubes(volume, level, sampling=(1., 1., 1.)):
+def marching_cubes(volume, level, spacing=(1., 1., 1.)):
     """
     Marching cubes algorithm to find iso-valued surfaces in 3d volumetric data
 
@@ -12,7 +12,7 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
         Input data volume to find isosurfaces. Will be cast to `np.float64`.
     level : float
         Contour value to search for isosurfaces in `volume`.
-    sampling : length-3 tuple of floats
+    spacing : length-3 tuple of floats
         Voxel spacing in spatial dimensions corresponding to numpy array
         indexing dimensions (M, N, P) as in `volume`.
 
@@ -107,7 +107,7 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
     #   have repeated vertices - and equivalent vertices are redundantly
     #   placed in every triangle they connect with.
     raw_tris = _marching_cubes_cy.iterate_and_store_3d(volume, float(level),
-                                                       sampling)
+                                                       spacing)
 
     # Find and collect unique vertices, storing triangle verts as indices.
     # Returns a true mesh with no degenerate faces.
