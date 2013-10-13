@@ -17,6 +17,8 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         One of the following strings, selecting the type of noise to add:
 
         'gaussian'  Gaussian-distributed additive noise.
+        'localvar'  Gaussian-distributed additive noise, with specified
+                    local variance at each point of `image`
         'poisson'   Poisson-distributed noise generated from the data.
         'salt'      Replaces random pixels with 1.
         'pepper'    Replaces random pixels with 0.
@@ -37,6 +39,9 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
     var : float
         Variance of random distribution. Used in 'gaussian' and 'speckle'.
         Note: variance = (standard deviation) ** 2. Default : 0.01
+    local_vars : ndarray
+        Array of positive floats, same shape as `image`, defining the local
+        variance at every image point. Used in 'localvar'.
     amount : float
         Proportion of image pixels to replace with noise on range [0, 1].
         Used in 'salt', 'pepper', and 'salt & pepper'. Default : 0.05
@@ -52,10 +57,11 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     Notes
     -----
-    Speckle, Poisson, and Gaussian noise may generate noise outside the valid
-    image range. The default is to clip (not alias) these values, but they may
-    be preserved by setting `clip=False`. Note that in this case the output
-    may contain values outside the ranges [0, 1] or [-1, 1]. Use with care.
+    Speckle, Poisson, Localvar, and Gaussian noise may generate noise outside
+    the valid image range. The default is to clip (not alias) these values,
+    but they may be preserved by setting `clip=False`. Note that in this case
+    the output may contain values outside the ranges [0, 1] or [-1, 1].
+    Use this option with care.
 
     Because of the prevalence of exclusively positive floating-point images in
     intermediate calculations, it is not possible to intuit if an input is
@@ -89,6 +95,7 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
 
     allowedtypes = {
         'gaussian': 'gaussian_values',
+        'localvar': 'localvar_values',
         'poisson': 'poisson_values',
         'salt': 'sp_values',
         'pepper': 'sp_values',
@@ -99,10 +106,12 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         'mean': 0.,
         'var': 0.01,
         'amount': 0.05,
-        'salt_vs_pepper': 0.5}
+        'salt_vs_pepper': 0.5,
+        'local_vars': np.zeros_like(image) + 0.01}
 
     allowedkwargs = {
         'gaussian_values': ['mean', 'var'],
+        'localvar_values': ['local_vars'],
         'sp_values': ['amount'],
         's&p_values': ['amount', 'salt_vs_pepper'],
         'poisson_values': []}
@@ -120,6 +129,14 @@ def random_noise(image, mode='gaussian', seed=None, clip=True, **kwargs):
         noise = np.random.normal(kwargs['mean'], kwargs['var'] ** 0.5,
                                  image.shape)
         out = image + noise
+
+    elif mode == 'localvar':
+        # Ensure local variance input is correct
+        if (kwargs['local_vars'] <= 0).any():
+            raise ValueError('All values of `local_vars` must be > 0.')
+
+        # Safe shortcut usage broadcasts kwargs['local_vars'] as a ufunc
+        out = image + np.random.normal(0, kwargs['local_vars'] ** 0.5)
 
     elif mode == 'poisson':
         # Determine unique values in image & calculate the next power of two

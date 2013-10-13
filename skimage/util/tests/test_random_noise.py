@@ -83,6 +83,31 @@ def test_gaussian():
     assert 0.012 < data_gaussian.var() < 0.018
 
 
+def test_localvar():
+    seed = 42
+    data = np.zeros((128, 128)) + 0.5
+    local_vars = np.zeros((128, 128)) + 0.001
+    local_vars[:64, 64:] = 0.1
+    local_vars[64:, :64] = 0.25
+    local_vars[64:, 64:] = 0.45
+
+    data_gaussian = random_noise(data, mode='localvar', seed=seed,
+                                 local_vars=local_vars, clip=False)
+    assert 0. < data_gaussian[:64, :64].var() < 0.002
+    assert 0.095 < data_gaussian[:64, 64:].var() < 0.105
+    assert 0.245 < data_gaussian[64:, :64].var() < 0.255
+    assert 0.445 < data_gaussian[64:, 64:].var() < 0.455
+
+    # Ensure local variance bounds checking works properly
+    bad_local_vars = np.zeros_like(data)
+    assert_raises(ValueError, random_noise, data, mode='localvar', seed=seed,
+                  local_vars=bad_local_vars)
+    bad_local_vars += 0.1
+    bad_local_vars[0, 0] = -1
+    assert_raises(ValueError, random_noise, data, mode='localvar', seed=seed,
+                  local_vars=bad_local_vars)
+
+
 def test_speckle():
     seed = 42
     data = np.zeros((128, 128)) + 0.1
