@@ -16,12 +16,12 @@ def test_marching_cubes_isotropic():
 
 
 def test_marching_cubes_anisotropic():
-    sampling = (1., 10 / 6., 16 / 6.)
-    ellipsoid_anisotropic = ellipsoid(6, 10, 16, sampling=sampling,
+    spacing = (1., 10 / 6., 16 / 6.)
+    ellipsoid_anisotropic = ellipsoid(6, 10, 16, spacing=spacing,
                                       levelset=True)
-    _, surf = ellipsoid_stats(6, 10, 16, sampling=sampling)
+    _, surf = ellipsoid_stats(6, 10, 16, spacing=spacing)
     verts, faces = marching_cubes(ellipsoid_anisotropic, 0.,
-                                  sampling=sampling)
+                                  spacing=spacing)
     surf_calc = mesh_surface_area(verts, faces)
 
     # Test within 1.5% tolerance for anisotropic. Will always underestimate.
@@ -32,7 +32,7 @@ def test_invalid_input():
     assert_raises(ValueError, marching_cubes, np.zeros((2, 2, 1)), 0)
     assert_raises(ValueError, marching_cubes, np.zeros((2, 2, 1)), 1)
     assert_raises(ValueError, marching_cubes, np.ones((3, 3, 3)), 1,
-                  sampling=(1, 2))
+                  spacing=(1, 2))
     assert_raises(ValueError, marching_cubes, np.zeros((20, 20)), 0)
 
 
