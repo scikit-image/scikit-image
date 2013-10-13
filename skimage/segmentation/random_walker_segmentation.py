@@ -282,7 +282,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     channels are separately normalized prior to running this algorithm.
 
     The `spacing` argument is specifically for anisotropic datasets, where
-    data points are spaced differently in one or more spatial dmensions.
+    data points are spaced differently in one or more spatial dimensions.
     Anisotropic data is commonly encountered in medical imaging.
 
     The algorithm was first proposed in *Random walks for image
