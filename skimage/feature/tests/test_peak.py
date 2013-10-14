@@ -154,7 +154,6 @@ def test_one_point():
                                  footprint=np.ones((3, 3), bool),
                                  min_distance=1, threshold_rel=0,
                                  indices=False, exclude_border=False)
-    print result, labels
     assert np.all(result == (labels == 1))
 
 
