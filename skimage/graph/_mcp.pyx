@@ -437,13 +437,17 @@ cdef class MCP:
         cdef FLOAT_T cost, new_cost, cumcost, new_cumcost
         cdef INDEX_T index, new_index
         cdef BOOL_T is_at_edge, use_offset
-        cdef INDEX_T d, i
+        cdef INDEX_T d, i, iter
         cdef OFFSET_T offset
         cdef EDGE_T pos_edge_val, neg_edge_val
         cdef int num_ends_found = 0
         cdef FLOAT_T inf = np.inf
         
-        while 1:
+        
+        for iter in range(flat_costs.size):
+            # This is rather like a while loop, except we are guaranteed to
+            # exit, which is nice during developing to prevent eternal loops.
+            
             # Find the point with the minimum cost in the heap. Once
             # popped, this point's minimum cost path has been found.
             if costs_heap.count == 0:
