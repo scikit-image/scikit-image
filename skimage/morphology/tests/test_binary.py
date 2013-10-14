@@ -17,27 +17,6 @@ def test_non_square_image():
     testing.assert_array_equal(binary_res, grey_res)
 
 
-def test_selem_overflow():
-    strel = np.ones((17, 17), dtype=np.uint8)
-    img = np.zeros((20, 20))
-    img[2:19, 2:19] = 1
-    binary_res = binary.binary_erosion(img, strel)
-    grey_res = img_as_bool(grey.erosion(img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
-
-
-def test_selem_overflow_exception():
-    strel = np.ones((17, 17), dtype=np.uint8)
-    img = np.zeros((20, 20))
-    img[2:19, 2:19] = 1
-    out = np.zeros((20, 20), dtype=np.uint8)
-    testing.assert_raises(ValueError, binary.binary_erosion, img, strel, out)
-    out = np.zeros((20, 20), dtype=np.uint16)
-    binary_res = binary.binary_erosion(img, strel, out=out)
-    grey_res = img_as_bool(grey.erosion(img, strel))
-    testing.assert_array_equal(binary_res, grey_res)
-
-
 def test_binary_erosion():
     strel = selem.square(3)
     binary_res = binary.binary_erosion(bw_lena, strel)
@@ -65,6 +44,25 @@ def test_binary_opening():
     grey_res = img_as_bool(grey.opening(bw_lena, strel))
     testing.assert_array_equal(binary_res, grey_res)
 
+
+def test_selem_overflow():
+    strel = np.ones((17, 17), dtype=np.uint8)
+    img = np.zeros((20, 20))
+    img[2:19, 2:19] = 1
+    binary_res = binary.binary_erosion(img, strel)
+    grey_res = img_as_bool(grey.erosion(img, strel))
+    testing.assert_array_equal(binary_res, grey_res)
+
+
+def test_out_argument():
+    for func in (binary.binary_erosion, binary.binary_dilation):
+        strel = np.ones((3, 3), dtype=np.uint8)
+        img = np.ones((10, 10))
+        out = np.zeros_like(img)
+        out_saved = out.copy()
+        func(img, strel, out=out)
+        testing.assert_(np.any(out != out_saved))
+        testing.assert_array_equal(out, func(img, strel))
 
 if __name__ == '__main__':
     testing.run_module_suite()
