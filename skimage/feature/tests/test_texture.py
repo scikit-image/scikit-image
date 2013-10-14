@@ -199,5 +199,16 @@ class TestLBP():
         np.testing.assert_array_almost_equal(lbp, ref)
 
 
+    def test_nri_uniform(self):
+        lbp = local_binary_pattern(self.image, 8, 1, 'nri_uniform')
+        ref = np.array([[ 0, 54,  0, 57, 12, 57],
+                        [34,  0, 58, 58,  3, 22],
+                        [58, 57, 15, 50,  0, 47],
+                        [10,  3, 40, 42, 35,  0],
+                        [57,  7, 57, 58,  0, 56],
+                        [ 9, 58,  0, 57,  7, 14]])
+        np.testing.assert_array_almost_equal(lbp, ref)
+
+
 if __name__ == '__main__':
     np.testing.run_module_suite()

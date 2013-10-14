@@ -4,17 +4,17 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
-from skimage.morphology import convex_hull_image
+from skimage.morphology import convex_hull_image, label
 from skimage.measure import _moments
 
 
-__all__ = ['regionprops']
+__all__ = ['regionprops', 'perimeter']
 
 
 STREL_4 = np.array([[0, 1, 0],
                     [1, 1, 1],
-                    [0, 1, 0]])
-STREL_8 = np.ones((3, 3), 'int8')
+                    [0, 1, 0]], dtype=np.uint8)
+STREL_8 = np.ones((3, 3), dtype=np.uint8)
 PROPS = {
     'Area': 'area',
     'BoundingBox': 'bbox',
@@ -155,8 +155,8 @@ class _RegionProperties(object):
     @_cached_property
     def euler_number(self):
         euler_array = self.filled_image != self.image
-        _, num = ndimage.label(euler_array, STREL_8)
-        return -num
+        _, num = label(euler_array, neighbors=8, return_num=True)
+        return -num + 1
 
     @_cached_property
     def extent(self):
@@ -470,8 +470,11 @@ def regionprops(label_image, properties=None,
     >>> props[0].centroid # centroid of first labelled object
     >>> props[0]['centroid'] # centroid of first labelled object
     """
-    if not np.issubdtype(label_image.dtype, 'int'):
-        raise TypeError('Labelled image must be of integer dtype.')
+
+    label_image = np.squeeze(label_image)
+
+    if label_image.ndim != 2:
+        raise TypeError('Only 2-D images supported.')
 
     if properties is not None:
         warnings.warn('The ``properties`` argument is deprecated and is '
@@ -498,14 +501,14 @@ def perimeter(image, neighbourhood=4):
     Parameters
     ----------
     image : array
-        binary image
+        Binary image.
     neighbourhood : 4 or 8, optional
-        neighbourhood connectivity for border pixel determination, default 4
+        Neighborhood connectivity for border pixel determination.
 
     Returns
     -------
     perimeter : float
-        total perimeter of all objects in binary image
+        Total perimeter of all objects in binary image.
 
     References
     ----------
@@ -517,24 +520,25 @@ def perimeter(image, neighbourhood=4):
         strel = STREL_4
     else:
         strel = STREL_8
+    image = image.astype(np.uint8)
     eroded_image = ndimage.binary_erosion(image, strel, border_value=0)
     border_image = image - eroded_image
 
-    # perimeter contribution: corresponding values in convolved image
-    perimeter_weights = {
-        1:                 (5, 7, 15, 17, 25, 27),
-        sqrt(2):           (21, 33),
-        (1 + sqrt(2)) / 2: (13, 23)
-    }
+    perimeter_weights = np.zeros(50, dtype=np.double)
+    perimeter_weights[[5, 7, 15, 17, 25, 27]] = 1
+    perimeter_weights[[21, 33]] = sqrt(2)
+    perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
+
+
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
                                                                [ 2, 1,  2],
                                                                [10, 2, 10]]),
                                        mode='constant', cval=0)
-    total_perimeter = 0
-    for weight, values in perimeter_weights.items():
-        num_values = 0
-        for value in values:
-            num_values += np.sum(perimeter_image == value)
-        total_perimeter += num_values * weight
 
+    # You can also write
+    # return perimeter_weights[perimeter_image].sum()
+    # but that was measured as taking much longer than bincount + np.dot (5x
+    # as much time)
+    perimeter_histogram = np.bincount(perimeter_image.ravel(), minlength=50)
+    total_perimeter = np.dot(perimeter_histogram, perimeter_weights)
     return total_perimeter

@@ -133,7 +133,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     else:
         selem = selem.copy()
 
-    if offset == None:
+    if offset is None:
         if not all([d % 2 == 1 for d in selem.shape]):
             ValueError("Footprint dimensions must all be odd")
         offset = np.array([d // 2 for d in selem.shape])

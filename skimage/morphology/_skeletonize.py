@@ -212,6 +212,7 @@ def medial_axis(image, mask=None, return_distance=False):
 
     Examples
     --------
+    >>> from skimage import morphology
     >>> square = np.zeros((7, 7), dtype=np.uint8)
     >>> square[1:-1, 2:-2] = 1
     >>> square

@@ -42,6 +42,19 @@ def test_labeled_image():
     assert_array_equal(observed, expected)
 
 
+def test_uint_image():
+    labeled_image = np.array([[2, 2, 2, 0, 1],
+                              [2, 2, 2, 0, 1],
+                              [2, 0, 0, 0, 0],
+                              [0, 0, 3, 3, 3]], dtype=np.uint8)
+    expected = np.array([[2, 2, 2, 0, 0],
+                         [2, 2, 2, 0, 0],
+                         [2, 0, 0, 0, 0],
+                         [0, 0, 3, 3, 3]], dtype=np.uint8)
+    observed = remove_small_objects(labeled_image, min_size=3)
+    assert_array_equal(observed, expected)
+
+
 def test_float_input():
     float_test = np.random.rand(5, 5)
     assert_raises(TypeError, remove_small_objects, float_test)

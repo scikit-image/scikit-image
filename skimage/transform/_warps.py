@@ -32,8 +32,8 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
     Other parameters
     ----------------
     order : int, optional
-        The order of the spline interpolation, default is 3. The order has to
-        be in the range 0-5.
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : string, optional
         Points outside the boundaries of the input are filled according
         to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
@@ -116,8 +116,8 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
     Other parameters
     ----------------
     order : int, optional
-        The order of the spline interpolation, default is 3. The order has to
-        be in the range 0-5.
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : string, optional
         Points outside the boundaries of the input are filled according
         to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
@@ -172,8 +172,8 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     Other parameters
     ----------------
     order : int, optional
-        The order of the spline interpolation, default is 3. The order has to
-        be in the range 0-5.
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : string, optional
         Points outside the boundaries of the input are filled according
         to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
@@ -315,8 +315,8 @@ def swirl(image, center=None, strength=1, radius=100, rotation=0,
         Shape of the output image generated. By default the shape of the input
         image is preserved.
     order : int, optional
-        The order of the spline interpolation, default is 3. The order has to
-        be in the range 0-5.
+        The order of the spline interpolation, default is 1. The order has to
+        be in the range 0-5. See `skimage.transform.warp` for detail.
     mode : string, optional
         Points outside the boundaries of the input are filled according
         to the given mode ('constant', 'nearest', 'reflect' or 'wrap').

@@ -1,6 +1,10 @@
 Version 0.9
 -----------
-- No longer wrap ``imread`` output in an ``Image`` class.
+- No longer wrap ``imread`` output in an ``Image`` class
+- Change default value of `sigma` parameter in ``skimage.segmentation.slic``
+  to 0
+- ``hough_circle`` now returns a stack of arrays that are the same size as the
+  input image. Set the ``full_output`` flag to True for the old behavior.
 
 Version 0.4
 -----------

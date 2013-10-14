@@ -8,7 +8,7 @@ from tempfile import NamedTemporaryFile
 from skimage import data_dir
 from skimage.io import (imread, imsave, use_plugin, reset_plugins,
                         Image as ioImage)
-from skimage._shared.six.moves import StringIO
+from skimage._shared.six import BytesIO
 
 
 try:
@@ -132,7 +132,7 @@ class TestSave:
 def test_imsave_filelike():
     shape = (2, 2)
     image = np.zeros(shape)
-    s = StringIO()
+    s = BytesIO()
 
     # save to file-like object
     imsave(s, image)

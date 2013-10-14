@@ -1,4 +1,4 @@
-__all__ = ['threshold_otsu', 'threshold_adaptive']
+__all__ = ['threshold_adaptive', 'threshold_otsu', 'threshold_yen']
 
 import numpy as np
 import scipy.ndimage
@@ -65,7 +65,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     thresh_image = np.zeros(image.shape, 'double')
     if method == 'generic':
         scipy.ndimage.generic_filter(image, param, block_size,
-            output=thresh_image, mode=mode)
+                                     output=thresh_image, mode=mode)
     elif method == 'gaussian':
         if param is None:
             # automatically determine sigma which covers > 99% of distribution
@@ -73,17 +73,17 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
         else:
             sigma = param
         scipy.ndimage.gaussian_filter(image, sigma, output=thresh_image,
-            mode=mode)
+                                      mode=mode)
     elif method == 'mean':
         mask = 1. / block_size * np.ones((block_size,))
         # separation of filters to speedup convolution
         scipy.ndimage.convolve1d(image, mask, axis=0, output=thresh_image,
-            mode=mode)
+                                 mode=mode)
         scipy.ndimage.convolve1d(thresh_image, mask, axis=1,
-            output=thresh_image, mode=mode)
+                                 output=thresh_image, mode=mode)
     elif method == 'median':
         scipy.ndimage.median_filter(image, block_size, output=thresh_image,
-            mode=mode)
+                                    mode=mode)
 
     return image > (thresh_image - offset)
 
@@ -95,14 +95,15 @@ def threshold_otsu(image, nbins=256):
     ----------
     image : array
         Input image.
-    nbins : int
+    nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
 
     Returns
     -------
     threshold : float
-        Threshold value.
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
 
     References
     ----------
@@ -113,7 +114,7 @@ def threshold_otsu(image, nbins=256):
     >>> from skimage.data import camera
     >>> image = camera()
     >>> thresh = threshold_otsu(image)
-    >>> binary = image > thresh
+    >>> binary = image <= thresh
     """
     hist, bin_centers = histogram(image, nbins)
     hist = hist.astype(float)
@@ -132,4 +133,54 @@ def threshold_otsu(image, nbins=256):
 
     idx = np.argmax(variance12)
     threshold = bin_centers[:-1][idx]
+    return threshold
+
+
+def threshold_yen(image, nbins=256):
+    """Return threshold value based on Yen's method.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+
+    Returns
+    -------
+    threshold : float
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as foreground.
+
+    References
+    ----------
+    .. [1] Yen J.C., Chang F.J., and Chang S. (1995) "A New Criterion
+           for Automatic Multilevel Thresholding" IEEE Trans. on Image
+           Processing, 4(3): 370-378
+    .. [2] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
+           Techniques and Quantitative Performance Evaluation" Journal of
+           Electronic Imaging, 13(1): 146-165,
+           http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
+    .. [3] ImageJ AutoThresholder code, http://fiji.sc/wiki/index.php/Auto_Threshold
+
+    Examples
+    --------
+    >>> from skimage.data import camera
+    >>> image = camera()
+    >>> thresh = threshold_yen(image)
+    >>> binary = image <= thresh
+    """
+    hist, bin_centers = histogram(image, nbins)
+    norm_histo = hist.astype(float) / hist.sum() # Probability mass function
+    P1 = np.cumsum(norm_histo) # Cumulative normalized histogram
+    P1_sq = np.cumsum(norm_histo ** 2)
+    # Get cumsum calculated from end of squared array:
+    P2_sq = np.cumsum(norm_histo[::-1] ** 2)[::-1]
+    # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
+    # in crit. ImageJ Yen implementation replaces those values by zero.
+    crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) * \
+                  (P1[:-1] * (1.0 - P1[:-1])) ** 2)
+    max_crit = np.argmax(crit)
+    threshold = bin_centers[:-1][max_crit]
     return threshold

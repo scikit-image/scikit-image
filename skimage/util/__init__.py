@@ -12,6 +12,7 @@ else:
     from numpy import pad
 del numpy, ver, chk
 from ._regular_grid import regular_grid
+from .unique import unique_rows
 
 
 __all__ = ['img_as_float',
@@ -24,4 +25,5 @@ __all__ = ['img_as_float',
            'view_as_windows',
            'pad',
            'random_noise',
-           'regular_grid']
+           'regular_grid',
+           'unique_rows']
