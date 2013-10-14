@@ -91,6 +91,7 @@ test_verbose.__doc__ = test.__doc__
 class _Log(Warning):
     pass
 
+
 class _FakeLog(object):
     def __init__(self, name):
         """
