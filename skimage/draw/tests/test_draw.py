@@ -1,11 +1,22 @@
 from numpy.testing import assert_array_equal, assert_equal
 import numpy as np
 
-from skimage.draw import (line, line_aa, polygon,
+from skimage.draw import (set_color, line, line_aa, polygon,
                           circle, circle_perimeter, circle_perimeter_aa,
                           ellipse, ellipse_perimeter,
-                          _bezier_segment, bezier_curve,
-                          )
+                          _bezier_segment, bezier_curve)
+
+
+def test_set_color():
+    img = np.zeros((10, 10))
+
+    rr, cc = line(0, 0, 0, 30)
+    set_color(img, (rr, cc), 1)
+
+    img_ = np.zeros((10, 10))
+    img_[0, :] = 1
+
+    assert_array_equal(img, img_)
 
 
 def test_line_horizontal():
