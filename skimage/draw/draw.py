@@ -2,6 +2,11 @@
 import numpy as np
 
 
+def _coords_inside_image(rr, cc, shape):
+    mask = (rr >= 0) & (rr < shape[0]) & (cc >= 0) & (cc < shape[1])
+    return rr[mask], cc[mask]
+
+
 def ellipse(cy, cx, yradius, xradius, shape=None):
     """Generate coordinates of pixels within ellipse.
 
@@ -126,10 +131,26 @@ def set_color(img, coords, color):
     img : (M, N, D) ndarray
         The updated image.
 
+    Examples
+    --------
+    >>> from skimage.draw import line, set_color
+    >>> img = np.zeros((10, 10), dtype=np.uint8)
+    >>> rr, cc = line(1, 1, 20, 20)
+    >>> set_color(img, (rr, cc), 1)
+    >>> img
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]], dtype=uint8)
+
     """
 
     rr, cc = coords
-    rr_inside = np.logical_and(rr >= 0, rr < img.shape[0])
-    cc_inside = np.logical_and(cc >= 0, cc < img.shape[1])
-    inside = np.logical_and(rr_inside, cc_inside)
-    img[rr[inside], cc[inside]] = color
+    rr, cc = _coords_inside_image(rr, cc, img.shape)
+    img[rr, cc] = color
