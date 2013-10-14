@@ -8,60 +8,24 @@ from numpy.testing import (assert_raises,
                            assert_almost_equal,
                            )
 
-def test_gradient():
-    # No duplication of the border
-    image = np.array([[-1, 0, 1, 1],
-                      [1, 0, 1, 1],
-                      [1, 1, 1, 1],
-                      [-1, 0, 1, 1],
-                      [-1, 0, 1, 1]])
-    gradx = np.array([[0, 1], [0, 0], [2, 1]])
-    grady = np.array([[1, 0], [0, 0], [-1, 0]])
-    resx, resy = feature._hog.gradient(image, same_size=False)
-    assert_array_equal(gradx, resx)
-    assert_array_equal(grady, resy)
-    # With duplication of the border
-    image = np.array([[1, 1],
-                      [-1, 1]])
-    gradx = np.array([[0, 0], [2, 2]])
-    grady = np.array([[-2, 0], [-2, 0]])
-    resx, resy = gradient(image, same_size=True)
-    assert_array_equal(gradx, resx)
-    assert_array_equal(grady, resy)
-
-
-def test_magnitude_orientation():
-    gx = np.array([[1, 0],
-                  [0, 1]])
-    gy = np.array([[0, 1],
-                  [0, 1]])
-    magnitude, orientation = feature._hog.magnitude_orientation(gx, gy)
-    res_orientation = np.array([[0, 90], [0, 45]])
-    res_magnitude = np.array([[1, 1], [0, sqrt(2)]])
-    assert_array_equal(res_orientation, orientation)
-    assert_array_equal(res_magnitude, magnitude)
-    
-    gx = np.array([[0]])
-    gy = np.array([[-1]])
-    magnitude, orientation = magnitude_orientation(gx, gy, max_angle=360)
-    assert orientation[0, 0] == 270
-
 
 def test_histogram_of_oriented_gradients():
     img = img_as_float(data.lena()[:256, :].mean(axis=2))
 
-    fd = feature.hog(img, orientations=9, pixels_per_cell=(8, 8),
+    fd = feature.hog(img, nbins=9, cell_size=(8, 8),
                      cells_per_block=(1, 1))
-
     assert len(fd) == 9 * (256 // 8) * (512 // 8)
+
+test_histogram_of_oriented_gradients()
 
 
 def test_hog_image_size_cell_size_mismatch():
     image = data.camera()[:150, :200]
-    fd = feature.hog(image, orientations=9, pixels_per_cell=(8, 8),
+    fd = feature.hog(image, nbins=9, cell_size=(8, 8),
                      cells_per_block=(1, 1))
     assert len(fd) == 9 * (150 // 8) * (200 // 8)
 
+test_hog_image_size_cell_size_mismatch()
 
 def test_hog_color_image_unsupported_error():
     image = np.zeros((20, 20, 3))
@@ -90,13 +54,13 @@ def test_hog_basic_orientations_and_data_types():
         # create uint8 image from image_float
         image_uint8 = image_float.astype('uint8')
 
-        (hog_float, hog_img_float) = feature.hog(image_float, orientations=4, pixels_per_cell=(8, 8),
+        (hog_float, hog_img_float) = feature.hog(image_float, nbins=4, cell_size=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=False)
-        (hog_uint8, hog_img_uint8) = feature.hog(image_uint8, orientations=4, pixels_per_cell=(8, 8),
+        (hog_uint8, hog_img_uint8) = feature.hog(image_uint8, nbins=4, cell_size=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=False)
-        (hog_float_norm, hog_img_float_norm) = feature.hog(image_float, orientations=4, pixels_per_cell=(8, 8),
+        (hog_float_norm, hog_img_float_norm) = feature.hog(image_float, nbins=4, cell_size=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=True)
-        (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(image_uint8, orientations=4, pixels_per_cell=(8, 8),
+        (hog_uint8_norm, hog_img_uint8_norm) = feature.hog(image_uint8, nbins=4, cell_size=(8, 8),
             cells_per_block=(1, 1), visualise=True, normalise=True)
 
         # set to True to enable manual debugging with graphical output,
@@ -175,6 +139,6 @@ def test_hog_orientations_circle():
         assert_almost_equal(actual, desired, decimal=1)
 
 
-if __name__ == '__main__':
-    from numpy.testing import run_module_suite
-    run_module_suite()
+#if __name__ == '__main__':
+#    from numpy.testing import run_module_suite
+#    run_module_suite()
