@@ -52,7 +52,7 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     True
     """
     # Should use `issubdtype` for bool below, but there's a bug in numpy 1.7
-    if not (ar.dtype == bool or np.issubdtype(ar.dtype, int)):
+    if not (ar.dtype == bool or np.issubdtype(ar.dtype, np.integer)):
         raise TypeError("Only bool or integer image types are supported. "
                         "Got %s." % ar.dtype)
 
@@ -66,7 +66,8 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
 
     if out.dtype == bool:
         selem = nd.generate_binary_structure(ar.ndim, connectivity)
-        ccs = nd.label(ar, selem)[0]
+        ccs = np.zeros_like(ar, dtype=np.int32)
+        nd.label(ar, selem, output=ccs)
     else:
         ccs = out
 

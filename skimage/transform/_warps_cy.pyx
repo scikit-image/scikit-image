@@ -40,22 +40,18 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
     """Projective transformation (homography).
 
     Perform a projective transformation (homography) of a
-    floating point image, using bi-linear interpolation.
+    floating point image, using interpolation.
 
     For each pixel, given its homogeneous coordinate :math:`\mathbf{x}
     = [x, y, 1]^T`, its target position is calculated by multiplying
     with the given matrix, :math:`H`, to give :math:`H \mathbf{x}`.
-    E.g., to rotate by theta degrees clockwise, the matrix should be
-
-    ::
+    E.g., to rotate by theta degrees clockwise, the matrix should be::
 
       [[cos(theta) -sin(theta) 0]
        [sin(theta)  cos(theta) 0]
        [0            0         1]]
 
-    or, to translate x by 10 and y by 20,
-
-    ::
+    or, to translate x by 10 and y by 20::
 
       [[1 0 10]
        [0 1 20]
@@ -69,12 +65,12 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         Transformation matrix H that defines the homography.
     output_shape : tuple (rows, cols), optional
         Shape of the output image generated (default None).
-    order : {0, 1}, optional
+    order : {0, 1, 2, 3}, optional
         Order of interpolation::
-        * 0: Nearest-neighbour interpolation.
-        * 1: Bilinear interpolation (default).
-        * 2: Biquadratic interpolation.
-        * 3: Bicubic interpolation.
+        * 0: Nearest-neighbor
+        * 1: Bi-linear (default)
+        * 2: Bi-quadratic
+        * 3: Bi-cubic
     mode : {'constant', 'reflect', 'wrap', 'nearest'}, optional
         How to handle values outside the image borders (default is constant).
     cval : string, optional (default 0)
@@ -83,10 +79,8 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     """
 
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode="c"] img = \
-         np.ascontiguousarray(image, dtype=np.double)
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2, mode="c"] M = \
-         np.ascontiguousarray(H)
+    cdef double[:, ::1] img = np.ascontiguousarray(image, dtype=np.double)
+    cdef double[:, ::1] M = np.ascontiguousarray(H)
 
     if mode not in ('constant', 'wrap', 'reflect', 'nearest'):
         raise ValueError("Invalid mode specified.  Please use "
@@ -101,8 +95,7 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
         out_r = output_shape[0]
         out_c = output_shape[1]
 
-    cdef cnp.ndarray[dtype=cnp.double_t, ndim=2] out = \
-         np.zeros((out_r, out_c), dtype=np.double)
+    cdef double[:, ::1] out = np.zeros((out_r, out_c), dtype=np.double)
 
     cdef Py_ssize_t tfr, tfc
     cdef double r, c
@@ -122,8 +115,8 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     for tfr in range(out_r):
         for tfc in range(out_c):
-            _matrix_transform(tfc, tfr, <double*>M.data, &c, &r)
-            out[tfr, tfc] = interp_func(<double*>img.data, rows, cols, r, c,
+            _matrix_transform(tfc, tfr, &M[0, 0], &c, &r)
+            out[tfr, tfc] = interp_func(&img[0, 0], rows, cols, r, c,
                                         mode_c, cval)
 
-    return out
+    return np.asarray(out)

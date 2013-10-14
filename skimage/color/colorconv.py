@@ -26,10 +26,17 @@ Supported color spaces
         Derived from the RGB CIE color space. Chosen such that
         ``x == y == z == 1/3`` at the whitepoint, and all color matching
         functions are greater than zero everywhere.
+* LAB CIE : Lightness, a, b
+        Colorspace derived from XYZ CIE that is intended to be more
+        perceptually uniform
+* LCH CIE : Lightness, Chroma, Hue
+        Defined in terms of LAB CIE.  C and H are the polar representation of
+        a and b.  The polar angle C is defined to be on (0, 2*pi)
 
 :author: Nicolas Pinto (rgb2hsv)
 :author: Ralf Gommers (hsv2rgb)
 :author: Travis Oliphant (XYZ and RGB CIE functions)
+:author: Matt Terry (lab2lch)
 
 :license: modified BSD
 
@@ -47,6 +54,37 @@ import numpy as np
 from scipy import linalg
 from ..util import dtype
 from skimage._shared.utils import deprecated
+
+
+def guess_spatial_dimensions(image):
+    """Make an educated guess about whether an image has a channels dimension.
+
+    Parameters
+    ----------
+    image : ndarray
+        The input image.
+
+    Returns
+    -------
+    spatial_dims : int or None
+        The number of spatial dimensions of `image`. If ambiguous, the value
+        is `None`.
+
+    Raises
+    ------
+    ValueError
+        If the image array has less than two or more than four dimensions.
+    """
+    if image.ndim == 2:
+        return 2
+    if image.ndim == 3 and image.shape[-1] != 3:
+        return 3
+    if image.ndim == 3 and image.shape[-1] == 3:
+        return None
+    if image.ndim == 4 and image.shape[-1] == 3:
+        return 3
+    else:
+        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
 @deprecated()
@@ -72,7 +110,7 @@ def is_gray(image):
         Input image.
 
     """
-    return np.squeeze(image).ndim == 2
+    return image.ndim in (2, 3) and not is_rgb(image)
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -129,8 +167,9 @@ def _prepare_colorarray(arr):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim != 3 or arr.shape[2] != 3:
-        msg = "the input array must be have a shape == (.,.,3))"
+    if arr.ndim not in [3, 4] or arr.shape[-1] != 3:
+        msg = ("the input array must be have a shape == (.., ..,[ ..,] 3)), " +
+               "got (" + (", ".join(map(str, arr.shape))) + ")")
         raise ValueError(msg)
 
     return dtype.img_as_float(arr)
@@ -413,12 +452,12 @@ def _convert(matrix, arr):
         The converted array.
     """
     arr = _prepare_colorarray(arr)
-    arr = np.swapaxes(arr, 0, 2)
+    arr = np.swapaxes(arr, 0, -1)
     oldshape = arr.shape
     arr = np.reshape(arr, (3, -1))
     out = np.dot(matrix, arr)
     out.shape = oldshape
-    out = np.swapaxes(out, 2, 0)
+    out = np.swapaxes(out, -1, 0)
 
     return np.ascontiguousarray(out)
 
@@ -473,17 +512,19 @@ def rgb2xyz(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -628,23 +669,24 @@ def gray2rgb(image):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M, N)``.
+        Input image of shape ``(M, N [, P])``.
 
     Returns
     -------
     rgb : ndarray
-        RGB image of shape ``(M, N, 3)``.
+        RGB image of shape ``(M, N, [, P], 3)``.
 
     Raises
     ------
     ValueError
-        If the input is not 2-dimensional.
+        If the input is not a 2- or 3-dimensional image.
 
     """
     if np.squeeze(image).ndim == 3 and image.shape[2] in (3, 4):
         return image
-    elif image.ndim == 2 or np.squeeze(image).ndim == 2:
-        return np.dstack((image, image, image))
+    elif image.ndim != 1 and np.squeeze(image).ndim in (1, 2, 3):
+        image = image[..., np.newaxis]
+        return np.concatenate(3 * (image,), axis=-1)
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
@@ -655,17 +697,19 @@ def xyz2lab(xyz):
     Parameters
     ----------
     xyz : array_like
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in CIE-LAB format, in a 3-D array of shape (.., .., 3).
+        The image in CIE-LAB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape (.., .., 3).
+        If `xyz` is not a 3-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -695,14 +739,14 @@ def xyz2lab(xyz):
     arr[mask] = np.power(arr[mask], 1. / 3.)
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
-    x, y, z = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
     # Vector scaling
     L = (116. * y) - 16.
     a = 500.0 * (x - y)
     b = 200.0 * (y - z)
 
-    return np.dstack([L, a, b])
+    return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
 
 def lab2xyz(lab):
@@ -759,17 +803,19 @@ def rgb2lab(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in Lab format, in a 3-D array of shape (.., .., 3).
+        The image in Lab format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -987,3 +1033,105 @@ def combine_stains(stains, conv_matrix):
     logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
     rgb2 = np.exp(logrgb2)
     return rescale_intensity(np.reshape(rgb2 - 2, stains.shape), in_range=(-1, 1))
+
+
+def lab2lch(lab):
+    """CIE-LAB to CIE-LCH color space conversion.
+
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+
+    Parameters
+    ----------
+    lab : array_like
+        The N-D image in CIE-LAB format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
+        channels.  Subsequent elements are copied.
+
+    Returns
+    -------
+    out : ndarray
+        The image in LCH format, in a N-D array with same shape as input `lab`.
+
+    Raises
+    ------
+    ValueError
+        If `lch` does not have at least 3 color channels (i.e. l, a, b).
+
+    Notes
+    -----
+    The Hue is expressed as an angle between (0, 2*pi)
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lab2lch
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    """
+    lch = _prepare_lab_array(lab)
+
+    a, b = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = _cart2polar_2pi(a, b)
+    return lch
+
+
+def _cart2polar_2pi(x, y):
+    """convert cartesian coordiantes to polar (uses non-standard theta range!)
+
+    NON-STANDARD RANGE! Maps to (0, 2*pi) rather than usual (-pi, +pi)
+    """
+    r, t = np.hypot(x, y), np.arctan2(y, x)
+    t += np.where(t < 0., 2 * np.pi, 0)
+    return r, t
+
+
+def lch2lab(lch):
+    """CIE-LCH to CIE-LAB color space conversion.
+
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+
+    Parameters
+    ----------
+    lch : array_like
+        The N-D image in CIE-LCH format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
+        channels.  Subsequent elements are copied.
+
+    Returns
+    -------
+    out : ndarray
+        The image in LAB format, with same shape as input `lch`.
+
+    Raises
+    ------
+    ValueError
+        If `lch` does not have at least 3 color channels (i.e. l, c, h).
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lch2lab
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    >>> lena_lab2 = lch2lab(lena_lch)
+    """
+    lch = _prepare_lab_array(lch)
+
+    c, h = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = c * np.cos(h), c * np.sin(h)
+    return lch
+
+
+def _prepare_lab_array(arr):
+    """Ensure input for lab2lch, lch2lab are well-posed.
+
+    Arrays must be in floating point and have at least 3 elements in
+    last dimension.  Return a new array.
+    """
+    arr = np.asarray(arr)
+    shape = arr.shape
+    if shape[-1] < 3:
+        raise ValueError('Input array has less than 3 color channels')
+    return dtype.img_as_float(arr, force_copy=True)

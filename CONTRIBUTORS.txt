@@ -114,7 +114,7 @@
 
 - Joshua Warner
   Multichannel random walker segmentation, unified peak finder backend,
-  n-dimensional array padding, bug and doc fixes.
+  n-dimensional array padding, marching cubes, bug and doc fixes.
 
 - Petter Strandmark
   Perimeter calculation in regionprops.
@@ -132,7 +132,8 @@
   Dense DAISY feature description, circle perimeter drawing.
 
 - François Boulogne
-  Drawing: Andres Method for circle perimeter, ellipse perimeter drawing, Bezier curve.
+  Drawing: Andres Method for circle perimeter, ellipse perimeter drawing,
+  Bezier curve, anti-aliasing.
   Circular and elliptical Hough Transforms
   Various fixes
 
@@ -144,3 +145,16 @@
 
 - Jostein Bø Fløystad
   Reconstruction circle mode for Radon transform
+  Simultaneous Algebraic Reconstruction Technique for inverse Radon transform
+
+- Matt Terry
+  Color difference functions
+
+- Eugene Dvoretsky
+  Yen threshold implementation.
+
+- Riaan van den Dool
+  skimage.io plugin: GDAL
+
+- Fedor Morozov
+  Drawing: Wu's anti-aliased circle

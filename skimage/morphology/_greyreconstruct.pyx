@@ -21,8 +21,8 @@ def reconstruction_loop(cnp.ndarray[dtype=cnp.uint32_t, ndim=1,
                                     negative_indices=False, mode='c'] anext,
                         cnp.ndarray[dtype=cnp.int32_t, ndim=1,
                                     negative_indices=False, mode='c'] astrides,
-                        int current_idx,
-                        int image_stride):
+                        Py_ssize_t current_idx,
+                        Py_ssize_t image_stride):
     """The inner loop for reconstruction.
 
     This algorithm uses the rank-order of pixels. If low intensity pixels have

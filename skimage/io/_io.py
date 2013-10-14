@@ -15,6 +15,7 @@ import numpy as np
 
 from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
+from skimage._shared import six
 
 
 # Shared image queue
@@ -25,7 +26,7 @@ URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
 
 def is_url(filename):
     """Return True if string is an http or ftp path."""
-    return (isinstance(filename, basestring) and
+    return (isinstance(filename, six.string_types) and
             URL_REGEX.match(filename) is not None)
 
 
@@ -34,27 +35,32 @@ class Image(np.ndarray):
 
     These objects have tags for image metadata and IPython display protocol
     methods for image display.
-    """
 
-    tags = {'filename': '',
-            'EXIF': {},
-            'info': {}}
+    Parameters
+    ----------
+    arr : ndarray
+        Image data.
+    kwargs : Image tags as keywords
+        Specified in the form ``tag0=value``, ``tag1=value``.
+
+    Attributes
+    ----------
+    tags : dict
+        Meta-data.
+
+    """
 
     def __new__(cls, arr, **kwargs):
         """Set the image data and tags according to given parameters.
 
-        Parameters
-        ----------
-        arr : ndarray
-            Image data.
-        kwargs : Image tags as keywords
-            Specified in the form ``tag0=value``, ``tag1=value``.
-
         """
         x = np.asarray(arr).view(cls)
-        for tag, value in Image.tags.items():
-            setattr(x, tag, kwargs.get(tag, getattr(arr, tag, value)))
+        x.tags = kwargs
+
         return x
+
+    def __array_finalize__(self, obj):
+        self.tags = getattr(obj, 'tags', {})
 
     def _repr_png_(self):
         return self._repr_image_format('png')
@@ -146,7 +152,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if as_grey and getattr(img, 'ndim', 0) >= 3:
         img = rgb2grey(img)
 
-    return Image(img)
+    return img
 
 
 def imread_collection(load_pattern, conserve_memory=True,
@@ -220,7 +226,7 @@ def imshow(arr, plugin=None, **plugin_args):
         Passed to the given plugin.
 
     """
-    if isinstance(arr, basestring):
+    if isinstance(arr, six.string_types):
         arr = call_plugin('imread', arr, plugin=plugin)
     return call_plugin('imshow', arr, plugin=plugin, **plugin_args)
 

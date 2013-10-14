@@ -21,7 +21,7 @@ y = 0.2 * x + 20
 data = np.column_stack([x, y])
 
 # add faulty data
-faulty = np.array(30 * [(180, -100)])
+faulty = np.array(30 * [(180., -100)])
 faulty += 5 * np.random.normal(size=faulty.shape)
 data[:faulty.shape[0]] = faulty
 

@@ -21,10 +21,12 @@ install:
     - sudo apt-get install libfreeimage3
     - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
     - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
-    - sudo pip-$PYVER install flake8 --use-mirrors
+    - sudo pip-$PYVER install flake8
     - $PYTHON setup.py build
     - sudo $PYTHON setup.py install
 script:
+    # Check if setup.py's match bento.info
+    - $PYTHON check_bento_build.py
     # Change into an innocuous directory and find tests from installation
     - mkdir $HOME/.matplotlib
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
@@ -35,4 +37,6 @@ script:
     # Change back to repository root directory and run all doc examples
     - cd ..
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    - flake8 --exit-zero skimage doc/examples viewer_examples
+    - for f in doc/examples/applications/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    # Run pep8 and flake tests
+    - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples

@@ -2,7 +2,8 @@ from warnings import warn
 
 from skimage.util.dtype import dtype_range
 from .base import Plugin
-from ..utils import ClearColormap
+from ..utils import ClearColormap, update_axes_image
+from skimage._shared import six
 
 
 __all__ = ['OverlayPlugin']
@@ -66,7 +67,8 @@ class OverlayPlugin(Plugin):
             self._overlay_plot = ax.imshow(image, cmap=self.cmap,
                                            vmin=vmin, vmax=vmax)
         else:
-            self._overlay_plot.set_array(image)
+            update_axes_image(self._overlay_plot, image)
+
         self.image_viewer.redraw()
 
     @property
@@ -76,7 +78,8 @@ class OverlayPlugin(Plugin):
     @color.setter
     def color(self, index):
         # Update colormap whenever color is changed.
-        if isinstance(index, basestring) and index not in self.color_names:
+        if isinstance(index, six.string_types) and \
+           index not in self.color_names:
             raise ValueError("%s not defined in OverlayPlugin.colors" % index)
         else:
             name = self.color_names[index]

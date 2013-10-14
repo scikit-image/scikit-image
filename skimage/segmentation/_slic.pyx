@@ -2,140 +2,147 @@
 #cython: boundscheck=False
 #cython: nonecheck=False
 #cython: wraparound=False
-import numpy as np
-from time import time
-from scipy import ndimage
+from libc.float cimport DBL_MAX
 
+import numpy as np
 cimport numpy as cnp
 
-from ..util import img_as_float
-from ..color import rgb2lab, gray2rgb
+from skimage.util import regular_grid
 
 
-def slic(image, n_segments=100, ratio=10., max_iter=10, sigma=1,
-         convert2lab=True):
-    """Segments image using k-means clustering in Color-(x,y) space.
+def _slic_cython(double[:, :, :, ::1] image_zyx,
+                 double[:, ::1] segments,
+                 Py_ssize_t max_iter,
+                 double[::1] spacing):
+    """Helper function for SLIC segmentation.
 
     Parameters
     ----------
-    image : (width, height [, 3]) ndarray
-        Input image.
-    n_segments : int, optional (default 100)
-        The (approximate) number of labels in the segmented output image.
-    ratio: float, optional (default 10)
-        Balances color-space proximity and image-space proximity.
-        Higher values give more weight to color-space.
-    max_iter : int, optional (default 10)
-        Maximum number of iterations of k-means.
-    sigma : float, optional (default 1)
-        Width of Gaussian smoothing kernel for preprocessing. Zero means no
-        smoothing.
-    convert2lab : bool, optional (default True)
-        Whether the input should be converted to Lab colorspace prior to
-        segmentation.  For this purpose, the input is assumed to be RGB. Highly
-        recommended.
+    image_zyx : 4D array of double, shape (Z, Y, X, C)
+        The input image.
+    segments : 2D array of double, shape (N, 3 + C)
+        The initial centroids obtained by SLIC as [Z, Y, X, C...].
+    max_iter : int
+        The maximum number of k-means iterations.
+    spacing : 1D array of double, shape (3,)
+        The voxel spacing along each image dimension. This parameter
+        controls the weights of the distances along z, y, and x during
+        k-means clustering.
 
     Returns
     -------
-    segment_mask : (width, height) ndarray
-        Integer mask indicating segment labels.
+    nearest_segments : 3D array of int, shape (Z, Y, X)
+        The label field/superpixels found by SLIC.
 
     Notes
     -----
-    The image is smoothed using a Gaussian kernel prior to segmentation.
+    The image is considered to be in (z, y, x) order, which can be
+    surprising. More commonly, the order (x, y, z) is used. However,
+    in 3D image analysis, 'z' is usually the "special" dimension, with,
+    for example, a different effective resolution than the other two
+    axes. Therefore, x and y are often processed together, or viewed as
+    a cut-plane through the volume. So, if the order was (x, y, z) and
+    we wanted to look at the 5th cut plane, we would write::
 
-    References
-    ----------
-    .. [1] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
-        Pascal Fua, and Sabine Süsstrunk, SLIC Superpixels Compared to
-        State-of-the-art Superpixel Methods, TPAMI, May 2012.
+        my_z_plane = img3d[:, :, 5]
 
-    Examples
-    --------
-    >>> from skimage.segmentation import slic
-    >>> from skimage.data import lena
-    >>> img = lena()
-    >>> segments = slic(img, n_segments=100, ratio=10)
-    >>> # Increasing the ratio parameter yields more square regions
-    >>> segments = slic(img, n_segments=100, ratio=20)
+    but, assuming a C-contiguous array, this would grab a discontiguous
+    slice of memory, which is bad for performance. In contrast, if we
+    see the image as (z, y, x) ordered, we would do::
+
+        my_z_plane = img3d[5]
+
+    and get back a contiguous block of memory. This is better both for
+    performance and for readability.
     """
-    if image.ndim == 2:
-        image = gray2rgb(image)
-    if image.ndim != 3 or image.shape[2] != 3:
-        ValueError("Only 1- or 3-channel 2D images are supported.")
-    image = ndimage.gaussian_filter(img_as_float(image), [sigma, sigma, 0])
-    if convert2lab:
-        image = rgb2lab(image)
 
-    # initialize on grid:
-    cdef Py_ssize_t height, width
-    height, width = image.shape[:2]
+    # initialize on grid
+    cdef Py_ssize_t depth, height, width
+    depth = image_zyx.shape[0]
+    height = image_zyx.shape[1]
+    width = image_zyx.shape[2]
+
+    cdef Py_ssize_t n_segments = segments.shape[0]
+    # number of features [X, Y, Z, ...]
+    cdef Py_ssize_t n_features = segments.shape[1]
+
     # approximate grid size for desired n_segments
-    cdef Py_ssize_t step = int(np.ceil(np.sqrt(height * width / n_segments)))
-    grid_y, grid_x = np.mgrid[:height, :width]
-    means_y = grid_y[::step, ::step]
-    means_x = grid_x[::step, ::step]
+    cdef Py_ssize_t step_z, step_y, step_x
+    slices = regular_grid((depth, height, width), n_segments)
+    step_z, step_y, step_x = [int(s.step) for s in slices]
 
-    means_color = np.zeros((means_y.shape[0], means_y.shape[1], 3))
-    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] means \
-            = np.dstack([means_y, means_x, means_color]).reshape(-1, 5)
-    cdef cnp.float_t* current_mean
-    cdef cnp.float_t* mean_entry
-    n_means = means.shape[0]
-    # we do the scaling of ratio in the same way as in the SLIC paper
-    # so the values have the same meaning
-    ratio = (ratio / float(step)) ** 2
-    cdef cnp.ndarray[dtype=cnp.float_t, ndim=3] image_yx \
-            = np.dstack([grid_y, grid_x, image / ratio]).copy("C")
-    cdef Py_ssize_t i, k, x, y, x_min, x_max, y_min, y_max, changes
-    cdef double dist_mean
+    cdef Py_ssize_t[:, :, ::1] nearest_segments \
+        = np.empty((depth, height, width), dtype=np.intp)
+    cdef double[:, :, ::1] distance \
+        = np.empty((depth, height, width), dtype=np.double)
+    cdef Py_ssize_t[::1] n_segment_elems = np.zeros(n_segments, dtype=np.intp)
 
-    cdef cnp.ndarray[dtype=cnp.intp_t, ndim=2] nearest_mean \
-            = np.zeros((height, width), dtype=np.intp)
-    cdef cnp.ndarray[dtype=cnp.float_t, ndim=2] distance \
-            = np.empty((height, width))
-    cdef cnp.float_t* image_p = <cnp.float_t*> image_yx.data
-    cdef cnp.float_t* distance_p = <cnp.float_t*> distance.data
-    cdef cnp.float_t* current_distance
-    cdef cnp.float_t* current_pixel
-    cdef double tmp
+    cdef Py_ssize_t i, c, k, x, y, z, x_min, x_max, y_min, y_max, z_min, z_max
+    cdef char change
+    cdef double dist_center, cx, cy, cz, dy, dz
+
+    cdef double sz, sy, sx
+    sz = spacing[0]
+    sy = spacing[1]
+    sx = spacing[2]
+
     for i in range(max_iter):
-        distance.fill(np.inf)
-        changes = 0
-        current_mean = <cnp.float_t*> means.data
-        # assign pixels to means
-        for k in range(n_means):
-            # compute windows:
-            y_min = int(max(current_mean[0] - 2 * step, 0))
-            y_max = int(min(current_mean[0] + 2 * step, height))
-            x_min = int(max(current_mean[1] - 2 * step, 0))
-            x_max = int(min(current_mean[1] + 2 * step, width))
-            for y in range(y_min, y_max):
-                current_pixel = &image_p[5 * (y * width + x_min)]
-                current_distance = &distance_p[y * width + x_min]
-                for x in range(x_min, x_max):
-                    mean_entry = current_mean
-                    dist_mean = 0
-                    for c in range(5):
-                        # you would think the compiler can optimize the squaring
-                        # itself. mine can't (with O2)
-                        tmp = current_pixel[0] - mean_entry[0]
-                        dist_mean += tmp * tmp
-                        current_pixel += 1
-                        mean_entry += 1
-                    # some precision issue here. Doesnt work if testing ">"
-                    if current_distance[0] - dist_mean > 1e-10:
-                        nearest_mean[y, x] = k
-                        current_distance[0] = dist_mean
-                        changes += 1
-                    current_distance += 1
-            current_mean += 5
-        if changes == 0:
+        change = 0
+        distance[:, :, :] = DBL_MAX
+
+        # assign pixels to segments
+        for k in range(n_segments):
+
+            # segment coordinate centers
+            cz = segments[k, 0]
+            cy = segments[k, 1]
+            cx = segments[k, 2]
+
+            # compute windows
+            z_min = <Py_ssize_t>max(cz - 2 * step_z, 0)
+            z_max = <Py_ssize_t>min(cz + 2 * step_z + 1, depth)
+            y_min = <Py_ssize_t>max(cy - 2 * step_y, 0)
+            y_max = <Py_ssize_t>min(cy + 2 * step_y + 1, height)
+            x_min = <Py_ssize_t>max(cx - 2 * step_x, 0)
+            x_max = <Py_ssize_t>min(cx + 2 * step_x + 1, width)
+
+            for z in range(z_min, z_max):
+                dz = (sz * (cz - z)) ** 2
+                for y in range(y_min, y_max):
+                    dy = (sy * (cy - y)) ** 2
+                    for x in range(x_min, x_max):
+                        dist_center = dz + dy + (sx * (cx - x)) ** 2
+                        for c in range(3, n_features):
+                            dist_center += (image_zyx[z, y, x, c - 3]
+                                            - segments[k, c]) ** 2
+                        if distance[z, y, x] > dist_center:
+                            nearest_segments[z, y, x] = k
+                            distance[z, y, x] = dist_center
+                            change = 1
+
+        # stop if no pixel changed its segment
+        if change == 0:
             break
-        # recompute means:
-        means_list = [np.bincount(nearest_mean.ravel(),
-                      image_yx[:, :, j].ravel()) for j in range(5)]
-        in_mean = np.bincount(nearest_mean.ravel())
-        in_mean[in_mean == 0] = 1
-        means = (np.vstack(means_list) / in_mean).T.copy("C")
-    return nearest_mean
+
+        # recompute segment centers
+
+        # sum features for all segments
+        n_segment_elems[:] = 0
+        segments[:, :] = 0
+        for z in range(depth):
+            for y in range(height):
+                for x in range(width):
+                    k = nearest_segments[z, y, x]
+                    n_segment_elems[k] += 1
+                    segments[k, 0] += z
+                    segments[k, 1] += y
+                    segments[k, 2] += x
+                    for c in range(3, n_features):
+                        segments[k, c] += image_zyx[z, y, x, c - 3]
+
+        # divide by number of elements per segment to obtain mean
+        for k in range(n_segments):
+            for c in range(n_features):
+                segments[k, c] /= n_segment_elems[k]
+
+    return np.asarray(nearest_segments)

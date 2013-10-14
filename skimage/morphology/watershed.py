@@ -124,13 +124,13 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     separate overlapping spheres.
     """
 
-    if connectivity == None:
+    if connectivity is None:
         c_connectivity = scipy.ndimage.generate_binary_structure(image.ndim, 1)
     else:
         c_connectivity = np.array(connectivity, bool)
         if c_connectivity.ndim != image.ndim:
             raise ValueError("Connectivity dimension must be same as image")
-    if offset == None:
+    if offset is None:
         if any([x % 2 == 0 for x in c_connectivity.shape]):
             raise ValueError("Connectivity array must have an unambiguous "
                     "center")
@@ -162,7 +162,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
                          "as image (ndim=%d)" % (c_markers.ndim, c_image.ndim))
     if c_markers.shape != c_image.shape:
         raise ValueError("image and markers must have the same shape")
-    if mask != None:
+    if mask is not None:
         c_mask = np.ascontiguousarray(mask, dtype=bool)
         if c_mask.ndim != c_markers.ndim:
             raise ValueError("mask must have same # of dimensions as image")
@@ -398,7 +398,7 @@ def _slow_watershed(image, markers, connectivity=8, mask=None):
                 continue
             if labels[x, y]:
                 continue
-            if mask != None and not mask[x, y]:
+            if mask is not None and not mask[x, y]:
                 continue
             # label the pixel
             labels[x, y] = pix_label

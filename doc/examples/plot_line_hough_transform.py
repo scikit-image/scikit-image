@@ -1,7 +1,7 @@
-"""
-===============
-Hough transform
-===============
+r"""
+=============================
+Straight line Hough transform
+=============================
 
 The Hough transform in its simplest form is a `method to detect straight lines
 <http://en.wikipedia.org/wiki/Hough_transform>`__.

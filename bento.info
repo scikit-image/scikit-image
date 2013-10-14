@@ -51,6 +51,9 @@ Library:
     Extension: skimage.measure._moments
         Sources:
             skimage/measure/_moments.pyx
+    Extension: skimage.measure._marching_cubes_cy
+        Sources:
+            skimage/measure/_marching_cubes_cy.pyx
     Extension: skimage.graph._mcp
         Sources:
             skimage/graph/_mcp.pyx
@@ -90,6 +93,12 @@ Library:
     Extension: skimage.morphology._greyreconstruct
         Sources:
             skimage/morphology/_greyreconstruct.pyx
+    Extension: skimage.feature.censure_cy
+        Sources:
+            skimage/feature/censure_cy.pyx
+    Extension: skimage.feature._brief_cy
+        Sources:
+            skimage/feature/_brief_cy.pyx
     Extension: skimage.feature.corner_cy
         Sources:
             skimage/feature/corner_cy.pyx
@@ -108,6 +117,9 @@ Library:
     Extension: skimage.morphology._skeletonize_cy
         Sources:
             skimage/morphology/_skeletonize_cy.pyx
+    Extension: skimage.transform._radon_transform
+        Sources:
+            skimage/transform/_radon_transform.pyx
     Extension: skimage.transform._warps_cy
         Sources:
             skimage/transform/_warps_cy.pyx
@@ -120,36 +132,18 @@ Library:
     Extension: skimage._shared.geometry
         Sources:
             skimage/_shared/geometry.pyx
-    Extension: skimage.filter.rank._core16
+    Extension: skimage.filter.rank.generic_cy
         Sources:
-            skimage/filter/rank/_core16.pyx
-    Extension: skimage.filter.rank._crank8
+            skimage/filter/rank/generic_cy.pyx
+    Extension: skimage.filter.rank.percentile_cy
         Sources:
-            skimage/filter/rank/_crank8.pyx
-    Extension: skimage.filter.rank._crank16
+            skimage/filter/rank/percentile_cy.pyx
+    Extension: skimage.filter.rank.core_cy
         Sources:
-            skimage/filter/rank/_crank16.pyx
-    Extension: skimage.filter.rank._core8
+            skimage/filter/rank/core_cy.pyx
+    Extension: skimage.filter.rank.bilateral_cy
         Sources:
-            skimage/filter/rank/_core8.pyx
-    Extension: skimage.filter.rank.rank
-        Sources:
-            skimage/filter/rank/rank.pyx
-    Extension: skimage.filter.rank.bilateral_rank
-        Sources:
-            skimage/filter/rank/bilateral_rank.pyx
-    Extension: skimage.filter.rank._crank16_percentiles
-        Sources:
-            skimage/filter/rank/_crank16_percentiles.pyx
-    Extension: skimage.filter.rank.percentile_rank
-        Sources:
-            skimage/filter/rank/percentile_rank.pyx
-    Extension: skimage.filter.rank._crank8_percentiles
-        Sources:
-            skimage/filter/rank/_crank8_percentiles.pyx
-    Extension: skimage.filter.rank._crank16_bilateral
-        Sources:
-            skimage/filter/rank/_crank16_bilateral.pyx
+            skimage/filter/rank/bilateral_cy.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi

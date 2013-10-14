@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from scipy import ndimage
 
@@ -8,32 +9,40 @@ def binary_erosion(image, selem, out=None):
     This function returns the same result as greyscale erosion but performs
     faster for binary images.
 
-    Morphological erosion sets a pixel at (i,j) to the minimum over all pixels
-    in the neighborhood centered at (i,j). Erosion shrinks bright regions and
-    enlarges dark regions.
+    Morphological erosion sets a pixel at ``(i,j)`` to the minimum over all
+    pixels in the neighborhood centered at ``(i,j)``. Erosion shrinks bright
+    regions and enlarges dark regions.
 
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray of bool
         The array to store the result of the morphology. If None is
         passed, a new array will be allocated.
 
     Returns
     -------
-    eroded : bool array
-        The result of the morphological erosion.
+    eroded : ndarray of bool or intp
+        The result of the morphological erosion with values in ``[0, 1]``.
 
     """
+    selem = (selem != 0)
+    selem_sum = np.sum(selem)
 
-    conv = ndimage.convolve(image > 0, selem, output=out,
-                            mode='constant', cval=1)
-    if conv is not None:
+    if selem_sum <= 255:
+        conv = np.empty_like(image, dtype=np.uint8)
+    else:
+        conv = np.empty_like(image, dtype=np.intp)
+
+    binary = (image > 0).view(np.uint8)
+    ndimage.convolve(binary, selem, mode='constant', cval=1, output=conv)
+
+    if out is None:
         out = conv
-    return np.equal(out, np.sum(selem), out=out)
+    return np.equal(conv, selem_sum, out=out)
 
 
 def binary_dilation(image, selem, out=None):
@@ -42,33 +51,40 @@ def binary_dilation(image, selem, out=None):
     This function returns the same result as greyscale dilation but performs
     faster for binary images.
 
-    Morphological dilation sets a pixel at (i,j) to the maximum over all pixels
-    in the neighborhood centered at (i,j). Dilation enlarges bright regions
-    and shrinks dark regions.
+    Morphological dilation sets a pixel at ``(i,j)`` to the maximum over all
+    pixels in the neighborhood centered at ``(i,j)``. Dilation enlarges bright
+    regions and shrinks dark regions.
 
     Parameters
     ----------
 
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray of bool
         The array to store the result of the morphology. If None, is
         passed, a new array will be allocated.
 
     Returns
     -------
-    dilated : bool array
-        The result of the morphological dilation.
+    dilated : ndarray of bool or intp
+        The result of the morphological dilation with values in ``[0, 1]``.
 
     """
+    selem = (selem != 0)
 
-    conv = ndimage.convolve(image > 0, selem, output=out,
-                            mode='constant', cval=0)
-    if conv is not None:
+    if np.sum(selem) <= 255:
+        conv = np.empty_like(image, dtype=np.uint8)
+    else:
+        conv = np.empty_like(image, dtype=np.intp)
+
+    binary = (image > 0).view(np.uint8)
+    ndimage.convolve(binary, selem, mode='constant', cval=0, output=conv)
+
+    if out is None:
         out = conv
-    return np.not_equal(out, 0, out=out)
+    return np.not_equal(conv, 0, out=out)
 
 
 def binary_opening(image, selem, out=None):
@@ -85,20 +101,19 @@ def binary_opening(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray of bool
         The array to store the result of the morphology. If None
         is passed, a new array will be allocated.
 
     Returns
     -------
-    opening : bool array
+    opening : ndarray of bool
         The result of the morphological opening.
 
     """
-
     eroded = binary_erosion(image, selem)
     out = binary_dilation(eroded, selem, out=out)
     return out
@@ -118,16 +133,16 @@ def binary_closing(image, selem, out=None):
     Parameters
     ----------
     image : ndarray
-        Image array.
+        Binary input image.
     selem : ndarray
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray
+    out : ndarray of bool
         The array to store the result of the morphology. If None,
         is passed, a new array will be allocated.
 
     Returns
     -------
-    closing : bool array
+    closing : ndarray of bool
         The result of the morphological closing.
 
     """

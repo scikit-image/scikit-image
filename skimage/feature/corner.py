@@ -277,8 +277,7 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-           foerstner87.fast.pdf
+    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/foerstner87.fast.pdf
     .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples

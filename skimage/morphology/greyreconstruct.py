@@ -133,7 +133,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     else:
         selem = selem.copy()
 
-    if offset == None:
+    if offset is None:
         if not all([d % 2 == 1 for d in selem.shape]):
             ValueError("Footprint dimensions must all be odd")
         offset = np.array([d // 2 for d in selem.shape])
@@ -159,7 +159,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     # Create a list of strides across the array to get the neighbors within
     # a flattened array
     value_stride = np.array(images.strides[1:]) / images.dtype.itemsize
-    image_stride = images.strides[0] / images.dtype.itemsize
+    image_stride = images.strides[0] // images.dtype.itemsize
     selem_mgrid = np.mgrid[[slice(-o, d - o)
                             for d, o in zip(selem.shape, offset)]]
     selem_offsets = selem_mgrid[:, selem].transpose()

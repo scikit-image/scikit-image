@@ -22,33 +22,42 @@ INTENSITY_SAMPLE = SAMPLE.copy()
 INTENSITY_SAMPLE[1, 9:11] = 2
 
 
-def test_unsupported_dtype():
+def test_all_props():
+    regions = regionprops(SAMPLE, 'all', INTENSITY_SAMPLE)[0]
+    for prop in PROPS:
+        regions[prop]
+
+
+def test_dtype():
+    regionprops(np.zeros((10, 10), dtype=np.int))
+    regionprops(np.zeros((10, 10), dtype=np.uint))
     assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
 
 
-def test_all_props():
-    props = regionprops(SAMPLE, 'all', INTENSITY_SAMPLE)[0]
-    for prop in PROPS:
-        assert prop in props
+def test_ndim():
+    regionprops(np.zeros((10, 10), dtype=np.int))
+    regionprops(np.zeros((10, 10, 1), dtype=np.int))
+    regionprops(np.zeros((10, 10, 1, 1), dtype=np.int))
+    assert_raises(TypeError, regionprops, np.zeros((10, 10, 2), dtype=np.int))
 
 
 def test_area():
-    area = regionprops(SAMPLE, ['Area'])[0]['Area']
+    area = regionprops(SAMPLE)[0].area
     assert area == np.sum(SAMPLE)
 
 
 def test_bbox():
-    bbox = regionprops(SAMPLE, ['BoundingBox'])[0]['BoundingBox']
+    bbox = regionprops(SAMPLE)[0].bbox
     assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]))
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[:, -1] = 0
-    bbox = regionprops(SAMPLE_mod, ['BoundingBox'])[0]['BoundingBox']
+    bbox = regionprops(SAMPLE_mod)[0].bbox
     assert_array_almost_equal(bbox, (0, 0, SAMPLE.shape[0], SAMPLE.shape[1]-1))
 
 
-def test_central_moments():
-    mu = regionprops(SAMPLE, ['CentralMoments'])[0]['CentralMoments']
+def test_moments_central():
+    mu = regionprops(SAMPLE)[0].moments_central
     # determined with OpenCV
     assert_almost_equal(mu[0,2], 436.00000000000045)
     # different from OpenCV results, bug in OpenCV
@@ -61,19 +70,19 @@ def test_central_moments():
 
 
 def test_centroid():
-    centroid = regionprops(SAMPLE, ['Centroid'])[0]['Centroid']
+    centroid = regionprops(SAMPLE)[0].centroid
     # determined with MATLAB
     assert_array_almost_equal(centroid, (5.66666666666666, 9.444444444444444))
 
 
 def test_convex_area():
-    area = regionprops(SAMPLE, ['ConvexArea'])[0]['ConvexArea']
+    area = regionprops(SAMPLE)[0].convex_area
     # determined with MATLAB
     assert area == 124
 
 
 def test_convex_image():
-    img = regionprops(SAMPLE, ['ConvexImage'])[0]['ConvexImage']
+    img = regionprops(SAMPLE)[0].convex_image
     # determined with MATLAB
     ref = np.array(
         [[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0],
@@ -94,43 +103,43 @@ def test_coordinates():
     sample = np.zeros((10, 10), dtype=np.int8)
     coords = np.array([[3, 2], [3, 3], [3, 4]])
     sample[coords[:, 0], coords[:, 1]] = 1
-    prop_coords = regionprops(sample, ['Coordinates'])[0]['Coordinates']
+    prop_coords = regionprops(sample)[0].coords
     assert_array_equal(prop_coords, coords)
 
 
 def test_eccentricity():
-    eps = regionprops(SAMPLE, ['Eccentricity'])[0]['Eccentricity']
+    eps = regionprops(SAMPLE)[0].eccentricity
     assert_almost_equal(eps, 0.814629313427)
 
     img = np.zeros((5, 5), dtype=np.int)
     img[2, 2] = 1
-    eps = regionprops(img, ['Eccentricity'])[0]['Eccentricity']
+    eps = regionprops(img)[0].eccentricity
     assert_almost_equal(eps, 0)
 
 
 def test_equiv_diameter():
-    diameter = regionprops(SAMPLE, ['EquivDiameter'])[0]['EquivDiameter']
+    diameter = regionprops(SAMPLE)[0].equivalent_diameter
     # determined with MATLAB
     assert_almost_equal(diameter, 9.57461472963)
 
 
 def test_euler_number():
-    en = regionprops(SAMPLE, ['EulerNumber'])[0]['EulerNumber']
+    en = regionprops(SAMPLE)[0].euler_number
     assert en == 0
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
-    en = regionprops(SAMPLE_mod, ['EulerNumber'])[0]['EulerNumber']
+    en = regionprops(SAMPLE_mod)[0].euler_number
     assert en == -1
 
 
 def test_extent():
-    extent = regionprops(SAMPLE, ['Extent'])[0]['Extent']
+    extent = regionprops(SAMPLE)[0].extent
     assert_almost_equal(extent, 0.4)
 
 
-def test_hu_moments():
-    hu = regionprops(SAMPLE, ['HuMoments'])[0]['HuMoments']
+def test_moments_hu():
+    hu = regionprops(SAMPLE)[0].moments_hu
     ref = np.array([
         3.27117627e-01,
         2.63869194e-02,
@@ -145,59 +154,64 @@ def test_hu_moments():
 
 
 def test_image():
-    img = regionprops(SAMPLE, ['Image'])[0]['Image']
+    img = regionprops(SAMPLE)[0].image
     assert_array_equal(img, SAMPLE)
 
 
+def test_label():
+    label = regionprops(SAMPLE)[0].label
+    assert_array_equal(label, 1)
+
+
 def test_filled_area():
-    area = regionprops(SAMPLE, ['FilledArea'])[0]['FilledArea']
+    area = regionprops(SAMPLE)[0].filled_area
     assert area == np.sum(SAMPLE)
 
     SAMPLE_mod = SAMPLE.copy()
     SAMPLE_mod[7, -3] = 0
-    area = regionprops(SAMPLE_mod, ['FilledArea'])[0]['FilledArea']
+    area = regionprops(SAMPLE_mod)[0].filled_area
     assert area == np.sum(SAMPLE)
 
 
 def test_filled_image():
-    img = regionprops(SAMPLE, ['FilledImage'])[0]['FilledImage']
+    img = regionprops(SAMPLE)[0].filled_image
     assert_array_equal(img, SAMPLE)
 
 
 def test_major_axis_length():
-    length = regionprops(SAMPLE, ['MajorAxisLength'])[0]['MajorAxisLength']
+    length = regionprops(SAMPLE)[0].major_axis_length
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     assert_almost_equal(length, 16.7924234999)
 
 
 def test_max_intensity():
-    intensity = regionprops(SAMPLE, ['MaxIntensity'], INTENSITY_SAMPLE
-                            )[0]['MaxIntensity']
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                            )[0].max_intensity
     assert_almost_equal(intensity, 2)
 
 
 def test_mean_intensity():
-    intensity = regionprops(SAMPLE, ['MeanIntensity'], INTENSITY_SAMPLE
-                            )[0]['MeanIntensity']
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                            )[0].mean_intensity
     assert_almost_equal(intensity, 1.02777777777777)
 
 
 def test_min_intensity():
-    intensity = regionprops(SAMPLE, ['MinIntensity'], INTENSITY_SAMPLE
-                            )[0]['MinIntensity']
+    intensity = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                            )[0].min_intensity
     assert_almost_equal(intensity, 1)
 
 
 def test_minor_axis_length():
-    length = regionprops(SAMPLE, ['MinorAxisLength'])[0]['MinorAxisLength']
+    length = regionprops(SAMPLE)[0].minor_axis_length
     # MATLAB has different interpretation of ellipse than found in literature,
     # here implemented as found in literature
     assert_almost_equal(length, 9.739302807263)
 
 
 def test_moments():
-    m = regionprops(SAMPLE, ['Moments'])[0]['Moments']
+    m = regionprops(SAMPLE)[0].moments
     # determined with OpenCV
     assert_almost_equal(m[0,0], 72.0)
     assert_almost_equal(m[0,1], 408.0)
@@ -211,8 +225,8 @@ def test_moments():
     assert_almost_equal(m[3,0], 95588.0)
 
 
-def test_normalized_moments():
-    nu = regionprops(SAMPLE, ['NormalizedMoments'])[0]['NormalizedMoments']
+def test_moments_normalized():
+    nu = regionprops(SAMPLE)[0].moments_normalized
     # determined with OpenCV
     assert_almost_equal(nu[0,2], 0.08410493827160502)
     assert_almost_equal(nu[1,1], -0.016846707818929982)
@@ -223,29 +237,26 @@ def test_normalized_moments():
 
 
 def test_orientation():
-    orientation = regionprops(SAMPLE, ['Orientation'])[0]['Orientation']
+    orientation = regionprops(SAMPLE)[0].orientation
     # determined with MATLAB
     assert_almost_equal(orientation, 0.10446844651921)
     # test correct quadrant determination
-    orientation2 = regionprops(SAMPLE.T, ['Orientation'])[0]['Orientation']
+    orientation2 = regionprops(SAMPLE.T)[0].orientation
     assert_almost_equal(orientation2, math.pi / 2 - orientation)
     # test diagonal regions
     diag = np.eye(10, dtype=int)
-    orientation_diag = regionprops(diag, ['Orientation'])[0]['Orientation']
+    orientation_diag = regionprops(diag)[0].orientation
     assert_almost_equal(orientation_diag, -math.pi / 4)
-    orientation_diag = regionprops(np.flipud(diag), ['Orientation']
-                                  )[0]['Orientation']
+    orientation_diag = regionprops(np.flipud(diag))[0].orientation
     assert_almost_equal(orientation_diag, math.pi / 4)
-    orientation_diag = regionprops(np.fliplr(diag), ['Orientation']
-                                  )[0]['Orientation']
+    orientation_diag = regionprops(np.fliplr(diag))[0].orientation
     assert_almost_equal(orientation_diag, math.pi / 4)
-    orientation_diag = regionprops(np.fliplr(np.flipud(diag)), ['Orientation']
-                                  )[0]['Orientation']
+    orientation_diag = regionprops(np.fliplr(np.flipud(diag)))[0].orientation
     assert_almost_equal(orientation_diag, -math.pi / 4)
 
 
 def test_perimeter():
-    per = regionprops(SAMPLE, ['Perimeter'])[0]['Perimeter']
+    per = regionprops(SAMPLE)[0].perimeter
     assert_almost_equal(per, 55.2487373415)
 
     per = perimeter(SAMPLE.astype('double'), neighbourhood=8)
@@ -253,14 +264,14 @@ def test_perimeter():
 
 
 def test_solidity():
-    solidity = regionprops(SAMPLE, ['Solidity'])[0]['Solidity']
+    solidity = regionprops(SAMPLE)[0].solidity
     # determined with MATLAB
     assert_almost_equal(solidity, 0.580645161290323)
 
 
-def test_weighted_central_moments():
-    wmu = regionprops(SAMPLE, ['WeightedCentralMoments'], INTENSITY_SAMPLE
-                     )[0]['WeightedCentralMoments']
+def test_weighted_moments():
+    wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                      )[0].weighted_moments_central
     ref = np.array(
         [[  7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
             -7.5943608473e+02],
@@ -276,14 +287,14 @@ def test_weighted_central_moments():
 
 
 def test_weighted_centroid():
-    centroid = regionprops(SAMPLE, ['WeightedCentroid'], INTENSITY_SAMPLE
-                           )[0]['WeightedCentroid']
+    centroid = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                           )[0].weighted_centroid
     assert_array_almost_equal(centroid, (5.540540540540, 9.445945945945))
 
 
-def test_weighted_hu_moments():
-    whu = regionprops(SAMPLE, ['WeightedHuMoments'], INTENSITY_SAMPLE
-                     )[0]['WeightedHuMoments']
+def test_weighted_moments_hu():
+    whu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                      )[0].weighted_moments_hu
     ref = np.array([
         3.1750587329e-01,
         2.1417517159e-02,
@@ -297,8 +308,8 @@ def test_weighted_hu_moments():
 
 
 def test_weighted_moments():
-    wm = regionprops(SAMPLE, ['WeightedMoments'], INTENSITY_SAMPLE
-                     )[0]['WeightedMoments']
+    wm = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                     )[0].weighted_moments
     ref = np.array(
         [[  7.4000000000e+01, 4.1000000000e+02, 2.7500000000e+03,
             1.9778000000e+04],
@@ -312,9 +323,9 @@ def test_weighted_moments():
     assert_array_almost_equal(wm, ref)
 
 
-def test_weighted_normalized_moments():
-    wnu = regionprops(SAMPLE, ['WeightedNormalizedMoments'], INTENSITY_SAMPLE
-                     )[0]['WeightedNormalizedMoments']
+def test_weighted_moments_normalized():
+    wnu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
+                      )[0].weighted_moments_normalized
     ref = np.array(
         [[       np.nan,        np.nan,  0.0873590903, -0.0161217406],
          [       np.nan, -0.0160405109, -0.0031421072, -0.0031376984],
