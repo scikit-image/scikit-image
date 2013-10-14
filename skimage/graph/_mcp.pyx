@@ -227,7 +227,7 @@ def _reverse(arr):
 @cython.boundscheck(False)
 @cython.wraparound(False)
 cdef class MCP:
-    """MCP(costs, offsets=None, fully_connected=True)
+    """MCP(costs, offsets=None, fully_connected=True, sampling=None)
 
     A class for finding the minimum cost path through a given n-d costs array.
 
@@ -261,7 +261,10 @@ cdef class MCP:
         generated neighborhood. If true, the path may go along diagonals
         between elements of the `costs` array; otherwise only axial moves are
         permitted.
-
+    sampling : tuple, optional
+        For each dimension, specifies the distance between two cells/voxels. 
+        If not given or None, the distance is assumed unit. 
+    
     Attributes
     ----------
     offsets : ndarray
@@ -271,15 +274,26 @@ cdef class MCP:
         returned by the find_costs() method.
 
     """
-    def __init__(self, costs, offsets=None, fully_connected=True):
-        """__init__(costs, offsets=None, fully_connected=True)
+    def __init__(self, costs, offsets=None, fully_connected=True, 
+                sampling=None):
+        """__init__(costs, offsets=None, fully_connected=True, sampling=None)
 
         See class documentation.
         """
         costs = np.asarray(costs)
         if not np.can_cast(costs.dtype, FLOAT_D):
             raise TypeError('cannot cast costs array to ' + str(FLOAT_D))
-
+        
+        # Check sampling
+        if sampling is None:
+            sampling = np.array([1.0 for s in costs.shape], FLOAT_D)
+        elif isinstance(sampling, (list, tuple)):
+            sampling = np.array(sampling, FLOAT_D)
+            if sampling.ndim != 1 or len(sampling) != costs.ndim:
+                raise ValueError('Need one sampling element per dimension.')
+        else:
+            raise ValueError('Invalid type for sampling: %r.' % type(sampling))
+        
         # We use flat, fortran-style indexing here (could use C-style,
         # but this is my code and I like fortran-style! Also, it's
         # faster when working with image arrays, which are often
@@ -326,7 +340,7 @@ cdef class MCP:
 
         # The offset lengths are the distances traveled along each offset
         self.offset_lengths = np.sqrt(
-            np.sum(self.offsets**2, axis=1)).astype(FLOAT_D)
+            np.sum((sampling*self.offsets)**2, axis=1)).astype(FLOAT_D)
         self.dirty = 0
         self.use_start_cost = 1
 
@@ -595,7 +609,7 @@ cdef class MCP:
              self.traceback_offsets
         cdef cnp.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
         cdef cnp.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
-
+        
         cdef OFFSETS_INDEX_T offset
         cdef DIM_T d
         cdef DIM_T dim = self.dim
@@ -635,15 +649,17 @@ cdef class MCP_Geometric(MCP):
     `(sqrt(2)/2)*costs[1,1] + (sqrt(2)/2)*costs[2,2]`.
 
     These calculations don't make a lot of sense with offsets of magnitude
-    greater than 1.
+    greater than 1. Use the `sampling` argument in order to deal with
+    anisotropic data.
     """
 
-    def __init__(self, costs, offsets=None, fully_connected=True):
-        """__init__(costs, offsets=None, fully_connected=True)
+    def __init__(self, costs, offsets=None, fully_connected=True, 
+                    sampling=None):
+        """__init__(costs, offsets=None, fully_connected=True, sampling=None)
 
         See class documentation.
         """
-        MCP.__init__(self, costs, offsets, fully_connected)
+        MCP.__init__(self, costs, offsets, fully_connected, sampling)
         if np.absolute(self.offsets).max() > 1:
             raise ValueError('all offset components must be 0, 1, or -1')
         self.use_start_cost = 0
