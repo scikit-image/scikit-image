@@ -1,6 +1,5 @@
 import numpy as np
 from skimage import img_as_float
-from skimage._shared.utils import deprecated
 
 
 def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
@@ -257,7 +256,3 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
         raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
     return out
-
-
-tv_denoise = deprecated('skimage.filter.denoise_tv_chambolle')\
-                       (denoise_tv_chambolle)

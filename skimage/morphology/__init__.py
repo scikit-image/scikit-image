@@ -7,7 +7,7 @@ from .grey import (erosion, dilation, opening, closing, white_tophat,
 from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
 from .ccomp import label
-from .watershed import watershed, is_local_maximum
+from .watershed import watershed
 from ._skeletonize import skeletonize, medial_axis
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
@@ -40,7 +40,6 @@ __all__ = ['binary_erosion',
            'octagon',
            'label',
            'watershed',
-           'is_local_maximum',
            'skeletonize',
            'medial_axis',
            'convex_hull_image',
