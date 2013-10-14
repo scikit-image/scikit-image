@@ -77,9 +77,9 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.)):
     >>> from mayavi import mlab
     >>> verts, tris = marching_cubes(myvolume, 0.0, (1., 1., 2.))
     >>> mlab.triangular_mesh([vert[0] for vert in verts],
-                             [vert[1] for vert in verts],
-                             [vert[2] for vert in verts],
-                             tris)
+    ...                      [vert[1] for vert in verts],
+    ...                      [vert[2] for vert in verts],
+    ...                      tris)
     >>> mlab.show()
 
     References

@@ -233,9 +233,7 @@ def view_as_windows(arr_in, window_shape, step=1):
                 tuple(window_shape)
 
     arr_strides = np.array(arr_in.strides)
-    new_strides = np.concatenate(
-                  (arr_strides * step, arr_strides)
-                  )
+    new_strides = np.concatenate((arr_strides * step, arr_strides))
 
     arr_out = as_strided(arr_in, shape=new_shape, strides=new_strides)
 
