@@ -30,9 +30,9 @@ def unique_rows(ar):
     Examples
     --------
     >>> ar = np.array([[1, 0, 1],
-                       [0, 1, 0],
-                       [1, 0, 1]], np.uint8)
-    >>> aru = unique_rows(ar)
+    ...                [0, 1, 0],
+    ...                [1, 0, 1]], np.uint8)
+    >>> unique_rows(ar)
     array([[0, 1, 0],
            [1, 0, 1]], dtype=uint8)
     """
