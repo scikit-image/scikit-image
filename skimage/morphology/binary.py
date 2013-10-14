@@ -26,7 +26,7 @@ def binary_erosion(image, selem, out=None):
     Returns
     -------
     eroded : ndarray of bool or intp
-        The result of the morphological erosion with values in [0, 1].
+        The result of the morphological erosion with values in ``[0, 1]``.
 
     """
     selem = (selem != 0)
@@ -70,7 +70,7 @@ def binary_dilation(image, selem, out=None):
     Returns
     -------
     dilated : ndarray of bool or intp
-        The result of the morphological dilation with values in [0, 1].
+        The result of the morphological dilation with values in ``[0, 1]``.
 
     """
     selem = (selem != 0)
