@@ -31,7 +31,8 @@ def test_all_props():
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
+    assert_raises((TypeError, RuntimeError), regionprops,
+                  np.zeros((10, 10), dtype=np.double))
 
 
 def test_ndim():
