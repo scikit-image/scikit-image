@@ -25,7 +25,7 @@ def binary_erosion(image, selem, out=None):
 
     Returns
     -------
-    eroded : ndarray of bool or intp
+    eroded : ndarray of bool or uint32
         The result of the morphological erosion with values in ``[0, 1]``.
 
     """
@@ -35,7 +35,7 @@ def binary_erosion(image, selem, out=None):
     if selem_sum <= 255:
         conv = np.empty_like(image, dtype=np.uint8)
     else:
-        conv = np.empty_like(image, dtype=np.intp)
+        conv = np.empty_like(image, dtype=np.uint32)
 
     binary = (image > 0).view(np.uint8)
     ndimage.convolve(binary, selem, mode='constant', cval=1, output=conv)
@@ -68,7 +68,7 @@ def binary_dilation(image, selem, out=None):
 
     Returns
     -------
-    dilated : ndarray of bool or intp
+    dilated : ndarray of bool or uint32
         The result of the morphological dilation with values in ``[0, 1]``.
 
     """
@@ -77,7 +77,7 @@ def binary_dilation(image, selem, out=None):
     if np.sum(selem) <= 255:
         conv = np.empty_like(image, dtype=np.uint8)
     else:
-        conv = np.empty_like(image, dtype=np.intp)
+        conv = np.empty_like(image, dtype=np.uint32)
 
     binary = (image > 0).view(np.uint8)
     ndimage.convolve(binary, selem, mode='constant', cval=0, output=conv)
