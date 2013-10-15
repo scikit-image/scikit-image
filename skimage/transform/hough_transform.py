@@ -3,30 +3,6 @@ from scipy import ndimage
 from skimage import measure, morphology
 
 
-from ._hough_transform import hough_line, probabilistic_hough_line
-from skimage._shared.utils import deprecated
-
-
-@deprecated('hough_line')
-def hough(img, theta=None):
-    return hough_line(img, theta)
-
-
-@deprecated('probabilistic_hough_line')
-def probabilistic_hough(img, threshold=10, line_length=50, line_gap=10,
-                        theta=None):
-    return probabilistic_hough_line(img, threshold=threshold,
-                                    line_length=line_length, line_gap=line_gap,
-                                    theta=theta)
-
-
-@deprecated('hough_line_peaks')
-def hough_peaks(hspace, angles, dists, min_distance=10, min_angle=10,
-                threshold=None, num_peaks=np.inf):
-    return hough_line_peaks(hspace, angles, dists, min_distance, min_angle,
-                            threshold, num_peaks)
-
-
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
                      threshold=None, num_peaks=np.inf):
     """Return peaks in hough transform.
