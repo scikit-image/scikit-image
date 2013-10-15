@@ -269,9 +269,9 @@ def test_solidity():
     assert_almost_equal(solidity, 0.580645161290323)
 
 
-def test_weighted_central_moments():
+def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
-                      )[0].weighted_central_moments
+                      )[0].weighted_moments_central
     ref = np.array(
         [[  7.4000000000e+01, -2.1316282073e-13,  4.7837837838e+02,
             -7.5943608473e+02],
