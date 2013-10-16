@@ -50,12 +50,12 @@ surname:
 - Nicolas Pinto
 - Davin Potts
 - Malcolm Reynolds
+- Umesh Sharma
 - Johannes Schönberger
 - Chintak Sheth
 - Kirill Shklovsky
 - Steven Silvester
 - Matt Terry
-- Umesh Sharma
 - Riaan van den Dool
 - Stéfan van der Walt
 - Josh Warner
