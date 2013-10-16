@@ -5,7 +5,7 @@ How to make a new release of ``skimage``
 
 - Update release notes.
 
-  - To show a list contributors, run ``doc/release/contributors.sh <commit>``,
+  - To show a list contributors, run ``doc/release/contributors.py <commit>``,
     where ``<commit>`` is the first commit since the previous release.
 
 - Update the version number in ``setup.py`` and ``bento.info`` and commit
