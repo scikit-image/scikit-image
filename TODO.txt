@@ -13,11 +13,3 @@ Version 0.10
 * Remove deprecated `skimage.color.is_gray` and `skimage.color.is_rgb`
   functions
 
-Version 0.9
------------
-* Remove deprecated functions
-    - `skimage.filter.denoise_tv_chambolle`
-    - `skimage.morphology.is_local_maximum`
-    - `skimage.transform.hough`
-    - `skimage.transform.probabilistic_hough`
-    - `skimage.transform.hough_peaks`
