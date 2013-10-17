@@ -310,6 +310,13 @@ class _RegionProperties(object):
                           category=DeprecationWarning)
             return getattr(self, PROPS[key])
 
+    def values(self):
+        return [getattr(self, PROPS[key]) for
+                key in self._requested_properties]
+
+    def __iter__(self):
+        return self._requested_properties
+
 
 def regionprops(label_image, properties=None,
                 intensity_image=None, cache=True):
@@ -481,15 +488,17 @@ def regionprops(label_image, properties=None,
                       'not needed any more as properties are '
                       'determined dynamically.',
                       category=DeprecationWarning)
+    else:
+        properties = ['Area', 'Centroid'] # defaults in 0.8.0
 
     regions = []
-
     objects = ndimage.find_objects(label_image)
     for i, sl in enumerate(objects):
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image,
                                   intensity_image, cache)
+        props._requested_properties = properties
         regions.append(props)
 
     return regions
