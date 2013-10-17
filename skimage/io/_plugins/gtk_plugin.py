@@ -5,7 +5,7 @@ try:
     # or else the gui import might trample another
     # gui's pyos_inputhook.
     window_manager.acquire('gtk')
-except GuiLockError, gle:
+except GuiLockError as gle:
     print(gle)
 else:
     try:
