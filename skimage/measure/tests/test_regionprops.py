@@ -342,7 +342,8 @@ def test_old_dict_interface():
                          'Extent', 'MinIntensity', 'MeanIntensity',
                          'MaxIntensity', 'Solidity'],
                         intensity_image=INTENSITY_SAMPLE)
-    np.array([props.values() for props in feats], np.float)
+
+    np.array([list(props.values()) for props in feats], np.float)
     assert_equal(len(feats[0]), 8)
 
 
