@@ -4,6 +4,8 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
+from collections import MutableMapping
+
 from skimage.morphology import convex_hull_image, label
 from skimage.measure import _moments
 
@@ -103,15 +105,16 @@ class _cached_property(object):
         return value
 
 
-class _RegionProperties(object):
+class _RegionProperties(MutableMapping):
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active):
+                 cache_active, properties=None):
         self.label = label
         self._slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
         self._cache_active = cache_active
+        self._properties = properties
 
     @_cached_property
     def area(self):
@@ -301,6 +304,20 @@ class _RegionProperties(object):
     def weighted_moments_normalized(self):
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
+
+    # Preserve dictionary interface
+    def __delitem__(self, key):
+        pass
+
+    def __len__(self):
+        return len(self._properties or PROPS.values())
+
+    def __setitem__(self, key, value):
+        raise RuntimeError("Cannot assign region properties.")
+
+    def __iter__(self):
+        return iter(self._properties or PROPS.values())
+
     def __getitem__(self, key):
         value = getattr(self, key, None)
         if value is not None:
@@ -489,7 +506,7 @@ def regionprops(label_image, properties=None,
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image,
-                                  intensity_image, cache)
+                                  intensity_image, cache, properties=properties)
         regions.append(props)
 
     return regions
