@@ -106,17 +106,17 @@ def _local_binary_pattern(double[:, ::1] image,
     """
 
     # texture weights
-    cdef int[:] weights = 2 ** np.arange(P, dtype=np.int32)
+    cdef int[::1] weights = 2 ** np.arange(P, dtype=np.int32)
     # local position of texture elements
     rr = - R * np.sin(2 * np.pi * np.arange(P, dtype=np.double) / P)
     cc = R * np.cos(2 * np.pi * np.arange(P, dtype=np.double) / P)
-    cdef double[:] rp = np.round(rr, 5)
-    cdef double[:] cp = np.round(cc, 5)
+    cdef double[::1] rp = np.round(rr, 5)
+    cdef double[::1] cp = np.round(cc, 5)
 
     # pre-allocate arrays for computation
-    cdef double[:] texture = np.zeros(P, dtype=np.double)
-    cdef char[:] signed_texture = np.zeros(P, dtype=np.int8)
-    cdef int[:] rotation_chain = np.zeros(P, dtype=np.int32)
+    cdef double[::1] texture = np.zeros(P, dtype=np.double)
+    cdef char[::1] signed_texture = np.zeros(P, dtype=np.int8)
+    cdef int[::1] rotation_chain = np.zeros(P, dtype=np.int32)
 
     output_shape = (image.shape[0], image.shape[1])
     cdef double[:, ::1] output = np.zeros(output_shape, dtype=np.double)
@@ -162,21 +162,21 @@ def _local_binary_pattern(double[:, ::1] image,
                     # n_ones=2: 0011, 1001, 1100, 0110
                     # n_ones=3: 0111, 1011, 1101, 1110
                     # n_ones=4: 1111
-                    # 
+                    #
                     # For a pattern of size P there are 2 constant patterns
                     # corresponding to n_ones=0 and n_ones=P. For each other
                     # value of `n_ones` , i.e n_ones=[1..P-1], there are P
                     # possible patterns which are related to each other through
                     # circular permutations. The total number of uniform
-                    # patterns is thus (2 + P * (P - 1)).                    
+                    # patterns is thus (2 + P * (P - 1)).
                     # Given any pattern (uniform or not) we must be able to
-                    # associate a unique code:                    
+                    # associate a unique code:
                     # 1. Constant patterns patterns (with n_ones=0 and
                     #    n_ones=P) and non uniform patterns are given fixed
                     #    code values.
                     # 2. Other uniform patterns are indexed considering the
                     #    value of n_ones, and an index called 'rot_index'
-                    #    reprenting the number of circular right shifts 
+                    #    reprenting the number of circular right shifts
                     #    required to obtain the pattern starting from a
                     #    reference position (corresponding to all zeros stacked
                     #    on the right). This number of rotations (or circular
@@ -215,7 +215,7 @@ def _local_binary_pattern(double[:, ::1] image,
                             lbp += signed_texture[i]
                     else:
                         lbp = P + 1
-    
+
                     if method == 'V':
                         var = np.var(texture)
                         if var != 0:
