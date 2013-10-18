@@ -202,7 +202,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
             stride = np.dot(image_stride, np.array(offs))
             offs.insert(0, stride)
             c.append(offs)
-    c = np.array(c, np.int32)
+    c = np.array(c, dtype=np.int32)
 
     pq, age = __heapify_markers(c_markers, c_image)
     pq = np.ascontiguousarray(pq, dtype=np.int32)
