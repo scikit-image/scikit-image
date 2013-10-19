@@ -19,7 +19,7 @@ How to make a new release of ``skimage``
     place.  Double check ``random.js``, otherwise the skimage.org front
     page gets broken!
   - Build using ``make gh-pages``.
-  - Push upstream: ``git push`` in ``doc/gh-pages``.
+  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Add the version number as a tag in git::
 
