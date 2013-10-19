@@ -34,7 +34,7 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.)):
       http://www.essi.fr/~lingrand/MarchingCubes/algo.html
 
     There are several known ambiguous cases in the marching cubes algorithm.
-    Using point labeling as in [1]_, Figure 4, as shown:
+    Using point labeling as in [1]_, Figure 4, as shown::
 
            v8 ------ v7
           / |       / |        y
@@ -72,15 +72,15 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.)):
     the outputs directly into `skimage.measure.mesh_surface_area`.
 
     Regarding visualization of algorithm output, the ``mayavi`` package
-    is recommended. To contour a volume named `myvolume` about the level 0.0:
+    is recommended. To contour a volume named `myvolume` about the level 0.0::
 
-    >>> from mayavi import mlab
-    >>> verts, tris = marching_cubes(myvolume, 0.0, (1., 1., 2.))
-    >>> mlab.triangular_mesh([vert[0] for vert in verts],
-    ...                      [vert[1] for vert in verts],
-    ...                      [vert[2] for vert in verts],
-    ...                      tris)
-    >>> mlab.show()
+      >>> from mayavi import mlab
+      >>> verts, tris = marching_cubes(myvolume, 0.0, (1., 1., 2.))
+      >>> mlab.triangular_mesh([vert[0] for vert in verts],
+      ...                      [vert[1] for vert in verts],
+      ...                      [vert[2] for vert in verts],
+      ...                      tris)
+      >>> mlab.show()
 
     References
     ----------
