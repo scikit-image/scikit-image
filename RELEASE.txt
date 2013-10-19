@@ -51,7 +51,7 @@ How to make a new release of ``skimage``
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`
   - Build using ``make gh-pages``.
-  - Push upstream: ``git push`` in ``gh-pages``.
+  - Push upstream: ``git push origin master`` in ``gh-pages``.
 
 - Update the development docs for the new version ``0.Xdev`` just like above
 
