@@ -12,7 +12,7 @@ How to make a new release of ``skimage``
 
 - Update the docs:
 
-  - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
+  - Edit ``doc/source/_static/docversions.js`` and commit
   - Build a clean version of the docs.  Run ``make`` in the root dir, then
     ``rm -rf build; make html`` in the docs.
   - Run ``make html`` again to copy the newly generated ``random.js`` into
