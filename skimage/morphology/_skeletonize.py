@@ -282,8 +282,8 @@ def medial_axis(image, mask=None, return_distance=False):
     i, j = np.mgrid[0:image.shape[0], 0:image.shape[1]]
     result = masked_image.copy()
     distance = distance[result]
-    i = np.ascontiguousarray(i[result], np.intp)
-    j = np.ascontiguousarray(j[result], np.intp)
+    i = np.ascontiguousarray(i[result], dtype=np.intp)
+    j = np.ascontiguousarray(j[result], dtype=np.intp)
     result = np.ascontiguousarray(result, np.uint8)
 
     # Determine the order in which pixels are processed.
@@ -296,9 +296,9 @@ def medial_axis(image, mask=None, return_distance=False):
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],
                         distance))
-    order = np.ascontiguousarray(order, np.int32)
+    order = np.ascontiguousarray(order, dtype=np.int32)
 
-    table = np.ascontiguousarray(table, np.uint8)
+    table = np.ascontiguousarray(table, dtype=np.uint8)
     # Remove pixels not belonging to the medial axis
     _skeletonize_loop(result, i, j, order, table)
 

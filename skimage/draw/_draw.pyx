@@ -71,8 +71,8 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
         sx, sy = sy, sx
     d = (2 * dy) - dx
 
-    cdef Py_ssize_t[:] rr = np.zeros(int(dx) + 1, dtype=np.intp)
-    cdef Py_ssize_t[:] cc = np.zeros(int(dx) + 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] rr = np.zeros(int(dx) + 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] cc = np.zeros(int(dx) + 1, dtype=np.intp)
 
     for i in range(dx):
         if steep:
