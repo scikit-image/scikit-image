@@ -21,13 +21,6 @@ In addition to several bug fixes, speed improvements and examples, the 204 pull
 requests merged for this release include the following new features (PR number
 in brackets):
 
-Feature detection:
-
-- BRIEF feature descriptor (#591)
-- Censure (STAR) Feature Detector (#668)
-- Octagon structural element (#669)
-- Add non rotation invariant uniform LBPs (#704)
-
 Segmentation:
 
 - 3D support in SLIC segmentation (#546)
@@ -44,6 +37,13 @@ Transforms and filters:
 - Rotation axis center for Radon transforms with inverses. (#654)
 - Reconstruction circle in inverse Radon transform (#567)
 - Pixelwise image adjustment curves and methods (#505)
+
+Feature detection:
+
+- [experimental API] BRIEF feature descriptor (#591)
+- [experimental API] Censure (STAR) Feature Detector (#668)
+- Octagon structural element (#669)
+- Add non rotation invariant uniform LBPs (#704)
 
 Color and noise:
 
