@@ -2,6 +2,7 @@
 import subprocess
 import sys
 import string
+import shlex
 
 if len(sys.argv) != 2:
     print "Usage: ./contributors.py tag-of-previous-release"
@@ -9,8 +10,15 @@ if len(sys.argv) != 2:
 
 tag = sys.argv[1]
 
-cmd = "git log %s..HEAD --format=%%aN"
-authors = subprocess.check_output((cmd % tag).split()).split('\n')
+def call(cmd):
+    return subprocess.check_output(shlex.split(cmd)).split('\n')
+
+
+tag_date = call("git show --format='%%ci' %s" % tag)[0]
+print "Release %s was on %s" % (tag, tag_date)
+print "\nCommitters since, alphabetical by last name:\n"
+
+authors = call("git log --since='%s' --format=%%aN" % tag_date)
 authors = [a.strip() for a in authors if a.strip()]
 
 def key(author):
