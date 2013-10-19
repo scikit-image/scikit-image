@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # are not (re)generated. This avoids automatic generation of documentation
     # for older or newer versions if such versions are installed on the system.
 
-    installed_version = V(module.version.version)
+    installed_version = V(module.__version__)
 
     setup_lines = open('../setup.py').readlines()
     version = 'vUndefined'
