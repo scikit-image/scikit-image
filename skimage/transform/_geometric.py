@@ -341,7 +341,7 @@ class AffineTransform(ProjectiveTransform):
         return self._matrix[0:2, 2]
 
 
-class PiecewiseAffineTransform(ProjectiveTransform):
+class PiecewiseAffineTransform(GeometricTransform):
 
     """2D piecewise affine transformation.
 
@@ -1047,8 +1047,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
               and inverse_map.__name__ == 'inverse'
-              and get_bound_method_class(inverse_map)
-                  in HOMOGRAPHY_TRANSFORMS):
+              and isinstance(get_bound_method_class(inverse_map),
+                             HOMOGRAPHY_TRANSFORMS)):
             matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
 
         if matrix is not None:
