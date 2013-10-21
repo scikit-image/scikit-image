@@ -1084,14 +1084,14 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
-        # The spline filters sometimes return results outside [0, 1],
-        # so clip to ensure valid data
-        clipped = np.clip(out, 0, 1)
+    # The spline filters sometimes return results outside [0, 1],
+    # so clip to ensure valid data
+    clipped = np.clip(out, 0, 1)
 
-        if mode == 'constant' and not (0 <= cval <= 1):
-            clipped[out == cval] = cval
+    if mode == 'constant' and not (0 <= cval <= 1):
+        clipped[out == cval] = cval
 
-        out = clipped
+    out = clipped
 
     if out.ndim == 3 and orig_ndim == 2:
         # remove singleton dimension introduced by atleast_3d
