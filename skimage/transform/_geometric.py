@@ -1038,7 +1038,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
             matrix = inverse_map
 
-        elif inverse_map in HOMOGRAPHY_TRANSFORMS:
+        elif isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
             matrix = inverse_map._matrix
 
         elif (hasattr(inverse_map, '__name__')
