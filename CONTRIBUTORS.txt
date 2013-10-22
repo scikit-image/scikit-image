@@ -158,3 +158,6 @@
 
 - Fedor Morozov
   Drawing: Wu's anti-aliased circle
+
+- Michael Hansen
+  novice submodule
