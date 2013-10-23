@@ -148,7 +148,8 @@ class Pixel(object):
         return value
 
     def _setpixel(self):
-        self._picture.xy_array[self._x, self._y] = self.rgb
+        # RGB + alpha
+        self._picture.xy_array[self._x, self._y] = self.rgb + (255,)
         self._picture._array_modified()
 
     def __eq__(self, other):
@@ -231,6 +232,10 @@ class Picture(object):
         elif xy_array is not None:
             self.xy_array = xy_array
 
+        # Force RGBA internally (max alpha)
+        if self.array.shape[-1] == 3:
+            self.array = np.insert(self.array, 3, values=255, axis=2)
+
     @staticmethod
     def from_size(size, color='black'):
         """Return a Picture of the specified size and a uniform color.
@@ -247,6 +252,7 @@ class Picture(object):
             color = color_dict[color]
         rgb_size = tuple(size) + (3,)
         array = np.ones(rgb_size, dtype=np.uint8) * color
+        array = np.insert(array, 3, values=255, axis=2)
         return Picture(array=array)
 
     @property
