@@ -909,12 +909,6 @@ def xyz2luv(xyz):
     u0  = 4*lab_ref_white[0] / np.dot( [1, 15, 3], lab_ref_white )
     v0  = 9*lab_ref_white[1] / np.dot( [1, 15, 3], lab_ref_white )
 
-    def div_nan_check( n, d ):
-        out = n / d
-        mask = np.isnan( out )
-        out[mask] = 0.
-        return out 
-
     # u' and v' helper functions
     def fu( X, Y, Z ):
         return ( 4.*X ) / ( X + 15.*Y + 3.*Z + machineEps )
@@ -975,12 +969,6 @@ def luv2xyz(luv):
     uv_weights = [1, 15, 3]
     u0  = 4*lab_ref_white[0] / np.dot( uv_weights, lab_ref_white )
     v0  = 9*lab_ref_white[1] / np.dot( uv_weights, lab_ref_white )
-
-    def div_nan_check( n, d ):
-        out = n / d
-        mask = np.isnan( out )
-        out[mask] = 0.
-        return out 
 
     # compute intermediate values
     a = u0 + u / ( 13.*L + machineEps )
