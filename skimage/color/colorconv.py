@@ -893,7 +893,7 @@ def xyz2luv(xyz):
     >>> lena_xyz = rgb2xyz(lena)
     >>> lena_luv = xyz2luv(lena_xyz)
     """
-    arr = _prepare_colorarray(xyz)  
+    arr = _prepare_colorarray(xyz)
 
     # extract channels
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
@@ -901,25 +901,26 @@ def xyz2luv(xyz):
     eps = np.finfo(np.float).eps
 
     # compute y_r and L
-    L           = y / lab_ref_white[1]
-    mask        = L > 0.008856
-    L[mask]     = 116. * np.power( L[mask], 1. / 3. ) - 16.
-    L[~mask]    = 903.3 * L[~mask]
+    L = y / lab_ref_white[1]
+    mask = L > 0.008856
+    L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
+    L[~mask] = 903.3 * L[~mask]
 
-    u0  = 4*lab_ref_white[0] / np.dot( [1, 15, 3], lab_ref_white )
-    v0  = 9*lab_ref_white[1] / np.dot( [1, 15, 3], lab_ref_white )
+    u0 = 4*lab_ref_white[0] / np.dot([1, 15, 3], lab_ref_white)
+    v0 = 9*lab_ref_white[1] / np.dot([1, 15, 3], lab_ref_white)
 
     # u' and v' helper functions
-    def fu( X, Y, Z ):
-        return ( 4.*X ) / ( X + 15.*Y + 3.*Z + eps )
-    def fv( X, Y, Z ):
-        return ( 9.*Y ) / ( X + 15.*Y + 3.*Z + eps )
+    def fu(X, Y, Z):
+        return (4.*X) / (X + 15.*Y + 3.*Z + eps)
+
+    def fv(X, Y, Z):
+        return (9.*Y) / (X + 15.*Y + 3.*Z + eps)
 
     # compute u and v using helper functions
-    u = 13.*L * ( fu(x,y,z) - u0 )
-    v = 13.*L * ( fv(x,y,z) - v0 )
+    u = 13.*L * (fu(x, y, z) - u0)
+    v = 13.*L * (fv(x, y, z) - v0)
 
-    return np.concatenate([x[..., np.newaxis] for x in [L, u, v]], axis=-1)
+    return np.concatenate([q[..., np.newaxis] for q in [L, u, v]], axis=-1)
 
 
 def luv2xyz(luv):
@@ -961,25 +962,25 @@ def luv2xyz(luv):
     # compute y
     y = L.copy()
     mask = y > 7.999625
-    y[mask] = np.power( (y[mask]+16.) / 116., 3.)
+    y[mask] = np.power((y[mask]+16.) / 116., 3.)
     y[~mask] = y[~mask] / 903.3
     y *= lab_ref_white[1]
 
     # reference white x,z
     uv_weights = [1, 15, 3]
-    u0  = 4*lab_ref_white[0] / np.dot( uv_weights, lab_ref_white )
-    v0  = 9*lab_ref_white[1] / np.dot( uv_weights, lab_ref_white )
+    u0 = 4*lab_ref_white[0] / np.dot(uv_weights, lab_ref_white)
+    v0 = 9*lab_ref_white[1] / np.dot(uv_weights, lab_ref_white)
 
     # compute intermediate values
-    a = u0 + u / ( 13.*L + eps )
-    b = v0 + v / ( 13.*L + eps )
+    a = u0 + u / (13.*L + eps)
+    b = v0 + v / (13.*L + eps)
     c = 3*y * (5*b-3)
 
     # compute x and z
-    z = ( (a-4)*c - 15*a*b*y ) / ( 12*b )
-    x = -( c/b + 3.*z )
+    z = ((a-4)*c - 15*a*b*y) / (12*b)
+    x = -(c/b + 3.*z)
 
-    return np.concatenate([x[..., np.newaxis] for x in [x, y, z]], axis=-1)
+    return np.concatenate([q[..., np.newaxis] for q in [x, y, z]], axis=-1)
 
 
 def rgb2luv(rgb):
