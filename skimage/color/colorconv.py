@@ -849,6 +849,197 @@ def lab2rgb(lab):
     return xyz2rgb(lab2xyz(lab))
 
 
+def xyz2luv(xyz):
+    """XYZ to CIE-Luv color space conversion.
+
+    Parameters
+    ----------
+    xyz : array_like
+        The image in XYZ format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in CIE-Luv format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
+
+    Raises
+    ------
+    ValueError
+        If `xyz` is not a 3-D array of shape (.., ..,[ ..,] 3).
+
+    Notes
+    -----
+    Observer= 2A, Illuminant= D65
+    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [2] http://en.wikipedia.org/wiki/CIELUV
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2xyz, xyz2luv
+    >>> lena = data.lena()
+    >>> lena_xyz = rgb2xyz(lena)
+    >>> lena_luv = xyz2luv(lena_xyz)
+    """
+    arr = _prepare_colorarray(xyz)  
+
+    # extract channels
+    x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
+
+    machineEps = np.finfo(np.float).eps
+
+    # compute y_r and L
+    L           = y / lab_ref_white[1]
+    mask        = L > 0.008856
+    L[mask]     = 116. * np.power( L[mask], 1. / 3. ) - 16.
+    L[~mask]    = 903.3 * L[~mask]
+
+    u0  = 4*lab_ref_white[0] / np.dot( [1, 15, 3], lab_ref_white )
+    v0  = 9*lab_ref_white[1] / np.dot( [1, 15, 3], lab_ref_white )
+
+    def div_nan_check( n, d ):
+        out = n / d
+        mask = np.isnan( out )
+        out[mask] = 0.
+        return out 
+
+    # u' and v' helper functions
+    def fu( X, Y, Z ):
+        return ( 4.*X ) / ( X + 15.*Y + 3.*Z + machineEps )
+    def fv( X, Y, Z ):
+        return ( 9.*Y ) / ( X + 15.*Y + 3.*Z + machineEps )
+
+    # compute u and v using helper functions
+    u = 13.*L * ( fu(x,y,z) - u0 )
+    v = 13.*L * ( fv(x,y,z) - v0 )
+
+    return np.concatenate([x[..., np.newaxis] for x in [L, u, v]], axis=-1)
+
+
+def luv2xyz(luv):
+    """CIE-LAB to XYZcolor space conversion.
+
+    Parameters
+    ----------
+    lab : array_like
+        The image in lab format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `lab` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Observer= 2A, Illuminant= D65
+    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+
+    References
+    ----------
+    .. [1] http://www.easyrgb.com/index.php?X=MATH&H=16#text16
+    .. [2] http://en.wikipedia.org/wiki/CIELUV
+
+    """
+
+    arr = _prepare_colorarray(luv).copy()
+
+    L, u, v = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+
+    machineEps = np.finfo(np.float).eps
+
+    # compute y
+    y = L.copy()
+    mask = y > 7.999625
+    y[mask] = np.power( (y[mask]+16.) / 116., 3.)
+    y[~mask] = y[~mask] / 903.3
+    y *= lab_ref_white[1]
+
+    # reference white x,z
+    uv_weights = [1, 15, 3]
+    u0  = 4*lab_ref_white[0] / np.dot( uv_weights, lab_ref_white )
+    v0  = 9*lab_ref_white[1] / np.dot( uv_weights, lab_ref_white )
+
+    def div_nan_check( n, d ):
+        out = n / d
+        mask = np.isnan( out )
+        out[mask] = 0.
+        return out 
+
+    # compute intermediate values
+    a = u0 + u / ( 13.*L + machineEps )
+    b = v0 + v / ( 13.*L + machineEps )
+    c = 3*y * (5*b-3)
+
+    # compute x and z
+    z = ( (a-4)*c - 15*a*b*y ) / ( 12*b )
+    x = -( c/b + 3.*z )
+
+    return np.concatenate([x[..., np.newaxis] for x in [x, y, z]], axis=-1)
+
+
+def rgb2luv(rgb):
+    """RGB to luv color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in Luv format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
+
+    Notes
+    -----
+    This function uses rgb2xyz and xyz2luv.
+    """
+    return xyz2luv(rgb2xyz(rgb))
+
+
+def luv2rgb(luv):
+    """Luv to RGB color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in Luv format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `luv` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    This function uses luv2xyz and xyz2rgb.
+    """
+    return xyz2rgb(luv2xyz(luv))
+
+
 def rgb2hed(rgb):
     """RGB to Haematoxylin-Eosin-DAB (HED) color space conversion.
 
