@@ -871,6 +871,12 @@ def xyz2luv(xyz):
 
     Notes
     -----
+    According to "Principles of Color Technology" by Roy S. Berns, it is a myth
+    that "CIELAB was recommended for large color differences and that CIELUV was 
+    recommended for small color differences."  It is also a myth that "CIELAB is 
+    recommended for reflecting samples while CIELUV is recommended for sources 
+    and displays."
+
     Observer= 2A, Illuminant= D65
     CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
 
