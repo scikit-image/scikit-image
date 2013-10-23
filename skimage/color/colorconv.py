@@ -898,7 +898,7 @@ def xyz2luv(xyz):
     # extract channels
     x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
-    machineEps = np.finfo(np.float).eps
+    eps = np.finfo(np.float).eps
 
     # compute y_r and L
     L           = y / lab_ref_white[1]
@@ -911,9 +911,9 @@ def xyz2luv(xyz):
 
     # u' and v' helper functions
     def fu( X, Y, Z ):
-        return ( 4.*X ) / ( X + 15.*Y + 3.*Z + machineEps )
+        return ( 4.*X ) / ( X + 15.*Y + 3.*Z + eps )
     def fv( X, Y, Z ):
-        return ( 9.*Y ) / ( X + 15.*Y + 3.*Z + machineEps )
+        return ( 9.*Y ) / ( X + 15.*Y + 3.*Z + eps )
 
     # compute u and v using helper functions
     u = 13.*L * ( fu(x,y,z) - u0 )
@@ -956,7 +956,7 @@ def luv2xyz(luv):
 
     L, u, v = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
 
-    machineEps = np.finfo(np.float).eps
+    eps = np.finfo(np.float).eps
 
     # compute y
     y = L.copy()
@@ -971,8 +971,8 @@ def luv2xyz(luv):
     v0  = 9*lab_ref_white[1] / np.dot( uv_weights, lab_ref_white )
 
     # compute intermediate values
-    a = u0 + u / ( 13.*L + machineEps )
-    b = v0 + v / ( 13.*L + machineEps )
+    a = u0 + u / ( 13.*L + eps )
+    b = v0 + v / ( 13.*L + eps )
     c = 3*y * (5*b-3)
 
     # compute x and z
