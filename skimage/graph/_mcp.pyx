@@ -39,13 +39,9 @@ import heap
 cimport numpy as cnp
 cimport heap
 
-ctypedef cnp.int8_t OFFSET_T
 OFFSET_D = np.int8
-ctypedef cnp.int16_t OFFSETS_INDEX_T
 OFFSETS_INDEX_D = np.int16
-ctypedef cnp.int8_t EDGE_T
 EDGE_D = np.int8
-ctypedef cnp.intp_t INDEX_T
 INDEX_D = np.intp
 FLOAT_D = np.float64
 
@@ -274,6 +270,7 @@ cdef class MCP:
         returned by the find_costs() method.
 
     """
+    
     def __init__(self, costs, offsets=None, fully_connected=True, 
                 sampling=None):
         """__init__(costs, offsets=None, fully_connected=True, sampling=None)
@@ -301,7 +298,7 @@ cdef class MCP:
         self.flat_costs = costs.astype(FLOAT_D).flatten('F')
         size = self.flat_costs.shape[0]
         self.flat_cumulative_costs = np.empty(size, dtype=FLOAT_D)
-        self.flat_cumulative_costs.fill(np.inf)
+        self.flat_cumulative_costs[...] = np.inf
         self.dim = len(costs.shape)
         self.costs_shape = costs.shape
         self.costs_heap = heap.FastUpdateBinaryHeap(initial_capacity=128,
@@ -311,7 +308,7 @@ cdef class MCP:
         # array (see below) that leads to that point from the
         # predecessor point.
         self.traceback_offsets = np.empty(size, dtype=OFFSETS_INDEX_D)
-        self.traceback_offsets.fill(-1)
+        self.traceback_offsets[...] = -1
 
         # The offsets are a list of relative offsets from a central
         # point to each point in the relevant neighborhood. (e.g. (-1,
@@ -343,21 +340,24 @@ cdef class MCP:
             np.sum((sampling*self.offsets)**2, axis=1)).astype(FLOAT_D)
         self.dirty = 0
         self.use_start_cost = 1
-
+    
+    
     def _reset(self):
         """_reset()
 
         Clears paths found by find_costs().
         """
         self.costs_heap.reset()
-        self.traceback_offsets.fill(-1)
-        self.flat_cumulative_costs.fill(np.inf)
+        self.traceback_offsets[...] = -1
+        self.flat_cumulative_costs[...] = np.inf
         self.dirty = 0
-
+    
+    
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost,
                               FLOAT_T new_cost, FLOAT_T offset_length):
         return new_cost
-
+    
+    
     def find_costs(self, starts, ends=None, find_all_ends=True):
         """
         Find the minimum-cost path from the given starting points.
@@ -406,7 +406,7 @@ cdef class MCP:
         cdef BOOL_T use_ends = 0
         cdef INDEX_T num_ends
         cdef BOOL_T all_ends = find_all_ends
-        cdef cnp.ndarray[INDEX_T, ndim=1] flat_ends
+        cdef INDEX_T [:] flat_ends
         starts = _normalize_indices(starts, self.costs_shape)
         if starts is None:
             raise ValueError('start points must all be within the costs array')
@@ -422,32 +422,31 @@ cdef class MCP:
 
         if self.dirty:
             self._reset()
-
-        # lookup and array-ify object attributes for fast use
+        
+        # Get shorter names for arrays
+        cdef FLOAT_T [:] flat_costs = self.flat_costs
+        cdef FLOAT_T [:] flat_cumulative_costs = self.flat_cumulative_costs
+        cdef OFFSETS_INDEX_T [:] traceback_offsets = self.traceback_offsets
+        cdef EDGE_T [:,:] flat_pos_edge_map = self.flat_pos_edge_map
+        cdef EDGE_T [:,:] flat_neg_edge_map = self.flat_neg_edge_map
+        cdef OFFSET_T [:,:] offsets = self.offsets
+        cdef INDEX_T [:] flat_offsets = self.flat_offsets
+        cdef FLOAT_T [:] offset_lengths = self.offset_lengths
+        
+        # Short names for other attributes
         cdef heap.FastUpdateBinaryHeap costs_heap = self.costs_heap
-        cdef cnp.ndarray[FLOAT_T, ndim=1] flat_costs = self.flat_costs
-        cdef cnp.ndarray[FLOAT_T, ndim=1] flat_cumulative_costs = \
-             self.flat_cumulative_costs
-        cdef cnp.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
-             self.traceback_offsets
-        cdef cnp.ndarray[EDGE_T, ndim=2] flat_pos_edge_map = \
-             self.flat_pos_edge_map
-        cdef cnp.ndarray[EDGE_T, ndim=2] flat_neg_edge_map = \
-             self.flat_neg_edge_map
-        cdef cnp.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
-        cdef cnp.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
-        cdef cnp.ndarray[FLOAT_T, ndim=1] offset_lengths = self.offset_lengths
-
         cdef DIM_T dim = self.dim
         cdef int num_offsets = len(flat_offsets)
 
         # push each start point into the heap. Note that we use flat indexing!
+        cdef INDEX_T start
         for start in _ravel_index_fortran(starts, self.costs_shape):
             if self.use_start_cost:
                 costs_heap.push_fast(flat_costs[start], start)
             else:
                 costs_heap.push_fast(0, start)
-
+        
+        # Variables used during front propagation
         cdef FLOAT_T cost, new_cost, cumcost, new_cumcost
         cdef INDEX_T index, new_index
         cdef BOOL_T is_at_edge, use_offset
@@ -475,7 +474,7 @@ cdef class MCP:
 
             # Record the cost we found to this point
             flat_cumulative_costs[index] = cumcost
-
+            
             if use_ends:
                 # If we're only tracing out a path to one or more
                 # endpoints, check to see if this is an endpoint, and
@@ -489,7 +488,7 @@ cdef class MCP:
                     # if we've found one or all of the end points (as
                     # requested), stop searching
                     break
-
+            
             # Look into the edge map to see if this point is at an
             # edge along any axis
             is_at_edge = 0
@@ -557,12 +556,15 @@ cdef class MCP:
                         traceback_offsets[new_index] = i
         
         # Un-flatten the costs and traceback arrays for human consumption.
-        cumulative_costs = flat_cumulative_costs.reshape(self.costs_shape,
+        cumulative_costs = np.asarray(flat_cumulative_costs)
+        cumulative_costs = cumulative_costs.reshape(self.costs_shape,
                                                          order='F')
-        traceback = traceback_offsets.reshape(self.costs_shape, order='F')
+        traceback = np.asarray(traceback_offsets)
+        traceback = traceback.reshape(self.costs_shape, order='F')
         self.dirty = 1
         return cumulative_costs, traceback
-
+    
+    
     def traceback(self, end):
         """traceback(end)
 
@@ -602,13 +604,13 @@ cdef class MCP:
         if self.flat_cumulative_costs[flat_position] == np.inf:
             raise ValueError('no minimum-cost path was found '
                              'to the specified end point')
-
-        cdef cnp.ndarray[INDEX_T, ndim=1] position = \
-             np.array(ends[0], dtype=INDEX_D)
-        cdef cnp.ndarray[OFFSETS_INDEX_T, ndim=1] traceback_offsets = \
-             self.traceback_offsets
-        cdef cnp.ndarray[OFFSET_T, ndim=2] offsets = self.offsets
-        cdef cnp.ndarray[INDEX_T, ndim=1] flat_offsets = self.flat_offsets
+        
+        # Short names for arrays
+        cdef OFFSETS_INDEX_T [:] traceback_offsets = self.traceback_offsets
+        cdef OFFSET_T [:,:] offsets = self.offsets
+        cdef INDEX_T [:] flat_offsets = self.flat_offsets
+        # New array
+        cdef INDEX_T [:] position = np.array(ends[0], dtype=INDEX_D)
         
         cdef OFFSETS_INDEX_T offset
         cdef DIM_T d
