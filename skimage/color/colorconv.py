@@ -29,6 +29,9 @@ Supported color spaces
 * LAB CIE : Lightness, a, b
         Colorspace derived from XYZ CIE that is intended to be more
         perceptually uniform
+* LUV CIE : Lightness, u, v
+        Colorspace derived from XYZ CIE that is intended to be more
+        perceptually uniform
 * LCH CIE : Lightness, Chroma, Hue
         Defined in terms of LAB CIE.  C and H are the polar representation of
         a and b.  The polar angle C is defined to be on (0, 2*pi)
