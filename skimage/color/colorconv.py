@@ -854,25 +854,24 @@ def xyz2luv(xyz):
 
     Parameters
     ----------
-    xyz : array_like
-        The image in XYZ format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+    xyz : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in XYZ format. Final dimension denotes 
+        channels.
 
     Returns
     -------
-    out : ndarray
-        The image in CIE-Luv format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+    out : (M, N, [P,] 3) ndarray
+        The image in CIE-Luv format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape (.., ..,[ ..,] 3).
+        If `xyz` is not a 3-D or 4-D array of shape `(M, N, [P,] 3)`.
 
     Notes
     -----
-    Observer= 2A, Illuminant= D65
-    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+    XYZ conversion weights use Observer = 2A. Reference whitepoint for D65 
+    Illuminant, with XYZ tristimulus values of `(95.047, 100., 108.883)`.
 
     References
     ----------
@@ -918,27 +917,28 @@ def xyz2luv(xyz):
 
 
 def luv2xyz(luv):
-    """CIE-Luv to XYZcolor space conversion.
+    """CIE-Luv to XYZ color space conversion.
 
     Parameters
     ----------
-    lab : array_like
-        The image in lab format, in a 3-D array of shape (.., .., 3).
+    luv : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in CIE-Luv format. Final dimension denotes
+        channels.
 
     Returns
     -------
-    out : ndarray
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+    out : (M, N, [P,] 3) ndarray
+        The image in XYZ format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `lab` is not a 3-D array of shape (.., .., 3).
+        If `luv` is not a 3-D or 4-D array of shape `(M, N, [P,] 3)`.
 
     Notes
     -----
-    Observer= 2A, Illuminant= D65
-    CIE XYZ tristimulus values x_ref = 95.047, y_ref = 100., z_ref = 108.883
+    XYZ conversion weights use Observer = 2A. Reference whitepoint for D65 
+    Illuminant, with XYZ tristimulus values of `(95.047, 100., 108.883)`.
 
     References
     ----------
@@ -978,24 +978,23 @@ def luv2xyz(luv):
 
 
 def rgb2luv(rgb):
-    """RGB to luv color space conversion.
+    """RGB to CIE-Luv color space conversion.
 
     Parameters
     ----------
-    rgb : array_like
-        The image in RGB format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+    rgb : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in RGB format. Final dimension denotes 
+        channels.
 
     Returns
     -------
-    out : ndarray
-        The image in Luv format, in a 3- or 4-D array of shape
-        (.., ..,[ ..,] 3).
+    out : (M, N, [P,] 3) ndarray
+        The image in CIE Luv format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
+        If `rgb` is not a 3-D or 4-D array of shape `(M, N, [P,] 3)`.
 
     Notes
     -----
@@ -1009,18 +1008,19 @@ def luv2rgb(luv):
 
     Parameters
     ----------
-    rgb : array_like
-        The image in Luv format, in a 3-D array of shape (.., .., 3).
+    luv : (M, N, [P,] 3) array_like
+        The 3 or 4 dimensional image in CIE Luv format. Final dimension denotes
+        channels.
 
     Returns
     -------
-    out : ndarray
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+    out : (M, N, [P,] 3) ndarray
+        The image in RGB format. Same dimensions as input.
 
     Raises
     ------
     ValueError
-        If `luv` is not a 3-D array of shape (.., .., 3).
+        If `luv` is not a 3-D or 4-D array of shape `(M, N, [P,] 3)`.
 
     Notes
     -----
