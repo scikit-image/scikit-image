@@ -89,11 +89,11 @@ def _warp_fast(cnp.ndarray image, cnp.ndarray H, output_shape=None,
 
     cdef Py_ssize_t out_r, out_c
     if output_shape is None:
-        out_r = img.shape[0]
-        out_c = img.shape[1]
+        out_r = int(img.shape[0])
+        out_c = int(img.shape[1])
     else:
-        out_r = output_shape[0]
-        out_c = output_shape[1]
+        out_r = int(output_shape[0])
+        out_c = int(output_shape[1])
 
     cdef double[:, ::1] out = np.zeros((out_r, out_c), dtype=np.double)
 
