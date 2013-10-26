@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """Skimage module for image deconvolution
 
-This module implement various algorithm of the literarture for image
+This module implement various algorithm of the literature for image
 deconvolution.
 
 References

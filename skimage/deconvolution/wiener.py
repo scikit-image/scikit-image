@@ -22,11 +22,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Commentary:
-
 """Implementations deconvolution functions"""
-
-# code:
 
 from __future__ import division
 
@@ -81,15 +77,16 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     im_deconv : (M, N) ndarray
        The deconvolued data
 
-    Exemples
+    Examples
     --------
+    >>> import numpy as np
     >>> from skimage import color, data, deconvolution
     >>> lena = color.rgb2gray(data.lena())
-    >>> from scipy.signal import convolve2d as conv2
+    >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5))
-    >>> lena = conv2(lena, psf, 'same')
+    >>> lena = convolve2d(lena, psf, 'same')
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolued_lena = deconvolution.wiener(lena, psf, 1100)
+    >>> deconvolved_lena = deconvolution.wiener(lena, psf, 1100)
 
     References
     ----------
@@ -184,15 +181,16 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
        exists, the current image sample. This function can be used to
        store the sample, or compute other moments than the mean.
 
-    Exemples
+    Examples
     --------
+    >>> import numpy as np
     >>> from skimage import color, data, deconvolution
     >>> lena = color.rgb2gray(data.lena())
-    >>> from scipy.signal import convolve2d as conv2
+    >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5))
-    >>> lena = conv2(lena, psf, 'same')
+    >>> lena = convolve2d(lena, psf, 'same')
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolued_lena = deconvolution.unsupervised_wiener(lena, psf)
+    >>> deconvolved_lena = deconvolution.unsupervised_wiener(lena, psf)
 
     References
     ----------
@@ -201,7 +199,7 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
            spread function parameters for Wiener-Hunt deconvolution",
            J. Opt. Soc. Am. A 27, 1593-1607 (2010)
 
-    http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
+           http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
     """
     params = {'threshold': 1e-4, 'max_iter': 200,
               'min_iter': 30, 'burnin': 15, 'callback': None}
@@ -285,11 +283,8 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
 
 
 def richardson_lucy(data, psf, iterations=50):
-    """Richardson lucy deconvolution
+    """Richardson-Lucy deconvolution.
 
-    This a python conversion of the wikipedia page on this algorithm. See
-
-    http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 
     Parameters
     ----------
@@ -297,28 +292,26 @@ def richardson_lucy(data, psf, iterations=50):
        The data
 
     psf : ndarray
-       The impulsionnal response in real space.
+       The point spread function
 
     iterations : int
-       dictionary of gibbs parameters. See below.
+       Number of iterations
 
     Returns
     -------
     im_deconv : ndarray
-       The deconvolued image
+       The deconvolved image
 
     References
     ----------
-    .. [2] Richardson, William Hadley, "Bayesian-Based Iterative
-           Method of Image Restoration". JOSA 62 (1):
-           55–59. doi:10.1364/JOSA.62.000055, 1972
+    .. [2] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 
     """
     data = data.astype(np.float)
     psf = psf.astype(np.float)
     im_deconv = 0.5 * np.ones(data.shape)
     psf_mirror = psf[::-1, ::-1]
-    for iteration in range(iterations):
+    for _ in range(iterations):
         relative_blur = data / conv2(im_deconv, psf, 'same')
         im_deconv *= conv2(relative_blur, psf_mirror, 'same')
 

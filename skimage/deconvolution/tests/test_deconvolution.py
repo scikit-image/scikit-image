@@ -1,38 +1,33 @@
-import warnings
-
+from os.path import abspath, dirname, join as pjoin
 import numpy as np
-import numpy.testing.assert_array_almost_equal
+from scipy.signal import convolve2d
+from skimage.data import camera
+from skimage import deconvolution
 
-from scipy.signal import convolve2d as conv2
-from skimage import data, deconvolution
-
-# Test deconvolution
-# ===========================
-
-test_img = data.camera().astype(np.float)
+test_img = camera().astype(np.float)
 
 
 def test_wiener():
     psf = np.ones((5, 5))
-    data = conv2(test_img, psf, 'same')
+    data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolued = deconvolution.wiener(data, psf, 25)
 
-    numpy.testing.assert_array_almost_equal(deconvolued,
-                                            np.load("./camera_wiener.npy"))
+    path = pjoin(dirname(abspath(__file__)), 'camera_wiener.npy')
+    np.testing.assert_array_almost_equal(deconvolued, np.load(path))
 
 
 def test_unsupervised_wiener():
     psf = np.ones((5, 5))
-    data = conv2(test_img, psf, 'same')
+    data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
     deconvolued, _ = deconvolution.unsupervised_wiener(data, psf)
 
-    numpy.testing.assert_array_almost_equal(deconvolued,
-                                            np.load("./camera_unsup.npy"))
+    path = pjoin(dirname(abspath(__file__)), 'camera_unsup.npy')
+    np.testing.assert_array_almost_equal(deconvolued, np.load(path))
 
 
-def test_rychardson_lucy():
+def test_richardson_lucy():
     return True

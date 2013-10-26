@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # uft.py --- Unitary fourier transform
 
-# Copyright (c) 2011, 2012, 2013  François Orieux <orieux@iap.fr>
+# Copyright (c) 2011, 2012, 2013  Fran��ois Orieux <orieux@iap.fr>
 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
@@ -63,12 +63,12 @@ except ImportError:
                  " by using fftw library.")
     ANFFTMOD = False
 
-__author__ = "François Orieux"
+__author__ = "Fran��ois Orieux"
 __copyright__ = "Copyright (C) 2011, 2012, 2013 F. Orieux <orieux@iap.fr>"
-__credits__ = ["François Orieux"]
+__credits__ = ["Fran��ois Orieux"]
 __license__ = "mit"
 __version__ = "0.1.0"
-__maintainer__ = "François Orieux"
+__maintainer__ = "Fran��ois Orieux"
 __email__ = "orieux@iap.fr"
 __status__ = "development"
 __url__ = ""
@@ -427,12 +427,12 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
                            for i, s in enumerate(imp_resp.shape)])
 
     if real:
-        if anfft:
+        if ANFFTMOD:
             return anfft.rfftn(irpadded, k=dim)
         else:
             return np.fft.rfftn(irpadded, axes=range(-dim, 0))
     else:
-        if anfft:
+        if ANFFTMOD:
             return anfft.fftn(irpadded, k=dim)
         else:
             return np.fft.fftn(irpadded, axes=range(-dim, 0))
