@@ -16,6 +16,7 @@ install:
     - sudo apt-get install $PYTHON-scipy
     - sudo apt-get install $PYTHON-setuptools
     - sudo apt-get install $PYTHON-nose
+    - sudo apt-get install $PYTHON-six
     - sudo easy_install$PYSUF pip
     - sudo pip-$PYVER install cython
     - sudo apt-get install libfreeimage3
