@@ -1,11 +1,11 @@
+import six
 import math
 import numpy as np
 from scipy import ndimage, spatial
-from skimage.util import img_as_float
-from ._warps_cy import _warp_fast
 
 from skimage._shared.utils import get_bound_method_class
-from skimage._shared import six
+from skimage.util import img_as_float
+from ._warps_cy import _warp_fast
 
 
 class GeometricTransform(object):

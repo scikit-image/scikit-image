@@ -4,8 +4,8 @@ of an n-dimensional array.
 
 """
 from __future__ import division, absolute_import, print_function
-from skimage._shared.six import integer_types
 
+from six import integer_types
 import numpy as np
 
 try:

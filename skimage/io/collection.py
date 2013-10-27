@@ -10,7 +10,8 @@ from copy import copy
 
 import numpy as np
 from ._io import imread
-from .._shared import six
+
+import six
 
 
 def concatenate_images(ic):
