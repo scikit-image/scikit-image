@@ -34,9 +34,6 @@ equal to
 
 .. math:: \frac{1}{\sqrt{n}} \sum_i x_i.
 
-If the anfft module is present, his function are used. anfft wrap fftw
-C library. Otherwise, numpy fft functions are used.
-
 You must keep in mind that the transform are applied from the last
 axes. this is a fftw convention for performance reason (c order
 array). If you want more sofisticated use, you must use directly the
@@ -52,16 +49,7 @@ References
 
 # code:
 
-import logging
-
 import numpy as np
-try:
-    import anfft
-    ANFFTMOD = True
-except ImportError:
-    logging.info("Installation of the anfft package improve preformance"
-                 " by using fftw library.")
-    ANFFTMOD = False
 
 __author__ = "Fran��ois Orieux"
 __copyright__ = "Copyright (C) 2011, 2012, 2013 F. Orieux <orieux@iap.fr>"
@@ -152,10 +140,7 @@ def ufftn(inarray, dim=None):
     if not dim:
         dim = inarray.ndim
 
-    if ANFFTMOD:
-        outarray = anfft.fftn(inarray, k=dim)
-    else:
-        outarray = np.fft.fftn(inarray, axes=range(-dim, 0))
+    outarray = np.fft.fftn(inarray, axes=range(-dim, 0))
 
     return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
 
@@ -179,10 +164,7 @@ def uifftn(inarray, dim=None):
     if not dim:
         dim = inarray.ndim
 
-    if ANFFTMOD:
-        outarray = anfft.ifftn(inarray, k=dim)
-    else:
-        outarray = np.fft.ifftn(inarray, axes=range(-dim, 0))
+    outarray = np.fft.ifftn(inarray, axes=range(-dim, 0))
 
     return outarray * np.sqrt(np.prod(inarray.shape[-dim:]))
 
@@ -209,10 +191,7 @@ def urfftn(inarray, dim=None):
     if not dim:
         dim = inarray.ndim
 
-    if ANFFTMOD:
-        outarray = anfft.rfftn(inarray, k=dim)
-    else:
-        outarray = np.fft.rfftn(inarray, axes=range(-dim, 0))
+    outarray = np.fft.rfftn(inarray, axes=range(-dim, 0))
 
     return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
 
@@ -239,10 +218,7 @@ def uirfftn(inarray, dim=None):
     if not dim:
         dim = inarray.ndim
 
-    if ANFFTMOD:
-        outarray = anfft.irfftn(inarray, k=dim)
-    else:
-        outarray = np.fft.irfftn(inarray, axes=range(-dim, 0))
+    outarray = np.fft.irfftn(inarray, axes=range(-dim, 0))
 
     return outarray * np.sqrt(np.prod(inarray.shape[-dim:-1]) *
                               (inarray.shape[-1] - 1) * 2)
@@ -427,15 +403,9 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
                            for i, s in enumerate(imp_resp.shape)])
 
     if real:
-        if ANFFTMOD:
-            return anfft.rfftn(irpadded, k=dim)
-        else:
-            return np.fft.rfftn(irpadded, axes=range(-dim, 0))
+        return np.fft.rfftn(irpadded, axes=range(-dim, 0))
     else:
-        if ANFFTMOD:
-            return anfft.fftn(irpadded, k=dim)
-        else:
-            return np.fft.fftn(irpadded, axes=range(-dim, 0))
+        return np.fft.fftn(irpadded, axes=range(-dim, 0))
 
 
 def laplacian(ndim, shape):
