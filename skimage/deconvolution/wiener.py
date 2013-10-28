@@ -87,6 +87,29 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
     >>> deconvolved_lena = deconvolution.wiener(lena, psf, 1100)
 
+    Notes
+    -----
+    This function apply the wiener filter to a noisy and convolued
+    image. If the data model is
+    
+    .. math:: y = Hx + n
+              
+    where :math:`n is the noise`, :math:`H` the psf and :math:`x` the
+    unknown original image, the wiener filter is
+
+    .. math:: \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2) \Lambda_H^\dag F y
+              
+    where :math:`F` and :math:`F^\dag` is the Fourier and inverse
+    Fourier transfrom, :math:`\Lambda_H` the transfert function (or
+    the Fourier transfrom of the PSF, see [2]) and :math:`\Lambda_D`
+    the filter to penalized the restored image frequency (laplacian by
+    default, that is penalization of high frequency). The parameter
+    :math:`\lambda` tune the balance between the data (that tends to
+    increase high frequency, even the noise), and the regularization.
+
+    These methods are then specifique to a prior model that must be
+    adequate. They could be refered to bayesian approaches.
+    
     References
     ----------
     .. [1] François Orieux, Jean-François Giovannelli, and Thomas
@@ -99,6 +122,7 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
            Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
+           
     """
     if not reg:
         reg, _ = uft.laplacian(data.ndim, data.shape)
