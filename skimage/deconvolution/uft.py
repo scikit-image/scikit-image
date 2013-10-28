@@ -332,17 +332,6 @@ def image_quad_norm(inarray):
         return np.sum(np.sum(np.abs(inarray)**2, axis=-1), axis=-1)
 
 
-def crandn(shape):
-    """white complex gaussian noise
-
-    Generate directly the unitary Fourier transform of white gaussian
-    noise noise field (with given shape) of zero mean and variance
-    unity (ie N(0,1)).
-    """
-    return np.sqrt(0.5) * (np.random.standard_normal(shape) +
-                           1j * np.random.standard_normal(shape))
-
-
 def ir2tf(imp_resp, shape, dim=None, real=True):
     """Compute the transfer function of IR
 

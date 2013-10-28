@@ -266,7 +266,9 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
 
         # weighing (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
-        excursion = uft.crandn(data.shape) / np.sqrt(precision)
+        excursion = np.sqrt(0.5) / np.sqrt(precision) * (
+            np.random.standard_normal(data.shape) +
+            1j * np.random.standard_normal(data.shape))
 
         # mean Eq. 30 (RLS for fixed gn, gamma0 and gamma1 ...)
         wiener_filter = gn_chain[-1] * np.conj(trans_fct) / precision
