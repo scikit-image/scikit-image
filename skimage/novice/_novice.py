@@ -10,9 +10,23 @@ from skimage.transform import resize
 from skimage.color import color_dict
 from skimage._shared import six
 
-from six.moves.urllib_parse import urlparse
-from six.moves.urllib import request
-urlopen = request.urlopen
+try:
+    from urlparse import urlparse
+except ImportError:
+    try:
+        from urllib import parse as urlparse
+    except ImportError:
+        from six.moves.urllib_parse import urlparse
+
+try:
+    from urllib2 import urlopen
+except ImportError:
+    try:
+        from urllib import request
+        urlopen = request.urlopen
+    except ImportError:
+        from six.moves.urllib import request
+        urlopen = request.urlopen
 
 
 # Convert colors from `skimage.color` to uint8 and allow access through
