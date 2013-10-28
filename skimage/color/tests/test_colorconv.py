@@ -71,24 +71,24 @@ class TestColorconv(TestCase):
     colbars_point75_array = np.swapaxes(colbars_point75.reshape(3, 4, 2), 0, 2)
 
     xyz_array = np.array([[[0.4124, 0.21260, 0.01930]],  # red
-                    [[0, 0, 0]],  # black
-                    [[.9505, 1., 1.089]],  # white
-                    [[.1805, .0722, .9505]],  # blue
-                    [[.07719, .15438, .02573]],  # green
-                    ])
+                          [[0, 0, 0]],  # black
+                          [[.9505, 1., 1.089]],  # white
+                          [[.1805, .0722, .9505]],  # blue
+                          [[.07719, .15438, .02573]],  # green
+                          ])
     lab_array = np.array([[[53.233, 80.109, 67.220]],  # red
-                    [[0., 0., 0.]],  # black
-                    [[100.0, 0.005, -0.010]],  # white
-                    [[32.303, 79.197, -107.864]],  # blue
-                    [[46.229, -51.7, 49.898]],  # green
-                    ])
+                          [[0., 0., 0.]],  # black
+                          [[100.0, 0.005, -0.010]],  # white
+                          [[32.303, 79.197, -107.864]],  # blue
+                          [[46.229, -51.7, 49.898]],  # green
+                          ])
 
     luv_array = np.array([[[53.233, 175.053, 37.751]], # red
-                    [[0., 0., 0.]], # black
-                    [[100., 0.001, -0.017]], # white
-                    [[32.303, -9.400, -130.358]], # blue
-                    [[46.228, -43.774, 56.589]], # green
-        ])
+                          [[0., 0., 0.]], # black
+                          [[100., 0.001, -0.017]], # white
+                          [[32.303, -9.400, -130.358]], # blue
+                          [[46.228, -43.774, 56.589]], # green
+                          ])
 
     # RGB to HSV
     def test_rgb2hsv_conversion(self):
@@ -259,7 +259,8 @@ class TestColorconv(TestCase):
         img_rgb = img_as_float(self.img_rgb)
         assert_array_almost_equal(lab2rgb(rgb2lab(img_rgb)), img_rgb)
 
-    # test matrices for xyz2luv and luv2xyz generated using http://www.easyrgb.com/index.php?X=CALC
+    # test matrices for xyz2luv and luv2xyz generated using
+    # http://www.easyrgb.com/index.php?X=CALC
     # Note: easyrgb website displays xyz*100
     def test_xyz2luv(self):
         assert_array_almost_equal(xyz2luv(self.xyz_array),
@@ -277,16 +278,17 @@ class TestColorconv(TestCase):
         """
         # Obtained with D65 white point, sRGB model and gamma
         gt_for_colbars = np.array([
-            [100,0,0],
+            [100, 0, 0],
             [97.1393, 7.7056, 106.7866],
             [91.1132, -70.4773, -15.2042],
             [87.7347, -83.0776, 107.3985],
             [60.3242, 84.0714, -108.6834],
             [53.2408, 175.0151, 37.7564],
             [32.2970, -9.4054, -130.3423],
-            [0,0,0]]).T
+            [0, 0, 0]]).T
         gt_array = np.swapaxes(gt_for_colbars.reshape(3, 4, 2), 0, 2)
-        assert_array_almost_equal(rgb2luv(self.colbars_array), gt_array, decimal=2)
+        assert_array_almost_equal(rgb2luv(self.colbars_array),
+                                  gt_array, decimal=2)
 
     def test_luv_rgb_roundtrip(self):
         img_rgb = img_as_float(self.img_rgb)
