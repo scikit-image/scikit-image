@@ -74,7 +74,7 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     Returns
     -------
     im_deconv : (M, N) ndarray
-       The deconvolued data
+       The deconvolved data
 
     Examples
     --------
@@ -94,7 +94,7 @@ def wiener(data, psf, reg_val, reg=None, real=True):
 
     .. math:: y = Hx + n
 
-    where :math:`n is the noise`, :math:`H` the psf and :math:`x` the
+    where :math:`n` is noise, :math:`H` the PSF and :math:`x` the
     unknown original image, the wiener filter is
 
     .. math:: \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2) \Lambda_H^\dag F y
@@ -102,13 +102,18 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     where :math:`F` and :math:`F^\dag` is the Fourier and inverse
     Fourier transfrom, :math:`\Lambda_H` the transfert function (or
     the Fourier transfrom of the PSF, see [2]) and :math:`\Lambda_D`
-    the filter to penalized the restored image frequency (laplacian by
-    default, that is penalization of high frequency). The parameter
-    :math:`\lambda` tune the balance between the data (that tends to
-    increase high frequency, even the noise), and the regularization.
+    the filter to penalize the restored image frequencies (laplacian
+    by default, that is penalization of high frequency). The parameter
+    :math:`\lambda` tunes the balance between the data (that tends to
+    increase high frequency, even those coming from noise), and the
+    regularization.
 
-    These methods are then specifique to a prior model that must be
-    adequate. They could be refered to bayesian approaches.
+    These methods are then specifique to a prior model that must match
+    the application (smoothness by default). They could be refered to
+    bayesian approaches.
+    
+    The use of Fourier space implies a circulant property of
+    :math:`H`, see [2]. 
 
     References
     ----------
@@ -175,7 +180,7 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     Returns
     -------
     x_postmean : (M, N) ndarray
-       The deconvolued data (the posterior mean)
+       The deconvolved data (the posterior mean)
 
     chains : dict
        The keys 'noise' and 'prior' contains the chain list of noise and
