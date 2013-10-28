@@ -34,7 +34,7 @@ from skimage import color, data, deconvolution
 
 lena = color.rgb2gray(data.lena())
 from scipy.signal import convolve2d as conv2
-psf = np.ones((5, 5))
+psf = np.ones((5, 5)) / 25
 lena = conv2(lena, psf, 'same')
 lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
 
