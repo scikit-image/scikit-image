@@ -12,10 +12,10 @@ def test_wiener():
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    deconvolued = deconvolution.wiener(data, psf, 25)
+    deconvolved = deconvolution.wiener(data, psf, 25)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_wiener.npy')
-    np.testing.assert_allclose(deconvolued, np.load(path))
+    np.testing.assert_allclose(deconvolved, np.load(path))
 
 
 def test_unsupervised_wiener():
@@ -23,12 +23,10 @@ def test_unsupervised_wiener():
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    deconvolued, _ = deconvolution.unsupervised_wiener(data, psf)
+    deconvolved, _ = deconvolution.unsupervised_wiener(data, psf)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_unsup.npy')
-    np.testing.assert_allclose(deconvolued, np.load(path))
-
-    return data, deconvolued
+    np.testing.assert_allclose(deconvolved, np.load(path))
 
 
 def test_richardson_lucy():

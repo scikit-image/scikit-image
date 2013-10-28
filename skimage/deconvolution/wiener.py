@@ -91,14 +91,14 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     -----
     This function apply the wiener filter to a noisy and convolued
     image. If the data model is
-    
+
     .. math:: y = Hx + n
-              
+
     where :math:`n is the noise`, :math:`H` the psf and :math:`x` the
     unknown original image, the wiener filter is
 
     .. math:: \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2) \Lambda_H^\dag F y
-              
+
     where :math:`F` and :math:`F^\dag` is the Fourier and inverse
     Fourier transfrom, :math:`\Lambda_H` the transfert function (or
     the Fourier transfrom of the PSF, see [2]) and :math:`\Lambda_D`
@@ -109,7 +109,7 @@ def wiener(data, psf, reg_val, reg=None, real=True):
 
     These methods are then specifique to a prior model that must be
     adequate. They could be refered to bayesian approaches.
-    
+
     References
     ----------
     .. [1] François Orieux, Jean-François Giovannelli, and Thomas
@@ -124,7 +124,7 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
            Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
-           
+
     """
     if not reg:
         reg, _ = uft.laplacian(data.ndim, data.shape)
