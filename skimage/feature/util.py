@@ -3,6 +3,20 @@ import numpy as np
 from skimage.util import img_as_float
 
 
+def _create_keypoint_recarray(row, col, octave=None, orientation=None,
+                              response=None):
+    keypoints = np.zeros(row.shape[0],
+                         dtype=[('row', np.double), ('col', np.double),
+                         ('octave', np.double), ('orientation', np.double),
+                         ('response', np.double)])
+    keypoints['row'] = row
+    keypoints['col'] = col
+    keypoints['octave'] = octave
+    keypoints['orientation'] = orientation
+    keypoints['response'] = response
+    return keypoints.view(np.recarray)
+
+
 def _prepare_grayscale_input_2D(image):
     image = np.squeeze(image)
     if image.ndim != 2:
