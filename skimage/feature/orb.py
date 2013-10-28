@@ -1,7 +1,8 @@
 import numpy as np
 
 from skimage.feature.util import (_mask_border_keypoints,
-                                  _prepare_grayscale_input_2D)
+                                  _prepare_grayscale_input_2D,
+                                  _create_keypoint_recarray)
 
 from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
@@ -120,33 +121,30 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
         harris_response_list.append(harris_response[corners[:, 0],
                                                     corners[:, 1]])
 
-    keypoints = np.round(np.vstack(keypoints_list)).astype(np.intp)
+    keypoints = np.vstack(keypoints_list)
     orientations = np.hstack(orientations_list)
-    scales = np.hstack(scales_list)
+    octaves = downscale ** np.hstack(scales_list)
     harris_measure = np.hstack(harris_response_list)
+    kpts_recarray = _create_keypoint_recarray(keypoints[:, 0], keypoints[:, 1],
+                                              octaves, orientations,
+                                              harris_measure)
 
-    if keypoints.shape[0] < n_keypoints:
-        return keypoints, orientations, scales
+    if kpts_recarray.shape[0] < n_keypoints:
+        return kpts_recarray
     else:
         best_indices = harris_measure.argsort()[::-1][:n_keypoints]
-        return (keypoints[best_indices], orientations[best_indices],
-                scales[best_indices])
+        return kpts_recarray[best_indices]
 
 
-def descriptor_orb(image, keypoints, orientations, scales,
-                   downscale=1.2, n_scales=8):
+def descriptor_orb(image, kpts_recarray, downscale=1.2, n_scales=8):
     """Compute rBRIEF descriptors of input keypoints.
 
     Parameters
     ----------
     image : 2D ndarray
         Input grayscale image.
-    keypoints : (N, 2) ndarray
+    kpts_recarray : (N, 2) ndarray
         Array of N input keypoint locations in the format (row, col).
-    orientations : (N,) ndarray
-        The orientations of the corresponding N keypoints.
-    scales : (N,) ndarray
-        The scales of the corresponding N keypoints.
     downscale : float
         Downscale factor for the image pyramid. Should be the same as that
         used in ``keypoints_orb``.
@@ -194,33 +192,31 @@ def descriptor_orb(image, keypoints, orientations, scales,
     pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
 
     descriptors_list = []
-    filtered_keypoints_list = []
-    descriptors = np.empty((0, 256), dtype=np.bool)
+    kpts_recarray_list = []
 
     for scale in range(n_scales):
         curr_image = np.ascontiguousarray(pyramid[scale])
 
-        curr_scale_mask = scales == scale
+        curr_scale_mask = (np.log(kpts_recarray.octave) /
+                           np.log(downscale)).astype(np.intp) == scale
         if np.sum(curr_scale_mask) > 0:
-            curr_scale_kpts = keypoints[curr_scale_mask] / (downscale ** scale)
-            curr_scale_kpts = np.round(curr_scale_kpts).astype(np.intp)
-            curr_scale_orientation = orientations[curr_scale_mask]
-
-            border_mask = _mask_border_keypoints(curr_image, curr_scale_kpts,
+            curr_kpts_recarray = kpts_recarray[curr_scale_mask]
+            curr_scale_kpts = np.squeeze(np.dstack((curr_kpts_recarray.row / curr_kpts_recarray.octave,
+                                         curr_kpts_recarray.col / curr_kpts_recarray.octave)))
+            border_mask = _mask_border_keypoints(curr_image,
+                                                 curr_scale_kpts,
                                                  dist=16)
 
-            curr_scale_kpts = curr_scale_kpts[border_mask]
-            curr_scale_orientation = curr_scale_orientation[border_mask]
+            curr_kpts_recarray = curr_kpts_recarray[border_mask]
 
-            curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts)
-            curr_scale_orientation = np.ascontiguousarray(curr_scale_orientation)
+            curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts[border_mask].astype(np.intp))
+            curr_scale_orientation = np.ascontiguousarray(curr_kpts_recarray.orientation)
             curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts,
                                                curr_scale_orientation)
 
             descriptors_list.append(curr_scale_descriptors)
-            filtered_keypoints_list.append(curr_scale_kpts * downscale ** scale)
+            kpts_recarray_list.append(curr_kpts_recarray)
 
     descriptors = np.vstack(descriptors_list).view(np.bool)
-    filtered_keypoints = np.vstack(filtered_keypoints_list)
-    filtered_keypoints = np.round(filtered_keypoints).astype(np.intp)
-    return descriptors, filtered_keypoints
+    filtered_kpts_recarray = np.hstack(kpts_recarray_list)
+    return descriptors, filtered_kpts_recarray
