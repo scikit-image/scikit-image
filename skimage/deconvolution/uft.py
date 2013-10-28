@@ -51,7 +51,7 @@ References
 
 import numpy as np
 
-__copyright__ = "Copyright (C) 2011, 2012, 2013 F. Orieux <orieux@iap.fr>"
+__copyright__ = "Copyright scikit-image team"
 __license__ = "mit"
 __version__ = "0.1.0"
 __maintainer__ = "Francois Orieux"
