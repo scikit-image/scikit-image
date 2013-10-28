@@ -51,14 +51,11 @@ References
 
 import numpy as np
 
-__author__ = "Fran��ois Orieux"
 __copyright__ = "Copyright (C) 2011, 2012, 2013 F. Orieux <orieux@iap.fr>"
-__credits__ = ["Fran��ois Orieux"]
 __license__ = "mit"
 __version__ = "0.1.0"
-__maintainer__ = "Fran��ois Orieux"
+__maintainer__ = "Francois Orieux"
 __email__ = "orieux@iap.fr"
-__status__ = "development"
 __url__ = ""
 __keywords__ = "fft"
 

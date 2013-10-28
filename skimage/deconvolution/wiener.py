@@ -32,7 +32,6 @@ from scipy.signal import convolve2d as conv2
 
 import uft
 
-__author__ = "François Orieux"
 __copyright__ = "Copyright (C) 2013 F. Orieux <orieux@iap.fr>"
 __credits__ = ["François Orieux"]
 __license__ = "mit"

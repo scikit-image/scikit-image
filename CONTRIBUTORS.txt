@@ -173,3 +173,6 @@
 
 - Gregor Thalhammer
   Phase unwrapping integration
+
+- François Orieux
+  Image deconvolution
