@@ -15,7 +15,7 @@ def test_wiener():
     deconvolued = deconvolution.wiener(data, psf, 25)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_wiener.npy')
-    np.testing.assert_array_almost_equal(deconvolued, np.load(path))
+    np.testing.assert_allclose(deconvolued, np.load(path))
 
 
 def test_unsupervised_wiener():
@@ -26,7 +26,9 @@ def test_unsupervised_wiener():
     deconvolued, _ = deconvolution.unsupervised_wiener(data, psf)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_unsup.npy')
-    np.testing.assert_array_almost_equal(deconvolued, np.load(path))
+    np.testing.assert_allclose(deconvolued, np.load(path))
+
+    return data, deconvolued
 
 
 def test_richardson_lucy():
