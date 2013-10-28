@@ -30,7 +30,7 @@ import numpy as np
 import numpy.random as npr
 from scipy.signal import convolve2d
 
-import uft
+from . import uft
 
 __copyright__ = "Copyright scikit-image team"
 __credits__ = ["François Orieux"]
