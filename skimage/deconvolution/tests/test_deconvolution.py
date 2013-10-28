@@ -30,4 +30,11 @@ def test_unsupervised_wiener():
 
 
 def test_richardson_lucy():
-    return True
+    psf = np.ones((5, 5)) / 25
+    data = convolve2d(test_img, psf, 'same')
+    np.random.seed(0)
+    data += 0.1 * data.std() * np.random.standard_normal(data.shape)
+    deconvolved, _ = deconvolution.richardson_lucy(data, psf, 5)
+
+    path = pjoin(dirname(abspath(__file__)), 'camera_rl.npy')
+    np.testing.assert_allclose(deconvolved, np.load(path))

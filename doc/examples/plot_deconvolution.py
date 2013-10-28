@@ -48,9 +48,9 @@ ax[0].imshow(lena)
 ax[0].axis('off')
 ax[0].set_title('Data')
 
-ax[1].imshow(deconvolued)
+ax[1].imshow(deconvolued, vmax=lena.max())
 ax[1].axis('off')
-ax[1].set_title('Deconvolution')
+ax[1].set_title('Self tuned deconvolution')
 
 fig.subplots_adjust(wspace=0.02, hspace=0.2,
                     top=0.9, bottom=0.05, left=0, right=1)
