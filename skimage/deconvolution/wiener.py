@@ -119,6 +119,8 @@ def wiener(data, psf, reg_val, reg=None, real=True):
 
            http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
 
+           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
+
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
            Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
@@ -223,6 +225,8 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
            J. Opt. Soc. Am. A 27, 1593-1607 (2010)
 
            http://www.opticsinfobase.org/josaa/abstract.cfm?URI=josaa-27-7-1593
+
+           http://research.orieux.fr/files/papers/OGR-JOSA10.pdf
     """
     params = {'threshold': 1e-4, 'max_iter': 200,
               'min_iter': 30, 'burnin': 15, 'callback': None}
