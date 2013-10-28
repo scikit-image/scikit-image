@@ -8,7 +8,7 @@ test_img = camera().astype(np.float)
 
 
 def test_wiener():
-    psf = np.ones((5, 5))
+    psf = np.ones((5, 5)) / 25
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
@@ -19,7 +19,7 @@ def test_wiener():
 
 
 def test_unsupervised_wiener():
-    psf = np.ones((5, 5))
+    psf = np.ones((5, 5)) / 25
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)

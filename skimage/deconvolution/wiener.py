@@ -82,7 +82,7 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     >>> from skimage import color, data, deconvolution
     >>> lena = color.rgb2gray(data.lena())
     >>> from scipy.signal import convolve2d
-    >>> psf = np.ones((5, 5))
+    >>> psf = np.ones((5, 5)) / 25
     >>> lena = convolve2d(lena, psf, 'same')
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
     >>> deconvolved_lena = deconvolution.wiener(lena, psf, 1100)
@@ -212,7 +212,7 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     >>> from skimage import color, data, deconvolution
     >>> lena = color.rgb2gray(data.lena())
     >>> from scipy.signal import convolve2d
-    >>> psf = np.ones((5, 5))
+    >>> psf = np.ones((5, 5)) / 25
     >>> lena = convolve2d(lena, psf, 'same')
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
     >>> deconvolved_lena = deconvolution.unsupervised_wiener(lena, psf)
@@ -258,6 +258,7 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     areg2 = np.abs(reg)**2
     atf2 = np.abs(trans_fct)**2
 
+    data_size = data.size
     data = uft.urfft2(data.astype(np.float))
 
     # Gibbs sampling
@@ -279,12 +280,12 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
             params['callback'](x_sample)
 
         # sample of Eq. 31 p(gn | x^k, gx^k, y)
-        gn_chain.append(npr.gamma(data.size / 2,
+        gn_chain.append(npr.gamma(data_size / 2,
                                   2 / uft.image_quad_norm(data - x_sample *
                                                           trans_fct)))
 
         # sample of Eq. 31 p(gx | x^k, gn^k-1, y)
-        gx_chain.append(npr.gamma((data.size - 1) / 2,
+        gx_chain.append(npr.gamma((data_size - 1) / 2,
                                   2 / uft.image_quad_norm(x_sample * reg)))
 
         # current empirical average
