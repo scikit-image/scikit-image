@@ -503,6 +503,9 @@ def regionprops(label_image, properties=None,
 
     objects = ndimage.find_objects(label_image)
     for i, sl in enumerate(objects):
+        if sl is None:
+            continue
+        
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image,

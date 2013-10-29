@@ -347,6 +347,20 @@ def test_old_dict_interface():
     assert_equal(len(feats[0]), 8)
 
 
+def test_label_sequence():
+    a = np.empty((2, 2), dtype=np.int)
+    a[:, :] = 2
+    ps = regionprops(a)
+    assert len(ps) == 1
+    assert ps[0].label == 2
+
+
+def test_pure_background():
+    a = np.zeros((2, 2), dtype=np.int)
+    ps = regionprops(a)
+    assert len(ps) == 0
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
