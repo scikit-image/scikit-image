@@ -1,10 +1,13 @@
 from os.path import abspath, dirname, join as pjoin
+
 import numpy as np
 from scipy.signal import convolve2d
+
+import skimage
 from skimage.data import camera
 from skimage import deconvolution
 
-test_img = camera().astype(np.float)
+test_img = skimage.img_as_float(camera())
 
 
 def test_wiener():
