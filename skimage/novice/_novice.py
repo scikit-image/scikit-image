@@ -14,7 +14,7 @@ try:
     from urlparse import urlparse
 except ImportError:
     try:
-        from urllib import parse as urlparse
+        from urllib.parse import urlparse
     except ImportError:
         from six.moves.urllib_parse import urlparse
 
