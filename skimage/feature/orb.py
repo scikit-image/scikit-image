@@ -57,12 +57,8 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
 
     Returns
     -------
-    keypoints : (N, 2) ndarray
-        The oFAST keypoints.
-    orientations : (N,) ndarray
-        The orientations of the N extracted keypoints.
-    scales : (N,) ndarray
-        The scales of the N extracted keypoints.
+    keypoints : record array
+        Record array with fields row, col, octave, orientation, response.
 
     References
     ----------
@@ -75,25 +71,20 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
     >>> from skimage.feature import keypoints_orb, descriptor_orb
     >>> square = np.zeros((50, 50))
     >>> square[20:30, 20:30] = 1
-    >>> keypoints, orientations, scales = keypoints_orb(square, n_keypoints=8, n_scales=2)
+    >>> keypoints = keypoints_orb(square, n_keypoints=8, n_scales=2)
     >>> keypoints.shape
-    (8, 2)
-    >>> keypoints
-    array([[29, 29],
-           [29, 20],
-           [20, 29],
-           [20, 20],
-           [15, 15],
-           [15, 20],
-           [20, 15],
-           [20, 20]])
-    >>> orientations
-    array([-2.35619449, -0.78539816,  2.35619449,  0.78539816,  0.78539816,
-           2.35619449, -0.78539816, -2.35619449])
-    >>> np.rad2deg(orientations)
-    array([-135.,  -45.,  135.,   45.,   45.,  135.,  -45., -135.])
-    >>> scales
-    array([0, 0, 0, 0, 1, 1, 1, 1])
+    (8,)
+    >>> keypoints.row
+    array([ 29. ,  29. ,  20. ,  20. ,  20.4,  20.4,  28.8,  28.8])
+    >>> keypoints.col
+    array([ 29. ,  20. ,  29. ,  20. ,  28.8,  20.4,  28.8,  20.4])
+    >>> keypoints.octave
+    array([ 1. ,  1. ,  1. ,  1. ,  1.2,  1.2,  1.2,  1.2])
+    >>> np.rad2deg(keypoints.orientation)
+    array([-135.,  -45.,  135.,   45.,  135.,   45., -135.,  -45.])
+    >>> keypoints.response
+    array([ 21.4776577 ,  21.4776577 ,  21.4776577 ,  21.4776577 ,
+            14.03845308,  14.03845308,  14.03845308,  14.03845308])
 
     """
 
@@ -121,30 +112,31 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
         harris_response_list.append(harris_response[corners[:, 0],
                                                     corners[:, 1]])
 
-    keypoints = np.vstack(keypoints_list)
+    keypoints_array = np.vstack(keypoints_list)
     orientations = np.hstack(orientations_list)
     octaves = downscale ** np.hstack(scales_list)
     harris_measure = np.hstack(harris_response_list)
-    kpts_recarray = _create_keypoint_recarray(keypoints[:, 0], keypoints[:, 1],
-                                              octaves, orientations,
-                                              harris_measure)
+    keypoints = _create_keypoint_recarray(keypoints_array[:, 0],
+                                          keypoints_array[:, 1],
+                                          octaves, orientations,
+                                          harris_measure)
 
-    if kpts_recarray.shape[0] < n_keypoints:
-        return kpts_recarray
+    if keypoints.shape[0] < n_keypoints:
+        return keypoints
     else:
         best_indices = harris_measure.argsort()[::-1][:n_keypoints]
-        return kpts_recarray[best_indices]
+        return keypoints[best_indices]
 
 
-def descriptor_orb(image, kpts_recarray, downscale=1.2, n_scales=8):
+def descriptor_orb(image, keypoints, downscale=1.2, n_scales=8):
     """Compute rBRIEF descriptors of input keypoints.
 
     Parameters
     ----------
     image : 2D ndarray
         Input grayscale image.
-    kpts_recarray : (N, 2) ndarray
-        Array of N input keypoint locations in the format (row, col).
+    keypoints : record array
+        Record array with fields row, col, octave, orientation, response.
     downscale : float
         Downscale factor for the image pyramid. Should be the same as that
         used in ``keypoints_orb``.
@@ -159,8 +151,9 @@ def descriptor_orb(image, kpts_recarray, downscale=1.2, n_scales=8):
         filtering out those near the image border. Size of each descriptor
         is 32 bytes or 256 bits.
     filtered_keypoints : (P, 2) ndarray
-        Location i.e. (row, col) of P keypoints after removing out those that
-        are near border.
+        Record array with fields row, col, octave, orientation, response for
+        P keypoints obtained after removing out those that are near the
+        border.
 
     References
     ----------
@@ -174,15 +167,12 @@ def descriptor_orb(image, kpts_recarray, downscale=1.2, n_scales=8):
     >>> from skimage.feature import keypoints_orb, descriptor_orb
     >>> square = np.zeros((50, 50))
     >>> square[20:30, 20:30] = 1
-    >>> keypoints, orientations, scales = keypoints_orb(square, n_keypoints=8,
-        ... n_scales=2)
+    >>> keypoints = keypoints_orb(square, n_keypoints=8, n_scales=2)
     >>> keypoints.shape
-    (8, 2)
-    >>> descriptors, filtered_keypoints = descriptor_orb(square, keypoints,
-        ... orientations, scales,
-        ... n_scales=2)
+    (8,)
+    >>> descriptors, filtered_keypoints = descriptor_orb(square, keypoints, n_scales=2)
     >>> filtered_keypoints.shape
-    (8, 2)
+    (8,)
     >>> descriptors.shape
     (8, 256)
 
@@ -192,31 +182,31 @@ def descriptor_orb(image, kpts_recarray, downscale=1.2, n_scales=8):
     pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
 
     descriptors_list = []
-    kpts_recarray_list = []
+    keypoints_list = []
 
     for scale in range(n_scales):
         curr_image = np.ascontiguousarray(pyramid[scale])
 
-        curr_scale_mask = (np.log(kpts_recarray.octave) /
+        curr_scale_mask = (np.log(keypoints.octave) /
                            np.log(downscale)).astype(np.intp) == scale
         if np.sum(curr_scale_mask) > 0:
-            curr_kpts_recarray = kpts_recarray[curr_scale_mask]
-            curr_scale_kpts = np.squeeze(np.dstack((curr_kpts_recarray.row / curr_kpts_recarray.octave,
-                                         curr_kpts_recarray.col / curr_kpts_recarray.octave)))
+            curr_keypoints = keypoints[curr_scale_mask]
+            curr_scale_kpts = np.squeeze(np.dstack((curr_keypoints.row / curr_keypoints.octave,
+                                         curr_keypoints.col / curr_keypoints.octave)))
             border_mask = _mask_border_keypoints(curr_image,
                                                  curr_scale_kpts,
                                                  dist=16)
 
-            curr_kpts_recarray = curr_kpts_recarray[border_mask]
+            curr_keypoints = curr_keypoints[border_mask]
 
             curr_scale_kpts = np.ascontiguousarray(curr_scale_kpts[border_mask].astype(np.intp))
-            curr_scale_orientation = np.ascontiguousarray(curr_kpts_recarray.orientation)
+            curr_scale_orientation = np.ascontiguousarray(curr_keypoints.orientation)
             curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts,
                                                curr_scale_orientation)
 
             descriptors_list.append(curr_scale_descriptors)
-            kpts_recarray_list.append(curr_kpts_recarray)
+            keypoints_list.append(curr_keypoints)
 
     descriptors = np.vstack(descriptors_list).view(np.bool)
-    filtered_kpts_recarray = np.hstack(kpts_recarray_list)
-    return descriptors, filtered_kpts_recarray
+    filtered_keypoints = np.hstack(keypoints_list)
+    return descriptors, filtered_keypoints.view(np.recarray)
