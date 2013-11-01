@@ -238,17 +238,20 @@ class Plugin(QtGui.QDialog):
 
     def output(self):
         """Return the plugin's representation and data.
-        
-        Parameters
-        ----------
-        None
-        
+
         Returns
         -------
-        overlay : array, same shape as ``self.image_viewer.image``, or None
+        image : array, same shape as ``self.image_viewer.image``, or None
             The filtered image.
-        data : array, arbitrary shape and type, or None
+        data : None
             Any data associated with the plugin.
+
+        Notes
+        -----
+        Derived classes should override this method to return a tuple
+        containing an *overlay* of the same shape of the image, and a
+        *data* object. Either of these is optional: return ``None`` if
+        you don't want to return a value.
         """
         return (self.image_viewer.image, None)
 

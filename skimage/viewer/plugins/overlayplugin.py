@@ -111,10 +111,6 @@ class OverlayPlugin(Plugin):
     def output(self):
         """Return the overlaid image.
 
-        Parameters
-        ----------
-        None
-
         Returns
         -------
         overlay : array, same shape as image
