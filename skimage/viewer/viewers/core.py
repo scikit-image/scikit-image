@@ -20,12 +20,28 @@ __all__ = ['ImageViewer', 'CollectionViewer']
 def mpl_image_to_rgba(mpl_image):
     """Return RGB image from the given matplotlib image object.
 
-    Each image in a matplotlib figure has it's own colormap and normalization
+    Each image in a matplotlib figure has its own colormap and normalization
     function. Return RGBA (RGB + alpha channel) image with float dtype.
+
+    Parameters
+    ----------
+    mpl_image : matplotlib.image.AxesImage object
+        The image being converted.
+
+    Returns
+    -------
+    img : array of float, shape (M, N, 4)
+        An image of float values in [0, 1].
     """
-    input_range = (mpl_image.norm.vmin, mpl_image.norm.vmax)
-    image = rescale_intensity(mpl_image.get_array(), in_range=input_range)
-    image = mpl_image.cmap(img_as_float(image)) # cmap complains on bool arrays
+    image = mpl_image.get_array()
+    if image.ndim == 2:
+        input_range = (mpl_image.norm.vmin, mpl_image.norm.vmax)
+        image = rescale_intensity(image, in_range=input_range)
+        # cmap complains on bool arrays
+        image = mpl_image.cmap(img_as_float(image))
+    elif image.ndim == 3 and image.shape[2] == 3:
+        # add alpha channel if it's missing
+        image = np.dstack((image, np.ones_like(image)))
     return img_as_float(image)
 
 

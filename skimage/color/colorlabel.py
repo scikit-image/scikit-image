@@ -4,10 +4,11 @@ import itertools
 import numpy as np
 
 from skimage import img_as_float
-from skimage._shared import six
-from skimage._shared.six.moves import zip
 from .colorconv import rgb2gray, gray2rgb
 from . import rgb_colors
+
+import six
+from six.moves import zip
 
 
 __all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
@@ -17,7 +18,8 @@ DEFAULT_COLORS = ('red', 'blue', 'yellow', 'magenta', 'green',
                   'indigo', 'darkorange', 'cyan', 'pink', 'yellowgreen')
 
 
-color_dict = rgb_colors.__dict__
+color_dict = dict((k, v) for k, v in six.iteritems(rgb_colors.__dict__)
+                  if isinstance(v, tuple))
 
 
 def _rgb_vector(color):

@@ -5,6 +5,11 @@ Version 0.9
   to 0
 - ``hough_circle`` now returns a stack of arrays that are the same size as the
   input image. Set the ``full_output`` flag to True for the old behavior.
+- The following functions were deprecated over two releases:
+  `skimage.filter.denoise_tv_chambolle`,
+  `skimage.morphology.is_local_maximum`, `skimage.transform.hough`,
+  `skimage.transform.probabilistic_hough`,`skimage.transform.hough_peaks`.
+  Their functionality still exists, but under different names.
 
 Version 0.4
 -----------

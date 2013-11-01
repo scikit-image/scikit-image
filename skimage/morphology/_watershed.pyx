@@ -23,12 +23,12 @@ include "heap_watershed.pxi"
 
 
 @cython.boundscheck(False)
-def watershed(DTYPE_INT32_t[:] image,
+def watershed(DTYPE_INT32_t[::1] image,
               DTYPE_INT32_t[:, ::1] pq,
               Py_ssize_t age,
               DTYPE_INT32_t[:, ::1] structure,
-              DTYPE_BOOL_t[:] mask,
-              DTYPE_INT32_t[:] output):
+              DTYPE_BOOL_t[::1] mask,
+              DTYPE_INT32_t[::1] output):
     """Do heavy lifting of watershed algorithm
 
     Parameters

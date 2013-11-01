@@ -85,10 +85,15 @@ if __name__ == '__main__':
     for l in setup_lines:
         if l.startswith('VERSION'):
             tag = l.split("'")[1]
+
+            if "dev" in tag:
+                tag = "dev"
+            else:
+                # Rename e.g. 0.9.0 to 0.9.x
+                tag = '.'.join(tag.split('.')[:-1] + ['x'])
+
             break
 
-    if "dev" in tag:
-        tag = "dev"
 
     startdir = os.getcwd()
     if not os.path.exists(pages_dir):

@@ -287,7 +287,7 @@ def adjust_log(image, gain=1, inv=False):
     inv : float
         If True, it performs inverse logarithmic correction,
         else correction will be logarithmic. Defaults to False.
-    
+
     Returns
     -------
     out : ndarray

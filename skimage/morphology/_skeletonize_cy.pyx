@@ -20,8 +20,8 @@ cimport numpy as cnp
 
 
 def _skeletonize_loop(cnp.uint8_t[:, ::1] result,
-                      Py_ssize_t[:] i, Py_ssize_t[:] j,
-                      cnp.int32_t[:] order, cnp.uint8_t[:] table):
+                      Py_ssize_t[::1] i, Py_ssize_t[::1] j,
+                      cnp.int32_t[::1] order, cnp.uint8_t[::1] table):
     """
     Inner loop of skeletonize function
 

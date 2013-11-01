@@ -71,8 +71,8 @@ def line(Py_ssize_t y, Py_ssize_t x, Py_ssize_t y2, Py_ssize_t x2):
         sx, sy = sy, sx
     d = (2 * dy) - dx
 
-    cdef Py_ssize_t[:] rr = np.zeros(int(dx) + 1, dtype=np.intp)
-    cdef Py_ssize_t[:] cc = np.zeros(int(dx) + 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] rr = np.zeros(int(dx) + 1, dtype=np.intp)
+    cdef Py_ssize_t[::1] cc = np.zeros(int(dx) + 1, dtype=np.intp)
 
     for i in range(dx):
         if steep:
@@ -834,31 +834,3 @@ def bezier_curve(Py_ssize_t y0, Py_ssize_t x0,
     px.extend(rr)
     py.extend(cc)
     return np.array(px, dtype=np.intp), np.array(py, dtype=np.intp)
-
-
-def set_color(img, coords, color):
-    """Set pixel color in the image at the given coordinates.
-
-    Coordinates that exceed the shape of the image will be ignored.
-
-    Parameters
-    ----------
-    img : (M, N, D) ndarray
-        Image
-    coords : ((P,) ndarray, (P,) ndarray)
-        Coordinates of pixels to be colored.
-    color : (D,) ndarray
-        Color to be assigned to coordinates in the image.
-
-    Returns
-    -------
-    img : (M, N, D) ndarray
-        The updated image.
-
-    """
-
-    rr, cc = coords
-    rr_inside = np.logical_and(rr >= 0, rr < img.shape[0])
-    cc_inside = np.logical_and(cc >= 0, cc < img.shape[1])
-    inside = np.logical_and(rr_inside, cc_inside)
-    img[rr[inside], cc[inside]] = color

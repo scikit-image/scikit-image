@@ -11,6 +11,7 @@ def configuration(parent_package='', top_path=None):
 
     config = Configuration('filter', parent_package, top_path)
     config.add_data_dir('tests')
+    config.add_data_dir('rank/tests')
 
     cython(['_ctmf.pyx'], working_path=base_path)
     cython(['_denoise_cy.pyx'], working_path=base_path)

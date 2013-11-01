@@ -4,6 +4,8 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
+from collections import MutableMapping
+
 from skimage.morphology import convex_hull_image, label
 from skimage.measure import _moments
 
@@ -47,7 +49,7 @@ PROPS = {
 #    'PixelList',
     'Solidity': 'solidity',
 #    'SubarrayIdx'
-    'WeightedCentralMoments': 'weighted_central_moments',
+    'WeightedCentralMoments': 'weighted_moments_central',
     'WeightedCentroid': 'weighted_centroid',
     'WeightedHuMoments': 'weighted_moments_hu',
     'WeightedMoments': 'weighted_moments',
@@ -103,15 +105,16 @@ class _cached_property(object):
         return value
 
 
-class _RegionProperties(object):
+class _RegionProperties(MutableMapping):
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active):
+                 cache_active, properties=None):
         self.label = label
         self._slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
         self._cache_active = cache_active
+        self._properties = properties
 
     @_cached_property
     def area(self):
@@ -288,7 +291,7 @@ class _RegionProperties(object):
         return _moments.moments_central(self._intensity_image_double, 0, 0, 3)
 
     @_cached_property
-    def weighted_central_moments(self):
+    def weighted_moments_central(self):
         row, col = self.weighted_local_centroid
         return _moments.moments_central(self._intensity_image_double,
                                         row, col, 3)
@@ -299,7 +302,21 @@ class _RegionProperties(object):
 
     @_cached_property
     def weighted_moments_normalized(self):
-        return _moments.moments_normalized(self.weighted_central_moments, 3)
+        return _moments.moments_normalized(self.weighted_moments_central, 3)
+
+
+    # Preserve dictionary interface
+    def __delitem__(self, key):
+        pass
+
+    def __len__(self):
+        return len(self._properties or PROPS.values())
+
+    def __setitem__(self, key, value):
+        raise RuntimeError("Cannot assign region properties.")
+
+    def __iter__(self):
+        return iter(self._properties or PROPS.values())
 
     def __getitem__(self, key):
         value = getattr(self, key, None)
@@ -430,7 +447,7 @@ def regionprops(label_image, properties=None,
             wm_ji = sum{ array(x, y) * x^j * y^i }
 
         where the sum is over the `x`, `y` coordinates of the region.
-    **weighted_central_moments** : (3, 3) ndarray
+    **weighted_moments_central** : (3, 3) ndarray
         Central moments (translation invariant) of intensity image up to
         3rd order::
 
@@ -486,10 +503,13 @@ def regionprops(label_image, properties=None,
 
     objects = ndimage.find_objects(label_image)
     for i, sl in enumerate(objects):
+        if sl is None:
+            continue
+        
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image,
-                                  intensity_image, cache)
+                                  intensity_image, cache, properties=properties)
         regions.append(props)
 
     return regions

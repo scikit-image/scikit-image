@@ -7,6 +7,7 @@ from skimage.viewer import ImageViewer
 from skimage.viewer.widgets import history
 from skimage.viewer.plugins.labelplugin import LabelPainter
 
+
 class OKCancelButtons(history.OKCancelButtons):
 
     def update_original_image(self):

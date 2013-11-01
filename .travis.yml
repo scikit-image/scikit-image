@@ -22,6 +22,7 @@ install:
     - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
     - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
     - sudo pip-$PYVER install flake8
+    - sudo pip-$PYVER install six
     - $PYTHON setup.py build
     - sudo $PYTHON setup.py install
 script:
