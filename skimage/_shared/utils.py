@@ -2,7 +2,7 @@ import warnings
 import functools
 import sys
 
-from . import six
+import six
 
 
 __all__ = ['deprecated', 'get_bound_method_class']

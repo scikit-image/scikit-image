@@ -3,7 +3,8 @@ from warnings import warn
 from skimage.util.dtype import dtype_range
 from .base import Plugin
 from ..utils import ClearColormap, update_axes_image
-from skimage._shared import six
+
+import six
 
 
 __all__ = ['OverlayPlugin']

@@ -12,10 +12,11 @@ import tempfile
 from io import BytesIO
 
 import numpy as np
+import six
 
 from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
-from skimage._shared import six
+
 
 
 # Shared image queue

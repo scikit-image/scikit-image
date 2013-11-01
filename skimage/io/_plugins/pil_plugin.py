@@ -11,7 +11,7 @@ except ImportError:
 
 from skimage.util import img_as_ubyte
 
-from skimage._shared import six
+from six import string_types
 
 
 def imread(fname, dtype=None):
@@ -106,7 +106,7 @@ def imsave(fname, arr, format_str=None):
         arr = arr.astype(np.uint8)
 
     # default to PNG if file-like object
-    if not isinstance(fname, six.string_types) and format_str is None:
+    if not isinstance(fname, string_types) and format_str is None:
         format_str = "PNG"
 
     img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
