@@ -2,7 +2,7 @@ import numpy as np
 from scipy import ndimage
 from scipy import stats
 from skimage.color import rgb2grey
-from skimage.util import img_as_float
+from skimage.util import img_as_float, pad
 from skimage.feature import peak_local_max
 
 
@@ -356,6 +356,11 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     # window extent in one direction
     wext = (window_size - 1) / 2
 
+    image = pad(image, pad_width=wext, mode='constant', constant_values=0)
+
+    # add pad width, make sure to not modify the input values in-place
+    corners = corners + wext
+
     # normal equation arrays
     N_dot = np.zeros((2, 2), dtype=np.double)
     N_edge = np.zeros((2, 2), dtype=np.double)
@@ -448,6 +453,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
             corners_subpix[i, :] = np.nan, np.nan
         elif corner_class == 1:
             corners_subpix[i, :] = y0 + est_edge[0], x0 + est_edge[1]
+
+    # subtract pad width
+    corners_subpix -= wext
 
     return corners_subpix
 
