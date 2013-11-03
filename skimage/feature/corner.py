@@ -351,6 +351,28 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            foerstner87.fast.pdf
     .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
+    Examples
+    --------
+    >>> from skimage.feature import corner_harris, corner_peaks, corner_subpix
+    >>> img = np.zeros((10, 10), dtype=int)
+    >>> img[:5, :5] = 1
+    >>> img[5:, 5:] = 1
+    >>> img
+    array([[1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
+    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords_subpix = corner_subpix(img, coords, window_size=7)
+    >>> coords_subpix
+    array([[ 4.5,  4.5]])
+
     """
 
     # window extent in one direction
