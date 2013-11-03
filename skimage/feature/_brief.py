@@ -15,8 +15,9 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
     ----------
     image : 2D ndarray
         Input image.
-    keypoints : (P, 2) ndarray
-        Array of keypoint locations in the format (row, col).
+    keypoints : record array with P rows
+        Record array with fields row, col, octave, orientation, response.
+        Octave, orientation and response can be None.
     descriptor_size : int
         Size of BRIEF descriptor about each keypoint. Sizes 128, 256 and 512
         preferred by the authors. Default is 256.
@@ -138,15 +139,18 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
 
     image = np.ascontiguousarray(image)
 
-    keypoints = np.array(keypoints + 0.5, dtype=np.intp, order='C')
+    keypoints_loc = np.array(np.squeeze(np.dstack((keypoints.row, keypoints.col)))
+                             + 0.5, dtype=np.intp, order='C')
 
     # Removing keypoints that are within (patch_size / 2) distance from the
     # image border
-    keypoints = keypoints[_mask_border_keypoints(image, keypoints, patch_size // 2)]
-    keypoints = np.ascontiguousarray(keypoints)
+    border_mask = _mask_border_keypoints(image, keypoints_loc, patch_size // 2)
+    keypoints = keypoints[border_mask]
+    keypoints_loc = keypoints_loc[border_mask]
+    keypoints_loc = np.ascontiguousarray(keypoints_loc)
 
-    descriptors = np.zeros((keypoints.shape[0], descriptor_size), dtype=bool,
-                            order='C')
+    descriptors = np.zeros((keypoints_loc.shape[0], descriptor_size),
+                           dtype=bool, order='C')
 
     # Sampling pairs of decision pixels in patch_size x patch_size window
     if mode == 'normal':
@@ -172,6 +176,6 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
     pos1 = np.ascontiguousarray(pos1)
     pos2 = np.ascontiguousarray(pos2)
 
-    _brief_loop(image, descriptors.view(np.uint8), keypoints, pos1, pos2)
+    _brief_loop(image, descriptors.view(np.uint8), keypoints_loc, pos1, pos2)
 
     return descriptors, keypoints

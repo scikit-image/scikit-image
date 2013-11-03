@@ -2,7 +2,7 @@ import numpy as np
 
 from skimage.feature.util import (_mask_border_keypoints,
                                   _prepare_grayscale_input_2D,
-                                  _create_keypoint_recarray)
+                                  create_keypoint_recarray)
 
 from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
@@ -116,10 +116,10 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
     orientations = np.hstack(orientations_list)
     octaves = downscale ** np.hstack(scales_list)
     harris_measure = np.hstack(harris_response_list)
-    keypoints = _create_keypoint_recarray(keypoints_array[:, 0],
-                                          keypoints_array[:, 1],
-                                          octaves, orientations,
-                                          harris_measure)
+    keypoints = create_keypoint_recarray(keypoints_array[:, 0],
+                                         keypoints_array[:, 1],
+                                         octaves, orientations,
+                                         harris_measure)
 
     if keypoints.shape[0] < n_keypoints:
         return keypoints
