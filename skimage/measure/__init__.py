@@ -23,6 +23,5 @@ __all__ = ['find_contours',
            'moments_central',
            'moments_normalized',
            'moments_hu',
-           'sum_blocks',
            'marching_cubes',
            'mesh_surface_area']

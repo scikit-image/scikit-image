@@ -551,20 +551,22 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> model = EllipseModel()
     >>> model.estimate(data)
     >>> model._params
-    array([  4.85808595e+02,   4.51492793e+02,   1.15018491e+03,
-             5.52428289e+00,   7.32420126e-01])
+    array([ -3.30354146e+03,  -2.87791160e+03,   5.59062118e+03,
+             7.84365066e+00,   7.19203152e-01])
+
 
     Estimate ellipse model using RANSAC:
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
-    >>> # ransac_model._params, inliers
-
-    Should give the correct result estimated without the faulty data::
-
-        [ 20.12762373, 29.73563061, 4.81499637, 10.4743584, 0.05217117]
-        [ 4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-         21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37,
-         38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49]
+    >>> ransac_model._params
+    array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
+    >>> inliers
+    array([False, False, False, False,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True], dtype=bool)
 
     Robustly estimate geometric transformation:
 
@@ -578,10 +580,12 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> dst[2] = (50, 50)
     >>> model, inliers = ransac((src, dst), SimilarityTransform, 2, 10)
     >>> inliers
-    array([ 3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-       37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49])
-
+    array([False, False, False,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True,  True,  True,  True,  True,
+            True,  True,  True,  True,  True], dtype=bool)
 
     """
 
