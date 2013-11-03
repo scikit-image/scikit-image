@@ -10,7 +10,11 @@ test:
 	nosetests skimage
 
 doctest:
-	nosetests --with-doctest skimage
+	nosetests \
+		--with-doctest \
+		--ignore-files="^\." \
+		--ignore-files="^setup\.py$$" \
+		skimage
 
 coverage:
 	nosetests skimage --with-coverage --cover-package=skimage

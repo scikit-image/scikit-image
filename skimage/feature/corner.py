@@ -500,7 +500,7 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
     Examples
     --------
-    >>> from skimage.feature import peak_local_max, corner_peaks
+    >>> from skimage.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response
