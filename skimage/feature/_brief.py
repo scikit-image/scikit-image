@@ -57,12 +57,11 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.feature.corner import corner_peaks, corner_harris
-    >>> from skimage.feature import pairwise_hamming_distance, brief, match_keypoints_brief
-    >>> square1 = np.zeros([8, 8], dtype=np.int32)
-    >>> square1[2:6, 2:6] = 1
-    >>> square1
+    >>> # from skimage.feature import corner_peaks, corner_harris,
+    >>> #   pairwise_hamming_distance, brief, match_keypoints_brief
+    >>> # square1 = np.zeros([8, 8], dtype=np.int32)
+    >>> # square1[2:6, 2:6] = 1
+    >>> # square1
     array([[0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 0, 0],
@@ -71,21 +70,21 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [0, 0, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
-    >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
-    >>> keypoints1
+    >>> # keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
+    >>> # keypoints1
     array([[2, 2],
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> descriptors1, keypoints1 = brief(square1, keypoints1, patch_size=5)
-    >>> keypoints1
+    >>> # descriptors1, keypoints1 = brief(square1, keypoints1, patch_size=5)
+    >>> # keypoints1
     array([[2, 2],
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> square2 = np.zeros([9, 9], dtype=np.int32)
-    >>> square2[2:7, 2:7] = 1
-    >>> square2
+    >>> # square2 = np.zeros([9, 9], dtype=np.int32)
+    >>> # square2[2:7, 2:7] = 1
+    >>> # square2
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
@@ -95,24 +94,25 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
-    >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
-    >>> keypoints2
+    >>> # keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
+    >>> # keypoints2
     array([[2, 2],
            [2, 6],
            [6, 2],
            [6, 6]])
-    >>> descriptors2, keypoints2 = brief(square2, keypoints2, patch_size=5)
-    >>> keypoints2
+    >>> # descriptors2, keypoints2 = brief(square2, keypoints2, patch_size=5)
+    >>> # keypoints2
     array([[2, 2],
            [2, 6],
            [6, 2],
            [6, 6]])
-    >>> pairwise_hamming_distance(descriptors1, descriptors2)
+    >>> # pairwise_hamming_distance(descriptors1, descriptors2)
     array([[ 0.03125  ,  0.3203125,  0.3671875,  0.6171875],
            [ 0.3203125,  0.03125  ,  0.640625 ,  0.375    ],
            [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
            [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
-    >>> match_keypoints_brief(keypoints1, descriptors1, keypoints2, descriptors2)
+    >>> # match_keypoints_brief(keypoints1, descriptors1,
+    >>> #                     keypoints2, descriptors2)
     array([[[ 2,  2],
             [ 2,  2]],
 
@@ -126,6 +126,7 @@ def brief(image, keypoints, descriptor_size=256, mode='normal', patch_size=49,
             [ 6,  6]]])
 
     """
+
     np.random.seed(sample_seed)
 
     image = np.squeeze(image)

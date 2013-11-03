@@ -14,6 +14,7 @@ doctest:
 		--with-doctest \
 		--ignore-files="^\." \
 		--ignore-files="^setup\.py$$" \
+		--ignore-files="^_test"
 		skimage
 
 coverage:
