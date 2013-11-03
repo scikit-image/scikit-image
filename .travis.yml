@@ -33,15 +33,13 @@ install:
 script:
     # Check if setup.py's match bento.info
     - $PYTHON check_bento_build.py
-    # Change into an innocuous directory and find tests from installation
+    # Setup matplotlib settings
     - mkdir $HOME/.matplotlib
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
-    - mkdir for_test
-    - cd for_test
+    # Run all tests
     - nosetests-$PYVER --exe -v --with-doctest skimage
-    # Change back to repository root directory and run all doc examples
-    - cd ..
+    # Run all doc examples
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     - for f in doc/examples/applications/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     # Run pep8 and flake tests
