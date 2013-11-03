@@ -15,7 +15,6 @@ install:
     - sudo apt-get install $PYTHON-numpy
     - sudo apt-get install $PYTHON-scipy
     - sudo apt-get install $PYTHON-setuptools
-    - sudo apt-get install $PYTHON-nose
     - sudo easy_install$PYSUF pip
     - sudo pip-$PYVER install cython
     - sudo apt-get install libfreeimage3
@@ -23,6 +22,7 @@ install:
     - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
     - sudo pip-$PYVER install flake8
     - sudo pip-$PYVER install six
+    - sudo pip-$PYVER install nose
     - $PYTHON setup.py build
     - sudo $PYTHON setup.py install
 script:
