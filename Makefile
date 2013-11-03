@@ -9,5 +9,8 @@ clean:
 test:
 	nosetests skimage
 
+doctest:
+	nosetests --with-doctest skimage
+
 coverage:
 	nosetests skimage --with-coverage --cover-package=skimage
