@@ -40,8 +40,7 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from skimage.transform import hough_line, hough_peaks
+    >>> from skimage.transform import hough_line, hough_line_peaks
     >>> from skimage.draw import line
     >>> img = np.zeros((15, 15), dtype=np.bool_)
     >>> rr, cc = line(0, 0, 14, 14)
@@ -49,11 +48,11 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     >>> rr, cc = line(0, 14, 14, 0)
     >>> img[cc, rr] = 1
     >>> hspace, angles, dists = hough_line(img)
-    >>> hspace, angles, dists = hough_peaks(hspace, angles, dists)
+    >>> hspace, angles, dists = hough_line_peaks(hspace, angles, dists)
     >>> angles
-    array([  0.74590887,  -0.79856126])
+    array([-0.78101046,  0.78101046])
     >>> dists
-    array([  10.74418605,  0.51162791])
+    array([  0.51162791,  10.74418605])
 
     """
 
