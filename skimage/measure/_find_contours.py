@@ -1,5 +1,5 @@
 import numpy as np
-from . import _find_contours
+from . import _find_contours_cy
 
 from collections import deque
 
@@ -115,8 +115,8 @@ def find_contours(array, level,
        positive_orientation not in _param_options):
         raise ValueError('Parameters "fully_connected" and'
         ' "positive_orientation" must be either "high" or "low".')
-    point_list = _find_contours.iterate_and_store(array, level,
-                                                  fully_connected == 'high')
+    point_list = _find_contours_cy.iterate_and_store(array, level,
+                                                     fully_connected == 'high')
     contours = _assemble_contours(_take_2(point_list))
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]

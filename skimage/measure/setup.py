@@ -12,11 +12,11 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('measure', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_find_contours.pyx'], working_path=base_path)
+    cython(['_find_contours_cy.pyx'], working_path=base_path)
     cython(['_moments.pyx'], working_path=base_path)
     cython(['_marching_cubes_cy.pyx'], working_path=base_path)
 
-    config.add_extension('_find_contours', sources=['_find_contours.c'],
+    config.add_extension('_find_contours_cy', sources=['_find_contours_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_moments', sources=['_moments.c'],
                          include_dirs=[get_numpy_include_dirs()])
