@@ -283,9 +283,9 @@ def corner_foerstner(image, sigma=1):
     Examples
     --------
     >>> from skimage.feature import corner_foerstner, corner_peaks
-    >>> square = np.zeros([10, 10], dtype=int)
+    >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
-    >>> square
+    >>> square.astype(int)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -301,10 +301,10 @@ def corner_foerstner(image, sigma=1):
     >>> roundness_thresh = 0.3
     >>> foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
     >>> corner_peaks(foerstner, min_distance=1)
-    array([[3, 3],
-           [3, 6],
-           [6, 3],
-           [6, 6]])
+    array([[2, 2],
+           [2, 7],
+           [7, 2],
+           [7, 7]])
 
     """
 
