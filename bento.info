@@ -45,9 +45,9 @@ Library:
     Extension: skimage.io._plugins._colormixer
         Sources:
             skimage/io/_plugins/_colormixer.pyx
-    Extension: skimage.measure._find_contours
+    Extension: skimage.measure._find_contours_cy
         Sources:
-            skimage/measure/_find_contours.pyx
+            skimage/measure/_find_contours_cy.pyx
     Extension: skimage.measure._moments
         Sources:
             skimage/measure/_moments.pyx
