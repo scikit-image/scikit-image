@@ -3,14 +3,17 @@ from numpy.testing import assert_array_equal, assert_raises
 from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
-from skimage.feature import (descriptor_brief, match_binary_descriptors, corner_peaks,
-                             corner_harris)
+from skimage.feature import (descriptor_brief, match_binary_descriptors,
+                             corner_peaks, corner_harris,
+                             create_keypoint_recarray)
 
 
 def test_descriptor_brief_color_image_unsupported_error():
     """Brief descriptors can be evaluated on gray-scale images only."""
     img = np.zeros((20, 20, 3))
-    keypoints = [[7, 5], [11, 13]]
+    keypoints_loc = np.asarray([[7, 5], [11, 13]])
+    keypoints = create_keypoint_recarray(keypoints_loc[:, 0],
+                                         keypoints_loc[:, 1])
     assert_raises(ValueError, descriptor_brief, img, keypoints)
 
 
@@ -18,7 +21,10 @@ def test_descriptor_brief_normal_mode():
     """Verify the computed BRIEF descriptors with expected for normal mode."""
     img = data.lena()
     img = rgb2gray(img)
-    keypoints = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints_loc = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints = create_keypoint_recarray(keypoints_loc[:, 0],
+                                         keypoints_loc[:, 1])
+
     descriptors, keypoints = descriptor_brief(img, keypoints[:8],
                                               descriptor_size=8)
 
@@ -38,7 +44,9 @@ def test_descriptor_brief_uniform_mode():
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
     img = data.lena()
     img = rgb2gray(img)
-    keypoints = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints_loc = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints = create_keypoint_recarray(keypoints_loc[:, 0],
+                                         keypoints_loc[:, 1])
     descriptors, keypoints = descriptor_brief(img, keypoints[:8],
                                               descriptor_size=8,
                                               mode='uniform')

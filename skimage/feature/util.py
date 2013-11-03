@@ -3,7 +3,7 @@ import numpy as np
 from skimage.util import img_as_float
 
 
-def _create_keypoint_recarray(row, col, octave=None, orientation=None,
+def create_keypoint_recarray(row, col, octave=None, orientation=None,
                               response=None):
     keypoints = np.zeros(row.shape[0],
                          dtype=[('row', np.double), ('col', np.double),

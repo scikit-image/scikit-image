@@ -11,7 +11,7 @@ from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
 from ._brief import descriptor_brief
 from .match import match_binary_descriptors
-from .util import pairwise_hamming_distance
+from .util import pairwise_hamming_distance, create_keypoint_recarray
 from .censure import keypoints_censure
 from .orb import keypoints_orb, descriptor_orb
 
@@ -31,6 +31,7 @@ __all__ = ['daisy',
            'match_template',
            'descriptor_brief',
            'pairwise_hamming_distance',
+           'create_keypoint_recarray',
            'match_binary_descriptors',
            'keypoints_censure',
            'corner_fast',
