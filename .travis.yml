@@ -29,6 +29,7 @@ install:
     - sudo pip-$PYVER install flake8
     - sudo pip-$PYVER install six
     - $PYTHON setup.py build
+    - $PYTHON setup.py build_ext --inplace
     - sudo $PYTHON setup.py install
 script:
     # Check if setup.py's match bento.info
