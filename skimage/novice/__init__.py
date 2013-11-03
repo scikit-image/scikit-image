@@ -53,7 +53,7 @@ and know their location in the picture.
 Pictures know if they've been modified from the original file
 >>> picture.modified
 True
->>> picture.path
+>>> print(picture.path)
 None
 
 Pictures can be indexed like arrays
