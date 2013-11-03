@@ -19,11 +19,11 @@ install:
     - sudo apt-get install xorg
     - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-qt4; fi
     - if [[ $PYVER == '3.2' ]]; then sudo apt-get install $PYTHON-pyqt4; fi
-    - sudo apt-get install cython$PYSUF
     - sudo apt-get install libfreeimage3
     - sudo easy_install$PYSUF pip
     - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
     - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
+    - sudo pip-$PYVER install cython
     - sudo pip-$PYVER install flake8
     - sudo pip-$PYVER install six
     - $PYTHON setup.py build
