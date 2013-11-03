@@ -28,9 +28,7 @@ install:
     - sudo pip-$PYVER install cython
     - sudo pip-$PYVER install flake8
     - sudo pip-$PYVER install six
-    - $PYTHON setup.py build
     - $PYTHON setup.py build_ext --inplace
-    - sudo $PYTHON setup.py install
 script:
     # Check if setup.py's match bento.info
     - $PYTHON check_bento_build.py
@@ -41,6 +39,7 @@ script:
     # Run all tests
     - nosetests-$PYVER --exe -v --with-doctest skimage
     # Run all doc examples
+    - export PYTHONPATH=$(pwd):$PYTHONPATH
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     - for f in doc/examples/applications/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     # Run pep8 and flake tests
