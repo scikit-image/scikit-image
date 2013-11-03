@@ -14,7 +14,6 @@ __all__ = ['histogram', 'cumulative_distribution', 'equalize',
 def histogram(image, nbins=256):
     """Return histogram of image.
 
-
     Unlike `numpy.histogram`, this function returns the centers of bins and
     does not rebin integer arrays. For integer arrays, each integer value has
     its own bin, which improves speed and intensity-resolution.
@@ -40,11 +39,12 @@ def histogram(image, nbins=256):
 
     Examples
     --------
-    >>> from skimage import data
-    >>> hist = histogram(data.camera())
-    >>> import matplotlib.pyplot as plt
-    >>> plt.plot(hist[1], hist[0])  # doctest: +ELLIPSIS
-    [...]
+    >>> from skimage import data, exposure, util
+    >>> image = util.img_as_float(data.camera())
+    >>> np.histogram(image, bins=2)
+    (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
+    >>> exposure.histogram(image, nbins=2)
+    (array([107432, 154712]), array([ 0.25,  0.75]))
     """
     sh = image.shape
     if len(sh) == 3 and sh[-1] < 4:
