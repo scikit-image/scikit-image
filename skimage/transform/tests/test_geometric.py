@@ -174,6 +174,20 @@ def test_translation_estimation(num_points=20):
     assert_array_almost_equal(tform.translation, translation_vec)
 
 
+def test_euclidean_estimation(num_points=20):
+    true_tform = EuclideanTransform(np.random.randn(2),
+                                    np.random.randn() * 2 * np.pi)
+
+    src_points = np.random.randn(num_points, 2)
+    dst_points = true_tform(src_points)
+
+    estimated = estimate_transform('euclidean', src_points, dst_points)
+    assert_array_almost_equal(estimated.translation, true_tform.translation)
+    assert_array_almost_equal(estimated.rotation, true_tform.rotation)
+    # assert(False)
+
+
+
 def test_union():
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)

@@ -728,7 +728,7 @@ class EuclideanTransform(ProjectiveTransform):
             self._matrix = np.eye(3)
 
     def estimate(self, src, dst):
-        """Using method from Simon Prince's boko (equations 15.23 - 15.26)
+        """Using method from Simon Prince's book (equations 15.23 - 15.26)
 
         http://computervisionmodels.blogspot.co.uk/"""
         if src.shape != dst.shape:
