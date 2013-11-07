@@ -736,8 +736,6 @@ class EuclideanTransform(ProjectiveTransform):
         if src.shape[1] != 2:
             raise ValueError('src must be Nx2 matrix')
 
-        # import ipdb; ipdb.set_trace()
-
         # Simon Prince does everything with column vectors, follow his lead
         src = src.T
         dst = dst.T
@@ -759,15 +757,8 @@ class EuclideanTransform(ProjectiveTransform):
         # to be the transpose of rot_mtx, otherwise bad things happen.
         translation = dst_mean - np.dot(rot_mtx.T, src_mean)
 
-        # print "rot_mtx: ", rot_mtx
-        # print "translation: ", translation
-
-        # import ipdb; ipdb.set_trace()
-
         self._matrix = np.vstack([np.hstack([rot_mtx, translation]),
                                   [0, 0, 1]])
-
-        # print "self._matrix: ", self._matrix
 
     @property
     def rotation(self):
