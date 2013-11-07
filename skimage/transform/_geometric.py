@@ -749,13 +749,13 @@ class EuclideanTransform(ProjectiveTransform):
         centred_dst = dst - dst_mean
 
         # See Simon Prince's book, appendix C.7.3
-        u, _, v = np.linalg.svd(np.dot(centred_dst, centred_src.T))
+        u, l, v = np.linalg.svd(np.dot(centred_dst, centred_src.T))
 
-        rot_mtx = np.dot(v, u.T)
+        rot_mtx = np.dot(v.T, u.T).T
 
         # Prince equation 15.24 - but that equation is WRONG!! This has
         # to be the transpose of rot_mtx, otherwise bad things happen.
-        translation = dst_mean - np.dot(rot_mtx.T, src_mean)
+        translation = dst_mean - np.dot(rot_mtx, src_mean)
 
         self._matrix = np.vstack([np.hstack([rot_mtx, translation]),
                                   [0, 0, 1]])

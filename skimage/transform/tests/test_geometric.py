@@ -183,8 +183,9 @@ def test_euclidean_estimation(num_points=20):
         dst_points = true_tform(src_points)
 
         estimated = estimate_transform('euclid', src_points, dst_points)
-        assert_array_almost_equal(estimated.translation, true_tform.translation)
-        assert_array_almost_equal(estimated.rotation, true_tform.rotation)
+        assert_array_almost_equal(estimated._matrix, true_tform._matrix)
+        # assert_array_almost_equal(estimated.translation, true_tform.translation)
+        # assert_array_almost_equal(estimated.rotation, true_tform.rotation)
 
 
 
