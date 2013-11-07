@@ -4,7 +4,7 @@ from skimage.transform._geometric import _stackcopy
 from skimage.transform import (estimate_transform,
                                SimilarityTransform, AffineTransform,
                                ProjectiveTransform, PolynomialTransform,
-                               PiecewiseAffineTransform)
+                               PiecewiseAffineTransform, EuclideanTransform)
 
 
 SRC = np.array([
@@ -175,16 +175,19 @@ def test_translation_estimation(num_points=20):
 
 
 def test_euclidean_estimation(num_points=20):
-    true_tform = EuclideanTransform(np.random.randn(2),
-                                    np.random.randn() * 2 * np.pi)
+    for i in range(100):  # Loop a lot here, just in case!!
+        true_tform = EuclideanTransform(np.random.randn(2),
+                                        np.random.rand() * 2 * np.pi)
 
-    src_points = np.random.randn(num_points, 2)
-    dst_points = true_tform(src_points)
+        src_points = np.random.randn(num_points, 2)
+        dst_points = true_tform(src_points)
 
-    estimated = estimate_transform('euclidean', src_points, dst_points)
-    assert_array_almost_equal(estimated.translation, true_tform.translation)
-    assert_array_almost_equal(estimated.rotation, true_tform.rotation)
-    # assert(False)
+        estimated = estimate_transform('euclid', src_points, dst_points)
+        assert_array_almost_equal(estimated.translation, true_tform.translation)
+        assert_array_almost_equal(estimated.rotation, true_tform.rotation)
+
+
+
 
 
 

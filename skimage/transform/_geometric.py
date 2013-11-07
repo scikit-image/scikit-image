@@ -717,7 +717,7 @@ class EuclideanTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            self._matrix = np.array([
+            self._matrix = np.array([ 
                 [math.cos(rotation), - math.sin(rotation), 0],
                 [math.sin(rotation),   math.cos(rotation), 0],
                 [                 0,                    0, 1]
@@ -736,6 +736,8 @@ class EuclideanTransform(ProjectiveTransform):
         if src.shape[1] != 2:
             raise ValueError('src must be Nx2 matrix')
 
+        # import ipdb; ipdb.set_trace()
+
         # Simon Prince does everything with column vectors, follow his lead
         src = src.T
         dst = dst.T
@@ -753,8 +755,9 @@ class EuclideanTransform(ProjectiveTransform):
 
         rot_mtx = np.dot(v, u.T)
 
-        # Prince equation 15.24
-        translation = dst_mean - np.dot(rot_mtx, src_mean)
+        # Prince equation 15.24 - but that equation is WRONG!! This has
+        # to be the transpose of rot_mtx, otherwise bad things happen.
+        translation = dst_mean - np.dot(rot_mtx.T, src_mean)
 
         # print "rot_mtx: ", rot_mtx
         # print "translation: ", translation
