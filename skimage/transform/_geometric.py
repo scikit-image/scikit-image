@@ -686,7 +686,7 @@ class EuclideanTransform(ProjectiveTransform):
 
         Y = x*sin(rotation) + y*cos(rotation) + ty
 
-    where ``m`` is a zoom factor and the homogeneous transformation matrix is::
+    where the homogeneous transformation matrix is::
 
         [[cos(theta) -sin(theta)  tx]
          [sin(theta)  cos(theta)  ty]
