@@ -16,12 +16,11 @@ before_install:
     - sudo apt-get install $PYTHON-dev
     - sudo apt-get install $PYTHON-numpy
     - sudo apt-get install $PYTHON-scipy
-    - sudo apt-get install $PYTHON-pip
     - sudo apt-get install libfreeimage3
     - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then sudo apt-get install $PYTHON-qt4; fi
     - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then sudo apt-get install $PYTHON-pyqt4; fi
     - if [[ $TRAVIS_PYTHON_VERSION == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then sudo pip install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then sudo pip install matplotlib; fi
     - sudo pip install cython
     - sudo pip install flake8
     - sudo pip install six
