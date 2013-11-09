@@ -56,8 +56,8 @@ script:
     # Setup matplotlib settings
     - mkdir $HOME/.matplotlib
     - touch $HOME/.matplotlib/matplotlibrc
-    - echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc
-    - echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc
+    - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
+    - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
     # Run all tests
     - nosetests --exe -v --with-doctest --ignore-files='^\.' --ignore-files='^setup\.py$$' --ignore-files='^_test' skimage
     # Run all doc examples
