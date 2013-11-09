@@ -61,5 +61,17 @@ def test_relabel_sequential_offset5_with0():
     assert_array_equal(inv, inv_ref)
 
 
+def test_relabel_sequential_dtype():
+    ar = np.array([1, 1, 5, 5, 8, 99, 42, 0], dtype=float)
+    ar_relab, fw, inv = relabel_sequential(ar, offset=5)
+    ar_relab_ref = np.array([5, 5, 6, 6, 7, 9, 8, 0])
+    assert_array_equal(ar_relab, ar_relab_ref)
+    fw_ref = np.zeros(100, int)
+    fw_ref[1] = 5; fw_ref[5] = 6; fw_ref[8] = 7; fw_ref[42] = 8; fw_ref[99] = 9
+    assert_array_equal(fw, fw_ref)
+    inv_ref = np.array([0, 0, 0, 0, 0, 1,  5,  8, 42, 99])
+    assert_array_equal(inv, inv_ref)
+
+
 if __name__ == "__main__":
     np.testing.run_module_suite()

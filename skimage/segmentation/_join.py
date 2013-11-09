@@ -114,6 +114,8 @@ def relabel_sequential(label_field, offset=1):
     >>> relab
     array([5, 5, 6, 6, 7, 9, 8])
     """
+    if not np.issubdtype(label_field.dtype, np.int):
+        label_field = label_field.astype(np.int)
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
     m = labels.max()
