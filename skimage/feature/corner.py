@@ -70,10 +70,10 @@ def corner_kitchen_rosenfeld(image):
     The corner measure is calculated as follows::
 
         (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy)
-        ------------------------------------------------------
-                        (imx**2 + imy**2)
+            / (imx**2 + imy**2)
 
-    Where imx and imy are the first and imxx, imxy, imyy the second derivatives.
+    Where imx and imy are the first and imxx, imxy, imyy the second
+    derivatives.
 
     Parameters
     ----------
