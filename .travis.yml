@@ -11,19 +11,11 @@ python:
 
 matrix:
     include:
-        - python: 2.6
-          env:
-            - PYTHON=python
-            - PYVER=2.x
         - python: 2.7
           env:
             - PYTHON=python
             - PYVER=2.x
         - python: 3.2
-          env:
-            - PYTHON=python3
-            - PYVER=3.x
-        - python: 3.3
           env:
             - PYTHON=python3
             - PYVER=3.x
