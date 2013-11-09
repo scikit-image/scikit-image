@@ -112,7 +112,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         label = label - offset  # Make sure you don't modify the input array.
         bg_label -= offset
 
-    new_type = np.min_scalar_type(label.max())
+    new_type = np.min_scalar_type(int(label.max()))
     if new_type == np.bool:
         new_type = np.uint8
     label = label.astype(new_type)
