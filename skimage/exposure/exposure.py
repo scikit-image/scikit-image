@@ -339,7 +339,8 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     References
     ----------
     .. [1] Gustav J. Braun, "Image Lightness Rescaling Using Sigmoidal Contrast
-    Enhancement Functions" http://www.cis.rit.edu/fairchild/PDFs/PAP07.pdf
+           Enhancement Functions",
+           http://www.cis.rit.edu/fairchild/PDFs/PAP07.pdf
 
     """
     _assert_non_negative(image)
