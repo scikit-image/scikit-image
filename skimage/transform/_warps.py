@@ -208,7 +208,7 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     """
 
     if angle % 90 == 0:
-        for i in range(angle / 90):
+        for i in range(angle // 90):
             image = np.rot90(image)
         return img_as_float(image, force_copy=True)
 
