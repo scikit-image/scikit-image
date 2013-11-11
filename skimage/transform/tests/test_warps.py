@@ -1,4 +1,5 @@
-from numpy.testing import assert_array_almost_equal, run_module_suite, assert_array_equal
+from numpy.testing import (assert_array_almost_equal, run_module_suite,
+                           assert_array_equal)
 import numpy as np
 from scipy.ndimage import map_coordinates
 
@@ -118,6 +119,16 @@ def test_rotate_resize():
     assert x45.shape == (14, 14)
 
 
+def test_rotate_no_change():
+    np.random.seed(1)
+    x = np.random.rand(10, 12)
+    assert_array_almost_equal(rotate(x, 0), x, 12)
+    assert_array_almost_equal(rotate(x, 360), x, 12)
+    assert_array_almost_equal(rotate(x, 720), x, 12)
+    assert_array_almost_equal(rotate(x, -360), x, 12)
+    assert_array_almost_equal(rotate(x, -720), x, 12)
+
+
 def test_rescale():
     # same scale factor
     x = np.zeros((5, 5), dtype=np.double)
@@ -134,6 +145,13 @@ def test_rescale():
     ref = np.zeros((10, 5))
     ref[2:4, 1] = 1
     assert_array_almost_equal(scaled, ref)
+
+
+def test_rescale_no_change():
+    np.random.seed(1)
+    x = np.random.rand(10, 12)
+    assert_array_almost_equal(rescale(x, 1), x, 12)
+    assert_array_almost_equal(rescale(x, 1), x, 12)
 
 
 def test_resize2d():
@@ -165,6 +183,17 @@ def test_resize3d_resize():
     ref = np.zeros((10, 10, 1))
     ref[2:4, 2:4] = 1
     assert_array_almost_equal(resized, ref)
+
+
+def test_resize_no_change():
+    np.random.seed(1)
+    x = np.random.rand(10, 12)
+    assert_array_almost_equal(resize(x, (10, 12)), x, 12)
+    assert_array_almost_equal(resize(x, (10, 12, 1)), x, 12)
+
+    x = np.random.rand(10, 12, 3)
+    assert_array_almost_equal(resize(x, (10, 12)), x, 12)
+    assert_array_almost_equal(resize(x, (10, 12, 3)), x, 12)
 
 
 def test_resize3d_bilinear():
