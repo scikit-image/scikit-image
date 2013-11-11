@@ -11,12 +11,14 @@ def match_binary_descriptors(keypoints1, descriptors1, keypoints2,
 
     Parameters
     ----------
-    keypoints1 : (M, 2) ndarray
-        M Keypoints from the first image described using skimage.feature.brief
+    keypoints1 : record array with M rows
+        Record array with fields row, col, octave, orientation, response.
+        Octave, orientation and response can be None.
     descriptors1 : (M, P) ndarray
         Binary descriptors of size P about M keypoints in the first image.
-    keypoints2 : (N, 2) ndarray
-        N Keypoints from the second image described using skimage.feature.brief
+    keypoints2 : record array with N rows
+        Record array with fields row, col, octave, orientation, response.
+        Octave, orientation and response can be None.
     descriptors2 : (N, P) ndarray
         Binary descriptors of size P about N keypoints in the second image.
     threshold : float in range [0, 1]
@@ -49,6 +51,8 @@ def match_binary_descriptors(keypoints1, descriptors1, keypoints2,
 
     # Get hamming distances between keypoints1 and keypoints2
     distance = pairwise_hamming_distance(descriptors1, descriptors2)
+    kp1 = np.squeeze(np.dstack((keypoints1.row, keypoints1.col)))
+    kp2 = np.squeeze(np.dstack((keypoints2.row, keypoints2.col)))
 
     if cross_check:
         matched_keypoints1_index = np.argmin(distance, axis=1)
@@ -62,16 +66,16 @@ def match_binary_descriptors(keypoints1, descriptors1, keypoints2,
                                           dtype=np.intp)
         mask1 = matched_index[:, 0]
         mask2 = matched_index[:, 1]
-        matches[:, 0, :] = keypoints1[mask1]
-        matches[:, 1, :] = keypoints2[mask2]
+        matches[:, 0, :] = kp1[mask1]
+        matches[:, 1, :] = kp2[mask2]
 
     else:
         temp = distance > threshold
         row_check = np.any(~temp, axis=1)
-        matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
+        matched_keypoints2 = kp2[np.argmin(distance, axis=1)]
         matches = np.zeros((np.sum(row_check), 2, 2),
                                           dtype=np.intp)
-        matches[:, 0, :] = keypoints1[row_check]
+        matches[:, 0, :] = kp1[row_check]
         matches[:, 1, :] = matched_keypoints2[row_check]
         mask1 = np.where(row_check == True)[0]
         mask2 = np.argmin(distance, axis=1)[row_check]

@@ -4,7 +4,8 @@ from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
 from skimage.feature import (descriptor_brief, match_binary_descriptors,
-                             corner_peaks, corner_harris)
+                             corner_peaks, corner_harris,
+                             create_keypoint_recarray)
 
 
 def test_match_binary_descriptors_unequal_descriptor_keypoints_error():
@@ -12,26 +13,30 @@ def test_match_binary_descriptors_unequal_descriptor_keypoints_error():
     kp1 = np.array([[40, 50],
                     [60, 40],
                     [30, 70]])
+    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
     des1 = np.array([[True, True, False, True],
                      [False, True, False, True]])
     kp2 = np.array([[60, 50],
                     [50, 80]])
+    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
     des2 = np.array([[True, False, False, True],
                      [False, True, True, True]])
-    assert_raises(ValueError, match_binary_descriptors, kp1, des1, kp2, des2)
+    assert_raises(ValueError, match_binary_descriptors, keypoints1, des1, keypoints2, des2)
 
 
 def test_match_binary_descriptors_unequal_descriptor_sizes_error():
     """Sizes of descriptors of keypoints to be matched should be equal."""
     kp1 = np.array([[40, 50],
                     [60, 40]])
+    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
     des1 = np.array([[True, True, False, True],
                      [False, True, False, True]])
     kp2 = np.array([[60, 50],
                     [50, 80]])
+    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
     des2 = np.array([[True, False, False, True, False],
                      [False, True, True, True, False]])
-    assert_raises(ValueError, match_binary_descriptors, kp1, des1, kp2, des2)
+    assert_raises(ValueError, match_binary_descriptors, keypoints1, des1, keypoints2, des2)
 
 
 def test_match_binary_descriptors_lena_rotation_crosscheck_false():
@@ -43,10 +48,13 @@ def test_match_binary_descriptors_lena_rotation_crosscheck_false():
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform)
 
-    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
-    descriptors1, keypoints1 = descriptor_brief(img, keypoints1, descriptor_size=512)
+    kp1 = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
+    descriptors1, keypoints1 = descriptor_brief(img, keypoints1,
+                                                descriptor_size=512)
 
-    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    kp2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
     descriptors2, keypoints2 = descriptor_brief(rotated_img, keypoints2,
                                                 descriptor_size=512)
 
@@ -57,8 +65,10 @@ def test_match_binary_descriptors_lena_rotation_crosscheck_false():
                                                          threshold=0.13,
                                                          cross_check=False)
 
-    expected_mask1 = np.array([11, 12, 16, 20, 24, 26, 27, 29, 35, 39, 40, 42, 45])
-    expected_mask2 = np.array([ 1,  3,  0,  4,  6,  7,  8,  9, 10, 10, 11, 12, 13])
+    expected_mask1 = np.array([11, 12, 16, 20, 24, 26, 27, 29, 35, 39, 40,
+                               42, 45])
+    expected_mask2 = np.array([ 1,  3,  0,  4,  6,  7,  8,  9, 10, 10, 11,
+                               12, 13])
     expected = np.array([[[245, 141],
                           [221, 176]],
 
@@ -112,10 +122,12 @@ def test_match_binary_descriptors_lena_rotation_crosscheck_true():
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform)
 
-    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
+    kp1 = corner_peaks(corner_harris(img), min_distance=5)
+    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
     descriptors1, keypoints1 = descriptor_brief(img, keypoints1, descriptor_size=512)
 
-    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    kp2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
     descriptors2, keypoints2 = descriptor_brief(rotated_img, keypoints2,
                                                 descriptor_size=512)
 
