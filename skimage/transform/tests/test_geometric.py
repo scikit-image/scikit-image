@@ -4,6 +4,7 @@ from skimage.transform._geometric import _stackcopy
 from skimage.transform import (estimate_transform,
                                SimilarityTransform, AffineTransform,
                                ProjectiveTransform, PolynomialTransform,
+                               RotationTransform, ScaleTransform,
                                PiecewiseAffineTransform, EuclideanTransform)
 
 
@@ -173,6 +174,16 @@ def test_translation_estimation(num_points=20):
     tform = estimate_transform('translation', src_points, dst_points)
     assert_array_almost_equal(tform.translation, translation_vec)
 
+def test_rotation_extimation(num_points=20):
+    for i in range(10):
+        true_tform = RotationTransform(np.random.rand() * 2 * np.pi)
+
+        src_points = np.random.randn(num_points, 2)
+        dst_points = true_tform(src_points)
+
+        estimated = estimate_transform('rotation', src_points, dst_points)
+        assert_array_almost_equal(estimated._matrix, true_tform._matrix)
+
 
 def test_euclidean_estimation(num_points=20):
     for i in range(100):  # Loop a lot here, just in case!!
@@ -186,6 +197,16 @@ def test_euclidean_estimation(num_points=20):
         assert_array_almost_equal(estimated._matrix, true_tform._matrix)
         # assert_array_almost_equal(estimated.translation, true_tform.translation)
         # assert_array_almost_equal(estimated.rotation, true_tform.rotation)
+
+def test_scale_estimation(num_points=20):
+    for i in range(100):
+        true_tform = ScaleTransform(10 * np.random.rand() + 0.5)
+
+        src_points = np.random.randn(num_points, 2)
+        dst_points = true_tform(src_points)
+
+        estimated = estimate_transform('scale', src_points, dst_points)
+        assert_array_almost_equal(estimated._matrix, true_tform._matrix)
 
 
 

@@ -9,7 +9,9 @@ from ._geometric import (warp, warp_coords, estimate_transform,
                          SimilarityTransform, AffineTransform,
                          ProjectiveTransform, PolynomialTransform,
                          PiecewiseAffineTransform,
-                         TranslationalTransform,
+                         TranslationTransform,
+                         RotationTransform,
+                         ScaleTransform,
                          EuclideanTransform)
 from ._warps import swirl, resize, rotate, rescale, downscale_local_mean
 from .pyramids import (pyramid_reduce, pyramid_expand,

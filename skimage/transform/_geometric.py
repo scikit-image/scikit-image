@@ -462,7 +462,156 @@ class PiecewiseAffineTransform(ProjectiveTransform):
         return out
 
 
-class SimilarityTransform(ProjectiveTransform):
+class TranslationTransform(ProjectiveTransform):
+    """2D transformation of the form
+
+        X = x + tx
+        Y = y + ty
+
+    where (tx, ty) is a 2d translation and the
+    homogeneous transformation matrix is::
+
+        [[1  0  tx]
+         [0  1  ty]
+         [0  0   1]]
+
+    Parameters
+    ----------
+    translation : (tx, ty) as array, list or tuple, optional
+        x, y translation parameters."""
+    def __init__(self, translation=None):
+        self._matrix = np.eye(3)
+        if translation is not None:
+            try:
+                x, y = translation
+            except ValueError:
+                raise ValueError("couldn't 2 elements from translation: %s" % translation)
+            self._matrix[0:2, 2] = [x, y]
+
+    def estimate(self, src, dst):
+        """Set the transformation matrix given source and destination
+        parameters.
+
+        The transformation is defined as::
+
+            X = x + tx
+            Y = y + ty
+
+        This is much simpler than the other transforms as the x and y are
+        independent - the best value for tx is simply the average
+        of the difference between source and destination points
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates."""
+        if src.shape != dst.shape:
+            raise ValueError('src and dst must be same shape')
+        xs = src[:, 0]
+        ys = src[:, 1]
+        xd = dst[:, 0]
+        yd = dst[:, 1]
+
+        tx = (xd - xs).mean()
+        ty = (yd - ys).mean()
+
+        self._matrix = np.array([[1, 0, tx],
+                                 [0, 1, ty],
+                                 [0, 0,  1]])
+
+    @property
+    def translation(self):
+        return self._matrix[0:2, 2]
+
+    def __str__(self):
+        return "[TransTf[%03.3f,%03.3f]" % (self.translation[0], self.translation[1])
+
+class RotationTransform(ProjectiveTransform):
+    """2D transformation of the form
+        X = a0*x - b0*y =
+          = x*cos(rotation) - y*sin(rotation)
+
+        Y = b0*x + a0*y + b1 =
+          = x*sin(rotation) + y*cos(rotation)
+
+    where ``m`` is a zoom factor and the homogeneous transformation matrix is::
+
+        [[a0  b0  0]
+         [b0  a0  0]
+         [0   0   1]]
+
+    Parameters
+    ----------
+    matrix : (3, 3) array, optional
+        Homogeneous transformation matrix.
+    rotation : float, optional
+        Rotation angle in counter-clockwise direction as radians.
+
+    """        
+    def __init__(self, rotation=None, matrix=None):
+        mat_provided, rot_provided = matrix is not None, rotation is not None
+        if mat_provided and rot_provided:
+            raise ValueError("Exactly one of rotation and matrix must be supplied")
+        if rot_provided:
+            self._matrix = np.array([
+                [math.cos(rotation), - math.sin(rotation), 0],
+                [math.sin(rotation),   math.cos(rotation), 0],
+                [                 0,                    0, 1]
+            ])
+        elif mat_provided:
+            self._matrix = matrix
+        else:
+            self._matrix = np.eye(3)
+
+    def estimate(self, src, dst):
+        # See Simon Prince's book, appendix C.7.3
+        u, l, v = np.linalg.svd(np.dot(dst.T, src))
+
+        rot_mtx = np.dot(v.T, u.T).T
+
+        self._matrix = np.vstack([np.hstack([rot_mtx, np.zeros((2, 1))]),
+                                  [0, 0, 1]])
+
+class ScaleTransform(ProjectiveTransform):
+    """2D transformation of the form
+        X = m*X
+        Y = m*Y
+
+    where ``m`` is a zoom factor and the homogeneous transformation matrix is::
+
+        [[m  0  0]
+         [0  m  0]
+         [0  0  1]]
+
+    Parameters
+    ----------
+    matrix : (3, 3) array, optional
+        Homogeneous transformation matrix.
+    scale : float, optional
+        Scale factor
+    """ 
+    def __init__(self, scale=None, matrix=None):
+        scale_provided, mat_provided = scale is not None, matrix is not None
+        if scale_provided and mat_provided:
+            raise ValueError("Exactly one of scale and matrix should be provided")
+        if scale_provided:
+            self._matrix = np.diag([scale, scale, 1])
+        elif mat_provided:
+            self._matrix = matrix
+        else:
+            self._matrix = np.eye(3)
+
+    def estimate(self, src, dst):
+        src_dst_prod = (src * dst).sum()
+        src_only_prod = (src * src).sum()
+        m = src_dst_prod / src_only_prod
+
+        self._matrix = np.diag([m, m, 1])
+
+
+class SimilarityTransform(RotationTransform, TranslationTransform, ScaleTransform):
     """2D similarity transformation of the form::
 
         X = a0*x - b0*y + a1 =
@@ -612,74 +761,8 @@ class SimilarityTransform(ProjectiveTransform):
 
 
 
-class TranslationalTransform(ProjectiveTransform):
-    """2D transformation of the form
 
-        X = x + tx
-        Y = y + ty
-
-    where (tx, ty) is a 2d translation and the
-    homogeneous transformation matrix is::
-
-        [[1  0  tx]
-         [0  1  ty]
-         [0  0   1]]
-
-    Parameters
-    ----------
-    translation : (tx, ty) as array, list or tuple, optional
-        x, y translation parameters."""
-    def __init__(self, translation=None):
-        self._matrix = np.eye(3)
-        if translation is not None:
-            try:
-                x, y = translation
-            except ValueError:
-                raise ValueError("couldn't 2 elements from translation: %s" % translation)
-            self._matrix[0:2, 2] = [x, y]
-
-    def estimate(self, src, dst):
-        """Set the transformation matrix given source and destination
-        parameters.
-
-        The transformation is defined as::
-
-            X = x + tx
-            Y = y + ty
-
-        This is much simpler than the other transforms as the x and y are
-        independent - the best value for tx is simply the average
-        of the difference between source and destination points
-
-        Parameters
-        ----------
-        src : (N, 2) array
-            Source coordinates.
-        dst : (N, 2) array
-            Destination coordinates."""
-        if src.shape != dst.shape:
-            raise ValueError('src and dst must be same shape')
-        xs = src[:, 0]
-        ys = src[:, 1]
-        xd = dst[:, 0]
-        yd = dst[:, 1]
-
-        tx = (xd - xs).mean()
-        ty = (yd - ys).mean()
-
-        self._matrix = np.array([[1, 0, tx],
-                                 [0, 1, ty],
-                                 [0, 0,  1]])
-
-    @property
-    def translation(self):
-        return self._matrix[0:2, 2]
-
-    def __str__(self):
-        return "[TransTf[%03.3f,%03.3f]" % (self.translation[0], self.translation[1])
-
-
-class EuclideanTransform(ProjectiveTransform):
+class EuclideanTransform(RotationTransform, TranslationTransform):
     """2D transformation of the form
 
         X = x*cos(rotation) - y*sin(rotation) + tx
@@ -753,8 +836,6 @@ class EuclideanTransform(ProjectiveTransform):
 
         rot_mtx = np.dot(v.T, u.T).T
 
-        # Prince equation 15.24 - but that equation is WRONG!! This has
-        # to be the transpose of rot_mtx, otherwise bad things happen.
         translation = dst_mean - np.dot(rot_mtx, src_mean)
 
         self._matrix = np.vstack([np.hstack([rot_mtx, translation]),
@@ -910,14 +991,16 @@ TRANSFORMS = {
     'similarity': SimilarityTransform,
     'affine': AffineTransform,
     'euclid': EuclideanTransform,
-    'translation': TranslationalTransform,
+    'translation': TranslationTransform,
+    'rotation': RotationTransform,
+    'scale': ScaleTransform,
     'piecewise-affine': PiecewiseAffineTransform,
     'projective': ProjectiveTransform,
     'polynomial': PolynomialTransform,
 }
 HOMOGRAPHY_TRANSFORMS = (
     EuclideanTransform,
-    TranslationalTransform,
+    TranslationTransform,
     SimilarityTransform,
     AffineTransform,
     ProjectiveTransform
