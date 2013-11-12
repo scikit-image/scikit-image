@@ -4,6 +4,7 @@ from scipy import ndimage
 from skimage.transform._geometric import (warp, SimilarityTransform,
                                           AffineTransform)
 from skimage.measure import block_reduce
+from skimage.util import img_as_float
 
 
 def resize(image, output_shape, order=1, mode='constant', cval=0.):
@@ -60,8 +61,13 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
     # 3-dimensional interpolation
     if len(output_shape) == 3 and (image.ndim == 2
                                    or output_shape[2] != image.shape[2]):
+
         dim = output_shape[2]
         orig_dim = 1 if image.ndim == 2 else image.shape[2]
+
+        if rows == orig_rows and cols == orig_cols and dim == orig_dim:
+            return img_as_float(image, force_copy=True)
+
         dim_scale = float(orig_dim) / dim
 
         map_rows, map_cols, map_dims = np.mgrid[:rows, :cols, :dim]
@@ -75,6 +81,9 @@ def resize(image, output_shape, order=1, mode='constant', cval=0.):
                                       cval=cval)
 
     else:  # 2-dimensional interpolation
+
+        if rows == orig_rows and cols == orig_cols:
+            return img_as_float(image, force_copy=True)
 
         # 3 control points necessary to estimate exact AffineTransform
         src_corners = np.array([[1, 1], [1, rows], [cols, rows]]) - 1
@@ -142,6 +151,9 @@ def rescale(image, scale, order=1, mode='constant', cval=0.):
     except TypeError:
         row_scale = col_scale = scale
 
+    if scale == 1:
+        return img_as_float(image, force_copy=True)
+
     orig_rows, orig_cols = image.shape[0], image.shape[1]
     rows = np.round(row_scale * orig_rows)
     cols = np.round(col_scale * orig_cols)
@@ -194,6 +206,11 @@ def rotate(image, angle, resize=False, order=1, mode='constant', cval=0.):
     (512, 512)
 
     """
+
+    if angle % 90 == 0:
+        for i in range(angle // 90):
+            image = np.rot90(image)
+        return img_as_float(image, force_copy=True)
 
     rows, cols = image.shape[0], image.shape[1]
 
