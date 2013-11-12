@@ -73,7 +73,7 @@ class ImageViewer(QtGui.QMainWindow):
     >>> from skimage import data
     >>> image = data.coins()
     >>> viewer = ImageViewer(image)
-    >>> # viewer.show()
+    >>> viewer.show() # doctest: +SKIP
 
     """
 

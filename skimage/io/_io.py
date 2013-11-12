@@ -248,7 +248,7 @@ def show():
 
     >>> for i in range(4):
     ...     io.imshow(np.random.random((50, 50)))
-    >>> io.show()
+    >>> io.show() # doctest: +SKIP
 
     '''
     return call_plugin('_app_show')
