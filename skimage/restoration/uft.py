@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # uft.py --- Unitary fourier transform
 
-# Copyright (c) 2011, 2012, 2013  Fran��ois Orieux <orieux@iap.fr>
+# Copyright (c) 2011, 2012, 2013  François Orieux <orieux@iap.fr>
 
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files

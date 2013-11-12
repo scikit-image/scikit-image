@@ -5,7 +5,7 @@ from scipy.signal import convolve2d
 
 import skimage
 from skimage.data import camera
-from skimage import deconvolution
+from skimage import restoration
 
 test_img = skimage.img_as_float(camera())
 
@@ -15,7 +15,7 @@ def test_wiener():
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    deconvolved = deconvolution.wiener(data, psf, 0.05)
+    deconvolved = restoration.wiener(data, psf, 0.05)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_wiener.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
@@ -26,7 +26,7 @@ def test_unsupervised_wiener():
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    deconvolved, _ = deconvolution.unsupervised_wiener(data, psf)
+    deconvolved, _ = restoration.unsupervised_wiener(data, psf)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_unsup.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)
@@ -37,7 +37,7 @@ def test_richardson_lucy():
     data = convolve2d(test_img, psf, 'same')
     np.random.seed(0)
     data += 0.1 * data.std() * np.random.standard_normal(data.shape)
-    deconvolved = deconvolution.richardson_lucy(data, psf, 5)
+    deconvolved = restoration.richardson_lucy(data, psf, 5)
 
     path = pjoin(dirname(abspath(__file__)), 'camera_rl.npy')
     np.testing.assert_allclose(deconvolved, np.load(path), rtol=1e-3)

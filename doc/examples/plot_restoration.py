@@ -30,7 +30,7 @@ data learning. This is not common and based on the following publication
 import numpy as np
 import matplotlib.pyplot as plt
 
-from skimage import color, data, deconvolution
+from skimage import color, data, restoration
 
 lena = color.rgb2gray(data.lena())
 from scipy.signal import convolve2d as conv2
@@ -38,7 +38,7 @@ psf = np.ones((5, 5)) / 25
 lena = conv2(lena, psf, 'same')
 lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
 
-deconvolued, _ = deconvolution.unsupervised_wiener(lena, psf)
+deconvolued, _ = restoration.unsupervised_wiener(lena, psf)
 
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5))
 
@@ -50,7 +50,7 @@ ax[0].set_title('Data')
 
 ax[1].imshow(deconvolued, vmax=lena.max())
 ax[1].axis('off')
-ax[1].set_title('Self tuned deconvolution')
+ax[1].set_title('Self tuned restoration')
 
 fig.subplots_adjust(wspace=0.02, hspace=0.2,
                     top=0.9, bottom=0.05, left=0, right=1)

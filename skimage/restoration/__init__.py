@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""Skimage module for image deconvolution
+"""Skimage module for image restoration
 
 This module implement various algorithm of the literature for image
-deconvolution.
+restoration.
 
 References
 ----------
