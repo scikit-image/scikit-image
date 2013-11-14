@@ -44,9 +44,9 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
         keypoints after filtering out border keypoints with value at an index
         (i, j) either being True or False representing the outcome
         of Intensity comparison about ith keypoint on jth decision pixel-pair.
-    keypoints : (Q, 2) ndarray
-        Location i.e. (row, col) of keypoints after removing out those that
-        are near border.
+    keypoints : record array with Q rows
+        Record array with fields row, col, octave, orientation, response.
+        Octave, orientation and response can be None.
 
     References
     ----------
@@ -56,9 +56,10 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage.feature.corner import corner_peaks, corner_harris
-    >>> from skimage.feature import pairwise_hamming_distance, descriptor_brief, match_binary_descriptors
+    >>> from skimage.feature import (pairwise_hamming_distance, descriptor_brief,
+    ...                              match_binary_descriptors,
+    ...                              create_keypoint_recarray)
     >>> square1 = np.zeros([8, 8], dtype=np.int32)
     >>> square1[2:6, 2:6] = 1
     >>> square1
@@ -71,17 +72,13 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
            [0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
     >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
-    >>> keypoints1
-    array([[2, 2],
-           [2, 5],
-           [5, 2],
-           [5, 5]])
+    >>> keypoints1 = create_keypoint_recarray(keypoints1[:, 0], keypoints1[:, 1])
     >>> descriptors1, keypoints1 = descriptor_brief(square1, keypoints1, patch_size=5)
     >>> keypoints1
-    array([[2, 2],
-           [2, 5],
-           [5, 2],
-           [5, 5]])
+    rec.array([(2.0, 2.0, nan, nan, nan), (2.0, 5.0, nan, nan, nan),
+               (5.0, 2.0, nan, nan, nan), (5.0, 5.0, nan, nan, nan)], 
+               dtype=[('row', '<f8'), ('col', '<f8'), ('octave', '<f8'),
+               ('orientation', '<f8'), ('response', '<f8')])
     >>> square2 = np.zeros([9, 9], dtype=np.int32)
     >>> square2[2:7, 2:7] = 1
     >>> square2
@@ -95,38 +92,34 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
     >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
+    >>> keypoints2 = create_keypoint_recarray(keypoints2[:, 0], keypoints2[:, 1])
     >>> keypoints2
-    array([[2, 2],
-           [2, 6],
-           [6, 2],
-           [6, 6]])
+    rec.array([(2.0, 2.0, nan, nan, nan), (2.0, 6.0, nan, nan, nan),
+               (6.0, 2.0, nan, nan, nan), (6.0, 6.0, nan, nan, nan)], 
+               dtype=[('row', '<f8'), ('col', '<f8'), ('octave', '<f8'),
+               ('orientation', '<f8'), ('response', '<f8')])
     >>> descriptors2, keypoints2 = descriptor_brief(square2, keypoints2, patch_size=5)
-    >>> keypoints2
-    array([[2, 2],
-           [2, 6],
-           [6, 2],
-           [6, 6]])
     >>> pairwise_hamming_distance(descriptors1, descriptors2)
     array([[ 0.03125  ,  0.3203125,  0.3671875,  0.6171875],
            [ 0.3203125,  0.03125  ,  0.640625 ,  0.375    ],
            [ 0.375    ,  0.6328125,  0.0390625,  0.328125 ],
            [ 0.625    ,  0.3671875,  0.34375  ,  0.0234375]])
     >>> matched_kpts, mask1, mask2 = match_binary_descriptors(keypoints1,
-                                                              descriptors1,
-                                                              keypoints2,
-                                                              descriptors2)
+    ...                                                       descriptors1,
+    ...                                                       keypoints2,
+    ...                                                       descriptors2)
     >>> matched_kpts
-    array([[[ 2,  2],
-            [ 2,  2]],
+    array([[[2, 2],
+            [2, 2]],
 
-           [[ 2,  5],
-            [ 2,  6]],
+           [[2, 5],
+            [2, 6]],
 
-           [[ 5,  2],
-            [ 6,  2]],
+           [[5, 2],
+            [6, 2]],
 
-           [[ 5,  5],
-            [ 6,  6]]])
+           [[5, 5],
+            [6, 6]]])
 
     """
     np.random.seed(sample_seed)
