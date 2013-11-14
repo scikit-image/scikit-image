@@ -1,4 +1,4 @@
-skimage (0.8.2-2) unstable; urgency=low
+skimage (0.8.2-2) UNRELEASED; urgency=low
 
   [ Julian Taylor ]
   * add python 3 packages
