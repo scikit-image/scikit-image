@@ -550,7 +550,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> model = EllipseModel()
     >>> model.estimate(data)
-    >>> model._params # doctest: +SKIP
+    >>> model._params
     array([ -3.30354146e+03,  -2.87791160e+03,   5.59062118e+03,
              7.84365066e+00,   7.19203152e-01])
 
@@ -558,9 +558,9 @@ def ransac(data, model_class, min_samples, residual_threshold,
     Estimate ellipse model using RANSAC:
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
-    >>> ransac_model._params # doctest: +SKIP
+    >>> ransac_model._params
     array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
-    >>> inliers # doctest: +SKIP
+    >>> inliers
     array([False, False, False, False,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
@@ -579,7 +579,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     >>> dst[1] = (-100, 100)
     >>> dst[2] = (50, 50)
     >>> model, inliers = ransac((src, dst), SimilarityTransform, 2, 10)
-    >>> inliers # doctest: +SKIP
+    >>> inliers
     array([False, False, False,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
             True,  True,  True,  True,  True,  True,  True,  True,  True,
