@@ -23,23 +23,21 @@ img = rgb2gray(img_color)
 transformed_img = rgb2gray(transformed_img_color)
 
 # Extracting oFAST keypoints and computing their rBRIEF descriptors
-keypoints1, orientations1, scales1 = keypoints_orb(img, n_keypoints=500)
+keypoints1 = keypoints_orb(img, n_keypoints=500)
 keypoints1.shape
-descriptors1, keypoints1 = descriptor_orb(img, keypoints1, orientations1,
-                                          scales1)
+descriptors1, keypoints1 = descriptor_orb(img, keypoints1)
 keypoints1.shape
 descriptors1.shape
 
-keypoints2, orientations2, scales2 = keypoints_orb(transformed_img,
+keypoints2 = keypoints_orb(transformed_img,
                                                    n_keypoints=500)
 keypoints2.shape
-descriptors2, keypoints2 = descriptor_orb(transformed_img, keypoints2,
-                                          orientations2, scales2)
+descriptors2, keypoints2 = descriptor_orb(transformed_img, keypoints2)
 keypoints2.shape
 descriptors2.shape
 
 #Initializing parameters for Descriptor matching
-match_threshold = 0.25
+match_threshold = 0.3
 match_cross_check = True
 
 pairwise_hamming_distance(descriptors1, descriptors2)
@@ -55,8 +53,8 @@ matched_keypoints.shape
 # Plotting the matched correspondences in both the images using matplotlib
 src = matched_keypoints[:, 0, :]
 dst = matched_keypoints[:, 1, :]
-src_scale = 10 * (scales1[mask1] + 1) ** 1.5
-dst_scale = 10 * (scales2[mask2] + 1) ** 1.5
+src_scale = 10 * (keypoints1.octave[mask1] + 1) ** 1.5
+dst_scale = 10 * (keypoints2.octave[mask2] + 1) ** 1.5
 
 img_combined = np.concatenate((img_as_float(img_color),
                                img_as_float(transformed_img_color)), axis=1)
@@ -71,7 +69,7 @@ ax.axis((0, 2 * offset[1], offset[0], 0))
 ax.set_title('Matched correspondences : Rotation = %f; Scale = %s; Translation = %s; threshold = %f; cross_check = %r' % (rotate, scaling, translate, match_threshold, match_cross_check))
 
 for m in range(len(src)):
-	c = np.random.rand(3,1)
+    c = np.random.rand(3,1)
     ax.plot((src[m, 1], dst[m, 1] + offset[1]), (src[m, 0], dst[m, 0]), '-', color=c)
     ax.scatter(src[m, 1], src[m, 0], src_scale[m], facecolors='none', edgecolors=c)
     ax.scatter(dst[m, 1] + offset[1], dst[m, 0], dst_scale[m], facecolors='none', edgecolors=c)
