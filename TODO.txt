@@ -13,5 +13,4 @@ Version 0.10
 * Remove deprecated function `filter.median_filter`
 * Remove deprecated `skimage.color.is_gray` and `skimage.color.is_rgb`
   functions
-
-
+* Enable doctests of experimental `skimage.feature.brief`
