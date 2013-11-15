@@ -34,10 +34,9 @@ def test_keypoints_orb_desired_no_of_keypoints():
 
 def test_keypoints_orb_less_than_desired_no_of_keypoints():
     img = rgb2gray(lena())
-    keypoints = keypoints_orb(img, n_keypoints=15,
-                                                    fast_n=12,
-                                                    fast_threshold=0.33,
-                                                    downscale=2, n_scales=2)
+    keypoints = keypoints_orb(img, n_keypoints=15, fast_n=12,
+                              fast_threshold=0.33, downscale=2, n_scales=2)
+
     exp_row = np.array([  67.,  247.,  269.,  413.,  435.,  230.,  264.,
                          330.,  372.])
     exp_col = np.array([ 157.,  146.,  111.,   70.,  180.,  136.,  336.,
@@ -48,6 +47,7 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
     exp_orientations = np.array([-105.76503839,  -96.28973044,  -53.08162354,
                                  -173.4479964 , -175.64733392, -106.07927215,
                                  -163.40016243,   75.80865813, -154.73195911])
+
     exp_response = np.array([ 0.13197835,  0.24931321,  0.44351774,
                               0.39063076,  0.96770745,  0.04935129,
                               0.21431068,  0.15826555,  0.42403573])
@@ -66,7 +66,7 @@ def test_descriptor_orb():
     descriptors, filtered_keypoints = descriptor_orb(img, keypoints)
 
     descriptors_120_129 = np.array([[ True, False, False,  True, False, False, False, False, False, False],
-                                    [  True,  True, False, False,  True, False, False,  True, False, True],
+                                    [ True,  True, False, False,  True, False, False,  True, False,  True],
                                     [False,  True,  True, False,  True, False,  True,  True,  True,  True],
                                     [False, False, False,  True,  True, False,  True, False,  True, False],
                                     [False,  True,  True,  True,  True, False,  True,  True,  True, False],
