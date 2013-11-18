@@ -92,7 +92,7 @@ else:
         """Run all doctests."""
         import nose
         # do not run normal test files
-        args = ['', pkg_dir, '--with-doctest', '--ignore-files=^\.',
+        args = ['', pkg_dir, '--exe', '--with-doctest', '--ignore-files=^\.',
                 '--ignore-files=^setup\.py$$', '--ignore-files=test']
         if verbose:
             args.extend(['-v', '-s'])
