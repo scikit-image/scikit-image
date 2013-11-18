@@ -52,6 +52,7 @@ img_as_ubyte
 import os.path as _osp
 import imp as _imp
 import functools as _functools
+import warnings as _warnings
 from skimage._shared.utils import deprecated as _deprecated
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
@@ -68,24 +69,46 @@ try:
     _imp.find_module('nose')
 except ImportError:
     def _test(verbose=False):
-        """This would invoke the skimage test suite, but nose couldn't be
+        """This would run all unit tests, but nose couldn't be
         imported so the test suite can not run.
         """
         raise ImportError("Could not load nose. Unit tests not available.")
+
+    def _doctest(verbose=False):
+        """This would run all doc tests, but nose couldn't be
+        imported so the test suite can not run.
+        """
+        raise ImportError("Could not load nose. Doctests not available.")
 else:
     def _test(verbose=False):
-        """Invoke the skimage test suite."""
+        """Run all unit tests."""
         import nose
-        args = ['', pkg_dir, '--exe']
+        args = ['', pkg_dir, '--exe', '--ignore-files=^_test']
         if verbose:
             args.extend(['-v', '-s'])
         nose.run('skimage', argv=args)
+
+    def _doctest(verbose=False):
+        """Run all doctests."""
+        import nose
+        # do not run normal test files
+        args = ['', pkg_dir, '--with-doctest', '--ignore-files=^\.',
+                '--ignore-files=^setup\.py$$', '--ignore-files=test']
+        if verbose:
+            args.extend(['-v', '-s'])
+        with _warnings.catch_warnings():
+            _warnings.simplefilter("ignore")
+            nose.run('skimage', argv=args)
+
 
 # do not use `test` as function name as this leads to a recursion problem with
 # the nose test suite
 test = _test
 test_verbose = _functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
+doctest = _doctest
+doctest_verbose = _functools.partial(_doctest, verbose=True)
+doctest.__doc__ = doctest.__doc__
 
 
 class _Log(Warning):
@@ -105,10 +128,9 @@ class _FakeLog(object):
         """
         self._name = name
 
-        import warnings
         warnings.simplefilter("always", _Log)
 
-        self._warnings = warnings
+        self._warnings = _warnings
 
     def _warn(self, msg, wtype):
         self._warnings.warn('%s: %s' % (wtype, msg), _Log)
