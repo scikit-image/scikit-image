@@ -80,25 +80,25 @@ except ImportError:
         """
         raise ImportError("Could not load nose. Doctests not available.")
 else:
-    def _test(verbose=False):
+    def _test(doctest=False, verbose=False):
         """Run all unit tests."""
         import nose
         args = ['', pkg_dir, '--exe', '--ignore-files=^_test']
         if verbose:
             args.extend(['-v', '-s'])
-        nose.run('skimage', argv=args)
-
-    def _doctest(verbose=False):
-        """Run all doctests."""
-        import nose
-        # do not run normal test files
-        args = ['', pkg_dir, '--exe', '--with-doctest', '--ignore-files=^\.',
-                '--ignore-files=^setup\.py$$', '--ignore-files=test']
-        if verbose:
-            args.extend(['-v', '-s'])
-        with _warnings.catch_warnings():
-            _warnings.simplefilter("ignore")
-            nose.run('skimage', argv=args)
+        if doctest:
+            args.extend(['--with-doctest', '--ignore-files=^\.',
+                        '--ignore-files=^setup\.py$$', '--ignore-files=test'])
+            with _warnings.catch_warnings():
+                _warnings.simplefilter("ignore")
+                success = nose.run('skimage', argv=args)
+        else:
+            success = nose.run('skimage', argv=args)
+        # Return sys.exit code
+        if success:
+            return 0
+        else:
+            return 1
 
 
 # do not use `test` as function name as this leads to a recursion problem with
@@ -106,9 +106,10 @@ else:
 test = _test
 test_verbose = _functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
-doctest = _doctest
-doctest_verbose = _functools.partial(_doctest, verbose=True)
+doctest = _functools.partial(test, doctest=True)
 doctest.__doc__ = doctest.__doc__
+doctest_verbose = _functools.partial(test, doctest=True, verbose=True)
+doctest_verbose.__doc__ = doctest.__doc__
 
 
 class _Log(Warning):
