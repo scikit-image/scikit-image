@@ -74,5 +74,4 @@ script:
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
 
 after_success:
-    - cd for_test
     - coveralls

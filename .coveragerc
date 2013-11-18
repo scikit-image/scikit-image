@@ -4,4 +4,6 @@
 branch = True
 source = skimage
 include = */skimage/*
+omit =
+    */setup.py
 
