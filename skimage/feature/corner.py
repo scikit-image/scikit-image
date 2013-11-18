@@ -376,7 +376,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     """
 
     # window extent in one direction
-    wext = int((window_size - 1) / 2)
+    wext = (window_size - 1) // 2
 
     image = pad(image, pad_width=wext, mode='constant', constant_values=0)
 
