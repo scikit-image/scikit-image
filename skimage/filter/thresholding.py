@@ -57,7 +57,7 @@ def threshold_adaptive(image, block_size, method='gaussian', offset=0,
     Examples
     --------
     >>> from skimage.data import camera
-    >>> image = camera()
+    >>> image = camera()[:50, :50]
     >>> binary_image1 = threshold_adaptive(image, 15, 'mean')
     >>> func = lambda arr: arr.mean()
     >>> binary_image2 = threshold_adaptive(image, 15, 'generic', param=func)

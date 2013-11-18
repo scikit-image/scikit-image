@@ -118,7 +118,8 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
     >>> distance = ndimage.distance_transform_edt(image)
     >>> from skimage.feature import peak_local_max
     >>> local_maxi = peak_local_max(distance, labels=image,
-    ...                             footprint=np.ones((3, 3)))
+    ...                             footprint=np.ones((3, 3)),
+    ...                             indices=False)
     >>> markers = ndimage.label(local_maxi)[0]
     >>> labels = watershed(-distance, markers, mask=image)
 

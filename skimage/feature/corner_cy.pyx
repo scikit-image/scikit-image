@@ -35,7 +35,7 @@ def corner_moravec(image, Py_ssize_t window_size=1):
 
     Examples
     --------
-    >>> from skimage.feature import moravec, peak_local_max
+    >>> from skimage.feature import corner_moravec, peak_local_max
     >>> square = np.zeros([7, 7])
     >>> square[3, 3] = 1
     >>> square
@@ -46,7 +46,7 @@ def corner_moravec(image, Py_ssize_t window_size=1):
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.]])
-    >>> moravec(square)
+    >>> corner_moravec(square)
     array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  1.,  1.,  1.,  0.,  0.],

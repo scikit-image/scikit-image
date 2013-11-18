@@ -37,17 +37,17 @@ def remove_small_objects(ar, min_size=64, connectivity=1, in_place=False):
     >>> a = np.array([[0, 0, 0, 1, 0],
     ...               [1, 1, 1, 0, 0],
     ...               [1, 1, 1, 0, 1]], bool)
-    >>> b = morphology.remove_small_connected_components(a, 6)
+    >>> b = morphology.remove_small_objects(a, 6)
     >>> b
     array([[False, False, False, False, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]], dtype=bool)
-    >>> c = morphology.remove_small_connected_components(a, 7, connectivity=2)
+    >>> c = morphology.remove_small_objects(a, 7, connectivity=2)
     >>> c
     array([[False, False, False,  True, False],
            [ True,  True,  True, False, False],
            [ True,  True,  True, False, False]], dtype=bool)
-    >>> d = morphology.remove_small_connected_components(a, 6, in_place=True)
+    >>> d = morphology.remove_small_objects(a, 6, in_place=True)
     >>> d is a
     True
     """

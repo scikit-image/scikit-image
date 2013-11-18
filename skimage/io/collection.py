@@ -96,17 +96,13 @@ class MultiImage(object):
     --------
     >>> from skimage import data_dir
 
-    >>> img = MultiImage(data_dir + '/multipage.tif')
-    >>> len(img)
+    >>> img = MultiImage(data_dir + '/multipage.tif') # doctest: +SKIP
+    >>> len(img) # doctest: +SKIP
     2
-    >>> for frame in img:
-    ...     print(frame.shape)
+    >>> for frame in img: # doctest: +SKIP
+    ...     print(frame.shape) # doctest: +SKIP
     (15, 10)
     (15, 10)
-
-    The two frames in this image can be shown with matplotlib:
-
-    .. plot:: show_collection.py
 
     """
     def __init__(self, filename, conserve_memory=True, dtype=None):

@@ -74,13 +74,13 @@ def marching_cubes(volume, level, spacing=(1., 1., 1.)):
     Regarding visualization of algorithm output, the ``mayavi`` package
     is recommended. To contour a volume named `myvolume` about the level 0.0::
 
-      >>> from mayavi import mlab
-      >>> verts, tris = marching_cubes(myvolume, 0.0, (1., 1., 2.))
+      >>> from mayavi import mlab # doctest: +SKIP
+      >>> verts, tris = marching_cubes(myvolume, 0.0, (1., 1., 2.)) # doctest: +SKIP
       >>> mlab.triangular_mesh([vert[0] for vert in verts],
       ...                      [vert[1] for vert in verts],
       ...                      [vert[2] for vert in verts],
-      ...                      tris)
-      >>> mlab.show()
+      ...                      tris) # doctest: +SKIP
+      >>> mlab.show() # doctest: +SKIP
 
     References
     ----------

@@ -479,13 +479,16 @@ def regionprops(label_image, properties=None,
 
     Examples
     --------
-    >>> from skimage.data import coins
+    >>> from skimage import data, util
     >>> from skimage.morphology import label
-    >>> img = coins() > 110
+    >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img)
     >>> props = regionprops(label_img)
     >>> props[0].centroid # centroid of first labelled object
+    (22.729879860483141, 81.912285234465827)
     >>> props[0]['centroid'] # centroid of first labelled object
+    (22.729879860483141, 81.912285234465827)
+
     """
 
     label_image = np.squeeze(label_image)
@@ -505,7 +508,7 @@ def regionprops(label_image, properties=None,
     for i, sl in enumerate(objects):
         if sl is None:
             continue
-        
+
         label = i + 1
 
         props = _RegionProperties(sl, label, label_image,

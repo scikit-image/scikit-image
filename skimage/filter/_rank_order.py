@@ -36,12 +36,12 @@ def rank_order(image):
     >>> a = np.array([[1, 4, 5], [4, 4, 1], [5, 1, 1]])
     >>> a
     array([[1, 4, 5],
-        [4, 4, 1],
-        [5, 1, 1]])
+           [4, 4, 1],
+           [5, 1, 1]])
     >>> rank_order(a)
     (array([[0, 1, 2],
-        [1, 1, 0],
-        [2, 0, 0]], dtype=uint32), array([1, 4, 5]))
+           [1, 1, 0],
+           [2, 0, 0]], dtype=uint32), array([1, 4, 5]))
     >>> b = np.array([-1., 2.5, 3.1, 2.5])
     >>> rank_order(b)
     (array([0, 1, 2, 1], dtype=uint32), array([-1. ,  2.5,  3.1]))
