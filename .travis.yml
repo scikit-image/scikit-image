@@ -59,7 +59,8 @@ script:
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
     # Run all tests
-    - nosetests --exe -v --with-doctest --ignore-files='^\.' --ignore-files='^setup\.py$$' --ignore-files='^_test' skimage
+    - python -c "import skimage; skimage.test_verbose()"
+    - python -c "import skimage; skimage.doctest_verbose()"
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done

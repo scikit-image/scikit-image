@@ -7,15 +7,10 @@ clean:
 	find . -name "*.so" -o -name "*.pyc" -o -name "*.pyx.md5" | xargs rm -f
 
 test:
-	nosetests skimage
+	python -c "import skimage; skimage.test_verbose()"
 
 doctest:
-	nosetests \
-		--with-doctest \
-		--ignore-files="^\." \
-		--ignore-files="^setup\.py$$" \
-		--ignore-files="^_test"
-		skimage
+	python -c "import skimage; skimage.doctest_verbose()"
 
 coverage:
 	nosetests skimage --with-coverage --cover-package=skimage
