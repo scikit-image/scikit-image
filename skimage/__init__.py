@@ -89,6 +89,7 @@ else:
         if doctest:
             args.extend(['--with-doctest', '--ignore-files=^\.',
                         '--ignore-files=^setup\.py$$', '--ignore-files=test'])
+            # Make sure warnings do not break the doc tests
             with _warnings.catch_warnings():
                 _warnings.simplefilter("ignore")
                 success = nose.run('skimage', argv=args)
