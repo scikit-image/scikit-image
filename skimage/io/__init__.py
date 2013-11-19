@@ -24,7 +24,6 @@ def _update_doc(doc):
     from textwrap import wrap
 
     info = [(p, plugin_info(p)) for p in available_plugins if not p == 'test']
-    print('test:', available_plugins, info)
 
     col_1_len = max([len(n) for (n, _) in info])
 
