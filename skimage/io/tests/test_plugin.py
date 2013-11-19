@@ -1,4 +1,4 @@
-from numpy.testing import *
+from numpy.testing import assert_equal, raises
 
 from skimage import io
 from skimage.io._plugins import plugin
