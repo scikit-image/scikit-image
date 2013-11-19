@@ -2,25 +2,26 @@
 
 """
 
-__all__ = ['use', 'available', 'call', 'info', 'configuration', 'reset_plugins']
-
 try:
-    from configparser import ConfigParser
+    from configparser import ConfigParser  # Python 3
 except ImportError:
-    from ConfigParser import ConfigParser
+    from ConfigParser import ConfigParser  # Python 2
 
 import os.path
 from glob import glob
 
 
-plugin_store = None
+__all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
+           'reset_plugins', 'find_available_plugins', 'available_plugins']
 
+
+plugin_store = None
 plugin_provides = {}
 plugin_module_name = {}
 plugin_meta_data = {}
 
 
-def reset_plugins():
+def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded
 
     """
@@ -30,8 +31,34 @@ def reset_plugins():
                     'imshow': [],
                     'imread_collection': [],
                     '_app_show': []}
+_clear_plugins()
 
-reset_plugins()
+
+def _load_preferred_plugins():
+    # Load preferred plugin for each io function.
+    io_funcs = ['imsave', 'imshow', 'imread_collection', 'imread']
+    preferred_plugins = ['matplotlib', 'pil', 'qt', 'freeimage', 'null']
+    for func in io_funcs:
+        for plugin in preferred_plugins:
+            if plugin not in available_plugins:
+                continue
+            try:
+                use_plugin(plugin, kind=func)
+                break
+            except (ImportError, RuntimeError, OSError):
+                pass
+
+    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
+    # is buggy (flips PNGs around, returns bytes as floats, etc.)
+    try:
+        use_plugin('pil', 'imread')
+    except ImportError:
+        pass
+
+
+def reset_plugins():
+    _clear_plugins()
+    _load_preferred_plugins()
 
 
 def _scan_plugins():
@@ -66,7 +93,40 @@ def _scan_plugins():
 _scan_plugins()
 
 
-def call(kind, *args, **kwargs):
+def find_available_plugins(loaded=False):
+    """List available plugins.
+
+    Parameters
+    ----------
+    loaded : bool
+        If True, show only those plugins currently loaded.  By default,
+        all plugins are shown.
+
+    Returns
+    -------
+    p : dict
+        Dictionary with plugin names as keys and exposed functions as
+        values.
+
+    """
+    active_plugins = set()
+    for plugin_func in plugin_store.values():
+        for plugin, func in plugin_func:
+            active_plugins.add(plugin)
+
+    d = {}
+    for plugin in plugin_provides:
+        if not loaded or plugin in active_plugins:
+            d[plugin] = [f for f in plugin_provides[plugin] \
+                         if not f.startswith('_')]
+
+    return d
+
+
+available_plugins = find_available_plugins()
+
+
+def call_plugin(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
 
     Parameters
@@ -105,7 +165,7 @@ command.  A list of all available plugins can be found using
     return func(*args, **kwargs)
 
 
-def use(name, kind=None):
+def use_plugin(name, kind=None):
     """Set the default plugin for a specified operation.  The plugin
     will be loaded if it hasn't been already.
 
@@ -158,35 +218,6 @@ def use(name, kind=None):
         plugin_store[k] = funcs
 
 
-def available(loaded=False):
-    """List available plugins.
-
-    Parameters
-    ----------
-    loaded : bool
-        If True, show only those plugins currently loaded.  By default,
-        all plugins are shown.
-
-    Returns
-    -------
-    p : dict
-        Dictionary with plugin names as keys and exposed functions as
-        values.
-
-    """
-    active_plugins = set()
-    for plugin_func in plugin_store.values():
-        for plugin, func in plugin_func:
-            active_plugins.add(plugin)
-
-    d = {}
-    for plugin in plugin_provides:
-        if not loaded or plugin in active_plugins:
-            d[plugin] = [f for f in plugin_provides[plugin] \
-                         if not f.startswith('_')]
-
-    return d
-
 
 def _load(plugin):
     """Load the given plugin.
@@ -201,7 +232,7 @@ def _load(plugin):
     plugins : List of available plugins
 
     """
-    if plugin in available(loaded=True):
+    if plugin in find_available_plugins(loaded=True):
         return
     if not plugin in plugin_module_name:
         raise ValueError("Plugin %s not found." % plugin)
@@ -222,7 +253,7 @@ def _load(plugin):
                 store.append((plugin, func))
 
 
-def info(plugin):
+def plugin_info(plugin):
     """Return plugin meta-data.
 
     Parameters
@@ -242,7 +273,7 @@ def info(plugin):
         raise ValueError('No information on plugin "%s"' % plugin)
 
 
-def configuration():
+def plugin_order():
     """Return the currently preferred plugin order.
 
     Returns

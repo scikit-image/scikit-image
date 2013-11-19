@@ -20,7 +20,7 @@ except RuntimeError:
 
 
 def setup_module(self):
-    plugin.use('test')  # see ../_plugins/test_plugin.py
+    plugin.use_plugin('test')  # see ../_plugins/test_plugin.py
 
 
 def teardown_module(self):
@@ -41,37 +41,37 @@ class TestPlugin:
         io.imread_collection('*.png', conserve_memory=False, plugin='test')
 
     def test_use(self):
-        plugin.use('test')
-        plugin.use('test', 'imshow')
+        plugin.use_plugin('test')
+        plugin.use_plugin('test', 'imshow')
 
     @raises(ValueError)
     def test_failed_use(self):
-        plugin.use('asd')
+        plugin.use_plugin('asd')
 
     @skipif(not PIL_available and not FI_available)
     def test_use_priority(self):
-        plugin.use(priority_plugin)
+        plugin.use_plugin(priority_plugin)
         plug, func = plugin.plugin_store['imread'][0]
         assert_equal(plug, priority_plugin)
 
-        plugin.use('test')
+        plugin.use_plugin('test')
         plug, func = plugin.plugin_store['imread'][0]
         assert_equal(plug, 'test')
 
     @skipif(not PIL_available)
     def test_use_priority_with_func(self):
-        plugin.use('pil')
+        plugin.use_plugin('pil')
         plug, func = plugin.plugin_store['imread'][0]
         assert_equal(plug, 'pil')
 
-        plugin.use('test', 'imread')
+        plugin.use_plugin('test', 'imread')
         plug, func = plugin.plugin_store['imread'][0]
         assert_equal(plug, 'test')
 
         plug, func = plugin.plugin_store['imsave'][0]
         assert_equal(plug, 'pil')
 
-        plugin.use('test')
+        plugin.use_plugin('test')
         plug, func = plugin.plugin_store['imsave'][0]
         assert_equal(plug, 'test')
 
@@ -81,8 +81,8 @@ class TestPlugin:
         assert 'test' in p['imread']
 
     def test_available(self):
-        assert 'qt' in io.plugins()
-        assert 'test' in io.plugins(loaded=True)
+        assert 'qt' in io.available_plugins
+        assert 'test' in io.find_available_plugins(loaded=True)
 
 if __name__ == "__main__":
     run_module_suite()

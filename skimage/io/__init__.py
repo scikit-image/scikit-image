@@ -4,12 +4,7 @@ The following plug-ins are available:
 
 """
 
-from ._plugins import use as use_plugin
-from ._plugins import available as plugins
-from ._plugins import info as plugin_info
-from ._plugins import configuration as plugin_order
-from ._plugins import reset_plugins as _reset_plugins
-
+from ._plugins import *
 from .sift import *
 from .collection import *
 
@@ -18,33 +13,8 @@ from ._image_stack import *
 from .video import *
 
 
-available_plugins = plugins()
+reset_plugins()
 
-
-def _load_preferred_plugins():
-    # Load preferred plugin for each io function.
-    io_funcs = ['imsave', 'imshow', 'imread_collection', 'imread']
-    preferred_plugins = ['matplotlib', 'pil', 'qt', 'freeimage', 'null']
-    for func in io_funcs:
-        for plugin in preferred_plugins:
-            if plugin not in available_plugins:
-                continue
-            try:
-                use_plugin(plugin, kind=func)
-                break
-            except (ImportError, RuntimeError, OSError):
-                pass
-
-    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
-    # is buggy (flips PNGs around, returns bytes as floats, etc.)
-    try:
-        use_plugin('pil', 'imread')
-    except ImportError:
-        pass
-
-def reset_plugins():
-    _reset_plugins()
-    _load_preferred_plugins()
 
 def _update_doc(doc):
     """Add a list of plugins to the module docstring, formatted as
@@ -53,7 +23,9 @@ def _update_doc(doc):
     """
     from textwrap import wrap
 
-    info = [(p, plugin_info(p)) for p in plugins() if not p == 'test']
+    info = [(p, plugin_info(p)) for p in available_plugins if not p == 'test']
+    print('test:', available_plugins, info)
+
     col_1_len = max([len(n) for (n, _) in info])
 
     wrap_len = 73
@@ -75,5 +47,3 @@ def _update_doc(doc):
     return doc
 
 __doc__ = _update_doc(__doc__)
-
-reset_plugins()
