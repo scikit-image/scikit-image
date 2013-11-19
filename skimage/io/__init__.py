@@ -1,4 +1,4 @@
-__doc__ = """Utilities to read and write images in various formats.
+"""Utilities to read and write images in various formats.
 
 The following plug-ins are available:
 
