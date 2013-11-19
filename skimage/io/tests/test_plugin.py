@@ -19,70 +19,71 @@ except RuntimeError:
     FI_available = False
 
 
-def setup_module(self):
+def setup_module():
     plugin.use_plugin('test')  # see ../_plugins/test_plugin.py
 
 
-def teardown_module(self):
+def teardown_module():
     io.reset_plugins()
 
 
-class TestPlugin:
-    def test_read(self):
-        io.imread('test.png', as_grey=True, dtype='i4', plugin='test')
+def test_read():
+    io.imread('test.png', as_grey=True, dtype='i4', plugin='test')
 
-    def test_save(self):
-        io.imsave('test.png', [1, 2, 3], plugin='test')
+def test_save():
+    io.imsave('test.png', [1, 2, 3], plugin='test')
 
-    def test_show(self):
-        io.imshow([1, 2, 3], plugin_arg=(1, 2), plugin='test')
+def test_show():
+    io.imshow([1, 2, 3], plugin_arg=(1, 2), plugin='test')
 
-    def test_collection(self):
-        io.imread_collection('*.png', conserve_memory=False, plugin='test')
+def test_collection():
+    io.imread_collection('*.png', conserve_memory=False, plugin='test')
 
-    def test_use(self):
-        plugin.use_plugin('test')
-        plugin.use_plugin('test', 'imshow')
+def test_use():
+    plugin.use_plugin('test')
+    plugin.use_plugin('test', 'imshow')
 
-    @raises(ValueError)
-    def test_failed_use(self):
-        plugin.use_plugin('asd')
+@raises(ValueError)
+def test_failed_use():
+    plugin.use_plugin('asd')
 
-    @skipif(not PIL_available and not FI_available)
-    def test_use_priority(self):
-        plugin.use_plugin(priority_plugin)
-        plug, func = plugin.plugin_store['imread'][0]
-        assert_equal(plug, priority_plugin)
+@skipif(not PIL_available and not FI_available)
+def test_use_priority():
+    plugin.use_plugin(priority_plugin)
+    plug, func = plugin.plugin_store['imread'][0]
+    assert_equal(plug, priority_plugin)
 
-        plugin.use_plugin('test')
-        plug, func = plugin.plugin_store['imread'][0]
-        assert_equal(plug, 'test')
+    plugin.use_plugin('test')
+    plug, func = plugin.plugin_store['imread'][0]
+    assert_equal(plug, 'test')
 
-    @skipif(not PIL_available)
-    def test_use_priority_with_func(self):
-        plugin.use_plugin('pil')
-        plug, func = plugin.plugin_store['imread'][0]
-        assert_equal(plug, 'pil')
+@skipif(not PIL_available)
+def test_use_priority_with_func():
+    plugin.use_plugin('pil')
+    plug, func = plugin.plugin_store['imread'][0]
+    assert_equal(plug, 'pil')
 
-        plugin.use_plugin('test', 'imread')
-        plug, func = plugin.plugin_store['imread'][0]
-        assert_equal(plug, 'test')
+    plugin.use_plugin('test', 'imread')
+    plug, func = plugin.plugin_store['imread'][0]
+    assert_equal(plug, 'test')
 
-        plug, func = plugin.plugin_store['imsave'][0]
-        assert_equal(plug, 'pil')
+    plug, func = plugin.plugin_store['imsave'][0]
+    assert_equal(plug, 'pil')
 
-        plugin.use_plugin('test')
-        plug, func = plugin.plugin_store['imsave'][0]
-        assert_equal(plug, 'test')
+    plugin.use_plugin('test')
+    plug, func = plugin.plugin_store['imsave'][0]
+    assert_equal(plug, 'test')
 
-    def test_plugin_order(self):
-        p = io.plugin_order()
-        assert 'imread' in p
-        assert 'test' in p['imread']
+def test_plugin_order():
+    p = io.plugin_order()
+    assert 'imread' in p
+    assert 'test' in p['imread']
 
-    def test_available(self):
-        assert 'qt' in io.available_plugins
-        assert 'test' in io.find_available_plugins(loaded=True)
+def test_available():
+    assert 'qt' in io.available_plugins
+    assert 'test' in io.find_available_plugins(loaded=True)
+
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()
