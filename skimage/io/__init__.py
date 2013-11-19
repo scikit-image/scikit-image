@@ -14,6 +14,7 @@ from .sift import *
 from .collection import *
 
 from ._io import *
+from ._image_stack import *
 from .video import *
 
 

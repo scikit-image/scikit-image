@@ -1,10 +1,7 @@
-__all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
-           'push', 'pop']
-
 try:
-    from urllib.request import urlopen
+    from urllib.request import urlopen  # Python 3
 except ImportError:
-    from urllib2 import urlopen
+    from urllib2 import urlopen  # Python 2
 
 import os
 import re
@@ -19,8 +16,8 @@ from skimage.color import rgb2grey
 
 
 
-# Shared image queue
-_image_stack = []
+__all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show']
+
 
 URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
 
@@ -75,33 +72,6 @@ class Image(np.ndarray):
         return_str = str_buffer.getvalue()
         str_buffer.close()
         return return_str
-
-
-def push(img):
-    """Push an image onto the shared image stack.
-
-    Parameters
-    ----------
-    img : ndarray
-        Image to push.
-
-    """
-    if not isinstance(img, np.ndarray):
-        raise ValueError("Can only push ndarrays to the image stack.")
-
-    _image_stack.append(img)
-
-
-def pop():
-    """Pop an image from the shared image stack.
-
-    Returns
-    -------
-    img : ndarray
-        Image popped from the stack.
-
-    """
-    return _image_stack.pop()
 
 
 def imread(fname, as_grey=False, plugin=None, flatten=None,
