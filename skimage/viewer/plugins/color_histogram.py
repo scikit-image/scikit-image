@@ -26,10 +26,12 @@ class ColorHistogram(PlotPlugin):
         L, a, b = self.lab_image.T
         left, right = -100, 100
         ab_extents = [left, right, right, left]
+        self.mask = np.ones(L.shape, bool)
         bins = np.arange(left, right)
-        hist, x_edges, y_edges = np.histogram2d(a.flatten(), b.flatten(), bins,
-                                                normed=True)
-
+        hist, x_edges, y_edges = np.histogram2d(a.flatten(), b.flatten(),
+                                                bins, normed=True)
+        self.data = {'bins': bins, 'hist': hist, 'edges': (x_edges, y_edges),
+                     'extents': (left, right, left, right)}
         # Clip bin heights that dominate a-b histogram
         max_val = pct_total_area(hist, percentile=self.max_pct)
         hist = exposure.rescale_intensity(hist, in_range=(0, max_val))
@@ -46,14 +48,35 @@ class ColorHistogram(PlotPlugin):
 
     def ab_selected(self, extents):
         x0, x1, y0, y1 = extents
+        self.data['extents'] = extents
 
         lab_masked = self.lab_image.copy()
         L, a, b = lab_masked.T
 
-        mask = ((a > y0) & (a < y1)) & ((b > x0) & (b < x1))
-        lab_masked[..., 1:][~mask.T] = 0
+        self.mask = ((a > y0) & (a < y1)) & ((b > x0) & (b < x1))
+        lab_masked[..., 1:][~self.mask.T] = 0
 
         self.image_viewer.image = color.lab2rgb(lab_masked)
+
+    def output(self):
+        """Return the image mask and the histogram data.
+
+        Returns
+        -------
+        mask : array of bool, same shape as image
+            The selected pixels.
+        data : dict
+            The data describing the histogram and the selected region.
+            Keys:
+                - 'bins' : array of float, the bin boundaries for both
+                    `a` and `b` channels.
+                - 'hist' : 2D array of float, the normalized histogram.
+                - 'edges' : tuple of array of float, the bin edges
+                    along each dimension
+                - 'extents' : tuple of float, the left and right and
+                    top and bottom of the selected region.
+        """
+        return (self.mask, self.data)
 
 
 def pct_total_area(image, percentile=0.80):
@@ -64,6 +87,4 @@ def pct_total_area(image, percentile=0.80):
     idx = int((image.size - 1) * percentile)
     sorted_pixels = np.sort(image.flat)
     return sorted_pixels[idx]
-
-
 

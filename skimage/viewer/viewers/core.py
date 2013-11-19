@@ -228,6 +228,7 @@ class ImageViewer(QtGui.QMainWindow):
         self._show()
         if main_window:
             utils.start_qtapp()
+        return [p.output() for p in self.plugins]
 
     def redraw(self):
         self.canvas.draw_idle()

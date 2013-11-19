@@ -235,3 +235,23 @@ class Plugin(QtGui.QDialog):
         """Remove artists that are connected to the image viewer."""
         for a in self.artists:
             a.remove()
+
+    def output(self):
+        """Return the plugin's representation and data.
+
+        Returns
+        -------
+        image : array, same shape as ``self.image_viewer.image``, or None
+            The filtered image.
+        data : None
+            Any data associated with the plugin.
+
+        Notes
+        -----
+        Derived classes should override this method to return a tuple
+        containing an *overlay* of the same shape of the image, and a
+        *data* object. Either of these is optional: return ``None`` if
+        you don't want to return a value.
+        """
+        return (self.image_viewer.image, None)
+

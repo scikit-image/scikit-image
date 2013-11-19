@@ -108,3 +108,15 @@ class OverlayPlugin(Plugin):
         # clear overlay from ImageViewer on close
         self.overlay = None
         super(OverlayPlugin, self).closeEvent(event)
+
+    def output(self):
+        """Return the overlaid image.
+
+        Returns
+        -------
+        overlay : array, same shape as image
+            The overlay currently displayed.
+        data : None
+        """
+        return (self.overlay, None)
+
