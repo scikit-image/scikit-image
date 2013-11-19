@@ -46,10 +46,11 @@ def _update_doc(doc):
     _format_plugin_info_table(info_table, column_lengths)
 
     for (name, plugin_description) in info_table:
-        wrapped_descr = wrap(plugin_description, description_length)
-        doc += "%s %s\n" % (name.ljust(name_length), '\n'.join(wrapped_descr))
+        description = wrap(plugin_description, description_length)
+        doc += "%s %s\n" % (name.ljust(name_length), '\n'.join(description))
     doc = doc.strip()
 
     return doc
+
 
 __doc__ = _update_doc(__doc__)
