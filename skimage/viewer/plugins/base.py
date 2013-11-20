@@ -5,11 +5,18 @@ from warnings import warn
 
 import numpy as np
 
-from ..qt import QtGui
+from ..qt import QtGui, qt_api
 from ..qt.QtCore import Qt, Signal
 from ..utils import RequiredAttr, init_qtapp
+from skimage._shared.testing import doctest_skip_parser
+
+if qt_api is not None:
+    has_qt = True
+else:
+    has_qt = False
 
 
+@doctest_skip_parser
 class Plugin(QtGui.QDialog):
     """Base class for plugins that interact with an ImageViewer.
 
@@ -52,13 +59,14 @@ class Plugin(QtGui.QDialog):
     >>> from skimage.viewer.widgets import Slider
     >>> from skimage import data
     >>>
-    >>> plugin = Plugin(image_filter=lambda img, threshold: img > threshold)
-    >>> plugin += Slider('threshold', 0, 255)
+    >>> plugin = Plugin(image_filter=lambda img,
+    ...                 threshold: img > threshold) # skip if not has_qt
+    >>> plugin += Slider('threshold', 0, 255)       # skip if not has_qt
     >>>
     >>> image = data.coins()
-    >>> viewer = ImageViewer(image)
-    >>> viewer += plugin
-    >>> # viewer.show()
+    >>> viewer = ImageViewer(image) # skip if not has_qt
+    >>> viewer += plugin            # skip if not has_qt
+    >>> viewer.show()               # skip if not has_qt
 
     The plugin will automatically delegate parameters to `image_filter` based
     on its parameter type, i.e., `ptype` (widgets for required arguments must
@@ -99,7 +107,7 @@ class Plugin(QtGui.QDialog):
         self.row = 0
 
         self.arguments = []
-        self.keyword_arguments= {}
+        self.keyword_arguments = {}
 
         self.useblit = useblit
         self.cids = []
@@ -254,4 +262,3 @@ class Plugin(QtGui.QDialog):
         you don't want to return a value.
         """
         return (self.image_viewer.image, None)
-
