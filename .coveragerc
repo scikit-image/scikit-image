@@ -1,0 +1,9 @@
+# Configuration for coverage.py
+
+[run]
+branch = True
+source = skimage
+include = */skimage/*
+omit =
+    */setup.py
+

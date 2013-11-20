@@ -40,12 +40,15 @@ before_install:
     - fi
     - if [[ $PYVER == '3.x' ]]; then
     -   sudo apt-get install $PYTHON-pyqt4;
-    -   pip install matplotlib;
+    -   pip install --use-mirrors matplotlib;
     - fi
 
-    - pip install cython
-    - pip install flake8
-    - pip install six
+    - pip install --use-mirrors cython
+    - pip install --use-mirrors flake8
+    - pip install --use-mirrors six
+
+    - pip install --use-mirrors nose-cov
+    - pip install --use-mirrors python-coveralls
 
     - python check_bento_build.py
 
@@ -53,17 +56,22 @@ install:
     - python setup.py build_ext --inplace
 
 script:
-    # Setup matplotlib settings
+    # Matplotlib settings
     - mkdir $HOME/.matplotlib
     - touch $HOME/.matplotlib/matplotlibrc
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
+
     # Run all tests
-    - python -c "import skimage, sys, io; sys.exit(skimage.test_verbose())"
-    - python -c "import skimage, sys, io; sys.exit(skimage.doctest_verbose())"
+    - nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
+
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
     - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
     - for f in doc/examples/applications/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+
     # Run pep8 and flake tests
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+
+after_success:
+    - coveralls
