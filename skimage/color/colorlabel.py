@@ -4,10 +4,11 @@ import itertools
 import numpy as np
 
 from skimage import img_as_float
-from skimage._shared import six
-from skimage._shared.six.moves import zip
 from .colorconv import rgb2gray, gray2rgb
 from . import rgb_colors
+
+import six
+from six.moves import zip
 
 
 __all__ = ['color_dict', 'label2rgb', 'DEFAULT_COLORS']
@@ -111,7 +112,7 @@ def label2rgb(label, image=None, colors=None, alpha=0.3,
         label = label - offset  # Make sure you don't modify the input array.
         bg_label -= offset
 
-    new_type = np.min_scalar_type(label.max())
+    new_type = np.min_scalar_type(int(label.max()))
     if new_type == np.bool:
         new_type = np.uint8
     label = label.astype(new_type)

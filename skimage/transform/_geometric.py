@@ -1,11 +1,11 @@
+import six
 import math
 import numpy as np
 from scipy import ndimage, spatial
-from skimage.util import img_as_float
-from ._warps_cy import _warp_fast
 
 from skimage._shared.utils import get_bound_method_class
-from skimage._shared import six
+from skimage.util import img_as_float
+from ._warps_cy import _warp_fast
 
 
 class GeometricTransform(object):
@@ -797,13 +797,14 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     >>> tform = tf.estimate_transform('similarity', src, dst)
 
-    >>> tform.inverse(tform(src)) # == src
+    >>> np.allclose(tform.inverse(tform(src)), src)
+    True
 
     >>> # warp image using the estimated transformation
     >>> from skimage import data
     >>> image = data.camera()
 
-    >>> warp(image, inverse_map=tform.inverse)
+    >>> warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 
     >>> # create transformation with explicit parameters
     >>> tform2 = tf.SimilarityTransform(scale=1.1, rotation=1,
@@ -811,7 +812,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     >>> # unite transformations, applied in order from left to right
     >>> tform3 = tform + tform2
-    >>> tform3(src) # == tform2(tform(src))
+    >>> np.allclose(tform3(src), tform2(tform(src)))
+    True
 
     """
     ttype = ttype.lower()
@@ -996,25 +998,25 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     >>> from skimage.transform import SimilarityTransform
     >>> tform = SimilarityTransform(translation=(0, -10))
-    >>> warp(image, tform)
+    >>> warp(image, tform) # doctest: +SKIP
 
     Shift an image to the right with a callable (slow):
 
     >>> def shift(xy):
     ...     xy[:, 1] -= 10
     ...     return xy
-    >>> warp(image, shift_right)
+    >>> warp(image, shift_right) # doctest: +SKIP
 
     Use a transformation matrix to warp an image (fast):
 
     >>> matrix = np.array([[1, 0, 0], [0, 1, -10], [0, 0, 1]])
-    >>> warp(image, matrix)
+    >>> warp(image, matrix) # doctest: +SKIP
     >>> from skimage.transform import ProjectiveTransform
-    >>> warp(image, ProjectiveTransform(matrix=matrix))
+    >>> warp(image, ProjectiveTransform(matrix=matrix)) # doctest: +SKIP
 
     You can also use the inverse of a geometric transformation (fast):
 
-    >>> warp(image, tform.inverse)
+    >>> warp(image, tform.inverse) # doctest: +SKIP
 
     """
     # Backward API compatibility

@@ -88,8 +88,8 @@ def convex_hull_object(image, neighbors=8):
     hull : ndarray of bool
         Binary image with pixels in convex hull set to True.
 
-    Note
-    ----
+    Notes
+    -----
     This function uses skimage.morphology.label to define unique objects,
     finds the convex hull of each using convex_hull_image, and combines
     these regions with logical OR. Be aware the convex hulls of unconnected

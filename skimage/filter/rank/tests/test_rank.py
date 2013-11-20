@@ -437,7 +437,7 @@ def test_16bit():
         image[10, 10] = value
         assert rank.minimum(image, selem)[10, 10] == 0
         assert rank.maximum(image, selem)[10, 10] == value
-        assert rank.mean(image, selem)[10, 10] == value / selem.size
+        assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
 
 
 def test_bilateral():

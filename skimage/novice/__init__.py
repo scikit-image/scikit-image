@@ -28,17 +28,17 @@ We can create a Picture object open opening an image file
 >>> picture = novice.open(data.data_dir + '/chelsea.png')
 
 Pictures know their format
->>> print picture.format
-png
+>>> picture.format
+'png'
 
 ... and where they came from
->>> print picture.path.endswith('chelsea.png')
+>>> picture.path.endswith('chelsea.png')
 True
 
 ... and their size
->>> print picture.size
+>>> picture.size
 (451, 300)
->>> print picture.width
+>>> picture.width
 451
 
 Changing `size` resizes the picture.
@@ -51,9 +51,9 @@ and know their location in the picture.
 ...         pixel.red /= 2
 
 Pictures know if they've been modified from the original file
->>> print picture.modified
+>>> picture.modified
 True
->>> print picture.path
+>>> print(picture.path)
 None
 
 Pictures can be indexed like arrays
@@ -61,11 +61,11 @@ Pictures can be indexed like arrays
 
 Saving the picture updates the path attribute, format, and modified state.
 >>> picture.save('save-demo.jpg')
->>> print picture.path.endswith('save-demo.jpg')
+>>> picture.path.endswith('save-demo.jpg')
 True
->>> print picture.format
-jpeg
->>> print picture.modified
+>>> picture.format
+'jpeg'
+>>> picture.modified
 False
 
 """

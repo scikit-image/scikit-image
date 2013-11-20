@@ -47,3 +47,7 @@ class PlotPlugin(Plugin):
             bgcolor = str(bgcolor / 255.)
         self.fig.patch.set_facecolor(bgcolor)
         self.layout.addWidget(self.canvas, self.row, 0)
+
+    def _update_original_image(self, image):
+        super(PlotPlugin, self)._update_original_image(image)
+        self.redraw()

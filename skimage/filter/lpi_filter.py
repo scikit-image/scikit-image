@@ -62,12 +62,12 @@ class LPIFilter2D(object):
             >>> filter_params = {'kw1': 1, 'kw2': 2, 'kw3': 3}
             >>> impulse_response(r, c, **filter_params)
 
+
         Examples
         --------
 
-        Gaussian filter:
-	    Use a 1-D gaussian in each direction without normalization
-	    coefficients.
+        Gaussian filter: Use a 1-D gaussian in each direction without
+        normalization coefficients.
         >>> def filt_func(r, c, sigma = 1):
         ...     return np.exp(-np.hypot(r, c)/sigma)
         >>> filter = LPIFilter2D(filt_func)

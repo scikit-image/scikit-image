@@ -69,7 +69,7 @@ def skeletonize(image):
            [0, 0, 1, 1, 1, 1, 1, 0, 0],
            [0, 0, 0, 1, 1, 1, 0, 0, 0]], dtype=uint8)
     >>> skel = skeletonize(ellipse)
-    >>> skel
+    >>> skel.astype(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -212,7 +212,6 @@ def medial_axis(image, mask=None, return_distance=False):
 
     Examples
     --------
-    >>> from skimage import morphology
     >>> square = np.zeros((7, 7), dtype=np.uint8)
     >>> square[1:-1, 2:-2] = 1
     >>> square
@@ -223,7 +222,7 @@ def medial_axis(image, mask=None, return_distance=False):
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 1, 1, 1, 0, 0],
            [0, 0, 0, 0, 0, 0, 0]], dtype=uint8)
-    >>> morphology.medial_axis(square).astype(np.uint8)
+    >>> medial_axis(square).astype(np.uint8)
     array([[0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 0, 1, 0, 0],
            [0, 0, 0, 1, 0, 0, 0],

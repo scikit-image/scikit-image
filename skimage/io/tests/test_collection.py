@@ -12,7 +12,8 @@ from skimage import data_dir
 from skimage.io import ImageCollection, MultiImage
 from skimage.io.collection import alphanumeric_key
 from skimage.io import Image as ioImage
-from skimage._shared import six
+
+import six
 
 
 try:

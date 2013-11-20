@@ -182,7 +182,12 @@ class Plugin(QtGui.QDialog):
         This method is called by the viewer when the original image is updated.
         """
         self.arguments[0] = image
+        self._on_new_image(image)
         self.filter_image()
+
+    def _on_new_image(self, image):
+        """Override this method to update your plugin for new images."""
+        pass
 
     @property
     def filtered_image(self):
@@ -235,3 +240,23 @@ class Plugin(QtGui.QDialog):
         """Remove artists that are connected to the image viewer."""
         for a in self.artists:
             a.remove()
+
+    def output(self):
+        """Return the plugin's representation and data.
+
+        Returns
+        -------
+        image : array, same shape as ``self.image_viewer.image``, or None
+            The filtered image.
+        data : None
+            Any data associated with the plugin.
+
+        Notes
+        -----
+        Derived classes should override this method to return a tuple
+        containing an *overlay* of the same shape of the image, and a
+        *data* object. Either of these is optional: return ``None`` if
+        you don't want to return a value.
+        """
+        return (self.image_viewer.image, None)
+

@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_almost_equal
 
 from skimage import data
 from skimage import img_as_float
@@ -99,6 +99,22 @@ def test_subpix():
     corner = peak_local_max(corner_harris(img), num_peaks=1)
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (24.5, 24.5))
+
+
+def test_subpix_border():
+    img = np.zeros((50, 50))
+    img[1:25,1:25] = 255
+    img[25:-1,25:-1] = 255
+    corner = corner_peaks(corner_harris(img), min_distance=1)
+    subpix = corner_subpix(img, corner, window_size=11)
+    ref = np.array([[ 0.52040816,  0.52040816],
+                    [ 0.52040816, 24.47959184],
+                    [24.47959184,  0.52040816],
+                    [24.5       , 24.5       ],
+                    [24.52040816, 48.47959184],
+                    [48.47959184, 24.52040816],
+                    [48.47959184, 48.47959184]])
+    assert_almost_equal(subpix, ref)
 
 
 def test_num_peaks():

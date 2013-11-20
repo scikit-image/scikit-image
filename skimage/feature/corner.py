@@ -2,7 +2,7 @@ import numpy as np
 from scipy import ndimage
 from scipy import stats
 from skimage.color import rgb2grey
-from skimage.util import img_as_float
+from skimage.util import img_as_float, pad
 from skimage.feature import peak_local_max
 
 
@@ -70,10 +70,10 @@ def corner_kitchen_rosenfeld(image):
     The corner measure is calculated as follows::
 
         (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy)
-        ------------------------------------------------------
-                        (imx**2 + imy**2)
+            / (imx**2 + imy**2)
 
-    Where imx and imy are the first and imxx, imxy, imyy the second derivatives.
+    Where imx and imy are the first and imxx, imxy, imyy the second
+    derivatives.
 
     Parameters
     ----------
@@ -147,19 +147,19 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     Examples
     --------
     >>> from skimage.feature import corner_harris, corner_peaks
-    >>> square = np.zeros([10, 10])
+    >>> square = np.zeros([10, 10], dtype=int)
     >>> square[2:8, 2:8] = 1
     >>> square
-    array([[ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> corner_peaks(corner_harris(square), min_distance=1)
     array([[2, 2],
            [2, 7],
@@ -217,19 +217,19 @@ def corner_shi_tomasi(image, sigma=1):
     Examples
     --------
     >>> from skimage.feature import corner_shi_tomasi, corner_peaks
-    >>> square = np.zeros([10, 10])
+    >>> square = np.zeros([10, 10], dtype=int)
     >>> square[2:8, 2:8] = 1
     >>> square
-    array([[ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> corner_peaks(corner_shi_tomasi(square), min_distance=1)
     array([[2, 2],
            [2, 7],
@@ -285,17 +285,17 @@ def corner_foerstner(image, sigma=1):
     >>> from skimage.feature import corner_foerstner, corner_peaks
     >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
-    >>> square
-    array([[ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  1,  1,  1,  1,  1,  1,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
-           [ 0,  0,  0,  0,  0,  0,  0,  0,  0,  0]])
+    >>> square.astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> w, q = corner_foerstner(square)
     >>> accuracy_thresh = 0.5
     >>> roundness_thresh = 0.3
@@ -351,10 +351,37 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
            foerstner87.fast.pdf
     .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
+    Examples
+    --------
+    >>> from skimage.feature import corner_harris, corner_peaks, corner_subpix
+    >>> img = np.zeros((10, 10), dtype=int)
+    >>> img[:5, :5] = 1
+    >>> img[5:, 5:] = 1
+    >>> img
+    array([[1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
+           [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]])
+    >>> coords = corner_peaks(corner_harris(img), min_distance=2)
+    >>> coords_subpix = corner_subpix(img, coords, window_size=7)
+    >>> coords_subpix
+    array([[ 4.5,  4.5]])
+
     """
 
     # window extent in one direction
-    wext = (window_size - 1) / 2
+    wext = (window_size - 1) // 2
+
+    image = pad(image, pad_width=wext, mode='constant', constant_values=0)
+
+    # add pad width, make sure to not modify the input values in-place
+    corners = corners + wext
 
     # normal equation arrays
     N_dot = np.zeros((2, 2), dtype=np.double)
@@ -449,6 +476,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
         elif corner_class == 1:
             corners_subpix[i, :] = y0 + est_edge[0], x0 + est_edge[1]
 
+    # subtract pad width
+    corners_subpix -= wext
+
     return corners_subpix
 
 
@@ -470,7 +500,7 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
     Examples
     --------
-    >>> from skimage.feature import peak_local_max, corner_peaks
+    >>> from skimage.feature import peak_local_max
     >>> response = np.zeros((5, 5))
     >>> response[2:4, 2:4] = 1
     >>> response

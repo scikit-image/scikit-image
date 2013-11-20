@@ -247,8 +247,8 @@ def maximum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     skimage.morphology.dilation
 
-    Note
-    ----
+    Notes
+    -----
     * the lower algorithm complexity makes the rank.maximum() more efficient
       for larger images and structuring elements
 
@@ -397,8 +397,8 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     --------
     skimage.morphology.erosion
 
-    Note
-    ----
+    Notes
+    -----
     * the lower algorithm complexity makes the rank.minimum() more efficient
       for larger images and structuring elements
 

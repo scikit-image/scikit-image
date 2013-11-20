@@ -12,10 +12,11 @@ import tempfile
 from io import BytesIO
 
 import numpy as np
+import six
 
 from skimage.io._plugins import call as call_plugin
 from skimage.color import rgb2grey
-from skimage._shared import six
+
 
 
 # Shared image queue
@@ -247,7 +248,7 @@ def show():
 
     >>> for i in range(4):
     ...     io.imshow(np.random.random((50, 50)))
-    >>> io.show()
+    >>> io.show() # doctest: +SKIP
 
     '''
     return call_plugin('_app_show')

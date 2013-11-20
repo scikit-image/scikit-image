@@ -8,12 +8,11 @@ from skimage import io
 from skimage import img_as_ubyte
 from skimage.transform import resize
 from skimage.color import color_dict
-from skimage._shared import six
 
+import six
 from six.moves.urllib_parse import urlparse
 from six.moves.urllib import request
 urlopen = request.urlopen
-
 
 # Convert colors from `skimage.color` to uint8 and allow access through
 # dict or a named tuple.
