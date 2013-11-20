@@ -63,7 +63,7 @@ script:
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
 
     # Run all tests
-    - nosetests-$PYVER --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
+    - nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
 
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
