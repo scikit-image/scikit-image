@@ -20,7 +20,10 @@ class ColorHistogram(PlotPlugin):
         super(ColorHistogram, self).attach(image_viewer)
 
         self.rect_tool = RectangleTool(self.ax, on_release=self.ab_selected)
-        self.lab_image = color.rgb2lab(image_viewer.image)
+        self._on_new_image(image_viewer.image)
+
+    def _on_new_image(self, image):
+        self.lab_image = color.rgb2lab(image)
 
         # Calculate color histogram in the Lab colorspace:
         L, a, b = self.lab_image.T
