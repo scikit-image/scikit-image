@@ -4,23 +4,25 @@
 Deconvolution of Lena
 =====================
 
-In this example, we deconvolve a noisy version of Lena using wiener
-and unsupervised wiener algorithms. This algorithms are known to not
-have the best respect of sharp edge in the image.
+In this example, we deconvolve a noisy version of Lena using Wiener
+and unsupervised Wiener algorithms. This algorithms are based on
+linear models that can't restore sharp edge as much as non-linear
+methods (like TV restoration) but are much faster.
 
 Wiener filter
 -------------
+The inverse filter based on the PSF (Point Spread Function),
+the prior regularisation (penalisation of high frequency) and the
+tradeoff between the data and prior adequacy. The regularization
+parameter must be hand tuned.
 
-This is simply the inverse filter based on the PSF, the prior
-regularisation (penalisation of high frequency) and the tradeoff
-between the data and prior adequacy. The regularization parameter must
-be hand tuned.
-
-Unsupervised wiener
+Unsupervised Wiener
 -------------------
-
-This algorithm has a self tuned regularisation parameters based on
-data learning. This is not common and based on the following publication
+This algorithm has a self-tuned regularisation parameters based on
+data learning. This is not common and based on the following
+publication. The algorithm is based on a iterative Gibbs sampler that
+draw alternatively samples of posterior conditionnal law of the image,
+the noise power and the image frequency power.
 
 .. [1] François Orieux, Jean-François Giovannelli, and Thomas
        Rodet, "Bayesian estimation of regularization and point
@@ -38,7 +40,7 @@ psf = np.ones((5, 5)) / 25
 lena = conv2(lena, psf, 'same')
 lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
 
-deconvolued, _ = restoration.unsupervised_wiener(lena, psf)
+deconvolved, _ = restoration.unsupervised_wiener(lena, psf)
 
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5))
 
@@ -48,7 +50,7 @@ ax[0].imshow(lena)
 ax[0].axis('off')
 ax[0].set_title('Data')
 
-ax[1].imshow(deconvolued, vmax=lena.max())
+ax[1].imshow(deconvolved, vmax=lena.max())
 ax[1].axis('off')
 ax[1].set_title('Self tuned restoration')
 

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Skimage module for image restoration
-
-This module implement various algorithm of the literature for image
-restoration.
+"""Image restoration module.
 
 References
 ----------
