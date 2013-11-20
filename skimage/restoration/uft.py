@@ -85,26 +85,26 @@ def _circshift(inarray, shifts):
 
     Examples
     --------
-    >>> _circshift(np.arange(10), 2)
+    >>> _circshift(np.arange(10), (2, ))
     array([8, 9, 0, 1, 2, 3, 4, 5, 6, 7])
 
     """
     # Initialize array of indices
     idx = []
 
-    # Loop through each dimension of the input matrix to calculate
+    # Loop through each dimension of the input matrix to compute
     # shifted indices
     for dim in range(inarray.ndim):
         length = inarray.shape[dim]
         try:
             shift = shifts[dim]
         except IndexError:
-            shift = 0  # no shift if not specify
+            shift = 0  # no shift if not specified
 
         # Lets start for fancy indexing. First we build the shifted
         # index for dim k. It will be broadcasted to other dim so
         # ndmin is specified
-        index = np.mod(np.array(range(length),
+        index = np.mod(np.array(np.arange(length),
                                 ndmin=inarray.ndim) - shift,
                        length)
         # Shape adaptation
@@ -114,7 +114,7 @@ def _circshift(inarray, shifts):
 
         idx.append(index.astype(int))
 
-    # Perform the actual conversion by indexing into the input matrix
+    # Conversion by indexing the input matrix
     return inarray[idx]
 
 
@@ -427,3 +427,8 @@ def laplacian(ndim, shape):
     impr[([slice(1, 2)] * ndim)] = 2.0 * ndim
 
     return ir2tf(impr, shape), impr
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod(optionflags=doctest.ELLIPSIS)

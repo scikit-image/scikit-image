@@ -113,7 +113,7 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     bayesian approaches.
     
     The use of Fourier space implies a circulant property of
-    :math:`H`, see [2]. 
+    :math:`H`, see [2].
 
     References
     ----------

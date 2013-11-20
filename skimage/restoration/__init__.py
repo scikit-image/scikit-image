@@ -18,7 +18,7 @@ References
        Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
 """
 
-from .wiener import wiener, unsupervised_wiener, richardson_lucy
+from .deconvolution import wiener, unsupervised_wiener, richardson_lucy
 
 __all__ = ['wiener',
            "unsupervised_wiener",
