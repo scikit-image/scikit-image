@@ -66,7 +66,7 @@ class Plugin(QtGui.QDialog):
     >>> image = data.coins()
     >>> viewer = ImageViewer(image) # skip if not has_qt
     >>> viewer += plugin            # skip if not has_qt
-    >>> viewer.show()               # skip if not has_qt
+    >>> viewer.show()               # doctest: +SKIP
 
     The plugin will automatically delegate parameters to `image_filter` based
     on its parameter type, i.e., `ptype` (widgets for required arguments must
