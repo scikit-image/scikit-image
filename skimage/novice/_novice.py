@@ -25,7 +25,7 @@ def open(path):
 def _verify_picture_index(index):
     """Raise error if picture index is not a 2D index/slice."""
     if not (isinstance(index, tuple) and len(index) == 2):
-        raise IndexError("Expected 2D index but got {!r}".format(index))
+        raise IndexError("Expected 2D index but got {0!r}".format(index))
 
     if all(isinstance(i, int) for i in index):
         return index
