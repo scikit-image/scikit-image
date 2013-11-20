@@ -22,7 +22,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Implementations deconvolution functions"""
+"""Implementations restoration functions"""
 
 from __future__ import division
 
@@ -40,7 +40,7 @@ __maintainer__ = "François Orieux"
 __email__ = "orieux@iap.fr"
 __status__ = "stable"
 __url__ = "http://research.orieux.fr"
-__keywords__ = "deconvolution, image"
+__keywords__ = "restoration, image"
 
 
 def wiener(data, psf, reg_val, reg=None, real=True):
@@ -79,13 +79,13 @@ def wiener(data, psf, reg_val, reg=None, real=True):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import color, data, deconvolution
+    >>> from skimage import color, data, restoration
     >>> lena = color.rgb2gray(data.lena())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> lena = convolve2d(lena, psf, 'same')
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolved_lena = deconvolution.wiener(lena, psf, 1100)
+    >>> deconvolved_lena = restoration.wiener(lena, psf, 1100)
 
     Notes
     -----
@@ -214,13 +214,13 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import color, data, deconvolution
+    >>> from skimage import color, data, restoration
     >>> lena = color.rgb2gray(data.lena())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> lena = convolve2d(lena, psf, 'same')
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolved_lena = deconvolution.unsupervised_wiener(lena, psf)
+    >>> deconvolved_lena = restoration.unsupervised_wiener(lena, psf)
 
     References
     ----------
@@ -340,13 +340,13 @@ def richardson_lucy(data, psf, iterations=50):
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage import color, data, deconvolution
+    >>> from skimage import color, data, restoration
     >>> camera = color.rgb2gray(data.camera())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
     >>> camera = convolve2d(camera, psf, 'same')
     >>> camera += 0.1 * camera.std() * np.random.standard_normal(camera.shape)
-    >>> deconvolved = deconvolution.richardson_lucy(camera, psf, 5)
+    >>> deconvolved = restoration.richardson_lucy(camera, psf, 5)
 
     References
     ----------

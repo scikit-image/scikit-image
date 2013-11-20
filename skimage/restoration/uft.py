@@ -85,7 +85,7 @@ def _circshift(inarray, shifts):
 
     Examples
     --------
-    >>> circshift(np.arange(10), 2)
+    >>> _circshift(np.arange(10), 2)
     array([8, 9, 0, 1, 2, 3, 4, 5, 6, 7])
 
     """
