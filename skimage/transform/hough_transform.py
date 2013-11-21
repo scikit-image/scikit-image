@@ -1,6 +1,7 @@
 import numpy as np
 from scipy import ndimage
 from skimage import measure, morphology
+from ._hough_transform import _hough_circle
 
 
 def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
@@ -125,3 +126,31 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
         angle_peaks = angle_peaks[idx_maxsort]
 
     return hspace_peaks, angle_peaks, dist_peaks
+
+
+def hough_circle(image, radius, normalize=True, full_output=False):
+    """Perform a circular Hough transform.
+
+    Parameters
+    ----------
+    image : (M, N) ndarray
+        Input image with nonzero values representing edges.
+    radius : ndarray
+        Radii at which to compute the Hough transform.
+    normalize : boolean, optional (default True)
+        Normalize the accumulator with the number
+        of pixels used to draw the radius.
+    full_output : boolean, optional (default False)
+        Extend the output size by twice the largest
+        radius in order to detect centers outside the
+        input picture.
+
+    Returns
+    -------
+    H : 3D ndarray (radius index, (M + 2R, N + 2R) ndarray)
+        Hough transform accumulator for each radius.
+        R designates the larger radius if full_output is True.
+        Otherwise, R = 0.
+    """
+    return _hough_circle(image, radius.astype(np.intp),
+                         normalize=normalize, full_output=full_output)
