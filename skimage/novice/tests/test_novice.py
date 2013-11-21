@@ -268,5 +268,4 @@ def test_pixel_blue_raises():
 
 
 if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
+    np.testing.run_module_suite()
