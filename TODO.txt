@@ -14,3 +14,4 @@ Version 0.10
 * Remove deprecated `skimage.color.is_gray` and `skimage.color.is_rgb`
   functions
 * Enable doctests of experimental `skimage.feature.brief`
+* Remove deprecated `skimage.segmentation.visualize_boundaries`
