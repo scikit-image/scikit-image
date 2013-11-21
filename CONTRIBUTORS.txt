@@ -175,4 +175,4 @@
   Phase unwrapping integration
 
 - François Orieux
-  Image deconvolution
+  Image deconvolution http://research.orieux.fr

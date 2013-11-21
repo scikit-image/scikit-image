@@ -35,12 +35,10 @@ from . import uft
 __copyright__ = "Copyright scikit-image team"
 __credits__ = ["François Orieux"]
 __license__ = "mit"
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __maintainer__ = "François Orieux"
-__email__ = "orieux@iap.fr"
 __status__ = "stable"
-__url__ = "http://research.orieux.fr"
-__keywords__ = "restoration, image"
+__keywords__ = "restoration, image, deconvolution"
 
 
 def wiener(data, psf, reg_val, reg=None, real=True):

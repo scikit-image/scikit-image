@@ -34,10 +34,9 @@ equal to
 
 .. math:: \frac{1}{\sqrt{n}} \sum_i x_i.
 
-You must keep in mind that the transform are applied from the last
-axes. this is a fftw convention for performance reason (c order
-array). If you want more sofisticated use, you must use directly the
-numpy.fft module.
+The transform is applied from the last axes for performance reason (c
+order array). You may use directly the numpy.fft module for more
+sophisticated purpose.
 
 References
 ----------
@@ -52,11 +51,10 @@ References
 import numpy as np
 
 __copyright__ = "Copyright scikit-image team"
+__credits__ = ["François Orieux"]
 __license__ = "mit"
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __maintainer__ = "Francois Orieux"
-__email__ = "orieux@iap.fr"
-__url__ = ""
 __keywords__ = "fft"
 
 
@@ -427,8 +425,3 @@ def laplacian(ndim, shape):
     impr[([slice(1, 2)] * ndim)] = 2.0 * ndim
 
     return ir2tf(impr, shape), impr
-
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod(optionflags=doctest.ELLIPSIS)
