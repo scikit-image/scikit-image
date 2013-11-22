@@ -18,27 +18,23 @@ from skimage.filter import sobel
 from skimage.segmentation import slic, join_segmentations
 from skimage.morphology import watershed
 from skimage.color import label2rgb
-from skimage import data
+from skimage import data, img_as_float
 
-
-coins = data.coins()
+coins = img_as_float(data.coins())
 
 # make segmentation using edge-detection and watershed
 edges = sobel(coins)
 markers = np.zeros_like(coins)
 foreground, background = 1, 2
-markers[coins < 30] = background
-markers[coins > 150] = foreground
+markers[coins < 30.0 / 255] = background
+markers[coins > 150.0 / 255] = foreground
 
 ws = watershed(edges, markers)
 seg1 = nd.label(ws == foreground)[0]
 
 # make segmentation using SLIC superpixels
-
-# make the RGB equivalent of `coins`
-coins_colour = np.tile(coins[..., np.newaxis], (1, 1, 3))
-seg2 = slic(coins_colour, n_segments=30, max_iter=160, sigma=1, ratio=9,
-            convert2lab=False)
+seg2 = slic(coins, n_segments=117, max_iter=160, sigma=1, compactness=0.75,
+            multichannel=False)
 
 # combine the two
 segj = join_segmentations(seg1, seg2)

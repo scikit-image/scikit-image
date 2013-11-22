@@ -1,5 +1,5 @@
 from numpy.testing import assert_array_equal, assert_almost_equal, \
-    assert_array_almost_equal, assert_raises
+    assert_array_almost_equal, assert_raises, assert_equal
 import numpy as np
 import math
 
@@ -31,7 +31,8 @@ def test_all_props():
 def test_dtype():
     regionprops(np.zeros((10, 10), dtype=np.int))
     regionprops(np.zeros((10, 10), dtype=np.uint))
-    assert_raises(TypeError, regionprops, np.zeros((10, 10), dtype=np.double))
+    assert_raises((TypeError, RuntimeError), regionprops,
+                  np.zeros((10, 10), dtype=np.double))
 
 
 def test_ndim():
@@ -269,7 +270,7 @@ def test_solidity():
     assert_almost_equal(solidity, 0.580645161290323)
 
 
-def test_weighted_moments():
+def test_weighted_moments_central():
     wmu = regionprops(SAMPLE, intensity_image=INTENSITY_SAMPLE
                       )[0].weighted_moments_central
     ref = np.array(
@@ -333,6 +334,17 @@ def test_weighted_moments_normalized():
          [-0.0162529732, -0.0104598869, -0.0028544152, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
+
+
+def test_old_dict_interface():
+    feats = regionprops(SAMPLE,
+                        ['Area', 'Eccentricity', 'EulerNumber',
+                         'Extent', 'MinIntensity', 'MeanIntensity',
+                         'MaxIntensity', 'Solidity'],
+                        intensity_image=INTENSITY_SAMPLE)
+
+    np.array([list(props.values()) for props in feats], np.float)
+    assert_equal(len(feats[0]), 8)
 
 
 if __name__ == "__main__":

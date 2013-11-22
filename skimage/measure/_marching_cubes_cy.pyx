@@ -56,32 +56,32 @@ def unpack_unique_verts(list trilist):
 
 
 def iterate_and_store_3d(double[:, :, ::1] arr, double level,
-                         tuple sampling=(1., 1., 1.)):
+                         tuple spacing=(1., 1., 1.)):
     """Iterate across the given array in a marching-cubes fashion,
     looking for volumes with edges that cross 'level'. If such a volume is
     found, appropriate triangulations are added to a growing list of
     faces to be returned by this function.
 
-    If `sampling` is not provided, vertices are returned in the indexing
+    If `spacing` is not provided, vertices are returned in the indexing
     coordinate system (assuming all 3 spatial dimensions sampled equally).
-    If `sampling` is provided, vertices will be returned in volume coordinates
+    If `spacing` is provided, vertices will be returned in volume coordinates
     relative to the origin, regularly spaced as specified in each dimension.
 
     """
     if arr.shape[0] < 2 or arr.shape[1] < 2 or arr.shape[2] < 2:
         raise ValueError("Input array must be at least 2x2x2.")
-    if len(sampling) != 3:
-        raise ValueError("`sampling` must be (double, double, double)")
+    if len(spacing) != 3:
+        raise ValueError("`spacing` must be (double, double, double)")
 
     cdef list face_list = []
     cdef list norm_list = []
     cdef Py_ssize_t n
-    cdef bint odd_sampling, plus_z
+    cdef bint odd_spacing, plus_z
     plus_z = False
-    if [float(i) for i in sampling] == [1.0, 1.0, 1.0]:
-        odd_sampling = False
+    if [float(i) for i in spacing] == [1.0, 1.0, 1.0]:
+        odd_spacing = False
     else:
-        odd_sampling = True
+        odd_spacing = True
 
     # The plan is to iterate a 2x2x2 cube across the input array. This means
     # the upper-left corner of the cube needs to iterate across a sub-array
@@ -107,11 +107,11 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
     coords[1] = 0
     coords[2] = 0
 
-    # Extract doubles from `sampling` for speed
-    cdef double[3] sampling2
-    sampling2[0] = sampling[0]
-    sampling2[1] = sampling[1]
-    sampling2[2] = sampling[2]
+    # Extract doubles from `spacing` for speed
+    cdef double[3] spacing2
+    spacing2[0] = spacing[0]
+    spacing2[1] = spacing[1]
+    spacing2[2] = spacing[2]
 
     # Calculate the number of iterations we'll need
     cdef Py_ssize_t num_cube_steps = ((arr.shape[0] - 1) *
@@ -138,15 +138,15 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
         x0, y0, z0 = coords[0], coords[1], coords[2]
         x1, y1, z1 = x0 + 1, y0 + 1, z0 + 1
 
-        if odd_sampling:
+        if odd_spacing:
             # These doubles are the modified world coordinates; they are only
-            # calculated if non-default `sampling` provided.
-            r0 = coords[0] * sampling2[0]
-            c0 = coords[1] * sampling2[1]
-            d0 = coords[2] * sampling2[2]
-            r1 = r0 + sampling2[0]
-            c1 = c0 + sampling2[1]
-            d1 = d0 + sampling2[2]
+            # calculated if non-default `spacing` provided.
+            r0 = coords[0] * spacing2[0]
+            c0 = coords[1] * spacing2[1]
+            d0 = coords[2] * spacing2[2]
+            r1 = r0 + spacing2[0]
+            c1 = c0 + spacing2[1]
+            d1 = d0 + spacing2[2]
         else:
             r0, c0, d0, r1, c1, d1 = x0, y0, z0, x1, y1, z1
 
@@ -193,11 +193,11 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
                 e4 = e8
             else:
                 # Calculate edges normally
-                if odd_sampling:
-                    e1 = r0 + _get_fraction(v1, v2, level) * sampling2[0], c0, d0
-                    e2 = r1, c0 + _get_fraction(v2, v3, level) * sampling2[1], d0
-                    e3 = r0 + _get_fraction(v4, v3, level) * sampling2[0], c1, d0
-                    e4 = r0, c0 + _get_fraction(v1, v4, level) * sampling2[1], d0
+                if odd_spacing:
+                    e1 = r0 + _get_fraction(v1, v2, level) * spacing2[0], c0, d0
+                    e2 = r1, c0 + _get_fraction(v2, v3, level) * spacing2[1], d0
+                    e3 = r0 + _get_fraction(v4, v3, level) * spacing2[0], c1, d0
+                    e4 = r0, c0 + _get_fraction(v1, v4, level) * spacing2[1], d0
                 else:
                     e1 = r0 + _get_fraction(v1, v2, level), c0, d0
                     e2 = r1, c0 + _get_fraction(v2, v3, level), d0
@@ -208,15 +208,15 @@ def iterate_and_store_3d(double[:, :, ::1] arr, double level,
             # large, growing lookup table for all adjacent values; could save
             # ~30% in terms of runtime at the expense of memory usage and
             # much greater complexity.
-            if odd_sampling:
-                e5 = r0 + _get_fraction(v5, v6, level) * sampling2[0], c0, d1
-                e6 = r1, c0 + _get_fraction(v6, v7, level) * sampling2[1], d1
-                e7 = r0 + _get_fraction(v8, v7, level) * sampling2[0], c1, d1
-                e8 = r0, c0 + _get_fraction(v5, v8, level) * sampling2[1], d1
-                e9 = r0, c0, d0 + _get_fraction(v1, v5, level) * sampling2[2]
-                e10 = r1, c0, d0 + _get_fraction(v2, v6, level) * sampling2[2]
-                e11 = r0, c1, d0 + _get_fraction(v4, v8, level) * sampling2[2]
-                e12 = r1, c1, d0 + _get_fraction(v3, v7, level) * sampling2[2]
+            if odd_spacing:
+                e5 = r0 + _get_fraction(v5, v6, level) * spacing2[0], c0, d1
+                e6 = r1, c0 + _get_fraction(v6, v7, level) * spacing2[1], d1
+                e7 = r0 + _get_fraction(v8, v7, level) * spacing2[0], c1, d1
+                e8 = r0, c0 + _get_fraction(v5, v8, level) * spacing2[1], d1
+                e9 = r0, c0, d0 + _get_fraction(v1, v5, level) * spacing2[2]
+                e10 = r1, c0, d0 + _get_fraction(v2, v6, level) * spacing2[2]
+                e11 = r0, c1, d0 + _get_fraction(v4, v8, level) * spacing2[2]
+                e12 = r1, c1, d0 + _get_fraction(v3, v7, level) * spacing2[2]
             else:
                 e5 = r0 + _get_fraction(v5, v6, level), c0, d1
                 e6 = r1, c0 + _get_fraction(v6, v7, level), d1

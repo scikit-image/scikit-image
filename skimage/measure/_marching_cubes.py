@@ -2,7 +2,7 @@ import numpy as np
 from . import _marching_cubes_cy
 
 
-def marching_cubes(volume, level, sampling=(1., 1., 1.)):
+def marching_cubes(volume, level, spacing=(1., 1., 1.)):
     """
     Marching cubes algorithm to find iso-valued surfaces in 3d volumetric data
 
@@ -12,7 +12,7 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
         Input data volume to find isosurfaces. Will be cast to `np.float64`.
     level : float
         Contour value to search for isosurfaces in `volume`.
-    sampling : length-3 tuple of floats
+    spacing : length-3 tuple of floats
         Voxel spacing in spatial dimensions corresponding to numpy array
         indexing dimensions (M, N, P) as in `volume`.
 
@@ -34,7 +34,7 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
       http://www.essi.fr/~lingrand/MarchingCubes/algo.html
 
     There are several known ambiguous cases in the marching cubes algorithm.
-    Using point labeling as in [1]_, Figure 4, as shown:
+    Using point labeling as in [1]_, Figure 4, as shown::
 
            v8 ------ v7
           / |       / |        y
@@ -72,15 +72,15 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
     the outputs directly into `skimage.measure.mesh_surface_area`.
 
     Regarding visualization of algorithm output, the ``mayavi`` package
-    is recommended. To contour a volume named `myvolume` about the level 0.0:
+    is recommended. To contour a volume named `myvolume` about the level 0.0::
 
-    >>> from mayavi import mlab
-    >>> verts, tris = marching_cubes(myvolume, 0.0, (1., 1., 2.))
-    >>> mlab.triangular_mesh([vert[0] for vert in verts],
-                             [vert[1] for vert in verts],
-                             [vert[2] for vert in verts],
-                             tris)
-    >>> mlab.show()
+      >>> from mayavi import mlab
+      >>> verts, tris = marching_cubes(myvolume, 0.0, (1., 1., 2.))
+      >>> mlab.triangular_mesh([vert[0] for vert in verts],
+      ...                      [vert[1] for vert in verts],
+      ...                      [vert[2] for vert in verts],
+      ...                      tris)
+      >>> mlab.show()
 
     References
     ----------
@@ -107,7 +107,7 @@ def marching_cubes(volume, level, sampling=(1., 1., 1.)):
     #   have repeated vertices - and equivalent vertices are redundantly
     #   placed in every triangle they connect with.
     raw_tris = _marching_cubes_cy.iterate_and_store_3d(volume, float(level),
-                                                       sampling)
+                                                       spacing)
 
     # Find and collect unique vertices, storing triangle verts as indices.
     # Returns a true mesh with no degenerate faces.

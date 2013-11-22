@@ -1,12 +1,13 @@
 import numpy as np
+from skimage._shared.utils import deprecated
 
 
 def join_segmentations(s1, s2):
     """Return the join of the two input segmentations.
 
-    The join J of S1 and S2 is defined as the segmentation in which two voxels
-    are in the same segment in J if and only if they are in the same segment
-    in *both* S1 and S2.
+    The join J of S1 and S2 is defined as the segmentation in which two
+    voxels are in the same segment if and only if they are in the same
+    segment in *both* S1 and S2.
 
     Parameters
     ----------
@@ -35,15 +36,24 @@ def join_segmentations(s1, s2):
     if s1.shape != s2.shape:
         raise ValueError("Cannot join segmentations of different shape. " +
                          "s1.shape: %s, s2.shape: %s" % (s1.shape, s2.shape))
-    s1 = relabel_from_one(s1)[0]
-    s2 = relabel_from_one(s2)[0]
+    s1 = relabel_sequential(s1)[0]
+    s2 = relabel_sequential(s2)[0]
     j = (s2.max() + 1) * s1 + s2
-    j = relabel_from_one(j)[0]
+    j = relabel_sequential(j)[0]
     return j
 
 
+@deprecated('relabel_sequential')
 def relabel_from_one(label_field):
     """Convert labels in an arbitrary label field to {1, ... number_of_labels}.
+
+    This function is deprecated, see ``relabel_sequential`` for more.
+    """
+    return relabel_sequential(label_field, offset=1)
+
+
+def relabel_sequential(label_field, offset=1):
+    """Relabel arbitrary labels to {`offset`, ... `offset` + number_of_labels}.
 
     This function also returns the forward map (mapping the original labels to
     the reduced labels) and the inverse map (mapping the reduced labels back
@@ -52,6 +62,10 @@ def relabel_from_one(label_field):
     Parameters
     ----------
     label_field : numpy array of int, arbitrary shape
+        An array of labels.
+    offset : int, optional
+        The return labels will start at `offset`, which should be
+        strictly positive.
 
     Returns
     -------
@@ -62,13 +76,15 @@ def relabel_from_one(label_field):
         The map from the original label space to the returned label
         space. Can be used to re-apply the same mapping. See examples
         for usage.
-    inverse_map : numpy array of int, shape ``(len(np.unique(label_field)),)``
+    inverse_map : 1D numpy array of int, of length offset + number of labels
         The map from the new label space to the original space. This
         can be used to reconstruct the original label field from the
         relabeled one.
 
     Notes
     -----
+    The label 0 is assumed to denote the background and is never remapped.
+
     The forward map can be extremely big for some inputs, since its
     length is given by the maximum of the label field. However, in most
     situations, ``label_field.max()`` is much smaller than
@@ -77,9 +93,9 @@ def relabel_from_one(label_field):
 
     Examples
     --------
-    >>> from skimage.segmentation import relabel_from_one
-    >>> label_field = array([1, 1, 5, 5, 8, 99, 42])
-    >>> relab, fw, inv = relabel_from_one(label_field)
+    >>> from skimage.segmentation import relabel_sequential
+    >>> label_field = np.array([1, 1, 5, 5, 8, 99, 42])
+    >>> relab, fw, inv = relabel_sequential(label_field)
     >>> relab
     array([1, 1, 2, 2, 3, 5, 4])
     >>> fw
@@ -94,16 +110,20 @@ def relabel_from_one(label_field):
     True
     >>> (inv[relab] == label_field).all()
     True
+    >>> relab, fw, inv = relabel_sequential(label_field, offset=5)
+    >>> relab
+    array([5, 5, 6, 6, 7, 9, 8])
     """
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
     m = labels.max()
-    if m == len(labels0): # nothing to do, already 1...n labels
+    if m == len(labels0):  # nothing to do, already 1...n labels
         return label_field, labels, labels
     forward_map = np.zeros(m+1, int)
-    forward_map[labels0] = np.arange(1, len(labels0) + 1)
+    forward_map[labels0] = np.arange(offset, offset + len(labels0) + 1)
     if not (labels == 0).any():
         labels = np.concatenate(([0], labels))
-    inverse_map = labels
-    return forward_map[label_field], forward_map, inverse_map
-
+    inverse_map = np.zeros(offset - 1 + len(labels), dtype=np.intp)
+    inverse_map[(offset - 1):] = labels
+    relabeled = forward_map[label_field]
+    return relabeled, forward_map, inverse_map
