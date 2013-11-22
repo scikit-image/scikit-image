@@ -3,7 +3,7 @@ from numpy.testing import (assert_equal, assert_array_almost_equal,
                            assert_raises)
 from skimage.transform._geometric import _stackcopy
 from skimage.transform._geometric import GeometricTransform
-from skimage.transform import (estimate_transform,
+from skimage.transform import (estimate_transform, matrix_transform,
                                SimilarityTransform, AffineTransform,
                                ProjectiveTransform, PolynomialTransform,
                                PiecewiseAffineTransform)
@@ -45,6 +45,11 @@ def test_estimate_transform():
         estimate_transform(tform, SRC[:2, :], DST[:2, :])
     assert_raises(ValueError, estimate_transform, 'foobar',
                   SRC[:2, :], DST[:2, :])
+
+
+def test_matrix_transform():
+    tform = AffineTransform(scale=(0.1, 0.5), rotation=2)
+    assert_equal(tform(SRC), matrix_transform(SRC, tform._matrix))
 
 
 def test_similarity_estimation():
