@@ -1,6 +1,8 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_array_almost_equal
+from numpy.testing import (assert_equal, assert_array_almost_equal,
+                           assert_raises)
 from skimage.transform._geometric import _stackcopy
+from skimage.transform._geometric import GeometricTransform
 from skimage.transform import (estimate_transform,
                                SimilarityTransform, AffineTransform,
                                ProjectiveTransform, PolynomialTransform,
@@ -178,6 +180,13 @@ def test_union():
     tform = tform1 + tform2
     assert_array_almost_equal(tform._matrix, tform3._matrix)
     assert tform.__class__ == ProjectiveTransform
+
+
+def test_geometric_tform():
+    tform = GeometricTransform()
+    assert_raises(NotImplementedError, tform, 0)
+    assert_raises(NotImplementedError, tform.inverse, 0)
+    assert_raises(NotImplementedError, tform.__add__, 0)
 
 
 if __name__ == "__main__":
