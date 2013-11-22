@@ -6,6 +6,9 @@ skimage (0.9.3-1) unstable; urgency=low
 
   [ Yaroslav Halchenko ]
   * Merge with previous UNRELEASED changes
+  * debian/patches
+    - changeset_0eea2a48fe2dca7bbb3681fcd5b511579cad6347.diff and
+      up_correct_version removed (upstreamed)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 22 Nov 2013 15:37:55 -0500
 
