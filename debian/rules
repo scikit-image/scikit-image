@@ -12,6 +12,9 @@ PY3VERS = $(shell py3versions -vr)
 export MPLCONFIGDIR=$(CURDIR)/build
 export HOME=$(CURDIR)/build
 
+export http_proxy = http://127.0.9.1:9
+export https_proxy = http://127.0.9.1:9
+
 # Mega rule
 %:
 	dh $@ --with python2,python3,sphinxdoc --buildsystem python_distutils
