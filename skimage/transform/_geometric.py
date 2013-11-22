@@ -1025,8 +1025,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                       'the `inverse_map` parameter.')
         inverse_map = reverse_map
 
-    if image.ndim < 2:
-        raise ValueError("Input must have more than 1 dimension.")
+    if image.ndim < 2 or image.ndim > 3:
+        raise ValueError("Input must have 2 or 3 dimensions.")
 
     orig_ndim = image.ndim
     image = np.atleast_3d(img_as_float(image))

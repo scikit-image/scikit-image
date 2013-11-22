@@ -1,4 +1,5 @@
-from numpy.testing import assert_array_almost_equal, run_module_suite, assert_array_equal
+from numpy.testing import (assert_array_almost_equal, run_module_suite,
+                           assert_array_equal, assert_raises)
 import numpy as np
 from scipy.ndimage import map_coordinates
 
@@ -232,6 +233,11 @@ def test_downscale_local_mean():
     expected2 = np.array([[ 14. ,  10.8],
                           [  8.5,   5.7]])
     assert_array_equal(expected2, out2)
+
+
+def test_invalid():
+    assert_raises(ValueError, warp, np.ones((4, )), SimilarityTransform())
+    assert_raises(ValueError, warp, np.ones((4, 3, 3, 3)), SimilarityTransform())
 
 
 if __name__ == "__main__":
