@@ -127,7 +127,7 @@ def test_ellipse_model_estimate():
     assert_almost_equal(model0._params, model_est._params, 0)
 
 
-def test_line_model_residuals():
+def test_ellipse_model_residuals():
     model = EllipseModel()
     # vertical line through origin
     model._params = (0, 0, 10, 5, 0)
