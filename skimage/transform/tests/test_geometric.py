@@ -76,6 +76,16 @@ def test_similarity_init():
     assert_array_almost_equal(tform2.rotation, rotation)
     assert_array_almost_equal(tform2.translation, translation)
 
+    # test special case for scale if rotation=0
+    scale = 0.1
+    rotation = 0
+    translation = (1, 1)
+    tform = SimilarityTransform(scale=scale, rotation=rotation,
+                                translation=translation)
+    assert_array_almost_equal(tform.scale, scale)
+    assert_array_almost_equal(tform.rotation, rotation)
+    assert_array_almost_equal(tform.translation, translation)
+
 
 def test_affine_estimation():
     # exact solution
