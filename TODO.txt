@@ -1,0 +1,15 @@
+Version 0.10
+------------
+* Remove deprecated functions in `skimage.filter.rank.*`
+* Remove deprecated parameter `epsilon` of `skimage.viewer.LineProfile`
+* Remove backwards-compatability of `skimage.measure.regionprops`
+* Remove {`ratio`, `sigma`} deprecation warnings of `skimage.segmentation.slic`
+
+Version 0.9
+-----------
+* Remove deprecated functions
+    - `skimage.filter.denoise_tv_chambolle`
+    - `skimage.morphology.is_local_maximum`
+    - `skimage.transform.hough`
+    - `skimage.transform.probabilistic_hough`
+    - `skimage.transform.hough_peaks`

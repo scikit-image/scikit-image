@@ -4,8 +4,6 @@
 #cython: wraparound=False
 import numpy as np
 
-cimport numpy as cnp
-
 
 cdef inline double _get_fraction(double from_value, double to_value,
                                  double level):
@@ -14,7 +12,7 @@ cdef inline double _get_fraction(double from_value, double to_value,
     return ((level - from_value) / (to_value - from_value))
 
 
-def iterate_and_store(cnp.ndarray[double, ndim=2] array,
+def iterate_and_store(double[:, :] array,
                       double level, Py_ssize_t vertex_connect_high):
     """Iterate across the given array in a marching-squares fashion,
     looking for segments that cross 'level'. If such a segment is
@@ -46,7 +44,7 @@ def iterate_and_store(cnp.ndarray[double, ndim=2] array,
 
     # Calculate the number of iterations we'll need
     cdef Py_ssize_t num_square_steps = (array.shape[0] - 1) \
-                                       * (array.shape[1] - 1)
+                                        * (array.shape[1] - 1)
 
     cdef unsigned char square_case = 0
     cdef tuple top, bottom, left, right

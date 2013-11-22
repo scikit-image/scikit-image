@@ -117,9 +117,9 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
         #create new integral image for this orientation
         # isolate orientations in this range
 
-        temp_ori = np.where(orientation < 180 / orientations * (i + 1),
+        temp_ori = np.where(orientation < 180.0 / orientations * (i + 1),
                             orientation, -1)
-        temp_ori = np.where(orientation >= 180 / orientations * i,
+        temp_ori = np.where(orientation >= 180.0 / orientations * i,
                             temp_ori, -1)
         # select magnitudes for those orientations
         cond2 = temp_ori > -1
@@ -142,10 +142,10 @@ def hog(image, orientations=9, pixels_per_cell=(8, 8),
                     centre = tuple([y * cy + cy // 2, x * cx + cx // 2])
                     dx = radius * cos(float(o) / orientations * np.pi)
                     dy = radius * sin(float(o) / orientations * np.pi)
-                    rr, cc = draw.bresenham(int(centre[0] - dx),
-                                            int(centre[1] - dy),
-                                            int(centre[0] + dx),
-                                            int(centre[1] + dy))
+                    rr, cc = draw.line(int(centre[0] - dx),
+                                       int(centre[1] - dy),
+                                       int(centre[0] + dx),
+                                       int(centre[1] + dy))
                     hog_image[rr, cc] += orientation_histogram[y, x, o]
 
     """

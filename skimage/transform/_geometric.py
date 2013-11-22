@@ -4,6 +4,9 @@ from scipy import ndimage, spatial
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
 
+from skimage._shared.utils import get_bound_method_class
+from skimage._shared import six
+
 
 class GeometricTransform(object):
     """Perform geometric transformations on a set of coordinates.
@@ -40,6 +43,28 @@ class GeometricTransform(object):
 
         """
         raise NotImplementedError()
+
+    def residuals(self, src, dst):
+        """Determine residuals of transformed destination coordinates.
+
+        For each transformed source coordinate the euclidean distance to the
+        respective destination coordinate is determined.
+
+        Parameters
+        ----------
+        src : (N, 2) array
+            Source coordinates.
+        dst : (N, 2) array
+            Destination coordinates.
+
+        Returns
+        -------
+        residuals : (N, ) array
+            Residual for coordinate.
+
+        """
+
+        return np.sqrt(np.sum((self(src) - dst)**2, axis=1))
 
     def __add__(self, other):
         """Combine this transformation with another.
@@ -200,14 +225,14 @@ class ProjectiveTransform(GeometricTransform):
         A[rows:, 8] = yd
 
         # Select relevant columns, depending on params
-        A = A[:, self._coeffs + [8]]
+        A = A[:, list(self._coeffs) + [8]]
 
         _, _, V = np.linalg.svd(A)
 
         H = np.zeros((3, 3))
         # solution is right singular vector that corresponds to smallest
         # singular value
-        H.flat[self._coeffs + [8]] = - V[-1, :-1] / V[-1, -1]
+        H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
         self._matrix = H
@@ -471,8 +496,8 @@ class SimilarityTransform(ProjectiveTransform):
                      for param in (scale, rotation, translation))
 
         if params and matrix is not None:
-            raise ValueError("You cannot specify the transformation matrix and "
-                             "the implicit parameters at the same time.")
+            raise ValueError("You cannot specify the transformation matrix and"
+                             " the implicit parameters at the same time.")
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
@@ -490,7 +515,7 @@ class SimilarityTransform(ProjectiveTransform):
                 [math.sin(rotation),   math.cos(rotation), 0],
                 [                 0,                    0, 1]
             ])
-            self._matrix *= scale
+            self._matrix[0:2, 0:2] *= scale
             self._matrix[0:2, 2] = translation
         else:
             # default to an identity transform
@@ -924,39 +949,72 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     Parameters
     ----------
-    image : 2-D array
+    image : 2-D or 3-D array
         Input image.
-    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``
+    inverse_map : transformation object, callable ``xy = f(xy, **kwargs)``, (3, 3) array
         Inverse coordinate map. A function that transforms a (N, 2) array of
         ``(x, y)`` coordinates in the *output image* into their corresponding
         coordinates in the *source image* (e.g. a transformation object or its
-        inverse).
+        inverse). See example section for usage.
     map_args : dict, optional
         Keyword arguments passed to `inverse_map`.
-    output_shape : tuple (rows, cols)
-        Shape of the output image generated.
-    order : int
-        Order of splines used in interpolation. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode : string
-        How to handle values outside the image borders.  See
-        `scipy.ndimage.map_coordinates` for detail.
-    cval : float
+    output_shape : tuple (rows, cols), optional
+        Shape of the output image generated. By default the shape of the input
+        image is preserved.
+    order : int, optional
+        The order of interpolation. The order has to be in the range 0-5:
+        * 0: Nearest-neighbor
+        * 1: Bi-linear (default)
+        * 2: Bi-quadratic
+        * 3: Bi-cubic
+        * 4: Bi-quartic
+        * 5: Bi-quintic
+    mode : string, optional
+        Points outside the boundaries of the input are filled according
+        to the given mode ('constant', 'nearest', 'reflect' or 'wrap').
+    cval : float, optional
         Used in conjunction with mode 'constant', the value outside
         the image boundaries.
 
+    Notes
+    -----
+    In case of a `SimilarityTransform`, `AffineTransform` and
+    `ProjectiveTransform` and `order` in [0, 3] this function uses the
+    underlying transformation matrix to warp the image with a much faster
+    routine.
+
     Examples
     --------
-    Shift an image to the right:
-
+    >>> from skimage.transform import warp
     >>> from skimage import data
     >>> image = data.camera()
-    >>>
-    >>> def shift_right(xy):
-    ...     xy[:, 0] -= 10
+
+    The following image warps are all equal but differ substantially in
+    execution time.
+
+    Use a geometric transform to warp an image (fast):
+
+    >>> from skimage.transform import SimilarityTransform
+    >>> tform = SimilarityTransform(translation=(0, -10))
+    >>> warp(image, tform)
+
+    Shift an image to the right with a callable (slow):
+
+    >>> def shift(xy):
+    ...     xy[:, 1] -= 10
     ...     return xy
-    >>>
     >>> warp(image, shift_right)
+
+    Use a transformation matrix to warp an image (fast):
+
+    >>> matrix = np.array([[1, 0, 0], [0, 1, -10], [0, 0, 1]])
+    >>> warp(image, matrix)
+    >>> from skimage.transform import ProjectiveTransform
+    >>> warp(image, ProjectiveTransform(matrix=matrix))
+
+    You can also use the inverse of a geometric transformation (fast):
+
+    >>> warp(image, tform.inverse)
 
     """
     # Backward API compatibility
@@ -976,13 +1034,22 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     # use fast Cython version for specific interpolation orders
     if order in range(4) and not map_args:
         matrix = None
-        if inverse_map in HOMOGRAPHY_TRANSFORMS:
+
+        if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
+            matrix = inverse_map
+
+        elif inverse_map in HOMOGRAPHY_TRANSFORMS:
             matrix = inverse_map._matrix
-        elif hasattr(inverse_map, '__name__') \
-                and inverse_map.__name__ == 'inverse' \
-                and inverse_map.im_class in HOMOGRAPHY_TRANSFORMS:
-            matrix = np.linalg.inv(inverse_map.im_self._matrix)
+
+        elif (hasattr(inverse_map, '__name__')
+              and inverse_map.__name__ == 'inverse'
+              and get_bound_method_class(inverse_map)
+                  in HOMOGRAPHY_TRANSFORMS):
+
+            matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
+
         if matrix is not None:
+            matrix = matrix.astype(np.double)
             # transform all bands
             dims = []
             for dim in range(image.shape[2]):
@@ -1000,25 +1067,30 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         rows, cols = output_shape[:2]
 
+        if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
+            inverse_map = ProjectiveTransform(matrix=inverse_map)
+
         def coord_map(*args):
             return inverse_map(*args, **map_args)
 
         coords = warp_coords(coord_map, (rows, cols, bands))
 
-        # Prefilter not necessary for order 1 interpolation
+        # Prefilter not necessary for order 0, 1 interpolation
         prefilter = order > 1
         out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
-    # The spline filters sometimes return results outside [0, 1],
-    # so clip to ensure valid data
-    clipped = np.clip(out, 0, 1)
+        # The spline filters sometimes return results outside [0, 1],
+        # so clip to ensure valid data
+        clipped = np.clip(out, 0, 1)
 
-    if mode == 'constant' and not (0 <= cval <= 1):
-        clipped[out == cval] = cval
+        if mode == 'constant' and not (0 <= cval <= 1):
+            clipped[out == cval] = cval
 
-    if clipped.ndim == 3 and orig_ndim == 2:
-        # remove singleton dim introduced by atleast_3d
-        return clipped[..., 0]
+        out = clipped
+
+    if out.ndim == 3 and orig_ndim == 2:
+        # remove singleton dimension introduced by atleast_3d
+        return out[..., 0]
     else:
-        return clipped
+        return out

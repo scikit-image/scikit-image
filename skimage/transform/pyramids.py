@@ -6,11 +6,11 @@ from skimage.util import img_as_float
 
 
 def _smooth(image, sigma, mode, cval):
-    """Return image with each channel smoothed by the gaussian filter."""
+    """Return image with each channel smoothed by the Gaussian filter."""
 
     smoothed = np.empty(image.shape, dtype=np.double)
 
-    if image.ndim == 3: # apply gaussian filter to all dimensions independently
+    if image.ndim == 3: # apply Gaussian filter to all dimensions independently
         for dim in range(image.shape[2]):
             ndimage.gaussian_filter(image[..., dim], sigma,
                                     output=smoothed[..., dim],
@@ -38,13 +38,13 @@ def pyramid_reduce(image, downscale=2, sigma=None, order=1,
     downscale : float, optional
         Downscale factor.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
+        Sigma for Gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
-        covers more than 99% of the gaussian distribution.
+        covers more than 99% of the Gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of downsampling. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        `skimage.transform.warp` for detail.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
@@ -92,13 +92,13 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
     upscale : float, optional
         Upscale factor.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * upscale / 6.0` which
+        Sigma for Gaussian filter. Default is `2 * upscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
-        covers more than 99% of the gaussian distribution.
+        covers more than 99% of the Gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of upsampling. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        `skimage.transform.warp` for detail.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
@@ -137,7 +137,7 @@ def pyramid_expand(image, upscale=2, sigma=None, order=1,
 
 def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
                      mode='reflect', cval=0):
-    """Yield images of the gaussian pyramid formed by the input image.
+    """Yield images of the Gaussian pyramid formed by the input image.
 
     Recursively applies the `pyramid_reduce` function to the image, and yields
     the downscaled images.
@@ -157,13 +157,13 @@ def pyramid_gaussian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     downscale : float, optional
         Downscale factor.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
+        Sigma for Gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
-        covers more than 99% of the gaussian distribution.
+        covers more than 99% of the Gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of downsampling. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        `skimage.transform.warp` for detail.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional
@@ -238,13 +238,13 @@ def pyramid_laplacian(image, max_layer=-1, downscale=2, sigma=None, order=1,
     downscale : float, optional
         Downscale factor.
     sigma : float, optional
-        Sigma for gaussian filter. Default is `2 * downscale / 6.0` which
+        Sigma for Gaussian filter. Default is `2 * downscale / 6.0` which
         corresponds to a filter mask twice the size of the scale factor that
-        covers more than 99% of the gaussian distribution.
+        covers more than 99% of the Gaussian distribution.
     order : int, optional
         Order of splines used in interpolation of downsampling. See
-        `scipy.ndimage.map_coordinates` for detail.
-    mode :  {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
+        `skimage.transform.warp` for detail.
+    mode : {'reflect', 'constant', 'nearest', 'mirror', 'wrap'}, optional
         The mode parameter determines how the array borders are handled, where
         cval is the value when mode is equal to 'constant'.
     cval : float, optional

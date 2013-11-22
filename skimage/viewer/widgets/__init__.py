@@ -1,2 +1,2 @@
-from core import *
-from history import *
+from .core import *
+from .history import *

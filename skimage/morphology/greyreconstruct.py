@@ -60,13 +60,15 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     >>> import numpy as np
     >>> from skimage.morphology import reconstruction
 
-    First, we create a sinusoidal mask image w/ peaks at middle and ends.
+    First, we create a sinusoidal mask image with peaks at middle and ends.
+
     >>> x = np.linspace(0, 4 * np.pi)
     >>> y_mask = np.cos(x)
 
     Then, we create a seed image initialized to the minimum mask value (for
     reconstruction by dilation, min-intensity values don't spread) and add
     "seeds" to the left and right peak, but at a fraction of peak value (1).
+
     >>> y_seed = y_mask.min() * np.ones_like(x)
     >>> y_seed[0] = 0.5
     >>> y_seed[-1] = 0
@@ -131,7 +133,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     else:
         selem = selem.copy()
 
-    if offset == None:
+    if offset is None:
         if not all([d % 2 == 1 for d in selem.shape]):
             ValueError("Footprint dimensions must all be odd")
         offset = np.array([d // 2 for d in selem.shape])
@@ -157,7 +159,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     # Create a list of strides across the array to get the neighbors within
     # a flattened array
     value_stride = np.array(images.strides[1:]) / images.dtype.itemsize
-    image_stride = images.strides[0] / images.dtype.itemsize
+    image_stride = images.strides[0] // images.dtype.itemsize
     selem_mgrid = np.mgrid[[slice(-o, d - o)
                             for d, o in zip(selem.shape, offset)]]
     selem_offsets = selem_mgrid[:, selem].transpose()

@@ -1,29 +1,35 @@
 """
 ImageViewer class for viewing and interacting with images.
 """
-try:
-    from PyQt4 import QtGui, QtCore
-    from PyQt4.QtGui import QMainWindow
-except ImportError:
-    QMainWindow = object  # hack to prevent nosetest and autodoc errors
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
+from ..qt.QtCore import Qt, Signal
 
+from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
+from skimage.exposure import rescale_intensity
+import numpy as np
 from .. import utils
 from ..widgets import Slider
+from ..utils import dialogs
+from ..plugins.base import Plugin
 
 
 __all__ = ['ImageViewer', 'CollectionViewer']
 
 
-class ImageCanvas(utils.MatplotlibCanvas):
-    """Canvas for displaying images."""
-    def __init__(self, parent, image, **kwargs):
-        self.fig, self.ax = utils.figimage(image, **kwargs)
-        super(ImageCanvas, self).__init__(parent, self.fig, **kwargs)
+def mpl_image_to_rgba(mpl_image):
+    """Return RGB image from the given matplotlib image object.
+
+    Each image in a matplotlib figure has it's own colormap and normalization
+    function. Return RGBA (RGB + alpha channel) image with float dtype.
+    """
+    input_range = (mpl_image.norm.vmin, mpl_image.norm.vmax)
+    image = rescale_intensity(mpl_image.get_array(), in_range=input_range)
+    image = mpl_image.cmap(img_as_float(image)) # cmap complains on bool arrays
+    return img_as_float(image)
 
 
-class ImageViewer(QMainWindow):
+class ImageViewer(QtGui.QMainWindow):
     """Viewer for displaying images.
 
     This viewer is a simple container object that holds a Matplotlib axes
@@ -54,6 +60,15 @@ class ImageViewer(QMainWindow):
     >>> # viewer.show()
 
     """
+
+    dock_areas = {'top': Qt.TopDockWidgetArea,
+                  'bottom': Qt.BottomDockWidgetArea,
+                  'left': Qt.LeftDockWidgetArea,
+                  'right': Qt.RightDockWidgetArea}
+
+    # Signal that the original image has been changed
+    original_image_changed = Signal(np.ndarray)
+
     def __init__(self, image):
         # Start main loop
         utils.init_qtapp()
@@ -61,35 +76,37 @@ class ImageViewer(QMainWindow):
 
         #TODO: Add ImageViewer to skimage.io window manager
 
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.setWindowTitle("Image Viewer")
 
         self.file_menu = QtGui.QMenu('&File', self)
-        self.file_menu.addAction('&Quit', self.close,
-                                 QtCore.Qt.CTRL + QtCore.Qt.Key_Q)
+        self.file_menu.addAction('Open file', self.open_file,
+                                 Qt.CTRL + Qt.Key_O)
+        self.file_menu.addAction('Save to file', self.save_to_file,
+                                 Qt.CTRL + Qt.Key_S)
+        self.file_menu.addAction('Quit', self.close,
+                                 Qt.CTRL + Qt.Key_Q)
         self.menuBar().addMenu(self.file_menu)
 
         self.main_widget = QtGui.QWidget()
         self.setCentralWidget(self.main_widget)
 
-        self.canvas = ImageCanvas(self.main_widget, image)
-        self.fig = self.canvas.fig
-        self.ax = self.canvas.ax
+        if isinstance(image, Plugin):
+            plugin = image
+            image = plugin.filtered_image
+            plugin.image_changed.connect(self._update_original_image)
+            # When plugin is started, start
+            plugin._started.connect(self._show)
+
+        self.fig, self.ax = utils.figimage(image)
+        self.canvas = self.fig.canvas
+        self.canvas.setParent(self)
+
         self.ax.autoscale(enable=False)
 
         self._image_plot = self.ax.images[0]
-
-        self.original_image = image
-        self.image = image.copy()
+        self._update_original_image(image)
         self.plugins = []
-
-        # List of axes artists to check for removal.
-        self._axes_artists = [self.ax.artists,
-                              self.ax.collections,
-                              self.ax.images,
-                              self.ax.lines,
-                              self.ax.patches,
-                              self.ax.texts]
 
         self.layout = QtGui.QVBoxLayout(self.main_widget)
         self.layout.addWidget(self.canvas)
@@ -105,32 +122,96 @@ class ImageViewer(QMainWindow):
     def __add__(self, plugin):
         """Add plugin to ImageViewer"""
         plugin.attach(self)
+        self.original_image_changed.connect(plugin._update_original_image)
+
+        if plugin.dock:
+            location = self.dock_areas[plugin.dock]
+            dock_location = Qt.DockWidgetArea(location)
+            dock = QtGui.QDockWidget()
+            dock.setWidget(plugin)
+            dock.setWindowTitle(plugin.name)
+            self.addDockWidget(dock_location, dock)
+
+            horiz = (self.dock_areas['left'], self.dock_areas['right'])
+            dimension = 'width' if location in horiz else 'height'
+            self._add_widget_size(plugin, dimension=dimension)
+
         return self
+
+    def _add_widget_size(self, widget, dimension='width'):
+        widget_size = widget.sizeHint()
+        viewer_size = self.frameGeometry()
+
+        dx = dy = 0
+        if dimension == 'width':
+            dx = widget_size.width()
+        elif dimension == 'height':
+            dy = widget_size.height()
+
+        w = viewer_size.width()
+        h = viewer_size.height()
+        self.resize(w + dx, h + dy)
+
+    def open_file(self):
+        """Open image file and display in viewer."""
+        filename = dialogs.open_file_dialog()
+        if filename is None:
+            return
+        image = io.imread(filename)
+        self._update_original_image(image)
+
+    def _update_original_image(self, image):
+        self.original_image = image     # update saved image
+        self.image = image.copy()       # update displayed image
+        self.original_image_changed.emit(image)
+
+    def save_to_file(self):
+        """Save current image to file.
+
+        The current behavior is not ideal: It saves the image displayed on
+        screen, so all images will be converted to RGB, and the image size is
+        not preserved (resizing the viewer window will alter the size of the
+        saved image).
+        """
+        filename = dialogs.save_file_dialog()
+        if filename is None:
+            return
+        if len(self.ax.images) == 1:
+            io.imsave(filename, self.image)
+        else:
+            underlay = mpl_image_to_rgba(self.ax.images[0])
+            overlay = mpl_image_to_rgba(self.ax.images[1])
+            alpha = overlay[:, :, 3]
+
+            # alpha can be set by channel of array or by a scalar value.
+            # Prefer the alpha channel, but fall back to scalar value.
+            if np.all(alpha == 1):
+                alpha = np.ones_like(alpha) * self.ax.images[1].get_alpha()
+
+            alpha = alpha[:, :, np.newaxis]
+            composite = (overlay[:, :, :3] * alpha +
+                         underlay[:, :, :3] * (1 - alpha))
+            io.imsave(filename, composite)
 
     def closeEvent(self, event):
         self.close()
 
-    def auto_layout(self):
-        """Move viewer to top-left and align plugin on right edge of viewer."""
-        size = self.geometry()
-        self.move(0, 0)
-        w = size.width()
-        y = 0
-        #TODO: Layout isn't quite correct for multiple plugins (overlaps).
+    def _show(self, x=0):
+        self.move(x, 0)
         for p in self.plugins:
-            p.move(w, y)
-            y += p.geometry().height()
+            p.show()
+        super(ImageViewer, self).show()
+        self.activateWindow()
+        self.raise_()
 
-    def show(self):
+    def show(self, main_window=True):
         """Show ImageViewer and attached plugins.
 
         This behaves much like `matplotlib.pyplot.show` and `QWidget.show`.
         """
-        self.auto_layout()
-        for p in self.plugins:
-            p.show()
-        super(ImageViewer, self).show()
-        utils.start_qtapp()
+        self._show()
+        if main_window:
+            utils.start_qtapp()
 
     def redraw(self):
         self.canvas.draw_idle()
@@ -142,11 +223,19 @@ class ImageViewer(QMainWindow):
     @image.setter
     def image(self, image):
         self._img = image
-        self._image_plot.set_array(image)
+        utils.update_axes_image(self._image_plot, image)
+
+        # update display (otherwise image doesn't fill the canvas)
+        h, w = image.shape[:2]
+        self.ax.set_xlim(0, w)
+        self.ax.set_ylim(h, 0)
+
+        # update color range
         clim = dtype_range[image.dtype.type]
         if clim[0] < 0 and image.min() >= 0:
             clim = (0, clim[1])
         self._image_plot.set_clim(clim)
+
         self.redraw()
 
     def reset_image(self):
@@ -160,25 +249,6 @@ class ImageViewer(QMainWindow):
     def disconnect_event(self, callback_id):
         """Disconnect callback by its id (returned by `connect_event`)."""
         self.canvas.mpl_disconnect(callback_id)
-
-    def remove_artist(self, artist):
-        """Disconnect matplotlib artist from image viewer.
-
-        The `closeEvent` method of a Plugin should remove artists (Matplotlib
-        lines, markers, etc.) from the viewer so that they aren't stranded.
-
-        Parameters
-        ----------
-        artist : Matplotlib Artist
-            Artists created by Matplotlib functions (e.g., `plot` returns list
-            of `Line2D` artists) should be saved by the plugin for removal.
-        """
-        # Note: an `add_artist` method is unnecessary since Matplotlib
-
-        # There's probably a smarter way to find where the artist is stored.
-        for artist_list in self._axes_artists:
-            if artist in artist_list:
-                artist_list.remove(artist)
 
     def _update_status_bar(self, event):
         if event.inaxes and event.inaxes.get_navigate():
@@ -217,7 +287,7 @@ class CollectionViewer(ImageViewer):
     ----------
     image_collection : list of images
         List of images to be displayed.
-    update_on : {'on_slide' | 'on_release'}
+    update_on : {'move' | 'release'}
         Control whether image is updated on slide or release of the image
         slider. Using 'on_release' will give smoother behavior when displaying
         large images or when writing a plugin/subclass that requires heavy
@@ -265,7 +335,7 @@ class CollectionViewer(ImageViewer):
         This method can be overridden or extended in subclasses and plugins to
         react to image changes.
         """
-        self.image = image
+        self._update_original_image(image)
 
     def keyPressEvent(self, event):
         if type(event) == QtGui.QKeyEvent:
@@ -274,6 +344,8 @@ class CollectionViewer(ImageViewer):
             if 48 <= key < 58:
                 index = 0.1 * int(key - 48) * self.num_images
                 self.update_index('', index)
-            event.accept()
+                event.accept()
+            else:
+                event.ignore()
         else:
             event.ignore()

@@ -1,3 +1,14 @@
+skimage (0.9.0-1) unstable; urgency=low
+
+  [ Stefan van der Walt ]
+  * New upstream release (Closes: #693523).
+  * Replace mentions of old package name.
+
+  [ Yaroslav Halchenko ]
+  * Merge with previous UNRELEASED changes
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 22 Nov 2013 15:12:46 -0500
+
 skimage (0.8.2-2) UNRELEASED; urgency=low
 
   [ Julian Taylor ]

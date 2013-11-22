@@ -2,16 +2,43 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
 
 import skimage.filter as F
+from skimage.filter.edges import _mask_filter_result
+
+
+def test_roberts_zeros():
+    """Roberts' filter on an array of all zeros."""
+    result = F.roberts(np.zeros((10, 10)), np.ones((10, 10), bool))
+    assert (np.all(result == 0))
+
+
+def test_roberts_diagonal1():
+    """Roberts' filter on a diagonal edge should be a diagonal line."""
+    image = np.tri(10, 10, 0)
+    expected = ~(np.tri(10, 10, -1).astype(bool) |
+                 np.tri(10, 10, -2).astype(bool).transpose())
+    expected = _mask_filter_result(expected, None)
+    result = F.roberts(image).astype(bool)
+    assert_close(result, expected)
+
+
+def test_roberts_diagonal2():
+    """Roberts' filter on a diagonal edge should be a diagonal line."""
+    image = np.rot90(np.tri(10, 10, 0), 3)
+    expected = ~np.rot90(np.tri(10, 10, -1).astype(bool) |
+                         np.tri(10, 10, -2).astype(bool).transpose())
+    expected = _mask_filter_result(expected, None)
+    result = F.roberts(image).astype(bool)
+    assert_close(result, expected)
 
 
 def test_sobel_zeros():
-    """Sobel on an array of all zeros"""
+    """Sobel on an array of all zeros."""
     result = F.sobel(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_sobel_mask():
-    """Sobel on a masked array should be zero"""
+    """Sobel on a masked array should be zero."""
     np.random.seed(0)
     result = F.sobel(np.random.uniform(size=(10, 10)),
                      np.zeros((10, 10), bool))
@@ -19,7 +46,7 @@ def test_sobel_mask():
 
 
 def test_sobel_horizontal():
-    """Sobel on an edge should be a horizontal line"""
+    """Sobel on a horizontal edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.sobel(image)
@@ -30,7 +57,7 @@ def test_sobel_horizontal():
 
 
 def test_sobel_vertical():
-    """Sobel on a vertical edge should be a vertical line"""
+    """Sobel on a vertical edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.sobel(image)
@@ -40,13 +67,13 @@ def test_sobel_vertical():
 
 
 def test_hsobel_zeros():
-    """Horizontal sobel on an array of all zeros"""
+    """Horizontal sobel on an array of all zeros."""
     result = F.hsobel(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_hsobel_mask():
-    """Horizontal Sobel on a masked array should be zero"""
+    """Horizontal Sobel on a masked array should be zero."""
     np.random.seed(0)
     result = F.hsobel(np.random.uniform(size=(10, 10)),
                       np.zeros((10, 10), bool))
@@ -54,7 +81,7 @@ def test_hsobel_mask():
 
 
 def test_hsobel_horizontal():
-    """Horizontal Sobel on an edge should be a horizontal line"""
+    """Horizontal Sobel on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.hsobel(image)
@@ -65,7 +92,7 @@ def test_hsobel_horizontal():
 
 
 def test_hsobel_vertical():
-    """Horizontal Sobel on a vertical edge should be zero"""
+    """Horizontal Sobel on a vertical edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.hsobel(image)
@@ -73,13 +100,13 @@ def test_hsobel_vertical():
 
 
 def test_vsobel_zeros():
-    """Vertical sobel on an array of all zeros"""
+    """Vertical sobel on an array of all zeros."""
     result = F.vsobel(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_vsobel_mask():
-    """Vertical Sobel on a masked array should be zero"""
+    """Vertical Sobel on a masked array should be zero."""
     np.random.seed(0)
     result = F.vsobel(np.random.uniform(size=(10, 10)),
                       np.zeros((10, 10), bool))
@@ -87,7 +114,7 @@ def test_vsobel_mask():
 
 
 def test_vsobel_vertical():
-    """Vertical Sobel on an edge should be a vertical line"""
+    """Vertical Sobel on an edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.vsobel(image)
@@ -98,7 +125,7 @@ def test_vsobel_vertical():
 
 
 def test_vsobel_horizontal():
-    """vertical Sobel on a horizontal edge should be zero"""
+    """vertical Sobel on a horizontal edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.vsobel(image)
@@ -107,13 +134,13 @@ def test_vsobel_horizontal():
 
 
 def test_scharr_zeros():
-    """Scharr on an array of all zeros"""
+    """Scharr on an array of all zeros."""
     result = F.scharr(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_scharr_mask():
-    """Scharr on a masked array should be zero"""
+    """Scharr on a masked array should be zero."""
     np.random.seed(0)
     result = F.scharr(np.random.uniform(size=(10, 10)),
                      np.zeros((10, 10), bool))
@@ -121,7 +148,7 @@ def test_scharr_mask():
 
 
 def test_scharr_horizontal():
-    """Scharr on an edge should be a horizontal line"""
+    """Scharr on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.scharr(image)
@@ -132,7 +159,7 @@ def test_scharr_horizontal():
 
 
 def test_scharr_vertical():
-    """Scharr on a vertical edge should be a vertical line"""
+    """Scharr on a vertical edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.scharr(image)
@@ -142,13 +169,13 @@ def test_scharr_vertical():
 
 
 def test_hscharr_zeros():
-    """Horizontal Scharr on an array of all zeros"""
+    """Horizontal Scharr on an array of all zeros."""
     result = F.hscharr(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_hscharr_mask():
-    """Horizontal Scharr on a masked array should be zero"""
+    """Horizontal Scharr on a masked array should be zero."""
     np.random.seed(0)
     result = F.hscharr(np.random.uniform(size=(10, 10)),
                       np.zeros((10, 10), bool))
@@ -156,7 +183,7 @@ def test_hscharr_mask():
 
 
 def test_hscharr_horizontal():
-    """Horizontal Scharr on an edge should be a horizontal line"""
+    """Horizontal Scharr on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.hscharr(image)
@@ -167,7 +194,7 @@ def test_hscharr_horizontal():
 
 
 def test_hscharr_vertical():
-    """Horizontal Scharr on a vertical edge should be zero"""
+    """Horizontal Scharr on a vertical edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.hscharr(image)
@@ -175,13 +202,13 @@ def test_hscharr_vertical():
 
 
 def test_vscharr_zeros():
-    """Vertical Scharr on an array of all zeros"""
+    """Vertical Scharr on an array of all zeros."""
     result = F.vscharr(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_vscharr_mask():
-    """Vertical Scharr on a masked array should be zero"""
+    """Vertical Scharr on a masked array should be zero."""
     np.random.seed(0)
     result = F.vscharr(np.random.uniform(size=(10, 10)),
                       np.zeros((10, 10), bool))
@@ -189,7 +216,7 @@ def test_vscharr_mask():
 
 
 def test_vscharr_vertical():
-    """Vertical Scharr on an edge should be a vertical line"""
+    """Vertical Scharr on an edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.vscharr(image)
@@ -200,7 +227,7 @@ def test_vscharr_vertical():
 
 
 def test_vscharr_horizontal():
-    """vertical Scharr on a horizontal edge should be zero"""
+    """vertical Scharr on a horizontal edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.vscharr(image)
@@ -209,13 +236,13 @@ def test_vscharr_horizontal():
 
 
 def test_prewitt_zeros():
-    """Prewitt on an array of all zeros"""
+    """Prewitt on an array of all zeros."""
     result = F.prewitt(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_prewitt_mask():
-    """Prewitt on a masked array should be zero"""
+    """Prewitt on a masked array should be zero."""
     np.random.seed(0)
     result = F.prewitt(np.random.uniform(size=(10, 10)),
                        np.zeros((10, 10), bool))
@@ -224,7 +251,7 @@ def test_prewitt_mask():
 
 
 def test_prewitt_horizontal():
-    """Prewitt on an edge should be a horizontal line"""
+    """Prewitt on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.prewitt(image)
@@ -236,7 +263,7 @@ def test_prewitt_horizontal():
 
 
 def test_prewitt_vertical():
-    """Prewitt on a vertical edge should be a vertical line"""
+    """Prewitt on a vertical edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.prewitt(image)
@@ -247,13 +274,13 @@ def test_prewitt_vertical():
 
 
 def test_hprewitt_zeros():
-    """Horizontal prewitt on an array of all zeros"""
+    """Horizontal prewitt on an array of all zeros."""
     result = F.hprewitt(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_hprewitt_mask():
-    """Horizontal prewitt on a masked array should be zero"""
+    """Horizontal prewitt on a masked array should be zero."""
     np.random.seed(0)
     result = F.hprewitt(np.random.uniform(size=(10, 10)),
                         np.zeros((10, 10), bool))
@@ -262,7 +289,7 @@ def test_hprewitt_mask():
 
 
 def test_hprewitt_horizontal():
-    """Horizontal prewitt on an edge should be a horizontal line"""
+    """Horizontal prewitt on an edge should be a horizontal line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.hprewitt(image)
@@ -274,7 +301,7 @@ def test_hprewitt_horizontal():
 
 
 def test_hprewitt_vertical():
-    """Horizontal prewitt on a vertical edge should be zero"""
+    """Horizontal prewitt on a vertical edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.hprewitt(image)
@@ -283,13 +310,13 @@ def test_hprewitt_vertical():
 
 
 def test_vprewitt_zeros():
-    """Vertical prewitt on an array of all zeros"""
+    """Vertical prewitt on an array of all zeros."""
     result = F.vprewitt(np.zeros((10, 10)), np.ones((10, 10), bool))
     assert (np.all(result == 0))
 
 
 def test_vprewitt_mask():
-    """Vertical prewitt on a masked array should be zero"""
+    """Vertical prewitt on a masked array should be zero."""
     np.random.seed(0)
     result = F.vprewitt(np.random.uniform(size=(10, 10)),
                         np.zeros((10, 10), bool))
@@ -297,7 +324,7 @@ def test_vprewitt_mask():
 
 
 def test_vprewitt_vertical():
-    """Vertical prewitt on an edge should be a vertical line"""
+    """Vertical prewitt on an edge should be a vertical line."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (j >= 0).astype(float)
     result = F.vprewitt(image)
@@ -309,7 +336,7 @@ def test_vprewitt_vertical():
 
 
 def test_vprewitt_horizontal():
-    """Vertical prewitt on a horizontal edge should be zero"""
+    """Vertical prewitt on a horizontal edge should be zero."""
     i, j = np.mgrid[-5:6, -5:6]
     image = (i >= 0).astype(float)
     result = F.vprewitt(image)

@@ -12,6 +12,21 @@ from ..io import imread
 from skimage import data_dir
 
 
+__all__ = ['load',
+           'camera',
+           'lena',
+           'text',
+           'checkerboard',
+           'coins',
+           'moon',
+           'page',
+           'horse',
+           'clock',
+           'immunohistochemistry',
+           'chelsea',
+           'coffee']
+
+
 def load(f):
     """Load an image file located in the data directory.
 
@@ -116,6 +131,19 @@ def page():
     return load("page.png")
 
 
+def horse():
+    """Black and white silhouette of a horse.
+
+    This image was downloaded from
+    `openclipart <http://openclipart.org/detail/158377/horse-by-marauder>`
+
+    Released into public domain and drawn and uploaded by Andreas Preuss
+    (marauder).
+
+    """
+    return load("horse.png")
+
+
 def clock():
     """Motion blurred clock.
 
@@ -127,3 +155,49 @@ def clock():
 
     """
     return load("clock_motion.png")
+
+
+def immunohistochemistry():
+    """Immunohistochemical (IHC) staining with hematoxylin counterstaining.
+
+    This picture shows colonic glands where the IHC expression of FHL2 protein
+    is revealed with DAB. Hematoxylin counterstaining is applied to enhance the
+    negative parts of the tissue.
+
+    This image was acquired at the Center for Microscopy And Molecular Imaging
+    (CMMI).
+
+    No known copyright restrictions.
+
+    """
+    return load("ihc.png")
+
+
+def chelsea():
+    """Chelsea the cat.
+
+    An example with texture, prominent edges in horizontal and diagonal
+    directions, as well as features of differing scales.
+
+    Notes
+    -----
+    No copyright restrictions.  CC0 by the photographer (Stefan van der Walt).
+
+    """
+    return load("chelsea.png")
+
+
+def coffee():
+    """Coffee cup.
+
+    This photograph is courtesy of Pikolo Espresso Bar.
+    It contains several elliptical shapes as well as varying texture (smooth
+    porcelain to course wood grain).
+
+    Notes
+    -----
+    No copyright restrictions.  CC0 by the photographer (Rachel Michetti).
+
+    """
+    return load("coffee.png")
+

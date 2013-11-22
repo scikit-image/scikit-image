@@ -1,19 +1,19 @@
-from numpy.testing import assert_array_almost_equal, run_module_suite
+from numpy.testing import assert_array_almost_equal, run_module_suite, assert_array_equal
 import numpy as np
 from scipy.ndimage import map_coordinates
 
 from skimage.transform import (warp, warp_coords, rotate, resize, rescale,
                                AffineTransform,
                                ProjectiveTransform,
-                               SimilarityTransform)
+                               SimilarityTransform,
+                               downscale_local_mean)
 from skimage import transform as tf, data, img_as_float
 from skimage.color import rgb2gray
 
 
-def test_warp():
-    x = np.zeros((5, 5), dtype=np.uint8)
-    x[2, 2] = 255
-    x = img_as_float(x)
+def test_warp_tform():
+    x = np.zeros((5, 5), dtype=np.double)
+    x[2, 2] = 1
     theta = - np.pi / 2
     tform = SimilarityTransform(scale=1, rotation=theta, translation=(0, 4))
 
@@ -24,10 +24,36 @@ def test_warp():
     assert_array_almost_equal(x90, np.rot90(x))
 
 
+def test_warp_callable():
+    x = np.zeros((5, 5), dtype=np.double)
+    x[2, 2] = 1
+    refx = np.zeros((5, 5), dtype=np.double)
+    refx[1, 1] = 1
+
+    shift = lambda xy: xy + 1
+
+    outx = warp(x, shift, order=1)
+    assert_array_almost_equal(outx, refx)
+
+
+def test_warp_matrix():
+    x = np.zeros((5, 5), dtype=np.double)
+    x[2, 2] = 1
+    refx = np.zeros((5, 5), dtype=np.double)
+    refx[1, 1] = 1
+
+    matrix = np.array([[1, 0, 1], [0, 1, 1], [0, 0, 1]])
+
+    # _warp_fast
+    outx = warp(x, matrix, order=1)
+    assert_array_almost_equal(outx, refx)
+    # check for ndimage.map_coordinates
+    outx = warp(x, matrix, order=5)
+
+
 def test_homography():
-    x = np.zeros((5, 5), dtype=np.uint8)
-    x[1, 1] = 255
-    x = img_as_float(x)
+    x = np.zeros((5, 5), dtype=np.double)
+    x[1, 1] = 1
     theta = -np.pi / 2
     M = np.array([[np.cos(theta), - np.sin(theta), 0],
                   [np.sin(theta),   np.cos(theta), 4],
@@ -192,6 +218,20 @@ def test_warp_coords_example():
     tform = SimilarityTransform(translation=(0, -10))
     coords = warp_coords(tform, (30, 30, 3))
     map_coordinates(image[:, :, 0], coords[:2])
+
+
+def test_downscale_local_mean():
+    image1 = np.arange(4 * 6).reshape(4, 6)
+    out1 = downscale_local_mean(image1, (2, 3))
+    expected1 = np.array([[  4.,   7.],
+                          [ 16.,  19.]])
+    assert_array_equal(expected1, out1)
+
+    image2 = np.arange(5 * 8).reshape(5, 8)
+    out2 = downscale_local_mean(image2, (4, 5))
+    expected2 = np.array([[ 14. ,  10.8],
+                          [  8.5,   5.7]])
+    assert_array_equal(expected2, out2)
 
 
 if __name__ == "__main__":
