@@ -237,7 +237,15 @@ def test_downscale_local_mean():
 
 def test_invalid():
     assert_raises(ValueError, warp, np.ones((4, )), SimilarityTransform())
-    assert_raises(ValueError, warp, np.ones((4, 3, 3, 3)), SimilarityTransform())
+    assert_raises(ValueError, warp, np.ones((4, 3, 3, 3)),
+                  SimilarityTransform())
+
+
+def test_inverse():
+    tform = SimilarityTransform(scale=0.5, rotation=0.1)
+    inverse_tform = SimilarityTransform(matrix=np.linalg.inv(tform._matrix))
+    image = np.arange(10 * 10).reshape(10, 10).astype(np.double)
+    assert_array_equal(warp(image, inverse_tform), warp(image, tform.inverse))
 
 
 if __name__ == "__main__":

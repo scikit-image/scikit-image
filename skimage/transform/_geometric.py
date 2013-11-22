@@ -1051,8 +1051,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
               and inverse_map.__name__ == 'inverse'
-              and isinstance(get_bound_method_class(inverse_map),
-                             HOMOGRAPHY_TRANSFORMS)):
+              and get_bound_method_class(inverse_map) \
+                  in HOMOGRAPHY_TRANSFORMS):
             matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
 
         if matrix is not None:
