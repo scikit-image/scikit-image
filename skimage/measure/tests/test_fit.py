@@ -44,7 +44,7 @@ def test_line_model_residuals():
     assert_equal(abs(model.residuals(np.array([[10, 0]]))), 10)
     model._params = (5, np.pi / 4)
     assert_equal(abs(model.residuals(np.array([[0, 0]]))), 5)
-    assert_equal(abs(model.residuals(np.array([[np.sqrt(50), 0]]))), 5)
+    assert_almost_equal(abs(model.residuals(np.array([[np.sqrt(50), 0]]))), 0)
 
 
 def test_line_model_under_determined():
