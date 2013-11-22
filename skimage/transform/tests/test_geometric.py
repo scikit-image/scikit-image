@@ -169,10 +169,15 @@ def test_union():
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
-
     tform = tform1 + tform2
-
     assert_array_almost_equal(tform._matrix, tform3._matrix)
+
+    tform1 = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
+    tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
+    tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
+    tform = tform1 + tform2
+    assert_array_almost_equal(tform._matrix, tform3._matrix)
+    assert tform.__class__ == ProjectiveTransform
 
 
 if __name__ == "__main__":
