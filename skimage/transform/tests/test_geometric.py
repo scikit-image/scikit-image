@@ -189,6 +189,17 @@ def test_geometric_tform():
     assert_raises(NotImplementedError, tform.__add__, 0)
 
 
+def test_invalid_input():
+    assert_raises(ValueError, ProjectiveTransform, np.zeros((2, 3)))
+    assert_raises(ValueError, AffineTransform, np.zeros((2, 3)))
+    assert_raises(ValueError, SimilarityTransform, np.zeros((2, 3)))
+
+    assert_raises(ValueError, AffineTransform,
+                  matrix=np.zeros((2, 3)), scale=1)
+    assert_raises(ValueError, SimilarityTransform,
+                  matrix=np.zeros((2, 3)), scale=1)
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
