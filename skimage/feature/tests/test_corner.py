@@ -146,6 +146,10 @@ def test_corner_peaks():
     corners = corner_peaks(response, exclude_border=False, min_distance=0)
     assert len(corners) == 4
 
+    corners = corner_peaks(response, exclude_border=False, min_distance=0,
+                           indices=False)
+    assert np.sum(corners) == 4
+
 
 def test_blank_image_nans():
     """Some of the corner detectors had a weakness in terms of returning
