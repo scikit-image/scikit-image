@@ -177,6 +177,10 @@ def test_polynomial_default_order():
     assert_array_almost_equal(tform2._params, tform._params)
 
 
+def test_polynomial_inverse():
+    assert_raises(Exception, PolynomialTransform().inverse, 0)
+
+
 def test_union():
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
@@ -208,6 +212,8 @@ def test_invalid_input():
                   matrix=np.zeros((2, 3)), scale=1)
     assert_raises(ValueError, SimilarityTransform,
                   matrix=np.zeros((2, 3)), scale=1)
+
+    assert_raises(ValueError, PolynomialTransform, np.zeros((3, 3)))
 
 
 if __name__ == "__main__":
