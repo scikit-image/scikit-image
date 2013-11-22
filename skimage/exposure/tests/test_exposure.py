@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_raises
 import skimage
 from skimage import data
 from skimage import exposure
@@ -336,3 +336,8 @@ def test_adjust_inv_sigmoid_cutoff_half():
 
     result = exposure.adjust_sigmoid(image, 0.5, 10, True)
     assert_array_equal(result, expected)
+
+
+def test_neggative():
+    image = np.arange(-10, 245, 4).reshape(8, 8).astype(np.double)
+    assert_raises(ValueError, exposure.adjust_gamma, image)
