@@ -1021,6 +1021,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     """
     # Backward API compatibility
     if reverse_map is not None:
+        warnings.warn('`reverse_map` parameter is deprecated and replaced by '
+                      'the `inverse_map` parameter.')
         inverse_map = reverse_map
 
     if image.ndim < 2:
