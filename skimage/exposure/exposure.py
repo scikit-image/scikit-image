@@ -263,7 +263,7 @@ def adjust_gamma(image, gamma=1, gain=1):
     dtype = image.dtype.type
 
     if gamma < 0:
-        return "Gamma should be a non-negative real number"
+        raise ValueError("Gamma should be a non-negative real number.")
 
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 

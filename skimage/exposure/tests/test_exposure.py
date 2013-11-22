@@ -230,6 +230,11 @@ def test_adjust_gamma_greater_one():
     assert_array_equal(result, expected)
 
 
+def test_adjust_gamma_neggative():
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
+    assert_raises(ValueError, exposure.adjust_gamma, image, -1)
+
+
 # Test Logarithmic Correction
 # ===========================
 
