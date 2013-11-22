@@ -145,6 +145,7 @@
 
 - Jostein Bø Fløystad
   Tomography: radon/iradon improvements and SART implementation
+  Phase unwrapping integration
 
 - Matt Terry
   Color difference functions
@@ -160,3 +161,15 @@
 
 - Michael Hansen
   novice submodule
+
+- Munther Gdeisat
+  Phase unwrapping implementation
+
+- Miguel Arevallilo Herraez
+  Phase unwrapping implementation
+
+- Hussein Abdul-Rahman
+  Phase unwrapping implementation
+
+- Gregor Thalhammer
+  Phase unwrapping integration
