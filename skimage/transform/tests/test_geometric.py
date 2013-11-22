@@ -40,6 +40,13 @@ def test_stackcopy():
         assert_array_almost_equal(x[..., i], y)
 
 
+def test_estimate_transform():
+    for tform in ('similarity', 'affine', 'projective', 'polynomial'):
+        estimate_transform(tform, SRC[:2, :], DST[:2, :])
+    assert_raises(ValueError, estimate_transform, 'foobar',
+                  SRC[:2, :], DST[:2, :])
+
+
 def test_similarity_estimation():
     # exact solution
     tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
