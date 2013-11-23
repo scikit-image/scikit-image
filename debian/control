@@ -8,7 +8,7 @@ Build-Depends: cython (>= 0.15),
                debhelper (>= 9~),
                libfreeimage3,
                python-all-dev (>= 2.6.6-3~),
-               python-imaging,
+               python-imaging | python-pil,
                python-matplotlib (>= 1.0),
                python-nose,
                python-numpy,
@@ -16,7 +16,7 @@ Build-Depends: cython (>= 0.15),
                python-setuptools,
                python-sphinx (>= 1.0.7+dfsg-1~),
                python3-all-dev,
-               python3-imaging,
+               python3-imaging | python3-pil,
                python3-nose,
                python3-numpy,
                python3-setuptools
@@ -36,7 +36,7 @@ Depends: libfreeimage3,
          python-skimage-lib (>= ${source:Version}),
          ${misc:Depends},
          ${python:Depends}
-Recommends: python-imaging, python-matplotlib (>= 1.0), python-nose, python-qt4
+Recommends: python-imaging, python-pil, python-matplotlib (>= 1.0), python-nose, python-qt4
 Suggests: python-opencv, python-skimage-doc
 Description: Python modules for image processing
  scikit-image is a collection of image processing algorithms for
@@ -53,7 +53,7 @@ Depends: libfreeimage3,
          python3-skimage-lib (>= ${source:Version}),
          ${misc:Depends},
          ${python3:Depends}
-Recommends: python3-imaging, python3-matplotlib (>= 1.0), python3-nose
+Recommends: python3-imaging, python3-pil, python3-matplotlib (>= 1.0), python3-nose
 Suggests: python-skimage-doc
 Description: Python 3 modules for image processing
  scikit-image is a collection of image processing algorithms for

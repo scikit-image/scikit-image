@@ -12,8 +12,11 @@ skimage (0.9.3-1) unstable; urgency=low
   * debian/rules
     - added export http(s)_proxy to point to non-existing localhost proxy,
       so we could guarantee no network is used at pkg build time
+  * debian/control
+    - *Depends on python{,3}-pil as well now as an alternative to
+      python{,3}-imaging due to its rename
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 22 Nov 2013 16:10:11 -0500
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 23 Nov 2013 17:24:52 -0500
 
 skimage (0.8.2-2) UNRELEASED; urgency=low
 
