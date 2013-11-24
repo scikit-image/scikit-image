@@ -19,6 +19,7 @@ Build-Depends: cython (>= 0.15),
                python3-imaging | python3-pil,
                python3-nose,
                python3-numpy,
+               python3-scipy,
                python3-setuptools
 Standards-Version: 3.9.4
 Homepage: http://scikit-image.org
