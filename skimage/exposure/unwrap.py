@@ -352,10 +352,10 @@ def find_phase_residues(image, wrap_around=False):
      [0 0 0 --]
      [-- -- -- --]]
     >>> find_phase_residues(image, wrap_around=True)
-    [[ 0  0  0  0]
-     [ 0  1  0 -1]
-     [ 0  0  0  0]
-     [ 0 -1  0  1]]
+    array([[ 0,  0,  0,  0],
+           [ 0,  1,  0, -1],
+           [ 0,  0,  0,  0],
+           [ 0, -1,  0,  1]], dtype=int8)
 
     References
     ----------
