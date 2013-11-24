@@ -347,10 +347,19 @@ def find_phase_residues(image, wrap_around=False):
     ...                                [0.9, 0.8, 0.6, 0.5],
     ...                                [0.8, 0.8, 0.7, 0.6]]) - 0.5)
     >>> find_phase_residues(image)   # "--" indicates a masked element
-    [[0 0 0 --]
+    masked_array(data =
+     [[0 0 0 --]
      [0 1 0 --]
      [0 0 0 --]
-     [-- -- -- --]]
+     [-- -- -- --]],
+                 mask =
+     [[False False False  True]
+     [False False False  True]
+     [False False False  True]
+     [ True  True  True  True]],
+           fill_value = 999999)
+    <BLANKLINE>
+
     >>> find_phase_residues(image, wrap_around=True)
     array([[ 0,  0,  0,  0],
            [ 0,  1,  0, -1],
