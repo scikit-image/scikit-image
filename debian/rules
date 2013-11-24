@@ -36,8 +36,12 @@ override_dh_auto_configure:
 override_dh_auto_install: ${PYVERS:%=python-install%} ${PY3VERS:%=python-install%}
 	: # Build Documentation
 ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+ifneq (,$(findstring -a,$(DH_INTERNAL_OPTIONS)))
+	: # not building documentation in -a
+else
 	export PYTHONPATH=$(PKG_TMP)/usr/lib/python$(PYVER)/dist-packages; \
 	 cd doc; test -d build/html || $(MAKE) html
+endif
 endif
 	touch install-stamp
 
@@ -65,6 +69,15 @@ override_dh_python3: _dh_python3
 ## immediately useable documentation and exemplar scripts/data
 override_dh_compress:
 	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
+
+override_dh_sphinxdoc:
+ifeq (,$(findstring nodoc,$(DEB_BUILD_OPTIONS)))
+ifneq (,$(findstring -a,$(DH_INTERNAL_OPTIONS)))
+	: # no documentation in -a -- surprised that sphinxdoc doesn't know that
+else
+	dh_sphinxdoc -ppython-skimage-doc
+endif
+endif
 
 override_dh_installdocs:
 	dh_installdocs -A CONTRIBUTORS.txt README.md CONTRIBUTING.txt TASKS.txt
