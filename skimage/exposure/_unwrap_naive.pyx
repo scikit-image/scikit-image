@@ -6,7 +6,7 @@
 from libc.math cimport M_PI
 
 
-def unwrap_1d(double[::1] image, double[::1] unwrapped_image):
+def unwrap_naive_1d(double[::1] image, double[::1] unwrapped_image):
     '''Phase unwrapping using the naive approach.'''
     cdef:
         Py_ssize_t i

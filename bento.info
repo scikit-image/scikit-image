@@ -132,6 +132,9 @@ Library:
     Extension: skimage._shared.geometry
         Sources:
             skimage/_shared/geometry.pyx
+    Extension: skimage._shared.queue
+        Sources:
+            skimage/_shared/queue.pyx, skimage/_shared/libcalg/queue.c
     Extension: skimage.filter.rank.generic_cy
         Sources:
             skimage/filter/rank/generic_cy.pyx
@@ -150,9 +153,12 @@ Library:
     Extension: skimage.exposure._unwrap_2d
         Sources:
             skimage/exposure/_unwrap_2d.pyx, skimage/exposure/unwrap_2d_ljmu.c
-    Extension: skimage.exposure._unwrap_1d
+    Extension: skimage.exposure._unwrap_naive
         Sources:
-            skimage/exposure/_unwrap_1d.pyx
+            skimage/exposure/_unwrap_naive.pyx
+    Extension: skimage.exposure._branch_cuts
+        Sources:
+            skimage/exposure/_branch_cuts.pyx, skimage/exposure/queue.c
 
 Executable: skivi
     Module: skimage.scripts.skivi
