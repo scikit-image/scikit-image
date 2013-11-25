@@ -58,7 +58,7 @@ endif
 
 ## remove .so libraries from main package, and call dh_numpy*
 _dh_python%: python-test%
-	find debian/$(PACKAGE$*_NAME)/usr/lib -name "*.so" -delete;
+	-find debian/$(PACKAGE$*_NAME)/usr/lib -name "*.so" -delete;
 
 	dh_numpy$(*:2=) -p$(PACKAGE$*_NAME)-lib
 	dh_python$*
