@@ -34,7 +34,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         controls the weights of the distances along z, y, and x during
         k-means clustering.        
     slic_zero : bool
-        True to run SLIC-ZERO, False to run original SLIC.
+        True to run SLIC-zero, False to run original SLIC.
 
 
     Returns
@@ -201,12 +201,5 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         # the color if it increases from previous iteration
                         if max_dist_color[k] < dist_color:
                             max_dist_color[k] = dist_color
-
-            ## DEBUG
-            print('Iter %d' % (i,))
-            print(str(np.asarray(max_dist_color)))
-
-    print('Image: ')
-    print(str(np.asarray(image_zyx)))
 
     return np.asarray(nearest_segments)
