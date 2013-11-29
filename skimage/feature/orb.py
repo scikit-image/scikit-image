@@ -201,8 +201,7 @@ def descriptor_orb(image, keypoints, downscale=1.2, n_scales=8):
 
             curr_scale_kpts = np.ascontiguousarray(np.round(curr_scale_kpts[border_mask]).astype(np.intp))
             curr_scale_orientation = np.ascontiguousarray(curr_keypoints.orientation)
-            curr_scale_descriptors = _orb_loop(curr_image, curr_scale_kpts,
-                                               curr_scale_orientation)
+            curr_scale_descriptors = _orb_loop(curr_image, curr_scale)
 
             descriptors_list.append(curr_scale_descriptors)
             keypoints_list.append(curr_keypoints)

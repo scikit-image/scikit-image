@@ -9,51 +9,62 @@ from ._brief_cy import _brief_loop
 
 def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
                      patch_size=49, sample_seed=1, variance=2):
-    """**Experimental function**.
+    """Extract BRIEF binary descriptors for given keypoints in an image.
 
-    Extract BRIEF Descriptor about given keypoints for a given image.
+    BRIEF (Binary Robust Independent Elementary Features) is an efficient
+    feature point descriptor. It it is highly discriminative even when using
+    relatively few bits and can be computed using simple intensity difference
+    tests.
+
+    For each keypoint intensity comparisons are carried out for a specifically
+    distributed number N of pixel-pairs resulting in a binary descriptor of
+    length N. The descriptor similarity can thus be computed using the Hamming
+    distance which leads to very good matching performance in contrast to the
+    L2 norm.
 
     Parameters
     ----------
     image : 2D ndarray
         Input image.
-    keypoints : record array with P rows
-        Record array with fields row, col, octave, orientation, response.
-        Octave, orientation and response can be None.
+    keypoints : (P, ...) recarray
+        Record array as returned by `skimage.feature.create_keypoint_recarray`
+        with the fields: `row`, `col`, `scale`, `orientation` and `response`.
     descriptor_size : int
-        Size of BRIEF descriptor about each keypoint. Sizes 128, 256 and 512
-        preferred by the authors. Default is 256.
-    mode : string
+        Size of BRIEF descriptor for each keypoint. Sizes 128, 256 and 512
+        recommended by the authors. Default is 256.
+    mode : {'normal', 'uniform'}
         Probability distribution for sampling location of decision pixel-pairs
-        around keypoints. Default is 'normal' otherwise uniform.
+        around keypoints.
     patch_size : int
         Length of the two dimensional square patch sampling region around
         the keypoints. Default is 49.
     sample_seed : int
-        Seed for sampling the decision pixel-pairs. From a square window with
-        length patch_size, pixel pairs are sampled using the `mode` parameter
-        to build the descriptors using intensity comparison. The value of
-        `sample_seed` should be the same for the images to be matched while
-        building the descriptors. Default is 1.
+        Seed for the random sampling of the decision pixel-pairs. From a square
+        window with length patch_size, pixel pairs are sampled using the `mode`
+        parameter to build the descriptors using intensity comparison. The
+        value of `sample_seed` must be the same for the images to be matched
+        while building the descriptors.
     variance : float
-        Variance of the Gaussian Low Pass filter applied on the image to
-        alleviate noise sensitivity. Default is 2.
+        Variance of the Gaussian low pass filter applied to the image to
+        alleviate noise sensitivity, which is strongly recommended to obtain
+        discriminative and good descriptors.
 
     Returns
     -------
     descriptors : (Q, `descriptor_size`) ndarray of dtype bool
-        2D ndarray of binary descriptors of size `descriptor_size` about Q
+        2D ndarray of binary descriptors of size `descriptor_size` for Q
         keypoints after filtering out border keypoints with value at an index
-        (i, j) either being True or False representing the outcome
-        of Intensity comparison about ith keypoint on jth decision pixel-pair.
-    keypoints : record array with Q rows
-        Record array with fields row, col, octave, orientation, response.
-        Octave, orientation and response can be None.
+        ``(i, j)`` either being `True` or `False` representing the outcome
+        of the intensity comparison for i-th keypoint on j-th decision
+        pixel-pair.
+    keypoints : (Q, ...) recarray
+        Record array as returned by `skimage.feature.create_keypoint_recarray`
+        with the fields: `row`, `col`, `scale`, `orientation` and `response`.
 
     References
     ----------
     .. [1] Michael Calonder, Vincent Lepetit, Christoph Strecha and Pascal Fua
-           "BRIEF : Binary robust independent elementary features",
+           "BRIEF : Binary robust independent elementary features", 2010
            http://cvlabwww.epfl.ch/~lepetit/papers/calonder_eccv10.pdf
 
     Examples
@@ -125,32 +136,19 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
 
     """
 
+    if mode not in ('normal', 'uniform'):
+        raise ValueError("`mode` must be one of 'normal' or 'uniform'.")
+
     np.random.seed(sample_seed)
 
     image = _prepare_grayscale_input_2D(image)
 
-    # Gaussian Low pass filtering to alleviate noise
-    # sensitivity
+    # Gaussian Low pass filtering to alleviate noise sensitivity
     image = gaussian_filter(image, variance)
-
     image = np.ascontiguousarray(image)
-
-    keypoints_loc = np.array(np.squeeze(np.dstack((keypoints.row, keypoints.col)))
-                             + 0.5, dtype=np.intp, order='C')
-
-    # Removing keypoints that are within (patch_size / 2) distance from the
-    # image border
-    border_mask = _mask_border_keypoints(image, keypoints_loc, patch_size // 2)
-    keypoints = keypoints[border_mask]
-    keypoints_loc = keypoints_loc[border_mask]
-    keypoints_loc = np.ascontiguousarray(keypoints_loc)
-
-    descriptors = np.zeros((keypoints_loc.shape[0], descriptor_size),
-                           dtype=bool, order='C')
 
     # Sampling pairs of decision pixels in patch_size x patch_size window
     if mode == 'normal':
-
         samples = (patch_size / 5.0) * np.random.randn(descriptor_size * 8)
         samples = np.array(samples, dtype=np.int32)
         samples = samples[(samples < (patch_size // 2))
@@ -160,9 +158,7 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
         pos1 = pos1.reshape(descriptor_size, 2)
         pos2 = samples[descriptor_size * 2:descriptor_size * 4]
         pos2 = pos2.reshape(descriptor_size, 2)
-
-    else:
-
+    elif mode == 'uniform':
         samples = np.random.randint(-(patch_size - 2) // 2,
                                     (patch_size // 2) + 1,
                                     (descriptor_size * 2, 2))
@@ -172,6 +168,18 @@ def descriptor_brief(image, keypoints, descriptor_size=256, mode='normal',
     pos1 = np.ascontiguousarray(pos1)
     pos2 = np.ascontiguousarray(pos2)
 
-    _brief_loop(image, descriptors.view(np.uint8), keypoints_loc, pos1, pos2)
+    # Removing keypoints that are within (patch_size / 2) distance from the
+    # image border
+    border_mask = _mask_border_keypoints(image.shape, keypoints.row,
+                                         keypoints.col, patch_size // 2)
+
+    keypoints_row = keypoints.row[border_mask].astype(np.intp)
+    keypoints_col = keypoints.col[border_mask].astype(np.intp)
+
+    descriptors = np.zeros((keypoints_row.shape[0], descriptor_size),
+                           dtype=bool, order='C')
+
+    _brief_loop(image, descriptors.view(np.uint8),
+                keypoints_row, keypoints_col, pos1, pos2)
 
     return descriptors, keypoints

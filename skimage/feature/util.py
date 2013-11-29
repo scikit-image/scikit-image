@@ -22,7 +22,7 @@ def create_keypoint_recarray(rows, cols, scales=None, orientations=None,
 
     Returns
     -------
-    recarray : (N, 5) recarray
+    recarray : (N, ...) recarray
         Array with the fields: `row`, `col`, `scale`, `orientation` and
         `response`.
 
@@ -33,7 +33,7 @@ def create_keypoint_recarray(rows, cols, scales=None, orientations=None,
              ('scale', np.double),
              ('orientation', np.double),
              ('response', np.double)]
-    keypoints = np.zeros(row.shape[0], dtype=dtype)
+    keypoints = np.zeros(rows.shape[0], dtype=dtype)
     keypoints['row'] = rows
     keypoints['col'] = cols
     keypoints['scale'] = scales
@@ -50,17 +50,37 @@ def _prepare_grayscale_input_2D(image):
     return img_as_float(image)
 
 
-def _mask_border_keypoints(image, keypoints, dist):
-    """Removes keypoints that are within dist pixels from the image border."""
-    width = image.shape[0]
-    height = image.shape[1]
+def _mask_border_keypoints(shape, rr, cc, distance):
+    """Mask coordinates that are within certain distance from the image border.
 
-    keypoints_filtering_mask = ((dist - 1 < keypoints[:, 0]) &
-                                (keypoints[:, 0] < width - dist + 1) &
-                                (dist - 1 < keypoints[:, 1]) &
-                                (keypoints[:, 1] < height - dist + 1))
+    Parameters
+    ----------
+    shape : (2, ) array_like
+        Shape of the image as ``(rows, cols)``.
+    rr : (N, ) array
+        Row coordinates.
+    cc : (N, ) array
+        Column coordinates.
+    distance : int
+        Image border distance.
 
-    return keypoints_filtering_mask
+    Returns
+    -------
+    mask : (N, ) bool array
+        Mask indicating if pixels are within the image (``True``) or in the
+        border region of the image (``False``).
+
+    """
+
+    rows = shape[0]
+    cols = shape[1]
+
+    mask = (((distance - 1) < rr)
+            & (rr < (rows - distance + 1))
+            & ((distance - 1) < cc)
+            & (cc < (cols - distance + 1)))
+
+    return mask
 
 
 def pairwise_hamming_distance(array1, array2):
