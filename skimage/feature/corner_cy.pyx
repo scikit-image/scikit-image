@@ -176,7 +176,7 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
 
     The orientation of corners is computed using the first order central moment
     i.e. the center of mass approach. The corner orientation is the angle of
-    the vector from the corner coordinate to the intensity centroid  in the
+    the vector from the corner coordinate to the intensity centroid in the
     local neighborhood around the corner calculated using first order central
     moment.
 
@@ -206,23 +206,23 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     Examples
     --------
     >>> from skimage.morphology import octagon
-    >>> from skimage.feature import corner_fast, corner_peaks, \
-    ...                             corner_orientations
+    >>> from skimage.feature import (corner_fast, corner_peaks,
+    ...                              corner_orientations)
     >>> square = np.zeros((12, 12))
     >>> square[3:9, 3:9] = 1
-    >>> square
-    array([[ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  1.,  1.,  1.,  1.,  1.,  1.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.],
-           [ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.]])
+    >>> square.astype(int)
+    array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+           [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
     >>> corners = corner_peaks(corner_fast(square, 9), min_distance=1)
     >>> corners
     array([[3, 3],
