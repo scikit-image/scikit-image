@@ -34,9 +34,9 @@ def match_binary_descriptors(keypoints1, descriptors1, keypoints2,
     -------
     matches : (Q, 2, 2) ndarray
         Location of Q matched keypoint pairs from two images.
-    mask1 : (Q,) ndarray
+    idxs1 : (Q,) ndarray
         Indices of keypoints in keypoints1 that have been matched.
-    mask2 : (Q,) ndarray
+    idxs2 : (Q,) ndarray
         Indices of keypoints in keypoints2 that have been matched.
 
     """
@@ -51,33 +51,31 @@ def match_binary_descriptors(keypoints1, descriptors1, keypoints2,
 
     # Get hamming distances between keypoints1 and keypoints2
     distance = pairwise_hamming_distance(descriptors1, descriptors2)
-    kp1 = np.squeeze(np.dstack((keypoints1.row, keypoints1.col)))
-    kp2 = np.squeeze(np.dstack((keypoints2.row, keypoints2.col)))
 
     if cross_check:
         matched_keypoints1_index = np.argmin(distance, axis=1)
         matched_keypoints2_index = np.argmin(distance, axis=0)
 
-        matched_index = _binary_cross_check_loop(matched_keypoints1_index,
+        matched_idxs = _binary_cross_check_loop(matched_keypoints1_index,
                                                  matched_keypoints2_index,
                                                  distance, threshold)
 
-        matches = np.zeros((matched_index.shape[0], 2, 2),
+        matches = np.zeros((matched_idxs.shape[0], 2, 2),
                                           dtype=np.intp)
-        mask1 = matched_index[:, 0]
-        mask2 = matched_index[:, 1]
-        matches[:, 0, :] = kp1[mask1]
-        matches[:, 1, :] = kp2[mask2]
+        idxs1 = matched_idxs[:, 0]
+        idxs2 = matched_idxs[:, 1]
+        matches[:, 0, :] = keypoints1[idxs1]
+        matches[:, 1, :] = keypoints2[idxs2]
 
     else:
         temp = distance > threshold
         row_check = np.any(~temp, axis=1)
-        matched_keypoints2 = kp2[np.argmin(distance, axis=1)]
+        matched_keypoints2 = keypoints2[np.argmin(distance, axis=1)]
         matches = np.zeros((np.sum(row_check), 2, 2),
                                           dtype=np.intp)
-        matches[:, 0, :] = kp1[row_check]
+        matches[:, 0, :] = keypoints1[row_check]
         matches[:, 1, :] = matched_keypoints2[row_check]
-        mask1 = np.where(row_check == True)[0]
-        mask2 = np.argmin(distance, axis=1)[row_check]
+        idxs1 = np.where(row_check == True)[0]
+        idxs2 = np.argmin(distance, axis=1)[row_check]
 
     return matches, mask1, mask2

@@ -3,43 +3,40 @@ import numpy as np
 from skimage.util import img_as_float
 
 
-def create_keypoint_recarray(rows, cols, scales=None, orientations=None,
-                             responses=None):
-    """Create keypoint array that allows field access through attributes.
+class FeatureDetector(object):
 
-    Parameters
-    ----------
-    rows : (N, ) array
-        Row coordinates of keypoints.
-    cols : (N, ) array
-        Column coordinates of keypoints.
-    scales : (N, ) array
-        Scales in which the keypoints have been detected.
-    orientations : (N, ) array
-        Orientations of the keypoints.
-    responses : (N, ) array
-        Detector response (strength) of the keypoints.
+    def __init__(self):
+        raise NotImplementedError()
 
-    Returns
-    -------
-    recarray : (N, ...) recarray
-        Array with the fields: `row`, `col`, `scale`, `orientation` and
-        `response`.
+    def detect(self, image):
+        """Detect keypoints in image.
 
-    """
+        Parameters
+        ----------
+        image : 2D array
+            Input image.
 
-    dtype = [('row', np.double),
-             ('col', np.double),
-             ('scale', np.double),
-             ('orientation', np.double),
-             ('response', np.double)]
-    keypoints = np.zeros(rows.shape[0], dtype=dtype)
-    keypoints['row'] = rows
-    keypoints['col'] = cols
-    keypoints['scale'] = scales
-    keypoints['orientation'] = orientations
-    keypoints['response'] = responses
-    return keypoints.view(np.recarray)
+        """
+        raise NotImplementedError()
+
+
+class DescriptorExtractor(object):
+
+    def __init__(self):
+        raise NotImplementedError()
+
+    def extract(self, image, keypoints):
+        """Extract feature descriptors in image for given keypoints.
+
+        Parameters
+        ----------
+        image : 2D array
+            Input image.
+        keypoints : (N, 2) array
+            Keypoint locations as ``(row, col)``.
+
+        """
+        raise NotImplementedError()
 
 
 def _prepare_grayscale_input_2D(image):
@@ -50,17 +47,15 @@ def _prepare_grayscale_input_2D(image):
     return img_as_float(image)
 
 
-def _mask_border_keypoints(shape, rr, cc, distance):
+def _mask_border_keypoints(image_shape, keypoints, distance):
     """Mask coordinates that are within certain distance from the image border.
 
     Parameters
     ----------
-    shape : (2, ) array_like
+    image_shape : (2, ) array_like
         Shape of the image as ``(rows, cols)``.
-    rr : (N, ) array
-        Row coordinates.
-    cc : (N, ) array
-        Column coordinates.
+    coords : (N, 2) array
+        Keypoint coordinates as ``(rows, cols)``.
     distance : int
         Image border distance.
 
@@ -72,13 +67,13 @@ def _mask_border_keypoints(shape, rr, cc, distance):
 
     """
 
-    rows = shape[0]
-    cols = shape[1]
+    rows = image_shape[0]
+    cols = image_shape[1]
 
-    mask = (((distance - 1) < rr)
-            & (rr < (rows - distance + 1))
-            & ((distance - 1) < cc)
-            & (cc < (cols - distance + 1)))
+    mask = (((distance - 1) < keypoints[:, 0])
+            & (keypoints[:, 0] < (rows - distance + 1))
+            & ((distance - 1) < keypoints[:, 1])
+            & (keypoints[:, 1] < (cols - distance + 1)))
 
     return mask
 
