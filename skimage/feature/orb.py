@@ -1,8 +1,7 @@
 import numpy as np
 
 from skimage.feature.util import (_mask_border_keypoints,
-                                  _prepare_grayscale_input_2D,
-                                  create_keypoint_recarray)
+                                  _prepare_grayscale_input_2D)
 
 from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
                              corner_harris)
@@ -12,36 +11,39 @@ from .orb_cy import _orb_loop
 
 
 OFAST_MASK = np.zeros((31, 31))
-umax = [15, 15, 15, 15, 14, 14, 14, 13, 13, 12, 11, 10, 9, 8, 6, 3]
+OFAST_UMAX = [15, 15, 15, 15, 14, 14, 14, 13, 13, 12, 11, 10, 9, 8, 6, 3]
 for i in range(-15, 16):
-    for j in range(-umax[np.abs(i)], umax[np.abs(i)] + 1):
+    for j in range(-OFAST_UMAX[abs(i)], OFAST_UMAX[abs(i)] + 1):
         OFAST_MASK[15 + j, 15 + i]  = 1
+
+
+
 
 
 def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
                   harris_k=0.04, downscale=1.2, n_scales=8):
 
-    """Detect Oriented Fast keypoints.
+    """Detect oriented FAST keypoints.
 
     Parameters
     ----------
     image : 2D ndarray
-        Input grayscale image.
+        Input image.
     n_keypoints : int
-        Number of keypoints to be returned from this function. The function
-        will return best ``n_keypoints`` if more than n_keypoints are detected
-        based on the values of other parameters. If not, then all the detected
-        keypoints are returned.
+        Number of keypoints to be returned. The function will return the best
+        ``n_keypoints`` according to the Harris corner response if more than
+        ``n_keypoints`` are detected. If not, then all the detected keypoints
+        are returned.
     fast_n : int
         The ``n`` parameter in ``feature.corner_fast``. Minimum number of
         consecutive pixels out of 16 pixels on the circle that should all be
-        either brighter or darker w.r.t testpixel. A point c on the circle is
+        either brighter or darker w.r.t test-pixel. A point c on the circle is
         darker w.r.t test pixel p if ``Ic < Ip - threshold`` and brighter if
         ``Ic > Ip + threshold``. Also stands for the n in ``FAST-n`` corner
         detector.
     fast_threshold : float
-        The ``threshold`` parameter in ``feature.corner_fast``. Threshold used to
-        decide whether the pixels on the circle are brighter, darker or
+        The ``threshold`` parameter in ``feature.corner_fast``. Threshold used
+        to decide whether the pixels on the circle are brighter, darker or
         similar w.r.t. the test pixel. Decrease the threshold when more
         corners are desired and vice-versa.
     harris_k : float
@@ -50,15 +52,17 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
         values of k result in detection of sharp corners.
     downscale : float
         Downscale factor for the image pyramid. Default value 1.2 is chosen so
-        that we have more dense scales that enable robust scale invariance.
+        that there are more dense scales which enable robust scale invariance
+        for a subsequent feature description.
     n_scales : int
-        Number of scales from the bottom of the image pyramid to extract
-        the features from.
+        Maximum number of scales from the bottom of the image pyramid to
+        extract the features from.
 
     Returns
     -------
-    keypoints : record array
-        Record array with fields row, col, octave, orientation, response.
+    keypoints : (N, ...) recarray
+        Record array as returned by `skimage.feature.create_keypoint_recarray`
+        with the fields: `row`, `col`, `scale`, `orientation` and `response`.
 
     References
     ----------
@@ -97,46 +101,53 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
     scales_list = []
     harris_response_list = []
 
-    for scale in range(n_scales):
+    for octave in range(len(pyramid)):
 
-        corners = corner_peaks(corner_fast(pyramid[scale], fast_n,
+        # Extract keypoints for current octave
+        corners = corner_peaks(corner_fast(pyramid[octave], fast_n,
                                            fast_threshold), min_distance=1)
-        keypoints_list.append(corners * downscale ** scale)
 
-        orientations_list.append(corner_orientations(pyramid[scale], corners,
+        # Scale keypoint coordinates so they correspond to the original
+        # image shape
+        keypoints_list.append(corners * downscale ** octave)
+
+        orientations_list.append(corner_orientations(pyramid[octave], corners,
                                                      OFAST_MASK))
 
-        scales_list.append(scale * np.ones(corners.shape[0], dtype=np.intp))
+        scales_list.append(octave * np.ones(corners.shape[0], dtype=np.intp))
 
-        harris_response = corner_harris(pyramid[scale], method='k', k=harris_k)
+        harris_response = corner_harris(pyramid[octave], method='k',
+                                        k=harris_k)
         harris_response_list.append(harris_response[corners[:, 0],
                                                     corners[:, 1]])
 
     keypoints_array = np.vstack(keypoints_list)
     orientations = np.hstack(orientations_list)
-    octaves = downscale ** np.hstack(scales_list)
+    scales = downscale ** np.hstack(scales_list)
     harris_measure = np.hstack(harris_response_list)
     keypoints = create_keypoint_recarray(keypoints_array[:, 0],
                                          keypoints_array[:, 1],
-                                         octaves, orientations,
+                                         scales, orientations,
                                          harris_measure)
 
     if keypoints.shape[0] < n_keypoints:
         return keypoints
     else:
+        # Choose best n_keypoints according to Harris corner response
         best_indices = harris_measure.argsort()[::-1][:n_keypoints]
         return keypoints[best_indices]
 
 
 def descriptor_orb(image, keypoints, downscale=1.2, n_scales=8):
-    """Compute rBRIEF descriptors of input keypoints.
+    """Compute rBRIEF descriptors for keypoints.
 
     Parameters
     ----------
     image : 2D ndarray
-        Input grayscale image.
-    keypoints : record array
-        Record array with fields row, col, octave, orientation, response.
+        Input image.
+    keypoints : (N, ...) recarray
+        Record array as returned by `skimage.feature.create_keypoint_recarray`
+        with the fields: `row`, `col`, `scale`, `orientation` and `response`.
     downscale : float
         Downscale factor for the image pyramid. Should be the same as that
         used in ``keypoints_orb``.

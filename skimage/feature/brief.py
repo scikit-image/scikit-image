@@ -101,6 +101,7 @@ class BRIEF(DescriptorExtractor):
     def __init__(self, descriptor_size=256, patch_size=49,
                  mode='normal', sigma=1, sample_seed=1):
 
+        mode = mode.lower()
         if mode not in ('normal', 'uniform'):
             raise ValueError("`mode` must be 'normal' or 'uniform'.")
 

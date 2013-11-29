@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage.filters import maximum_filter, minimum_filter, convolve
 
-from .util import _prepare_grayscale_input_2D
+from skimage.feature.util import FeatureDetector, _prepare_grayscale_input_2D
 
 from skimage.transform import integral_image
 from skimage.feature import structure_tensor
@@ -66,19 +66,19 @@ def _filter_image(image, min_scale, max_scale, mode):
             mo, no = OCTAGON_OUTER_SHAPE[min_scale + i - 1]
             mi, ni = OCTAGON_INNER_SHAPE[min_scale + i - 1]
             response[:, :, i] = convolve(image,
-                                         _octagon_filter_kernel(mo, no, mi, ni))
+                                         _octagon_kernel(mo, no, mi, ni))
 
     elif mode == 'star':
 
         for i in range(max_scale - min_scale + 1):
             m = STAR_SHAPE[STAR_FILTER_SHAPE[min_scale + i - 1][0]]
             n = STAR_SHAPE[STAR_FILTER_SHAPE[min_scale + i - 1][1]]
-            response[:, :, i] = convolve(image, _star_filter_kernel(m, n))
+            response[:, :, i] = convolve(image, _star_kernel(m, n))
 
     return response
 
 
-def _octagon_filter_kernel(mo, no, mi, ni):
+def _octagon_kernel(mo, no, mi, ni):
     outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
     inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
     outer_weight = 1.0 / (outer - inner)
@@ -92,7 +92,7 @@ def _octagon_filter_kernel(mo, no, mi, ni):
     return bfilter
 
 
-def _star_filter_kernel(m, n):
+def _star_kernel(m, n):
     c = m + m // 2 - n - n // 2
     outer_star = star(m)
     inner_star = np.zeros_like(outer_star)
@@ -106,21 +106,15 @@ def _star_filter_kernel(m, n):
 
 def _suppress_lines(feature_mask, image, sigma, line_threshold):
     Axx, Axy, Ayy = structure_tensor(image, sigma)
-    feature_mask[(Axx + Ayy) * (Axx + Ayy)
-                 > line_threshold * (Axx * Ayy - Axy * Axy)] = False
+    feature_mask[(Axx + Ayy) ** 2
+                 > line_threshold * (Axx * Ayy - Axy ** 2)] = False
 
 
-def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
-                      non_max_threshold=0.15, line_threshold=10):
-    """**Experimental function**.
 
-    Extracts CenSurE keypoints along with the corresponding scale using
-    either Difference of Boxes, Octagon or STAR bi-level filter.
+class CenSurE(FeatureDetector):
 
-    Parameters
-    ----------
-    image : 2D ndarray
-        Input image.
+    """CenSurE keypoint detector.
+
     min_scale : int
         Minimum scale to extract keypoints from.
     max_scale : int
@@ -145,13 +139,6 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
         Threshold for rejecting interest points which have ratio of principal
         curvatures greater than this value.
 
-    Returns
-    -------
-    keypoints : (N, 2) array
-        Location of the extracted keypoints in the ``(row, col)`` format.
-    scales : (N, 1) array
-        The corresponding scale of the N extracted keypoints.
-
     References
     ----------
     .. [1] Motilal Agrawal, Kurt Konolige and Morten Rufus Blas
@@ -166,69 +153,101 @@ def keypoints_censure(image, min_scale=1, max_scale=7, mode='DoB',
 
     """
 
-    # (1) First we generate the required scales on the input grayscale image
-    # using a bi-level filter and stack them up in `filter_response`.
-    # (2) We then perform Non-Maximal suppression in 3 x 3 x 3 window on the
-    # filter_response to suppress points that are neither minima or maxima in
-    # 3 x 3 x 3 neighbourhood. We obtain a boolean ndarray `feature_mask`
-    # containing all the minimas and maximas in `filter_response` as True.
-    # (3) Then we suppress all the points in the `feature_mask` for which the
-    # corresponding point in the image at a particular scale has the ratio of
-    # principal curvatures greater than `line_threshold`.
-    # (4) Finally, we remove the border keypoints and return the keypoints
-    # along with its corresponding scale.
+    def __init__(self, min_scale=1, max_scale=7, mode='DoB',
+                 non_max_threshold=0.15, line_threshold=10):
 
-    image = _prepare_grayscale_input_2D(image)
+        mode = mode.lower()
+        if mode not in ('dob', 'octagon', 'star'):
+            raise ValueError("`mode` must be one of 'DoB', 'Octagon', 'STAR'.")
 
-    mode = mode.lower()
-    if mode not in ('dob', 'octagon', 'star'):
-        raise ValueError('Mode must be one of "DoB", "Octagon", "STAR".')
+        if min_scale < 1 or max_scale < 1 or max_scale - min_scale < 2:
+            raise ValueError('The scales must be >= 1 and the number of '
+                             'scales should be >= 3.')
 
-    if min_scale < 1 or max_scale < 1 or max_scale - min_scale < 2:
-        raise ValueError('The scales must be >= 1 and the number of scales '
-                         'should be >= 3.')
+        self.min_scale = min_scale
+        self.max_scale = max_scale
+        self.mode = mode
+        self.non_max_threshold = non_max_threshold
+        self.line_threshold = line_threshold
 
-    image = np.ascontiguousarray(image)
+    def detect(self, image):
+        """Detect CenSurE keypoints along with the corresponding scale.
 
-    # Generating all the scales
-    filter_response = _filter_image(image, min_scale, max_scale, mode)
+        Parameters
+        ----------
+        image : 2D ndarray
+            Input image.
 
-    # Suppressing points that are neither minima or maxima in their 3 x 3 x 3
-    # neighbourhood to zero
-    minimas = minimum_filter(filter_response, (3, 3, 3)) == filter_response
-    maximas = maximum_filter(filter_response, (3, 3, 3)) == filter_response
+        Returns
+        -------
+        keypoints : (N, 2) array
+            Keypoint coordinates as ``(row, col)``.
+        scales : (N, 1) array
+            Corresponding scales of the N extracted keypoints.
 
-    feature_mask = minimas | maximas
-    feature_mask[filter_response < non_max_threshold] = False
+        """
 
-    for i in range(1, max_scale - min_scale):
-        # sigma = (window_size - 1) / 6.0, so the window covers > 99% of the
-        #                                  kernel's distribution
-        # window_size = 7 + 2 * (min_scale - 1 + i)
-        # Hence sigma = 1 + (min_scale - 1 + i)/ 3.0
-        _suppress_lines(feature_mask[:, :, i], image,
-                        (1 + (min_scale + i - 1) / 3.0), line_threshold)
+        # (1) First we generate the required scales on the input grayscale
+        # image using a bi-level filter and stack them up in `filter_response`.
 
-    rows, cols, scales = np.nonzero(feature_mask[..., 1:max_scale - min_scale])
-    keypoints = np.column_stack([rows, cols])
-    scales = scales + min_scale + 1
+        # (2) We then perform Non-Maximal suppression in 3 x 3 x 3 window on
+        # the filter_response to suppress points that are neither minima or
+        # maxima in 3 x 3 x 3 neighbourhood. We obtain a boolean ndarray
+        # `feature_mask` containing all the minimas and maximas in
+        # `filter_response` as True.
+        # (3) Then we suppress all the points in the `feature_mask` for which
+        # the corresponding point in the image at a particular scale has the
+        # ratio of principal curvatures greater than `line_threshold`.
+        # (4) Finally, we remove the border keypoints and return the keypoints
+        # along with its corresponding scale.
 
-    if mode == 'dob':
-        return keypoints, scales
+        num_scales = self.max_scale - self.min_scale
 
-    cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
+        image = np.ascontiguousarray(_prepare_grayscale_input_2D(image))
 
-    if mode == 'octagon':
-        for i in range(min_scale + 1, max_scale):
-            c = (OCTAGON_OUTER_SHAPE[i - 1][0] - 1) // 2 \
-                + OCTAGON_OUTER_SHAPE[i - 1][1]
-            cumulative_mask |= _mask_border_keypoints(image, keypoints, c) \
-                               & (scales == i)
-    elif mode == 'star':
-        for i in range(min_scale + 1, max_scale):
-            c = STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] \
-                + STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] // 2
-            cumulative_mask |= _mask_border_keypoints(image, keypoints, c) \
-                               & (scales == i)
+        # Generating all the scales
+        filter_response = _filter_image(image, self.min_scale, self.max_scale,
+                                        self.mode)
 
-    return keypoints[cumulative_mask], scales[cumulative_mask]
+        # Suppressing points that are neither minima or maxima in their
+        # 3 x 3 x 3 neighborhood to zero
+        minimas = minimum_filter(filter_response, (3, 3, 3)) == filter_response
+        maximas = maximum_filter(filter_response, (3, 3, 3)) == filter_response
+
+        feature_mask = minimas | maximas
+        feature_mask[filter_response < self.non_max_threshold] = False
+
+        for i in range(1, num_scales):
+            # sigma = (window_size - 1) / 6.0, so the window covers > 99% of
+            #                                  the kernel's distribution
+            # window_size = 7 + 2 * (min_scale - 1 + i)
+            # Hence sigma = 1 + (min_scale - 1 + i)/ 3.0
+            _suppress_lines(feature_mask[:, :, i], image,
+                            (1 + (self.min_scale + i - 1) / 3.0),
+                            self.line_threshold)
+
+        rows, cols, scales = np.nonzero(feature_mask[..., 1:num_scales])
+        keypoints = np.column_stack([rows, cols])
+        scales = scales + self.min_scale + 1
+
+        if self.mode == 'dob':
+            return keypoints, scales
+
+        cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
+
+        if self.mode == 'octagon':
+            for i in range(self.min_scale + 1, self.max_scale):
+                c = (OCTAGON_OUTER_SHAPE[i - 1][0] - 1) // 2 \
+                    + OCTAGON_OUTER_SHAPE[i - 1][1]
+                cumulative_mask |= (
+                    _mask_border_keypoints(image.shape, keypoints, c)
+                    & (scales == i))
+        elif self.mode == 'star':
+            for i in range(self.min_scale + 1, self.max_scale):
+                c = STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] \
+                    + STAR_SHAPE[STAR_FILTER_SHAPE[i - 1][0]] // 2
+                cumulative_mask |= (
+                    _mask_border_keypoints(image.shape, keypoints, c)
+                    & (scales == i))
+
+        return keypoints[cumulative_mask], scales[cumulative_mask]

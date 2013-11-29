@@ -9,10 +9,10 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      hessian_matrix_eigvals)
 from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
-from ._brief import BRIEF
+from .brief import BRIEF
+from .censure import CenSurE
 from .match import match_binary_descriptors
 from .util import pairwise_hamming_distance
-from .censure import keypoints_censure
 from .orb import keypoints_orb, descriptor_orb
 
 __all__ = ['daisy',
@@ -30,9 +30,9 @@ __all__ = ['daisy',
            'corner_moravec',
            'match_template',
            'BRIEF',
+           'CenSurE',
            'pairwise_hamming_distance',
            'match_binary_descriptors',
-           'keypoints_censure',
            'corner_fast',
            'corner_orientations',
            'structure_tensor',
