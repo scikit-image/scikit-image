@@ -143,7 +143,7 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
                     # Similar pixel
                     bins[k] = 's'
 
-            # High speed test for n>=12
+            # High speed test for n >= 12
             if n >= 12:
                 speed_sum_b = 0
                 speed_sum_d = 0
@@ -155,10 +155,12 @@ def _corner_fast(double[:, ::1] image, char n, double threshold):
                 if speed_sum_d < 3 and speed_sum_b < 3:
                     continue
 
+            # Test for bright pixels
             curr_response = \
                 _corner_fast_response(curr_pixel, circle_intensities,
                                       bins, 'b', n)
 
+            # Test for dark pixels
             if curr_response == 0:
                 curr_response = \
                     _corner_fast_response(curr_pixel, circle_intensities,
