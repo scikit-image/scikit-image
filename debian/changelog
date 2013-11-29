@@ -1,3 +1,10 @@
+skimage (0.9.3-2) unstable; urgency=low
+
+  * debian/tests/control
+    - [thanks Julian Taylor] adding pil|imaging, tk, matplotlib to Depends
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 28 Nov 2013 21:46:35 -0500
+
 skimage (0.9.3-1) unstable; urgency=low
 
   [ Stefan van der Walt ]
