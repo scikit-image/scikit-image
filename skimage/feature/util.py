@@ -3,17 +3,42 @@ import numpy as np
 from skimage.util import img_as_float
 
 
-def create_keypoint_recarray(row, col, octave=None, orientation=None,
-                              response=None):
-    keypoints = np.zeros(row.shape[0],
-                         dtype=[('row', np.double), ('col', np.double),
-                         ('octave', np.double), ('orientation', np.double),
-                         ('response', np.double)])
-    keypoints['row'] = row
-    keypoints['col'] = col
-    keypoints['octave'] = octave
-    keypoints['orientation'] = orientation
-    keypoints['response'] = response
+def create_keypoint_recarray(rows, cols, scales=None, orientations=None,
+                             responses=None):
+    """Create keypoint array that allows field access through attributes.
+
+    Parameters
+    ----------
+    rows : (N, ) array
+        Row coordinates of keypoints.
+    cols : (N, ) array
+        Column coordinates of keypoints.
+    scales : (N, ) array
+        Scales in which the keypoints have been detected.
+    orientations : (N, ) array
+        Orientations of the keypoints.
+    responses : (N, ) array
+        Detector response (strength) of the keypoints.
+
+    Returns
+    -------
+    recarray : (N, 5) recarray
+        Array with the fields: `row`, `col`, `scale`, `orientation` and
+        `response`.
+
+    """
+
+    dtype = [('row', np.double),
+             ('col', np.double),
+             ('scale', np.double),
+             ('orientation', np.double),
+             ('response', np.double)]
+    keypoints = np.zeros(row.shape[0], dtype=dtype)
+    keypoints['row'] = rows
+    keypoints['col'] = cols
+    keypoints['scale'] = scales
+    keypoints['orientation'] = orientations
+    keypoints['response'] = responses
     return keypoints.view(np.recarray)
 
 
