@@ -7,14 +7,14 @@ from skimage.feature import (BRIEF, match_binary_descriptors,
                              corner_peaks, corner_harris)
 
 
-def test_descriptor_brief_color_image_unsupported_error():
+def test_color_image_unsupported_error():
     """Brief descriptors can be evaluated on gray-scale images only."""
     img = np.zeros((20, 20, 3))
     keypoints = np.asarray([[7, 5], [11, 13]])
     assert_raises(ValueError, BRIEF().extract, img, keypoints)
 
 
-def test_descriptor_brief_normal_mode():
+def test_normal_mode():
     """Verify the computed BRIEF descriptors with expected for normal mode."""
     img = rgb2gray(data.lena())
 
@@ -36,7 +36,7 @@ def test_descriptor_brief_normal_mode():
     assert_array_equal(descriptors, expected)
 
 
-def test_descriptor_brief_uniform_mode():
+def test_uniform_mode():
     """Verify the computed BRIEF descriptors with expected for uniform mode."""
     img = rgb2gray(data.lena())
 
@@ -56,6 +56,17 @@ def test_descriptor_brief_uniform_mode():
                          [ True,  True, False, False, False, False, False, False]], dtype=bool)
 
     assert_array_equal(descriptors, expected)
+
+
+def test_border():
+    img = np.zeros((100, 100))
+    keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
+
+    extractor = BRIEF(patch_size=41)
+    descs, mask = extractor.extract(img, keypoints)
+
+    assert descs.shape[0] == 3
+    assert_array_equal(mask, (False, True, True, True))
 
 
 if __name__ == '__main__':
