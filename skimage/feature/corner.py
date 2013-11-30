@@ -339,9 +339,9 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
     Examples
     --------
     >>> from skimage.feature import corner_harris, corner_peaks
-    >>> square = np.zeros([10, 10], dtype=int)
+    >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
-    >>> square
+    >>> square.astype(int)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -409,9 +409,9 @@ def corner_shi_tomasi(image, sigma=1):
     Examples
     --------
     >>> from skimage.feature import corner_shi_tomasi, corner_peaks
-    >>> square = np.zeros([10, 10], dtype=int)
+    >>> square = np.zeros([10, 10])
     >>> square[2:8, 2:8] = 1
-    >>> square
+    >>> square.astype(int)
     array([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
            [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -609,10 +609,10 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     Examples
     --------
     >>> from skimage.feature import corner_harris, corner_peaks, corner_subpix
-    >>> img = np.zeros((10, 10), dtype=int)
+    >>> img = np.zeros((10, 10))
     >>> img[:5, :5] = 1
     >>> img[5:, 5:] = 1
-    >>> img
+    >>> img.astype(int)
     array([[1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
            [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
