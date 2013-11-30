@@ -47,7 +47,7 @@ class BRIEF(DescriptorExtractor):
     Examples
     --------
     >>> from skimage.feature import (corner_harris, corner_peaks, BRIEF,
-    ...                              match_binary_descriptors)
+    ...                              match_descriptors)
     >>> import numpy as np
     >>> square1 = np.zeros((8, 8), dtype=np.int32)
     >>> square1[2:6, 2:6] = 1
@@ -77,24 +77,19 @@ class BRIEF(DescriptorExtractor):
     >>> extractor = BRIEF(patch_size=5)
     >>> descs1, _ = extractor.extract(square1, keypoints1)
     >>> descs2, _ = extractor.extract(square2, keypoints2)
-    >>> matches, idxs1, idxs2 = match_binary_descriptors(keypoints1, descs1,
-    ...                                                  keypoints2, descs2)
-    >>> matches
-    array([[[2, 2],
-            [2, 2]],
-
-           [[2, 5],
-            [2, 6]],
-
-           [[5, 2],
-            [6, 2]],
-
-           [[5, 5],
-            [6, 6]]])
-    >>> mask1
-    array([0, 1, 2, 3])
-    >>> mask2
-    array([0, 1, 2, 3])
+    >>> idxs1, idxs2 = match_descriptors(descs1, descs2)
+    >>> idxs1, idxs2
+    (array([0, 1, 2, 3]), array([0, 1, 2, 3]))
+    >>> keypoints1[idxs1]
+    array([[2, 2],
+           [2, 5],
+           [5, 2],
+           [5, 5]])
+    >>> keypoints2[idxs2]
+    array([[2, 2],
+           [2, 6],
+           [6, 2],
+           [6, 6]])
 
     """
 
