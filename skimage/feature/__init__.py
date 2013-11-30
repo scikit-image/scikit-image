@@ -13,6 +13,7 @@ from .brief import BRIEF
 from .censure import CenSurE
 from .orb import ORB
 from .match import match_descriptors
+from .util import plot_matches
 
 
 __all__ = ['daisy',
@@ -38,4 +39,5 @@ __all__ = ['daisy',
            'BRIEF',
            'CenSurE',
            'ORB',
-           'match_descriptors']
+           'match_descriptors',
+           'plot_matches']
