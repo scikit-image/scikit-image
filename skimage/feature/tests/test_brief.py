@@ -57,6 +57,10 @@ def test_uniform_mode():
     assert_array_equal(descriptors, expected)
 
 
+def test_unsupported_mode():
+    assert_raises(ValueError, BRIEF, mode='foobar')
+
+
 def test_border():
     img = np.zeros((100, 100))
     keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
