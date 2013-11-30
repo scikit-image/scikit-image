@@ -1,13 +1,12 @@
 import numpy as np
 from scipy import ndimage
 from scipy import stats
+
 from skimage.color import rgb2grey
 from skimage.util import img_as_float, pad
 from skimage.feature import peak_local_max
-
-from .util import _prepare_grayscale_input_2D
-
-from corner_cy import _corner_fast
+from skimage.feature.util import _prepare_grayscale_input_2D
+from skimage.feature.corner_cy import _corner_fast
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
