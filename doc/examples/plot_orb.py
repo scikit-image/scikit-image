@@ -1,3 +1,17 @@
+"""
+==========================================
+ORB feature detector and binary descriptor
+==========================================
+
+This example demonstrates the ORB feature detection and binary description
+algorithm. It uses an oriented FAST detection method and the rotated BRIEF
+descriptors.
+
+ORB is comparatively scale- and rotation-invariant. As a binary descriptor it
+allows to employ the very efficient Hamming distance metric for matching and
+is thus preferred for real-time applications.
+
+"""
 import numpy as np
 from skimage import data
 from skimage import transform as tf
