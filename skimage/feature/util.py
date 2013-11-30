@@ -137,7 +137,7 @@ def _mask_border_keypoints(image_shape, keypoints, distance):
     ----------
     image_shape : (2, ) array_like
         Shape of the image as ``(rows, cols)``.
-    coords : (N, 2) array
+    keypoints : (N, 2) array
         Keypoint coordinates as ``(rows, cols)``.
     distance : int
         Image border distance.
