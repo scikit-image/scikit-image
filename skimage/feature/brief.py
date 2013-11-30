@@ -4,7 +4,7 @@ from scipy.ndimage.filters import gaussian_filter
 from .util import (DescriptorExtractor, _mask_border_keypoints,
                    _prepare_grayscale_input_2D)
 
-from ._brief_cy import _brief_loop
+from .brief_cy import _brief_loop
 
 
 class BRIEF(DescriptorExtractor):
