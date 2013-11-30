@@ -151,6 +151,32 @@ class CenSurE(FeatureDetector):
            Descriptors in the Context of Robot Navigation"
            http://www.jamris.org/01_2013/saveas.php?QUEST=JAMRIS_No01_2013_P_11-20.pdf
 
+    Examples
+    --------
+    >>> from skimage.data import lena
+    >>> from skimage.color import rgb2gray
+    >>> from skimage.feature import CenSurE
+    >>> img = rgb2gray(lena()[100:300, 100:300])
+    >>> keypoints, scales = CenSurE().detect(img)
+    >>> keypoints
+    array([[ 71, 148],
+           [ 77, 186],
+           [ 78, 189],
+           [ 89, 174],
+           [127, 134],
+           [131, 133],
+           [134, 125],
+           [137, 125],
+           [149,  36],
+           [162, 165],
+           [168, 167],
+           [170,   5],
+           [171,  29],
+           [179,  20],
+           [194,  65]])
+    >>> scales
+    array([2, 4, 2, 3, 4, 2, 2, 3, 4, 6, 3, 2, 3, 4, 2])
+
     """
 
     def __init__(self, min_scale=1, max_scale=7, mode='DoB',
