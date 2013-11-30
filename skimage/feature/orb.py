@@ -192,6 +192,11 @@ class ORB(FeatureDetector, DescriptorExtractor):
     def extract(self, image, keypoints, scales, orientations):
         """Extract rBRIEF binary descriptors for given keypoints in image.
 
+        Note that the keypoints must be extracted using the same `downscale`
+        and `n_scales` parameters. Additionally, if you want to extract both
+        keypoints and descriptors you should use the faster
+        `detect_and_extract`.
+
         Parameters
         ----------
         image : 2D array
@@ -253,6 +258,9 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     def detect_and_extract(self, image):
         """Detect oriented FAST keypoints and extract rBRIEF descriptors.
+
+        Note that this is faster than first calling `detect` and then
+        `extract`.
 
         Parameters
         ----------
