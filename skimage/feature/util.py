@@ -5,9 +5,6 @@ from skimage.util import img_as_float
 
 class FeatureDetector(object):
 
-    def __init__(self):
-        raise NotImplementedError()
-
     def detect(self, image):
         """Detect keypoints in image.
 
@@ -21,9 +18,6 @@ class FeatureDetector(object):
 
 
 class DescriptorExtractor(object):
-
-    def __init__(self):
-        raise NotImplementedError()
 
     def extract(self, image, keypoints):
         """Extract feature descriptors in image for given keypoints.
