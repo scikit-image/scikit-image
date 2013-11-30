@@ -182,8 +182,8 @@ class CenSurE(FeatureDetector):
         -------
         keypoints : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
-        scales : (N, 1) array
-            Corresponding scales of the N extracted keypoints.
+        scales : (N, ) array
+            Corresponding scales.
 
         """
 

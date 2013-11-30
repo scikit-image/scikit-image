@@ -11,9 +11,10 @@ from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
 from .brief import BRIEF
 from .censure import CenSurE
+from .orb import ORB
 from .match import match_binary_descriptors
 from .util import pairwise_hamming_distance
-from .orb import keypoints_orb, descriptor_orb
+
 
 __all__ = ['daisy',
            'hog',
@@ -21,6 +22,10 @@ __all__ = ['daisy',
            'greycoprops',
            'local_binary_pattern',
            'peak_local_max',
+           'structure_tensor',
+           'structure_tensor_eigvals',
+           'hessian_matrix',
+           'hessian_matrix_eigvals',
            'corner_kitchen_rosenfeld',
            'corner_harris',
            'corner_shi_tomasi',
@@ -28,16 +33,11 @@ __all__ = ['daisy',
            'corner_subpix',
            'corner_peaks',
            'corner_moravec',
+           'corner_fast',
+           'corner_orientations',
            'match_template',
            'BRIEF',
            'CenSurE',
+           'ORB',
            'pairwise_hamming_distance',
-           'match_binary_descriptors',
-           'corner_fast',
-           'corner_orientations',
-           'structure_tensor',
-           'structure_tensor_eigvals',
-           'hessian_matrix',
-           'hessian_matrix_eigvals',
-           'keypoints_orb',
-           'descriptor_orb']
+           'match_binary_descriptors']

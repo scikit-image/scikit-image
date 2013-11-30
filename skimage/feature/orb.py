@@ -1,6 +1,7 @@
 import numpy as np
 
-from skimage.feature.util import (_mask_border_keypoints,
+from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
+                                  _mask_border_keypoints,
                                   _prepare_grayscale_input_2D)
 
 from skimage.feature import (corner_fast, corner_orientations, corner_peaks,
@@ -17,18 +18,13 @@ for i in range(-15, 16):
         OFAST_MASK[15 + j, 15 + i]  = 1
 
 
+class ORB(FeatureDetector, DescriptorExtractor):
 
-
-
-def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
-                  harris_k=0.04, downscale=1.2, n_scales=8):
-
-    """Detect oriented FAST keypoints.
+    """Oriented FAST and rotated BRIEF feature detector and binary descriptor
+    extractor.
 
     Parameters
     ----------
-    image : 2D ndarray
-        Input image.
     n_keypoints : int
         Number of keypoints to be returned. The function will return the best
         ``n_keypoints`` according to the Harris corner response if more than
@@ -58,165 +54,223 @@ def keypoints_orb(image, n_keypoints=500, fast_n=9, fast_threshold=0.08,
         Maximum number of scales from the bottom of the image pyramid to
         extract the features from.
 
-    Returns
-    -------
-    keypoints : (N, ...) recarray
-        Record array as returned by `skimage.feature.create_keypoint_recarray`
-        with the fields: `row`, `col`, `scale`, `orientation` and `response`.
-
     References
     ----------
     .. [1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
-          "ORB : An efficient alternative to SIFT and SURF"
+          "ORB: An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
-
-    Examples
-    --------
-    >>> from skimage.feature import keypoints_orb, descriptor_orb
-    >>> square = np.zeros((50, 50))
-    >>> square[20:30, 20:30] = 1
-    >>> keypoints = keypoints_orb(square, n_keypoints=8, n_scales=2)
-    >>> keypoints.shape
-    (8,)
-    >>> keypoints.row
-    array([ 29. ,  29. ,  20. ,  20. ,  20.4,  20.4,  28.8,  28.8])
-    >>> keypoints.col
-    array([ 29. ,  20. ,  29. ,  20. ,  28.8,  20.4,  28.8,  20.4])
-    >>> keypoints.octave
-    array([ 1. ,  1. ,  1. ,  1. ,  1.2,  1.2,  1.2,  1.2])
-    >>> np.rad2deg(keypoints.orientation)
-    array([-135.,  -45.,  135.,   45.,  135.,   45., -135.,  -45.])
-    >>> keypoints.response
-    array([ 21.4776577 ,  21.4776577 ,  21.4776577 ,  21.4776577 ,
-            14.03845308,  14.03845308,  14.03845308,  14.03845308])
 
     """
 
-    image = _prepare_grayscale_input_2D(image)
+    def __init__(self, downscale=1.2, n_scales=8,
+                 n_keypoints=500, fast_n=9, fast_threshold=0.08,
+                 harris_k=0.04):
+        self.downscale = downscale
+        self.n_scales = n_scales
+        self.n_keypoints = n_keypoints
+        self.fast_n = fast_n
+        self.fast_threshold = fast_threshold
+        self.harris_k = harris_k
 
-    pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
+    def _build_pyramid(self, image):
+        image = _prepare_grayscale_input_2D(image)
+        return list(pyramid_gaussian(image, self.n_scales - 1, self.downscale))
 
-    keypoints_list = []
-    orientations_list = []
-    scales_list = []
-    harris_response_list = []
-
-    for octave in range(len(pyramid)):
-
+    def _detect_octave(self, octave_image):
         # Extract keypoints for current octave
-        corners = corner_peaks(corner_fast(pyramid[octave], fast_n,
-                                           fast_threshold), min_distance=1)
+        fast_response = corner_fast(octave_image, self.fast_n,
+                                    self.fast_threshold)
+        keypoints = corner_peaks(fast_response, min_distance=1)
 
-        # Scale keypoint coordinates so they correspond to the original
-        # image shape
-        keypoints_list.append(corners * downscale ** octave)
+        mask = _mask_border_keypoints(octave_image.shape, keypoints,
+                                      distance=16)
+        keypoints = keypoints[mask]
 
-        orientations_list.append(corner_orientations(pyramid[octave], corners,
-                                                     OFAST_MASK))
+        orientations = corner_orientations(octave_image, keypoints,
+                                           OFAST_MASK)
 
-        scales_list.append(octave * np.ones(corners.shape[0], dtype=np.intp))
+        harris_response = corner_harris(octave_image, method='k',
+                                        k=self.harris_k)
+        responses = harris_response[keypoints[:, 0], keypoints[:, 1]]
 
-        harris_response = corner_harris(pyramid[octave], method='k',
-                                        k=harris_k)
-        harris_response_list.append(harris_response[corners[:, 0],
-                                                    corners[:, 1]])
+        return keypoints, orientations, responses
 
-    keypoints_array = np.vstack(keypoints_list)
-    orientations = np.hstack(orientations_list)
-    scales = downscale ** np.hstack(scales_list)
-    harris_measure = np.hstack(harris_response_list)
-    keypoints = create_keypoint_recarray(keypoints_array[:, 0],
-                                         keypoints_array[:, 1],
-                                         scales, orientations,
-                                         harris_measure)
+    def detect(self, image):
+        """Detect oriented FAST keypoints along with the corresponding scale.
 
-    if keypoints.shape[0] < n_keypoints:
-        return keypoints
-    else:
-        # Choose best n_keypoints according to Harris corner response
-        best_indices = harris_measure.argsort()[::-1][:n_keypoints]
-        return keypoints[best_indices]
+        Parameters
+        ----------
+        image : 2D array
+            Input image.
 
+        Returns
+        -------
+        keypoints : (N, 2) array
+            Keypoint coordinates as ``(row, col)``.
+        scales : (N, ) array
+            Corresponding scales.
+        orientations : (N, ) array
+            Corresponding orientations in radians.
+        responses : (N, ) array
+            Corresponding Harris corner responses.
 
-def descriptor_orb(image, keypoints, downscale=1.2, n_scales=8):
-    """Compute rBRIEF descriptors for keypoints.
+        """
 
-    Parameters
-    ----------
-    image : 2D ndarray
-        Input image.
-    keypoints : (N, ...) recarray
-        Record array as returned by `skimage.feature.create_keypoint_recarray`
-        with the fields: `row`, `col`, `scale`, `orientation` and `response`.
-    downscale : float
-        Downscale factor for the image pyramid. Should be the same as that
-        used in ``keypoints_orb``.
-    n_scales : int
-        Number of scales from the bottom of the image pyramid to extract
-        the features from.
+        pyramid = self._build_pyramid(image)
 
-    Returns
-    -------
-    descriptors : (P, 256) bool ndarray
-        2darray of type bool describing the P keypoints obtained after
-        filtering out those near the image border. Size of each descriptor
-        is 32 bytes or 256 bits.
-    filtered_keypoints : (P, 2) ndarray
-        Record array with fields row, col, octave, orientation, response for
-        P keypoints obtained after removing out those that are near the
-        border.
+        keypoints_list = []
+        orientations_list = []
+        octave_list = []
+        responses_list = []
 
-    References
-    ----------
-    .. [1] Ethan Rublee, Vincent Rabaud, Kurt Konolige and Gary Bradski
-          "ORB : An efficient alternative to SIFT and SURF"
-          http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
+        for octave in range(len(pyramid)):
 
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from skimage.feature import keypoints_orb, descriptor_orb
-    >>> square = np.zeros((50, 50))
-    >>> square[20:30, 20:30] = 1
-    >>> keypoints = keypoints_orb(square, n_keypoints=8, n_scales=2)
-    >>> keypoints.shape
-    (8,)
-    >>> descriptors, filtered_keypoints = descriptor_orb(square, keypoints, n_scales=2)
-    >>> filtered_keypoints.shape
-    (8,)
-    >>> descriptors.shape
-    (8, 256)
+            octave_image = np.ascontiguousarray(pyramid[octave])
 
-    """
-    image = _prepare_grayscale_input_2D(image)
+            keypoints, orientations, responses = \
+                self._detect_octave(octave_image)
 
-    pyramid = list(pyramid_gaussian(image, n_scales - 1, downscale))
+            keypoints_list.append(keypoints * self.downscale ** octave)
+            orientations_list.append(orientations)
+            octave_list.append(self.downscale **  octave
+                               * np.ones(keypoints.shape[0], dtype=np.intp))
+            responses_list.append(responses)
 
-    descriptors_list = []
-    keypoints_list = []
+        keypoints = np.vstack(keypoints_list)
+        orientations = np.hstack(orientations_list)
+        scales = np.hstack(octave_list)
+        responses = np.hstack(responses_list)
 
-    for scale in range(n_scales):
-        curr_image = np.ascontiguousarray(pyramid[scale])
+        if keypoints.shape[0] < self.n_keypoints:
+            return keypoints, scales, orientations, responses
+        else:
+            # Choose best n_keypoints according to Harris corner response
+            best_indices = responses.argsort()[::-1][:self.n_keypoints]
+            return (keypoints[best_indices], scales[best_indices],
+                    orientations[best_indices], responses[best_indices])
 
-        curr_scale_mask = (np.log(keypoints.octave) /
-                           np.log(downscale)).astype(np.intp) == scale
-        if np.sum(curr_scale_mask) > 0:
-            curr_keypoints = keypoints[curr_scale_mask]
-            curr_scale_kpts = np.squeeze(np.dstack((curr_keypoints.row / curr_keypoints.octave,
-                                         curr_keypoints.col / curr_keypoints.octave)))
-            border_mask = _mask_border_keypoints(curr_image,
-                                                 curr_scale_kpts,
-                                                 dist=16)
+    def _extract_octave(self, octave_image, keypoints, orientations):
+        mask = _mask_border_keypoints(octave_image.shape, keypoints,
+                                      distance=16)
+        keypoints = np.array(keypoints[mask], dtype=np.intp, order='C',
+                             copy=False)
+        orientations = np.array(orientations[mask], dtype=np.double, order='C',
+                                copy=False)
 
-            curr_keypoints = curr_keypoints[border_mask]
+        descriptors = _orb_loop(octave_image, keypoints, orientations)
 
-            curr_scale_kpts = np.ascontiguousarray(np.round(curr_scale_kpts[border_mask]).astype(np.intp))
-            curr_scale_orientation = np.ascontiguousarray(curr_keypoints.orientation)
-            curr_scale_descriptors = _orb_loop(curr_image, curr_scale)
+        return descriptors, mask
 
-            descriptors_list.append(curr_scale_descriptors)
-            keypoints_list.append(curr_keypoints)
+    def extract(self, image, keypoints, scales, orientations):
+        """Extract rBRIEF binary descriptors for given keypoints in image.
 
-    descriptors = np.vstack(descriptors_list).view(np.bool)
-    filtered_keypoints = np.hstack(keypoints_list)
-    return descriptors, filtered_keypoints.view(np.recarray)
+        Parameters
+        ----------
+        image : 2D array
+            Input image.
+        keypoints : (N, 2) array
+            Keypoint coordinates as ``(row, col)``.
+        scales : (N, ) array
+            Corresponding scales.
+        orientations : (N, ) array
+            Corresponding orientations in radians.
+
+        Returns
+        -------
+        descriptors : (Q, `descriptor_size`) array of dtype bool
+            2D array of binary descriptors of size `descriptor_size` for Q
+            keypoints after filtering out border keypoints with value at an
+            index ``(i, j)`` either being ``True`` or ``False`` representing
+            the outcome of the intensity comparison for i-th keypoint on j-th
+            decision pixel-pair. It is ``Q == np.sum(mask)``.
+        mask : (N, ) array of dtype bool
+            Mask indicating whether a keypoint has been filtered out
+            (``False``) or is described in the `descriptors` array (``True``).
+
+        """
+
+        pyramid = self._build_pyramid(image)
+
+        descriptors_list = []
+        mask_list = []
+
+        # Determine octaves from scales
+        octaves = (np.log(scales) / np.log(self.downscale)).astype(np.intp)
+
+        for octave in range(len(pyramid)):
+
+            # Mask for all keypoints in current octave
+            octave_mask = octaves == octave
+
+            if np.sum(octave_mask) > 0:
+
+                octave_image = np.ascontiguousarray(pyramid[octave])
+
+                octave_keypoints = keypoints[octave_mask]
+                octave_keypoints /= self.downscale ** octave
+
+                octave_orientations = orientations[octave_mask]
+
+                descriptors, mask = self._extract_octave(octave_image,
+                                                         octave_keypoints,
+                                                         octave_orientations)
+
+                descriptors_list.append(descriptors)
+                mask_list.append(mask)
+
+        descriptors = np.vstack(descriptors_list).view(np.bool)
+        mask = np.hstack(mask_list)
+
+        return descriptors, mask
+
+    def detect_and_extract(self, image):
+        """Detect oriented FAST keypoints and extract rBRIEF descriptors.
+
+        Parameters
+        ----------
+        image : 2D array
+            Input image.
+
+        Returns
+        -------
+        keypoints : (Q, 2) array
+            Keypoint coordinates as ``(row, col)``.
+        descriptors : (Q, `descriptor_size`) array of dtype bool
+            2D array of binary descriptors of size `descriptor_size` for Q
+            keypoints after filtering out border keypoints with value at an
+            index ``(i, j)`` either being ``True`` or ``False`` representing
+            the outcome of the intensity comparison for i-th keypoint on j-th
+            decision pixel-pair. It is ``Q == np.sum(mask)``.
+
+        """
+
+        pyramid = self._build_pyramid(image)
+
+        keypoints_list = []
+        responses_list = []
+        descriptors_list = []
+
+        for octave in range(len(pyramid)):
+
+            octave_image = np.ascontiguousarray(pyramid[octave])
+
+            keypoints, orientations, responses = \
+                self._detect_octave(octave_image)
+
+            descriptors, mask = self._extract_octave(octave_image, keypoints,
+                                                     orientations)
+
+            keypoints_list.append(keypoints * self.downscale ** octave)
+            responses_list.append(responses)
+            descriptors_list.append(descriptors)
+
+        keypoints = np.vstack(keypoints_list)
+        responses = np.hstack(responses_list)
+        descriptors = np.vstack(descriptors_list).view(np.bool)
+
+        if keypoints.shape[0] < self.n_keypoints:
+            return keypoints, descriptors
+        else:
+            # Choose best n_keypoints according to Harris corner response
+            best_indices = responses.argsort()[::-1][:self.n_keypoints]
+            return (keypoints[best_indices], descriptors[best_indices])

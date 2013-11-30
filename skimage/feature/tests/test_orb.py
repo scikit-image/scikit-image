@@ -1,21 +1,24 @@
 import numpy as np
 from numpy.testing import assert_array_equal, assert_almost_equal
-from skimage.feature import keypoints_orb, descriptor_orb
+from skimage.feature import ORB
 from skimage.data import lena
 from skimage.color import rgb2gray
 
 
-def test_keypoints_orb_desired_no_of_keypoints():
-    img = rgb2gray(lena())
-    keypoints = keypoints_orb(img, n_keypoints=10, fast_n=12,
-                              fast_threshold=0.20)
-    exp_row = np.array([ 435.  ,  435.6 ,  376.  ,  455.  ,  434.88,  269.  ,
-                         375.6 ,  310.8 ,  413.  ,  311.04])
-    exp_col = np.array([ 180. ,  180. ,  156. ,  176. ,  180. ,  111. ,
-                         156. ,  172.8,   70. ,  172.8])
+img = rgb2gray(lena())
 
-    exp_octaves = np.array([ 1.   ,  1.2  ,  1.   ,  1.   ,  1.44 ,  1.   ,
-                             1.2  ,  1.2  ,  1.   ,  1.728])
+
+def test_keypoints_orb_desired_no_of_keypoints():
+    detector_extractor = ORB(n_keypoints=10, fast_n=12, fast_threshold=0.20)
+    keypoints, scales, orientations, responses = detector_extractor.detect(img)
+
+    exp_rows = np.array([ 435.  ,  435.6 ,  376.  ,  455.  ,  434.88,  269.  ,
+                          375.6 ,  310.8 ,  413.  ,  311.04])
+    exp_cols = np.array([ 180. ,  180. ,  156. ,  176. ,  180. ,  111. ,
+                          156. ,  172.8,   70. ,  172.8])
+
+    exp_scales = np.array([ 1.   ,  1.2  ,  1.   ,  1.   ,  1.44 ,  1.   ,
+                            1.2  ,  1.2  ,  1.   ,  1.728])
 
     exp_orientations = np.array([-175.64733392, -167.94842949, -148.98350192,
                                  -142.03599837, -176.08535837,  -53.08162354,
@@ -25,24 +28,30 @@ def test_keypoints_orb_desired_no_of_keypoints():
                               0.5626413 ,  0.5097993 ,  0.44351774,
                               0.39154173,  0.39084861,  0.39063076,
                               0.37602487])
-    assert_almost_equal(exp_row, keypoints.row)
-    assert_almost_equal(exp_col, keypoints.col)
-    assert_almost_equal(exp_octaves, keypoints.octave)
-    assert_almost_equal(exp_response, keypoints.response)
-    assert_almost_equal(exp_orientations, np.rad2deg(keypoints.orientation))
+
+    assert_almost_equal(exp_rows, keypoints[:, 0])
+    assert_almost_equal(exp_cols, keypoints[:, 1])
+    assert_almost_equal(exp_scales, scales)
+    assert_almost_equal(exp_response, responses)
+    assert_almost_equal(exp_orientations, np.rad2deg(orientations), 5)
+
+    keypoints, _ = detector_extractor.detect_and_extract(img)
+    assert_almost_equal(exp_rows, keypoints[:, 0])
+    assert_almost_equal(exp_cols, keypoints[:, 1])
 
 
 def test_keypoints_orb_less_than_desired_no_of_keypoints():
     img = rgb2gray(lena())
-    keypoints = keypoints_orb(img, n_keypoints=15, fast_n=12,
-                              fast_threshold=0.33, downscale=2, n_scales=2)
+    detector_extractor = ORB(n_keypoints=15, fast_n=12,
+                             fast_threshold=0.33, downscale=2, n_scales=2)
+    keypoints, scales, orientations, responses = detector_extractor.detect(img)
 
-    exp_row = np.array([  67.,  247.,  269.,  413.,  435.,  230.,  264.,
-                         330.,  372.])
-    exp_col = np.array([ 157.,  146.,  111.,   70.,  180.,  136.,  336.,
-                         148.,  156.])
+    exp_rows = np.array([  67.,  247.,  269.,  413.,  435.,  230.,  264.,
+                          330.,  372.])
+    exp_cols = np.array([ 157.,  146.,  111.,   70.,  180.,  136.,  336.,
+                          148.,  156.])
 
-    exp_octaves = np.array([ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  2.])
+    exp_scales = np.array([ 1.,  1.,  1.,  1.,  1.,  2.,  2.,  2.,  2.])
 
     exp_orientations = np.array([-105.76503839,  -96.28973044,  -53.08162354,
                                  -173.4479964 , -175.64733392, -106.07927215,
@@ -52,33 +61,51 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
                               0.39063076,  0.96770745,  0.04935129,
                               0.21431068,  0.15826555,  0.42403573])
 
-    assert_almost_equal(exp_row, keypoints.row)
-    assert_almost_equal(exp_col, keypoints.col)
-    assert_almost_equal(exp_octaves, keypoints.octave)
-    assert_almost_equal(exp_response, keypoints.response)
-    assert_almost_equal(exp_orientations, np.rad2deg(keypoints.orientation))
+    assert_almost_equal(exp_rows, keypoints[:, 0])
+    assert_almost_equal(exp_cols, keypoints[:, 1])
+    assert_almost_equal(exp_scales, scales)
+    assert_almost_equal(exp_response, responses)
+    assert_almost_equal(exp_orientations, np.rad2deg(orientations), 5)
+
+    keypoints, _ = detector_extractor.detect_and_extract(img)
+    assert_almost_equal(exp_rows, keypoints[:, 0])
+    assert_almost_equal(exp_cols, keypoints[:, 1])
 
 
 def test_descriptor_orb():
-    img = rgb2gray(lena())
-    keypoints = keypoints_orb(img, n_keypoints=10, fast_n=12,
-                              fast_threshold=0.20)
-    descriptors, filtered_keypoints = descriptor_orb(img, keypoints)
+    detector_extractor = ORB(fast_n=12, fast_threshold=0.20)
 
-    descriptors_120_129 = np.array([[ True, False, False,  True, False, False, False, False, False, False],
-                                    [ True,  True, False, False,  True, False, False,  True, False,  True],
-                                    [False,  True,  True, False,  True, False,  True,  True,  True,  True],
-                                    [False, False, False,  True,  True, False,  True, False,  True, False],
-                                    [False,  True,  True,  True,  True, False,  True,  True,  True, False],
-                                    [ True, False,  True,  True,  True, False, False, False,  True, False],
-                                    [ True, False,  True, False,  True, False,  True,  True, False,  True],
-                                    [ True,  True,  True,  True,  True,  True, False,  True,  True,  True],
-                                    [ True,  True,  True, False,  True, False,  True,  True,  True, False],
-                                    [ True, False, False, False, False, False,  True,  True,  True, False]],
-                                    dtype=bool)
+    exp_descriptors = np.array([[ True, False,  True,  True, False, False, False, False, False, False],
+                                [False, False,  True,  True, False,  True,  True, False,  True,  True],
+                                [ True, False, False, False,  True, False,  True,  True,  True, False],
+                                [ True, False, False,  True, False,  True,  True, False, False, False],
+                                [False,  True,  True,  True, False, False, False,  True,  True, False],
+                                [False, False, False, False, False,  True, False,  True,  True,  True],
+                                [False,  True,  True,  True,  True, False, False,  True, False,  True],
+                                [ True,  True,  True, False,  True,  True,  True,  True, False, False],
+                                [ True,  True, False,  True,  True,  True,  True, False, False, False],
+                                [ True, False, False, False, False,  True, False, False,  True,  True],
+                                [ True, False, False, False,  True,  True,  True, False, False, False],
+                                [False, False,  True, False,  True, False, False,  True, False, False],
+                                [False, False,  True,  True, False, False, False, False, False,  True],
+                                [ True,  True, False, False, False,  True,  True,  True,  True,  True],
+                                [ True,  True,  True, False, False,  True, False,  True,  True, False],
+                                [False,  True,  True, False, False,  True,  True,  True,  True,  True],
+                                [ True,  True,  True, False, False, False, False,  True,  True,  True],
+                                [False, False, False, False,  True, False, False,  True,  True, False],
+                                [False,  True, False, False,  True, False, False, False,  True,  True],
+                                [ True, False,  True, False, False, False,  True,  True, False, False]], dtype=bool)
 
+    keypoints1, scales1, orientations1, responses1 \
+        = detector_extractor.detect(img)
+    descriptors1, mask1 \
+        = detector_extractor.extract(img, keypoints1, scales1, orientations1)
+    assert_array_equal(exp_descriptors, descriptors1[100:120, 10:20])
 
-    assert_array_equal(descriptors_120_129, descriptors[:, 120:130])
+    keypoints2, descriptors2 = detector_extractor.detect_and_extract(img)
+    assert_array_equal(exp_descriptors, descriptors2[100:120, 10:20])
+
+    assert_array_equal(keypoints1[mask1], keypoints2)
 
 
 if __name__ == '__main__':
