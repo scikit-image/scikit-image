@@ -22,10 +22,14 @@ but with very different mean structural similarity indices.
 
 """
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data, img_as_float
 from skimage.measure import structural_similarity as ssim
+
+
+matplotlib.rcParams['font.size'] = 9
 
 
 img = img_as_float(data.camera())
@@ -41,7 +45,7 @@ def mse(x, y):
 img_noise = img + noise
 img_const = img + abs(noise)
 
-f, (ax0, ax1, ax2) = plt.subplots(1, 3)
+f, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(8, 4))
 
 mse_none = mse(img, img)
 ssim_none = ssim(img, img, dynamic_range=img.max() - img.min())
