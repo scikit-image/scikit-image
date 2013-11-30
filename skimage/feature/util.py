@@ -36,7 +36,6 @@ class DescriptorExtractor(object):
 def plot_matches(ax, image1, image2, keypoints1, keypoints2,
                  indices1, indices2, keypoints_color='k', matches_color=None,
                  only_matches=False):
-
     """Plot matched features.
 
     Parameters
@@ -69,6 +68,9 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2,
 
     image1 = img_as_float(image1)
     image2 = img_as_float(image2)
+
+    indices1 = np.squeeze(indices1)
+    indices2 = np.squeeze(indices2)
 
     new_shape1 = image1.shape
     new_shape2 = image2.shape
