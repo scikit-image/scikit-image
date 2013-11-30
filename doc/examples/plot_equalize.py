@@ -17,11 +17,16 @@ that fall within the 2nd and 98th percentiles [2]_.
 .. [2] http://homepages.inf.ed.ac.uk/rbf/HIPR2/stretch.htm
 
 """
+
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
 from skimage import data, img_as_float
 from skimage import exposure
+
+
+matplotlib.rcParams['font.size'] = 8
 
 
 def plot_img_and_hist(img, axes, bins=256):
@@ -66,7 +71,7 @@ img_eq = exposure.equalize_hist(img)
 img_adapteq = exposure.equalize_adapthist(img, clip_limit=0.03)
 
 # Display results
-f, axes = plt.subplots(2, 4, figsize=(8, 4))
+f, axes = plt.subplots(nrows=2, ncols=4, figsize=(8, 5))
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
 ax_img.set_title('Low contrast image')
