@@ -18,13 +18,11 @@ the BRIEF method and provides rotation and scale-invariance, see
 `skimage.feature.ORB`.
 
 """
-import numpy as np
 from skimage import data
 from skimage import transform as tf
 from skimage.feature import (match_descriptors, corner_peaks, corner_harris,
                              plot_matches, BRIEF)
 from skimage.color import rgb2gray
-from skimage import img_as_float
 import matplotlib.pyplot as plt
 
 

@@ -12,13 +12,11 @@ allows to employ the very efficient Hamming distance metric for matching and
 is thus preferred for real-time applications.
 
 """
-import numpy as np
 from skimage import data
 from skimage import transform as tf
 from skimage.feature import (match_descriptors, corner_harris,
                              corner_peaks, ORB, plot_matches)
 from skimage.color import rgb2gray
-from skimage import img_as_float
 import matplotlib.pyplot as plt
 
 
