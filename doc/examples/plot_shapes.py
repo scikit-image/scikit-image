@@ -4,11 +4,17 @@ Shapes
 ======
 
 This example shows how to draw several different shapes:
-* line
-* Bezier curve
-* polygon
-* circle
-* ellipse
+
+ - line
+ - Bezier curve
+ - polygon
+ - circle
+ - ellipse
+
+Anti-aliased drawing for:
+
+ - line
+ - circle
 
 """
 import math
@@ -69,13 +75,6 @@ ax1.imshow(img)
 ax1.set_title('No anti-aliasing')
 ax1.axis('off')
 
-"""
-
-Anti-aliased drawing for:
-* line
-* circle
-
-"""
 
 from skimage.draw import line_aa, circle_perimeter_aa
 
