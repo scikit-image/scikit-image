@@ -60,6 +60,34 @@ class ORB(FeatureDetector, DescriptorExtractor):
           "ORB: An efficient alternative to SIFT and SURF"
           http://www.vision.cs.chubu.ac.jp/CV-R/pdf/Rublee_iccv2011.pdf
 
+    Examples
+    --------
+    >>> from skimage.feature import ORB, match_descriptors
+    >>> img1 = np.zeros((100, 100))
+    >>> img2 = np.zeros_like(img1)
+    >>> np.random.seed(1)
+    >>> square = np.random.rand(20, 20)
+    >>> img1[40:60, 40:60] = square
+    >>> img2[53:73, 53:73] = square
+    >>> detector_extractor = ORB(n_keypoints=5)
+    >>> keypoints1, descriptors1 = detector_extractor.detect_and_extract(img1)
+    >>> keypoints2, descriptors2 = detector_extractor.detect_and_extract(img2)
+    >>> idxs1, idxs2 = match_descriptors(descriptors1, descriptors2)
+    >>> idxs1, idxs2
+    (array([0, 1, 2, 3, 4]), array([0, 1, 2, 3, 4]))
+    >>> keypoints1[idxs1]
+    array([[ 42.,  40.],
+           [ 47.,  58.],
+           [ 44.,  40.],
+           [ 59.,  42.],
+           [ 45.,  44.]])
+    >>> keypoints2[idxs2]
+    array([[ 55.,  53.],
+           [ 60.,  71.],
+           [ 57.,  53.],
+           [ 72.,  55.],
+           [ 58.,  57.]])
+
     """
 
     def __init__(self, downscale=1.2, n_scales=8,
