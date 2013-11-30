@@ -1,3 +1,12 @@
+skimage (0.9.3-3) unstable; urgency=low
+
+  * debian/control
+    - swap order of Build-Depends (and Recommends just in case) to favor
+      python*-pil over python*-imaging so builders do not get confused
+      (Closes: #730678)
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 29 Nov 2013 19:50:11 -0500
+
 skimage (0.9.3-2) unstable; urgency=low
 
   * debian/tests/control
