@@ -24,9 +24,6 @@ from skimage.util import img_as_float
 from skimage.filter import gabor_kernel
 
 
-matplotlib.rcParams['font.size'] = 9
-
-
 def compute_feats(image, kernels):
     feats = np.zeros((len(kernels), 2), dtype=np.double)
     for k, kernel in enumerate(kernels):
@@ -104,24 +101,24 @@ for theta in (0, 1):
         # Save kernel and the power image for each image
         results.append((kernel, [power(img, kernel) for img in images]))
 
-fig, axes = plt.subplots(nrows=5, ncols=4, figsize=(9, 6))
+fig, axes = plt.subplots(nrows=5, ncols=4, figsize=(5, 6))
 plt.gray()
 
-fig.suptitle('Image responses for Gabor filter kernels', fontsize=15)
+fig.suptitle('Image responses for Gabor filter kernels', fontsize=12)
 
 axes[0][0].axis('off')
 
 # Plot original images
 for label, img, ax in zip(image_names, images, axes[0][1:]):
     ax.imshow(img)
-    ax.set_title(label)
+    ax.set_title(label, fontsize=9)
     ax.axis('off')
 
 for label, (kernel, powers), ax_row in zip(kernel_params, results, axes[1:]):
     # Plot Gabor kernel
     ax = ax_row[0]
     ax.imshow(np.real(kernel), interpolation='nearest')
-    ax.set_ylabel(label)
+    ax.set_ylabel(label, fontsize=7)
     ax.set_xticks([])
     ax.set_yticks([])
 
