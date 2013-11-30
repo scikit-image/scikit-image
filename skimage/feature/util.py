@@ -72,8 +72,8 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2,
     indices1 = np.squeeze(indices1)
     indices2 = np.squeeze(indices2)
 
-    new_shape1 = image1.shape
-    new_shape2 = image2.shape
+    new_shape1 = list(image1.shape)
+    new_shape2 = list(image2.shape)
 
     if image1.shape[0] < image2.shape[0]:
         new_shape1[0] = image2.shape[0]
