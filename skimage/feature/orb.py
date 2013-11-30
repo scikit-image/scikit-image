@@ -110,6 +110,11 @@ class ORB(FeatureDetector, DescriptorExtractor):
                                     self.fast_threshold)
         keypoints = corner_peaks(fast_response, min_distance=1)
 
+        if len(keypoints) == 0:
+            return (np.zeros((0, 2), dtype=np.double),
+                    np.zeros((0, ), dtype=np.double),
+                    np.zeros((0, ), dtype=np.double))
+
         mask = _mask_border_keypoints(octave_image.shape, keypoints,
                                       distance=16)
         keypoints = keypoints[mask]
@@ -292,6 +297,12 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             keypoints, orientations, responses = \
                 self._detect_octave(octave_image)
+
+            if len(keypoints) == 0:
+                keypoints_list.append(keypoints)
+                responses_list.append(responses)
+                descriptors_list.append(np.zeros((0, 256), dtype=np.bool))
+                continue
 
             descriptors, mask = self._extract_octave(octave_image, keypoints,
                                                      orientations)
