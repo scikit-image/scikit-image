@@ -12,8 +12,7 @@ from .template import match_template
 from .brief import BRIEF
 from .censure import CenSurE
 from .orb import ORB
-from .match import match_binary_descriptors
-from .util import pairwise_hamming_distance
+from .match import match_descriptors
 
 
 __all__ = ['daisy',
@@ -39,5 +38,4 @@ __all__ = ['daisy',
            'BRIEF',
            'CenSurE',
            'ORB',
-           'pairwise_hamming_distance',
-           'match_binary_descriptors']
+           'match_descriptors']

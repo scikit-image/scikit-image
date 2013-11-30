@@ -1,45 +1,32 @@
 import numpy as np
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import assert_equal, assert_raises
 from skimage import data
 from skimage import transform as tf
 from skimage.color import rgb2gray
-from skimage.feature import (descriptor_brief, match_binary_descriptors,
-                             corner_peaks, corner_harris,
-                             create_keypoint_recarray)
+from skimage.feature import (BRIEF, match_descriptors,
+                             corner_peaks, corner_harris)
 
 
-def test_match_binary_descriptors_unequal_descriptor_keypoints_error():
-    """Number of descriptors should be equal to the number of keypoints."""
-    kp1 = np.array([[40, 50],
-                    [60, 40],
-                    [30, 70]])
-    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
-    des1 = np.array([[True, True, False, True],
-                     [False, True, False, True]])
-    kp2 = np.array([[60, 50],
-                    [50, 80]])
-    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
-    des2 = np.array([[True, False, False, True],
-                     [False, True, True, True]])
-    assert_raises(ValueError, match_binary_descriptors, keypoints1, des1, keypoints2, des2)
-
-
-def test_match_binary_descriptors_unequal_descriptor_sizes_error():
+def test_binary_descriptors_unequal_descriptor_sizes_error():
     """Sizes of descriptors of keypoints to be matched should be equal."""
-    kp1 = np.array([[40, 50],
-                    [60, 40]])
-    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
     des1 = np.array([[True, True, False, True],
                      [False, True, False, True]])
-    kp2 = np.array([[60, 50],
-                    [50, 80]])
-    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
     des2 = np.array([[True, False, False, True, False],
                      [False, True, True, True, False]])
-    assert_raises(ValueError, match_binary_descriptors, keypoints1, des1, keypoints2, des2)
+    assert_raises(ValueError, match_descriptors, des1, des2)
 
 
-def test_match_binary_descriptors_lena_rotation_crosscheck_false():
+def test_binary_descriptors():
+    des1 = np.array([[True, True, False, True, True],
+                     [False, True, False, True, True]])
+    des2 = np.array([[True, False, False, True, False],
+                     [False, False, True, True, True]])
+    indices1, indices2 = match_descriptors(des1, des2)
+    assert_equal(indices1, [0, 1])
+    assert_equal(indices2, [0, 1])
+
+
+def test_binary_descriptors_lena_rotation_crosscheck_false():
     """Verify matched keypoints and their corresponding masks results between
     lena image and its rotated version with the expected keypoint pairs with
     cross_check disabled."""
@@ -48,72 +35,35 @@ def test_match_binary_descriptors_lena_rotation_crosscheck_false():
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform)
 
-    kp1 = corner_peaks(corner_harris(img), min_distance=5)
-    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
-    descriptors1, keypoints1 = descriptor_brief(img, keypoints1,
-                                                descriptor_size=512)
+    descriptor = BRIEF(descriptor_size=512)
 
-    kp2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
-    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
-    descriptors2, keypoints2 = descriptor_brief(rotated_img, keypoints2,
-                                                descriptor_size=512)
+    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
+    descriptors1, mask1 = descriptor.extract(img, keypoints1)
+    keypoints1 = keypoints1[mask1]
 
-    matched_keypoints, m1, m2 = match_binary_descriptors(keypoints1,
-                                                         descriptors1,
-                                                         keypoints2,
-                                                         descriptors2,
-                                                         threshold=0.13,
-                                                         cross_check=False)
+    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    descriptors2, mask2 = descriptor.extract(rotated_img, keypoints2)
+    keypoints2 = keypoints1[mask2]
 
-    expected_mask1 = np.array([11, 12, 16, 20, 24, 26, 27, 29, 35, 39, 40,
-                               42, 45])
-    expected_mask2 = np.array([ 1,  3,  0,  4,  6,  7,  8,  9, 10, 10, 11,
-                               12, 13])
-    expected = np.array([[[245, 141],
-                          [221, 176]],
+    m1, m2 = match_descriptors(descriptors1, descriptors2, threshold=0.13,
+                               cross_check=False)
 
-                         [[247, 130],
-                          [225, 165]],
+    print m1
+    print m2
 
-                         [[263, 272],
-                          [219, 309]],
-
-                         [[271, 120],
-                          [250, 159]],
-
-                         [[311, 174],
-                          [282, 218]],
-
-                         [[323, 164],
-                          [294, 210]],
-
-                         [[327, 147],
-                          [301, 195]],
-
-                         [[377, 157],
-                          [349, 211]],
-
-                         [[414,  70],
-                          [399, 131]],
-
-                         [[425,  67],
-                          [399, 131]],
-
-                         [[435, 181],
-                          [403, 244]],
-
-                         [[454, 176],
-                          [423, 242]],
-
-                         [[467, 166],
-                          [437, 234]]])
-
-    assert_array_equal(matched_keypoints, expected)
-    assert_array_equal(m1, expected_mask1)
-    assert_array_equal(m2, expected_mask2)
+    expected_mask1 = np.array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
+                               12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+                               24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                               36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46])
+    expected_mask2 = np.array([33,  0, 35,  7,  1, 35,  3,  2,  3,  6,  4,  9,
+                               11, 10, 28,  7,  8,  5, 31, 14, 13, 15, 21, 16,
+                               16, 13, 17, 18, 19, 21, 22, 23,  0, 24,  1, 24,
+                               23,  0, 26, 27, 25, 34, 28, 14, 29, 30, 21])
+    assert_equal(m1, expected_mask1)
+    assert_equal(m2, expected_mask2)
 
 
-def test_match_binary_descriptors_lena_rotation_crosscheck_true():
+def test_binary_descriptors_lena_rotation_crosscheck_true():
     """Verify matched keypoints and their corresponding masks results between
     lena image and its rotated version with the expected keypoint pairs with
     cross_check enabled."""
@@ -122,62 +72,27 @@ def test_match_binary_descriptors_lena_rotation_crosscheck_true():
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform)
 
-    kp1 = corner_peaks(corner_harris(img), min_distance=5)
-    keypoints1 = create_keypoint_recarray(kp1[:, 0], kp1[:, 1])
-    descriptors1, keypoints1 = descriptor_brief(img, keypoints1, descriptor_size=512)
+    descriptor = BRIEF(descriptor_size=512)
 
-    kp2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
-    keypoints2 = create_keypoint_recarray(kp2[:, 0], kp2[:, 1])
-    descriptors2, keypoints2 = descriptor_brief(rotated_img, keypoints2,
-                                                descriptor_size=512)
+    keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
+    descriptors1, mask1 = descriptor.extract(img, keypoints1)
+    keypoints1 = keypoints1[mask1]
 
-    matched_keypoints, m1, m2 = match_binary_descriptors(keypoints1,
-                                                         descriptors1,
-                                                         keypoints2,
-                                                         descriptors2,
-                                                         threshold=0.13)
+    keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
+    descriptors2, mask2 = descriptor.extract(rotated_img, keypoints2)
+    keypoints2 = keypoints1[mask2]
 
-    expected = np.array([[[245, 141],
-                          [221, 176]],
+    m1, m2 = match_descriptors(descriptors1, descriptors2, threshold=0.13,
+                               cross_check=True)
 
-                         [[247, 130],
-                          [225, 165]],
-
-                         [[263, 272],
-                          [219, 309]],
-
-                         [[271, 120],
-                          [250, 159]],
-
-                         [[311, 174],
-                          [282, 218]],
-
-                         [[323, 164],
-                          [294, 210]],
-
-                         [[327, 147],
-                          [301, 195]],
-
-                         [[377, 157],
-                          [349, 211]],
-
-                         [[414,  70],
-                          [399, 131]],
-
-                         [[435, 181],
-                          [403, 244]],
-
-                         [[454, 176],
-                          [423, 242]],
-
-                         [[467, 166],
-                          [437, 234]]])
-
-    expected_mask1 = np.array([11, 12, 16, 20, 24, 26, 27, 29, 35, 40, 42, 45])
-    expected_mask2 = np.array([ 1,  3,  0,  4,  6,  7,  8,  9, 10, 11, 12, 13])
-    assert_array_equal(matched_keypoints, expected)
-    assert_array_equal(m1, expected_mask1)
-    assert_array_equal(m2, expected_mask2)
+    expected_mask1 = np.array([ 0,  1,  2,  4,  6,  7,  9, 10, 11, 12, 13, 15,
+                               16, 17, 19, 20, 21, 24, 26, 27, 28, 29, 30, 35,
+                               36, 38, 39, 40, 42, 44, 45])
+    expected_mask2 = np.array([33,  0, 35,  1,  3,  2,  6,  4,  9, 11, 10,  7,
+                                8,  5, 14, 13, 15, 16, 17, 18, 19, 21, 22, 24,
+                                23, 26, 27, 25, 28, 29, 30])
+    assert_equal(m1, expected_mask1)
+    assert_equal(m2, expected_mask2)
 
 
 if __name__ == '__main__':

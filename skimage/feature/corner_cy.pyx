@@ -7,7 +7,7 @@ cimport numpy as cnp
 from libc.float cimport DBL_MAX
 from libc.math cimport atan2
 
-from skimage.util import img_as_float
+from skimage.util import img_as_float, pad
 from skimage.color import rgb2grey
 
 from .util import _prepare_grayscale_input_2D
@@ -240,7 +240,8 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     if mask.shape[0] % 2 != 1 or mask.shape[1] % 2 != 1:
         raise ValueError("Size of mask must be uneven.")
 
-    cdef double[:, :] cimage = image
+    cdef double[:, :] cimage = pad(image, 16, mode='constant',
+                                   constant_values=0)
     cdef char[:, ::1] cmask = np.ascontiguousarray(mask != 0, dtype=np.uint8)
 
     cdef Py_ssize_t i, r, c, r0, c0
@@ -253,8 +254,8 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     cdef double m01, m10
 
     for i in range(corners.shape[0]):
-        r0 = corners[i, 0] - mrows2
-        c0 = corners[i, 1] - mcols2
+        r0 = corners[i, 0] - mrows2 + 16
+        c0 = corners[i, 1] - mcols2 + 16
 
         m01 = 0
         m10 = 0

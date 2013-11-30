@@ -16,7 +16,6 @@ def configuration(parent_package='', top_path=None):
     cython(['censure_cy.pyx'], working_path=base_path)
     cython(['orb_cy.pyx'], working_path=base_path)
     cython(['brief_cy.pyx'], working_path=base_path)
-    cython(['match_cy.pyx'], working_path=base_path)
     cython(['_texture.pyx'], working_path=base_path)
     cython(['_template.pyx'], working_path=base_path)
 
@@ -27,8 +26,6 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('orb_cy', sources=['orb_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('brief_cy', sources=['brief_cy.c'],
-                         include_dirs=[get_numpy_include_dirs()])
-    config.add_extension('match_cy', sources=['match_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])

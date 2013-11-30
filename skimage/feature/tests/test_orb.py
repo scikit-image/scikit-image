@@ -105,8 +105,6 @@ def test_descriptor_orb():
     keypoints2, descriptors2 = detector_extractor.detect_and_extract(img)
     assert_array_equal(exp_descriptors, descriptors2[100:120, 10:20])
 
-    assert_array_equal(keypoints1[mask1], keypoints2)
-
 
 if __name__ == '__main__':
     from numpy import testing

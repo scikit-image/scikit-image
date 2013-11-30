@@ -151,7 +151,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     def _extract_octave(self, octave_image, keypoints, orientations):
         mask = _mask_border_keypoints(octave_image.shape, keypoints,
-                                      distance=16)
+                                      distance=20)
         keypoints = np.array(keypoints[mask], dtype=np.intp, order='C',
                              copy=False)
         orientations = np.array(orientations[mask], dtype=np.double, order='C',
@@ -260,8 +260,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
             descriptors, mask = self._extract_octave(octave_image, keypoints,
                                                      orientations)
 
-            keypoints_list.append(keypoints * self.downscale ** octave)
-            responses_list.append(responses)
+            keypoints_list.append(keypoints[mask] * self.downscale ** octave)
+            responses_list.append(responses[mask])
             descriptors_list.append(descriptors)
 
         keypoints = np.vstack(keypoints_list)
@@ -273,4 +273,4 @@ class ORB(FeatureDetector, DescriptorExtractor):
         else:
             # Choose best n_keypoints according to Harris corner response
             best_indices = responses.argsort()[::-1][:self.n_keypoints]
-            return (keypoints[best_indices], descriptors[best_indices])
+            return keypoints[best_indices], descriptors[best_indices]

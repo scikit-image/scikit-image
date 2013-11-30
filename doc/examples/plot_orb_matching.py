@@ -1,78 +1,63 @@
 import numpy as np
 from skimage import data
 from skimage import transform as tf
-from skimage.feature import (pairwise_hamming_distance,
-                             match_binary_descriptors, corner_harris,
-                             corner_peaks, keypoints_orb, descriptor_orb)
+from skimage.feature import (match_descriptors, corner_harris,
+                             corner_peaks, ORB)
 from skimage.color import rgb2gray
 from skimage import img_as_float
 import matplotlib.pyplot as plt
 
-# Initializing parameters for transformation
-rotate = 0.5
-translate = (-100, -200)
-scaling = (1.5, 1.5)
 
-# Creating a transformed image from the original Lena image by scaling and
-# rotating it
-img_color = data.lena()
-tform = tf.AffineTransform(scale = scaling, rotation=rotate,
-                           translation=translate)
-transformed_img_color = tf.warp(img_color, tform)
-img = rgb2gray(img_color)
-transformed_img = rgb2gray(transformed_img_color)
+img1_color = data.lena()
+img2_color = tf.rotate(img1_color, 180)
+tform = tf.AffineTransform(scale=(1.3, 1.1), rotation=0.5,
+                           translation=(0, -200))
+img3_color = tf.warp(img1_color, tform)
+img1 = rgb2gray(img1_color)
+img2 = rgb2gray(img2_color)
+img3 = rgb2gray(img3_color)
 
-# Extracting oFAST keypoints and computing their rBRIEF descriptors
-keypoints1 = keypoints_orb(img, n_keypoints=500)
-keypoints1.shape
-descriptors1, keypoints1 = descriptor_orb(img, keypoints1)
-keypoints1.shape
-descriptors1.shape
+descriptor_extractor = ORB(n_keypoints=200)
+keypoints1, descriptors1 = descriptor_extractor.detect_and_extract(img1)
+keypoints2, descriptors2 = descriptor_extractor.detect_and_extract(img2)
+keypoints3, descriptors3 = descriptor_extractor.detect_and_extract(img3)
 
-keypoints2 = keypoints_orb(transformed_img,
-                                                   n_keypoints=500)
-keypoints2.shape
-descriptors2, keypoints2 = descriptor_orb(transformed_img, keypoints2)
-keypoints2.shape
-descriptors2.shape
+idxs1, idxs2 = match_descriptors(descriptors1, descriptors2, cross_check=True)
+src12 = keypoints1[idxs1]
+dst12 = keypoints2[idxs2]
 
-#Initializing parameters for Descriptor matching
-match_threshold = 0.3
-match_cross_check = True
+idxs1, idxs3 = match_descriptors(descriptors1, descriptors3, cross_check=True)
+src13 = keypoints1[idxs1]
+dst13 = keypoints3[idxs3]
 
-pairwise_hamming_distance(descriptors1, descriptors2)
-matched_keypoints, mask1, mask2 = match_binary_descriptors(keypoints1,
-                                                           descriptors1,
-                                                           keypoints2,
-                                                           descriptors2,
-                                                           cross_check=match_cross_check,
-                                                           threshold=match_threshold)
+img12 = np.concatenate((img_as_float(img1_color),
+                        img_as_float(img2_color)), axis=1)
+img13 = np.concatenate((img_as_float(img1_color),
+                        img_as_float(img3_color)), axis=1)
 
-matched_keypoints.shape
+imgs = (img12, img13)
+srcs = (src12, src13)
+dsts = (dst12, dst13)
 
-# Plotting the matched correspondences in both the images using matplotlib
-src = matched_keypoints[:, 0, :]
-dst = matched_keypoints[:, 1, :]
-src_scale = 10 * (keypoints1.octave[mask1] + 1) ** 1.5
-dst_scale = 10 * (keypoints2.octave[mask2] + 1) ** 1.5
+offset = img1.shape
 
-img_combined = np.concatenate((img_as_float(img_color),
-                               img_as_float(transformed_img_color)), axis=1)
-offset = img.shape
+fig, ax = plt.subplots(nrows=2, ncols=1)
 
-fig, ax = plt.subplots(nrows=1, ncols=1)
-plt.gray()
+for i in range(2):
 
-ax.imshow(img_combined, interpolation='nearest')
-ax.axis('off')
-ax.axis((0, 2 * offset[1], offset[0], 0))
-ax.set_title('Matched correspondences : Rotation = %f; Scale = %s; Translation = %s; threshold = %f; cross_check = %r' % (rotate, scaling, translate, match_threshold, match_cross_check))
+    ax[i].imshow(imgs[i], interpolation='nearest')
+    ax[i].axis('off')
+    ax[i].axis((0, 2 * offset[1], offset[0], 0))
 
-for m in range(len(src)):
-    c = np.random.rand(3,1)
-    ax.plot((src[m, 1], dst[m, 1] + offset[1]), (src[m, 0], dst[m, 0]), '-', color=c)
-    ax.scatter(src[m, 1], src[m, 0], src_scale[m], facecolors='none', edgecolors=c)
-    ax.scatter(dst[m, 1] + offset[1], dst[m, 0], dst_scale[m], facecolors='none', edgecolors=c)
+    src = srcs[i]
+    dst = dsts[i]
+
+    for m in range(len(src)):
+        color = np.random.rand(3, 1)
+        ax[i].plot((src[m, 1], dst[m, 1] + offset[1]), (src[m, 0], dst[m, 0]),
+                '-', color=color)
+        ax[i].scatter(src[m, 1], src[m, 0], facecolors='none', edgecolors=color)
+        ax[i].scatter(dst[m, 1] + offset[1], dst[m, 0], facecolors='none',
+                   edgecolors=color)
 
 plt.show()
-

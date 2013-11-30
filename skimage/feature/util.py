@@ -76,28 +76,3 @@ def _mask_border_keypoints(image_shape, keypoints, distance):
             & (keypoints[:, 1] < (cols - distance + 1)))
 
     return mask
-
-
-def pairwise_hamming_distance(array1, array2):
-    """**Experimental function**.
-
-    Calculate hamming dissimilarity measure between two sets of
-    vectors.
-
-    Parameters
-    ----------
-    array1 : (P1, D) array
-        P1 vectors of size D.
-    array2 : (P2, D) array
-        P2 vectors of size D.
-
-    Returns
-    -------
-    distance : (P1, P2) array of dtype float
-        2D ndarray with value at an index (i, j) representing the hamming
-        distance in the range [0, 1] between ith vector in array1 and jth
-        vector in array2.
-
-    """
-    distance = (array1[:, None] != array2[None]).mean(axis=2)
-    return distance
