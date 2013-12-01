@@ -1,8 +1,10 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from numpy.testing import assert_equal, assert_raises
+
 from skimage.feature.util import (FeatureDetector, DescriptorExtractor,
                                   _prepare_grayscale_input_2D,
-                                  _mask_border_keypoints)
+                                  _mask_border_keypoints, plot_matches)
 
 
 def test_feature_detector():
@@ -35,6 +37,34 @@ def test_mask_border_keypoints():
                  [0, 0, 0, 0, 0])
     assert_equal(_mask_border_keypoints((10, 10), keypoints, 4),
                  [0, 0, 0, 0, 1])
+
+
+def test_plot_matches():
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+
+    shapes = (((10, 10), (10, 10)),
+              ((10, 10), (12, 10)),
+              ((10, 10), (10, 12)),
+              ((10, 10), (12, 12)),
+              ((12, 10), (10, 10)),
+              ((10, 12), (10, 10)),
+              ((12, 12), (10, 10)))
+
+    keypoints1 = 10 * np.random.rand(10, 2)
+    keypoints2 = 10 * np.random.rand(10, 2)
+    idxs1 = np.random.randint(10, size=10)
+    idxs2 = np.random.randint(10, size=10)
+
+    for shape1, shape2 in shapes:
+        img1 = np.zeros(shape1)
+        img2 = np.zeros(shape2)
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2)
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2,
+                     only_matches=True)
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2,
+                     keypoints_color='r')
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2,
+                     matches_color='r')
 
 
 if __name__ == '__main__':
