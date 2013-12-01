@@ -240,7 +240,8 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
     if mask.shape[0] % 2 != 1 or mask.shape[1] % 2 != 1:
         raise ValueError("Size of mask must be uneven.")
 
-    cdef char[:, ::1] cmask = np.ascontiguousarray(mask != 0, dtype=np.uint8)
+    cdef unsigned char[:, ::1] cmask = np.ascontiguousarray(mask != 0,
+                                                            dtype=np.uint8)
 
     cdef Py_ssize_t i, r, c, r0, c0
     cdef Py_ssize_t mrows = mask.shape[0]
@@ -251,7 +252,7 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
                                    constant_values=0)
     cdef double[:] orientations = np.zeros(corners.shape[0], dtype=np.double)
     cdef double curr_pixel
-    cdef double m01, m10
+    cdef double m01, m10, m01_tmp
 
     for i in range(corners.shape[0]):
         r0 = corners[i, 0]
@@ -261,11 +262,13 @@ def corner_orientations(image, Py_ssize_t[:, :] corners, mask):
         m10 = 0
 
         for r in range(mrows):
+            m01_tmp = 0
             for c in range(mcols):
                 if cmask[r, c]:
                     curr_pixel = cimage[r0 + r, c0 + c]
                     m10 += curr_pixel * (c - mcols2)
-                    m01 += curr_pixel * (r - mrows2)
+                    m01_tmp += curr_pixel
+            m01 += m01_tmp * (r - mrows2)
 
         orientations[i] = atan2(m01, m10)
 
