@@ -45,16 +45,17 @@ keypoints1 = keypoints1[mask1]
 keypoints2 = keypoints2[mask2]
 keypoints3 = keypoints3[mask3]
 
+matches12 = match_descriptors(descriptors1, descriptors2, cross_check=True)
+matches13 = match_descriptors(descriptors1, descriptors3, cross_check=True)
+
 fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()
 
-idxs1, idxs2 = match_descriptors(descriptors1, descriptors2, cross_check=True)
-plot_matches(ax[0], img1, img2, keypoints1, keypoints2, idxs1, idxs2)
+plot_matches(ax[0], img1, img2, keypoints1, keypoints2, matches12)
 ax[0].axis('off')
 
-idxs1, idxs3 = match_descriptors(descriptors1, descriptors3, cross_check=True)
-plot_matches(ax[1], img1, img3, keypoints1, keypoints3, idxs1, idxs3)
+plot_matches(ax[1], img1, img3, keypoints1, keypoints3, matches13)
 ax[1].axis('off')
 
 plt.show()

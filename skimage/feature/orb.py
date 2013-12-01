@@ -72,16 +72,20 @@ class ORB(FeatureDetector, DescriptorExtractor):
     >>> detector_extractor = ORB(n_keypoints=5)
     >>> keypoints1, descriptors1 = detector_extractor.detect_and_extract(img1)
     >>> keypoints2, descriptors2 = detector_extractor.detect_and_extract(img2)
-    >>> idxs1, idxs2 = match_descriptors(descriptors1, descriptors2)
-    >>> idxs1, idxs2
-    (array([0, 1, 2, 3, 4]), array([0, 1, 2, 3, 4]))
-    >>> keypoints1[idxs1]
+    >>> matches = match_descriptors(descriptors1, descriptors2)
+    >>> matches
+    array([[0, 0],
+           [1, 1],
+           [2, 2],
+           [3, 3],
+           [4, 4]])
+    >>> keypoints1[matches[:, 0]]
     array([[ 42.,  40.],
            [ 47.,  58.],
            [ 44.,  40.],
            [ 59.,  42.],
            [ 45.,  44.]])
-    >>> keypoints2[idxs2]
+    >>> keypoints2[matches[:, 1]]
     array([[ 55.,  53.],
            [ 60.,  71.],
            [ 57.,  53.],

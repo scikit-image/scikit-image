@@ -33,9 +33,8 @@ class DescriptorExtractor(object):
         raise NotImplementedError()
 
 
-def plot_matches(ax, image1, image2, keypoints1, keypoints2,
-                 indices1, indices2, keypoints_color='k', matches_color=None,
-                 only_matches=False):
+def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
+                 keypoints_color='k', matches_color=None, only_matches=False):
     """Plot matched features.
 
     Parameters
@@ -50,10 +49,10 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2,
         First keypoint coordinates as ``(row, col)``.
     keypoints2 : (K2, 2) array
         Second keypoint coordinates as ``(row, col)``.
-    indices1 : (Q, ) array
-        Indices of corresponding matches for first set of keypoints.
-    indices2 : (Q, ) array
-        Indices of corresponding matches for second set of keypoints.
+    matches : (Q, 2) array
+        Indices of corresponding matches in first and second set of
+        descriptors, where ``matches[:, 0]`` denote the indices in the first
+        and ``matches[:, 1]`` the indices in the second set of descriptors.
     keypoints_color : matplotlib color
         Color for keypoint locations.
     matches_color : matplotlib color
@@ -66,9 +65,6 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2,
 
     image1 = img_as_float(image1)
     image2 = img_as_float(image2)
-
-    indices1 = np.squeeze(indices1)
-    indices2 = np.squeeze(indices2)
 
     new_shape1 = list(image1.shape)
     new_shape2 = list(image2.shape)
@@ -106,9 +102,9 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2,
     ax.imshow(image)
     ax.axis((0, 2 * offset[1], offset[0], 0))
 
-    for i in range(len(indices1)):
-        idx1 = indices1[i]
-        idx2 = indices2[i]
+    for i in range(matches.shape[0]):
+        idx1 = matches[i, 0]
+        idx2 = matches[i, 1]
 
         if matches_color is None:
             color = np.random.rand(3, 1)

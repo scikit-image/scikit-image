@@ -77,15 +77,18 @@ class BRIEF(DescriptorExtractor):
     >>> extractor = BRIEF(patch_size=5)
     >>> descs1, _ = extractor.extract(square1, keypoints1)
     >>> descs2, _ = extractor.extract(square2, keypoints2)
-    >>> idxs1, idxs2 = match_descriptors(descs1, descs2)
-    >>> idxs1, idxs2
-    (array([0, 1, 2, 3]), array([0, 1, 2, 3]))
-    >>> keypoints1[idxs1]
+    >>> matches = match_descriptors(descs1, descs2)
+    >>> matches
+    array([[0, 0],
+           [1, 1],
+           [2, 2],
+           [3, 3]])
+    >>> keypoints1[matches[:, 0]]
     array([[2, 2],
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> keypoints2[idxs2]
+    >>> keypoints2[matches[:, 1]]
     array([[2, 2],
            [2, 6],
            [6, 2],

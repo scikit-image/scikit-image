@@ -35,10 +35,10 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
 
     Returns
     -------
-    indices1 : (Q, ) array
-        Indices of corresponding matches for first set of descriptors.
-    indices2 : (Q, ) array
-        Indices of corresponding matches for second set of descriptors.
+    matches : (Q, 2) array
+        Indices of corresponding matches in first and second set of
+        descriptors, where ``matches[:, 0]`` denote the indices in the first
+        and ``matches[:, 1]`` the indices in the second set of descriptors.
 
     """
 
@@ -62,4 +62,4 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         indices1 = indices1[mask]
         indices2 = indices2[mask]
 
-    return indices1, indices2
+    return np.column_stack((indices1, indices2))

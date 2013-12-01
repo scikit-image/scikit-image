@@ -54,16 +54,17 @@ def test_plot_matches():
     keypoints2 = 10 * np.random.rand(10, 2)
     idxs1 = np.random.randint(10, size=10)
     idxs2 = np.random.randint(10, size=10)
+    matches = np.column_stack((idxs1, idxs2))
 
     for shape1, shape2 in shapes:
         img1 = np.zeros(shape1)
         img2 = np.zeros(shape2)
-        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2)
-        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2,
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches)
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches,
                      only_matches=True)
-        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2,
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches,
                      keypoints_color='r')
-        plot_matches(ax, img1, img2, keypoints1, keypoints2, idxs1, idxs2,
+        plot_matches(ax, img1, img2, keypoints1, keypoints2, matches,
                      matches_color='r')
 
 
