@@ -123,15 +123,15 @@ fig, ax = plt.subplots(nrows=2, ncols=1)
 
 plt.gray()
 
-inlier_idxs = np.nonzero(inliers)
+inlier_idxs = np.nonzero(inliers)[0]
 plot_matches(ax[0], img_orig_gray, img_warped_gray, src, dst,
-             inlier_idxs, inlier_idxs, matches_color='b')
+             np.column_stack((inlier_idxs, inlier_idxs)), matches_color='b')
 ax[0].axis('off')
 ax[0].set_title('Correct correspondences')
 
-outlier_idxs = np.nonzero(outliers)
+outlier_idxs = np.nonzero(outliers)[0]
 plot_matches(ax[1], img_orig_gray, img_warped_gray, src, dst,
-             outlier_idxs, outlier_idxs, matches_color='r')
+             np.column_stack((outlier_idxs, outlier_idxs)), matches_color='r')
 ax[1].axis('off')
 ax[1].set_title('Faulty correspondences')
 
