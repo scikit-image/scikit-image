@@ -36,7 +36,7 @@ def test_structure_tensor():
                                       [ 0,  0,  0,  0,  0]]))
 
 
-def test_structure_tensor():
+def test_hessian_matrix():
     square = np.zeros((5, 5))
     square[2, 2] = 1
     Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
@@ -74,7 +74,7 @@ def test_structure_tensor_eigvals():
                                      [0, 0, 0, 0, 0]]))
 
 
-def test_structure_tensor_eigvals():
+def test_hessian_matrix_eigvals():
     square = np.zeros((5, 5))
     square[2, 2] = 1
     Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
