@@ -5,7 +5,7 @@ from . import _template
 
 
 def match_template(image, template, pad_input=False):
-    """Match a template to an image using normalized correlation.
+    """Match a template to a 2-D image using normalized correlation.
 
     The output is an array with values between -1.0 and 1.0, which correspond
     to the probability that the template is found at that position.
@@ -13,7 +13,7 @@ def match_template(image, template, pad_input=False):
     Parameters
     ----------
     image : array_like
-        Image to process.
+        2-D Image to process. 
     template : array_like
         Template to locate.
     pad_input : bool
