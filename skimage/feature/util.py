@@ -46,12 +46,10 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2,
         First grayscale or color image.
     image2 : (N, M [, 3]) array
         Second grayscale or color image.
-    keypoints : (K1, 2) array
+    keypoints1 : (K1, 2) array
         First keypoint coordinates as ``(row, col)``.
-    keypoints : (K2, 2) array
+    keypoints2 : (K2, 2) array
         Second keypoint coordinates as ``(row, col)``.
-    keypoints : (K1, 2) array
-        Keypoint coordinates as ``(row, col)``.
     indices1 : (Q, ) array
         Indices of corresponding matches for first set of keypoints.
     indices2 : (Q, ) array
