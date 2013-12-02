@@ -10,8 +10,8 @@ a set of intensity difference tests. The short binary descriptor results
 in low memory footprint and very efficient matching based on the Hamming
 distance metric.
 
-However, BRIEF does not provide rotation-invariance and scale scale-invariance
-can be achieved by detecting and extracting features at different scales.
+However, BRIEF does not provide rotation-invariance and scale-invariance can be
+achieved by detecting and extracting features at different scales.
 
 The ORB feature detection and binary description algorithm is an extension to
 the BRIEF method and provides rotation and scale-invariance, see
