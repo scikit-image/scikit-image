@@ -53,12 +53,12 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         Indices of corresponding matches in first and second set of
         descriptors, where ``matches[:, 0]`` denote the indices in the first
         and ``matches[:, 1]`` the indices in the second set of descriptors.
-    keypoints_color : matplotlib color
+    keypoints_color : matplotlib color, optional
         Color for keypoint locations.
-    matches_color : matplotlib color
+    matches_color : matplotlib color, optional
         Color for lines which connect keypoint matches. By default the
         color is chosen randomly.
-    only_matches : bool
+    only_matches : bool, optional
         Whether to only plot matches and not plot the keypoint locations.
 
     """

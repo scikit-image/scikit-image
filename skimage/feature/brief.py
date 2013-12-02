@@ -24,22 +24,22 @@ class BRIEF(DescriptorExtractor):
 
     Parameters
     ----------
-    descriptor_size : int
+    descriptor_size : int, optional
         Size of BRIEF descriptor for each keypoint. Sizes 128, 256 and 512
         recommended by the authors. Default is 256.
-    patch_size : int
+    patch_size : int, optional
         Length of the two dimensional square patch sampling region around
         the keypoints. Default is 49.
-    mode : {'normal', 'uniform'}
+    mode : {'normal', 'uniform'}, optional
         Probability distribution for sampling location of decision pixel-pairs
         around keypoints.
-    sample_seed : int
+    sample_seed : int, optional
         Seed for the random sampling of the decision pixel-pairs. From a square
         window with length patch_size, pixel pairs are sampled using the `mode`
         parameter to build the descriptors using intensity comparison. The
         value of `sample_seed` must be the same for the images to be matched
         while building the descriptors.
-    sigma : float
+    sigma : float, optional
         Standard deviation of the Gaussian low pass filter applied to the image
         to alleviate noise sensitivity, which is strongly recommended to obtain
         discriminative and good descriptors.

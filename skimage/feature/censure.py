@@ -115,15 +115,15 @@ class CenSurE(FeatureDetector):
 
     """CenSurE keypoint detector.
 
-    min_scale : int
+    min_scale : int, optional
         Minimum scale to extract keypoints from.
-    max_scale : int
+    max_scale : int, optional
         Maximum scale to extract keypoints from. The keypoints will be
         extracted from all the scales except the first and the last i.e.
         from the scales in the range [min_scale + 1, max_scale - 1]. The filter
         sizes for different scales is such that the two adjacent scales
         comprise of an octave.
-    mode : {'DoB', 'Octagon', 'STAR'}
+    mode : {'DoB', 'Octagon', 'STAR'}, optional
         Type of bi-level filter used to get the scales of the input image.
         Possible values are 'DoB', 'Octagon' and 'STAR'. The three modes
         represent the shape of the bi-level filters i.e. box(square), octagon
@@ -132,10 +132,10 @@ class CenSurE(FeatureDetector):
         weights being uniformly negative in both the inner octagon while
         uniformly positive in the difference region. Use STAR and Octagon for
         better features and DoB for better performance.
-    non_max_threshold : float
+    non_max_threshold : float, optional
         Threshold value used to suppress maximas and minimas with a weak
         magnitude response obtained after Non-Maximal Suppression.
-    line_threshold : float
+    line_threshold : float, optional
         Threshold for rejecting interest points which have ratio of principal
         curvatures greater than this value.
 

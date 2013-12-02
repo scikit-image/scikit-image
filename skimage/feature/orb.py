@@ -25,32 +25,32 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
     Parameters
     ----------
-    n_keypoints : int
+    n_keypoints : int, optional
         Number of keypoints to be returned. The function will return the best
         ``n_keypoints`` according to the Harris corner response if more than
         ``n_keypoints`` are detected. If not, then all the detected keypoints
         are returned.
-    fast_n : int
+    fast_n : int, optional
         The ``n`` parameter in ``feature.corner_fast``. Minimum number of
         consecutive pixels out of 16 pixels on the circle that should all be
         either brighter or darker w.r.t test-pixel. A point c on the circle is
         darker w.r.t test pixel p if ``Ic < Ip - threshold`` and brighter if
         ``Ic > Ip + threshold``. Also stands for the n in ``FAST-n`` corner
         detector.
-    fast_threshold : float
+    fast_threshold : float, optional
         The ``threshold`` parameter in ``feature.corner_fast``. Threshold used
         to decide whether the pixels on the circle are brighter, darker or
         similar w.r.t. the test pixel. Decrease the threshold when more
         corners are desired and vice-versa.
-    harris_k : float
+    harris_k : float, optional
         The ``k`` parameter in ``feature.corner_harris``. Sensitivity factor to
         separate corners from edges, typically in range ``[0, 0.2]``. Small
         values of k result in detection of sharp corners.
-    downscale : float
+    downscale : float, optional
         Downscale factor for the image pyramid. Default value 1.2 is chosen so
         that there are more dense scales which enable robust scale invariance
         for a subsequent feature description.
-    n_scales : int
+    n_scales : int, optional
         Maximum number of scales from the bottom of the image pyramid to
         extract the features from.
 
