@@ -3,7 +3,7 @@
 CenSurE feature detector
 ========================
 
-The CenSurE feature detector is a scale-invariant center-surround detectors
+The CenSurE feature detector is a scale-invariant center-surround detector
 (CenSurE) that claims to outperform other detectors and is capable of real-time
 implementation.
 
