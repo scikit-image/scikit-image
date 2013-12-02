@@ -20,6 +20,7 @@ References
 
 """
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage import data
@@ -28,6 +29,9 @@ from skimage.util import img_as_ubyte
 from skimage import exposure
 from skimage.morphology import disk
 from skimage.filter import rank
+
+
+matplotlib.rcParams['font.size'] = 9
 
 
 def plot_img_and_hist(img, axes, bins=256):
@@ -70,7 +74,7 @@ img_eq = rank.equalize(img, selem=selem)
 
 
 # Display results
-f, axes = plt.subplots(2, 3, figsize=(8, 4))
+f, axes = plt.subplots(2, 3, figsize=(8, 5))
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
 ax_img.set_title('Low contrast image')

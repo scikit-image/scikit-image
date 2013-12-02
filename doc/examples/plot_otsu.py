@@ -14,10 +14,14 @@ the intra-class variance.
 .. [1] http://en.wikipedia.org/wiki/Otsu's_method
 
 """
+import matplotlib
 import matplotlib.pyplot as plt
 
 from skimage.data import camera
 from skimage.filter import threshold_otsu
+
+
+matplotlib.rcParams['font.size'] = 9
 
 
 image = camera()
