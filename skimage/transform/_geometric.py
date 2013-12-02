@@ -1,5 +1,6 @@
 import six
 import math
+import warnings
 import numpy as np
 from scipy import ndimage, spatial
 
@@ -113,11 +114,17 @@ class ProjectiveTransform(GeometricTransform):
             matrix = np.eye(3)
         if matrix.shape != (3, 3):
             raise ValueError("invalid shape of transformation matrix")
-        self._matrix = matrix
+        self.matrix_ = matrix
+
+    @property
+    def _matrix(self):
+        warnings.warn('`_matrix` attribute is deprecated, '
+                      'use `matrix_` instead.')
+        return self.matrix_
 
     @property
     def _inv_matrix(self):
-        return np.linalg.inv(self._matrix)
+        return np.linalg.inv(self.matrix_)
 
     def _apply_mat(self, coords, matrix):
         coords = np.array(coords, copy=False, ndmin=2)
@@ -133,7 +140,7 @@ class ProjectiveTransform(GeometricTransform):
         return dst[:, :2]
 
     def __call__(self, coords):
-        return self._apply_mat(coords, self._matrix)
+        return self._apply_mat(coords, self.matrix_)
 
     def inverse(self, coords):
         """Apply inverse transformation.
@@ -235,7 +242,7 @@ class ProjectiveTransform(GeometricTransform):
         H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
-        self._matrix = H
+        self.matrix_ = H
 
     def __add__(self, other):
         """Combine this transformation with another.
@@ -248,7 +255,7 @@ class ProjectiveTransform(GeometricTransform):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
-            return tform(other._matrix.dot(self._matrix))
+            return tform(other.matrix_.dot(self.matrix_))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -299,7 +306,7 @@ class AffineTransform(ProjectiveTransform):
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
-            self._matrix = matrix
+            self.matrix_ = matrix
         elif params:
             if scale is None:
                 scale = (1, 1)
@@ -311,34 +318,34 @@ class AffineTransform(ProjectiveTransform):
                 translation = (0, 0)
 
             sx, sy = scale
-            self._matrix = np.array([
+            self.matrix_ = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
                 [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
                 [                      0,                                0, 1]
             ])
-            self._matrix[0:2, 2] = translation
+            self.matrix_[0:2, 2] = translation
         else:
             # default to an identity transform
-            self._matrix = np.eye(3)
+            self.matrix_ = np.eye(3)
 
     @property
     def scale(self):
-        sx = math.sqrt(self._matrix[0, 0] ** 2 + self._matrix[1, 0] ** 2)
-        sy = math.sqrt(self._matrix[0, 1] ** 2 + self._matrix[1, 1] ** 2)
+        sx = math.sqrt(self.matrix_[0, 0] ** 2 + self.matrix_[1, 0] ** 2)
+        sy = math.sqrt(self.matrix_[0, 1] ** 2 + self.matrix_[1, 1] ** 2)
         return sx, sy
 
     @property
     def rotation(self):
-        return math.atan2(self._matrix[1, 0], self._matrix[0, 0])
+        return math.atan2(self.matrix_[1, 0], self.matrix_[0, 0])
 
     @property
     def shear(self):
-        beta = math.atan2(- self._matrix[0, 1], self._matrix[1, 1])
+        beta = math.atan2(- self.matrix_[0, 1], self.matrix_[1, 1])
         return beta - self.rotation
 
     @property
     def translation(self):
-        return self._matrix[0:2, 2]
+        return self.matrix_[0:2, 2]
 
 
 class PiecewiseAffineTransform(GeometricTransform):
@@ -354,8 +361,20 @@ class PiecewiseAffineTransform(GeometricTransform):
     def __init__(self):
         self._tesselation = None
         self._inverse_tesselation = None
-        self.affines = []
-        self.inverse_affines = []
+        self.affines_ = []
+        self.inverse_affines_ = []
+
+    @property
+    def affines(self):
+        warnings.warn('`affines` attribute is deprecated, '
+                      'use `affines_` instead.')
+        return self.affines_
+
+    @property
+    def inverse_affines(self):
+        warnings.warn('`inverse_affines` attribute is deprecated, '
+                      'use `inverse_affines_` instead.')
+        return self.inverse_affines_
 
     def estimate(self, src, dst):
         """Set the control points with which to perform the piecewise mapping.
@@ -375,21 +394,21 @@ class PiecewiseAffineTransform(GeometricTransform):
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
         # find affine mapping from source positions to destination
-        self.affines = []
+        self.affines_ = []
         for tri in self._tesselation.vertices:
             affine = AffineTransform()
             affine.estimate(src[tri, :], dst[tri, :])
-            self.affines.append(affine)
+            self.affines_.append(affine)
 
         # inverse piecewise affine
         # triangulate input positions into mesh
         self._inverse_tesselation = spatial.Delaunay(dst)
         # find affine mapping from source positions to destination
-        self.inverse_affines = []
+        self.inverse_affines_ = []
         for tri in self._inverse_tesselation.vertices:
             affine = AffineTransform()
             affine.estimate(dst[tri, :], src[tri, :])
-            self.inverse_affines.append(affine)
+            self.inverse_affines_.append(affine)
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -418,7 +437,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         for index in range(len(self._tesselation.vertices)):
             # affine transform for triangle
-            affine = self.affines[index]
+            affine = self.affines_[index]
             # all coordinates within triangle
             index_mask = simplex == index
 
@@ -453,7 +472,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         for index in range(len(self._inverse_tesselation.vertices)):
             # affine transform for triangle
-            affine = self.inverse_affines[index]
+            affine = self.inverse_affines_[index]
             # all coordinates within triangle
             index_mask = simplex == index
 
@@ -501,7 +520,7 @@ class SimilarityTransform(ProjectiveTransform):
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
-            self._matrix = matrix
+            self.matrix_ = matrix
         elif params:
             if scale is None:
                 scale = 1
@@ -510,16 +529,16 @@ class SimilarityTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            self._matrix = np.array([
+            self.matrix_ = np.array([
                 [math.cos(rotation), - math.sin(rotation), 0],
                 [math.sin(rotation),   math.cos(rotation), 0],
                 [                 0,                    0, 1]
             ])
-            self._matrix[0:2, 0:2] *= scale
-            self._matrix[0:2, 2] = translation
+            self.matrix_[0:2, 0:2] *= scale
+            self.matrix_[0:2, 2] = translation
         else:
             # default to an identity transform
-            self._matrix = np.eye(3)
+            self.matrix_ = np.eye(3)
 
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit parameters.
@@ -585,7 +604,7 @@ class SimilarityTransform(ProjectiveTransform):
         # singular value
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
-        self._matrix = np.array([[a0, -b0, a1],
+        self.matrix_ = np.array([[a0, -b0, a1],
                                  [b0,  a0, b1],
                                  [ 0,   0,  1]])
 
@@ -593,18 +612,18 @@ class SimilarityTransform(ProjectiveTransform):
     def scale(self):
         if math.cos(self.rotation) == 0:
             # sin(self.rotation) == 1
-            scale = self._matrix[0, 1]
+            scale = self.matrix_[0, 1]
         else:
-            scale = self._matrix[0, 0] / math.cos(self.rotation)
+            scale = self.matrix_[0, 0] / math.cos(self.rotation)
         return scale
 
     @property
     def rotation(self):
-        return math.atan2(self._matrix[1, 0], self._matrix[1, 1])
+        return math.atan2(self.matrix_[1, 0], self.matrix_[1, 1])
 
     @property
     def translation(self):
-        return self._matrix[0:2, 2]
+        return self.matrix_[0:2, 2]
 
 
 class PolynomialTransform(GeometricTransform):
@@ -627,7 +646,13 @@ class PolynomialTransform(GeometricTransform):
             params = np.array([[0, 1, 0], [0, 0, 1]])
         if params.shape[0] != 2:
             raise ValueError("invalid shape of transformation parameters")
-        self._params = params
+        self.params_ = params
+
+    @property
+    def _params(self):
+        warnings.warn('`_params` attribute is deprecated, '
+                      'use `params_` instead.')
+        return self.params_
 
     def estimate(self, src, dst, order=2):
         """Set the transformation matrix with the explicit transformation
@@ -700,7 +725,7 @@ class PolynomialTransform(GeometricTransform):
         # singular value
         params = - V[-1, :-1] / V[-1, -1]
 
-        self._params = params.reshape((2, u / 2))
+        self.params_ = params.reshape((2, u / 2))
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -718,7 +743,7 @@ class PolynomialTransform(GeometricTransform):
         """
         x = coords[:, 0]
         y = coords[:, 1]
-        u = len(self._params.ravel())
+        u = len(self.params_.ravel())
         # number of coefficients -> u = (order + 1) * (order + 2)
         order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
         dst = np.zeros(coords.shape)
@@ -726,8 +751,8 @@ class PolynomialTransform(GeometricTransform):
         pidx = 0
         for j in range(order + 1):
             for i in range(j + 1):
-                dst[:, 0] += self._params[0, pidx] * x ** (j - i) * y ** i
-                dst[:, 1] += self._params[1, pidx] * x ** (j - i) * y ** i
+                dst[:, 0] += self.params_[0, pidx] * x ** (j - i) * y ** i
+                dst[:, 1] += self.params_[1, pidx] * x ** (j - i) * y ** i
                 pidx += 1
 
         return dst
@@ -1046,7 +1071,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         # inverse_map is a homography
         elif isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
-            matrix = inverse_map._matrix
+            matrix = inverse_map.matrix_
 
         # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
