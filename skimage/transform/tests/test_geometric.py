@@ -228,6 +228,19 @@ def test_invalid_input():
     assert_raises(ValueError, PolynomialTransform, np.zeros((3, 3)))
 
 
+def test_deprecated_params_attributes():
+    for t in ('projective', 'affine', 'similarity'):
+        tform = estimate_transform(t, SRC, DST)
+        assert_equal(tform._matrix, tform.matrix_)
+
+    tform = estimate_transform('polynomial', SRC, DST, order=3)
+    assert_equal(tform._params, tform.params_)
+
+    tform = estimate_transform('piecewise-affine', SRC, DST)
+    assert_equal(tform.affines, tform.affines_)
+    assert_equal(tform.inverse_affines, tform.inverse_affines_)
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
