@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # uft.py --- Unitary fourier transform
 
-# Copyright (c) 2011, 2012, 2013  François Orieux <orieux@iap.fr>
-
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
 # (the "Software"), to deal in the Software without restriction,
@@ -23,13 +21,11 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Commentary:
-
 """Function of unitary fourier transform and utilities
 
 This module implement unitary fourier transform, that is ortho-normal
-transform. They are specially usefull for convolution [1]: they
-respect the parseval equality, the value of the null frequency is
+transform. They are especially and usefull for convolution [1]: they
+respect the Parseval equality, the value of the null frequency is
 equal to
 
 .. math:: \frac{1}{\sqrt{n}} \sum_i x_i.
@@ -46,11 +42,10 @@ References
 
 """
 
-# code:
+from __future__ import division
 
 import numpy as np
 
-__copyright__ = "Copyright scikit-image team"
 __credits__ = ["François Orieux"]
 __license__ = "mit"
 __version__ = "1.0.0"
@@ -132,7 +127,7 @@ def ufftn(inarray, dim=None):
     -------
     outarray : array-like (same shape than inarray)
     """
-    if not dim:
+    if dim is None:
         dim = inarray.ndim
 
     outarray = np.fft.fftn(inarray, axes=range(-dim, 0))

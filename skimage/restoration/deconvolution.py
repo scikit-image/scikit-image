@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2013  François Orieux <orieux@iap.fr>
-
 # Permission is hereby granted, free of charge, to any person
 # obtaining a copy of this software and associated documentation files
 # (the "Software"), to deal in the Software without restriction,
@@ -32,7 +30,6 @@ from scipy.signal import convolve2d
 
 from . import uft
 
-__copyright__ = "Copyright scikit-image team"
 __credits__ = ["François Orieux"]
 __license__ = "mit"
 __version__ = "1.0.0"
@@ -41,33 +38,33 @@ __status__ = "stable"
 __keywords__ = "restoration, image, deconvolution"
 
 
-def wiener(data, psf, reg_val, reg=None, real=True):
+def wiener(data, psf, balance, reg=None, is_real=True):
     """Wiener-Hunt deconvolution
 
-    return the deconvolution with a wiener-hunt approach (ie with
+    Return the deconvolution with a wiener-Hunt approach (ie with
     Fourier diagonalisation).
 
     Parameters
     ----------
     data : (M, N) ndarray
-       The data
-
+       Input degraded image
     psf : ndarray
-       The impulsionnal response in real space or the transfer
-       function. Differentiation is done with the dtype where
-       transfer function is supposed complex.
-
-    reg_val : float
-       The regularisation parameter value.
-
+       The impulse response (input image's space) or the transfer
+       function (Fourier space). Both are accepted. The transfer
+       function is recognize as being complex (`np.iscomplex(psf)`).
+    balance : float
+       The regularisation parameter value that tune the balance
+       between the data and the prior information.
     reg : ndarray, optional
-       The regularisation operator. The laplacian by
-       default. Otherwise, the same constraints that for `psf`
-       apply.
-
-    real : boolean, optional
-       True by default. Specify if `psf` or `reg` are provided
-       with hermitian hypothesis or not. See uft module.
+       The regularisation operator. The Laplacian by default. It can
+       be an impulse response or a transfer function, as for the psf.
+    is_real : boolean, optional
+       True by default. Specify if `psf` and `reg` are provided with
+       hermitian hypothesis, that is only half of the frequency plane
+       is provided (due to the redundancy of Fourier transform of real
+       signal). It's apply only if `psf` and/or `reg` are provided as
+       transfer function.  For the hermitian property see `uft`
+       module or `np.fft.rfftn`.
 
     Returns
     -------
@@ -76,7 +73,6 @@ def wiener(data, psf, reg_val, reg=None, real=True):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage import color, data, restoration
     >>> lena = color.rgb2gray(data.lena())
     >>> from scipy.signal import convolve2d
@@ -87,30 +83,34 @@ def wiener(data, psf, reg_val, reg=None, real=True):
 
     Notes
     -----
-    This function apply the wiener filter to a noisy and convolued
-    image. If the data model is
+    This function applies the Wiener filter to a noisy and degraded
+    image by an impulse response (or PSF). If the data model is
 
     .. math:: y = Hx + n
 
     where :math:`n` is noise, :math:`H` the PSF and :math:`x` the
-    unknown original image, the wiener filter is
+    unknown original image, the Wiener filter is
 
     .. math:: \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2) \Lambda_H^\dag F y
 
-    where :math:`F` and :math:`F^\dag` is the Fourier and inverse
-    Fourier transfrom, :math:`\Lambda_H` the transfert function (or
-    the Fourier transfrom of the PSF, see [2]) and :math:`\Lambda_D`
-    the filter to penalize the restored image frequencies (laplacian
-    by default, that is penalization of high frequency). The parameter
-    :math:`\lambda` tunes the balance between the data (that tends to
-    increase high frequency, even those coming from noise), and the
-    regularization.
+    where :math:`F` and :math:`F^\dag` are the Fourier and inverse
+    Fourier transfroms respectively, :math:`\Lambda_H` the transfer
+    function (or the Fourier transfrom of the PSF, see [2]) and
+    :math:`\Lambda_D` the filter to penalize the restored image
+    frequencies (Laplacian by default, that is penalization of high
+    frequency). The parameter :math:`\lambda` tunes the balance
+    between the data (that tends to increase high frequency, even
+    those coming from noise), and the regularization.
 
-    These methods are then specifique to a prior model that must match
-    the application (smoothness by default). They could be refered to
-    bayesian approaches.
+    These methods are then specific to a prior model. Consequently,
+    the application or the true image nature must corresponds to the
+    prior model. By default, the prior model (Laplacian) introduce
+    image smoothness or pixel correlation. It can also be interpreted
+    as high-frequency penalization to compensate noise amplification
+    or so called "explosive" solution. These methods are well
+    interpreted by Bayesian analysis.
     
-    The use of Fourier space implies a circulant property of
+    Finally, the use of Fourier space implies a circulant property of
     :math:`H`, see [2].
 
     References
@@ -129,9 +129,9 @@ def wiener(data, psf, reg_val, reg=None, real=True):
            Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
 
     """
-    if not reg:
+    if reg is None:
         reg, _ = uft.laplacian(data.ndim, data.shape)
-    if reg.dtype != np.complex:
+    if not np.iscomplex(reg):
         reg = uft.ir2tf(reg, data.shape)
 
     if psf.shape != reg.shape:
@@ -140,8 +140,8 @@ def wiener(data, psf, reg_val, reg=None, real=True):
         trans_func = psf
 
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func)**2 +
-                                           reg_val * np.abs(reg)**2)
-    if real:
+                                           balance * np.abs(reg)**2)
+    if is_real:
         return uft.uirfft2(wiener_filter * uft.urfft2(data))
     else:
         return uft.uifft2(wiener_filter * uft.ufft2(data))
@@ -150,64 +150,58 @@ def wiener(data, psf, reg_val, reg=None, real=True):
 def unsupervised_wiener(data, psf, reg=None, user_params=None):
     """Unsupervised Wiener-Hunt deconvolution
 
-    return the deconvolution with a wiener-hunt approach, where the
-    hyperparameters are estimated (or automatically tuned from a
-    practical point of view). The algorithm is a stochastic iterative
-    process (Gibbs sampler).
-
-    If you use this work, please add a citation to the reference below.
+    Return the deconvolution with a Wiener-Hunt approach, where the
+    hyperparameters are estimated. The algorithm is a stochastic
+    iterative process (Gibbs sampler) described in [1].
 
     Parameters
     ----------
     image : (M, N) ndarray
-       The data
-
+       The input degraded image
     psf : ndarray
-       The impulsionnal response in real space or the transfer
-       function. Differentiation is done with the dtype where
-       transfer function is supposed complex.
-
+       The impulse response (input image's space) or the transfer
+       function (Fourier space). Both are accepted. The transfer
+       function is recognize as being complex (`np.iscomplex(psf)`).
     reg : ndarray, optional
-       The regularisation operator. The laplacian by
-       default. Otherwise, the same constraints that for `psf`
-       apply
-
+       The regularisation operator. The Laplacian by default. It can
+       be an impulse response or a transfer function, as for the psf.
     user_params : dict
        dictionary of gibbs parameters. See below.
 
     Returns
     -------
     x_postmean : (M, N) ndarray
-       The deconvolved data (the posterior mean)
+       The deconvolved data (the posterior mean).
 
     chains : dict
-       The keys 'noise' and 'prior' contains the chain list of noise and
-       prior precision respectively
+       The keys 'noise' and 'prior' contain the chain list of noise and
+       prior precision respectively.
 
     Other parameters
     ----------------
-    The key of user_params are
+    The keys of `user_params` are:
 
     threshold : float
        The stopping criterion: the norm of the difference between to
        successive approximated solution (empirical mean of object
-       sample). 1e-4 by default.
+       samples). 1e-4 by default.
 
     burnin : int
        The number of sample to ignore to start computation of the
        mean. 100 by default.
 
     min_iter : int
-       The minimum number of iteration. 30 by default.
+       The minimum number of iterations. 30 by default.
 
     max_iter : int
-       The maximum number of iteration if `threshold` is not
+       The maximum number of iterations if `threshold` is not
        satisfied. 150 by default.
 
     callback : None
        A user provided callable to which is passed, if the function
        exists, the current image sample. This function can be used to
-       store the sample, or compute other moments than the mean.
+       store the sample, or compute other moments than the mean. It
+       has no influence on the algorithm execution.
 
     Examples
     --------
@@ -233,11 +227,11 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     """
     params = {'threshold': 1e-4, 'max_iter': 200,
               'min_iter': 30, 'burnin': 15, 'callback': None}
-    params.update(user_params if user_params else {})
+    params.update(user_params or {})
 
     if not reg:
         reg, _ = uft.laplacian(data.ndim, data.shape)
-    if reg.dtype != np.complex:
+    if not np.iscomplex(reg):
         reg = uft.ir2tf(reg, data.shape)
 
     if psf.shape != reg.shape:
@@ -261,6 +255,8 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     areg2 = np.abs(reg)**2
     atf2 = np.abs(trans_fct)**2
 
+    # The Fourier transfrom may change the data.size attribut, so we
+    # store it.
     data_size = data.size
     data = uft.urfft2(data.astype(np.float))
 
