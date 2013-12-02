@@ -148,3 +148,8 @@ ax2.set_title('Edge (white) and result (red)')
 ax2.imshow(edges)
 
 plt.show()
+
+"""
+.. image:: PLOT2RST.current_figure
+
+"""
