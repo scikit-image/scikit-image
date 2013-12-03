@@ -24,7 +24,7 @@
 """Function of unitary fourier transform and utilities
 
 This module implement unitary fourier transform, that is ortho-normal
-transform. They are especially and usefull for convolution [1]: they
+transform. They are especially and useful for convolution [1]: they
 respect the Parseval equality, the value of the null frequency is
 equal to
 
@@ -123,13 +123,12 @@ def ufftn(inarray, dim=None):
 
     Returns
     -------
-    outarray : array-like (same shape than inarray)
+    outarray : ndarray (same shape than inarray)
+        The unitary N-D Fourier transform of `inarray`.
     """
     if dim is None:
         dim = inarray.ndim
-
     outarray = np.fft.fftn(inarray, axes=range(-dim, 0))
-
     return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
 
 
@@ -146,13 +145,12 @@ def uifftn(inarray, dim=None):
 
     Returns
     -------
-    outarray : array-like (same shape than inarray)
+    outarray : ndarray (same shape than inarray)
+        The unitary inverse N-D Fourier transform of `inarray`.
     """
-    if not dim:
+    if dim is None:
         dim = inarray.ndim
-
     outarray = np.fft.ifftn(inarray, axes=range(-dim, 0))
-
     return outarray * np.sqrt(np.prod(inarray.shape[-dim:]))
 
 
@@ -172,13 +170,18 @@ def urfftn(inarray, dim=None):
 
     Returns
     -------
-    outarray : array-like (the last dim as  N / 2 + 1 lenght)
+    outarray : ndarray (the last dim as  N / 2 + 1 lenght)
+        The unitary N-D real Fourier transform of `inarray`.
+
+    Notes
+    -----
+    The `r` function assume an input array of real
+    values. Consequently, the output have an Hermitian property and
+    redondant values are not computed and returned.
     """
-    if not dim:
+    if dim is None:
         dim = inarray.ndim
-
     outarray = np.fft.rfftn(inarray, axes=range(-dim, 0))
-
     return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
 
 
@@ -198,13 +201,18 @@ def uirfftn(inarray, dim=None):
 
     Returns
     -------
-    outarray : array-like (the last dim as (N - 1) *2 lenght)
+    outarray : ndarray (the last dim as (N - 1) *2 lenght)
+        The unitary N-D inverse real Fourier transform of `inarray`.
+
+    Notes
+    -----
+    The `r` function assume an input array of real
+    values. Consequently, the output have an Hermitian property and
+    redondant values are not computed and returned.
     """
-    if not dim:
+    if dim is None:
         dim = inarray.ndim
-
     outarray = np.fft.irfftn(inarray, axes=range(-dim, 0))
-
     return outarray * np.sqrt(np.prod(inarray.shape[-dim:-1]) *
                               (inarray.shape[-1] - 1) * 2)
 
@@ -221,7 +229,8 @@ def ufft2(inarray):
 
     Returns
     -------
-    outarray : array-like (same shape than inarray)
+    outarray : ndarray (same shape than inarray)
+        The unitary 2-D Fourier transform of `inarray`.
 
     See Also
     --------
@@ -242,7 +251,8 @@ def uifft2(inarray):
 
     Returns
     -------
-    outarray : array-like (same shape than inarray)
+    outarray : ndarray (same shape than inarray)
+        The unitary 2-D inverse Fourier transform of `inarray`.
 
     See Also
     --------
@@ -265,7 +275,8 @@ def urfft2(inarray):
 
     Returns
     -------
-    outarray : array-like (the last dim as (N - 1) *2 lenght)
+    outarray : ndarray (the last dim as (N - 1) *2 lenght)
+        The unitary 2-D real Fourier transform of `inarray`.
 
     See Also
     --------
@@ -288,7 +299,8 @@ def uirfft2(inarray):
 
     Returns
     -------
-    outarray : array-like (the last dim as (N - 1) *2 lenght)
+    outarray : ndarray (the last dim as (N - 1) *2 lenght)
+        The unitary 2-D inverse real Fourier transform of `inarray`.
 
     See Also
     --------
@@ -304,12 +316,13 @@ def image_quad_norm(inarray):
 
     Parameters
     ----------
-    inarray : array-like
+    inarray : ndarray
         The images are supposed to be in the last two axes
 
     Returns
     -------
     norm : float
+        The quadratic norm of `inarray`. 
 
     """
     # If there is an hermitian symmetry
@@ -361,7 +374,6 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
     """
     if not dim:
         dim = imp_resp.ndim
-
     # Zero padding and fill
     irpadded = np.zeros(shape)
     irpadded[tuple([slice(0, s) for s in imp_resp.shape])] = imp_resp
@@ -372,7 +384,6 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
                            if i >= imp_resp.ndim - dim
                            else 0
                            for i, s in enumerate(imp_resp.shape)])
-
     if real:
         return np.fft.rfftn(irpadded, axes=range(-dim, 0))
     else:
@@ -409,5 +420,4 @@ def laplacian(ndim, shape):
                               -1.0]).reshape([-1 if i == dim else 1
                                               for i in range(ndim)])
     impr[([slice(1, 2)] * ndim)] = 2.0 * ndim
-
     return ir2tf(impr, shape), impr

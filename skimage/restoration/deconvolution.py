@@ -41,7 +41,7 @@ __keywords__ = "restoration, image, deconvolution"
 def wiener(image, psf, balance, reg=None, is_real=True):
     """Wiener-Hunt deconvolution
 
-    Return the deconvolution with a wiener-Hunt approach (ie with
+    Return the deconvolution with a Wiener-Hunt approach (ie with
     Fourier diagonalisation).
 
     Parameters
@@ -151,8 +151,9 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
     """Unsupervised Wiener-Hunt deconvolution
 
     Return the deconvolution with a Wiener-Hunt approach, where the
-    hyperparameters are estimated. The algorithm is a stochastic
-    iterative process (Gibbs sampler) described in [1].
+    hyperparameters are automatically estimated. The algorithm is a
+    stochastic iterative process (Gibbs sampler) described in [1]. See
+    also `wiener` function.
 
     Parameters
     ----------
@@ -183,7 +184,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
     threshold : float
        The stopping criterion: the norm of the difference between to
        successive approximated solution (empirical mean of object
-       samples). 1e-4 by default.
+       samples, see Notes section). 1e-4 by default.
     burnin : int
        The number of sample to ignore to start computation of the
        mean. 100 by default.
@@ -192,11 +193,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
     max_iter : int
        The maximum number of iterations if `threshold` is not
        satisfied. 150 by default.
-    callback : None
+    callback : callable (None by default)
        A user provided callable to which is passed, if the function
-       exists, the current image sample. This function can be used to
-       store the sample, or compute other moments than the mean. It
-       has no influence on the algorithm execution.
+       exists, the current image sample for whatever purpose. The user
+       can store the sample, or compute other moments than the
+       mean. It has no influence on the algorithm execution and is
+       only for inspection.
 
     Examples
     --------
@@ -207,6 +209,18 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
     >>> lena = convolve2d(lena, psf, 'same')
     >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
     >>> deconvolved_lena = restoration.unsupervised_wiener(lena, psf)
+
+    Notes
+    -----
+    The estimated image is design as the posterior mean of a
+    probability law (from a Bayesian analysis). The mean is defined as
+    a sum over all the possible images weighted by their respective
+    probability. Given the size of the problem, the exact sum is not
+    tractable. This algorithm use of MCMC to draw image under the
+    posterior law. The practical idea is to consider low probable
+    image useless in the sum. Finally the empirical mean of these
+    samples give us an estimation of the mean, and an exact
+    computation with an infinite sample set.
 
     References
     ----------
@@ -223,7 +237,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
               'min_iter': 30, 'burnin': 15, 'callback': None}
     params.update(user_params or {})
 
-    if not reg:
+    if reg is None:
         reg, _ = uft.laplacian(image.ndim, image.shape)
     if not np.iscomplex(reg):
         reg = uft.ir2tf(reg, image.shape)
@@ -251,8 +265,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
 
     # The Fourier transfrom may change the image.size attribut, so we
     # store it.
-    image_size = image.size
-    image = uft.urfft2(image.astype(np.float))
+    data_spectrum = uft.urfft2(image.astype(np.float))
 
     # Gibbs sampling
     for iteration in range(params['max_iter']):
@@ -261,24 +274,25 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
         # weighing (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
         excursion = np.sqrt(0.5) / np.sqrt(precision) * (
-            np.random.standard_normal(image.shape) +
-            1j * np.random.standard_normal(image.shape))
+            np.random.standard_normal(data_spectrum.shape) +
+            1j * np.random.standard_normal(data_spectrum.shape))
 
         # mean Eq. 30 (RLS for fixed gn, gamma0 and gamma1 ...)
         wiener_filter = gn_chain[-1] * np.conj(trans_fct) / precision
 
         # sample of X in Fourier space
-        x_sample = wiener_filter * image + excursion
+        x_sample = wiener_filter * data_spectrum + excursion
         if params['callback']:
             params['callback'](x_sample)
 
         # sample of Eq. 31 p(gn | x^k, gx^k, y)
-        gn_chain.append(npr.gamma(image_size / 2,
-                                  2 / uft.image_quad_norm(image - x_sample *
+        gn_chain.append(npr.gamma(image.size / 2,
+                                  2 / uft.image_quad_norm(data_spectrum -
+                                                          x_sample *
                                                           trans_fct)))
 
         # sample of Eq. 31 p(gx | x^k, gn^k-1, y)
-        gx_chain.append(npr.gamma((image_size - 1) / 2,
+        gx_chain.append(npr.gamma((image.size - 1) / 2,
                                   2 / uft.image_quad_norm(x_sample * reg)))
 
         # current empirical average
