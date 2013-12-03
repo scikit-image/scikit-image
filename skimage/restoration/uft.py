@@ -63,7 +63,6 @@ def _circshift(inarray, shifts):
     ----------
     a : ndarray
        The array to shift.
-
     s : tuple of int
        A tuple of integer scalars where the N-th element specifies the
        shift amount for the N-th dimension of array `a`. If an element
@@ -118,7 +117,6 @@ def ufftn(inarray, dim=None):
     ----------
     inarray : ndarray
         The array to transform.
-
     dim : int, optional
         The `dim` last axis along wich to compute the transform. All
         axes by default.
@@ -142,7 +140,6 @@ def uifftn(inarray, dim=None):
     ----------
     inarray : ndarray
         The array to transform.
-
     dim : int, optional
         The `dim` last axis along wich to compute the transform. All
         axes by default.
@@ -169,7 +166,6 @@ def urfftn(inarray, dim=None):
     ----------
     inarray : ndarray
         The array to transform.
-
     dim : int, optional
         The `dim` last axis along wich to compute the transform. All
         axes by default.
@@ -196,7 +192,6 @@ def uirfftn(inarray, dim=None):
     ----------
     inarray : ndarray
         The array to transform.
-
     dim : int, optional
         The `dim` last axis along wich to compute the transform. All
         axes by default.
@@ -337,15 +332,12 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
     ----------
     imp_resp : ndarray
        The impulsionnal responses.
-
     shape : tuple of int
        A tuple of integer corresponding to the target shape of the
        tranfert function.
-
     dim : int, optional
         The `dim` last axis along wich to compute the transform. All
         axes by default.
-
     real : boolean (optionnal, default True)
        If True, imp_resp is supposed real and the hermissian property
        is used with rfftn Fourier transform.
@@ -396,7 +388,6 @@ def laplacian(ndim, shape):
     ----------
     ndim : int
         The dimension of the laplacian
-
     shape : tuple, shape
         The support on which to compute the transfert function
 

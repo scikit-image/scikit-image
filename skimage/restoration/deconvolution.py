@@ -172,7 +172,6 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     -------
     x_postmean : (M, N) ndarray
        The deconvolved data (the posterior mean).
-
     chains : dict
        The keys 'noise' and 'prior' contain the chain list of noise and
        prior precision respectively.
@@ -185,18 +184,14 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
        The stopping criterion: the norm of the difference between to
        successive approximated solution (empirical mean of object
        samples). 1e-4 by default.
-
     burnin : int
        The number of sample to ignore to start computation of the
        mean. 100 by default.
-
     min_iter : int
        The minimum number of iterations. 30 by default.
-
     max_iter : int
        The maximum number of iterations if `threshold` is not
        satisfied. 150 by default.
-
     callback : None
        A user provided callable to which is passed, if the function
        exists, the current image sample. This function can be used to
@@ -314,15 +309,12 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
 def richardson_lucy(data, psf, iterations=50):
     """Richardson-Lucy deconvolution.
 
-
     Parameters
     ----------
     data : ndarray
        The data
-
     psf : ndarray
        The point spread function
-
     iterations : int
        Number of iterations. This parameter play to role of regularisation.
 
