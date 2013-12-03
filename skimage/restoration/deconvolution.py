@@ -51,7 +51,8 @@ def wiener(image, psf, balance, reg=None, is_real=True):
     psf : ndarray
        The impulse response (input image's space) or the transfer
        function (Fourier space). Both are accepted. The transfer
-       function is recognize as being complex (`np.iscomplex(psf)`).
+       function is recognize as being complex
+       (`np.iscomplexobj(psf)`).
     balance : float
        The regularisation parameter value that tune the balance
        between the data and the prior information.
@@ -131,7 +132,7 @@ def wiener(image, psf, balance, reg=None, is_real=True):
     """
     if reg is None:
         reg, _ = uft.laplacian(image.ndim, image.shape)
-    if not np.iscomplex(reg):
+    if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape)
 
     if psf.shape != reg.shape:
@@ -162,7 +163,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
     psf : ndarray
        The impulse response (input image's space) or the transfer
        function (Fourier space). Both are accepted. The transfer
-       function is recognize as being complex (`np.iscomplex(psf)`).
+       function is recognize as being complex
+       (`np.iscomplexobj(psf)`).
     reg : ndarray, optional
        The regularisation operator. The Laplacian by default. It can
        be an impulse response or a transfer function, as for the psf.
@@ -239,7 +241,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
 
     if reg is None:
         reg, _ = uft.laplacian(image.ndim, image.shape)
-    if not np.iscomplex(reg):
+    if not np.iscomplexobj(reg):
         reg = uft.ir2tf(reg, image.shape)
 
     if psf.shape != reg.shape:

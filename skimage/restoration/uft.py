@@ -53,63 +53,6 @@ __maintainer__ = "Francois Orieux"
 __keywords__ = "fft"
 
 
-def _circshift(inarray, shifts):
-    """Shift array circularly.
-
-    Circularly shifts the values in the array `a` by `s`
-    elements. Return a copy.
-
-    Parameters
-    ----------
-    a : ndarray
-       The array to shift.
-    s : tuple of int
-       A tuple of integer scalars where the N-th element specifies the
-       shift amount for the N-th dimension of array `a`. If an element
-       is positive, the values of `a` are shifted down (or to the
-       right). If it is negative, the values of `a` are shifted up (or
-       to the left).
-
-    Returns
-    -------
-    y : ndarray
-       The shifted array (elements are copied)
-
-    Examples
-    --------
-    >>> _circshift(np.arange(10), (2, ))
-    array([8, 9, 0, 1, 2, 3, 4, 5, 6, 7])
-
-    """
-    # Initialize array of indices
-    idx = []
-
-    # Loop through each dimension of the input matrix to compute
-    # shifted indices
-    for dim in range(inarray.ndim):
-        length = inarray.shape[dim]
-        try:
-            shift = shifts[dim]
-        except IndexError:
-            shift = 0  # no shift if not specified
-
-        # Lets start for fancy indexing. First we build the shifted
-        # index for dim k. It will be broadcasted to other dim so
-        # ndmin is specified
-        index = np.mod(np.array(np.arange(length),
-                                ndmin=inarray.ndim) - shift,
-                       length)
-        # Shape adaptation
-        shape = np.ones(inarray.ndim)
-        shape[dim] = inarray.shape[dim]
-        index = np.reshape(index, shape)
-
-        idx.append(index.astype(int))
-
-    # Conversion by indexing the input matrix
-    return inarray[idx]
-
-
 def ufftn(inarray, dim=None):
     """N-dim unitary Fourier transform
 
@@ -322,8 +265,7 @@ def image_quad_norm(inarray):
     Returns
     -------
     norm : float
-        The quadratic norm of `inarray`. 
-
+        The quadratic norm of `inarray`.
     """
     # If there is an hermitian symmetry
     if inarray.shape[-1] != inarray.shape[-2]:
@@ -377,13 +319,13 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
     # Zero padding and fill
     irpadded = np.zeros(shape)
     irpadded[tuple([slice(0, s) for s in imp_resp.shape])] = imp_resp
-    # Circshift fo zero convention of the fft to avoid the phase
+    # Roll for zero convention of the fft to avoid the phase
     # problem. Work with odd and even size.
-    irpadded = _circshift(irpadded,
-                          [-np.floor(s / 2)
-                           if i >= imp_resp.ndim - dim
-                           else 0
-                           for i, s in enumerate(imp_resp.shape)])
+    for axis, axis_size in enumerate(imp_resp.shape):
+        if axis >= imp_resp.ndim - dim:
+            irpadded = np.roll(irpadded,
+                               shift=-int(np.floor(axis_size / 2)),
+                               axis=axis)
     if real:
         return np.fft.rfftn(irpadded, axes=range(-dim, 0))
     else:
