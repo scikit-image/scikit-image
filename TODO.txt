@@ -5,7 +5,7 @@ Version 0.11
   and set it to True as default
 * Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
 * Remove deprecated `skimage.measure.fit.BaseModel._params`,
-  `skimage.transform.ProjectiveTransform._matrx`,
+  `skimage.transform.ProjectiveTransform._matrix`,
   `skimage.transform.PolynomialTransform._params`,
   `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
 
