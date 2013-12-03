@@ -12,7 +12,6 @@ def _check_data_dim(data, dim):
 class BaseModel(object):
 
     def __init__(self):
-        # keep _params for backwards compatibility
         self.params_ = None
 
     @property
