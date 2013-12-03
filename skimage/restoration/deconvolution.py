@@ -200,7 +200,6 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage import color, data, restoration
     >>> lena = color.rgb2gray(data.lena())
     >>> from scipy.signal import convolve2d
@@ -325,7 +324,6 @@ def richardson_lucy(image, psf, iterations=50):
 
     Examples
     --------
-    >>> import numpy as np
     >>> from skimage import color, data, restoration
     >>> camera = color.rgb2gray(data.camera())
     >>> from scipy.signal import convolve2d
