@@ -28,11 +28,12 @@ transform. They are especially and useful for convolution [1]: they
 respect the Parseval equality, the value of the null frequency is
 equal to
 
-.. math:: \frac{1}{\sqrt{n}} \sum_i x_i.
+.. math::  \frac{1}{\sqrt{n}} \sum_i x_i
 
-The transform is applied from the last axes for performance reason (c
-order array). You may use directly the numpy.fft module for more
-sophisticated purpose.
+or the Fourier tranform have the same energy than the original image
+(see `image_quad_norm` function). The transform is applied from the
+last axes for performance reason (c order array). You may use directly
+the numpy.fft module for more sophisticated purpose.
 
 References
 ----------
@@ -42,7 +43,7 @@ References
 
 """
 
-from __future__ import division
+from __future__ import division, print_function
 
 import numpy as np
 
@@ -68,6 +69,15 @@ def ufftn(inarray, dim=None):
     -------
     outarray : ndarray (same shape than inarray)
         The unitary N-D Fourier transform of `inarray`.
+
+    Examples
+    --------
+    >>> input = np.ones((3, 3, 3))
+    >>> output = ufftn(input)
+    >>> np.allclose(np.sum(input) / np.sqrt(input.size), output[0, 0, 0])
+    True
+    >>> output.shape
+    (3, 3, 3)
     """
     if dim is None:
         dim = inarray.ndim
@@ -90,6 +100,15 @@ def uifftn(inarray, dim=None):
     -------
     outarray : ndarray (same shape than inarray)
         The unitary inverse N-D Fourier transform of `inarray`.
+
+    Examples
+    --------
+    >>> input = np.ones((3, 3, 3))
+    >>> output = uifftn(input)
+    >>> np.allclose(np.sum(input) / np.sqrt(input.size), output[0, 0, 0])
+    True
+    >>> output.shape
+    (3, 3, 3)
     """
     if dim is None:
         dim = inarray.ndim
@@ -118,9 +137,18 @@ def urfftn(inarray, dim=None):
 
     Notes
     -----
-    The `r` function assume an input array of real
+    The `urfft` functions assume an input array of real
     values. Consequently, the output have an Hermitian property and
     redondant values are not computed and returned.
+
+    Examples
+    --------
+    >>> input = np.ones((5, 5, 5))
+    >>> output = urfftn(input)
+    >>> np.allclose(np.sum(input) / np.sqrt(input.size), output[0, 0, 0])
+    True
+    >>> output.shape
+    (5, 5, 3)
     """
     if dim is None:
         dim = inarray.ndim
@@ -128,7 +156,7 @@ def urfftn(inarray, dim=None):
     return outarray / np.sqrt(np.prod(inarray.shape[-dim:]))
 
 
-def uirfftn(inarray, dim=None):
+def uirfftn(inarray, dim=None, shape=None):
     """N-dim real unitary Fourier transform
 
     This transform consider the Hermitian property of the transform
@@ -141,23 +169,35 @@ def uirfftn(inarray, dim=None):
     dim : int, optional
         The `dim` last axis along wich to compute the transform. All
         axes by default.
+    shape : tuple of int
+        The shape of the output. The shape of `rfft` is ambiguous in
+        case of odd shape. In this case, the parameter must be
+        used. see `np.fft.irfftn`.
 
     Returns
     -------
-    outarray : ndarray (the last dim as (N - 1) *2 lenght)
+    outarray : ndarray
         The unitary N-D inverse real Fourier transform of `inarray`.
 
     Notes
     -----
-    The `r` function assume an input array of real
-    values. Consequently, the output have an Hermitian property and
-    redondant values are not computed and returned.
+    The `uirfft` function assume that output array is of real
+    values. Consequently, the input is assumed of having an Hermitian
+    property and redondant values are implicit.
+
+    Examples
+    --------
+    >>> input = np.ones((5, 5, 5))
+    >>> output = uirfftn(urfftn(input), shape=input.shape)
+    >>> np.allclose(input, output)
+    True
+    >>> output.shape
+    (5, 5, 5)
     """
     if dim is None:
         dim = inarray.ndim
-    outarray = np.fft.irfftn(inarray, axes=range(-dim, 0))
-    return outarray * np.sqrt(np.prod(inarray.shape[-dim:-1]) *
-                              (inarray.shape[-1] - 1) * 2)
+    outarray = np.fft.irfftn(inarray, shape, axes=range(-dim, 0))
+    return outarray * np.sqrt(np.prod(outarray.shape[-dim:]))
 
 
 def ufft2(inarray):
@@ -178,6 +218,15 @@ def ufft2(inarray):
     See Also
     --------
     uifft2, ufftn, urfftn
+
+    Examples
+    --------
+    >>> input = np.ones((10, 128, 128))
+    >>> output = ufft2(input)
+    >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size), output[1, 0, 0])
+    True
+    >>> output.shape
+    (10, 128, 128)
     """
     return ufftn(inarray, 2)
 
@@ -200,6 +249,15 @@ def uifft2(inarray):
     See Also
     --------
     uifft2, uifftn, uirfftn
+
+    Examples
+    --------
+    >>> input = np.ones((10, 128, 128))
+    >>> output = uifft2(input)
+    >>> np.allclose(np.sum(input[1, ...]) / np.sqrt(input[1, ...].size), output[0, 0, 0])
+    True
+    >>> output.shape
+    (10, 128, 128)
     """
     return uifftn(inarray, 2)
 
@@ -224,11 +282,20 @@ def urfft2(inarray):
     See Also
     --------
     ufft2, ufftn, urfftn
+
+    Examples
+    --------
+    >>> input = np.ones((10, 128, 128))
+    >>> output = urfft2(input)
+    >>> np.allclose(np.sum(input[1,...]) / np.sqrt(input[1,...].size), output[1, 0, 0])
+    True
+    >>> output.shape
+    (10, 128, 65)
     """
     return urfftn(inarray, 2)
 
 
-def uirfft2(inarray):
+def uirfft2(inarray, shape=None):
     """2-dim real unitary Fourier transform
 
     Compute the real inverse Fourier transform on the last 2 axes.
@@ -248,14 +315,24 @@ def uirfft2(inarray):
     See Also
     --------
     urfft2, uifftn, uirfftn
+
+    Examples
+    --------
+    >>> input = np.ones((10, 128, 128))
+    >>> output = uirfftn(urfftn(input), shape=input.shape)
+    >>> np.allclose(input, output)
+    True
+    >>> output.shape
+    (10, 128, 128)
     """
-    return uirfftn(inarray, 2)
+    return uirfftn(inarray, 2, shape=shape)
 
 
 def image_quad_norm(inarray):
     """Return quadratic norm of images in Fourier space
 
-    This function detect if the image suppose the hermitian property.
+    This function detect if the image suppose the hermitian
+    property.
 
     Parameters
     ----------
@@ -266,6 +343,14 @@ def image_quad_norm(inarray):
     -------
     norm : float
         The quadratic norm of `inarray`.
+        
+    Examples
+    --------
+    >>> input = np.ones((5, 5))
+    >>> image_quad_norm(ufft2(input)) == np.sum(np.abs(input)**2)
+    True
+    >>> image_quad_norm(ufft2(input)) == image_quad_norm(urfft2(input))
+    True
     """
     # If there is an hermitian symmetry
     if inarray.shape[-1] != inarray.shape[-2]:
@@ -305,6 +390,11 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
     See Also
     --------
     ufftn, uifftn, urfftn, uirfftn
+
+    Examples
+    --------
+    >>> np.all(np.array([[4, 0], [0, 0]]) == ir2tf(np.ones((2, 2)), (2, 2)))
+    True
 
     Notes
     -----
@@ -348,9 +438,16 @@ def laplacian(ndim, shape):
     -------
     tf : array_like, complex
         The transfert function
-
     impr : array_like, real
         The laplacian
+        
+    Examples
+    --------
+    >>> tf, ir = laplacian(2, (32, 32))
+    >>> np.all(ir == np.array([[0, -1, 0], [-1, 4, -1], [0, -1, 0]]))
+    True
+    >>> np.all(tf == ir2tf(ir, (32, 32)))
+    True
     """
     impr = np.zeros([3] * ndim)
     for dim in range(ndim):
