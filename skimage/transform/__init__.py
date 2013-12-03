@@ -5,6 +5,7 @@ from .radon_transform import radon, iradon, iradon_sart
 from .finite_radon_transform import frt2, ifrt2
 from .integral import integral_image, integrate
 from ._geometric import (warp, warp_coords, estimate_transform,
+                         matrix_transform,
                          SimilarityTransform, AffineTransform,
                          ProjectiveTransform, PolynomialTransform,
                          PiecewiseAffineTransform)
@@ -30,6 +31,7 @@ __all__ = ['hough_circle',
            'warp',
            'warp_coords',
            'estimate_transform',
+           'matrix_transform',
            'SimilarityTransform',
            'AffineTransform',
            'ProjectiveTransform',

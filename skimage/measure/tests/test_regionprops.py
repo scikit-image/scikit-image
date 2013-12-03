@@ -345,6 +345,9 @@ def test_old_dict_interface():
 
     np.array([list(props.values()) for props in feats], np.float)
     assert_equal(len(feats[0]), 8)
+    def assign():
+        feats[0]['Area'] = 0
+    assert_raises(RuntimeError, assign)
 
 
 def test_label_sequence():
@@ -359,6 +362,13 @@ def test_pure_background():
     a = np.zeros((2, 2), dtype=np.int)
     ps = regionprops(a)
     assert len(ps) == 0
+
+
+def test_invalid():
+    ps = regionprops(SAMPLE)
+    def get_intensity_image():
+        ps[0].intensity_image
+    assert_raises(AttributeError, get_intensity_image)
 
 
 if __name__ == "__main__":

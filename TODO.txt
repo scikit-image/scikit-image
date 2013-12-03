@@ -1,3 +1,8 @@
+Version 0.11
+------------
+* Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
+
+
 Version 0.10
 ------------
 * Remove deprecated functions in `skimage.filter.rank.*`
@@ -14,3 +19,6 @@ Version 0.10
 * Remove deprecated `skimage.color.is_gray` and `skimage.color.is_rgb`
   functions
 * Enable doctests of experimental `skimage.feature.brief`
+* Remove deprecated `skimage.segmentation.visualize_boundaries`
+* Remove deprecated `skimage.morphology.greyscale_*`
+* Remove deprecated `skimage.exposure.equalize`

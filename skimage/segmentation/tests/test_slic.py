@@ -1,7 +1,7 @@
 import itertools as it
 import warnings
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal
+from numpy.testing import assert_equal, assert_raises
 from skimage.segmentation import slic
 
 
@@ -21,10 +21,10 @@ def test_color_2d():
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape[:-1])
-    assert_array_equal(seg[:10, :10], 0)
-    assert_array_equal(seg[10:, :10], 2)
-    assert_array_equal(seg[:10, 10:], 1)
-    assert_array_equal(seg[10:, 10:], 3)
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
 
 
 def test_gray_2d():
@@ -41,10 +41,10 @@ def test_gray_2d():
 
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape)
-    assert_array_equal(seg[:10, :10], 0)
-    assert_array_equal(seg[10:, :10], 2)
-    assert_array_equal(seg[:10, 10:], 1)
-    assert_array_equal(seg[10:, 10:], 3)
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
 
 
 def test_color_3d():
@@ -65,7 +65,7 @@ def test_color_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_array_equal(seg[s], c)
+        assert_equal(seg[s], c)
 
 
 def test_gray_3d():
@@ -87,7 +87,7 @@ def test_gray_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_array_equal(seg[s], c)
+        assert_equal(seg[s], c)
 
 
 def test_list_sigma():
@@ -116,6 +116,12 @@ def test_spacing():
                       compactness=1.0, multichannel=False)
     assert_equal(seg_non_spaced, result_non_spaced)
     assert_equal(seg_spaced, result_spaced)
+
+
+def test_invalid_lab_conversion():
+    img = np.array([[1, 1, 1, 0, 0],
+                    [1, 1, 0, 0, 0]], np.float)
+    assert_raises(ValueError, slic, img, multichannel=True, convert2lab=True)
 
 
 

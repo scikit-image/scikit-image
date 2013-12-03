@@ -1021,10 +1021,12 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     """
     # Backward API compatibility
     if reverse_map is not None:
+        warnings.warn('`reverse_map` parameter is deprecated and replaced by '
+                      'the `inverse_map` parameter.')
         inverse_map = reverse_map
 
-    if image.ndim < 2:
-        raise ValueError("Input must have more than 1 dimension.")
+    if image.ndim < 2 or image.ndim > 3:
+        raise ValueError("Input must have 2 or 3 dimensions.")
 
     orig_ndim = image.ndim
     image = np.atleast_3d(img_as_float(image))
@@ -1049,8 +1051,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
               and inverse_map.__name__ == 'inverse'
-              and isinstance(get_bound_method_class(inverse_map),
-                             HOMOGRAPHY_TRANSFORMS)):
+              and get_bound_method_class(inverse_map) \
+                  in HOMOGRAPHY_TRANSFORMS):
             matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
 
         if matrix is not None:

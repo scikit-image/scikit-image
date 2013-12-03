@@ -19,7 +19,11 @@ def test_square_image():
     assert len(results) == 57
 
     # Harris
-    results = peak_local_max(corner_harris(im))
+    results = peak_local_max(corner_harris(im, method='k'))
+    # interest at corner
+    assert len(results) == 1
+
+    results = peak_local_max(corner_harris(im, method='eps'))
     # interest at corner
     assert len(results) == 1
 
@@ -41,7 +45,9 @@ def test_noisy_square_image():
     assert results.any()
 
     # Harris
-    results = peak_local_max(corner_harris(im, sigma=1.5))
+    results = peak_local_max(corner_harris(im, sigma=1.5, method='k'))
+    assert len(results) == 1
+    results = peak_local_max(corner_harris(im, sigma=1.5, method='eps'))
     assert len(results) == 1
 
     # Shi-Tomasi
@@ -139,6 +145,10 @@ def test_corner_peaks():
 
     corners = corner_peaks(response, exclude_border=False, min_distance=0)
     assert len(corners) == 4
+
+    corners = corner_peaks(response, exclude_border=False, min_distance=0,
+                           indices=False)
+    assert np.sum(corners) == 4
 
 
 def test_blank_image_nans():

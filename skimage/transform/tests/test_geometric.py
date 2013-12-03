@@ -1,7 +1,9 @@
 import numpy as np
-from numpy.testing import assert_equal, assert_array_almost_equal
+from numpy.testing import (assert_equal, assert_array_almost_equal,
+                           assert_raises)
 from skimage.transform._geometric import _stackcopy
-from skimage.transform import (estimate_transform,
+from skimage.transform._geometric import GeometricTransform
+from skimage.transform import (estimate_transform, matrix_transform,
                                SimilarityTransform, AffineTransform,
                                ProjectiveTransform, PolynomialTransform,
                                PiecewiseAffineTransform)
@@ -36,6 +38,18 @@ def test_stackcopy():
     _stackcopy(x, y)
     for i in range(layers):
         assert_array_almost_equal(x[..., i], y)
+
+
+def test_estimate_transform():
+    for tform in ('similarity', 'affine', 'projective', 'polynomial'):
+        estimate_transform(tform, SRC[:2, :], DST[:2, :])
+    assert_raises(ValueError, estimate_transform, 'foobar',
+                  SRC[:2, :], DST[:2, :])
+
+
+def test_matrix_transform():
+    tform = AffineTransform(scale=(0.1, 0.5), rotation=2)
+    assert_equal(tform(SRC), matrix_transform(SRC, tform._matrix))
 
 
 def test_similarity_estimation():
@@ -73,6 +87,16 @@ def test_similarity_init():
     assert_array_almost_equal(tform2.scale, scale)
     assert_array_almost_equal(tform2.rotation, rotation)
     assert_array_almost_equal(tform2.translation, translation)
+
+    # test special case for scale if rotation=0
+    scale = 0.1
+    rotation = 0
+    translation = (1, 1)
+    tform = SimilarityTransform(scale=scale, rotation=rotation,
+                                translation=translation)
+    assert_array_almost_equal(tform.scale, scale)
+    assert_array_almost_equal(tform.rotation, rotation)
+    assert_array_almost_equal(tform.translation, translation)
 
 
 def test_affine_estimation():
@@ -165,14 +189,43 @@ def test_polynomial_default_order():
     assert_array_almost_equal(tform2._params, tform._params)
 
 
+def test_polynomial_inverse():
+    assert_raises(Exception, PolynomialTransform().inverse, 0)
+
+
 def test_union():
     tform1 = SimilarityTransform(scale=0.1, rotation=0.3)
     tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
     tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
-
     tform = tform1 + tform2
-
     assert_array_almost_equal(tform._matrix, tform3._matrix)
+
+    tform1 = AffineTransform(scale=(0.1, 0.1), rotation=0.3)
+    tform2 = SimilarityTransform(scale=0.1, rotation=0.9)
+    tform3 = SimilarityTransform(scale=0.1 ** 2, rotation=0.3 + 0.9)
+    tform = tform1 + tform2
+    assert_array_almost_equal(tform._matrix, tform3._matrix)
+    assert tform.__class__ == ProjectiveTransform
+
+
+def test_geometric_tform():
+    tform = GeometricTransform()
+    assert_raises(NotImplementedError, tform, 0)
+    assert_raises(NotImplementedError, tform.inverse, 0)
+    assert_raises(NotImplementedError, tform.__add__, 0)
+
+
+def test_invalid_input():
+    assert_raises(ValueError, ProjectiveTransform, np.zeros((2, 3)))
+    assert_raises(ValueError, AffineTransform, np.zeros((2, 3)))
+    assert_raises(ValueError, SimilarityTransform, np.zeros((2, 3)))
+
+    assert_raises(ValueError, AffineTransform,
+                  matrix=np.zeros((2, 3)), scale=1)
+    assert_raises(ValueError, SimilarityTransform,
+                  matrix=np.zeros((2, 3)), scale=1)
+
+    assert_raises(ValueError, PolynomialTransform, np.zeros((3, 3)))
 
 
 if __name__ == "__main__":
