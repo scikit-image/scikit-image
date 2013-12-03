@@ -38,7 +38,7 @@ __status__ = "stable"
 __keywords__ = "restoration, image, deconvolution"
 
 
-def wiener(data, psf, balance, reg=None, is_real=True):
+def wiener(image, psf, balance, reg=None, is_real=True):
     """Wiener-Hunt deconvolution
 
     Return the deconvolution with a wiener-Hunt approach (ie with
@@ -46,7 +46,7 @@ def wiener(data, psf, balance, reg=None, is_real=True):
 
     Parameters
     ----------
-    data : (M, N) ndarray
+    image : (M, N) ndarray
        Input degraded image
     psf : ndarray
        The impulse response (input image's space) or the transfer
@@ -69,7 +69,7 @@ def wiener(data, psf, balance, reg=None, is_real=True):
     Returns
     -------
     im_deconv : (M, N) ndarray
-       The deconvolved data
+       The deconvolved image
 
     Examples
     --------
@@ -130,24 +130,24 @@ def wiener(data, psf, balance, reg=None, is_real=True):
 
     """
     if reg is None:
-        reg, _ = uft.laplacian(data.ndim, data.shape)
+        reg, _ = uft.laplacian(image.ndim, image.shape)
     if not np.iscomplex(reg):
-        reg = uft.ir2tf(reg, data.shape)
+        reg = uft.ir2tf(reg, image.shape)
 
     if psf.shape != reg.shape:
-        trans_func = uft.ir2tf(psf, data.shape)
+        trans_func = uft.ir2tf(psf, image.shape)
     else:
         trans_func = psf
 
     wiener_filter = np.conj(trans_func) / (np.abs(trans_func)**2 +
                                            balance * np.abs(reg)**2)
     if is_real:
-        return uft.uirfft2(wiener_filter * uft.urfft2(data))
+        return uft.uirfft2(wiener_filter * uft.urfft2(image))
     else:
-        return uft.uifft2(wiener_filter * uft.ufft2(data))
+        return uft.uifft2(wiener_filter * uft.ufft2(image))
 
 
-def unsupervised_wiener(data, psf, reg=None, user_params=None):
+def unsupervised_wiener(image, psf, reg=None, user_params=None):
     """Unsupervised Wiener-Hunt deconvolution
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -171,7 +171,7 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     Returns
     -------
     x_postmean : (M, N) ndarray
-       The deconvolved data (the posterior mean).
+       The deconvolved image (the posterior mean).
     chains : dict
        The keys 'noise' and 'prior' contain the chain list of noise and
        prior precision respectively.
@@ -225,12 +225,12 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     params.update(user_params or {})
 
     if not reg:
-        reg, _ = uft.laplacian(data.ndim, data.shape)
+        reg, _ = uft.laplacian(image.ndim, image.shape)
     if not np.iscomplex(reg):
-        reg = uft.ir2tf(reg, data.shape)
+        reg = uft.ir2tf(reg, image.shape)
 
     if psf.shape != reg.shape:
-        trans_fct = uft.ir2tf(psf, data.shape)
+        trans_fct = uft.ir2tf(psf, image.shape)
     else:
         trans_fct = psf
 
@@ -250,10 +250,10 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     areg2 = np.abs(reg)**2
     atf2 = np.abs(trans_fct)**2
 
-    # The Fourier transfrom may change the data.size attribut, so we
+    # The Fourier transfrom may change the image.size attribut, so we
     # store it.
-    data_size = data.size
-    data = uft.urfft2(data.astype(np.float))
+    image_size = image.size
+    image = uft.urfft2(image.astype(np.float))
 
     # Gibbs sampling
     for iteration in range(params['max_iter']):
@@ -262,24 +262,24 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
         # weighing (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
         excursion = np.sqrt(0.5) / np.sqrt(precision) * (
-            np.random.standard_normal(data.shape) +
-            1j * np.random.standard_normal(data.shape))
+            np.random.standard_normal(image.shape) +
+            1j * np.random.standard_normal(image.shape))
 
         # mean Eq. 30 (RLS for fixed gn, gamma0 and gamma1 ...)
         wiener_filter = gn_chain[-1] * np.conj(trans_fct) / precision
 
         # sample of X in Fourier space
-        x_sample = wiener_filter * data + excursion
+        x_sample = wiener_filter * image + excursion
         if params['callback']:
             params['callback'](x_sample)
 
         # sample of Eq. 31 p(gn | x^k, gx^k, y)
-        gn_chain.append(npr.gamma(data_size / 2,
-                                  2 / uft.image_quad_norm(data - x_sample *
+        gn_chain.append(npr.gamma(image_size / 2,
+                                  2 / uft.image_quad_norm(image - x_sample *
                                                           trans_fct)))
 
         # sample of Eq. 31 p(gx | x^k, gn^k-1, y)
-        gx_chain.append(npr.gamma((data_size - 1) / 2,
+        gx_chain.append(npr.gamma((image_size - 1) / 2,
                                   2 / uft.image_quad_norm(x_sample * reg)))
 
         # current empirical average
@@ -306,13 +306,13 @@ def unsupervised_wiener(data, psf, reg=None, user_params=None):
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
 
-def richardson_lucy(data, psf, iterations=50):
+def richardson_lucy(image, psf, iterations=50):
     """Richardson-Lucy deconvolution.
 
     Parameters
     ----------
-    data : ndarray
-       The data
+    image : ndarray
+       Input degraded image
     psf : ndarray
        The point spread function
     iterations : int
@@ -339,12 +339,12 @@ def richardson_lucy(data, psf, iterations=50):
     .. [2] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
 
     """
-    data = data.astype(np.float)
+    image = image.astype(np.float)
     psf = psf.astype(np.float)
-    im_deconv = 0.5 * np.ones(data.shape)
+    im_deconv = 0.5 * np.ones(image.shape)
     psf_mirror = psf[::-1, ::-1]
     for _ in range(iterations):
-        relative_blur = data / convolve2d(im_deconv, psf, 'same')
+        relative_blur = image / convolve2d(im_deconv, psf, 'same')
         im_deconv *= convolve2d(relative_blur, psf_mirror, 'same')
 
     return im_deconv
