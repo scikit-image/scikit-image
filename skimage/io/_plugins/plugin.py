@@ -61,25 +61,32 @@ def reset_plugins():
     _load_preferred_plugins()
 
 
+def _parse_config_file(filename):
+    """Return plugin name and meta-data dict from plugin config file."""
+    parser = ConfigParser()
+    parser.read(filename)
+    name = parser.sections()[0]
+
+    meta_data = {}
+    for opt in parser.options(name):
+        meta_data[opt] = parser.get(name, opt)
+
+    return name, meta_data
+
+
 def _scan_plugins():
     """Scan the plugins directory for .ini files and parse them
     to gather plugin meta-data.
 
     """
     pd = os.path.dirname(__file__)
-    ini = glob(os.path.join(pd, '*.ini'))
+    config_files = glob(os.path.join(pd, '*.ini'))
 
-    for f in ini:
-        cp = ConfigParser()
-        cp.read(f)
-        name = cp.sections()[0]
-
-        meta_data = {}
-        for opt in cp.options(name):
-            meta_data[opt] = cp.get(name, opt)
+    for filename in config_files:
+        name, meta_data = _parse_config_file(filename)
         plugin_meta_data[name] = meta_data
 
-        provides = [s.strip() for s in cp.get(name, 'provides').split(',')]
+        provides = [s.strip() for s in meta_data['provides'].split(',')]
         valid_provides = [p for p in provides if p in plugin_store]
 
         for p in provides:
@@ -88,7 +95,7 @@ def _scan_plugins():
                       " Ignoring." % (name, p))
 
         plugin_provides[name] = valid_provides
-        plugin_module_name[name] = os.path.basename(f)[:-4]
+        plugin_module_name[name] = os.path.basename(filename)[:-4]
 
 _scan_plugins()
 
