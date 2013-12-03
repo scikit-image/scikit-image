@@ -15,7 +15,10 @@ __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
 
 
+# The plugin store will save a list of *loaded* io functions for each io type
+# (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
 plugin_store = None
+
 plugin_provides = {}
 plugin_module_name = {}
 plugin_meta_data = {}
@@ -223,7 +226,6 @@ def use_plugin(name, kind=None):
                 [(n, f) for (n, f) in funcs if n != name]
 
         plugin_store[k] = funcs
-
 
 
 def _load(plugin):
