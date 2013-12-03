@@ -361,8 +361,8 @@ class PiecewiseAffineTransform(GeometricTransform):
     def __init__(self):
         self._tesselation = None
         self._inverse_tesselation = None
-        self.affines_ = []
-        self.inverse_affines_ = []
+        self.affines_ = None
+        self.inverse_affines_ = None
 
     @property
     def affines(self):
