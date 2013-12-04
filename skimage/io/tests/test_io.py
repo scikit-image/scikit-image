@@ -4,6 +4,7 @@ from numpy.testing import assert_array_equal, raises, run_module_suite
 import numpy as np
 
 import skimage.io as io
+from skimage.io._plugins.plugin import plugin_store
 from skimage import data_dir
 
 
@@ -26,6 +27,14 @@ def test_imread_url():
     image_url = 'file:///{0}/camera.png'.format(data_path)
     image = io.imread(image_url)
     assert image.shape == (512, 512)
+
+
+@raises(RuntimeError)
+def test_imread_no_plugin():
+    # tweak data path so that file URI works on both unix and windows.
+    image_path = os.path.join(data_dir, 'lena.png')
+    plugin_store['imread'] = []
+    io.imread(image_path)
 
 
 if __name__ == "__main__":
