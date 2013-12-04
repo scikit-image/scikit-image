@@ -1,11 +1,3 @@
-try:
-    from urllib.request import urlopen  # Python 3
-except ImportError:
-    from urllib2 import urlopen  # Python 2
-
-import os
-import re
-import tempfile
 from io import BytesIO
 
 import numpy as np
@@ -13,19 +5,11 @@ import six
 
 from skimage.io._plugins import call_plugin
 from skimage.color import rgb2grey
-
+from skimage._shared import six
+from .util import file_or_url_context
 
 
 __all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show']
-
-
-URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
-
-
-def is_url(filename):
-    """Return True if string is an http or ftp path."""
-    return (isinstance(filename, six.string_types) and
-            URL_REGEX.match(filename) is not None)
 
 
 class Image(np.ndarray):
@@ -110,14 +94,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    if is_url(fname):
-        _, ext = os.path.splitext(fname)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as f:
-            u = urlopen(fname)
-            f.write(u.read())
-        img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)
-        os.remove(f.name)
-    else:
+    with file_or_url_context(fname) as fname:
         img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
 
     if as_grey and getattr(img, 'ndim', 0) >= 3:
