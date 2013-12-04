@@ -155,11 +155,11 @@ def call_plugin(kind, *args, **kwargs):
 
     plugin_funcs = plugin_store[kind]
     if len(plugin_funcs) == 0:
-        raise RuntimeError('''No suitable plugin registered for %s.
-
-You may load I/O plugins with the `skimage.io.use_plugin`
-command.  A list of all available plugins can be found using
-`skimage.io.plugins()`.''' % kind)
+        msg = ("No suitable plugin registered for %s.\n\n"
+               "You may load I/O plugins with the `skimage.io.use_plugin` "
+               "command.  A list of all available plugins can be found using "
+               "`skimage.io.plugins()`.")
+        raise RuntimeError(msg % kind)
 
     plugin = kwargs.pop('plugin', None)
     if plugin is None:
