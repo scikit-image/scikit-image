@@ -36,6 +36,12 @@ def test_contains():
     assert 'imread.jpg' in config
 
 
+def test_getitem():
+    config = InheritedConfig({'imread': 'a'})
+    assert config['imread'] == 'a'
+    assert config['imread.png'] == 'a'
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()

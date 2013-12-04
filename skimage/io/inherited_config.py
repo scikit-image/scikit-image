@@ -32,7 +32,10 @@ class InheritedConfig(dict):
 
         super(InheritedConfig, self).__init__(config_values, **kwargs)
 
-    def get(self, key, default=None, _prev=None):
+    def __getitem__(self, key):
+        return self.get(key, _raise=True)
+
+    def get(self, key, default=None, _raise=False):
         """Return best matching config value for `key`.
 
         Get value from configuration. The search for `key` is in the following
@@ -94,11 +97,13 @@ class InheritedConfig(dict):
         1
         """
         if key in self.keys():
-            return self[key]
+            return super(InheritedConfig, self).__getitem__(key)
         elif default is not None:
             return default
         elif self._separator in key:
             return self.get(self._parent(key))
+        elif _raise:
+            raise KeyError('%r not in %s' % (key, self.__class__.__name__))
         else:
             return None
 
