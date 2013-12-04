@@ -33,8 +33,12 @@ def test_imread_url():
 def test_imread_no_plugin():
     # tweak data path so that file URI works on both unix and windows.
     image_path = os.path.join(data_dir, 'lena.png')
+    plugins = plugin_store['imread']
     plugin_store['imread'] = []
-    io.imread(image_path)
+    try:
+        io.imread(image_path)
+    finally:
+        plugin_store['imread'] = plugins
 
 
 if __name__ == "__main__":
