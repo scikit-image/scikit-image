@@ -95,7 +95,7 @@ def test_available():
 
 def test_load_preferred_plugins():
     from skimage.io._plugins import null_plugin
-    plugin.preferred_plugins = ['null']
+    plugin.preferred_plugins['io'] = ['null']
     plugin.reset_plugins()
     plug, func = plugin.plugin_store['imshow'][0]
     assert func == null_plugin.imshow
