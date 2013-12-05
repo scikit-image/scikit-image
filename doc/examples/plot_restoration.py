@@ -46,11 +46,11 @@ fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 5))
 
 plt.gray()
 
-ax[0].imshow(lena)
+ax[0].imshow(lena, vmin=deconvolved.min(), vmax=deconvolved.max())
 ax[0].axis('off')
 ax[0].set_title('Data')
 
-ax[1].imshow(deconvolved, vmax=lena.max())
+ax[1].imshow(deconvolved)
 ax[1].axis('off')
 ax[1].set_title('Self tuned restoration')
 

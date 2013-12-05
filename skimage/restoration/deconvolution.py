@@ -153,8 +153,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
 
     Return the deconvolution with a Wiener-Hunt approach, where the
     hyperparameters are automatically estimated. The algorithm is a
-    stochastic iterative process (Gibbs sampler) described in [1]. See
-    also `wiener` function.
+    stochastic iterative process (Gibbs sampler) described in ref
+    belo]. See also `wiener` function.
 
     Parameters
     ----------
