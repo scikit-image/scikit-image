@@ -24,6 +24,8 @@ plugin_provides = {}
 plugin_module_name = {}
 plugin_meta_data = {}
 
+preferred_plugins = ['matplotlib', 'pil', 'qt', 'freeimage', 'null']
+
 
 def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded
@@ -41,7 +43,6 @@ _clear_plugins()
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
     io_funcs = ['imsave', 'imshow', 'imread_collection', 'imread']
-    preferred_plugins = ['matplotlib', 'pil', 'qt', 'freeimage', 'null']
     for func in io_funcs:
         for plugin in preferred_plugins:
             if plugin not in available_plugins:
