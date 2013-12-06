@@ -528,6 +528,52 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     return _apply(generic_cy._pop, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
+def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
+    """Return the sum of pixels inside the neighborhood. If sum does not fit the data type,folding is possible.
+
+    Parameters
+    ----------
+    image : ndarray (uint8, uint16)
+        Image array.
+    selem : ndarray
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray (same dtype as input)
+        If None, a new array will be allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+
+    Returns
+    -------
+    out : ndarray (same dtype as input image)
+        Output image.
+
+    Examples
+    --------
+    >>> # Local mean
+    >>> from skimage.morphology import square
+    >>> import skimage.filter.rank as rank
+    >>> ima = 255 * np.array([[0, 0, 0, 0, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 1, 1, 1, 0],
+    ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
+    >>> rank.pop(ima, square(3))
+    array([[1, 2, 3, 2, 1],
+           [2, 4, 6, 4, 2],
+           [3, 6, 9, 6, 3],
+           [2, 4, 6, 4, 2],
+           [1, 2, 3, 2, 1]], dtype=uint8)
+
+    """
+
+    return _apply(generic_cy._sum, image, selem, out=out,
+                  mask=mask, shift_x=shift_x, shift_y=shift_y)
+
 
 def threshold(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return greyscale local threshold of an image.
