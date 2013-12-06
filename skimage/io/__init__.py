@@ -4,7 +4,7 @@ The following plug-ins are available:
 
 """
 
-from ._plugins import *
+from .manage_plugins import *
 from .sift import *
 from .collection import *
 
@@ -36,6 +36,7 @@ def _update_doc(doc):
 
     """
     from textwrap import wrap
+
 
     info_table = [(p, plugin_info(p).get('description', 'no description'))
                   for p in available_plugins if not p == 'test']

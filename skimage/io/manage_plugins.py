@@ -9,6 +9,7 @@ except ImportError:
 
 import os.path
 from glob import glob
+
 from skimage.io.inherited_config import InheritedConfig
 
 
@@ -25,6 +26,7 @@ plugin_module_name = {}
 plugin_meta_data = {}
 
 preferred_plugins = {
+    # Default plugins for all types (overridden by specific types below).
     'all': ['matplotlib', 'pil', 'qt', 'freeimage', 'null'],
     # Use PIL as the default imread plugin, since matplotlib (1.2.x)
     # is buggy (flips PNGs around, returns bytes as floats, etc.)
@@ -92,7 +94,7 @@ def _scan_plugins():
 
     """
     pd = os.path.dirname(__file__)
-    config_files = glob(os.path.join(pd, '*.ini'))
+    config_files = glob(os.path.join(pd, '_plugins', '*.ini'))
 
     for filename in config_files:
         name, meta_data = _parse_config_file(filename)

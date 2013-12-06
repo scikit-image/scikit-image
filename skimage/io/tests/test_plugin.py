@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from numpy.testing import assert_equal, raises
 
 from skimage import io
-from skimage.io._plugins import plugin
+from skimage.io import manage_plugins
 from numpy.testing.decorators import skipif
 
 try:
@@ -22,7 +22,7 @@ except RuntimeError:
 
 
 def setup_module():
-    plugin.use_plugin('test')  # see ../_plugins/test_plugin.py
+    manage_plugins.use_plugin('test')  # see ../_plugins/test_plugin.py
 
 
 def teardown_module():
@@ -32,11 +32,11 @@ def teardown_module():
 @contextmanager
 def protect_preferred_plugins():
     """Contexts where `preferred_plugins` can be modified w/o side-effects."""
-    preferred_plugins = plugin.preferred_plugins.copy()
+    preferred_plugins = manage_plugins.preferred_plugins.copy()
     try:
         yield
     finally:
-        plugin.preferred_plugins = preferred_plugins
+        manage_plugins.preferred_plugins = preferred_plugins
 
 
 def test_read():
@@ -56,41 +56,41 @@ def test_collection():
 
 
 def test_use():
-    plugin.use_plugin('test')
-    plugin.use_plugin('test', 'imshow')
+    manage_plugins.use_plugin('test')
+    manage_plugins.use_plugin('test', 'imshow')
 
 
 @raises(ValueError)
 def test_failed_use():
-    plugin.use_plugin('asd')
+    manage_plugins.use_plugin('asd')
 
 
 @skipif(not PIL_available and not FI_available)
 def test_use_priority():
-    plugin.use_plugin(priority_plugin)
-    plug, func = plugin.plugin_store['imread'][0]
+    manage_plugins.use_plugin(priority_plugin)
+    plug, func = manage_plugins.plugin_store['imread'][0]
     assert_equal(plug, priority_plugin)
 
-    plugin.use_plugin('test')
-    plug, func = plugin.plugin_store['imread'][0]
+    manage_plugins.use_plugin('test')
+    plug, func = manage_plugins.plugin_store['imread'][0]
     assert_equal(plug, 'test')
 
 
 @skipif(not PIL_available)
 def test_use_priority_with_func():
-    plugin.use_plugin('pil')
-    plug, func = plugin.plugin_store['imread'][0]
+    manage_plugins.use_plugin('pil')
+    plug, func = manage_plugins.plugin_store['imread'][0]
     assert_equal(plug, 'pil')
 
-    plugin.use_plugin('test', 'imread')
-    plug, func = plugin.plugin_store['imread'][0]
+    manage_plugins.use_plugin('test', 'imread')
+    plug, func = manage_plugins.plugin_store['imread'][0]
     assert_equal(plug, 'test')
 
-    plug, func = plugin.plugin_store['imsave'][0]
+    plug, func = manage_plugins.plugin_store['imsave'][0]
     assert_equal(plug, 'pil')
 
-    plugin.use_plugin('test')
-    plug, func = plugin.plugin_store['imsave'][0]
+    manage_plugins.use_plugin('test')
+    plug, func = manage_plugins.plugin_store['imsave'][0]
     assert_equal(plug, 'test')
 
 
@@ -109,11 +109,11 @@ def test_load_preferred_plugins_all():
     from skimage.io._plugins import null_plugin
 
     with protect_preferred_plugins():
-        plugin.preferred_plugins = {'all': ['null']}
-        plugin.reset_plugins()
+        manage_plugins.preferred_plugins = {'all': ['null']}
+        manage_plugins.reset_plugins()
 
         for plugin_type in ('imread', 'imsave', 'imshow'):
-            plug, func = plugin.plugin_store[plugin_type][0]
+            plug, func = manage_plugins.plugin_store[plugin_type][0]
             assert func == getattr(null_plugin, plugin_type)
 
 
@@ -121,12 +121,12 @@ def test_load_preferred_plugins_imread():
     from skimage.io._plugins import null_plugin
 
     with protect_preferred_plugins():
-        plugin.preferred_plugins['imread'] = ['null']
-        plugin.reset_plugins()
+        manage_plugins.preferred_plugins['imread'] = ['null']
+        manage_plugins.reset_plugins()
 
-        plug, func = plugin.plugin_store['imread'][0]
+        plug, func = manage_plugins.plugin_store['imread'][0]
         assert func == null_plugin.imread
-        plug, func = plugin.plugin_store['imshow'][0]
+        plug, func = manage_plugins.plugin_store['imshow'][0]
         assert func != null_plugin.imshow
 
 
