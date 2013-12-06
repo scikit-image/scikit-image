@@ -45,7 +45,7 @@ def test_unsupervised_wiener():
     deconvolved = np.real(restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
         user_params={"callback": lambda x: None})[0])
-    path = pjoin(dirname(abspath("./tests/")), 'camera_unsup2.npy')
+    path = pjoin(dirname(abspath(__file__)), 'camera_unsup2.npy')
     np.testing.assert_allclose(deconvolved, np.load(path))
 
 
