@@ -529,7 +529,8 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
                   mask=mask, shift_x=shift_x, shift_y=shift_y)
 
 def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
-    """Return the sum of pixels inside the neighborhood. If sum does not fit the data type,folding is possible.
+    """Return the sum of pixels inside the neighborhood.
+    If sum does not fit the data type,folding is possible.
 
     Parameters
     ----------
