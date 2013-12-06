@@ -52,7 +52,7 @@ def wiener(image, psf, balance, reg=None, is_real=True):
        The impulse response (input image's space) or the transfer
        function (Fourier space). Both are accepted. The transfer
        function is recognize as being complex
-       (`np.iscomplexobj(psf)`).
+       (``np.iscomplexobj(psf)``).
     balance : float
        The regularisation parameter value that tune the balance
        between the data and the prior information.
@@ -60,12 +60,12 @@ def wiener(image, psf, balance, reg=None, is_real=True):
        The regularisation operator. The Laplacian by default. It can
        be an impulse response or a transfer function, as for the psf.
     is_real : boolean, optional
-       True by default. Specify if `psf` and `reg` are provided with
-       hermitian hypothesis, that is only half of the frequency plane
-       is provided (due to the redundancy of Fourier transform of real
-       signal). It's apply only if `psf` and/or `reg` are provided as
-       transfer function.  For the hermitian property see `uft`
-       module or `np.fft.rfftn`.
+       True by default. Specify if ``psf`` and ``reg`` are provided
+       with hermitian hypothesis, that is only half of the frequency
+       plane is provided (due to the redundancy of Fourier transform
+       of real signal). It's apply only if ``psf`` and/or ``reg`` are
+       provided as transfer function.  For the hermitian property see
+       ``uft`` module or ``np.fft.rfftn``.
 
     Returns
     -------
@@ -154,8 +154,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True):
 
     Return the deconvolution with a Wiener-Hunt approach, where the
     hyperparameters are automatically estimated. The algorithm is a
-    stochastic iterative process (Gibbs sampler) described in ref
-    belo]. See also `wiener` function.
+    stochastic iterative process (Gibbs sampler) described in
+    reference below. See also ``wiener`` function.
 
     Parameters
     ----------
@@ -165,7 +165,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True):
        The impulse response (input image's space) or the transfer
        function (Fourier space). Both are accepted. The transfer
        function is recognize as being complex
-       (`np.iscomplexobj(psf)`).
+       (``np.iscomplexobj(psf)``).
     reg : ndarray, optional
        The regularisation operator. The Laplacian by default. It can
        be an impulse response or a transfer function, as for the psf.
@@ -177,12 +177,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True):
     x_postmean : (M, N) ndarray
        The deconvolved image (the posterior mean).
     chains : dict
-       The keys 'noise' and 'prior' contain the chain list of noise and
-       prior precision respectively.
+       The keys ``noise`` and ``prior`` contain the chain list of
+       noise and prior precision respectively.
 
     Other parameters
     ----------------
-    The keys of `user_params` are:
+    The keys of ``user_params`` are:
 
     threshold : float
        The stopping criterion: the norm of the difference between to
@@ -194,7 +194,7 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True):
     min_iter : int
        The minimum number of iterations. 30 by default.
     max_iter : int
-       The maximum number of iterations if `threshold` is not
+       The maximum number of iterations if ``threshold`` is not
        satisfied. 150 by default.
     callback : callable (None by default)
        A user provided callable to which is passed, if the function
@@ -338,7 +338,8 @@ def richardson_lucy(image, psf, iterations=50):
     psf : ndarray
        The point spread function
     iterations : int
-       Number of iterations. This parameter play to role of regularisation.
+       Number of iterations. This parameter play to role of
+       regularisation.
 
     Returns
     -------

@@ -29,6 +29,8 @@ measure
     Measurement of image properties, e.g., similarity and contours.
 morphology
     Morphological operations, e.g. opening or skeletonization.
+restoration
+    Deconvolution algorithms.
 segmentation
     Splitting an image into self-similar regions.
 transform

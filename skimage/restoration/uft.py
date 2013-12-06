@@ -31,7 +31,7 @@ equal to
 .. math::  \frac{1}{\sqrt{n}} \sum_i x_i
 
 or the Fourier tranform have the same energy than the original image
-(see `image_quad_norm` function). The transform is applied from the
+(see ``image_quad_norm`` function). The transform is applied from the
 last axes for performance reason (c order array). You may use directly
 the numpy.fft module for more sophisticated purpose.
 
@@ -62,13 +62,13 @@ def ufftn(inarray, dim=None):
     inarray : ndarray
         The array to transform.
     dim : int, optional
-        The `dim` last axis along wich to compute the transform. All
+        The ``dim`` last axis along wich to compute the transform. All
         axes by default.
 
     Returns
     -------
     outarray : ndarray (same shape than inarray)
-        The unitary N-D Fourier transform of `inarray`.
+        The unitary N-D Fourier transform of ``inarray``.
 
     Examples
     --------
@@ -93,13 +93,13 @@ def uifftn(inarray, dim=None):
     inarray : ndarray
         The array to transform.
     dim : int, optional
-        The `dim` last axis along wich to compute the transform. All
+        The ``dim`` last axis along wich to compute the transform. All
         axes by default.
 
     Returns
     -------
     outarray : ndarray (same shape than inarray)
-        The unitary inverse N-D Fourier transform of `inarray`.
+        The unitary inverse N-D Fourier transform of ``inarray``.
 
     Examples
     --------
@@ -127,17 +127,17 @@ def urfftn(inarray, dim=None):
     inarray : ndarray
         The array to transform.
     dim : int, optional
-        The `dim` last axis along wich to compute the transform. All
+        The ``dim`` last axis along wich to compute the transform. All
         axes by default.
 
     Returns
     -------
     outarray : ndarray (the last dim as  N / 2 + 1 lenght)
-        The unitary N-D real Fourier transform of `inarray`.
+        The unitary N-D real Fourier transform of ``inarray``.
 
     Notes
     -----
-    The `urfft` functions assume an input array of real
+    The ``urfft`` functions assume an input array of real
     values. Consequently, the output have an Hermitian property and
     redondant values are not computed and returned.
 
@@ -167,21 +167,21 @@ def uirfftn(inarray, dim=None, shape=None):
     inarray : ndarray
         The array to transform.
     dim : int, optional
-        The `dim` last axis along wich to compute the transform. All
+        The ``dim`` last axis along wich to compute the transform. All
         axes by default.
     shape : tuple of int
-        The shape of the output. The shape of `rfft` is ambiguous in
+        The shape of the output. The shape of ``rfft`` is ambiguous in
         case of odd shape. In this case, the parameter must be
-        used. see `np.fft.irfftn`.
+        used. see ``np.fft.irfftn``.
 
     Returns
     -------
     outarray : ndarray
-        The unitary N-D inverse real Fourier transform of `inarray`.
+        The unitary N-D inverse real Fourier transform of ``inarray``.
 
     Notes
     -----
-    The `uirfft` function assume that output array is of real
+    The ``uirfft`` function assume that output array is of real
     values. Consequently, the input is assumed of having an Hermitian
     property and redondant values are implicit.
 
@@ -213,7 +213,7 @@ def ufft2(inarray):
     Returns
     -------
     outarray : ndarray (same shape than inarray)
-        The unitary 2-D Fourier transform of `inarray`.
+        The unitary 2-D Fourier transform of ``inarray``.
 
     See Also
     --------
@@ -244,7 +244,7 @@ def uifft2(inarray):
     Returns
     -------
     outarray : ndarray (same shape than inarray)
-        The unitary 2-D inverse Fourier transform of `inarray`.
+        The unitary 2-D inverse Fourier transform of ``inarray``.
 
     See Also
     --------
@@ -277,7 +277,7 @@ def urfft2(inarray):
     Returns
     -------
     outarray : ndarray (the last dim as (N - 1) *2 lenght)
-        The unitary 2-D real Fourier transform of `inarray`.
+        The unitary 2-D real Fourier transform of ``inarray``.
 
     See Also
     --------
@@ -310,7 +310,7 @@ def uirfft2(inarray, shape=None):
     Returns
     -------
     outarray : ndarray (the last dim as (N - 1) *2 lenght)
-        The unitary 2-D inverse real Fourier transform of `inarray`.
+        The unitary 2-D inverse real Fourier transform of ``inarray``.
 
     See Also
     --------
@@ -331,8 +331,7 @@ def uirfft2(inarray, shape=None):
 def image_quad_norm(inarray):
     """Return quadratic norm of images in Fourier space
 
-    This function detect if the image suppose the hermitian
-    property.
+    This function detect if the image suppose the hermitian property.
 
     Parameters
     ----------
@@ -342,7 +341,7 @@ def image_quad_norm(inarray):
     Returns
     -------
     norm : float
-        The quadratic norm of `inarray`.
+        The quadratic norm of ``inarray``.
 
     Examples
     --------
@@ -376,7 +375,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
        A tuple of integer corresponding to the target shape of the
        tranfert function.
     dim : int, optional
-        The `dim` last axis along wich to compute the transform. All
+        The ``dim`` last axis along wich to compute the transform. All
         axes by default.
     is_real : boolean (optionnal, default True)
        If True, imp_resp is supposed real and the hermissian property
@@ -385,7 +384,7 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     Returns
     -------
     y : complex ndarray
-       The tranfert function of shape `shape`.
+       The tranfert function of shape ``shape``.
 
     See Also
     --------
@@ -404,8 +403,8 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
     -----
     The input array can be composed of multiple dimentionnal IR with
     an arbitraru number of IR. The individual IR must be accesed
-    through first axes. The last `dim` axes of space definition. The
-    `dim` parameter must be specified to compute the transform only
+    through first axes. The last ``dim`` axes of space definition. The
+    ``dim`` parameter must be specified to compute the transform only
     along these last axes.
     """
     if not dim:
