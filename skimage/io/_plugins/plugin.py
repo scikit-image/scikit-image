@@ -25,8 +25,13 @@ plugin_module_name = {}
 plugin_meta_data = {}
 
 preferred_plugins = {
-    'io': ['matplotlib', 'pil', 'qt', 'freeimage', 'null']
+    'all': ['matplotlib', 'pil', 'qt', 'freeimage', 'null'],
+    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
+    # is buggy (flips PNGs around, returns bytes as floats, etc.)
+    'imread': ['pil'],
+    'imread.tiff': ['tifffile'],
 }
+
 
 def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded
@@ -43,23 +48,24 @@ _clear_plugins()
 
 def _load_preferred_plugins():
     # Load preferred plugin for each io function.
-    io_funcs = ['imsave', 'imshow', 'imread_collection', 'imread']
-    for func in io_funcs:
-        for plugin in preferred_plugins['io']:
-            if plugin not in available_plugins:
-                continue
-            try:
-                use_plugin(plugin, kind=func)
-                break
-            except (ImportError, RuntimeError, OSError):
-                pass
+    io_types = ['imsave', 'imshow', 'imread_collection', 'imread']
+    for p_type in io_types:
+        _set_plugin(p_type, preferred_plugins['all'])
 
-    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
-    # is buggy (flips PNGs around, returns bytes as floats, etc.)
-    try:
-        use_plugin('pil', 'imread')
-    except ImportError:
-        pass
+    plugin_types = (p for p in preferred_plugins.keys() if p != 'all')
+    for p_type in plugin_types:
+        _set_plugin(p_type, preferred_plugins[p_type])
+
+
+def _set_plugin(plugin_type, plugin_list):
+    for plugin in plugin_list:
+        if plugin not in available_plugins:
+            continue
+        try:
+            use_plugin(plugin, kind=plugin_type)
+            break
+        except (ImportError, RuntimeError, OSError):
+            pass
 
 
 def reset_plugins():

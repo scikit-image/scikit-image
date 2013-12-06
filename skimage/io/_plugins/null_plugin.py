@@ -1,4 +1,4 @@
-__all__ = ['imshow', 'imread', '_app_show']
+__all__ = ['imshow', 'imread', 'imsave', '_app_show']
 
 import warnings
 
@@ -16,5 +16,10 @@ def imshow(*args, **kwargs):
 
 def imread(*args, **kwargs):
     warnings.warn(RuntimeWarning(message))
+
+
+def imsave(*args, **kwargs):
+    warnings.warn(RuntimeWarning(message))
+
 
 _app_show = imshow

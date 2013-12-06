@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+
 from numpy.testing import assert_equal, raises
 
 from skimage import io
@@ -25,6 +27,16 @@ def setup_module():
 
 def teardown_module():
     io.reset_plugins()
+
+
+@contextmanager
+def protect_preferred_plugins():
+    """Contexts where `preferred_plugins` can be modified w/o side-effects."""
+    preferred_plugins = plugin.preferred_plugins.copy()
+    try:
+        yield
+    finally:
+        plugin.preferred_plugins = preferred_plugins
 
 
 def test_read():
@@ -93,12 +105,29 @@ def test_available():
     assert 'test' in io.find_available_plugins(loaded=True)
 
 
-def test_load_preferred_plugins():
+def test_load_preferred_plugins_all():
     from skimage.io._plugins import null_plugin
-    plugin.preferred_plugins['io'] = ['null']
-    plugin.reset_plugins()
-    plug, func = plugin.plugin_store['imshow'][0]
-    assert func == null_plugin.imshow
+
+    with protect_preferred_plugins():
+        plugin.preferred_plugins = {'all': ['null']}
+        plugin.reset_plugins()
+
+        for plugin_type in ('imread', 'imsave', 'imshow'):
+            plug, func = plugin.plugin_store[plugin_type][0]
+            assert func == getattr(null_plugin, plugin_type)
+
+
+def test_load_preferred_plugins_imread():
+    from skimage.io._plugins import null_plugin
+
+    with protect_preferred_plugins():
+        plugin.preferred_plugins['imread'] = ['null']
+        plugin.reset_plugins()
+
+        plug, func = plugin.plugin_store['imread'][0]
+        assert func == null_plugin.imread
+        plug, func = plugin.plugin_store['imshow'][0]
+        assert func != null_plugin.imshow
 
 
 if __name__ == "__main__":
