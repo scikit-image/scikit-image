@@ -66,6 +66,9 @@ Library:
     Extension: skimage.filter._ctmf
         Sources:
             skimage/filter/_ctmf.pyx
+    Extension: skimage.filter._inpaint_criminisi
+        Sources:
+            skimage/filter/_inpaint_criminisi.pyx
     Extension: skimage.filter._denoise_cy
         Sources:
             skimage/filter/_denoise_cy.pyx
