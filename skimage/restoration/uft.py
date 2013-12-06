@@ -343,7 +343,7 @@ def image_quad_norm(inarray):
     -------
     norm : float
         The quadratic norm of `inarray`.
-        
+
     Examples
     --------
     >>> input = np.ones((5, 5))
@@ -360,7 +360,7 @@ def image_quad_norm(inarray):
         return np.sum(np.sum(np.abs(inarray)**2, axis=-1), axis=-1)
 
 
-def ir2tf(imp_resp, shape, dim=None, real=True):
+def ir2tf(imp_resp, shape, dim=None, is_real=True):
     """Compute the transfer function of IR
 
     This function make the necessary correct zero-padding, zero
@@ -378,7 +378,7 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
     dim : int, optional
         The `dim` last axis along wich to compute the transform. All
         axes by default.
-    real : boolean (optionnal, default True)
+    is_real : boolean (optionnal, default True)
        If True, imp_resp is supposed real and the hermissian property
        is used with rfftn Fourier transform.
 
@@ -394,6 +394,10 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
     Examples
     --------
     >>> np.all(np.array([[4, 0], [0, 0]]) == ir2tf(np.ones((2, 2)), (2, 2)))
+    True
+    >>> ir2tf(np.ones((2, 2)), (512, 512)).shape == (512, 257)
+    True
+    >>> ir2tf(np.ones((2, 2)), (512, 512), is_real=False).shape == (512, 512)
     True
 
     Notes
@@ -416,13 +420,13 @@ def ir2tf(imp_resp, shape, dim=None, real=True):
             irpadded = np.roll(irpadded,
                                shift=-int(np.floor(axis_size / 2)),
                                axis=axis)
-    if real:
+    if is_real:
         return np.fft.rfftn(irpadded, axes=range(-dim, 0))
     else:
         return np.fft.fftn(irpadded, axes=range(-dim, 0))
 
 
-def laplacian(ndim, shape):
+def laplacian(ndim, shape, is_real=True):
     """Return the transfert function of the laplacian
 
     Laplacian is the second order difference, on line and column.
@@ -433,6 +437,10 @@ def laplacian(ndim, shape):
         The dimension of the laplacian
     shape : tuple, shape
         The support on which to compute the transfert function
+    is_real : boolean (optionnal, default True)
+       If True, imp_resp is supposed real and the hermissian property
+       is used with rfftn Fourier transform to return the transfert
+       function.
 
     Returns
     -------
@@ -440,7 +448,7 @@ def laplacian(ndim, shape):
         The transfert function
     impr : array_like, real
         The laplacian
-        
+
     Examples
     --------
     >>> tf, ir = laplacian(2, (32, 32))
@@ -459,4 +467,4 @@ def laplacian(ndim, shape):
                               -1.0]).reshape([-1 if i == dim else 1
                                               for i in range(ndim)])
     impr[([slice(1, 2)] * ndim)] = 2.0 * ndim
-    return ir2tf(impr, shape), impr
+    return ir2tf(impr, shape, is_real=is_real), impr

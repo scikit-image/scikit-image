@@ -92,12 +92,14 @@ def wiener(image, psf, balance, reg=None, is_real=True):
     where :math:`n` is noise, :math:`H` the PSF and :math:`x` the
     unknown original image, the Wiener filter is
 
-    .. math:: \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2) \Lambda_H^\dag F y
+    .. math::
+       \hat x = F^\dag (|\Lambda_H|^2 + \lambda |\Lambda_D|^2)
+       \Lambda_H^\dag F y
 
     where :math:`F` and :math:`F^\dag` are the Fourier and inverse
     Fourier transfroms respectively, :math:`\Lambda_H` the transfer
-    function (or the Fourier transfrom of the PSF, see [2]) and
-    :math:`\Lambda_D` the filter to penalize the restored image
+    function (or the Fourier transfrom of the PSF, see [Hunt] below)
+    and :math:`\Lambda_D` the filter to penalize the restored image
     frequencies (Laplacian by default, that is penalization of high
     frequency). The parameter :math:`\lambda` tunes the balance
     between the data (that tends to increase high frequency, even
@@ -110,9 +112,9 @@ def wiener(image, psf, balance, reg=None, is_real=True):
     as high-frequency penalization to compensate noise amplification
     or so called "explosive" solution. These methods are well
     interpreted by Bayesian analysis.
-    
+
     Finally, the use of Fourier space implies a circulant property of
-    :math:`H`, see [2].
+    :math:`H`, see [Hunt].
 
     References
     ----------
@@ -128,15 +130,14 @@ def wiener(image, psf, balance, reg=None, is_real=True):
     .. [2] B. R. Hunt "A matrix theory proof of the discrete
            convolution theorem", IEEE Trans. on Audio and
            Electroacoustics, vol. au-19, no. 4, pp. 285-288, dec. 1971
-
     """
     if reg is None:
-        reg, _ = uft.laplacian(image.ndim, image.shape)
+        reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
-        reg = uft.ir2tf(reg, image.shape)
+        reg = uft.ir2tf(reg, image.shape, is_real=is_real)
 
     if psf.shape != reg.shape:
-        trans_func = uft.ir2tf(psf, image.shape)
+        trans_func = uft.ir2tf(psf, image.shape, is_real=is_real)
     else:
         trans_func = psf
 
@@ -148,7 +149,7 @@ def wiener(image, psf, balance, reg=None, is_real=True):
         return uft.uifft2(wiener_filter * uft.ufft2(image))
 
 
-def unsupervised_wiener(image, psf, reg=None, user_params=None):
+def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True):
     """Unsupervised Wiener-Hunt deconvolution
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -240,12 +241,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
     params.update(user_params or {})
 
     if reg is None:
-        reg, _ = uft.laplacian(image.ndim, image.shape)
+        reg, _ = uft.laplacian(image.ndim, image.shape, is_real=is_real)
     if not np.iscomplexobj(reg):
-        reg = uft.ir2tf(reg, image.shape)
+        reg = uft.ir2tf(reg, image.shape, is_real=is_real)
 
     if psf.shape != reg.shape:
-        trans_fct = uft.ir2tf(psf, image.shape)
+        trans_fct = uft.ir2tf(psf, image.shape,  is_real=is_real)
     else:
         trans_fct = psf
 
@@ -267,13 +268,16 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
 
     # The Fourier transfrom may change the image.size attribut, so we
     # store it.
-    data_spectrum = uft.urfft2(image.astype(np.float))
+    if is_real:
+        data_spectrum = uft.urfft2(image.astype(np.float))
+    else:
+        data_spectrum = uft.ufft2(image.astype(np.float))
 
     # Gibbs sampling
     for iteration in range(params['max_iter']):
         # Sample of Eq. 27 p(circX^k | gn^k-1, gx^k-1, y).
 
-        # weighing (correlation in direct space)
+        # weighting (correlation in direct space)
         precision = gn_chain[-1] * atf2 + gx_chain[-1] * areg2  # Eq. 29
         excursion = np.sqrt(0.5) / np.sqrt(precision) * (
             np.random.standard_normal(data_spectrum.shape) +
@@ -316,7 +320,10 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None):
 
     # Empirical average \approx POSTMEAN Eq. 44
     x_postmean = x_postmean / (iteration - params['burnin'])
-    x_postmean = uft.uirfft2(x_postmean)
+    if is_real:
+        x_postmean = uft.uirfft2(x_postmean)
+    else:
+        x_postmean = uft.uifft2(x_postmean)
 
     return (x_postmean, {'noise': gn_chain, 'prior': gx_chain})
 
