@@ -556,10 +556,10 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
     >>> ima = np.array([[0, 0, 0, 0, 0],
-    ...                       [0, 1, 1, 1, 0],
-    ...                       [0, 1, 1, 1, 0],
-    ...                       [0, 1, 1, 1, 0],
-    ...                       [0, 0, 0, 0, 0]], dtype=np.uint8)
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 1, 1, 1, 0],
+    ...                 [0, 0, 0, 0, 0]], dtype=np.uint8)
     >>> rank.sum(ima, square(3))
     array([[1, 2, 3, 2, 1],
            [2, 4, 6, 4, 2],

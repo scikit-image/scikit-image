@@ -471,10 +471,10 @@ def _pop(dtype_t[:, ::1] image,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
 
 def _sum(dtype_t[:, ::1] image,
-                   char[:, ::1] selem,
-                   char[:, ::1] mask,
-                   dtype_t_out[:, ::1] out,
-                   char shift_x, char shift_y, Py_ssize_t max_bin):
+         char[:, ::1] selem,
+         char[:, ::1] mask,
+         dtype_t_out[:, ::1] out,
+         char shift_x, char shift_y, Py_ssize_t max_bin):
 
     _core(_kernel_sum[dtype_t], image, selem, mask,
           out, shift_x, shift_y, 0, 0, 0, 0, max_bin)
