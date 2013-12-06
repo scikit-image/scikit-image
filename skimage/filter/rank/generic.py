@@ -508,7 +508,6 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Examples
     --------
-    >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
     >>> ima = 255 * np.array([[0, 0, 0, 0, 0],
@@ -555,7 +554,6 @@ def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 
     Examples
     --------
-    >>> # Local mean
     >>> from skimage.morphology import square
     >>> import skimage.filter.rank as rank
     >>> ima = np.array([[0, 0, 0, 0, 0],
