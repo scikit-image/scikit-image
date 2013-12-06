@@ -4,7 +4,7 @@ from .generic import (autolevel, bottomhat, equalize, gradient, maximum, mean,
 from ._percentile import (autolevel_percentile, gradient_percentile,
                           mean_percentile, subtract_mean_percentile,
                           enhance_contrast_percentile, percentile,
-                          pop_percentile,sum_percentile, threshold_percentile)
+                          pop_percentile, sum_percentile, threshold_percentile)
 from .bilateral import mean_bilateral, pop_bilateral, sum_bilateral
 
 from skimage._shared.utils import deprecated
@@ -52,6 +52,8 @@ __all__ = ['autolevel',
            'pop_percentile',
            'pop_bilateral',
            'sum',
+           'sum_bilateral',
+           'sum_percentile',
            'threshold',
            'threshold_percentile',
            'tophat',
