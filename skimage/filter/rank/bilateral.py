@@ -169,7 +169,8 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
     Radiometric similarity is defined by the greylevel interval [g-s0, g+s1]
     where g is the current pixel greylevel. Only pixels belonging to the
     structuring element AND having a greylevel inside this interval are
-    averaged. Return greyscale local bilateral_sum of an image.
+    summed. Return greyscale local bilateral_sum of an image.
+    Result is truncated (8bit or 16bit).
 
     Parameters
     ----------

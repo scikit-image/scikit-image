@@ -315,7 +315,7 @@ def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
     """Return greyscale local sum of an image.
 
     sum is computed on the given structuring element. Only levels between
-    percentiles [p0, p1] are used. result is truncated (8bit or 16bit).
+    percentiles [p0, p1] are used. Result is truncated (8bit or 16bit).
 
     Parameters
     ----------
