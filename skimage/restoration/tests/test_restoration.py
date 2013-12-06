@@ -26,7 +26,9 @@ def test_wiener():
     deconvolved = restoration.wiener(data, otf, 0.05,
                                      reg=laplacian,
                                      is_real=False)
-    np.testing.assert_allclose(deconvolved, np.load(path))
+    np.testing.assert_allclose(np.real(deconvolved),
+                               np.load(path),
+                               rtol=1e-3)
 
 
 def test_unsupervised_wiener():
@@ -42,11 +44,13 @@ def test_unsupervised_wiener():
     _, laplacian = uft.laplacian(2, data.shape)
     otf = uft.ir2tf(psf, data.shape, is_real=False)
     np.random.seed(0)
-    deconvolved = np.real(restoration.unsupervised_wiener(
+    deconvolved = restoration.unsupervised_wiener(
         data, otf, reg=laplacian, is_real=False,
-        user_params={"callback": lambda x: None})[0])
+        user_params={"callback": lambda x: None})[0]
     path = pjoin(dirname(abspath(__file__)), 'camera_unsup2.npy')
-    np.testing.assert_allclose(deconvolved, np.load(path))
+    np.testing.assert_allclose(np.real(deconvolved),
+                               np.load(path),
+                               rtol=1e-3)
 
 
 def test_richardson_lucy():
