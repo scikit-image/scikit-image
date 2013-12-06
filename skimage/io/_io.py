@@ -99,7 +99,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         # TODO: This should probably use imghdr to get the image format.
         try:
             _, extension = os.path.splitext(fname)
-            function = function + extension
+            function = function + extension.lower()
         except AttributeError:  # Buffers don't work with splitext
             pass
         img = call_plugin(function, fname, plugin=plugin, **plugin_args)
