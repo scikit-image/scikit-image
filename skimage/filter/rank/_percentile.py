@@ -310,6 +310,42 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
+def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
+                   shift_y=False, p0=0, p1=1):
+    """Return greyscale local sum of an image.
+
+    sum is computed on the given structuring element. Only levels between
+    percentiles [p0, p1] are used. result is truncated (8bit or 16bit).
+
+    Parameters
+    ----------
+    image : ndarray (uint8, uint16)
+        Image array.
+    selem : ndarray
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray (same dtype as input)
+        If None, a new array will be allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+    p0, p1 : float in [0, ..., 1]
+        Define the [p0, p1] percentile interval to be considered for computing
+        the value.
+
+    Returns
+    -------
+    out : ndarray (same dtype as input image)
+        Output image.
+
+    """
+
+    return _apply(percentile_cy._sum,
+                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  shift_y=shift_y, p0=p0, p1=p1)
 
 def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0):
