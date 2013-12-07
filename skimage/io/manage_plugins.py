@@ -202,10 +202,10 @@ def use_plugin(name, kind=None):
     Examples
     --------
 
-    To use a plugin named 'null' as the default image reader, you would write:
+    To use Matplotlib as the default image reader, you would write:
 
     >>> from skimage import io
-    >>> io.use_plugin('null', 'imread')
+    >>> io.use_plugin('matplotlib', 'imread')
 
     To see a list of available plugins run ``io.available_plugins``. Note that
     this lists plugins that are defined, but the full list may not be usable
