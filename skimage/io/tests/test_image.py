@@ -18,7 +18,8 @@ def test_tags():
 
 
 def test_repr_png_roundtrip():
-    original_array = 255 * np.ones((3, 3), dtype=np.uint8)
+    # Use RGB-like shape since some backends convert grayscale to RGB
+    original_array = 255 * np.ones((5, 5, 3), dtype=np.uint8)
     image = Image(original_array)
     array = imread(BytesIO(image._repr_png_()))
     # Force output to ubyte range for plugin compatibility.
