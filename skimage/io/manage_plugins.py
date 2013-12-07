@@ -10,6 +10,8 @@ except ImportError:
 import os.path
 from glob import glob
 
+from skimage.io.inherited_config import InheritedConfig
+
 
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
@@ -29,6 +31,7 @@ preferred_plugins = {
     # Use PIL as the default imread plugin, since matplotlib (1.2.x)
     # is buggy (flips PNGs around, returns bytes as floats, etc.)
     'imread': ['pil'],
+    'imread.tiff': ['tifffile'],
 }
 
 
@@ -37,11 +40,11 @@ def _clear_plugins():
 
     """
     global plugin_store
-    plugin_store = {'imread': [],
-                    'imsave': [],
-                    'imshow': [],
-                    'imread_collection': [],
-                    '_app_show': []}
+    plugin_store = InheritedConfig({'imread': [],
+                                    'imsave': [],
+                                    'imshow': [],
+                                    'imread_collection': [],
+                                    '_app_show': []})
 _clear_plugins()
 
 
@@ -197,19 +200,15 @@ def use_plugin(name, kind=None):
 
     See Also
     --------
-    available_plugins : List of available plugins
+    plugins : List of available plugins
 
     Examples
     --------
 
-    To use a plugin named 'null' as the default image reader, you would write:
+    Use the Python Imaging Library to read images:
 
-    >>> from skimage import io
-    >>> io.use_plugin('null', 'imread')
-
-    To see a list of available plugins run ``io.available_plugins``. Note that
-    this lists plugins that are defined, but the full list may not be usable
-    if your system does not have the required libraries installed.
+    >>> from skimage.io import use_plugin
+    >>> use_plugin('pil', 'imread')
 
     """
     if kind is None:

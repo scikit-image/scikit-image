@@ -1,3 +1,4 @@
+import os
 from io import BytesIO
 
 import numpy as np
@@ -94,7 +95,14 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
         as_grey = flatten
 
     with file_or_url_context(fname) as fname:
-        img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
+        function = 'imread'
+        # TODO: This should probably use imghdr to get the image format.
+        try:
+            _, extension = os.path.splitext(fname)
+            function = function + extension.lower()
+        except AttributeError:  # Buffers don't work with splitext
+            pass
+        img = call_plugin(function, fname, plugin=plugin, **plugin_args)
 
     if as_grey and getattr(img, 'ndim', 0) >= 3:
         img = rgb2grey(img)
