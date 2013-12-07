@@ -10,8 +10,6 @@ except ImportError:
 import os.path
 from glob import glob
 
-from skimage.io.inherited_config import InheritedConfig
-
 
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
@@ -31,7 +29,6 @@ preferred_plugins = {
     # Use PIL as the default imread plugin, since matplotlib (1.2.x)
     # is buggy (flips PNGs around, returns bytes as floats, etc.)
     'imread': ['pil'],
-    'imread.tiff': ['tifffile'],
 }
 
 
@@ -40,11 +37,11 @@ def _clear_plugins():
 
     """
     global plugin_store
-    plugin_store = InheritedConfig({'imread': [],
-                                    'imsave': [],
-                                    'imshow': [],
-                                    'imread_collection': [],
-                                    '_app_show': []})
+    plugin_store = {'imread': [],
+                    'imsave': [],
+                    'imshow': [],
+                    'imread_collection': [],
+                    '_app_show': []}
 _clear_plugins()
 
 
