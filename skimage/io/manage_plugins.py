@@ -200,16 +200,19 @@ def use_plugin(name, kind=None):
 
     See Also
     --------
-    plugins : List of available plugins
+    available_plugins : List of available plugins
 
     Examples
     --------
 
-    Use the Python Imaging Library to read images:
+    To use a plugin named 'null' as the default image reader, you would write:
 
-    >>> from skimage.io import use_plugin
-    >>> use_plugin('pil', 'imread')
+    >>> from skimage import io
+    >>> io.use_plugin('null', 'imread')
 
+    To see a list of available plugins run ``io.available_plugins``. Note that
+    this lists plugins that are defined, but the full list may not be usable
+    if your system does not have the required libraries installed.
     """
     if kind is None:
         kind = plugin_store.keys()
