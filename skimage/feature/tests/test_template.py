@@ -108,7 +108,8 @@ def test_pad_input():
     image[mid, -9:-4] -= template       # full min template centered at 12
     image[mid, -3:] += template[:, :3]  # half max template centered at 18
 
-    result = match_template(image, template, pad_input=True)
+    result = match_template(image, template, pad_input=True,
+                            constant_values=image.mean())
 
     # get the max and min results.
     sorted_result = np.argsort(result.flat)
