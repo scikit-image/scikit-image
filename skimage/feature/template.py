@@ -19,13 +19,7 @@ def _window_sum_2d(image, window_shape):
 
 def _window_sum_3d(image, window_shape):
 
-    window_sum = np.cumsum(image, axis=0)
-    window_sum = (window_sum[window_shape[0]:-1]
-                  - window_sum[:-window_shape[0]-1])
-
-    window_sum = np.cumsum(window_sum, axis=1)
-    window_sum = (window_sum[:, window_shape[1]:-1]
-                  - window_sum[:, :-window_shape[1]-1])
+    window_sum = _window_sum_2d(image, window_shape)
 
     window_sum = np.cumsum(window_sum, axis=2)
     window_sum = (window_sum[:, :, window_shape[2]:-1]
