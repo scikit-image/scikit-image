@@ -266,6 +266,14 @@ def use_plugin(name, kind=None):
         plugin_store[k] = funcs
 
 
+def _inject_imread_collection_if_needed(module):
+    """Add `imread_collection` to module if not already present."""
+    if not hasattr(module, 'imread_collection') and hasattr(module, 'imread'):
+        imread = getattr(module, 'imread')
+        func = imread_collection_wrapper(imread)
+        setattr(module, 'imread_collection', func)
+
+
 def _load(plugin):
     """Load the given plugin.
 
@@ -291,12 +299,7 @@ def _load(plugin):
     provides = plugin_provides[plugin]
     for p in provides:
         if p == 'imread_collection':
-            add_plugin = (not hasattr(plugin_module, 'imread_collection') and
-                          hasattr(plugin_module, 'imread'))
-            if add_plugin:
-                imread = getattr(plugin_module, 'imread')
-                func = imread_collection_wrapper(imread)
-                setattr(plugin_module, 'imread_collection', func)
+            _inject_imread_collection_if_needed(plugin_module)
         elif not hasattr(plugin_module, p):
             print("Plugin %s does not provide %s as advertised.  Ignoring." % \
                   (plugin, p))
