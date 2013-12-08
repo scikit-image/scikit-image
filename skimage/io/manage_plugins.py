@@ -1,5 +1,19 @@
 """Handle image reading, writing and plotting plugins.
 
+To improve performance, plugins are only loaded as needed. As a result, there
+can be multiple states for a given plugin:
+
+    available: Defined in an *ini file located in `skimage.io._plugins`.
+        See also `skimage.io.available_plugins`.
+    partial definition: Specified in an *ini file, but not defined in the
+        corresponding plugin module. This will raise an error when loaded.
+    available but not on this system: Defined in `skimage.io._plugins`, but
+        a dependent library (e.g. Qt, PIL) is not available on your system.
+        This will raise an error when loaded.
+    loaded: The real availability is determined when it's explicitly loaded,
+        either because it's one of the default plugins, or because it's
+        loaded explicitly by the user.
+
 """
 
 try:
@@ -20,11 +34,14 @@ __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
 # The plugin store will save a list of *loaded* io functions for each io type
 # (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
 plugin_store = None
-
+# Dictionary mapping plugin names to a list of functions they provide.
 plugin_provides = {}
+# The module names for the plugins in `skimage.io._plugins`.
 plugin_module_name = {}
+# Meta-data about plugins provided by *.ini files.
 plugin_meta_data = {}
-
+# For each plugin type, default to the first available plugin as defined by
+# the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
     'all': ['matplotlib', 'pil', 'qt', 'freeimage', 'null'],
