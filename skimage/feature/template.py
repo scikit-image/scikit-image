@@ -4,7 +4,7 @@ from scipy.signal import fftconvolve
 from skimage.util import pad
 
 
-def _window_sum(image, window_shape):
+def _window_sum_2d(image, window_shape):
 
     window_sum = np.cumsum(image, axis=0)
     window_sum = (window_sum[window_shape[0]:-1]
@@ -17,18 +17,35 @@ def _window_sum(image, window_shape):
     return window_sum
 
 
+def _window_sum_3d(image, window_shape):
+
+    window_sum = np.cumsum(image, axis=0)
+    window_sum = (window_sum[window_shape[0]:-1]
+                  - window_sum[:-window_shape[0]-1])
+
+    window_sum = np.cumsum(window_sum, axis=1)
+    window_sum = (window_sum[:, window_shape[1]:-1]
+                  - window_sum[:, :-window_shape[1]-1])
+
+    window_sum = np.cumsum(window_sum, axis=2)
+    window_sum = (window_sum[:, :, window_shape[2]:-1]
+                  - window_sum[:, :, :-window_shape[2]-1])
+
+    return window_sum
+
+
 def match_template(image, template, pad_input=False, mode='constant',
                    constant_values=0):
-    """Match a template to a 2-D image using normalized correlation.
+    """Match a template to a 2-D or 3-D image using normalized correlation.
 
     The output is an array with values between -1.0 and 1.0, which correspond
     to the correlation coefficient that the template is found at the position.
 
     Parameters
     ----------
-    image : array_like
-        2-D Image to process.
-    template : array_like
+    image : (N, M[, D]) array
+        2-D or 3-D input image.
+    template : (N, M[, D]) array
         Template to locate.
     pad_input : bool
         If True, pad `image` with image mean so that output is the same size as
@@ -91,27 +108,42 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     if np.any(np.less(image.shape, template.shape)):
         raise ValueError("Image must be larger than template.")
+    if image.ndim not in (2, 3):
+        raise ValueError("Only 2- and 3-D images supported.")
+    if image.ndim != template.ndim:
+        raise ValueError("Dimensionality of template must match image.")
 
-    orig_shape = image.shape
+    image_shape = image.shape
 
     image = np.array(image, dtype=np.float32, copy=False)
 
+    pad_width = tuple((width, width) for width in template.shape)
     if mode == 'constant':
-        image = pad(image, pad_width=template.shape, mode=mode,
+        image = pad(image, pad_width=pad_width, mode=mode,
                     constant_values=constant_values)
     else:
-        image = pad(image, pad_width=template.shape, mode=mode)
+        image = pad(image, pad_width=pad_width, mode=mode)
 
-    image_window_sum = _window_sum(image, template.shape)
-    image_window_sum2 = _window_sum(image**2, template.shape)
+    if image.ndim == 2:
+        image_window_sum = _window_sum_2d(image, template.shape)
+        image_window_sum2 = _window_sum_2d(image**2, template.shape)
+    elif image.ndim == 3:
+        image_window_sum = _window_sum_3d(image, template.shape)
+        image_window_sum2 = _window_sum_3d(image**2, template.shape)
 
-    template_area = np.prod(template.shape)
+    template_volume = np.prod(template.shape)
     template_ssd = np.sum((template - template.mean())**2)
 
-    xcorr = fftconvolve(image, template[::-1, ::-1], mode="valid")[1:-1, 1:-1]
-    nom = xcorr - image_window_sum * (template.sum() / template_area)
+    if image.ndim == 2:
+        xcorr = fftconvolve(image, template[::-1, ::-1],
+                            mode="valid")[1:-1, 1:-1]
+    elif image.ndim == 3:
+        xcorr = fftconvolve(image, template[::-1, ::-1, ::-1],
+                            mode="valid")[1:-1, 1:-1, 1:-1]
 
-    denom = image_window_sum2 - image_window_sum**2 / template_area
+    nom = xcorr - image_window_sum * (template.sum() / template_volume)
+
+    denom = image_window_sum2 - image_window_sum**2 / template_volume
     denom *= template_ssd
     np.maximum(denom, 0, out=denom)  # sqrt of negative number not allowed
     np.sqrt(denom, out=denom)
@@ -125,15 +157,26 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     if pad_input:
         r0 = (template.shape[0] - 1) // 2
-        r1 = r0 + orig_shape[0]
+        r1 = r0 + image_shape[0]
         c0 = (template.shape[1] - 1) // 2
-        c1 = c0 + orig_shape[1]
+        c1 = c0 + image_shape[1]
     else:
         r0 = template.shape[0] - 1
-        r1 = r0 + orig_shape[0] - template.shape[0] + 1
+        r1 = r0 + image_shape[0] - template.shape[0] + 1
         c0 = template.shape[1] - 1
-        c1 = c0 + orig_shape[1] - template.shape[1] + 1
+        c1 = c0 + image_shape[1] - template.shape[1] + 1
 
-    response = response[r0:r1, c0:c1]
+
+    if image.ndim == 3:
+        if pad_input:
+            d0 = (template.shape[2] - 1) // 2
+            d1 = d0 + image_shape[2]
+        else:
+            d0 = template.shape[2] - 1
+            d1 = d0 + image_shape[2] - template.shape[2] + 1
+
+        response = response[r0:r1, c0:c1, d0:d1]
+    else:
+        response = response[r0:r1, c0:c1]
 
     return response
