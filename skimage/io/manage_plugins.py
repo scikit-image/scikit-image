@@ -24,7 +24,7 @@ except ImportError:
 import os.path
 from glob import glob
 
-from .collection import ImageCollection
+from .collection import imread_collection_wrapper
 
 
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
@@ -266,32 +266,6 @@ def use_plugin(name, kind=None):
         plugin_store[k] = funcs
 
 
-def _imread_collection_wrapper(imread):
-    def imread_collection(load_pattern, conserve_memory=True):
-        """Return an `ImageCollection` from files matching the given pattern.
-
-        Note that files are always stored in alphabetical order. Also note that
-        slicing returns a new ImageCollection, *not* a view into the data.
-
-        See `skimage.io.ImageCollection` for details.
-
-        Parameters
-        ----------
-        load_pattern : str or list
-            Pattern glob or filenames to load. The path can be absolute or
-            relative.  Multiple patterns should be separated by a colon,
-            e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
-            implementation notes below.
-        conserve_memory : bool, optional
-            If True, never keep more than one in memory at a specific
-            time.  Otherwise, images will be cached once they are loaded.
-
-        """
-        return ImageCollection(load_pattern, conserve_memory=conserve_memory,
-                               load_func=imread)
-    return imread_collection
-
-
 def _load(plugin):
     """Load the given plugin.
 
@@ -321,7 +295,7 @@ def _load(plugin):
                           hasattr(plugin_module, 'imread'))
             if add_plugin:
                 imread = getattr(plugin_module, 'imread')
-                func = _imread_collection_wrapper(imread)
+                func = imread_collection_wrapper(imread)
                 setattr(plugin_module, 'imread_collection', func)
         elif not hasattr(plugin_module, p):
             print("Plugin %s does not provide %s as advertised.  Ignoring." % \
