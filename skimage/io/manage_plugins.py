@@ -10,6 +10,8 @@ except ImportError:
 import os.path
 from glob import glob
 
+from .collection import ImageCollection
+
 
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
@@ -105,7 +107,14 @@ def _scan_plugins():
                 print("Plugin `%s` wants to provide non-existent `%s`." \
                       " Ignoring." % (name, p))
 
+        # Add plugins that provide 'imread' as provider of 'imread_collection'.
+        need_to_add_collection = ('imread_collection' not in valid_provides and
+                                  'imread' in valid_provides)
+        if need_to_add_collection:
+            valid_provides.append('imread_collection')
+
         plugin_provides[name] = valid_provides
+
         plugin_module_name[name] = os.path.basename(filename)[:-4]
 
 _scan_plugins()
@@ -135,7 +144,7 @@ def find_available_plugins(loaded=False):
     d = {}
     for plugin in plugin_provides:
         if not loaded or plugin in active_plugins:
-            d[plugin] = [f for f in plugin_provides[plugin] \
+            d[plugin] = [f for f in plugin_provides[plugin]
                          if not f.startswith('_')]
 
     return d
@@ -240,6 +249,32 @@ def use_plugin(name, kind=None):
         plugin_store[k] = funcs
 
 
+def _imread_collection_wrapper(imread):
+    def imread_collection(load_pattern, conserve_memory=True):
+        """Return an `ImageCollection` from files matching the given pattern.
+
+        Note that files are always stored in alphabetical order. Also note that
+        slicing returns a new ImageCollection, *not* a view into the data.
+
+        See `skimage.io.ImageCollection` for details.
+
+        Parameters
+        ----------
+        load_pattern : str or list
+            Pattern glob or filenames to load. The path can be absolute or
+            relative.  Multiple patterns should be separated by a colon,
+            e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
+            implementation notes below.
+        conserve_memory : bool, optional
+            If True, never keep more than one in memory at a specific
+            time.  Otherwise, images will be cached once they are loaded.
+
+        """
+        return ImageCollection(load_pattern, conserve_memory=conserve_memory,
+                               load_func=imread)
+    return imread_collection
+
+
 def _load(plugin):
     """Load the given plugin.
 
@@ -264,14 +299,22 @@ def _load(plugin):
 
     provides = plugin_provides[plugin]
     for p in provides:
-        if not hasattr(plugin_module, p):
+        if p == 'imread_collection':
+            add_plugin = (not hasattr(plugin_module, 'imread_collection') and
+                          hasattr(plugin_module, 'imread'))
+            if add_plugin:
+                imread = getattr(plugin_module, 'imread')
+                func = _imread_collection_wrapper(imread)
+                setattr(plugin_module, 'imread_collection', func)
+        elif not hasattr(plugin_module, p):
             print("Plugin %s does not provide %s as advertised.  Ignoring." % \
                   (plugin, p))
-        else:
-            store = plugin_store[p]
-            func = getattr(plugin_module, p)
-            if not (plugin, func) in store:
-                store.append((plugin, func))
+            continue
+
+        store = plugin_store[p]
+        func = getattr(plugin_module, p)
+        if not (plugin, func) in store:
+            store.append((plugin, func))
 
 
 def plugin_info(plugin):

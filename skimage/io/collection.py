@@ -2,14 +2,13 @@
 
 from __future__ import with_statement
 
-__all__ = ['MultiImage', 'ImageCollection', 'imread', 'concatenate_images']
+__all__ = ['MultiImage', 'ImageCollection', 'concatenate_images']
 
 from glob import glob
 import re
 from copy import copy
 
 import numpy as np
-from ._io import imread
 
 import six
 
@@ -312,6 +311,7 @@ class ImageCollection(object):
         self._cached = None
 
         if load_func is None:
+            from ._io import imread
             self.load_func = imread
         else:
             self.load_func = load_func

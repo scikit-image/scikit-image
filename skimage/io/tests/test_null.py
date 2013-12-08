@@ -30,6 +30,17 @@ def test_null_imshow():
         io.imshow(np.zeros((3, 3)), plugin='null')
 
 
+@raises(Warning)
+def test_null_imread_collection():
+    # Note that the null plugin doesn't define an `imread_collection` plugin
+    # but this function dynamically added by the plugin manager.
+    path = os.path.join(data_dir, '*.png')
+    with warnings.catch_warnings():  # Temporarily set warnings as errors.
+        warnings.filterwarnings('error')
+        collection = io.imread_collection(path, plugin='null')
+        collection[0]
+
+
 if __name__ == '__main__':
     from numpy.testing import run_module_suite
     run_module_suite()
