@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_almost_equal, assert_equal
+from numpy.testing import assert_almost_equal, assert_equal, assert_raises
 
 from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
@@ -88,7 +88,7 @@ def test_no_nans():
 def test_switched_arguments():
     image = np.ones((5, 5))
     template = np.ones((3, 3))
-    np.testing.assert_raises(ValueError, match_template, template, image)
+    assert_raises(ValueError, match_template, template, image)
 
 
 def test_pad_input():
@@ -143,6 +143,20 @@ def test_3d_pad_input():
 
     assert_equal(result.shape, (12, 12, 12))
     assert_equal(np.unravel_index(result.argmax(), image.shape), (4, 6, 5))
+
+
+def test_wrong_input():
+    image = np.ones((5, 5, 1))
+    template = np.ones((3, 3))
+    assert_raises(ValueError, match_template, template, image)
+
+    image = np.ones((5, 5))
+    template = np.ones((3, 3, 2))
+    assert_raises(ValueError, match_template, template, image)
+
+    image = np.ones((5, 5, 3, 3))
+    template = np.ones((3, 3, 2))
+    assert_raises(ValueError, match_template, template, image)
 
 
 if __name__ == "__main__":
