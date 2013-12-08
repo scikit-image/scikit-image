@@ -118,6 +118,8 @@ def match_template(image, template, pad_input=False, mode='constant',
     else:
         image = pad(image, pad_width=pad_width, mode=mode)
 
+    # Use special case for 2-D images for much better performance in
+    # computation of integral images
     if image.ndim == 2:
         image_window_sum = _window_sum_2d(image, template.shape)
         image_window_sum2 = _window_sum_2d(image**2, template.shape)
@@ -159,7 +161,6 @@ def match_template(image, template, pad_input=False, mode='constant',
         r1 = r0 + image_shape[0] - template.shape[0] + 1
         c0 = template.shape[1] - 1
         c1 = c0 + image_shape[1] - template.shape[1] + 1
-
 
     if image.ndim == 3:
         if pad_input:

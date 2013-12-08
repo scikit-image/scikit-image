@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_almost_equal as assert_close
+from numpy.testing import assert_almost_equal, assert_equal
 
 from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
@@ -31,7 +31,7 @@ def test_template():
     positions = positions[np.argsort(positions[:, 0])]
 
     for xy_target, xy in zip(target_positions, positions):
-        yield assert_close, xy, xy_target
+        yield assert_almost_equal, xy, xy_target
 
 
 def test_normalization():
@@ -114,9 +114,35 @@ def test_pad_input():
     # get the max and min results.
     sorted_result = np.argsort(result.flat)
     i, j = np.unravel_index(sorted_result[:2], result.shape)
-    assert_close(j, (12, 0))
+    assert_equal(j, (12, 0))
     i, j = np.unravel_index(sorted_result[-2:], result.shape)
-    assert_close(j, (18, 6))
+    assert_equal(j, (18, 6))
+
+
+def test_3d():
+    np.random.seed(1)
+    template = np.random.rand(3, 3, 3)
+    image = np.zeros((12, 12, 12))
+
+    image[3:6, 5:8, 4:7] = template
+
+    result = match_template(image, template)
+
+    assert_equal(result.shape, (10, 10, 10))
+    assert_equal(np.unravel_index(result.argmax(), image.shape), (2, 5, 6))
+
+
+def test_3d_pad_input():
+    np.random.seed(1)
+    template = np.random.rand(3, 3, 3)
+    image = np.zeros((12, 12, 12))
+
+    image[3:6, 5:8, 4:7] = template
+
+    result = match_template(image, template, pad_input=True)
+
+    assert_equal(result.shape, (12, 12, 12))
+    assert_equal(np.unravel_index(result.argmax(), image.shape), (4, 6, 5))
 
 
 if __name__ == "__main__":
