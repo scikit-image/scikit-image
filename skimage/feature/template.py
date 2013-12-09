@@ -100,12 +100,12 @@ def match_template(image, template, pad_input=False, mode='constant',
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32)
     """
 
-    if np.any(np.less(image.shape, template.shape)):
-        raise ValueError("Image must be larger than template.")
     if image.ndim not in (2, 3):
         raise ValueError("Only 2- and 3-D images supported.")
     if image.ndim != template.ndim:
         raise ValueError("Dimensionality of template must match image.")
+    if np.any(np.less(image.shape, template.shape)):
+        raise ValueError("Image must be larger than template.")
 
     image_shape = image.shape
 
