@@ -139,7 +139,10 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     nom = xcorr - image_window_sum * (template.sum() / template_volume)
 
-    denom = image_window_sum2 - image_window_sum**2 / template_volume
+    denom = image_window_sum2
+    np.multiply(image_window_sum, image_window_sum, out=image_window_sum)
+    np.divide(image_window_sum, template_volume, out=image_window_sum)
+    denom -= image_window_sum
     denom *= template_ssd
     np.maximum(denom, 0, out=denom)  # sqrt of negative number not allowed
     np.sqrt(denom, out=denom)
