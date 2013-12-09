@@ -123,9 +123,6 @@ Library:
     Extension: skimage.transform._warps_cy
         Sources:
             skimage/transform/_warps_cy.pyx
-    Extension: skimage._shared.interpolation
-        Sources:
-            skimage/_shared/interpolation.pyx
     Extension: skimage.segmentation._felzenszwalb_cy
         Sources:
             skimage/segmentation/_felzenszwalb_cy.pyx
