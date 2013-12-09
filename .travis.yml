@@ -79,4 +79,6 @@ script:
 after_success:
      - if [[ $PYVER == '3.x' ]]; then
      -   coveralls
+     - else
+     -   exit 0
      - fi
