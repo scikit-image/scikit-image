@@ -129,7 +129,7 @@ def test_3d():
     result = match_template(image, template)
 
     assert_equal(result.shape, (10, 10, 10))
-    assert_equal(np.unravel_index(result.argmax(), image.shape), (2, 5, 6))
+    assert_equal(np.unravel_index(result.argmax(), result.shape), (3, 5, 4))
 
 
 def test_3d_pad_input():
@@ -142,7 +142,7 @@ def test_3d_pad_input():
     result = match_template(image, template, pad_input=True)
 
     assert_equal(result.shape, (12, 12, 12))
-    assert_equal(np.unravel_index(result.argmax(), image.shape), (4, 6, 5))
+    assert_equal(np.unravel_index(result.argmax(), result.shape), (4, 6, 5))
 
 
 def test_wrong_input():
