@@ -89,7 +89,7 @@ def match_template(image, template, pad_input=False, mode='constant',
     array([[ 1.   , -0.125,  0.   ,  0.   ],
            [-0.125, -0.125,  0.   ,  0.   ],
            [ 0.   ,  0.   ,  0.125,  0.125],
-           [ 0.   ,  0.   ,  0.125, -1.   ]], dtype=float32))
+           [ 0.   ,  0.   ,  0.125, -1.   ]], dtype=float32)
     >>> result = match_template(image, template, pad_input=True)
     >>> np.round(result, 3)
     array([[-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],
@@ -97,7 +97,7 @@ def match_template(image, template, pad_input=False, mode='constant',
            [-0.125, -0.125, -0.125,  0.   ,  0.   ,  0.   ],
            [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125],
            [ 0.   ,  0.   ,  0.   ,  0.125, -1.   ,  0.125],
-           [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32))
+           [ 0.   ,  0.   ,  0.   ,  0.125,  0.125,  0.125]], dtype=float32)
     """
 
     if np.any(np.less(image.shape, template.shape)):
