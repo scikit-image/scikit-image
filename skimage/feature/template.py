@@ -32,8 +32,10 @@ def match_template(image, template, pad_input=False, mode='constant',
                    constant_values=0):
     """Match a template to a 2-D or 3-D image using normalized correlation.
 
-    The output is an array with values between -1.0 and 1.0, which correspond
-    to the correlation coefficient that the template is found at the position.
+    The output is an array with values between -1.0 and 1.0. The value at a
+    given position corresponds to the correlation coefficient between the image
+    and the template. The template is centered around each position. To find
+    the best match you must search for peaks in the response image.
 
     Parameters
     ----------
