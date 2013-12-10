@@ -156,27 +156,14 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     response[mask] = nom[mask] / denom[mask]
 
-    if pad_input:
-        r0 = (template.shape[0] - 1) // 2
-        r1 = r0 + image_shape[0]
-        c0 = (template.shape[1] - 1) // 2
-        c1 = c0 + image_shape[1]
-    else:
-        r0 = template.shape[0] - 1
-        r1 = r0 + image_shape[0] - template.shape[0] + 1
-        c0 = template.shape[1] - 1
-        c1 = c0 + image_shape[1] - template.shape[1] + 1
-
-    if image.ndim == 3:
+    slices = []
+    for i in range(template.ndim):
         if pad_input:
-            d0 = (template.shape[2] - 1) // 2
-            d1 = d0 + image_shape[2]
+            d0 = (template.shape[i] - 1) // 2
+            d1 = d0 + image_shape[i]
         else:
-            d0 = template.shape[2] - 1
-            d1 = d0 + image_shape[2] - template.shape[2] + 1
+            d0 = template.shape[i] - 1
+            d1 = d0 + image_shape[i] - template.shape[i] + 1
+        slices.append(slice(d0, d1))
 
-        response = response[r0:r1, c0:c1, d0:d1]
-    else:
-        response = response[r0:r1, c0:c1]
-
-    return response
+    return response[slices]
