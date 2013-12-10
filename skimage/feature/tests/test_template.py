@@ -145,6 +145,17 @@ def test_3d_pad_input():
     assert_equal(np.unravel_index(result.argmax(), result.shape), (4, 6, 5))
 
 
+def test_padding_reflect():
+    template = diamond(2)
+    image = np.zeros((10, 10))
+    image[2:7, :3] = template[:, -3:]
+
+    result = match_template(image, template, pad_input=True,
+                            mode='reflect')
+
+    assert_equal(np.unravel_index(result.argmax(), result.shape), (4, 0))
+
+
 def test_wrong_input():
     image = np.ones((5, 5, 1))
     template = np.ones((3, 3))
