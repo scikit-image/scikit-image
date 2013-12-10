@@ -426,27 +426,27 @@ def ir2tf(imp_resp, shape, dim=None, is_real=True):
 
 
 def laplacian(ndim, shape, is_real=True):
-    """Return the transfert function of the laplacian
+    """Return the transfer function of the Laplacian
 
     Laplacian is the second order difference, on line and column.
 
     Parameters
     ----------
     ndim : int
-        The dimension of the laplacian
+        The dimension of the Laplacian
     shape : tuple, shape
-        The support on which to compute the transfert function
+        The support on which to compute the transfer function
     is_real : boolean (optionnal, default True)
        If True, imp_resp is supposed real and the hermissian property
-       is used with rfftn Fourier transform to return the transfert
+       is used with rfftn Fourier transform to return the transfer
        function.
 
     Returns
     -------
     tf : array_like, complex
-        The transfert function
+        The transfer function
     impr : array_like, real
-        The laplacian
+        The Laplacian
 
     Examples
     --------
