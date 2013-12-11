@@ -34,21 +34,24 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     The output is an array with values between -1.0 and 1.0. The value at a
     given position corresponds to the correlation coefficient between the image
-    and the template. The template is centered around each position. To find
-    the best match you must search for peaks in the response image.
+    and the template.
+
+    For `pad_input=True` matches correspond to the center and otherwise to the
+    top-left corner of the template. To find the best match you must search for
+    peaks in the response (output) image.
 
     Parameters
     ----------
-    image : (N, M[, D]) array
+    image : (M, N[, D]) array
         2-D or 3-D input image.
-    template : (N, M[, D]) array
-        Template to locate.
+    template : (m, n[, d]) array
+        Template to locate. It must be `(m <= M, n <= N[, d <= D])`.
     pad_input : bool
-        If True, pad `image` with image mean so that output is the same size as
-        the image, and output values correspond to the template center.
-        Otherwise, the output is an array with shape `(M - m + 1, N - n + 1)`
-        for an `(M, N)` image and an `(m, n)` template, and matches correspond
-        to origin (top-left corner) of the template.
+        If True, pad `image` so that output is the same size as the image, and
+        output values correspond to the template center. Otherwise, the output
+        is an array with shape `(M - m + 1, N - n + 1)` for an `(M, N)` image
+        and an `(m, n)` template, and matches correspond to origin
+        (top-left corner) of the template.
     mode : see `numpy.pad`, optional
         Padding mode.
     constant_values : see `numpy.pad`, optional
@@ -56,10 +59,8 @@ def match_template(image, template, pad_input=False, mode='constant',
 
     Returns
     -------
-    output : ndarray
-        Correlation results between -1.0 and 1.0. For an `(M, N)` image and an
-        `(m, n)` template, the `output` is `(M - m + 1, N - n + 1)` when
-        `pad_input = False` and `(M, N)` when `pad_input = True`.
+    output : array
+        Response image with correlation coefficients.
 
     References
     ----------
