@@ -885,3 +885,61 @@ cdef class Mcp_Connect(MCP):
         """
         self.flat_idmap[new_index] = self.flat_idmap[index]
 
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cdef class MCP_Flexible(MCP):
+    """MCP_Flexible(costs, offsets=None, fully_connected=True)
+    
+    Find minimum cost paths through an n-d costs array.
+
+    See the documentation for MCP for full details. This class differs from
+    MCP in that several methods can be overloaded (from pure Python) to
+    modify the behavior of the algorithm and/or create custom algorithms
+    based on MCP. Note that goal_reached can also be overloaded in the 
+    MCP class.
+    
+    """
+    
+    def travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost, 
+                                                        FLOAT_T offset_length):
+        """ travel_cost(self, old_cost, new_cost, offset_length)
+        The travel cost for going from the current node to the next.
+        Overload this method to adapt the behaviour of the algorithm.
+        """
+        return new_cost
+    
+    
+    def examine_neighbor(self, INDEX_T index, INDEX_T new_index,
+                                                        FLOAT_T offset_length):
+        """ examine_neighbor(self, index, new_index, offset_length)
+        This method is called for every neighbor examined, even before
+        checking whether it is frozen.
+        Overload this method to adapt the behaviour of the algorithm. 
+        """
+        pass
+    
+    
+    def update_node(self, INDEX_T index, INDEX_T new_index, 
+                                                        FLOAT_T offset_length):
+        """ update_node(self, index, new_index, offset_length)
+        This method is called when a node is updated. 
+        Overload this method to adapt the behaviour of the algorithm.
+        """
+        pass
+    
+    
+    cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost,
+                                    FLOAT_T new_cost, FLOAT_T offset_length):
+        return self.travel_cost(old_cost, new_cost, offset_length)
+    
+    
+    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, 
+                                                        FLOAT_T offset_length):
+        self.examine_neighbor(index, new_index, offset_length)
+    
+    
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, 
+                                                        FLOAT_T offset_length):
+        self.update_node(index, new_index, offset_length)
