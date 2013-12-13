@@ -761,3 +761,127 @@ cdef class MCP_Geometric(MCP):
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost,
                               FLOAT_T offset_length):
         return offset_length * 0.5 * (old_cost + new_cost)
+
+
+
+@cython.boundscheck(True)
+@cython.wraparound(True)
+cdef class Mcp_Connect(MCP):
+    """Mcp_Connect(costs, offsets=None, fully_connected=True)
+    
+    Connect source points using the distance-weighted minimum cost function.
+    
+    A front is grown from each seed point simultaneously, while the
+    origin of the front is tracked as well. When two fronts A and
+    B meet, create_connection() is called. This method must be overloaded
+    to deal with the found edges in a way that is appropriate for the
+    application.
+    
+    """
+    
+    cdef INDEX_T [:] flat_idmap
+    
+    
+    def __init__(self, costs, offsets=None, fully_connected=True, 
+                                                            sampling=None):
+        MCP.__init__(self, costs, offsets, fully_connected, sampling)
+        
+        # Create id map to keep track of origin of nodes
+        self.flat_idmap = np.zeros(self.costs_shape, INDEX_D).ravel('F')
+    
+    
+    def _reset(self):
+        """ Reset the id map.
+        """
+        MCP._reset(self)
+        starts, ends = self._starts, self._ends
+        
+        # Reset idmap
+        self.flat_idmap[...] = -1
+        id = 0
+        for start in _ravel_index_fortran(starts, self.costs_shape):
+            self.flat_idmap[start] = id
+            id += 1
+    
+    
+    cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost,
+                              FLOAT_T offset_length):
+        """ Equivalent to MCP_Geometric.
+        """
+        return offset_length * 0.5 * (old_cost + new_cost)
+    
+    
+    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, 
+                                                        FLOAT_T offset_length):
+        """ Check whether two fronts are meeting. If so, the flat_traceback
+        is obtained and a connection is created.
+        """
+        
+        # Short names
+        cdef INDEX_T [:] flat_idmap = self.flat_idmap
+        cdef FLOAT_T [:] flat_cumulative_costs = self.flat_cumulative_costs
+        
+        # Get ids
+        cdef INDEX_T id1 = flat_idmap[index]
+        cdef INDEX_T id2 = flat_idmap[new_index]
+        
+        if id2 < 0 or id1 < 0:
+            pass
+        elif id2 != id1:
+            # we reached the 'front' of another seed point!
+            # We need to establish the traceback now, because the traceback
+            # may be overridden in future iterations.
+            path1 = self._flat_traceback(index)
+            path2 = self._flat_traceback(new_index)
+            # Also get the costs, so we can keep the path with the least cost
+            cost1 = flat_cumulative_costs[index]
+            cost2 = flat_cumulative_costs[new_index]
+            # Create connection
+            self.create_connection(id1, id2, path1, path2, cost1, cost2)
+    
+    
+    def unravel_traceback(self, flat_traceback):
+        """ unravel_traceback(flat_traceback)
+        
+        This method can be used to unravel a flat traceback that is passed
+        to create_connection(). The result is equivalent to a traceback
+        returned by traceback().
+        """
+        return self._unravel_traceback(flat_traceback)
+    
+    
+    def create_connection(self, id1, id2, tb1, tb2, cost1, cost2):
+        """ create_connection id1, id2, traceback1, traceback2, cost1, cost2)
+        
+        Overload this method to keep track of the connections that are
+        found during MCP processing. Note that a connection with the same
+        ids can be found multiple times (but with different costs). 
+        
+        Parameters
+        ----------
+        id1 : int
+            The index of the seed point where front A originated from.
+        id2 : int
+            The index of the seed point where front B originated from.
+        traceback1 : list
+            A list of integers representing the flat traceback from the 
+            meeting point to seed point id1. Use the unravel_traceback() method
+            to turn obtain a list of coordinates from source to meeting point.
+        traceback2 : list
+           Dito for id2.
+        cost1 : float
+            The cumulative cost at side A of the connection.
+        cost2 : float
+            The cumulative costs at side B of the connection.
+        
+        """
+        pass
+    
+    
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, 
+                                                        FLOAT_T offset_length):
+        """ Keep track of the id map so that we know which seed point
+        a certain front originates from.
+        """
+        self.flat_idmap[new_index] = self.flat_idmap[index]
+
