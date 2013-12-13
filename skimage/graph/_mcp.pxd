@@ -18,6 +18,8 @@ ctypedef cnp.int16_t OFFSETS_INDEX_T
 cdef class MCP:
     cdef heap.FastUpdateBinaryHeap costs_heap
     cdef object costs_shape
+    cdef object _starts
+    cdef object _ends
     cdef DIM_T dim
     cdef BOOL_T dirty
     cdef BOOL_T use_start_cost
