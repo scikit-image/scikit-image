@@ -172,7 +172,7 @@ def _unravel_index_fortran(flat_indices, shape):
 
     """
     strides = np.multiply.accumulate([1] + list(shape[:-1]))
-    indices = [tuple(idx/strides % shape) for idx in flat_indices]
+    indices = [tuple(idx//strides % shape) for idx in flat_indices]
     return indices
 
 
@@ -298,7 +298,6 @@ cdef class MCP:
         self.flat_costs = costs.astype(FLOAT_D).flatten('F')
         size = self.flat_costs.shape[0]
         self.flat_cumulative_costs = np.empty(size, dtype=FLOAT_D)
-        self.flat_cumulative_costs[...] = np.inf
         self.dim = len(costs.shape)
         self.costs_shape = costs.shape
         self.costs_heap = heap.FastUpdateBinaryHeap(initial_capacity=128,
@@ -308,7 +307,6 @@ cdef class MCP:
         # array (see below) that leads to that point from the
         # predecessor point.
         self.traceback_offsets = np.empty(size, dtype=OFFSETS_INDEX_D)
-        self.traceback_offsets[...] = -1
 
         # The offsets are a list of relative offsets from a central
         # point to each point in the relevant neighborhood. (e.g. (-1,
@@ -348,17 +346,60 @@ cdef class MCP:
         Clears paths found by find_costs().
         """
         self.costs_heap.reset()
-        self.traceback_offsets[...] = -1
+        self.traceback_offsets[...] = -2  # -2 is not reached, -1 is start
         self.flat_cumulative_costs[...] = np.inf
         self.dirty = 0
+        
+        # Get starts and ends
+        # We do not pass them in as arguments for backwards compat
+        starts, ends = self._starts, self._ends
+        
+        # push each start point into the heap. Note that we use flat indexing!
+        for start in _ravel_index_fortran(starts, self.costs_shape):
+            self.traceback_offsets[start] = -1
+            if self.use_start_cost:
+                self.costs_heap.push_fast(self.flat_costs[start], start)
+            else:
+                self.costs_heap.push_fast(0, start)
     
     
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost,
                               FLOAT_T new_cost, FLOAT_T offset_length):
+        """ The travel cost for going from the current node to the next.
+        Default is simply the cost of the next node.
+        """
         return new_cost
     
     
-    def find_costs(self, starts, ends=None, find_all_ends=True):
+    cpdef int goal_reached(self, INDEX_T index, FLOAT_T cumcost):
+        """ int goal_reached(self, int index, float cumcost)
+        This method is called each iteration after popping an index
+        from the heap, before examining the neighbours.
+        
+        This method should return 1 if the algorithm should not check
+        the current point's neighbours and 2 if the algorithm is now
+        done, for example an end point is reached.
+        """        
+        return 0
+    
+    
+    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length):
+        """ _examine_neighbor(self, int index, int new_index, float offset_length)
+        This method is called for every neighbor examined, even before
+        checking whether it is frozen.
+        """
+        pass
+    
+    
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length):
+        """ _update_node(self, int index, int new_index, float offset_length)
+        This method is called when a node is updated. 
+        """
+        pass
+    
+    
+    def find_costs(self, starts, ends=None, find_all_ends=True, 
+                    max_coverage=1.0, max_cumulative_cost=None, max_cost=None):
         """
         Find the minimum-cost path from the given starting points.
 
@@ -410,6 +451,8 @@ cdef class MCP:
         starts = _normalize_indices(starts, self.costs_shape)
         if starts is None:
             raise ValueError('start points must all be within the costs array')
+        elif not starts:
+            raise ValueError('no valid start points to start front propagation')
         if ends is not None:
             ends = _normalize_indices(ends, self.costs_shape)
             if ends is None:
@@ -420,8 +463,10 @@ cdef class MCP:
             flat_ends = np.array(_ravel_index_fortran(
                 ends, self.costs_shape), dtype=INDEX_D)
 
-        if self.dirty:
-            self._reset()
+        # Always perform a reset to (re)initialize our arrays and start
+        # positions
+        self._starts, self._ends = starts, ends
+        self._reset()
         
         # Get shorter names for arrays
         cdef FLOAT_T [:] flat_costs = self.flat_costs
@@ -437,17 +482,9 @@ cdef class MCP:
         cdef heap.FastUpdateBinaryHeap costs_heap = self.costs_heap
         cdef DIM_T dim = self.dim
         cdef int num_offsets = len(flat_offsets)
-
-        # push each start point into the heap. Note that we use flat indexing!
-        cdef INDEX_T start
-        for start in _ravel_index_fortran(starts, self.costs_shape):
-            if self.use_start_cost:
-                costs_heap.push_fast(flat_costs[start], start)
-            else:
-                costs_heap.push_fast(0, start)
         
         # Variables used during front propagation
-        cdef FLOAT_T cost, new_cost, cumcost, new_cumcost
+        cdef FLOAT_T cost, new_cost, cumcost, new_cumcost, offset_length
         cdef INDEX_T index, new_index
         cdef BOOL_T is_at_edge, use_offset
         cdef INDEX_T d, i, iter
@@ -455,9 +492,12 @@ cdef class MCP:
         cdef EDGE_T pos_edge_val, neg_edge_val
         cdef int num_ends_found = 0
         cdef FLOAT_T inf = np.inf
+        cdef int goal_reached
         
+        cdef INDEX_T maxiter = int(max_coverage * flat_costs.size)
         
-        for iter in range(flat_costs.size):
+        for iter in range(maxiter):
+            
             # This is rather like a while loop, except we are guaranteed to
             # exit, which is nice during developing to prevent eternal loops.
             
@@ -474,6 +514,14 @@ cdef class MCP:
 
             # Record the cost we found to this point
             flat_cumulative_costs[index] = cumcost
+            
+            # Check if goal is reached
+            goal_reached = self.goal_reached(index, cumcost)
+            if goal_reached > 0:
+                if goal_reached == 1:
+                    continue  # Skip neighbours
+                else:
+                    break  # Done completely
             
             if use_ends:
                 # If we're only tracing out a path to one or more
@@ -522,10 +570,14 @@ cdef class MCP:
                 # push over the edge, then we go on.
                 if not use_offset:
                     continue
-
+                
                 # using the flat offsets, calculate the new flat index
                 new_index = index + flat_offsets[i]
-
+                
+                # Allow subclasses to examine this neighbour
+                offset_length = offset_lengths[i]
+                self._examine_neighbor(index, new_index, offset_length)
+                
                 # If we have already found the best path here then
                 # ignore this point
                 if flat_cumulative_costs[new_index] != inf:
@@ -541,7 +593,7 @@ cdef class MCP:
                 
                 # Calculate new cumulative cost
                 new_cumcost = cumcost + self._travel_cost(cost, new_cost,
-                                                offset_lengths[i])
+                                                offset_length)
                 
                 # Now we ask the heap to append or update the cost to
                 # this new point, but only if that point isn't already
@@ -554,6 +606,8 @@ cdef class MCP:
                     # point
                     if costs_heap._pushed:
                         traceback_offsets[new_index] = i
+                        self._update_node(index, new_index, offset_length)
+               
         
         # Un-flatten the costs and traceback arrays for human consumption.
         cumulative_costs = np.asarray(flat_cumulative_costs)
@@ -563,6 +617,64 @@ cdef class MCP:
         traceback = traceback.reshape(self.costs_shape, order='F')
         self.dirty = 1
         return cumulative_costs, traceback
+    
+    
+    cdef object _flat_traceback(self, INDEX_T end):
+        """ _flat_traceback(end)
+        Do a traceback, input and output is in flat coordinates.
+        Returns a list of integers, from given end point to start.
+        """
+        
+        # Initialize traceback
+        traceback = [end]
+        
+        # Init position with end
+        cdef INDEX_T flat_position = end
+        # Check if we can find a path
+        #print(flat_position)
+        if self.traceback_offsets[flat_position] == -2:
+            raise ValueError('no minimum-cost path was found '
+                             'to the specified end point')
+        
+        # Short names for arrays
+        cdef OFFSETS_INDEX_T [:] traceback_offsets = self.traceback_offsets
+        cdef INDEX_T [:] flat_offsets = self.flat_offsets
+        
+        
+        # Do traceback
+        cdef OFFSETS_INDEX_T offset
+        while 1:
+            offset = traceback_offsets[flat_position]
+            if offset == -1:
+                break  # -2 is uninitialized, -1 is start point
+            flat_position -= flat_offsets[offset]
+            traceback.append(offset)
+        return traceback
+    
+    
+    cdef object _unravel_traceback(self, object flat_traceback):
+        """ Unravel the given traceback obtained from _flat_traceback().
+        Returns a new traceback that is reversed and has x-y(-z) coordinates.
+        """
+        
+        flat_end = flat_traceback.pop(0)
+        end = _unravel_index_fortran([flat_end], self.costs_shape)[0]
+        
+        # Prepare arrays
+        cdef INDEX_T [:] position = np.array(end, dtype=INDEX_D)
+        cdef OFFSET_T [:,:] offsets = self.offsets
+        
+        # Prepare variables
+        cdef DIM_T dim = self.dim
+        cdef DIM_T d
+        
+        # Reverse and convert
+        traceback = [tuple(position)]
+        for offset in flat_traceback:
+            for d in range(dim):
+                position[d] -= offsets[offset, d]
+            traceback.append(tuple(position))
+        return _reverse(traceback)
     
     
     def traceback(self, end):
@@ -597,34 +709,14 @@ cdef class MCP:
         if ends is None:
             raise ValueError('the specified end point must be '
                              'within the costs array')
-        traceback = [tuple(ends[0])]
+        
+        # Get flat traceback
+        cdef INDEX_T flat_end = _ravel_index_fortran(ends, self.costs_shape)[0]
+        flat_traceback = self._flat_traceback(flat_end)
+        
+        # Transform it
+        return self._unravel_traceback(flat_traceback)
 
-        cdef INDEX_T flat_position =\
-             _ravel_index_fortran(ends, self.costs_shape)[0]
-        if self.flat_cumulative_costs[flat_position] == np.inf:
-            raise ValueError('no minimum-cost path was found '
-                             'to the specified end point')
-        
-        # Short names for arrays
-        cdef OFFSETS_INDEX_T [:] traceback_offsets = self.traceback_offsets
-        cdef OFFSET_T [:,:] offsets = self.offsets
-        cdef INDEX_T [:] flat_offsets = self.flat_offsets
-        # New array
-        cdef INDEX_T [:] position = np.array(ends[0], dtype=INDEX_D)
-        
-        cdef OFFSETS_INDEX_T offset
-        cdef DIM_T d
-        cdef DIM_T dim = self.dim
-        while 1:
-            offset = traceback_offsets[flat_position]
-            if offset == -1:
-                # At a point where we can go no further: probably a start point
-                break
-            flat_position -= flat_offsets[offset]
-            for d in range(dim):
-                position[d] -= offsets[offset, d]
-            traceback.append(tuple(position))
-        return _reverse(traceback)
 
 
 @cython.boundscheck(False)

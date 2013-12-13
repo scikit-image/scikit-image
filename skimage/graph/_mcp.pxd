@@ -35,4 +35,11 @@ cdef class MCP:
     cdef FLOAT_T [:] offset_lengths
     
     # Methods
+    cpdef int goal_reached(self, INDEX_T index, FLOAT_T cumcost)
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost, FLOAT_T offset_length)
+    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length)
+    
+    cdef object _flat_traceback(self, INDEX_T end) 
+    cdef object _unravel_traceback(self, object flat_traceback)
+    
