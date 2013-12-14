@@ -11,11 +11,6 @@ from scipy.signal import convolve2d
 
 from . import uft
 
-__credits__ = ["François Orieux"]
-__license__ = "mit"
-__version__ = "1.0.0"
-__maintainer__ = "François Orieux"
-__status__ = "stable"
 __keywords__ = "restoration, image, deconvolution"
 
 
@@ -145,7 +140,9 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
 
     return deconv
 
-def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True, clip=True):
+
+def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
+                        clip=True):
     """Unsupervised Wiener-Hunt deconvolution
 
     Return the deconvolution with a Wiener-Hunt approach, where the
@@ -369,7 +366,6 @@ def richardson_lucy(image, psf, iterations=50, clip=True):
     References
     ----------
     .. [2] http://en.wikipedia.org/wiki/Richardson%E2%80%93Lucy_deconvolution
-
     """
     image = image.astype(np.float)
     psf = psf.astype(np.float)

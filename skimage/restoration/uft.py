@@ -27,11 +27,7 @@ from __future__ import division, print_function
 
 import numpy as np
 
-__credits__ = ["François Orieux"]
-__license__ = "mit"
-__version__ = "1.0.0"
-__maintainer__ = "Francois Orieux"
-__keywords__ = "fft"
+__keywords__ = "fft, Fourier Transform, orthonormal, unitary"
 
 
 def ufftn(inarray, dim=None):
