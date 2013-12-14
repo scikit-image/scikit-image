@@ -116,8 +116,8 @@ def test_offsets():
     m = mcp.MCP(a, offsets=offsets)
     costs, traceback = m.find_costs([(1, 6)])
     assert_array_equal(traceback,
-                       [[-1, -1, -1, -1, -1, -1, -1, -1],
-                        [-1, -1, -1, -1, -1, -1, -1, -1],
+                       [[-2, -2, -2, -2, -2, -2, -2, -2],
+                        [-2, -2, -2, -2, -2, -2, -1, -2],
                         [15, 14, 13, 12, 11, 10,  0,  1],
                         [10,  0,  1,  2,  3,  4,  5,  6],
                         [10,  0,  1,  2,  3,  4,  5,  6],
@@ -149,6 +149,7 @@ def _test_random(shape):
     for end in ends:
         m.traceback(end)
     return a, costs, offsets
+
 
 
 if __name__ == "__main__":
