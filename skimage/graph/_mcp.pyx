@@ -385,8 +385,8 @@ cdef class MCP:
     
     cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length):
         """ _examine_neighbor(self, int index, int new_index, float offset_length)
-        This method is called for every neighbor examined, even before
-        checking whether it is frozen.
+        This method is called once for every pair of neighboring nodes,
+        as soon as both nodes become frozen.
         """
         pass
     
@@ -574,13 +574,17 @@ cdef class MCP:
                 # using the flat offsets, calculate the new flat index
                 new_index = index + flat_offsets[i]
                 
-                # Allow subclasses to examine this neighbour
+                # Get offset length
                 offset_length = offset_lengths[i]
-                self._examine_neighbor(index, new_index, offset_length)
                 
                 # If we have already found the best path here then
                 # ignore this point
                 if flat_cumulative_costs[new_index] != inf:
+                    # Give subclass the oportunity to examine these two nodes
+                    # Note that only when both nodes are "frozen" their
+                    # cumulative cost is set. By doing the check here, each 
+                    # pair of nodes is checked exactly once.
+                    self._examine_neighbor(index, new_index, offset_length)
                     continue
                 
                 # Get cost and new cost
@@ -766,15 +770,15 @@ cdef class MCP_Geometric(MCP):
 
 @cython.boundscheck(True)
 @cython.wraparound(True)
-cdef class Mcp_Connect(MCP):
-    """Mcp_Connect(costs, offsets=None, fully_connected=True)
+cdef class MCP_Connect(MCP):
+    """MCP_Connect(costs, offsets=None, fully_connected=True)
     
     Connect source points using the distance-weighted minimum cost function.
     
     A front is grown from each seed point simultaneously, while the
-    origin of the front is tracked as well. When two fronts A and
-    B meet, create_connection() is called. This method must be overloaded
-    to deal with the found edges in a way that is appropriate for the
+    origin of the front is tracked as well. When two fronts meet,
+    create_connection() is called. This method must be overloaded to
+    deal with the found edges in a way that is appropriate for the
     application.
     
     """
@@ -828,51 +832,41 @@ cdef class Mcp_Connect(MCP):
         if id2 < 0 or id1 < 0:
             pass
         elif id2 != id1:
-            # we reached the 'front' of another seed point!
-            # We need to establish the traceback now, because the traceback
-            # may be overridden in future iterations.
-            path1 = self._flat_traceback(index)
-            path2 = self._flat_traceback(new_index)
+            # We reached the 'front' of another seed point!
+            # Get position/coordinates
+            pos1, pos2 = _unravel_index_fortran(
+                                    [index, new_index], self.costs_shape)
             # Also get the costs, so we can keep the path with the least cost
             cost1 = flat_cumulative_costs[index]
             cost2 = flat_cumulative_costs[new_index]
             # Create connection
-            self.create_connection(id1, id2, path1, path2, cost1, cost2)
-    
-    
-    def unravel_traceback(self, flat_traceback):
-        """ unravel_traceback(flat_traceback)
-        
-        This method can be used to unravel a flat traceback that is passed
-        to create_connection(). The result is equivalent to a traceback
-        returned by traceback().
-        """
-        return self._unravel_traceback(flat_traceback)
+            self.create_connection(id1, id2, pos1, pos2, cost1, cost2)
     
     
     def create_connection(self, id1, id2, tb1, tb2, cost1, cost2):
-        """ create_connection id1, id2, traceback1, traceback2, cost1, cost2)
+        """ create_connection id1, id2, pos1, pos2, cost1, cost2)
         
         Overload this method to keep track of the connections that are
         found during MCP processing. Note that a connection with the same
         ids can be found multiple times (but with different costs). 
         
+        At the time that this method is called, both points are "frozen"
+        and will not be visited again by the MCP algorithm.
+        
         Parameters
         ----------
         id1 : int
-            The index of the seed point where front A originated from.
+            The seed point id where the first neighbor originated from.
         id2 : int
-            The index of the seed point where front B originated from.
-        traceback1 : list
-            A list of integers representing the flat traceback from the 
-            meeting point to seed point id1. Use the unravel_traceback() method
-            to turn obtain a list of coordinates from source to meeting point.
-        traceback2 : list
-           Dito for id2.
+            The seed point id where the second neighbor originated from.
+        pos1 : tuple
+            The index of of the first neighbour in the connection. 
+        pos2 : tuple
+            The index of of the second neighbour in the connection. 
         cost1 : float
-            The cumulative cost at side A of the connection.
+            The cumulative cost at pos1.
         cost2 : float
-            The cumulative costs at side B of the connection.
+            The cumulative costs at pos2.
         
         """
         pass
@@ -914,8 +908,8 @@ cdef class MCP_Flexible(MCP):
     def examine_neighbor(self, INDEX_T index, INDEX_T new_index,
                                                         FLOAT_T offset_length):
         """ examine_neighbor(self, index, new_index, offset_length)
-        This method is called for every neighbor examined, even before
-        checking whether it is frozen.
+        This method is called once for every pair of neighboring nodes,
+        as soon as both nodes become frozen.
         Overload this method to adapt the behaviour of the algorithm. 
         """
         pass
