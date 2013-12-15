@@ -376,9 +376,14 @@ cdef class MCP:
         This method is called each iteration after popping an index
         from the heap, before examining the neighbours.
         
+        This method can be overloaded to modify the behavior of the MCP
+        algorithm. An example might be to stop the algorithm when a
+        certain cumulative cost is reached, or when the front is a
+        certain distance away from the seed point.
+        
         This method should return 1 if the algorithm should not check
         the current point's neighbours and 2 if the algorithm is now
-        done, for example an end point is reached.
+        done.
         """        
         return 0
     
@@ -847,8 +852,9 @@ cdef class MCP_Connect(MCP):
         """ create_connection id1, id2, pos1, pos2, cost1, cost2)
         
         Overload this method to keep track of the connections that are
-        found during MCP processing. Note that a connection with the same
-        ids can be found multiple times (but with different costs). 
+        found during MCP processing. Note that a connection with the
+        same ids can be found multiple times (but with different
+        positions and costs).
         
         At the time that this method is called, both points are "frozen"
         and will not be visited again by the MCP algorithm.
@@ -899,8 +905,10 @@ cdef class MCP_Flexible(MCP):
     def travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost, 
                                                         FLOAT_T offset_length):
         """ travel_cost(self, old_cost, new_cost, offset_length)
-        The travel cost for going from the current node to the next.
-        Overload this method to adapt the behaviour of the algorithm.
+        This method calculates the travel cost for going from the
+        current node to the next. The default implementation returns
+        new_cost. Overload this method to adapt the behaviour of the
+        algorithm.
         """
         return new_cost
     
@@ -909,8 +917,12 @@ cdef class MCP_Flexible(MCP):
                                                         FLOAT_T offset_length):
         """ examine_neighbor(self, index, new_index, offset_length)
         This method is called once for every pair of neighboring nodes,
-        as soon as both nodes become frozen.
-        Overload this method to adapt the behaviour of the algorithm. 
+        as soon as both nodes are frozen. 
+        
+        This method can be overloaded to obtain information about
+        neightboring nodes, and/or to modify the behavior of the MCP
+        algorithm. One example is the MCP_Connect class, which checks
+        for meeting fronts using this hook.
         """
         pass
     
@@ -918,8 +930,13 @@ cdef class MCP_Flexible(MCP):
     def update_node(self, INDEX_T index, INDEX_T new_index, 
                                                         FLOAT_T offset_length):
         """ update_node(self, index, new_index, offset_length)
-        This method is called when a node is updated. 
-        Overload this method to adapt the behaviour of the algorithm.
+        This method is called when a node is updated, right after
+        new_index is pushed onto the heap and the traceback map is
+        updated.
+        
+        This method can be overloaded to keep track of other arrays
+        that are used by a specific implementation of the algorithm.
+        For instance the MCP_Connect class uses it to update an id map.
         """
         pass
     
