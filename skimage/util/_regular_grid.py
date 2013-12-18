@@ -64,8 +64,8 @@ def regular_grid(ar_shape, n_points):
                                  (1.0 / (ndim - dim - 1)))
             if (sorted_dims >= stepsizes).all():
                 break
-    starts = stepsizes // 2
-    stepsizes = np.round(stepsizes)
+    starts = (stepsizes // 2).astype(int)
+    stepsizes = np.round(stepsizes).astype(int)
     slices = [slice(start, None, step) for
               start, step in zip(starts, stepsizes)]
     slices = [slices[i] for i in unsort_dim_idxs]
