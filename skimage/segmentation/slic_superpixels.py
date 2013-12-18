@@ -11,7 +11,8 @@ from skimage.color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
-         spacing=None, multichannel=True, convert2lab=True, ratio=None):
+         spacing=None, multichannel=True, convert2lab=True, slic_zero = False,
+         ratio=None):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -24,7 +25,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     compactness : float, optional
         Balances color-space proximity and image-space proximity. Higher
         values give more weight to image-space. As `compactness` tends to
-        infinity, superpixel shapes become square/cubic.
+        infinity, superpixel shapes become square/cubic. In SLICO mode, this
+        is the initial compactness.
     max_iter : int, optional
         Maximum number of iterations of k-means.
     sigma : float or (3,) array-like of floats, optional
@@ -45,6 +47,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         Whether the input should be converted to Lab colorspace prior to
         segmentation. For this purpose, the input is assumed to be RGB. Highly
         recommended.
+    slic_zero: bool, optional
+        True to run SLIC-zero, False to run original SLIC.
     ratio : float, optional
         Synonym for `compactness`. This keyword is deprecated.
 
@@ -158,10 +162,17 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
 
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    ratio = float(max((step_z, step_y, step_x))) / compactness
-    image = np.ascontiguousarray(image * ratio)
+    step = float(max((step_z, step_y, step_x)))
+    ratio = float(1) / compactness
+    
+    if slic_zero:
+        image = np.ascontiguousarray(image * ratio)
+    else:
+        image = np.ascontiguousarray(image * ratio)
 
-    labels = _slic_cython(image, segments, max_iter, spacing)
+    # _slic_cython expects the image in zyx format... but isn't image in xyz
+    # format???
+    labels = _slic_cython(image, segments, step, max_iter, spacing, slic_zero)
 
     if is_2d:
         labels = labels[0]
