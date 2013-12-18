@@ -446,7 +446,7 @@ def minimum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def modal(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return local mode of an image.
 
-    The mode is the value that appears most often in the histogram.
+    The mode is the value that appears most often in the local histogram.
 
     Parameters
     ----------
