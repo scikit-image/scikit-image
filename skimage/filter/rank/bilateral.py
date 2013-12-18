@@ -146,7 +146,7 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 1, 1, 1, 0],
     ...                       [0, 0, 0, 0, 0]], dtype=np.uint16)
-    >>> rank.pop_bilateral(imgsquare(3), s0=10, s1=10)
+    >>> rank.pop_bilateral(img, square(3), s0=10, s1=10)
     array([[3, 4, 3, 4, 3],
            [4, 4, 6, 4, 4],
            [3, 6, 9, 6, 3],
