@@ -221,6 +221,7 @@ cdef inline double _kernel_pop(Py_ssize_t* histo, double pop, dtype_t g,
 
     return pop
 
+
 cdef inline double _kernel_sum(Py_ssize_t* histo, double pop,dtype_t g,
                                Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                double p0, double p1,
