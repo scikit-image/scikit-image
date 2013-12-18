@@ -30,7 +30,7 @@ from . import bilateral_cy
 from .generic import _handle_input
 
 
-__all__ = ['mean_bilateral', 'pop_bilateral']
+__all__ = ['mean_bilateral', 'pop_bilateral', 'sum_bilateral']
 
 
 def _apply(func, image, selem, out, mask, shift_x, shift_y, s0, s1,
@@ -154,4 +154,63 @@ def pop_bilateral(image, selem, out=None, mask=None, shift_x=False,
     """
 
     return _apply(bilateral_cy._pop, image, selem, out=out,
+                  mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
+
+def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
+                   shift_y=False, s0=10, s1=10):
+    """Apply a flat kernel bilateral filter.
+
+    This is an edge-preserving and noise reducing denoising filter. It averages
+    pixels based on their spatial closeness and radiometric similarity.
+
+    Spatial closeness is measured by considering only the local pixel
+    neighborhood given by a structuring element (selem).
+
+    Radiometric similarity is defined by the greylevel interval [g-s0, g+s1]
+    where g is the current pixel greylevel. Only pixels belonging to the
+    structuring element AND having a greylevel inside this interval are
+    summed. Return greyscale local bilateral sum of an image.
+    Result is truncated (8bit or 16bit).
+
+    Parameters
+    ----------
+    image : ndarray (uint8, uint16)
+        Image array.
+    selem : ndarray
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : ndarray (same dtype as input)
+        If None, a new array will be allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+    s0, s1 : int
+        Define the [s0, s1] interval around the greyvalue of the center pixel
+        to be considered for computing the value.
+
+    Returns
+    -------
+    out : ndarray (same dtype as input image)
+        Output image.
+
+    See also
+    --------
+    skimage.filter.denoise_bilateral for a gaussian bilateral filter.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.morphology import disk
+    >>> from skimage.filter.rank import sum_bilateral
+    >>> # Load test image / cast to uint16
+    >>> ima = data.camera().astype(np.uint16)
+    >>> # bilateral filtering of cameraman image using a flat kernel
+    >>> bilat_ima = sum_bilateral(ima, disk(20), s0=10,s1=10)
+
+    """
+
+    return _apply(bilateral_cy._sum, image, selem, out=out,
                   mask=mask, shift_x=shift_x, shift_y=shift_y, s0=s0, s1=s1)
