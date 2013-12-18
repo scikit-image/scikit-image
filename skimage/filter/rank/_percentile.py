@@ -322,6 +322,8 @@ def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
 
     Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
+    Note that the result is truncated to 8 or 16 bit.
+
     Parameters
     ----------
     image : 2-D array (uint8, uint16)
