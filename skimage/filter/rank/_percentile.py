@@ -316,6 +316,7 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
 
+
 def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
     """Return the local sum of pixels.
@@ -353,6 +354,7 @@ def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
     return _apply(percentile_cy._sum,
                   image, selem, out=out, mask=mask, shift_x=shift_x,
                   shift_y=shift_y, p0=p0, p1=p1)
+
 
 def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0):
