@@ -145,4 +145,73 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
             for c in range(n_features):
                 segments[k, c] /= n_segment_elems[k]
 
-    return np.asarray(nearest_segments)
+    #return np.asarray(nearest_segments)
+
+    #enforce segment connectivity
+    cdef Py_ssize_t[:] ddx = np.array((1,-1,0,0,0,0))
+    cdef Py_ssize_t[:] ddy = np.array((0,0,1,-1,0,0))
+    cdef Py_ssize_t[:] ddz = np.array((0,0,0,0,1,-1))
+
+    cdef double factor = 0.25
+    cdef double size = height*width*depth / n_segments
+    cdef double min_size = factor * size
+    cdef double max_size = 3*size
+
+    #new object with connected segments
+    cdef Py_ssize_t[:, :, ::1] new_nearest_segments \
+        = np.zeros((depth, height, width), dtype=np.intp)
+
+    cdef Py_ssize_t current_new_label       = 0
+    cdef Py_ssize_t label = 0
+
+    #variables for the breadth first search
+    cdef Py_ssize_t count = 1
+    cdef Py_ssize_t p = 0
+    cdef Py_ssize_t adjacent
+
+    cdef Py_ssize_t zz,yy,xx
+
+    cdef Py_ssize_t[:, :] coord_list \
+        = np.zeros((max_size,3), dtype=np.intp)
+
+    #loop through all image
+    for z in range(depth):
+        for y in range(height):
+            for x in range(width):
+                if (new_nearest_segments[z,y,x] > 0):
+                    continue
+                #find the component size
+                adjacent = 0
+                label = nearest_segments[z,y,x]
+                current_new_label = current_new_label+1
+                new_nearest_segments[z,y,x] = current_new_label
+
+                count  = 1
+                p = 0
+                coord_list[p,0] = z
+                coord_list[p,1] = y
+                coord_list[p,2] = x
+
+                #perform a breadth first search to find the size of the connected component
+                while (p != count):
+                    for i in range(6):
+                        zz = coord_list[p,0] + ddz[i]
+                        yy = coord_list[p,1] + ddy[i]
+                        xx = coord_list[p,2] + ddx[i]
+                        if (xx >= 0 and xx < width and yy >= 0 and yy < height and zz >= 0 and zz < depth):
+                            if (nearest_segments[zz,yy,xx] == label and new_nearest_segments[zz,yy,xx] == 0):
+                                new_nearest_segments[zz,yy,xx] = current_new_label
+                                coord_list[count,0] = zz
+                                coord_list[count,1] = yy
+                                coord_list[count,2] = xx
+                                count = count + 1
+                            elif (new_nearest_segments[zz,yy,xx] > 0 and new_nearest_segments[zz,yy,xx] != current_new_label):
+                                adjacent = new_nearest_segments[zz,yy,xx]
+                    p = p + 1
+
+                #change to an adjacent one, like in the original paper
+                if (count < min_size):
+                    for i in range(count):
+                        new_nearest_segments[coord_list[i,0],coord_list[i,1],coord_list[i,2]] = adjacent
+
+    return np.asarray(new_nearest_segments)
