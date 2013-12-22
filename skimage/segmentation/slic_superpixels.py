@@ -6,12 +6,13 @@ from scipy import ndimage
 import warnings
 
 from skimage.util import img_as_float, regular_grid
-from skimage.segmentation._slic import _slic_cython
+from skimage.segmentation._slic import _slic_cython, _enforce_label_connectivity_cython
 from skimage.color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
-         spacing=None, multichannel=True, convert2lab=True, ratio=None):
+         spacing=None, multichannel=True, convert2lab=True, ratio=None,
+         enforce_connectivity=True, min_size_factor=0.5):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -47,6 +48,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         recommended.
     ratio : float, optional
         Synonym for `compactness`. This keyword is deprecated.
+    enforce_connectivity: bool, optional
+        Whether the generated segments are connected or not
+    min_size_factor: float
+        proportion of the minimum segment size to be removed with respect
+        to the supposed segment size (depth*width*height/n_segments)
 
     Returns
     -------
@@ -161,7 +167,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     ratio = float(max((step_z, step_y, step_x))) / compactness
     image = np.ascontiguousarray(image * ratio)
 
-    labels = _slic_cython(image, segments, max_iter, spacing)
+    labels = _slic_cython(image, segments, max_iter, spacing, enforce_connectivity)
+
+    if (enforce_connectivity):
+        labels = _enforce_label_connectivity_cython(labels, n_segments, min_size_factor*depth*height*width/n_segments)
 
     if is_2d:
         labels = labels[0]
