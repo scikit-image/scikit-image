@@ -11,7 +11,8 @@ from skimage.util import regular_grid
 
 def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] nearest_segments,
                                 Py_ssize_t n_segments,
-                                int min_size):
+                                int min_size,
+                                int max_size):
     """ Helper function to remove small disconnected regions from the labels
 
     Parameters
@@ -22,7 +23,9 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] nearest_segments,
         number of specified segments
     min_size: int
         minimum size of the segment
-
+    max_size: int
+        maximum size of the segment. This is done for performance reasons,
+        to pre-allocate a sufficiently large array for the breadth first search
     Returns
     -------
     connected_nearest_segments : 3D array of int, shape (Z, Y, X)
@@ -39,9 +42,6 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] nearest_segments,
     cdef Py_ssize_t[:] ddx = np.array((1,-1,0,0,0,0))
     cdef Py_ssize_t[:] ddy = np.array((0,0,1,-1,0,0))
     cdef Py_ssize_t[:] ddz = np.array((0,0,0,0,1,-1))
-
-    cdef double size = height*width*depth / n_segments
-    cdef double max_size = 3*size
 
     #new object with connected segments
     cdef Py_ssize_t[:, :, ::1] new_nearest_segments \
