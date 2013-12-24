@@ -21,10 +21,10 @@ def test_color_2d():
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape[:-1])
-    assert_equal(seg[:10, :10], 1)
-    assert_equal(seg[10:, :10], 3)
-    assert_equal(seg[:10, 10:], 2)
-    assert_equal(seg[10:, 10:], 4)
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
 
 
 def test_gray_2d():
@@ -41,10 +41,10 @@ def test_gray_2d():
 
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape)
-    assert_equal(seg[:10, :10], 1)
-    assert_equal(seg[10:, :10], 3)
-    assert_equal(seg[:10, 10:], 2)
-    assert_equal(seg[10:, 10:], 4)
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
 
 
 def test_color_3d():
@@ -65,7 +65,7 @@ def test_color_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_equal(seg[s], c + 1)
+        assert_equal(seg[s], c)
 
 
 def test_gray_3d():
@@ -87,7 +87,7 @@ def test_gray_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_equal(seg[s], c + 1)
+        assert_equal(seg[s], c)
 
 
 def test_list_sigma():
@@ -96,7 +96,7 @@ def test_list_sigma():
                     [0, 0, 0, 1, 1, 1]], np.float)
     img += 0.1 * rnd.normal(size=img.shape)
     result_sigma = np.array([[0, 0, 0, 1, 1, 1],
-                             [0, 0, 0, 1, 1, 1]], np.int) + 1
+                             [0, 0, 0, 1, 1, 1]], np.int)
     seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1], multichannel=False)
     assert_equal(seg_sigma, result_sigma)
 
@@ -106,9 +106,9 @@ def test_spacing():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float)
     result_non_spaced = np.array([[0, 0, 0, 1, 1],
-                                  [0, 0, 1, 1, 1]], np.int) + 1
+                                  [0, 0, 1, 1, 1]], np.int)
     result_spaced = np.array([[0, 0, 0, 0, 0],
-                              [1, 1, 1, 1, 1]], np.int) + 1
+                              [1, 1, 1, 1, 1]], np.int)
     img += 0.1 * rnd.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, multichannel=False,
                           compactness=1.0)
@@ -136,13 +136,13 @@ def test_enforce_connectivity():
                                  enforce_connectivity=False,
                                  convert2lab=False)
 
-    result_connected = np.array([[1, 1, 1, 2, 2, 2],
-                                 [1, 1, 1, 2, 2, 2],
-                                 [1, 1, 1, 2, 2, 2]], np.float)
+    result_connected = np.array([[0, 0, 0, 1, 1, 1],
+                                 [0, 0, 0, 1, 1, 1],
+                                 [0, 0, 0, 1, 1, 1]], np.float)
 
-    result_disconnected = np.array([[1, 1, 1, 2, 2, 2],
-                                    [2, 1, 1, 2, 2, 1],
-                                    [1, 1, 1, 2, 2, 1]], np.float)
+    result_disconnected = np.array([[0, 0, 0, 1, 1, 1],
+                                    [1, 0, 0, 1, 1, 0],
+                                    [0, 0, 0, 1, 1, 0]], np.float)
 
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)

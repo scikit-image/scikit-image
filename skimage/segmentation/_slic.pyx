@@ -116,7 +116,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                                             - segments[k, c]) ** 2
                         if distance[z, y, x] > dist_center:
                             # segments start at 1
-                            nearest_segments[z, y, x] = k+1
+                            nearest_segments[z, y, x] = k
                             distance[z, y, x] = dist_center
                             change = 1
 
@@ -133,7 +133,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
             for y in range(height):
                 for x in range(width):
                     #compensate the label offset 1
-                    k = nearest_segments[z, y, x] - 1
+                    k = nearest_segments[z, y, x]
                     n_segment_elems[k] += 1
                     segments[k, 0] += z
                     segments[k, 1] += y
@@ -183,9 +183,9 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
     cdef Py_ssize_t[::1] ddy = np.array((0, 0, 1, -1, 0, 0))
     cdef Py_ssize_t[::1] ddz = np.array((0, 0, 0, 0, 1, -1))
 
-    #new object with connected segments
+    #new object with connected segments initialized to -1
     cdef Py_ssize_t[:, :, ::1] connected_segments \
-        = np.zeros_like(segments, dtype=np.intp)
+        = -1 * np.ones_like(segments, dtype=np.intp)
 
     cdef Py_ssize_t current_new_label = 0
     cdef Py_ssize_t label = 0
@@ -203,12 +203,11 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
     for z in range(depth):
         for y in range(height):
             for x in range(width):
-                if connected_segments[z, y, x] > 0:
+                if connected_segments[z, y, x] >= 0:
                     continue
                 #find the component size
                 adjacent = 0
                 label = segments[z, y, x]
-                current_new_label += 1
                 connected_segments[z, y, x] = current_new_label
                 current_segment_size = 1
                 bfs_visited = 0
@@ -223,18 +222,18 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                         zz = coord_list[bfs_visited, 0] + ddz[i]
                         yy = coord_list[bfs_visited, 1] + ddy[i]
                         xx = coord_list[bfs_visited, 2] + ddx[i]
-                        if (xx >= 0 and xx < width and
-                            yy >= 0 and yy < height and
-                            zz >= 0 and zz < depth):
+                        if (0 <= xx < width and
+                                0 <= yy < height and
+                                0 <= zz < depth):
                             if (segments[zz, yy, xx] == label and
-                               connected_segments[zz, yy, xx] == 0):
+                                    connected_segments[zz, yy, xx] == -1):
                                 connected_segments[zz, yy, xx] = \
                                     current_new_label
                                 coord_list[current_segment_size, 0] = zz
                                 coord_list[current_segment_size, 1] = yy
                                 coord_list[current_segment_size, 2] = xx
                                 current_segment_size += 1
-                            elif (connected_segments[zz, yy, xx] > 0 and
+                            elif (connected_segments[zz, yy, xx] >= 0 and
                                   connected_segments[zz, yy, xx] != current_new_label):
                                 adjacent = connected_segments[zz, yy, xx]
                     bfs_visited += 1
@@ -245,5 +244,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                         connected_segments[coord_list[i, 0],
                                            coord_list[i, 1],
                                            coord_list[i, 2]] = adjacent
+                else:
+                    current_new_label += 1
 
     return np.asarray(connected_segments)
