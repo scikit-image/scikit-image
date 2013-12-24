@@ -150,9 +150,9 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
 
 def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
-                                Py_ssize_t n_segments,
-                                int min_size,
-                                int max_size):
+                                       Py_ssize_t n_segments,
+                                       int min_size,
+                                       int max_size):
     """ Helper function to remove small disconnected regions from the labels
 
     Parameters
@@ -179,64 +179,71 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
     width = segments.shape[2]
 
     #neighborhood arrays
-    cdef Py_ssize_t[:] ddx = np.array((1,-1,0,0,0,0))
-    cdef Py_ssize_t[:] ddy = np.array((0,0,1,-1,0,0))
-    cdef Py_ssize_t[:] ddz = np.array((0,0,0,0,1,-1))
+    cdef Py_ssize_t[::1] ddx = np.array((1, -1, 0, 0, 0, 0))
+    cdef Py_ssize_t[::1] ddy = np.array((0, 0, 1, -1, 0, 0))
+    cdef Py_ssize_t[::1] ddz = np.array((0, 0, 0, 0, 1, -1))
 
     #new object with connected segments
-    cdef Py_ssize_t[:, :, ::1] connected_segments = np.zeros_like(segments)
+    cdef Py_ssize_t[:, :, ::1] connected_segments \
+        = np.zeros_like(segments, dtype=np.intp)
 
-    cdef Py_ssize_t current_new_label       = 0
+    cdef Py_ssize_t current_new_label = 0
     cdef Py_ssize_t label = 0
 
     #variables for the breadth first search
-    cdef Py_ssize_t count = 1
-    cdef Py_ssize_t p = 0
+    cdef Py_ssize_t current_segment_size = 1
+    cdef Py_ssize_t bfs_visited = 0
     cdef Py_ssize_t adjacent
 
-    cdef Py_ssize_t zz,yy,xx
+    cdef Py_ssize_t zz, yy, xx
 
-    cdef Py_ssize_t[:, ::1] coord_list = np.zeros((max_size,3), dtype=np.intp)
+    cdef Py_ssize_t[:, ::1] coord_list = np.zeros((max_size, 3), dtype=np.intp)
 
     #loop through all image
     for z in range(depth):
         for y in range(height):
             for x in range(width):
-                if (connected_segments[z,y,x] > 0):
+                if connected_segments[z, y, x] > 0:
                     continue
                 #find the component size
                 adjacent = 0
-                label = segments[z,y,x]
+                label = segments[z, y, x]
                 current_new_label += 1
-                connected_segments[z,y,x] = current_new_label
+                connected_segments[z, y, x] = current_new_label
+                current_segment_size = 1
+                bfs_visited = 0
+                coord_list[bfs_visited, 0] = z
+                coord_list[bfs_visited, 1] = y
+                coord_list[bfs_visited, 2] = x
 
-                count  = 1
-                p = 0
-                coord_list[p,0] = z
-                coord_list[p,1] = y
-                coord_list[p,2] = x
-
-                #perform a breadth first search to find the size of the connected component
-                while (p != count):
+                #perform a breadth first search to find
+                # the size of the connected component
+                while bfs_visited != current_segment_size:
                     for i in range(6):
-                        zz = coord_list[p,0] + ddz[i]
-                        yy = coord_list[p,1] + ddy[i]
-                        xx = coord_list[p,2] + ddx[i]
-                        if (xx >= 0 and xx < width and yy >= 0 and yy < height and zz >= 0 and zz < depth):
-                            if (segments[zz,yy,xx] == label and connected_segments[zz,yy,xx] == 0):
-                                connected_segments[zz,yy,xx] = current_new_label
-                                coord_list[count,0] = zz
-                                coord_list[count,1] = yy
-                                coord_list[count,2] = xx
-                                count = count + 1
-                            elif (connected_segments[zz,yy,xx] > 0 and connected_segments[zz,yy,xx] != current_new_label):
-                                adjacent = connected_segments[zz,yy,xx]
-                    p = p + 1
-
+                        zz = coord_list[bfs_visited, 0] + ddz[i]
+                        yy = coord_list[bfs_visited, 1] + ddy[i]
+                        xx = coord_list[bfs_visited, 2] + ddx[i]
+                        if (xx >= 0 and xx < width and
+                            yy >= 0 and yy < height and
+                            zz >= 0 and zz < depth):
+                            if (segments[zz, yy, xx] == label and
+                               connected_segments[zz, yy, xx] == 0):
+                                connected_segments[zz, yy, xx] = \
+                                    current_new_label
+                                coord_list[current_segment_size, 0] = zz
+                                coord_list[current_segment_size, 1] = yy
+                                coord_list[current_segment_size, 2] = xx
+                                current_segment_size += 1
+                            elif (connected_segments[zz, yy, xx] > 0 and
+                                  connected_segments[zz, yy, xx] != current_new_label):
+                                adjacent = connected_segments[zz, yy, xx]
+                    bfs_visited += 1
 
                 #change to an adjacent one, like in the original paper
-                if (count < min_size):
-                    for i in range(count):
-                        connected_segments[coord_list[i,0],coord_list[i,1],coord_list[i,2]] = adjacent
+                if current_segment_size < min_size:
+                    for i in range(current_segment_size):
+                        connected_segments[coord_list[i, 0],
+                                           coord_list[i, 1],
+                                           coord_list[i, 2]] = adjacent
 
     return np.asarray(connected_segments)
