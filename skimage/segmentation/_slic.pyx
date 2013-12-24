@@ -115,7 +115,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             dist_center += (image_zyx[z, y, x, c - 3]
                                             - segments[k, c]) ** 2
                         if distance[z, y, x] > dist_center:
-                            nearest_segments[z, y, x] = k
+                            # segments start at 1
+                            nearest_segments[z, y, x] = k+1
                             distance[z, y, x] = dist_center
                             change = 1
 
@@ -131,7 +132,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
-                    k = nearest_segments[z, y, x]
+                    #compensate the label offset 1
+                    k = nearest_segments[z, y, x] - 1
                     n_segment_elems[k] += 1
                     segments[k, 0] += z
                     segments[k, 1] += y
