@@ -196,13 +196,13 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
 
     cdef Py_ssize_t zz,yy,xx
 
-    cdef Py_ssize_t[:, :] coord_list = np.zeros((max_size,3), dtype=np.intp)
+    cdef Py_ssize_t[:, ::1] coord_list = np.zeros((max_size,3), dtype=np.intp)
 
     #loop through all image
     for z in range(depth):
         for y in range(height):
             for x in range(width):
-                if (new_segments[z,y,x] > 0):
+                if (connected_segments[z,y,x] > 0):
                     continue
                 #find the component size
                 adjacent = 0
@@ -229,15 +229,14 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                 coord_list[count,1] = yy
                                 coord_list[count,2] = xx
                                 count = count + 1
-                            elif (new_segments[zz,yy,xx] > 0 and connected_segments[zz,yy,xx] != current_new_label):
+                            elif (connected_segments[zz,yy,xx] > 0 and connected_segments[zz,yy,xx] != current_new_label):
                                 adjacent = connected_segments[zz,yy,xx]
                     p = p + 1
 
 
                 #change to an adjacent one, like in the original paper
                 if (count < min_size):
-                    connected_segments[*coords.T] = adjacent
-                    #for i in range(count):
-                    #    connected_segments[coord_list[i,0],coord_list[i,1],coord_list[i,2]] = adjacent
+                    for i in range(count):
+                        connected_segments[coord_list[i,0],coord_list[i,1],coord_list[i,2]] = adjacent
 
     return np.asarray(connected_segments)
