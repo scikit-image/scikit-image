@@ -9,107 +9,10 @@ cimport numpy as cnp
 
 from skimage.util import regular_grid
 
-def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] nearest_segments,
-                                Py_ssize_t n_segments,
-                                int min_size,
-                                int max_size):
-    """ Helper function to remove small disconnected regions from the labels
-
-    Parameters
-    ----------
-    nearest_segments : 3D array of int, shape (Z, Y, X)
-        The label field/superpixels found by SLIC.
-    n_segments: int
-        number of specified segments
-    min_size: int
-        minimum size of the segment
-    max_size: int
-        maximum size of the segment. This is done for performance reasons,
-        to pre-allocate a sufficiently large array for the breadth first search
-    Returns
-    -------
-    connected_nearest_segments : 3D array of int, shape (Z, Y, X)
-        A label field with connected labels starting at label=1
-    """
-
-    #get image dimensions
-    cdef Py_ssize_t depth, height, width
-    depth = nearest_segments.shape[0]
-    height = nearest_segments.shape[1]
-    width = nearest_segments.shape[2]
-
-    #neighborhood arrays
-    cdef Py_ssize_t[:] ddx = np.array((1,-1,0,0,0,0))
-    cdef Py_ssize_t[:] ddy = np.array((0,0,1,-1,0,0))
-    cdef Py_ssize_t[:] ddz = np.array((0,0,0,0,1,-1))
-
-    #new object with connected segments
-    cdef Py_ssize_t[:, :, ::1] new_nearest_segments \
-        = np.zeros((depth, height, width), dtype=np.intp)
-
-    cdef Py_ssize_t current_new_label       = 0
-    cdef Py_ssize_t label = 0
-
-    #variables for the breadth first search
-    cdef Py_ssize_t count = 1
-    cdef Py_ssize_t p = 0
-    cdef Py_ssize_t adjacent
-
-    cdef Py_ssize_t zz,yy,xx
-
-    cdef Py_ssize_t[:, :] coord_list \
-        = np.zeros((max_size,3), dtype=np.intp)
-
-    #loop through all image
-    for z in range(depth):
-        for y in range(height):
-            for x in range(width):
-                if (new_nearest_segments[z,y,x] > 0):
-                    continue
-                #find the component size
-                adjacent = 0
-                label = nearest_segments[z,y,x]
-                current_new_label = current_new_label+1
-                new_nearest_segments[z,y,x] = current_new_label
-
-                count  = 1
-                p = 0
-                coord_list[p,0] = z
-                coord_list[p,1] = y
-                coord_list[p,2] = x
-
-                #perform a breadth first search to find the size of the connected component
-                while (p != count):
-                    for i in range(6):
-                        zz = coord_list[p,0] + ddz[i]
-                        yy = coord_list[p,1] + ddy[i]
-                        xx = coord_list[p,2] + ddx[i]
-                        if (xx >= 0 and xx < width and yy >= 0 and yy < height and zz >= 0 and zz < depth):
-                            if (nearest_segments[zz,yy,xx] == label and new_nearest_segments[zz,yy,xx] == 0):
-                                new_nearest_segments[zz,yy,xx] = current_new_label
-                                coord_list[count,0] = zz
-                                coord_list[count,1] = yy
-                                coord_list[count,2] = xx
-                                count = count + 1
-                            elif (new_nearest_segments[zz,yy,xx] > 0 and new_nearest_segments[zz,yy,xx] != current_new_label):
-                                adjacent = new_nearest_segments[zz,yy,xx]
-                    p = p + 1
-
-
-                #change to an adjacent one, like in the original paper
-                if (count < min_size):
-                    #print("Changing segment {0} label {1} ".format(current_new_label, label))
-                    for i in range(count):
-                        new_nearest_segments[coord_list[i,0],coord_list[i,1],coord_list[i,2]] = adjacent
-
-    return np.asarray(new_nearest_segments)
-
 def _slic_cython(double[:, :, :, ::1] image_zyx,
                  double[:, ::1] segments,
                  Py_ssize_t max_iter,
-                 double[::1] spacing,
-                 int enforce_connectivity,
-                 Py_ssize_t min_size = True):
+                 double[::1] spacing):
     """Helper function for SLIC segmentation.
 
     Parameters
@@ -124,8 +27,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         The voxel spacing along each image dimension. This parameter
         controls the weights of the distances along z, y, and x during
         k-means clustering.
-    enforce_connectivity: int indicating whether the returned label
-        field must have connected labels
 
     Returns
     -------
@@ -244,3 +145,103 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 segments[k, c] /= n_segment_elems[k]
 
     return np.asarray(nearest_segments)
+
+
+def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
+                                       Py_ssize_t n_segments,
+                                       int min_size,
+                                       int max_size):
+    """ Helper function to remove small disconnected regions from the labels
+
+    Parameters
+    ----------
+    segments : 3D array of int, shape (Z, Y, X)
+        The label field/superpixels found by SLIC.
+    n_segments: int
+        number of specified segments
+    min_size: int
+        minimum size of the segment
+    max_size: int
+        maximum size of the segment. This is done for performance reasons,
+        to pre-allocate a sufficiently large array for the breadth first search
+    Returns
+    -------
+    connected_segments : 3D array of int, shape (Z, Y, X)
+        A label field with connected labels starting at label=1
+    """
+
+    #get image dimensions
+    cdef Py_ssize_t depth, height, width
+    depth = segments.shape[0]
+    height = segments.shape[1]
+    width = segments.shape[2]
+
+    #neighborhood arrays
+    cdef Py_ssize_t[::1] ddx = np.array((1, -1, 0, 0, 0, 0))
+    cdef Py_ssize_t[::1] ddy = np.array((0, 0, 1, -1, 0, 0))
+    cdef Py_ssize_t[::1] ddz = np.array((0, 0, 0, 0, 1, -1))
+
+    #new object with connected segments
+    cdef Py_ssize_t[:, :, ::1] connected_segments \
+        = np.zeros_like(segments, dtype=np.intp)
+
+    cdef Py_ssize_t current_new_label = 0
+    cdef Py_ssize_t label = 0
+
+    #variables for the breadth first search
+    cdef Py_ssize_t current_segment_size = 1
+    cdef Py_ssize_t bfs_visited = 0
+    cdef Py_ssize_t adjacent
+
+    cdef Py_ssize_t zz, yy, xx
+
+    cdef Py_ssize_t[:, ::1] coord_list = np.zeros((max_size, 3), dtype=np.intp)
+
+    #loop through all image
+    for z in range(depth):
+        for y in range(height):
+            for x in range(width):
+                if connected_segments[z, y, x] > 0:
+                    continue
+                #find the component size
+                adjacent = 0
+                label = segments[z, y, x]
+                current_new_label += 1
+                connected_segments[z, y, x] = current_new_label
+                current_segment_size = 1
+                bfs_visited = 0
+                coord_list[bfs_visited, 0] = z
+                coord_list[bfs_visited, 1] = y
+                coord_list[bfs_visited, 2] = x
+
+                #perform a breadth first search to find
+                # the size of the connected component
+                while bfs_visited != current_segment_size:
+                    for i in range(6):
+                        zz = coord_list[bfs_visited, 0] + ddz[i]
+                        yy = coord_list[bfs_visited, 1] + ddy[i]
+                        xx = coord_list[bfs_visited, 2] + ddx[i]
+                        if (xx >= 0 and xx < width and
+                            yy >= 0 and yy < height and
+                            zz >= 0 and zz < depth):
+                            if (segments[zz, yy, xx] == label and
+                               connected_segments[zz, yy, xx] == 0):
+                                connected_segments[zz, yy, xx] = \
+                                    current_new_label
+                                coord_list[current_segment_size, 0] = zz
+                                coord_list[current_segment_size, 1] = yy
+                                coord_list[current_segment_size, 2] = xx
+                                current_segment_size += 1
+                            elif (connected_segments[zz, yy, xx] > 0 and
+                                  connected_segments[zz, yy, xx] != current_new_label):
+                                adjacent = connected_segments[zz, yy, xx]
+                    bfs_visited += 1
+
+                #change to an adjacent one, like in the original paper
+                if current_segment_size < min_size:
+                    for i in range(current_segment_size):
+                        connected_segments[coord_list[i, 0],
+                                           coord_list[i, 1],
+                                           coord_list[i, 2]] = adjacent
+
+    return np.asarray(connected_segments)

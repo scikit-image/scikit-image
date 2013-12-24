@@ -21,10 +21,10 @@ def test_color_2d():
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape[:-1])
-    assert_equal(seg[:10, :10], 0)
-    assert_equal(seg[10:, :10], 2)
-    assert_equal(seg[:10, 10:], 1)
-    assert_equal(seg[10:, 10:], 3)
+    assert_equal(seg[:10, :10], 1)
+    assert_equal(seg[10:, :10], 3)
+    assert_equal(seg[:10, 10:], 2)
+    assert_equal(seg[10:, 10:], 4)
 
 
 def test_gray_2d():
@@ -41,10 +41,10 @@ def test_gray_2d():
 
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape)
-    assert_equal(seg[:10, :10], 0)
-    assert_equal(seg[10:, :10], 2)
-    assert_equal(seg[:10, 10:], 1)
-    assert_equal(seg[10:, 10:], 3)
+    assert_equal(seg[:10, :10], 1)
+    assert_equal(seg[10:, :10], 3)
+    assert_equal(seg[:10, 10:], 2)
+    assert_equal(seg[10:, 10:], 4)
 
 
 def test_color_3d():
@@ -65,7 +65,7 @@ def test_color_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_equal(seg[s], c)
+        assert_equal(seg[s], c + 1)
 
 
 def test_gray_3d():
@@ -76,7 +76,7 @@ def test_gray_3d():
         midpoint = dim_size // 2
         slices.append((slice(None, midpoint), slice(midpoint, None)))
     slices = list(it.product(*slices))
-    shades = np.arange(0, 1.000001, 1.0/7)
+    shades = np.arange(0, 1.000001, 1.0 / 7)
     for s, sh in zip(slices, shades):
         img[s] = sh
     img += 0.001 * rnd.normal(size=img.shape)
@@ -87,7 +87,7 @@ def test_gray_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_equal(seg[s], c)
+        assert_equal(seg[s], c + 1)
 
 
 def test_list_sigma():
@@ -96,7 +96,7 @@ def test_list_sigma():
                     [0, 0, 0, 1, 1, 1]], np.float)
     img += 0.1 * rnd.normal(size=img.shape)
     result_sigma = np.array([[0, 0, 0, 1, 1, 1],
-                             [0, 0, 0, 1, 1, 1]], np.int)
+                             [0, 0, 0, 1, 1, 1]], np.int) + 1
     seg_sigma = slic(img, n_segments=2, sigma=[1, 50, 1], multichannel=False)
     assert_equal(seg_sigma, result_sigma)
 
@@ -106,9 +106,9 @@ def test_spacing():
     img = np.array([[1, 1, 1, 0, 0],
                     [1, 1, 0, 0, 0]], np.float)
     result_non_spaced = np.array([[0, 0, 0, 1, 1],
-                                  [0, 0, 1, 1, 1]], np.int)
+                                  [0, 0, 1, 1, 1]], np.int) + 1
     result_spaced = np.array([[0, 0, 0, 0, 0],
-                              [1, 1, 1, 1, 1]], np.int)
+                              [1, 1, 1, 1, 1]], np.int) + 1
     img += 0.1 * rnd.normal(size=img.shape)
     seg_non_spaced = slic(img, n_segments=2, sigma=0, multichannel=False,
                           compactness=1.0)
@@ -120,11 +120,34 @@ def test_spacing():
 
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], np.float)
+                    [1, 1, 0, 0, 0]], np.float) + 1
     assert_raises(ValueError, slic, img, multichannel=True, convert2lab=True)
 
 
+def test_enforce_connectivity():
+    img = np.array([[0, 0, 0, 1, 1, 1],
+                    [1, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 1, 1, 0]], np.float)
+
+    segments_connected = slic(img, 2, compactness=0.0001,
+                              enforce_connectivity=True,
+                              convert2lab=False)
+    segments_disconnected = slic(img, 2, compactness=0.0001,
+                                 enforce_connectivity=False,
+                                 convert2lab=False)
+
+    result_connected = np.array([[1, 1, 1, 2, 2, 2],
+                                 [1, 1, 1, 2, 2, 2],
+                                 [1, 1, 1, 2, 2, 2]], np.float)
+
+    result_disconnected = np.array([[1, 1, 1, 2, 2, 2],
+                                    [2, 1, 1, 2, 2, 1],
+                                    [1, 1, 1, 2, 2, 1]], np.float)
+
+    assert_equal(segments_connected, result_connected)
+    assert_equal(segments_disconnected, result_disconnected)
 
 if __name__ == '__main__':
     from numpy import testing
+
     testing.run_module_suite()
