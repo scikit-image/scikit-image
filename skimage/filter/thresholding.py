@@ -172,15 +172,16 @@ def threshold_yen(image, nbins=256):
     >>> binary = image <= thresh
     """
     hist, bin_centers = histogram(image, nbins)
-    norm_histo = hist.astype(float) / hist.sum() # Probability mass function
-    P1 = np.cumsum(norm_histo) # Cumulative normalized histogram
+    if bin_centers.size == 1:
+        return bin_centers[0]
+
+    norm_histo = hist.astype(float) / hist.sum()  # Probability mass function
+    P1 = np.cumsum(norm_histo)  # Cumulative normalized histogram
     P1_sq = np.cumsum(norm_histo ** 2)
     # Get cumsum calculated from end of squared array:
     P2_sq = np.cumsum(norm_histo[::-1] ** 2)[::-1]
     # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
     # in crit. ImageJ Yen implementation replaces those values by zero.
-    crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) * \
+    crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
                   (P1[:-1] * (1.0 - P1[:-1])) ** 2)
-    max_crit = np.argmax(crit)
-    threshold = bin_centers[:-1][max_crit]
-    return threshold
+    return bin_centers[crit.argmax()]

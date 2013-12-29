@@ -43,9 +43,18 @@ class TestSimpleImage():
         assert threshold_yen(image) == 127
 
     def test_yen_binary(self):
-        image = np.zeros([2,256], dtype='uint8')
+        image = np.zeros([2,256], dtype=np.uint8)
         image[0] = 255
         assert threshold_yen(image) < 1
+
+    def test_yen_blank_zero(self):
+        image = np.zeros((5, 5), dtype=np.uint8)
+        assert threshold_yen(image) == 0
+
+    def test_yen_blank_max(self):
+        image = np.empty((5, 5), dtype=np.uint8)
+        image.fill(255)
+        assert threshold_yen(image) == 255
 
     def test_threshold_adaptive_generic(self):
         def func(arr):
@@ -122,6 +131,11 @@ def test_yen_coins_image():
 def test_yen_coins_image_as_float():
     coins = skimage.img_as_float(data.coins())
     assert 0.43 < threshold_yen(coins) < 0.44
+
+
+def test_yen_camera_image():
+    camera = skimage.img_as_ubyte(data.camera())
+    assert 197 < threshold_yen(camera) < 199
 
 
 if __name__ == '__main__':
