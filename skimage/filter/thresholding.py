@@ -1,4 +1,7 @@
-__all__ = ['threshold_adaptive', 'threshold_otsu', 'threshold_yen']
+__all__ = ['threshold_adaptive',
+           'threshold_otsu',
+           'threshold_yen',
+           'threshold_isodata']
 
 import numpy as np
 import scipy.ndimage
@@ -185,3 +188,63 @@ def threshold_yen(image, nbins=256):
     crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
                   (P1[:-1] * (1.0 - P1[:-1])) ** 2)
     return bin_centers[crit.argmax()]
+
+
+def threshold_isodata(image, nbins=256):
+    """Return threshold value based on ISODATA method.
+
+    Histogram-based threshold, known as Ridler-Calvard method or intermeans.
+
+    Parameters
+    ----------
+    image : array
+        Input image float or int of any range.
+    nbins : int, optional
+        Number of bins used to calculate histogram. This value is ignored for
+        integer arrays.
+
+    Returns
+    -------
+    threshold : float64 or int64
+        Upper threshold value. All pixels intensities that less or equal of
+        this value assumed as background.
+
+    References
+    ----------
+    .. [1] Ridler, TW & Calvard, S (1978), "Picture thresholding using an
+           iterative selection method"
+    .. [2] IEEE Transactions on Systems, Man and Cybernetics 8: 630-632,
+           http://ieeexplore.ieee.org/xpls/abs_all.jsp?arnumber=4310039
+    .. [3] Sezgin M. and Sankur B. (2004) "Survey over Image Thresholding
+           Techniques and Quantitative Performance Evaluation" Journal of
+           Electronic Imaging, 13(1): 146-165,
+           http://www.busim.ee.boun.edu.tr/~sankur/SankurFolder/Threshold_survey.pdf
+    .. [4] ImageJ AutoThresholder code,
+           http://fiji.sc/wiki/index.php/Auto_Threshold
+
+    Examples
+    --------
+    >>> from skimage.data import coins
+    >>> image = coins()
+    >>> thresh = threshold_isodata(image)
+    >>> binary = image > thresh
+    """
+    hist, bin_centers = histogram(image, nbins)
+    if bin_centers.size == 1:
+        return bin_centers[0]
+    # It is not necessary to calculate probability mass function in this case
+    # since in the l and h fractions it's reduced.
+    pmf = hist.astype(float)# / hist.sum()
+    cpmfl = np.cumsum(pmf, dtype=float)  # Cumulative probability mass function
+    cpmfh = np.cumsum(pmf[::-1], dtype=float)[::-1]
+
+    binnums = np.arange(pmf.size, dtype=np.uint8)
+    l = np.ma.divide(np.cumsum(pmf * binnums, dtype=float), cpmfl)
+    h = np.ma.divide(np.cumsum((pmf[::-1] * binnums[::-1]), dtype=float)[::-1], 
+                     cpmfh)
+
+    allmean = (l + h) / 2.0
+    threshold = bin_centers[np.nonzero(allmean.round() == binnums)[0][0]]
+    # ImageJ shows *inclusive* threshold. This implementation returns
+    # threshold, where `background <= threshold_value < foreground`.
+    return threshold
