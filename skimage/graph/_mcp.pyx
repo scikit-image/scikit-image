@@ -628,80 +628,22 @@ cdef class MCP:
         return cumulative_costs, traceback
     
     
-    cdef object _flat_traceback(self, INDEX_T end):
-        """ _flat_traceback(end)
-        Do a traceback, input and output is in flat coordinates.
-        Returns a list of integers, from given end point to start.
-        """
-        
-        # Initialize traceback
-        traceback = [end]
-        
-        # Init position with end
-        cdef INDEX_T flat_position = end
-        # Check if we can find a path
-        #print(flat_position)
-        if self.traceback_offsets[flat_position] == -2:
-            raise ValueError('no minimum-cost path was found '
-                             'to the specified end point')
-        
-        # Short names for arrays
-        cdef OFFSETS_INDEX_T [:] traceback_offsets = self.traceback_offsets
-        cdef INDEX_T [:] flat_offsets = self.flat_offsets
-        
-        
-        # Do traceback
-        cdef OFFSETS_INDEX_T offset
-        while 1:
-            offset = traceback_offsets[flat_position]
-            if offset == -1:
-                break  # -2 is uninitialized, -1 is start point
-            flat_position -= flat_offsets[offset]
-            traceback.append(offset)
-        return traceback
-    
-    
-    cdef object _unravel_traceback(self, object flat_traceback):
-        """ Unravel the given traceback obtained from _flat_traceback().
-        Returns a new traceback that is reversed and has x-y(-z) coordinates.
-        """
-        
-        flat_end = flat_traceback.pop(0)
-        end = _unravel_index_fortran([flat_end], self.costs_shape)[0]
-        
-        # Prepare arrays
-        cdef INDEX_T [:] position = np.array(end, dtype=INDEX_D)
-        cdef OFFSET_T [:,:] offsets = self.offsets
-        
-        # Prepare variables
-        cdef DIM_T dim = self.dim
-        cdef DIM_T d
-        
-        # Reverse and convert
-        traceback = [tuple(position)]
-        for offset in flat_traceback:
-            for d in range(dim):
-                position[d] -= offsets[offset, d]
-            traceback.append(tuple(position))
-        return _reverse(traceback)
-    
-    
     def traceback(self, end):
         """traceback(end)
-
+        
         Trace a minimum cost path through the pre-calculated traceback array.
-
+        
         This convenience function reconstructs the the minimum cost path to a
         given end position from one of the starting indices provided to
         find_costs(), which must have been called previously. This function
         can be called as many times as desired after find_costs() has been
         run.
-
+        
         Parameters
         ----------
         end : iterable
             An n-d index into the `costs` array.
-
+        
         Returns
         -------
         traceback : list of n-d tuples
@@ -718,13 +660,34 @@ cdef class MCP:
         if ends is None:
             raise ValueError('the specified end point must be '
                              'within the costs array')
+        traceback = [tuple(ends[0])]
+
+        cdef INDEX_T flat_position =\
+             _ravel_index_fortran(ends, self.costs_shape)[0]
+        if self.flat_cumulative_costs[flat_position] == np.inf:
+            raise ValueError('no minimum-cost path was found '
+                             'to the specified end point')
         
-        # Get flat traceback
-        cdef INDEX_T flat_end = _ravel_index_fortran(ends, self.costs_shape)[0]
-        flat_traceback = self._flat_traceback(flat_end)
+        # Short names for arrays
+        cdef OFFSETS_INDEX_T [:] traceback_offsets = self.traceback_offsets
+        cdef OFFSET_T [:,:] offsets = self.offsets
+        cdef INDEX_T [:] flat_offsets = self.flat_offsets
+        # New array
+        cdef INDEX_T [:] position = np.array(ends[0], dtype=INDEX_D)
         
-        # Transform it
-        return self._unravel_traceback(flat_traceback)
+        cdef OFFSETS_INDEX_T offset
+        cdef DIM_T d
+        cdef DIM_T dim = self.dim
+        while 1:
+            offset = traceback_offsets[flat_position]
+            if offset == -1:
+                # At a point where we can go no further: probably a start point
+                break
+            flat_position -= flat_offsets[offset]
+            for d in range(dim):
+                position[d] -= offsets[offset, d]
+            traceback.append(tuple(position))
+        return _reverse(traceback)
 
 
 
