@@ -39,14 +39,14 @@ def test_flexible():
     
     # Create MCP and do a traceback
     mcp = TestFlexibleMCP(a)
-    costs, traceback = mcp.find_costs([(0,0)])
+    costs, traceback = mcp.find_costs([(0, 0)])
     
     # Check that inner part is correct. This basically
     # tests whether travel_cost works.
-    assert_array_equal(costs[:4,:4], [[1,2,3,4],
-                                      [2,2,3,4],
-                                      [3,3,3,4],
-                                      [4,4,4,4]])
+    assert_array_equal(costs[:4,:4], [[1, 2, 3, 4],
+                                      [2, 2, 3, 4],
+                                      [3, 3, 3, 4],
+                                      [4, 4, 4, 4]])
     
     # Test that the algorithm stopped at the right distance.
     # Note that some of the costs are filled in but not yet frozen,

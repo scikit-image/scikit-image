@@ -5,6 +5,7 @@ for use with data on a n-dimensional lattice.
 
 Original author: Zachary Pincus
 Inspired by code from Almar Klein
+Later modifications by Almar Klein (Dec 2013)
 
 License: BSD
 
@@ -102,7 +103,7 @@ def _offset_edge_map(shape, offsets):
           [0, 0, 2, 1]], dtype=int8)
 
     """
-    indices = np.indices(shape) # indices.shape = (n,)+shape
+    indices = np.indices(shape)  # indices.shape = (n,)+shape
 
     #get the distance from each index to the upper or lower edge in each dim
     pos_edges = (shape - indices.T).T
@@ -168,11 +169,12 @@ def make_offsets(d, fully_connected):
 def _unravel_index_fortran(flat_indices, shape):
     """_unravel_index_fortran(flat_indices, shape)
 
-    Given a flat index into an n-d fortran-strided array, return an index tuple.
-
+    Given a flat index into an n-d fortran-strided array, return an
+    index tuple.
+    
     """
     strides = np.multiply.accumulate([1] + list(shape[:-1]))
-    indices = [tuple(idx//strides % shape) for idx in flat_indices]
+    indices = [tuple((idx // strides) % shape) for idx in flat_indices]
     return indices
 
 
@@ -181,7 +183,8 @@ def _unravel_index_fortran(flat_indices, shape):
 def _ravel_index_fortran(indices, shape):
     """_ravel_index_fortran(flat_indices, shape)
 
-    Given an index tuple into an n-d fortran-strided array, return a flat index.
+    Given an index tuple into an n-d fortran-strided array, return a
+    flat index.
 
     """
     strides = np.multiply.accumulate([1] + list(shape[:-1]))
@@ -205,7 +208,7 @@ def _normalize_indices(indices, shape):
         for i, s in zip(index, shape):
             i = int(i)
             if i < 0:
-                i = s+i
+                i = s + i
             if not (0 <= i < s):
                 return None
             new_index.append(i)
@@ -216,7 +219,8 @@ def _normalize_indices(indices, shape):
 @cython.boundscheck(True)
 @cython.wraparound(True)
 def _reverse(arr):
-    """Reverse index an array safely, with bounds/wraparound checks on."""
+    """Reverse index an array safely, with bounds/wraparound checks on.
+    """
     return arr[::-1]
 
 
@@ -272,7 +276,7 @@ cdef class MCP:
     """
     
     def __init__(self, costs, offsets=None, fully_connected=True, 
-                sampling=None):
+                 sampling=None):
         """__init__(costs, offsets=None, fully_connected=True, sampling=None)
 
         See class documentation.
@@ -311,8 +315,8 @@ cdef class MCP:
         # The offsets are a list of relative offsets from a central
         # point to each point in the relevant neighborhood. (e.g. (-1,
         # 0) might be a 2d offset).
-        # These offsets are raveled to provide flat, 1d offsets that can be used
-        # in the same way for flat indices to move to neighboring points.
+        # These offsets are raveled to provide flat, 1d offsets that can be 
+        # used in the same way for flat indices to move to neighboring points.
         if offsets is None:
             offsets = make_offsets(self.dim, fully_connected)
         self.offsets = np.array(offsets, dtype=OFFSET_D)
@@ -322,9 +326,9 @@ cdef class MCP:
 
         # Instead of unraveling each index during the pathfinding algorithm, we
         # will use a pre-computed "edge map" that specifies for each dimension
-        # whether a given index is on a lower or upper boundary (or none at all)
-        # Flatten this map to get something that can be indexed as by the same
-        # flat indices as elsewhere.
+        # whether a given index is on a lower or upper boundary (or none at 
+        # all). Flatten this map to get something that can be indexed as by the
+        # same flat indices as elsewhere.
         # The edge map stores more than a boolean "on some edge" flag so as to
         # allow us to examine the non-out-of-bounds neighbors for a given edge
         # point while excluding the neighbors which are outside the array.
@@ -334,15 +338,14 @@ cdef class MCP:
 
 
         # The offset lengths are the distances traveled along each offset
-        self.offset_lengths = np.sqrt(
-            np.sum((sampling*self.offsets)**2, axis=1)).astype(FLOAT_D)
+        self.offset_lengths = np.sqrt(np.sum((sampling * self.offsets)**2, 
+                                      axis=1)).astype(FLOAT_D)
         self.dirty = 0
         self.use_start_cost = 1
     
     
     def _reset(self):
         """_reset()
-
         Clears paths found by find_costs().
         """
         self.costs_heap.reset()
@@ -365,14 +368,16 @@ cdef class MCP:
     
     cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost,
                               FLOAT_T new_cost, FLOAT_T offset_length):
-        """ The travel cost for going from the current node to the next.
+        """ float _travel_cost(float old_cost, float new_cost, 
+                               float offset_length)
+        The travel cost for going from the current node to the next.
         Default is simply the cost of the next node.
         """
         return new_cost
     
     
     cpdef int goal_reached(self, INDEX_T index, FLOAT_T cumcost):
-        """ int goal_reached(self, int index, float cumcost)
+        """ int goal_reached(int index, float cumcost)
         This method is called each iteration after popping an index
         from the heap, before examining the neighbours.
         
@@ -388,23 +393,25 @@ cdef class MCP:
         return 0
     
     
-    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length):
-        """ _examine_neighbor(self, int index, int new_index, float offset_length)
+    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, 
+                                FLOAT_T offset_length):
+        """ _examine_neighbor(int index, int new_index, float offset_length)
         This method is called once for every pair of neighboring nodes,
         as soon as both nodes become frozen.
         """
         pass
     
     
-    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, FLOAT_T offset_length):
-        """ _update_node(self, int index, int new_index, float offset_length)
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, 
+                           FLOAT_T offset_length):
+        """ _update_node(int index, int new_index, float offset_length)
         This method is called when a node is updated. 
         """
         pass
     
     
     def find_costs(self, starts, ends=None, find_all_ends=True, 
-                    max_coverage=1.0, max_cumulative_cost=None, max_cost=None):
+                   max_coverage=1.0, max_cumulative_cost=None, max_cost=None):
         """
         Find the minimum-cost path from the given starting points.
 
@@ -457,7 +464,8 @@ cdef class MCP:
         if starts is None:
             raise ValueError('start points must all be within the costs array')
         elif not starts:
-            raise ValueError('no valid start points to start front propagation')
+            raise ValueError('no valid start points to start front' + 
+                             'propagation')
         if ends is not None:
             ends = _normalize_indices(ends, self.costs_shape)
             if ends is None:
@@ -602,7 +610,7 @@ cdef class MCP:
                 
                 # Calculate new cumulative cost
                 new_cumcost = cumcost + self._travel_cost(cost, new_cost,
-                                                offset_length)
+                                                          offset_length)
                 
                 # Now we ask the heap to append or update the cost to
                 # this new point, but only if that point isn't already
@@ -620,8 +628,8 @@ cdef class MCP:
         
         # Un-flatten the costs and traceback arrays for human consumption.
         cumulative_costs = np.asarray(flat_cumulative_costs)
-        cumulative_costs = cumulative_costs.reshape(self.costs_shape,
-                                                         order='F')
+        cumulative_costs = cumulative_costs.reshape(self.costs_shape, 
+                                                    order='F')
         traceback = np.asarray(traceback_offsets)
         traceback = traceback.reshape(self.costs_shape, order='F')
         self.dirty = 1
@@ -720,7 +728,7 @@ cdef class MCP_Geometric(MCP):
     """
 
     def __init__(self, costs, offsets=None, fully_connected=True, 
-                    sampling=None):
+                 sampling=None):
         """__init__(costs, offsets=None, fully_connected=True, sampling=None)
 
         See class documentation.
@@ -748,14 +756,13 @@ cdef class MCP_Connect(MCP):
     create_connection() is called. This method must be overloaded to
     deal with the found edges in a way that is appropriate for the
     application.
-    
     """
     
     cdef INDEX_T [:] flat_idmap
     
     
     def __init__(self, costs, offsets=None, fully_connected=True, 
-                                                            sampling=None):
+                 sampling=None):
         MCP.__init__(self, costs, offsets, fully_connected, sampling)
         
         # Create id map to keep track of origin of nodes
@@ -784,7 +791,7 @@ cdef class MCP_Connect(MCP):
     
     
     cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, 
-                                                        FLOAT_T offset_length):
+                                FLOAT_T offset_length):
         """ Check whether two fronts are meeting. If so, the flat_traceback
         is obtained and a connection is created.
         """
@@ -802,8 +809,8 @@ cdef class MCP_Connect(MCP):
         elif id2 != id1:
             # We reached the 'front' of another seed point!
             # Get position/coordinates
-            pos1, pos2 = _unravel_index_fortran(
-                                    [index, new_index], self.costs_shape)
+            pos1, pos2 = _unravel_index_fortran([index, new_index], 
+                                                self.costs_shape)
             # Also get the costs, so we can keep the path with the least cost
             cost1 = flat_cumulative_costs[index]
             cost2 = flat_cumulative_costs[new_index]
@@ -833,16 +840,15 @@ cdef class MCP_Connect(MCP):
         pos2 : tuple
             The index of of the second neighbour in the connection. 
         cost1 : float
-            The cumulative cost at pos1.
+            The cumulative cost at `pos1`.
         cost2 : float
-            The cumulative costs at pos2.
-        
+            The cumulative costs at `pos2`.
         """
         pass
     
     
-    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, 
-                                                        FLOAT_T offset_length):
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index,
+                           FLOAT_T offset_length):
         """ Keep track of the id map so that we know which seed point
         a certain front originates from.
         """
@@ -855,19 +861,19 @@ cdef class MCP_Connect(MCP):
 cdef class MCP_Flexible(MCP):
     """MCP_Flexible(costs, offsets=None, fully_connected=True)
     
-    Find minimum cost paths through an n-d costs array.
+    Find minimum cost paths through an N-d costs array.
 
     See the documentation for MCP for full details. This class differs from
     MCP in that several methods can be overloaded (from pure Python) to
     modify the behavior of the algorithm and/or create custom algorithms
-    based on MCP. Note that goal_reached can also be overloaded in the 
+    based on MCP. Note that goal_reached can also be overloaded in the
     MCP class.
     
     """
     
-    def travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost, 
-                                                        FLOAT_T offset_length):
-        """ travel_cost(self, old_cost, new_cost, offset_length)
+    def travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost,
+                    FLOAT_T offset_length):
+        """ travel_cost(old_cost, new_cost, offset_length)
         This method calculates the travel cost for going from the
         current node to the next. The default implementation returns
         new_cost. Overload this method to adapt the behaviour of the
@@ -877,10 +883,10 @@ cdef class MCP_Flexible(MCP):
     
     
     def examine_neighbor(self, INDEX_T index, INDEX_T new_index,
-                                                        FLOAT_T offset_length):
-        """ examine_neighbor(self, index, new_index, offset_length)
+                         FLOAT_T offset_length):
+        """ examine_neighbor(index, new_index, offset_length)
         This method is called once for every pair of neighboring nodes,
-        as soon as both nodes are frozen. 
+        as soon as both nodes are frozen.
         
         This method can be overloaded to obtain information about
         neightboring nodes, and/or to modify the behavior of the MCP
@@ -890,9 +896,9 @@ cdef class MCP_Flexible(MCP):
         pass
     
     
-    def update_node(self, INDEX_T index, INDEX_T new_index, 
-                                                        FLOAT_T offset_length):
-        """ update_node(self, index, new_index, offset_length)
+    def update_node(self, INDEX_T index, INDEX_T new_index,
+                    FLOAT_T offset_length):
+        """ update_node(index, new_index, offset_length)
         This method is called when a node is updated, right after
         new_index is pushed onto the heap and the traceback map is
         updated.
@@ -904,16 +910,16 @@ cdef class MCP_Flexible(MCP):
         pass
     
     
-    cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost,
-                                    FLOAT_T new_cost, FLOAT_T offset_length):
+    cdef FLOAT_T _travel_cost(self, FLOAT_T old_cost, FLOAT_T new_cost,
+                              FLOAT_T offset_length):
         return self.travel_cost(old_cost, new_cost, offset_length)
     
     
-    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index, 
-                                                        FLOAT_T offset_length):
+    cdef void _examine_neighbor(self, INDEX_T index, INDEX_T new_index,
+                                FLOAT_T offset_length):
         self.examine_neighbor(index, new_index, offset_length)
     
     
-    cdef void _update_node(self, INDEX_T index, INDEX_T new_index, 
-                                                        FLOAT_T offset_length):
+    cdef void _update_node(self, INDEX_T index, INDEX_T new_index,
+                           FLOAT_T offset_length):
         self.update_node(index, new_index, offset_length)
