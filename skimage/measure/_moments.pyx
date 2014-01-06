@@ -12,7 +12,7 @@ def moments(double[:, :] image, Py_ssize_t order=3):
      * Area as ``m[0, 0]``.
      * Centroid as {``m[0, 1] / m[0, 0]``, ``m[1, 0] / m[0, 0]``}.
 
-    Note that raw moments are whether translation, scale nor rotation
+    Note that raw moments are neither translation, scale nor rotation
     invariant.
 
     Parameters
