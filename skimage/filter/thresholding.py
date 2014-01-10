@@ -198,14 +198,14 @@ def threshold_isodata(image, nbins=256):
     Parameters
     ----------
     image : array
-        Input image float or int of any range.
+        Input image.
     nbins : int, optional
         Number of bins used to calculate histogram. This value is ignored for
         integer arrays.
 
     Returns
     -------
-    threshold : float64 or int64
+    threshold : float or int
         Upper threshold value. All pixels intensities that less or equal of
         this value assumed as background.
 
@@ -233,18 +233,19 @@ def threshold_isodata(image, nbins=256):
     if bin_centers.size == 1:
         return bin_centers[0]
     # It is not necessary to calculate probability mass function in this case
-    # since in the l and h fractions it's reduced.
-    pmf = hist.astype(float)# / hist.sum()
-    cpmfl = np.cumsum(pmf, dtype=float)  # Cumulative probability mass function
-    cpmfh = np.cumsum(pmf[::-1], dtype=float)[::-1]
+    # since the l and h fractions are reduced.
+    pmf = hist.astype(np.float32)# / hist.sum()
+    cpmfl = np.cumsum(pmf, dtype=np.float32)
+    cpmfh = np.cumsum(pmf[::-1], dtype=np.float32)[::-1]
 
     binnums = np.arange(pmf.size, dtype=np.uint8)
-    l = np.ma.divide(np.cumsum(pmf * binnums, dtype=float), cpmfl)
-    h = np.ma.divide(np.cumsum((pmf[::-1] * binnums[::-1]), dtype=float)[::-1], 
-                     cpmfh)
+    l = np.ma.divide(np.cumsum(pmf * binnums, dtype=np.float32), cpmfl)
+    h = np.ma.divide(
+        np.cumsum((pmf[::-1] * binnums[::-1]), dtype=np.float32)[::-1],
+        cpmfh)
 
     allmean = (l + h) / 2.0
     threshold = bin_centers[np.nonzero(allmean.round() == binnums)[0][0]]
-    # ImageJ shows *inclusive* threshold. This implementation returns
-    # threshold, where `background <= threshold_value < foreground`.
+    # This implementation returns threshold where
+    # `background <= threshold < foreground`.
     return threshold

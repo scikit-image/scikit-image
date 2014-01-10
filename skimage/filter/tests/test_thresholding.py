@@ -164,5 +164,17 @@ def test_isodata_moon_image():
     assert threshold_isodata(moon) == 87
 
 
+def test_isodata_moon_image_negative_int():
+    moon = data.moon().astype(np.int32)
+    moon -= 100
+    assert threshold_isodata(moon) == -13
+
+
+def test_isodata_moon_image_negative_float():
+    moon = data.moon().astype(np.float64)
+    moon -= 100
+    assert -13 < threshold_isodata(moon) < -12
+
+
 if __name__ == '__main__':
     np.testing.run_module_suite()
