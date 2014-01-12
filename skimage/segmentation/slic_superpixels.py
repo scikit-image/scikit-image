@@ -12,7 +12,7 @@ from skimage.color import rgb2lab
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
          spacing=None, multichannel=True, convert2lab=True, ratio=None,
-         enforce_connectivity=True, min_size_factor=0.5, max_size_factor=3):
+         enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -51,10 +51,10 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     enforce_connectivity: bool, optional
         Whether the generated segments are connected or not
     min_size_factor: float, optional
-        proportion of the minimum segment size to be removed with respect
-        to the supposed segment size (depth*width*height/n_segments)
+        Proportion of the minimum segment size to be removed with respect
+        to the supposed segment size ```depth*width*height/n_segments```
     max_size_factor: float, optional
-        proportion of the maximum connected segment size. A value of 3 works
+        Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
     Returns
     -------
@@ -173,10 +173,12 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
 
     if enforce_connectivity:
         segment_size = depth * height * width / n_segments
+        min_size = int(min_size_factor * segment_size)
+        max_size = int(max_size_factor * segment_size)
         labels = _enforce_label_connectivity_cython(labels,
                                                     n_segments,
-                                                    min_size_factor * segment_size,
-                                                    max_size_factor * segment_size)
+                                                    min_size,
+                                                    max_size)
 
     if is_2d:
         labels = labels[0]

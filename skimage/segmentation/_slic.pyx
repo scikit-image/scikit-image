@@ -115,7 +115,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                             dist_center += (image_zyx[z, y, x, c - 3]
                                             - segments[k, c]) ** 2
                         if distance[z, y, x] > dist_center:
-                            # segments start at 1
                             nearest_segments[z, y, x] = k
                             distance[z, y, x] = dist_center
                             change = 1
@@ -132,7 +131,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         for z in range(depth):
             for y in range(height):
                 for x in range(width):
-                    #compensate the label offset 1
                     k = nearest_segments[z, y, x]
                     n_segment_elems[k] += 1
                     segments[k, 0] += z
@@ -151,8 +149,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
 
 def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                        Py_ssize_t n_segments,
-                                       int min_size,
-                                       int max_size):
+                                       Py_ssize_t min_size,
+                                       Py_ssize_t max_size):
     """ Helper function to remove small disconnected regions from the labels
 
     Parameters
@@ -160,11 +158,11 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
     segments : 3D array of int, shape (Z, Y, X)
         The label field/superpixels found by SLIC.
     n_segments: int
-        number of specified segments
+        Number of specified segments
     min_size: int
-        minimum size of the segment
+        Minimum size of the segment
     max_size: int
-        maximum size of the segment. This is done for performance reasons,
+        Maximum size of the segment. This is done for performance reasons,
         to pre-allocate a sufficiently large array for the breadth first search
     Returns
     -------
@@ -172,25 +170,25 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
         A label field with connected labels starting at label=1
     """
 
-    #get image dimensions
+    # get image dimensions
     cdef Py_ssize_t depth, height, width
     depth = segments.shape[0]
     height = segments.shape[1]
     width = segments.shape[2]
 
-    #neighborhood arrays
+    # neighborhood arrays
     cdef Py_ssize_t[::1] ddx = np.array((1, -1, 0, 0, 0, 0))
     cdef Py_ssize_t[::1] ddy = np.array((0, 0, 1, -1, 0, 0))
     cdef Py_ssize_t[::1] ddz = np.array((0, 0, 0, 0, 1, -1))
 
-    #new object with connected segments initialized to -1
+    # new object with connected segments initialized to -1
     cdef Py_ssize_t[:, :, ::1] connected_segments \
         = -1 * np.ones_like(segments, dtype=np.intp)
 
     cdef Py_ssize_t current_new_label = 0
     cdef Py_ssize_t label = 0
 
-    #variables for the breadth first search
+    # variables for the breadth first search
     cdef Py_ssize_t current_segment_size = 1
     cdef Py_ssize_t bfs_visited = 0
     cdef Py_ssize_t adjacent
@@ -199,13 +197,13 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
 
     cdef Py_ssize_t[:, ::1] coord_list = np.zeros((max_size, 3), dtype=np.intp)
 
-    #loop through all image
+    # loop through all image
     for z in range(depth):
         for y in range(height):
             for x in range(width):
                 if connected_segments[z, y, x] >= 0:
                     continue
-                #find the component size
+                # find the component size
                 adjacent = 0
                 label = segments[z, y, x]
                 connected_segments[z, y, x] = current_new_label
@@ -238,7 +236,7 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
                                 adjacent = connected_segments[zz, yy, xx]
                     bfs_visited += 1
 
-                #change to an adjacent one, like in the original paper
+                # change to an adjacent one, like in the original paper
                 if current_segment_size < min_size:
                     for i in range(current_segment_size):
                         connected_segments[coord_list[i, 0],
