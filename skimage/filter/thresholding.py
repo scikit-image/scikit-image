@@ -132,7 +132,7 @@ def threshold_otsu(image, nbins=256):
     # Clip ends to align class 1 and class 2 variables:
     # The last value of `weight1`/`mean1` should pair with zero values in
     # `weight2`/`mean2`, which do not exist.
-    variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:])**2
+    variance12 = weight1[:-1] * weight2[1:] * (mean1[:-1] - mean2[1:]) ** 2
 
     idx = np.argmax(variance12)
     threshold = bin_centers[:-1][idx]
@@ -175,14 +175,17 @@ def threshold_yen(image, nbins=256):
     >>> binary = image <= thresh
     """
     hist, bin_centers = histogram(image, nbins)
+    # On blank images (e.g. filled with 0) with int dtype, `histogram()`
+    # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
         return bin_centers[0]
 
-    norm_histo = hist.astype(float) / hist.sum()  # Probability mass function
-    P1 = np.cumsum(norm_histo)  # Cumulative normalized histogram
-    P1_sq = np.cumsum(norm_histo ** 2)
+    # Calculate probability mass function
+    pmf = hist.astype(np.float32) / hist.sum()
+    P1 = np.cumsum(pmf)  # Cumulative normalized histogram
+    P1_sq = np.cumsum(pmf ** 2)
     # Get cumsum calculated from end of squared array:
-    P2_sq = np.cumsum(norm_histo[::-1] ** 2)[::-1]
+    P2_sq = np.cumsum(pmf[::-1] ** 2)[::-1]
     # P2_sq indexes is shifted +1. I assume, with P1[:-1] it's help avoid '-inf'
     # in crit. ImageJ Yen implementation replaces those values by zero.
     crit = np.log(((P1_sq[:-1] * P2_sq[1:]) ** -1) *
@@ -205,7 +208,7 @@ def threshold_isodata(image, nbins=256):
 
     Returns
     -------
-    threshold : float or int
+    threshold : float or int, corresponding input array dtype.
         Upper threshold value. All pixels intensities that less or equal of
         this value assumed as background.
 
@@ -230,15 +233,19 @@ def threshold_isodata(image, nbins=256):
     >>> binary = image > thresh
     """
     hist, bin_centers = histogram(image, nbins)
+    # On blank images (e.g. filled with 0) with int dtype, `histogram()`
+    # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
         return bin_centers[0]
     # It is not necessary to calculate probability mass function in this case
     # since the l and h fractions are reduced.
-    pmf = hist.astype(np.float32)# / hist.sum()
+    pmf = hist.astype(np.float32)  # / hist.sum()
     cpmfl = np.cumsum(pmf, dtype=np.float32)
     cpmfh = np.cumsum(pmf[::-1], dtype=np.float32)[::-1]
 
     binnums = np.arange(pmf.size, dtype=np.uint8)
+    # l and h contain average value of pixels in sum of bins, calculated
+    # from lower to higher and from higher to lower respectively.
     l = np.ma.divide(np.cumsum(pmf * binnums, dtype=np.float32), cpmfl)
     h = np.ma.divide(
         np.cumsum((pmf[::-1] * binnums[::-1]), dtype=np.float32)[::-1],
