@@ -237,8 +237,8 @@ def threshold_isodata(image, nbins=256):
     # returns `bin_centers` containing only one value. Speed up with it.
     if bin_centers.size == 1:
         return bin_centers[0]
-    # It is not necessary to calculate probability mass function in this case
-    # since the l and h fractions are reduced.
+    # It is not necessary to calculate the probability mass function here,
+    # because the l and h fractions already include the normalization.
     pmf = hist.astype(np.float32)  # / hist.sum()
     cpmfl = np.cumsum(pmf, dtype=np.float32)
     cpmfh = np.cumsum(pmf[::-1], dtype=np.float32)[::-1]
