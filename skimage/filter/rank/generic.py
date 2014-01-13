@@ -578,6 +578,9 @@ def pop(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
 def sum(image, selem, out=None, mask=None, shift_x=False, shift_y=False):
     """Return the local sum of pixels.
 
+    Note that the sum may overflow depending on the data type of the input
+    array.
+
     Parameters
     ----------
     image : 2-D array (uint8, uint16)

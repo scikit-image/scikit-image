@@ -174,6 +174,9 @@ def sum_bilateral(image, selem, out=None, mask=None, shift_x=False,
     Only pixels belonging to the structuring element AND having a greylevel
     inside this interval are summed.
 
+    Note that the sum may overflow depending on the data type of the input
+    array.
+
     Parameters
     ----------
     image : 2-D array (uint8, uint16)
