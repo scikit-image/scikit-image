@@ -1,49 +1,34 @@
-__doc__ = """Utilities to read and write images in various formats.
+"""Utilities to read and write images in various formats.
 
 The following plug-ins are available:
 
 """
 
-from ._plugins import use as use_plugin
-from ._plugins import available as plugins
-from ._plugins import info as plugin_info
-from ._plugins import configuration as plugin_order
-from ._plugins import reset_plugins as _reset_plugins
-
+from .manage_plugins import *
 from .sift import *
 from .collection import *
 
 from ._io import *
+from ._image_stack import *
 from .video import *
 
 
-available_plugins = plugins()
+reset_plugins()
+
+WRAP_LEN = 73
 
 
-def _load_preferred_plugins():
-    # Load preferred plugin for each io function.
-    io_funcs = ['imsave', 'imshow', 'imread_collection', 'imread']
-    preferred_plugins = ['matplotlib', 'pil', 'qt', 'freeimage', 'null']
-    for func in io_funcs:
-        for plugin in preferred_plugins:
-            if plugin not in available_plugins:
-                continue
-            try:
-                use_plugin(plugin, kind=func)
-                break
-            except (ImportError, RuntimeError, OSError):
-                pass
+def _separator(char, lengths):
+    return [char * separator_length for separator_length in lengths]
 
-    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
-    # is buggy (flips PNGs around, returns bytes as floats, etc.)
-    try:
-        use_plugin('pil', 'imread')
-    except ImportError:
-        pass
 
-def reset_plugins():
-    _reset_plugins()
-    _load_preferred_plugins()
+def _format_plugin_info_table(info_table, column_lengths):
+    """Add separators and column titles to plugin info table."""
+    info_table.insert(0, _separator('=', column_lengths))
+    info_table.insert(1, ('Plugin', 'Description'))
+    info_table.insert(2, _separator('-', column_lengths))
+    info_table.append(_separator('-', column_lengths))
+
 
 def _update_doc(doc):
     """Add a list of plugins to the module docstring, formatted as
@@ -52,27 +37,24 @@ def _update_doc(doc):
     """
     from textwrap import wrap
 
-    info = [(p, plugin_info(p)) for p in plugins() if not p == 'test']
-    col_1_len = max([len(n) for (n, _) in info])
 
-    wrap_len = 73
-    col_2_len = wrap_len - 1 - col_1_len
+    info_table = [(p, plugin_info(p).get('description', 'no description'))
+                  for p in available_plugins if not p == 'test']
 
-    # Insert table header
-    info.insert(0, ('=' * col_1_len, {'description': '=' * col_2_len}))
-    info.insert(1, ('Plugin', {'description': 'Description'}))
-    info.insert(2, ('-' * col_1_len, {'description': '-' * col_2_len}))
-    info.append(('=' * col_1_len, {'description': '=' * col_2_len}))
+    name_length = max([len(n) for (n, _) in info_table])
+    description_length = WRAP_LEN - 1 - name_length
+    column_lengths = [name_length, description_length]
+    _format_plugin_info_table(info_table, column_lengths)
 
-    for (name, meta_data) in info:
-        wrapped_descr = wrap(meta_data.get('description', ''),
-                             col_2_len)
-        doc += "%s %s\n" % (name.ljust(col_1_len),
-                            '\n'.join(wrapped_descr))
+    for (name, plugin_description) in info_table:
+        description_lines = wrap(plugin_description, description_length)
+        name_column = [name]
+        name_column.extend(['' for _ in range(len(description_lines) - 1)])
+        for name, description in zip(name_column, description_lines):
+            doc += "%s %s\n" % (name.ljust(name_length), description)
     doc = doc.strip()
 
     return doc
 
-__doc__ = _update_doc(__doc__)
 
-reset_plugins()
+__doc__ = _update_doc(__doc__)

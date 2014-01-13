@@ -2,25 +2,37 @@
 
 """
 
-__all__ = ['use', 'available', 'call', 'info', 'configuration', 'reset_plugins']
-
 try:
-    from configparser import ConfigParser
+    from configparser import ConfigParser  # Python 3
 except ImportError:
-    from ConfigParser import ConfigParser
+    from ConfigParser import ConfigParser  # Python 2
 
 import os.path
 from glob import glob
 
 
+__all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
+           'reset_plugins', 'find_available_plugins', 'available_plugins']
+
+
+# The plugin store will save a list of *loaded* io functions for each io type
+# (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
 plugin_store = None
 
 plugin_provides = {}
 plugin_module_name = {}
 plugin_meta_data = {}
 
+preferred_plugins = {
+    # Default plugins for all types (overridden by specific types below).
+    'all': ['matplotlib', 'pil', 'qt', 'freeimage', 'null'],
+    # Use PIL as the default imread plugin, since matplotlib (1.2.x)
+    # is buggy (flips PNGs around, returns bytes as floats, etc.)
+    'imread': ['pil'],
+}
 
-def reset_plugins():
+
+def _clear_plugins():
     """Clear the plugin state to the default, i.e., where no plugins are loaded
 
     """
@@ -30,8 +42,47 @@ def reset_plugins():
                     'imshow': [],
                     'imread_collection': [],
                     '_app_show': []}
+_clear_plugins()
 
-reset_plugins()
+
+def _load_preferred_plugins():
+    # Load preferred plugin for each io function.
+    io_types = ['imsave', 'imshow', 'imread_collection', 'imread']
+    for p_type in io_types:
+        _set_plugin(p_type, preferred_plugins['all'])
+
+    plugin_types = (p for p in preferred_plugins.keys() if p != 'all')
+    for p_type in plugin_types:
+        _set_plugin(p_type, preferred_plugins[p_type])
+
+
+def _set_plugin(plugin_type, plugin_list):
+    for plugin in plugin_list:
+        if plugin not in available_plugins:
+            continue
+        try:
+            use_plugin(plugin, kind=plugin_type)
+            break
+        except (ImportError, RuntimeError, OSError):
+            pass
+
+
+def reset_plugins():
+    _clear_plugins()
+    _load_preferred_plugins()
+
+
+def _parse_config_file(filename):
+    """Return plugin name and meta-data dict from plugin config file."""
+    parser = ConfigParser()
+    parser.read(filename)
+    name = parser.sections()[0]
+
+    meta_data = {}
+    for opt in parser.options(name):
+        meta_data[opt] = parser.get(name, opt)
+
+    return name, meta_data
 
 
 def _scan_plugins():
@@ -40,19 +91,13 @@ def _scan_plugins():
 
     """
     pd = os.path.dirname(__file__)
-    ini = glob(os.path.join(pd, '*.ini'))
+    config_files = glob(os.path.join(pd, '_plugins', '*.ini'))
 
-    for f in ini:
-        cp = ConfigParser()
-        cp.read(f)
-        name = cp.sections()[0]
-
-        meta_data = {}
-        for opt in cp.options(name):
-            meta_data[opt] = cp.get(name, opt)
+    for filename in config_files:
+        name, meta_data = _parse_config_file(filename)
         plugin_meta_data[name] = meta_data
 
-        provides = [s.strip() for s in cp.get(name, 'provides').split(',')]
+        provides = [s.strip() for s in meta_data['provides'].split(',')]
         valid_provides = [p for p in provides if p in plugin_store]
 
         for p in provides:
@@ -61,12 +106,45 @@ def _scan_plugins():
                       " Ignoring." % (name, p))
 
         plugin_provides[name] = valid_provides
-        plugin_module_name[name] = os.path.basename(f)[:-4]
+        plugin_module_name[name] = os.path.basename(filename)[:-4]
 
 _scan_plugins()
 
 
-def call(kind, *args, **kwargs):
+def find_available_plugins(loaded=False):
+    """List available plugins.
+
+    Parameters
+    ----------
+    loaded : bool
+        If True, show only those plugins currently loaded.  By default,
+        all plugins are shown.
+
+    Returns
+    -------
+    p : dict
+        Dictionary with plugin names as keys and exposed functions as
+        values.
+
+    """
+    active_plugins = set()
+    for plugin_func in plugin_store.values():
+        for plugin, func in plugin_func:
+            active_plugins.add(plugin)
+
+    d = {}
+    for plugin in plugin_provides:
+        if not loaded or plugin in active_plugins:
+            d[plugin] = [f for f in plugin_provides[plugin] \
+                         if not f.startswith('_')]
+
+    return d
+
+
+available_plugins = find_available_plugins()
+
+
+def call_plugin(kind, *args, **kwargs):
     """Find the appropriate plugin of 'kind' and execute it.
 
     Parameters
@@ -85,11 +163,11 @@ def call(kind, *args, **kwargs):
 
     plugin_funcs = plugin_store[kind]
     if len(plugin_funcs) == 0:
-        raise RuntimeError('''No suitable plugin registered for %s.
-
-You may load I/O plugins with the `skimage.io.use_plugin`
-command.  A list of all available plugins can be found using
-`skimage.io.plugins()`.''' % kind)
+        msg = ("No suitable plugin registered for %s.\n\n"
+               "You may load I/O plugins with the `skimage.io.use_plugin` "
+               "command.  A list of all available plugins can be found using "
+               "`skimage.io.plugins()`.")
+        raise RuntimeError(msg % kind)
 
     plugin = kwargs.pop('plugin', None)
     if plugin is None:
@@ -105,7 +183,7 @@ command.  A list of all available plugins can be found using
     return func(*args, **kwargs)
 
 
-def use(name, kind=None):
+def use_plugin(name, kind=None):
     """Set the default plugin for a specified operation.  The plugin
     will be loaded if it hasn't been already.
 
@@ -119,15 +197,19 @@ def use(name, kind=None):
 
     See Also
     --------
-    plugins : List of available plugins
+    available_plugins : List of available plugins
 
     Examples
     --------
 
-    Use the Python Imaging Library to read images:
+    To use Matplotlib as the default image reader, you would write:
 
-    >>> from skimage.io import use_plugin
-    >>> use_plugin('pil', 'imread')
+    >>> from skimage import io
+    >>> io.use_plugin('matplotlib', 'imread')
+
+    To see a list of available plugins run ``io.available_plugins``. Note that
+    this lists plugins that are defined, but the full list may not be usable
+    if your system does not have the required libraries installed.
 
     """
     if kind is None:
@@ -158,36 +240,6 @@ def use(name, kind=None):
         plugin_store[k] = funcs
 
 
-def available(loaded=False):
-    """List available plugins.
-
-    Parameters
-    ----------
-    loaded : bool
-        If True, show only those plugins currently loaded.  By default,
-        all plugins are shown.
-
-    Returns
-    -------
-    p : dict
-        Dictionary with plugin names as keys and exposed functions as
-        values.
-
-    """
-    active_plugins = set()
-    for plugin_func in plugin_store.values():
-        for plugin, func in plugin_func:
-            active_plugins.add(plugin)
-
-    d = {}
-    for plugin in plugin_provides:
-        if not loaded or plugin in active_plugins:
-            d[plugin] = [f for f in plugin_provides[plugin] \
-                         if not f.startswith('_')]
-
-    return d
-
-
 def _load(plugin):
     """Load the given plugin.
 
@@ -201,7 +253,7 @@ def _load(plugin):
     plugins : List of available plugins
 
     """
-    if plugin in available(loaded=True):
+    if plugin in find_available_plugins(loaded=True):
         return
     if not plugin in plugin_module_name:
         raise ValueError("Plugin %s not found." % plugin)
@@ -222,7 +274,7 @@ def _load(plugin):
                 store.append((plugin, func))
 
 
-def info(plugin):
+def plugin_info(plugin):
     """Return plugin meta-data.
 
     Parameters
@@ -242,7 +294,7 @@ def info(plugin):
         raise ValueError('No information on plugin "%s"' % plugin)
 
 
-def configuration():
+def plugin_order():
     """Return the currently preferred plugin order.
 
     Returns
