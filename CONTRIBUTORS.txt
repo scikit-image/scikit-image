@@ -151,7 +151,7 @@
   Color difference functions
 
 - Eugene Dvoretsky
-  Yen threshold implementation.
+  Yen, Ridler-Calvard (ISODATA) threshold implementations.
 
 - Riaan van den Dool
   skimage.io plugin: GDAL
