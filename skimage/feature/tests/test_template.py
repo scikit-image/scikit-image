@@ -1,5 +1,5 @@
 import numpy as np
-from numpy.testing import assert_array_almost_equal as assert_close
+from numpy.testing import assert_almost_equal, assert_equal, assert_raises
 
 from skimage.morphology import diamond
 from skimage.feature import match_template, peak_local_max
@@ -31,7 +31,7 @@ def test_template():
     positions = positions[np.argsort(positions[:, 0])]
 
     for xy_target, xy in zip(target_positions, positions):
-        yield assert_close, xy, xy_target
+        yield assert_almost_equal, xy, xy_target
 
 
 def test_normalization():
@@ -88,7 +88,7 @@ def test_no_nans():
 def test_switched_arguments():
     image = np.ones((5, 5))
     template = np.ones((3, 3))
-    np.testing.assert_raises(ValueError, match_template, template, image)
+    assert_raises(ValueError, match_template, template, image)
 
 
 def test_pad_input():
@@ -108,14 +108,66 @@ def test_pad_input():
     image[mid, -9:-4] -= template       # full min template centered at 12
     image[mid, -3:] += template[:, :3]  # half max template centered at 18
 
-    result = match_template(image, template, pad_input=True)
+    result = match_template(image, template, pad_input=True,
+                            constant_values=image.mean())
 
     # get the max and min results.
     sorted_result = np.argsort(result.flat)
     i, j = np.unravel_index(sorted_result[:2], result.shape)
-    assert_close(j, (12, 0))
+    assert_equal(j, (12, 0))
     i, j = np.unravel_index(sorted_result[-2:], result.shape)
-    assert_close(j, (18, 6))
+    assert_equal(j, (18, 6))
+
+
+def test_3d():
+    np.random.seed(1)
+    template = np.random.rand(3, 3, 3)
+    image = np.zeros((12, 12, 12))
+
+    image[3:6, 5:8, 4:7] = template
+
+    result = match_template(image, template)
+
+    assert_equal(result.shape, (10, 10, 10))
+    assert_equal(np.unravel_index(result.argmax(), result.shape), (3, 5, 4))
+
+
+def test_3d_pad_input():
+    np.random.seed(1)
+    template = np.random.rand(3, 3, 3)
+    image = np.zeros((12, 12, 12))
+
+    image[3:6, 5:8, 4:7] = template
+
+    result = match_template(image, template, pad_input=True)
+
+    assert_equal(result.shape, (12, 12, 12))
+    assert_equal(np.unravel_index(result.argmax(), result.shape), (4, 6, 5))
+
+
+def test_padding_reflect():
+    template = diamond(2)
+    image = np.zeros((10, 10))
+    image[2:7, :3] = template[:, -3:]
+
+    result = match_template(image, template, pad_input=True,
+                            mode='reflect')
+
+    assert_equal(np.unravel_index(result.argmax(), result.shape), (4, 0))
+
+
+def test_wrong_input():
+    image = np.ones((5, 5, 1))
+    template = np.ones((3, 3))
+    assert_raises(ValueError, match_template, template, image)
+
+    image = np.ones((5, 5))
+    template = np.ones((3, 3, 2))
+    assert_raises(ValueError, match_template, template, image)
+
+    image = np.ones((5, 5, 3, 3))
+    template = np.ones((3, 3, 2))
+    assert_raises(ValueError, match_template, template, image)
 
 
 if __name__ == "__main__":

@@ -39,9 +39,6 @@ Library:
     Extension: skimage.morphology._pnpoly
         Sources:
             skimage/morphology/_pnpoly.pyx
-    Extension: skimage.feature._template
-        Sources:
-            skimage/feature/_template.pyx
     Extension: skimage.io._plugins._colormixer
         Sources:
             skimage/io/_plugins/_colormixer.pyx

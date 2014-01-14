@@ -41,4 +41,5 @@ cdef float integrate(float[:, ::1] sat, Py_ssize_t r0, Py_ssize_t c0,
 
     if (c0 - 1 >= 0):
         S -= sat[r1, c0 - 1]
+
     return S
