@@ -54,7 +54,19 @@ def _get_mean_intensity(integral_img, keypoint, rot_pattern):
 
 
 def descriptor_freak(image, keypoints):
-    # Prepare the input image. Use the util function once #669  is merged.
+    """
+    Compute FREAK Descriptors for the given set of keypoints from the given
+    image.
+
+    Parameters
+    ----------
+    image : 2D ndarray
+        Input grayscale image.
+    keypoints : (N, 2) array
+        Keypoint locations extracted from ``image``.
+
+    """
+    # Prepare the input image. Use the util function once #669 is merged.
     image = np.squeeze(image)
     if image.ndim != 2:
         raise ValueError("Only 2-D gray-scale images supported.")

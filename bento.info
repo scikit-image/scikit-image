@@ -96,6 +96,9 @@ Library:
     Extension: skimage.feature._brief_cy
         Sources:
             skimage/feature/_brief_cy.pyx
+    Extension: skimage.feature._freak_cy
+        Sources:
+            skimage/feature/_freak_cy.pyx
     Extension: skimage.feature.corner_cy
         Sources:
             skimage/feature/corner_cy.pyx
