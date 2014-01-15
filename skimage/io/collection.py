@@ -457,13 +457,3 @@ def imread_collection_wrapper(imread):
         return ImageCollection(load_pattern, conserve_memory=conserve_memory,
                                load_func=imread)
     return imread_collection
-
-
-def inject_imread_collection_if_needed(module):
-    """Add `imread_collection` to module if not already present."""
-    add_plugin = (not hasattr(module, 'imread_collection') and
-                  hasattr(module, 'imread'))
-    if add_plugin:
-        imread = getattr(module, 'imread')
-        func = imread_collection_wrapper(imread)
-        setattr(module, 'imread_collection', func)
