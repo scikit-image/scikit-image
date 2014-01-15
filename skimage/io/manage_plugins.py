@@ -1,5 +1,19 @@
 """Handle image reading, writing and plotting plugins.
 
+To improve performance, plugins are only loaded as needed. As a result, there
+can be multiple states for a given plugin:
+
+    available: Defined in an *ini file located in `skimage.io._plugins`.
+        See also `skimage.io.available_plugins`.
+    partial definition: Specified in an *ini file, but not defined in the
+        corresponding plugin module. This will raise an error when loaded.
+    available but not on this system: Defined in `skimage.io._plugins`, but
+        a dependent library (e.g. Qt, PIL) is not available on your system.
+        This will raise an error when loaded.
+    loaded: The real availability is determined when it's explicitly loaded,
+        either because it's one of the default plugins, or because it's
+        loaded explicitly by the user.
+
 """
 
 try:
@@ -10,6 +24,8 @@ except ImportError:
 import os.path
 from glob import glob
 
+from .collection import imread_collection_wrapper
+
 
 __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
            'reset_plugins', 'find_available_plugins', 'available_plugins']
@@ -18,11 +34,14 @@ __all__ = ['use_plugin', 'call_plugin', 'plugin_info', 'plugin_order',
 # The plugin store will save a list of *loaded* io functions for each io type
 # (e.g. 'imread', 'imsave', etc.). Plugins are loaded as requested.
 plugin_store = None
-
+# Dictionary mapping plugin names to a list of functions they provide.
 plugin_provides = {}
+# The module names for the plugins in `skimage.io._plugins`.
 plugin_module_name = {}
+# Meta-data about plugins provided by *.ini files.
 plugin_meta_data = {}
-
+# For each plugin type, default to the first available plugin as defined by
+# the following preferences.
 preferred_plugins = {
     # Default plugins for all types (overridden by specific types below).
     'all': ['matplotlib', 'pil', 'qt', 'freeimage', 'null'],
@@ -105,7 +124,14 @@ def _scan_plugins():
                 print("Plugin `%s` wants to provide non-existent `%s`." \
                       " Ignoring." % (name, p))
 
+        # Add plugins that provide 'imread' as provider of 'imread_collection'.
+        need_to_add_collection = ('imread_collection' not in valid_provides and
+                                  'imread' in valid_provides)
+        if need_to_add_collection:
+            valid_provides.append('imread_collection')
+
         plugin_provides[name] = valid_provides
+
         plugin_module_name[name] = os.path.basename(filename)[:-4]
 
 _scan_plugins()
@@ -135,7 +161,7 @@ def find_available_plugins(loaded=False):
     d = {}
     for plugin in plugin_provides:
         if not loaded or plugin in active_plugins:
-            d[plugin] = [f for f in plugin_provides[plugin] \
+            d[plugin] = [f for f in plugin_provides[plugin]
                          if not f.startswith('_')]
 
     return d
@@ -240,6 +266,14 @@ def use_plugin(name, kind=None):
         plugin_store[k] = funcs
 
 
+def _inject_imread_collection_if_needed(module):
+    """Add `imread_collection` to module if not already present."""
+    if not hasattr(module, 'imread_collection') and hasattr(module, 'imread'):
+        imread = getattr(module, 'imread')
+        func = imread_collection_wrapper(imread)
+        setattr(module, 'imread_collection', func)
+
+
 def _load(plugin):
     """Load the given plugin.
 
@@ -264,14 +298,17 @@ def _load(plugin):
 
     provides = plugin_provides[plugin]
     for p in provides:
-        if not hasattr(plugin_module, p):
+        if p == 'imread_collection':
+            _inject_imread_collection_if_needed(plugin_module)
+        elif not hasattr(plugin_module, p):
             print("Plugin %s does not provide %s as advertised.  Ignoring." % \
                   (plugin, p))
-        else:
-            store = plugin_store[p]
-            func = getattr(plugin_module, p)
-            if not (plugin, func) in store:
-                store.append((plugin, func))
+            continue
+
+        store = plugin_store[p]
+        func = getattr(plugin_module, p)
+        if not (plugin, func) in store:
+            store.append((plugin, func))
 
 
 def plugin_info(plugin):
