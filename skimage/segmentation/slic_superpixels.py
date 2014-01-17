@@ -48,7 +48,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         recommended.
     ratio : float, optional
         Synonym for `compactness`. This keyword is deprecated.
-    enforce_connectivity: bool, optional
+    enforce_connectivity: bool, optional (default False)
         Whether the generated segments are connected or not
     min_size_factor: float, optional
         Proportion of the minimum segment size to be removed with respect
@@ -111,6 +111,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         warnings.warn('Keyword `ratio` is deprecated. Use `compactness` '
                       'instead.')
         compactness = ratio
+
+    if enforce_connectivity is None:
+        warnings.warn('Deprecation: enforce_connectivity will default to'
+                      ' True in future versions.')
+        enforce_connectivity = False
 
     image = img_as_float(image)
     is_2d = False
