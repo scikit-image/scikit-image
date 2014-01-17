@@ -1,7 +1,8 @@
 Version 0.11
 ------------
 * Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
-
+* Change depecrated `enforce_connectivity=False`on skimage.segmentation.slic
+  and set it to True as default
 
 Version 0.10
 ------------

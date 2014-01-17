@@ -76,7 +76,7 @@ def test_gray_3d():
         midpoint = dim_size // 2
         slices.append((slice(None, midpoint), slice(midpoint, None)))
     slices = list(it.product(*slices))
-    shades = np.arange(0, 1.000001, 1.0/7)
+    shades = np.arange(0, 1.000001, 1.0 / 7)
     for s, sh in zip(slices, shades):
         img[s] = sh
     img += 0.001 * rnd.normal(size=img.shape)
@@ -120,11 +120,34 @@ def test_spacing():
 
 def test_invalid_lab_conversion():
     img = np.array([[1, 1, 1, 0, 0],
-                    [1, 1, 0, 0, 0]], np.float)
+                    [1, 1, 0, 0, 0]], np.float) + 1
     assert_raises(ValueError, slic, img, multichannel=True, convert2lab=True)
 
 
+def test_enforce_connectivity():
+    img = np.array([[0, 0, 0, 1, 1, 1],
+                    [1, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 1, 1, 0]], np.float)
+
+    segments_connected = slic(img, 2, compactness=0.0001,
+                              enforce_connectivity=True,
+                              convert2lab=False)
+    segments_disconnected = slic(img, 2, compactness=0.0001,
+                                 enforce_connectivity=False,
+                                 convert2lab=False)
+
+    result_connected = np.array([[0, 0, 0, 1, 1, 1],
+                                 [0, 0, 0, 1, 1, 1],
+                                 [0, 0, 0, 1, 1, 1]], np.float)
+
+    result_disconnected = np.array([[0, 0, 0, 1, 1, 1],
+                                    [1, 0, 0, 1, 1, 0],
+                                    [0, 0, 0, 1, 1, 0]], np.float)
+
+    assert_equal(segments_connected, result_connected)
+    assert_equal(segments_disconnected, result_disconnected)
 
 if __name__ == '__main__':
     from numpy import testing
+
     testing.run_module_suite()

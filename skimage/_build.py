@@ -68,4 +68,4 @@ def _changed(filename):
         with open(filename_cache, 'wb') as cf:
             cf.write(md5_new.encode('utf-8'))
 
-    return md5_cached != md5_new
+    return md5_cached != md5_new.encode('utf-8')
