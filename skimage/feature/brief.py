@@ -74,21 +74,23 @@ class BRIEF(DescriptorExtractor):
            [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=int32)
     >>> keypoints1 = corner_peaks(corner_harris(square1), min_distance=1)
     >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
-    >>> extractor = BRIEF(patch_size=5)
-    >>> descs1, _ = extractor.extract(square1, keypoints1)
-    >>> descs2, _ = extractor.extract(square2, keypoints2)
-    >>> matches = match_descriptors(descs1, descs2)
+    >>> extractor1 = BRIEF(patch_size=5)
+    >>> extractor2 = BRIEF(patch_size=5)
+    >>> extractor1.extract(square1, keypoints1)
+    >>> extractor2.extract(square2, keypoints2)
+    >>> matches = match_descriptors(extractor1.descriptors_,
+    ...                             extractor2.descriptors_)
     >>> matches
     array([[0, 0],
            [1, 1],
            [2, 2],
            [3, 3]])
-    >>> keypoints1[matches[:, 0]]
+    >>> extractor1.keypoints_[matches[:, 0]]
     array([[2, 2],
            [2, 5],
            [5, 2],
            [5, 5]])
-    >>> keypoints2[matches[:, 1]]
+    >>> extractor2.keypoints_[matches[:, 1]]
     array([[2, 2],
            [2, 6],
            [6, 2],
@@ -119,15 +121,15 @@ class BRIEF(DescriptorExtractor):
         keypoints : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
 
-        Returns
-        -------
-        descriptors : (Q, `descriptor_size`) array of dtype bool
+        Attributes
+        ----------
+        descriptors_ : (Q, `descriptor_size`) array of dtype bool
             2D ndarray of binary descriptors of size `descriptor_size` for Q
             keypoints after filtering out border keypoints with value at an
             index ``(i, j)`` either being ``True`` or ``False`` representing
             the outcome of the intensity comparison for i-th keypoint on j-th
             decision pixel-pair. It is ``Q == np.sum(mask)``.
-        mask : (N, ) array of dtype bool
+        mask_ : (N, ) array of dtype bool
             Mask indicating whether a keypoint has been filtered out
             (``False``) or is described in the `descriptors` array (``True``).
 
@@ -163,14 +165,14 @@ class BRIEF(DescriptorExtractor):
 
         # Removing keypoints that are within (patch_size / 2) distance from the
         # image border
-        mask = _mask_border_keypoints(image.shape, keypoints, patch_size // 2)
+        self.mask_ = _mask_border_keypoints(image.shape, keypoints,
+                                            patch_size // 2)
 
-        keypoints = np.array(keypoints[mask, :], dtype=np.intp, order='C',
-                             copy=False)
+        keypoints = np.array(keypoints[self.mask_, :], dtype=np.intp,
+                             order='C', copy=False)
 
-        descriptors = np.zeros((keypoints.shape[0], desc_size),
-                               dtype=bool, order='C')
+        self.descriptors_ = np.zeros((keypoints.shape[0], desc_size),
+                                     dtype=bool, order='C')
 
-        _brief_loop(image, descriptors.view(np.uint8), keypoints, pos1, pos2)
-
-        return descriptors, mask
+        _brief_loop(image, self.descriptors_.view(np.uint8), keypoints,
+                    pos1, pos2)

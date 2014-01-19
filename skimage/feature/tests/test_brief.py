@@ -21,7 +21,7 @@ def test_normal_mode():
 
     extractor = BRIEF(descriptor_size=8, sigma=2)
 
-    descriptors, mask = extractor.extract(img, keypoints[:8])
+    extractor.extract(img, keypoints[:8])
 
     expected = np.array([[ True, False,  True, False,  True,  True, False, False],
                          [False, False, False, False,  True, False, False, False],
@@ -32,7 +32,7 @@ def test_normal_mode():
                          [False,  True,  True,  True, False, False,  True, False],
                          [False, False, False, False,  True, False, False, False]], dtype=bool)
 
-    assert_array_equal(descriptors, expected)
+    assert_array_equal(extractor.descriptors_, expected)
 
 
 def test_uniform_mode():
@@ -43,7 +43,7 @@ def test_uniform_mode():
 
     extractor = BRIEF(descriptor_size=8, sigma=2, mode='uniform')
 
-    descriptors, mask = extractor.extract(img, keypoints[:8])
+    extractor.extract(img, keypoints[:8])
 
     expected = np.array([[ True, False,  True, False, False,  True, False, False],
                          [False,  True, False, False,  True,  True,  True,  True],
@@ -54,7 +54,7 @@ def test_uniform_mode():
                          [False, False,  True,  True, False, False,  True,  True],
                          [ True,  True, False, False, False, False, False, False]], dtype=bool)
 
-    assert_array_equal(descriptors, expected)
+    assert_array_equal(extractor.descriptors_, expected)
 
 
 def test_unsupported_mode():
@@ -66,10 +66,10 @@ def test_border():
     keypoints = np.array([[1, 1], [20, 20], [50, 50], [80, 80]])
 
     extractor = BRIEF(patch_size=41)
-    descs, mask = extractor.extract(img, keypoints)
+    extractor.extract(img, keypoints)
 
-    assert descs.shape[0] == 3
-    assert_array_equal(mask, (False, True, True, True))
+    assert extractor.descriptors_.shape[0] == 3
+    assert_array_equal(extractor.mask_, (False, True, True, True))
 
 
 if __name__ == '__main__':

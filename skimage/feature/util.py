@@ -5,6 +5,9 @@ from skimage.util import img_as_float
 
 class FeatureDetector(object):
 
+    def __init__(self):
+        self.keypoints_ = np.array([])
+
     def detect(self, image):
         """Detect keypoints in image.
 
@@ -18,6 +21,9 @@ class FeatureDetector(object):
 
 
 class DescriptorExtractor(object):
+
+    def __init__(self):
+        self.descriptors_ = np.array([])
 
     def extract(self, image, keypoints):
         """Extract feature descriptors in image for given keypoints.

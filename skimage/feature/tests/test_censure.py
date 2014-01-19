@@ -28,7 +28,7 @@ def test_keypoints_censure_moon_image_dob():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for DoB filter."""
     detector = CenSurE()
-    keypoints, scales = detector.detect(img)
+    detector.detect(img)
     expected_keypoints = np.array([[ 21, 497],
                                    [ 36,  46],
                                    [119, 350],
@@ -40,8 +40,8 @@ def test_keypoints_censure_moon_image_dob():
                                    [467, 260]])
     expected_scales = np.array([3, 4, 4, 2, 2, 3, 2, 2, 2])
 
-    assert_array_equal(expected_keypoints, keypoints)
-    assert_array_equal(expected_scales, scales)
+    assert_array_equal(expected_keypoints, detector.keypoints_)
+    assert_array_equal(expected_scales, detector.scales_)
 
 
 def test_keypoints_censure_moon_image_octagon():
@@ -49,7 +49,7 @@ def test_keypoints_censure_moon_image_octagon():
     the expected values for Octagon filter."""
 
     detector = CenSurE(mode='octagon')
-    keypoints, scales = detector.detect(img)
+    detector.detect(img)
     expected_keypoints = np.array([[ 21, 496],
                                    [ 35,  46],
                                    [287, 250],
@@ -58,15 +58,15 @@ def test_keypoints_censure_moon_image_octagon():
 
     expected_scales = np.array([3, 4, 2, 2, 2])
 
-    assert_array_equal(expected_keypoints, keypoints)
-    assert_array_equal(expected_scales, scales)
+    assert_array_equal(expected_keypoints, detector.keypoints_)
+    assert_array_equal(expected_scales, detector.scales_)
 
 
 def test_keypoints_censure_moon_image_star():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for STAR filter."""
     detector = CenSurE(mode='star')
-    keypoints, scales = detector.detect(img)
+    detector.detect(img)
     expected_keypoints = np.array([[ 21, 497],
                                   [ 36,  46],
                                   [117, 356],
@@ -78,10 +78,10 @@ def test_keypoints_censure_moon_image_star():
                                   [463, 116],
                                   [467, 260]])
 
-    expected_scale = np.array([3, 3, 6, 2, 3, 2, 3, 5, 2, 2])
+    expected_scales = np.array([3, 3, 6, 2, 3, 2, 3, 5, 2, 2])
 
-    assert_array_equal(expected_keypoints, keypoints)
-    assert_array_equal(expected_scale, scales)
+    assert_array_equal(expected_keypoints, detector.keypoints_)
+    assert_array_equal(expected_scales, detector.scales_)
 
 
 if __name__ == '__main__':

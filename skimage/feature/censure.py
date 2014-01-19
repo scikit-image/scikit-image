@@ -157,8 +157,9 @@ class CenSurE(FeatureDetector):
     >>> from skimage.color import rgb2gray
     >>> from skimage.feature import CenSurE
     >>> img = rgb2gray(lena()[100:300, 100:300])
-    >>> keypoints, scales = CenSurE().detect(img)
-    >>> keypoints
+    >>> censure = CenSurE()
+    >>> censure.detect(img)
+    >>> censure.keypoints_
     array([[ 71, 148],
            [ 77, 186],
            [ 78, 189],
@@ -174,7 +175,7 @@ class CenSurE(FeatureDetector):
            [171,  29],
            [179,  20],
            [194,  65]])
-    >>> scales
+    >>> censure.scales_
     array([2, 4, 2, 3, 4, 2, 2, 3, 4, 6, 3, 2, 3, 4, 2])
 
     """
@@ -204,8 +205,8 @@ class CenSurE(FeatureDetector):
         image : 2D ndarray
             Input image.
 
-        Returns
-        -------
+        Attributes
+        ----------
         keypoints : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
         scales : (N, ) array
@@ -257,7 +258,9 @@ class CenSurE(FeatureDetector):
         scales = scales + self.min_scale + 1
 
         if self.mode == 'dob':
-            return keypoints, scales
+            self.keypoints_ = keypoints
+            self.scales_ = scales
+            return
 
         cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
 
@@ -276,4 +279,5 @@ class CenSurE(FeatureDetector):
                     _mask_border_keypoints(image.shape, keypoints, c)
                     & (scales == i))
 
-        return keypoints[cumulative_mask], scales[cumulative_mask]
+        self.keypoints_ = keypoints[cumulative_mask]
+        self.scales_ = scales[cumulative_mask]

@@ -21,21 +21,23 @@ tform = tf.AffineTransform(scale=(1.5, 1.5), rotation=0.5,
 img2 = tf.warp(img1, tform)
 
 detector = CenSurE()
-keypoints1, scales1 = detector.detect(img1)
-keypoints2, scales2 = detector.detect(img2)
 
 fig, ax = plt.subplots(nrows=1, ncols=2)
 
 plt.gray()
 
+detector.detect(img1)
+
 ax[0].imshow(img1)
 ax[0].axis('off')
-ax[0].scatter(keypoints1[:, 1], keypoints1[:, 0], 2 ** scales1,
-              facecolors='none', edgecolors='r')
+ax[0].scatter(detector.keypoints_[:, 1], detector.keypoints_[:, 0],
+              2 ** detector.scales_, facecolors='none', edgecolors='r')
+
+detector.detect(img2)
 
 ax[1].imshow(img2)
 ax[1].axis('off')
-ax[1].scatter(keypoints2[:, 1], keypoints2[:, 0], 2 ** scales2,
-              facecolors='none', edgecolors='r')
+ax[1].scatter(detector.keypoints_[:, 1], detector.keypoints_[:, 0],
+              2 ** detector.scales_, facecolors='none', edgecolors='r')
 
 plt.show()

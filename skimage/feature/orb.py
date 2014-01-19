@@ -69,23 +69,25 @@ class ORB(FeatureDetector, DescriptorExtractor):
     >>> square = np.random.rand(20, 20)
     >>> img1[40:60, 40:60] = square
     >>> img2[53:73, 53:73] = square
-    >>> detector_extractor = ORB(n_keypoints=5)
-    >>> keypoints1, descriptors1 = detector_extractor.detect_and_extract(img1)
-    >>> keypoints2, descriptors2 = detector_extractor.detect_and_extract(img2)
-    >>> matches = match_descriptors(descriptors1, descriptors2)
+    >>> detector_extractor1 = ORB(n_keypoints=5)
+    >>> detector_extractor2 = ORB(n_keypoints=5)
+    >>> detector_extractor1.detect_and_extract(img1)
+    >>> detector_extractor2.detect_and_extract(img2)
+    >>> matches = match_descriptors(detector_extractor1.descriptors_,
+    ...                             detector_extractor2.descriptors_)
     >>> matches
     array([[0, 0],
            [1, 1],
            [2, 2],
            [3, 3],
            [4, 4]])
-    >>> keypoints1[matches[:, 0]]
+    >>> detector_extractor1.keypoints_[matches[:, 0]]
     array([[ 42.,  40.],
            [ 47.,  58.],
            [ 44.,  40.],
            [ 59.,  42.],
            [ 45.,  44.]])
-    >>> keypoints2[matches[:, 1]]
+    >>> detector_extractor2.keypoints_[matches[:, 1]]
     array([[ 55.,  53.],
            [ 60.,  71.],
            [ 57.,  53.],
@@ -140,15 +142,15 @@ class ORB(FeatureDetector, DescriptorExtractor):
         image : 2D array
             Input image.
 
-        Returns
-        -------
-        keypoints : (N, 2) array
+        Attributes
+        ----------
+        keypoints_ : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
-        scales : (N, ) array
+        scales_ : (N, ) array
             Corresponding scales.
-        orientations : (N, ) array
+        orientations_ : (N, ) array
             Corresponding orientations in radians.
-        responses : (N, ) array
+        responses_ : (N, ) array
             Corresponding Harris corner responses.
 
         """
@@ -157,7 +159,7 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
         keypoints_list = []
         orientations_list = []
-        octave_list = []
+        scales_list = []
         responses_list = []
 
         for octave in range(len(pyramid)):
@@ -169,22 +171,27 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             keypoints_list.append(keypoints * self.downscale ** octave)
             orientations_list.append(orientations)
-            octave_list.append(self.downscale **  octave
+            scales_list.append(self.downscale **  octave
                                * np.ones(keypoints.shape[0], dtype=np.intp))
             responses_list.append(responses)
 
         keypoints = np.vstack(keypoints_list)
         orientations = np.hstack(orientations_list)
-        scales = np.hstack(octave_list)
+        scales = np.hstack(scales_list)
         responses = np.hstack(responses_list)
 
         if keypoints.shape[0] < self.n_keypoints:
-            return keypoints, scales, orientations, responses
+            self.keypoints_ = keypoints
+            self.scales_ = scales
+            self.orientations_ = orientations
+            self.responses_ = responses
         else:
             # Choose best n_keypoints according to Harris corner response
             best_indices = responses.argsort()[::-1][:self.n_keypoints]
-            return (keypoints[best_indices], scales[best_indices],
-                    orientations[best_indices], responses[best_indices])
+            self.keypoints_ = keypoints[best_indices]
+            self.scales_ = scales[best_indices]
+            self.orientations_ = orientations[best_indices]
+            self.responses_ = responses[best_indices]
 
     def _extract_octave(self, octave_image, keypoints, orientations):
         mask = _mask_border_keypoints(octave_image.shape, keypoints,
@@ -217,15 +224,15 @@ class ORB(FeatureDetector, DescriptorExtractor):
         orientations : (N, ) array
             Corresponding orientations in radians.
 
-        Returns
-        -------
-        descriptors : (Q, `descriptor_size`) array of dtype bool
+        Attributes
+        ----------
+        descriptors_ : (Q, `descriptor_size`) array of dtype bool
             2D array of binary descriptors of size `descriptor_size` for Q
             keypoints after filtering out border keypoints with value at an
             index ``(i, j)`` either being ``True`` or ``False`` representing
             the outcome of the intensity comparison for i-th keypoint on j-th
             decision pixel-pair. It is ``Q == np.sum(mask)``.
-        mask : (N, ) array of dtype bool
+        mask_ : (N, ) array of dtype bool
             Mask indicating whether a keypoint has been filtered out
             (``False``) or is described in the `descriptors` array (``True``).
 
@@ -260,10 +267,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
                 descriptors_list.append(descriptors)
                 mask_list.append(mask)
 
-        descriptors = np.vstack(descriptors_list).view(np.bool)
-        mask = np.hstack(mask_list)
-
-        return descriptors, mask
+        self.descriptors_ = np.vstack(descriptors_list).view(np.bool)
+        self.mask_ = np.hstack(mask_list)
 
     def detect_and_extract(self, image):
         """Detect oriented FAST keypoints and extract rBRIEF descriptors.
@@ -276,11 +281,17 @@ class ORB(FeatureDetector, DescriptorExtractor):
         image : 2D array
             Input image.
 
-        Returns
-        -------
-        keypoints : (Q, 2) array
+        Attributes
+        ----------
+        keypoints_ : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
-        descriptors : (Q, `descriptor_size`) array of dtype bool
+        scales_ : (N, ) array
+            Corresponding scales.
+        orientations_ : (N, ) array
+            Corresponding orientations in radians.
+        responses_ : (N, ) array
+            Corresponding Harris corner responses.
+        descriptors_ : (Q, `descriptor_size`) array of dtype bool
             2D array of binary descriptors of size `descriptor_size` for Q
             keypoints after filtering out border keypoints with value at an
             index ``(i, j)`` either being ``True`` or ``False`` representing
@@ -293,6 +304,8 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
         keypoints_list = []
         responses_list = []
+        scales_list = []
+        orientations_list = []
         descriptors_list = []
 
         for octave in range(len(pyramid)):
@@ -313,15 +326,28 @@ class ORB(FeatureDetector, DescriptorExtractor):
 
             keypoints_list.append(keypoints[mask] * self.downscale ** octave)
             responses_list.append(responses[mask])
+            orientations_list.append(orientations[mask])
+            scales_list.append(self.downscale **  octave
+                               * np.ones(keypoints.shape[0], dtype=np.intp))
             descriptors_list.append(descriptors)
 
         keypoints = np.vstack(keypoints_list)
         responses = np.hstack(responses_list)
+        scales = np.hstack(scales_list)
+        orientations = np.hstack(orientations_list)
         descriptors = np.vstack(descriptors_list).view(np.bool)
 
         if keypoints.shape[0] < self.n_keypoints:
-            return keypoints, descriptors
+            self.keypoints_ = keypoints
+            self.scales_ = scales
+            self.orientations_ = orientations
+            self.responses_ = responses
+            self.descriptors_ = descriptors
         else:
             # Choose best n_keypoints according to Harris corner response
             best_indices = responses.argsort()[::-1][:self.n_keypoints]
-            return keypoints[best_indices], descriptors[best_indices]
+            self.keypoints_ = keypoints[best_indices]
+            self.scales_ = scales[best_indices]
+            self.orientations_ = orientations[best_indices]
+            self.responses_ = responses[best_indices]
+            self.descriptors_ = descriptors[best_indices]

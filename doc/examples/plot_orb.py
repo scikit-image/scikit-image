@@ -27,9 +27,18 @@ tform = tf.AffineTransform(scale=(1.3, 1.1), rotation=0.5,
 img3 = tf.warp(img1, tform)
 
 descriptor_extractor = ORB(n_keypoints=200)
-keypoints1, descriptors1 = descriptor_extractor.detect_and_extract(img1)
-keypoints2, descriptors2 = descriptor_extractor.detect_and_extract(img2)
-keypoints3, descriptors3 = descriptor_extractor.detect_and_extract(img3)
+
+descriptor_extractor.detect_and_extract(img1)
+keypoints1 = descriptor_extractor.keypoints_
+descriptors1 = descriptor_extractor.descriptors_
+
+descriptor_extractor.detect_and_extract(img2)
+keypoints2 = descriptor_extractor.keypoints_
+descriptors2 = descriptor_extractor.descriptors_
+
+descriptor_extractor.detect_and_extract(img3)
+keypoints3 = descriptor_extractor.keypoints_
+descriptors3 = descriptor_extractor.descriptors_
 
 matches12 = match_descriptors(descriptors1, descriptors2, cross_check=True)
 matches13 = match_descriptors(descriptors1, descriptors3, cross_check=True)
