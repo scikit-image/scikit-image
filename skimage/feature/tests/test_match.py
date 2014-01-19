@@ -34,15 +34,15 @@ def test_binary_descriptors_lena_rotation_crosscheck_false():
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform)
 
-    descriptor = BRIEF(descriptor_size=512)
+    extractor = BRIEF(descriptor_size=512)
 
     keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
-    descriptors1, mask1 = descriptor.extract(img, keypoints1)
-    keypoints1 = keypoints1[mask1]
+    extractor.extract(img, keypoints1)
+    descriptors1 = extractor.descriptors_
 
     keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
-    descriptors2, mask2 = descriptor.extract(rotated_img, keypoints2)
-    keypoints2 = keypoints1[mask2]
+    extractor.extract(rotated_img, keypoints2)
+    descriptors2 = extractor.descriptors_
 
     matches = match_descriptors(descriptors1, descriptors2, threshold=0.13,
                                cross_check=False)
@@ -68,15 +68,15 @@ def test_binary_descriptors_lena_rotation_crosscheck_true():
     tform = tf.SimilarityTransform(scale=1, rotation=0.15, translation=(0, 0))
     rotated_img = tf.warp(img, tform)
 
-    descriptor = BRIEF(descriptor_size=512)
+    extractor = BRIEF(descriptor_size=512)
 
     keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
-    descriptors1, mask1 = descriptor.extract(img, keypoints1)
-    keypoints1 = keypoints1[mask1]
+    extractor.extract(img, keypoints1)
+    descriptors1 = extractor.descriptors_
 
     keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
-    descriptors2, mask2 = descriptor.extract(rotated_img, keypoints2)
-    keypoints2 = keypoints1[mask2]
+    extractor.extract(rotated_img, keypoints2)
+    descriptors2 = extractor.descriptors_
 
     matches = match_descriptors(descriptors1, descriptors2, threshold=0.13,
                                cross_check=True)
