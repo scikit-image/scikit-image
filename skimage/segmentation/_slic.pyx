@@ -10,12 +10,13 @@ cimport numpy as cnp
 
 from skimage.util import regular_grid
 
+
 def _slic_cython(double[:, :, :, ::1] image_zyx,
                  double[:, ::1] segments,
                  float step,
                  Py_ssize_t max_iter,
                  double[::1] spacing,
-                 bool slic_zero,
+                 bint slic_zero,
                  ):
     """Helper function for SLIC segmentation.
 
@@ -35,7 +36,6 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
         k-means clustering.        
     slic_zero : bool
         True to run SLIC-zero, False to run original SLIC.
-
 
     Returns
     -------
@@ -122,42 +122,25 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
             x_min = <Py_ssize_t>max(cx - 2 * step_x, 0)
             x_max = <Py_ssize_t>min(cx + 2 * step_x + 1, width)
 
-            # The loop is duplicated to avoid looking up slic_zero in every
-            # iteration but perhaps it's better to improve readability at
-            # the cost of performance.
-            if slic_zero:
-                for z in range(z_min, z_max):
-                    dz = (sz * (cz - z)) ** 2
-                    for y in range(y_min, y_max):
-                        dy = (sy * (cy - y)) ** 2
-                        for x in range(x_min, x_max):
-                            dist_center = (dz + dy + (sx * (cx - x)) ** 2) * zyx_wt
-                            dist_color = 0
-                            for c in range(3, n_features):
-                                dist_color += (image_zyx[z, y, x, c - 3]
-                                                - segments[k, c]) ** 2
-
+            for z in range(z_min, z_max):
+                dz = (sz * (cz - z)) ** 2
+                for y in range(y_min, y_max):
+                    dy = (sy * (cy - y)) ** 2
+                    for x in range(x_min, x_max):
+                        dist_center = (dz + dy + (sx * (cx - x)) ** 2) * zyx_wt
+                        dist_color = 0
+                        for c in range(3, n_features):
+                            dist_color += (image_zyx[z, y, x, c - 3]
+                                            - segments[k, c]) ** 2
+                        if slic_zero:
                             dist_center += dist_color / max_dist_color[k]
+                        else:
+                            dist_center += dist_color
 
-                            if distance[z, y, x] > dist_center:
-                                nearest_segments[z, y, x] = k
-                                distance[z, y, x] = dist_center
-                                change = 1
-            else:
-                for z in range(z_min, z_max):
-                    dz = (sz * (cz - z)) ** 2
-                    for y in range(y_min, y_max):
-                        dy = (sy * (cy - y)) ** 2
-                        for x in range(x_min, x_max):
-                            dist_center = (dz + dy + (sx * (cx - x)) ** 2) * zyx_wt
-                            for c in range(3, n_features):
-                                dist_center += (image_zyx[z, y, x, c - 3]
-                                                - segments[k, c]) ** 2
-
-                            if distance[z, y, x] > dist_center:
-                                nearest_segments[z, y, x] = k
-                                distance[z, y, x] = dist_center
-                                change = 1
+                        if distance[z, y, x] > dist_center:
+                            nearest_segments[z, y, x] = k
+                            distance[z, y, x] = dist_center
+                            change = 1
 
         # stop if no pixel changed its segment
         if change == 0:

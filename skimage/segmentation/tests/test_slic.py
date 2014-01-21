@@ -147,6 +147,7 @@ def test_enforce_connectivity():
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
 
+
 if __name__ == '__main__':
     from numpy import testing
 
