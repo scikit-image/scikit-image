@@ -104,6 +104,11 @@ class ProjectiveTransform(GeometricTransform):
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
 
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
+
     """
 
     _coeffs = range(8)
@@ -291,6 +296,11 @@ class AffineTransform(ProjectiveTransform):
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters.
 
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
+
     """
 
     _coeffs = range(6)
@@ -356,25 +366,20 @@ class PiecewiseAffineTransform(GeometricTransform):
     a Delaunay triangulation of the points to form a mesh. Each triangle is
     used to find a local affine transform.
 
+    Attributes
+    ----------
+    affines : list of AffineTransform objects
+        Affine transformations for each triangle in the mesh.
+    inverse_affines : list of AffineTransform objects
+        Inverse affine transformations for each triangle in the mesh.
+
     """
 
     def __init__(self):
         self._tesselation = None
         self._inverse_tesselation = None
-        self.affines_ = None
-        self.inverse_affines_ = None
-
-    @property
-    def affines(self):
-        warnings.warn('`affines` attribute is deprecated, '
-                      'use `affines_` instead.')
-        return self.affines_
-
-    @property
-    def inverse_affines(self):
-        warnings.warn('`inverse_affines` attribute is deprecated, '
-                      'use `inverse_affines_` instead.')
-        return self.inverse_affines_
+        self.affines = None
+        self.inverse_affines = None
 
     def estimate(self, src, dst):
         """Set the control points with which to perform the piecewise mapping.
@@ -394,21 +399,21 @@ class PiecewiseAffineTransform(GeometricTransform):
         # triangulate input positions into mesh
         self._tesselation = spatial.Delaunay(src)
         # find affine mapping from source positions to destination
-        self.affines_ = []
+        self.affines = []
         for tri in self._tesselation.vertices:
             affine = AffineTransform()
             affine.estimate(src[tri, :], dst[tri, :])
-            self.affines_.append(affine)
+            self.affines.append(affine)
 
         # inverse piecewise affine
         # triangulate input positions into mesh
         self._inverse_tesselation = spatial.Delaunay(dst)
         # find affine mapping from source positions to destination
-        self.inverse_affines_ = []
+        self.inverse_affines = []
         for tri in self._inverse_tesselation.vertices:
             affine = AffineTransform()
             affine.estimate(dst[tri, :], src[tri, :])
-            self.inverse_affines_.append(affine)
+            self.inverse_affines.append(affine)
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -437,7 +442,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         for index in range(len(self._tesselation.vertices)):
             # affine transform for triangle
-            affine = self.affines_[index]
+            affine = self.affines[index]
             # all coordinates within triangle
             index_mask = simplex == index
 
@@ -472,7 +477,7 @@ class PiecewiseAffineTransform(GeometricTransform):
 
         for index in range(len(self._inverse_tesselation.vertices)):
             # affine transform for triangle
-            affine = self.inverse_affines_[index]
+            affine = self.inverse_affines[index]
             # all coordinates within triangle
             index_mask = simplex == index
 
@@ -506,6 +511,11 @@ class SimilarityTransform(ProjectiveTransform):
         Rotation angle in counter-clockwise direction as radians.
     translation : (tx, ty) as array, list or tuple, optional
         x, y translation parameters.
+
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
 
     """
 
@@ -635,6 +645,12 @@ class PolynomialTransform(GeometricTransform):
     Parameters
     ----------
     params : (2, N) array, optional
+        Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
+        a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
+
+    Attributes
+    ----------
+    params : (2, N) array
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 

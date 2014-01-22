@@ -37,11 +37,12 @@ class LineModel(BaseModel):
 
         min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
 
-    The ``params`` attribute contains the parameters in the following order::
-
-        dist, theta
-
     A minimum number of 2 points is required to solve for the parameters.
+
+    Attributes
+    ----------
+    params : tuple
+        Line model parameters in the following order `dist`, `theta`.
 
     """
 
@@ -161,11 +162,12 @@ class CircleModel(BaseModel):
 
         min{ sum((r - sqrt((x_i - xc)**2 + (y_i - yc)**2))**2) }
 
-    The ``params`` attribute contains the parameters in the following order::
-
-        xc, yc, r
-
     A minimum number of 3 points is required to solve for the parameters.
+
+    Attributes
+    ----------
+    params : tuple
+        Circle model parameters in the following order `xc`, `yc`, `r`.
 
     """
 
@@ -291,6 +293,12 @@ class EllipseModel(BaseModel):
         xc, yc, a, b, theta
 
     A minimum number of 5 points is required to solve for the parameters.
+
+    Attributes
+    ----------
+    params : tuple
+        Ellipse model parameters in the following order `xc`, `yc`, `a`,
+        `b`, `theta`.
 
     """
 
