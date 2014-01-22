@@ -20,9 +20,9 @@ cdef inline Py_ssize_t round(double r):
     return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 
-def hough_circle(cnp.ndarray img,
-                 cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
-                 char normalize=True, char full_output=False):
+def _hough_circle(cnp.ndarray img,
+                  cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
+                  char normalize=True, char full_output=False):
     """Perform a circular Hough transform.
 
     Parameters
