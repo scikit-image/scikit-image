@@ -16,7 +16,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  float step,
                  Py_ssize_t max_iter,
                  double[::1] spacing,
-                 bint slic_zero,
+                 bint slic_zero
                  ):
     """Helper function for SLIC segmentation.
 
@@ -177,8 +177,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                         dist_color = 0
 
                         for c in range(3, n_features):
-                            dist_color += (image_zyx[z, y, x, c - 3]
-                                           - segments[k, c]) ** 2
+                            dist_color += (image_zyx[z, y, x, c - 3] -
+                                           segments[k, c]) ** 2
                         
                         # The reference implementation seems to only change
                         # the color if it increases from previous iteration

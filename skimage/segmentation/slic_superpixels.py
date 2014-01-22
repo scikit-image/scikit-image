@@ -59,7 +59,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
     slic_zero: bool, optional
-        True to run SLIC-zero, False to run original SLIC.
+        Run SLIC-zero, the zero-parameter mode of SLIC
+
     Returns
     -------
     labels : 2D or 3D array
@@ -169,8 +170,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     segments = np.concatenate([segments_z[..., np.newaxis],
                                segments_y[..., np.newaxis],
                                segments_x[..., np.newaxis],
-                               segments_color
-                               ], axis=-1).reshape(-1, 3 + image.shape[3])
+                               segments_color],
+                              axis=-1).reshape(-1, 3 + image.shape[3])
     segments = np.ascontiguousarray(segments)
 
     # we do the scaling of ratio in the same way as in the SLIC paper
@@ -178,10 +179,7 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     step = float(max((step_z, step_y, step_x)))
     ratio = 1.0 / compactness
 
-    if slic_zero:
-        image = np.ascontiguousarray(image * ratio)
-    else:
-        image = np.ascontiguousarray(image * ratio)
+    image = np.ascontiguousarray(image * ratio)
 
     labels = _slic_cython(image, segments, step, max_iter, spacing, slic_zero)
 
