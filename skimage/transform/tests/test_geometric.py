@@ -56,19 +56,19 @@ def test_similarity_estimation():
     # exact solution
     tform = estimate_transform('similarity', SRC[:2, :], DST[:2, :])
     assert_array_almost_equal(tform(SRC[:2, :]), DST[:2, :])
-    assert_equal(tform.params_[0, 0], tform.params_[1, 1])
-    assert_equal(tform.params_[0, 1], - tform.params_[1, 0])
+    assert_equal(tform.params[0, 0], tform.params[1, 1])
+    assert_equal(tform.params[0, 1], - tform.params[1, 0])
 
     # over-determined
     tform2 = estimate_transform('similarity', SRC, DST)
     assert_array_almost_equal(tform2.inverse(tform2(SRC)), SRC)
-    assert_equal(tform2.params_[0, 0], tform2.params_[1, 1])
-    assert_equal(tform2.params_[0, 1], - tform2.params_[1, 0])
+    assert_equal(tform2.params[0, 0], tform2.params[1, 1])
+    assert_equal(tform2.params[0, 1], - tform2.params[1, 0])
 
     # via estimate method
     tform3 = SimilarityTransform()
     tform3.estimate(SRC, DST)
-    assert_array_almost_equal(tform3.params_, tform2.params_)
+    assert_array_almost_equal(tform3.params, tform2.params)
 
 
 def test_similarity_init():
@@ -83,7 +83,7 @@ def test_similarity_init():
     assert_array_almost_equal(tform.translation, translation)
 
     # init with transformation matrix
-    tform2 = SimilarityTransform(tform.params_)
+    tform2 = SimilarityTransform(tform.params)
     assert_array_almost_equal(tform2.scale, scale)
     assert_array_almost_equal(tform2.rotation, rotation)
     assert_array_almost_equal(tform2.translation, translation)
@@ -111,7 +111,7 @@ def test_affine_estimation():
     # via estimate method
     tform3 = AffineTransform()
     tform3.estimate(SRC, DST)
-    assert_array_almost_equal(tform3.params_, tform2.params_)
+    assert_array_almost_equal(tform3.params, tform2.params)
 
 
 def test_affine_init():
@@ -128,7 +128,7 @@ def test_affine_init():
     assert_array_almost_equal(tform.translation, translation)
 
     # init with transformation matrix
-    tform2 = AffineTransform(tform.params_)
+    tform2 = AffineTransform(tform.params)
     assert_array_almost_equal(tform2.scale, scale)
     assert_array_almost_equal(tform2.rotation, rotation)
     assert_array_almost_equal(tform2.shear, shear)
@@ -155,14 +155,14 @@ def test_projective_estimation():
     # via estimate method
     tform3 = ProjectiveTransform()
     tform3.estimate(SRC, DST)
-    assert_array_almost_equal(tform3.params_, tform2.params_)
+    assert_array_almost_equal(tform3.params, tform2.params)
 
 
 def test_projective_init():
     tform = estimate_transform('projective', SRC, DST)
     # init with transformation matrix
-    tform2 = ProjectiveTransform(tform.params_)
-    assert_array_almost_equal(tform2.params_, tform.params_)
+    tform2 = ProjectiveTransform(tform.params)
+    assert_array_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_estimation():
@@ -173,20 +173,20 @@ def test_polynomial_estimation():
     # via estimate method
     tform2 = PolynomialTransform()
     tform2.estimate(SRC, DST, order=10)
-    assert_array_almost_equal(tform2.params_, tform.params_)
+    assert_array_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_init():
     tform = estimate_transform('polynomial', SRC, DST, order=10)
     # init with transformation parameters
-    tform2 = PolynomialTransform(tform.params_)
-    assert_array_almost_equal(tform2.params_, tform.params_)
+    tform2 = PolynomialTransform(tform.params)
+    assert_array_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_default_order():
     tform = estimate_transform('polynomial', SRC, DST)
     tform2 = estimate_transform('polynomial', SRC, DST, order=2)
-    assert_array_almost_equal(tform2.params_, tform.params_)
+    assert_array_almost_equal(tform2.params, tform.params)
 
 
 def test_polynomial_inverse():
@@ -231,10 +231,10 @@ def test_invalid_input():
 def test_deprecated_params_attributes():
     for t in ('projective', 'affine', 'similarity'):
         tform = estimate_transform(t, SRC, DST)
-        assert_equal(tform._matrix, tform.params_)
+        assert_equal(tform._matrix, tform.params)
 
     tform = estimate_transform('polynomial', SRC, DST, order=3)
-    assert_equal(tform._params, tform.params_)
+    assert_equal(tform._params, tform.params)
 
     tform = estimate_transform('piecewise-affine', SRC, DST)
     assert_equal(tform.affines, tform.affines_)

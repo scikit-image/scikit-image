@@ -10,7 +10,7 @@ def test_line_model_invalid_input():
 
 def test_line_model_predict():
     model = LineModel()
-    model.params_ = (10, 1)
+    model.params = (10, 1)
     x = np.arange(-10, 10)
     y = model.predict_y(x)
     assert_almost_equal(x, model.predict_x(y))
@@ -19,7 +19,7 @@ def test_line_model_predict():
 def test_line_model_estimate():
     # generate original data without noise
     model0 = LineModel()
-    model0.params_ = (10, 1)
+    model0.params = (10, 1)
     x0 = np.arange(-100, 100)
     y0 = model0.predict_y(x0)
     data0 = np.column_stack([x0, y0])
@@ -33,16 +33,16 @@ def test_line_model_estimate():
     model_est.estimate(data)
 
     # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params_, model_est.params_, 1)
+    assert_almost_equal(model0.params, model_est.params, 1)
 
 
 def test_line_model_residuals():
     model = LineModel()
-    model.params_ = (0, 0)
+    model.params = (0, 0)
     assert_equal(abs(model.residuals(np.array([[0, 0]]))), 0)
     assert_equal(abs(model.residuals(np.array([[0, 10]]))), 0)
     assert_equal(abs(model.residuals(np.array([[10, 0]]))), 10)
-    model.params_ = (5, np.pi / 4)
+    model.params = (5, np.pi / 4)
     assert_equal(abs(model.residuals(np.array([[0, 0]]))), 5)
     assert_almost_equal(abs(model.residuals(np.array([[np.sqrt(50), 0]]))), 0)
 
@@ -59,7 +59,7 @@ def test_circle_model_invalid_input():
 def test_circle_model_predict():
     model = CircleModel()
     r = 5
-    model.params_ = (0, 0, r)
+    model.params = (0, 0, r)
     t = np.arange(0, 2 * np.pi, np.pi / 2)
 
     xy = np.array(((5, 0), (0, 5), (-5, 0), (0, -5)))
@@ -69,7 +69,7 @@ def test_circle_model_predict():
 def test_circle_model_estimate():
     # generate original data without noise
     model0 = CircleModel()
-    model0.params_ = (10, 12, 3)
+    model0.params = (10, 12, 3)
     t = np.linspace(0, 2 * np.pi, 1000)
     data0 = model0.predict_xy(t)
 
@@ -82,12 +82,12 @@ def test_circle_model_estimate():
     model_est.estimate(data)
 
     # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params_, model_est.params_, 1)
+    assert_almost_equal(model0.params, model_est.params, 1)
 
 
 def test_circle_model_residuals():
     model = CircleModel()
-    model.params_ = (0, 0, 5)
+    model.params = (0, 0, 5)
     assert_almost_equal(abs(model.residuals(np.array([[5, 0]]))), 0)
     assert_almost_equal(abs(model.residuals(np.array([[6, 6]]))),
                         np.sqrt(2 * 6**2) - 5)
@@ -101,7 +101,7 @@ def test_ellipse_model_invalid_input():
 def test_ellipse_model_predict():
     model = EllipseModel()
     r = 5
-    model.params_ = (0, 0, 5, 10, 0)
+    model.params = (0, 0, 5, 10, 0)
     t = np.arange(0, 2 * np.pi, np.pi / 2)
 
     xy = np.array(((5, 0), (0, 10), (-5, 0), (0, -10)))
@@ -111,7 +111,7 @@ def test_ellipse_model_predict():
 def test_ellipse_model_estimate():
     # generate original data without noise
     model0 = EllipseModel()
-    model0.params_ = (10, 20, 15, 25, 0)
+    model0.params = (10, 20, 15, 25, 0)
     t = np.linspace(0, 2 * np.pi, 100)
     data0 = model0.predict_xy(t)
 
@@ -124,13 +124,13 @@ def test_ellipse_model_estimate():
     model_est.estimate(data)
 
     # test whether estimated parameters almost equal original parameters
-    assert_almost_equal(model0.params_, model_est.params_, 0)
+    assert_almost_equal(model0.params, model_est.params, 0)
 
 
 def test_ellipse_model_residuals():
     model = EllipseModel()
     # vertical line through origin
-    model.params_ = (0, 0, 10, 5, 0)
+    model.params = (0, 0, 10, 5, 0)
     assert_almost_equal(abs(model.residuals(np.array([[10, 0]]))), 0)
     assert_almost_equal(abs(model.residuals(np.array([[0, 5]]))), 0)
     assert_almost_equal(abs(model.residuals(np.array([[0, 10]]))), 5)
@@ -141,7 +141,7 @@ def test_ransac_shape():
 
     # generate original data without noise
     model0 = CircleModel()
-    model0.params_ = (10, 12, 3)
+    model0.params = (10, 12, 3)
     t = np.linspace(0, 2 * np.pi, 1000)
     data0 = model0.predict_xy(t)
 
@@ -155,7 +155,7 @@ def test_ransac_shape():
     model_est, inliers = ransac(data0, CircleModel, 3, 5)
 
     # test whether estimated parameters equal original parameters
-    assert_equal(model0.params_, model_est.params_)
+    assert_equal(model0.params, model_est.params)
     for outlier in outliers:
         assert outlier not in inliers
 
@@ -206,10 +206,10 @@ def test_ransac_is_model_valid():
 
 def test_deprecated_params_attribute():
     model = LineModel()
-    model.params_ = (10, 1)
+    model.params = (10, 1)
     x = np.arange(-10, 10)
     y = model.predict_y(x)
-    assert_equal(model.params_, model._params)
+    assert_equal(model.params, model._params)
 
 
 if __name__ == "__main__":

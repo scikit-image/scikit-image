@@ -114,17 +114,17 @@ class ProjectiveTransform(GeometricTransform):
             matrix = np.eye(3)
         if matrix.shape != (3, 3):
             raise ValueError("invalid shape of transformation matrix")
-        self.params_ = matrix
+        self.params = matrix
 
     @property
     def _matrix(self):
         warnings.warn('`_matrix` attribute is deprecated, '
-                      'use `params_` instead.')
-        return self.params_
+                      'use `params` instead.')
+        return self.params
 
     @property
     def _inv_matrix(self):
-        return np.linalg.inv(self.params_)
+        return np.linalg.inv(self.params)
 
     def _apply_mat(self, coords, matrix):
         coords = np.array(coords, copy=False, ndmin=2)
@@ -140,7 +140,7 @@ class ProjectiveTransform(GeometricTransform):
         return dst[:, :2]
 
     def __call__(self, coords):
-        return self._apply_mat(coords, self.params_)
+        return self._apply_mat(coords, self.params)
 
     def inverse(self, coords):
         """Apply inverse transformation.
@@ -242,7 +242,7 @@ class ProjectiveTransform(GeometricTransform):
         H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
-        self.params_ = H
+        self.params = H
 
     def __add__(self, other):
         """Combine this transformation with another.
@@ -255,7 +255,7 @@ class ProjectiveTransform(GeometricTransform):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
-            return tform(other.params_.dot(self.params_))
+            return tform(other.params.dot(self.params))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -306,7 +306,7 @@ class AffineTransform(ProjectiveTransform):
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
-            self.params_ = matrix
+            self.params = matrix
         elif params:
             if scale is None:
                 scale = (1, 1)
@@ -318,34 +318,34 @@ class AffineTransform(ProjectiveTransform):
                 translation = (0, 0)
 
             sx, sy = scale
-            self.params_ = np.array([
+            self.params = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
                 [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
                 [                      0,                                0, 1]
             ])
-            self.params_[0:2, 2] = translation
+            self.params[0:2, 2] = translation
         else:
             # default to an identity transform
-            self.params_ = np.eye(3)
+            self.params = np.eye(3)
 
     @property
     def scale(self):
-        sx = math.sqrt(self.params_[0, 0] ** 2 + self.params_[1, 0] ** 2)
-        sy = math.sqrt(self.params_[0, 1] ** 2 + self.params_[1, 1] ** 2)
+        sx = math.sqrt(self.params[0, 0] ** 2 + self.params[1, 0] ** 2)
+        sy = math.sqrt(self.params[0, 1] ** 2 + self.params[1, 1] ** 2)
         return sx, sy
 
     @property
     def rotation(self):
-        return math.atan2(self.params_[1, 0], self.params_[0, 0])
+        return math.atan2(self.params[1, 0], self.params[0, 0])
 
     @property
     def shear(self):
-        beta = math.atan2(- self.params_[0, 1], self.params_[1, 1])
+        beta = math.atan2(- self.params[0, 1], self.params[1, 1])
         return beta - self.rotation
 
     @property
     def translation(self):
-        return self.params_[0:2, 2]
+        return self.params[0:2, 2]
 
 
 class PiecewiseAffineTransform(GeometricTransform):
@@ -520,7 +520,7 @@ class SimilarityTransform(ProjectiveTransform):
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
-            self.params_ = matrix
+            self.params = matrix
         elif params:
             if scale is None:
                 scale = 1
@@ -529,16 +529,16 @@ class SimilarityTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            self.params_ = np.array([
+            self.params = np.array([
                 [math.cos(rotation), - math.sin(rotation), 0],
                 [math.sin(rotation),   math.cos(rotation), 0],
                 [                 0,                    0, 1]
             ])
-            self.params_[0:2, 0:2] *= scale
-            self.params_[0:2, 2] = translation
+            self.params[0:2, 0:2] *= scale
+            self.params[0:2, 2] = translation
         else:
             # default to an identity transform
-            self.params_ = np.eye(3)
+            self.params = np.eye(3)
 
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit parameters.
@@ -604,7 +604,7 @@ class SimilarityTransform(ProjectiveTransform):
         # singular value
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
-        self.params_ = np.array([[a0, -b0, a1],
+        self.params = np.array([[a0, -b0, a1],
                                  [b0,  a0, b1],
                                  [ 0,   0,  1]])
 
@@ -612,18 +612,18 @@ class SimilarityTransform(ProjectiveTransform):
     def scale(self):
         if math.cos(self.rotation) == 0:
             # sin(self.rotation) == 1
-            scale = self.params_[0, 1]
+            scale = self.params[0, 1]
         else:
-            scale = self.params_[0, 0] / math.cos(self.rotation)
+            scale = self.params[0, 0] / math.cos(self.rotation)
         return scale
 
     @property
     def rotation(self):
-        return math.atan2(self.params_[1, 0], self.params_[1, 1])
+        return math.atan2(self.params[1, 0], self.params[1, 1])
 
     @property
     def translation(self):
-        return self.params_[0:2, 2]
+        return self.params[0:2, 2]
 
 
 class PolynomialTransform(GeometricTransform):
@@ -646,13 +646,13 @@ class PolynomialTransform(GeometricTransform):
             params = np.array([[0, 1, 0], [0, 0, 1]])
         if params.shape[0] != 2:
             raise ValueError("invalid shape of transformation parameters")
-        self.params_ = params
+        self.params = params
 
     @property
     def _params(self):
         warnings.warn('`_params` attribute is deprecated, '
-                      'use `params_` instead.')
-        return self.params_
+                      'use `params` instead.')
+        return self.params
 
     def estimate(self, src, dst, order=2):
         """Set the transformation matrix with the explicit transformation
@@ -725,7 +725,7 @@ class PolynomialTransform(GeometricTransform):
         # singular value
         params = - V[-1, :-1] / V[-1, -1]
 
-        self.params_ = params.reshape((2, u / 2))
+        self.params = params.reshape((2, u / 2))
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -743,7 +743,7 @@ class PolynomialTransform(GeometricTransform):
         """
         x = coords[:, 0]
         y = coords[:, 1]
-        u = len(self.params_.ravel())
+        u = len(self.params.ravel())
         # number of coefficients -> u = (order + 1) * (order + 2)
         order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
         dst = np.zeros(coords.shape)
@@ -751,8 +751,8 @@ class PolynomialTransform(GeometricTransform):
         pidx = 0
         for j in range(order + 1):
             for i in range(j + 1):
-                dst[:, 0] += self.params_[0, pidx] * x ** (j - i) * y ** i
-                dst[:, 1] += self.params_[1, pidx] * x ** (j - i) * y ** i
+                dst[:, 0] += self.params[0, pidx] * x ** (j - i) * y ** i
+                dst[:, 1] += self.params[1, pidx] * x ** (j - i) * y ** i
                 pidx += 1
 
         return dst
@@ -1071,14 +1071,14 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         # inverse_map is a homography
         elif isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
-            matrix = inverse_map.params_
+            matrix = inverse_map.params
 
         # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
               and inverse_map.__name__ == 'inverse'
               and get_bound_method_class(inverse_map) \
                   in HOMOGRAPHY_TRANSFORMS):
-            matrix = np.linalg.inv(six.get_method_self(inverse_map).params_)
+            matrix = np.linalg.inv(six.get_method_self(inverse_map).params)
 
         if matrix is not None:
             matrix = matrix.astype(np.double)
