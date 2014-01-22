@@ -12,15 +12,15 @@ class BRIEF(DescriptorExtractor):
     """BRIEF binary descriptor extractor.
 
     BRIEF (Binary Robust Independent Elementary Features) is an efficient
-    feature point descriptor. It it is highly discriminative even when using
-    relatively few bits and can be computed using simple intensity difference
+    feature point descriptor. It is highly discriminative even when using
+    relatively few bits and is computed using simple intensity difference
     tests.
 
-    For each keypoint intensity comparisons are carried out for a specifically
+    For each keypoint, intensity comparisons are carried out for a specifically
     distributed number N of pixel-pairs resulting in a binary descriptor of
-    length N. The descriptor similarity can thus be computed using the Hamming
-    distance which leads to very good matching performance in contrast to the
-    L2 norm.
+    length N. For binary descriptors the Hamming distance can be used for
+    feature matching, which leads to lower computational cost in comparison to
+    the L2 norm.
 
     Parameters
     ----------
@@ -35,12 +35,12 @@ class BRIEF(DescriptorExtractor):
         around keypoints.
     sample_seed : int, optional
         Seed for the random sampling of the decision pixel-pairs. From a square
-        window with length patch_size, pixel pairs are sampled using the `mode`
-        parameter to build the descriptors using intensity comparison. The
-        value of `sample_seed` must be the same for the images to be matched
-        while building the descriptors.
+        window with length `patch_size`, pixel pairs are sampled using the
+        `mode` parameter to build the descriptors using intensity comparison.
+        The value of `sample_seed` must be the same for the images to be
+        matched while building the descriptors.
     sigma : float, optional
-        Standard deviation of the Gaussian low pass filter applied to the image
+        Standard deviation of the Gaussian low-pass filter applied to the image
         to alleviate noise sensitivity, which is strongly recommended to obtain
         discriminative and good descriptors.
 
@@ -139,7 +139,7 @@ class BRIEF(DescriptorExtractor):
 
         image = _prepare_grayscale_input_2D(image)
 
-        # Gaussian Low pass filtering to alleviate noise sensitivity
+        # Gaussian low-pass filtering to alleviate noise sensitivity
         image = np.ascontiguousarray(gaussian_filter(image, self.sigma))
 
         # Sampling pairs of decision pixels in patch_size x patch_size window
