@@ -4,6 +4,8 @@
 PACKAGE2_NAME = python-skimage
 PACKAGE3_NAME = python3-skimage
 PKG_TMP = $(CURDIR)/debian/tmp
+# don't optimize pngs, palette changes break tests and documented examples
+export NO_PNG_PKG_MANGLE=1
 
 PYVERS = $(shell pyversions -vr)
 PYVER = $(shell pyversions  -vd)
