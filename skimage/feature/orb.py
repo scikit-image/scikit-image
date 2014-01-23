@@ -27,11 +27,11 @@ class ORB(FeatureDetector, DescriptorExtractor):
     ----------
     n_keypoints : int, optional
         Number of keypoints to be returned. The function will return the best
-        ``n_keypoints`` according to the Harris corner response if more than
-        ``n_keypoints`` are detected. If not, then all the detected keypoints
+        `n_keypoints` according to the Harris corner response if more than
+        `n_keypoints` are detected. If not, then all the detected keypoints
         are returned.
     fast_n : int, optional
-        The ``n`` parameter in ``feature.corner_fast``. Minimum number of
+        The `n` parameter in `skimage.feature.corner_fast`. Minimum number of
         consecutive pixels out of 16 pixels on the circle that should all be
         either brighter or darker w.r.t test-pixel. A point c on the circle is
         darker w.r.t test pixel p if ``Ic < Ip - threshold`` and brighter if
@@ -43,9 +43,9 @@ class ORB(FeatureDetector, DescriptorExtractor):
         similar w.r.t. the test pixel. Decrease the threshold when more
         corners are desired and vice-versa.
     harris_k : float, optional
-        The ``k`` parameter in ``feature.corner_harris``. Sensitivity factor to
-        separate corners from edges, typically in range ``[0, 0.2]``. Small
-        values of k result in detection of sharp corners.
+        The `k` parameter in `skimage.feature.corner_harris`. Sensitivity
+        factor to separate corners from edges, typically in range ``[0, 0.2]``.
+        Small values of `k` result in detection of sharp corners.
     downscale : float, optional
         Downscale factor for the image pyramid. Default value 1.2 is chosen so
         that there are more dense scales which enable robust scale invariance
