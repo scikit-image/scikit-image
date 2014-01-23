@@ -111,9 +111,9 @@ def _suppress_lines(feature_mask, image, sigma, line_threshold):
 
 
 
-class CenSurE(FeatureDetector):
+class CENSURE(FeatureDetector):
 
-    """CenSurE keypoint detector.
+    """CENSURE keypoint detector.
 
     min_scale : int, optional
         Minimum scale to extract keypoints from.
@@ -149,7 +149,7 @@ class CenSurE(FeatureDetector):
     References
     ----------
     .. [1] Motilal Agrawal, Kurt Konolige and Morten Rufus Blas
-           "CenSurE: Center Surround Extremas for Realtime Feature
+           "CENSURE: Center Surround Extremas for Realtime Feature
            Detection and Matching",
            http://link.springer.com/content/pdf/10.1007%2F978-3-540-88693-8_8.pdf
 
@@ -162,9 +162,9 @@ class CenSurE(FeatureDetector):
     --------
     >>> from skimage.data import lena
     >>> from skimage.color import rgb2gray
-    >>> from skimage.feature import CenSurE
+    >>> from skimage.feature import CENSURE
     >>> img = rgb2gray(lena()[100:300, 100:300])
-    >>> censure = CenSurE()
+    >>> censure = CENSURE()
     >>> censure.detect(img)
     >>> censure.keypoints
     array([[ 71, 148],
@@ -208,7 +208,7 @@ class CenSurE(FeatureDetector):
         self.scales = None
 
     def detect(self, image):
-        """Detect CenSurE keypoints along with the corresponding scale.
+        """Detect CENSURE keypoints along with the corresponding scale.
 
         Parameters
         ----------

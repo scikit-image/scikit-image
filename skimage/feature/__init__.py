@@ -10,7 +10,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
 from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
 from .brief import BRIEF
-from .censure import CenSurE
+from .censure import CENSURE
 from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
@@ -37,7 +37,7 @@ __all__ = ['daisy',
            'corner_orientations',
            'match_template',
            'BRIEF',
-           'CenSurE',
+           'CENSURE',
            'ORB',
            'match_descriptors',
            'plot_matches']

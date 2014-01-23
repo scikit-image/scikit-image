@@ -1,16 +1,16 @@
 """
 ========================
-CenSurE feature detector
+CENSURE feature detector
 ========================
 
-The CenSurE feature detector is a scale-invariant center-surround detector
-(CenSurE) that claims to outperform other detectors and is capable of real-time
+The CENSURE feature detector is a scale-invariant center-surround detector
+(CENSURE) that claims to outperform other detectors and is capable of real-time
 implementation.
 
 """
 from skimage import data
 from skimage import transform as tf
-from skimage.feature import CenSurE
+from skimage.feature import CENSURE
 from skimage.color import rgb2gray
 import matplotlib.pyplot as plt
 
@@ -20,7 +20,7 @@ tform = tf.AffineTransform(scale=(1.5, 1.5), rotation=0.5,
                            translation=(150, -200))
 img2 = tf.warp(img1, tform)
 
-detector = CenSurE()
+detector = CENSURE()
 
 fig, ax = plt.subplots(nrows=1, ncols=2)
 

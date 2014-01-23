@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.testing import assert_array_equal, assert_raises
 from skimage.data import moon
-from skimage.feature import CenSurE
+from skimage.feature import CENSURE
 
 
 img = moon()
@@ -9,25 +9,25 @@ img = moon()
 
 def test_keypoints_censure_color_image_unsupported_error():
     """Censure keypoints can be extracted from gray-scale images only."""
-    assert_raises(ValueError, CenSurE().detect, np.zeros((20, 20, 3)))
+    assert_raises(ValueError, CENSURE().detect, np.zeros((20, 20, 3)))
 
 
 def test_keypoints_censure_mode_validity_error():
     """Mode argument in keypoints_censure can be either DoB, Octagon or
     STAR."""
-    assert_raises(ValueError, CenSurE, mode='dummy')
+    assert_raises(ValueError, CENSURE, mode='dummy')
 
 
 def test_keypoints_censure_scale_range_error():
     """Difference between the the max_scale and min_scale parameters in
     keypoints_censure should be greater than or equal to two."""
-    assert_raises(ValueError, CenSurE, min_scale=1, max_scale=2)
+    assert_raises(ValueError, CENSURE, min_scale=1, max_scale=2)
 
 
 def test_keypoints_censure_moon_image_dob():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for DoB filter."""
-    detector = CenSurE()
+    detector = CENSURE()
     detector.detect(img)
     expected_keypoints = np.array([[ 21, 497],
                                    [ 36,  46],
@@ -48,7 +48,7 @@ def test_keypoints_censure_moon_image_octagon():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for Octagon filter."""
 
-    detector = CenSurE(mode='octagon')
+    detector = CENSURE(mode='octagon')
     detector.detect(img)
     expected_keypoints = np.array([[ 21, 496],
                                    [ 35,  46],
@@ -65,7 +65,7 @@ def test_keypoints_censure_moon_image_octagon():
 def test_keypoints_censure_moon_image_star():
     """Verify the actual Censure keypoints and their corresponding scale with
     the expected values for STAR filter."""
-    detector = CenSurE(mode='star')
+    detector = CENSURE(mode='star')
     detector.detect(img)
     expected_keypoints = np.array([[ 21, 497],
                                   [ 36,  46],
