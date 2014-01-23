@@ -38,11 +38,11 @@ def test_binary_descriptors_lena_rotation_crosscheck_false():
 
     keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
     extractor.extract(img, keypoints1)
-    descriptors1 = extractor.descriptors_
+    descriptors1 = extractor.descriptors
 
     keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
     extractor.extract(rotated_img, keypoints2)
-    descriptors2 = extractor.descriptors_
+    descriptors2 = extractor.descriptors
 
     matches = match_descriptors(descriptors1, descriptors2, threshold=0.13,
                                cross_check=False)
@@ -72,11 +72,11 @@ def test_binary_descriptors_lena_rotation_crosscheck_true():
 
     keypoints1 = corner_peaks(corner_harris(img), min_distance=5)
     extractor.extract(img, keypoints1)
-    descriptors1 = extractor.descriptors_
+    descriptors1 = extractor.descriptors
 
     keypoints2 = corner_peaks(corner_harris(rotated_img), min_distance=5)
     extractor.extract(rotated_img, keypoints2)
-    descriptors2 = extractor.descriptors_
+    descriptors2 = extractor.descriptors
 
     matches = match_descriptors(descriptors1, descriptors2, threshold=0.13,
                                cross_check=True)
