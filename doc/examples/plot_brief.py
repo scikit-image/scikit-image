@@ -34,16 +34,16 @@ keypoints3 = corner_peaks(corner_harris(img3), min_distance=5)
 extractor = BRIEF()
 
 extractor.extract(img1, keypoints1)
-keypoints1 = keypoints1[extractor.mask_]
-descriptors1 = extractor.descriptors_
+keypoints1 = keypoints1[extractor.mask]
+descriptors1 = extractor.descriptors
 
 extractor.extract(img2, keypoints2)
-keypoints2 = keypoints2[extractor.mask_]
-descriptors2 = extractor.descriptors_
+keypoints2 = keypoints2[extractor.mask]
+descriptors2 = extractor.descriptors
 
 extractor.extract(img3, keypoints3)
-keypoints3 = keypoints3[extractor.mask_]
-descriptors3 = extractor.descriptors_
+keypoints3 = keypoints3[extractor.mask]
+descriptors3 = extractor.descriptors
 
 matches12 = match_descriptors(descriptors1, descriptors2, cross_check=True)
 matches13 = match_descriptors(descriptors1, descriptors3, cross_check=True)

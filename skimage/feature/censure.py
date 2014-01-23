@@ -139,6 +139,13 @@ class CenSurE(FeatureDetector):
         Threshold for rejecting interest points which have ratio of principal
         curvatures greater than this value.
 
+    Attributes
+    ----------
+    keypoints : (N, 2) array
+        Keypoint coordinates as ``(row, col)``.
+    scales : (N, ) array
+        Corresponding scales.
+
     References
     ----------
     .. [1] Motilal Agrawal, Kurt Konolige and Morten Rufus Blas
@@ -159,7 +166,7 @@ class CenSurE(FeatureDetector):
     >>> img = rgb2gray(lena()[100:300, 100:300])
     >>> censure = CenSurE()
     >>> censure.detect(img)
-    >>> censure.keypoints_
+    >>> censure.keypoints
     array([[ 71, 148],
            [ 77, 186],
            [ 78, 189],
@@ -175,7 +182,7 @@ class CenSurE(FeatureDetector):
            [171,  29],
            [179,  20],
            [194,  65]])
-    >>> censure.scales_
+    >>> censure.scales
     array([2, 4, 2, 3, 4, 2, 2, 3, 4, 6, 3, 2, 3, 4, 2])
 
     """
@@ -197,6 +204,9 @@ class CenSurE(FeatureDetector):
         self.non_max_threshold = non_max_threshold
         self.line_threshold = line_threshold
 
+        self.keypoints = None
+        self.scales = None
+
     def detect(self, image):
         """Detect CenSurE keypoints along with the corresponding scale.
 
@@ -204,13 +214,6 @@ class CenSurE(FeatureDetector):
         ----------
         image : 2D ndarray
             Input image.
-
-        Attributes
-        ----------
-        keypoints : (N, 2) array
-            Keypoint coordinates as ``(row, col)``.
-        scales : (N, ) array
-            Corresponding scales.
 
         """
 
@@ -258,8 +261,8 @@ class CenSurE(FeatureDetector):
         scales = scales + self.min_scale + 1
 
         if self.mode == 'dob':
-            self.keypoints_ = keypoints
-            self.scales_ = scales
+            self.keypoints = keypoints
+            self.scales = scales
             return
 
         cumulative_mask = np.zeros(keypoints.shape[0], dtype=np.bool)
@@ -279,5 +282,5 @@ class CenSurE(FeatureDetector):
                     _mask_border_keypoints(image.shape, keypoints, c)
                     & (scales == i))
 
-        self.keypoints_ = keypoints[cumulative_mask]
-        self.scales_ = scales[cumulative_mask]
+        self.keypoints = keypoints[cumulative_mask]
+        self.scales = scales[cumulative_mask]

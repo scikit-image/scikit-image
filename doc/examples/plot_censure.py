@@ -30,14 +30,14 @@ detector.detect(img1)
 
 ax[0].imshow(img1)
 ax[0].axis('off')
-ax[0].scatter(detector.keypoints_[:, 1], detector.keypoints_[:, 0],
-              2 ** detector.scales_, facecolors='none', edgecolors='r')
+ax[0].scatter(detector.keypoints[:, 1], detector.keypoints[:, 0],
+              2 ** detector.scales, facecolors='none', edgecolors='r')
 
 detector.detect(img2)
 
 ax[1].imshow(img2)
 ax[1].axis('off')
-ax[1].scatter(detector.keypoints_[:, 1], detector.keypoints_[:, 0],
-              2 ** detector.scales_, facecolors='none', edgecolors='r')
+ax[1].scatter(detector.keypoints[:, 1], detector.keypoints[:, 0],
+              2 ** detector.scales, facecolors='none', edgecolors='r')
 
 plt.show()

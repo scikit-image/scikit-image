@@ -29,16 +29,16 @@ def test_keypoints_orb_desired_no_of_keypoints():
                               0.39154173,  0.39084861,  0.39063076,
                               0.37602487])
 
-    assert_almost_equal(exp_rows, detector_extractor.keypoints_[:, 0])
-    assert_almost_equal(exp_cols, detector_extractor.keypoints_[:, 1])
-    assert_almost_equal(exp_scales, detector_extractor.scales_)
-    assert_almost_equal(exp_response, detector_extractor.responses_)
+    assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
+    assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
+    assert_almost_equal(exp_scales, detector_extractor.scales)
+    assert_almost_equal(exp_response, detector_extractor.responses)
     assert_almost_equal(exp_orientations,
-                        np.rad2deg(detector_extractor.orientations_), 5)
+                        np.rad2deg(detector_extractor.orientations), 5)
 
     detector_extractor.detect_and_extract(img)
-    assert_almost_equal(exp_rows, detector_extractor.keypoints_[:, 0])
-    assert_almost_equal(exp_cols, detector_extractor.keypoints_[:, 1])
+    assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
+    assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
 def test_keypoints_orb_less_than_desired_no_of_keypoints():
@@ -62,16 +62,16 @@ def test_keypoints_orb_less_than_desired_no_of_keypoints():
                               0.39063076,  0.96770745,  0.04935129,
                               0.21431068,  0.15826555,  0.42403573])
 
-    assert_almost_equal(exp_rows, detector_extractor.keypoints_[:, 0])
-    assert_almost_equal(exp_cols, detector_extractor.keypoints_[:, 1])
-    assert_almost_equal(exp_scales, detector_extractor.scales_)
-    assert_almost_equal(exp_response, detector_extractor.responses_)
+    assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
+    assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
+    assert_almost_equal(exp_scales, detector_extractor.scales)
+    assert_almost_equal(exp_response, detector_extractor.responses)
     assert_almost_equal(exp_orientations,
-                        np.rad2deg(detector_extractor.orientations_), 5)
+                        np.rad2deg(detector_extractor.orientations), 5)
 
     detector_extractor.detect_and_extract(img)
-    assert_almost_equal(exp_rows, detector_extractor.keypoints_[:, 0])
-    assert_almost_equal(exp_cols, detector_extractor.keypoints_[:, 1])
+    assert_almost_equal(exp_rows, detector_extractor.keypoints[:, 0])
+    assert_almost_equal(exp_cols, detector_extractor.keypoints[:, 1])
 
 
 def test_descriptor_orb():
@@ -99,15 +99,15 @@ def test_descriptor_orb():
                                 [ True, False,  True, False, False, False,  True,  True, False, False]], dtype=bool)
 
     detector_extractor.detect(img)
-    detector_extractor.extract(img, detector_extractor.keypoints_,
-                               detector_extractor.scales_,
-                               detector_extractor.orientations_)
+    detector_extractor.extract(img, detector_extractor.keypoints,
+                               detector_extractor.scales,
+                               detector_extractor.orientations)
     assert_array_equal(exp_descriptors,
-                       detector_extractor.descriptors_[100:120, 10:20])
+                       detector_extractor.descriptors[100:120, 10:20])
 
     detector_extractor.detect_and_extract(img)
     assert_array_equal(exp_descriptors,
-                       detector_extractor.descriptors_[100:120, 10:20])
+                       detector_extractor.descriptors[100:120, 10:20])
 
 
 if __name__ == '__main__':

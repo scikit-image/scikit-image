@@ -40,8 +40,8 @@ def test_keypoints_censure_moon_image_dob():
                                    [467, 260]])
     expected_scales = np.array([3, 4, 4, 2, 2, 3, 2, 2, 2])
 
-    assert_array_equal(expected_keypoints, detector.keypoints_)
-    assert_array_equal(expected_scales, detector.scales_)
+    assert_array_equal(expected_keypoints, detector.keypoints)
+    assert_array_equal(expected_scales, detector.scales)
 
 
 def test_keypoints_censure_moon_image_octagon():
@@ -58,8 +58,8 @@ def test_keypoints_censure_moon_image_octagon():
 
     expected_scales = np.array([3, 4, 2, 2, 2])
 
-    assert_array_equal(expected_keypoints, detector.keypoints_)
-    assert_array_equal(expected_scales, detector.scales_)
+    assert_array_equal(expected_keypoints, detector.keypoints)
+    assert_array_equal(expected_scales, detector.scales)
 
 
 def test_keypoints_censure_moon_image_star():
@@ -80,8 +80,8 @@ def test_keypoints_censure_moon_image_star():
 
     expected_scales = np.array([3, 3, 6, 2, 3, 2, 3, 5, 2, 2])
 
-    assert_array_equal(expected_keypoints, detector.keypoints_)
-    assert_array_equal(expected_scales, detector.scales_)
+    assert_array_equal(expected_keypoints, detector.keypoints)
+    assert_array_equal(expected_scales, detector.scales)
 
 
 if __name__ == '__main__':

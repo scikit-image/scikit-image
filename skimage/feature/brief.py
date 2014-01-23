@@ -44,6 +44,18 @@ class BRIEF(DescriptorExtractor):
         to alleviate noise sensitivity, which is strongly recommended to obtain
         discriminative and good descriptors.
 
+    Attributes
+    ----------
+    descriptors : (Q, `descriptor_size`) array of dtype bool
+        2D ndarray of binary descriptors of size `descriptor_size` for Q
+        keypoints after filtering out border keypoints with value at an
+        index ``(i, j)`` either being ``True`` or ``False`` representing
+        the outcome of the intensity comparison for i-th keypoint on j-th
+        decision pixel-pair. It is ``Q == np.sum(mask)``.
+    mask : (N, ) array of dtype bool
+        Mask indicating whether a keypoint has been filtered out
+        (``False``) or is described in the `descriptors` array (``True``).
+
     Examples
     --------
     >>> from skimage.feature import (corner_harris, corner_peaks, BRIEF,
@@ -76,9 +88,9 @@ class BRIEF(DescriptorExtractor):
     >>> keypoints2 = corner_peaks(corner_harris(square2), min_distance=1)
     >>> extractor = BRIEF(patch_size=5)
     >>> extractor.extract(square1, keypoints1)
-    >>> descriptors1 = extractor.descriptors_
+    >>> descriptors1 = extractor.descriptors
     >>> extractor.extract(square2, keypoints2)
-    >>> descriptors2 = extractor.descriptors_
+    >>> descriptors2 = extractor.descriptors
     >>> matches = match_descriptors(descriptors1, descriptors2)
     >>> matches
     array([[0, 0],
@@ -111,6 +123,9 @@ class BRIEF(DescriptorExtractor):
         self.sigma = sigma
         self.sample_seed = sample_seed
 
+        self.descriptors = None
+        self.mask = None
+
     def extract(self, image, keypoints):
         """Extract BRIEF binary descriptors for given keypoints in image.
 
@@ -120,18 +135,6 @@ class BRIEF(DescriptorExtractor):
             Input image.
         keypoints : (N, 2) array
             Keypoint coordinates as ``(row, col)``.
-
-        Attributes
-        ----------
-        descriptors_ : (Q, `descriptor_size`) array of dtype bool
-            2D ndarray of binary descriptors of size `descriptor_size` for Q
-            keypoints after filtering out border keypoints with value at an
-            index ``(i, j)`` either being ``True`` or ``False`` representing
-            the outcome of the intensity comparison for i-th keypoint on j-th
-            decision pixel-pair. It is ``Q == np.sum(mask)``.
-        mask_ : (N, ) array of dtype bool
-            Mask indicating whether a keypoint has been filtered out
-            (``False``) or is described in the `descriptors` array (``True``).
 
         """
 
@@ -165,14 +168,14 @@ class BRIEF(DescriptorExtractor):
 
         # Removing keypoints that are within (patch_size / 2) distance from the
         # image border
-        self.mask_ = _mask_border_keypoints(image.shape, keypoints,
+        self.mask = _mask_border_keypoints(image.shape, keypoints,
                                             patch_size // 2)
 
-        keypoints = np.array(keypoints[self.mask_, :], dtype=np.intp,
+        keypoints = np.array(keypoints[self.mask, :], dtype=np.intp,
                              order='C', copy=False)
 
-        self.descriptors_ = np.zeros((keypoints.shape[0], desc_size),
+        self.descriptors = np.zeros((keypoints.shape[0], desc_size),
                                      dtype=bool, order='C')
 
-        _brief_loop(image, self.descriptors_.view(np.uint8), keypoints,
+        _brief_loop(image, self.descriptors.view(np.uint8), keypoints,
                     pos1, pos2)
