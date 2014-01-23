@@ -29,16 +29,16 @@ img3 = tf.warp(img1, tform)
 descriptor_extractor = ORB(n_keypoints=200)
 
 descriptor_extractor.detect_and_extract(img1)
-keypoints1 = descriptor_extractor.keypoints_
-descriptors1 = descriptor_extractor.descriptors_
+keypoints1 = descriptor_extractor.keypoints
+descriptors1 = descriptor_extractor.descriptors
 
 descriptor_extractor.detect_and_extract(img2)
-keypoints2 = descriptor_extractor.keypoints_
-descriptors2 = descriptor_extractor.descriptors_
+keypoints2 = descriptor_extractor.keypoints
+descriptors2 = descriptor_extractor.descriptors
 
 descriptor_extractor.detect_and_extract(img3)
-keypoints3 = descriptor_extractor.keypoints_
-descriptors3 = descriptor_extractor.descriptors_
+keypoints3 = descriptor_extractor.keypoints
+descriptors3 = descriptor_extractor.descriptors
 
 matches12 = match_descriptors(descriptors1, descriptors2, cross_check=True)
 matches13 = match_descriptors(descriptors1, descriptors3, cross_check=True)
