@@ -6,7 +6,7 @@
 cimport numpy as cnp
 
 
-def _brief_loop(double[:, ::1] image, char[:, ::1] descriptors,
+def _brief_loop(double[:, ::1] image, unsigned char[:, ::1] descriptors,
                 Py_ssize_t[:, ::1] keypoints,
                 int[:, ::1] pos0, int[:, ::1] pos1):
 
