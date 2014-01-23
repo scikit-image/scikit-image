@@ -1,3 +1,11 @@
+skimage (0.9.3-4) unstable; urgency=low
+
+  * debian/rules
+    don't optimize pngs in post build processors some derivatives use
+    palette changes break tests and documented examples
+
+ -- Julian Taylor <jtaylor.debian@googlemail.com>  Thu, 23 Jan 2014 20:48:51 +0100
+
 skimage (0.9.3-3) unstable; urgency=low
 
   * debian/control
