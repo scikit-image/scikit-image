@@ -3,6 +3,7 @@ import warnings
 import numpy as np
 import scipy.ndimage as ndi
 from skimage.util.dtype import dtype_range
+from skimage import measure
 
 from .plotplugin import PlotPlugin
 from ..canvastools import ThickLineTool
@@ -70,7 +71,7 @@ class LineProfile(PlotPlugin):
                                        on_change=self.line_changed)
         self.line_tool.end_points = np.transpose([x, y])
 
-        scan_data = profile_line(image, self.line_tool.end_points)
+        scan_data = measure.profile_line(image, self.line_tool.end_points)
 
         self.reset_axes(scan_data)
 
@@ -104,8 +105,9 @@ class LineProfile(PlotPlugin):
     def line_changed(self, end_points):
         x, y = np.transpose(end_points)
         self.line_tool.end_points = end_points
-        scan = profile_line(self.image_viewer.original_image, end_points,
-                            linewidth=self.line_tool.linewidth)
+        scan = measure.profile_line(self.image_viewer.original_image,
+                                    end_points,
+                                    linewidth=self.line_tool.linewidth)
 
         if scan.shape[1] != len(self.profile):
             self.reset_axes(scan)
@@ -143,67 +145,3 @@ def _calc_vert(img, x1, x2, y1, y2, linewidth):
 
     return pixels.mean(axis=1)[:, np.newaxis]
 
-
-def profile_line(img, end_points, linewidth=1):
-    """Return the intensity profile of an image measured along a scan line.
-
-    Parameters
-    ----------
-    img : 2d or 3d array
-        The image, in grayscale (2d) or RGB (3d) format.
-    end_points: (2, 2) list
-        End points ((x1, y1), (x2, y2)) of scan line.
-    linewidth: int
-        Width of the scan, perpendicular to the line
-
-    Returns
-    -------
-    return_value : array
-        The intensity profile along the scan line. The length of the profile
-        is the ceil of the computed length of the scan line.
-    """
-    point1, point2 = end_points
-    x1, y1 = point1 = np.asarray(point1, dtype=float)
-    x2, y2 = point2 = np.asarray(point2, dtype=float)
-    dx, dy = point2 - point1
-    channels = 1
-    if img.ndim == 3:
-        channels = 3
-
-    # Quick calculation if perfectly vertical; shortcuts div0 error
-    if x1 == x2:
-        if channels == 1:
-            img = img[:, :, np.newaxis]
-
-        img = np.rollaxis(img, -1)
-        intensities = np.hstack([_calc_vert(im, x1, x2, y1, y2, linewidth)
-                                 for im in img])
-        return intensities
-
-    theta = np.arctan2(dy, dx)
-    a = dy / dx
-    b = y1 - a * x1
-    length = np.hypot(dx, dy)
-
-    line_x = np.linspace(x2, x1, np.ceil(length))
-    line_y = line_x * a + b
-    y_width = abs(linewidth * np.cos(theta) / 2)
-    perp_ys = np.array([np.linspace(yi - y_width,
-                                    yi + y_width, linewidth) for yi in line_y])
-    perp_xs = - a * perp_ys + (line_x + a * line_y)[:, np.newaxis]
-
-    perp_lines = np.array([perp_ys, perp_xs])
-    if img.ndim == 3:
-        pixels = [ndi.map_coordinates(img[..., i], perp_lines)
-                  for i in range(3)]
-        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
-    else:
-        pixels = ndi.map_coordinates(img, perp_lines)
-        pixels = pixels[..., np.newaxis]
-
-    intensities = pixels.mean(axis=1)
-
-    if intensities.ndim == 1:
-        return intensities[..., np.newaxis]
-    else:
-        return intensities
