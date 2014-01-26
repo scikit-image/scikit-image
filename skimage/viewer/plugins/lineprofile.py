@@ -1,7 +1,6 @@
 import warnings
 
 import numpy as np
-import scipy.ndimage as ndi
 from skimage.util.dtype import dtype_range
 from skimage import measure
 
@@ -71,7 +70,7 @@ class LineProfile(PlotPlugin):
                                        on_change=self.line_changed)
         self.line_tool.end_points = np.transpose([x, y])
 
-        scan_data = measure.profile_line(image, self.line_tool.end_points)
+        scan_data = measure.profile_line(image, *self.line_tool.end_points)
 
         self.reset_axes(scan_data)
 
@@ -106,7 +105,7 @@ class LineProfile(PlotPlugin):
         x, y = np.transpose(end_points)
         self.line_tool.end_points = end_points
         scan = measure.profile_line(self.image_viewer.original_image,
-                                    end_points,
+                                    *end_points,
                                     linewidth=self.line_tool.linewidth)
 
         if scan.shape[1] != len(self.profile):
