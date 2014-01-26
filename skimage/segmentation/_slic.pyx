@@ -16,8 +16,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                  float step,
                  Py_ssize_t max_iter,
                  double[::1] spacing,
-                 bint slic_zero
-                 ):
+                 bint slic_zero):
     """Helper function for SLIC segmentation.
 
     Parameters
@@ -99,8 +98,8 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
     cdef double[::1] max_dist_color = np.ones(n_segments, dtype=np.double)
     cdef double dist_color
 
-    # The reference implementation calls this invxywt
-    cdef double zyx_wt = float(1) / (step ** 2)
+    # The reference implementation (Achanta et al.) calls this invxywt
+    cdef double spatial_weight = float(1) / (step ** 2)
 
     for i in range(max_iter):
         change = 0
@@ -127,7 +126,7 @@ def _slic_cython(double[:, :, :, ::1] image_zyx,
                 for y in range(y_min, y_max):
                     dy = (sy * (cy - y)) ** 2
                     for x in range(x_min, x_max):
-                        dist_center = (dz + dy + (sx * (cx - x)) ** 2) * zyx_wt
+                        dist_center = (dz + dy + (sx * (cx - x)) ** 2) * spatial_weight
                         dist_color = 0
                         for c in range(3, n_features):
                             dist_color += (image_zyx[z, y, x, c - 3]
