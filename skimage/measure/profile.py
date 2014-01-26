@@ -13,15 +13,17 @@ def _calc_vert(img, x1, x2, y1, y2, linewidth):
     return pixels.mean(axis=1)[:, np.newaxis]
 
 
-def profile_line(img, end_points, linewidth=1, mode='constant', cval=0.0):
+def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
     img : 2d or 3d array
         The image, in grayscale (2d) or RGB (3d) format.
-    end_points : (2, 2) list
-        End points ((x1, y1), (x2, y2)) of scan line.
+    src : 2-tuple of numeric scalar (float or int)
+        The start point of the scan line.
+    dst : 2-tuple of numeric scalar (float or int)
+        The end point of the scan line.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
     mode : string, one of {'constant', 'nearest', 'reflect', 'wrap'}, optional
@@ -45,16 +47,15 @@ def profile_line(img, end_points, linewidth=1, mode='constant', cval=0.0):
            [1, 1, 1, 2, 2, 2],
            [1, 1, 1, 2, 2, 2],
            [0, 0, 0, 0, 0, 0]])
-    >>> profile_line(img, ((1, 2), (5, 2)))
+    >>> profile_line(img, (1, 2), (5, 2))
     array([[ 1.],
            [ 1.],
            [ 2.],
            [ 2.]])
     """
-    point1, point2 = end_points
-    x1, y1 = point1 = np.asarray(point1, dtype=float)
-    x2, y2 = point2 = np.asarray(point2, dtype=float)
-    dx, dy = point2 - point1
+    x1, y1 = src = np.asarray(src, dtype=float)
+    x2, y2 = dst = np.asarray(dst, dtype=float)
+    dx, dy = dst - src
     channels = 1
     if img.ndim == 3:
         channels = 3
