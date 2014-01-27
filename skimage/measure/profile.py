@@ -1,15 +1,10 @@
 import numpy as np
 import scipy.ndimage as ndi
 
-def _calc_vert(img, x1, x2, y1, y2, linewidth):
-    # Quick calculation if perfectly horizontal
-    pixels = img[min(y1, y2): max(y1, y2) + 1,
-                 x1 - linewidth / 2: x1 + linewidth / 2 + 1]
-
-    # Reverse index if necessary
-    if y2 > y1:
-        pixels = pixels[::-1, :]
-
+def _calc_vert(img, col, src_row, dst_row, linewidth):
+    # Quick calculation if perfectly vertical
+    pixels = img[src_row:dst_row:np.sign(dst_row - src_row),
+                 col - linewidth / 2: col + linewidth / 2 + 1]
     return pixels.mean(axis=1)[:, np.newaxis]
 
 
@@ -66,7 +61,7 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
             img = img[:, :, np.newaxis]
 
         img = np.rollaxis(img, -1)
-        intensities = np.hstack([_calc_vert(im, src_col, dst_col, 
+        intensities = np.hstack([_calc_vert(im, src_col, 
                                             src_row, dst_row, linewidth)
                                  for im in img])
         return intensities
