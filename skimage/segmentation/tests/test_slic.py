@@ -147,6 +147,30 @@ def test_enforce_connectivity():
     assert_equal(segments_connected, result_connected)
     assert_equal(segments_disconnected, result_disconnected)
 
+
+def test_slic_zero():
+    # Same as test_color_2d but with slic_zero=True
+    rnd = np.random.RandomState(0)
+    img = np.zeros((20, 21, 3))
+    img[:10, :10, 0] = 1
+    img[10:, :10, 1] = 1
+    img[10:, 10:, 2] = 1
+    img += 0.01 * rnd.normal(size=img.shape)
+    img[img > 1] = 1
+    img[img < 0] = 0
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        seg = slic(img, n_segments=4, sigma=0, slic_zero=True)
+
+    # we expect 4 segments
+    assert_equal(len(np.unique(seg)), 4)
+    assert_equal(seg.shape, img.shape[:-1])
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
+
+
 if __name__ == '__main__':
     from numpy import testing
 

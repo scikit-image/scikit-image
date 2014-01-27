@@ -12,7 +12,8 @@ from skimage.color import rgb2lab
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
          spacing=None, multichannel=True, convert2lab=True, ratio=None,
-         enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3):
+         enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3,
+         slic_zero=False):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -25,7 +26,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     compactness : float, optional
         Balances color-space proximity and image-space proximity. Higher
         values give more weight to image-space. As `compactness` tends to
-        infinity, superpixel shapes become square/cubic.
+        infinity, superpixel shapes become square/cubic. In SLICO mode, this
+        is the initial compactness.
     max_iter : int, optional
         Maximum number of iterations of k-means.
     sigma : float or (3,) array-like of floats, optional
@@ -56,6 +58,9 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     max_size_factor: float, optional
         Proportion of the maximum connected segment size. A value of 3 works
         in most of the cases.
+    slic_zero: bool, optional
+        Run SLIC-zero, the zero-parameter mode of SLIC
+
     Returns
     -------
     labels : 2D or 3D array
@@ -165,16 +170,18 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     segments = np.concatenate([segments_z[..., np.newaxis],
                                segments_y[..., np.newaxis],
                                segments_x[..., np.newaxis],
-                               segments_color
-                              ], axis=-1).reshape(-1, 3 + image.shape[3])
+                               segments_color],
+                              axis=-1).reshape(-1, 3 + image.shape[3])
     segments = np.ascontiguousarray(segments)
 
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    ratio = float(max((step_z, step_y, step_x))) / compactness
+    step = float(max((step_z, step_y, step_x)))
+    ratio = 1.0 / compactness
+
     image = np.ascontiguousarray(image * ratio)
 
-    labels = _slic_cython(image, segments, max_iter, spacing)
+    labels = _slic_cython(image, segments, step, max_iter, spacing, slic_zero)
 
     if enforce_connectivity:
         segment_size = depth * height * width / n_segments
