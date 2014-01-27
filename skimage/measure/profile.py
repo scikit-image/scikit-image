@@ -14,7 +14,7 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
     Parameters
     ----------
     img : 2d or 3d array
-        The image, in grayscale (2d) or RGB (3d) format.
+        The image, in grayscale (2d) or multichannel (2d + c) format.
     src : 2-tuple of numeric scalar (float or int)
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
@@ -73,8 +73,8 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
 
     perp_lines = np.array([perp_ys, perp_xs])
     if img.ndim == 3:
-        pixels = [ndi.map_coordinates(img[..., i], perp_lines,
-                                      mode=mode, cval=cval) for i in range(3)]
+        pixels = [ndi.map_coordinates(img[..., i], perp_lines, mode=mode,
+                                      cval=cval) for i in range(img.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
         pixels = ndi.map_coordinates(img, perp_lines, mode=mode, cval=cval)
