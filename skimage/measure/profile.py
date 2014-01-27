@@ -47,35 +47,36 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
            [1, 1, 1, 2, 2, 2],
            [1, 1, 1, 2, 2, 2],
            [0, 0, 0, 0, 0, 0]])
-    >>> profile_line(img, (1, 2), (5, 2))
+    >>> profile_line(img, (2, 1), (2, 5))
     array([[ 1.],
            [ 1.],
            [ 2.],
            [ 2.]])
     """
-    x1, y1 = src = np.asarray(src, dtype=float)
-    x2, y2 = dst = np.asarray(dst, dtype=float)
-    dx, dy = dst - src
+    src_row, src_col = src = np.asarray(src, dtype=float)
+    dst_row, dst_col = dst = np.asarray(dst, dtype=float)
+    d_col, d_row = dst - src
     channels = 1
     if img.ndim == 3:
         channels = 3
 
     # Quick calculation if perfectly vertical; shortcuts div0 error
-    if x1 == x2:
+    if src_col == dst_col:
         if channels == 1:
             img = img[:, :, np.newaxis]
 
         img = np.rollaxis(img, -1)
-        intensities = np.hstack([_calc_vert(im, x1, x2, y1, y2, linewidth)
+        intensities = np.hstack([_calc_vert(im, src_col, dst_col, 
+                                            src_row, dst_row, linewidth)
                                  for im in img])
         return intensities
 
-    theta = np.arctan2(dy, dx)
-    a = dy / dx
-    b = y1 - a * x1
-    length = np.hypot(dx, dy)
+    theta = np.arctan2(d_row, d_col)
+    a = d_row / d_col
+    b = src_row - a * src_col
+    length = np.hypot(d_row, d_col)
 
-    line_x = np.linspace(x1, x2, np.ceil(length))
+    line_x = np.linspace(src_col, dst_col, np.ceil(length))
     line_y = line_x * a + b
     y_width = abs(linewidth * np.cos(theta) / 2)
     perp_ys = np.array([np.linspace(yi - y_width,
