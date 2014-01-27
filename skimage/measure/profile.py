@@ -5,7 +5,7 @@ def _calc_vert(img, col, src_row, dst_row, linewidth):
     # Quick calculation if perfectly vertical
     pixels = img[src_row:dst_row:np.sign(dst_row - src_row),
                  col - linewidth / 2: col + linewidth / 2 + 1]
-    return pixels.mean(axis=1)[:, np.newaxis]
+    return pixels.mean(axis=1)[..., np.newaxis]
 
 
 def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
@@ -43,28 +43,21 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
            [1, 1, 1, 2, 2, 2],
            [0, 0, 0, 0, 0, 0]])
     >>> profile_line(img, (2, 1), (2, 5))
-    array([[ 1.],
-           [ 1.],
-           [ 2.],
-           [ 2.]])
+    array([ 1., 1., 2., 2.])
     """
     src_row, src_col = src = np.asarray(src, dtype=float)
     dst_row, dst_col = dst = np.asarray(dst, dtype=float)
-    d_col, d_row = dst - src
-    channels = 1
-    if img.ndim == 3:
-        channels = 3
+    d_row, d_col = dst - src
 
     # Quick calculation if perfectly vertical; shortcuts div0 error
     if src_col == dst_col:
-        if channels == 1:
+        if img.ndim == 2:
             img = img[:, :, np.newaxis]
-
         img = np.rollaxis(img, -1)
         intensities = np.hstack([_calc_vert(im, src_col, 
                                             src_row, dst_row, linewidth)
                                  for im in img])
-        return intensities
+        return np.squeeze(intensities)
 
     theta = np.arctan2(d_row, d_col)
     a = d_row / d_col
@@ -89,8 +82,5 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
 
     intensities = pixels.mean(axis=1)
 
-    if intensities.ndim == 1:
-        return intensities[..., np.newaxis]
-    else:
-        return intensities
+    return intensities
 
