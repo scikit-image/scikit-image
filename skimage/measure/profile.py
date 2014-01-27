@@ -43,7 +43,7 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
            [1, 1, 1, 2, 2, 2],
            [0, 0, 0, 0, 0, 0]])
     >>> profile_line(img, (2, 1), (2, 5))
-    array([ 1., 1., 2., 2.])
+    array([ 1.,  1.,  2.,  2.])
     """
     src_row, src_col = src = np.asarray(src, dtype=float)
     dst_row, dst_col = dst = np.asarray(dst, dtype=float)
@@ -78,7 +78,6 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
         pixels = ndi.map_coordinates(img, perp_lines, mode=mode, cval=cval)
-        pixels = pixels[..., np.newaxis]
 
     intensities = pixels.mean(axis=1)
 
