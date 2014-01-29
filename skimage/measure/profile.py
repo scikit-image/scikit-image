@@ -1,12 +1,6 @@
 import numpy as np
 import scipy.ndimage as ndi
 
-def _calc_vert(img, col, src_row, dst_row, linewidth):
-    # Quick calculation if perfectly vertical
-    pixels = img[src_row:dst_row:np.sign(dst_row - src_row),
-                 col - linewidth / 2: col + linewidth / 2 + 1]
-    return pixels.mean(axis=1)[..., np.newaxis]
-
 
 def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
     """Return the intensity profile of an image measured along a scan line.
@@ -49,29 +43,32 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
     dst_row, dst_col = dst = np.asarray(dst, dtype=float)
     d_row, d_col = dst - src
 
-    # Quick calculation if perfectly vertical; shortcuts div0 error
-    if src_col == dst_col:
-        if img.ndim == 2:
-            img = img[:, :, np.newaxis]
-        img = np.rollaxis(img, -1)
-        intensities = np.hstack([_calc_vert(im, src_col, 
-                                            src_row, dst_row, linewidth)
-                                 for im in img])
-        return np.squeeze(intensities)
+    if d_col == 0:
+        if d_row > 0:
+            theta = -np.pi / 2
+        else:
+            theta = np.pi / 2
+    else:
+        theta = np.arctan2(-d_row, d_col)
 
-    theta = np.arctan2(d_row, d_col)
-    a = d_row / d_col
-    b = src_row - a * src_col
-    length = np.hypot(d_row, d_col)
+    length = np.ceil(np.hypot(d_row, d_col))
+    line_col = np.linspace(src_col, dst_col, length)
+    line_row = np.linspace(src_row, dst_row, length)
 
-    line_x = np.linspace(src_col, dst_col, np.ceil(length))
-    line_y = line_x * a + b
-    y_width = abs(linewidth * np.cos(theta) / 2)
-    perp_ys = np.array([np.linspace(yi - y_width,
-                                    yi + y_width, linewidth) for yi in line_y])
-    perp_xs = - a * perp_ys + (line_x + a * line_y)[:, np.newaxis]
-
-    perp_lines = np.array([perp_ys, perp_xs])
+    # this if clause is necessary to keep the line centered on the true
+    # source and destination points. Otherwise, the computed line has
+    # an offset of `linewidth/2`
+    if linewidth <= 1:
+        perp_lines = np.array([line_row[:, np.newaxis],
+                               line_col[:, np.newaxis]])
+    else:
+        col_width = linewidth * np.sin(theta) / 2
+        row_width = linewidth * np.cos(theta) / 2
+        perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
+                                          linewidth) for row_i in line_row])
+        perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
+                                          linewidth) for col_i in line_col])
+        perp_lines = np.array([perp_rows, perp_cols])
     if img.ndim == 3:
         pixels = [ndi.map_coordinates(img[..., i], perp_lines, mode=mode,
                                       cval=cval) for i in range(img.shape[2])]
