@@ -40,27 +40,37 @@ def profile_line(img, src, dst, linewidth=1,
            [1, 1, 1, 2, 2, 2],
            [1, 1, 1, 2, 2, 2],
            [0, 0, 0, 0, 0, 0]])
-    >>> profile_line(img, (2, 1), (2, 5))
+    >>> profile_line(img, (2, 1), (2, 4))
     array([ 1.,  1.,  2.,  2.])
+
+    Notes
+    -----
+    The destination point is included in the profile, in contrast to
+    standard numpy indexing.
     """
     src_row, src_col = src = np.asarray(src, dtype=float)
     dst_row, dst_col = dst = np.asarray(dst, dtype=float)
     d_row, d_col = dst - src
     theta = np.arctan2(d_row, d_col)
 
-    length = np.ceil(np.hypot(d_row, d_col))
+    length = np.ceil(np.hypot(d_row, d_col) + 1)
+    # we add one above because we include the last point in the profile
+    # (in contrast to standard numpy indexing)
     line_col = np.linspace(src_col, dst_col, length)
     line_row = np.linspace(src_row, dst_row, length)
 
     # this if clause is necessary to keep the line centered on the true
     # source and destination points. Otherwise, the computed line has
-    # an offset of `linewidth/2`
+    # an offset of `linewidth / 2`
     if linewidth <= 1:
         perp_lines = np.array([line_row[:, np.newaxis],
                                line_col[:, np.newaxis]])
     else:
-        col_width = linewidth * np.sin(-theta) / 2
-        row_width = linewidth * np.cos(theta) / 2
+        # we subtract 1 from linewidth to change from pixel-counting
+        # (make this line 3 pixels wide) to point distances (the
+        # distance between pixel centers)
+        col_width = (linewidth - 1) * np.sin(-theta) / 2
+        row_width = (linewidth - 1) * np.cos(theta) / 2
         perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
                                           linewidth) for row_i in line_row])
         perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
