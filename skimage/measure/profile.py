@@ -1,8 +1,9 @@
 import numpy as np
-import scipy.ndimage as ndi
+import scipy.ndimage as nd
 
 
-def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
+def profile_line(img, src, dst, linewidth=1,
+                 order=0, mode='constant', cval=0.0):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
@@ -15,6 +16,9 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
         The end point of the scan line.
     linewidth : int, optional
         Width of the scan, perpendicular to the line
+    order : int in {0, 1, 2, 3, 4, 5}, optional
+        The order of the spline interpolation to compute image values at
+        non-integer coordinates. 0 means nearest-neighbor interpolation.
     mode : string, one of {'constant', 'nearest', 'reflect', 'wrap'}, optional
         How to compute any values falling outside of the image.
     cval : float, optional
@@ -63,11 +67,13 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
                                           linewidth) for col_i in line_col])
         perp_lines = np.array([perp_rows, perp_cols])
     if img.ndim == 3:
-        pixels = [ndi.map_coordinates(img[..., i], perp_lines, mode=mode,
-                                      cval=cval) for i in range(img.shape[2])]
+        pixels = [nd.map_coordinates(img[..., i], perp_lines,
+                                     order=order, mode=mode, cval=cval)
+                  for i in range(img.shape[2])]
         pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
     else:
-        pixels = ndi.map_coordinates(img, perp_lines, mode=mode, cval=cval)
+        pixels = nd.map_coordinates(img, perp_lines,
+                                    order=order, mode=mode, cval=cval)
 
     intensities = pixels.mean(axis=1)
 
