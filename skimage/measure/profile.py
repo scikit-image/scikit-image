@@ -42,14 +42,7 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
     src_row, src_col = src = np.asarray(src, dtype=float)
     dst_row, dst_col = dst = np.asarray(dst, dtype=float)
     d_row, d_col = dst - src
-
-    if d_col == 0:
-        if d_row > 0:
-            theta = -np.pi / 2
-        else:
-            theta = np.pi / 2
-    else:
-        theta = np.arctan2(-d_row, d_col)
+    theta = np.arctan2(d_row, d_col)
 
     length = np.ceil(np.hypot(d_row, d_col))
     line_col = np.linspace(src_col, dst_col, length)
@@ -62,7 +55,7 @@ def profile_line(img, src, dst, linewidth=1, mode='constant', cval=0.0):
         perp_lines = np.array([line_row[:, np.newaxis],
                                line_col[:, np.newaxis]])
     else:
-        col_width = linewidth * np.sin(theta) / 2
+        col_width = linewidth * np.sin(-theta) / 2
         row_width = linewidth * np.cos(theta) / 2
         perp_rows = np.array([np.linspace(row_i - row_width, row_i + row_width,
                                           linewidth) for row_i in line_row])
