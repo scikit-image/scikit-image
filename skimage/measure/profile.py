@@ -3,7 +3,7 @@ import scipy.ndimage as nd
 
 
 def profile_line(img, src, dst, linewidth=1,
-                 order=0, mode='constant', cval=0.0):
+                 order=1, mode='constant', cval=0.0):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
