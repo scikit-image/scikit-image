@@ -70,7 +70,10 @@ class LineProfile(PlotPlugin):
                                        on_change=self.line_changed)
         self.line_tool.end_points = np.transpose([x, y])
 
-        scan_data = measure.profile_line(image, *self.line_tool.end_points)
+        scan_data = measure.profile_line(image, 
+                                         *self.line_tool.end_points[:, ::-1])
+        if scan_data.ndim == 1:
+            scan_data = scan_data[:, np.newaxis]
 
         self.reset_axes(scan_data)
 
@@ -105,8 +108,10 @@ class LineProfile(PlotPlugin):
         x, y = np.transpose(end_points)
         self.line_tool.end_points = end_points
         scan = measure.profile_line(self.image_viewer.original_image,
-                                    *end_points,
+                                    *end_points[:, ::-1],
                                     linewidth=self.line_tool.linewidth)
+        if scan.ndim == 1:
+            scan = scan[:, np.newaxis]
 
         if scan.shape[1] != len(self.profile):
             self.reset_axes(scan)
@@ -131,16 +136,4 @@ class LineProfile(PlotPlugin):
             self.profile = self.ax.plot(scan_data[:, 0], 'r-',
                                         scan_data[:, 1], 'g-',
                                         scan_data[:, 2], 'b-')
-
-
-def _calc_vert(img, x1, x2, y1, y2, linewidth):
-    # Quick calculation if perfectly horizontal
-    pixels = img[min(y1, y2): max(y1, y2) + 1,
-                 x1 - linewidth / 2: x1 + linewidth / 2 + 1]
-
-    # Reverse index if necessary
-    if y2 > y1:
-        pixels = pixels[::-1, :]
-
-    return pixels.mean(axis=1)[:, np.newaxis]
 
