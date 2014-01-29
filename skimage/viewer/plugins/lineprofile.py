@@ -2,6 +2,7 @@ import warnings
 
 import numpy as np
 from skimage.util.dtype import dtype_range
+from skimage import draw
 from skimage import measure
 
 from .plotplugin import PlotPlugin
@@ -72,6 +73,7 @@ class LineProfile(PlotPlugin):
 
         scan_data = measure.profile_line(image, 
                                          *self.line_tool.end_points[:, ::-1])
+        self.scan_data = scan_data
         if scan_data.ndim == 1:
             scan_data = scan_data[:, np.newaxis]
 
@@ -110,6 +112,7 @@ class LineProfile(PlotPlugin):
         scan = measure.profile_line(self.image_viewer.original_image,
                                     *end_points[:, ::-1],
                                     linewidth=self.line_tool.linewidth)
+        self.scan_data = scan
         if scan.ndim == 1:
             scan = scan[:, np.newaxis]
 
@@ -136,4 +139,21 @@ class LineProfile(PlotPlugin):
             self.profile = self.ax.plot(scan_data[:, 0], 'r-',
                                         scan_data[:, 1], 'g-',
                                         scan_data[:, 2], 'b-')
+
+    def output(self):
+        """Return the drawn line and the resulting scan.
+
+        Returns
+        -------
+        line_image : (M, N) uint8 array, same shape as image
+            An array of 0s with the scanned line set to 255.
+        scan : (P,) or (P, 3) array of int or float
+            The line scan values across the image.
+        """
+        (x1, y1), (x2, y2) = self.line_tool.end_points
+        line_image = np.zeros(self.image_viewer.original_image.shape[:2],
+                              np.uint8)
+        rr, cc = draw.line(y1, x1, y2, x2)
+        line_image[rr, cc] = 255
+        return line_image, self.scan_data
 
