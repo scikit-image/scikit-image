@@ -8,8 +8,10 @@ def profile_line(img, src, dst, linewidth=1,
 
     Parameters
     ----------
-    img : 2d or 3d array
-        The image, in grayscale (2d) or multichannel (2d + c) format.
+    img : numeric array, shape (M, N[, C])
+        The image, either grayscale (2D array) or multichannel 
+        (3D array, where the final axis contains the channel
+        information).
     src : 2-tuple of numeric scalar (float or int)
         The start point of the scan line.
     dst : 2-tuple of numeric scalar (float or int)
