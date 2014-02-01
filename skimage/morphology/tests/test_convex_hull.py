@@ -45,15 +45,12 @@ def test_qhull_offset_example():
        147, 148, 149, 150, 151, 152, 153, 154, 146, 147, 148, 149, 150,
        151, 152, 153, 154, 147, 148, 149, 150, 151, 152, 153, 148, 149,
        150, 151, 152, 149, 150, 151, 150]))
-
     image = np.zeros((1392, 1040), dtype=bool)
-    image[ nonzeros ] = True    
-    
-    expected = image.copy() 
- 
+    image[ nonzeros ] = True
+    expected = image.copy()
     assert_array_equal(convex_hull_image(image), expected)
 
- 
+
 @skipif(not scipy_spatial)
 def test_pathological_qhull_example():
     image = np.array(

@@ -54,10 +54,10 @@ def convex_hull_image(image):
         raise ImportError('Could not import scipy.spatial, only available in '
                           'scipy >= 0.9.')
 
-    # Subtract offset 
+    # Subtract offset
     offset = coords.mean(axis=0)
     coords -= offset
-    
+
     # Find the convex hull
     chull = Delaunay(coords).convex_hull
     v = coords[np.unique(chull)]
@@ -67,7 +67,7 @@ def convex_hull_image(image):
     angles = np.arctan2(v_centred[:, 0], v_centred[:, 1])
     v = v[np.argsort(angles)]
 
-    # Add back offset 
+    # Add back offset
     v += offset
 
     # For each pixel coordinate, check whether that pixel
