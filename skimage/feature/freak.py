@@ -1,29 +1,37 @@
 import numpy as np
+import os
 
 from skimage.transform import integral_image
 from skimage.feature.util import _mask_border_keypoints
 from skimage.util import img_as_float
+from skimage import data_dir
+
+from _freak_cy import _get_mean_intensity
 
 
 # Constants
-n = [6, 6, 6, 6, 6, 6, 6, 1]
+best_pairs = np.loadtxt(os.path.join(data_dir, 'freak_descriptor_pairs.txt'), dtype=np.uint8)
+ns = [6, 6, 6, 6, 6, 6, 6, 1]
 BIG_RADIUS = 2./3
 SMALL_RADIUS = 2./24
 unit_space = (BIG_RADIUS - SMALL_RADIUS) / 21
-radius = [BIG_RADIUS, BIG_RADIUS - 6 * unit_space, BIG_RADIUS - 11 * unit_space, BIG_RADIUS - 15 * unit_space, BIG_RADIUS - 18 * unit_space, BIG_RADIUS - 20 * unit_space, SMALL_RADIUS, 0.0]
+radii = [BIG_RADIUS, BIG_RADIUS - 6 * unit_space, BIG_RADIUS - 11 * unit_space,
+         BIG_RADIUS - 15 * unit_space, BIG_RADIUS - 18 * unit_space,
+         BIG_RADIUS - 20 * unit_space, SMALL_RADIUS, 0.0]
 
-radius_stretched = []
-for i in range(8):
-    radius_stretched = radius_stretched + [radius[i]] * n[i]
+radii_stretched = []
+for radius, n in zip(radii, ns):
+    radii_stretched.extend([radius] * n)
 
 
-def _get_pattern():
+def _get_pattern(pattern_scale):
     pattern = []
     for i in range(8):
-        for j in range(n[i]):
-            beta = (np.pi / n[i]) * (i % 2)
-            alpha = j * 2 * np.pi / n[i] + beta 
-            pattern.append([radius[i] * np.cos(alpha) * 22, radius[i] * np.sin(alpha) * 22])
+        for j in range(ns[i]):
+            beta = (np.pi / ns[i]) * (i % 2)
+            alpha = j * 2 * np.pi / ns[i] + beta 
+            pattern.append([radii[i] * np.cos(alpha) * pattern_scale,
+                            radii[i] * np.sin(alpha) * pattern_scale])
 
     pattern = np.asarray(pattern, dtype=np.intp)
     pattern = np.round(pattern)
@@ -40,20 +48,7 @@ def _get_freak_orientation(image, keypoint, pattern):
     return np.arctan2(x_dir, y_dir)
 
 
-# TODO : Cythonize.
-def _get_mean_intensity(integral_img, keypoint, rot_pattern):
-    x = keypoint[0]
-    y = keypoint[1]
-    pattern_intensities = []
-    for i in range(len(rot_pattern)):
-        x_p = x + rot_pattern[i, 0]
-        y_p = y + rot_pattern[i, 1]
-        t = radius_stretched[i]
-        pattern_intensities.append(integral_img[x_p + t, y_p + t] + integral_img[x_p - t - 1, y_p - t] - integral_img[x_p - t - 1, y_p + t] - integral_img[x_p + t, y_p - t - 1])
-    return np.asarray(pattern_intensities)
-
-
-def descriptor_freak(image, keypoints):
+def descriptor_freak(image, keypoints, pattern_scale=22.0):
     """
     Compute FREAK Descriptors for the given set of keypoints from the given
     image.
@@ -64,6 +59,23 @@ def descriptor_freak(image, keypoints):
         Input grayscale image.
     keypoints : (N, 2) array
         Keypoint locations extracted from ``image``.
+    pattern_scale : float
+        Scaling or spread of the Decriptor pattern.
+
+    Returns
+    -------
+    descriptors : (Q, 512) ndarray of dtype bool
+        Extracted FREAK decriptors of length 512 bits about Q keypoints
+        obtained after filtering the border keypoints.
+    keypoints : (Q, 2) ndarray
+        Q keypoints obtained after border filtering out the original N
+        keypoints.
+
+    References
+    ----------
+    .. [1] Alexandre Alahi, Raphael Ortiz, Pierre Vandergheynst "FREAK: Fast
+           Retina Keypoint",
+           http://infoscience.epfl.ch/record/175537/files/2069.pdf
 
     """
     # Prepare the input image. Use the util function once #669 is merged.
@@ -77,7 +89,7 @@ def descriptor_freak(image, keypoints):
     keypoints = keypoints[_mask_border_keypoints(image, keypoints, 30)]
 
     # Generate the FREAK pattern of 43 points
-    pattern = _get_pattern()
+    pattern = _get_pattern(pattern_scale)
 
     # Orientation of the keypoints.
     # TODO : Cythonize.
@@ -98,10 +110,13 @@ def descriptor_freak(image, keypoints):
         a = np.cos(orientations[i])
         b = np.sin(orientations[i])
         rot_matrix = [[b, a], [a, -b]]
-        rot_pattern = np.dot(pattern, rot_matrix)
+        rotated_pattern = np.dot(pattern, rot_matrix)
 
         # Mean / Gaussian intensity at 43 points
-        pattern_intensities = _get_mean_intensity(integral_img, keypoints[i], rot_pattern)
+        pattern_intensities = np.zeros((43))
+        _get_mean_intensity(integral_img, keypoints[i][0], keypoints[i][1],
+                            rotated_pattern, np.asarray(radii_stretched),
+                            pattern_scale, pattern_intensities)
         pos0 = best_pairs[:, 0]
         pos1 = best_pairs[:, 1]
         descriptors[i, :] = pattern_intensities[pos0] < pattern_intensities[pos1]
