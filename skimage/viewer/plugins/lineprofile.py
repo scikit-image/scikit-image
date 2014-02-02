@@ -147,13 +147,28 @@ class LineProfile(PlotPlugin):
         -------
         line_image : (M, N) uint8 array, same shape as image
             An array of 0s with the scanned line set to 255.
+            If the linewidth of the line tool is greater than 1,
+            sets the values within the profiled polygon to 128.
         scan : (P,) or (P, 3) array of int or float
             The line scan values across the image.
         """
         (x1, y1), (x2, y2) = self.line_tool.end_points
         line_image = np.zeros(self.image_viewer.original_image.shape[:2],
                               np.uint8)
-        rr, cc = draw.line(y1, x1, y2, x2)
+        w = self.line_tool.linewidth
+        if w > 1:
+            a = np.arctan2((y2 - y1), (x2 - x1))
+            xinc = abs(int(np.cos(a) * w / 2)) + 1
+            yinc = abs(int(np.sin(a) * w / 2)) + 1
+            if ((x2 > x1) and (y2 > y1)) or ((x2 < x1) and (y2 < y1)):
+                xinc *= -1
+            xx = np.array([x1 + xinc, x1 - xinc, x2 - xinc, x2 + xinc],
+                          dtype=np.int)
+            yy = np.array([y1 + yinc, y1 - yinc, y2 - yinc, y2 + yinc],
+                          dtype=np.int)
+            rrp, ccp = draw.polygon(yy, xx, line_image.shape)
+            line_image[rrp, ccp] = 128
+        rr, cc = draw.line(int(y1), int(x1), int(y2), int(x2))
         line_image[rr, cc] = 255
         return line_image, self.scan_data
 
