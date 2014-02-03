@@ -152,23 +152,16 @@ class LineProfile(PlotPlugin):
         scan : (P,) or (P, 3) array of int or float
             The line scan values across the image.
         """
-        (x1, y1), (x2, y2) = self.line_tool.end_points
+        end_points = self.line_tool.end_points
         line_image = np.zeros(self.image_viewer.original_image.shape[:2],
                               np.uint8)
-        w = self.line_tool.linewidth
-        if w > 1:
-            a = np.arctan2((y2 - y1), (x2 - x1))
-            xinc = abs(int(np.cos(a) * w / 2)) + 1
-            yinc = abs(int(np.sin(a) * w / 2)) + 1
-            if ((x2 > x1) and (y2 > y1)) or ((x2 < x1) and (y2 < y1)):
-                xinc *= -1
-            xx = np.array([x1 + xinc, x1 - xinc, x2 - xinc, x2 + xinc],
-                          dtype=np.int)
-            yy = np.array([y1 + yinc, y1 - yinc, y2 - yinc, y2 + yinc],
-                          dtype=np.int)
-            rrp, ccp = draw.polygon(yy, xx, line_image.shape)
-            line_image[rrp, ccp] = 128
-        rr, cc = draw.line(int(y1), int(x1), int(y2), int(x2))
+        width = self.line_tool.linewidth
+        if width > 1:
+            rp, cp = measure.profile._line_profile_coordinates(
+                *end_points[:, ::-1], linewidth=width)
+            line_image[rp.astype(int), cp.astype(int)] = 128
+        (x1, y1), (x2, y2) = end_points.astype(int)
+        rr, cc = draw.line(y1, x1, y2, x2)
         line_image[rr, cc] = 255
         return line_image, self.scan_data
 

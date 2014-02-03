@@ -50,6 +50,43 @@ def profile_line(img, src, dst, linewidth=1,
     The destination point is included in the profile, in contrast to
     standard numpy indexing.
     """
+    perp_lines = _line_profile_coordinates(src, dst, linewidth=linewidth)
+    if img.ndim == 3:
+        pixels = [nd.map_coordinates(img[..., i], perp_lines,
+                                     order=order, mode=mode, cval=cval)
+                  for i in range(img.shape[2])]
+        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
+    else:
+        pixels = nd.map_coordinates(img, perp_lines,
+                                    order=order, mode=mode, cval=cval)
+    intensities = pixels.mean(axis=1)
+
+    return intensities
+
+
+def _line_profile_coordinates(src, dst, linewidth=1):
+    """Return the coordinates of the profile of an image along a scan line.
+
+    Parameters
+    ----------
+    src : 2-tuple of numeric scalar (float or int)
+        The start point of the scan line.
+    dst : 2-tuple of numeric scalar (float or int)
+        The end point of the scan line.
+    linewidth : int, optional
+        Width of the scan, perpendicular to the line
+
+    Returns
+    -------
+    return_value : array
+        The coordinates of the profile along the scan line. The length of the profile is the ceil of the computed length of the scan line.  The array is of the form (2, length, linewidth).
+
+    Notes
+    -----
+    This is a utility method meant to be used internally by skimage functions.
+    The destination point is included in the profile, in contrast to
+    standard numpy indexing.
+    """
     src_row, src_col = src = np.asarray(src, dtype=float)
     dst_row, dst_col = dst = np.asarray(dst, dtype=float)
     d_row, d_col = dst - src
@@ -70,18 +107,5 @@ def profile_line(img, src, dst, linewidth=1,
                                       linewidth) for row_i in line_row])
     perp_cols = np.array([np.linspace(col_i - col_width, col_i + col_width,
                                       linewidth) for col_i in line_col])
-    perp_lines = np.array([perp_rows, perp_cols])
-
-    if img.ndim == 3:
-        pixels = [nd.map_coordinates(img[..., i], perp_lines,
-                                     order=order, mode=mode, cval=cval)
-                  for i in range(img.shape[2])]
-        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
-    else:
-        pixels = nd.map_coordinates(img, perp_lines,
-                                    order=order, mode=mode, cval=cval)
-
-    intensities = pixels.mean(axis=1)
-
-    return intensities
+    return np.array([perp_rows, perp_cols])
 
