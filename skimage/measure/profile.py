@@ -78,8 +78,9 @@ def _line_profile_coordinates(src, dst, linewidth=1):
 
     Returns
     -------
-    return_value : array
-        The coordinates of the profile along the scan line. The length of the profile is the ceil of the computed length of the scan line.  The array is of the form (2, length, linewidth).
+    coords : array, shape (2, N, C), float
+        The coordinates of the profile along the scan line. The length of the
+        profile is the ceil of the computed length of the scan line.
 
     Notes
     -----

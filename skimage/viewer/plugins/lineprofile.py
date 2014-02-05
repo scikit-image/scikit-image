@@ -159,7 +159,11 @@ class LineProfile(PlotPlugin):
         if width > 1:
             rp, cp = measure.profile._line_profile_coordinates(
                 *end_points[:, ::-1], linewidth=width)
-            line_image[rp.astype(int), cp.astype(int)] = 128
+            # the points are aliased, so create a polygon using the corners
+            yp = np.rint(rp[[0, 0, -1, -1],[0, -1, -1, 0]]).astype(int)
+            xp = np.rint(cp[[0, 0, -1, -1],[0, -1, -1, 0]]).astype(int)
+            rp, cp = draw.polygon(yp, xp, line_image.shape)
+            line_image[rp, cp] = 128
         (x1, y1), (x2, y2) = end_points.astype(int)
         rr, cc = draw.line(y1, x1, y2, x2)
         line_image[rr, cc] = 255
