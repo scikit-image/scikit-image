@@ -1,3 +1,4 @@
+import skimage
 import skimage.data as data
 from skimage.viewer import ImageViewer
 from numpy.testing import assert_equal, assert_allclose
@@ -5,7 +6,7 @@ from numpy.testing import assert_equal, assert_allclose
 
 def setup_line_profile(image):
     from skimage.viewer.plugins.lineprofile import LineProfile
-    viewer = ImageViewer(image)
+    viewer = ImageViewer(skimage.img_as_float(image))
     plugin = LineProfile()
     viewer += plugin
     return plugin
@@ -20,8 +21,8 @@ def test_line_profile():
                 scan_data.size]:
         assert_equal(inp, 172)
     assert_equal(line_image.shape, (512, 512))
-    assert_equal(scan_data.max(), 234.0)
-    assert_allclose(scan_data.mean(), 71.726744186046517)
+    assert_allclose(scan_data.max(), 0.9139, rtol=1e-3)
+    assert_allclose(scan_data.mean(), 0.2828, rtol=1e-3)
 
 
 def test_line_profile_rgb():
@@ -30,12 +31,12 @@ def test_line_profile_rgb():
     for i in range(6):
         plugin.line_tool._thicken_scan_line()
     line_image, scan_data = plugin.output()
-    assert_equal(line_image[line_image == 128].size, 750)
+    assert_equal(line_image[line_image == 128].size, 755)
     assert_equal(line_image[line_image == 255].size, 151)
     assert_equal(line_image.shape, (300, 451))
-    assert_equal(scan_data.shape, (151, 3))
-    assert_allclose(scan_data.max(), 196.85714285714286)
-    assert_allclose(scan_data.mean(), 111.17029328287606)
+    assert_equal(scan_data.shape, (152, 3))
+    assert_allclose(scan_data.max(), 0.772, rtol=1e-3)
+    assert_allclose(scan_data.mean(), 0.4355, rtol=1e-3)
 
 
 if __name__ == "__main__":
