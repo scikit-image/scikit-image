@@ -51,8 +51,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     Notes
     -----
     * The algorithm relies on an image whose rows and columns are even
-      multiples of the number of tiles, so the extra rows and columns are left
-      at their original values, thus  preserving the input image shape.
+      multiples of the number of tiles, so the extra rows and columns are to zero, thus  preserving the input image shape.
     * For color images, the following steps are performed:
        - The image is converted to LAB color space
        - The CLAHE algorithm is run on the L channel
@@ -73,14 +72,20 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
         new_l = _clahe(*args).astype(float)
         new_l = rescale_intensity(new_l, out_range=(0, 100))
-        lab_img[:new_l.shape[0], :new_l.shape[1], 0] = new_l
+        col, row = new_l.shape
+        lab_img[:col, :row, 0] = new_l
+        lab_img[col:, :, 0] = 0
+        lab_img[:, row:, 0] = 0
         image = color.lab2rgb(lab_img)
         image = rescale_intensity(image, out_range=(0, 1))
     else:
         image = skimage.img_as_uint(image)
         args[0] = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
         out = _clahe(*args)
-        image[:out.shape[0], :out.shape[1]] = out
+        col, row = out.shape
+        image[:col, :row] = out
+        image[col:, :] = 0
+        image[:, row:] = 0
         image = rescale_intensity(image)
     return image
 
