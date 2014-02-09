@@ -260,7 +260,7 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
         raise ValueError("Incorrect input %s in `gradient_direction`, see "
                          "docstring." % (gradient_direction))
 
-    # Swap orientation and returh, without modifying original data
+    # Swap orientation and return, without modifying original data
     faces_corrected = faces.copy()
     faces_corrected[indices] = faces_corrected[indices, ::-1]
 
