@@ -43,7 +43,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     nbins : int, optional
         Number of gray bins for histogram ("dynamic range").
     mode : string, one of {'unchanged', 'zero', 'trim'}, optional
-        How to treat any pixels falling outside of the tiles.
+        How to treat any pixels falling outside of the tiles.  See the notes.
 
     Returns
     -------
@@ -53,7 +53,12 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     Notes
     -----
     * The algorithm relies on an image whose rows and columns are even
-      multiples of the number of tiles, so the extra rows and columns are to zero, thus  preserving the input image shape.
+      multiples of the number of tiles, so the extra rows and columns are not
+      affected by the algorithm.  The handling of those outlier pixels is
+      determined by the "mode" paramter.  If mode is 'unchanged', the values
+      the same as the input values.  If mode is 'zero', they are set to zero.
+      If mode is 'trim', only the portion of the image that was equalized will
+      be returned.
     * For color images, the following steps are performed:
        - The image is converted to LAB color space
        - The CLAHE algorithm is run on the L channel
