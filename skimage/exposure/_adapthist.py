@@ -26,7 +26,7 @@ NR_OF_GREY = 16384  # number of grayscale levels to use in CLAHE algorithm
 
 
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
-                       nbins=256):
+                       nbins=256, mode='unchanged'):
     """Contrast Limited Adaptive Histogram Equalization.
 
     Parameters
@@ -42,6 +42,8 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         contrast).
     nbins : int, optional
         Number of gray bins for histogram ("dynamic range").
+    mode : string, one of {'unchanged', 'zero', 'trim'}, optional
+        How to treat any pixels falling outside of the tiles.
 
     Returns
     -------
@@ -72,20 +74,28 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
         new_l = _clahe(*args).astype(float)
         new_l = rescale_intensity(new_l, out_range=(0, 100))
-        col, row = new_l.shape
-        lab_img[:col, :row, 0] = new_l
-        lab_img[col:, :, 0] = 0
-        lab_img[:, row:, 0] = 0
+        if mode == 'trim':
+            lab_img = new_l
+        else:
+            col, row = new_l.shape
+            lab_img[:col, :row, 0] = new_l
+            if mode == 'zero':
+                lab_img[col:, :, 0] = 0
+                lab_img[:, row:, 0] = 0
         image = color.lab2rgb(lab_img)
         image = rescale_intensity(image, out_range=(0, 1))
     else:
         image = skimage.img_as_uint(image)
         args[0] = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
         out = _clahe(*args)
-        col, row = out.shape
-        image[:col, :row] = out
-        image[col:, :] = 0
-        image[:, row:] = 0
+        if mode == 'trim':
+            image = out
+        else:
+            col, row = out.shape
+            image[:col, :row] = out
+            if mode == 'zero':
+                image[col:, :] = 0
+                image[:, row:] = 0
         image = rescale_intensity(image)
     return image
 
