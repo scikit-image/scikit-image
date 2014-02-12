@@ -109,7 +109,7 @@ def imsave(fname, arr, format_str=None):
     if not isinstance(fname, string_types) and format_str is None:
         format_str = "PNG"
 
-    img = Image.fromstring(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
+    img = Image.frombytes(mode, (arr.shape[1], arr.shape[0]), arr.tostring())
     img.save(fname, format=format_str)
 
 
