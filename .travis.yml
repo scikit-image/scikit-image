@@ -65,7 +65,8 @@ script:
     # Run all tests
     - if [[ $PYVER == '3.x' ]]; then
     -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
-    - else
+    - fi
+    - if [[ $PYVER == '2.x' ]]; then
     -   nosetests --exe -v --with-doctest skimage
     - fi
     # Run all doc examples
@@ -79,6 +80,5 @@ script:
 after_success:
      - if [[ $PYVER == '3.x' ]]; then
      -   coveralls
-     - else
-     -   exit 0
      - fi
+
