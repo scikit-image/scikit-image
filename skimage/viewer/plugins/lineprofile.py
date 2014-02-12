@@ -1,3 +1,4 @@
+from __future__ import division
 import warnings
 
 import numpy as np
@@ -147,12 +148,24 @@ class LineProfile(PlotPlugin):
         -------
         line_image : (M, N) uint8 array, same shape as image
             An array of 0s with the scanned line set to 255.
+            If the linewidth of the line tool is greater than 1,
+            sets the values within the profiled polygon to 128.
         scan : (P,) or (P, 3) array of int or float
             The line scan values across the image.
         """
-        (x1, y1), (x2, y2) = self.line_tool.end_points
+        end_points = self.line_tool.end_points
         line_image = np.zeros(self.image_viewer.original_image.shape[:2],
                               np.uint8)
+        width = self.line_tool.linewidth
+        if width > 1:
+            rp, cp = measure.profile._line_profile_coordinates(
+                *end_points[:, ::-1], linewidth=width)
+            # the points are aliased, so create a polygon using the corners
+            yp = np.rint(rp[[0, 0, -1, -1],[0, -1, -1, 0]]).astype(int)
+            xp = np.rint(cp[[0, 0, -1, -1],[0, -1, -1, 0]]).astype(int)
+            rp, cp = draw.polygon(yp, xp, line_image.shape)
+            line_image[rp, cp] = 128
+        (x1, y1), (x2, y2) = end_points.astype(int)
         rr, cc = draw.line(y1, x1, y2, x2)
         line_image[rr, cc] = 255
         return line_image, self.scan_data
