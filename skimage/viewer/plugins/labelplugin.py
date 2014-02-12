@@ -43,6 +43,10 @@ class LabelPainter(Plugin):
         self.paint_tool.label = self._label_widget.index = 1
         self.artists.append(self.paint_tool)
 
+    def _on_new_image(self, image):
+        """Update plugin for new images."""
+        self.paint_tool.shape = image.shape
+
     def on_enter(self, overlay):
         pass
 
