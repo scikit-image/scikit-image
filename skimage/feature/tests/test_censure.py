@@ -7,6 +7,14 @@ from skimage.feature import CENSURE
 img = moon()
 
 
+def test_censure_on_rectangular_images():
+    """Censure feature detector should work on 2D image of any shape."""
+    rect_image = np.random.random((300, 200))
+    square_image = np.random.random((200, 200))
+    CENSURE().detect((square_image))
+    CENSURE().detect((rect_image))
+
+
 def test_keypoints_censure_color_image_unsupported_error():
     """Censure keypoints can be extracted from gray-scale images only."""
     assert_raises(ValueError, CENSURE().detect, np.zeros((20, 20, 3)))
