@@ -3,7 +3,7 @@ from scipy.spatial.distance import cdist
 
 
 def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
-                      threshold=0, cross_check=True):
+                      max_distance=np.inf, cross_check=True):
     """Brute-force matching of descriptors.
 
     For each descriptor in the first set this matcher finds the closest
@@ -24,7 +24,7 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         distance is used for binary descriptors automatically.
     p : int
         The p-norm to apply for ``metric='minkowski'``.
-    threshold : float
+    max_distance : float
         Maximum allowed distance between descriptors of two keypoints
         in separate images to be regarded as a match.
     cross_check : bool
@@ -62,4 +62,9 @@ def match_descriptors(descriptors1, descriptors2, metric=None, p=2,
         indices1 = indices1[mask]
         indices2 = indices2[mask]
 
-    return np.column_stack((indices1, indices2))
+    matches = np.column_stack((indices1, indices2))
+
+    if max_distance < np.inf:
+        matches = matches[distances[indices1, indices2] < max_distance]
+
+    return matches
