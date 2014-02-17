@@ -26,7 +26,7 @@ NR_OF_GREY = 16384  # number of grayscale levels to use in CLAHE algorithm
 
 
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
-                       nbins=256, mode='unchanged'):
+                       nbins=256, mode='ignore'):
     """Contrast Limited Adaptive Histogram Equalization.
 
     Parameters
@@ -42,7 +42,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         contrast).
     nbins : int, optional
         Number of gray bins for histogram ("dynamic range").
-    mode : string, one of {'unchanged', 'zero', 'trim'}, optional
+    mode : string, one of {'unchanged', 'zero', 'crop'}, optional
         How to treat any pixels falling outside of the tiles.  See the notes.
 
     Returns
@@ -79,7 +79,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
         new_l = _clahe(*args).astype(float)
         new_l = rescale_intensity(new_l, out_range=(0, 100))
-        if mode == 'trim':
+        if mode == 'crop':
             lab_img = new_l
         else:
             col, row = new_l.shape
@@ -93,7 +93,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         image = skimage.img_as_uint(image)
         args[0] = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
         out = _clahe(*args)
-        if mode == 'trim':
+        if mode == 'crop':
             image = out
         else:
             col, row = out.shape
