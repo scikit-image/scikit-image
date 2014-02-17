@@ -42,7 +42,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
         contrast).
     nbins : int, optional
         Number of gray bins for histogram ("dynamic range").
-    mode : string, one of {'unchanged', 'zero', 'crop'}, optional
+    mode : {'unchanged', 'zero', 'crop'}, optional
         How to treat any pixels falling outside of the tiles.  See the notes.
 
     Returns
@@ -55,13 +55,13 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     * The algorithm relies on an image whose rows and columns are even
       multiples of the number of tiles, so the extra rows and columns are not
       affected by the algorithm.  The handling of those outlier pixels is
-      determined by the "mode" paramter.  If mode is 'unchanged', the values
+      determined by the `mode` parameter.  If mode is 'unchanged', the values
       the same as the input values.  If mode is 'zero', they are set to zero.
       If mode is 'trim', only the portion of the image that was equalized will
       be returned.
     * For color images, the following steps are performed:
-       - The image is converted to LAB color space
-       - The CLAHE algorithm is run on the L channel
+       - The image is converted to HSV color space
+       - The CLAHE algorithm is run on the V (Value) channel
        - The image is converted back to RGB space and returned
     * For RGBA images, the original alpha channel is removed.
 
@@ -70,38 +70,36 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
     """
-    args = [None, ntiles_x, ntiles_y, clip_limit * nbins, nbins]
-    if image.ndim > 2:
-        lab_img = color.rgb2lab(skimage.img_as_float(image))
-        l_chan = lab_img[:, :, 0]
-        l_chan /= np.max(np.abs(l_chan))
-        l_chan = skimage.img_as_uint(l_chan)
-        args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
-        new_l = _clahe(*args).astype(float)
-        new_l = rescale_intensity(new_l, out_range=(0, 100))
-        if mode == 'crop':
-            lab_img = new_l
-        else:
-            col, row = new_l.shape
-            lab_img[:col, :row, 0] = new_l
-            if mode == 'zero':
-                lab_img[col:, :, 0] = 0
-                lab_img[:, row:, 0] = 0
-        image = color.lab2rgb(lab_img)
-        image = rescale_intensity(image, out_range=(0, 1))
-    else:
-        image = skimage.img_as_uint(image)
-        args[0] = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
-        out = _clahe(*args)
-        if mode == 'crop':
-            image = out
-        else:
-            col, row = out.shape
-            image[:col, :row] = out
-            if mode == 'zero':
-                image[col:, :] = 0
-                image[:, row:] = 0
+    ndim = image.ndim
+    if ndim == 3:
+        if image.shape[2] == 4:
+            image = image[:, :, :3]
+        image = skimage.img_as_float(image)
         image = rescale_intensity(image)
+        hsv_img = color.rgb2hsv(image)
+        image = hsv_img[:, :, 2].copy()
+    image = skimage.img_as_uint(image)
+    image = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
+    out = _clahe(image, ntiles_x, ntiles_y, clip_limit * nbins, nbins)
+    if mode == 'crop':
+        image = image[:out.shape[0], :out.shape[1]]
+        if ndim == 3:
+            hsv_img = hsv_img[:out.shape[0], :out.shape[1], :]
+    image[:out.shape[0], :out.shape[1]] = out
+    image = skimage.img_as_float(image)
+    if ndim == 3:
+        hsv_img[:, :, 2] = rescale_intensity(image)
+        image = color.hsv2rgb(hsv_img)
+    else:
+        image = rescale_intensity(image)
+    if mode == 'zero':
+        mask = np.zeros(image.shape)
+        if ndim == 3:
+            for i in range(3):
+                mask[:out.shape[0], :out.shape[1], i] = 1
+        else:
+            mask[:out.shape[0], :out.shape[1]] = 1
+        image[mask == 0] = 0
     return image
 
 
@@ -134,8 +132,8 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     """
     ntiles_x = min(ntiles_x, MAX_REG_X)
     ntiles_y = min(ntiles_y, MAX_REG_Y)
-    ntiles_y = max(ntiles_x, 2)
-    ntiles_x = max(ntiles_y, 2)
+    ntiles_y = max(ntiles_y, 2)
+    ntiles_x = max(ntiles_x, 2)
 
     if clip_limit == 1.0:
         return image  # is OK, immediately returns original image.
@@ -144,6 +142,11 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
 
     y_res = image.shape[0] - image.shape[0] % ntiles_y
     x_res = image.shape[1] - image.shape[1] % ntiles_x
+    # make the tile size divisible by 2
+    while y_res % (2 * ntiles_y):
+        y_res -= 1
+    while x_res % (2 * ntiles_x):
+        x_res -= 1
     image = image[: y_res, : x_res]
 
     x_size = image.shape[1] // ntiles_x  # Actual size of contextual regions
