@@ -194,6 +194,31 @@ def test_adapthist_color():
     return data, adapted
 
 
+def test_adapthist_modes():
+    '''Test adaptist `mode` parameter values.
+    '''
+    img = skimage.img_as_float(data.moon())
+    full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
+    ignore = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=9)
+    zero = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=9,
+                                       mode='zero')
+    crop = exposure.equalize_adapthist(img.copy(), ntiles_x=9, ntiles_y=9,
+                                       mode='crop')
+    assert ignore.shape == zero.shape
+    assert ignore.shape != crop.shape
+    assert_array_equal(zero[crop.shape[0]:, :], 0)
+    assert_array_equal(zero[:, crop.shape[1]:], 0)
+
+    assert_almost_equal = np.testing.assert_almost_equal
+    full_cropped = full_scale[:crop.shape[0], :crop.shape[1]]
+    assert_almost_equal(peak_snr(full_scale, ignore), 56.175, 3)
+    assert_almost_equal(peak_snr(full_scale, zero), 94.7988, 3)
+    assert_almost_equal(peak_snr(full_cropped, crop), 120.4598, 3)
+    assert_almost_equal(norm_brightness_err(full_scale, ignore), 0.223, 3)
+    assert_almost_equal(norm_brightness_err(full_scale, zero), 0.01589, 3)
+    assert_almost_equal(norm_brightness_err(full_cropped, crop), 0.02878, 3)
+
+
 def peak_snr(img1, img2):
     '''Peak signal to noise ratio of two images
 
@@ -234,11 +259,6 @@ def norm_brightness_err(img1, img2):
     ambe = np.abs(img1.mean() - img2.mean())
     nbe = ambe / dtype_range[img1.dtype.type][1]
     return nbe
-
-
-if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
 
 
 # Test Gamma Correction
@@ -409,3 +429,8 @@ def test_adjust_inv_sigmoid_cutoff_half():
 def test_negative():
     image = np.arange(-10, 245, 4).reshape(8, 8).astype(np.double)
     assert_raises(ValueError, exposure.adjust_gamma, image)
+
+
+if __name__ == '__main__':
+    from numpy import testing
+    testing.run_module_suite()
