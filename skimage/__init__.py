@@ -37,6 +37,8 @@ transform
     Geometric and other transforms, e.g. rotation or the Radon transform.
 util
     Generic utilities.
+viewer
+    Interactive image viewer and plugin framework.
 
 Utility Functions
 -----------------
