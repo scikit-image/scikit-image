@@ -45,7 +45,7 @@ class OverlayPlugin(Plugin):
         self._overlay_plot = None
         self._overlay = None
         self.cmap = None
-        self.color_names = self.colors.keys()
+        self.color_names = list(self.colors.keys())
 
     def attach(self, image_viewer):
         super(OverlayPlugin, self).attach(image_viewer)
