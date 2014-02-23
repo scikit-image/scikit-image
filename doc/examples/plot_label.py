@@ -43,7 +43,7 @@ image_label_overlay = label2rgb(label_image, image=image)
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
 ax.imshow(image_label_overlay)
 
-for region in regionprops(label_image, ['Area', 'BoundingBox']):
+for region in regionprops(label_image):
 
     # skip small images
     if region['Area'] < 100:
