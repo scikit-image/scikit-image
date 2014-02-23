@@ -1,10 +1,10 @@
 import numpy as np
 import warnings
+from six import string_types
 
 from ._unwrap_1d import unwrap_1d
 from ._unwrap_2d import unwrap_2d
 from ._unwrap_3d import unwrap_3d
-from .._shared.six import string_types
 
 
 def unwrap_phase(image, wrap_around=False):

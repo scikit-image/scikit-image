@@ -7,8 +7,7 @@ import os
 import re
 import tempfile
 from contextlib import contextmanager
-
-from skimage._shared import six
+import six
 
 
 URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
