@@ -11,8 +11,8 @@ cdef eps = 1.e-8
 
 @cython.boundscheck(False)
 cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
-                                   DTYPE_t [:, :] p2,
-                                   DTYPE_t [:, ::] w, int s):
+                                    DTYPE_t [:, :] p2,
+                                    DTYPE_t [:, ::] w, int s):
     cdef int i, j
     cdef int center = s / 2
     # Check if central pixel is too different in the 2 patches
@@ -34,8 +34,8 @@ cdef inline float patch_distance_2d(DTYPE_t [:, :] p1,
 
 @cython.boundscheck(False)
 cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
-                                   DTYPE_t [:, :, :] p2,
-                                   DTYPE_t [:, ::] w, int s):
+                                       DTYPE_t [:, :, :] p2,
+                                       DTYPE_t [:, ::] w, int s):
     cdef int i, j
     cdef int center = s / 2
     cdef int color
@@ -55,8 +55,8 @@ cdef inline float patch_distance_2drgb(DTYPE_t [:, :, :] p1,
 
 @cython.boundscheck(False)
 cdef inline float patch_distance_3d(DTYPE_t [:, :, :] p1,
-                                 DTYPE_t [:, :, :] p2,
-                                 DTYPE_t [:, :, ::] w, int s):
+                                    DTYPE_t [:, :, :] p2,
+                                    DTYPE_t [:, :, ::] w, int s):
     cdef int i, j, k
     cdef float distance = 0
     cdef float tmp_diff
@@ -139,7 +139,7 @@ def _nl_means_denoising_2d(image, int s=7, int d=13, float h=0.1):
                                        y_start: y_end],
                                 padded[x_start_i: x_end_i,
                                        y_start_j: y_end_j],
-                                        w, s)
+                                w, s)
                     weight_sum += weight
                     new_value += weight * padded[x + i, y + j]
             result[x, y] = new_value / weight_sum
@@ -214,7 +214,7 @@ def _nl_means_denoising_2drgb(image, int s=7, int d=13, float h=0.1):
                                        y_start: y_end, :],
                                 padded[x_start_i: x_end_i,
                                        y_start_j: y_end_j, :],
-                                        w, s)
+                                w, s)
                     weight_sum += weight
                     for color in range(3):
                         new_values[color] += weight * padded[x + i, y + j,
@@ -295,8 +295,8 @@ def _nl_means_denoising_3d(image, int s=7,
                             z_end_k = z_end + k
                             weight = patch_distance_3d(
                                     padded[x_start: x_end,
-                                                y_start: y_end,
-                                                z_start: z_end],
+                                           y_start: y_end,
+                                           z_start: z_end],
                                     padded[x_start_i: x_end_i,
                                            y_start_j: y_end_j,
                                            z_start_k: z_end_k],
