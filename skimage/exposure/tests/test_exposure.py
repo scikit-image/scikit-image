@@ -44,6 +44,11 @@ def check_cdf_slope(cdf):
 # Test rescale intensity
 # ======================
 
+
+uint10_max = 2**10 - 1
+uint16_max = 2**16 - 1
+
+
 def test_rescale_stretch():
     image = np.array([51, 102, 153], dtype=np.uint8)
     out = exposure.rescale_intensity(image)
@@ -74,6 +79,18 @@ def test_rescale_out_range():
     out = exposure.rescale_intensity(image, out_range=(0, 127))
     assert out.dtype == np.int8
     assert_close(out, [0, 63, 127])
+
+
+def test_rescale_named_in_range():
+    image = np.array([0, uint10_max, uint10_max + 100], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, in_range='uint10')
+    assert_close(out, [0, uint16_max, uint16_max])
+
+
+def test_rescale_named_out_range():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint10')
+    assert_close(out, [0, uint10_max])
 
 
 # Test adaptive histogram equalization

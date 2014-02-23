@@ -7,8 +7,16 @@ from skimage._shared.utils import deprecated
 
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
-           'rescale_intensity', 'adjust_gamma',
-           'adjust_log', 'adjust_sigmoid']
+           'rescale_intensity', 'adjust_gamma', 'adjust_log', 'adjust_sigmoid']
+
+
+DTYPE_RANGE = dtype_range.copy()
+DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
+DTYPE_RANGE.update({'uint10': (0, 2**10 - 1),
+                    'uint12': (0, 2**12 - 1),
+                    'uint14': (0, 2**14 - 1),
+                    'bool': dtype_range[np.bool_],
+                    'float': dtype_range[np.float64]})
 
 
 def histogram(image, nbins=256):
@@ -143,14 +151,15 @@ def rescale_intensity(image, in_range=None, out_range=None):
     ----------
     image : array
         Image array.
-    in_range : 2-tuple (float, float)
+    in_range : 2-tuple (float, float) or str
         Min and max *allowed* intensity values of input image. If None, the
         *allowed* min/max values are set to the *actual* min/max values in the
-        input image.
-    out_range : 2-tuple (float, float)
+        input image. Intensity values outside this range are clipped.
+        If string, use data limits of dtype specified by the string.
+    out_range : 2-tuple (float, float) or str
         Min and max intensity values of output image. If None, use the min/max
         intensities of the image data type. See `skimage.util.dtype` for
-        details.
+        details. If string, use data limits of dtype specified by the string.
 
     Returns
     -------
@@ -201,11 +210,16 @@ def rescale_intensity(image, in_range=None, out_range=None):
     if in_range is None:
         imin = np.min(image)
         imax = np.max(image)
+    elif in_range in DTYPE_RANGE:
+        imin, imax = DTYPE_RANGE[in_range]
     else:
         imin, imax = in_range
 
-    if out_range is None:
-        omin, omax = dtype_range[dtype]
+    if out_range is None or out_range in DTYPE_RANGE:
+        out_range = dtype if out_range is None else out_range
+        if out_range is None:
+            out_range
+        omin, omax = DTYPE_RANGE[out_range]
         if imin >= 0:
             omin = 0
     else:
