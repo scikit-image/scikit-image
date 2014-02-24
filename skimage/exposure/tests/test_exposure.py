@@ -46,6 +46,8 @@ def check_cdf_slope(cdf):
 
 
 uint10_max = 2**10 - 1
+uint12_max = 2**12 - 1
+uint14_max = 2**14 - 1
 uint16_max = 2**16 - 1
 
 
@@ -91,6 +93,18 @@ def test_rescale_named_out_range():
     image = np.array([0, uint16_max], dtype=np.uint16)
     out = exposure.rescale_intensity(image, out_range='uint10')
     assert_close(out, [0, uint10_max])
+
+
+def test_rescale_uint12_limits():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint12')
+    assert_close(out, [0, uint12_max])
+
+
+def test_rescale_uint14_limits():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint14')
+    assert_close(out, [0, uint14_max])
 
 
 # Test adaptive histogram equalization
