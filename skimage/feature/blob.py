@@ -12,8 +12,25 @@ from skimage.util import img_as_float
 
 
 def _get_local_maxima_3d(array,thresh):
+    
+    """Finds local maxima in a 3d Array
+    
+    Returns an array of indices of local minimas
 
+    Parameters
+    ----------
+    array : ndarray
+        The 3d array whose local minimas are sought
+    thresh : float
+        Local minimas lesser than thresh are ignored
 
+    Returns
+    -------
+    A : ndarray
+        A 2d array in which each row contains 3 values, the incdices of local
+        maxima
+
+    """
     #computing max filter using all neighbors in cube
     fp = np.ones((3,3,3))
     max_array = maximum_filter(array,footprint = fp)
@@ -22,6 +39,27 @@ def _get_local_maxima_3d(array,thresh):
 
 
 def _blob_overlap(blob1,blob2):
+    """Finds the overlapping area fraction between two blobs
+    
+    Returns a float reprenting fraction of overlapped area
+
+    Parameters
+    ----------
+    blob1 : sequence
+        A sequqnce of (y,x,sigma), where x,y are coordinates of blob and sigma
+        is the standard deviation of the Gaussian kernel which detected the 
+        blob
+    blob2 : sequence
+        A sequqnce of (y,x,sigma), where x,y are coordinates of blob and sigma
+        is the standard deviation of the Gaussian kernel which detected the 
+        blob
+
+    Returns
+    -------
+    f : float
+        Returns a float reprenting fraction of overlapped area
+    
+    """    
     root2 = sqrt(2)
     
     #extent of the blob is given by sqrt(2)*scale
@@ -46,6 +84,26 @@ def _blob_overlap(blob1,blob2):
     return area/(math.pi*(min(r1,r2)**2))
     
 def _prune_blobs(array,overlap):
+    """Eleminated blobs with area overlap
+    
+    Given a
+
+    Parameters
+    ----------
+    array : ndarray
+        a 2d array with each row representing 3 vales, the (y,x,sigma) where 
+        (y,x) are coordnates of the blob and sigma is the standard deviation 
+        of the Gaussian kernel which detected the blob
+    overlap: float
+        A value between 0 and 1. If the fraction of area overlapping for 2 blobs
+        is greater than 'overlap' the smaller blob is eliminated
+
+    Returns
+    -------
+    A : ndarray
+        'array' with overlapping blobs removed
+    
+    """
     
     #iterating again might eliminate more blobs, but one iteration suffices
     # for most cases
@@ -134,7 +192,7 @@ def get_blobs(image,min_sigma=1,max_sigma=20,num_sigma=50,thresh=0.25,
         
     
     local_maxima = _get_local_maxima_3d(image_cube,thresh)
-    #print local_maxima
+    #covert the last index to its corresponding scale value
     local_maxima[:,2] = scales[local_maxima[:,2]]
     #print local_maxima
     ret_val = _prune_blobs(local_maxima,overlap)
