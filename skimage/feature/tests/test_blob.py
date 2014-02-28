@@ -25,8 +25,6 @@ def test_get_blobs_dog():
     s = sorted(blobs, key=area)
     thresh = 5
 
-    for b in s:
-        print b[0], b[1], radius(b[2])
 
     b = s[0]
     assert abs(b[0] - 400) <= thresh
