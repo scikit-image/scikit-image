@@ -160,6 +160,7 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
     >>> for blob in blobs:
     ...     print "Blob found at (%d,%d) of area %d" % (blob[1],blob[0],blob[2])
     ...
+    Blob found at (117,0) of area 1061
     Blob found at (336,46) of area 2513
     Blob found at (156,53) of area 2035
     Blob found at (217,53) of area 1608
