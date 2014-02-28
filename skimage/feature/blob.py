@@ -117,7 +117,7 @@ def _prune_blobs(array,overlap):
     return np.array([ a for a in array if a[2] > 0 ])
     
 
-def get_blobs(image,min_sigma=1,max_sigma=20,num_sigma=50,thresh=0.25,
+def get_blobs_dog(image,min_sigma=1,max_sigma=20,num_sigma=50,thresh=1.0,
             overlap=.5,mode='dog'):
     
     """Finds blobs in the given grayscale image
@@ -140,7 +140,7 @@ def get_blobs(image,min_sigma=1,max_sigma=20,num_sigma=50,thresh=0.25,
         of third dimension of the sace space
     thresh : float, optional
         The lower bound for scale space maxima. Local maxima smaller than thresh
-        are ignored
+        are ignored. Reduce this to detect blobs with less intensities
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a fraction
         greather than 'thresh', the smaller blob is eliminated
@@ -179,12 +179,12 @@ def get_blobs(image,min_sigma=1,max_sigma=20,num_sigma=50,thresh=0.25,
     image = img_as_float(image)
     
     if mode == 'dog':
-        ds = 0.1
+        ds = 0.01
         #ordered from inside to out
         # compute difference of gaussian , normalize with scale space,
         # iterate over all scales, and finally put all images obtained in
         # a 3d array with np.dstack
-        image_cube = np.dstack( [(gf(image,s) - gf(image,s+ds))*s**2\
+        image_cube = np.dstack( [(gf(image,s-ds) - gf(image,s+ds))*s**2/ds\
                      for s in scales] )
         
     else:

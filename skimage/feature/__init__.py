@@ -14,7 +14,7 @@ from .censure import CENSURE
 from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
-from .blob import get_blobs
+from .blob import get_blobs_dog
 
 
 __all__ = ['daisy',
@@ -41,5 +41,5 @@ __all__ = ['daisy',
            'CENSURE',
            'ORB',
            'match_descriptors',
-           'plot_matches'
-           'get_blobs']
+           'plot_matches',
+           'get_blobs_dog']
