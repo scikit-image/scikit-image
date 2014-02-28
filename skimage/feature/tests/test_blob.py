@@ -16,9 +16,6 @@ def test_get_blobs_dog():
     xs, ys = circle(200, 350, 30)
     img[xs, ys] = 255
 
-    # io.imshow(img)
-    # plt.show()
-
     blobs = get_blobs_dog(img)
     area = lambda x: x[2]
     radius = lambda x: math.sqrt(x / math.pi)
@@ -32,7 +29,6 @@ def test_get_blobs_dog():
     assert abs(radius(b[2]) - 5) <= thresh
 
     b = s[1]
-    print radius(b[2])
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
     assert abs(radius(b[2]) - 25) <= thresh

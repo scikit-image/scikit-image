@@ -156,35 +156,32 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
     Examples
     --------
     >>> from skimage import data,feature
-    >>> blobs = feature.get_blobs_dog(data.coins())
-    >>> for blob in blobs:
-    ...     print "Blob found at (%d,%d) of area %d" % (blob[1],blob[0],blob[2])
-    ...
-    Blob found at (117,0) of area 1061
-    Blob found at (336,46) of area 2513
-    Blob found at (156,53) of area 2035
-    Blob found at (217,53) of area 1608
-    Blob found at (276,54) of area 1231
-    Blob found at (42,55) of area 1608
-    Blob found at (100,57) of area 1231
-    Blob found at (272,121) of area 2035
-    Blob found at (337,124) of area 1413
-    Blob found at (45,125) of area 1815
-    Blob found at (207,125) of area 1608
-    Blob found at (102,126) of area 1231
-    Blob found at (154,128) of area 1231
-    Blob found at (347,185) of area 2513
-    Blob found at (213,194) of area 1815
-    Blob found at (277,194) of area 1608
-    Blob found at (42,196) of area 1231
-    Blob found at (101,196) of area 1608
-    Blob found at (155,197) of area 1231
-    Blob found at (46,260) of area 2513
-    Blob found at (174,261) of area 2035
-    Blob found at (245,263) of area 2035
-    Blob found at (302,263) of area 2035
-    Blob found at (114,266) of area 1608
-    Blob found at (358,268) of area 1608
+    >>> feature.get_blobs_dog(data.coins())
+    array([[   0,  117, 1061],
+           [  46,  336, 2513],
+           [  53,  156, 2035],
+           [  53,  217, 1608],
+           [  54,  276, 1231],
+           [  55,   42, 1608],
+           [  57,  100, 1231],
+           [ 121,  272, 2035],
+           [ 124,  337, 1413],
+           [ 125,   45, 1815],
+           [ 125,  207, 1608],
+           [ 126,  102, 1231],
+           [ 128,  154, 1231],
+           [ 185,  347, 2513],
+           [ 194,  213, 1815],
+           [ 194,  277, 1608],
+           [ 196,   42, 1231],
+           [ 196,  101, 1608],
+           [ 197,  155, 1231],
+           [ 260,   46, 2513],
+           [ 261,  174, 2035],
+           [ 263,  245, 2035],
+           [ 263,  302, 2035],
+           [ 266,  114, 1608],
+           [ 268,  358, 1608]])
 
     """
 
