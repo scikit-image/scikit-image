@@ -74,7 +74,7 @@ def _blob_overlap(blob1, blob2):
         return 0
 
     # one blob is inside the other, the smaller blob must die
-    if d < abs(r1 - r2):
+    if d <= abs(r1 - r2):
         return 1
 
     area = (r1 ** 2 * arccos((d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1))
@@ -82,7 +82,7 @@ def _blob_overlap(blob1, blob2):
             arccos(
             (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2))
             - 0.5 * sqrt(abs((-d + r2 + r1) * (d + r2 - r1) *
-                             (d - r2 + r1) * (d + r2 + r2))))
+                             (d - r2 + r1) * (d + r2 + r1))))
 
     return area / (math.pi * (min(r1, r2) ** 2))
 
@@ -119,7 +119,7 @@ def _prune_blobs(array, overlap):
     return np.array([a for a in array if a[2] > 0])
 
 
-def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=5.0,
+def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
                   overlap=.5):
     """Finds blobs in the given grayscale image.
 
