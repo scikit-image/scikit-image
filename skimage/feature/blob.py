@@ -6,6 +6,9 @@ from math import sqrt,hypot
 from numpy import arccos
 from skimage.util import img_as_float
 
+#This basic blob detection algorithm is based on:
+#http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)
+#Theory behind: http://en.wikipedia.org/wiki/Blob_detection (04.04.2013)
 
 # A lot of this code is borrowed from here
 # https://github.com/adonath/blob_detection/tree/master/blob_detection
@@ -117,7 +120,7 @@ def _prune_blobs(array,overlap):
     return np.array([ a for a in array if a[2] > 0 ])
     
 
-def get_blobs_dog(image,min_sigma=1,max_sigma=20,num_sigma=50,thresh=1.0,
+def get_blobs_dog(image,min_sigma=1,max_sigma=20,num_sigma=50,thresh=5.0,
             overlap=.5,mode='dog'):
     
     """Finds blobs in the given grayscale image
