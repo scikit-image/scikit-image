@@ -15,22 +15,22 @@ from skimage.util import img_as_float
 
 
 def _get_local_maxima_3d(array, thresh):
-    """Finds local maxima in a 3d Array
+    """Finds local maxima in a 3d Array.
 
-    Returns an array of indices of local minimas
+    Returns an array of indices of local minimas.
 
     Parameters
     ----------
     array : ndarray
-        The 3d array whose local minimas are sought
+        The 3d array whose local minimas are sought.
     thresh : float
-        Local minimas lesser than thresh are ignored
+        Local minimas lesser than thresh are ignored.
 
     Returns
     -------
     A : ndarray
         A 2d array in which each row contains 3 values, the incdices of local
-        maxima
+        maxima.
 
     """
     # computing max filter using all neighbors in cube
@@ -41,25 +41,25 @@ def _get_local_maxima_3d(array, thresh):
 
 
 def _blob_overlap(blob1, blob2):
-    """Finds the overlapping area fraction between two blobs
+    """Finds the overlapping area fraction between two blobs.
 
-    Returns a float reprenting fraction of overlapped area
+    Returns a float reprenting fraction of overlapped area.
 
     Parameters
     ----------
     blob1 : sequence
         A sequqnce of (y,x,sigma), where x,y are coordinates of blob and sigma
         is the standard deviation of the Gaussian kernel which detected the
-        blob
+        blob.
     blob2 : sequence
         A sequqnce of (y,x,sigma), where x,y are coordinates of blob and sigma
         is the standard deviation of the Gaussian kernel which detected the
-        blob
+        blob.
 
     Returns
     -------
     f : float
-        Returns a float reprenting fraction of overlapped area
+        Returns a float reprenting fraction of overlapped area.
 
     """
     root2 = sqrt(2)
@@ -88,24 +88,22 @@ def _blob_overlap(blob1, blob2):
 
 
 def _prune_blobs(array, overlap):
-    """Eleminated blobs with area overlap
-
-    Given a
+    """Eleminated blobs with area overlap.
 
     Parameters
     ----------
     array : ndarray
         a 2d array with each row representing 3 vales, the (y,x,sigma) where
         (y,x) are coordnates of the blob and sigma is the standard deviation
-        of the Gaussian kernel which detected the blob
+        of the Gaussian kernel which detected the blob.
     overlap: float
         A value between 0 and 1. If the fraction of area overlapping for 2 blobs
-        is greater than 'overlap' the smaller blob is eliminated
+        is greater than 'overlap' the smaller blob is eliminated.
 
     Returns
     -------
     A : ndarray
-        'array' with overlapping blobs removed
+        'array' with overlapping blobs removed.
 
     """
 
@@ -123,36 +121,36 @@ def _prune_blobs(array, overlap):
 
 def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=5.0,
                   overlap=.5):
-    """Finds blobs in the given grayscale image
+    """Finds blobs in the given grayscale image.
 
-    For each blob found, it's coordinates and area are returned
+    For each blob found, it's coordinates and area are returned.
 
     Parameters
     ----------
     image : ndarray
         Input grayscale image, blobs are assumed to be light on dark
-        background ( white on black )
+        background ( white on black ).
     min_sigma : float, optional
         The minimum standard deviation for Gaussian Kernel. Keep this low to
-        detect smaller blobs
+        detect smaller blobs.
     max_sigma : float, optional
         The maximum standard deviation for Gaussian Kernel. Keep this high to
-        detect larger blobs
+        detect larger blobs.
     num_sigma : float, optional
         The number of times Gaussian Kernels are computed i.e , the length
         of third dimension of the sace space
-    thresh : float, optional
+    thresh : float, optional.
         The lower bound for scale space maxima. Local maxima smaller than thresh
         are ignored. Reduce this to detect blobs with less intensities
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a fraction
-        greather than 'thresh', the smaller blob is eliminated
+        greather than 'thresh', the smaller blob is eliminated.
 
     Returns
     -------
     A : ndarray
         A 2d array in which each row contains 3 values, the Y-Coordinate , the
-        X-Coordinate and the estimated area of the blob respectively
+        X-Coordinate and the estimated area of the blob respectively.
 
 
     Examples
