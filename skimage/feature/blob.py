@@ -18,7 +18,7 @@ def _get_local_maxima_3d(array, thresh):
     """Finds local maxima in a 3d Array.
 
     A pixel is considered to be a maxima if it is greater than or equal to all
-    it's 28 neighbors in the 3d cube.This function returns an array of indices 
+    it's 28 neighbors in the 3d cube.This function returns an array of indices
     of local maximas.
 
     Parameters
@@ -85,7 +85,7 @@ def _blob_overlap(blob1, blob2):
     b = d - r2 + r1
     c = d + r2 - r1
     d = d + r2 + r1
-    area = r1**2*acos1 + r2**2*acos2 - 0.5 * sqrt(abs(a*b*c*d))
+    area = r1 ** 2 * acos1 + r2 ** 2 * acos2 - 0.5 * sqrt(abs(a * b * c * d))
 
     return area / (math.pi * (min(r1, r2) ** 2))
 
@@ -122,8 +122,9 @@ def _prune_blobs(array, overlap):
     return np.array([a for a in array if a[2] > 0])
 
 
-def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50,delta = 0.01, thresh=5.0,
-                  overlap=.5):
+def get_blobs_dog(
+    image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01, thresh=5.0,
+        overlap=.5):
     """Finds blobs in the given grayscale image.
 
     Blobs are found using the Difference of Gaussian (DoG) method[1]
@@ -158,11 +159,11 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50,delta = 0.01, t
     A : ndarray
         A 2d array in which each row contains 3 values, the Y-Coordinate , the
         X-Coordinate and the estimated area of the blob respectively.
-    
+
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
-    
+
     Examples
     --------
     >>> from skimage import data,feature
@@ -194,7 +195,7 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50,delta = 0.01, t
 
     """
 
-    if( image.ndim != 2):
+    if(image.ndim != 2):
         raise ValueError("'image' must be a grayscale ")
 
     scales = np.linspace(min_sigma, max_sigma, num_sigma)
