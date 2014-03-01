@@ -85,7 +85,7 @@ def _blob_overlap(blob1, blob2):
     b = d - r2 + r1
     c = d + r2 - r1
     d = d + r2 + r1
-    area = (r1**2*acos1 + r2**2*acos2 - 0.5 * sqrt(abs(a*b*c*d))
+    area = r1**2*acos1 + r2**2*acos2 - 0.5 * sqrt(abs(a*b*c*d))
 
     return area / (math.pi * (min(r1, r2) ** 2))
 
@@ -122,7 +122,7 @@ def _prune_blobs(array, overlap):
     return np.array([a for a in array if a[2] > 0])
 
 
-def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
+def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50,delta = 0.01, thresh=5.0,
                   overlap=.5):
     """Finds blobs in the given grayscale image.
 
@@ -143,6 +143,9 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
     num_sigma : float, optional
         The number of times Gaussian Kernels are computed i.e , the length
         of third dimension of the scale space
+    delta : float, optional.
+        The limiting value of scale, used for computing the difference between
+        two successive Gaussian blurred images
     thresh : float, optional.
         The lower bound for scale space maxima. Local maxima smaller than thresh
         are ignored. Reduce this to detect blobs with less intensities
@@ -164,8 +167,7 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
     --------
     >>> from skimage import data,feature
     >>> feature.get_blobs_dog(data.coins())
-    array([[   0,  117, 1061],
-           [  46,  336, 2513],
+    array([[  46,  336, 2513],
            [  53,  156, 2035],
            [  53,  217, 1608],
            [  54,  276, 1231],
@@ -192,13 +194,13 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
 
     """
 
-    if(len(image.shape) != 2):
+    if( image.ndim != 2):
         raise ValueError("'image' must be a grayscale ")
 
     scales = np.linspace(min_sigma, max_sigma, num_sigma)
     image = img_as_float(image)
 
-    ds = 0.01
+    ds = delta
     # ordered from inside to out
     # compute difference of Gaussian , normalize with scale space,
     # iterate over all scales, and finally put all images obtained in
