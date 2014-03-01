@@ -17,19 +17,19 @@ from skimage.util import img_as_float
 def _get_local_maxima_3d(array, thresh):
     """Finds local maxima in a 3d Array.
 
-    Returns an array of indices of local minimas.
+    Returns an array of indices of local maximas.
 
     Parameters
     ----------
     array : ndarray
-        The 3d array whose local minimas are sought.
+        The 3d array whose local maximas are sought.
     thresh : float
-        Local minimas lesser than thresh are ignored.
+        Local maximas lesser than thresh are ignored.
 
     Returns
     -------
     A : ndarray
-        A 2d array in which each row contains 3 values, the incdices of local
+        A 2d array in which each row contains 3 values, the indices of local
         maxima.
 
     """
@@ -43,23 +43,23 @@ def _get_local_maxima_3d(array, thresh):
 def _blob_overlap(blob1, blob2):
     """Finds the overlapping area fraction between two blobs.
 
-    Returns a float reprenting fraction of overlapped area.
+    Returns a float representing fraction of overlapped area.
 
     Parameters
     ----------
     blob1 : sequence
-        A sequqnce of (y,x,sigma), where x,y are coordinates of blob and sigma
+        A sequence of (y,x,sigma), where x,y are coordinates of blob and sigma
         is the standard deviation of the Gaussian kernel which detected the
         blob.
     blob2 : sequence
-        A sequqnce of (y,x,sigma), where x,y are coordinates of blob and sigma
+        A sequence of (y,x,sigma), where x,y are coordinates of blob and sigma
         is the standard deviation of the Gaussian kernel which detected the
         blob.
 
     Returns
     -------
     f : float
-        Returns a float reprenting fraction of overlapped area.
+        Returns a float representing fraction of overlapped area.
 
     """
     root2 = sqrt(2)
@@ -88,13 +88,13 @@ def _blob_overlap(blob1, blob2):
 
 
 def _prune_blobs(array, overlap):
-    """Eleminated blobs with area overlap.
+    """Eliminated blobs with area overlap.
 
     Parameters
     ----------
     array : ndarray
         a 2d array with each row representing 3 vales, the (y,x,sigma) where
-        (y,x) are coordnates of the blob and sigma is the standard deviation
+        (y,x) are coordinates of the blob and sigma is the standard deviation
         of the Gaussian kernel which detected the blob.
     overlap: float
         A value between 0 and 1. If the fraction of area overlapping for 2 blobs
@@ -138,13 +138,13 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
         detect larger blobs.
     num_sigma : float, optional
         The number of times Gaussian Kernels are computed i.e , the length
-        of third dimension of the sace space
+        of third dimension of the scale space
     thresh : float, optional.
         The lower bound for scale space maxima. Local maxima smaller than thresh
         are ignored. Reduce this to detect blobs with less intensities
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a fraction
-        greather than 'thresh', the smaller blob is eliminated.
+        greater than 'thresh', the smaller blob is eliminated.
 
     Returns
     -------
@@ -193,7 +193,7 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
 
     ds = 0.01
     # ordered from inside to out
-    # compute difference of gaussian , normalize with scale space,
+    # compute difference of Gaussian , normalize with scale space,
     # iterate over all scales, and finally put all images obtained in
     # a 3d array with np.dstack
     image_cube = np.dstack([(gf(image, s - ds) - gf(image, s + ds)) * s ** 2 / ds
