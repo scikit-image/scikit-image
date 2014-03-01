@@ -14,7 +14,7 @@ from skimage.util import img_as_float
 # https://github.com/adonath/blob_detection/tree/master/blob_detection
 
 
-def _get_local_maxima_3d(array, thresh):
+def _get_local_maxima_3d(array, threshold):
     """Finds local maxima in a 3d Array.
 
     A pixel is considered to be a maximum if it is greater than or equal to all
@@ -38,7 +38,7 @@ def _get_local_maxima_3d(array, thresh):
     # computing max filter using all neighbors in cube
     fp = np.ones((3, 3, 3))
     max_array = maximum_filter(array, footprint=fp)
-    peaks = (max_array == array) & (array > thresh)
+    peaks = (max_array == array) & (array > threshold)
     return np.argwhere(peaks)
 
 
@@ -123,7 +123,7 @@ def _prune_blobs(array, overlap):
 
 
 def blob_dog(
-    image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01, thresh=5.0,
+    image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01, threshold=5.0,
         overlap=.5, log_scale=False):
     """Finds blobs in the given grayscale image.
 
@@ -147,7 +147,7 @@ def blob_dog(
     delta : float, optional.
         The limiting value of scale, used for computing the difference between
         two successive Gaussian blurred images
-    thresh : float, optional.
+    threshold : float, optional.
         The lower bound for scale space maxima. Local maxima smaller than thresh
         are ignored. Reduce this to detect blobs with less intensities
     overlap : float, optional
@@ -199,7 +199,7 @@ def blob_dog(
 
     """
 
-    if(image.ndim != 2):
+    if image.ndim != 2 :
         raise ValueError("'image' must be a grayscale ")
 
     if log_scale:
@@ -217,7 +217,7 @@ def blob_dog(
     image_cube = np.dstack([(gf(image, s - ds) - gf(image, s + ds)) * s ** 2 / ds
                             for s in scales])
 
-    local_maxima = _get_local_maxima_3d(image_cube, thresh)
+    local_maxima = _get_local_maxima_3d(image_cube, threshold)
     # covert the last index to its corresponding scale value
     local_maxima[:, 2] = scales[local_maxima[:, 2]]
     # print local_maxima
