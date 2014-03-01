@@ -79,12 +79,13 @@ def _blob_overlap(blob1, blob2):
     if d <= abs(r1 - r2):
         return 1
 
-    area = (r1 ** 2 * arccos((d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1))
-            + r2 ** 2 *
-            arccos(
-            (d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2))
-            - 0.5 * sqrt(abs((-d + r2 + r1) * (d + r2 - r1) *
-                             (d - r2 + r1) * (d + r2 + r1))))
+    acos1 = arccos((d ** 2 + r1 ** 2 - r2 ** 2) / (2 * d * r1))
+    acos2 = arccos((d ** 2 + r2 ** 2 - r1 ** 2) / (2 * d * r2))
+    a = -d + r2 + r1
+    b = d - r2 + r1
+    c = d + r2 - r1
+    d = d + r2 + r1
+    area = (r1**2*acos1 + r2**2*acos2 - 0.5 * sqrt(abs(a*b*c*d))
 
     return area / (math.pi * (min(r1, r2) ** 2))
 
