@@ -17,7 +17,9 @@ from skimage.util import img_as_float
 def _get_local_maxima_3d(array, thresh):
     """Finds local maxima in a 3d Array.
 
-    Returns an array of indices of local maximas.
+    A pixel is considered to be a maxima if it is greater than or equal to all
+    it's 28 neighbors in the 3d cube.This function returns an array of indices 
+    of local maximas.
 
     Parameters
     ----------
@@ -123,6 +125,7 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
                   overlap=.5):
     """Finds blobs in the given grayscale image.
 
+    Blobs are found using the Difference of Gaussian (DoG) method[1]
     For each blob found, it's coordinates and area are returned.
 
     Parameters
@@ -151,7 +154,11 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
     A : ndarray
         A 2d array in which each row contains 3 values, the Y-Coordinate , the
         X-Coordinate and the estimated area of the blob respectively.
-
+    
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach
+    
     Examples
     --------
     >>> from skimage import data,feature
