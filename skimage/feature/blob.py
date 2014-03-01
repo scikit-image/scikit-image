@@ -122,7 +122,7 @@ def _prune_blobs(array, overlap):
     return np.array([a for a in array if a[2] > 0])
 
 
-def get_blobs_dog(
+def blob_dog(
     image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01, thresh=5.0,
         overlap=.5, log_scale=False):
     """Finds blobs in the given grayscale image.
@@ -171,7 +171,7 @@ def get_blobs_dog(
     Examples
     --------
     >>> from skimage import data,feature
-    >>> feature.get_blobs_dog(data.coins())
+    >>> feature.blob_dog(data.coins())
     array([[  46,  336, 2513],
            [  53,  156, 2035],
            [  53,  217, 1608],

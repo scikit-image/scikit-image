@@ -1,10 +1,10 @@
 import numpy as np
 from skimage.draw import circle
-from skimage.feature import get_blobs_dog
+from skimage.feature import blob_dog
 import math
 
 
-def test_get_blobs_dog():
+def test_blob_dog():
     img = np.ones((512, 512))
 
     xs, ys = circle(400, 130, 5)
@@ -16,7 +16,7 @@ def test_get_blobs_dog():
     xs, ys = circle(200, 350, 30)
     img[xs, ys] = 255
 
-    blobs = get_blobs_dog(img)
+    blobs = blob_dog(img)
     area = lambda x: x[2]
     radius = lambda x: math.sqrt(x / math.pi)
     s = sorted(blobs, key=area)
