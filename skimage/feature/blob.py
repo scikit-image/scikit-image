@@ -17,7 +17,7 @@ from skimage.util import img_as_float
 def _get_local_maxima_3d(array, thresh):
     """Finds local maxima in a 3d Array.
 
-    A pixel is considered to be a maxima if it is greater than or equal to all
+    A pixel is considered to be a maximum if it is greater than or equal to all
     it's 28 neighbors in the 3d cube.This function returns an array of indices
     of local maximas.
 
