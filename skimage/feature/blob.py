@@ -142,7 +142,7 @@ def get_blobs_dog(
         The maximum standard deviation for Gaussian Kernel. Keep this high to
         detect larger blobs.
     num_sigma : float, optional
-        The number of times Gaussian Kernels are computed i.e , the length
+        The number of times Gaussian Kernels are computed , i.e  the length
         of third dimension of the scale space
     delta : float, optional.
         The limiting value of scale, used for computing the difference between
