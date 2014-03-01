@@ -152,7 +152,6 @@ def get_blobs_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, thresh=1.0,
         A 2d array in which each row contains 3 values, the Y-Coordinate , the
         X-Coordinate and the estimated area of the blob respectively.
 
-
     Examples
     --------
     >>> from skimage import data,feature
