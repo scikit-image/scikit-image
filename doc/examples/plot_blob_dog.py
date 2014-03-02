@@ -19,14 +19,13 @@ blobs = blob_dog(img)
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
-plt.imshow(img,cmap='gray')
+plt.imshow(img, cmap='gray')
 
 
 for b in blobs:
-    x,y = b[0],b[1]
-    r = math.sqrt( b[2]/math.pi )
-    c = plt.Circle((y,x),r,color='#ff0000',lw = 2,fill = False)
+    y, x = b[0], b[1]
+    r = math.sqrt(b[2] / math.pi)
+    c = plt.Circle((x, y), r, color='#ff0000', lw=2, fill=False)
     ax.add_patch(c)
 
 plt.show()
-
