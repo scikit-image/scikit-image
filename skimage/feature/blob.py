@@ -199,7 +199,7 @@ def blob_dog(
 
     """
 
-    if image.ndim != 2 :
+    if image.ndim != 2:
         raise ValueError("'image' must be a grayscale ")
 
     if log_scale:
