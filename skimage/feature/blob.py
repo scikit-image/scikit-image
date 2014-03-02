@@ -72,7 +72,7 @@ def _blob_overlap(blob1, blob2):
 
     d = hypot(blob1[0] - blob2[0], blob1[1] - blob2[1])
 
-    if(d > r1 + r2):
+    if d > r1 + r2:
         return 0
 
     # one blob is inside the other, the smaller blob must die
@@ -122,9 +122,8 @@ def _prune_blobs(array, overlap):
     return np.array([a for a in array if a[2] > 0])
 
 
-def blob_dog(
-    image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01, threshold=5.0,
-        overlap=.5, log_scale=False):
+def blob_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01,
+             threshold=5.0, overlap=.5, log_scale=False):
     """Finds blobs in the given grayscale image.
 
     Blobs are found using the Difference of Gaussian (DoG) method[1]
