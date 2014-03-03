@@ -49,11 +49,11 @@ def _blob_overlap(blob1, blob2):
     Parameters
     ----------
     blob1 : sequence
-        A sequence of (y,x,sigma), where x,y are coordinates of blob and sigma
+        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob and sigma
         is the standard deviation of the Gaussian kernel which detected the
         blob.
     blob2 : sequence
-        A sequence of (y,x,sigma), where x,y are coordinates of blob and sigma
+        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob and sigma
         is the standard deviation of the Gaussian kernel which detected the
         blob.
 
