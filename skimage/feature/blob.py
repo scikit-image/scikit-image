@@ -118,7 +118,7 @@ def _prune_blobs(blobs_array, overlap):
             else:
                 blob1[2] = -1
 
-    return blobs_array[blobs_array[:,2] > 0]
+    return blobs_array[blobs_array[:, 2] > 0]
 
 
 def blob_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01,
