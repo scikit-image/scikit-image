@@ -49,13 +49,13 @@ def _blob_overlap(blob1, blob2):
     Parameters
     ----------
     blob1 : sequence
-        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob and sigma
-        is the standard deviation of the Gaussian kernel which detected the
-        blob.
+        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob
+        and sigma is the standard deviation of the Gaussian kernel which
+        detected the blob.
     blob2 : sequence
-        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob and sigma
-        is the standard deviation of the Gaussian kernel which detected the
-        blob.
+        A sequence of ``(y,x,sigma)``, where ``x,y`` are coordinates of blob
+        and sigma is the standard deviation of the Gaussian kernel which
+        detected the blob.
 
     Returns
     -------
@@ -118,7 +118,7 @@ def _prune_blobs(blobs_array, overlap):
             else:
                 blob1[2] = -1
 
-    return blobs_array[blobs_array[2] > 0]
+    return np.array([a for a in blobs_array if a[2] > 0])
 
 
 def blob_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01,
