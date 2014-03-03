@@ -24,7 +24,8 @@ __all__ = ['load',
            'clock',
            'immunohistochemistry',
            'chelsea',
-           'coffee']
+           'coffee',
+           'hubble_deep_field']
 
 
 def load(f):
@@ -200,3 +201,22 @@ def coffee():
 
     """
     return load("coffee.png")
+
+
+def hubble_deep_field():
+    """The Hubble Deep Field.
+
+    This image shows a small part of the night sky containing many galaxies
+    ans stars. It may be used to illustrate multi-scale blob detection.
+
+    This image was captured by National Aeronautics and Space Administration
+    (NASA)
+
+    It was obtained from
+    `File:HubbleDeepField.800px.jpg
+    http://en.wikipedia.org/wiki/File:HubbleDeepField.800px.jpg`__.
+
+    Released into the public domain by NASA.
+
+    """
+    return load("hubble_deep_field.png")
