@@ -22,7 +22,6 @@ def test_blob_dog():
     s = sorted(blobs, key=area)
     thresh = 5
 
-
     b = s[0]
     assert abs(b[0] - 400) <= thresh
     assert abs(b[1] - 130) <= thresh

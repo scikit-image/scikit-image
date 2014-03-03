@@ -100,8 +100,8 @@ def _prune_blobs(array, overlap):
         (y,x) are coordinates of the blob and sigma is the standard deviation
         of the Gaussian kernel which detected the blob.
     overlap: float
-        A value between 0 and 1. If the fraction of area overlapping for 2 blobs
-        is greater than 'overlap' the smaller blob is eliminated.
+        A value between 0 and 1. If the fraction of area overlapping for 2
+        blobs is greater than 'overlap' the smaller blob is eliminated.
 
     Returns
     -------
@@ -147,15 +147,16 @@ def blob_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01,
         The limiting value of scale, used for computing the difference between
         two successive Gaussian blurred images
     threshold : float, optional.
-        The lower bound for scale space maxima. Local maxima smaller than thresh
-        are ignored. Reduce this to detect blobs with less intensities
+        The lower bound for scale space maxima. Local maxima smaller than
+        thresh are ignored. Reduce this to detect blobs with less intensities
     overlap : float, optional
-        A value between 0 and 1. If the area of two blobs overlaps by a fraction
-        greater than 'thresh', the smaller blob is eliminated.
+        A value between 0 and 1. If the area of two blobs overlaps by a
+        fraction greater than 'thresh', the smaller blob is eliminated.
     log_scale : boolean, optional
-        If set to true, the standard deviations of Gaussian Kernels are interpolated
-        using a logarithmic scale. This is useful when finding blobs with a large
-        variation of sizes.If set, scales are interploated with log to the base 10.
+        If set to true, the standard deviations of Gaussian Kernels are
+        interpolated using a logarithmic scale. This is useful when finding
+        blobs with a large variation of sizes.If set, scales are interploated
+        with log to the base 10.
 
     Returns
     -------
@@ -213,8 +214,8 @@ def blob_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01,
     # compute difference of Gaussian , normalize with scale space,
     # iterate over all scales, and finally put all images obtained in
     # a 3d array with np.dstack
-    image_cube = np.dstack([(gf(image, s - ds) - gf(image, s + ds)) * s ** 2 / ds
-                            for s in scales])
+    image_cube = np.dstack([(gf(image, s - ds) - gf(image, s + ds)) *
+                            s ** 2 / ds for s in scales])
 
     local_maxima = _get_local_maxima_3d(image_cube, threshold)
     # covert the last index to its corresponding scale value
