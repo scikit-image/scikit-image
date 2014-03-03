@@ -40,7 +40,7 @@ for b in blobs:
     c = plt.Circle((x, y), r, color='#ff0000', lw=2, fill=False)
     ax.add_patch(c)
 
-print("""This picture contains atleast %d detected stellar objects
+print("""This picture contains atleast %d detected galaxies
 Yet another reminder of the extraordinaty vastness of our universe.
 """ % blobs.shape[0])
 
