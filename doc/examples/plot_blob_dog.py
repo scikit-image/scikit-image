@@ -3,7 +3,7 @@
 Blob Detection
 ================
 
-Detect blobs in an image with the Difference of Gaussian ( DoG ) method and
+Detect blobs in an image with the Difference of Gaussian (DoG) method and
 plot their position on the image.
 
 .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_difference_of_Gaussians_approach

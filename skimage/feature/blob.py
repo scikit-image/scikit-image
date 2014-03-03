@@ -95,8 +95,8 @@ def _prune_blobs(blobs_array, overlap):
     Parameters
     ----------
     blobs_array : ndarray
-        a 2d array with each row representing 3 values, the ``(y,x,sigma)`` where
-        ``(y,x)`` are coordinates of the blob and sigma is the standard
+        a 2d array with each row representing 3 values, the ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and sigma is the standard
         deviation of the Gaussian kernel which detected the blob.
     overlap : float
         A value between 0 and 1. If the fraction of area overlapping for 2
@@ -146,8 +146,8 @@ def blob_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01,
         The difference between standard deviation of Gaussian Kernels used for
         computing the Differenec of Gaussians.
     threshold : float, optional.
-        The absolute lower bound for scale space maxima. Local maxima smaller 
-        than thresh are ignored. Reduce this to detect blobs with less 
+        The absolute lower bound for scale space maxima. Local maxima smaller
+        than thresh are ignored. Reduce this to detect blobs with less
         intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
@@ -213,7 +213,8 @@ def blob_dog(image, min_sigma=1, max_sigma=20, num_sigma=50, delta=0.01,
     # compute difference of Gaussian , normalize with scale space,
     # iterate over all scales, and finally put all images obtained in
     # a 3d array with np.dstack
-    image_cube = np.dstack([(gaussian_filter(image, s - delta) - gaussian_filter(image, s + delta)) *
+    image_cube = np.dstack([(gaussian_filter(image, s - delta) -
+                            gaussian_filter(image, s + delta)) *
                             s ** 2 / delta for s in scales])
 
     local_maxima = _get_local_maxima_3d(image_cube, threshold)
