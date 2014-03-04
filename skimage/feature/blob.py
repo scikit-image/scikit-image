@@ -191,7 +191,6 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
            [ 267,  115, 1608],
            [ 267,  359, 1608]])
 
-
     """
 
     if image.ndim != 2:
