@@ -26,7 +26,7 @@ def _get_local_maxima_3d(array, threshold):
     array : ndarray
         The 3d array whose local maximas are sought.
     thresh : float
-        Local maximas lesser than thresh are ignored.
+        Local maximas lesser than `thresh` are ignored.
 
     Returns
     -------
@@ -144,7 +144,6 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
     sigma_ratio : float, optional
         The ratio between the standard deviation of Gaussian Kernels used for
         computing the Difference of Gaussians
-        `max_sigma`
     threshold : float, optional.
         The absolute lower bound for scale space maxima. Local maxima smaller
         than thresh are ignored. Reduce this to detect blobs with less
@@ -152,11 +151,6 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
         fraction greater than `thresh`, the smaller blob is eliminated.
-    log_scale : boolean, optional
-        If set to True, the standard deviations of Gaussian Kernels are
-        interpolated using a logarithmic scale. This is useful when finding
-        blobs with a large variation in size. If set, scales are interpolated
-        with log to the base 10.
 
     Returns
     -------
