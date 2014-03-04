@@ -123,7 +123,7 @@ def _prune_blobs(blobs_array, overlap):
     return np.array([b for b in blobs_array if b[2] > 0])
 
 
-def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
+def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
              overlap=.5,):
     """Finds blobs in the given grayscale image.
 
@@ -165,30 +165,30 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
     Examples
     --------
     >>> from skimage import data, feature
-    >>> feature.blob_dog(data.coins())
+    >>> feature.blob_dog(data.coins(),threshold=.5,max_sigma=40)
     array([[  45,  336, 1608],
-           [  51,  277, 1608],
            [  52,  155, 1608],
            [  52,  216, 1608],
            [  54,   42, 1608],
-           [  56,  101, 1608],
+           [  54,  276,  628],
+           [  58,  100,  628],
            [ 120,  272, 1608],
-           [ 124,  206, 1608],
-           [ 124,  339, 1608],
+           [ 124,  337,  628],
            [ 125,   45, 1608],
-           [ 125,  102, 1608],
-           [ 127,  154, 1608],
+           [ 125,  208,  628],
+           [ 127,  102,  628],
+           [ 128,  154,  628],
            [ 185,  347, 1608],
            [ 193,  213, 1608],
            [ 194,  277, 1608],
            [ 195,  102, 1608],
-           [ 196,   41, 1608],
-           [ 197,  154, 1608],
+           [ 196,   43,  628],
+           [ 198,  155,  628],
            [ 260,   46, 1608],
            [ 261,  173, 1608],
            [ 263,  245, 1608],
            [ 263,  302, 1608],
-           [ 267,  115, 1608],
+           [ 267,  115,  628],
            [ 267,  359, 1608]])
 
     """
@@ -208,9 +208,9 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
     gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 
     # computing difference between two successive Gaussian blurred images
-    # multiplying with square of standard deviation provides scale invariance
+    # multiplying with standard deviation provides scale invariance
     dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
-                  * sigma_list[i] ** 2 for i in range(k)]
+                  * sigma_list[i] for i in range(k)]
     image_cube = np.dstack(dog_images)
 
     local_maxima = _get_local_maxima_3d(image_cube, threshold)
