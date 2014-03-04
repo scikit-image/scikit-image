@@ -150,7 +150,7 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
         intensities.
     overlap : float, optional
         A value between 0 and 1. If the area of two blobs overlaps by a
-        fraction greater than `thresh`, the smaller blob is eliminated.
+        fraction greater than `threshold`, the smaller blob is eliminated.
 
     Returns
     -------
