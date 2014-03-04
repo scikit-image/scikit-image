@@ -170,32 +170,33 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
 
     Examples
     --------
-    >>> from skimage import data,feature
+    >>> from skimage import data, feature
     >>> feature.blob_dog(data.coins())
-    array([[  46,  336, 2513],
-           [  53,  156, 2035],
-           [  53,  217, 1608],
-           [  54,  276, 1231],
-           [  55,   42, 1608],
-           [  57,  100, 1231],
-           [ 121,  272, 2035],
-           [ 124,  337, 1413],
-           [ 125,   45, 1815],
-           [ 125,  207, 1608],
-           [ 126,  102, 1231],
-           [ 128,  154, 1231],
-           [ 185,  347, 2513],
-           [ 194,  213, 1815],
+    array([[  45,  336, 1608],
+           [  51,  277, 1608],
+           [  52,  155, 1608],
+           [  52,  216, 1608],
+           [  54,   42, 1608],
+           [  56,  101, 1608],
+           [ 120,  272, 1608],
+           [ 124,  206, 1608],
+           [ 124,  339, 1608],
+           [ 125,   45, 1608],
+           [ 125,  102, 1608],
+           [ 127,  154, 1608],
+           [ 185,  347, 1608],
+           [ 193,  213, 1608],
            [ 194,  277, 1608],
-           [ 196,   42, 1231],
-           [ 196,  101, 1608],
-           [ 197,  155, 1231],
-           [ 260,   46, 2513],
-           [ 261,  174, 2035],
-           [ 263,  245, 2035],
-           [ 263,  302, 2035],
-           [ 266,  114, 1608],
-           [ 268,  358, 1608]])
+           [ 195,  102, 1608],
+           [ 196,   41, 1608],
+           [ 197,  154, 1608],
+           [ 260,   46, 1608],
+           [ 261,  173, 1608],
+           [ 263,  245, 1608],
+           [ 263,  302, 1608],
+           [ 267,  115, 1608],
+           [ 267,  359, 1608]])
+
 
     """
 
@@ -213,8 +214,8 @@ def blob_dog(image, min_sigma=1, max_sigma=25, sigma_ratio=1.6, threshold=2.0,
 
     gaussian_images = [gaussian_filter(image, s) for s in sigma_list]
 
-    # computing difference between two succesive gaussian blurred images
-    # multipying with square of standard deviation provides scale invariance
+    # computing difference between two successive Gaussian blurred images
+    # multiplying with square of standard deviation provides scale invariance
     dog_images = [(gaussian_images[i] - gaussian_images[i + 1])
                   * sigma_list[i] ** 2 for i in range(k)]
     image_cube = np.dstack(dog_images)
