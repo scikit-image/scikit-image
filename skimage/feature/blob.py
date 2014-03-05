@@ -16,23 +16,24 @@ from skimage.util import img_as_float
 # https://github.com/adonath/blob_detection/tree/master/blob_detection
 
 
-def get_local_maxima_3d(array, threshold, connectivity=3):
-    """Finds local maxima in a 3d array.
+def get_local_maxima(ar, threshold, connectivity=3):
+    """Finds local maxima in an array.
 
-    A pixel is considered to be a maximum if it is greater than or equal to all
-    its neighbors in the 3d cube.
+    A point is considered to be a maximum if it is greater than or equal to all
+    its neighbors.
 
     Parameters
     ----------
-    array : ndarray
-        The 3d array whose local maximas are sought.
+    ar : ndarray
+        The array whose local maximas are sought.
     thresh : float
         Local maximas lesser than `thresh` are ignored.
     connectivity : float, optional
         Elements up to a squared distance of `connectivity` from a point are
-        considered neighbors. If `connectivity` is 1, 6 neighbors are
-        considered, if `connectivity` is 2, 18 neighbors are considered and if
-        `connectivity` is 3, all 26 neighbors are considered.
+        considered neighbors. For example in a 3 Dimensional array, if
+        `connectivity` is 1, 6 neighbors are considered, if `connectivity` is
+        2, 18 neighbors are considered and if `connectivity` is 3, all 26
+        neighbors are considered.
 
     Returns
     -------
@@ -42,9 +43,9 @@ def get_local_maxima_3d(array, threshold, connectivity=3):
 
     """
     # computing max filter using all neighbors in cube
-    fp = generate_binary_structure(3, connectivity)
-    max_array = maximum_filter(array, footprint=fp)
-    peaks = (max_array == array) & (array > threshold)
+    fp = generate_binary_structure(ar.ndim, connectivity)
+    max_ar = maximum_filter(ar, footprint=fp)
+    peaks = (max_ar == ar) & (ar > threshold)
     return np.argwhere(peaks)
 
 
@@ -219,7 +220,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
                   * sigma_list[i] for i in range(k)]
     image_cube = np.dstack(dog_images)
 
-    local_maxima = get_local_maxima_3d(image_cube, threshold)
+    local_maxima = get_local_maxima(image_cube, threshold)
 
     # Convert the last index to its corresponding scale value
     local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
