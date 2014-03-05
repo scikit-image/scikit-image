@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter, maximum_filter
+from scipy.ndimage.morphology import generate_binary_structure
 import itertools as itt
 import math
 from math import sqrt, hypot, log
@@ -15,11 +16,11 @@ from skimage.util import img_as_float
 # https://github.com/adonath/blob_detection/tree/master/blob_detection
 
 
-def _get_local_maxima_3d(array, threshold):
+def get_local_maxima_3d(array, threshold, connectivity=3):
     """Finds local maxima in a 3d array.
 
     A pixel is considered to be a maximum if it is greater than or equal to all
-    its 28 neighbors in the 3d cube.
+    its neighbors in the 3d cube.
 
     Parameters
     ----------
@@ -27,6 +28,11 @@ def _get_local_maxima_3d(array, threshold):
         The 3d array whose local maximas are sought.
     thresh : float
         Local maximas lesser than `thresh` are ignored.
+    connectivity : float, optional
+        Elements up to a squared distance of `connectivity` from a point are
+        considered neighbors. If `connectivity` is 1, 6 neighbors are
+        considered, if `connectivity` is 2, 18 neighbors are considered and if
+        `connectivity` is 3, all 26 neighbors are considered.
 
     Returns
     -------
@@ -36,7 +42,7 @@ def _get_local_maxima_3d(array, threshold):
 
     """
     # computing max filter using all neighbors in cube
-    fp = np.ones((3, 3, 3))
+    fp = generate_binary_structure(3, connectivity)
     max_array = maximum_filter(array, footprint=fp)
     peaks = (max_array == array) & (array > threshold)
     return np.argwhere(peaks)
@@ -213,7 +219,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
                   * sigma_list[i] for i in range(k)]
     image_cube = np.dstack(dog_images)
 
-    local_maxima = _get_local_maxima_3d(image_cube, threshold)
+    local_maxima = get_local_maxima_3d(image_cube, threshold)
 
     # Convert the last index to its corresponding scale value
     local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
