@@ -41,6 +41,16 @@ def get_local_maxima(ar, threshold, connectivity=3):
         A 2d array in which each row contains 3 values, the indices of local
         maxima.
 
+    Examples
+    --------
+    >>> a = np.array([[ 0 , 0 , 0 , 0 , 0],
+    ...               [ 0 , 0 , 3 , 0 , 0],
+    ...               [ 0 , 0 , 1 , 0 , 0],
+    ...               [ 0 , 1 , 0 , 0 , 0],
+    ...               [ 0 , 0 , 0 , 0 , 0]])
+    >>> get_local_maxima(a, threshold = 1, connectivity = 2)
+    array([[1, 2]])
+
     """
     # computing max filter using all neighbors in cube
     fp = generate_binary_structure(ar.ndim, connectivity)
