@@ -11,6 +11,8 @@ from skimage.filters.thresholding import (threshold_adaptive,
                                           threshold_li,
                                           threshold_yen,
                                           threshold_isodata,
+                                          threshold_niblack,
+                                          threshold_sauvola,
                                           threshold_mean,
                                           threshold_triangle,
                                           threshold_minimum)
@@ -148,6 +150,52 @@ class TestSimpleImage():
              [False,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='median')
+        assert_equal(ref, out)
+
+    def test_threshold_niblack(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, True, True, True, True],
+             [False, True, True, True, False],
+             [False, True, True, True, True],
+             [True, True, False, False, False]]
+        )
+        out = threshold_niblack(self.image, w=3, k=0.5)
+        assert_equal(ref, out)
+
+    def test_threshold_sauvola_sauvola(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, True, False],
+             [True, True, False, False, False]]
+        )
+        out = threshold_sauvola(self.image, method='sauvola', w=3,
+                                k=0.2, r=128)
+        assert_equal(ref, out)
+
+    def test_threshold_sauvola_wolf(self):
+        ref = np.array(
+            [[False, False, False, True, True],
+             [False, False, True, True, True],
+             [False, False, True, True, False],
+             [False, True, True, False, False],
+             [True, True, False, False, False]]
+        )
+        out = threshold_sauvola(self.image, method='wolf', w=5, k=0.1)
+        assert_equal(ref, out)
+
+    def test_threshold_sauvola_phansalkar(self):
+        ref = np.array(
+            [[False, False, False, False, True],
+             [False, False, False, False, False],
+             [False, False, True, False, False],
+             [False, False, True, False, False],
+             [False, True, False, False, False]]
+        )
+        out = threshold_sauvola(self.image, method='phansalkar',
+                                w=9, k=0.8, r=64)
         assert_equal(ref, out)
 
 
