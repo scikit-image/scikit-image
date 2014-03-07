@@ -2,7 +2,10 @@ __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_li', ]
+           'threshold_li', 
+           'threshold_niblack',
+           'threshold_sauvola',
+           ]
 
 import numpy as np
 import scipy.ndimage
@@ -248,6 +251,7 @@ def threshold_isodata(image, nbins=256, return_all=False):
     >>> thresh = threshold_isodata(image)
     >>> binary = image > thresh
     """
+<<<<<<< HEAD:skimage/filters/thresholding.py
 
     hist, bin_centers = histogram(image.ravel(), nbins)
 
@@ -369,3 +373,201 @@ def threshold_li(image):
             new_thresh = temp + tolerance
 
     return threshold + offset
+
+
+def _mean_std(image, w):
+    """Return local mean and standard deviation of each pixel using a
+    neighborhood defined by window w x w. The algorithm uses Integral
+    images to speedup computation. This is used by threshold_niblack
+    and threshold_sauvola.
+
+    Parameters
+    ----------
+    image : (N, M) ndarray
+        Input image.
+    w : int
+        Uneven window size (e.g. 3, 5, 7, ..., 21, ...).
+
+    Returns
+    -------
+    m : 2-D array of same size of image containning local mean values.
+    s : 2-D array of same size of image containning local standard
+        deviation values.
+
+    References
+    ----------
+    .. [1] F. Shafait, D. Keysers, and T. M. Breuel, "Efficient
+           implementation of local adaptive thresholding techniques
+           using integral images." in Document Recognition and
+           Retrieval XV, (San Jose, USA), Jan. 2008.
+    """
+
+    I = np.cumsum(np.cumsum(image, axis=0), axis=1)  # Integral Image.
+    kern = np.zeros((w, w))
+    kern[0, 0], kern[-1, -1] = 1, 1
+    kern[[0, -1], [-1, 0]] = -1
+    w2 = (w - 1) ** 2
+    m = scipy.ndimage.convolve(I, kern, mode='nearest') / w2
+    g = image.astype(np.float)
+    g2 = g ** 2.
+    m2 = m ** 2.
+    kern[:, :] = 1  # Reuse kernel to get summation of local intensities in g
+    sum_g2 = scipy.ndimage.convolve(g2, kern, mode='nearest')
+    sum_m2 = w2 * m2
+    s2 = (sum_g2 - sum_m2) * 1 / w2
+    s = np.sqrt(s2)
+    return m, s
+
+
+def threshold_niblack(image, w=15, k=0.2, offset=0):
+    """Applies Niblack local threshold to an array.
+
+    A threshold T is calculated for every pixel in the image using the
+    following formula:
+
+    T = m(x,y) - k * s(x,y)
+
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by window w x w centered around
+    the pixel. k is a configurable parameter that weights the effect
+    of standar deviation.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        Input image.
+    w : int
+        Uneven size of pixel neighborhood window w x w (e.g. 3, 5, 7,
+        ..., 21, ...). Default: 15.
+    k : float, optional
+        Value of parameter k in threshold formula. Default: 0.2.
+    offset : float, optional
+        Constant subtracted from obtained local thresholds.
+        Default: 0.0.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Thresholded binary image
+
+    References
+    ----------
+    .. [1] Niblack, W (1986), An introduction to Digital Image
+           Processing, Prentice-Hall.
+
+    Examples
+    --------
+    >>> from skimage.data import page
+    >>> image = page()
+    >>> binary_image = threshold_niblack(image, w=7, k=0.1)
+    """
+
+    m, s = _mean_std(image, w)
+    t = m - k * s
+    return image > (t - offset)
+
+
+def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0, 
+                      p=2, q=10):
+    """Applies Sauvola local threshold to an array. Sauvola is a
+    modification of Niblack technique.
+
+    In the original method a threshold T is calculated for every pixel
+    in the image using the following formula:
+
+    T = m(x,y) * (1 + k * ((s(x,y) / R) - 1))
+
+    where m(x,y) and s(x,y) are the mean and standard deviation of
+    pixel (x,y) neighborhood defined by window w x w centered around
+    the pixel. k is a configurable parameter that weights the effect
+    of standar deviation. R is the maximum standard deviation of
+    a greyscale image (R = 128).
+    
+    In Wolf's variation the threshold T is given by:
+
+    T = (1 - k) * m(x,y) + k * M + k * (s(x,y) / R) * (m(x,y) - M)
+    
+    where R is the maximum standard deviation found in all local
+    neighborhoods and M is the minimum pixel intensity in image.
+
+    In Phansalkar's variation image pixels are normalized and the
+    threshold T is given by:
+
+    T = m * (1 + p * exp(-q * m(x,y)) + k * ((s(x,y) / R) - 1))
+
+    where p and q are fixed values of 2 and 10 respectively. The
+    other parameters have the same meaning as in the previous methods.
+
+    Parameters
+    ----------
+    image: (N, M) ndarray
+        Input image.
+    method : {'original', 'wolf', 'phansalkar'}, optional.
+        method used for computing local thresholds. 
+
+        * 'sauvola': Uses original implementation described in [1].
+        * 'wolf': Uses Wolf's variation described in [2].
+        * 'phansalkar': Uses Phansalkar's variation described in [3]-
+
+        Default: 'sauvola'.
+    w : int
+        Uneven size of pixel neighborhood window w x w (e.g. 3, 5, 7,
+        ..., 21, ...). Default: 15.
+    k : float, optional
+        Value of parameter k in threshold formula. Default: 0.2.
+    r : float, optional
+        Value of R in threshold formula. Not used by method 'wolf'.
+        Default: 128.
+
+    offset : float, optional
+        Constant subtracted from obtained local thresholds.
+        Default: 0.0.
+    p : float, optional
+        Value of p in 'phansalkar' threshold formula. Default: 2.
+    q : float, optional
+        Value of q in 'phansalkar' threshold formula. Default: 10.
+
+    Returns
+    -------
+    threshold : (N, M) ndarray
+        Thresholded binary image
+
+    References
+    ----------
+    .. [1] J. Sauvola and M. Pietikainen, "Adaptive document image
+           binarization," Pattern Recognition 33(2),
+           pp. 225-236, 2000.
+    .. [2] C. Wolf, J-M. Jolion, "Extraction and Recognition of
+           Artificial Text in Multimedia Documents", Pattern
+           Analysis and Applications, 6(4):309-326, (2003).
+    .. [3] Phansalskar, N; More, S & Sabale, A et al. (2011), "Adaptive
+           local thresholding for detection of nuclei in diversity
+           stained cytology images.", International Conference on
+           Communications and Signal Processing (ICCSP): 218-220.
+
+    Examples
+    --------
+    >>> from skimage.data import page
+    >>> image = page()
+    >>> binary_sauvola = threshold_sauvola(image, method='sauvola',
+                                           w=7, k=0.2, r=128)
+    >>> binary_wolf = threshold_sauvola(image, method='wolf',
+                                        w=7, k=0.2, r=128)
+    >>> binary_sauvola = threshold_sauvola(image, method='phansalkar',
+                                           w=15, k=0.2, r=128)
+    """
+
+    t = np.zeros_like(image)
+    m, s = _mean_std(image, w)
+    if method == 'sauvola':
+        t = m * (1 + k * ((s / r) - 1))
+    elif method == 'wolf':
+        R = s.max() / 255.  # Normalized max std_dev used by Wolf.
+        M = image.min()
+        t = (1 - k) * m + k * M + k * (s / R) * (m - M)
+    elif method == 'phansalkar':
+        image = image.astype(np.float) / 255.  # Normalized image.
+        m, s = _mean_std(image, w)
+        t = m * (1 + p * np.exp(-q * m) + k * ((s / r) - 1))
+
+    return image > (t - offset)
