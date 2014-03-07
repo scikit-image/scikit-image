@@ -386,7 +386,7 @@ def _mean_std(image, w):
     image : (N, M) ndarray
         Input image.
     w : int
-        Uneven window size (e.g. 3, 5, 7, ..., 21, ...).
+        Odd window size w x w (e.g. 3, 5, 7, ..., 21, ...).
 
     Returns
     -------
@@ -401,20 +401,29 @@ def _mean_std(image, w):
            using integral images." in Document Recognition and
            Retrieval XV, (San Jose, USA), Jan. 2008.
     """
-
+    if w == 1 or w % 2 == 0:
+        raise ValueError(
+            "Window size w = %s must be odd and greater than 1." % (w))
     I = np.cumsum(np.cumsum(image, axis=0), axis=1)  # Integral Image.
-    kern = np.zeros((w, w))
+
+    # Pad left and top of Integral image with zeros
+    I = np.vstack((np.zeros((1, I.shape[1]), I.dtype), I))
+    I = np.hstack((np.zeros((I.shape[0], 1), I.dtype), I))
+
+    kern = np.zeros((w + 1, w + 1))
     kern[0, 0], kern[-1, -1] = 1, 1
     kern[[0, -1], [-1, 0]] = -1
-    w2 = (w - 1) ** 2
-    m = scipy.ndimage.convolve(I, kern, mode='nearest') / w2
+    # w2 holds total of pixels in window for each pixel (usually w x w).
+    w2 = scipy.ndimage.convolve(
+        np.ones(image.shape, np.float), np.ones((w, w)), mode='constant')
+
+    m = scipy.ndimage.convolve(I, kern, mode='nearest')[:-1, :-1] / w2
     g = image.astype(np.float)
     g2 = g ** 2.
     m2 = m ** 2.
-    kern[:, :] = 1  # Reuse kernel to get summation of local intensities in g
-    sum_g2 = scipy.ndimage.convolve(g2, kern, mode='nearest')
+    sum_g2 = scipy.ndimage.convolve(g2, np.ones((w, w)), mode='constant')
     sum_m2 = w2 * m2
-    s2 = (sum_g2 - sum_m2) * 1 / w2
+    s2 = (sum_g2 - sum_m2) / w2
     s = np.sqrt(s2)
     return m, s
 
@@ -436,8 +445,8 @@ def threshold_niblack(image, w=15, k=0.2, offset=0):
     ----------
     image: (N, M) ndarray
         Input image.
-    w : int
-        Uneven size of pixel neighborhood window w x w (e.g. 3, 5, 7,
+    w : int, optional
+        Odd size of pixel neighborhood window w x w (e.g. 3, 5, 7,
         ..., 21, ...). Default: 15.
     k : float, optional
         Value of parameter k in threshold formula. Default: 0.2.
@@ -467,7 +476,7 @@ def threshold_niblack(image, w=15, k=0.2, offset=0):
     return image > (t - offset)
 
 
-def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0, 
+def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
                       p=2, q=10):
     """Applies Sauvola local threshold to an array. Sauvola is a
     modification of Niblack technique.
@@ -482,11 +491,11 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
     the pixel. k is a configurable parameter that weights the effect
     of standar deviation. R is the maximum standard deviation of
     a greyscale image (R = 128).
-    
+
     In Wolf's variation the threshold T is given by:
 
     T = (1 - k) * m(x,y) + k * M + k * (s(x,y) / R) * (m(x,y) - M)
-    
+
     where R is the maximum standard deviation found in all local
     neighborhoods and M is the minimum pixel intensity in image.
 
@@ -503,22 +512,21 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
     image: (N, M) ndarray
         Input image.
     method : {'original', 'wolf', 'phansalkar'}, optional.
-        method used for computing local thresholds. 
+        method used for computing local thresholds.
 
         * 'sauvola': Uses original implementation described in [1].
         * 'wolf': Uses Wolf's variation described in [2].
         * 'phansalkar': Uses Phansalkar's variation described in [3]-
 
         Default: 'sauvola'.
-    w : int
-        Uneven size of pixel neighborhood window w x w (e.g. 3, 5, 7,
+    w : int, optional
+        Odd size of pixel neighborhood window w x w (e.g. 3, 5, 7,
         ..., 21, ...). Default: 15.
     k : float, optional
         Value of parameter k in threshold formula. Default: 0.2.
     r : float, optional
         Value of R in threshold formula. Not used by method 'wolf'.
         Default: 128.
-
     offset : float, optional
         Constant subtracted from obtained local thresholds.
         Default: 0.0.
@@ -570,5 +578,7 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
         m, s = _mean_std(image, w)
         rn = r / 255.
         t = m * (1 + p * np.exp(-q * m) + k * ((s / rn) - 1))
+    else:
+        raise ValueError("Unknown method: %s" % (method))
 
     return image > (t - offset)
