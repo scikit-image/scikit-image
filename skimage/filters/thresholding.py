@@ -550,11 +550,11 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
     >>> from skimage.data import page
     >>> image = page()
     >>> binary_sauvola = threshold_sauvola(image, method='sauvola',
-                                           w=7, k=0.2, r=128)
-    >>> binary_wolf = threshold_sauvola(image, method='wolf',
-                                        w=7, k=0.2, r=128)
-    >>> binary_sauvola = threshold_sauvola(image, method='phansalkar',
                                            w=15, k=0.2, r=128)
+    >>> binary_wolf = threshold_sauvola(image, method='wolf',
+                                        w=7, k=0.2)
+    >>> binary_phansalkar = threshold_sauvola(image, method='phansalkar',
+                                           w=7, k=0.2, r=128)
     """
 
     t = np.zeros_like(image)
@@ -562,12 +562,13 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
     if method == 'sauvola':
         t = m * (1 + k * ((s / r) - 1))
     elif method == 'wolf':
-        R = s.max() / 255.  # Normalized max std_dev used by Wolf.
+        R = s.max()  # Max std_dev used by Wolf.
         M = image.min()
         t = (1 - k) * m + k * M + k * (s / R) * (m - M)
     elif method == 'phansalkar':
         image = image.astype(np.float) / 255.  # Normalized image.
         m, s = _mean_std(image, w)
-        t = m * (1 + p * np.exp(-q * m) + k * ((s / r) - 1))
+        rn = r / 255.
+        t = m * (1 + p * np.exp(-q * m) + k * ((s / rn) - 1))
 
     return image > (t - offset)
