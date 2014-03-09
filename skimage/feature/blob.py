@@ -1,11 +1,11 @@
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter, maximum_filter
-from scipy.ndimage.morphology import generate_binary_structure
+from scipy.ndimage.filters import gaussian_filter
 import itertools as itt
 import math
 from math import sqrt, hypot, log
 from numpy import arccos
 from skimage.util import img_as_float
+from .peak import peak_local_max
 
 
 # This basic blob detection algorithm is based on:
@@ -14,49 +14,6 @@ from skimage.util import img_as_float
 
 # A lot of this code is borrowed from here
 # https://github.com/adonath/blob_detection/tree/master/blob_detection
-
-
-def get_local_maxima(ar, threshold, connectivity=3):
-    """Finds local maxima in an array.
-
-    A point is considered to be a maximum if it is greater than or equal to all
-    its neighbors.
-
-    Parameters
-    ----------
-    ar : ndarray
-        The array whose local maximas are sought.
-    thresh : float
-        Local maximas lesser than `thresh` are ignored.
-    connectivity : float, optional
-        Elements up to a squared distance of `connectivity` from a point are
-        considered neighbors. For example in a 3 Dimensional array, if
-        `connectivity` is 1, 6 neighbors are considered, if `connectivity` is
-        2, 18 neighbors are considered and if `connectivity` is 3, all 26
-        neighbors are considered.
-
-    Returns
-    -------
-    A : (n, 3) ndarray
-        A 2d array in which each row contains 3 values, the indices of local
-        maxima.
-
-    Examples
-    --------
-    >>> a = np.array([[ 0 , 0 , 0 , 0 , 0],
-    ...               [ 0 , 0 , 3 , 0 , 0],
-    ...               [ 0 , 0 , 1 , 0 , 0],
-    ...               [ 0 , 1 , 0 , 0 , 0],
-    ...               [ 0 , 0 , 0 , 0 , 0]])
-    >>> get_local_maxima(a, threshold = 1, connectivity = 2)
-    array([[1, 2]])
-
-    """
-    # computing max filter using all neighbors in cube
-    fp = generate_binary_structure(ar.ndim, connectivity)
-    max_ar = maximum_filter(ar, footprint=fp)
-    peaks = (max_ar == ar) & (ar > threshold)
-    return np.argwhere(peaks)
 
 
 def _blob_overlap(blob1, blob2):
@@ -230,7 +187,11 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
                   * sigma_list[i] for i in range(k)]
     image_cube = np.dstack(dog_images)
 
-    local_maxima = get_local_maxima(image_cube, threshold)
+    # local_maxima = get_local_maxima(image_cube, threshold)
+    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
+                                  footprint=np.ones((3, 3, 3)),
+                                  threshold_rel=0.0,
+                                  exclude_border=False)
 
     # Convert the last index to its corresponding scale value
     local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
