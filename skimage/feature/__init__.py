@@ -42,5 +42,4 @@ __all__ = ['daisy',
            'ORB',
            'match_descriptors',
            'plot_matches',
-           'blob_dog',
-           'get_local_maxima']
+           'blob_dog']
