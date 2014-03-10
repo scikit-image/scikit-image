@@ -282,6 +282,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     else:
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
+    #computing gaussian laplace
+    #s**2 provides scale invariance
     gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
     image_cube = np.dstack(gl_images)
 
