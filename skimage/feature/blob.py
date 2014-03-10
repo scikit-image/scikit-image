@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage.filters import gaussian_filter, gaussian_laplace
 import itertools as itt
 import math
 from math import sqrt, hypot, log
@@ -185,6 +185,114 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     image_cube = np.dstack(dog_images)
 
     # local_maxima = get_local_maxima(image_cube, threshold)
+    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
+                                  footprint=np.ones((3, 3, 3)),
+                                  threshold_rel=0.0,
+                                  exclude_border=False)
+
+    # Convert the last index to its corresponding scale value
+    local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
+    ret_val = _prune_blobs(local_maxima, overlap)
+
+    if len(ret_val) > 0:
+        ret_val[:, 2] = math.pi * \
+            ((ret_val[:, 2] * math.sqrt(2)) ** 2).astype(int)
+        return ret_val
+    else:
+        return []
+
+
+def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.1,
+             overlap=.5, log_scale=False):
+    """Finds blobs in the given grayscale image.
+
+    Blobs are found using the Laplacian of Gaussian (DoG) method[1]_.
+    For each blob found, its coordinates and area are returned.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input grayscale image, blobs are assumed to be light on dark
+        background (white on black).
+    min_sigma : float, optional
+        The minimum standard deviation for Gaussian Kernel. Keep this low to
+        detect smaller blobs.
+    max_sigma : float, optional
+        The maximum standard deviation for Gaussian Kernel. Keep this high to
+        detect larger blobs.
+    num_sigma : int, optional
+        The number of intermediate values of standard deviations to consider
+        between `min_sigma` and `max_sigma`.
+    threshold : float, optional.
+        The absolute lower bound for scale space maxima. Local maxima smaller
+        than thresh are ignored. Reduce this to detect blobs with less
+        intensities.
+    overlap : float, optional
+        A value between 0 and 1. If the area of two blobs overlaps by a
+        fraction greater than `threshold`, the smaller blob is eliminated.
+    log_scale : bool, optional
+        If set intermediate values of standard deviations are interpolated
+        using a logarithmic scale to the base `10`. If not, linear
+        interpolation is used.
+
+    Returns
+    -------
+    A : (n, 3) ndarray
+        A 2d array with each row containing the Y-Coordinate , the
+        X-Coordinate and the estimated area of the blob respectively.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_Laplacian_of_Gaussian
+
+    Examples
+    --------
+    >>> from skimage import data, feature, exposure
+    >>> img = data.coins()
+    >>> img = exposure.equalize_hist(img) # imporves detection
+    >>> feature.blob_log(img,threshold = .3)
+    array([[ 107,  333,    6],
+           [ 107,  337,   25],
+           [ 108,  329,    6],
+           [ 113,  323,    6],
+           [ 114,  322,    6],
+           [ 121,  273, 1608],
+           [ 124,  336,  904],
+           [ 125,   45, 1061],
+           [ 125,  207,  904],
+           [ 127,  102,  760],
+           [ 128,  155,  760],
+           [ 178,  261,   25],
+           [ 186,  345, 2268],
+           [ 193,  276, 1413],
+           [ 194,  213, 1413],
+           [ 196,  102, 1061],
+           [ 197,   43,  904],
+           [ 198,  155,  904],
+           [ 198,  255,   56],
+           [ 214,  282,   25],
+           [ 260,  174, 1608],
+           [ 262,  244, 1413],
+           [ 262,  302, 1413],
+           [ 266,  114, 1061],
+           [ 268,  358, 1061]])
+
+    """
+
+    if image.ndim != 2:
+        raise ValueError("'image' must be a grayscale ")
+
+    image = img_as_float(image)
+
+    if log_scale:
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
+    else:
+        start, stop = log(min_sigma, 10), log(max_sigma, 10)
+        sigma_list = np.logspace(start, stop)
+
+    gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
+    image_cube = np.dstack(gl_images)
+
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3, 3, 3)),
                                   threshold_rel=0.0,
