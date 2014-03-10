@@ -12,9 +12,6 @@ from .peak import peak_local_max
 # http://www.cs.utah.edu/~jfishbau/advimproc/project1/ (04.04.2013)
 # Theory behind: http://en.wikipedia.org/wiki/Blob_detection (04.04.2013)
 
-# A lot of this code is borrowed from here
-# https://github.com/adonath/blob_detection/tree/master/blob_detection
-
 
 def _blob_overlap(blob1, blob2):
     """Finds the overlapping area fraction between two blobs.

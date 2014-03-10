@@ -176,3 +176,9 @@
 
 - François Orieux
   Image deconvolution http://research.orieux.fr
+  
+- Vighnesh Birodkar
+  Blob Detection
+  
+- Axel Donath
+  Blob Detection
