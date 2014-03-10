@@ -279,6 +279,18 @@ def test_3D():
                  [[5, 5, 5], [15, 15, 15]])
 
 
+def test_4D():
+    image = np.zeros((30, 30, 30, 30))
+    image[15, 15, 15, 15] = 1
+    image[5, 5, 5, 5] = 1
+    assert_equal(peak.peak_local_max(image), [[15, 15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=6), [[15, 15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, exclude_border=False),
+                 [[5, 5, 5, 5], [15, 15, 15, 15]])
+    assert_equal(peak.peak_local_max(image, min_distance=5),
+                 [[5, 5, 5, 5], [15, 15, 15, 15]])
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
