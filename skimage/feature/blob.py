@@ -202,11 +202,11 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
         return []
 
 
-def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.1,
+def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
              overlap=.5, log_scale=False):
     """Finds blobs in the given grayscale image.
 
-    Blobs are found using the Laplacian of Gaussian (DoG) method[1]_.
+    Blobs are found using the Laplacian of Gaussian (LoG) method[1]_.
     For each blob found, its coordinates and area are returned.
 
     Parameters
@@ -249,33 +249,25 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.1,
     --------
     >>> from skimage import data, feature, exposure
     >>> img = data.coins()
-    >>> img = exposure.equalize_hist(img) # imporves detection
+    >>> img = exposure.equalize_hist(img) # improves detection
     >>> feature.blob_log(img,threshold = .3)
-    array([[ 107,  333,    6],
-           [ 107,  337,   25],
-           [ 108,  329,    6],
-           [ 113,  323,    6],
-           [ 114,  322,    6],
-           [ 121,  273, 1608],
-           [ 124,  336,  904],
-           [ 125,   45, 1061],
-           [ 125,  207,  904],
+    array([[ 113,  323,    6],
+           [ 121,  272, 1815],
+           [ 124,  336,  760],
+           [ 126,   46,  760],
+           [ 126,  208,  760],
            [ 127,  102,  760],
-           [ 128,  155,  760],
-           [ 178,  261,   25],
-           [ 186,  345, 2268],
-           [ 193,  276, 1413],
-           [ 194,  213, 1413],
-           [ 196,  102, 1061],
-           [ 197,   43,  904],
-           [ 198,  155,  904],
-           [ 198,  255,   56],
-           [ 214,  282,   25],
-           [ 260,  174, 1608],
-           [ 262,  244, 1413],
-           [ 262,  302, 1413],
-           [ 266,  114, 1061],
-           [ 268,  358, 1061]])
+           [ 128,  154,  760],
+           [ 185,  344, 1815],
+           [ 194,  213, 1815],
+           [ 194,  276, 1815],
+           [ 197,   44,  760],
+           [ 198,  103,  760],
+           [ 198,  155,  760],
+           [ 260,  174, 1815],
+           [ 263,  244, 1815],
+           [ 263,  302, 1815],
+           [ 266,  115,  760]])
 
     """
 
@@ -285,10 +277,10 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.1,
     image = img_as_float(image)
 
     if log_scale:
-        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
-    else:
         start, stop = log(min_sigma, 10), log(max_sigma, 10)
-        sigma_list = np.logspace(start, stop)
+        sigma_list = np.logspace(start, stop, num_sigma)
+    else:
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
     gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
     image_cube = np.dstack(gl_images)
