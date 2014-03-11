@@ -1,7 +1,9 @@
 import skimage
 import skimage.data as data
 from skimage.viewer import ImageViewer
+from skimage.viewer.qt import qt_api
 from numpy.testing import assert_equal, assert_allclose
+from numpy.testing.decorators import skipif
 
 
 def setup_line_profile(image):
@@ -12,6 +14,7 @@ def setup_line_profile(image):
     return plugin
 
 
+@skipif(qt_api is None)
 def test_line_profile():
     """ Test a line profile using an ndim=2 image"""
     plugin = setup_line_profile(data.camera())
@@ -25,6 +28,7 @@ def test_line_profile():
     assert_allclose(scan_data.mean(), 0.2828, rtol=1e-3)
 
 
+@skipif(qt_api is None)
 def test_line_profile_rgb():
     """ Test a line profile using an ndim=3 image"""
     plugin = setup_line_profile(data.chelsea())
