@@ -104,8 +104,8 @@ yes_no find_pivot(EDGE *left, EDGE *right, double *pivot_ptr)
 			*pivot_ptr = (p->reliab < left->reliab) ? left->reliab : p->reliab;
 			return yes;
 		}
-		return no;
 	}
+    return no;
 }
 
 EDGE *partition(EDGE *left, EDGE *right, double pivot)

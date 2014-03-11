@@ -77,64 +77,64 @@ typedef enum {yes, no} yes_no;
 
 yes_no find_pivot(EDGE *left, EDGE *right, double *pivot_ptr)
 {
-  EDGE a, b, c, *p;
+    EDGE a, b, c, *p;
 
-  a = *left;
-  b = *(left + (right - left) /2 );
-  c = *right;
-  o3(a,b,c);
+    a = *left;
+    b = *(left + (right - left) / 2);
+    c = *right;
+    o3(a, b, c);
 
-  if (a.reliab < b.reliab)
+    if (a.reliab < b.reliab)
     {
-      *pivot_ptr = b.reliab;
-      return yes;
+        *pivot_ptr = b.reliab;
+        return yes;
     }
 
-  if (b.reliab < c.reliab)
+    if (b.reliab < c.reliab)
     {
-      *pivot_ptr = c.reliab;
-      return yes;
+        *pivot_ptr = c.reliab;
+        return yes;
     }
 
-  for (p = left + 1; p <= right; ++p)
+    for (p = left + 1; p <= right; ++p)
     {
-      if (p->reliab != left->reliab)
-	{
-	  *pivot_ptr = (p->reliab < left->reliab) ? left->reliab : p->reliab;
-	  return yes;
-	}
-      return no;
+        if (p->reliab != left->reliab)
+        {
+            *pivot_ptr = (p->reliab < left->reliab) ? left->reliab : p->reliab;
+            return yes;
+        }
     }
+    return no;
 }
 
 EDGE *partition(EDGE *left, EDGE *right, double pivot)
 {
-  while (left <= right)
+    while (left <= right)
     {
-      while (left->reliab < pivot)
-	++left;
-      while (right->reliab >= pivot)
-	--right;
-      if (left < right)
-	{
-	  swap (*left, *right);
-	  ++left;
-	  --right;
-	}
+        while (left->reliab < pivot)
+            ++left;
+        while (right->reliab >= pivot)
+            --right;
+        if (left < right)
+        {
+            swap (*left, *right);
+            ++left;
+            --right;
+        }
     }
-  return left;
+    return left;
 }
 
 void quicker_sort(EDGE *left, EDGE *right)
 {
-  EDGE *p;
-  double pivot;
+    EDGE *p;
+    double pivot;
 
-  if (find_pivot(left, right, &pivot) == yes)
+    if (find_pivot(left, right, &pivot) == yes)
     {
-      p = partition(left, right, pivot);
-      quicker_sort(left, p - 1);
-      quicker_sort(p, right);
+        p = partition(left, right, pivot);
+        quicker_sort(left, p - 1);
+        quicker_sort(p, right);
     }
 }
 //--------------end quicker_sort algorithm -----------------------------------
