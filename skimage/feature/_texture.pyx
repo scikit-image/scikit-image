@@ -48,8 +48,8 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                     i = image[r, c]
 
                     # compute the location of the offset pixel
-                    row = r + <int>(sin(angle) * distance + 0.5)
-                    col = c + <int>(cos(angle) * distance + 0.5)
+                    row = r + np.round(sin(angle)) * distance 
+                    col = c + np.round(cos(angle)) * distance
 
                     # make sure the offset is within bounds
                     if row >= 0 and row < rows and \
