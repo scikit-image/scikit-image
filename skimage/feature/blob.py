@@ -67,9 +67,9 @@ def _prune_blobs(blobs_array, overlap):
     Parameters
     ----------
     blobs_array : ndarray
-        a 2d array with each row representing 3 values, the ``(y,x,sigma)``
-        where ``(y,x)`` are coordinates of the blob and sigma is the standard
-        deviation of the Gaussian kernel which detected the blob.
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel which detected the blob.
     overlap : float
         A value between 0 and 1. If the fraction of area overlapping for 2
         blobs is greater than `overlap` the smaller blob is eliminated.
@@ -126,8 +126,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     Returns
     -------
     A : (n, 3) ndarray
-        A 2d array with each row containing the Y-Coordinate , the
-        X-Coordinate and the estimated area of the blob respectively.
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel which detected the blob.
 
     References
     ----------
@@ -137,31 +138,34 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     --------
     >>> from skimage import data, feature
     >>> feature.blob_dog(data.coins(),threshold=.5,max_sigma=40)
-    array([[  45,  336, 1608],
-           [  52,  155, 1608],
-           [  52,  216, 1608],
-           [  54,   42, 1608],
-           [  54,  276,  628],
-           [  58,  100,  628],
-           [ 120,  272, 1608],
-           [ 124,  337,  628],
-           [ 125,   45, 1608],
-           [ 125,  208,  628],
-           [ 127,  102,  628],
-           [ 128,  154,  628],
-           [ 185,  347, 1608],
-           [ 193,  213, 1608],
-           [ 194,  277, 1608],
-           [ 195,  102, 1608],
-           [ 196,   43,  628],
-           [ 198,  155,  628],
-           [ 260,   46, 1608],
-           [ 261,  173, 1608],
-           [ 263,  245, 1608],
-           [ 263,  302, 1608],
-           [ 267,  115,  628],
-           [ 267,  359, 1608]])
+    array([[ 45, 336,  16],
+           [ 52, 155,  16],
+           [ 52, 216,  16],
+           [ 54,  42,  16],
+           [ 54, 276,  10],
+           [ 58, 100,  10],
+           [120, 272,  16],
+           [124, 337,  10],
+           [125,  45,  16],
+           [125, 208,  10],
+           [127, 102,  10],
+           [128, 154,  10],
+           [185, 347,  16],
+           [193, 213,  16],
+           [194, 277,  16],
+           [195, 102,  16],
+           [196,  43,  10],
+           [198, 155,  10],
+           [260,  46,  16],
+           [261, 173,  16],
+           [263, 245,  16],
+           [263, 302,  16],
+           [267, 115,  10],
+           [267, 359,  16]])
 
+    Notes
+    -----
+    The radius of each blob is approximately :math:`\sqrt{2}sigma`.
     """
 
     if image.ndim != 2:
@@ -192,14 +196,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     # Convert the last index to its corresponding scale value
     local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
-    ret_val = _prune_blobs(local_maxima, overlap)
-
-    if len(ret_val) > 0:
-        ret_val[:, 2] = math.pi * \
-            ((ret_val[:, 2] * math.sqrt(2)) ** 2).astype(int)
-        return ret_val
-    else:
-        return []
+    return _prune_blobs(local_maxima, overlap)
 
 
 def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
@@ -238,8 +235,9 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     Returns
     -------
     A : (n, 3) ndarray
-        A 2d array with each row containing the Y-Coordinate , the
-        X-Coordinate and the estimated area of the blob respectively.
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel which detected the blob.
 
     References
     ----------
@@ -251,24 +249,27 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     >>> img = data.coins()
     >>> img = exposure.equalize_hist(img) # improves detection
     >>> feature.blob_log(img,threshold = .3)
-    array([[ 113,  323,    6],
-           [ 121,  272, 1815],
-           [ 124,  336,  760],
-           [ 126,   46,  760],
-           [ 126,  208,  760],
-           [ 127,  102,  760],
-           [ 128,  154,  760],
-           [ 185,  344, 1815],
-           [ 194,  213, 1815],
-           [ 194,  276, 1815],
-           [ 197,   44,  760],
-           [ 198,  103,  760],
-           [ 198,  155,  760],
-           [ 260,  174, 1815],
-           [ 263,  244, 1815],
-           [ 263,  302, 1815],
-           [ 266,  115,  760]])
+    array([[113, 323,   1],
+           [121, 272,  17],
+           [124, 336,  11],
+           [126,  46,  11],
+           [126, 208,  11],
+           [127, 102,  11],
+           [128, 154,  11],
+           [185, 344,  17],
+           [194, 213,  17],
+           [194, 276,  17],
+           [197,  44,  11],
+           [198, 103,  11],
+           [198, 155,  11],
+           [260, 174,  17],
+           [263, 244,  17],
+           [263, 302,  17],
+           [266, 115,  11]])
 
+    Notes
+    -----
+    The radius of each blob is approximately :math:`\sqrt{2}sigma`.
     """
 
     if image.ndim != 2:
@@ -294,11 +295,4 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
 
     # Convert the last index to its corresponding scale value
     local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
-    ret_val = _prune_blobs(local_maxima, overlap)
-
-    if len(ret_val) > 0:
-        ret_val[:, 2] = math.pi * \
-            ((ret_val[:, 2] * math.sqrt(2)) ** 2).astype(int)
-        return ret_val
-    else:
-        return []
+    return _prune_blobs(local_maxima, overlap)
