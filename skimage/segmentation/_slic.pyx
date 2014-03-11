@@ -217,9 +217,9 @@ def _enforce_label_connectivity_cython(Py_ssize_t[:, :, ::1] segments,
     width = segments.shape[2]
 
     # neighborhood arrays
-    cdef Py_ssize_t[::1] ddx = np.array((1, -1, 0, 0, 0, 0))
-    cdef Py_ssize_t[::1] ddy = np.array((0, 0, 1, -1, 0, 0))
-    cdef Py_ssize_t[::1] ddz = np.array((0, 0, 0, 0, 1, -1))
+    cdef Py_ssize_t[::1] ddx = np.array((1, -1, 0, 0, 0, 0), dtype=np.intp)
+    cdef Py_ssize_t[::1] ddy = np.array((0, 0, 1, -1, 0, 0), dtype=np.intp)
+    cdef Py_ssize_t[::1] ddz = np.array((0, 0, 0, 0, 1, -1), dtype=np.intp)
 
     # new object with connected segments initialized to -1
     cdef Py_ssize_t[:, :, ::1] connected_segments \
