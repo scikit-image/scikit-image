@@ -28,7 +28,6 @@ def test_blob_dog():
     assert abs(radius(b) - 5) <= thresh
 
     b = s[1]
-    print abs(radius(b))
     assert abs(b[0] - 100) <= thresh
     assert abs(b[1] - 300) <= thresh
     assert abs(radius(b) - 25) <= thresh
