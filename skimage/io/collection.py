@@ -2,6 +2,7 @@
 
 from __future__ import with_statement
 
+import os
 from glob import glob
 import re
 from copy import copy
@@ -229,7 +230,7 @@ class ImageCollection(object):
     ----------
     load_pattern : str or list
         Pattern glob or filenames to load. The path can be absolute or
-        relative.  Multiple patterns should be separated by a colon,
+        relative.  Multiple patterns should be separated by os.pathsep,
         e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
         implementation notes below.
     conserve_memory : bool, optional
@@ -295,7 +296,7 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
         if isinstance(load_pattern, six.string_types):
-            load_pattern = load_pattern.split(':')
+            load_pattern = load_pattern.split(os.pathsep)
             self._files = []
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
