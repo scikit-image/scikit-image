@@ -249,7 +249,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     --------
     >>> from skimage import data, feature, exposure
     >>> img = data.coins()
-    >>> img = exposure.equalize_hist(img)# improves detection
+    >>> img = exposure.equalize_hist(img)  # improves detection
     >>> feature.blob_log(img, threshold = .3)
     array([[113, 323,   1],
            [121, 272,  17],
