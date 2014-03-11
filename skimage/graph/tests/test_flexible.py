@@ -9,7 +9,7 @@ a = np.ones((8, 8), dtype=np.float32)
 a[1::2] *= 2.0
 
 
-class TestFlexibleMCP(mcp.MCP_Flexible):
+class FlexibleMCP(mcp.MCP_Flexible):
     """ Simple MCP subclass that allows the front to travel 
     a certain distance from the seed point, and uses a constant
     cost factor that is independant of the cost array.
@@ -38,7 +38,7 @@ class TestFlexibleMCP(mcp.MCP_Flexible):
 def test_flexible():
     
     # Create MCP and do a traceback
-    mcp = TestFlexibleMCP(a)
+    mcp = FlexibleMCP(a)
     costs, traceback = mcp.find_costs([(0, 0)])
     
     # Check that inner part is correct. This basically
