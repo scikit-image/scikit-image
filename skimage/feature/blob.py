@@ -99,7 +99,8 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     """Finds blobs in the given grayscale image.
 
     Blobs are found using the Difference of Gaussian (DoG) method[1]_.
-    For each blob found, its coordinates and area are returned.
+    For each blob found, the method returns its coordinates and the standard
+    deviation of the Gaussian kernel that detected the blob.
 
     Parameters
     ----------
@@ -137,7 +138,7 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     Examples
     --------
     >>> from skimage import data, feature
-    >>> feature.blob_dog(data.coins(),threshold=.5,max_sigma=40)
+    >>> feature.blob_dog(data.coins(), threshold=.5, max_sigma=40)
     array([[ 45, 336,  16],
            [ 52, 155,  16],
            [ 52, 216,  16],
@@ -204,7 +205,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     """Finds blobs in the given grayscale image.
 
     Blobs are found using the Laplacian of Gaussian (LoG) method[1]_.
-    For each blob found, its coordinates and area are returned.
+    For each blob found, the method returns its coordinates and the standard
+    deviation of the Gaussian kernel that detected the blob.
 
     Parameters
     ----------
@@ -247,8 +249,8 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     --------
     >>> from skimage import data, feature, exposure
     >>> img = data.coins()
-    >>> img = exposure.equalize_hist(img) # improves detection
-    >>> feature.blob_log(img,threshold = .3)
+    >>> img = exposure.equalize_hist(img)# improves detection
+    >>> feature.blob_log(img, threshold = .3)
     array([[113, 323,   1],
            [121, 272,  17],
            [124, 336,  11],
