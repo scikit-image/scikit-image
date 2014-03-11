@@ -44,8 +44,7 @@ def test_binary_descriptors_lena_rotation_crosscheck_false():
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
 
-    matches = match_descriptors(descriptors1, descriptors2, threshold=0.13,
-                               cross_check=False)
+    matches = match_descriptors(descriptors1, descriptors2, cross_check=False)
 
     exp_matches1 = np.array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11,
                              12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
@@ -78,8 +77,7 @@ def test_binary_descriptors_lena_rotation_crosscheck_true():
     extractor.extract(rotated_img, keypoints2)
     descriptors2 = extractor.descriptors
 
-    matches = match_descriptors(descriptors1, descriptors2, threshold=0.13,
-                               cross_check=True)
+    matches = match_descriptors(descriptors1, descriptors2, cross_check=True)
 
     exp_matches1 = np.array([ 0,  1,  2,  4,  6,  7,  9, 10, 11, 12, 13, 15,
                                16, 17, 19, 20, 21, 24, 26, 27, 28, 29, 30, 35,
@@ -89,6 +87,32 @@ def test_binary_descriptors_lena_rotation_crosscheck_true():
                                 23, 26, 27, 25, 28, 29, 30])
     assert_equal(matches[:, 0], exp_matches1)
     assert_equal(matches[:, 1], exp_matches2)
+
+
+def test_max_distance():
+    descs1 = np.zeros((10, 128))
+    descs2 = np.zeros((15, 128))
+
+    descs1[0, :] = 1
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_distance=0.1, cross_check=False)
+    assert len(matches) == 9
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_distance=np.sqrt(128.1),
+                                 cross_check=False)
+    assert len(matches) == 10
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_distance=0.1,
+                                 cross_check=True)
+    assert_equal(matches, [[1, 0]])
+
+    matches =  match_descriptors(descs1, descs2, metric='euclidean',
+                                 max_distance=np.sqrt(128.1),
+                                 cross_check=True)
+    assert_equal(matches, [[1, 0]])
 
 
 if __name__ == '__main__':
