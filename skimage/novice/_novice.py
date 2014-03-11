@@ -169,7 +169,7 @@ class Picture(object):
     Attributes
     ----------
     path : str
-        Path to an image file to load.
+        Path to an image file to load / URL of an image
     array : array
         Raw RGB image data [0-255], with origin at top-left.
     xy_array : array
@@ -181,6 +181,8 @@ class Picture(object):
     >>> from skimage import novice
     >>> from skimage import data
     >>> picture = novice.open(data.data_dir + '/chelsea.png')
+    >>> picture = novice.open('http://static3.businessinsider.com/image/
+        52a0bbfd6bb3f7961363819e/the-most-amazing-satellite-images-of-the-year.jpg')
 
     Create a blank 100 pixel wide, 200 pixel tall white image
     >>> pic = Picture.from_size((100, 200), color=(255, 255, 255))
