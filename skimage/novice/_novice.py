@@ -10,12 +10,11 @@ from skimage.transform import resize
 from skimage.color import color_dict
 
 import re
-
+import six
 from six.moves.urllib_parse import urlparse
 from six.moves.urllib import request
+from six.moves.urllib import error
 urlopen = request.urlopen
-
-import six
 
 # Convert colors from `skimage.color` to uint8 and allow access through
 # dict or a named tuple.
@@ -181,6 +180,8 @@ class Picture(object):
     >>> from skimage import novice
     >>> from skimage import data
     >>> picture = novice.open(data.data_dir + '/chelsea.png')
+
+    Load an image from a URL. URL must start with http(s):// or ftp(s)://
     >>> picture = novice.open('http://scikit-image.org/_static/img/logo.png')
 
     Create a blank 100 pixel wide, 200 pixel tall white image
@@ -218,19 +219,19 @@ class Picture(object):
             msg = "Must provide a single keyword arg (path, array, xy_array)."
             ValueError(msg)
         elif path is not None:
-            self._path = path
-            regex = re.compile(
-                r'^(?:http|ftp)s?://' # http:// or https://
-                r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain
-                r'localhost|' #localhost...
-                r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
-                r'(?::\d+)?' # optional port
-                r'(?:/?|[/?]\S+)$', re.IGNORECASE)
-            matchObj = re.match(regex, path)
-            if matchObj:
-                data = urlopen(path).read()
-                self.array = img_as_ubyte(io.imread(BytesIO(data)))
-                self._format = imghdr.what("", h=data)
+            urlObj = urlparse(path)
+            if (urlObj.scheme == 'http') or (urlObj.scheme == 'https') or (urlObj.scheme == 'ftp') or (urlObj.scheme == 'ftps'):
+                try:
+                    data = urlopen(path).read()
+                    self.array = img_as_ubyte(io.imread(BytesIO(data)))
+                    self._format = imghdr.what("", h=data)
+                    self._path = path
+                except error.HTTPError, e:
+                    print 'HTTP Error ', e.code
+                except error.URLError, e:
+                    print 'URL Error\n', e.args
+                except error.ContentTooShortError:
+                    print 'Content too short'
             else:
                 path = os.path.abspath(path)
                 self.array = img_as_ubyte(io.imread(path))
