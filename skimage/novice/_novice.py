@@ -181,8 +181,7 @@ class Picture(object):
     >>> from skimage import novice
     >>> from skimage import data
     >>> picture = novice.open(data.data_dir + '/chelsea.png')
-    >>> picture = novice.open('http://static3.businessinsider.com/image/
-        52a0bbfd6bb3f7961363819e/the-most-amazing-satellite-images-of-the-year.jpg')
+    >>> picture = novice.open('http://scikit-image.org/_static/img/logo.png')
 
     Create a blank 100 pixel wide, 200 pixel tall white image
     >>> pic = Picture.from_size((100, 200), color=(255, 255, 255))
