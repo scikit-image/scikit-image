@@ -4,9 +4,16 @@ from collections import namedtuple
 
 import numpy as np
 from skimage import io
+from io import BytesIO
 from skimage import img_as_ubyte
 from skimage.transform import resize
 from skimage.color import color_dict
+
+import re
+
+from six.moves.urllib_parse import urlparse
+from six.moves.urllib import request
+urlopen = request.urlopen
 
 import six
 
@@ -19,7 +26,7 @@ colors = namedtuple('colors', color_dict.keys())(**color_dict)
 
 def open(path):
     """Return Picture object from the given image path."""
-    return Picture(path=os.path.abspath(path))
+    return Picture(path)
 
 
 def _verify_picture_index(index):
@@ -210,9 +217,24 @@ class Picture(object):
             msg = "Must provide a single keyword arg (path, array, xy_array)."
             ValueError(msg)
         elif path is not None:
-            self.array = img_as_ubyte(io.imread(path))
             self._path = path
-            self._format = imghdr.what(path)
+            regex = re.compile(
+                r'^(?:http|ftp)s?://' # http:// or https://
+                r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|' #domain
+                r'localhost|' #localhost...
+                r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+                r'(?::\d+)?' # optional port
+                r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+            matchObj = re.match(regex, path)
+            if matchObj:
+                data = urlopen(path).read()
+                self.array = img_as_ubyte(io.imread(BytesIO(data)))
+                self._format = imghdr.what("", h=data)
+            else:
+                path = os.path.abspath(path)
+                self.array = img_as_ubyte(io.imread(path))
+                self._path = path
+                self._format = imghdr.what(path)
         elif array is not None:
             self.array = array
         elif xy_array is not None:
