@@ -11,6 +11,7 @@ from skimage.color import color_dict
 
 import re
 import six
+import six.moves.urllib
 from six.moves.urllib_parse import urlparse
 from six.moves.urllib import request
 from six.moves.urllib import error
@@ -222,7 +223,10 @@ class Picture(object):
             urlObj = urlparse(path)
             if (urlObj.scheme == 'http') or (urlObj.scheme == 'https') or (urlObj.scheme == 'ftp') or (urlObj.scheme == 'ftps'):
                 try:
-                    data = urlopen(path).read()
+                    req = request.Request(path)
+                    opener = request.build_opener()
+                    req.add_header('User-Agent', 'Mozilla/5.0')
+                    data = opener.open(req).read()
                     self.array = img_as_ubyte(io.imread(BytesIO(data)))
                     self._format = imghdr.what("", h=data)
                     self._path = path
