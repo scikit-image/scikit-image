@@ -230,12 +230,12 @@ class Picture(object):
                     self.array = img_as_ubyte(io.imread(BytesIO(data)))
                     self._format = imghdr.what("", h=data)
                     self._path = path
-                except error.HTTPError, e:
-                    print 'HTTP Error ', e.code
-                except error.URLError, e:
-                    print 'URL Error\n', e.args
+                except error.HTTPError as err:
+                    print('HTTP Error: {0}'.format(err))
+                except error.URLError as err:
+                    print('URL Error: {0}'.format(err))
                 except error.ContentTooShortError:
-                    print 'Content too short'
+                    print('Content too short')
             else:
                 path = os.path.abspath(path)
                 self.array = img_as_ubyte(io.imread(path))
