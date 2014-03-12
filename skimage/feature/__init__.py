@@ -43,5 +43,5 @@ __all__ = ['daisy',
            'match_descriptors',
            'plot_matches',
            'blob_dog'
-		   'shapecontext']
+           'shapecontext']
 
