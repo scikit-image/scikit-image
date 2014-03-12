@@ -15,7 +15,7 @@ from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
 from .blob import blob_dog
-
+from .shapecontext import shapecontext
 
 __all__ = ['daisy',
            'hog',
@@ -42,4 +42,6 @@ __all__ = ['daisy',
            'ORB',
            'match_descriptors',
            'plot_matches',
-           'blob_dog']
+           'blob_dog'
+		   'shapecontext']
+
