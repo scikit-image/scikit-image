@@ -8,13 +8,14 @@ from io import BytesIO
 from skimage import img_as_ubyte
 from skimage.transform import resize
 from skimage.color import color_dict
+from skimage.io.util import file_or_url_context
+from skimage.io.util import is_url
 
 import re
 import six
 import six.moves.urllib
 from six.moves.urllib.parse import urlparse
 from six.moves.urllib import request
-from six.moves.urllib import error
 urlopen = request.urlopen
 
 # Convert colors from `skimage.color` to uint8 and allow access through
@@ -220,27 +221,14 @@ class Picture(object):
             msg = "Must provide a single keyword arg (path, array, xy_array)."
             ValueError(msg)
         elif path is not None:
-            urlObj = urlparse(path)
-            if (urlObj.scheme == 'http') or (urlObj.scheme == 'https') or (urlObj.scheme == 'ftp') or (urlObj.scheme == 'ftps'):
-                try:
-                    req = request.Request(path)
-                    opener = request.build_opener()
-                    req.add_header('User-Agent', 'Mozilla/5.0')
-                    data = opener.open(req).read()
-                    self.array = img_as_ubyte(io.imread(BytesIO(data)))
-                    self._format = imghdr.what("", h=data)
-                    self._path = path
-                except error.HTTPError as err:
-                    print('HTTP Error: {0}'.format(err))
-                except error.URLError as err:
-                    print('URL Error: {0}'.format(err))
-                except error.ContentTooShortError:
-                    print('Content too short')
+            if is_url(path):
+                self._path = path
             else:
                 path = os.path.abspath(path)
-                self.array = img_as_ubyte(io.imread(path))
                 self._path = path
-                self._format = imghdr.what(path)
+            with file_or_url_context(path) as context:
+                self.array = io.imread(context)
+                self._format = imghdr.what(context)
         elif array is not None:
             self.array = array
         elif xy_array is not None:
