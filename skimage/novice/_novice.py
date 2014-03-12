@@ -12,7 +12,7 @@ from skimage.color import color_dict
 import re
 import six
 import six.moves.urllib
-from six.moves.urllib_parse import urlparse
+from six.moves.urllib.parse import urlparse
 from six.moves.urllib import request
 from six.moves.urllib import error
 urlopen = request.urlopen
