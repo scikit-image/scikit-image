@@ -113,6 +113,16 @@ class TestSimpleImage():
         out = threshold_adaptive(self.image, 3, method='median')
         assert_array_equal(ref, out)
 
+	def test_threshold_bradley(self):
+        ref = np.array(
+            [[True, False, True, True,  True],
+             [True, True,  True, True, True],
+             [True, True,  True, True, True],
+             [True, True,  True,  True, True],
+             [True,  True, True, True, True]]
+        )
+        out = threshold_bradley(self.image, 3)
+        assert_array_equal(ref, out)
 
 def test_otsu_camera_image():
     camera = skimage.img_as_ubyte(data.camera())

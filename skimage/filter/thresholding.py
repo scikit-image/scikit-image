@@ -1,7 +1,8 @@
 __all__ = ['threshold_adaptive',
            'threshold_otsu',
            'threshold_yen',
-           'threshold_isodata']
+           'threshold_isodata'
+           'threshold_bradley']
 
 import numpy as np
 import scipy.ndimage
@@ -256,3 +257,51 @@ def threshold_isodata(image, nbins=256):
     # This implementation returns threshold where
     # `background <= threshold < foreground`.
     return threshold
+
+def threshold_bradley(image,block_size):
+	"""Return threshold value based on Bradley method.
+
+    Adaptive Thresholding Using the Integral Image, known as Bradley threshold method.
+
+    Parameters
+    ----------
+    image : array
+        Input image.
+    block_size : int
+        Window size used for convolution.In the reference[1],it is taken as (width of image)/8.
+
+    Returns
+    -------
+    threshold : Binary image 
+        
+
+    References
+    ----------
+    .. [1]Derek Bradley*, Gerhard Roth, "Adaptive Thresholding Using the Integral Image"
+
+    Examples
+    --------
+    >>> from from skimage import data,util
+    >>> image=data.camera()
+	>>> image=util.img_as_float(image)	
+    >>> thresh = threshold_bradley(image,image.shape[0]/8)
+    """
+	t=15
+	
+	# Creates the mask of given size
+	mask=np.zeros((block_size,block_size))
+	mask[0,0],mask[-1,-1],mask[0,-1],mask[-1,0]=1,1,-1,-1
+	
+	# Integral Image
+	I=np.cumsum(np.cumsum(image,axis=0),axis=1) 
+	
+	# Convolution with the given mask
+	I=scipy.ndimage.convolve(I, mask, mode='nearest')  
+	
+	# Checking condition for Bradley Threshold
+	image=image*block_size**2
+	thresh_image=image - I*(100-t)/100
+	thresh_image[thresh_image>0]=True
+	thresh_image[thresh_image<0]=False
+		
+	return thresh_image
