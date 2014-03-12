@@ -29,8 +29,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
-	config.add_extension('_shapecontext', sources=['_shapecontext.c'],
-						 include_dirs=[get_numpy_include_dirs()])
+    config.add_extension('_shapecontext', sources=['_shapecontext.c'],
+                         include_dirs=[get_numpy_include_dirs()])
 
     return config
 
