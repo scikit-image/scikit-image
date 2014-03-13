@@ -60,8 +60,7 @@ def plot_img_and_hist(img, axes, bins=256):
 img = data.moon()
 
 # Contrast stretching
-p2 = np.percentile(img, 2)
-p98 = np.percentile(img, 98)
+p2, p98 = np.percentile(img, (2, 98))
 img_rescale = exposure.rescale_intensity(img, in_range=(p2, p98))
 
 # Equalization
