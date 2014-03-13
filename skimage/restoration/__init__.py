@@ -19,7 +19,9 @@ References
 """
 
 from .deconvolution import wiener, unsupervised_wiener, richardson_lucy
+from .unwrap import unwrap_phase
 
 __all__ = ['wiener',
-           "unsupervised_wiener",
-           "richardson_lucy"]
+           'unsupervised_wiener',
+           'richardson_lucy',
+           'unwrap_phase']

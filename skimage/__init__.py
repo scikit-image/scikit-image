@@ -30,7 +30,7 @@ measure
 morphology
     Morphological operations, e.g. opening or skeletonization.
 restoration
-    Deconvolution algorithms.
+    Restoration algorithms.
 segmentation
     Splitting an image into self-similar regions.
 transform

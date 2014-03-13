@@ -13,19 +13,6 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('exposure', parent_package, top_path)
     config.add_data_dir('tests')
 
-    cython(['_unwrap_1d.pyx'], working_path=base_path)
-    cython(['_unwrap_2d.pyx'], working_path=base_path)
-    cython(['_unwrap_3d.pyx'], working_path=base_path)
-
-    config.add_extension('_unwrap_1d', sources=['_unwrap_1d.c'],
-                         include_dirs=[get_numpy_include_dirs()])
-    unwrap_sources_2d = ['_unwrap_2d.c', 'unwrap_2d_ljmu.c']
-    config.add_extension('_unwrap_2d', sources=unwrap_sources_2d,
-                         include_dirs=[get_numpy_include_dirs()])
-    unwrap_sources_3d = ['_unwrap_3d.c', 'unwrap_3d_ljmu.c']
-    config.add_extension('_unwrap_3d', sources=unwrap_sources_3d,
-                         include_dirs=[get_numpy_include_dirs()])
-
     return config
 
 if __name__ == '__main__':
