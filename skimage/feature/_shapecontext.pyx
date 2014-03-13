@@ -17,6 +17,9 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
                   int radial_bins=5, int polar_bins=12):
     """
     Cython implementation of calculation of shape contexts
+    
+    computes the log-polar histogram of non zero pixels with the given 
+    point as the origin and returns it as the shape context descriptor
 
     Parameters
     ----------
@@ -28,14 +31,14 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
         of histogram from current_pixel
 
     r_min : float
-        minmimum distance of the pixels that are considered in computation
+        minimum distance of the pixels that are considered in computation
         of histogram from current_pixel
 
     current_pixel_x : int
-        the row of pixel for which to compute shape context descriptor
+        the row of pixel in the passed array
 
     current_pixel_y : int
-        the column of pixel for which to compute shape context descriptor
+        the column of pixel in the passed array
 
     radial_bins : int, optional
         number of log r bins in the log-r vs theta histogram (default: 5)
@@ -98,19 +101,23 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
                 # angle in radians
                 theta = atan2(y_diff, x_diff)
 
+                # find the log-r bin index of pixel in the log-polar histogram
                 r_idx = -1
                 for tmp in xrange(radial_bins):
                     if r > r_array[tmp] and r < r_array[tmp + 1]:
                         r_idx = tmp
                         break
 
+                # find the polar bin index of pixel in the log-polar histogram
                 theta_idx = -1
                 for tmp in xrange(polar_bins):
                     if (theta > theta_array[tmp]
                             and theta < theta_array[tmp + 1]):
                         theta_idx = tmp
                         break
+
                 # increment the counter for the point in histogram
                 if r_idx != -1 and theta_idx != -1:
                     bin_histogram[r_idx, theta_idx] += 1
+
     return bin_histogram
