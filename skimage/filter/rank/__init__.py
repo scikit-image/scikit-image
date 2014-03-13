@@ -59,7 +59,7 @@ __all__ = ['autolevel',
            'tophat',
            'noise_filter',
            'entropy',
-           'otsu'
+           'otsu',
            'percentile',
            # Deprecated
            'percentile_autolevel',

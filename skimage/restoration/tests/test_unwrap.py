@@ -6,7 +6,7 @@ from numpy.testing import (run_module_suite, assert_array_almost_equal,
                            assert_raises)
 import warnings
 
-from skimage.exposure import unwrap_phase
+from skimage.restoration import unwrap_phase
 
 
 def assert_phase_almost_equal(a, b, *args, **kwargs):
