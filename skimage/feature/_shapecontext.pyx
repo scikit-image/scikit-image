@@ -55,6 +55,10 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
             IEEE PAMI 2002.
             http://www.eecs.berkeley.edu/Research/Projects/CS/vision/shape/belongie-pami02.pdf
 
+    .. [2]  Serge Belongie, Jitendra Malik and Jan Puzicha.
+            Matching with Shape Contexts
+            http://www.eecs.berkeley.edu/Research/Projects/CS/vision/shape/sc_digits.html
+
     .. [2]  Wikipedia, "Shape Contexts".
             http://en.wikipedia.org/wiki/Shape_context
 
