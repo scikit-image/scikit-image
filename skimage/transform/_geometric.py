@@ -1033,31 +1033,31 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> image = data.camera()
 
     The following image warps are all equal but differ substantially in
-    execution time.
+    execution time. The image is shifted to the bottom.
 
     Use a geometric transform to warp an image (fast):
 
     >>> from skimage.transform import SimilarityTransform
     >>> tform = SimilarityTransform(translation=(0, -10))
-    >>> warp(image, tform) # doctest: +SKIP
+    >>> warped = warp(image, tform)
 
-    Shift an image to the right with a callable (slow):
+    Use a callable (slow):
 
     >>> def shift(xy):
     ...     xy[:, 1] -= 10
     ...     return xy
-    >>> warp(image, shift_right) # doctest: +SKIP
+    >>> warped = warp(image, shift_right)
 
     Use a transformation matrix to warp an image (fast):
 
     >>> matrix = np.array([[1, 0, 0], [0, 1, -10], [0, 0, 1]])
-    >>> warp(image, matrix) # doctest: +SKIP
+    >>> warped = warp(image, matrix)
     >>> from skimage.transform import ProjectiveTransform
-    >>> warp(image, ProjectiveTransform(matrix=matrix)) # doctest: +SKIP
+    >>> warped = warp(image, ProjectiveTransform(matrix=matrix))
 
     You can also use the inverse of a geometric transformation (fast):
 
-    >>> warp(image, tform.inverse) # doctest: +SKIP
+    >>> warped = warp(image, tform.inverse)
 
     """
     # Backward API compatibility
