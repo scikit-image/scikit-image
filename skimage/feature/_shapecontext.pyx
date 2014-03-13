@@ -17,8 +17,8 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
                   int radial_bins=5, int polar_bins=12):
     """
     Cython implementation of calculation of shape contexts
-    
-    computes the log-polar histogram of non zero pixels with the given 
+
+    computes the log-polar histogram of non zero pixels with the given
     point as the origin and returns it as the shape context descriptor
 
     Parameters
