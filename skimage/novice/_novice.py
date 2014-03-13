@@ -7,8 +7,7 @@ from skimage import io
 from skimage import img_as_ubyte
 from skimage.transform import resize
 from skimage.color import color_dict
-from skimage.io.util import file_or_url_context
-from skimage.io.util import is_url
+from skimage.io.util import file_or_url_context, is_url
 
 import six
 
@@ -215,11 +214,9 @@ class Picture(object):
             msg = "Must provide a single keyword arg (path, array, xy_array)."
             ValueError(msg)
         elif path is not None:
-            if is_url(path):
-                self._path = path
-            else:
+            if not is_url(path):
                 path = os.path.abspath(path)
-                self._path = path
+            self._path = path
             with file_or_url_context(path) as context:
                 self.array = io.imread(context)
                 self._format = imghdr.what(context)
