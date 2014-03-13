@@ -21,7 +21,7 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
     Parameters
     ----------
     image : (M, N) ndarray
-        Input image (greyscale).
+        Input image (grayscale).
 
     r_max : float
         maximum distance of the pixels that are considered in computation
@@ -31,17 +31,17 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
         minmimum distance of the pixels that are considered in computation
         of histogram from current_pixel
 
-    current_pixel_x : integer
+    current_pixel_x : int
         the row of pixel for which to compute shape context descriptor
 
-    current_pixel_y : integer
+    current_pixel_y : int
         the column of pixel for which to compute shape context descriptor
 
-    radial_bins : integer
-        number of log r bins in the log-r vs theta histogram
+    radial_bins : int, optional
+        number of log r bins in the log-r vs theta histogram (default: 5)
 
-    polar_bins : integer
-        number of theta bins in log-r vs theta histogram
+    polar_bins : int, optional
+        number of theta bins in log-r vs theta histogram (default: 12)
 
     Returns
     -------

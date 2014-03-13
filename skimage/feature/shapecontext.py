@@ -27,11 +27,11 @@ def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
     current_pixel : int tuple, (r, c)
         the pixel for which to find shape context descriptor
 
-    radial_bins : int, optional (default: 5)
-        number of log r bins in log-r vs theta histogram
+    radial_bins : int, optional
+        number of log r bins in log-r vs theta histogram (default: 5)
 
-    polar_bins : int, optional (default: 12)
-        number of theta bins in log-r vs theta histogram
+    polar_bins : int, optional
+        number of theta bins in log-r vs theta histogram (default: 12)
 
     Returns
     -------
