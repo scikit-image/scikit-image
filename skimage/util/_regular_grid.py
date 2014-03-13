@@ -29,21 +29,21 @@ def regular_grid(ar_shape, n_points):
     >>> ar = np.zeros((20, 40))
     >>> g = regular_grid(ar.shape, 8)
     >>> g
-    [slice(5.0, None, 10.0), slice(5.0, None, 10.0)]
+    [slice(5, None, 10), slice(5, None, 10)]
     >>> ar[g] = 1
     >>> ar.sum()
     8.0
     >>> ar = np.zeros((20, 40))
     >>> g = regular_grid(ar.shape, 32)
     >>> g
-    [slice(2.0, None, 5.0), slice(2.0, None, 5.0)]
+    [slice(2, None, 5), slice(2, None, 5)]
     >>> ar[g] = 1
     >>> ar.sum()
     32.0
     >>> ar = np.zeros((3, 20, 40))
     >>> g = regular_grid(ar.shape, 8)
     >>> g
-    [slice(1.0, None, 3.0), slice(5.0, None, 10.0), slice(5.0, None, 10.0)]
+    [slice(1, None, 3), slice(5, None, 10), slice(5, None, 10)]
     >>> ar[g] = 1
     >>> ar.sum()
     8.0

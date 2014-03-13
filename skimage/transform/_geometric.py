@@ -1043,10 +1043,10 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     Use a callable (slow):
 
-    >>> def shift(xy):
+    >>> def shift_bottom(xy):
     ...     xy[:, 1] -= 10
     ...     return xy
-    >>> warped = warp(image, shift_right)
+    >>> warped = warp(image, shift_bottom)
 
     Use a transformation matrix to warp an image (fast):
 
