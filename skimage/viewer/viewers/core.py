@@ -51,7 +51,6 @@ def mpl_image_to_rgba(mpl_image):
     return img_as_float(image)
 
 
-@doctest_skip_parser
 class ImageViewer(QtGui.QMainWindow):
     """Viewer for displaying images.
 
@@ -79,7 +78,7 @@ class ImageViewer(QtGui.QMainWindow):
     --------
     >>> from skimage import data
     >>> image = data.coins()
-    >>> viewer = ImageViewer(image) # skip if not has_qt
+    >>> viewer = ImageViewer(image) # doctest: +SKIP
     >>> viewer.show()               # doctest: +SKIP
 
     """

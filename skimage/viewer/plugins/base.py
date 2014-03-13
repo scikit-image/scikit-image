@@ -16,7 +16,6 @@ else:
     has_qt = False
 
 
-@doctest_skip_parser
 class Plugin(QtGui.QDialog):
     """Base class for plugins that interact with an ImageViewer.
 
@@ -60,12 +59,12 @@ class Plugin(QtGui.QDialog):
     >>> from skimage import data
     >>>
     >>> plugin = Plugin(image_filter=lambda img,
-    ...                 threshold: img > threshold) # skip if not has_qt
-    >>> plugin += Slider('threshold', 0, 255)       # skip if not has_qt
+    ...                 threshold: img > threshold) # doctest: +SKIP
+    >>> plugin += Slider('threshold', 0, 255)       # doctest: +SKIP
     >>>
     >>> image = data.coins()
-    >>> viewer = ImageViewer(image) # skip if not has_qt
-    >>> viewer += plugin            # skip if not has_qt
+    >>> viewer = ImageViewer(image) # doctest: +SKIP
+    >>> viewer += plugin            # doctest: +SKIP
     >>> viewer.show()               # doctest: +SKIP
 
     The plugin will automatically delegate parameters to `image_filter` based
