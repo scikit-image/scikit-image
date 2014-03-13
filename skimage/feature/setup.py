@@ -19,6 +19,7 @@ def configuration(parent_package='', top_path=None):
             '_texture.pyx',
             '_hessian_det_appx.pyx',
             '_hoghistogram.pyx',
+            '_shapecontext.pyx'
             ], working_path=base_path)
     # _haar uses c++, so it must be cythonized separately
     cython(['_cascade.pyx',
@@ -37,6 +38,8 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
+    config.add_extension('_shapecontext', sources=['_shapecontext.c'],
+                         include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_hoghistogram', sources=['_hoghistogram.c'],
