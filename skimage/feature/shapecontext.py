@@ -24,13 +24,13 @@ def shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
         minmimum distance of the pixels that are considered in computation of
         histogram from current_pixel
 
-    current_pixel : integer tuple, (r, c)
+    current_pixel : int tuple, (r, c)
         the pixel for which to find shape context descriptor
 
-    radial_bins : integer
+    radial_bins : int, optional (default: 5)
         number of log r bins in log-r vs theta histogram
 
-    polar_bins : integer
+    polar_bins : int, optional (default: 12)
         number of theta bins in log-r vs theta histogram
 
     Returns
