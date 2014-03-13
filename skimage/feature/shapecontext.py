@@ -3,8 +3,8 @@ import numpy as np
 from ._shapecontext import _shapecontext
 
 
-def shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
-                 polar_bins=12):
+def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
+                            polar_bins=12):
     """Compute Shape Context descriptor for a given point.
 
     Compute Shape Context by summing non-zero points into a log-polar
@@ -55,11 +55,11 @@ def shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.feature import shapecontext
+    >>> from skimage.feature import descriptor_shapecontext
     >>> img = np.zeros((20, 20)).astype(float)
     >>> img[4:8, 4:8] = 1
     >>> px = (10, 10)
-    >>> shapecontext(img, 0, 25, px, radial_bins=3, polar_bins=4)
+    >>> descriptor_shapecontext(img, 0, 25, px, radial_bins=3, polar_bins=4)
     array([[  0.,   0.,   0.,   0.],
            [  0.,   0.,  16.,   0.],
            [  0.,   0.,   0.,   0.]])

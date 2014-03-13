@@ -26,7 +26,7 @@ from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
-from .shapecontext import shapecontext
+from .shapecontext import descriptor_shapecontext
 
 
 __all__ = ['canny',
@@ -63,16 +63,9 @@ __all__ = ['canny',
            'match_descriptors',
            'plot_matches',
            'blob_dog',
-<<<<<<< HEAD
            'blob_doh',
            'blob_log',
            'haar_like_feature',
            'haar_like_feature_coord',
-           'draw_haar_like_feature']
-=======
-<<<<<<< HEAD
-           'blob_log']
-=======
-           'shapecontext']
->>>>>>> initial commit resolves pep8 warnings
->>>>>>> initial commit resolves pep8 warnings
+           'draw_haar_like_feature',
+           'descriptor_shapecontext']
