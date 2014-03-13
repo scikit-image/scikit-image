@@ -6,7 +6,8 @@ from skimage import data
 from skimage.filter.thresholding import (threshold_adaptive,
                                          threshold_otsu,
                                          threshold_yen,
-                                         threshold_isodata)
+                                         threshold_isodata,
+                                         threshold_bradley)
 
 
 class TestSimpleImage():
@@ -44,7 +45,7 @@ class TestSimpleImage():
         assert threshold_yen(image) == 127
 
     def test_yen_binary(self):
-        image = np.zeros([2,256], dtype=np.uint8)
+        image = np.zeros([2, 256], dtype=np.uint8)
         image[0] = 255
         assert threshold_yen(image) < 1
 
@@ -75,7 +76,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='generic', param=func)
         assert_array_equal(ref, out)
@@ -86,7 +87,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='gaussian')
         assert_array_equal(ref, out)
@@ -97,7 +98,7 @@ class TestSimpleImage():
              [False, False,  True, False,  True],
              [False, False,  True,  True, False],
              [False,  True,  True, False, False],
-             [ True,  True, False, False, False]]
+             [True,  True, False, False, False]]
         )
         out = threshold_adaptive(self.image, 3, method='mean')
         assert_array_equal(ref, out)
@@ -113,16 +114,17 @@ class TestSimpleImage():
         out = threshold_adaptive(self.image, 3, method='median')
         assert_array_equal(ref, out)
 
-	def test_threshold_bradley(self):
+    def test_threshold_bradley(self):
         ref = np.array(
-            [[True, False, True, True,  True],
-             [True, True,  True, True, True],
-             [True, True,  True, True, True],
-             [True, True,  True,  True, True],
-             [True,  True, True, True, True]]
+            [[True, False, True, True, True],
+             [True, True, True, True, True],
+             [True, True, True, True, True],
+             [True, True, True, True, True],
+             [True, True, True, True, True]]
         )
         out = threshold_bradley(self.image, 3)
         assert_array_equal(ref, out)
+
 
 def test_otsu_camera_image():
     camera = skimage.img_as_ubyte(data.camera())

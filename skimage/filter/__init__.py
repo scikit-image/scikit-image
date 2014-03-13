@@ -10,7 +10,7 @@ from ._denoise_cy import denoise_bilateral, denoise_tv_bregman
 from ._rank_order import rank_order
 from ._gabor import gabor_kernel, gabor_filter
 from .thresholding import (threshold_adaptive, threshold_otsu, threshold_yen,
-                           threshold_isodata,threshold_bradley)
+                           threshold_isodata, threshold_bradley)
 from . import rank
 
 
@@ -42,5 +42,5 @@ __all__ = ['inverse',
            'threshold_otsu',
            'threshold_yen',
            'threshold_isodata',
-           'threshold_bradley'
+           'threshold_bradley',
            'rank']
