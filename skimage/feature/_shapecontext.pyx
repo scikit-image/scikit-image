@@ -15,8 +15,7 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
                   float r_min, float r_max,
                   int current_pixel_x, int current_pixel_y,
                   int radial_bins=5, int polar_bins=12):
-    """
-    Cython implementation of calculation of shape contexts
+    """Cython implementation of calculation of shape contexts
 
     computes the log-polar histogram of non zero pixels with the given
     point as the origin and returns it as the shape context descriptor
@@ -27,29 +26,29 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
         Input image (grayscale).
 
     r_max : float
-        maximum distance of the pixels that are considered in computation
-        of histogram from current_pixel
+        Maximum distance of the pixels that are considered in computation
+        of histogram from current_pixel.
 
     r_min : float
-        minimum distance of the pixels that are considered in computation
-        of histogram from current_pixel
+        Minimum distance of the pixels that are considered in computation
+        of histogram from current_pixel.
 
     current_pixel_x : int
-        the row of pixel in the passed array
+        The row of pixel in the passed array.
 
     current_pixel_y : int
-        the column of pixel in the passed array
+        The column of pixel in the passed array.
 
     radial_bins : int, optional
-        number of log r bins in the log-r vs theta histogram (default: 5)
+        Number of log r bins in the log-r vs theta histogram (default: 5).
 
     polar_bins : int, optional
-        number of theta bins in log-r vs theta histogram (default: 12)
+        Number of theta bins in log-r vs theta histogram (default: 12).
 
     Returns
     -------
     bin_histogram : (radial_bins, polar_bins) ndarray
-        the shapecontext - the log-polar histogram of points on shape
+        The shape context - the log-polar histogram of points on shape.
 
     References
     ----------
@@ -61,9 +60,6 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
     .. [2]  Serge Belongie, Jitendra Malik and Jan Puzicha.
             Matching with Shape Contexts
             http://www.eecs.berkeley.edu/Research/Projects/CS/vision/shape/sc_digits.html
-
-    .. [2]  Wikipedia, "Shape Contexts".
-            http://en.wikipedia.org/wiki/Shape_context
 
     """
     cdef int rows = image.shape[0]

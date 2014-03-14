@@ -14,29 +14,29 @@ def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
     Parameters
     ----------
     image : (M, N) ndarray
-        Input image (greyscale).
+        Input image (grayscale).
 
     r_max : float
-        maximum distance of the pixels that are considered in computation of
-        histogram from current_pixel
+        Maximum distance of the pixels that are considered in computation of
+        histogram from current_pixel.
 
     r_min : float
-        minmimum distance of the pixels that are considered in computation of
-        histogram from current_pixel
+        Minimum distance of the pixels that are considered in computation of
+        histogram from current_pixel.
 
     current_pixel : int tuple, (r, c)
-        the pixel for which to find shape context descriptor
+        The pixel for which to find shape context descriptor.
 
     radial_bins : int, optional
-        number of log r bins in log-r vs theta histogram (default: 5)
+        Number of log r bins in log-r vs theta histogram.
 
     polar_bins : int, optional
-        number of theta bins in log-r vs theta histogram (default: 12)
+        Number of theta bins in log-r vs theta histogram.
 
     Returns
     -------
     bin_histogram : (radial_bins, polar_bins) ndarray
-        the shapecontext - the log-polar histogram of points on shape
+        The shape context - the log-polar histogram of points on shape.
 
     References
     ----------
@@ -48,9 +48,6 @@ def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
     .. [2]  Serge Belongie, Jitendra Malik and Jan Puzicha.
             Matching with Shape Contexts
             http://www.eecs.berkeley.edu/Research/Projects/CS/vision/shape/sc_digits.html
-
-    .. [3]  Wikipedia, "Shape Contexts".
-            http://en.wikipedia.org/wiki/Shape_context
 
     Examples
     --------
