@@ -1,6 +1,6 @@
 import numpy as np
 from skimage.draw import circle
-from skimage.feature import blob_dog, blob_log
+from skimage.feature import blob_dog, blob_log, blob_doh
 import math
 
 
@@ -79,3 +79,45 @@ def test_blob_log():
     assert abs(b[0] - 200) <= thresh
     assert abs(b[1] - 350) <= thresh
     assert abs(radius(b) - 30) <= thresh
+    
+def test_blob_doh():
+    r2 = math.sqrt(2)
+    img = np.ones((512, 512), dtype = np.uint8)
+
+    xs, ys = circle(400, 130, 20)
+    img[xs, ys] = 255
+
+    xs, ys = circle(160, 50, 30)
+    img[xs, ys] = 255
+
+    xs, ys = circle(100, 300, 40)
+    img[xs, ys] = 255
+
+    xs, ys = circle(200, 350, 50)
+    img[xs, ys] = 255
+
+    blobs = blob_doh(img, min_sigma=1, max_sigma=60, num_sigma=10)
+
+    radius = lambda x: r2*x[2]
+    s = sorted(blobs, key=radius)
+    thresh = 3
+
+    b = s[0]
+    assert abs(b[0] - 400) <= thresh
+    assert abs(b[1] - 130) <= thresh
+    assert abs(radius(b) - 20) <= thresh
+
+    b = s[1]
+    assert abs(b[0] - 160) <= thresh
+    assert abs(b[1] - 50) <= thresh
+    assert abs(radius(b) - 30) <= thresh
+
+    b = s[2]
+    assert abs(b[0] - 100) <= thresh
+    assert abs(b[1] - 300) <= thresh
+    assert abs(radius(b) - 40) <= thresh
+
+    b = s[3]
+    assert abs(b[0] - 200) <= thresh
+    assert abs(b[1] - 350) <= thresh
+    assert abs(radius(b) - 50) <= thresh
