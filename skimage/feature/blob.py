@@ -377,7 +377,9 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
     Computation of Determinant of Hessians is independent of the standard
     deviation. Therefore detecting larger blobs won't take more time. In
     methods line :py:meth:`blob_dog` and :py:meth:`blob_log` the computation
-    of Gaussians for larger `sigma` takes more time.
+    of Gaussians for larger `sigma` takes more time. The downside is that
+    this method can't be used for detecting blobs of radius less than `3px` 
+    due to the box filters used in the approximation of Hessian Determinant.
     """
     
     if image.ndim != 2:
