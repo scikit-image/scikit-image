@@ -6,6 +6,27 @@ from skimage import util
 
 
 cdef inline int  _clip(np.int_t x, np.int_t low, np.int_t high):
+    """Clips coordinate between high and low.
+    
+    This method was created so that `hessian_det_appx` does not have to make 
+    a Python call.
+
+    Parameters
+    ----------
+    x : int
+        Coordinate to be clipped.
+    low : int
+        The lower bound.
+    high : int
+        The higher bound.
+
+    Returns
+    -------
+    x : int
+        `x` clipped between 'high' and `low`.
+
+    """
+
     if(x > high):
         return high
     if(x < low):
