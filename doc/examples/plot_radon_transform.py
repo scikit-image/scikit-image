@@ -60,22 +60,20 @@ from skimage.transform import radon, rescale
 image = imread(data_dir + "/phantom.png", as_grey=True)
 image = rescale(image, scale=0.4)
 
-plt.figure(figsize=(8, 4.5))
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
 
-plt.subplot(121)
-plt.title("Original")
-plt.imshow(image, cmap=plt.cm.Greys_r)
+ax1.set_title("Original")
+ax1.imshow(image, cmap=plt.cm.Greys_r)
 
 theta = np.linspace(0., 180., max(image.shape), endpoint=True)
 sinogram = radon(image, theta=theta, circle=True)
-plt.subplot(122)
-plt.title("Radon transform\n(Sinogram)")
-plt.xlabel("Projection angle (deg)")
-plt.ylabel("Projection position (pixels)")
-plt.imshow(sinogram, cmap=plt.cm.Greys_r,
+ax2.set_title("Radon transform\n(Sinogram)")
+ax2.set_xlabel("Projection angle (deg)")
+ax2.set_ylabel("Projection position (pixels)")
+ax2.imshow(sinogram, cmap=plt.cm.Greys_r,
            extent=(0, 180, 0, sinogram.shape[0]), aspect='auto')
 
-plt.subplots_adjust(hspace=0.4, wspace=0.5)
+f.subplots_adjust(hspace=0.4, wspace=0.5)
 plt.show()
 
 """
@@ -103,13 +101,11 @@ error = reconstruction_fbp - image
 print('FBP rms reconstruction error: %.3g' % np.sqrt(np.mean(error**2)))
 
 imkwargs = dict(vmin=-0.2, vmax=0.2)
-plt.figure(figsize=(8, 4.5))
-plt.subplot(121)
-plt.title("Reconstruction\nFiltered back projection")
-plt.imshow(reconstruction_fbp, cmap=plt.cm.Greys_r)
-plt.subplot(122)
-plt.title("Reconstruction error\nFiltered back projection")
-plt.imshow(reconstruction_fbp - image, cmap=plt.cm.Greys_r, **imkwargs)
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4.5))
+ax1.set_title("Reconstruction\nFiltered back projection")
+ax1.imshow(reconstruction_fbp, cmap=plt.cm.Greys_r)
+ax2.set_title("Reconstruction error\nFiltered back projection")
+ax2.imshow(reconstruction_fbp - image, cmap=plt.cm.Greys_r, **imkwargs)
 plt.show()
 
 """
@@ -156,14 +152,12 @@ error = reconstruction_sart - image
 print('SART (1 iteration) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-plt.figure(figsize=(8, 8.5))
-
-plt.subplot(221)
-plt.title("Reconstruction\nSART")
-plt.imshow(reconstruction_sart, cmap=plt.cm.Greys_r)
-plt.subplot(222)
-plt.title("Reconstruction error\nSART")
-plt.imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
+f, ax = plt.subplots(2, 2, figsize=(8, 8.5))
+ax1, ax2, ax3, ax4 = ax.ravel()
+ax1.set_title("Reconstruction\nSART")
+ax1.imshow(reconstruction_sart, cmap=plt.cm.Greys_r)
+ax2.set_title("Reconstruction error\nSART")
+ax2.imshow(reconstruction_sart - image, cmap=plt.cm.Greys_r, **imkwargs)
 
 # Run a second iteration of SART by supplying the reconstruction
 # from the first iteration as an initial estimate
@@ -173,12 +167,10 @@ error = reconstruction_sart2 - image
 print('SART (2 iterations) rms reconstruction error: %.3g'
       % np.sqrt(np.mean(error**2)))
 
-plt.subplot(223)
-plt.title("Reconstruction\nSART, 2 iterations")
-plt.imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
-plt.subplot(224)
-plt.title("Reconstruction error\nSART, 2 iterations")
-plt.imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
+ax3.set_title("Reconstruction\nSART, 2 iterations")
+ax3.imshow(reconstruction_sart2, cmap=plt.cm.Greys_r)
+ax4.set_title("Reconstruction error\nSART, 2 iterations")
+ax4.imshow(reconstruction_sart2 - image, cmap=plt.cm.Greys_r, **imkwargs)
 plt.show()
 
 """

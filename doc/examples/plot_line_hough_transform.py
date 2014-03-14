@@ -77,30 +77,30 @@ image[idx, idx] = 255
 
 h, theta, d = hough_line(image)
 
-plt.figure(figsize=(8, 4))
+f, ax = plt.subplots(1, 3, figsize=(8, 4))
 
-plt.subplot(131)
-plt.imshow(image, cmap=plt.cm.gray)
-plt.title('Input image')
+ax[0].imshow(image, cmap=plt.cm.gray)
+ax[0].set_title('Input image')
+ax[0].axis('image')
 
-plt.subplot(132)
-plt.imshow(np.log(1 + h),
+ax[1].imshow(np.log(1 + h),
            extent=[np.rad2deg(theta[-1]), np.rad2deg(theta[0]),
                    d[-1], d[0]],
            cmap=plt.cm.gray, aspect=1/1.5)
-plt.title('Hough transform')
-plt.xlabel('Angles (degrees)')
-plt.ylabel('Distance (pixels)')
+ax[1].set_title('Hough transform')
+ax[1].set_xlabel('Angles (degrees)')
+ax[1].set_ylabel('Distance (pixels)')
+ax[1].axis('image')
 
-plt.subplot(133)
-plt.imshow(image, cmap=plt.cm.gray)
+ax[2].imshow(image, cmap=plt.cm.gray)
 rows, cols = image.shape
 for _, angle, dist in zip(*hough_line_peaks(h, theta, d)):
     y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
     y1 = (dist - cols * np.cos(angle)) / np.sin(angle)
-    plt.plot((0, cols), (y0, y1), '-r')
-plt.axis((0, cols, rows, 0))
-plt.title('Detected lines')
+    ax[2].plot((0, cols), (y0, y1), '-r')
+ax[2].axis((0, cols, rows, 0))
+ax[2].set_title('Detected lines')
+ax[2].axis('image')
 
 # Line finding, using the Probabilistic Hough Transform
 
@@ -108,23 +108,22 @@ image = data.camera()
 edges = canny(image, 2, 1, 25)
 lines = probabilistic_hough_line(edges, threshold=10, line_length=5, line_gap=3)
 
-plt.figure(figsize=(8, 3))
+f2, ax = plt.subplots(1, 3, figsize=(8, 3))
 
-plt.subplot(131)
-plt.imshow(image, cmap=plt.cm.gray)
-plt.title('Input image')
+ax[0].imshow(image, cmap=plt.cm.gray)
+ax[0].set_title('Input image')
+ax[0].axis('image')
 
-plt.subplot(132)
-plt.imshow(edges, cmap=plt.cm.gray)
-plt.title('Canny edges')
+ax[1].imshow(edges, cmap=plt.cm.gray)
+ax[1].set_title('Canny edges')
+ax[1].axis('image')
 
-plt.subplot(133)
-plt.imshow(edges * 0)
+ax[2].imshow(edges * 0)
 
 for line in lines:
     p0, p1 = line
-    plt.plot((p0[0], p1[0]), (p0[1], p1[1]))
+    ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]))
 
-plt.title('Probabilistic Hough')
-plt.axis('image')
+ax[2].set_title('Probabilistic Hough')
+ax[2].axis('image')
 plt.show()

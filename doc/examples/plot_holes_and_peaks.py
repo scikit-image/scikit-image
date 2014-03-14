@@ -22,13 +22,13 @@ image = data.moon()
 image = rescale_intensity(image, in_range=(50, 200))
 
 # convenience function for plotting images
-def imshow(image, **kwargs):
-    plt.figure(figsize=(5, 4))
-    plt.imshow(image, **kwargs)
-    plt.axis('off')
+def imshow(image, title, **kwargs):
+    f, ax = plt.subplots(figsize=(5, 4))
+    ax.imshow(image, **kwargs)
+    ax.axis('off')
+    ax.set_title(title)
 
-imshow(image)
-plt.title('original image')
+imshow(image, 'Original image')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -50,8 +50,7 @@ mask = image
 
 filled = reconstruction(seed, mask, method='erosion')
 
-imshow(filled, vmin=image.min(), vmax=image.max())
-plt.title('after filling holes')
+imshow(filled, 'after filling holes',vmin=image.min(), vmax=image.max())
 
 """
 .. image:: PLOT2RST.current_figure
@@ -62,8 +61,8 @@ isolate the dark regions by subtracting the reconstructed image from the
 original image.
 """
 
-imshow(image - filled)
-plt.title('holes')
+imshow(image - filled, 'holes')
+# plt.title('holes')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -78,8 +77,7 @@ intensity instead of the maximum. The remainder of the process is the same.
 seed = np.copy(image)
 seed[1:-1, 1:-1] = image.min()
 rec = reconstruction(seed, mask, method='dilation')
-imshow(image - rec)
-plt.title('peaks')
+imshow(image - rec, 'peaks')
 plt.show()
 
 """

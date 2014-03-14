@@ -35,24 +35,21 @@ edges1 = filter.canny(im)
 edges2 = filter.canny(im, sigma=3)
 
 # display results
-plt.figure(figsize=(8, 3))
+f, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))
 
-plt.subplot(131)
-plt.imshow(im, cmap=plt.cm.jet)
-plt.axis('off')
-plt.title('noisy image', fontsize=20)
+ax1.imshow(im, cmap=plt.cm.jet)
+ax1.axis('off')
+ax1.set_title('noisy image', fontsize=20)
 
-plt.subplot(132)
-plt.imshow(edges1, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title('Canny filter, $\sigma=1$', fontsize=20)
+ax2.imshow(edges1, cmap=plt.cm.gray)
+ax2.axis('off')
+ax2.set_title('Canny filter, $\sigma=1$', fontsize=20)
 
-plt.subplot(133)
-plt.imshow(edges2, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title('Canny filter, $\sigma=3$', fontsize=20)
+ax3.imshow(edges2, cmap=plt.cm.gray)
+ax3.axis('off')
+ax3.set_title('Canny filter, $\sigma=3$', fontsize=20)
 
-plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
+f.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
                     bottom=0.02, left=0.02, right=0.98)
 
 plt.show()

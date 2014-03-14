@@ -25,25 +25,23 @@ image_max = ndimage.maximum_filter(im, size=20, mode='constant')
 coordinates = peak_local_max(im, min_distance=20)
 
 # display results
-plt.figure(figsize=(8, 3))
-plt.subplot(131)
-plt.imshow(im, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title('Original')
+f, ax = plt.subplots(1, 3, figsize=(8, 3))
+ax1, ax2, ax3 = ax.ravel()
+ax1.imshow(im, cmap=plt.cm.gray)
+ax1.axis('off')
+ax1.set_title('Original')
 
-plt.subplot(132)
-plt.imshow(image_max, cmap=plt.cm.gray)
-plt.axis('off')
-plt.title('Maximum filter')
+ax2.imshow(image_max, cmap=plt.cm.gray)
+ax2.axis('off')
+ax2.set_title('Maximum filter')
 
-plt.subplot(133)
-plt.imshow(im, cmap=plt.cm.gray)
-plt.autoscale(False)
-plt.plot([p[1] for p in coordinates], [p[0] for p in coordinates], 'r.')
-plt.axis('off')
-plt.title('Peak local max')
+ax3.imshow(im, cmap=plt.cm.gray)
+ax3.autoscale(False)
+ax3.plot([p[1] for p in coordinates], [p[0] for p in coordinates], 'r.')
+ax3.axis('off')
+ax3.set_title('Peak local max')
 
-plt.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
+f.subplots_adjust(wspace=0.02, hspace=0.02, top=0.9,
                     bottom=0.02, left=0.02, right=0.98)
 
 plt.show()

@@ -35,7 +35,8 @@ out_rows = image.shape[0] - 1.5 * 50
 out_cols = cols
 out = warp(image, tform, output_shape=(out_rows, out_cols))
 
-plt.imshow(out)
-plt.plot(tform.inverse(src)[:, 0], tform.inverse(src)[:, 1], '.b')
-plt.axis((0, out_cols, out_rows, 0))
+f, ax = plt.subplots()
+ax.imshow(out)
+ax.plot(tform.inverse(src)[:, 0], tform.inverse(src)[:, 1], '.b')
+ax.axis((0, out_cols, out_rows, 0))
 plt.show()

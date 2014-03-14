@@ -32,7 +32,7 @@ from skimage import io
 
 plt.gray()
 phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
-plt.imshow(phantom)
+io.imshow(phantom)
 
 """
 .. image:: PLOT2RST.current_figure
