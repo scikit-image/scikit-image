@@ -398,29 +398,24 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-plt.figure()
+f, ax = plt.subplots(2, 2)
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 1)
-plt.imshow(p8, cmap=plt.cm.gray)
-plt.title('Original')
-plt.colorbar()
-plt.axis('off')
+f.colorbar(ax1.imshow(p8, cmap=plt.cm.gray), ax=ax1)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(t_loc_otsu, cmap=plt.cm.gray)
-plt.title('Local Otsu ($r=%d$)' % radius)
-plt.colorbar()
-plt.axis('off')
+f.colorbar(ax2.imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax2)
+ax2.set_title('Local Otsu ($r=%d$)' % radius)
+ax2.axis('off')
 
-plt.subplot(2, 2, 3)
-plt.imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
-plt.title('Original >= local Otsu' % t_glob_otsu)
-plt.axis('off')
+ax3.imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
+ax3.set_title('Original >= local Otsu' % t_glob_otsu)
+ax3.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(glob_otsu, cmap=plt.cm.gray)
-plt.title('Global Otsu ($t=%d$)' % t_glob_otsu)
-plt.axis('off')
+ax4.imshow(glob_otsu, cmap=plt.cm.gray)
+ax4.set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
+ax4.axis('off')
 
 """
 
@@ -528,19 +523,15 @@ import matplotlib.pyplot as plt
 
 image = data.camera()
 
-plt.figure(figsize=(10, 4))
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
-plt.subplot(1, 2, 1)
-plt.imshow(image, cmap=plt.cm.gray)
-plt.title('Image')
-plt.colorbar()
-plt.axis('off')
+f.colorbar(ax1.imshow(image, cmap=plt.cm.gray), ax=ax1)
+ax1.set_title('Image')
+ax1.axis('off')
 
-plt.subplot(1, 2, 2)
-plt.imshow(entropy(image, disk(5)), cmap=plt.cm.jet)
-plt.title('Entropy')
-plt.colorbar()
-plt.axis('off')
+f.colorbar(ax2.imshow(entropy(image, disk(5)), cmap=plt.cm.jet), ax=ax2)
+ax2.set_title('Entropy')
+ax2.axis('off')
 
 """
 
