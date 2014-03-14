@@ -309,13 +309,12 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
     Blobs are found using the Determinant of Hessian method [1]_. For each blob
     found, the method returns its coordinates and the standard deviation
     of the Gaussian Kernel used for the Hessian matrix whose determinant
-    detected the blob. Determinant of Hessians is approximated using [2]_
+    detected the blob. Determinant of Hessians is approximated using [2]_.
 
     Parameters
     ----------
     image : ndarray
-        Input grayscale image, blobs are assumed to be light on dark
-        background (white on black).
+        Input grayscale image.Blobs can either be light on dark or vice versa.
     min_sigma : float, optional
         The minimum standard deviation for Gaussian Kernel used to compute
         Hessian matrix. Keep this low to detect smaller blobs.

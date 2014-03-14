@@ -22,7 +22,7 @@ cdef inline int  _clip(np.int_t x, np.int_t low, np.int_t high):
     Returns
     -------
     x : int
-        `x` clipped between 'high' and `low`.
+        `x` clipped between `high` and `low`.
 
     """
 
@@ -77,7 +77,7 @@ def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
-    approximate Hessian Determinant as described in [1].
+    approximate Hessian Determinant as described in [1]_.
 
     Parameters
     ----------
