@@ -9,7 +9,7 @@ __all__ = ['threshold_adaptive',
 import numpy as np
 import scipy.ndimage
 from skimage.exposure import histogram
-from skimage.transform import integral_image
+from skimage.transform.integral import integral_image
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
                        mode='reflect', param=None):
