@@ -346,7 +346,10 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_determinant_of_the_Hessian
-    .. [2] ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+
+    .. [2] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
+           "SURF: Speeded Up Robust Features"
+           ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
 
     Examples
     --------
@@ -377,10 +380,10 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
     deviation. Therefore detecting larger blobs won't take more time. In
     methods line :py:meth:`blob_dog` and :py:meth:`blob_log` the computation
     of Gaussians for larger `sigma` takes more time. The downside is that
-    this method can't be used for detecting blobs of radius less than `3px` 
+    this method can't be used for detecting blobs of radius less than `3px`
     due to the box filters used in the approximation of Hessian Determinant.
     """
-    
+
     if image.ndim != 2:
         raise ValueError("'image' must be a grayscale ")
 

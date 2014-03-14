@@ -94,7 +94,9 @@ def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
 
     References
     ----------
-    .. [1] ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+    .. [1] Herbert Bay, Andreas Ess, Tinne Tuytelaars, Luc Van Gool,
+           "SURF: Speeded Up Robust Features"
+           ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
 
     Notes
     -----
