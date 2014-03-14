@@ -8,6 +8,7 @@ Version 0.11
   `skimage.transform.ProjectiveTransform._matrix`,
   `skimage.transform.PolynomialTransform._params`,
   `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
+* Remove deprecated functions `skimage.filter.denoise_*`
 
 Version 0.10
 ------------
