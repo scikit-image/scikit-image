@@ -35,7 +35,8 @@ Library:
         skimage, skimage.color, skimage.data, skimage.draw, skimage.exposure,
         skimage.feature, skimage.filter, skimage.graph, skimage.io,
         skimage.io._plugins, skimage.measure, skimage.morphology,
-        skimage.scripts, skimage.segmentation, skimage.transform, skimage.util
+        skimage.scripts, skimage.restoration, skimage.segmentation,
+        skimage.transform, skimage.util
     Extension: skimage.morphology._pnpoly
         Sources:
             skimage/morphology/_pnpoly.pyx
@@ -63,9 +64,6 @@ Library:
     Extension: skimage.filter._ctmf
         Sources:
             skimage/filter/_ctmf.pyx
-    Extension: skimage.filter._denoise_cy
-        Sources:
-            skimage/filter/_denoise_cy.pyx
     Extension: skimage.morphology.ccomp
         Sources:
             skimage/morphology/ccomp.pyx
@@ -141,15 +139,18 @@ Library:
     Extension: skimage.filter.rank.bilateral_cy
         Sources:
             skimage/filter/rank/bilateral_cy.pyx
-    Extension: skimage.exposure._unwrap_3d
+    Extension: skimage.restoration._unwrap_1d
         Sources:
-            skimage/exposure/_unwrap_3d.pyx, skimage/exposure/unwrap_3d_ljmu.c
-    Extension: skimage.exposure._unwrap_2d
+            skimage/restoration/_unwrap_1d.pyx
+    Extension: skimage.restoration._unwrap_2d
         Sources:
-            skimage/exposure/_unwrap_2d.pyx, skimage/exposure/unwrap_2d_ljmu.c
-    Extension: skimage.exposure._unwrap_1d
+            skimage/restoration/_unwrap_2d.pyx skimage/exposure/unwrap_2d_ljmu.c
+    Extension: skimage.restoration._unwrap_3d
         Sources:
-            skimage/exposure/_unwrap_1d.pyx
+            skimage/restoration/_unwrap_3d.pyx skimage/exposure/unwrap_3d_ljmu.c
+    Extension: skimage.restoration._denoise_cy
+        Sources:
+            skimage/restoration/_denoise_cy.pyx
 
 Executable: skivi
     Module: skimage.scripts.skivi
