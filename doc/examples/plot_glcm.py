@@ -53,41 +53,44 @@ for i, patch in enumerate(grass_patches + sky_patches):
     ys.append(greycoprops(glcm, 'correlation')[0, 0])
 
 # create the figure
-fig, ax = plt.subplots(3, 4, figsize=(8, 8))
+fig = plt.figure(figsize=(8, 8))
+
+# display original image with locations of patches
+ax = fig.add_subplot(3, 2, 1)
+ax.imshow(image, cmap=plt.cm.gray, interpolation='nearest',
+           vmin=0, vmax=255)
+for (y, x) in grass_locations:
+    ax.plot(x + PATCH_SIZE / 2, y + PATCH_SIZE / 2, 'gs')
+for (y, x) in sky_locations:
+    ax.plot(x + PATCH_SIZE / 2, y + PATCH_SIZE / 2, 'bs')
+ax.set_xlabel('Original Image')
+ax.set_xticks([])
+ax.set_yticks([])
+ax.axis('image')
+
+# for each patch, plot (dissimilarity, correlation)
+ax = fig.add_subplot(3, 2, 2)
+ax.plot(xs[:len(grass_patches)], ys[:len(grass_patches)], 'go',
+        label='Grass')
+ax.plot(xs[len(grass_patches):], ys[len(grass_patches):], 'bo',
+        label='Sky')
+ax.set_xlabel('GLCM Dissimilarity')
+ax.set_ylabel('GLVM Correlation')
+ax.legend()
 
 # display the image patches
 for i, patch in enumerate(grass_patches):
-    ax[1, i].imshow(patch, cmap=plt.cm.gray, interpolation='nearest',
-               vmin=0, vmax=255)
-    ax[1, i].set_xlabel('Grass %d' % (i + 1))
+    ax = fig.add_subplot(3, 4, 4+i+1)
+    ax.imshow(patch, cmap=plt.cm.gray, interpolation='nearest',
+              vmin=0, vmax=255)
+    ax.set_xlabel('Grass %d' % (i + 1))
 
 for i, patch in enumerate(sky_patches):
-    ax[2, i].imshow(patch, cmap=plt.cm.gray, interpolation='nearest',
-               vmin=0, vmax=255)
-    ax[2, i].set_xlabel('Sky %d' % (i + 1))
+    ax = fig.add_subplot(3, 4, 4*2+i+1)
+    ax.imshow(patch, cmap=plt.cm.gray, interpolation='nearest',
+              vmin=0, vmax=255)
+    ax.set_xlabel('Sky %d' % (i + 1))
 
-# display original image with locations of patches
-ax1 = fig.add_subplot(321)
-ax1.imshow(image, cmap=plt.cm.gray, interpolation='nearest',
-           vmin=0, vmax=255)
-for (y, x) in grass_locations:
-    ax1.plot(x + PATCH_SIZE / 2, y + PATCH_SIZE / 2, 'gs')
-for (y, x) in sky_locations:
-    ax1.plot(x + PATCH_SIZE / 2, y + PATCH_SIZE / 2, 'bs')
-ax1.set_xlabel('Original Image')
-ax1.set_xticks([])
-ax1.set_yticks([])
-ax1.axis('image')
-
-# for each patch, plot (dissimilarity, correlation)
-ax2 = fig.add_subplot(322)
-ax2.plot(xs[:len(grass_patches)], ys[:len(grass_patches)], 'go',
-         label='Grass')
-ax2.plot(xs[len(grass_patches):], ys[len(grass_patches):], 'bo',
-         label='Sky')
-ax2.set_xlabel('GLCM Dissimilarity')
-ax2.set_ylabel('GLVM Correlation')
-ax2.legend()
 
 # display the patches and plot
 fig.suptitle('Grey level co-occurrence matrix features', fontsize=14)
