@@ -351,27 +351,25 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
 
     Examples
     --------
-    >>> from skimage import data, feature, exposure
+    >>> from skimage import data, feature
     >>> img = data.coins()
-    >>> img = exposure.equalize_hist(img)  # improves detection
-    >>> feature.blob_log(img, threshold = .3)
-    array([[113, 323,   1],
-           [121, 272,  17],
-           [124, 336,  11],
-           [126,  46,  11],
-           [126, 208,  11],
-           [127, 102,  11],
-           [128, 154,  11],
-           [185, 344,  17],
-           [194, 213,  17],
-           [194, 276,  17],
-           [197,  44,  11],
-           [198, 103,  11],
-           [198, 155,  11],
-           [260, 174,  17],
-           [263, 244,  17],
-           [263, 302,  17],
-           [266, 115,  11]])
+    >>> feature.blob_doh(img,threshold = 700)
+    array([[121, 271,  30],
+           [123,  44,  23],
+           [123, 205,  20],
+           [124, 336,  20],
+           [126, 101,  20],
+           [126, 153,  20],
+           [156, 302,  30],
+           [185, 348,  30],
+           [192, 212,  23],
+           [193, 275,  23],
+           [195, 100,  23],
+           [197, 153,  20],
+           [260, 173,  30],
+           [262, 243,  23],
+           [265, 113,  23],
+           [270, 363,  30]])
 
     Notes
     -----
@@ -381,6 +379,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
     methods line :py:meth:`blob_dog` and :py:meth:`blob_log` the computation
     of Gaussians for larger `sigma` takes more time.
     """
+    
     if image.ndim != 2:
         raise ValueError("'image' must be a grayscale ")
 
