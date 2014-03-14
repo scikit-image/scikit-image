@@ -37,28 +37,25 @@ threshold_global_otsu = threshold_otsu(img)
 global_otsu = img >= threshold_global_otsu
 
 
-plt.figure(figsize=(8, 5))
+f, ax = plt.subplots(2, 2, figsize=(8, 5))
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 1)
-plt.imshow(img, cmap=plt.cm.gray)
-plt.title('Original')
-plt.colorbar(orientation='horizontal')
-plt.axis('off')
+f.colorbar(ax1.imshow(img, cmap=plt.cm.gray),
+           ax=ax1, orientation='horizontal')
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(local_otsu, cmap=plt.cm.gray)
-plt.title('Local Otsu (radius=%d)' % radius)
-plt.colorbar(orientation='horizontal')
-plt.axis('off')
+f.colorbar(ax2.imshow(local_otsu, cmap=plt.cm.gray),
+           ax=ax2, orientation='horizontal')
+ax2.set_title('Local Otsu (radius=%d)' % radius)
+ax2.axis('off')
 
-plt.subplot(2, 2, 3)
-plt.imshow(img >= local_otsu, cmap=plt.cm.gray)
-plt.title('Original >= Local Otsu' % threshold_global_otsu)
-plt.axis('off')
+ax3.imshow(img >= local_otsu, cmap=plt.cm.gray)
+ax3.set_title('Original >= Local Otsu' % threshold_global_otsu)
+ax3.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(global_otsu, cmap=plt.cm.gray)
-plt.title('Global Otsu (threshold = %d)' % threshold_global_otsu)
-plt.axis('off')
+ax4.imshow(global_otsu, cmap=plt.cm.gray)
+ax4.set_title('Global Otsu (threshold = %d)' % threshold_global_otsu)
+ax4.axis('off')
 
 plt.show()
