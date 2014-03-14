@@ -244,7 +244,7 @@ def correct_mesh_orientation(volume, verts, faces, spacing=(1., 1., 1.),
 
     # Calculate and normalize cross products for each face
     crosses = np.cross(a, b)
-    crosses = crosses / np.linalg.norm(crosses, axis=1)[:, np.newaxis]
+    crosses = crosses / np.sum(crosses ** 2, axis=1) ** (0.5)[:, np.newaxis]
 
     # Take dot product
     dotproducts = (grad_centroids * crosses).sum(axis=1)
