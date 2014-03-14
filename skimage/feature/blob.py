@@ -4,8 +4,11 @@ import itertools as itt
 import math
 from math import sqrt, hypot, log
 from numpy import arccos
-from skimage.util import img_as_float
+from skimage.util import img_as_float, img_as_ubyte
 from .peak import peak_local_max
+from ._hessian_det_appx import _hessian_det_appx
+from skimage.transform import integral_image
+
 
 
 # This basic blob detection algorithm is based on:
@@ -289,6 +292,111 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     #s**2 provides scale invariance
     gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
     image_cube = np.dstack(gl_images)
+
+    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
+                                  footprint=np.ones((3, 3, 3)),
+                                  threshold_rel=0.0,
+                                  exclude_border=False)
+
+    # Convert the last index to its corresponding scale value
+    local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
+    return _prune_blobs(local_maxima, overlap)
+
+
+def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
+             overlap=.5, log_scale=False):
+    """Finds blobs in the given grayscale image.
+
+    Blobs are found using the Determinant of Hessian method [1]_. For each blob 
+    found, the method returns its coordinates and the standard deviation
+    of the Gaussian Kernel used for the Hessian matrix whose determinant
+    detected the blob. Determinant of Hessians is approximated using [2]
+
+    Parameters
+    ----------
+    image : ndarray
+        Input grayscale image, blobs are assumed to be light on dark
+        background (white on black).
+    min_sigma : float, optional
+        The minimum standard deviation for Gaussian Kernel used to compute 
+        Hessian matrix. Keep this low to detect smaller blobs.
+    max_sigma : float, optional
+        The maximum standard deviation for Gaussian Kernel used to compute 
+        Hessian matrix. Keep this high to detect larger blobs.
+    num_sigma : int, optional
+        The number of intermediate values of standard deviations to consider
+        between `min_sigma` and `max_sigma`.
+    threshold : float, optional.
+        The absolute lower bound for scale space maxima. Local maxima smaller
+        than thresh are ignored. Reduce this to detect less prominent blobs.
+    overlap : float, optional
+        A value between 0 and 1. If the area of two blobs overlaps by a
+        fraction greater than `threshold`, the smaller blob is eliminated.
+    log_scale : bool, optional
+        If set intermediate values of standard deviations are interpolated
+        using a logarithmic scale to the base `10`. If not, linear
+        interpolation is used.
+
+    Returns
+    -------
+    A : (n, 3) ndarray
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel of the Hessian Matrix whose
+        determinant detected the blob.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_Laplacian_of_Gaussian
+    .. [2] ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+
+    Examples
+    --------
+    >>> from skimage import data, feature, exposure
+    >>> img = data.coins()
+    >>> img = exposure.equalize_hist(img)  # improves detection
+    >>> feature.blob_log(img, threshold = .3)
+    array([[113, 323,   1],
+           [121, 272,  17],
+           [124, 336,  11],
+           [126,  46,  11],
+           [126, 208,  11],
+           [127, 102,  11],
+           [128, 154,  11],
+           [185, 344,  17],
+           [194, 213,  17],
+           [194, 276,  17],
+           [197,  44,  11],
+           [198, 103,  11],
+           [198, 155,  11],
+           [260, 174,  17],
+           [263, 244,  17],
+           [263, 302,  17],
+           [266, 115,  11]])
+
+    Notes
+    -----
+    The radius of each blob is approximately `sigma`.
+    Computation of Determinant of Hessians is independent of the standard 
+    deviation. Therefore detecting larger blobs won't take more time. In
+    mathods line :py:meth:`blob_dog` and :py:math:`blob_log` the computation
+    of Gaussians for larger `sigma` takes more time.
+    """
+    if image.ndim != 2:
+        raise ValueError("'image' must be a grayscale ")
+
+    image = img_as_ubyte(image).astype(np.uint8)
+    image = integral_image(image).astype(np.int)
+    print image
+
+    if log_scale:
+        start, stop = log(min_sigma, 10), log(max_sigma, 10)
+        sigma_list = np.logspace(start, stop, num_sigma)
+    else:
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
+        
+    hessian_images = [_hessian_det_appx(image, s) for s in sigma_list]
+    image_cube = np.dstack(hessian_images)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
                                   footprint=np.ones((3, 3, 3)),

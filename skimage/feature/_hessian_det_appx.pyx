@@ -1,6 +1,5 @@
 import numpy as np
 cimport numpy as np
-
 from skimage.transform import integral_image, integrate
 from skimage import util
 
@@ -113,8 +112,9 @@ def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
     cdef int r, c
     cdef int s2 = (size - 1) / 2
     cdef int s3 = size / 3
-    cdef int l = size / 3
+    cdef int l = size/3
     cdef int w = size
+    cdef int b = (size - 1)/2
     cdef int mid, side
     zeros = np.zeros_like(img)
     cdef np.ndarray[np.float_t, ndim = 2] out = zeros.astype(np.float)
@@ -141,8 +141,8 @@ def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
             dxx = mid - 3 * side
             dxx = -dxx / w / w
 
-            mid = _integ(img, r - s2, c - s2 + 1, w, 2 * s3 - 1)
-            side = _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1) * 3
+            mid = _integ(img, r - s2, c - s3 + 1, w, 2 * s3 - 1)
+            side = _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1)
 
             dyy = mid - 3 * side
             dyy = -dyy / w / w
