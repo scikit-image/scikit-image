@@ -61,10 +61,10 @@ h = rescale_intensity(ihc_hed[:, :, 0], out_range=(0, 1))
 d = rescale_intensity(ihc_hed[:, :, 2], out_range=(0, 1))
 zdh = np.dstack((np.zeros_like(h), d, h))
 
-plt.figure()
-plt.imshow(zdh)
-plt.title("Stain separated image (rescaled)")
-plt.axis('off')
+f, ax = plt.subplots()
+ax.imshow(zdh)
+ax.set_title("Stain separated image (rescaled)")
+ax.axis('off')
 plt.show()
 
 """
