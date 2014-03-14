@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.ndimage.filters import gaussian_filter
+from scipy.ndimage.filters import gaussian_filter, gaussian_laplace
 import itertools as itt
 import math
 from math import sqrt, hypot, log
@@ -67,9 +67,9 @@ def _prune_blobs(blobs_array, overlap):
     Parameters
     ----------
     blobs_array : ndarray
-        a 2d array with each row representing 3 values, the ``(y,x,sigma)``
-        where ``(y,x)`` are coordinates of the blob and sigma is the standard
-        deviation of the Gaussian kernel which detected the blob.
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel which detected the blob.
     overlap : float
         A value between 0 and 1. If the fraction of area overlapping for 2
         blobs is greater than `overlap` the smaller blob is eliminated.
@@ -98,8 +98,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
              overlap=.5,):
     """Finds blobs in the given grayscale image.
 
-    Blobs are found using the Difference of Gaussian (DoG) method[1]_.
-    For each blob found, its coordinates and area are returned.
+    Blobs are found using the Difference of Gaussian (DoG) method [1]_.
+    For each blob found, the method returns its coordinates and the standard
+    deviation of the Gaussian kernel that detected the blob.
 
     Parameters
     ----------
@@ -126,8 +127,9 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     Returns
     -------
     A : (n, 3) ndarray
-        A 2d array with each row containing the Y-Coordinate , the
-        X-Coordinate and the estimated area of the blob respectively.
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel which detected the blob.
 
     References
     ----------
@@ -136,32 +138,35 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
     Examples
     --------
     >>> from skimage import data, feature
-    >>> feature.blob_dog(data.coins(),threshold=.5,max_sigma=40)
-    array([[  45,  336, 1608],
-           [  52,  155, 1608],
-           [  52,  216, 1608],
-           [  54,   42, 1608],
-           [  54,  276,  628],
-           [  58,  100,  628],
-           [ 120,  272, 1608],
-           [ 124,  337,  628],
-           [ 125,   45, 1608],
-           [ 125,  208,  628],
-           [ 127,  102,  628],
-           [ 128,  154,  628],
-           [ 185,  347, 1608],
-           [ 193,  213, 1608],
-           [ 194,  277, 1608],
-           [ 195,  102, 1608],
-           [ 196,   43,  628],
-           [ 198,  155,  628],
-           [ 260,   46, 1608],
-           [ 261,  173, 1608],
-           [ 263,  245, 1608],
-           [ 263,  302, 1608],
-           [ 267,  115,  628],
-           [ 267,  359, 1608]])
+    >>> feature.blob_dog(data.coins(), threshold=.5, max_sigma=40)
+    array([[ 45, 336,  16],
+           [ 52, 155,  16],
+           [ 52, 216,  16],
+           [ 54,  42,  16],
+           [ 54, 276,  10],
+           [ 58, 100,  10],
+           [120, 272,  16],
+           [124, 337,  10],
+           [125,  45,  16],
+           [125, 208,  10],
+           [127, 102,  10],
+           [128, 154,  10],
+           [185, 347,  16],
+           [193, 213,  16],
+           [194, 277,  16],
+           [195, 102,  16],
+           [196,  43,  10],
+           [198, 155,  10],
+           [260,  46,  16],
+           [261, 173,  16],
+           [263, 245,  16],
+           [263, 302,  16],
+           [267, 115,  10],
+           [267, 359,  16]])
 
+    Notes
+    -----
+    The radius of each blob is approximately :math:`\sqrt{2}sigma`.
     """
 
     if image.ndim != 2:
@@ -192,11 +197,104 @@ def blob_dog(image, min_sigma=1, max_sigma=50, sigma_ratio=1.6, threshold=2.0,
 
     # Convert the last index to its corresponding scale value
     local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
-    ret_val = _prune_blobs(local_maxima, overlap)
+    return _prune_blobs(local_maxima, overlap)
 
-    if len(ret_val) > 0:
-        ret_val[:, 2] = math.pi * \
-            ((ret_val[:, 2] * math.sqrt(2)) ** 2).astype(int)
-        return ret_val
+
+def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
+             overlap=.5, log_scale=False):
+    """Finds blobs in the given grayscale image.
+
+    Blobs are found using the Laplacian of Gaussian (LoG) method [1]_.
+    For each blob found, the method returns its coordinates and the standard
+    deviation of the Gaussian kernel that detected the blob.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input grayscale image, blobs are assumed to be light on dark
+        background (white on black).
+    min_sigma : float, optional
+        The minimum standard deviation for Gaussian Kernel. Keep this low to
+        detect smaller blobs.
+    max_sigma : float, optional
+        The maximum standard deviation for Gaussian Kernel. Keep this high to
+        detect larger blobs.
+    num_sigma : int, optional
+        The number of intermediate values of standard deviations to consider
+        between `min_sigma` and `max_sigma`.
+    threshold : float, optional.
+        The absolute lower bound for scale space maxima. Local maxima smaller
+        than thresh are ignored. Reduce this to detect blobs with less
+        intensities.
+    overlap : float, optional
+        A value between 0 and 1. If the area of two blobs overlaps by a
+        fraction greater than `threshold`, the smaller blob is eliminated.
+    log_scale : bool, optional
+        If set intermediate values of standard deviations are interpolated
+        using a logarithmic scale to the base `10`. If not, linear
+        interpolation is used.
+
+    Returns
+    -------
+    A : (n, 3) ndarray
+        A 2d array with each row representing 3 values, ``(y,x,sigma)``
+        where ``(y,x)`` are coordinates of the blob and ``sigma`` is the
+        standard deviation of the Gaussian kernel which detected the blob.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Blob_detection#The_Laplacian_of_Gaussian
+
+    Examples
+    --------
+    >>> from skimage import data, feature, exposure
+    >>> img = data.coins()
+    >>> img = exposure.equalize_hist(img)  # improves detection
+    >>> feature.blob_log(img, threshold = .3)
+    array([[113, 323,   1],
+           [121, 272,  17],
+           [124, 336,  11],
+           [126,  46,  11],
+           [126, 208,  11],
+           [127, 102,  11],
+           [128, 154,  11],
+           [185, 344,  17],
+           [194, 213,  17],
+           [194, 276,  17],
+           [197,  44,  11],
+           [198, 103,  11],
+           [198, 155,  11],
+           [260, 174,  17],
+           [263, 244,  17],
+           [263, 302,  17],
+           [266, 115,  11]])
+
+    Notes
+    -----
+    The radius of each blob is approximately :math:`\sqrt{2}sigma`.
+    """
+
+    if image.ndim != 2:
+        raise ValueError("'image' must be a grayscale ")
+
+    image = img_as_float(image)
+
+    if log_scale:
+        start, stop = log(min_sigma, 10), log(max_sigma, 10)
+        sigma_list = np.logspace(start, stop, num_sigma)
     else:
-        return []
+        sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
+
+    #computing gaussian laplace
+    #s**2 provides scale invariance
+    gl_images = [-gaussian_laplace(image, s) * s ** 2 for s in sigma_list]
+    image_cube = np.dstack(gl_images)
+
+    local_maxima = peak_local_max(image_cube, threshold_abs=threshold,
+                                  footprint=np.ones((3, 3, 3)),
+                                  threshold_rel=0.0,
+                                  exclude_border=False)
+
+    # Convert the last index to its corresponding scale value
+    local_maxima[:, 2] = sigma_list[local_maxima[:, 2]]
+    return _prune_blobs(local_maxima, overlap)
