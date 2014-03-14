@@ -5,7 +5,7 @@ from skimage.transform import integral_image, integrate
 from skimage import util
 
 
-cdef inline int  clip(np.int_t x, np.int_t low, np.int_t high):
+cdef inline int  _clip(np.int_t x, np.int_t low, np.int_t high):
     if(x > high):
         return high
     if(x < low):
@@ -13,13 +13,13 @@ cdef inline int  clip(np.int_t x, np.int_t low, np.int_t high):
     return x
 
 
-cdef inline int integ(np.int_t[:, :] img, np.int_t r1, np.int_t c1, np.int_t rl, np.int_t cl):
+cdef inline int _integ(np.int_t[:, :] img, np.int_t r1, np.int_t c1, np.int_t rl, np.int_t cl):
 
-    r1 = clip(r1, 0, img.shape[0] - 1)
-    c1 = clip(c1, 0, img.shape[1] - 1)
+    r1 = _clip(r1, 0, img.shape[0] - 1)
+    c1 = _clip(c1, 0, img.shape[1] - 1)
 
-    r2 = clip(r1 + rl, 0, img.shape[0] - 1)
-    c2 = clip(c1 + cl, 0, img.shape[1] - 1)
+    r2 = _clip(r1 + rl, 0, img.shape[0] - 1)
+    c2 = _clip(c1 + cl, 0, img.shape[1] - 1)
 
     cdef np.int_t r = img[r2, c2] + img[r1, c1] - img[r1, c2] - img[r2, c1]
 
@@ -50,18 +50,18 @@ def hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
     for r in range(height):
         for c in range(width):
         
-            dxy =  integ(img, r - s3, c + 1, s3, s3) + \
-                   integ(img, r + 1, c - s3, s3, s3) - \
-                   integ(img, r - s3, c - s3, s3, s3) - \
-                   integ(img, r + 1, c + 1, s3, s3)
+            dxy =  _integ(img, r - s3, c + 1, s3, s3) + \
+                   _integ(img, r + 1, c - s3, s3, s3) - \
+                   _integ(img, r - s3, c - s3, s3, s3) - \
+                   _integ(img, r + 1, c + 1, s3, s3)
             dxy = -dxy / w / w
 
-            dxx = integ(img, r - s3 + 1, c - s2, 2 * s3 - 1,w) - \
-                  integ(img, r - s3 + 1, c - s3 / 2, 2 * s3 - 1, s3) * 3
+            dxx = _integ(img, r - s3 + 1, c - s2, 2 * s3 - 1,w) - \
+                  _integ(img, r - s3 + 1, c - s3 / 2, 2 * s3 - 1, s3) * 3
             dxx = -dxx / w / w
 
-            dyy = integ(img, r - s2, c - s2 + 1, w, 2 * s3 - 1) - \
-                  integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1) * 3
+            dyy = _integ(img, r - s2, c - s2 + 1, w, 2 * s3 - 1) - \
+                  _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1) * 3
             dyy = -dyy / w / w
 
             out[r, c] = (dxx * dyy - 0.81 * (dxy * dxy))
