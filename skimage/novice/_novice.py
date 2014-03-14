@@ -7,6 +7,7 @@ from skimage import io
 from skimage import img_as_ubyte
 from skimage.transform import resize
 from skimage.color import color_dict
+from skimage.io.util import file_or_url_context, is_url
 
 import six
 
@@ -19,7 +20,7 @@ colors = namedtuple('colors', color_dict.keys())(**color_dict)
 
 def open(path):
     """Return Picture object from the given image path."""
-    return Picture(path=os.path.abspath(path))
+    return Picture(path)
 
 
 def _verify_picture_index(index):
@@ -162,7 +163,7 @@ class Picture(object):
     Attributes
     ----------
     path : str
-        Path to an image file to load.
+        Path to an image file to load / URL of an image
     array : array
         Raw RGB image data [0-255], with origin at top-left.
     xy_array : array
@@ -174,6 +175,9 @@ class Picture(object):
     >>> from skimage import novice
     >>> from skimage import data
     >>> picture = novice.open(data.data_dir + '/chelsea.png')
+
+    Load an image from a URL. URL must start with http(s):// or ftp(s)://
+    >>> picture = novice.open('http://scikit-image.org/_static/img/logo.png')
 
     Create a blank 100 pixel wide, 200 pixel tall white image
     >>> pic = Picture.from_size((100, 200), color=(255, 255, 255))
@@ -210,9 +214,12 @@ class Picture(object):
             msg = "Must provide a single keyword arg (path, array, xy_array)."
             ValueError(msg)
         elif path is not None:
-            self.array = img_as_ubyte(io.imread(path))
+            if not is_url(path):
+                path = os.path.abspath(path)
             self._path = path
-            self._format = imghdr.what(path)
+            with file_or_url_context(path) as context:
+                self.array = io.imread(context)
+                self._format = imghdr.what(context)
         elif array is not None:
             self.array = array
         elif xy_array is not None:
