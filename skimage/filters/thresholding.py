@@ -12,7 +12,7 @@ import scipy.ndimage
 from ..exposure import histogram
 from .._shared.utils import assert_nD
 from skimage.exposure import histogram
-from skimage.transform import integral_image
+from skimage.transform.integral import integral_image
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
