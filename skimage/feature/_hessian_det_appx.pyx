@@ -7,8 +7,8 @@ from skimage import util
 
 cdef inline int  _clip(np.int_t x, np.int_t low, np.int_t high):
     """Clips coordinate between high and low.
-    
-    This method was created so that `hessian_det_appx` does not have to make 
+
+    This method was created so that `hessian_det_appx` does not have to make
     a Python call.
 
     Parameters
@@ -34,27 +34,80 @@ cdef inline int  _clip(np.int_t x, np.int_t low, np.int_t high):
     return x
 
 
-cdef inline int _integ(np.int_t[:, :] img, np.int_t r1, np.int_t c1, np.int_t rl, np.int_t cl):
+cdef inline int _integ(np.int_t[:, :] img, np.int_t r, np.int_t c,
+                       np.int_t rl, np.int_t cl):
+    """Integrate over the integral image in the given window
 
-    r1 = _clip(r1, 0, img.shape[0] - 1)
-    c1 = _clip(c1, 0, img.shape[1] - 1)
+    This method was created so that `hessian_det_appx` does not have to make
+    a Python call.
 
-    r2 = _clip(r1 + rl, 0, img.shape[0] - 1)
-    c2 = _clip(c1 + cl, 0, img.shape[1] - 1)
+    Parameters
+    ----------
+    img : array
+        The integral image over which to integrate.
+    r : int
+        The row number of the top left corner.
+    c : int
+        The column number of the top left corner.
+    rl : int
+        The number of rows over which to integrate.
+    cl : int
+        The number of columns over which to integrate.
 
-    cdef np.int_t r = img[r2, c2] + img[r1, c1] - img[r1, c2] - img[r2, c1]
+    Returns
+    -------
+    ans : int
+        The integral over the given window.
 
-    if (r < 0):
+    """
+
+    r = _clip(r, 0, img.shape[0] - 1)
+    c = _clip(c, 0, img.shape[1] - 1)
+
+    r2 = _clip(r + rl, 0, img.shape[0] - 1)
+    c2 = _clip(c + cl, 0, img.shape[1] - 1)
+
+    cdef np.int_t ans = img[r, c] + img[r2, c2] - img[r, c2] - img[r2, c]
+
+    if (ans < 0):
         return 0
-    return r
+    return ans
 
 
-def hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
+def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
+    """Computes the approximate Hessian Determinant over an image.
+
+    This method uses box filters over integral images to compute the
+    approximate Hessian Determinant as described in [1].
+
+    Parameters
+    ----------
+    image : array
+        The integral image over which to compute Hessian Determinant.
+    sigma : float
+        Standard deviation used for the Gaussian kernel, used for the Hessian
+        matrix
+
+    Returns
+    -------
+    out : array
+        The array of the Determinant of Hessians.
+
+    References
+    ----------
+    .. [1] ftp://ftp.vision.ee.ethz.ch/publications/articles/eth_biwi_00517.pdf
+
+    Notes
+    -----
+    The running time of this method only depends on size of the image. It is
+    independent of `sigma` as one would expect. The downside is that the
+    result for `sigma` less than `3` is not accurate, i.e., not similar to
+    the result obtained if someone computed the Hessian and took it's
+    determinant.
+    """
 
     cdef np.int_t[:, :] img = image
     cdef int size = int(3 * sigma)
-    cdef np.ndarray[np.float_t, ndim = 2] out = np.zeros_like(img).astype(np.float)
-
     cdef int height = img.shape[0]
     cdef int width = img.shape[1]
     cdef int r, c
@@ -62,6 +115,9 @@ def hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
     cdef int s3 = size / 3
     cdef int l = size / 3
     cdef int w = size
+    cdef int mid, side
+    zeros = np.zeros_like(img)
+    cdef np.ndarray[np.float_t, ndim = 2] out = zeros.astype(np.float)
 
     cdef float dxx, dyy, dxy
 
@@ -70,19 +126,25 @@ def hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
 
     for r in range(height):
         for c in range(width):
-        
-            dxy =  _integ(img, r - s3, c + 1, s3, s3) + \
-                   _integ(img, r + 1, c - s3, s3, s3) - \
-                   _integ(img, r - s3, c - s3, s3, s3) - \
-                   _integ(img, r + 1, c + 1, s3, s3)
+
+            tl = _integ(img, r - s3, c - s3, s3, s3)  # top left
+            br = _integ(img, r + 1, c + 1, s3, s3)  # bottom right
+            bl = _integ(img, r - s3, c + 1, s3, s3)  # bottom left
+            tr = _integ(img, r + 1, c - s3, s3, s3)  # top right
+
+            dxy = bl + tr - tl - br
             dxy = -dxy / w / w
 
-            dxx = _integ(img, r - s3 + 1, c - s2, 2 * s3 - 1,w) - \
-                  _integ(img, r - s3 + 1, c - s3 / 2, 2 * s3 - 1, s3) * 3
+            mid = _integ(img, r - s3 + 1, c - s2, 2 * s3 - 1, w)  # middle box
+            side = _integ(img, r - s3 + 1, c - s3 / 2, 2 * s3 - 1, s3)  # sides
+
+            dxx = mid - 3 * side
             dxx = -dxx / w / w
 
-            dyy = _integ(img, r - s2, c - s2 + 1, w, 2 * s3 - 1) - \
-                  _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1) * 3
+            mid = _integ(img, r - s2, c - s2 + 1, w, 2 * s3 - 1)
+            side = _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1) * 3
+
+            dyy = mid - 3 * side
             dyy = -dyy / w / w
 
             out[r, c] = (dxx * dyy - 0.81 * (dxy * dxy))
