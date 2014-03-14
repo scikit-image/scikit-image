@@ -9,7 +9,7 @@ __all__ = ['threshold_adaptive',
 import numpy as np
 import scipy.ndimage
 from skimage.exposure import histogram
-
+from skimage.transform import integral_image
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
                        mode='reflect', param=None):
@@ -290,7 +290,7 @@ def _mean_std(image, w):
     if w == 1 or w % 2 == 0:
         raise ValueError(
             "Window size w = %s must be odd and greater than 1." % (w))
-    I = np.cumsum(np.cumsum(image, axis=0), axis=1)  # Integral Image.
+    I = integral_image(image)  # Integral Image.
 
     # Pad left and top of Integral image with zeros
     I = np.vstack((np.zeros((1, I.shape[1]), I.dtype), I))
@@ -352,9 +352,9 @@ def threshold_niblack(image, w=15, k=0.2, offset=0):
 
     Examples
     --------
-    >>> from skimage.data import page
-    >>> image = page()
-    >>> binary_image = threshold_niblack(image, w=7, k=0.1)
+    ... from skimage.data import page
+    ... image = page()
+    ... binary_image = threshold_niblack(image, w=7, k=0.1)
     """
 
     m, s = _mean_std(image, w)
@@ -441,14 +441,14 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
 
     Examples
     --------
-    >>> from skimage.data import page
-    >>> image = page()
-    >>> binary_sauvola = threshold_sauvola(image, method='sauvola',
+    ... from skimage.data import page
+    ... image = page()
+    ... binary_sauvola = threshold_sauvola(image, method='sauvola',
                                            w=15, k=0.2, r=128)
-    >>> binary_wolf = threshold_sauvola(image, method='wolf',
+    ... binary_wolf = threshold_sauvola(image, method='wolf',
                                         w=7, k=0.2)
-    >>> binary_phansalkar = threshold_sauvola(image, method='phansalkar',
-                                           w=7, k=0.2, r=128)
+    ... binary_phansalkar = threshold_sauvola(image, method='phansalkar',
+                                              w=7, k=0.2, r=128)
     """
 
     t = np.zeros_like(image)
