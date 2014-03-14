@@ -2,7 +2,8 @@ import numpy as np
 from numpy.testing import assert_raises
 
 from skimage.draw import ellipsoid, ellipsoid_stats
-from skimage.measure import marching_cubes, mesh_surface_area
+from skimage.measure import (marching_cubes, mesh_surface_area,
+                             correct_mesh_orientation)
 
 
 def test_marching_cubes_isotropic():
@@ -34,6 +35,26 @@ def test_invalid_input():
     assert_raises(ValueError, marching_cubes, np.ones((3, 3, 3)), 1,
                   spacing=(1, 2))
     assert_raises(ValueError, marching_cubes, np.zeros((20, 20)), 0)
+
+
+def test_correct_mesh_orientation():
+    sphere_small = ellipsoid(1, 1, 1, levelset=True)
+    verts, faces = marching_cubes(sphere_small, 0.)
+
+    # Correct mesh orientation - descent
+    corrected_faces1 = correct_mesh_orientation(sphere_small, verts, faces,
+                                                gradient_direction='descent')
+    corrected_faces2 = correct_mesh_orientation(sphere_small, verts, faces,
+                                                gradient_direction='ascent')
+
+    # Ensure ascent is opposite of descent for all faces
+    np.testing.assert_array_equal(corrected_faces1, corrected_faces2[:, ::-1])
+
+    # Ensure correct faces have been reversed: 1, 4, and 5
+    idx = [1, 4, 5]
+    expected = faces.copy()
+    expected[idx] = expected[idx, ::-1]
+    np.testing.assert_array_equal(expected, corrected_faces1)
 
 
 if __name__ == '__main__':
