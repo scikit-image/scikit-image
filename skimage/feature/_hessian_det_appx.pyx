@@ -38,7 +38,7 @@ cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low, Py_ssize_t high):
 
 
 cdef inline cnp.double_t _integ(
-    cnp.double_t[:, :] img, Py_ssize_t r, Py_ssize_t c,
+    cnp.double_t[:, ::1] img, Py_ssize_t r, Py_ssize_t c,
         Py_ssize_t rl, Py_ssize_t cl):
     """Integrate over the integral image in the given window
 
@@ -78,7 +78,7 @@ cdef inline cnp.double_t _integ(
     return ans
 
 
-def _hessian_det_appx(cnp.double_t[:, :] img, float sigma):
+def _hessian_det_appx(cnp.double_t[:, ::1] img, float sigma):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
