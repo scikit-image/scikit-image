@@ -107,12 +107,12 @@ def test_ellipsoid_stats():
 
     # Test when a <= b <= c does not hold
     vol, surf = ellipsoid_stats(16, 6, 10)
-    assert_allclose(1280 * np.pi, vol, atol=1e-4))
+    assert_allclose(1280 * np.pi, vol, atol=1e-4)
     assert_allclose(1383.28, surf, atol=1e-2)
 
     # Larger test to ensure reliability over broad range
     vol, surf = ellipsoid_stats(17, 27, 169)
-    assert_allclose(103428 * np.pi, vol, atol=1e-4))
+    assert_allclose(103428 * np.pi, vol, atol=1e-4)
     assert_allclose(37426.3, surf, atol=1e-1)
 
 
