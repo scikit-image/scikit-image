@@ -15,6 +15,7 @@ from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
+from ._hessian_det_appx import hessian_det_appx
 
 
 __all__ = ['daisy',
@@ -44,4 +45,5 @@ __all__ = ['daisy',
            'plot_matches',
            'blob_dog',
            'blob_doh',
+           'hessian_det_appx',
            'blob_log']

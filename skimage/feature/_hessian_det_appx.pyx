@@ -78,7 +78,7 @@ cdef inline cnp.double_t _integ(
     return ans
 
 
-def _hessian_det_appx(cnp.double_t[:, ::1] img, float sigma):
+def hessian_det_appx(cnp.double_t[:, ::1] img, float sigma):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
