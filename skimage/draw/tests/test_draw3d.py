@@ -6,17 +6,17 @@ from skimage.draw import ellipsoid, ellipsoid_stats
 
 
 @raises(ValueError)
-def test_ellipsoid_sign_paramters1():
+def test_ellipsoid_sign_parameters1():
     ellipsoid(-1, 2, 2)
 
 
 @raises(ValueError)
-def test_ellipsoid_sign_paramters2():
+def test_ellipsoid_sign_parameters2():
     ellipsoid(0, 2, 2)
 
 
 @raises(ValueError)
-def test_ellipsoid_sign_paramters3():
+def test_ellipsoid_sign_parameters3():
     ellipsoid(-3, -2, 2)
 
 
