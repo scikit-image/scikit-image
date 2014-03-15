@@ -217,8 +217,6 @@ def rescale_intensity(image, in_range=None, out_range=None):
 
     if out_range is None or out_range in DTYPE_RANGE:
         out_range = dtype if out_range is None else out_range
-        if out_range is None:
-            out_range
         omin, omax = DTYPE_RANGE[out_range]
         if imin >= 0:
             omin = 0
