@@ -355,7 +355,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     --------
     >>> from skimage import data, feature
     >>> img = data.coins()
-    >>> feature.blob_doh(img,threshold = 700)
+    >>> feature.blob_doh(img)
     array([[121, 271,  30],
            [123,  44,  23],
            [123, 205,  20],
