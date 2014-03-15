@@ -4,7 +4,7 @@ import itertools as itt
 import math
 from math import sqrt, hypot, log
 from numpy import arccos
-from skimage.util import img_as_float, img_as_ubyte
+from skimage.util import img_as_float
 from .peak import peak_local_max
 from ._hessian_det_appx import _hessian_det_appx
 from skimage.transform import integral_image
@@ -302,7 +302,7 @@ def blob_log(image, min_sigma=1, max_sigma=50, num_sigma=10, threshold=.2,
     return _prune_blobs(local_maxima, overlap)
 
 
-def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
+def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
              overlap=.5, log_scale=False):
     """Finds blobs in the given grayscale image.
 
@@ -367,11 +367,13 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
            [192, 212,  23],
            [193, 275,  23],
            [195, 100,  23],
+           [197,  44,  20],
            [197, 153,  20],
            [260, 173,  30],
            [262, 243,  23],
            [265, 113,  23],
            [270, 363,  30]])
+
 
     Notes
     -----
@@ -387,8 +389,8 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=500,
     if image.ndim != 2:
         raise ValueError("'image' must be a grayscale ")
 
-    image = img_as_ubyte(image).astype(np.uint8)
-    image = integral_image(image).astype(np.int)
+    image = img_as_float(image)
+    image = integral_image(image)
 
     if log_scale:
         start, stop = log(min_sigma, 10), log(max_sigma, 10)

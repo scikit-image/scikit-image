@@ -101,7 +101,7 @@ def test_blob_doh():
         min_sigma=1,
         max_sigma=60,
         num_sigma=10,
-        threshold=1000)
+        threshold=.05)
 
     radius = lambda x: x[2]
     s = sorted(blobs, key=radius)

@@ -1,10 +1,14 @@
+# cython: cdivision=True
+# cython: boundscheck=False
+# cython: nonecheck=False
+# cython: wraparound=False
 import numpy as np
-cimport numpy as np
+cimport numpy as cnp
 from skimage.transform import integral_image, integrate
 from skimage import util
 
 
-cdef inline int  _clip(np.int_t x, np.int_t low, np.int_t high):
+cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low, Py_ssize_t high):
     """Clips coordinate between high and low.
 
     This method was created so that `hessian_det_appx` does not have to make
@@ -33,8 +37,9 @@ cdef inline int  _clip(np.int_t x, np.int_t low, np.int_t high):
     return x
 
 
-cdef inline int _integ(np.int_t[:, :] img, np.int_t r, np.int_t c,
-                       np.int_t rl, np.int_t cl):
+cdef inline cnp.double_t _integ(
+    cnp.double_t[:, :] img, Py_ssize_t r, Py_ssize_t c,
+        Py_ssize_t rl, Py_ssize_t cl):
     """Integrate over the integral image in the given window
 
     This method was created so that `hessian_det_appx` does not have to make
@@ -66,14 +71,14 @@ cdef inline int _integ(np.int_t[:, :] img, np.int_t r, np.int_t c,
     r2 = _clip(r + rl, 0, img.shape[0] - 1)
     c2 = _clip(c + cl, 0, img.shape[1] - 1)
 
-    cdef np.int_t ans = img[r, c] + img[r2, c2] - img[r, c2] - img[r2, c]
+    cdef cnp.double_t ans = img[r, c] + img[r2, c2] - img[r, c2] - img[r2, c]
 
     if (ans < 0):
         return 0
     return ans
 
 
-def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
+def _hessian_det_appx(cnp.double_t[:, :] img, float sigma):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
@@ -81,7 +86,7 @@ def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
 
     Parameters
     ----------
-    image : array
+    img : array
         The integral image over which to compute Hessian Determinant.
     sigma : float
         Standard deviation used for the Gaussian kernel, used for the Hessian
@@ -107,19 +112,18 @@ def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
     determinant.
     """
 
-    cdef np.int_t[:, :] img = image
-    cdef int size = int(3 * sigma)
-    cdef int height = img.shape[0]
-    cdef int width = img.shape[1]
-    cdef int r, c
-    cdef int s2 = (size - 1) / 2
-    cdef int s3 = size / 3
-    cdef int l = size/3
-    cdef int w = size
-    cdef int b = (size - 1)/2
-    cdef int mid, side
-    zeros = np.zeros_like(img)
-    cdef np.ndarray[np.float_t, ndim = 2] out = zeros.astype(np.float)
+    cdef Py_ssize_t size = int(3 * sigma)
+    cdef Py_ssize_t height = img.shape[0]
+    cdef Py_ssize_t width = img.shape[1]
+    cdef Py_ssize_t r, c
+    cdef Py_ssize_t s2 = (size - 1) / 2
+    cdef Py_ssize_t s3 = size / 3
+    cdef Py_ssize_t l = size / 3
+    cdef Py_ssize_t w = size
+    cdef Py_ssize_t b = (size - 1) / 2
+    cdef cnp.double_t mid, side, tl, tr, bl, br
+    cdef cnp.double_t[:, ::1] out = np.zeros_like(img, dtype=np.double)
+    cdef cnp.double_t w_i = 1.0 / size / size
 
     cdef float dxx, dyy, dxy
 
@@ -135,19 +139,19 @@ def _hessian_det_appx(np.ndarray[np.int_t, ndim=2] image, float sigma):
             tr = _integ(img, r + 1, c - s3, s3, s3)  # top right
 
             dxy = bl + tr - tl - br
-            dxy = -dxy / w / w
+            dxy = -dxy * w_i
 
             mid = _integ(img, r - s3 + 1, c - s2, 2 * s3 - 1, w)  # middle box
             side = _integ(img, r - s3 + 1, c - s3 / 2, 2 * s3 - 1, s3)  # sides
 
             dxx = mid - 3 * side
-            dxx = -dxx / w / w
+            dxx = -dxx * w_i
 
             mid = _integ(img, r - s2, c - s3 + 1, w, 2 * s3 - 1)
             side = _integ(img, r - s3 / 2, c - s3 + 1, s3, 2 * s3 - 1)
 
             dyy = mid - 3 * side
-            dyy = -dyy / w / w
+            dyy = -dyy * w_i
 
             out[r, c] = (dxx * dyy - 0.81 * (dxy * dxy))
 
