@@ -1,7 +1,6 @@
 # coding: utf-8
 
 from __future__ import division
-from itertools import izip
 
 import numpy as np
 
@@ -14,7 +13,7 @@ def _coords_inside_image(rr, cc, shape):
 def _pairs(iterable):
     "s -> (s0,s1), (s2,s3), (s4, s5), ..."
     a = iter(iterable)
-    return izip(a, a)
+    return zip(a, a)
 
 
 def polygon_scanline(image, yp, xp):
