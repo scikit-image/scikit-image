@@ -111,9 +111,10 @@ def view_as_windows(arr_in, window_shape, step=1):
     window_shape: tuple
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
-    step : int
+    step : int, optional
         Number of elements to skip when moving the window forward (by
-        default, move forward by one).
+        default, move forward by one). The value must be equal or larger
+        than one.
 
     Returns
     -------

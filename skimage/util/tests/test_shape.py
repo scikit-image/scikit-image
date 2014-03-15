@@ -96,6 +96,13 @@ def test_view_as_windows_negative_window_length():
 
 
 @raises(ValueError)
+def test_view_as_windows_step_below_one():
+
+    A = np.arange(10)
+    view_as_windows(A, (11,), step=0.9)
+
+
+@raises(ValueError)
 def test_view_as_windows_window_too_large():
 
     A = np.arange(10)
