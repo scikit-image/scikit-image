@@ -4,12 +4,12 @@ Shape Contexts
 ==============
 
 The Shape Context descriptor was introduced by Serge Belongie and Jitendra
-Malik in 2002.
+Malik.
 
 The Shape Context descriptor caputures the coarse distribution of the rest
 of the shape with respect to a given point on the shape.
-The Shape Context descriptor is the log-polar histogram of point on the shape
-relative to the given point. It uses bins that are uniform in log-polar space
+It is the log-polar histogram of points on the shape relative
+to the given point. It uses bins that are uniform in log-polar space
 to make the descriptor more sensitive to positions of nearby sample points than
 to those of points farther away.
 Corresponding points on two similar shapes will have similar shape contexts.
