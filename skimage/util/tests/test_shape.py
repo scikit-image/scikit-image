@@ -89,6 +89,11 @@ def test_view_as_windows_window_too_large():
     view_as_windows(A, (11,))
 
 
+@raises(ValueError)
+def test_view_as_windows_step_below_one():
+    A = np.arange(10)
+    view_as_windows(A, (11,), step=0.9)
+
 def test_view_as_windows_1D():
     A = np.arange(10)
     window_shape = (3,)
