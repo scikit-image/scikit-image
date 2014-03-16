@@ -489,11 +489,11 @@ class PiecewiseAffineTransform(GeometricTransform):
 class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form::
 
-        X = a0*x - b0*y + a1 =
-          = m*x*cos(rotation) + m*y*sin(rotation) + a1
+        X = a0 * x - b0 * y + a1 =
+          = m * x * cos(rotation) - m * y * sin(rotation) + a1
 
-        Y = b0*x + a0*y + b1 =
-          = m*x*sin(rotation) + m*y*cos(rotation) + b1
+        Y = b0 * x + a0 * y + b1 =
+          = m * x * sin(rotation) + m * y * cos(rotation) + b1
 
     where ``m`` is a zoom factor and the homogeneous transformation matrix is::
 
@@ -560,13 +560,13 @@ class SimilarityTransform(ProjectiveTransform):
 
         The transformation is defined as::
 
-            X = a0*x - b0*y + a1
-            Y = b0*x + a0*y + b1
+            X = a0 * x - b0 * y + a1
+            Y = b0 * x + a0 * y + b1
 
         These equations can be transformed to the following form::
 
-            0 = a0*x - b0*y + a1 - X
-            0 = b0*x + a0*y + b1 - Y
+            0 = a0 * x - b0 * y + a1 - X
+            0 = b0 * x + a0 * y + b1 - Y
 
         which exist for each set of corresponding points, so we have a set of
         N * 2 equations. The coefficients appear linearly so we can write
