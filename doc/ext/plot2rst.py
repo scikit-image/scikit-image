@@ -70,6 +70,8 @@ import shutil
 import token
 import tokenize
 import traceback
+import json
+import copy
 
 import numpy as np
 import matplotlib
@@ -90,6 +92,13 @@ LITERALINCLUDE = """
 CODE_LINK = """
 
 **Python source code:** :download:`download <{0}>`
+(generated using ``skimage`` |version|)
+
+"""
+
+NOTEBOOK_LINK = """
+
+**ipython Notebook source code:** :download:`download <{0}>`
 (generated using ``skimage`` |version|)
 
 """
@@ -305,16 +314,19 @@ def write_example(src_name, src_dir, rst_dir, cfg):
 
     image_dir = rst_dir.pjoin('images')
     thumb_dir = image_dir.pjoin('thumb')
+    notebook_dir = rst_dir.pjoin('notebook')
     image_dir.makedirs()
     thumb_dir.makedirs()
+    notebook_dir.makedirs()
 
     base_image_name = os.path.splitext(src_name)[0]
     image_path = image_dir.pjoin(base_image_name + '_{0}.png')
 
     basename, py_ext = os.path.splitext(src_name)
     rst_path = rst_dir.pjoin(basename + cfg.source_suffix)
+    notebook_path = notebook_dir.pjoin(basename + '.ipynb')
 
-    if _plots_are_current(src_path, image_path) and rst_path.exists:
+    if _plots_are_current(src_path, image_path) and rst_path.exists and notebook_path.exists:
         return
 
     blocks = split_code_and_text_blocks(example_file)
@@ -341,6 +353,9 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         example_rst += LITERALINCLUDE.format(**code_info)
 
     example_rst += CODE_LINK.format(src_name)
+    ipnotebook_name = src_name.replace('.py', '.ipynb')
+    ipnotebook_name = './notebook/' + ipnotebook_name
+    example_rst += NOTEBOOK_LINK.format(ipnotebook_name)
 
     f = open(rst_path,'w')
     f.write(example_rst)
@@ -358,6 +373,93 @@ def write_example(src_name, src_dir, rst_dir, cfg):
             print("Specify 'plot2rst_default_thumb' in Sphinx config file.")
         else:
             shutil.copy(cfg.plot2rst_default_thumb, thumb_path)
+
+    save_ipython_notebook(example_file, notebook_dir, notebook_path, basename)
+
+
+def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
+    sample_notebook_path = notebook_dir.pjoin('sample.ipynb')
+    sample = open(sample_notebook_path, 'r')
+    output = open(notebook_path, 'w')
+    pythonfile = open(example_file, 'r')
+
+    test = json.load(sample)
+    code = pythonfile.readlines()
+
+    cell1 = {
+                "cell_type": "code",
+                "collapsed": False,
+                "input": [
+                    "# Code Goes Here"
+                ],
+                "language": "python",
+                "metadata": {},
+                "outputs": []
+        }
+
+    cell2 = {
+                "cell_type": "markdown",
+                "metadata": {},
+                "source": [
+                    'Markdown Goes Here'
+                ]
+        }
+
+
+    # Done to cluster together multiple '\n's into one
+    modified_code = []
+    for line in code:
+        if not modified_code or modified_code[-1] != line:
+            modified_code.append(line)
+
+    segment_number = 0
+    segment_has_begun = True
+    docstring = False
+    source = []
+
+    for line in modified_code:
+        # A linebreak indicates a segment has ended. If the text segment had only comments, then source is blank,
+        # So, ignore it, as already added in cell type 2
+        if line == "\n":
+            if segment_has_begun is True and source:
+                segment_number += 1
+                # we've found text segments within the docstring
+                if docstring is True:
+                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell2))
+                    test["worksheets"][0]["cells"][segment_number]["source"] = source
+                else:
+                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell1))
+                    test["worksheets"][0]["cells"][segment_number]["input"] = source
+                source = []
+        # if its a comment
+        elif line.strip(' ')[0] == '#':
+            segment_number += 1
+            line = line.strip(' #')
+            test["worksheets"][0]["cells"].append(copy.deepcopy(cell2))
+            test["worksheets"][0]["cells"][segment_number]["source"] = line
+        elif line == "\"\"\"\n":
+            if docstring is False:
+                docstring = True
+            # Indicates, completion of docstring, add whatever in source to markdown (cell type 2)
+            elif docstring is True:
+                docstring = False
+                # Write leftover docstring if any left
+                if source:
+                    segment_number += 1
+                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell2))
+                    test["worksheets"][0]["cells"][segment_number]["source"] = source
+                    source = []
+        else:
+            # some text segment is continuing, so add to source
+            source.append(line)
+    # if basename == 'plot_brief':
+    #     pdb.set_trace()
+
+    json.dump(test, output, indent=2)
+
+    sample.close()
+    output.close()
+    pythonfile.close()
 
 
 def save_thumbnail(image, thumb_path, shape):
