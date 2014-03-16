@@ -60,7 +60,7 @@ def ellipse(cy, cx, yradius, xradius, shape=None):
     cc += cx - xradius
 
     if shape is not None:
-        _coords_inside_image(rr, cc, shape)
+        return _coords_inside_image(rr, cc, shape)
 
     return rr, cc
 
