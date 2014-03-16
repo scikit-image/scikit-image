@@ -615,8 +615,8 @@ class SimilarityTransform(ProjectiveTransform):
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
         self.params = np.array([[a0, -b0, a1],
-                                 [b0,  a0, b1],
-                                 [ 0,   0,  1]])
+                                [b0,  a0, b1],
+                                [ 0,   0,  1]])
 
     @property
     def scale(self):
