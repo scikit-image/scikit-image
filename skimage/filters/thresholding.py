@@ -12,7 +12,6 @@ import scipy.ndimage
 from ..exposure import histogram
 from .._shared.utils import assert_nD
 from skimage.exposure import histogram
-from skimage.transform.integral import integral_image
 
 
 def threshold_adaptive(image, block_size, method='gaussian', offset=0,
@@ -403,6 +402,8 @@ def _mean_std(image, w):
            using integral images." in Document Recognition and
            Retrieval XV, (San Jose, USA), Jan. 2008.
     """
+    from skimage.transform.integral import integral_image  # To avoid
+                                                           # circular import.
     if w == 1 or w % 2 == 0:
         raise ValueError(
             "Window size w = %s must be odd and greater than 1." % (w))
