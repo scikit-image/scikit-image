@@ -144,14 +144,14 @@
   Color separation (color deconvolution) for several stainings.
 
 - Jostein Bø Fløystad
-  Reconstruction circle mode for Radon transform
-  Simultaneous Algebraic Reconstruction Technique for inverse Radon transform
+  Tomography: radon/iradon improvements and SART implementation
+  Phase unwrapping integration
 
 - Matt Terry
   Color difference functions
 
 - Eugene Dvoretsky
-  Yen threshold implementation.
+  Yen, Ridler-Calvard (ISODATA) threshold implementations.
 
 - Riaan van den Dool
   skimage.io plugin: GDAL
@@ -161,3 +161,24 @@
 
 - Michael Hansen
   novice submodule
+
+- Munther Gdeisat
+  Phase unwrapping implementation
+
+- Miguel Arevallilo Herraez
+  Phase unwrapping implementation
+
+- Hussein Abdul-Rahman
+  Phase unwrapping implementation
+
+- Gregor Thalhammer
+  Phase unwrapping integration
+
+- François Orieux
+  Image deconvolution http://research.orieux.fr
+  
+- Vighnesh Birodkar
+  Blob Detection
+  
+- Axel Donath
+  Blob Detection

@@ -2,16 +2,17 @@
 
 from __future__ import with_statement
 
-__all__ = ['MultiImage', 'ImageCollection', 'imread', 'concatenate_images']
-
+import os
 from glob import glob
 import re
 from copy import copy
 
 import numpy as np
-from ._io import imread
-
 import six
+
+
+__all__ = ['MultiImage', 'ImageCollection', 'concatenate_images',
+           'imread_collection_wrapper']
 
 
 def concatenate_images(ic):
@@ -229,7 +230,7 @@ class ImageCollection(object):
     ----------
     load_pattern : str or list
         Pattern glob or filenames to load. The path can be absolute or
-        relative.  Multiple patterns should be separated by a colon,
+        relative.  Multiple patterns should be separated by os.pathsep,
         e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
         implementation notes below.
     conserve_memory : bool, optional
@@ -295,7 +296,7 @@ class ImageCollection(object):
     def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
         if isinstance(load_pattern, six.string_types):
-            load_pattern = load_pattern.split(':')
+            load_pattern = load_pattern.split(os.pathsep)
             self._files = []
             for pattern in load_pattern:
                 self._files.extend(glob(pattern))
@@ -312,6 +313,7 @@ class ImageCollection(object):
         self._cached = None
 
         if load_func is None:
+            from ._io import imread
             self.load_func = imread
         else:
             self.load_func = load_func
@@ -430,3 +432,29 @@ class ImageCollection(object):
             If images in the `ImageCollection` don't have identical shapes.
         """
         return concatenate_images(self)
+
+
+def imread_collection_wrapper(imread):
+    def imread_collection(load_pattern, conserve_memory=True):
+        """Return an `ImageCollection` from files matching the given pattern.
+
+        Note that files are always stored in alphabetical order. Also note that
+        slicing returns a new ImageCollection, *not* a view into the data.
+
+        See `skimage.io.ImageCollection` for details.
+
+        Parameters
+        ----------
+        load_pattern : str or list
+            Pattern glob or filenames to load. The path can be absolute or
+            relative.  Multiple patterns should be separated by a colon,
+            e.g. '/tmp/work/*.png:/tmp/other/*.jpg'.  Also see
+            implementation notes below.
+        conserve_memory : bool, optional
+            If True, never keep more than one in memory at a specific
+            time.  Otherwise, images will be cached once they are loaded.
+
+        """
+        return ImageCollection(load_pattern, conserve_memory=conserve_memory,
+                               load_func=imread)
+    return imread_collection

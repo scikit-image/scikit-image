@@ -15,14 +15,12 @@ from skimage.draw import circle_perimeter
 cdef double PI_2 = 1.5707963267948966
 cdef double NEG_PI_2 = -PI_2
 
-
-cdef inline Py_ssize_t round(double r):
-    return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
+from skimage._shared.interpolation cimport round
 
 
-def hough_circle(cnp.ndarray img,
-                 cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
-                 char normalize=True, char full_output=False):
+def _hough_circle(cnp.ndarray img,
+                  cnp.ndarray[ndim=1, dtype=cnp.intp_t] radius,
+                  char normalize=True, char full_output=False):
     """Perform a circular Hough transform.
 
     Parameters

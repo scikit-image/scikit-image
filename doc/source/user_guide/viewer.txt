@@ -24,26 +24,26 @@ alternatively, ``skimage.io.imshow`` which adds support for multiple
 io-plugins) to display images. The advantage of ``ImageViewer`` is that you can
 easily add plugins for manipulating images. Currently, only a few plugins are
 implemented, but it is easy to write your own. Before going into the details,
-let's see an example of how a plugin is added to the viewer:
+let's see an example of how a pre-defined plugin is added to the viewer:
 
 .. code-block:: python
 
-   from skimage.viewer.plugins import Canny
+   from skimage.viewer.plugins.lineprofile import LineProfile
 
    viewer = ImageViewer(image)
-   viewer += Canny(view)
+   viewer += LineProfile(viewer)
    viewer.show()
 
-At the moment, there aren't very many plugins pre-defined, but there's a really
-simple interface for creating your own plugin. First, let's create a plugin to
-call the total-variation denoising function, ``tv_denoise``:
+At the moment, there are not many plugins pre-defined, but there is a really
+simple interface for creating your own plugin. First, let us create a plugin to
+call the total-variation denoising function, ``denoise_tv_bregman``:
 
 .. code-block:: python
 
-   from skimage.filter import tv_denoise
+   from skimage.filter import denoise_tv_bregman
    from skimage.viewer.plugins.base import Plugin
 
-   denoise_plugin = Plugin(image_filter=tv_denoise)
+   denoise_plugin = Plugin(image_filter=denoise_tv_bregman)
 
 .. note::
 

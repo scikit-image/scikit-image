@@ -4,6 +4,7 @@ from .exposure import histogram, equalize, equalize_hist, \
 
 from ._adapthist import equalize_adapthist
 
+
 __all__ = ['histogram',
            'equalize',
            'equalize_hist',

@@ -27,7 +27,8 @@ from matplotlib import pyplot as plt
 
 from skimage import data
 from skimage.util import img_as_float
-from skimage.feature import corner_harris, corner_subpix, corner_peaks
+from skimage.feature import (corner_harris, corner_subpix, corner_peaks,
+                             plot_matches)
 from skimage.transform import warp, AffineTransform
 from skimage.exposure import rescale_intensity
 from skimage.color import rgb2gray
@@ -117,28 +118,21 @@ print(tform.scale, tform.translation, tform.rotation)
 print(model.scale, model.translation, model.rotation)
 print(model_robust.scale, model_robust.translation, model_robust.rotation)
 
-
-# visualize correspondences
-img_combined = np.concatenate((img_orig_gray, img_warped_gray), axis=1)
-
+# visualize correspondence
 fig, ax = plt.subplots(nrows=2, ncols=1)
+
 plt.gray()
 
-ax[0].imshow(img_combined, interpolation='nearest')
+inlier_idxs = np.nonzero(inliers)[0]
+plot_matches(ax[0], img_orig_gray, img_warped_gray, src, dst,
+             np.column_stack((inlier_idxs, inlier_idxs)), matches_color='b')
 ax[0].axis('off')
-ax[0].axis((0, 400, 200, 0))
 ax[0].set_title('Correct correspondences')
-ax[1].imshow(img_combined, interpolation='nearest')
+
+outlier_idxs = np.nonzero(outliers)[0]
+plot_matches(ax[1], img_orig_gray, img_warped_gray, src, dst,
+             np.column_stack((outlier_idxs, outlier_idxs)), matches_color='r')
 ax[1].axis('off')
-ax[1].axis((0, 400, 200, 0))
 ax[1].set_title('Faulty correspondences')
-
-
-for ax_idx, (m, color) in enumerate(((inliers, 'g'), (outliers, 'r'))):
-    ax[ax_idx].plot((src[m, 1], dst[m, 1] + 200), (src[m, 0], dst[m, 0]), '-',
-                    color=color)
-    ax[ax_idx].plot(src[m, 1], src[m, 0], '.', markersize=10, color=color)
-    ax[ax_idx].plot(dst[m, 1] + 200, dst[m, 0], '.', markersize=10,
-                    color=color)
 
 plt.show()

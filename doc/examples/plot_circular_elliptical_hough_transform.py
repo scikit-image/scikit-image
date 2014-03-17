@@ -48,7 +48,7 @@ from skimage.util import img_as_ubyte
 image = img_as_ubyte(data.coins()[0:95, 70:370])
 edges = filter.canny(image, sigma=3, low_threshold=10, high_threshold=50)
 
-fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
+fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(5, 2))
 
 # Detect two radii
 hough_radii = np.arange(15, 30, 2)
@@ -77,6 +77,8 @@ ax.imshow(image, cmap=plt.cm.gray)
 
 
 """
+.. image:: PLOT2RST.current_figure
+
 Ellipse detection
 =================
 
@@ -137,7 +139,7 @@ image_rgb[cy, cx] = (0, 0, 255)
 edges = color.gray2rgb(edges)
 edges[cy, cx] = (250, 0, 0)
 
-fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(10, 6))
+fig2, (ax1, ax2) = plt.subplots(ncols=2, nrows=1, figsize=(8, 4))
 
 ax1.set_title('Original picture')
 ax1.imshow(image_rgb)
@@ -146,3 +148,8 @@ ax2.set_title('Edge (white) and result (red)')
 ax2.imshow(edges)
 
 plt.show()
+
+"""
+.. image:: PLOT2RST.current_figure
+
+"""

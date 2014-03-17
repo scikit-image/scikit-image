@@ -29,12 +29,16 @@ measure
     Measurement of image properties, e.g., similarity and contours.
 morphology
     Morphological operations, e.g. opening or skeletonization.
+restoration
+    Restoration algorithms.
 segmentation
     Splitting an image into self-similar regions.
 transform
     Geometric and other transforms, e.g. rotation or the Radon transform.
 util
     Generic utilities.
+viewer
+    Interactive image viewer and plugin framework.
 
 Utility Functions
 -----------------

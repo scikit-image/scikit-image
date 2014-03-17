@@ -1027,7 +1027,11 @@ def _normalize_shape(narray, shape):
     """
     normshp = None
     shapelen = len(np.shape(narray))
-    if (isinstance(shape, int)) or shape is None:
+
+    if isinstance(shape, np.ndarray):
+        shape = shape.tolist()
+
+    if isinstance(shape, (int, float)) or shape is None:
         normshp = ((shape, shape), ) * shapelen
     elif (isinstance(shape, (tuple, list))
             and isinstance(shape[0], (tuple, list))

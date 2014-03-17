@@ -139,12 +139,16 @@ def test_update_on_save():
     assert pic.modified
     assert pic.path is None
 
-    with tempfile.NamedTemporaryFile(suffix=".jpg") as tmp:
-        pic.save(tmp.name)
+    fd, filename = tempfile.mkstemp(suffix=".jpg")
+    os.close(fd)
+    try:
+        pic.save(filename)
 
         assert not pic.modified
-        assert_equal(pic.path, os.path.abspath(tmp.name))
+        assert_equal(pic.path, os.path.abspath(filename))
         assert_equal(pic.format, "jpeg")
+    finally:
+        os.unlink(filename)
 
 
 def test_indexing():
@@ -302,5 +306,4 @@ def test_pixel_alpha_raises():
 
 
 if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
+    np.testing.run_module_suite()

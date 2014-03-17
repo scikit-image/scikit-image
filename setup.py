@@ -21,9 +21,13 @@ VERSION             = '0.10dev'
 PYTHON_VERSION      = (2, 5)
 DEPENDENCIES        = {
                         'numpy': (1, 6),
-                        'Cython': (0, 17),
                         'six': (1, 3),
                       }
+
+# Only require Cython if we have a developer checkout
+if VERSION.endswith('dev'):
+    DEPENDENCIES['Cython'] = (0, 17)
+
 
 
 import os

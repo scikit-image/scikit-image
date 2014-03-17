@@ -125,7 +125,7 @@ if __name__ == '__main__':
         sh("touch .nojekyll")
         sh('git add .nojekyll')
         sh('git add index.html')
-        sh('git add %s' % tag)
+        sh('git add --all %s' % tag)
         sh2('git commit -m"Updated doc release: %s"' % tag)
 
         print('Most recent commit:')

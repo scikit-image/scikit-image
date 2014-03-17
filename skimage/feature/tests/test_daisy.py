@@ -45,8 +45,15 @@ def test_descs_shape():
     assert(descs.shape[1] == ceil((img.shape[1] - radius * 2) / float(step)))
 
 
+def test_daisy_sigmas_and_radii():
+    img = img_as_float(data.lena()[:64, :64].mean(axis=2))
+    sigmas = [1, 2, 3]
+    radii = [1, 2]
+    daisy(img, sigmas=sigmas, ring_radii=radii)
+
+
 def test_daisy_incompatible_sigmas_and_radii():
-    img = img_as_float(data.lena()[:128, :128].mean(axis=2))
+    img = img_as_float(data.lena()[:64, :64].mean(axis=2))
     sigmas = [1, 2]
     radii = [1, 2]
     assert_raises(ValueError, daisy, img, sigmas=sigmas, ring_radii=radii)

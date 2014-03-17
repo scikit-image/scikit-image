@@ -1,5 +1,109 @@
+# coding: utf-8
 import numpy as np
 from skimage import img_as_float
+from skimage.restoration._denoise_cy import _denoise_bilateral, \
+                                            _denoise_tv_bregman
+
+
+def denoise_bilateral(image, win_size=5, sigma_range=None, sigma_spatial=1,
+                      bins=10000, mode='constant', cval=0):
+    """Denoise image using bilateral filter.
+
+    This is an edge-preserving and noise reducing denoising filter. It averages
+    pixels based on their spatial closeness and radiometric similarity.
+
+    Spatial closeness is measured by the gaussian function of the euclidian
+    distance between two pixels and a certain standard deviation
+    (`sigma_spatial`).
+
+    Radiometric similarity is measured by the gaussian function of the euclidian
+    distance between two color values and a certain standard deviation
+    (`sigma_range`).
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    win_size : int
+        Window size for filtering.
+    sigma_range : float
+        Standard deviation for grayvalue/color distance (radiometric
+        similarity). A larger value results in averaging of pixels with larger
+        radiometric differences. Note, that the image will be converted using
+        the `img_as_float` function and thus the standard deviation is in
+        respect to the range `[0, 1]`.
+    sigma_spatial : float
+        Standard deviation for range distance. A larger value results in
+        averaging of pixels with larger spatial differences.
+    bins : int
+        Number of discrete values for gaussian weights of color filtering.
+        A larger value results in improved accuracy.
+    mode : string
+        How to handle values outside the image borders. See
+        `scipy.ndimage.map_coordinates` for detail.
+    cval : string
+        Used in conjunction with mode 'constant', the value outside
+        the image boundaries.
+
+    Returns
+    -------
+    denoised : ndarray
+        Denoised image.
+
+    References
+    ----------
+    .. [1] http://users.soe.ucsc.edu/~manduchi/Papers/ICCV98.pdf
+
+    """
+    return _denoise_bilateral(image, win_size, sigma_range, sigma_spatial,
+                              bins, mode, cval)
+
+
+def denoise_tv_bregman(image, weight, max_iter=100, eps=1e-3, isotropic=True):
+    """Perform total-variation denoising using split-Bregman optimization.
+
+    Total-variation denoising (also know as total-variation regularization)
+    tries to find an image with less total-variation under the constraint
+    of being similar to the input image, which is controlled by the
+    regularization parameter.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input data to be denoised (converted using img_as_float`).
+    weight : float, optional
+        Denoising weight. The smaller the `weight`, the more denoising (at
+        the expense of less similarity to the `input`). The regularization
+        parameter `lambda` is chosen as `2 * weight`.
+    eps : float, optional
+        Relative difference of the value of the cost function that determines
+        the stop criterion. The algorithm stops when::
+
+            SUM((u(n) - u(n-1))**2) < eps
+
+    max_iter : int, optional
+        Maximal number of iterations used for the optimization.
+    isotropic : boolean, optional
+        Switch between isotropic and anisotropic TV denoising.
+
+    Returns
+    -------
+    u : ndarray
+        Denoised image.
+
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Total_variation_denoising
+    .. [2] Tom Goldstein and Stanley Osher, "The Split Bregman Method For L1
+           Regularized Problems",
+           ftp://ftp.math.ucla.edu/pub/camreport/cam08-29.pdf
+    .. [3] Pascal Getreuer, "Rudin–Osher–Fatemi Total Variation Denoising
+           using Split Bregman" in Image Processing On Line on 2012–05–19,
+           http://www.ipol.im/pub/art/2012/g-tvd/article_lr.pdf
+    .. [4] http://www.math.ucsb.edu/~cgarcia/UGProjects/BregmanAlgorithms_JacquelineBush.pdf
+
+    """
+    return _denoise_tv_bregman(image, weight, max_iter, eps, isotropic)
 
 
 def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):

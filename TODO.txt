@@ -1,3 +1,15 @@
+Version 0.11
+------------
+* Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
+* Change depecrated `enforce_connectivity=False`on skimage.segmentation.slic
+  and set it to True as default
+* Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
+* Remove deprecated `skimage.measure.fit.BaseModel._params`,
+  `skimage.transform.ProjectiveTransform._matrix`,
+  `skimage.transform.PolynomialTransform._params`,
+  `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
+* Remove deprecated functions `skimage.filter.denoise_*`
+
 Version 0.10
 ------------
 * Remove deprecated functions in `skimage.filter.rank.*`
@@ -14,3 +26,6 @@ Version 0.10
 * Remove deprecated `skimage.color.is_gray` and `skimage.color.is_rgb`
   functions
 * Enable doctests of experimental `skimage.feature.brief`
+* Remove deprecated `skimage.segmentation.visualize_boundaries`
+* Remove deprecated `skimage.morphology.greyscale_*`
+* Remove deprecated `skimage.exposure.equalize`

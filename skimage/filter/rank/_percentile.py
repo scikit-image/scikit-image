@@ -50,17 +50,19 @@ def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
                          shift_y=False, p0=0, p1=1):
     """Return greyscale local autolevel of an image.
 
-    Autolevel is computed on the given structuring element. Only levels between
-    percentiles [p0, p1] are used.
+    This filter locally stretches the histogram of greyvalues to cover the
+    entire range of values from "white" to "black".
+
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -74,7 +76,7 @@ def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     """
@@ -86,19 +88,18 @@ def autolevel_percentile(image, selem, out=None, mask=None, shift_x=False,
 
 def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
                         shift_y=False, p0=0, p1=1):
-    """Return greyscale local gradient of an image.
+    """Return local gradient of an image (i.e. local maximum - local minimum).
 
-    gradient is computed on the given structuring element. Only
-    levels between percentiles [p0, p1] are used.
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -112,7 +113,7 @@ def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     """
@@ -124,19 +125,18 @@ def gradient_percentile(image, selem, out=None, mask=None, shift_x=False,
 
 def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
                     shift_y=False, p0=0, p1=1):
-    """Return greyscale local mean of an image.
+    """Return local mean of an image.
 
-    Mean is computed on the given structuring element. Only levels between
-    percentiles [p0, p1] are used.
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -150,7 +150,7 @@ def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     """
@@ -162,19 +162,18 @@ def mean_percentile(image, selem, out=None, mask=None, shift_x=False,
 
 def subtract_mean_percentile(image, selem, out=None, mask=None,
                              shift_x=False, shift_y=False, p0=0, p1=1):
-    """Return greyscale local subtract_mean of an image.
+    """Return image subtracted from its local mean.
 
-    subtract_mean is computed on the given structuring element. Only levels
-    between percentiles [p0, p1] are used.
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -188,7 +187,7 @@ def subtract_mean_percentile(image, selem, out=None, mask=None,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     """
@@ -200,19 +199,22 @@ def subtract_mean_percentile(image, selem, out=None, mask=None,
 
 def enhance_contrast_percentile(image, selem, out=None, mask=None,
                                 shift_x=False, shift_y=False, p0=0, p1=1):
-    """Return greyscale local enhance_contrast of an image.
+    """Enhance contrast of an image.
 
-    enhance_contrast is computed on the given structuring element. Only levels
-    between percentiles [p0, p1] are used.
+    This replaces each pixel by the local maximum if the pixel greyvalue is
+    closer to the local maximum than the local minimum. Otherwise it is
+    replaced by the local minimum.
+
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -226,7 +228,7 @@ def enhance_contrast_percentile(image, selem, out=None, mask=None,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     """
@@ -238,19 +240,21 @@ def enhance_contrast_percentile(image, selem, out=None, mask=None,
 
 def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
                p0=0):
-    """Return greyscale local percentile of an image.
+    """Return local percentile of an image.
 
-    percentile is computed on the given structuring element. Returns the value
-    of the p0 lower percentile of the neighborhood value distribution.
+    Returns the value of the p0 lower percentile of the local greyvalue
+    distribution.
+
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -263,7 +267,7 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     """
@@ -275,19 +279,21 @@ def percentile(image, selem, out=None, mask=None, shift_x=False, shift_y=False,
 
 def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
                    shift_y=False, p0=0, p1=1):
-    """Return greyscale local pop of an image.
+    """Return the local number (population) of pixels.
 
-    pop is computed on the given structuring element. Only levels between
-    percentiles [p0, p1] are used.
+    The number of pixels is defined as the number of pixels which are included
+    in the structuring element and the mask.
+
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -301,7 +307,7 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
 
     Returns
     -------
-    out : ndarray (same dtype as input image)
+    out : 2-D array (same dtype as input image)
         Output image.
 
     """
@@ -311,23 +317,63 @@ def pop_percentile(image, selem, out=None, mask=None, shift_x=False,
                   shift_y=shift_y, p0=p0, p1=p1)
 
 
-def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
-                         shift_y=False, p0=0):
-    """Return greyscale local threshold of an image.
+def sum_percentile(image, selem, out=None, mask=None, shift_x=False,
+                   shift_y=False, p0=0, p1=1):
+    """Return the local sum of pixels.
 
-    threshold is computed on the given structuring element. Returns
-    thresholded image such that pixels having a higher value than the the p0
-    percentile of the neighborhood value distribution are set to 2^nbit-1
-    (e.g. 255 for 8bit image).
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+
+    Note that the sum may overflow depending on the data type of the input
+    array.
 
     Parameters
     ----------
-    image : ndarray (uint8, uint16)
-        Image array.
-    selem : ndarray
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
         The neighborhood expressed as a 2-D array of 1's and 0's.
-    out : ndarray (same dtype as input)
-        If None, a new array will be allocated.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
+    mask : ndarray
+        Mask array that defines (>0) area of the image included in the local
+        neighborhood. If None, the complete image is used (default).
+    shift_x, shift_y : int
+        Offset added to the structuring element center point. Shift is bounded
+        to the structuring element sizes (center must be inside the given
+        structuring element).
+    p0, p1 : float in [0, ..., 1]
+        Define the [p0, p1] percentile interval to be considered for computing
+        the value.
+
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
+        Output image.
+
+    """
+
+    return _apply(percentile_cy._sum,
+                  image, selem, out=out, mask=mask, shift_x=shift_x,
+                  shift_y=shift_y, p0=p0, p1=p1)
+
+
+def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
+                         shift_y=False, p0=0):
+    """Local threshold of an image.
+
+    The resulting binary mask is True if the greyvalue of the center pixel is
+    greater than the local mean.
+
+    Only greyvalues between percentiles [p0, p1] are considered in the filter.
+
+    Parameters
+    ----------
+    image : 2-D array (uint8, uint16)
+        Input image.
+    selem : 2-D array
+        The neighborhood expressed as a 2-D array of 1's and 0's.
+    out : 2-D array (same dtype as input)
+        If None, a new array is allocated.
     mask : ndarray
         Mask array that defines (>0) area of the image included in the local
         neighborhood. If None, the complete image is used (default).
@@ -338,7 +384,7 @@ def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
     p0 : float in [0, ..., 1]
         Set the percentile value.
 
-        out : ndarray (same dtype as input image)
+        out : 2-D array (same dtype as input image)
         Output image.
     local threshold : ndarray (same dtype as input)
         The result of the local threshold.

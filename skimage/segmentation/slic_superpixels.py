@@ -6,12 +6,14 @@ from scipy import ndimage
 import warnings
 
 from skimage.util import img_as_float, regular_grid
-from skimage.segmentation._slic import _slic_cython
+from skimage.segmentation._slic import _slic_cython, _enforce_label_connectivity_cython
 from skimage.color import rgb2lab
 
 
 def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
-         spacing=None, multichannel=True, convert2lab=True, ratio=None):
+         spacing=None, multichannel=True, convert2lab=True, ratio=None,
+         enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3,
+         slic_zero=False):
     """Segments image using k-means clustering in Color-(x,y,z) space.
 
     Parameters
@@ -24,7 +26,8 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     compactness : float, optional
         Balances color-space proximity and image-space proximity. Higher
         values give more weight to image-space. As `compactness` tends to
-        infinity, superpixel shapes become square/cubic.
+        infinity, superpixel shapes become square/cubic. In SLICO mode, this
+        is the initial compactness.
     max_iter : int, optional
         Maximum number of iterations of k-means.
     sigma : float or (3,) array-like of floats, optional
@@ -47,6 +50,16 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         recommended.
     ratio : float, optional
         Synonym for `compactness`. This keyword is deprecated.
+    enforce_connectivity: bool, optional (default False)
+        Whether the generated segments are connected or not
+    min_size_factor: float, optional
+        Proportion of the minimum segment size to be removed with respect
+        to the supposed segment size ```depth*width*height/n_segments```
+    max_size_factor: float, optional
+        Proportion of the maximum connected segment size. A value of 3 works
+        in most of the cases.
+    slic_zero: bool, optional
+        Run SLIC-zero, the zero-parameter mode of SLIC
 
     Returns
     -------
@@ -104,6 +117,11 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
                       'instead.')
         compactness = ratio
 
+    if enforce_connectivity is None:
+        warnings.warn('Deprecation: enforce_connectivity will default to'
+                      ' True in future versions.')
+        enforce_connectivity = False
+
     image = img_as_float(image)
     is_2d = False
     if image.ndim == 2:
@@ -152,16 +170,27 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     segments = np.concatenate([segments_z[..., np.newaxis],
                                segments_y[..., np.newaxis],
                                segments_x[..., np.newaxis],
-                               segments_color
-                              ], axis=-1).reshape(-1, 3 + image.shape[3])
+                               segments_color],
+                              axis=-1).reshape(-1, 3 + image.shape[3])
     segments = np.ascontiguousarray(segments)
 
     # we do the scaling of ratio in the same way as in the SLIC paper
     # so the values have the same meaning
-    ratio = float(max((step_z, step_y, step_x))) / compactness
+    step = float(max((step_z, step_y, step_x)))
+    ratio = 1.0 / compactness
+
     image = np.ascontiguousarray(image * ratio)
 
-    labels = _slic_cython(image, segments, max_iter, spacing)
+    labels = _slic_cython(image, segments, step, max_iter, spacing, slic_zero)
+
+    if enforce_connectivity:
+        segment_size = depth * height * width / n_segments
+        min_size = int(min_size_factor * segment_size)
+        max_size = int(max_size_factor * segment_size)
+        labels = _enforce_label_connectivity_cython(labels,
+                                                    n_segments,
+                                                    min_size,
+                                                    max_size)
 
     if is_2d:
         labels = labels[0]

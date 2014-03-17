@@ -399,7 +399,7 @@ def regionprops(label_image, properties=None,
     **major_axis_length** : float
         The length of the major axis of the ellipse that has the same
         normalized second central moments as the region.
-    **min_intensity** : float
+    **max_intensity** : float
         Value with the greatest intensity in the region.
     **mean_intensity** : float
         Value with the mean intensity in the region.

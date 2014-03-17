@@ -1,4 +1,5 @@
 import math
+import warnings
 import numpy as np
 from scipy import optimize
 
@@ -11,7 +12,13 @@ def _check_data_dim(data, dim):
 class BaseModel(object):
 
     def __init__(self):
-        self._params = None
+        self.params = None
+
+    @property
+    def _params(self):
+        warnings.warn('`_params` attribute is deprecated, '
+                      'use `params` instead.')
+        return self.params
 
 
 class LineModel(BaseModel):
@@ -30,11 +37,12 @@ class LineModel(BaseModel):
 
         min{ sum((dist - x_i * cos(theta) + y_i * sin(theta))**2) }
 
-    The ``_params`` attribute contains the parameters in the following order::
-
-        dist, theta
-
     A minimum number of 2 points is required to solve for the parameters.
+
+    Attributes
+    ----------
+    params : tuple
+        Line model parameters in the following order `dist`, `theta`.
 
     """
 
@@ -68,7 +76,7 @@ class LineModel(BaseModel):
         # line always passes through mean
         dist = X0[0] * math.cos(theta) + X0[1] * math.sin(theta)
 
-        self._params = (dist, theta)
+        self.params = (dist, theta)
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -89,7 +97,7 @@ class LineModel(BaseModel):
 
         _check_data_dim(data, dim=2)
 
-        dist, theta = self._params
+        dist, theta = self.params
 
         x = data[:, 0]
         y = data[:, 1]
@@ -114,7 +122,7 @@ class LineModel(BaseModel):
         """
 
         if params is None:
-            params = self._params
+            params = self.params
         dist, theta = params
         return (dist - y * math.sin(theta)) / math.cos(theta)
 
@@ -136,7 +144,7 @@ class LineModel(BaseModel):
         """
 
         if params is None:
-            params = self._params
+            params = self.params
         dist, theta = params
         return (dist - x * math.cos(theta)) / math.sin(theta)
 
@@ -154,11 +162,12 @@ class CircleModel(BaseModel):
 
         min{ sum((r - sqrt((x_i - xc)**2 + (y_i - yc)**2))**2) }
 
-    The ``_params`` attribute contains the parameters in the following order::
-
-        xc, yc, r
-
     A minimum number of 3 points is required to solve for the parameters.
+
+    Attributes
+    ----------
+    params : tuple
+        Circle model parameters in the following order `xc`, `yc`, `r`.
 
     """
 
@@ -203,7 +212,7 @@ class CircleModel(BaseModel):
         params0 = (xc0, yc0, r0)
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
-        self._params = params
+        self.params = params
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -224,7 +233,7 @@ class CircleModel(BaseModel):
 
         _check_data_dim(data, dim=2)
 
-        xc, yc, r = self._params
+        xc, yc, r = self.params
 
         x = data[:, 0]
         y = data[:, 1]
@@ -249,7 +258,7 @@ class CircleModel(BaseModel):
 
         """
         if params is None:
-            params = self._params
+            params = self.params
         xc, yc, r = params
 
         x = xc + r * np.cos(t)
@@ -279,11 +288,17 @@ class EllipseModel(BaseModel):
     Thus you have ``2 * N`` equations (x_i, y_i) for ``N + 5`` unknowns (t_i,
     xc, yc, a, b, theta), which gives you an effective redundancy of ``N - 5``.
 
-    The ``_params`` attribute contains the parameters in the following order::
+    The ``params`` attribute contains the parameters in the following order::
 
         xc, yc, a, b, theta
 
     A minimum number of 5 points is required to solve for the parameters.
+
+    Attributes
+    ----------
+    params : tuple
+        Ellipse model parameters in the following order `xc`, `yc`, `a`,
+        `b`, `theta`.
 
     """
 
@@ -353,7 +368,7 @@ class EllipseModel(BaseModel):
 
         params, _ = optimize.leastsq(fun, params0, Dfun=Dfun, col_deriv=True)
 
-        self._params = params[:5]
+        self.params = params[:5]
 
     def residuals(self, data):
         """Determine residuals of data to model.
@@ -374,7 +389,7 @@ class EllipseModel(BaseModel):
 
         _check_data_dim(data, dim=2)
 
-        xc, yc, a, b, theta = self._params
+        xc, yc, a, b, theta = self.params
 
         ctheta = math.cos(theta)
         stheta = math.sin(theta)
@@ -436,7 +451,7 @@ class EllipseModel(BaseModel):
         """
 
         if params is None:
-            params = self._params
+            params = self.params
         xc, yc, a, b, theta = params
 
         ct = np.cos(t)
@@ -550,7 +565,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
 
     >>> model = EllipseModel()
     >>> model.estimate(data)
-    >>> model._params # doctest: +SKIP
+    >>> model.params # doctest: +SKIP
     array([ -3.30354146e+03,  -2.87791160e+03,   5.59062118e+03,
              7.84365066e+00,   7.19203152e-01])
 
@@ -558,7 +573,7 @@ def ransac(data, model_class, min_samples, residual_threshold,
     Estimate ellipse model using RANSAC:
 
     >>> ransac_model, inliers = ransac(data, EllipseModel, 5, 3, max_trials=50)
-    >>> ransac_model._params
+    >>> ransac_model.params
     array([ 20.12762373,  29.73563063,   4.81499637,  10.4743584 ,   0.05217117])
     >>> inliers
     array([False, False, False, False,  True,  True,  True,  True,  True,

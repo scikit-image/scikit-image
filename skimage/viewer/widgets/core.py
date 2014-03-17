@@ -232,7 +232,7 @@ class ComboBox(BaseWidget):
         self.name_label.setAlignment(QtCore.Qt.AlignLeft)
 
         self._combo_box = QtGui.QComboBox()
-        self._combo_box.addItems(items)
+        self._combo_box.addItems(list(items))
 
         self.layout = QtGui.QHBoxLayout(self)
         self.layout.addWidget(self.name_label)

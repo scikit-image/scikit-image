@@ -1,12 +1,18 @@
 """
 ImageViewer class for viewing and interacting with images.
 """
-from ..qt import QtGui
+from ..qt import QtGui, qt_api
 from ..qt.QtCore import Qt, Signal
+
+if qt_api is not None:
+    has_qt = True
+else:
+    has_qt = False
 
 from skimage import io, img_as_float
 from skimage.util.dtype import dtype_range
 from skimage.exposure import rescale_intensity
+from skimage._shared.testing import doctest_skip_parser
 import numpy as np
 from .. import utils
 from ..widgets import Slider
@@ -72,8 +78,8 @@ class ImageViewer(QtGui.QMainWindow):
     --------
     >>> from skimage import data
     >>> image = data.coins()
-    >>> viewer = ImageViewer(image)
-    >>> viewer.show() # doctest: +SKIP
+    >>> viewer = ImageViewer(image) # doctest: +SKIP
+    >>> viewer.show()               # doctest: +SKIP
 
     """
 
