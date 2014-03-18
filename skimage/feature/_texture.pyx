@@ -7,6 +7,8 @@ cimport numpy as cnp
 from libc.math cimport sin, cos, abs
 from skimage._shared.interpolation cimport bilinear_interpolation
 
+cdef inline int _round_towards_zero(double r):
+    return <int>((r + 0.5) if (r > 0.0) else (r - 0.5))
 
 def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                double[:] angles, Py_ssize_t levels,
@@ -48,8 +50,8 @@ def _glcm_loop(cnp.uint8_t[:, ::1] image, double[:] distances,
                     i = image[r, c]
 
                     # compute the location of the offset pixel
-                    row = r + <int>(sin(angle) * distance + 0.5)
-                    col = c + <int>(cos(angle) * distance + 0.5)
+                    row = r + _round_towards_zero(sin(angle) * distance)
+                    col = c + _round_towards_zero(cos(angle) * distance)
 
                     # make sure the offset is within bounds
                     if row >= 0 and row < rows and \
