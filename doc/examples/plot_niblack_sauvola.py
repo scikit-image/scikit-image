@@ -48,7 +48,7 @@ binary_wolf = threshold_sauvola(image, w=window_size, method='wolf', k=0.5)
 binary_phansalkar = threshold_sauvola(image, w=window_size,
                                       method='phansalkar', r=50)
 # Parameters k, r, etc. are other parameters that directly affect
-# threshold calculation formula. Check ecah method's documentation to see the
+# threshold calculation formula. Check each method's documentation to see the
 # respective definition of its threshold formula.
 
 plt.figure(figsize=(8, 7))
