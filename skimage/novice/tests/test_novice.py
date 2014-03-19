@@ -13,8 +13,8 @@ IMAGE_PATH = os.path.join(data_dir, "chelsea.png")
 SMALL_IMAGE_PATH = os.path.join(data_dir, "block.png")
 
 
-def _array_2d_to_RGB(array):
-    return np.tile(array[:, :, np.newaxis], (1, 1, 3))
+def _array_2d_to_RGBA(array):
+    return np.tile(array[:, :, np.newaxis], (1, 1, 4))
 
 
 def test_xy_to_array_origin():
@@ -82,11 +82,39 @@ def test_pixel_rgb():
     for i, channel in enumerate((pixel.red, pixel.green, pixel.blue)):
         assert_equal(channel, i + 3)
 
+    pixel.rgb = np.arange(4)
+    assert_equal(pixel.rgb, np.arange(3))
+
+
+def test_pixel_rgba():
+    pic = novice.Picture.from_size((3, 3), color=(10, 10, 10))
+    pixel = pic[0, 0]
+    pixel.rgba = np.arange(4)
+
+    assert_equal(pixel.rgba, np.arange(4))
+    for i, channel in enumerate((pixel.red, pixel.green, pixel.blue, pixel.alpha)):
+        assert_equal(channel, i)
+
+    pixel.red = 3
+    pixel.green = 4
+    pixel.blue = 5
+    pixel.alpha = 6
+    assert_equal(pixel.rgba, np.arange(4) + 3)
+
+    for i, channel in enumerate((pixel.red, pixel.green, pixel.blue, pixel.alpha)):
+        assert_equal(channel, i + 3)
+
 
 def test_pixel_rgb_float():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.rgb = (1.1, 1.1, 1.1)
     assert_equal(pixel.rgb, (1, 1, 1))
+
+
+def test_pixel_rgba_float():
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
+    pixel.rgba = (1.1, 1.1, 1.1, 1.1)
+    assert_equal(pixel.rgba, (1, 1, 1, 1))
 
 
 def test_modified_on_set():
@@ -161,7 +189,7 @@ def test_indexing():
 
 
 def test_picture_slice():
-    array = _array_2d_to_RGB(np.arange(0, 10)[np.newaxis, :])
+    array = _array_2d_to_RGBA(np.arange(0, 10)[np.newaxis, :])
     pic = novice.Picture(array=array)
 
     x_slice = slice(3, 8)
@@ -171,7 +199,7 @@ def test_picture_slice():
 
 def test_move_slice():
     h, w = 3, 12
-    array = _array_2d_to_RGB(np.linspace(0, 255, h * w).reshape(h, w))
+    array = _array_2d_to_RGBA(np.linspace(0, 255, h * w).reshape(h, w))
     array = array.astype(np.uint8)
 
     pic = novice.Picture(array=array)
@@ -191,7 +219,7 @@ def test_move_slice():
 
 def test_negative_index():
     n = 10
-    array = _array_2d_to_RGB(np.arange(0, n)[np.newaxis, :])
+    array = _array_2d_to_RGBA(np.arange(0, n)[np.newaxis, :])
     # Test both x and y indices.
     pic = novice.Picture(array=array)
     assert pic[-1, 0] == pic[n - 1, 0]
@@ -201,7 +229,7 @@ def test_negative_index():
 
 def test_negative_slice():
     n = 10
-    array = _array_2d_to_RGB(np.arange(0, n)[np.newaxis, :])
+    array = _array_2d_to_RGBA(np.arange(0, n)[np.newaxis, :])
     # Test both x and y slices.
     pic = novice.Picture(array=array)
     assert pic[-3:, 0] == pic[n - 3:, 0]
@@ -211,7 +239,7 @@ def test_negative_slice():
 
 def test_getitem_with_step():
     h, w = 5, 5
-    array = _array_2d_to_RGB(np.linspace(0, 255, h * w).reshape(h, w))
+    array = _array_2d_to_RGBA(np.linspace(0, 255, h * w).reshape(h, w))
     pic = novice.Picture(array=array)
     sliced_pic = pic[::2, ::2]
     assert sliced_pic == novice.Picture(array=array[::2, ::2])
@@ -269,6 +297,12 @@ def test_pixel_green_raises():
 def test_pixel_blue_raises():
     pixel = novice.Picture.from_size((1, 1))[0, 0]
     pixel.blue = 256
+
+
+@raises(ValueError)
+def test_pixel_alpha_raises():
+    pixel = novice.Picture.from_size((1, 1))[0, 0]
+    pixel.alpha = 256
 
 
 if __name__ == '__main__':
