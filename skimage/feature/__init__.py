@@ -23,10 +23,15 @@ from .censure import CENSURE
 from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
+<<<<<<< HEAD
 from .blob import blob_dog, blob_log, blob_doh
 from .haar import (haar_like_feature, haar_like_feature_coord,
                    draw_haar_like_feature)
 from .shapecontext import descriptor_shapecontext
+=======
+from .blob import blob_dog, blob_log
+from .shapecontext import shape_context
+>>>>>>> changed the api & make suggested changes
 
 
 __all__ = ['canny',

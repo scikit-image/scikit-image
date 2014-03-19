@@ -1,9 +1,9 @@
 import numpy as np
 
-from ._shapecontext import _shapecontext
+from .shapecontext_cy import _shape_context
 
 
-def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
+def shape_context(image, current_pixel, r_min=1, r_max=50, radial_bins=5,
                             polar_bins=12):
     """Compute Shape Context descriptor for a given point.
 
@@ -15,28 +15,23 @@ def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
     ----------
     image : (M, N) ndarray
         Input image (grayscale).
-
-    r_max : float
-        Maximum distance of the pixels that are considered in computation of
-        histogram from current_pixel.
-
-    r_min : float
-        Minimum distance of the pixels that are considered in computation of
-        histogram from current_pixel.
-
     current_pixel : int tuple, (r, c)
         The pixel for which to find shape context descriptor.
-
+    r_min : float, optional
+        Minimum distance of the pixels that are considered in computation of
+        histogram from `current_pixel` (default: 1).
+    r_max : float, optional
+        Maximum distance of the pixels that are considered in computation of
+        histogram from `current_pixel` (default: 50).
     radial_bins : int, optional
-        Number of log r bins in log-r vs theta histogram.
-
+        Number of log r bins in log-r vs theta histogram (default: 5).
     polar_bins : int, optional
-        Number of theta bins in log-r vs theta histogram.
+        Number of theta bins in log-r vs theta histogram (default: 12).
 
     Returns
     -------
     bin_histogram : (radial_bins, polar_bins) ndarray
-        The shape context - the log-polar histogram of points on shape.
+        The shape context - the log-r vs theta histogram of non-zero pixels in the image.
 
     References
     ----------
@@ -52,11 +47,11 @@ def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
     Examples
     --------
     >>> import numpy as np
-    >>> from skimage.feature import descriptor_shapecontext
+    >>> from skimage.feature import shape_context
     >>> img = np.zeros((20, 20)).astype(float)
     >>> img[4:8, 4:8] = 1
     >>> px = (10, 10)
-    >>> descriptor_shapecontext(img, 0, 25, px, radial_bins=3, polar_bins=4)
+    >>> shape_context(img, px, 0, 25, radial_bins=3, polar_bins=4)
     array([[  0.,   0.,   0.,   0.],
            [  0.,   0.,  16.,   0.],
            [  0.,   0.,   0.,   0.]])
@@ -69,8 +64,9 @@ def descriptor_shapecontext(image, r_min, r_max, current_pixel, radial_bins=5,
         raise ValueError("Currently only supports grey-level images")
 
     # call helper
-    bin_histogram = _shapecontext(image, r_min, r_max,
+    bin_histogram = _shape_context(image,
                                   current_pixel[0], current_pixel[1],
+                                  r_min, r_max,
                                   radial_bins, polar_bins)
 
     return bin_histogram

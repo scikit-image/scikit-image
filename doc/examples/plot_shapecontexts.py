@@ -6,7 +6,7 @@ Shape Contexts
 The Shape Context descriptor was introduced by Serge Belongie and Jitendra
 Malik.
 
-The Shape Context descriptor caputures the coarse distribution of the rest
+The Shape Context descriptor captures the coarse distribution of the rest
 of the shape with respect to a given point on the shape.
 It is the log-polar histogram of points on the shape relative
 to the given point. It uses bins that are uniform in log-polar space
@@ -29,7 +29,7 @@ See their paper_ for further details.
 """
 import matplotlib.pyplot as plt
 from skimage import img_as_float
-from skimage.feature import descriptor_shapecontext
+from skimage.feature import shape_context
 from skimage.filter import canny
 from skimage.transform import resize
 from skimage.io import imread
@@ -38,7 +38,7 @@ from skimage.data import data_dir
 
 fig = plt.figure(figsize=(10, 10))
 
-img1 = imread(data_dir+'/first_9.png')
+img1 = imread(data_dir + '/first_9.png')
 img1 = resize(img1, (70, 70), order=1)
 ax = fig.add_subplot(3, 2, 1)
 ax.imshow(img1, cmap=plt.cm.gray_r)
@@ -63,7 +63,7 @@ ax.set_xticks(())
 ax.set_yticks(())
 ax.set_title('Shape First 9')
 
-img2 = imread(data_dir+'/second_9.png')
+img2 = imread(data_dir + '/second_9.png')
 img2 = resize(img2, (70, 70), order=1)
 ax = fig.add_subplot(3, 2, 3)
 ax.imshow(img2, cmap=plt.cm.gray_r)
@@ -85,7 +85,7 @@ ax.set_yticks(())
 ax.set_title('Shape Second 9')
 
 
-pt1_histogram = descriptor_shapecontext(img_as_float(img1_edges), 0, 25, pt1,
+pt1_histogram = shape_context(img_as_float(img1_edges), pt1, 0, 25,
                                         radial_bins=5, polar_bins=12)
 ax = fig.add_subplot(3, 3, 7)
 ax.imshow(pt1_histogram, cmap=plt.cm.gray_r, interpolation='nearest')
@@ -96,7 +96,7 @@ ax.set_ylabel('log r')
 ax.set_xlabel(r'$\Theta$')
 ax.set_title('Shape context of Point 1')
 
-pt2_histogram = descriptor_shapecontext(img_as_float(img2_edges), 0, 25, pt2,
+pt2_histogram = shape_context(img_as_float(img2_edges), pt2, 0, 25,
                                         radial_bins=5, polar_bins=12)
 ax = fig.add_subplot(3, 3, 8)
 ax.imshow(pt2_histogram, cmap=plt.cm.gray_r, interpolation='nearest')
@@ -108,7 +108,7 @@ ax.set_xlabel(r'$\Theta$')
 ax.set_title('Shape context of Point 2')
 
 
-pt3_histogram = descriptor_shapecontext(img_as_float(img1_edges), 0, 25, pt3,
+pt3_histogram = shape_context(img_as_float(img1_edges), pt3, 0, 25,
                                         radial_bins=5, polar_bins=12)
 ax = fig.add_subplot(3, 3, 9)
 ax.imshow(pt3_histogram, cmap=plt.cm.gray_r, interpolation='nearest')

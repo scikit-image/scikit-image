@@ -12,6 +12,7 @@ def configuration(parent_package='', top_path=None):
     config = Configuration('feature', parent_package, top_path)
     config.add_data_dir('tests')
 
+<<<<<<< HEAD
     cython(['corner_cy.pyx',
             'censure_cy.pyx',
             'orb_cy.pyx',
@@ -28,6 +29,15 @@ def configuration(parent_package='', top_path=None):
     config.add_extension('_cascade', sources=['_cascade.cpp'],
                          include_dirs=[get_numpy_include_dirs()],
                          language="c++")
+=======
+    cython(['corner_cy.pyx'], working_path=base_path)
+    cython(['censure_cy.pyx'], working_path=base_path)
+    cython(['orb_cy.pyx'], working_path=base_path)
+    cython(['brief_cy.pyx'], working_path=base_path)
+    cython(['_texture.pyx'], working_path=base_path)
+    cython(['shapecontext_cy.pyx'], working_path=base_path)
+
+>>>>>>> changed the api & make suggested changes
     config.add_extension('corner_cy', sources=['corner_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('censure_cy', sources=['censure_cy.c'],
@@ -38,7 +48,7 @@ def configuration(parent_package='', top_path=None):
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_texture', sources=['_texture.c'],
                          include_dirs=[get_numpy_include_dirs(), '../_shared'])
-    config.add_extension('_shapecontext', sources=['_shapecontext.c'],
+    config.add_extension('shapecontext_cy', sources=['shapecontext_cy.c'],
                          include_dirs=[get_numpy_include_dirs()])
     config.add_extension('_hessian_det_appx', sources=['_hessian_det_appx.c'],
                          include_dirs=[get_numpy_include_dirs()])

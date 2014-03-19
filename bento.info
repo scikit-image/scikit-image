@@ -151,9 +151,16 @@ Library:
     Extension: skimage.restoration._denoise_cy
         Sources:
             skimage/restoration/_denoise_cy.pyx
+<<<<<<< HEAD
     Extension: skimage.feature._shapecontext
         Sources:
             skimage/feature/_shapecontext.pyx
+=======
+            skimage/exposure/_unwrap_1d.pyx
+    Extension: skimage.feature.shapecontext_cy
+        Sources:
+            skimage/feature/shapecontext_cy.pyx
+>>>>>>> changed the api & make suggested changes
 
 Executable: skivi
     Module: skimage.scripts.skivi
