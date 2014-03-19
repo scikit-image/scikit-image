@@ -98,7 +98,7 @@ CODE_LINK = """
 
 NOTEBOOK_LINK = """
 
-**ipython Notebook source code:** :download:`download <{0}>`
+**IPython Notebook:** :download:`download <{0}>`
 (generated using ``skimage`` |version|)
 
 """
@@ -379,14 +379,11 @@ def write_example(src_name, src_dir, rst_dir, cfg):
 
 def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
     sample_notebook_path = notebook_dir.pjoin('sample.ipynb')
-    sample = open(sample_notebook_path, 'r')
-    output = open(notebook_path, 'w')
-    pythonfile = open(example_file, 'r')
+    with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
+        test = json.load(sample)
+        code = pythonfile.readlines()
 
-    test = json.load(sample)
-    code = pythonfile.readlines()
-
-    cell1 = {
+    cell_code = {
                 "cell_type": "code",
                 "collapsed": False,
                 "input": [
@@ -397,7 +394,8 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
                 "outputs": []
         }
 
-    cell2 = {
+    # cell type markdown
+    cell_md = {
                 "cell_type": "markdown",
                 "metadata": {},
                 "source": [
@@ -406,11 +404,10 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
         }
 
 
-    # Done to cluster together multiple '\n's into one
+    # Done to cluster together multiple '\n's into one.
+    # For ex - "import xyz\n\n\n print 2" becomes "import xyz\n print 2"
     modified_code = []
-    for line in code:
-        if not modified_code or modified_code[-1] != line:
-            modified_code.append(line)
+    modified_code = [code[i] for i in range(len(code)) if i==0 or code[i]!=code[i-1]]
 
     segment_number = 0
     segment_has_begun = True
@@ -419,47 +416,42 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
 
     for line in modified_code:
         # A linebreak indicates a segment has ended. If the text segment had only comments, then source is blank,
-        # So, ignore it, as already added in cell type 2
+        # So, ignore it, as already added in cell type markdown
         if line == "\n":
             if segment_has_begun is True and source:
                 segment_number += 1
                 # we've found text segments within the docstring
                 if docstring is True:
-                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell2))
+                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell_md))
                     test["worksheets"][0]["cells"][segment_number]["source"] = source
                 else:
-                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell1))
+                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell_code))
                     test["worksheets"][0]["cells"][segment_number]["input"] = source
                 source = []
-        # if its a comment
-        elif line.strip(' ')[0] == '#':
+        # if it's a comment
+        elif line.strip().startswith('#'):
             segment_number += 1
             line = line.strip(' #')
-            test["worksheets"][0]["cells"].append(copy.deepcopy(cell2))
+            test["worksheets"][0]["cells"].append(copy.deepcopy(cell_md))
             test["worksheets"][0]["cells"][segment_number]["source"] = line
-        elif line == "\"\"\"\n":
+        elif line == '"""\n':
             if docstring is False:
                 docstring = True
-            # Indicates, completion of docstring, add whatever in source to markdown (cell type 2)
+            # Indicates, completion of docstring, add whatever in source to markdown (cell type markdown)
             elif docstring is True:
                 docstring = False
                 # Write leftover docstring if any left
                 if source:
                     segment_number += 1
-                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell2))
+                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell_md))
                     test["worksheets"][0]["cells"][segment_number]["source"] = source
                     source = []
         else:
             # some text segment is continuing, so add to source
             source.append(line)
-    # if basename == 'plot_brief':
-    #     pdb.set_trace()
 
-    json.dump(test, output, indent=2)
-
-    sample.close()
-    output.close()
-    pythonfile.close()
+    with open(notebook_path, 'w') as output:
+        json.dump(test, output, indent=2)
 
 
 def save_thumbnail(image, thumb_path, shape):
