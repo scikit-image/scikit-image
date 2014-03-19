@@ -11,9 +11,9 @@ from libc.math cimport atan2
 
 
 def _shape_context(cnp.ndarray[cnp.float64_t, ndim=2] image,
-                  int current_pixel_x, int current_pixel_y,
-                  float r_min=1, float r_max=50,
-                  int radial_bins=5, int polar_bins=12):
+                   int current_pixel_x, int current_pixel_y,
+                   float r_min=1, float r_max=50,
+                   int radial_bins=5, int polar_bins=12):
     """Cython implementation of calculation of shape contexts.
 
     Computes the log-polar histogram of non-zero pixels with the given
