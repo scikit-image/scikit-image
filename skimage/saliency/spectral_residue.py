@@ -10,7 +10,8 @@ def spectralResidue(rgbImage,sigma = 3,displayResult = False):
 	This Function computes Spectral Residue Based Saliency map
 
 	References:
-
+	Xiaodi Hou,Liquin Zhang, Saliency Detection: A spectral residue approach
+	CVPR 2007
 
 	Inputs
 	rgbimage: rgb input image for computation of saliency
