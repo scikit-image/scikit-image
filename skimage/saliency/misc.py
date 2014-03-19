@@ -1,5 +1,3 @@
-"""author:tabish
-"""
 from skimage.color import rgb2lab                                   
 from scipy.ndimage import filters
 import matplotlib.pyplot as plt
