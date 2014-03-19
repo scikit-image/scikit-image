@@ -86,7 +86,7 @@ ax.set_title('Shape Second 9')
 
 
 pt1_histogram = shape_context(img_as_float(img1_edges), pt1, 0, 25,
-                                        radial_bins=5, polar_bins=12)
+                              radial_bins=5, polar_bins=12)
 ax = fig.add_subplot(3, 3, 7)
 ax.imshow(pt1_histogram, cmap=plt.cm.gray_r, interpolation='nearest')
 ax.axis('image')
@@ -97,7 +97,7 @@ ax.set_xlabel(r'$\Theta$')
 ax.set_title('Shape context of Point 1')
 
 pt2_histogram = shape_context(img_as_float(img2_edges), pt2, 0, 25,
-                                        radial_bins=5, polar_bins=12)
+                              radial_bins=5, polar_bins=12)
 ax = fig.add_subplot(3, 3, 8)
 ax.imshow(pt2_histogram, cmap=plt.cm.gray_r, interpolation='nearest')
 ax.axis('image')
@@ -109,7 +109,7 @@ ax.set_title('Shape context of Point 2')
 
 
 pt3_histogram = shape_context(img_as_float(img1_edges), pt3, 0, 25,
-                                        radial_bins=5, polar_bins=12)
+                              radial_bins=5, polar_bins=12)
 ax = fig.add_subplot(3, 3, 9)
 ax.imshow(pt3_histogram, cmap=plt.cm.gray_r, interpolation='nearest')
 ax.axis('image')

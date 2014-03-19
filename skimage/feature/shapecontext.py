@@ -4,7 +4,7 @@ from .shapecontext_cy import _shape_context
 
 
 def shape_context(image, current_pixel, r_min=1, r_max=50, radial_bins=5,
-                            polar_bins=12):
+                  polar_bins=12):
     """Compute Shape Context descriptor for a given point.
 
     Compute Shape Context by summing non-zero points into a log-polar
@@ -57,16 +57,16 @@ def shape_context(image, current_pixel, r_min=1, r_max=50, radial_bins=5,
            [  0.,   0.,   0.,   0.]])
 
     """
-    # view input array as arrays with atleast two dimensions
+    # view input array as arrays with at least two dimensions
     image = np.atleast_2d(image)
 
     if image.ndim > 3:
-        raise ValueError("Currently only supports grey-level images")
+        raise ValueError("Currently only supports gray-level images")
 
     # call helper
     bin_histogram = _shape_context(image,
-                                  current_pixel[0], current_pixel[1],
-                                  r_min, r_max,
-                                  radial_bins, polar_bins)
+                                   current_pixel[0], current_pixel[1],
+                                   r_min, r_max,
+                                   radial_bins, polar_bins)
 
     return bin_histogram
