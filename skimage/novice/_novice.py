@@ -1,7 +1,6 @@
 import os
 import imghdr
 from collections import namedtuple
-from io import BytesIO
 
 import numpy as np
 from skimage import io
@@ -11,9 +10,6 @@ from skimage.color import color_dict
 from skimage.io.util import file_or_url_context, is_url
 
 import six
-from six.moves.urllib_parse import urlparse
-from six.moves.urllib import request
-urlopen = request.urlopen
 
 # Convert colors from `skimage.color` to uint8 and allow access through
 # dict or a named tuple.
