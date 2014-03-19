@@ -8,7 +8,7 @@ import numpy as np
 def sr_saliency(rgb_image, sigma = 3, display_result = False):
     """This Function computes Spectral Residue Based Saliency map
 
-<<<<<<< HEAD
+
     References:
         Xiaodi Hou,Liquin Zhang, Saliency Detection: A spectral residue approach
         CVPR 2007
@@ -21,38 +21,36 @@ def sr_saliency(rgb_image, sigma = 3, display_result = False):
 	         		  displayed
     Outputs:
         function return the saliency map of the rgbimage.
-=======
-	References:
-	Xiaodi Hou,Liquin Zhang, Saliency Detection: A spectral residue approach
-	CVPR 2007
->>>>>>> 0d001bef1376eab9c209b4c711ef19ff02664216
 
     Examples:
         >>filename = 'image.jpg'
         >>rgb_image = imread(filename);
         >>sr_saliency(rgb_image,display_result = 1)
     """
-#handle cases where the input isn't an rgbimage
+    #handle cases where the input isn't an rgbimage
     try:
         gray_image = rgb2gray(rgb_image)
     except:
         gray_image = rgb_image
     gray_image = img_as_float(gray_image)
-# Spectral Residue Computation
-  	#compute fourier transform on image
+    # Spectral Residue Computation
+    
+    #compute fourier transform on image
     fft_gray_image = fftpack.fft2(gray_image)                                                   
     log_magnitude = np.log(np.abs(fft_gray_image))                                          
     phase = np.angle(fft_gray_image)     
 
-#smooth the log magnitude response  
+    #smooth the log magnitude response  
     avg_log_magnitude = filters.gaussian_filter(log_magnitude, sigma, mode="nearest")            
 
-#compute spectral residue
+    #compute spectral residue
     spectral_residual = log_magnitude - avg_log_magnitude                                 
-#find inverse fourier transform of spectral residue to obtain the saliency map
+    
+    #find inverse fourier transform of spectral residue to obtain the saliency map
     saliency_map = np.abs(fftpack.ifft2(np.exp(spectral_residual + 1j * phase))) ** 2
     saliency_map = ndimage.gaussian_filter(saliency_map, sigma=3)
-#display option
+    
+    #display option
     if(display_result):
         plt.imshow(saliency_map)
         plt.show()
