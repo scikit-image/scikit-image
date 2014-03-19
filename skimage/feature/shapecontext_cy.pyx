@@ -4,44 +4,37 @@
 #cython: wraparound=False
 
 import numpy as np
-from six.moves import range
 
 cimport numpy as cnp
 from libc.math cimport sqrt
 from libc.math cimport atan2
 
 
-def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
-                  float r_min, float r_max,
+def _shape_context(cnp.ndarray[cnp.float64_t, ndim=2] image,
                   int current_pixel_x, int current_pixel_y,
+                  float r_min=1, float r_max=50,
                   int radial_bins=5, int polar_bins=12):
-    """Cython implementation of calculation of shape contexts
+    """Cython implementation of calculation of shape contexts.
 
-    computes the log-polar histogram of non zero pixels with the given
-    point as the origin and returns it as the shape context descriptor
+    Computes the log-polar histogram of non-zero pixels with the given
+    point as the origin and returns it as the shape context descriptor.
 
     Parameters
     ----------
     image : (M, N) ndarray
         Input image (grayscale).
-
-    r_max : float
-        Maximum distance of the pixels that are considered in computation
-        of histogram from current_pixel.
-
-    r_min : float
-        Minimum distance of the pixels that are considered in computation
-        of histogram from current_pixel.
-
     current_pixel_x : int
         The row of pixel in the passed array.
-
     current_pixel_y : int
         The column of pixel in the passed array.
-
+    r_min : float, optional
+        Minimum distance of the pixels that are considered in computation
+        of histogram from current_pixel (default: 1).
+    r_max : float
+        Maximum distance of the pixels that are considered in computation
+        of histogram from current_pixel (default: 50).
     radial_bins : int, optional
         Number of log r bins in the log-r vs theta histogram (default: 5).
-
     polar_bins : int, optional
         Number of theta bins in log-r vs theta histogram (default: 12).
 
@@ -93,7 +86,7 @@ def _shapecontext(cnp.ndarray[cnp.float64_t, ndim=2] image,
                 y_diff = current_pixel_y - y
 
                 # distance from current_pixel
-                r = sqrt(x_diff*x_diff + y_diff*y_diff)
+                r = sqrt(x_diff * x_diff + y_diff * y_diff)
                 # angle in radians
                 theta = atan2(y_diff, x_diff)
 
