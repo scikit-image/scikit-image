@@ -8,6 +8,7 @@ import numpy as np
 def sr_saliency(rgb_image, sigma = 3, display_result = False):
     """This Function computes Spectral Residue Based Saliency map
 
+<<<<<<< HEAD
     References:
         Xiaodi Hou,Liquin Zhang, Saliency Detection: A spectral residue approach
         CVPR 2007
@@ -20,6 +21,11 @@ def sr_saliency(rgb_image, sigma = 3, display_result = False):
 	         		  displayed
     Outputs:
         function return the saliency map of the rgbimage.
+=======
+	References:
+	Xiaodi Hou,Liquin Zhang, Saliency Detection: A spectral residue approach
+	CVPR 2007
+>>>>>>> 0d001bef1376eab9c209b4c711ef19ff02664216
 
     Examples:
         >>filename = 'image.jpg'
