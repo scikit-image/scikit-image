@@ -28,7 +28,7 @@ image = camera()
 thresh = threshold_otsu(image)
 binary = image > thresh
 
-f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5))
+fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 2.5))
 ax1.imshow(image, cmap=plt.cm.gray)
 ax1.set_title('Original')
 ax1.axis('off')

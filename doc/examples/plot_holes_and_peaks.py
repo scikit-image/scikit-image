@@ -23,7 +23,7 @@ image = rescale_intensity(image, in_range=(50, 200))
 
 # convenience function for plotting images
 def imshow(image, title, **kwargs):
-    f, ax = plt.subplots(figsize=(5, 4))
+    fig, ax = plt.subplots(figsize=(5, 4))
     ax.imshow(image, **kwargs)
     ax.axis('off')
     ax.set_title(title)

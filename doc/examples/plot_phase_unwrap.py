@@ -26,19 +26,19 @@ image_wrapped = np.angle(np.exp(1j * image))
 # Perform phase unwrapping
 image_unwrapped = unwrap_phase(image_wrapped)
 
-f, ax = plt.subplots(2, 2)
+fig, ax = plt.subplots(2, 2)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
-f.colorbar(ax1.imshow(image, cmap='gray', vmin=0, vmax=4 * np.pi), ax=ax1)
+fig.colorbar(ax1.imshow(image, cmap='gray', vmin=0, vmax=4 * np.pi), ax=ax1)
 ax1.set_title('Original')
 
-f.colorbar(ax2.imshow(image_wrapped, cmap='gray', vmin=-np.pi, vmax=np.pi), ax=ax2)
+fig.colorbar(ax2.imshow(image_wrapped, cmap='gray', vmin=-np.pi, vmax=np.pi), ax=ax2)
 ax2.set_title('Wrapped phase')
 
-f.colorbar(ax3.imshow(image_unwrapped, cmap='gray'), ax=ax3)
+fig.colorbar(ax3.imshow(image_unwrapped, cmap='gray'), ax=ax3)
 ax3.set_title('After phase unwrapping')
 
-f.colorbar(ax4.imshow(image_unwrapped - image, cmap='gray'), ax=ax4)
+fig.colorbar(ax4.imshow(image_unwrapped - image, cmap='gray'), ax=ax4)
 ax4.set_title('Unwrapped minus original')
 
 """
@@ -64,21 +64,21 @@ image_unwrapped_no_wrap_around = unwrap_phase(image_wrapped,
 image_unwrapped_wrap_around = unwrap_phase(image_wrapped,
                                            wrap_around=(True, False))
 
-f, ax = plt.subplots(2, 2)
+fig, ax = plt.subplots(2, 2)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
-f.colorbar(ax1.imshow(np.ma.array(image, mask=mask), cmap='jet'), ax=ax1)
+fig.colorbar(ax1.imshow(np.ma.array(image, mask=mask), cmap='jet'), ax=ax1)
 ax1.set_title('Original')
 
-f.colorbar(ax2.imshow(image_wrapped, cmap='jet', vmin=-np.pi, vmax=np.pi),
+fig.colorbar(ax2.imshow(image_wrapped, cmap='jet', vmin=-np.pi, vmax=np.pi),
            ax=ax2)
 ax2.set_title('Wrapped phase')
 
-f.colorbar(ax3.imshow(image_unwrapped_no_wrap_around, cmap='jet'),
+fig.colorbar(ax3.imshow(image_unwrapped_no_wrap_around, cmap='jet'),
            ax=ax3)
 ax3.set_title('Unwrapped without wrap_around')
 
-f.colorbar(ax4.imshow(image_unwrapped_wrap_around, cmap='jet'), ax=ax4)
+fig.colorbar(ax4.imshow(image_unwrapped_wrap_around, cmap='jet'), ax=ax4)
 ax4.set_title('Unwrapped with wrap_around')
 
 plt.show()

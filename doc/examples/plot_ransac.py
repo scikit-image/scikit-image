@@ -45,7 +45,7 @@ line_x = np.arange(-250, 250)
 line_y = model.predict_y(line_x)
 line_y_robust = model_robust.predict_y(line_x)
 
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.plot(data[inliers, 0], data[inliers, 1], '.b', alpha=0.6,
         label='Inlier data')
 ax.plot(data[outliers, 0], data[outliers, 1], '.r', alpha=0.6,

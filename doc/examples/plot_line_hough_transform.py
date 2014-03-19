@@ -77,7 +77,7 @@ image[idx, idx] = 255
 
 h, theta, d = hough_line(image)
 
-f, ax = plt.subplots(1, 3, figsize=(8, 4))
+fig, ax = plt.subplots(1, 3, figsize=(8, 4))
 
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Input image')
@@ -108,7 +108,7 @@ image = data.camera()
 edges = canny(image, 2, 1, 25)
 lines = probabilistic_hough_line(edges, threshold=10, line_length=5, line_gap=3)
 
-f2, ax = plt.subplots(1, 3, figsize=(8, 3))
+fig2, ax = plt.subplots(1, 3, figsize=(8, 3))
 
 ax[0].imshow(image, cmap=plt.cm.gray)
 ax[0].set_title('Input image')

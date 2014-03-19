@@ -26,7 +26,7 @@ image = rotate(image, angle=15, order=0)
 label_img = label(image)
 regions = regionprops(label_img)
 
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.imshow(image, cmap=plt.cm.gray)
 
 for props in regions:

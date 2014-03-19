@@ -50,7 +50,7 @@ ax3.imshow(image - dilated)
 ax3.set_title('image - dilated')
 ax3.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 
 """
 
@@ -98,7 +98,7 @@ ax3.axhline(yslice, color='r', alpha=0.4)
 ax3.set_title('image - dilated')
 ax3.axis('off')
 
-plt.tight_layout()
+fig.tight_layout()
 plt.show()
 
 """

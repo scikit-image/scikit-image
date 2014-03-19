@@ -29,7 +29,7 @@ r = np.sin(np.exp((np.sin(x)**3 + np.cos(y)**2)))
 contours = measure.find_contours(r, 0.8)
 
 # Display the image and plot all contours found
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.imshow(r, interpolation='nearest', cmap=plt.cm.gray)
 
 for n, contour in enumerate(contours):

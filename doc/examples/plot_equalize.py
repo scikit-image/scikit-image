@@ -70,7 +70,7 @@ img_eq = exposure.equalize_hist(img)
 img_adapteq = exposure.equalize_adapthist(img, clip_limit=0.03)
 
 # Display results
-f, axes = plt.subplots(nrows=2, ncols=4, figsize=(8, 5))
+fig, axes = plt.subplots(nrows=2, ncols=4, figsize=(8, 5))
 
 ax_img, ax_hist, ax_cdf = plot_img_and_hist(img, axes[:, 0])
 ax_img.set_title('Low contrast image')
@@ -92,5 +92,5 @@ ax_cdf.set_ylabel('Fraction of total intensity')
 ax_cdf.set_yticks(np.linspace(0, 1, 5))
 
 # prevent overlap of y-axis labels
-f.subplots_adjust(wspace=0.4)
+fig.subplots_adjust(wspace=0.4)
 plt.show()
