@@ -44,7 +44,7 @@ from skimage import data
 noisy_image = img_as_ubyte(data.camera())
 hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 3))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 3))
 ax1.imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
 ax1.axis('off')
 ax2.plot(hist[1][:-1], hist[0], lw=2)
@@ -201,7 +201,7 @@ hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 glob_hist = np.histogram(glob, bins=np.arange(0, 256))
 loc_hist = np.histogram(loc, bins=np.arange(0, 256))
 
-f, ax = plt.subplots(3, 2, figsize=(10, 10))
+fig, ax = plt.subplots(3, 2, figsize=(10, 10))
 ax1, ax2, ax3, ax4, ax5, ax6 = ax.ravel()
 
 ax1.imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
@@ -398,14 +398,14 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-f, ax = plt.subplots(2, 2)
+fig, ax = plt.subplots(2, 2)
 ax1, ax2, ax3, ax4 = ax.ravel()
 
-f.colorbar(ax1.imshow(p8, cmap=plt.cm.gray), ax=ax1)
+fig.colorbar(ax1.imshow(p8, cmap=plt.cm.gray), ax=ax1)
 ax1.set_title('Original')
 ax1.axis('off')
 
-f.colorbar(ax2.imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax2)
+fig.colorbar(ax2.imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax2)
 ax2.set_title('Local Otsu ($r=%d$)' % radius)
 ax2.axis('off')
 
@@ -434,7 +434,7 @@ m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 radius = 10
 t = rank.otsu(m, disk(radius))
 
-f, (ax1, ax2) = plt.subplots(1, 2)
+fig, (ax1, ax2) = plt.subplots(1, 2)
 
 ax1.imshow(m)
 ax1.set_title('Original')
@@ -523,13 +523,13 @@ import matplotlib.pyplot as plt
 
 image = data.camera()
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
-f.colorbar(ax1.imshow(image, cmap=plt.cm.gray), ax=ax1)
+fig.colorbar(ax1.imshow(image, cmap=plt.cm.gray), ax=ax1)
 ax1.set_title('Image')
 ax1.axis('off')
 
-f.colorbar(ax2.imshow(entropy(image, disk(5)), cmap=plt.cm.jet), ax=ax2)
+fig.colorbar(ax2.imshow(entropy(image, disk(5)), cmap=plt.cm.jet), ax=ax2)
 ax2.set_title('Entropy')
 ax2.axis('off')
 
@@ -616,7 +616,7 @@ for r in e_range:
 
 rec = np.asarray(rec)
 
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.set_title('Performance with respect to element size')
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
@@ -644,7 +644,7 @@ for s in s_range:
 
 rec = np.asarray(rec)
 
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.set_title('Performance with respect to image size')
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
@@ -679,7 +679,7 @@ for r in e_range:
 
 rec = np.asarray(rec)
 
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.set_title('Performance with respect to element size')
 ax.plot(e_range, rec)
 ax.legend(['filter.rank.median', 'filter.median_filter',
@@ -694,7 +694,7 @@ Comparison of outcome of the three methods:
 
 """
 
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.imshow(np.hstack((rc, rctmf, rndi)))
 ax.set_title('filter.rank.median vs filtermedian_filter vs scipy.ndimage.percentile')
 ax.axis('off')
@@ -720,7 +720,7 @@ for s in s_range:
 
 rec = np.asarray(rec)
 
-f, ax = plt.subplots()
+fig, ax = plt.subplots()
 ax.set_title('Performance with respect to image size')
 ax.plot(s_range, rec)
 ax.legend(['filter.rank.median', 'filter.median_filter',

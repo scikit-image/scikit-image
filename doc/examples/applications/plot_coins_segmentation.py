@@ -16,7 +16,7 @@ from skimage import data
 coins = data.coins()
 hist = np.histogram(coins, bins=np.arange(0, 256))
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 3))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 3))
 ax1.imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 ax1.axis('off')
 ax2.plot(hist[1][:-1], hist[0], lw=2)
@@ -35,7 +35,7 @@ background with the coins:
 
 """
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
 ax1.imshow(coins > 100, cmap=plt.cm.gray, interpolation='nearest')
 ax1.set_title('coins > 100')
 ax1.axis('off')
@@ -43,7 +43,7 @@ ax2.imshow(coins > 150, cmap=plt.cm.gray, interpolation='nearest')
 ax2.set_title('coins > 150')
 ax2.axis('off')
 margins = dict(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
-f.subplots_adjust(**margins)
+fig.subplots_adjust(**margins)
 
 """
 .. image:: PLOT2RST.current_figure
@@ -60,7 +60,7 @@ edge-detector.
 from skimage.filter import canny
 edges = canny(coins/255.)
 
-f, ax = plt.subplots(figsize=(4, 3))
+fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(edges, cmap=plt.cm.gray, interpolation='nearest')
 ax.axis('off')
 ax.set_title('Canny detector')
@@ -75,7 +75,7 @@ from scipy import ndimage
 
 fill_coins = ndimage.binary_fill_holes(edges)
 
-f, ax = plt.subplots(figsize=(4, 3))
+fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(fill_coins, cmap=plt.cm.gray, interpolation='nearest')
 ax.axis('off')
 ax.set_title('Filling the holes')
@@ -89,7 +89,7 @@ objects.
 from skimage import morphology
 coins_cleaned = morphology.remove_small_objects(fill_coins, 21)
 
-f, ax = plt.subplots(figsize=(4, 3))
+fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(coins_cleaned, cmap=plt.cm.gray, interpolation='nearest')
 ax.axis('off')
 ax.set_title('Removing small objects')
@@ -113,7 +113,7 @@ from skimage.filter import sobel
 
 elevation_map = sobel(coins)
 
-f, ax = plt.subplots(figsize=(4, 3))
+fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(elevation_map, cmap=plt.cm.jet, interpolation='nearest')
 ax.axis('off')
 ax.set_title('elevation_map')
@@ -129,7 +129,7 @@ markers = np.zeros_like(coins)
 markers[coins < 30] = 1
 markers[coins > 150] = 2
 
-f, ax = plt.subplots(figsize=(4, 3))
+fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(markers, cmap=plt.cm.spectral, interpolation='nearest')
 ax.axis('off')
 ax.set_title('markers')
@@ -143,7 +143,7 @@ starting from the markers determined above:
 """
 segmentation = morphology.watershed(elevation_map, markers)
 
-f, ax = plt.subplots(figsize=(4, 3))
+fig, ax = plt.subplots(figsize=(4, 3))
 ax.imshow(segmentation, cmap=plt.cm.gray, interpolation='nearest')
 ax.axis('off')
 ax.set_title('segmentation')
@@ -162,14 +162,14 @@ segmentation = ndimage.binary_fill_holes(segmentation - 1)
 labeled_coins, _ = ndimage.label(segmentation)
 image_label_overlay = label2rgb(labeled_coins, image=coins)
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(6, 3))
 ax1.imshow(coins, cmap=plt.cm.gray, interpolation='nearest')
 ax1.contour(segmentation, [0.5], linewidths=1.2, colors='y')
 ax1.axis('off')
 ax2.imshow(image_label_overlay, interpolation='nearest')
 ax2.axis('off')
 
-f.subplots_adjust(**margins)
+fig.subplots_adjust(**margins)
 
 """
 .. image:: PLOT2RST.current_figure
