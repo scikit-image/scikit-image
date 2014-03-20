@@ -86,7 +86,7 @@ def _shape_context(cnp.ndarray[cnp.float64_t, ndim=2] image,
                 y_diff = current_pixel_y - y
 
                 # distance from current_pixel
-                r = sqrt(x_diff * x_diff + y_diff * y_diff)
+                r = sqrt(x_diff*x_diff + y_diff*y_diff)
                 # angle in radians
                 theta = atan2(y_diff, x_diff)
 
