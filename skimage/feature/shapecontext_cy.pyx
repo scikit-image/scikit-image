@@ -10,7 +10,7 @@ from libc.math cimport sqrt
 from libc.math cimport atan2
 
 
-def _shape_context(cnp.ndarray[cnp.float64_t, ndim=2] image,
+def _shape_context(cnp.float64_t[:, :] image,
                    int current_pixel_x, int current_pixel_y,
                    float r_min=1, float r_max=50,
                    int radial_bins=5, int polar_bins=12):
@@ -64,14 +64,14 @@ def _shape_context(cnp.ndarray[cnp.float64_t, ndim=2] image,
     if r_min <= 0:
         r_min = 1
 
-    cdef cnp.ndarray[cnp.float64_t, ndim = 1] r_array = \
+    cdef cnp.float64_t[:] r_array = \
         np.logspace(np.log10(r_min), np.log10(r_max), radial_bins + 1, base=10)
 
-    cdef cnp.ndarray[cnp.float64_t, ndim = 1] theta_array = \
+    cdef cnp.float64_t[:] theta_array = \
         np.linspace(-np.pi, np.pi, polar_bins + 1)
 
-    cdef cnp.ndarray[cnp.float64_t, ndim = 2] bin_histogram = \
-        np.zeros((radial_bins, polar_bins), dtype=float)
+    cdef cnp.float64_t[:, :] bin_histogram = \
+        np.zeros((radial_bins, polar_bins), dtype=np.float64)
 
     cdef int r_max_int = int(r_max)
 
@@ -109,4 +109,4 @@ def _shape_context(cnp.ndarray[cnp.float64_t, ndim=2] image,
                 if r_idx != -1 and theta_idx != -1:
                     bin_histogram[r_idx, theta_idx] += 1
 
-    return bin_histogram
+    return np.asarray(bin_histogram)
