@@ -181,7 +181,7 @@ def hessian_matrix_det(image, sigma, integral=True):
     Parameters
     ----------
     image : array
-        The integral image over which to compute Hessian Determinant.
+        The image over which to compute Hessian Determinant.
     sigma : float
         Standard deviation used for the Gaussian kernel, used for the Hessian
         matrix
