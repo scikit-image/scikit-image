@@ -6,7 +6,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      corner_shi_tomasi, corner_foerstner, corner_subpix,
                      corner_peaks, corner_fast, structure_tensor,
                      structure_tensor_eigvals, hessian_matrix,
-                     hessian_matrix_eigvals)
+                     hessian_matrix_eigvals, hessian_matrix_det)
 from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
 from .brief import BRIEF
@@ -15,7 +15,6 @@ from .orb import ORB
 from .match import match_descriptors
 from .util import plot_matches
 from .blob import blob_dog, blob_log, blob_doh
-from ._hessian_det_appx import hessian_det_appx
 
 
 __all__ = ['daisy',
@@ -27,6 +26,7 @@ __all__ = ['daisy',
            'structure_tensor',
            'structure_tensor_eigvals',
            'hessian_matrix',
+           'hessian_matrx_det',
            'hessian_matrix_eigvals',
            'corner_kitchen_rosenfeld',
            'corner_harris',
@@ -45,5 +45,5 @@ __all__ = ['daisy',
            'plot_matches',
            'blob_dog',
            'blob_doh',
-           'hessian_det_appx',
-           'blob_log']
+           'blob_log',
+           'hessian_matrix_det']

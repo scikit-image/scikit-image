@@ -1,3 +1,4 @@
+
 import numpy as np
 from scipy.ndimage.filters import gaussian_filter, gaussian_laplace
 import itertools as itt
@@ -6,7 +7,7 @@ from math import sqrt, hypot, log
 from numpy import arccos
 from skimage.util import img_as_float
 from .peak import peak_local_max
-from ._hessian_det_appx import hessian_det_appx
+from ._hessian_det_appx import _hessian_matrix_det
 from skimage.transform import integral_image
 
 
@@ -398,7 +399,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     else:
         sigma_list = np.linspace(min_sigma, max_sigma, num_sigma)
 
-    hessian_images = [hessian_det_appx(image, s) for s in sigma_list]
+    hessian_images = [_hessian_matrix_det(image, s) for s in sigma_list]
     image_cube = np.dstack(hessian_images)
 
     local_maxima = peak_local_max(image_cube, threshold_abs=threshold,

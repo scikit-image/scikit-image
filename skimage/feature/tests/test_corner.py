@@ -12,7 +12,8 @@ from skimage.feature import (corner_moravec, corner_harris, corner_shi_tomasi,
                              corner_kitchen_rosenfeld, corner_foerstner,
                              corner_fast, corner_orientations,
                              structure_tensor, structure_tensor_eigvals,
-                             hessian_matrix, hessian_matrix_eigvals)
+                             hessian_matrix, hessian_matrix_eigvals,
+                             hessian_matrix_det)
 
 
 def test_structure_tensor():
@@ -89,6 +90,12 @@ def test_hessian_matrix_eigvals():
                                      [0, 0, 1, 0, 0],
                                      [0, 0, 0, 0, 0],
                                      [0, 0, 0, 0, 0]]))
+
+
+def test_hessian_matrix_det():
+    image = np.ones((5, 5))
+    det = hessian_matrix_det(image, 3, False)
+    assert_array_equal(det, 0)
 
 
 def test_square_image():
