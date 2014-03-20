@@ -26,6 +26,11 @@ See their paper_ for further details.
 
 .. _paper: http://www.eecs.berkeley.edu/Research/Projects/CS/vision/shape/belongie-pami02.pdf
 
+    References
+    ----------
+    .. [1]  Serge Belongie, Jitendra Malik and Jan Puzicha.
+            "Shape matching and object recognition using shape contexts."
+            IEEE PAMI 2002.
 """
 import matplotlib.pyplot as plt
 from skimage import img_as_float
