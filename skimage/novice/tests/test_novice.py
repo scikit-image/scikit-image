@@ -17,6 +17,10 @@ def _array_2d_to_RGBA(array):
     return np.tile(array[:, :, np.newaxis], (1, 1, 4))
 
 
+def _array_2d_to_RGBA(array):
+    return np.tile(array[:, :, np.newaxis], (1, 1, 4))
+
+
 def test_xy_to_array_origin():
     h, w = 3, 5
     array = np.arange(h * w).reshape(h, w, 1)

@@ -149,18 +149,22 @@ class Pixel(object):
         if len(value) == 4:
             self.rgba = value
         else:
-            self._red, self._green, self._blue = (self._validate(v) for v in value)
+            self._red, self._green, self._blue \
+                = (self._validate(v) for v in value)
             self._alpha = 255
             self._setpixel()
 
     @property
     def rgba(self):
-        """The RGB color and transparency components of the pixel (4 values 0-255)."""
+        """The RGB color and transparency components of the pixel
+        (4 values 0-255).
+        """
         return (self.red, self.green, self.blue, self.alpha)
 
     @rgba.setter
     def rgba(self, value):
-        self._red, self._green, self._blue, self._alpha = (self._validate(v) for v in value)
+        self._red, self._green, self._blue, self._alpha \
+            = (self._validate(v) for v in value)
         self._setpixel()
 
     def _validate(self, value):
@@ -270,8 +274,8 @@ class Picture(object):
         size : tuple
             Width and height of the picture in pixels.
         color : tuple or str
-            RGB or RGBA tuple with the fill color for the picture [0-255] or a valid
-            key in `color_dict`.
+            RGB or RGBA tuple with the fill color for the picture [0-255] or
+            a valid key in `color_dict`.
         """
         if isinstance(color, six.string_types):
             color = color_dict[color]
