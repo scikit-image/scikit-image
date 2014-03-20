@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal
 from skimage.saliency import misc
 from scipy.ndimage import filters
 
-test_image = data.lena()
+test_image = np.random.rand(300,400,3) 
 
 def test_lab_saliency():
     out1 = misc.lab_saliency(test_image,5,False)

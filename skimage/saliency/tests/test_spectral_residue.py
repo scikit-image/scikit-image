@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal
 from skimage.saliency import spectral_residue
 from skimage.color import rgb2gray
 
-test_image = data.lena()
+test_image = np.random.rand(300, 400, 3) 
 
 def test_sr_saliency():
     out1 = spectral_residue.sr_saliency(test_image, 3, False)
