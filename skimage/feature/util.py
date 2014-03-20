@@ -105,7 +105,7 @@ def plot_matches(ax, image1, image2, keypoints1, keypoints2, matches,
         ax.scatter(keypoints2[:, 1] + offset[1], keypoints2[:, 0],
                    facecolors='none', edgecolors=keypoints_color)
 
-    ax.imshow(image)
+    ax.imshow(image, interpolation='nearest', cmap='gray')
     ax.axis((0, 2 * offset[1], offset[0], 0))
 
     for i in range(matches.shape[0]):
