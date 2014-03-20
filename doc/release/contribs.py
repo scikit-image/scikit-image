@@ -11,7 +11,6 @@ if len(sys.argv) != 2:
 tag = sys.argv[1]
 
 def call(cmd):
-    print(shlex.split(cmd))
     return subprocess.check_output(shlex.split(cmd), universal_newlines=True).split('\n')
 
 tag_date = call("git show --format='%%ci' %s" % tag)[0]
