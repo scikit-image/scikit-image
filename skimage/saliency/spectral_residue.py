@@ -9,28 +9,36 @@ def sr_saliency(rgb_image, sigma = 3, display_result = False):
     """This Function computes Spectral Residue Based Saliency map
 
 
-    References:
-        Xiaodi Hou,Liquin Zhang, Saliency Detection: A spectral residue approach
-        CVPR 2007
-
+    Parameters
+    ----------
     Inputs
-        rgbimage:  rgb input image for computation of saliency
-        sigma(optional):  standard deviation of the smoothing filter for
-	   	  smoothed log magnitude of input rgbimage
-        display_result(optional):  set 1 if you want the result to be 
-	         		  displayed
-    Outputs:
+        rgbimage: M x N x 3 array (rgb color image)
+            rgb input image for computation of saliency
+        sigma: scalar ,optional
+           standard deviation of the smoothing filter for
+	   smoothed log magnitude of input rgbimage
+        display_result: bool value, optional
+	    set true if you want the result to be displayed
+    Returns
+    -------
+    Outputs: 2D array
         function return the saliency map of the rgbimage.
+	Number of rows and cols of output is same as input
 
+    References
+    ----------
+        Xiaodi Hou,Liquin Zhang,
+       	Saliency Detection: A spectral residue approach
+        IEEE Computer Visoin and Pattern Recognition(2007)
     Examples:
-        >>filename = 'image.jpg'
+        >>filename = 'image.jpg'(path of image)
         >>rgb_image = imread(filename);
-        >>sr_saliency(rgb_image,display_result = 1)
+        >>saliency_map = sr_saliency(rgb_image,display_result = True)
     """
     #handle cases where the input isn't an rgbimage
     try:
         gray_image = rgb2gray(rgb_image)
-    except:
+    except ValueError:
         gray_image = rgb_image
     gray_image = img_as_float(gray_image)
     # Spectral Residue Computation

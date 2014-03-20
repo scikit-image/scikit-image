@@ -7,15 +7,24 @@ def lab_saliency(rgb_image, size=5, display_result=False):
     """The function calculates lab color space based(Frequency-tuned) saliency
     of input rgb_image
 
-    References:
-        Achanta,S. Hemami,F. Estrada,S. Susstrunk 'Frequency-tuned Salient region detection
-        IEEE International Conference on Computer Vision and Pattern Recognition (CVPR 2009),
-    Inputs:
-        rgb_image: input rgb image whose saliency map has to be calculated
-        size: size of the gaussian filter kernel to smooth the rgb_image
-
-    Outputs:
+    Parameters
+    ----------
+    rgb_image: M x N x 3 array (assumed to be color image in rgb space) 
+        Input rgb image whose saliency map has to be calculated
+    size: scalar value, optional
+        size of the gaussian filter kernel to smooth the rgb_image
+    
+    Returns
+    -------
+    Outputs: 2D array(M x N)
         The functions returns the saliency map of Input Image
+	Number of rows and Cols. of input is same as input image
+    
+    References
+    ----------
+        Achanta,S. Hemami,F. Estrada,S. Susstrunk 
+	'Frequency-tuned Salient region detection'
+        IEEE International Conference on Computer Vision and Pattern Recognition (CVPR 2009),
     """
     #smooth the input rgb_image
     rgb_image = filters.gaussian_filter(rgb_image, size)
