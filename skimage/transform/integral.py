@@ -18,8 +18,8 @@ def integral_image(x):
 
     Returns
     -------
-    S : scalar value
-        summed area table.
+    S : ndarray
+        Integral image / summed area table.
 
     References
     ----------
@@ -27,66 +27,44 @@ def integral_image(x):
            ACM SIGGRAPH Computer Graphics, vol. 18, 1984, pp. 207-212.
 
     """
-    dim = len(x.shape)
-    S = x
-    for i in range(dim):
-	S = S.cumsum(i)
-    return S
+    return x.cumsum(1).cumsum(0)
 
 
-def integrate(ii, start, end):
+def integrate(ii, r0, c0, r1, c1):
     """Use an integral image to integrate over a given window.
 
     Parameters
     ----------
     ii : ndarray
         Integral image.
-    start : int or ndarray or list
-        Top-left corner of block to be summed.
-    end  : int or ndarray or list
-        Bottom-right corner of block to be summed.
+    r0, c0 : int or ndarray
+        Top-left corner(s) of block to be summed.
+    r1, c1 : int or ndarray
+        Bottom-right corner(s) of block to be summed.
 
     Returns
     -------
-    S : scalar 
-        Integral (sum) over the given window.
-    Notes
-    -----
-    Explination:
-        For a 2D array say(10 x 10) intergral from start=(2,3) to end=(5,6) is
-        #replace 'zero' elements from end -> permutation('00')
-        +Intgral_array[5,6]
-        #replace 'one' elements from end by 'start coorinate - 1' -> permutation('10','01')
-        -(Integral_array[5,(3 - 1)] + integral_array[(2 - 1), 6])
-        #replace 'two' elements from end by 'start coordinate - 1' -> permutation('11')
-        +(Integral_array[(2-1),(3-1)])
+    S : scalar or ndarray
+        Integral (sum) over the given window(s).
+
     """
-    #make sure start and end both are arrays	
-    start = np.asarray(start)
-    end = np.asarray(end)
+    if np.isscalar(r0):
+        r0, c0, r1, c1 = [np.asarray([x]) for x in (r0, c0, r1, c1)]
 
-    if(np.any(start < 0) or np.any(end < 0)):
-	raise IndexingError('cordinates must be non negative')
+    S = np.zeros(r0.shape, ii.dtype)
 
-    if(np.any((end - start) < 0)):
-	raise Error('end coordinates must be larger or equal to start')
+    S += ii[r1, c1]
 
-    dim = len(ii.shape)  #No. of dimensions of input nd-array 
-    S = 0
-    bit_perm = 2**dim  #bit_perm is the total number of elements in expression of S
-    width = len(bin(bit_perm-1)[2:])
+    good = (r0 >= 1) & (c0 >= 1)
+    S[good] += ii[r0[good] - 1, c0[good] - 1]
 
-    for i in range(bit_perm):  #for all permutations
-        #generate boolean array corresponding to permutation eg [True, False] for '10'		      
-        binary = bin(i)[2:].zfill(width)
-	bool_mask = [bit=='1' for bit in binary]
-        
-        sign = (-1)**sum(bool_mask)  #determine sign of permutation
-        bad = np.any(((start - 1)*bool_mask) < 0)
-        if(bad):
-	    continue
-	 
-        corner_point = (end * (np.invert(bool_mask))) + ((start - 1) * bool_mask)
-        
-        S += sign*ii[tuple(corner_point)]
+    good = r0 >= 1
+    S[good] -= ii[r0[good] - 1, c1[good]]
+
+    good = c0 >= 1
+    S[good] -= ii[r1[good], c0[good] - 1]
+
+    if S.size == 1:
+        return np.asscalar(S)
+
     return S
