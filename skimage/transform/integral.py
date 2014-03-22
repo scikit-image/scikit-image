@@ -30,7 +30,7 @@ def integral_image(x):
     dim = len(x.shape)
     S = x
     for i in range(dim):
-	S = S.cumsum(i)
+        S = S.cumsum(i)
     return S
 
 
