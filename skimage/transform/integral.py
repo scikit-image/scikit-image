@@ -66,10 +66,10 @@ def integrate(ii, start, end):
     end = np.asarray(end)
 
     if(np.any(start < 0) or np.any(end < 0)):
-	raise IndexingError('cordinates must be non negative')
+        raise IndexError('cordinates must be non negative')
 
     if(np.any((end - start) < 0)):
-	raise Error('end coordinates must be larger or equal to start')
+        raise IndexError('end coordinates must be greater or equal to start')
 
     dim = len(ii.shape)  #No. of dimensions of input nd-array 
     S = 0
@@ -79,12 +79,12 @@ def integrate(ii, start, end):
     for i in range(bit_perm):  #for all permutations
         #generate boolean array corresponding to permutation eg [True, False] for '10'		      
         binary = bin(i)[2:].zfill(width)
-	bool_mask = [bit=='1' for bit in binary]
+        bool_mask = [bit == '1' for bit in binary]
         
         sign = (-1)**sum(bool_mask)  #determine sign of permutation
         bad = np.any(((start - 1)*bool_mask) < 0)
         if(bad):
-	    continue
+            continue
 	 
         corner_point = (end * (np.invert(bool_mask))) + ((start - 1) * bool_mask)
         
