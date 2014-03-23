@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def integral_image(x):
+def integral_image(img):
     """Integral image / summed area table.
 
     The integral image contains the sum of all elements above and to the
@@ -13,13 +13,13 @@ def integral_image(x):
 
     Parameters
     ----------
-    x : ndarray
+    img : ndarray
         Input image.
 
     Returns
     -------
-    S : scalar value
-        summed area table.
+    S : ndarray
+        Integral image/summed area table of same shape as input image.
 
     References
     ----------
@@ -27,66 +27,87 @@ def integral_image(x):
            ACM SIGGRAPH Computer Graphics, vol. 18, 1984, pp. 207-212.
 
     """
-    dim = len(x.shape)
-    S = x
-    for i in range(dim):
-        S = S.cumsum(i)
+    S = img
+    for i in range(img.ndim):
+        S = S.cumsum(axis=i)
     return S
 
 
-def integrate(ii, start, end):
+def integrate(ii, *args):
     """Use an integral image to integrate over a given window.
 
     Parameters
     ----------
     ii : ndarray
         Integral image.
-    start : int or ndarray or list
-        Top-left corner of block to be summed.
-    end  : int or ndarray or list
-        Bottom-right corner of block to be summed.
+    args: lists of start and end coordinates
+        (see example for detailed explanation)
 
     Returns
     -------
-    S : scalar 
-        Integral (sum) over the given window.
+    S : scalar or ndarray
+        Integral (sum) over the given window(s).
     Notes
     -----
-    Explination:
-        For a 2D array say(10 x 10) intergral from start=(2,3) to end=(5,6) is
-        #replace 'zero' elements from end -> permutation('00')
-        +Intgral_array[5,6]
-        #replace 'one' elements from end by 'start coorinate - 1' -> permutation('10','01')
-        -(Integral_array[5,(3 - 1)] + integral_array[(2 - 1), 6])
-        #replace 'two' elements from end by 'start coordinate - 1' -> permutation('11')
-        +(Integral_array[(2-1),(3-1)])
+    Example
+    >>arr = np.asarray([[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1],[1,1,1,1,1,1]])
+    >>print arr
+    [[1 1 1 1 1 1]
+    [1 1 1 1 1 1]
+    [1 1 1 1 1 1]
+    [1 1 1 1 1 1]
+    [1 1 1 1 1 1]]
+    >>ii = integral_image(arr);
+    >>print integrate(ii,1,0,1,2) #sum from (1,0) -> (1,2)
+    [ 3.]    
+    >>print integrate(ii,3,3,4,5) #sum form (3,3) -> (4,5)
+    [ 6.]
+    >>print integrate(ii,[1,3],[0,3],[1,4],[2,5]) # sum from (1,0) -> (1,2) and (3,3) -> (4,5) 
+    [3. 6.]
     """
-    #make sure start and end both are arrays	
-    start = np.asarray(start)
-    end = np.asarray(end)
+    assert(len(args) == 2 * ii.ndim)
+    start = args[0]
+    end = args[ii.ndim]
+    for i in range(1, ii.ndim):
+        start = np.vstack((start, args[i]))
+        end = np.vstack((end, args[i + ii.ndim]))
+    
+    # each row of start/end is a starting/ending point
+    start = start.T
+    end = end.T
+    
+    rows = start.shape[0]
+    image_shape = ii.shape
+    total_shape = image_shape
+    # take care of negative coordinates
+    for i in range(1, rows):
+        total_shape = np.vstack((total_shape, image_shape))
 
-    if(np.any(start < 0) or np.any(end < 0)):
-        raise IndexError('cordinates must be non negative')
+    start_negatives  = start < 0
+    end_negatives = end < 0
+    start = (start + total_shape) * start_negatives + start * np.invert(start_negatives)
+    end = (end + total_shape) * end_negatives + end * np.invert(end_negatives)
+
 
     if(np.any((end - start) < 0)):
         raise IndexError('end coordinates must be greater or equal to start')
 
-    dim = len(ii.shape)  #No. of dimensions of input nd-array 
-    S = 0
-    bit_perm = 2**dim  #bit_perm is the total number of elements in expression of S
-    width = len(bin(bit_perm-1)[2:])
 
-    for i in range(bit_perm):  #for all permutations
-        #generate boolean array corresponding to permutation eg [True, False] for '10'		      
+    S = np.zeros(rows)
+    bit_perm = 2**(ii.ndim)  # bit_perm is the total number of elements in expression of S
+    width = len(bin(bit_perm - 1)[2:])
+
+    for i in range(bit_perm):  # for all permutations
+        # generate boolean array corresponding to permutation eg [True, False] for '10'		      
         binary = bin(i)[2:].zfill(width)
         bool_mask = [bit == '1' for bit in binary]
         
-        sign = (-1)**sum(bool_mask)  #determine sign of permutation
-        bad = np.any(((start - 1)*bool_mask) < 0)
-        if(bad):
-            continue
-
-        corner_point = (end * (np.invert(bool_mask))) + ((start - 1) * bool_mask)
+        sign = (-1)**sum(bool_mask)  # determine sign of permutation
         
-        S += sign*ii[tuple(corner_point)]
+        bad = [np.any(((start[r] - 1) * bool_mask) < 0) for r in range(rows)] # find out bad start rows
+
+        corner_points = (end * (np.invert(bool_mask))) + ((start - 1) * bool_mask) # find corner for each row
+        
+        S += [sign * ii[tuple(corner_points[r])] if(bad[r] == False) else 0 for r in range(rows)] # add only good rows
     return S
+
