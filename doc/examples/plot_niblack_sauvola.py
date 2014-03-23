@@ -7,7 +7,8 @@ are useful for images where the background is not uniform. Instead of
 calculating a single global threshold for the entire image, several
 thresholds are calculated for every pixel by using specific formulas
 that take into account the mean and standard deviation of the local
-neighborhood (defined by a window w x w centered around the pixel).
+neighborhood defined by a rectangular window with size `w` times `w`
+(e.g. 5x5 size for `w`=5) centered around the pixel.
 
 Here, we binarize an image using `threshold_niblack` and
 `threshold_sauvola` and compare it to a common global thresholding

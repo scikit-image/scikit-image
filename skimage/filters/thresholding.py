@@ -378,16 +378,16 @@ def threshold_li(image):
 
 def _mean_std(image, w):
     """Return local mean and standard deviation of each pixel using a
-    neighborhood defined by window w x w. The algorithm uses Integral
-    images to speedup computation. This is used by threshold_niblack
-    and threshold_sauvola.
+    neighborhood defined by a rectangular window with size w times w.
+    The algorithm uses integral images to speedup computation. This is
+    used by threshold_niblack and threshold_sauvola.
 
     Parameters
     ----------
     image : (N, M) ndarray
         Input image.
     w : int
-        Odd window size w x w (e.g. 3, 5, 7, ..., 21, ...).
+        Odd window size (e.g. 3, 5, 7, ..., 21, ...).
 
     Returns
     -------
@@ -440,16 +440,16 @@ def threshold_niblack(image, w=15, k=0.2, offset=0):
     T = m(x,y) - k * s(x,y)
 
     where m(x,y) and s(x,y) are the mean and standard deviation of
-    pixel (x,y) neighborhood defined by window w x w centered around
-    the pixel. k is a configurable parameter that weights the effect
-    of standar deviation.
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k is a configurable parameter
+    that weights the effect of standar deviation.
 
     Parameters
     ----------
     image: (N, M) ndarray
         Input image.
     w : int, optional
-        Odd size of pixel neighborhood window w x w (e.g. 3, 5, 7,
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7,
         ..., 21, ...). Default: 15.
     k : float, optional
         Value of parameter k in threshold formula. Default: 0.2.
@@ -490,10 +490,10 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
     T = m(x,y) * (1 + k * ((s(x,y) / R) - 1))
 
     where m(x,y) and s(x,y) are the mean and standard deviation of
-    pixel (x,y) neighborhood defined by window w x w centered around
-    the pixel. k is a configurable parameter that weights the effect
-    of standar deviation. R is the maximum standard deviation of
-    a greyscale image (R = 128).
+    pixel (x,y) neighborhood defined by a rectangular window with size w
+    times w centered around the pixel. k is a configurable parameter
+    that weights the effect of standar deviation.
+    R is the maximum standard deviation of a greyscale image (R = 128).
 
     In Wolf's variation the threshold T is given by:
 
@@ -523,7 +523,7 @@ def threshold_sauvola(image, method='sauvola', w=15, k=0.2, r=128., offset=0,
 
         Default: 'sauvola'.
     w : int, optional
-        Odd size of pixel neighborhood window w x w (e.g. 3, 5, 7,
+        Odd size of pixel neighborhood window (e.g. 3, 5, 7,
         ..., 21, ...). Default: 15.
     k : float, optional
         Value of parameter k in threshold formula. Default: 0.2.
