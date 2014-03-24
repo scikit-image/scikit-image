@@ -30,9 +30,9 @@ from skimage.data import data_dir
 from skimage.util import img_as_ubyte
 from skimage import io
 
-plt.gray()
 phantom = img_as_ubyte(io.imread(data_dir+'/phantom.png', as_grey=True))
-io.imshow(phantom)
+fig, ax = plt.subplots()
+ax.imshow(phantom, cmap=plt.cm.gray)
 
 """
 .. image:: PLOT2RST.current_figure
@@ -43,10 +43,10 @@ Let's also define a convenience function for plotting comparisons:
 def plot_comparison(original, filtered, filter_name):
 
     fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
-    ax1.imshow(original)
+    ax1.imshow(original, cmap=plt.cm.gray)
     ax1.set_title('original')
     ax1.axis('off')
-    ax2.imshow(filtered)
+    ax2.imshow(filtered, cmap=plt.cm.gray)
     ax2.set_title(filter_name)
     ax2.axis('off')
 
