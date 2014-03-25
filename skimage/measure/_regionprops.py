@@ -23,14 +23,14 @@ PROPS = {
     'CentralMoments': 'moments_central',
     'Centroid': 'centroid',
     'ConvexArea': 'convex_area',
-#    'ConvexHull',
+    #    'ConvexHull',
     'ConvexImage': 'convex_image',
     'Coordinates': 'coords',
     'Eccentricity': 'eccentricity',
     'EquivDiameter': 'equivalent_diameter',
     'EulerNumber': 'euler_number',
     'Extent': 'extent',
-#    'Extrema',
+    #    'Extrema',
     'FilledArea': 'filled_area',
     'FilledImage': 'filled_image',
     'HuMoments': 'moments_hu',
@@ -45,10 +45,10 @@ PROPS = {
     'NormalizedMoments': 'moments_normalized',
     'Orientation': 'orientation',
     'Perimeter': 'perimeter',
-#    'PixelIdxList',
-#    'PixelList',
+    #    'PixelIdxList',
+    #    'PixelList',
     'Solidity': 'solidity',
-#    'SubarrayIdx'
+    #    'SubarrayIdx'
     'WeightedCentralMoments': 'weighted_moments_central',
     'WeightedCentroid': 'weighted_centroid',
     'WeightedHuMoments': 'weighted_moments_hu',
@@ -56,8 +56,11 @@ PROPS = {
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
 
+PROP_VALS = PROPS.values()
+
 
 class _cached_property(object):
+
     """Decorator to use a function as a cached property.
 
     The function is only called the first time and each successive call returns
@@ -304,7 +307,6 @@ class _RegionProperties(MutableMapping):
     def weighted_moments_normalized(self):
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
-
     # Preserve dictionary interface
     def __delitem__(self, key):
         pass
@@ -326,6 +328,11 @@ class _RegionProperties(MutableMapping):
             warnings.warn('Usage of deprecated property name.',
                           category=DeprecationWarning)
             return getattr(self, PROPS[key])
+
+    def __eq__(self, other):
+        attr1 = np.array([getattr(self, k, None)for k in PROP_VALS])
+        attr2 = np.array([getattr(other, k, None)for k in PROP_VALS])
+        return np.all(attr1 == attr2)
 
 
 def regionprops(label_image, properties=None,
@@ -552,9 +559,8 @@ def perimeter(image, neighbourhood=4):
     perimeter_weights[[21, 33]] = sqrt(2)
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
-
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
-                                                               [ 2, 1,  2],
+                                                               [2, 1, 2],
                                                                [10, 2, 10]]),
                                        mode='constant', cval=0)
 
