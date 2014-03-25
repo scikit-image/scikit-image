@@ -371,6 +371,11 @@ def test_invalid():
     assert_raises(AttributeError, get_intensity_image)
 
 
+def test_equals():
+    r1 = regionprops(SAMPLE)[0]
+    r2 = regionprops(SAMPLE)[0]
+    assert r1 == r2
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
