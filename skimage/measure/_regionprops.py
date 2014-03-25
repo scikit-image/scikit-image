@@ -569,6 +569,7 @@ def perimeter(image, neighbourhood=4):
     perimeter_weights[[21, 33]] = sqrt(2)
     perimeter_weights[[13, 23]] = (1 + sqrt(2)) / 2
 
+
     perimeter_image = ndimage.convolve(border_image, np.array([[10, 2, 10],
                                                                [ 2, 1,  2],
                                                                [10, 2, 10]]),
