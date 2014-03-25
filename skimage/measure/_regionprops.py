@@ -306,6 +306,7 @@ class _RegionProperties(MutableMapping):
     def weighted_moments_normalized(self):
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
+
     # Preserve dictionary interface
     def __delitem__(self, key):
         pass
