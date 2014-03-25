@@ -60,7 +60,6 @@ PROP_VALS = PROPS.values()
 
 
 class _cached_property(object):
-
     """Decorator to use a function as a cached property.
 
     The function is only called the first time and each successive call returns
