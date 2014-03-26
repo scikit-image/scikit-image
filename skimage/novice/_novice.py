@@ -254,7 +254,7 @@ class Picture(object):
                 path = os.path.abspath(path)
             self._path = path
             with file_or_url_context(path) as context:
-                self.array = io.imread(context)
+                self.array = img_as_ubyte(io.imread(context))
                 self._format = imghdr.what(context)
         elif array is not None:
             self.array = array
