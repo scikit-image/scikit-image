@@ -46,7 +46,7 @@ ax.imshow(image_label_overlay)
 for region in regionprops(label_image):
 
     # skip small images
-    if region['Area'] < 100:
+    if region.area < 100:
         continue
 
     # draw rectangle around segmented coins
