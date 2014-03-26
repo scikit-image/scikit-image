@@ -50,7 +50,7 @@ for region in regionprops(label_image):
         continue
 
     # draw rectangle around segmented coins
-    minr, minc, maxr, maxc = region['BoundingBox']
+    minr, minc, maxr, maxc = region.bbox
     rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
                               fill=False, edgecolor='red', linewidth=2)
     ax.add_patch(rect)
