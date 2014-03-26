@@ -46,11 +46,11 @@ ax.imshow(image_label_overlay)
 for region in regionprops(label_image):
 
     # skip small images
-    if region['Area'] < 100:
+    if region.area < 100:
         continue
 
     # draw rectangle around segmented coins
-    minr, minc, maxr, maxc = region['BoundingBox']
+    minr, minc, maxr, maxc = region.bbox
     rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
                               fill=False, edgecolor='red', linewidth=2)
     ax.add_patch(rect)
