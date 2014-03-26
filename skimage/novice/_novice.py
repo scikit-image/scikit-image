@@ -1,6 +1,7 @@
 import os
 import imghdr
 from collections import namedtuple
+from io import BytesIO
 
 import numpy as np
 from skimage import io
@@ -10,6 +11,9 @@ from skimage.color import color_dict
 from skimage.io.util import file_or_url_context, is_url
 
 import six
+from six.moves.urllib_parse import urlparse
+from six.moves.urllib import request
+urlopen = request.urlopen
 
 # Convert colors from `skimage.color` to uint8 and allow access through
 # dict or a named tuple.
@@ -72,15 +76,18 @@ class Pixel(object):
         Vertical coordinate of this pixel (bottom = 0).
     rgb : tuple
         RGB tuple with red, green, and blue components (0-255)
+    alpha : int
+        Transparency component (0-255), 255 (opaque) by default
 
     """
-    def __init__(self, pic, array, x, y, rgb):
+    def __init__(self, pic, array, x, y, rgb, alpha=255):
         self._picture = pic
         self._x = x
         self._y = y
         self._red = self._validate(rgb[0])
         self._green = self._validate(rgb[1])
         self._blue = self._validate(rgb[2])
+        self._alpha = self._validate(alpha)
 
     @property
     def x(self):
@@ -123,13 +130,41 @@ class Pixel(object):
         self._setpixel()
 
     @property
+    def alpha(self):
+        """The transparency component of the pixel (0-255)."""
+        return self._alpha
+
+    @alpha.setter
+    def alpha(self, value):
+        self._alpha = self._validate(value)
+        self._setpixel()
+
+    @property
     def rgb(self):
         """The RGB color components of the pixel (3 values 0-255)."""
         return (self.red, self.green, self.blue)
 
     @rgb.setter
     def rgb(self, value):
-        self._red, self._green, self._blue = (self._validate(v) for v in value)
+        if len(value) == 4:
+            self.rgba = value
+        else:
+            self._red, self._green, self._blue \
+                = (self._validate(v) for v in value)
+            self._alpha = 255
+            self._setpixel()
+
+    @property
+    def rgba(self):
+        """The RGB color and transparency components of the pixel
+        (4 values 0-255).
+        """
+        return (self.red, self.green, self.blue, self.alpha)
+
+    @rgba.setter
+    def rgba(self, value):
+        self._red, self._green, self._blue, self._alpha \
+            = (self._validate(v) for v in value)
         self._setpixel()
 
     def _validate(self, value):
@@ -145,16 +180,17 @@ class Pixel(object):
         return value
 
     def _setpixel(self):
-        self._picture.xy_array[self._x, self._y] = self.rgb
+        # RGB + alpha
+        self._picture.xy_array[self._x, self._y] = self.rgba
         self._picture._array_modified()
 
     def __eq__(self, other):
         if isinstance(other, Pixel):
-            return self.rgb == other.rgb
+            return self.rgba == other.rgba
 
     def __repr__(self):
-        args = self.red, self.green, self.blue
-        return "Pixel(red={0}, green={1}, blue={2})".format(*args)
+        args = self.red, self.green, self.blue, self.alpha
+        return "Pixel(red={0}, green={1}, blue={2}, alpha={3})".format(*args)
 
 
 class Picture(object):
@@ -165,9 +201,9 @@ class Picture(object):
     path : str
         Path to an image file to load / URL of an image
     array : array
-        Raw RGB image data [0-255], with origin at top-left.
+        Raw RGB or RGBA image data [0-255], with origin at top-left.
     xy_array : array
-        Raw RGB image data [0-255], with origin at bottom-left.
+        Raw RGB or RGBA image data [0-255], with origin at bottom-left.
 
     Examples
     --------
@@ -218,12 +254,16 @@ class Picture(object):
                 path = os.path.abspath(path)
             self._path = path
             with file_or_url_context(path) as context:
-                self.array = io.imread(context)
+                self.array = img_as_ubyte(io.imread(context))
                 self._format = imghdr.what(context)
         elif array is not None:
             self.array = array
         elif xy_array is not None:
             self.xy_array = xy_array
+
+        # Force RGBA internally (use max alpha)
+        if self.array.shape[-1] == 3:
+            self.array = np.insert(self.array, 3, values=255, axis=2)
 
     @staticmethod
     def from_size(size, color='black'):
@@ -234,13 +274,18 @@ class Picture(object):
         size : tuple
             Width and height of the picture in pixels.
         color : tuple or str
-            RGB tuple with the fill color for the picture [0-255] or a valid
-            key in `color_dict`.
+            RGB or RGBA tuple with the fill color for the picture [0-255] or
+            a valid key in `color_dict`.
         """
         if isinstance(color, six.string_types):
             color = color_dict[color]
-        rgb_size = tuple(size) + (3,)
+        rgb_size = tuple(size) + (len(color),)
         array = np.ones(rgb_size, dtype=np.uint8) * color
+
+        # Force RGBA internally (use max alpha)
+        if array.shape[-1] == 3:
+            array = np.insert(array, 3, values=255, axis=2)
+
         return Picture(array=array)
 
     @property
@@ -385,12 +430,30 @@ class Picture(object):
         self._set_channel(2, value)
 
     @property
+    def alpha(self):
+        """The transparency component of the pixel (0-255)."""
+        return self._get_channel(3).ravel()
+
+    @alpha.setter
+    def alpha(self, value):
+        self._set_channel(3, value)
+
+    @property
     def rgb(self):
         """The RGB color components of the pixel (3 values 0-255)."""
-        return self.xy_array
+        return self.xy_array[:, :, :3]
 
     @rgb.setter
     def rgb(self, value):
+        self.xy_array[:, :, :3] = value
+
+    @property
+    def rgba(self):
+        """The RGBA color components of the pixel (4 values 0-255)."""
+        return self.xy_array
+
+    @rgba.setter
+    def rgba(self, value):
         self.xy_array[:] = value
 
     def __iter__(self):
