@@ -79,7 +79,7 @@ print("Quickshift number of segments: %d" % len(np.unique(segments_quick)))
 
 fig, ax = plt.subplots(1, 3)
 fig.set_size_inches(8, 3, forward=True)
-plt.subplots_adjust(0.05, 0.05, 0.95, 0.95, 0.05, 0.05)
+fig.subplots_adjust(0.05, 0.05, 0.95, 0.95, 0.05, 0.05)
 
 ax[0].imshow(mark_boundaries(img, segments_fz))
 ax[0].set_title("Felzenszwalbs's method")

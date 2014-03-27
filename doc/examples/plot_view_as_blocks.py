@@ -60,5 +60,5 @@ ax2.imshow(max_view, cmap=cm.Greys_r)
 ax3.set_title("Block view with\n local median pooling")
 ax3.imshow(median_view, cmap=cm.Greys_r)
 
-plt.subplots_adjust(hspace=0.4, wspace=0.4)
+fig.subplots_adjust(hspace=0.4, wspace=0.4)
 plt.show()

@@ -40,11 +40,9 @@ image[chull] += 1
 # [ 0.  0.  0.  0.  0.  0.  0.  0.  0.]]
 
 
-fig = plt.subplots(figsize=(10, 6))
-plt.subplot(1, 2, 1)
-plt.title('Original picture')
-plt.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
-plt.subplot(1, 2, 2)
-plt.title('Transformed picture')
-plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+ax1.set_title('Original picture')
+ax1.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
+ax2.set_title('Transformed picture')
+ax2.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
 plt.show()
