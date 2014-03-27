@@ -37,7 +37,7 @@ ax2.set_title('Maximum filter')
 
 ax3.imshow(im, cmap=plt.cm.gray)
 ax3.autoscale(False)
-ax3.plot([p[1] for p in coordinates], [p[0] for p in coordinates], 'r.')
+ax3.plot(coordinates[:, 1], coordinates[:, 0], 'r.')
 ax3.axis('off')
 ax3.set_title('Peak local max')
 
