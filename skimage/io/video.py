@@ -104,8 +104,9 @@ class CvVideo(object):
         output : int
             Time length [ms].
         """
-        return cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FPS) * \
-            cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_COUNT)
+        return 1000 * \
+            cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_COUNT) / \
+            cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FPS)
 
 
 class GstVideo(object):
