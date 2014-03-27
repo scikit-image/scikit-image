@@ -333,13 +333,11 @@ class _RegionProperties(MutableMapping):
         if not isinstance(other, _RegionProperties):
             return False
 
-        attr1 = np.array([getattr(self, k, None)for k in PROP_VALS])
-        attr2 = np.array([getattr(other, k, None)for k in PROP_VALS])
-
-        for x, y in zip(attr1, attr2):
+        for key in PROP_VALS:
             try:
                 #so that NaNs are equal
-                np.testing.assert_equal(x, y)
+                np.testing.assert_equal(
+                    getattr(self, key, None), getattr(other, key, None))
             except AssertionError:
                 return False
 

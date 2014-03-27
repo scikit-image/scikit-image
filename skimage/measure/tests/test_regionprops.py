@@ -372,9 +372,20 @@ def test_invalid():
 
 
 def test_equals():
-    r1 = regionprops(SAMPLE)[0]
-    r2 = regionprops(SAMPLE)[0]
+    arr = np.zeros((100, 100), dtype=np.int)
+    arr[0:25, 0:25] = 1
+    arr[50:99, 50:99] = 2
+
+    regions = regionprops(arr)
+    r1 = regions[0]
+
+    regions = regionprops(arr)
+    r2 = regions[0]
+    r3 = regions[1]
+
     assert r1 == r2
+    assert r1 != r3
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
