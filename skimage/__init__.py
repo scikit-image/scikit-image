@@ -14,31 +14,34 @@ color
 data
     Test images and example data.
 draw
-    Image drawing primitives (lines, text, etc.).
+    Drawing primitives (lines, text, etc.) that operate on NumPy arrays.
 exposure
     Image intensity adjustment (e.g., histogram equalization).
 feature
-    Feature detection (e.g. texture analysis, corners, etc.).
+    Feature detection and extraction (e.g., texture analysis, corners, etc.).
 filter
-    Sharpening, edge finding, denoising, etc.
+    Sharpening, edge finding, rank filters, thresholding, etc.
 graph
-    Graph-theoretic operations, e.g. dynamic programming (shortest paths).
+    Graph-theoretic operations, e.g., dynamic programming (shortest paths).
 io
     Reading, saving, and displaying images and video.
 measure
     Measurement of image properties, e.g., similarity and contours.
 morphology
-    Morphological operations, e.g. opening or skeletonization.
+    Morphological operations, e.g., opening or skeletonization.
+novice
+    Simplified interface for teaching purposes.
 restoration
-    Restoration algorithms.
+    Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
-    Splitting an image into self-similar regions.
+    Partitioning an image into multiple regions.
 transform
-    Geometric and other transforms, e.g. rotation or the Radon transform.
+    Geometric and other transforms, e.g., rotation or the Radon transform.
 util
     Generic utilities.
 viewer
-    Interactive image viewer and plugin framework.
+    A simple graphical user interface for visualizing results and exploring
+    parameters.
 
 Utility Functions
 -----------------
