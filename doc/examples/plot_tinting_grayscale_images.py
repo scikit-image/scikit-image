@@ -12,9 +12,9 @@ In 2D, color images are often represented in RGB---3 layers of 2D arrays, where
 the 3 layers represent (R)ed, (G)reen and (B)lue channels of the image. The
 simplest way of getting a tinted image is to set each RGB channel to the
 grayscale image scaled by a different multiplier for each channel. For example,
-if I want a red image, I can just multiply my green and blue channels by 0 so
-that only the red channel appears. Similarly, I can zero-out the blue channel,
-leaving only the red and green channels, which combine to form yellow.
+multiplying the green and blue channels by 0 leaves only the red channel and
+produces a bright red image. Similarly, zeroing-out the blue channel leaves
+only the red and green channels, which combine to form yellow.
 """
 
 import matplotlib.pyplot as plt
@@ -28,7 +28,7 @@ image = color.gray2rgb(grayscale_image)
 red_multiplier = [1, 0, 0]
 yellow_multiplier = [1, 1, 0]
 
-fig, (ax1, ax2) = plt.subplots(ncols=2)
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
 ax1.imshow(red_multiplier * image)
 ax2.imshow(yellow_multiplier * image)
 
@@ -80,7 +80,7 @@ Now, lets create a little utility function to take an RGB image and:
 def colorize(image, hue, saturation=1):
     """ Add color of the given hue to an RGB image.
 
-    By default, set the saturation to 1 so that the colors to pop!
+    By default, set the saturation to 1 so that the colors pop!
     """
     hsv = color.rgb2hsv(image)
     hsv[:, :, 1] = saturation
@@ -116,23 +116,28 @@ thresholding. In practice, you might want to define a region for tinting based
 on segmentation results or blob detection methods.
 """
 
+from skimage.filter import rank
+
 # Square regions defined as slices over the first two dimensions.
 top_left = (slice(100),) * 2
 bottom_right = (slice(-100, None),) * 2
 
-image[top_left] = colorize(image[top_left], 0)
-image[bottom_right] = colorize(image[bottom_right], 0.5)
+sliced_image = image.copy()
+sliced_image[top_left] = colorize(image[top_left], 0.82, saturation=0.5)
+sliced_image[bottom_right] = colorize(image[bottom_right], 0.5, saturation=0.5)
 
-# Create a mask selecting the brightest pixels and scale the RGB values.
+# Create a mask selecting regions with interesting texture.
+noisy = rank.entropy(grayscale_image, np.ones((9, 9)))
+textured_regions = noisy > 4
 # Note that using `colorize` here is a bit more difficult, since `rgb2hsv`
 # expects an RGB image (height x width x channel), but fancy-indexing returns
 # a set of RGB pixels (# pixels x channel).
-bright_pixels = image[:, :, 0] > 0.75
-image[bright_pixels, :] *= yellow_multiplier
+masked_image = image.copy()
+masked_image[textured_regions, :] *= red_multiplier
 
-fig, ax = plt.subplots()
-ax.imshow(image)
-ax.set_axis_off()
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(8, 4))
+ax1.imshow(sliced_image)
+ax2.imshow(masked_image)
 
 plt.show()
 
