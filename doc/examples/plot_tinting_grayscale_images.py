@@ -39,7 +39,7 @@ In many cases, dealing with RGB values may not be ideal. Because of that, there
 are many other `color spaces`_ in which you can represent a color image. One
 popular color space is called HSV_, which represents hue (~the color),
 saturation (~colorfulness), and value (~brightness). For example, a color
-(hue) might be green, but it's saturation is how intense that green is---where
+(hue) might be green, but its saturation is how intense that green is---where
 olive is on the low end and neon on the high end.
 
 In some implementations, the hue in HSV goes from 0 to 360, since hues wrap
@@ -69,7 +69,7 @@ Notice how the colors at the far left and far right are the same. That reflects
 the fact that the hues wrap around like the color wheel (see HSV_ for more
 info).
 
-Now, lets create a little utility function to take an RGB image and:
+Now, let's create a little utility function to take an RGB image and:
 
 1. Transform the RGB image to HSV
 2. Set the hue and saturation
