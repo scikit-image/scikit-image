@@ -61,13 +61,13 @@ def integrate(ii, begining, ending, *args):
     >>> arr = np.ones((5, 6), dtype=np.float)
     >>> ii = integral_image(arr)
     >>> print(integrate(ii,(1, 0), (1, 2)))  # sum from (1,0) -> (1,2)
-    [ 3.]    
+    [ 3.]
     >>> print(integrate(ii,(3, 3), (4, 5)))  # sum form (3,3) -> (4,5)
     [ 6.]
     >>> print(integrate(ii,([1, 3], [0, 3]), ([1, 4], [2, 5])))  # sum from (1,0) -> (1,2) and (3,3) -> (4,5) 
-    [3.  6.]
+    [ 3.  6.]
     >>> print(integrate(ii, [1, 3], [0, 3], [1, 4], [2, 5]))  # deprecated usage
-    [3.  6.]
+    [ 3.  6.]
     """
     # handle new input format
     if(len(args) == 0):
