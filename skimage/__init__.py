@@ -16,13 +16,13 @@ data
 draw
     Drawing primitives (lines, text, etc.) that operate on NumPy arrays.
 exposure
-    Image intensity adjustment (e.g., histogram equalization).
+    Image intensity adjustment, e.g., histogram equalization, etc.
 feature
-    Feature detection and extraction (e.g., texture analysis, corners, etc.).
+    Feature detection and extraction, e.g., texture analysis corners, etc.
 filter
     Sharpening, edge finding, rank filters, thresholding, etc.
 graph
-    Graph-theoretic operations, e.g., dynamic programming (shortest paths).
+    Graph-theoretic operations, e.g., shortest paths.
 io
     Reading, saving, and displaying images and video.
 measure
