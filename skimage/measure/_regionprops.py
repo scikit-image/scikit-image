@@ -56,6 +56,8 @@ PROPS = {
     'WeightedNormalizedMoments': 'weighted_moments_normalized'
 }
 
+PROP_VALS = PROPS.values()
+
 
 class _cached_property(object):
     """Decorator to use a function as a cached property.
@@ -326,6 +328,20 @@ class _RegionProperties(MutableMapping):
             warnings.warn('Usage of deprecated property name.',
                           category=DeprecationWarning)
             return getattr(self, PROPS[key])
+
+    def __eq__(self, other):
+        if not isinstance(other, _RegionProperties):
+            return False
+
+        for key in PROP_VALS:
+            try:
+                #so that NaNs are equal
+                np.testing.assert_equal(getattr(self, key, None),
+                                        getattr(other, key, None))
+            except AssertionError:
+                return False
+
+        return True
 
 
 def regionprops(label_image, properties=None,

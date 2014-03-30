@@ -371,6 +371,22 @@ def test_invalid():
     assert_raises(AttributeError, get_intensity_image)
 
 
+def test_equals():
+    arr = np.zeros((100, 100), dtype=np.int)
+    arr[0:25, 0:25] = 1
+    arr[50:99, 50:99] = 2
+
+    regions = regionprops(arr)
+    r1 = regions[0]
+
+    regions = regionprops(arr)
+    r2 = regions[0]
+    r3 = regions[1]
+
+    assert_equal(r1 == r2, True, "Same regionprops are not equal")
+    assert_equal(r1 != r3, True, "Different regionprops are equal")
+
+
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
     run_module_suite()
