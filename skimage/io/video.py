@@ -20,6 +20,7 @@ except ImportError:
     opencv_available = False
 
 
+
 class CvVideo(object):
     """
     Opencv-based video loader.
