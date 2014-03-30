@@ -86,8 +86,8 @@ def integrate(ii, start, end, *args):
         if(not(isinstance(start, int))):
             rows = len(start)
         args = (start , end) + args
-        start = np.array(args[:len(args)/2]).T
-        end = np.array(args[len(args)/2:]).T
+        start = np.array(args[:int(len(args)/2)]).T
+        end = np.array(args[int(len(args)/2):]).T
 
 
     total_shape = ii.shape
