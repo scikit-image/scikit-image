@@ -336,8 +336,8 @@ class _RegionProperties(MutableMapping):
         for key in PROP_VALS:
             try:
                 #so that NaNs are equal
-                np.testing.assert_equal(
-                    getattr(self, key, None), getattr(other, key, None))
+                np.testing.assert_equal(getattr(self, key, None),
+                                        getattr(other, key, None))
             except AssertionError:
                 return False
 

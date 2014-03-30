@@ -383,8 +383,8 @@ def test_equals():
     r2 = regions[0]
     r3 = regions[1]
 
-    assert r1 == r2
-    assert r1 != r3
+    assert_equal(r1 == r2, True, "Same regionprops are not equal")
+    assert_equal(r1 != r3, True, "Different regionprops are equal")
 
 
 if __name__ == "__main__":
