@@ -184,8 +184,13 @@ class TestLBP():
 
     def test_var(self):
         # Test idea: mean of variance is estimate of overall variance.
-        target_std = 0.3
+
+        # Fix random seed for test stability.
+        np.random.seed(13141516)
+
+        # Create random image with known variance.
         image = np.random.random((500, 500))
+        target_std = 0.3
         image = image / image.std() * target_std
 
         # Use P=4 to avoid interpolation effects
