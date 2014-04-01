@@ -203,8 +203,7 @@ class TestLBP():
         # The LBP variance is biased (ddof=0), correct for that.
         expected = target_std**2 * (P-1)/P
 
-        np.testing.assert_almost_equal(lbp[10:-10,10:-10].mean(),
-                                       expected, 4)
+        np.testing.assert_almost_equal(lbp.mean(), expected, 4)
 
     def test_nri_uniform(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'nri_uniform')
