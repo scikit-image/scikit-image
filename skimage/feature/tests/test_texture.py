@@ -183,21 +183,23 @@ class TestLBP():
         np.testing.assert_array_equal(lbp, ref)
 
     def test_var(self):
-        lbp = local_binary_pattern(self.image, 8, 1, 'var')
-        ref = np.array([[0.        , 0.00072786, 0.        , 0.00115377,
-                         0.00032355, 0.00224467],
-                        [0.00051758, 0.        , 0.0026383 , 0.00163246,
-                         0.00027414, 0.00041124],
-                        [0.00192834, 0.00130368, 0.00042095, 0.00171894,
-                         0.        , 0.00063726],
-                        [0.00023048, 0.00019464 , 0.00082291, 0.00225386,
-                         0.00076696, 0.        ],
-                        [0.00097253, 0.00013236, 0.0009134 , 0.0014467 ,
-                         0.        , 0.00082472],
-                        [0.00024701, 0.0012277 , 0.        , 0.00109869,
-                         0.00015445, 0.00035881]])
-        np.testing.assert_array_almost_equal(lbp, ref)
+        # Test idea: mean of variance is estimate of overall variance.
+        target_std = 0.3
+        image = np.random.random((500, 500))
+        image = image / image.std() * target_std
 
+        # Use P=4 to avoid interpolation effects
+        P, R = 4, 1
+        lbp = local_binary_pattern(image, P, R, 'var')
+
+        # Take central part to avoid border effect.
+        lbp = lbp[5:-5,5:-5]
+
+        # The LBP variance is biased (ddof=0), correct for that.
+        expected = target_std**2 * (P-1)/P
+
+        np.testing.assert_almost_equal(lbp[10:-10,10:-10].mean(),
+                                       expected, 4)
 
     def test_nri_uniform(self):
         lbp = local_binary_pattern(self.image, 8, 1, 'nri_uniform')
