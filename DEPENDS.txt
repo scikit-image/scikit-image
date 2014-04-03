@@ -46,6 +46,10 @@ functionality is only available with the following installed:
    The ``pyamg`` module is used for the fast `cg_mg` mode of random
    walker segmentation.
 
+* `Pillow <https://pypi.python.org/pypi/Pillow>`__
+   (or <`PIL http://www.pythonware.com/products/pil/>`__)
+   The ``Pillow`` (or equivalently ``PIL``) is used for Input/Output.
+
 Testing requirements
 --------------------
 * `Nose <https://nose.readthedocs.org/en/latest/>`__
