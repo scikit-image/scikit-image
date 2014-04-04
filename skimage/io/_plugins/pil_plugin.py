@@ -6,7 +6,9 @@ try:
     from PIL import Image
 except ImportError:
     raise ImportError("The Python Image Library could not be found. "
-                      "Please refer to http://pypi.python.org/pypi/PIL/ "
+                      "Please refer to "
+                      "https://pypi.python.org/pypi/Pillow/ (or "
+                      "http://pypi.python.org/pypi/PIL/) "
                       "for further instructions.")
 
 from skimage.util import img_as_ubyte
