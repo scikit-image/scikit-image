@@ -48,7 +48,7 @@ functionality is only available with the following installed:
 
 * `Pillow <https://pypi.python.org/pypi/Pillow>`__
    (or <`PIL http://www.pythonware.com/products/pil/>`__)
-   The ``Pillow`` (or equivalently ``PIL``) is used for Input/Output.
+   The ``Pillow`` library (or equivalently ``PIL``) is used for Input/Output.
 
 Testing requirements
 --------------------
