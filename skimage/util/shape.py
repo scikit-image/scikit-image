@@ -2,6 +2,7 @@ __all__ = ['view_as_blocks', 'view_as_windows']
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
+from warnings import warn
 
 
 def view_as_blocks(arr_in, block_shape):
@@ -12,8 +13,7 @@ def view_as_blocks(arr_in, block_shape):
     Parameters
     ----------
     arr_in : ndarray
-        Contiguous N-d input array.
-
+        N-d input array.
     block_shape : tuple
         The shape of the block. Each dimension must divide evenly into the
         corresponding dimensions of `arr_in`.
@@ -21,7 +21,8 @@ def view_as_blocks(arr_in, block_shape):
     Returns
     -------
     arr_out : ndarray
-        Block view of the input array.
+        Block view of the input array.  If `arr_in` is non-contiguous, a copy
+        is made.
 
     Examples
     --------
@@ -86,8 +87,10 @@ def view_as_blocks(arr_in, block_shape):
         raise ValueError("'block_shape' is not compatible with 'arr_in'")
 
     # -- restride the array to build the block view
+
     if not arr_in.flags.contiguous:
-        raise ValueError("Cannot provide views on a non-contiguous input array")
+        warn(RuntimeWarning("Cannot provide views on a non-contiguous input "
+                            "array without copying."))
 
     arr_in = np.ascontiguousarray(arr_in)
 
@@ -107,9 +110,9 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     Parameters
     ----------
-    arr_in: ndarray
+    arr_in : ndarray
         Contiguous N-d input array.
-    window_shape: tuple
+    window_shape : tuple
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
     step : int, optional
@@ -119,7 +122,7 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     Returns
     -------
-    arr_out: ndarray
+    arr_out : ndarray
         (rolling) window view of the input array.
 
     Notes
@@ -230,7 +233,8 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     # -- build rolling window view
     if not arr_in.flags.contiguous:
-        raise ValueError("Cannot provide views on a non-contiguous input array")
+        warn(RuntimeWarning("Cannot provide views on a non-contiguous input "
+                            "array without copying."))
 
     arr_in = np.ascontiguousarray(arr_in)
 

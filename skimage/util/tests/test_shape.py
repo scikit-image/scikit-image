@@ -1,6 +1,7 @@
 import numpy as np
 from nose.tools import raises
-from numpy.testing import assert_equal, assert_raises
+from numpy.testing import assert_equal, assert_warns
+
 from skimage.util.shape import view_as_blocks, view_as_windows
 
 
@@ -151,8 +152,8 @@ def test_views_non_contiguous():
     A = np.arange(16).reshape((4, 4))
     A = A[::2, :]
 
-    assert_raises(ValueError, view_as_blocks, A, (2, 2))
-    assert_raises(ValueError, view_as_windows, A, (2, 2))
+    assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
+    assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
 
 
 if __name__ == '__main__':
