@@ -66,16 +66,26 @@ def greycomatrix(image, distances, angles, levels=256, symmetric=False,
     ...                   [0, 0, 1, 1],
     ...                   [0, 2, 2, 2],
     ...                   [2, 2, 3, 3]], dtype=np.uint8)
-    >>> result = greycomatrix(image, [1], [0, np.pi/2], levels=4)
+    >>> result = greycomatrix(image, [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], levels=4)
     >>> result[:, :, 0, 0]
     array([[2, 2, 1, 0],
            [0, 2, 0, 0],
            [0, 0, 3, 1],
            [0, 0, 0, 1]], dtype=uint32)
     >>> result[:, :, 0, 1]
+    array([[1, 1, 3, 0],
+           [0, 1, 1, 0],
+           [0, 0, 0, 2],
+           [0, 0, 0, 0]], dtype=uint32)
+    >>> result[:, :, 0, 2]
     array([[3, 0, 2, 0],
            [0, 2, 2, 0],
            [0, 0, 1, 2],
+           [0, 0, 0, 0]], dtype=uint32)
+    >>> result[:, :, 0, 3]
+    array([[2, 0, 0, 0],
+           [1, 1, 2, 0],
+           [0, 0, 2, 1],
            [0, 0, 0, 0]], dtype=uint32)
 
     """
