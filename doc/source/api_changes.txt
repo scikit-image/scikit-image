@@ -1,6 +1,9 @@
 Version 0.10
 ------------
 - Removed ``skimage.io.video`` functionality due to broken gstreamer bindings
+- The functions `skimage.util.view_as_blocks` and
+  `skimage.util.view_as_windows` now raise exceptions if the input data is not
+  contiguous.
 
 Version 0.9
 -----------
