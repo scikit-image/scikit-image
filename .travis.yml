@@ -13,11 +13,13 @@ matrix:
     include:
         - python: 2.7
           env:
-            - PYTHON=python
+            - PYTHON=PYWARNINGS=all python
+            - NOSETESTS=PYWARNINGS=all nosetests
             - PYVER=2.x
         - python: 3.2
           env:
-            - PYTHON=python3
+            - PYTHON=PYWARNINGS=all python3
+            - NOSETESTS=PYWARNINGS=all nosetests
             - PYVER=3.x
     exclude:
         - python: 2.6
@@ -64,10 +66,10 @@ script:
 
     # Run all tests
     - if [[ $PYVER == '3.x' ]]; then
-    -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
+    -   $NOSETESTS --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
     - fi
     - if [[ $PYVER == '2.x' ]]; then
-    -   nosetests --exe -v --with-doctest skimage
+    -   $NOSETESTS --exe -v --with-doctest skimage
     - fi
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
