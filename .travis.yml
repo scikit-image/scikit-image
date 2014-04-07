@@ -13,13 +13,15 @@ matrix:
     include:
         - python: 2.7
           env:
-            - PYTHON=PYWARNINGS=all python
-            - NOSETESTS=PYWARNINGS=all nosetests
+            - PYTHON=python
+            - PYTHONWARNINGS=all
+            - PYTHONX=python
             - PYVER=2.x
         - python: 3.2
           env:
-            - PYTHON=PYWARNINGS=all python3
-            - NOSETESTS=PYWARNINGS=all nosetests
+            - PYTHON=python3
+            - PYTHONWARNINGS=all
+            - PYTHONX=python3
             - PYVER=3.x
     exclude:
         - python: 2.6
@@ -66,15 +68,15 @@ script:
 
     # Run all tests
     - if [[ $PYVER == '3.x' ]]; then
-    -   $NOSETESTS --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
+    -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
     - fi
     - if [[ $PYVER == '2.x' ]]; then
-    -   $NOSETESTS --exe -v --with-doctest skimage
+    -   nosetests --exe -v --with-doctest skimage
     - fi
     # Run all doc examples
     - export PYTHONPATH=$(pwd):$PYTHONPATH
-    - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    - for f in doc/examples/applications/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    - for f in doc/examples/*.py; do $PYTHONX "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    - for f in doc/examples/applications/*.py; do $PYTHONX "$f"; if [ $? -ne 0 ]; then exit 1; fi done
 
     # Run pep8 and flake tests
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
