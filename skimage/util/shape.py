@@ -123,7 +123,8 @@ def view_as_windows(arr_in, window_shape, step=1):
     Returns
     -------
     arr_out : ndarray
-        (rolling) window view of the input array.
+        (rolling) window view of the input array.   If `arr_in` is
+        non-contiguous, a copy is made.
 
     Notes
     -----
