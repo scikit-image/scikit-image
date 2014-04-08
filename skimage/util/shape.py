@@ -111,7 +111,7 @@ def view_as_windows(arr_in, window_shape, step=1):
     Parameters
     ----------
     arr_in : ndarray
-        Contiguous N-d input array.
+        N-d input array.
     window_shape : tuple
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
