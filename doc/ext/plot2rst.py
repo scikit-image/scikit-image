@@ -166,6 +166,58 @@ class Path(str):
     def __iadd__(self, other):
         return self.__add__(other)
 
+class Notebook():
+    """Notebook object for generating an IPython notebook from an example file"""
+
+
+    def __init__(self, sample_notebook_path, example_file):
+        # Object variables, gives the ability to personalise per object
+        # cell type code
+        self.cell_code = {
+                "cell_type": "code",
+                "collapsed": False,
+                "input": [
+                    "# Code Goes Here"
+                ],
+                "language": "python",
+                "metadata": {},
+                "outputs": []
+        }
+
+        # cell type markdown
+        self.cell_md = {
+                "cell_type": "markdown",
+                "metadata": {},
+                "source": [
+                    'Markdown Goes Here'
+                ]
+        }
+
+        self.cell_type = {'input':self.cell_code, 'source': self.cell_md}
+        with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
+            self.template = json.load(sample)
+            self.code = pythonfile.readlines()
+            # Adds an extra newline at the end, which aids in extraction of text segments
+            self.code.append('\n')
+
+    def getModifiedCode(self):
+        # Done to cluster together multiple '\n's into one.
+        # For ex - "import xyz\n\n\n print 2" becomes "import xyz\n print 2"
+        modified_code = []
+        modified_code = [self.code[i] for i in range(len(self.code)) if i==0 or self.code[i]!=self.code[i-1]]
+        return modified_code
+
+    def addcell(self, segment_number, typeOfValue, value):
+        if typeOfValue in ['source', 'input']:
+            self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[typeOfValue]))
+            self.template["worksheets"][0]["cells"][segment_number][typeOfValue] = value
+
+    def jsondump(self, notebook_path):
+        # writes the template to file
+        with open(notebook_path, 'w') as output:
+            json.dump(self.template, output, indent=2)
+
+
 
 def setup(app):
     app.connect('builder-inited', generate_example_galleries)
@@ -379,40 +431,15 @@ def write_example(src_name, src_dir, rst_dir, cfg):
 
 def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
     sample_notebook_path = notebook_dir.pjoin('sample.ipynb')
-    with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
-        test = json.load(sample)
-        code = pythonfile.readlines()
-
-    cell_code = {
-                "cell_type": "code",
-                "collapsed": False,
-                "input": [
-                    "# Code Goes Here"
-                ],
-                "language": "python",
-                "metadata": {},
-                "outputs": []
-        }
-
-    # cell type markdown
-    cell_md = {
-                "cell_type": "markdown",
-                "metadata": {},
-                "source": [
-                    'Markdown Goes Here'
-                ]
-        }
-
-
-    # Done to cluster together multiple '\n's into one.
-    # For ex - "import xyz\n\n\n print 2" becomes "import xyz\n print 2"
-    modified_code = []
-    modified_code = [code[i] for i in range(len(code)) if i==0 or code[i]!=code[i-1]]
+    
+    nb = Notebook(sample_notebook_path, example_file)
 
     segment_number = 0
     segment_has_begun = True
     docstring = False
     source = []
+
+    modified_code = nb.getModifiedCode()
 
     for line in modified_code:
         # A linebreak indicates a segment has ended. If the text segment had only comments, then source is blank,
@@ -422,18 +449,15 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
                 segment_number += 1
                 # we've found text segments within the docstring
                 if docstring is True:
-                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell_md))
-                    test["worksheets"][0]["cells"][segment_number]["source"] = source
+                    nb.addcell(segment_number, 'source', source)
                 else:
-                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell_code))
-                    test["worksheets"][0]["cells"][segment_number]["input"] = source
+                    nb.addcell(segment_number, 'input', source)
                 source = []
         # if it's a comment
         elif line.strip().startswith('#'):
             segment_number += 1
             line = line.strip(' #')
-            test["worksheets"][0]["cells"].append(copy.deepcopy(cell_md))
-            test["worksheets"][0]["cells"][segment_number]["source"] = line
+            nb.addcell(segment_number, 'source', line)
         elif line == '"""\n':
             if docstring is False:
                 docstring = True
@@ -443,15 +467,13 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
                 # Write leftover docstring if any left
                 if source:
                     segment_number += 1
-                    test["worksheets"][0]["cells"].append(copy.deepcopy(cell_md))
-                    test["worksheets"][0]["cells"][segment_number]["source"] = source
+                    nb.addcell(segment_number, 'source', source)
                     source = []
         else:
             # some text segment is continuing, so add to source
             source.append(line)
-
-    with open(notebook_path, 'w') as output:
-        json.dump(test, output, indent=2)
+    
+    nb.jsondump(notebook_path)
 
 
 def save_thumbnail(image, thumb_path, shape):
