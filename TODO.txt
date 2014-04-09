@@ -15,8 +15,6 @@ Version 0.10
 * Remove deprecated functions in `skimage.filter.rank.*`
 * Remove deprecated parameter `epsilon` of `skimage.viewer.LineProfile`
 * Remove backwards-compatability of `skimage.measure.regionprops`
-* Remove {`ratio`, `sigma`} deprecation warnings of `skimage.segmentation.slic`
-  and also remove explicit `sigma` parameter from doc-string example
 * Change default mode of random_walker segmentation to 'cg_mg' > 'cg' > 'bf',
   depending on which optional dependencies are available.
 * Remove deprecated `out` parameter of `skimage.morphology.binary_*`

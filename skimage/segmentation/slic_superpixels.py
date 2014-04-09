@@ -10,8 +10,8 @@ from skimage.segmentation._slic import _slic_cython, _enforce_label_connectivity
 from skimage.color import rgb2lab
 
 
-def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
-         spacing=None, multichannel=True, convert2lab=True, ratio=None,
+def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
+         spacing=None, multichannel=True, convert2lab=True,
          enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3,
          slic_zero=False):
     """Segments image using k-means clustering in Color-(x,y,z) space.
@@ -48,8 +48,6 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
         Whether the input should be converted to Lab colorspace prior to
         segmentation. For this purpose, the input is assumed to be RGB. Highly
         recommended.
-    ratio : float, optional
-        Synonym for `compactness`. This keyword is deprecated.
     enforce_connectivity: bool, optional (default False)
         Whether the generated segments are connected or not
     min_size_factor: float, optional
@@ -100,23 +98,13 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     >>> from skimage.segmentation import slic
     >>> from skimage.data import lena
     >>> img = lena()
-    >>> segments = slic(img, n_segments=100, compactness=10, sigma=0)
+    >>> segments = slic(img, n_segments=100, compactness=10)
 
     Increasing the compactness parameter yields more square regions:
 
-    >>> segments = slic(img, n_segments=100, compactness=20, sigma=0)
+    >>> segments = slic(img, n_segments=100, compactness=20)
 
     """
-
-    if sigma is None:
-        warnings.warn('Default value of keyword `sigma` changed from ``1`` '
-                      'to ``0``.')
-        sigma = 0
-    if ratio is not None:
-        warnings.warn('Keyword `ratio` is deprecated. Use `compactness` '
-                      'instead.')
-        compactness = ratio
-
     if enforce_connectivity is None:
         warnings.warn('Deprecation: enforce_connectivity will default to'
                       ' True in future versions.')
