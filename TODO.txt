@@ -18,4 +18,3 @@ Version 0.10
 * Enable doctests of experimental `skimage.feature.brief`
 * Remove deprecated `skimage.segmentation.visualize_boundaries`
 * Remove deprecated `skimage.morphology.greyscale_*`
-* Remove deprecated `skimage.exposure.equalize`
