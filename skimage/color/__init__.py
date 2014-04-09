@@ -44,9 +44,7 @@ from .colorconv import (convert_colorspace,
                         rgb_from_ahx,
                         ahx_from_rgb,
                         rgb_from_hpx,
-                        hpx_from_rgb,
-                        is_rgb,
-                        is_gray)
+                        hpx_from_rgb)
 
 from .colorlabel import color_dict, label2rgb
 
@@ -100,8 +98,6 @@ __all__ = ['convert_colorspace',
            'ahx_from_rgb',
            'rgb_from_hpx',
            'hpx_from_rgb',
-           'is_rgb',
-           'is_gray',
            'color_dict',
            'label2rgb',
            'deltaE_cie76',
