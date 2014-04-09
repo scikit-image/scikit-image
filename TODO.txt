@@ -16,4 +16,3 @@ Version 0.10
 * Remove deprecated logger function in `skimage/__init__.py`
 * Remove deprecated function `filter.median_filter`
 * Enable doctests of experimental `skimage.feature.brief`
-* Remove deprecated `skimage.segmentation.visualize_boundaries`
