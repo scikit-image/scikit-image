@@ -1,5 +1,4 @@
 from __future__ import division
-import warnings
 
 import numpy as np
 from skimage.util.dtype import dtype_range
@@ -22,8 +21,6 @@ class LineProfile(PlotPlugin):
     ----------
     maxdist : float
         Maximum pixel distance allowed when selecting end point of scan line.
-    epsilon : float
-        Deprecated. Use `maxdist` instead.
     limits : tuple or {None, 'image', 'dtype'}
         (minimum, maximum) intensity limits for plotted profile. The following
         special values are defined:
@@ -37,10 +34,6 @@ class LineProfile(PlotPlugin):
     def __init__(self, maxdist=10, epsilon='deprecated',
                  limits='image', **kwargs):
         super(LineProfile, self).__init__(**kwargs)
-
-        if not epsilon == 'deprecated':
-            warnings.warn("Parameter `epsilon` deprecated; use `maxdist`.")
-            maxdist = epsilon
         self.maxdist = maxdist
         self._limit_type = limits
         print(self.help())
