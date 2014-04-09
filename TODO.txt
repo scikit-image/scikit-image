@@ -17,4 +17,3 @@ Version 0.10
 * Remove deprecated function `filter.median_filter`
 * Enable doctests of experimental `skimage.feature.brief`
 * Remove deprecated `skimage.segmentation.visualize_boundaries`
-* Remove deprecated `skimage.morphology.greyscale_*`

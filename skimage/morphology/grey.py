@@ -5,9 +5,7 @@ from . import cmorph
 
 
 __all__ = ['erosion', 'dilation', 'opening', 'closing', 'white_tophat',
-           'black_tophat', 'greyscale_erode', 'greyscale_dilate',
-           'greyscale_open', 'greyscale_close', 'greyscale_white_top_hat',
-           'greyscale_black_top_hat']
+           'black_tophat']
 
 
 def erosion(image, selem, out=None, shift_x=False, shift_y=False):
@@ -313,33 +311,3 @@ def black_tophat(image, selem, out=None):
     out = closing(image, selem, out=out)
     out = out - image
     return out
-
-
-def greyscale_erode(*args, **kwargs):
-    warnings.warn("`greyscale_erode` renamed `erosion`.")
-    return erosion(*args, **kwargs)
-
-
-def greyscale_dilate(*args, **kwargs):
-    warnings.warn("`greyscale_dilate` renamed `dilation`.")
-    return dilation(*args, **kwargs)
-
-
-def greyscale_open(*args, **kwargs):
-    warnings.warn("`greyscale_open` renamed `opening`.")
-    return opening(*args, **kwargs)
-
-
-def greyscale_close(*args, **kwargs):
-    warnings.warn("`greyscale_close` renamed `closing`.")
-    return closing(*args, **kwargs)
-
-
-def greyscale_white_top_hat(*args, **kwargs):
-    warnings.warn("`greyscale_white_top_hat` renamed `white_tophat`.")
-    return white_tophat(*args, **kwargs)
-
-
-def greyscale_black_top_hat(*args, **kwargs):
-    warnings.warn("`greyscale_black_top_hat` renamed `black_tophat`.")
-    return black_tophat(*args, **kwargs)
