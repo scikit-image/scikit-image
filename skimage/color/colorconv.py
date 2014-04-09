@@ -90,32 +90,6 @@ def guess_spatial_dimensions(image):
         raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
 
 
-@deprecated()
-def is_rgb(image):
-    """Test whether the image is RGB or RGBA.
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-
-    """
-    return (image.ndim == 3 and image.shape[2] in (3, 4))
-
-
-@deprecated()
-def is_gray(image):
-    """Test whether the image is gray (i.e. has only one color band).
-
-    Parameters
-    ----------
-    image : ndarray
-        Input image.
-
-    """
-    return image.ndim in (2, 3) and not is_rgb(image)
-
-
 def convert_colorspace(arr, fromspace, tospace):
     """Convert an image array to a new color space.
 

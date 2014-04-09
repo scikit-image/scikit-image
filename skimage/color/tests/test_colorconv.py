@@ -35,7 +35,6 @@ from skimage.color import (rgb2hsv, hsv2rgb,
                            lab2rgb, rgb2lab,
                            xyz2luv, luv2xyz,
                            luv2rgb, rgb2luv,
-                           is_rgb, is_gray,
                            lab2lch, lch2lab,
                            guess_spatial_dimensions
                            )
@@ -353,17 +352,6 @@ def test_gray2rgb_rgb():
     x = np.random.random((5, 5, 4))
     y = gray2rgb(x)
     assert_equal(x, y)
-
-
-def test_is_rgb():
-    color = data.lena()
-    gray = data.camera()
-
-    assert is_rgb(color)
-    assert not is_gray(color)
-
-    assert is_gray(gray)
-    assert not is_gray(color)
 
 
 if __name__ == "__main__":
