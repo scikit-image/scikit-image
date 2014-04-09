@@ -10,7 +10,7 @@ from skimage.segmentation._slic import _slic_cython, _enforce_label_connectivity
 from skimage.color import rgb2lab
 
 
-def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
+def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=0,
          spacing=None, multichannel=True, convert2lab=True,
          enforce_connectivity=False, min_size_factor=0.5, max_size_factor=3,
          slic_zero=False):
@@ -98,18 +98,13 @@ def slic(image, n_segments=100, compactness=10., max_iter=10, sigma=None,
     >>> from skimage.segmentation import slic
     >>> from skimage.data import lena
     >>> img = lena()
-    >>> segments = slic(img, n_segments=100, compactness=10, sigma=0)
+    >>> segments = slic(img, n_segments=100, compactness=10)
 
     Increasing the compactness parameter yields more square regions:
 
-    >>> segments = slic(img, n_segments=100, compactness=20, sigma=0)
+    >>> segments = slic(img, n_segments=100, compactness=20)
 
     """
-
-    if sigma is None:
-        warnings.warn('Default value of keyword `sigma` changed from ``1`` '
-                      'to ``0``.')
-        sigma = 0
     if enforce_connectivity is None:
         warnings.warn('Deprecation: enforce_connectivity will default to'
                       ' True in future versions.')
