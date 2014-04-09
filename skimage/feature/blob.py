@@ -388,7 +388,7 @@ def blob_doh(image, min_sigma=1, max_sigma=30, num_sigma=10, threshold=0.01,
     """
 
     if image.ndim != 2:
-        raise ValueError("'image' must be a grayscale ")
+        raise ValueError("'image' must be grayscale ")
 
     image = img_as_float(image)
     image = integral_image(image)

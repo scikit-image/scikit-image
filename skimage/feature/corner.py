@@ -190,7 +190,6 @@ def hessian_matrix_det(image, sigma, integral=True):
         not computed. If `True` the integral image is computed for `image`
         and used for finding the Hessian Determinant.
 
-
     Returns
     -------
     out : array
