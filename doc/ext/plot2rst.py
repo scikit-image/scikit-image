@@ -207,10 +207,10 @@ class Notebook():
         modified_code = [self.code[i] for i in range(len(self.code)) if i==0 or self.code[i]!=self.code[i-1]]
         return modified_code
 
-    def addcell(self, segment_number, typeOfValue, value):
-        if typeOfValue in ['source', 'input']:
-            self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[typeOfValue]))
-            self.template["worksheets"][0]["cells"][segment_number][typeOfValue] = value
+    def addcell(self, segment_number, type_of_value, value):
+        if type_of_value in ['source', 'input']:
+            self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[type_of_value]))
+            self.template["worksheets"][0]["cells"][segment_number][type_of_value] = value
 
     def jsondump(self, notebook_path):
         # writes the template to file
