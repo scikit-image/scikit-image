@@ -32,7 +32,14 @@ let's see an example of how a pre-defined plugin is added to the viewer:
 
    viewer = ImageViewer(image)
    viewer += LineProfile(viewer)
-   viewer.show()
+   overlay, data = viewer.show()[0]
+
+The viewer's ``show`` method will return an overlay (of the same shape as the
+input image) and data (possibly ``None``) for each attached plugin. In this
+case, there is only one plugin, so we can directly name both. You can see the
+plugin class's ``output`` method to see what will be returned. Here,
+``overlay`` contains a drawing of the line (including its width), and ``data``
+contains the measured line profile.
 
 At the moment, there are not many plugins pre-defined, but there is a really
 simple interface for creating your own plugin. First, let us create a plugin to
@@ -74,8 +81,10 @@ All that's left is to create an image viewer and add the plugin to that viewer.
 
    viewer = ImageViewer(image)
    viewer += denoise_plugin
-   viewer.show()
+   denoised = viewer.show()[0][0]
 
+When we close the viewer, ``denoised`` will contain the filtered image for the
+last used setting of ``weight``.
 
 .. image:: data/denoise_viewer_window.png
 .. image:: data/denoise_plugin_window.png
