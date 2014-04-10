@@ -3,6 +3,7 @@ from .exposure import histogram, equalize, equalize_hist, \
                       adjust_gamma, adjust_sigmoid, adjust_log
 
 from ._adapthist import equalize_adapthist
+from .backproject import histogram_backproject
 
 
 __all__ = ['histogram',
@@ -13,4 +14,5 @@ __all__ = ['histogram',
            'cumulative_distribution',
            'adjust_gamma',
            'adjust_sigmoid',
-           'adjust_log']
+           'adjust_log',
+           'histogram_backproject']
