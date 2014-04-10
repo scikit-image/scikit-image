@@ -70,8 +70,6 @@ import shutil
 import token
 import tokenize
 import traceback
-import json
-import copy
 
 import numpy as np
 import matplotlib
@@ -81,6 +79,8 @@ import matplotlib.pyplot as plt
 from skimage import io
 from skimage import transform
 from skimage.util.dtype import dtype_range
+
+from notebook import *
 
 
 LITERALINCLUDE = """
@@ -165,58 +165,6 @@ class Path(str):
 
     def __iadd__(self, other):
         return self.__add__(other)
-
-class Notebook():
-    """Notebook object for generating an IPython notebook from an example file"""
-
-
-    def __init__(self, sample_notebook_path, example_file):
-        # Object variables, gives the ability to personalise per object
-        # cell type code
-        self.cell_code = {
-                "cell_type": "code",
-                "collapsed": False,
-                "input": [
-                    "# Code Goes Here"
-                ],
-                "language": "python",
-                "metadata": {},
-                "outputs": []
-        }
-
-        # cell type markdown
-        self.cell_md = {
-                "cell_type": "markdown",
-                "metadata": {},
-                "source": [
-                    'Markdown Goes Here'
-                ]
-        }
-
-        self.cell_type = {'input':self.cell_code, 'source': self.cell_md}
-        with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
-            self.template = json.load(sample)
-            self.code = pythonfile.readlines()
-            # Adds an extra newline at the end, which aids in extraction of text segments
-            self.code.append('\n')
-
-    def getModifiedCode(self):
-        # Done to cluster together multiple '\n's into one.
-        # For ex - "import xyz\n\n\n print 2" becomes "import xyz\n print 2"
-        modified_code = []
-        modified_code = [self.code[i] for i in range(len(self.code)) if i==0 or self.code[i]!=self.code[i-1]]
-        return modified_code
-
-    def addcell(self, segment_number, type_of_value, value):
-        if type_of_value in ['source', 'input']:
-            self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[type_of_value]))
-            self.template["worksheets"][0]["cells"][segment_number][type_of_value] = value
-
-    def jsondump(self, notebook_path):
-        # writes the template to file
-        with open(notebook_path, 'w') as output:
-            json.dump(self.template, output, indent=2)
-
 
 
 def setup(app):
@@ -427,53 +375,6 @@ def write_example(src_name, src_dir, rst_dir, cfg):
             shutil.copy(cfg.plot2rst_default_thumb, thumb_path)
 
     save_ipython_notebook(example_file, notebook_dir, notebook_path, basename)
-
-
-def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
-    sample_notebook_path = notebook_dir.pjoin('sample.ipynb')
-    
-    nb = Notebook(sample_notebook_path, example_file)
-
-    segment_number = 0
-    segment_has_begun = True
-    docstring = False
-    source = []
-
-    modified_code = nb.getModifiedCode()
-
-    for line in modified_code:
-        # A linebreak indicates a segment has ended. If the text segment had only comments, then source is blank,
-        # So, ignore it, as already added in cell type markdown
-        if line == "\n":
-            if segment_has_begun is True and source:
-                segment_number += 1
-                # we've found text segments within the docstring
-                if docstring is True:
-                    nb.addcell(segment_number, 'source', source)
-                else:
-                    nb.addcell(segment_number, 'input', source)
-                source = []
-        # if it's a comment
-        elif line.strip().startswith('#'):
-            segment_number += 1
-            line = line.strip(' #')
-            nb.addcell(segment_number, 'source', line)
-        elif line == '"""\n':
-            if docstring is False:
-                docstring = True
-            # Indicates, completion of docstring, add whatever in source to markdown (cell type markdown)
-            elif docstring is True:
-                docstring = False
-                # Write leftover docstring if any left
-                if source:
-                    segment_number += 1
-                    nb.addcell(segment_number, 'source', source)
-                    source = []
-        else:
-            # some text segment is continuing, so add to source
-            source.append(line)
-    
-    nb.jsondump(notebook_path)
 
 
 def save_thumbnail(image, thumb_path, shape):
