@@ -36,24 +36,36 @@ class Notebook():
             self.code.append('\n')
 
     def getModifiedCode(self):
-        # Done to cluster together multiple '\n's into one.
-        # For ex - "import xyz\n\n\n print 2" becomes "import xyz\n print 2"
+        """ Clusters multiple '\n's into one.
+        For ex - 'import xyz\n\n\n print 2' becomes 'import xyz\n print 2' """
         modified_code = []
         modified_code = [self.code[i] for i in range(len(self.code)) if i==0 or self.code[i]!=self.code[i-1]]
         return modified_code
 
     def addcell(self, segment_number, type_of_value, value):
+        """ Adds a notebook cell, by updating the json template. Cell differs with type of value """
         if type_of_value in ['source', 'input']:
             self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[type_of_value]))
             self.template["worksheets"][0]["cells"][segment_number][type_of_value] = value
 
     def json(self, notebook_path):
-        # writes the template to file
+        """ Writes the template to file (json) """
         with open(notebook_path, 'w') as output:
             json.dump(self.template, output, indent=2)
 
 
 def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
+    """ Saves a Python file as an IPython notebook 
+
+    Parameters
+    ----------
+    example_file : 'str'
+        path for source Python file
+    notebook_dir : 'str'
+        directory for saving the notebook files
+    notebook_path : 'str'
+        path for saving the notebook file (includes the filename)
+    """
     sample_notebook_path = notebook_dir.pjoin('sample.ipynb')
     
     nb = Notebook(sample_notebook_path, example_file)
