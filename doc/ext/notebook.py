@@ -47,7 +47,7 @@ class Notebook():
             self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[type_of_value]))
             self.template["worksheets"][0]["cells"][segment_number][type_of_value] = value
 
-    def jsondump(self, notebook_path):
+    def json(self, notebook_path):
         # writes the template to file
         with open(notebook_path, 'w') as output:
             json.dump(self.template, output, indent=2)
@@ -97,4 +97,4 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
             # some text segment is continuing, so add to source
             source.append(line)
     
-    nb.jsondump(notebook_path)
+    nb.json(notebook_path)

@@ -80,7 +80,7 @@ from skimage import io
 from skimage import transform
 from skimage.util.dtype import dtype_range
 
-from notebook import *
+from notebook import save_ipython_notebook
 
 
 LITERALINCLUDE = """
