@@ -54,7 +54,7 @@ class Notebook():
             json.dump(self.template, output, indent=2)
 
 
-def save_ipython_notebook(example_file, notebook_dir, notebook_path, basename):
+def save_ipython_notebook(example_file, notebook_dir, notebook_path):
     """ Saves a Python file as an IPython notebook 
 
     Parameters
