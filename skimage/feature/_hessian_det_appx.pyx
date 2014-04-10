@@ -4,8 +4,6 @@
 # cython: wraparound=False
 import numpy as np
 cimport numpy as cnp
-from skimage.transform import integral_image, integrate
-from skimage import util
 
 
 cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low, Py_ssize_t high):
@@ -78,7 +76,7 @@ cdef inline cnp.double_t _integ(
     return ans
 
 
-def _hessian_matrix_det(cnp.double_t[:, ::1] img, float sigma):
+def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the

@@ -31,7 +31,7 @@ def _compute_derivatives(image, mode='constant', cval=0):
     imy : ndarray
         Derivative in y-direction.
 
-v    """
+    """
 
     imy = ndimage.sobel(image, axis=0, mode=mode, cval=cval)
     imx = ndimage.sobel(image, axis=1, mode=mode, cval=cval)
@@ -172,7 +172,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
     return Hxx, Hxy, Hyy
 
 
-def hessian_matrix_det(image, sigma, integral=True):
+def hessian_matrix_det(image, sigma):
     """Computes the approximate Hessian Determinant over an image.
 
     This method uses box filters over integral images to compute the
@@ -184,11 +184,7 @@ def hessian_matrix_det(image, sigma, integral=True):
         The image over which to compute Hessian Determinant.
     sigma : float
         Standard deviation used for the Gaussian kernel, used for the Hessian
-        matrix
-    integral : bool
-        If `False`, `image` is assumed to be integral and intergral image is
-        not computed. If `True` the integral image is computed for `image`
-        and used for finding the Hessian Determinant.
+        matrix.
 
     Returns
     -------
@@ -211,9 +207,7 @@ def hessian_matrix_det(image, sigma, integral=True):
     """
 
     image = img_as_float(image)
-    if(integral):
-        image = integral_image(image)
-
+    image = integral_image(image)
     return np.array(_hessian_matrix_det(image, sigma))
 
 

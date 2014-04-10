@@ -93,9 +93,12 @@ def test_hessian_matrix_eigvals():
 
 
 def test_hessian_matrix_det():
-    image = np.ones((5, 5))
-    det = hessian_matrix_det(image, 3, False)
-    assert_array_equal(det, 0)
+    image = np.zeros((5, 5))
+    image[2, 2] = 1
+    det = hessian_matrix_det(image, 5)
+    
+
+    assert_almost_equal(det, 0, decimal = 3)
 
 
 def test_square_image():
