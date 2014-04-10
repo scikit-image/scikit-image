@@ -96,8 +96,6 @@ def test_hessian_matrix_det():
     image = np.zeros((5, 5))
     image[2, 2] = 1
     det = hessian_matrix_det(image, 5)
-    
-
     assert_almost_equal(det, 0, decimal = 3)
 
 
