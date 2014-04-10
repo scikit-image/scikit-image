@@ -184,7 +184,7 @@ def test_multispectral_3d():
     return data, multi_labels, single_labels, labels
 
 
-def test_depth():
+def test_spacing_0():
     n = 30
     lx, ly, lz = n, n, n
     data, _ = make_3d_syntheticdata(lx, ly, lz)
@@ -202,14 +202,14 @@ def test_depth():
                  ly // 2 - small_l // 4,
                  lz // 4 - small_l // 8] = 2
 
-    # Test with `depth` kwarg
+    # Test with `spacing` kwarg
     labels_aniso = random_walker(data_aniso, labels_aniso, mode='cg',
-                                 depth=0.5)
+                                 spacing=(1., 1., 0.5))
 
     assert (labels_aniso[13:17, 13:17, 7:9] == 2).all()
 
 
-def test_spacing():
+def test_spacing_1():
     n = 30
     lx, ly, lz = n, n, n
     data, _ = make_3d_syntheticdata(lx, ly, lz)

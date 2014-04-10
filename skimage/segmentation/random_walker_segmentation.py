@@ -190,8 +190,7 @@ def _build_laplacian(data, spacing, mask=None, beta=50,
 
 
 def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
-                  multichannel=False, return_full_prob=False, depth=1.,
-                  spacing=None):
+                  multichannel=False, return_full_prob=False, spacing=None):
     """Random walker algorithm for segmentation from markers.
 
     Random walker algorithm is implemented for gray-level or multichannel
@@ -203,8 +202,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
         dimensional (multichannel=True) with the highest dimension denoting
-        channels. Data spacing is assumed isotropic unless depth keyword
-        argument is used.
+        channels. Data spacing is assumed isotropic unless the `spacing` 
+        keyword argument is used.
     labels : array of ints, of same shape as `data` without channels dimension
         Array of seed markers labeled with different positive integers
         for different phases. Zero-labeled pixels are unlabeled pixels.
@@ -249,13 +248,6 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     return_full_prob : bool, default False
         If True, the probability that a pixel belongs to each of the labels
         will be returned, instead of only the most likely label.
-    depth : float, default 1. [DEPRECATED]
-        Correction for non-isotropic voxel depths in 3D volumes.
-        Default (1.) implies isotropy.  This factor is derived as follows:
-        depth = (out-of-plane voxel spacing) / (in-plane voxel spacing), where
-        in-plane voxel spacing represents the first two spatial dimensions and
-        out-of-plane voxel spacing represents the third spatial dimension.
-        `depth` is deprecated as of 0.9, in favor of `spacing`.
     spacing : iterable of floats
         Spacing between voxels in each spatial dimension. If `None`, then
         the spacing between pixels/voxels in each dimension is assumed 1.
@@ -344,10 +336,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     """
 
     if mode is None:
-        mode = 'bf'
-        warnings.warn("Default mode will change in the next release from 'bf' "
-                      "to 'cg_mg' if pyamg is installed, else to 'cg' if "
-                      "SciPy was built with UMFPACK, or to 'bf' otherwise.")
+        if amg_loaded:
+            mode = 'cg_mg'
+        elif UmfpackContext is not None:
+            mode = 'cg'
+        else:
+            mode = 'bf'
 
     if UmfpackContext is None and mode == 'cg':
         warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
@@ -355,19 +349,15 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                       'random walker functions. You may also install pyamg '
                       'and run the random walker function in cg_mg mode '
                       '(see the docstrings)')
-    if depth != 1.:
-        warnings.warn('`depth` kwarg is deprecated, and will be removed in the'
-                      ' next major release. Use `spacing` instead.')
 
     # Spacing kwarg checks
     if spacing is None:
-        spacing = (1., 1.) + (depth, )
-    elif len(spacing) == 2:
-        spacing = tuple(spacing) + (depth, )
+        spacing = (1., 1., 1.)
     elif len(spacing) == 3:
         pass
     else:
-        raise ValueError('Input argument `spacing` incorrect, see docstring.')
+        raise ValueError('Input argument `spacing` incorrect, should be an '
+                         'iterable of length 3.')
 
     # Parse input data
     if not multichannel:

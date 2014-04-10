@@ -142,11 +142,11 @@ the central one.
 
 """
 
-from skimage.filter.rank import bilateral_mean
+from skimage.filter.rank import mean_bilateral
 
 noisy_image = img_as_ubyte(data.camera())
 
-bilat = bilateral_mean(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
+bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
 fig, ax = plt.subplots(2, 2, figsize=(10, 7))
 ax1, ax2, ax3, ax4 = ax.ravel()
