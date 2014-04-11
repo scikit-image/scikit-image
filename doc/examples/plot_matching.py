@@ -72,7 +72,7 @@ def gaussian_weights(window_ext, sigma=1):
 
 
 def match_corner(coord, window_ext=5):
-    r, c =  np.round(coord)
+    r, c =  np.round(coord).astype(np.intp)
     window_orig = img_orig[r-window_ext:r+window_ext+1,
                            c-window_ext:c+window_ext+1, :]
 
