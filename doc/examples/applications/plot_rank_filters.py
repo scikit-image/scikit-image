@@ -193,7 +193,7 @@ from skimage.filter import rank
 noisy_image = img_as_ubyte(data.camera())
 
 # equalize globally and locally
-glob = exposure.equalize(noisy_image) * 255
+glob = exposure.equalize_hist(noisy_image) * 255
 loc = rank.equalize(noisy_image, disk(20))
 
 # extract histogram for each image
