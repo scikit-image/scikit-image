@@ -23,9 +23,9 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 
 
 def test_all_props():
-    regions = regionprops(SAMPLE, 'all', INTENSITY_SAMPLE)[0]
+    region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
-        regions[prop]
+        assert_equal(region[prop], getattr(region, PROPS[prop]))
 
 
 def test_dtype():
@@ -334,20 +334,6 @@ def test_weighted_moments_normalized():
          [-0.0162529732, -0.0104598869, -0.0028544152, -0.0011057191]]
     )
     assert_array_almost_equal(wnu, ref)
-
-
-def test_old_dict_interface():
-    feats = regionprops(SAMPLE,
-                        ['Area', 'Eccentricity', 'EulerNumber',
-                         'Extent', 'MinIntensity', 'MeanIntensity',
-                         'MaxIntensity', 'Solidity'],
-                        intensity_image=INTENSITY_SAMPLE)
-
-    np.array([list(props.values()) for props in feats], np.float)
-    assert_equal(len(feats[0]), 8)
-    def assign():
-        feats[0]['Area'] = 0
-    assert_raises(RuntimeError, assign)
 
 
 def test_label_sequence():
