@@ -25,7 +25,6 @@ cdef inline Py_ssize_t _clip(Py_ssize_t x, Py_ssize_t low, Py_ssize_t high):
     -------
     x : int
         `x` clipped between `high` and `low`.
-
     """
 
     if(x > high):
@@ -60,7 +59,6 @@ cdef inline cnp.double_t _integ(
     -------
     ans : int
         The integral over the given window.
-
     """
 
     r = _clip(r, 0, img.shape[0] - 1)
@@ -130,7 +128,6 @@ def _hessian_matrix_det(cnp.double_t[:, ::1] img, double sigma):
 
     for r in range(height):
         for c in range(width):
-
             tl = _integ(img, r - s3, c - s3, s3, s3)  # top left
             br = _integ(img, r + 1, c + 1, s3, s3)  # bottom right
             bl = _integ(img, r - s3, c + 1, s3, s3)  # bottom left

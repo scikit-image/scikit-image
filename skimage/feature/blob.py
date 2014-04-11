@@ -36,7 +36,6 @@ def _blob_overlap(blob1, blob2):
     -------
     f : float
         Fraction of overlapped area.
-
     """
     root2 = sqrt(2)
 
@@ -81,7 +80,6 @@ def _prune_blobs(blobs_array, overlap):
     -------
     A : ndarray
         `array` with overlapping blobs removed.
-
     """
 
     # iterating again might eliminate more blobs, but one iteration suffices
