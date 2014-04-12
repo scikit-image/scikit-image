@@ -226,7 +226,7 @@ class Picture(object):
 
     Get the bottom-left pixel
     >>> pic[0, 0]
-    Pixel(red=255, green=0, blue=0)
+    Pixel(red=255, green=0, blue=0, alpha=255)
 
     Get the top row of the picture
     >>> pic[:, pic.height-1]
