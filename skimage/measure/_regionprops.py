@@ -4,8 +4,6 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
-from collections import MutableMapping
-
 from skimage.morphology import convex_hull_image, label
 from skimage.measure import _moments
 
@@ -107,16 +105,15 @@ class _cached_property(object):
         return value
 
 
-class _RegionProperties(MutableMapping):
+class _RegionProperties(object):
 
     def __init__(self, slice, label, label_image, intensity_image,
-                 cache_active, properties=None):
+                 cache_active):
         self.label = label
         self._slice = slice
         self._label_image = label_image
         self._intensity_image = intensity_image
         self._cache_active = cache_active
-        self._properties = properties
 
     @_cached_property
     def area(self):
@@ -306,27 +303,14 @@ class _RegionProperties(MutableMapping):
     def weighted_moments_normalized(self):
         return _moments.moments_normalized(self.weighted_moments_central, 3)
 
-
-    # Preserve dictionary interface
-    def __delitem__(self, key):
-        pass
-
-    def __len__(self):
-        return len(self._properties or PROPS.values())
-
-    def __setitem__(self, key, value):
-        raise RuntimeError("Cannot assign region properties.")
-
     def __iter__(self):
-        return iter(self._properties or PROPS.values())
+        return iter(PROPS.values())
 
     def __getitem__(self, key):
         value = getattr(self, key, None)
         if value is not None:
             return value
         else:  # backwards compatability
-            warnings.warn('Usage of deprecated property name.',
-                          category=DeprecationWarning)
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):
@@ -344,22 +328,15 @@ class _RegionProperties(MutableMapping):
         return True
 
 
-def regionprops(label_image, properties=None,
-                intensity_image=None, cache=True):
-    """Measure properties of labelled image regions.
+def regionprops(label_image, intensity_image=None, cache=True):
+    """Measure properties of labeled image regions.
 
     Parameters
     ----------
     label_image : (N, M) ndarray
-        Labelled input image.
-    properties : {'all', list}
-        **Deprecated parameter**
-
-        This parameter is not needed any more since all properties are
-        determined dynamically.
-
+        Labeled input image.
     intensity_image : (N, M) ndarray, optional
-        Intensity image with same size as labelled image. Default is None.
+        Intensity image with same size as labeled image. Default is None.
     cache : bool, optional
         Determine whether to cache calculated properties. The computation is
         much faster for cached properties, whereas the memory consumption
@@ -500,9 +477,9 @@ def regionprops(label_image, properties=None,
     >>> img = util.img_as_ubyte(data.coins()) > 110
     >>> label_img = label(img)
     >>> props = regionprops(label_img)
-    >>> props[0].centroid # centroid of first labelled object
+    >>> props[0].centroid # centroid of first labeled object
     (22.729879860483141, 81.912285234465827)
-    >>> props[0]['centroid'] # centroid of first labelled object
+    >>> props[0]['centroid'] # centroid of first labeled object
     (22.729879860483141, 81.912285234465827)
 
     """
@@ -511,12 +488,6 @@ def regionprops(label_image, properties=None,
 
     if label_image.ndim != 2:
         raise TypeError('Only 2-D images supported.')
-
-    if properties is not None:
-        warnings.warn('The ``properties`` argument is deprecated and is '
-                      'not needed any more as properties are '
-                      'determined dynamically.',
-                      category=DeprecationWarning)
 
     regions = []
 
@@ -527,8 +498,8 @@ def regionprops(label_image, properties=None,
 
         label = i + 1
 
-        props = _RegionProperties(sl, label, label_image,
-                                  intensity_image, cache, properties=properties)
+        props = _RegionProperties(sl, label, label_image, intensity_image,
+                                  cache)
         regions.append(props)
 
     return regions

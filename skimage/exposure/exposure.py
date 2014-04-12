@@ -105,11 +105,6 @@ def cumulative_distribution(image, nbins=256):
     return img_cdf, bin_centers
 
 
-@deprecated('equalize_hist')
-def equalize(image, nbins=256):
-    return equalize_hist(image, nbins)
-
-
 def equalize_hist(image, nbins=256):
     """Return image after histogram equalization.
 

@@ -72,8 +72,8 @@ def hough_line_peaks(hspace, angles, dists, min_distance=9, min_angle=10,
     hspace_t = hspace > threshold
 
     label_hspace = morphology.label(hspace_t)
-    props = measure.regionprops(label_hspace, ['Centroid'])
-    coords = np.array([np.round(p['Centroid']) for p in props], dtype=int)
+    props = measure.regionprops(label_hspace)
+    coords = np.array([np.round(p.centroid) for p in props], dtype=int)
 
     hspace_peaks = []
     dist_peaks = []

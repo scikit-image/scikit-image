@@ -168,30 +168,4 @@ class _FakeLog(object):
         pass
 
 
-@_deprecated()
-def get_log(name=None):
-    """Return a console logger.
-
-    Output may be sent to the logger using the `debug`, `info`, `warning`,
-    `error` and `critical` methods.
-
-    Parameters
-    ----------
-    name : str
-        Name of the log.
-
-    References
-    ----------
-    .. [1] Logging facility for Python,
-           http://docs.python.org/library/logging.html
-
-    """
-    if name is None:
-        name = 'skimage'
-    else:
-        name = 'skimage.' + name
-
-    return _FakeLog(name)
-
-
 from .util.dtype import *

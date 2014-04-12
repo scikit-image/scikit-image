@@ -1,9 +1,7 @@
 from .binary import (binary_erosion, binary_dilation, binary_opening,
                      binary_closing)
 from .grey import (erosion, dilation, opening, closing, white_tophat,
-                   black_tophat, greyscale_erode, greyscale_dilate,
-                   greyscale_open, greyscale_close, greyscale_white_top_hat,
-                   greyscale_black_top_hat)
+                   black_tophat)
 from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
 from .ccomp import label
@@ -24,12 +22,6 @@ __all__ = ['binary_erosion',
            'closing',
            'white_tophat',
            'black_tophat',
-           'greyscale_erode',
-           'greyscale_dilate',
-           'greyscale_open',
-           'greyscale_close',
-           'greyscale_white_top_hat',
-           'greyscale_black_top_hat',
            'square',
            'rectangle',
            'diamond',
