@@ -4,16 +4,16 @@ from skimage.exposure import rescale_intensity
 from scipy.ndimage import convolve
 
 # kernel for final convolution
-disc = np.array([
-                [0, 0, 1, 0, 0],
-                [1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1],
-                [1, 1, 1, 1, 1],
-                [0, 0, 1, 0, 0]], dtype=np.uint8)
+disc = np.array([[0, 0, 1, 0, 0],
+                 [1, 1, 1, 1, 1],
+                 [1, 1, 1, 1, 1],
+                 [1, 1, 1, 1, 1],
+                 [0, 0, 1, 0, 0]], dtype=np.uint8)
 
 
 def normalize_hsv(hsv):
-    """It extends the Hue value to 0-179 and S&V values to 0-255
+    """It changes the range of Hue and Saturation to [0, 179] and [0, 255]
+    respectively.
 
     Parameters
     ----------
@@ -26,46 +26,60 @@ def normalize_hsv(hsv):
         It is an uint8 image array in HSV format
 
     """
-    hsv[:, :, 0] = hsv[:, :, 0]*179
-    hsv[:, :, 1:] = hsv[:, :, 1:]*255
-    return hsv.astype('uint8')
+
+    return ([179, 255, 1] * hsv).astype(np.uint8)
 
 
-def histogram_backproject(img1, img2):
-    """Return the image after backprojection of img2 on img1.
+def histogram_backproject(img1, img2, multichannel=True):
+    """Project the histogram of one image onto another
 
     Parameters
     ----------
-    img1 : array
+    img1 : (M, N, 3) ndarray or (M, N) ndarray
         Image array on which img2 is backprojected
-    img2 : array
+    img2 : (M, N, 3) ndarray or (M, N) ndarray
         Image array whose histogram is backprojected
+    multichannel : bool, optional
+        Whether the last axis of the image is to be interpreted as multiple
+        channels or another spatial dimension. Default Value : True
 
     Returns
     -------
-    out : Image array
-        Single channel image array
+    out : (M, N) ndarray
+        Backprojected image.  This is a grey-level image that indicates the
+        level of correspondence to the histogram of the object image.
 
     References
     ----------
     .. [1] Swain, Michael J., and Dana H. Ballard. "Indexing via color
-    histograms." Active Perception and Robot Vision. Springer Berlin
-    Heidelberg, 1992. 261-273.
+           histograms." Active Perception and Robot Vision. Springer Berlin
+           Heidelberg, 1992. 261-273.
 
     """
 
     # Both image should be of uint8 dtype
-    assert (img1.dtype == np.uint8 and img2.dtype == np.uint8),\
-        " both images should be of np.uint8 dtype "
+    if img1.dtype != np.uint8:
+        img1 = img_as_ubyte(img1)
+    if img2.dtype != np.uint8:
+        img2 = img_as_ubyte(img2)
 
-    shape1, shape2 = img1.shape, img2.shape
+    isGray = False
+    isColor = False
 
-    # Both images should be single or 3-channel
-    assert len(shape1) == len(shape2),\
-        "both images should be 1-channel or 3-channel"
+    if img1.ndim == 2 and img2.ndim == 2:
+        isGray = True
+    elif multichannel and img1.ndim == 3 and img2.ndim == 3:
+        isColor = True
+    elif not multichannel and img1.ndim >= 2 and img2.ndim >= 2:
+        img1 = img1.reshape(img1.shape[:2])
+        img2 = img2.reshape(img2.shape[:2])
+        isGray = True
+    else:
+        raise ValueError("Both images should be 1-channel or 3-channel \
+            and multichannel should be True for 3-channel images")
 
     # for grayscale image take 1D histogram of intensity values
-    if len(shape1) < 3:
+    if isGray:
 
         # find histograms
         hist1 = np.bincount(img1.ravel(), minlength=256)
@@ -83,7 +97,7 @@ def histogram_backproject(img1, img2):
         return B
 
     # if color image, take 2D histogram
-    else:
+    elif isColor:
         # convert images to hsv plane
         hsv_img1 = rgb2hsv(img1)
         hsv_img2 = rgb2hsv(img2)
