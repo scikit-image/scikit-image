@@ -60,11 +60,6 @@ Noise removal
 Some noise is added to the image, 1% of pixels are randomly set to 255, 1% are
 randomly set to 0. The **median** filter is applied to remove the noise.
 
-.. note::
-
-    There are different implementations of median filter:
-    `skimage.filter.median_filter` and `skimage.filter.rank.median`
-
 """
 
 from skimage.filter.rank import median
@@ -554,7 +549,6 @@ from time import time
 
 from scipy.ndimage.filters import percentile_filter
 from skimage.morphology import dilation
-from skimage.filter import median_filter
 from skimage.filter.rank import median, maximum
 
 
@@ -582,11 +576,6 @@ def cr_max(image, selem):
 @exec_and_timeit
 def cm_dil(image, selem):
     return dilation(image=image, selem=selem)
-
-
-@exec_and_timeit
-def ctmf_med(image, radius):
-    return median_filter(image=image, radius=radius)
 
 
 @exec_and_timeit
@@ -659,7 +648,6 @@ ax.legend(['filter.rank.maximum', 'morphology.dilate'])
 Comparison between:
 
 * `filter.rank.median`
-* `filter.median_filter`
 * `scipy.ndimage.percentile`
 
 on increasing structuring element size:
@@ -673,17 +661,15 @@ e_range = range(2, 30, 4)
 for r in e_range:
     elem = disk(r + 1)
     rc, ms_rc = cr_med(a, elem)
-    rctmf, ms_rctmf = ctmf_med(a, r)
     rndi, ms_ndi = ndi_med(a, r)
-    rec.append((ms_rc, ms_rctmf, ms_ndi))
+    rec.append((ms_rc, ms_ndi))
 
 rec = np.asarray(rec)
 
 fig, ax = plt.subplots()
 ax.set_title('Performance with respect to element size')
 ax.plot(e_range, rec)
-ax.legend(['filter.rank.median', 'filter.median_filter',
-           'scipy.ndimage.percentile'])
+ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Element radius')
 
@@ -695,8 +681,8 @@ Comparison of outcome of the three methods:
 """
 
 fig, ax = plt.subplots()
-ax.imshow(np.hstack((rc, rctmf, rndi)))
-ax.set_title('filter.rank.median vs filtermedian_filter vs scipy.ndimage.percentile')
+ax.imshow(np.hstack((rc, rndi)))
+ax.set_title('filter.rank.median vs. scipy.ndimage.percentile')
 ax.axis('off')
 
 """
@@ -714,17 +700,15 @@ s_range = [100, 200, 500, 1000]
 for s in s_range:
     a = (np.random.random((s, s)) * 256).astype(np.uint8)
     (rc, ms_rc) = cr_med(a, elem)
-    rctmf, ms_rctmf = ctmf_med(a, r)
     rndi, ms_ndi = ndi_med(a, r)
-    rec.append((ms_rc, ms_rctmf, ms_ndi))
+    rec.append((ms_rc, ms_ndi))
 
 rec = np.asarray(rec)
 
 fig, ax = plt.subplots()
 ax.set_title('Performance with respect to image size')
 ax.plot(s_range, rec)
-ax.legend(['filter.rank.median', 'filter.median_filter',
-           'scipy.ndimage.percentile'])
+ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
 ax.set_ylabel('Time (ms)')
 ax.set_xlabel('Image size')
 
