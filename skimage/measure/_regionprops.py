@@ -311,7 +311,6 @@ class _RegionProperties(object):
         if value is not None:
             return value
         else:  # backwards compatability
-            print PROPS[key]
             return getattr(self, PROPS[key])
 
     def __eq__(self, other):
