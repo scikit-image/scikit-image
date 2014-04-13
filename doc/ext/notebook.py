@@ -1,34 +1,37 @@
 import json
 import copy
 
-class Notebook():
-    """Notebook object for generating an IPython notebook from an example file"""
 
+class Notebook():
+    """
+    Notebook object for generating an IPython notebook
+    from an example Python file.
+    """
 
     def __init__(self, sample_notebook_path, example_file):
         # Object variables, gives the ability to personalise per object
         # cell type code
         self.cell_code = {
-                "cell_type": "code",
-                "collapsed": False,
-                "input": [
-                    "# Code Goes Here"
-                ],
-                "language": "python",
-                "metadata": {},
-                "outputs": []
+            "cell_type": "code",
+            "collapsed": False,
+            "input": [
+                "# Code Goes Here"
+            ],
+            "language": "python",
+            "metadata": {},
+            "outputs": []
         }
 
         # cell type markdown
         self.cell_md = {
-                "cell_type": "markdown",
-                "metadata": {},
-                "source": [
-                    'Markdown Goes Here'
-                ]
+            "cell_type": "markdown",
+            "metadata": {},
+            "source": [
+                'Markdown Goes Here'
+            ]
         }
 
-        self.cell_type = {'input':self.cell_code, 'source': self.cell_md}
+        self.cell_type = {'input': self.cell_code, 'source': self.cell_md}
         with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
             self.template = json.load(sample)
             self.code = pythonfile.readlines()
@@ -39,7 +42,7 @@ class Notebook():
         """ Clusters multiple '\n's into one.
         For ex - 'import xyz\n\n\n print 2' becomes 'import xyz\n print 2' """
         modified_code = []
-        modified_code = [self.code[i] for i in range(len(self.code)) if i==0 or self.code[i]!=self.code[i-1]]
+        modified_code = [self.code[i] for i in range(len(self.code)) if i == 0 or self.code[i] != self.code[i-1]]
         return modified_code
 
     def addcell(self, segment_number, type_of_value, value):
@@ -55,7 +58,7 @@ class Notebook():
 
 
 def save_ipython_notebook(example_file, notebook_dir, notebook_path):
-    """ Saves a Python file as an IPython notebook 
+    """ Saves a Python file as an IPython notebook
 
     Parameters
     ----------
@@ -67,7 +70,7 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path):
         path for saving the notebook file (includes the filename)
     """
     sample_notebook_path = notebook_dir.pjoin('sample.ipynb')
-    
+
     nb = Notebook(sample_notebook_path, example_file)
 
     segment_number = 0
@@ -108,5 +111,5 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path):
         else:
             # some text segment is continuing, so add to source
             source.append(line)
-    
+
     nb.json(notebook_path)
