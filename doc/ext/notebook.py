@@ -29,34 +29,35 @@ sample = """{
 }"""
 
 
-def remove_continuous_duplicates(code):
+def remove_consecutive_duplicates(inp):
     """ Remove duplicates of elements appearing consecutively.
 
     Parameters
     ----------
-    code : list of str
+    inp : list
+        Input list.
 
     Returns
     -------
-    modified_code : list of str
+    modified_inp : list
+        Output list, with no consecutive duplicates.
 
-    Notes
-    -----
-    We create a new list and add elements to it which do not have
-    duplicates appearing consecutively.
-    One use case here,
-    'import xyz\n\n\n print 2' becomes 'import xyz\n print 2'
+    Examples
+    --------
+    >>> input = [1, 2, 3, 3, 4, 5, 6, 6]
+    >>> output = remove_consecutive_duplicates(input)
+    >>> output
+    [1, 2, 3, 4, 5, 6]
 
     """
-    modified_code = []
-    modified_code = [code[i] for i in range(len(code)) if i == 0 or code[i] != code[i-1]]
-    return modified_code
+    modified_inp = [inp[0]] + [inp[i] for i in range(1, len(inp)) if inp[i] != inp[i-1]]
+    return modified_inp
 
 
 class Notebook():
     """
-    Notebook object for generating an IPython notebook,
-    from an example Python file.
+    Notebook object for generating an IPython notebook from an example Python
+    file.
 
     Parameters
     ----------
@@ -177,7 +178,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
     docstring = False
     source = []
 
-    modified_code = remove_continuous_duplicates(nb.code)
+    modified_code = remove_consecutive_duplicates(nb.code)
 
     for line in modified_code:
         # A linebreak indicates a segment has ended.
