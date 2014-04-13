@@ -1,4 +1,4 @@
-__all__ = ['python_to_notebook']
+__all__ = ['python_to_notebook', 'Notebook']
 
 import json
 import copy
@@ -29,7 +29,7 @@ sample = """{
 }"""
 
 
-def remove_consecutive_duplicates(inp):
+def _remove_consecutive_duplicates(inp):
     """Remove duplicates of elements appearing consecutively.
 
     Parameters
@@ -152,7 +152,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
     docstring = False
     source = []
 
-    modified_code = remove_consecutive_duplicates(nb.code)
+    modified_code = _remove_consecutive_duplicates(nb.code)
 
     for line in modified_code:
         # A linebreak indicates a segment has ended.
