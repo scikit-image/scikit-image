@@ -3,6 +3,31 @@ __all__ = ['python_to_notebook']
 import json
 import copy
 
+sample = """{
+    "metadata": {
+    "name":""
+    },
+    "nbformat": 3,
+    "nbformat_minor": 0,
+    "worksheets": [
+        {
+            "cells": [
+            {
+                "cell_type": "code",
+                "collapsed": false,
+                "input": [
+                    "%matplotlib inline"
+                ],
+                "language": "python",
+                "metadata": {},
+                "outputs": []
+            }
+            ],
+          "metadata": {}
+        }
+    ]
+}"""
+
 
 class Notebook():
     """
@@ -33,13 +58,20 @@ class Notebook():
             ]
         }
 
-        self.cell_type = {'input_code': self.cell_code, 'input_markdown': self.cell_md}
-        with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
-            self.template = json.load(sample)
+        self.cell_type = {'input': self.cell_code, 'source': self.cell_md}
+        self.keys = {'input_code': 'input', 'input_markdown': 'source'}
+        with open(example_file, 'r') as pythonfile:
+            self.template = json.loads(sample)
             self.code = pythonfile.readlines()
             # Adds an extra newline at the end,
             # this aids in extraction of text segments
             self.code.append('\n')
+
+    def fetchkey(self, type_of_value):
+        """ Returns the key required for insertion into notebook,
+        based on the type of value.
+        """
+        return self.keys[type_of_value]
 
     def filter_continuous_duplication(self):
         """ Clusters multiple '\n's into one.
@@ -53,8 +85,9 @@ class Notebook():
         Cell differs with type of value.
         """
         if type_of_value in ['input_markdown', 'input_code']:
-            self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[type_of_value]))
-            self.template["worksheets"][0]["cells"][segment_number][type_of_value] = value
+            key = self.fetchkey(type_of_value)
+            self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[key]))
+            self.template["worksheets"][0]["cells"][segment_number][key] = value
 
     def json(self, notebook_path):
         """ Writes the template to file (json) """
