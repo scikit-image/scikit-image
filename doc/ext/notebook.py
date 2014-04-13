@@ -33,7 +33,7 @@ class Notebook():
             ]
         }
 
-        self.cell_type = {'input': self.cell_code, 'source': self.cell_md}
+        self.cell_type = {'input_code': self.cell_code, 'input_markdown': self.cell_md}
         with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
             self.template = json.load(sample)
             self.code = pythonfile.readlines()
@@ -48,11 +48,11 @@ class Notebook():
         modified_code = [self.code[i] for i in range(len(self.code)) if i == 0 or self.code[i] != self.code[i-1]]
         return modified_code
 
-    def addcell(self, segment_number, type_of_value, value):
+    def addcell(self, segment_number, value, type_of_value='input_code'):
         """ Adds a notebook cell, by updating the json template.
         Cell differs with type of value.
         """
-        if type_of_value in ['source', 'input']:
+        if type_of_value in ['input_markdown', 'input_code']:
             self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[type_of_value]))
             self.template["worksheets"][0]["cells"][segment_number][type_of_value] = value
 
@@ -94,15 +94,15 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
                 segment_number += 1
                 # we've found text segments within the docstring
                 if docstring is True:
-                    nb.addcell(segment_number, 'source', source)
+                    nb.addcell(segment_number, source, 'input_markdown')
                 else:
-                    nb.addcell(segment_number, 'input', source)
+                    nb.addcell(segment_number, source, 'input_code')
                 source = []
         # if it's a comment
         elif line.strip().startswith('#'):
             segment_number += 1
             line = line.strip(' #')
-            nb.addcell(segment_number, 'source', line)
+            nb.addcell(segment_number, line, 'input_markdown')
         elif line == '"""\n':
             if docstring is False:
                 docstring = True
@@ -113,7 +113,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
                 # Write leftover docstring if any left
                 if source:
                     segment_number += 1
-                    nb.addcell(segment_number, 'source', source)
+                    nb.addcell(segment_number, source, 'input_markdown')
                     source = []
         else:
             # some text segment is continuing, so add to source
