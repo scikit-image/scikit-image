@@ -38,7 +38,7 @@ class Notebook():
             # Adds an extra newline at the end, which aids in extraction of text segments
             self.code.append('\n')
 
-    def getModifiedCode(self):
+    def filter_continous_duplication(self):
         """ Clusters multiple '\n's into one.
         For ex - 'import xyz\n\n\n print 2' becomes 'import xyz\n print 2' """
         modified_code = []
@@ -78,7 +78,7 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path):
     docstring = False
     source = []
 
-    modified_code = nb.getModifiedCode()
+    modified_code = nb.filter_continous_duplication()
 
     for line in modified_code:
         # A linebreak indicates a segment has ended. If the text segment had only comments, then source is blank,
