@@ -30,7 +30,7 @@ sample = """{
 
 
 def remove_consecutive_duplicates(inp):
-    """ Remove duplicates of elements appearing consecutively.
+    """Remove duplicates of elements appearing consecutively.
 
     Parameters
     ----------
@@ -99,7 +99,7 @@ class Notebook():
             self.code.append('\n')
 
     def fetch_key(self, type_of_value):
-        """ Find the key required for insertion into notebook.
+        """Find the key required for insertion into notebook.
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class Notebook():
         return self.valuetype_to_celltype[type_of_value]
 
     def add_cell(self, segment_number, value, type_of_value='code'):
-        """ Adds a notebook cell.
+        """Adds a notebook cell.
 
         Parameters
         ----------
@@ -147,7 +147,7 @@ class Notebook():
             self.template["worksheets"][0]["cells"][segment_number][key] = value
 
     def json(self):
-        """ Dumps the template JSON to string.
+        """Dumps the template JSON to string.
 
         Returns
         -------
@@ -159,7 +159,7 @@ class Notebook():
 
 
 def python_to_notebook(example_file, notebook_dir, notebook_path):
-    """ Convert a Python file to an IPython notebook.
+    """Convert a Python file to an IPython notebook.
 
     Parameters
     ----------
