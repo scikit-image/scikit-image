@@ -110,7 +110,7 @@ class Notebook():
             segment.
         value : str
             The actual content to be saved in the cell.
-        type_of_value : str, optional
+        type_of_value : {'code', 'markdown'}
             The type of content in the segment.
             The default value will add a cell of type code.
 
