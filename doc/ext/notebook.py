@@ -38,7 +38,7 @@ class Notebook():
             # Adds an extra newline at the end, which aids in extraction of text segments
             self.code.append('\n')
 
-    def filter_continous_duplication(self):
+    def filter_continuous_duplication(self):
         """ Clusters multiple '\n's into one.
         For ex - 'import xyz\n\n\n print 2' becomes 'import xyz\n print 2' """
         modified_code = []
@@ -57,8 +57,8 @@ class Notebook():
             json.dump(self.template, output, indent=2)
 
 
-def save_ipython_notebook(example_file, notebook_dir, notebook_path):
-    """ Saves a Python file as an IPython notebook
+def python_to_notebook(example_file, notebook_dir, notebook_path):
+    """ Convert a Python file to an IPython notebook.
 
     Parameters
     ----------
@@ -78,7 +78,7 @@ def save_ipython_notebook(example_file, notebook_dir, notebook_path):
     docstring = False
     source = []
 
-    modified_code = nb.filter_continous_duplication()
+    modified_code = nb.filter_continuous_duplication()
 
     for line in modified_code:
         # A linebreak indicates a segment has ended. If the text segment had only comments, then source is blank,
