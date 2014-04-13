@@ -162,7 +162,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
             if segment_has_begun is True and source:
                 segment_number += 1
                 # we've found text segments within the docstring
-                if docstring is True:
+                if docstring:
                     nb.add_cell(segment_number, source, 'markdown')
                 else:
                     nb.add_cell(segment_number, source, 'code')
@@ -175,9 +175,9 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
         elif line == '"""\n':
             if docstring is False:
                 docstring = True
-            # Indicates, completion of docstring,
+            # Indicates, completion of docstring
             # add whatever in source to markdown (cell type markdown)
-            elif docstring is True:
+            elif docstring:
                 docstring = False
                 # Write leftover docstring if any left
                 if source:
