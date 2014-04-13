@@ -124,10 +124,10 @@ class Notebook():
         Parameters
         ----------
         segment_number : int
-            Newline separated sections in example file, are segments.
-            Code and markdown written together in such a section are,
-            treated as different segments. Each cell has content from
-            one section.
+            Newline separated portions in example file, are sections.
+            Code and markdown written together in such a section are further
+            treated as different segments. Each cell has content from one
+            segment.
         value : str
             The actual content to be saved in the cell.
         type_of_value : str, optional
