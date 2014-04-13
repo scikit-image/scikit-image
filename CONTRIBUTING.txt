@@ -54,6 +54,18 @@ For a more detailed discussion, read these :doc:`detailed documents
 <gitwash/index>` on how to use Git with ``scikit-image``
 (`<http://scikit-image.org/docs/dev/gitwash/index.html>`_).
 
+4. Review process:
+
+    * Reviewers will write inline and/or general comments to improve the
+      implementation and the documentation. This step makes the quality of
+      scikit-image and ensures an homogeneous style as well as the best
+      performances.
+
+    * Modify the code and commit locally.
+
+    * Push your changes on GitHub as before. Your pull request will be
+      automatically updated.
+
 .. note::
 
    To reviewers: add a short explanation of what a branch did to the merge
