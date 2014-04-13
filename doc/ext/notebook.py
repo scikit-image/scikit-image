@@ -49,7 +49,7 @@ def remove_continuous_duplicates(code):
 
     """
     modified_code = []
-    modified_code = [self.code[i] for i in range(len(self.code)) if i == 0 or self.code[i] != self.code[i-1]]
+    modified_code = [code[i] for i in range(len(code)) if i == 0 or code[i] != code[i-1]]
     return modified_code
 
 
@@ -154,7 +154,7 @@ class Notebook():
             The template JSON converted to a string with a two char indent.
 
         """
-        return json.dump(self.template, indent=2)
+        return json.dumps(self.template, indent=2)
 
 
 def python_to_notebook(example_file, notebook_dir, notebook_path):
@@ -214,4 +214,4 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
             source.append(line)
 
     with open(notebook_path, 'w') as output:
-        output.write(nb.json(notebook_path))
+        output.write(nb.json())
