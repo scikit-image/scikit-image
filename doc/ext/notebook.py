@@ -35,7 +35,8 @@ class Notebook():
         with open(sample_notebook_path, 'r') as sample, open(example_file, 'r') as pythonfile:
             self.template = json.load(sample)
             self.code = pythonfile.readlines()
-            # Adds an extra newline at the end, which aids in extraction of text segments
+            # Adds an extra newline at the end,
+            # this aids in extraction of text segments
             self.code.append('\n')
 
     def filter_continuous_duplication(self):
@@ -46,7 +47,9 @@ class Notebook():
         return modified_code
 
     def addcell(self, segment_number, type_of_value, value):
-        """ Adds a notebook cell, by updating the json template. Cell differs with type of value """
+        """ Adds a notebook cell, by updating the json template.
+        Cell differs with type of value.
+        """
         if type_of_value in ['source', 'input']:
             self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[type_of_value]))
             self.template["worksheets"][0]["cells"][segment_number][type_of_value] = value
@@ -81,7 +84,8 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
     modified_code = nb.filter_continuous_duplication()
 
     for line in modified_code:
-        # A linebreak indicates a segment has ended. If the text segment had only comments, then source is blank,
+        # A linebreak indicates a segment has ended.
+        # If the text segment had only comments, then source is blank,
         # So, ignore it, as already added in cell type markdown
         if line == "\n":
             if segment_has_begun is True and source:
@@ -100,7 +104,8 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
         elif line == '"""\n':
             if docstring is False:
                 docstring = True
-            # Indicates, completion of docstring, add whatever in source to markdown (cell type markdown)
+            # Indicates, completion of docstring,
+            # add whatever in source to markdown (cell type markdown)
             elif docstring is True:
                 docstring = False
                 # Write leftover docstring if any left

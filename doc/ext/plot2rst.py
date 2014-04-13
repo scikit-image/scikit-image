@@ -357,7 +357,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     ipnotebook_name = './notebook/' + ipnotebook_name
     example_rst += NOTEBOOK_LINK.format(ipnotebook_name)
 
-    f = open(rst_path,'w')
+    f = open(rst_path, 'w')
     f.write(example_rst)
     f.flush()
 
