@@ -98,27 +98,6 @@ class Notebook():
             # this aids in extraction of text segments
             self.code.append('\n')
 
-    def fetch_key(self, type_of_value):
-        """Find the key required for insertion into notebook.
-
-        Parameters
-        ----------
-        type_of_value : str
-            Type of data, to be inserted in a cell.
-
-        Returns
-        -------
-        str
-            Key which reflects what is the cell type.
-
-        Notes
-        -----
-        type_of_value is either, 'code', which maps to cell of type
-        code('input') or 'markdown', which maps to cell of type markdown('source').
-
-        """
-        return self.valuetype_to_celltype[type_of_value]
-
     def add_cell(self, segment_number, value, type_of_value='code'):
         """Adds a notebook cell.
 
@@ -135,14 +114,9 @@ class Notebook():
             The type of content in the segment.
             The default value will add a cell of type code.
 
-        Notes
-        -----
-        The cell is only added in the notebook if the segment is of type,
-        markdown or code.
-
         """
         if type_of_value in ['markdown', 'code']:
-            key = self.fetch_key(type_of_value)
+            key = self.valuetype_to_celltype[type_of_value]
             self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[key]))
             self.template["worksheets"][0]["cells"][segment_number][key] = value
 
