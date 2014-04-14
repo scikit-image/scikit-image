@@ -52,7 +52,7 @@ before_install:
     - pip install --use-mirrors six
 
     - pip install --use-mirrors nose-cov
-    - pip install --use-mirrors python-coveralls
+    - pip install --use-mirrors coveralls
 
     - python check_bento_build.py
 
@@ -68,7 +68,7 @@ script:
 
     # Run all tests
     - if [[ $PYVER == '3.x' ]]; then
-    -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config .coveragerc skimage
+    -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config=.coveragerc skimage
     - fi
     - if [[ $PYVER == '2.x' ]]; then
     -   nosetests --exe -v --with-doctest skimage
@@ -82,7 +82,7 @@ script:
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
 
 after_success:
-     - if [[ $PYVER == '3.x' ]]; then
-     -   coveralls
-     - fi
+    - if [[ $PYVER == '3.x' ]]; then
+    -   coveralls
+    - fi
 
