@@ -98,27 +98,23 @@ class Notebook():
             # this aids in extraction of text segments
             self.code.append('\n')
 
-    def add_cell(self, segment_number, value, type_of_value='code'):
+    def add_cell(self, value, type_of_value='code'):
         """Adds a notebook cell.
 
         Parameters
         ----------
-        segment_number : int
-            Newline separated portions in example file, are sections.
-            Code and markdown written together in such a section are further
-            treated as different segments. Each cell has content from one
-            segment.
         value : str
             The actual content to be saved in the cell.
         type_of_value : {'code', 'markdown'}
-            The type of content in the segment.
+            The type of content.
             The default value will add a cell of type code.
 
         """
         if type_of_value in ['markdown', 'code']:
             key = self.valuetype_to_celltype[type_of_value]
             self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[key]))
-            self.template["worksheets"][0]["cells"][segment_number][key] = value
+            # assign value to the last cell
+            self.template["worksheets"][0]["cells"][-1][key] = value
 
     def json(self):
         """Dumps the template JSON to string.
@@ -147,7 +143,10 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
     """
     nb = Notebook(example_file)
 
-    segment_number = 0
+    # Newline separated portions in example file, are sections.
+    # Code and markdown written together in such a section are further
+    # treated as different segments. Each cell has content from one
+    # segment.
     segment_has_begun = True
     docstring = False
     source = []
@@ -160,18 +159,16 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
         # So, ignore it, as already added in cell type markdown
         if line == "\n":
             if segment_has_begun is True and source:
-                segment_number += 1
                 # we've found text segments within the docstring
                 if docstring:
-                    nb.add_cell(segment_number, source, 'markdown')
+                    nb.add_cell(source, 'markdown')
                 else:
-                    nb.add_cell(segment_number, source, 'code')
+                    nb.add_cell(source, 'code')
                 source = []
         # if it's a comment
         elif line.strip().startswith('#'):
-            segment_number += 1
             line = line.strip(' #')
-            nb.add_cell(segment_number, line, 'markdown')
+            nb.add_cell(line, 'markdown')
         elif line == '"""\n':
             if docstring is False:
                 docstring = True
@@ -181,8 +178,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
                 docstring = False
                 # Write leftover docstring if any left
                 if source:
-                    segment_number += 1
-                    nb.add_cell(segment_number, source, 'markdown')
+                    nb.add_cell(source, 'markdown')
                     source = []
         else:
             # some text segment is continuing, so add to source
