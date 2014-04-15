@@ -29,17 +29,17 @@ sample = """{
 }"""
 
 
-def _remove_consecutive_duplicates(inp):
+def _remove_consecutive_duplicates(x):
     """Remove duplicates of elements appearing consecutively.
 
     Parameters
     ----------
-    inp : list
+    x : list
         Input list.
 
     Returns
     -------
-    modified_inp : list
+    modified_x : list
         Output list, with no consecutive duplicates.
 
     Examples
@@ -50,8 +50,8 @@ def _remove_consecutive_duplicates(inp):
     [1, 2, 3, 4, 5, 6]
 
     """
-    modified_inp = [inp[0]] + [inp[i] for i in range(1, len(inp)) if inp[i] != inp[i-1]]
-    return modified_inp
+    modified_x = [x[0]] + [x[i] for i in range(1, len(x)) if x[i] != x[i-1]]
+    return modified_x
 
 
 class Notebook():
@@ -67,7 +67,7 @@ class Notebook():
     """
 
     def __init__(self, example_file):
-        # Object variables, gives the ability to personalise per object
+        # Object variables, give the ability to personalise, each object
         # cell type code
         self.cell_code = {
             "cell_type": "code",
@@ -94,12 +94,12 @@ class Notebook():
         with open(example_file, 'r') as pythonfile:
             self.template = json.loads(sample)
             self.code = pythonfile.readlines()
-            # Adds an extra newline at the end,
+            # Add an extra newline at the end,
             # this aids in extraction of text segments
             self.code.append('\n')
 
     def add_cell(self, value, type_of_value='code'):
-        """Adds a notebook cell.
+        """Add a notebook cell.
 
         Parameters
         ----------
@@ -112,12 +112,13 @@ class Notebook():
         """
         if type_of_value in ['markdown', 'code']:
             key = self.valuetype_to_celltype[type_of_value]
-            self.template["worksheets"][0]["cells"].append(copy.deepcopy(self.cell_type[key]))
+            cells = self.template["worksheets"][0]["cells"]
+            cells.append(copy.deepcopy(self.cell_type[key]))
             # assign value to the last cell
-            self.template["worksheets"][0]["cells"][-1][key] = value
+            cells[-1][key] = value
 
     def json(self):
-        """Dumps the template JSON to string.
+        """Dump the template JSON to string.
 
         Returns
         -------
