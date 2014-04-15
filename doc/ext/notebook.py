@@ -66,7 +66,7 @@ class Notebook():
 
     """
 
-    def __init__(self, example_file):
+    def __init__(self):
         # Object variables, give the ability to personalise, each object
         # cell type code
         self.cell_code = {
@@ -91,12 +91,6 @@ class Notebook():
 
         self.cell_type = {'input': self.cell_code, 'source': self.cell_md}
         self.valuetype_to_celltype = {'code': 'input', 'markdown': 'source'}
-        with open(example_file, 'r') as pythonfile:
-            self.template = json.loads(sample)
-            self.code = pythonfile.readlines()
-            # Add an extra newline at the end,
-            # this aids in extraction of text segments
-            self.code.append('\n')
 
     def add_cell(self, value, type_of_value='code'):
         """Add a notebook cell.
@@ -142,7 +136,13 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
         Path for saving the notebook file (includes the filename).
 
     """
-    nb = Notebook(example_file)
+    nb = Notebook()
+    with open(example_file, 'r') as pythonfile:
+        nb.template = json.loads(sample)
+        nb.code = pythonfile.readlines()
+        # Add an extra newline at the end,
+        # this aids in extraction of text segments
+        nb.code.append('\n')
 
     # Newline separated portions in example file, are sections.
     # Code and markdown written together in such a section are further
