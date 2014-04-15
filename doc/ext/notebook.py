@@ -159,7 +159,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
         # If the text segment had only comments, then source is blank,
         # So, ignore it, as already added in cell type markdown
         if line == "\n":
-            if segment_has_begun is True and source:
+            if segment_has_begun and source:
                 # we've found text segments within the docstring
                 if docstring:
                     nb.add_cell(source, 'markdown')
@@ -171,7 +171,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
             line = line.strip(' #')
             nb.add_cell(line, 'markdown')
         elif line == '"""\n':
-            if docstring is False:
+            if not docstring:
                 docstring = True
             # Indicates, completion of docstring
             # add whatever in source to markdown (cell type markdown)
