@@ -5,7 +5,8 @@ import copy
 import warnings
 
 
-sample = """{
+# Skeleton notebook in JSON format
+skeleton_nb = """{
     "metadata": {
     "name":""
     },
@@ -29,29 +30,6 @@ sample = """{
         }
     ]
 }"""
-
-
-def _squash_repeats(x):
-    """Reduce repeating elements to a single occurrance.
-
-    Parameters
-    ----------
-    x : list
-        Input list.
-
-    Returns
-    -------
-    list
-        A copy of `x` with repeating elements squashed.
-
-    Examples
-    --------
-    >>> input = [1, 2, 3, 3, 4, 5, 6, 6]
-    >>> print _squash_repeats(input)
-    [1, 2, 3, 4, 5, 6]
-
-    """
-    return [x[0]] + [x[i] for i in range(1, len(x)) if x[i] != x[i-1]]
 
 
 class Notebook(object):
@@ -81,6 +59,7 @@ class Notebook(object):
             ]
         }
 
+        self.template = json.loads(skeleton_nb)
         self.cell_type = {'input': self.cell_code, 'source': self.cell_md}
         self.valuetype_to_celltype = {'code': 'input', 'markdown': 'source'}
 
@@ -116,71 +95,30 @@ class Notebook(object):
         return json.dumps(self.template, indent=2)
 
 
-def python_to_notebook(example_file, notebook_path):
-    """Convert a Python file to an IPython notebook.
-
-    Parameters
-    ----------
-    example_file : str
-        Path for source Python file.
-    notebook_path : str
-        Path for saving the notebook file (includes the filename).
-
-    """
+def test_notebook_basic():
     nb = Notebook()
-    with open(example_file, 'r') as pythonfile:
-        nb.template = json.loads(sample)
-        nb.code = pythonfile.readlines()
-        # Add an extra newline at the end,
-        # this aids in extraction of text segments
-        nb.code.append('\n')
-
-    # Newline separated portions in example file, are sections.
-    # Code and markdown written together in such a section are further
-    # treated as different segments. Each cell has content from one
-    # segment.
-    docstring = False
-    source = []
-
-    code = _squash_repeats(nb.code)
-
-    for line in code:
-        # A linebreak indicates a segment has ended.
-        # If the text segment had only comments, ignore the blank source as
-        # already added in cell type markdown
-        if line == '\n':
-            if source:
-                # we've found text segments within the docstring
-                if docstring:
-                    nb.add_cell(source, 'markdown')
-                else:
-                    nb.add_cell(source, 'code')
-                source = []
-        # if it's a comment
-        elif line.strip().startswith('#'):
-            line = line.lstrip(' #')
-            nb.add_cell(line, 'markdown')
-        elif line == '"""\n':
-            if not docstring:
-                docstring = True
-            # Indicates, completion of docstring
-            # add whatever in source to markdown (cell type markdown)
-            elif docstring:
-                docstring = False
-                # Write leftover docstring if any left
-                if source:
-                    nb.add_cell(source, 'markdown')
-                    source = []
-        else:
-            # some text segment is continuing, so add to source
-            source.append(line)
-
-    with open(notebook_path, 'w') as output:
-        output.write(nb.json())
+    assert(json.loads(nb.json()) == json.loads(skeleton_nb))
 
 
-def test_foo():
-    assert 1==1
+def test_notebook_add():
+    nb = Notebook()
+
+    str1 = 'hello world'
+    str2 = 'f = lambda x: x * x'
+
+    nb.add_cell(str1, cell_type='markdown')
+    nb.add_cell(str2, cell_type='code')
+
+    d = json.loads(nb.json())
+    cells = d['worksheets'][0]['cells']
+    values = [c['input'] if c['cell_type'] == 'code' else c['source']
+              for c in cells]
+
+    assert values[1] == str1
+    assert values[2] == str2
+
+    assert cells[1]['cell_type'] == 'markdown'
+    assert cells[2]['cell_type'] == 'code'
 
 
 if __name__ == "__main__":
