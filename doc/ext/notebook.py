@@ -4,7 +4,9 @@ import json
 import copy
 import warnings
 
-sample = """{
+
+# Skeleton notebook in JSON format
+skeleton_nb = """{
     "metadata": {
     "name":""
     },
@@ -30,36 +32,9 @@ sample = """{
 }"""
 
 
-def _remove_consecutive_duplicates(x):
-    """Remove duplicates of elements appearing consecutively.
-
-    Parameters
-    ----------
-    x : list
-        Input list.
-
-    Returns
-    -------
-    modified_x : list
-        Output list, with no consecutive duplicates.
-
-    Examples
-    --------
-    >>> input = [1, 2, 3, 3, 4, 5, 6, 6]
-    >>> output = remove_consecutive_duplicates(input)
-    >>> output
-    [1, 2, 3, 4, 5, 6]
-
+class Notebook(object):
     """
-    modified_x = [x[0]] + [x[i] for i in range(1, len(x)) if x[i] != x[i-1]]
-    return modified_x
-
-
-class Notebook():
-    """
-    Notebook object for generating an IPython notebook from an example Python
-    file.
-
+    Notebook object for building an IPython notebook cell-by-cell.
     """
 
     def __init__(self):
@@ -84,6 +59,7 @@ class Notebook():
             ]
         }
 
+        self.template = json.loads(skeleton_nb)
         self.cell_type = {'input': self.cell_code, 'source': self.cell_md}
         self.valuetype_to_celltype = {'code': 'input', 'markdown': 'source'}
 
@@ -93,10 +69,9 @@ class Notebook():
         Parameters
         ----------
         value : str
-            The actual content to be saved in the cell.
+            Cell content.
         cell_type : {'code', 'markdown'}
-            The type of content.
-            The default value will add a cell of type 'code'.
+            Type of content (default is 'code').
 
         """
         if cell_type in ['markdown', 'code']:
@@ -106,78 +81,46 @@ class Notebook():
             # assign value to the last cell
             cells[-1][key] = value
         else:
-            warnings.warn('Unsupported cell type %s, data ignored' % cell_type)
+            warnings.warn('Ignoring unsupported cell type (%s)' % cell_type)
 
     def json(self):
-        """Dump the template JSON to string.
+        """Return a JSON representation of the notebook.
 
         Returns
         -------
         str
-            The template JSON converted to a string with a two char indent.
+            JSON notebook.
 
         """
         return json.dumps(self.template, indent=2)
 
 
-def python_to_notebook(example_file, notebook_path):
-    """Convert a Python file to an IPython notebook.
-
-    Parameters
-    ----------
-    example_file : str
-        Path for source Python file.
-    notebook_path : str
-        Path for saving the notebook file (includes the filename).
-
-    """
+def test_notebook_basic():
     nb = Notebook()
-    with open(example_file, 'r') as pythonfile:
-        nb.template = json.loads(sample)
-        nb.code = pythonfile.readlines()
-        # Add an extra newline at the end,
-        # this aids in extraction of text segments
-        nb.code.append('\n')
+    assert(json.loads(nb.json()) == json.loads(skeleton_nb))
 
-    # Newline separated portions in example file, are sections.
-    # Code and markdown written together in such a section are further
-    # treated as different segments. Each cell has content from one
-    # segment.
-    docstring = False
-    source = []
 
-    code = _remove_consecutive_duplicates(nb.code)
+def test_notebook_add():
+    nb = Notebook()
 
-    for line in code:
-        # A linebreak indicates a segment has ended.
-        # If the text segment had only comments, ignore the blank source as
-        # already added in cell type markdown
-        if line == '\n':
-            if source:
-                # we've found text segments within the docstring
-                if docstring:
-                    nb.add_cell(source, 'markdown')
-                else:
-                    nb.add_cell(source, 'code')
-                source = []
-        # if it's a comment
-        elif line.strip().startswith('#'):
-            line = line.lstrip(' #')
-            nb.add_cell(line, 'markdown')
-        elif line == '"""\n':
-            if not docstring:
-                docstring = True
-            # Indicates, completion of docstring
-            # add whatever in source to markdown (cell type markdown)
-            elif docstring:
-                docstring = False
-                # Write leftover docstring if any left
-                if source:
-                    nb.add_cell(source, 'markdown')
-                    source = []
-        else:
-            # some text segment is continuing, so add to source
-            source.append(line)
+    str1 = 'hello world'
+    str2 = 'f = lambda x: x * x'
 
-    with open(notebook_path, 'w') as output:
-        output.write(nb.json())
+    nb.add_cell(str1, cell_type='markdown')
+    nb.add_cell(str2, cell_type='code')
+
+    d = json.loads(nb.json())
+    cells = d['worksheets'][0]['cells']
+    values = [c['input'] if c['cell_type'] == 'code' else c['source']
+              for c in cells]
+
+    assert values[1] == str1
+    assert values[2] == str2
+
+    assert cells[1]['cell_type'] == 'markdown'
+    assert cells[2]['cell_type'] == 'code'
+
+
+if __name__ == "__main__":
+    import numpy.testing as npt
+    npt.run_module_suite()

@@ -80,7 +80,9 @@ from skimage import io
 from skimage import transform
 from skimage.util.dtype import dtype_range
 
-from notebook import python_to_notebook
+from notebook import Notebook
+
+from docutils.core import publish_parts
 
 
 LITERALINCLUDE = """
@@ -326,7 +328,8 @@ def write_example(src_name, src_dir, rst_dir, cfg):
     rst_path = rst_dir.pjoin(basename + cfg.source_suffix)
     notebook_path = notebook_dir.pjoin(basename + '.ipynb')
 
-    if _plots_are_current(src_path, image_path) and rst_path.exists and notebook_path.exists:
+    if _plots_are_current(src_path, image_path) and rst_path.exists and \
+        notebook_path.exists:
         return
 
     blocks = split_code_and_text_blocks(example_file)
@@ -374,7 +377,23 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         else:
             shutil.copy(cfg.plot2rst_default_thumb, thumb_path)
 
-    python_to_notebook(example_file, notebook_path)
+    # Export example to IPython notebook
+    nb = Notebook()
+
+    for (cell_type, _, content) in blocks:
+        content = content.rstrip('\n')
+
+        if cell_type == 'code':
+            nb.add_cell(content, cell_type='code')
+        else:
+            content = content.replace('"""', '')
+            content = '\n'.join([line for line in content.split('\n') if
+                                 not line.startswith('.. image')])
+            html = publish_parts(content, writer_name='html')['html_body']
+            nb.add_cell(html, cell_type='markdown')
+
+    with open(notebook_path, 'w') as f:
+        f.write(nb.json())
 
 
 def save_thumbnail(image, thumb_path, shape):
