@@ -53,11 +53,9 @@ def _squash_repeats(x):
     return [x[0]] + [x[i] for i in range(1, len(x)) if x[i] != x[i-1]]
 
 
-class Notebook():
+class Notebook(object):
     """
-    Notebook object for generating an IPython notebook from an example Python
-    file.
-
+    Notebook object for building an IPython notebook cell-by-cell.
     """
 
     def __init__(self):
@@ -91,10 +89,9 @@ class Notebook():
         Parameters
         ----------
         value : str
-            The actual content to be saved in the cell.
+            Cell content.
         cell_type : {'code', 'markdown'}
-            The type of content.
-            The default value will add a cell of type 'code'.
+            Type of content (default is 'code').
 
         """
         if cell_type in ['markdown', 'code']:
@@ -104,15 +101,15 @@ class Notebook():
             # assign value to the last cell
             cells[-1][key] = value
         else:
-            warnings.warn('Unsupported cell type %s, data ignored' % cell_type)
+            warnings.warn('Ignoring unsupported cell type (%s)' % cell_type)
 
     def json(self):
-        """Dump the template JSON to string.
+        """Return a JSON representation of the notebook.
 
         Returns
         -------
         str
-            The template JSON converted to a string with a two char indent.
+            JSON notebook.
 
         """
         return json.dumps(self.template, indent=2)
