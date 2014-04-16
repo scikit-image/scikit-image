@@ -4,6 +4,7 @@ import json
 import copy
 import warnings
 
+
 sample = """{
     "metadata": {
     "name":""
@@ -176,3 +177,12 @@ def python_to_notebook(example_file, notebook_path):
 
     with open(notebook_path, 'w') as output:
         output.write(nb.json())
+
+
+def test_foo():
+    assert 1==1
+
+
+if __name__ == "__main__":
+    import numpy.testing as npt
+    npt.run_module_suite()
