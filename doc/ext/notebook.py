@@ -30,8 +30,8 @@ sample = """{
 }"""
 
 
-def _remove_consecutive_duplicates(x):
-    """Remove duplicates of elements appearing consecutively.
+def _squash_repeats(x):
+    """Reduce repeating elements to a single occurrance.
 
     Parameters
     ----------
@@ -40,19 +40,17 @@ def _remove_consecutive_duplicates(x):
 
     Returns
     -------
-    modified_x : list
-        Output list, with no consecutive duplicates.
+    list
+        A copy of `x` with repeating elements squashed.
 
     Examples
     --------
     >>> input = [1, 2, 3, 3, 4, 5, 6, 6]
-    >>> output = remove_consecutive_duplicates(input)
-    >>> output
+    >>> print _squash_repeats(input)
     [1, 2, 3, 4, 5, 6]
 
     """
-    modified_x = [x[0]] + [x[i] for i in range(1, len(x)) if x[i] != x[i-1]]
-    return modified_x
+    return [x[0]] + [x[i] for i in range(1, len(x)) if x[i] != x[i-1]]
 
 
 class Notebook():
@@ -146,7 +144,7 @@ def python_to_notebook(example_file, notebook_path):
     docstring = False
     source = []
 
-    code = _remove_consecutive_duplicates(nb.code)
+    code = _squash_repeats(nb.code)
 
     for line in code:
         # A linebreak indicates a segment has ended.
