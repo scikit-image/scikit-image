@@ -374,7 +374,7 @@ def write_example(src_name, src_dir, rst_dir, cfg):
         else:
             shutil.copy(cfg.plot2rst_default_thumb, thumb_path)
 
-    python_to_notebook(example_file, notebook_dir, notebook_path)
+    python_to_notebook(example_file, notebook_path)
 
 
 def save_thumbnail(image, thumb_path, shape):

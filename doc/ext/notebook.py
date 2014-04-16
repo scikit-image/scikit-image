@@ -120,15 +120,13 @@ class Notebook():
         return json.dumps(self.template, indent=2)
 
 
-def python_to_notebook(example_file, notebook_dir, notebook_path):
+def python_to_notebook(example_file, notebook_path):
     """Convert a Python file to an IPython notebook.
 
     Parameters
     ----------
     example_file : str
         Path for source Python file.
-    notebook_dir : str
-        Directory for saving the notebook files.
     notebook_path : str
         Path for saving the notebook file (includes the filename).
 
@@ -145,18 +143,17 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
     # Code and markdown written together in such a section are further
     # treated as different segments. Each cell has content from one
     # segment.
-    segment_has_begun = True
     docstring = False
     source = []
 
-    modified_code = _remove_consecutive_duplicates(nb.code)
+    code = _remove_consecutive_duplicates(nb.code)
 
-    for line in modified_code:
+    for line in code:
         # A linebreak indicates a segment has ended.
-        # If the text segment had only comments, then source is blank,
-        # So, ignore it, as already added in cell type markdown
+        # If the text segment had only comments, ignore the blank source as
+        # already added in cell type markdown
         if line == '\n':
-            if segment_has_begun and source:
+            if source:
                 # we've found text segments within the docstring
                 if docstring:
                     nb.add_cell(source, 'markdown')
@@ -165,7 +162,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
                 source = []
         # if it's a comment
         elif line.strip().startswith('#'):
-            line = line.strip(' #')
+            line = line.lstrip(' #')
             nb.add_cell(line, 'markdown')
         elif line == '"""\n':
             if not docstring:
