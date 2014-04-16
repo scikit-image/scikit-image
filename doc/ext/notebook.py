@@ -2,6 +2,7 @@ __all__ = ['python_to_notebook', 'Notebook']
 
 import json
 import copy
+import warnings
 
 sample = """{
     "metadata": {
@@ -59,32 +60,26 @@ class Notebook():
     Notebook object for generating an IPython notebook from an example Python
     file.
 
-    Parameters
-    ----------
-    example_file : str
-        Path for example file.
-
     """
 
     def __init__(self):
-        # Object variables, give the ability to personalise, each object
         # cell type code
         self.cell_code = {
-            "cell_type": "code",
-            "collapsed": False,
-            "input": [
-                "# Code Goes Here"
+            'cell_type': 'code',
+            'collapsed': False,
+            'input': [
+                '# Code Goes Here'
             ],
-            "language": "python",
-            "metadata": {},
-            "outputs": []
+            'language': 'python',
+            'metadata': {},
+            'outputs': []
         }
 
         # cell type markdown
         self.cell_md = {
-            "cell_type": "markdown",
-            "metadata": {},
-            "source": [
+            'cell_type': 'markdown',
+            'metadata': {},
+            'source': [
                 'Markdown Goes Here'
             ]
         }
@@ -92,24 +87,26 @@ class Notebook():
         self.cell_type = {'input': self.cell_code, 'source': self.cell_md}
         self.valuetype_to_celltype = {'code': 'input', 'markdown': 'source'}
 
-    def add_cell(self, value, type_of_value='code'):
+    def add_cell(self, value, cell_type='code'):
         """Add a notebook cell.
 
         Parameters
         ----------
         value : str
             The actual content to be saved in the cell.
-        type_of_value : {'code', 'markdown'}
+        cell_type : {'code', 'markdown'}
             The type of content.
-            The default value will add a cell of type code.
+            The default value will add a cell of type 'code'.
 
         """
-        if type_of_value in ['markdown', 'code']:
-            key = self.valuetype_to_celltype[type_of_value]
-            cells = self.template["worksheets"][0]["cells"]
+        if cell_type in ['markdown', 'code']:
+            key = self.valuetype_to_celltype[cell_type]
+            cells = self.template['worksheets'][0]['cells']
             cells.append(copy.deepcopy(self.cell_type[key]))
             # assign value to the last cell
             cells[-1][key] = value
+        else:
+            warnings.warn('Unsupported cell type %s, data ignored' % cell_type)
 
     def json(self):
         """Dump the template JSON to string.
@@ -158,7 +155,7 @@ def python_to_notebook(example_file, notebook_dir, notebook_path):
         # A linebreak indicates a segment has ended.
         # If the text segment had only comments, then source is blank,
         # So, ignore it, as already added in cell type markdown
-        if line == "\n":
+        if line == '\n':
             if segment_has_begun and source:
                 # we've found text segments within the docstring
                 if docstring:
