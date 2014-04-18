@@ -9,7 +9,7 @@ significantly the performance.
 """
 
 import warnings
-
+from numbers import Number
 import numpy as np
 from scipy import sparse, ndimage
 
@@ -216,14 +216,14 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-    mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
-        Mode for solving the linear system in the random walker
-        algorithm.
+    mode : string, available options {'cg_mg', 'cg', 'bf'}
+        Mode for solving the linear system in the random walker algorithm.
+        If no preference given, automatically attempt to use the fastest
+        option available ('cg_mg' from pyamg >> 'cg' with UMFPACK > 'bf').
 
-        - 'bf' (brute force, default): an LU factorization of the Laplacian is
+        - 'bf' (brute force): an LU factorization of the Laplacian is
           computed. This is fast for small images (<1024x1024), but very slow
-          (due to the memory cost) and memory-consuming for big images (in 3-D
-          for example).
+          and memory-intensive for large images (e.g., 3-D volumes).
         - 'cg' (conjugate gradient): the linear system is solved iteratively
           using the Conjugate Gradient method from scipy.sparse.linalg. This is
           less memory-consuming than the brute force method for large images,
@@ -316,11 +316,11 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> a = np.zeros((10, 10)) + 0.2*np.random.random((10, 10))
+    >>> a = np.zeros((10, 10)) + 0.2 * np.random.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a)
-    >>> b[3,3] = 1 #Marker for first phase
-    >>> b[6,6] = 2 #Marker for second phase
+    >>> b[3, 3] = 1  # Marker for first phase
+    >>> b[6, 6] = 2  # Marker for second phase
     >>> random_walker(a, b)
     array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -334,7 +334,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=int32)
 
     """
-
+    # Parse input data
     if mode is None:
         if amg_loaded:
             mode = 'cg_mg'
@@ -351,40 +351,64 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                       'You may also install pyamg and run the random_walker '
                       'function in "cg_mg" mode (see docstring).')
 
-    # Spacing kwarg checks
-    if spacing is None:
-        spacing = (1., 1., 1.)
-    elif len(spacing) == 3:
-        pass
-    else:
-        raise ValueError('Input argument `spacing` incorrect, should be an '
-                         'iterable of length 3.')
+    if (labels == 0).sum() == 0:
+        warnings.warn('Random walker only segments unlabeled areas, where '
+                      'labels == 0. No zero valued areas in labels were '
+                      'found. Returning provided labels.')
 
-    # Parse input data
+        if return_full_prob:
+            # Find and iterate over valid labels
+            unique_labels = np.unique(labels)
+            unique_labels = unique_labels[unique_labels > 0]
+
+            out_labels = np.empty(labels.shape + (0, ))
+            for i in unique_labels:
+                out_labels = np.concatenate(
+                    (out_labels, (labels == i)[..., np.newaxis]), axis=-1)
+        else:
+            out_labels = labels
+        return out_labels
+
     if not multichannel:
         # We work with 4-D arrays of floats
-        if data.ndim < 1 or data.ndim > 4:
+        if data.ndim < 2 or data.ndim > 3:
             raise ValueError('For non-multichannel input, data must be of '
                              'dimension 2 or 3.')
-        dims = data.shape
+        dims = data.shape  # To reshape final labeled result
         data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
     else:
-        if data.ndim < 2:
-            raise ValueError('For multichannel input, data must have >= 3 '
+        if data.ndim < 3:
+            raise ValueError('For multichannel input, data must have 3 or 4 '
                              'dimensions.')
-        dims = data[..., 0].shape
+        dims = data[..., 0].shape  # To reshape final labeled result
         data = img_as_float(data)
         if data.ndim == 3:
             data = data[..., np.newaxis].transpose((0, 1, 3, 2))
 
+    # Spacing kwarg checks
+    if spacing is None:
+        spacing = (1., ) * 3
+    elif len(spacing) == len(dims):
+        for i in spacing:
+            if not isinstance(i, Number):
+                raise ValueError('Input `spacing` contained %s, which is not '
+                                 'a number.' % (i))
+        if len(spacing) == 2:
+            spacing += (1., )
+    else:
+        raise ValueError('Input argument `spacing` incorrect, should be an '
+                         'iterable of length 3.')
+
     if copy:
         labels = np.copy(labels)
     label_values = np.unique(labels)
+
     # Reorder label values to have consecutive integers (no gaps)
     if np.any(np.diff(label_values) != 1):
         mask = labels >= 0
         labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
     labels = labels.astype(np.int32)
+
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
     if np.any(labels < 0):
@@ -399,6 +423,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         lap_sparse = _build_laplacian(data, spacing, beta=beta,
                                       multichannel=multichannel)
     lap_sparse, B = _buildAB(lap_sparse, labels)
+
     # We solve the linear system
     # lap_sparse X = B
     # where X[i, j] is the probability that a marker of label i arrives
@@ -420,6 +445,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if mode == 'bf':
         X = _solve_bf(lap_sparse, B,
                       return_full_prob=return_full_prob)
+
     # Clean up results
     if return_full_prob:
         labels = labels.astype(np.float)
