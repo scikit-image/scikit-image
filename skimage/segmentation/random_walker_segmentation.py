@@ -202,7 +202,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
         dimensional (multichannel=True) with the highest dimension denoting
-        channels. Data spacing is assumed isotropic unless the `spacing` 
+        channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
     labels : array of ints, of same shape as `data` without channels dimension
         Array of seed markers labeled with different positive integers
@@ -344,11 +344,12 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             mode = 'bf'
 
     if UmfpackContext is None and mode == 'cg':
-        warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
-                      'SciPy with UMFPACK, this will greatly speed up the '
-                      'random walker functions. You may also install pyamg '
-                      'and run the random walker function in cg_mg mode '
-                      '(see the docstrings)')
+        warnings.warn('"cg" mode will be used, but it may be slower than '
+                      '"bf" because SciPy was built without UMFPACK. Consider'
+                      ' rebuilding SciPy with UMFPACK; this will greatly '
+                      'accelerate the conjugate gradient ("cg") solver. '
+                      'You may also install pyamg and run the random_walker '
+                      'function in "cg_mg" mode (see docstring).')
 
     # Spacing kwarg checks
     if spacing is None:
@@ -362,15 +363,16 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     # Parse input data
     if not multichannel:
         # We work with 4-D arrays of floats
-        assert data.ndim > 1 and data.ndim < 4, 'For non-multichannel input, \
-                                                 data must be of dimension 2 \
-                                                 or 3.'
+        if data.ndim < 1 or data.ndim > 4:
+            raise ValueError('For non-multichannel input, data must be of '
+                             'dimension 2 or 3.')
         dims = data.shape
         data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
     else:
+        if data.ndim < 2:
+            raise ValueError('For multichannel input, data must have >= 3 '
+                             'dimensions.')
         dims = data[..., 0].shape
-        assert multichannel and data.ndim > 2, 'For multichannel input, data \
-                                                must have >= 3 dimensions.'
         data = img_as_float(data)
         if data.ndim == 3:
             data = data[..., np.newaxis].transpose((0, 1, 3, 2))
