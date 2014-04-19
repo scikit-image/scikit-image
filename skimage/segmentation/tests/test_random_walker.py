@@ -270,6 +270,17 @@ def test_trivial_cases():
     np.testing.assert_array_equal(test, expected)
 
 
+def test_length2_spacing():
+    # If this passes without raising an exception (warnings OK), the new
+    #   spacing code is working properly.
+    np.random.seed(42)
+    img = np.ones((10, 10)) + 0.2 * np.random.normal(size=(10, 10))
+    labels = np.zeros((10, 10), dtype=np.uint8)
+    labels[2, 4] = 1
+    labels[6, 8] = 4
+    random_walker(img, labels, spacing=(1., 2.))
+
+
 def test_bad_inputs():
     # Too few dimensions
     img = np.ones(10)
@@ -279,6 +290,7 @@ def test_bad_inputs():
                              random_walker, img, labels, multichannel=True)
 
     # Too many dimensions
+    np.random.seed(42)
     img = np.random.normal(size=(3, 3, 3, 3, 3))
     labels = np.arange(3 ** 5).reshape(img.shape)
     np.testing.assert_raises(ValueError, random_walker, img, labels)
