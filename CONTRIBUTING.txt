@@ -79,7 +79,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 .. note::
 
-   To reviewers: if it is not ovvious, add a short explanation of what a branch
+   To reviewers: if it is not obvious, add a short explanation of what a branch
    did to the merge message and, if closing a bug, also add "Closes #123"
    where 123 is the issue number.
 
