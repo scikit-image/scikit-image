@@ -59,8 +59,8 @@ For a more detailed discussion, read these :doc:`detailed documents
     * Reviewers (the other developers and interested community members) will
       write inline and/or general comments on your Pull Request (PR) to improve
       the implementation and the documentation. Everyone has their code reviewed
-      in the same manner, it should not discourage you to contribute and it is
-      actually a chance to improve your coding skills. Code review ensures high
+      in the same manner. Don't let the review discourage you from contributing,
+      as it is a great chance to improve your coding.  Code review ensures high
       quality code, homogeneous style and optimal performance.
 
     * To update your pull request, make your changes on your local repository
@@ -70,7 +70,9 @@ For a more detailed discussion, read these :doc:`detailed documents
     * `Travis-CI <http://travis-ci.org/>`__, a continuous integration service
       is triggered after each Pull Request update, to build the code, run the
       unittests, measure the code coverage and check the coding style (PEP8) of
-      your branch.
+      your branch. The Travis tests must pass before your PR is merged. If
+      Travis fails, you can find out why by clicking on the "failed" icon to see
+      the build number, then on individual jobs to see the test logs.
 
 .. note::
 
