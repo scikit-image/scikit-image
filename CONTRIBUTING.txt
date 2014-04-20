@@ -13,7 +13,7 @@ Here's the long and short of it:
 
       git clone git@github.com:your-username/scikit-image.git
 
-   * Add upstream repository::
+   * Add the upstream repository::
 
       git remote add upstream git@github.com:scikit-image/scikit-image.git
 
@@ -43,8 +43,8 @@ Here's the long and short of it:
 
       git push origin transform-speedups
 
-   * Go to GitHub. The new branch will show up with a Pull Request button -
-     click it.
+   * Go to GitHub. The new branch will show up with a green Pull Request
+     button - click it.
 
    * If you want, post on the `mailing list
      <http://groups.google.com/group/scikit-image>`_ to explain your changes or
@@ -57,28 +57,31 @@ For a more detailed discussion, read these :doc:`detailed documents
 4. Review process:
 
     * Reviewers (the other developers and interested community members) will
-      write inline and/or general comments on your Pull Request (PR) to improve
-      the implementation and the documentation. Everyone has their code reviewed
-      in the same manner. Don't let the review discourage you from contributing,
-      as it is a great chance to improve your coding.  Code review ensures high
-      quality code, homogeneous style and optimal performance.
+      write inline and/or general comments on your Pull Request (PR) to help
+      you improve its implementation, documentation and style.  Every single
+      developer working on the project has their code reviewed, and we've come
+      to see it as friendly conversation from which we all learn and the
+      overall code quality benefits.  Therefore, please don't let the review
+      discourage you from contributing: its only aim is to improve the quality
+      of project, not to criticize (we are, after all, very grateful for the
+      time you're donating!).
 
     * To update your pull request, make your changes on your local repository
-      and commit. As soon as those changes are pushed up to the same branch as
-      before, the pull request will be automatically updated.
+      and commit. As soon as those changes are pushed up (to the same branch as
+      before) the pull request will update automatically.
 
-    * `Travis-CI <http://travis-ci.org/>`__, a continuous integration service
-      is triggered after each Pull Request update, to build the code, run the
-      unittests, measure the code coverage and check the coding style (PEP8) of
-      your branch. The Travis tests must pass before your PR is merged. If
-      Travis fails, you can find out why by clicking on the "failed" icon to see
-      the build number, then on individual jobs to see the test logs.
+    * `Travis-CI <http://travis-ci.org/>`__, a continuous integration service,
+      is triggered after each Pull Request update to build the code, run unit
+      tests, measure code coverage and check coding style (PEP8) of your
+      branch. The Travis tests must pass before your PR can be merged. If
+      Travis fails, you can find out why by clicking on the "failed" icon (red
+      cross) and inspecting the build and test log.
 
 .. note::
 
-   To reviewers: add a short explanation of what a branch did to the merge
-   message and, if closing a bug, also add "Closes gh-123" where 123 is the
-   bug number.
+   To reviewers: if it is not ovvious, add a short explanation of what a branch
+   did to the merge message and, if closing a bug, also add "Closes #123"
+   where 123 is the issue number.
 
 
 Divergence between ``upstream master`` and your feature branch
@@ -118,7 +121,7 @@ Guidelines
   as NumPy and SciPy.
 * For new functionality, always add an example to the
   gallery.
-* No changes should be committed without review.  Ask on the
+* No changes are ever committed without review.  Ask on the
   `mailing list <http://groups.google.com/group/scikit-image>`_ if
   you get no response to your pull request.
   **Never merge your own pull request.**
@@ -174,6 +177,7 @@ detailing the test coverage::
   skimage/filter/__init__                              1      1   100%
   ...
 
+
 Activate Travis-CI for your fork (optional)
 -------------------------------------------
 
@@ -193,6 +197,10 @@ It corresponds to steps one and two in
 
 Thus, as soon as you push your code to your fork, it will trigger Travis-CI,
 and you will receive an email notification when the process is done.
+
+Every time Travis is triggered, it also calls on `Coveralls
+<http://coveralls.io>`_ to inspect the current test overage.
+
 
 Bugs
 ----
