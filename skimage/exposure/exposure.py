@@ -4,7 +4,7 @@ import numpy as np
 from skimage import img_as_float
 from skimage.util.dtype import dtype_range, dtype_limits
 from skimage._shared.utils import deprecated
-
+from scipy.ndimage.measurements import histogram as sp_hist
 
 __all__ = ['histogram', 'cumulative_distribution', 'equalize',
            'rescale_intensity', 'adjust_gamma', 'adjust_log', 'adjust_sigmoid']
@@ -104,15 +104,18 @@ def cumulative_distribution(image, nbins=256):
     img_cdf = img_cdf / float(img_cdf[-1])
     return img_cdf, bin_centers
 
-
-def equalize_hist(image, nbins=256):
+def equalize_hist(image, bin_min=0, bin_max=255, bin_level=256):
     """Return image after histogram equalization.
 
     Parameters
     ----------
     image : array
         Image array.
-    nbins : int
+    bin_min : int
+        Output image minimum level.
+    bin_max : int
+        Output image maximum level.
+    bin_level : int
         Number of bins for image histogram.
 
     Returns
@@ -130,11 +133,91 @@ def equalize_hist(image, nbins=256):
     .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 
     """
-    image = img_as_float(image)
-    cdf, bin_centers = cumulative_distribution(image, nbins)
-    out = np.interp(image.flat, bin_centers, cdf)
-    return out.reshape(image.shape)
+    row, col = image.shape
+    hist = sp_hist(image, bin_min, bin_max, bin_level)
+    cdf = hist.cumsum()
+    cdf_min = cdf[cdf > 0].min()
+    x = cdf - cdf_min
+    y = (row * col) - cdf_min
+    z = bin_max - bin_min
+    cdf = np.round((x / y) * z)
+    cdf = np.nan_to_num(cdf)
+    cdf[cdf < 0] = 0
+    bin_center = np.linspace(bin_min, bin_max, bin_level)
+    image2 = np.interp(image.flat, bin_center, cdf, bin_min, bin_max)
+    return image2.reshape((row, col))
 
+def equalize_adapthist(image, tiles=(16, 16), bin_min=0, bin_max=255,
+                       bin_level=256, clip=1):
+    """Return image after contrast limited adaptive histogram equalization.
+
+    Parameters
+    ----------
+    image : array
+        Image array.
+    tiles : tuple
+        Number of tiles.
+    bin_min : int
+        Output image minimum level.
+    bin_max : int
+        Output image maximum level.
+    bin_level : int
+        Number of bins for image histogram.
+    clip : float
+        Contrast clipping.
+
+    Returns
+    -------
+    out : float array
+        Image array after contrast limited adaptive histogram equalization.
+    
+    References
+    ----------
+    .. [1] http://en.wikipedia.org/wiki/Adaptive_histogram_equalization
+    
+    """
+    row, col = image.shape
+    image_tiles = np.zeros_like(image)
+    
+    for r in xrange(0, row, tiles[0]):
+        r2 = r + tiles[0]
+        for c in xrange(0, col, tiles[1]):
+            c2 = c + tiles[1]
+            
+            image_tile = image[r:r2, c:c2]
+            r3, c3 = image_tile.shape
+            hist = sp_hist(image_tile, bin_min, bin_max, bin_level)
+            limit = clip * r3 * c3
+            excess_mod = 0
+            while True:
+                excess = hist - limit
+                excess[excess < 0] = 0
+                hist -= excess
+                excess = excess.sum()
+                
+                if excess <= 0:
+                    break
+                
+                hist += excess / bin_level
+            
+            cdf = hist.cumsum()
+            cdf_min = cdf[cdf > 0].min()
+            
+            if cdf_min == r3 * c3:
+                image_tiles[r:r2, c:c2] = image_tile
+                continue
+            
+            x = cdf - cdf_min
+            y = (r3 * c3) - cdf_min
+            z = bin_max - bin_min
+            cdf = np.round((x / y) * z)
+            cdf = np.nan_to_num(cdf)
+            cdf[cdf < 0] = 0
+            bins = np.linspace(bin_min, bin_max, nbins)
+            image_tile2 = np.interp(image_tile.flat, bins, cdf, bin_min, bin_max)
+            image_tiles[r:r2, c:c2] = image_tile2.reshape((r3, c3))
+    
+    return image_tiles
 
 def rescale_intensity(image, in_range=None, out_range=None):
     """Return image after stretching or shrinking its intensity levels.
