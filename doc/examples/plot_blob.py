@@ -11,14 +11,14 @@ image is a star or a galaxy, so we are literally counting stars.
 Laplacian of Gaussian (LoG)
 -----------------------------
 This is the most accurate and slowest approach. It computes the Laplacian
-of Gaussian images with successively increasing standard devation and
+of Gaussian images with successively increasing standard deviation and
 stacks them up in a cube. Blobs are local maximas in this cube. Detecting
 larger blobs is especially slower because of larger kernel sizes during
 convolution. Only bright blobs on dark backgrounds are detected.
 
 Difference of Gaussian (LoG)
 ----------------------------
-This is a faster approximant of LoG approach. In this case the image is
+This is a faster approximation of LoG approach. In this case the image is
 blurred with increasing standard deviations and the difference between
 two successively blurred images are stacked up in a cube. This method
 suffers from the same disadvantage as LoG approach for detecting larger
