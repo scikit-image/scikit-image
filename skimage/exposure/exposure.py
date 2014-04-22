@@ -138,7 +138,7 @@ def equalize_hist(image, bin_min=0, bin_max=255, bin_level=256):
     cdf = hist.cumsum()
     cdf_min = cdf[cdf > 0].min()
     x = cdf - cdf_min
-    y = (row * col) - cdf_min
+    y = float((row * col) - cdf_min)
     z = bin_max - bin_min
     cdf = np.round((x / y) * z)
     cdf = np.nan_to_num(cdf)
@@ -198,7 +198,7 @@ def equalize_adapthist(image, tiles=(16, 16), bin_min=0, bin_max=255,
                 if excess <= 0:
                     break
                 
-                hist += excess / bin_level
+                hist += excess / float(bin_level)
             
             cdf = hist.cumsum()
             cdf_min = cdf[cdf > 0].min()
@@ -208,7 +208,7 @@ def equalize_adapthist(image, tiles=(16, 16), bin_min=0, bin_max=255,
                 continue
             
             x = cdf - cdf_min
-            y = (r3 * c3) - cdf_min
+            y = float((r3 * c3) - cdf_min)
             z = bin_max - bin_min
             cdf = np.round((x / y) * z)
             cdf = np.nan_to_num(cdf)
