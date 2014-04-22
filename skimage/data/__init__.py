@@ -202,6 +202,7 @@ def coffee():
     """
     return load("coffee.png")
 
+
 def hubble_deep_field():
     """Hubble eXtreme Deep Field
 
@@ -217,7 +218,6 @@ def hubble_deep_field():
 
     The image was captured by NASA and may be freely used in the public domain
     according to NASA's contract (NAS5-26555).
-    
+
     """
     return load("hubble_deep_field.jpg")
-
