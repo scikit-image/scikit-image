@@ -207,7 +207,7 @@ def hubble_deep_field():
     """Hubble eXtreme Deep Field
 
     This photograph contains the Hubble Telescopes farthest ever view of
-    the universe.Originally intended to be used as an example of blob
+    the universe. Originally intended to be used as an example of blob
     detection.
 
     Notes
