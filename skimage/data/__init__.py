@@ -24,7 +24,8 @@ __all__ = ['load',
            'clock',
            'immunohistochemistry',
            'chelsea',
-           'coffee']
+           'coffee',
+           'hubble_deep_field']
 
 
 def load(f):
@@ -200,3 +201,23 @@ def coffee():
 
     """
     return load("coffee.png")
+
+def hubble_deep_field():
+    """Hubble eXtreme Deep Field
+
+    This photograph contains the Hubble Telescopes farthest ever view of
+    the universe.Originally intended to be used as an example of blob
+    detection.
+
+    Notes
+    -----
+    This image was downloaded from
+    `HubbleSite
+    <http://hubblesite.org/newscenter/archive/releases/2012/37/image/a/>`__.
+
+    The image was captured by NASA and may be freely used in the public domain
+    according to NASA's contract (NAS5-26555).
+    
+    """
+    return load("hubble_deep_field.jpg")
+
