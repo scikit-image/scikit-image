@@ -50,6 +50,8 @@ functionality is only available with the following installed:
    (or <`PIL http://www.pythonware.com/products/pil/>`__)
    The ``Pillow`` library (or equivalently ``PIL``) is used for Input/Output.
 
+* `Astropy <http://www.astropy.org>`__ is required to use the FITS io plug-in.
+
 Testing requirements
 --------------------
 * `Nose <https://nose.readthedocs.org/en/latest/>`__
