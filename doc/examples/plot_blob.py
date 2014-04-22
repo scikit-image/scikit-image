@@ -30,7 +30,7 @@ This is the fastest approach. It detects blobs by finding maximas in the
 matrix of the Determinant of Hessian of the image. The detection speed is
 independent of the size of blobs as internally the implementation uses
 box filters instead of convolutions. Bright on dark as well as dark on
-bright blobs are detected.The downside is that small blobs (<3px) are not
+bright blobs are detected. The downside is that small blobs (<3px) are not
 detected accurately.
 
 """
