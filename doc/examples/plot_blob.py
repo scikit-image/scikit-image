@@ -44,47 +44,35 @@ from skimage.color import rgb2gray
 image = data.hubble_deep_field()[0:500, 0:500]
 image_gray = rgb2gray(image)
 
-blobs = blob_log(image_gray, max_sigma=30, num_sigma=10, threshold=.1)
+blobs_log = blob_log(image_gray, max_sigma=30, num_sigma=10, threshold=.1)
+# Compute areas in the 2nd column.
+blobs_log[:, 2] = blobs_log[:, 2] * sqrt(2)
 
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-ax.set_title('Laplacian of Gaussian')
-plt.imshow(image)
+blobs_dog = blob_dog(image_gray, max_sigma=30, threshold=.1)
+blobs_dog[:, 2] = blobs_dog[:, 2] * sqrt(2)
 
-for blob in blobs:
-    y, x = blob[0], blob[1]
-    r = blob[2] * sqrt(2)
-    c = plt.Circle((x, y), r, color='#00ff00', lw=2, fill=False)
-    ax.add_patch(c)
+blobs_doh = blob_doh(image_gray, max_sigma=30, threshold=.01)
 
+fig1, ax1 = plt.subplots(1, 1)
+ax1.set_title('Laplacian of Gaussian')
 
-blobs = blob_dog(image_gray, max_sigma=30, threshold=.1)
+fig2, ax2 = plt.subplots(1, 1)
+ax2.set_title('Difference of Gaussian')
 
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-ax.set_title('Difference of Gaussian')
-plt.imshow(image)
+fig3, ax3 = plt.subplots(1, 1)
+ax3.set_title('Determinant of Hessian')
 
-for blob in blobs:
-    y, x = blob[0], blob[1]
-    r = blob[2] * sqrt(2)
-    c = plt.Circle((x, y), r, color='#ffff00', lw=2, fill=False)
-    ax.add_patch(c)
+axes = [ax1, ax2, ax3]
+blobs_list = [blobs_log, blobs_dog, blobs_doh]
+colors = ['yellow', 'lime', 'red']
 
+sequence = zip(axes, blobs_list, colors)
 
-blobs = blob_doh(image_gray, max_sigma=30, threshold=.01)
-
-fig = plt.figure()
-ax = fig.add_subplot(1, 1, 1)
-ax.set_title('Determinant of Hessian')
-plt.imshow(image)
-
-
-for blob in blobs:
-    y, x = blob[0], blob[1]
-    r = blob[2]
-    c = plt.Circle((x, y), r, color='#ff0000', lw=2, fill=False)
-    ax.add_patch(c)
-
+for ax, blobs, color in sequence:
+    ax.imshow(image, interpolation='nearest')
+    for blob in blobs:
+        y, x, r = blob
+        c = plt.Circle((x, y), r, color=color, linewidth=2, fill=False)
+        ax.add_patch(c)
 
 plt.show()
