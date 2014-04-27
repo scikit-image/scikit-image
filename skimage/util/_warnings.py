@@ -55,6 +55,6 @@ def all_warnings():
         except AttributeError:
             pass
 
-    with warnings.catch_warnings():
+    with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
-        yield
+        yield w
