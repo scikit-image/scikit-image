@@ -5,6 +5,7 @@ import sys
 import warnings
 import inspect
 
+
 @contextmanager
 def all_warnings():
     """
