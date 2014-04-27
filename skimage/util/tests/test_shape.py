@@ -3,7 +3,7 @@ from nose.tools import raises
 from numpy.testing import assert_equal, assert_warns
 
 from skimage.util.shape import view_as_blocks, view_as_windows
-from skimage.util import all_warnings
+from skimage._shared.utils import all_warnings
 
 
 @raises(TypeError)
