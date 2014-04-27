@@ -216,7 +216,7 @@ def hubble_deep_field():
     `HubbleSite
     <http://hubblesite.org/newscenter/archive/releases/2012/37/image/a/>`__.
 
-    The image was captured by NASA and `may be freely used in the 
+    The image was captured by NASA and `may be freely used in the
     public domain <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
 
     """
