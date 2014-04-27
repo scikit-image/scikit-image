@@ -14,15 +14,17 @@ This is the most accurate and slowest approach. It computes the Laplacian
 of Gaussian images with successively increasing standard deviation and
 stacks them up in a cube. Blobs are local maximas in this cube. Detecting
 larger blobs is especially slower because of larger kernel sizes during
-convolution. Only bright blobs on dark backgrounds are detected.
+convolution. Only bright blobs on dark backgrounds are detected. See
+:py:meth:`skimage.feature.blob_log` for usage.
 
-Difference of Gaussian (LoG)
+Difference of Gaussian (DoG)
 ----------------------------
 This is a faster approximation of LoG approach. In this case the image is
 blurred with increasing standard deviations and the difference between
 two successively blurred images are stacked up in a cube. This method
 suffers from the same disadvantage as LoG approach for detecting larger
-blobs. Blobs are again assumed to be bright on dark.
+blobs. Blobs are again assumed to be bright on dark. See
+:py:meth:`skimage.feature.blob_dog` for usage.
 
 Determinant of Hessian (DoH)
 ----------------------------
@@ -31,7 +33,7 @@ matrix of the Determinant of Hessian of the image. The detection speed is
 independent of the size of blobs as internally the implementation uses
 box filters instead of convolutions. Bright on dark as well as dark on
 bright blobs are detected. The downside is that small blobs (<3px) are not
-detected accurately.
+detected accurately. See :py:meth:`skimage.feature.blob_doh` for usage.
 
 """
 
