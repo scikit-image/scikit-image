@@ -6,7 +6,7 @@ Blob Detection
 Blobs are bright on dark or dark on bright regions in an image. In
 this example, blobs are detected using 3 algorithms. The image used
 in this case is the Hubble eXtreme Deep Field. Each bright dot in the
-image is a star or a galaxy, so we are literally counting stars.
+image is a star or a galaxy.
 
 Laplacian of Gaussian (LoG)
 -----------------------------
@@ -53,22 +53,15 @@ blobs_dog[:, 2] = blobs_dog[:, 2] * sqrt(2)
 
 blobs_doh = blob_doh(image_gray, max_sigma=30, threshold=.01)
 
-fig1, ax1 = plt.subplots(1, 1)
-ax1.set_title('Laplacian of Gaussian')
-
-fig2, ax2 = plt.subplots(1, 1)
-ax2.set_title('Difference of Gaussian')
-
-fig3, ax3 = plt.subplots(1, 1)
-ax3.set_title('Determinant of Hessian')
-
-axes = [ax1, ax2, ax3]
 blobs_list = [blobs_log, blobs_dog, blobs_doh]
 colors = ['yellow', 'lime', 'red']
+titles = ['Laplacian of Gaussian', 'Difference of Gaussian',
+          'Determinant of Hessian']
+sequence = zip(blobs_list, colors, titles)
 
-sequence = zip(axes, blobs_list, colors)
-
-for ax, blobs, color in sequence:
+for blobs, color, title in sequence:
+    fig, ax = plt.subplots(1, 1)
+    ax.set_title(title)
     ax.imshow(image, interpolation='nearest')
     for blob in blobs:
         y, x, r = blob

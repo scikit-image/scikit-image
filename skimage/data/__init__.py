@@ -204,10 +204,10 @@ def coffee():
 
 
 def hubble_deep_field():
-    """Hubble eXtreme Deep Field
+    """Hubble eXtreme Deep Field.
 
     This photograph contains the Hubble Telescope's farthest ever view of
-    the universe. Originally intended to be used as an example of blob
+    the universe. It can be useful as an example for multi-scale
     detection.
 
     Notes
@@ -216,7 +216,8 @@ def hubble_deep_field():
     `HubbleSite
     <http://hubblesite.org/newscenter/archive/releases/2012/37/image/a/>`__.
 
-    The image was captured by NASA and `may be freely used in the public domain <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
+    The image was captured by NASA and `may be freely used in the 
+    public domain <http://www.nasa.gov/audience/formedia/features/MP_Photo_Guidelines.html>`_.
 
     """
     return load("hubble_deep_field.jpg")
