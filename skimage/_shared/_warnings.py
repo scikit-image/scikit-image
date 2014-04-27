@@ -49,7 +49,7 @@ def all_warnings():
             f[0].f_locals['__warningregistry__'] = {}
     del frame
 
-    for mod in sys.modules.values():
+    for mod in list(sys.modules.values()):
         try:
             mod.__warningregistry__.clear()
         except AttributeError:
