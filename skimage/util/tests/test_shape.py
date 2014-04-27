@@ -3,6 +3,7 @@ from nose.tools import raises
 from numpy.testing import assert_equal, assert_warns
 
 from skimage.util.shape import view_as_blocks, view_as_windows
+from skimage.util import all_warnings
 
 
 @raises(TypeError)
@@ -132,7 +133,7 @@ def test_view_as_windows_2D():
                                 [17, 18, 19]]]]))
 
 
-def test_view_as_windows_With_skip():
+def test_view_as_windows_with_skip():
     A = np.arange(20).reshape((5, 4))
     B = view_as_windows(A, (2, 2), step=2)
     assert_equal(B, [[[[0, 1],
@@ -152,8 +153,9 @@ def test_views_non_contiguous():
     A = np.arange(16).reshape((4, 4))
     A = A[::2, :]
 
-    assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
-    assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
+    with all_warnings():
+        assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
+        assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
 
 
 if __name__ == '__main__':
