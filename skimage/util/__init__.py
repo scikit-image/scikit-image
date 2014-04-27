@@ -7,6 +7,8 @@ from .arraypad import pad
 from ._regular_grid import regular_grid
 from .unique import unique_rows
 
+from ._warnings import all_warnings
+
 
 __all__ = ['img_as_float',
            'img_as_int',
