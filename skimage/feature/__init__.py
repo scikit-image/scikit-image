@@ -10,6 +10,7 @@ from .corner import (corner_kitchen_rosenfeld, corner_harris,
                      hessian_matrix_eigvals, hessian_matrix_det)
 from .corner_cy import corner_moravec, corner_orientations
 from .template import match_template
+from .register_translation import register_translation
 from .brief import BRIEF
 from .censure import CENSURE
 from .orb import ORB
@@ -40,6 +41,7 @@ __all__ = ['canny'
            'corner_fast',
            'corner_orientations',
            'match_template',
+           'register_translation',
            'BRIEF',
            'CENSURE',
            'ORB',

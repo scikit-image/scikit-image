@@ -27,3 +27,5 @@ Version 0.12
   `skimage.transform.PolynomialTransform._params`,
   `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
 * Remove deprecated functions `skimage.filters.denoise_*`
+* Add 3D phantom in `skimage.data`
+* Add 3D test case of `skimage.feature.phase_correlate`
