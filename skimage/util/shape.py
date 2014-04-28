@@ -2,6 +2,7 @@ __all__ = ['view_as_blocks', 'view_as_windows']
 
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
+from warnings import warn
 
 
 def view_as_blocks(arr_in, block_shape):
@@ -11,17 +12,17 @@ def view_as_blocks(arr_in, block_shape):
 
     Parameters
     ----------
-    arr_in: ndarray
-        The n-dimensional input array.
-
-    block_shape: tuple
+    arr_in : ndarray
+        N-d input array.
+    block_shape : tuple
         The shape of the block. Each dimension must divide evenly into the
         corresponding dimensions of `arr_in`.
 
     Returns
     -------
-    arr_out: ndarray
-        Block view of the input array.
+    arr_out : ndarray
+        Block view of the input array.  If `arr_in` is non-contiguous, a copy
+        is made.
 
     Examples
     --------
@@ -70,8 +71,6 @@ def view_as_blocks(arr_in, block_shape):
            [[[76, 77],
              [82, 83]]]])
     """
-
-    # -- basic checks on arguments
     if not isinstance(block_shape, tuple):
         raise TypeError('block needs to be a tuple')
 
@@ -88,6 +87,11 @@ def view_as_blocks(arr_in, block_shape):
         raise ValueError("'block_shape' is not compatible with 'arr_in'")
 
     # -- restride the array to build the block view
+
+    if not arr_in.flags.contiguous:
+        warn(RuntimeWarning("Cannot provide views on a non-contiguous input "
+                            "array without copying."))
+
     arr_in = np.ascontiguousarray(arr_in)
 
     new_shape = tuple(arr_shape / block_shape) + tuple(block_shape)
@@ -106,9 +110,9 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     Parameters
     ----------
-    arr_in: ndarray
-        The n-dimensional input array.
-    window_shape: tuple
+    arr_in : ndarray
+        N-d input array.
+    window_shape : tuple
         Defines the shape of the elementary n-dimensional orthotope
         (better know as hyperrectangle [1]_) of the rolling window view.
     step : int, optional
@@ -118,8 +122,9 @@ def view_as_windows(arr_in, window_shape, step=1):
 
     Returns
     -------
-    arr_out: ndarray
-        (rolling) window view of the input array.
+    arr_out : ndarray
+        (rolling) window view of the input array.   If `arr_in` is
+        non-contiguous, a copy is made.
 
     Notes
     -----
@@ -228,6 +233,10 @@ def view_as_windows(arr_in, window_shape, step=1):
         raise ValueError("`window_shape` is too small")
 
     # -- build rolling window view
+    if not arr_in.flags.contiguous:
+        warn(RuntimeWarning("Cannot provide views on a non-contiguous input "
+                            "array without copying."))
+
     arr_in = np.ascontiguousarray(arr_in)
 
     new_shape = tuple((arr_shape - window_shape) // step + 1) + \
