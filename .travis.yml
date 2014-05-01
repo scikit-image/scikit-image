@@ -29,6 +29,10 @@ matrix:
 virtualenv:
     system_site_packages: true
 
+env:
+    global:
+    - secure: "Z0N0B1f9Fn3QAaA8JTFSBOqcVcqi1ZK9xqoffDSBp4lcxhvdXeMU3Kdct2dapJ10zFkVGjkLv2Nb/e2Y1pF+2wqYdNs1AQ6gzsuzglgaOIBt1VHLLiJzq1abgtYZnPIh4+Yf8rjceh9DSNfLQLr+L5zN8DfmzWjL8Zt1sHs9EvM="
+
 before_install:
     - export DISPLAY=:99.0
     - sh -e /etc/init.d/xvfb start
@@ -51,6 +55,7 @@ before_install:
     - pip install --use-mirrors cython
     - pip install --use-mirrors flake8
     - pip install --use-mirrors six
+    - pip install --use-mirrors sphinx
 
     - pip install --use-mirrors nose-cov
     - pip install --use-mirrors coveralls
@@ -82,8 +87,16 @@ script:
     # Run pep8 and flake tests
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
 
-after_success:
-    - if [[ $PYVER == '3.x' ]]; then
-    -   coveralls
+    # Generate docs
+    - if [[ $PYVER == '2.x' ]]; then
+    -   cd doc
+    -   make html
     - fi
 
+after_success:
+     - if [[ $PYVER == '3.x' ]]; then
+     -   coveralls
+     - fi
+     - if [[ $PYVER == '2.x' ]]; then
+     -   bash ../deploy.sh
+     - fi
