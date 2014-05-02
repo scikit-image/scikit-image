@@ -2,6 +2,12 @@ from skimage import data, io
 import os.path
 import jinja2
 
+
+if not os.path.exists("../source/data_gallery/images"):
+    os.makedirs("../source/data_gallery/images")
+
+
+
 image_list = []
 for name in data.__all__:
     if name != 'load':
