@@ -1003,7 +1003,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Keyword arguments passed to `inverse_map`.
     output_shape : tuple (rows, cols), optional
         Shape of the output image generated. By default the shape of the input
-        image is preserved.
+        image is preserved.  Note that, even for multi-band images, only rows
+        and columns need to be specified.
     order : int, optional
         The order of interpolation. The order has to be in the range 0-5:
         * 0: Nearest-neighbor
@@ -1073,6 +1074,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     image = np.atleast_3d(img_as_float(image))
     ishape = np.array(image.shape)
     bands = ishape[2]
+    output_shape = np.array(output_shape, dtype=int)
 
     out = None
 
@@ -1102,8 +1104,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             dims = []
             for dim in range(image.shape[2]):
                 dims.append(_warp_fast(image[..., dim], matrix,
-                            output_shape=output_shape,
-                            order=order, mode=mode, cval=cval))
+                                       output_shape=output_shape,
+                                       order=order, mode=mode, cval=cval))
             out = np.dstack(dims)
             if orig_ndim == 2:
                 out = out[..., 0]
