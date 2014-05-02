@@ -1074,7 +1074,12 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     image = np.atleast_3d(img_as_float(image))
     ishape = np.array(image.shape)
     bands = ishape[2]
-    output_shape = np.array(output_shape, dtype=int)
+
+    if output_shape is None:
+        output_shape = ishape
+    else:
+        output_shape = np.array(output_shape, dtype=int)
+
 
     out = None
 
@@ -1111,10 +1116,6 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
                 out = out[..., 0]
 
     if out is None:  # use ndimage.map_coordinates
-
-        if output_shape is None:
-            output_shape = ishape
-
         rows, cols = output_shape[:2]
 
         # inverse_map is a transformation matrix as numpy array

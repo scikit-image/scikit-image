@@ -248,5 +248,10 @@ def test_inverse():
     assert_array_equal(warp(image, inverse_tform), warp(image, tform.inverse))
 
 
+def test_slow_warp_nonint_oshape():
+    image = np.random.random((5, 5))
+    warp(image, lambda xy: xy, output_shape=(13.1, 19.5))
+
+
 if __name__ == "__main__":
     run_module_suite()
