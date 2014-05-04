@@ -136,7 +136,8 @@ cdef inline double biquadratic_interpolation(double* image, Py_ssize_t rows,
     if c == c0:
         xc += 1
 
-    cdef double fc[3], fr[3]
+    cdef double fc[3]
+    cdef double fr[3]
 
     cdef Py_ssize_t pr, pc
 
@@ -208,7 +209,8 @@ cdef inline double bicubic_interpolation(double* image, Py_ssize_t rows,
     cdef double xr = (r - r0) / 3
     cdef double xc = (c - c0) / 3
 
-    cdef double fc[4], fr[4]
+    cdef double fc[4]
+    cdef double fr[4]
 
     cdef Py_ssize_t pr, pc
 
