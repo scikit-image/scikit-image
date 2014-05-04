@@ -62,10 +62,10 @@ install:
 
 script:
     # Matplotlib settings
-    - mkdir $HOME/.config/matplotlib
-    - touch $HOME/.config/matplotlib/matplotlibrc
-    - "echo 'backend : Agg' > $HOME/.config/matplotlib/matplotlibrc"
-    - "echo 'backend.qt4 : PyQt4' >> $HOME/.config/matplotlib/matplotlibrc"
+    - mkdir $HOME/.matplotlib
+    - touch $HOME/.matplotlib/matplotlibrc
+    - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
+    - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
 
     # Run all tests
     - if [[ $PYVER == '3.x' ]]; then
