@@ -52,6 +52,7 @@ before_install:
     - pip install --use-mirrors flake8
     - pip install --use-mirrors six
 
+    - pip install --upgrade --use-mirrors nose
     - pip install --use-mirrors nose-cov
     - pip install --use-mirrors coveralls
 
