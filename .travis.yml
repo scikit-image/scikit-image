@@ -68,7 +68,7 @@ install:
 
 script:
     # Matplotlib settings
-    - mkdir $HOME/.matplotlib
+    - mkdir -p $HOME/.matplotlib
     - touch $HOME/.matplotlib/matplotlibrc
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
