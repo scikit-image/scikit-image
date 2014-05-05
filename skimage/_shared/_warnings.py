@@ -50,7 +50,9 @@ def all_warnings():
             f[0].f_locals['__warningregistry__'] = {}
     del frame
 
-    for mod in list(sys.modules.values()):
+    for mod_name, mod in list(sys.modules.items()):
+        if 'six.moves' in mod_name:
+            continue
         try:
             mod.__warningregistry__.clear()
         except AttributeError:
