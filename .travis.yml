@@ -34,7 +34,10 @@ before_install:
     - sh -e /etc/init.d/xvfb start
 
     - sudo apt-get update
+
     - sudo apt-get install $PYTHON-numpy
+    - wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py
+
     - sudo apt-get install $PYTHON-scipy
     - sudo apt-get install libfreeimage3
 
