@@ -31,7 +31,7 @@ virtualenv:
 
 env:
     global:
-    - secure: "Z0N0B1f9Fn3QAaA8JTFSBOqcVcqi1ZK9xqoffDSBp4lcxhvdXeMU3Kdct2dapJ10zFkVGjkLv2Nb/e2Y1pF+2wqYdNs1AQ6gzsuzglgaOIBt1VHLLiJzq1abgtYZnPIh4+Yf8rjceh9DSNfLQLr+L5zN8DfmzWjL8Zt1sHs9EvM="
+    - secure: "M/t6G0+xYC9c7vjCOdbGj/2m5YKIWCrSpuk1a93ql/bQrF+l5Cdwt3VSTx9mkNFpx1WZgz1We+9OBG0OMR+N/WDLESAlx6L0QRoNBL8+KyKcw3/+MdGjVsFzSq4mJsLW3eEZ35U9PI81/JEyWg6GybjheikzaoW8uPyKTu2Qzmc="
 
 before_install:
     - export DISPLAY=:99.0
