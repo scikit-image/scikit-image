@@ -22,6 +22,7 @@ from scipy import sparse, ndimage
 try:
     from scipy.sparse.linalg.dsolve import umfpack
     old_del = umfpack.UmfpackContext.__del__
+
     def new_del(self):
         try:
             old_del(self)
@@ -351,7 +352,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                       'You may also install pyamg and run the random_walker '
                       'function in "cg_mg" mode (see docstring).')
 
-    if (labels == 0).sum() == 0:
+    if (labels != 0).all():
         warnings.warn('Random walker only segments unlabeled areas, where '
                       'labels == 0. No zero valued areas in labels were '
                       'found. Returning provided labels.')
@@ -361,16 +362,22 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             unique_labels = np.unique(labels)
             unique_labels = unique_labels[unique_labels > 0]
 
-            out_labels = np.empty(labels.shape + (0, ))
-            for i in unique_labels:
-                out_labels = np.concatenate(
-                    (out_labels, (labels == i)[..., np.newaxis]), axis=-1)
+            out_labels = np.empty(labels.shape + (len(unique_labels),),
+                                  dtype=np.bool)
+            for n, i in enumerate(unique_labels):
+                out_labels[..., n] = (labels == i)
+
         else:
             out_labels = labels
         return out_labels
 
+    # This algorithm expects 4-D arrays of floats, where the first three
+    # dimensions are spatial and the final denotes channels. 2-D images have
+    # a singleton placeholder dimension added for the third spatial dimension,
+    # and single channel images likewise have a singleton added for channels.
+    # The following block ensures valid input and coerces it to the correct
+    # form.
     if not multichannel:
-        # We work with 4-D arrays of floats
         if data.ndim < 2 or data.ndim > 3:
             raise ValueError('For non-multichannel input, data must be of '
                              'dimension 2 or 3.')
@@ -382,22 +389,24 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
                              'dimensions.')
         dims = data[..., 0].shape  # To reshape final labeled result
         data = img_as_float(data)
-        if data.ndim == 3:
-            data = data[..., np.newaxis].transpose((0, 1, 3, 2))
+        if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
+            data = data[:, :, np.newaxis, :].transpose((0, 1, 3, 2))
 
     # Spacing kwarg checks
     if spacing is None:
-        spacing = (1., ) * 3
+        spacing = np.asarray((1.,) * 3)
     elif len(spacing) == len(dims):
         for i in spacing:
             if not isinstance(i, Number):
                 raise ValueError('Input `spacing` contained %s, which is not '
                                  'a number.' % (i))
-        if len(spacing) == 2:
-            spacing += (1., )
+        if len(spacing) == 2:  # Need a dummy spacing for singleton 3rd dim
+            spacing = np.r_[spacing, 1.]
+        else:                  # Convert to array
+            spacing = np.asarray(spacing)
     else:
         raise ValueError('Input argument `spacing` incorrect, should be an '
-                         'iterable of length 3.')
+                         'iterable with one number per spatial dimension.')
 
     if copy:
         labels = np.copy(labels)
