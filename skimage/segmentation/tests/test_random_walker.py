@@ -305,10 +305,6 @@ def test_bad_inputs():
     np.testing.assert_raises(ValueError,
                              random_walker, img, labels, spacing=(1,))
 
-    # Spacing contains unacceptable information
-    np.testing.assert_raises(
-        ValueError, random_walker, img, labels, spacing=(1, 'chickens'))
-
 
 if __name__ == '__main__':
     np.testing.run_module_suite()

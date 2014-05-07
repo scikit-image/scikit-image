@@ -9,7 +9,6 @@ significantly the performance.
 """
 
 import warnings
-from numbers import Number
 import numpy as np
 from scipy import sparse, ndimage
 
@@ -396,10 +395,6 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if spacing is None:
         spacing = np.asarray((1.,) * 3)
     elif len(spacing) == len(dims):
-        for i in spacing:
-            if not isinstance(i, Number):
-                raise ValueError('Input `spacing` contained %s, which is not '
-                                 'a number.' % (i))
         if len(spacing) == 2:  # Need a dummy spacing for singleton 3rd dim
             spacing = np.r_[spacing, 1.]
         else:                  # Convert to array
