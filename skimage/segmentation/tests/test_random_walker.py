@@ -255,6 +255,56 @@ def test_spacing_1():
     assert (labels_aniso2[26:34, 13:17, 13:17] == 2).all()
 
 
+def test_trivial_cases():
+    # When all voxels are labeled
+    img = np.ones((10, 10))
+    labels = np.ones((10, 10))
+    pass_through = random_walker(img, labels)
+    np.testing.assert_array_equal(pass_through, labels)
+
+    # When all voxels are labeled AND return_full_prob is True
+    labels[:, :5] = 3
+    expected = np.concatenate(((labels == 1)[..., np.newaxis],
+                               (labels == 3)[..., np.newaxis]), axis=2)
+    test = random_walker(img, labels, return_full_prob=True)
+    np.testing.assert_array_equal(test, expected)
+
+
+def test_length2_spacing():
+    # If this passes without raising an exception (warnings OK), the new
+    #   spacing code is working properly.
+    np.random.seed(42)
+    img = np.ones((10, 10)) + 0.2 * np.random.normal(size=(10, 10))
+    labels = np.zeros((10, 10), dtype=np.uint8)
+    labels[2, 4] = 1
+    labels[6, 8] = 4
+    random_walker(img, labels, spacing=(1., 2.))
+
+
+def test_bad_inputs():
+    # Too few dimensions
+    img = np.ones(10)
+    labels = np.arange(10)
+    np.testing.assert_raises(ValueError, random_walker, img, labels)
+    np.testing.assert_raises(ValueError,
+                             random_walker, img, labels, multichannel=True)
+
+    # Too many dimensions
+    np.random.seed(42)
+    img = np.random.normal(size=(3, 3, 3, 3, 3))
+    labels = np.arange(3 ** 5).reshape(img.shape)
+    np.testing.assert_raises(ValueError, random_walker, img, labels)
+    np.testing.assert_raises(ValueError,
+                             random_walker, img, labels, multichannel=True)
+
+    # Spacing incorrect length
+    img = np.random.normal(size=(10, 10))
+    labels = np.zeros((10, 10))
+    labels[2, 4] = 2
+    labels[6, 8] = 5
+    np.testing.assert_raises(ValueError,
+                             random_walker, img, labels, spacing=(1,))
+
+
 if __name__ == '__main__':
-    from numpy import testing
-    testing.run_module_suite()
+    np.testing.run_module_suite()

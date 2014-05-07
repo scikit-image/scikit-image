@@ -9,7 +9,6 @@ significantly the performance.
 """
 
 import warnings
-
 import numpy as np
 from scipy import sparse, ndimage
 
@@ -22,6 +21,7 @@ from scipy import sparse, ndimage
 try:
     from scipy.sparse.linalg.dsolve import umfpack
     old_del = umfpack.UmfpackContext.__del__
+
     def new_del(self):
         try:
             old_del(self)
@@ -202,7 +202,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         Image to be segmented in phases. Gray-level `data` can be two- or
         three-dimensional; multichannel data can be three- or four-
         dimensional (multichannel=True) with the highest dimension denoting
-        channels. Data spacing is assumed isotropic unless the `spacing` 
+        channels. Data spacing is assumed isotropic unless the `spacing`
         keyword argument is used.
     labels : array of ints, of same shape as `data` without channels dimension
         Array of seed markers labeled with different positive integers
@@ -216,14 +216,14 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     beta : float
         Penalization coefficient for the random walker motion
         (the greater `beta`, the more difficult the diffusion).
-    mode : {'bf', 'cg_mg', 'cg'} (default: 'bf')
-        Mode for solving the linear system in the random walker
-        algorithm.
+    mode : string, available options {'cg_mg', 'cg', 'bf'}
+        Mode for solving the linear system in the random walker algorithm.
+        If no preference given, automatically attempt to use the fastest
+        option available ('cg_mg' from pyamg >> 'cg' with UMFPACK > 'bf').
 
-        - 'bf' (brute force, default): an LU factorization of the Laplacian is
+        - 'bf' (brute force): an LU factorization of the Laplacian is
           computed. This is fast for small images (<1024x1024), but very slow
-          (due to the memory cost) and memory-consuming for big images (in 3-D
-          for example).
+          and memory-intensive for large images (e.g., 3-D volumes).
         - 'cg' (conjugate gradient): the linear system is solved iteratively
           using the Conjugate Gradient method from scipy.sparse.linalg. This is
           less memory-consuming than the brute force method for large images,
@@ -316,11 +316,11 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
 
     Examples
     --------
-    >>> a = np.zeros((10, 10)) + 0.2*np.random.random((10, 10))
+    >>> a = np.zeros((10, 10)) + 0.2 * np.random.random((10, 10))
     >>> a[5:8, 5:8] += 1
     >>> b = np.zeros_like(a)
-    >>> b[3,3] = 1 #Marker for first phase
-    >>> b[6,6] = 2 #Marker for second phase
+    >>> b[3, 3] = 1  # Marker for first phase
+    >>> b[6, 6] = 2  # Marker for second phase
     >>> random_walker(a, b)
     array([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -334,7 +334,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]], dtype=int32)
 
     """
-
+    # Parse input data
     if mode is None:
         if amg_loaded:
             mode = 'cg_mg'
@@ -344,45 +344,75 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
             mode = 'bf'
 
     if UmfpackContext is None and mode == 'cg':
-        warnings.warn('SciPy was built without UMFPACK. Consider rebuilding '
-                      'SciPy with UMFPACK, this will greatly speed up the '
-                      'random walker functions. You may also install pyamg '
-                      'and run the random walker function in cg_mg mode '
-                      '(see the docstrings)')
+        warnings.warn('"cg" mode will be used, but it may be slower than '
+                      '"bf" because SciPy was built without UMFPACK. Consider'
+                      ' rebuilding SciPy with UMFPACK; this will greatly '
+                      'accelerate the conjugate gradient ("cg") solver. '
+                      'You may also install pyamg and run the random_walker '
+                      'function in "cg_mg" mode (see docstring).')
+
+    if (labels != 0).all():
+        warnings.warn('Random walker only segments unlabeled areas, where '
+                      'labels == 0. No zero valued areas in labels were '
+                      'found. Returning provided labels.')
+
+        if return_full_prob:
+            # Find and iterate over valid labels
+            unique_labels = np.unique(labels)
+            unique_labels = unique_labels[unique_labels > 0]
+
+            out_labels = np.empty(labels.shape + (len(unique_labels),),
+                                  dtype=np.bool)
+            for n, i in enumerate(unique_labels):
+                out_labels[..., n] = (labels == i)
+
+        else:
+            out_labels = labels
+        return out_labels
+
+    # This algorithm expects 4-D arrays of floats, where the first three
+    # dimensions are spatial and the final denotes channels. 2-D images have
+    # a singleton placeholder dimension added for the third spatial dimension,
+    # and single channel images likewise have a singleton added for channels.
+    # The following block ensures valid input and coerces it to the correct
+    # form.
+    if not multichannel:
+        if data.ndim < 2 or data.ndim > 3:
+            raise ValueError('For non-multichannel input, data must be of '
+                             'dimension 2 or 3.')
+        dims = data.shape  # To reshape final labeled result
+        data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
+    else:
+        if data.ndim < 3:
+            raise ValueError('For multichannel input, data must have 3 or 4 '
+                             'dimensions.')
+        dims = data[..., 0].shape  # To reshape final labeled result
+        data = img_as_float(data)
+        if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
+            data = data[:, :, np.newaxis, :].transpose((0, 1, 3, 2))
 
     # Spacing kwarg checks
     if spacing is None:
-        spacing = (1., 1., 1.)
-    elif len(spacing) == 3:
-        pass
+        spacing = np.asarray((1.,) * 3)
+    elif len(spacing) == len(dims):
+        if len(spacing) == 2:  # Need a dummy spacing for singleton 3rd dim
+            spacing = np.r_[spacing, 1.]
+        else:                  # Convert to array
+            spacing = np.asarray(spacing)
     else:
         raise ValueError('Input argument `spacing` incorrect, should be an '
-                         'iterable of length 3.')
-
-    # Parse input data
-    if not multichannel:
-        # We work with 4-D arrays of floats
-        assert data.ndim > 1 and data.ndim < 4, 'For non-multichannel input, \
-                                                 data must be of dimension 2 \
-                                                 or 3.'
-        dims = data.shape
-        data = np.atleast_3d(img_as_float(data))[..., np.newaxis]
-    else:
-        dims = data[..., 0].shape
-        assert multichannel and data.ndim > 2, 'For multichannel input, data \
-                                                must have >= 3 dimensions.'
-        data = img_as_float(data)
-        if data.ndim == 3:
-            data = data[..., np.newaxis].transpose((0, 1, 3, 2))
+                         'iterable with one number per spatial dimension.')
 
     if copy:
         labels = np.copy(labels)
     label_values = np.unique(labels)
+
     # Reorder label values to have consecutive integers (no gaps)
     if np.any(np.diff(label_values) != 1):
         mask = labels >= 0
         labels[mask] = rank_order(labels[mask])[0].astype(labels.dtype)
     labels = labels.astype(np.int32)
+
     # If the array has pruned zones, be sure that no isolated pixels
     # exist between pruned zones (they could not be determined)
     if np.any(labels < 0):
@@ -397,6 +427,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         lap_sparse = _build_laplacian(data, spacing, beta=beta,
                                       multichannel=multichannel)
     lap_sparse, B = _buildAB(lap_sparse, labels)
+
     # We solve the linear system
     # lap_sparse X = B
     # where X[i, j] is the probability that a marker of label i arrives
@@ -418,6 +449,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     if mode == 'bf':
         X = _solve_bf(lap_sparse, B,
                       return_full_prob=return_full_prob)
+
     # Clean up results
     if return_full_prob:
         labels = labels.astype(np.float)
