@@ -40,7 +40,7 @@ input image, and a data field (which may be ``None``). A plugin class documents
 its return value in its ``output`` method.
 
 In this example, only one plugin is attached, so the list returned by ``show``
-will have length 1. We extract that single tuple and bind its ``overlay`` and
+will have length 1. We extract the single tuple and bind its ``overlay`` and
 ``data`` elements to individual variables. Here, ``overlay`` contains an image
 of the line drawn on the viewer, and ``data`` contains the 1-dimensional
 intensity profile along that line.
