@@ -1,5 +1,7 @@
 """Standard test images.
 
+You can view all images in the `Data Gallery <../data_gallery.html>`_
+
 For more images, see
 
  - http://sipi.usc.edu/database/database.php
