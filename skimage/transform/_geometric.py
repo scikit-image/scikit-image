@@ -729,7 +729,7 @@ class PolynomialTransform(GeometricTransform):
         for j in range(order + 1):
             for i in range(j + 1):
                 A[:rows, pidx] = xs ** (j - i) * ys ** i
-                A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
+                A[rows:, pidx + u // 2] = xs ** (j - i) * ys ** i
                 pidx += 1
 
         A[:rows, -1] = xd
@@ -741,7 +741,7 @@ class PolynomialTransform(GeometricTransform):
         # singular value
         params = - V[-1, :-1] / V[-1, -1]
 
-        self.params = params.reshape((2, u / 2))
+        self.params = params.reshape((2, u // 2))
 
     def __call__(self, coords):
         """Apply forward transformation.

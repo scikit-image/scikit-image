@@ -2,7 +2,6 @@ import numpy as np
 from scipy import ndimage
 from scipy import stats
 
-from skimage.color import rgb2grey
 from skimage.util import img_as_float, pad
 from skimage.feature import peak_local_max
 from skimage.feature.util import _prepare_grayscale_input_2D
@@ -134,7 +133,7 @@ def hessian_matrix(image, sigma=1, mode='constant', cval=0):
 
     Examples
     --------
-    >>> from skimage.feature import hessian_matrix, hessian_matrix_eigvals
+    >>> from skimage.feature import hessian_matrix
     >>> square = np.zeros((5, 5))
     >>> square[2, 2] = 1
     >>> Hxx, Hxy, Hyy = hessian_matrix(square, sigma=0.1)
@@ -342,7 +341,7 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
         A = [(imx**2)   (imx*imy)] = [Axx Axy]
             [(imx*imy)   (imy**2)]   [Axy Ayy]
 
-    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    Where imx and imy are first derivatives, averaged with a gaussian filter.
     The corner measure is then defined as::
 
         det(A) - k * trace(A)**2
@@ -423,7 +422,7 @@ def corner_shi_tomasi(image, sigma=1):
         A = [(imx**2)   (imx*imy)] = [Axx Axy]
             [(imx*imy)   (imy**2)]   [Axy Ayy]
 
-    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    Where imx and imy are first derivatives, averaged with a gaussian filter.
     The corner measure is then defined as the smaller eigenvalue of A::
 
         ((Axx + Ayy) - sqrt((Axx - Ayy)**2 + 4 * Axy**2)) / 2
@@ -486,7 +485,7 @@ def corner_foerstner(image, sigma=1):
         A = [(imx**2)   (imx*imy)] = [Axx Axy]
             [(imx*imy)   (imy**2)]   [Axy Ayy]
 
-    Where imx and imy are the first derivatives averaged with a gaussian filter.
+    Where imx and imy are first derivatives, averaged with a gaussian filter.
     The corner measure is then defined as::
 
         w = det(A) / trace(A)           (size of error ellipse)
@@ -755,9 +754,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
         # determine corner class (dot or edge)
         # variance for different models
-        var_dot = np.sum(winx_winx * ryy_dot - 2 * winx_winy * rxy_dot \
+        var_dot = np.sum(winx_winx * ryy_dot - 2 * winx_winy * rxy_dot
                          + winy_winy * rxx_dot)
-        var_edge = np.sum(winy_winy * ryy_edge + 2 * winx_winy * rxy_edge \
+        var_edge = np.sum(winy_winy * ryy_edge + 2 * winx_winy * rxy_edge
                           + winx_winx * rxx_edge)
         # test value (F-distributed)
         t = var_edge / var_dot
