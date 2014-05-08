@@ -32,7 +32,18 @@ let's see an example of how a pre-defined plugin is added to the viewer:
 
    viewer = ImageViewer(image)
    viewer += LineProfile(viewer)
-   viewer.show()
+   overlay, data = viewer.show()[0]
+
+The viewer's ``show()`` method returns a list of tuples, one for each attached
+plugin. Each tuple contains two elements: an overlay of the same shape as the
+input image, and a data field (which may be ``None``). A plugin class documents
+its return value in its ``output`` method.
+
+In this example, only one plugin is attached, so the list returned by ``show``
+will have length 1. We extract the single tuple and bind its ``overlay`` and
+``data`` elements to individual variables. Here, ``overlay`` contains an image
+of the line drawn on the viewer, and ``data`` contains the 1-dimensional
+intensity profile along that line.
 
 At the moment, there are not many plugins pre-defined, but there is a really
 simple interface for creating your own plugin. First, let us create a plugin to
@@ -74,8 +85,10 @@ All that's left is to create an image viewer and add the plugin to that viewer.
 
    viewer = ImageViewer(image)
    viewer += denoise_plugin
-   viewer.show()
+   denoised = viewer.show()[0][0]
 
+Here, we access only the overlay returned by the plugin, which contains the
+filtered image for the last used setting of ``weight``.
 
 .. image:: data/denoise_viewer_window.png
 .. image:: data/denoise_plugin_window.png
