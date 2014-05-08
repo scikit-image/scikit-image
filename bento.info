@@ -64,9 +64,9 @@ Library:
     Extension: skimage.filter._ctmf
         Sources:
             skimage/filter/_ctmf.pyx
-    Extension: skimage.morphology.ccomp
+    Extension: skimage.measure._ccomp
         Sources:
-            skimage/morphology/ccomp.pyx
+            skimage/measure/_ccomp.pyx
     Extension: skimage.morphology._watershed
         Sources:
             skimage/morphology/_watershed.pyx
