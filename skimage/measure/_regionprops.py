@@ -344,9 +344,9 @@ def regionprops(label_image, intensity_image=None, cache=True):
 
     Returns
     -------
-    properties : list
-        List containing a properties for each region. The properties of each
-        region can be accessed as attributes and keys.
+    properties : list of RegionProperties
+        Each item describes one labeled region, and can be accessed using the
+        attributes listed below.
 
     Notes
     -----
