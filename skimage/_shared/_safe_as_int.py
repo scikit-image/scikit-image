@@ -3,7 +3,7 @@ import numpy as np
 __all__ = ['_safe_as_int']
 
 
-def _safe_as_int(val, atol=1e-7):
+def safe_as_int(val, atol=1e-3):
     """
     Attempt to safely cast values to integer format.
 

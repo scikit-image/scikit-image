@@ -250,7 +250,11 @@ def test_inverse():
 
 def test_slow_warp_nonint_oshape():
     image = np.random.random((5, 5))
-    warp(image, lambda xy: xy, output_shape=(13.1, 19.5))
+
+    assert_raises(ValueError, warp, image, lambda xy: xy,
+                  output_shape=(13.1, 19.5))
+
+    warp(image, lambda xy: xy, output_shape=(13.0001, 19.9999))
 
 
 if __name__ == "__main__":

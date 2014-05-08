@@ -5,8 +5,10 @@ import sys
 import six
 
 from ._warnings import all_warnings
+from ._safe_as_int import safe_as_int
 
-__all__ = ['deprecated', 'get_bound_method_class', 'all_warnings']
+__all__ = ['deprecated', 'get_bound_method_class', 'all_warnings',
+           'safe_as_int']
 
 
 class skimage_deprecation(Warning):

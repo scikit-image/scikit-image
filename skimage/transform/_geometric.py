@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 from scipy import ndimage, spatial
 
-from skimage._shared.utils import get_bound_method_class
+from skimage._shared.utils import get_bound_method_class, safe_as_int
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
 
@@ -1078,7 +1078,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     if output_shape is None:
         output_shape = ishape
     else:
-        output_shape = np.array(output_shape, dtype=int)
+        output_shape = safe_as_int(output_shape)
 
 
     out = None
