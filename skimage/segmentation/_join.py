@@ -118,7 +118,7 @@ def relabel_sequential(label_field, offset=1):
     if not np.issubdtype(label_field.dtype, np.int):
         new_type = np.min_scalar_type(int(m))
         label_field = label_field.astype(new_type)
-        m = np.round(m).astype(new_type)  # Ensures m is an integer
+        m = m.astype(new_type)  # Ensures m is an integer
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
     if m == len(labels0):  # nothing to do, already 1...n labels
