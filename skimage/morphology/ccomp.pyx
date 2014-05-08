@@ -4,6 +4,7 @@
 #cython: wraparound=False
 
 import numpy as np
+import warnings
 
 cimport numpy as cnp
 
@@ -82,7 +83,7 @@ cdef inline void link_bg(DTYPE_t *forest, DTYPE_t n, DTYPE_t *background_node):
 
 
 # Connected components search as described in Fiorio et al.
-def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
+def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
     """Label connected regions of an integer array.
 
     Two pixels are connected when they are neighbors and have the same value.
@@ -104,7 +105,10 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
         Whether to use 4- or 8-connectivity.
     background : int
         Consider all pixels with this value as background pixels, and label
-        them as -1.
+        them as -1. (Note: background pixels will be labeled as 0 starting with
+        version 0.12).
+    return_num : bool
+        Whether to return the number of assigned labels.
 
     Returns
     -------
@@ -157,17 +161,27 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
 
     cdef DTYPE_t i, j
 
+    cdef DTYPE_t background_val
+
+    if background is None:
+        background_val = -1
+        warnings.warn(DeprecationWarning(
+                'The default value for `background` will change to 0 in v0.12'
+            ))
+    else:
+        background_val = background
+
     cdef DTYPE_t background_node = -999
 
     if neighbors != 4 and neighbors != 8:
         raise ValueError('Neighbors must be either 4 or 8.')
 
     # Initialize the first row
-    if data[0, 0] == background:
+    if data[0, 0] == background_val:
         link_bg(forest_p, 0, &background_node)
 
     for j in range(1, cols):
-        if data[0, j] == background:
+        if data[0, j] == background_val:
             link_bg(forest_p, j, &background_node)
 
         if data[0, j] == data[0, j-1]:
@@ -175,7 +189,7 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
 
     for i in range(1, rows):
         # Handle the first column
-        if data[i, 0] == background:
+        if data[i, 0] == background_val:
             link_bg(forest_p, i * cols, &background_node)
 
         if data[i, 0] == data[i-1, 0]:
@@ -186,7 +200,7 @@ def label(input, DTYPE_t neighbors=8, DTYPE_t background=-1, return_num=False):
                 join_trees(forest_p, i*cols, (i-1)*cols + 1)
 
         for j in range(1, cols):
-            if data[i, j] == background:
+            if data[i, j] == background_val:
                 link_bg(forest_p, i * cols + j, &background_node)
 
             if neighbors == 8:
