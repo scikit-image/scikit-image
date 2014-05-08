@@ -1,9 +1,9 @@
 import numpy as np
 
-__all__ == ['_safe_int']
+__all__ = ['_safe_as_int']
 
 
-def _safe_int_cast(val, atol=1e-7):
+def _safe_as_int(val, atol=1e-7):
     """
     Attempt to safely cast values to integer format.
 
@@ -19,8 +19,8 @@ def _safe_int_cast(val, atol=1e-7):
 
     Returns
     -------
-    val_int : NumPy scalar or ndarray of dtype `np.int32`
-        Returns the input value(s) coerced to dtype `np.int32` assuming all
+    val_int : NumPy scalar or ndarray of dtype `np.int64`
+        Returns the input value(s) coerced to dtype `np.int64` assuming all
         were within ``atol`` of the nearest integer.
 
     Notes
@@ -37,13 +37,22 @@ def _safe_int_cast(val, atol=1e-7):
 
     Examples
     --------
-    >>> _safe_int_cast(7.0)
+    >>> _safe_as_int(7.0)
     7
-    >>> _safe_int_cast([9, 4, 2.9999999999])
+
+    >>> _safe_as_int([9, 4, 2.9999999999])
     array([9, 4, 3], dtype=int32)
 
+    >>> _safe_as_int(53.01)
+    Traceback (most recent call last):
+        ...
+    ValueError: Integer argument required but received 53.1, check inputs.
+
+    >>> _safe_as_int(53.01, atol=0.01)
+    53
+
     """
-    mod = np.asarray(val) % 1                # Modulo 1
+    mod = np.asarray(val) % 1                # Extract mantissa
 
     # Check for and subtract any mod values > 0.5 from 1
     if mod.ndim == 0:                        # Scalar input, cannot be indexed
@@ -58,4 +67,4 @@ def _safe_int_cast(val, atol=1e-7):
         raise ValueError("Integer argument required but received "
                          "{0}, check inputs.".format(val))
 
-    return np.round(val).astype(np.int32)
+    return np.round(val).astype(np.int64)
