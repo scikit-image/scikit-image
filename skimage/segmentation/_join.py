@@ -71,7 +71,7 @@ def relabel_sequential(label_field, offset=1):
     -------
     relabeled : numpy array of int, same shape as `label_field`
         The input label field with labels mapped to
-        {offset, ..., number_of_labels}.
+        {offset, ..., number_of_labels + offset - 1}.
     forward_map : numpy array of int, shape ``(label_field.max() + 1,)``
         The map from the original label space to the returned label
         space. Can be used to re-apply the same mapping. See examples
@@ -113,13 +113,12 @@ def relabel_sequential(label_field, offset=1):
     >>> relab, fw, inv = relabel_sequential(label_field, offset=5)
     >>> relab
     array([5, 5, 6, 6, 7, 9, 8])
-
     """
     m = label_field.max()
     if not np.issubdtype(label_field.dtype, np.int):
         new_type = np.min_scalar_type(int(m))
         label_field = label_field.astype(new_type)
-        m = label_field.max()  # Ensures m is an integer
+        m = np.round(m).astype(new_type)  # Ensures m is an integer
     labels = np.unique(label_field)
     labels0 = labels[labels != 0]
     if m == len(labels0):  # nothing to do, already 1...n labels
