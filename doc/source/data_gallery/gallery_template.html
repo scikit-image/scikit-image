@@ -11,8 +11,8 @@
 
 <script>
     image_array = [
-    {% for image in images[1:] %}
-        {image :"_static/{{image['name']}}", title : "{{image['title']}}", description : "{{image['desc']}}"},
+    {% for image in images %}
+        {image :"_static/{{image['name']}}", title : "{{image['title']}}", description : "{{image['desc']}}",link :"_static/{{image['name']}}"},
     {% endfor %}    
     ];
 
