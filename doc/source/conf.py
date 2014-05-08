@@ -295,3 +295,17 @@ intersphinx_mapping = {
     'http://docs.scipy.org/doc/scipy/reference': None,
     'http://scikit-learn.org/stable': None
 }
+
+# To add links to images in skimage.data.
+# Importing this at the beginning causes matplotlib configuration errors.
+from skimage import data
+template = """
+**Preview**
+
+.. image:: ../data_gallery/images/%s.png
+    :height: 300px
+"""
+for name in data.__all__:
+    if name != 'load':
+        func = getattr(data, name)
+        func.__doc__ += template % name
