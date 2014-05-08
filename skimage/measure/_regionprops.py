@@ -4,8 +4,9 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
-from skimage.morphology import convex_hull_image, label
-from skimage.measure import _moments
+from skimage.morphology import convex_hull_image
+from ._ccomp import label
+from . import _moments
 
 
 __all__ = ['regionprops', 'perimeter']
