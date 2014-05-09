@@ -8,6 +8,7 @@ from skimage.feature.util import _prepare_grayscale_input_2D
 from skimage.feature.corner_cy import _corner_fast
 from ._hessian_det_appx import _hessian_matrix_det
 from ..transform import integral_image
+from .._shared.utils import safe_as_int
 
 
 def _compute_derivatives(image, mode='constant', cval=0):
@@ -675,7 +676,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     image = pad(image, pad_width=wext, mode='constant', constant_values=0)
 
     # add pad width, make sure to not modify the input values in-place
-    corners = corners + wext
+    corners = safe_as_int(corners + wext)
 
     # normal equation arrays
     N_dot = np.zeros((2, 2), dtype=np.double)

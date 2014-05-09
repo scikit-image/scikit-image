@@ -7,6 +7,7 @@ from scipy import ndimage, spatial
 from skimage._shared.utils import get_bound_method_class
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
+from .._shared.utils import safe_as_int
 
 
 class GeometricTransform(object):
@@ -722,6 +723,7 @@ class PolynomialTransform(GeometricTransform):
         rows = src.shape[0]
 
         # number of unknown polynomial coefficients
+        order = safe_as_int(order)
         u = (order + 1) * (order + 2)
 
         A = np.zeros((rows * 2, u + 1))
@@ -958,6 +960,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     >>> warped_image = map_coordinates(image, coords)
 
     """
+    shape = safe_as_int(shape)
     rows, cols = shape[0], shape[1]
     coords_shape = [len(shape), rows, cols]
     if len(shape) == 3:
