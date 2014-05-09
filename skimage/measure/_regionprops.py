@@ -4,7 +4,7 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
-from skimage.morphology import convex_hull_image
+from ..morphology.convex_hull import convex_hull_image
 from ._ccomp import label
 from . import _moments
 

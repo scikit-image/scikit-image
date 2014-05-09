@@ -3,7 +3,7 @@ from numpy.testing import assert_array_equal, run_module_suite
 
 from skimage.morphology import label
 from warnings import catch_warnings
-from _shared.util import skimage_deprecation
+from skimage._shared.utils import skimage_deprecation
 
 class TestConnectedComponents:
     def setup(self):
