@@ -389,7 +389,7 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
         dims = data[..., 0].shape  # To reshape final labeled result
         data = img_as_float(data)
         if data.ndim == 3:  # 2D multispectral, needs singleton in 3rd axis
-            data = data[:, :, np.newaxis, :].transpose((0, 1, 3, 2))
+            data = data[:, :, np.newaxis, :]
 
     # Spacing kwarg checks
     if spacing is None:

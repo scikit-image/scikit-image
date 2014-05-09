@@ -63,9 +63,9 @@ class Plugin(QtGui.QDialog):
     >>> plugin += Slider('threshold', 0, 255)       # doctest: +SKIP
     >>>
     >>> image = data.coins()
-    >>> viewer = ImageViewer(image) # doctest: +SKIP
-    >>> viewer += plugin            # doctest: +SKIP
-    >>> viewer.show()               # doctest: +SKIP
+    >>> viewer = ImageViewer(image)       # doctest: +SKIP
+    >>> viewer += plugin                  # doctest: +SKIP
+    >>> thresholded = viewer.show()[0][0] # doctest: +SKIP
 
     The plugin will automatically delegate parameters to `image_filter` based
     on its parameter type, i.e., `ptype` (widgets for required arguments must

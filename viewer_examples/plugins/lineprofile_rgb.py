@@ -6,4 +6,4 @@ from skimage.viewer.plugins.lineprofile import LineProfile
 image = data.chelsea()
 viewer = ImageViewer(image)
 viewer += LineProfile()
-viewer.show()
+line, rgb_profiles = viewer.show()[0]

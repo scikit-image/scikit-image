@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 from scipy import ndimage, spatial
 
-from skimage._shared.utils import get_bound_method_class
+from skimage._shared.utils import get_bound_method_class, safe_as_int
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
 from .._shared.utils import safe_as_int
@@ -1006,7 +1006,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Keyword arguments passed to `inverse_map`.
     output_shape : tuple (rows, cols), optional
         Shape of the output image generated. By default the shape of the input
-        image is preserved.
+        image is preserved.  Note that, even for multi-band images, only rows
+        and columns need to be specified.
     order : int, optional
         The order of interpolation. The order has to be in the range 0-5:
         * 0: Nearest-neighbor
@@ -1077,6 +1078,12 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     ishape = np.array(image.shape)
     bands = ishape[2]
 
+    if output_shape is None:
+        output_shape = ishape
+    else:
+        output_shape = safe_as_int(output_shape)
+
+
     out = None
 
     # use fast Cython version for specific interpolation orders and input
@@ -1105,17 +1112,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             dims = []
             for dim in range(image.shape[2]):
                 dims.append(_warp_fast(image[..., dim], matrix,
-                            output_shape=output_shape,
-                            order=order, mode=mode, cval=cval))
+                                       output_shape=output_shape,
+                                       order=order, mode=mode, cval=cval))
             out = np.dstack(dims)
             if orig_ndim == 2:
                 out = out[..., 0]
 
     if out is None:  # use ndimage.map_coordinates
-
-        if output_shape is None:
-            output_shape = ishape
-
         rows, cols = output_shape[:2]
 
         # inverse_map is a transformation matrix as numpy array
