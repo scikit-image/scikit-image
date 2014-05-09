@@ -126,8 +126,8 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     x_res = image.shape[1] - image.shape[1] % ntiles_x
     image = image[: y_res, : x_res]
 
-    x_size = image.shape[1] / ntiles_x  # Actual size of contextual regions
-    y_size = image.shape[0] / ntiles_y
+    x_size = image.shape[1] // ntiles_x  # Actual size of contextual regions
+    y_size = image.shape[0] // ntiles_y
     n_pixels = x_size * y_size
 
     if clip_limit > 0.0:  # Calculate actual cliplimit
@@ -139,7 +139,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
 
     bin_size = 1 + NR_OF_GREY / nbins
     aLUT = np.arange(NR_OF_GREY)
-    aLUT /= bin_size
+    aLUT //= bin_size
     img_blocks = view_as_blocks(image, (y_size, x_size))
 
     # Calculate greylevel mappings for each contextual region
