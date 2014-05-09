@@ -7,7 +7,6 @@ from scipy import ndimage, spatial
 from skimage._shared.utils import get_bound_method_class, safe_as_int
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
-from .._shared.utils import safe_as_int
 
 
 class GeometricTransform(object):
