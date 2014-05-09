@@ -101,13 +101,13 @@ def label(input, DTYPE_t neighbors=8, background=None, return_num=False):
     ----------
     input : ndarray of dtype int
         Image to label.
-    neighbors : {4, 8}, int
+    neighbors : {4, 8}, int, optional
         Whether to use 4- or 8-connectivity.
-    background : int
+    background : int, optional
         Consider all pixels with this value as background pixels, and label
         them as -1. (Note: background pixels will be labeled as 0 starting with
         version 0.12).
-    return_num : bool
+    return_num : bool, optional
         Whether to return the number of assigned labels.
 
     Returns
