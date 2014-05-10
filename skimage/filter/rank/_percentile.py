@@ -384,10 +384,10 @@ def threshold_percentile(image, selem, out=None, mask=None, shift_x=False,
     p0 : float in [0, ..., 1]
         Set the percentile value.
 
-        out : 2-D array (same dtype as input image)
+    Returns
+    -------
+    out : 2-D array (same dtype as input image)
         Output image.
-    local threshold : ndarray (same dtype as input)
-        The result of the local threshold.
 
     """
 
