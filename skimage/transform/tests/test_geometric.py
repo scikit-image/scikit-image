@@ -208,6 +208,12 @@ def test_union():
     assert tform.__class__ == ProjectiveTransform
 
 
+def test_union_differing_types():
+    tform1 = SimilarityTransform()
+    tform2 = PolynomialTransform()
+    assert_raises(TypeError, tform1.__add__, tform2)
+
+
 def test_geometric_tform():
     tform = GeometricTransform()
     assert_raises(NotImplementedError, tform, 0)
