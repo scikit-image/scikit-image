@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 BRANCH=gh-pages
-TARGET_REPO=sharky93/docs.git
+TARGET_REPO=scikit-image/docs.git
 DOCS_OUTPUT_FOLDER=build/html
 
 if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     echo -e "Starting to deploy to Github Pages\n"
     if [ "$TRAVIS" == "true" ]; then
-        git config --global user.email "rishabhr123@gmail.com"
-        git config --global user.name "sharky93"
+        git config --global user.email "stefan@sun.ac.za"
+        git config --global user.name "stefanv"
     fi
     # using token clone gh-pages branch
     git clone --quiet --branch=$BRANCH https://${GH_TOKEN}@github.com/$TARGET_REPO built_website > /dev/null
