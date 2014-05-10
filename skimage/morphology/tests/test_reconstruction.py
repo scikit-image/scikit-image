@@ -90,9 +90,11 @@ def test_invalid_seed():
 def test_invalid_selem():
     seed = np.ones((5, 5))
     mask = np.ones((5, 5))
-    selem =
-    assert_raises(ValueError, reconstruction, seed, mask, np.ones((2, 2)))
-    reconstruction(seed, mask, np.ones((3, 3)))
+    assert_raises(ValueError, reconstruction, seed, mask,
+                  selem=np.ones((4, 4)))
+    assert_raises(ValueError, reconstruction, seed, mask,
+                  selem=np.ones((3, 4)))
+    reconstruction(seed, mask, selem=np.ones((3, 3)))
 
 
 if __name__ == '__main__':
