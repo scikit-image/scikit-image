@@ -137,5 +137,12 @@ def test_mask():
         assert_array_almost_equal(image_unwrapped_3d[:, :, -1], image[i, -1])
 
 
+def test_invalid_input():
+    assert_raises(ValueError, unwrap_phase, np.zeros([]))
+    assert_raises(ValueError, unwrap_phase, np.zeros((1, 1, 1, 1)))
+    assert_raises(ValueError, unwrap_phase, np.zeros((1, 1)), 3 * [False])
+    assert_raises(ValueError, unwrap_phase, np.zeros((1, 1)), 'False')
+
+
 if __name__ == "__main__":
     run_module_suite()
