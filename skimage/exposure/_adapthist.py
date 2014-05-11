@@ -34,9 +34,9 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     image : array-like
         Input image.
     ntiles_x : int, optional
-        Number of tile regions in the X direction.  Ranges between 2 and 16.
+        Number of tile regions in the X direction. Ranges between 2 and 16.
     ntiles_y : int, optional
-        Number of tile regions in the Y direction.  Ranges between 2 and 16.
+        Number of tile regions in the Y direction. Ranges between 2 and 16.
     clip_limit : float: optional
         Clipping limit, normalized between 0 and 1 (higher values give more
         contrast).
@@ -52,7 +52,7 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     -----
     * The algorithm relies on an image whose rows and columns are even
       multiples of the number of tiles, so the extra rows and columns are left
-      at their original values, thus  preserving the input image shape.
+      at their original values, thus preserving the input image shape.
     * For color images, the following steps are performed:
        - The image is converted to LAB color space
        - The CLAHE algorithm is run on the L channel
@@ -63,26 +63,28 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     ----------
     .. [1] http://tog.acm.org/resources/GraphicsGems/gems.html#gemsvi
     .. [2] https://en.wikipedia.org/wiki/CLAHE#CLAHE
+
     """
+
     args = [None, ntiles_x, ntiles_y, clip_limit * nbins, nbins]
+
     if image.ndim > 2:
         lab_img = color.rgb2lab(skimage.img_as_float(image))
         l_chan = lab_img[:, :, 0]
         l_chan /= np.max(np.abs(l_chan))
         l_chan = skimage.img_as_uint(l_chan)
         args[0] = rescale_intensity(l_chan, out_range=(0, NR_OF_GREY - 1))
-        new_l = _clahe(*args).astype(float)
+        new_l = _clahe(*args).astype(np.double)
         new_l = rescale_intensity(new_l, out_range=(0, 100))
         lab_img[:new_l.shape[0], :new_l.shape[1], 0] = new_l
         image = color.lab2rgb(lab_img)
-        image = rescale_intensity(image, out_range=(0, 1))
     else:
         image = skimage.img_as_uint(image)
         args[0] = rescale_intensity(image, out_range=(0, NR_OF_GREY - 1))
-        out = _clahe(*args)
+        out = _clahe(*args).astype(np.double)
         image[:out.shape[0], :out.shape[1]] = out
-        image = rescale_intensity(image)
-    return image
+
+    return rescale_intensity(image, out_range=(0, 1))
 
 
 def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):

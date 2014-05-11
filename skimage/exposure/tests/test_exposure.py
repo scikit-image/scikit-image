@@ -116,14 +116,13 @@ def test_adapthist_scalar():
     img = skimage.img_as_ubyte(data.moon())
     adapted = exposure.equalize_adapthist(img, clip_limit=0.02)
     assert adapted.min() == 0
-    assert adapted.max() == (1 << 16) - 1
+    assert adapted.max() == 1
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(skimage.img_as_uint(img))
 
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(peak_snr(full_scale, adapted), 101.231, 3)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted),
-                        0.041, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 32.5695, 3)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.4398, 3)
     return img, adapted
 
 
