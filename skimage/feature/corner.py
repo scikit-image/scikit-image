@@ -741,6 +741,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
             est_dot = np.linalg.solve(N_dot, b_dot)
             est_edge = np.linalg.solve(N_edge, b_edge)
         except np.linalg.LinAlgError:
+            # if image is constant the system is singular
             corners_subpix[i, :] = np.nan, np.nan
             continue
 
