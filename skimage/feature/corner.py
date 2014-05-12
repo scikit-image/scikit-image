@@ -624,6 +624,13 @@ def corner_fast(image, n=12, threshold=0.15):
 def corner_subpix(image, corners, window_size=11, alpha=0.99):
     """Determine subpixel position of corners.
 
+    A statistical test decides whether the corner is defined as the
+    intersection of two edges or a single peak. Depending on the classification
+    result, the subpixel corner location is determined based on the local
+    covariance of the grey-values. If the significance level for either
+    statistical test is not sufficient, the corner cannot be classified, and
+    the output subpixel position is set to NaN.
+
     Parameters
     ----------
     image : ndarray
@@ -633,7 +640,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     window_size : int, optional
         Search window size for subpixel estimation.
     alpha : float, optional
-        Significance level for point classification.
+        Significance level for corner classification.
 
     Returns
     -------
