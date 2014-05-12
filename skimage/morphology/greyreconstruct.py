@@ -131,11 +131,11 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     if selem is None:
         selem = np.ones([3] * seed.ndim, dtype=bool)
     else:
-        selem = selem.copy()
+        selem = selem.astype(bool, copy=True)
 
     if offset is None:
         if not all([d % 2 == 1 for d in selem.shape]):
-            ValueError("Footprint dimensions must all be odd")
+            raise ValueError("Footprint dimensions must all be odd")
         offset = np.array([d // 2 for d in selem.shape])
     # Cross out the center of the selem
     selem[[slice(d, d + 1) for d in offset]] = False

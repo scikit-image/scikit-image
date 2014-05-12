@@ -624,6 +624,13 @@ def corner_fast(image, n=12, threshold=0.15):
 def corner_subpix(image, corners, window_size=11, alpha=0.99):
     """Determine subpixel position of corners.
 
+    A statistical test decides whether the corner is defined as the
+    intersection of two edges or a single peak. Depending on the classification
+    result, the subpixel corner location is determined based on the local
+    covariance of the grey-values. If the significance level for either
+    statistical test is not sufficient, the corner cannot be classified, and
+    the output subpixel position is set to NaN.
+
     Parameters
     ----------
     image : ndarray
@@ -633,7 +640,7 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
     window_size : int, optional
         Search window size for subpixel estimation.
     alpha : float, optional
-        Significance level for point classification.
+        Significance level for corner classification.
 
     Returns
     -------
@@ -737,8 +744,13 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
         b_edge[:] = byy_y + bxy_x, bxx_x + bxy_y
 
         # estimated positions
-        est_dot = np.linalg.solve(N_dot, b_dot)
-        est_edge = np.linalg.solve(N_edge, b_edge)
+        try:
+            est_dot = np.linalg.solve(N_dot, b_dot)
+            est_edge = np.linalg.solve(N_edge, b_edge)
+        except np.linalg.LinAlgError:
+            # if image is constant the system is singular
+            corners_subpix[i, :] = np.nan, np.nan
+            continue
 
         # residuals
         ry_dot = y - est_dot[0]
@@ -759,12 +771,19 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
                          + winy_winy * rxx_dot)
         var_edge = np.sum(winy_winy * ryy_edge + 2 * winx_winy * rxy_edge \
                           + winx_winx * rxx_edge)
-        # test value (F-distributed)
-        t = var_edge / var_dot
-        # 1 for edge, -1 for dot, 0 for "not classified"
-        corner_class = (t < t_crit_edge) - (t > t_crit_dot)
 
-        if corner_class == - 1:
+        # test value (F-distributed)
+        if var_dot < np.spacing(1) and var_edge < np.spacing(1):
+            t = np.nan
+        elif var_dot == 0:
+            t = np.inf
+        else:
+            t = var_edge / var_dot
+
+        # 1 for edge, -1 for dot, 0 for "not classified"
+        corner_class = int(t < t_crit_edge) - int(t > t_crit_dot)
+
+        if corner_class == -1:
             corners_subpix[i, :] = y0 + est_dot[0], x0 + est_dot[1]
         elif corner_class == 0:
             corners_subpix[i, :] = np.nan, np.nan

@@ -620,9 +620,9 @@ class SimilarityTransform(ProjectiveTransform):
 
     @property
     def scale(self):
-        if math.cos(self.rotation) == 0:
+        if abs(math.cos(self.rotation)) < np.spacing(1):
             # sin(self.rotation) == 1
-            scale = self.params[0, 1]
+            scale = self.params[1, 0]
         else:
             scale = self.params[0, 0] / math.cos(self.rotation)
         return scale

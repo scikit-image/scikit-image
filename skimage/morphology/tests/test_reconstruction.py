@@ -8,7 +8,8 @@ All rights reserved.
 Original author: Lee Kamentsky
 """
 import numpy as np
-from numpy.testing import assert_array_almost_equal as assert_close
+from numpy.testing import (assert_array_almost_equal as assert_close,
+                           assert_raises)
 
 from skimage.morphology.greyreconstruct import reconstruction
 
@@ -75,6 +76,25 @@ def test_fill_hole():
     mask = np.array([0, 3, 6, 2, 1, 1, 1, 4, 2, 0])
     result = reconstruction(seed, mask, method='erosion')
     assert_close(result, np.array([0, 3, 6, 4, 4, 4, 4, 4, 2, 0]))
+
+
+def test_invalid_seed():
+    seed = np.ones((5, 5))
+    mask = np.ones((5, 5))
+    assert_raises(ValueError, reconstruction, seed * 2, mask,
+                  method='dilation')
+    assert_raises(ValueError, reconstruction, seed * 0.5, mask,
+                  method='erosion')
+
+
+def test_invalid_selem():
+    seed = np.ones((5, 5))
+    mask = np.ones((5, 5))
+    assert_raises(ValueError, reconstruction, seed, mask,
+                  selem=np.ones((4, 4)))
+    assert_raises(ValueError, reconstruction, seed, mask,
+                  selem=np.ones((3, 4)))
+    reconstruction(seed, mask, selem=np.ones((3, 3)))
 
 
 if __name__ == '__main__':

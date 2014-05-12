@@ -188,13 +188,32 @@ def test_rotated_lena():
     assert (np.sort(results[:, 1]) == np.sort(results_rotated[:, 0])).all()
 
 
-def test_subpix():
+def test_subpix_edge():
     img = np.zeros((50, 50))
     img[:25, :25] = 255
     img[25:, 25:] = 255
     corner = peak_local_max(corner_harris(img), num_peaks=1)
     subpix = corner_subpix(img, corner)
     assert_array_equal(subpix[0], (24.5, 24.5))
+
+
+def test_subpix_dot():
+    img = np.zeros((50, 50))
+    img[25, 25] = 255
+    corner = peak_local_max(corner_harris(img), num_peaks=1)
+    subpix = corner_subpix(img, corner)
+    assert_array_equal(subpix[0], (25, 25))
+
+
+def test_subpix_no_class():
+    img = np.zeros((50, 50))
+    subpix = corner_subpix(img, np.array([[25, 25]]))
+    assert_array_equal(subpix[0], (np.nan, np.nan))
+
+    img[25, 25] = 1e-10
+    corner = peak_local_max(corner_harris(img), num_peaks=1)
+    subpix = corner_subpix(img, np.array([[25, 25]]))
+    assert_array_equal(subpix[0], (np.nan, np.nan))
 
 
 def test_subpix_border():

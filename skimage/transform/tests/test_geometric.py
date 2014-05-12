@@ -99,6 +99,17 @@ def test_similarity_init():
     assert_array_almost_equal(tform.translation, translation)
 
 
+    # test special case for scale if rotation=90deg
+    scale = 0.1
+    rotation = np.pi / 2
+    translation = (1, 1)
+    tform = SimilarityTransform(scale=scale, rotation=rotation,
+                                translation=translation)
+    assert_array_almost_equal(tform.scale, scale)
+    assert_array_almost_equal(tform.rotation, rotation)
+    assert_array_almost_equal(tform.translation, translation)
+
+
 def test_affine_estimation():
     # exact solution
     tform = estimate_transform('affine', SRC[:3, :], DST[:3, :])
@@ -206,6 +217,12 @@ def test_union():
     tform = tform1 + tform2
     assert_array_almost_equal(tform._matrix, tform3._matrix)
     assert tform.__class__ == ProjectiveTransform
+
+
+def test_union_differing_types():
+    tform1 = SimilarityTransform()
+    tform2 = PolynomialTransform()
+    assert_raises(TypeError, tform1.__add__, tform2)
 
 
 def test_geometric_tform():
