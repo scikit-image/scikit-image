@@ -722,6 +722,7 @@ class PolynomialTransform(GeometricTransform):
         rows = src.shape[0]
 
         # number of unknown polynomial coefficients
+        order = safe_as_int(order)
         u = (order + 1) * (order + 2)
 
         A = np.zeros((rows * 2, u + 1))
@@ -729,7 +730,7 @@ class PolynomialTransform(GeometricTransform):
         for j in range(order + 1):
             for i in range(j + 1):
                 A[:rows, pidx] = xs ** (j - i) * ys ** i
-                A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
+                A[rows:, pidx + u // 2] = xs ** (j - i) * ys ** i
                 pidx += 1
 
         A[:rows, -1] = xd
@@ -741,7 +742,7 @@ class PolynomialTransform(GeometricTransform):
         # singular value
         params = - V[-1, :-1] / V[-1, -1]
 
-        self.params = params.reshape((2, u / 2))
+        self.params = params.reshape((2, u // 2))
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -958,6 +959,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     >>> warped_image = map_coordinates(image, coords)
 
     """
+    shape = safe_as_int(shape)
     rows, cols = shape[0], shape[1]
     coords_shape = [len(shape), rows, cols]
     if len(shape) == 3:
