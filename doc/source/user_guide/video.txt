@@ -1,0 +1,99 @@
+Handling Video Files
+--------------------
+
+Sometimes it is necessary to read a sequence of images from a standard video
+file, such as .avi and .mov files.
+
+In a scientific context, it is usually better to avoid these formats in favor
+of a simple directory of images or a multi-dimensional TIF. Video formats are
+more difficult to read piecemeal, typically do not support random frame access
+or research-minded meta data, and use lossy compression if not carefully
+configured. But video files are in widespread use, and they are easy to share,
+so it is convenient to be equipped to read and write them when necessary.
+
+Tools for reading video files vary in their ease of installation and use, their
+disk and memory usage, and their cross-platform compatibility.  This is a
+practical guide.
+
+A Workaround: Convert the Video to an Image Sequence
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+For a one-off solution, the simplest, surest route is to convert the video to a
+collection of sequentially-numbered image files, usually called an image
+sequence. Then the images files can be read into an `ImageCollection` by
+`skimage.io.imread_collection`. Converting the video to frames can be done
+easily in [ImageJ](http://imagej.nih.gov/ij/), a cross-platform, GUI-based
+program from the bio-imaging community, or [FFmpeg](https://www.ffmpeg.org/), a
+powerful command-line utility for manipulating video files. 
+
+In FFmpeg, the following command generates an image file from each frame in a
+video. The files are numbered with five digits, padded on the left with zeros.
+
+.. code-block:: bash
+   ffmpeg -i "video.mov" -f image2 "video-frame%05d.png"
+
+More information is available in an `FFmpeg tutorial on image sequences 
+<http://en.wikibooks.org/wiki/FFMPEG_An_Intermediate_Guide/image_sequence#Making_an_Image_Sequence_from_a_video>`__.
+
+Generating an image sequence has disadvantages: they can be large and unwieldy,
+and generating them can take some time. It is generally preferrable to work
+directly with the original video file. For a more direct solution, we need to
+execute FFmpeg or LibAV from Python to read frames from the video.
+FFmpeg and LibAV are two large open-source
+projects that decode video from the sprawling variety of formats used in the
+wild. There are several ways to use them from Python. Each, unfortunately,
+has some disadvantages.
+
+OpenCV
+^^^^^^
+
+One solution is the `VideoReader
+<http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#videocapture-open>`__
+class in OpenCV, which has bindings to FFmpeg. OpenCV can be difficult to
+install, especially because it must be linked to FFmpeg to support reading video
+from files. Even if installed correctly, it is known to get the meta data wrong
+for some video codecs. (See `this issue <http://code.opencv.org/issues/481>`__.)
+
+PyAV
+^^^^
+
+`PyAV <http://mikeboers.github.io/PyAV/>`__ uses FFmpeg's (or LibAV's) libraries
+to read image data directly from the video file. It invokes them using Cython
+bindings, so it is very fast.
+
+.. code-block:: python
+   import av
+   v = pims.open('path/to/video.mov')
+
+PyAV is pip-installable (`pip install av`) on Linux and OSX. Unfortunately,
+PyAV does not yet work on Windows.
+
+PIMS
+^^^^
+
+The `Video` class in `PIMS <github.com/soft-matter/pims>`__ invokes PyAV and
+adds additional functionality to solve a common problem in scientific
+applications, accessing a video by frame number. Unfortunately, video file
+formats are designed to be searched in an approximate way by time, and they do
+not support any way of querying a specific frame number. PIMS adds this missing
+functionality by decoding (but not reading) the entire video at and producing an
+internal table of contents that supports indexing by frame.
+
+.. code-block:: python
+
+   import pims
+   v = pims.Video('path/to/video.mov')
+   v[-1]  # a 2D numpy array representing the last frame
+
+MoviePy
+^^^^^^^
+
+`Moviepy <http://zulko.github.io/moviepy>`__ pipes the decoded video from FFmpeg
+into RAM and reads it out. This is straightforward, but impossible for large
+videos that exceed available RAM. It works on all floats if FFmpeg is installed.
+
+.. code-block:: python
+
+    from moviepy.editor import VideoFileClip
+    myclip = VideoFileClip("some_video.avi")
+
