@@ -70,11 +70,11 @@ def integrate(ii, start, end, *args):
     >>> arr = np.ones((5, 6), dtype=np.float)
     >>> ii = integral_image(arr)
     >>> integrate(ii, (1, 0), (1, 2))  # sum from (1,0) -> (1,2)
-    [ 3.]
+    array([ 3.])
     >>> integrate(ii, (3, 3), (4, 5))  # sum form (3,3) -> (4,5)
-    [ 6.]
+    array([ 6.])
     >>> integrate(ii, ([1, 3], [0, 3]), ([1, 4], [2, 5]))  # sum from (1,0) -> (1,2) and (3,3) -> (4,5) 
-    [ 3.  6.]
+    array([ 3.,  6.])
     """
     rows = 1
     # handle input from new input format
