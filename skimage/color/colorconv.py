@@ -806,7 +806,7 @@ def lab2rgb(lab):
 
     Parameters
     ----------
-    rgb : array_like
+    lab : array_like
         The image in Lab format, in a 3-D array of shape ``(.., .., 3)``.
 
     Returns
