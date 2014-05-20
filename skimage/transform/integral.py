@@ -40,23 +40,23 @@ def integrate(ii, start, end, *args):
     ----------
     ii : ndarray
         Integral image.
-    start : tuple of length equal to dimension of ii
+    start : tuple of length equal to dimension of `ii`
         Coordinates of top left corner of window(s).
         For multiple windows start may be a tuple of lists, each list
        	containing the starting row, col, ... index i.e
-	([row_win1, row_win2, ...], [col_win1, col_win2,...], ...),
-        The convention mirrors the  NumPy multi-indexing convention.
-    end : tuple of length equal to dimension of ii
+        `([row_win1, row_win2, ...], [col_win1, col_win2,...], ...)`,
+        This convention mirrors the NumPy multi-indexing convention.
+    end : tuple of length equal to dimension of `ii`
         Coordinates of bottom right corner of window(s).
         For multiple windows end may be a tuple of lists, each list
         containing the end row, col, ... index i.e
         ([row_win1, row_win2, ...], [col_win1, col_win2, ...], ...)
-        The convention mirrors the NumPy multi-indexing convention.
+        This convention mirrors the NumPy multi-indexing convention.
     args: optional
-        For backward compatibility with versions prior to 0.10
+        For backward compatibility with versions prior to 0.10.
         The earlier function signature was `integrate(ii, r0, c0, r1, c1)`,
-        where r0, c0 are int(lists) specifying start coordinates 
-        of window(s) to be integrated and r1, c1 the end coordinates. 
+        where `r0`, `c0` are int(lists) specifying start coordinates
+        of window(s) to be integrated and `r1`, `c1` the end coordinates.
        
 
     Returns
@@ -125,9 +125,9 @@ def integrate(ii, start, end, *args):
     # binary numbers 000 to 111. Each number is called a permutation, where 
     # perm(000) means, select end corner where none of the coordinates 
     # is replaced, i.e ii[end_row, end_col, end_depth]. Similarly, perm(001)
-    # means replace last coordinated by start - 1, i.e  
-    # ii[end_row, end_col, start_depth - 1],and so on.
-    # Sign of even permutations is +ve, while those of odd is -ve. 
+    # means replace last coordinate by start - 1, i.e  
+    # ii[end_row, end_col, start_depth - 1], and so on.
+    # Sign of even permutations is positive, while those of odd is negative. 
     # If 'start_coord - 1' is -ve it is labeled bad and not considered in 
     # the final sum.
 
