@@ -43,7 +43,7 @@ def integrate(ii, start, end, *args):
     start : tuple of length equal to dimension of `ii`
         Coordinates of top left corner of window(s).
         For multiple windows start may be a tuple of lists, each list
-       	containing the starting row, col, ... index i.e
+        containing the starting row, col, ... index i.e
         `([row_win1, row_win2, ...], [col_win1, col_win2,...], ...)`,
         This convention mirrors the NumPy multi-indexing convention.
     end : tuple of length equal to dimension of `ii`
