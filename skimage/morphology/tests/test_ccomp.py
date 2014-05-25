@@ -26,7 +26,7 @@ class TestConnectedComponents:
     def test_random(self):
         x = (np.random.random((20, 30)) * 5).astype(np.int)
 
-        with catch_warnings(skimage_deprecation):
+        with catch_warnings():
             labels = label(x)
 
         n = labels.max()
@@ -38,13 +38,13 @@ class TestConnectedComponents:
         x = np.array([[0, 0, 1],
                       [0, 1, 0],
                       [1, 0, 0]])
-        with catch_warnings(skimage_deprecation):
+        with catch_warnings():
             assert_array_equal(label(x), x)
 
     def test_4_vs_8(self):
         x = np.array([[0, 1],
                       [1, 0]], dtype=int)
-        with catch_warnings(skimage_deprecation):
+        with catch_warnings():
             assert_array_equal(label(x, 4),
                                [[0, 1],
                                 [2, 3]])
@@ -57,7 +57,7 @@ class TestConnectedComponents:
                       [1, 1, 5],
                       [0, 0, 0]])
 
-        with catch_warnings(skimage_deprecation):
+        with catch_warnings():
             assert_array_equal(label(x), [[0, 1, 1],
                                           [0, 0, 2],
                                           [3, 3, 3]])
@@ -92,7 +92,7 @@ class TestConnectedComponents:
                       [0, 0, 6],
                       [5, 5, 5]])
 
-        with catch_warnings(skimage_deprecation):
+        with catch_warnings():
             assert_array_equal(label(x, return_num=True)[1], 4)
 
         assert_array_equal(label(x, background=0, return_num=True)[1], 3)
