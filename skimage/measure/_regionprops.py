@@ -4,8 +4,7 @@ from math import sqrt, atan2, pi as PI
 import numpy as np
 from scipy import ndimage
 
-from ..morphology.convex_hull import convex_hull_image
-from ._ccomp import label
+from ._label import label
 from . import _moments
 
 
@@ -136,6 +135,7 @@ class _RegionProperties(object):
 
     @_cached_property
     def convex_image(self):
+        from ..morphology.convex_hull import convex_hull_image
         return convex_hull_image(self.image)
 
     @_cached_property
