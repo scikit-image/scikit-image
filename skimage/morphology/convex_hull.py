@@ -3,7 +3,7 @@ __all__ = ['convex_hull_image', 'convex_hull_object']
 import numpy as np
 from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
-from skimage.morphology import label
+from ..measure._label import label
 from skimage.util import unique_rows
 
 

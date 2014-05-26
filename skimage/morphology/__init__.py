@@ -4,12 +4,15 @@ from .grey import (erosion, dilation, opening, closing, white_tophat,
                    black_tophat)
 from .selem import (square, rectangle, diamond, disk, cube, octahedron, ball,
                     octagon, star)
-from .ccomp import label
 from .watershed import watershed
 from ._skeletonize import skeletonize, medial_axis
 from .convex_hull import convex_hull_image, convex_hull_object
 from .greyreconstruct import reconstruction
 from .misc import remove_small_objects
+
+from ..measure._label import label
+from skimage._shared.utils import deprecated as _deprecated
+label = _deprecated('skimage.measure.label')(label)
 
 
 __all__ = ['binary_erosion',
