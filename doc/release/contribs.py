@@ -14,7 +14,7 @@ def call(cmd):
     return subprocess.check_output(shlex.split(cmd), universal_newlines=True).split('\n')
 
 tag_date = call("git show --format='%%ci' %s" % tag)[0]
-print("Release %s was on %s" % (tag, tag_date))
+print("Release %s was on %s\n" % (tag, tag_date))
 
 merges = call("git log --since='%s' --merges --format='>>>%%B' --reverse" % tag_date)
 merges = [m for m in merges if m.strip()]
@@ -22,7 +22,10 @@ merges = '\n'.join(merges).split('>>>')
 merges = [m.split('\n')[:2] for m in merges]
 merges = [m for m in merges if len(m) == 2 and m[1].strip()]
 
-print("\nIt contained the following %d merges:\n" % len(merges))
+num_commits = call("git rev-list %s..HEAD --count" % tag)[0]
+print("A total of %s changes have been committed.\n" % num_commits)
+
+print("It contained the following %d merges:\n" % len(merges))
 for (merge, message) in merges:
     if merge.startswith('Merge pull request #'):
         PR = ' (%s)' % merge.split()[3]
