@@ -47,7 +47,7 @@ functionality is only available with the following installed:
    walker segmentation.
 
 * `Pillow <https://pypi.python.org/pypi/Pillow>`__
-   (or <`PIL http://www.pythonware.com/products/pil/>`__)
+   (or `PIL <http://www.pythonware.com/products/pil/>`__)
    The ``Pillow`` library (or equivalently ``PIL``) is used for Input/Output.
 
 * `Astropy <http://www.astropy.org>`__ is required to use the FITS io plug-in.
