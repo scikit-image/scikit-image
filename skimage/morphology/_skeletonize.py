@@ -164,11 +164,11 @@ def medial_axis(image, mask=None, return_distance=False):
     Parameters
     ----------
 
-    image : binary ndarray
+    image : binary ndarray, shape (M, N)
 
-    mask : binary ndarray, optional
-        If a mask is given, only those elements with a true value in `mask`
-        are used for computing the medial axis.
+    mask : binary ndarray, shape (M, N), optional
+        If a mask is given, only those elements in `image` with a true
+        value in `mask` are used for computing the medial axis.
 
     return_distance : bool, optional
         If true, the distance transform is returned as well as the skeleton.
@@ -179,7 +179,7 @@ def medial_axis(image, mask=None, return_distance=False):
     out : ndarray of bools
         Medial axis transform of the image
 
-    dist : ndarray of ints
+    dist : ndarray of ints, optional
         Distance transform of the image (only returned if `return_distance`
         is True)
 
