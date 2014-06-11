@@ -77,6 +77,12 @@ For a more detailed discussion, read these :doc:`detailed documents
       Travis fails, you can find out why by clicking on the "failed" icon (red
       cross) and inspecting the build and test log.
 
+5. Document changes
+
+    Before merging your commits, you must add a description of your changes
+    to the release notes of the upcoming version in
+    ``doc/release/release_dev.txt``.
+
 .. note::
 
    To reviewers: if it is not obvious, add a short explanation of what a branch
@@ -85,7 +91,7 @@ For a more detailed discussion, read these :doc:`detailed documents
 
 
 Divergence between ``upstream master`` and your feature branch
-..............................................................
+--------------------------------------------------------------
 
 Do *not* ever merge the main branch into yours. If GitHub indicates that the
 branch of your Pull Request can no longer be merged automatically, rebase
