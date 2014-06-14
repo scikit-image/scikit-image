@@ -14,27 +14,34 @@ color
 data
     Test images and example data.
 draw
-    Image drawing primitives (lines, text, etc.).
+    Drawing primitives (lines, text, etc.) that operate on NumPy arrays.
 exposure
-    Image intensity adjustment (e.g., histogram equalization).
+    Image intensity adjustment, e.g., histogram equalization, etc.
 feature
-    Feature detection (e.g. texture analysis, corners, etc.).
+    Feature detection and extraction, e.g., texture analysis corners, etc.
 filter
-    Sharpening, edge finding, denoising, etc.
+    Sharpening, edge finding, rank filters, thresholding, etc.
 graph
-    Graph-theoretic operations, e.g. dynamic programming (shortest paths).
+    Graph-theoretic operations, e.g., shortest paths.
 io
     Reading, saving, and displaying images and video.
 measure
     Measurement of image properties, e.g., similarity and contours.
 morphology
-    Morphological operations, e.g. opening or skeletonization.
+    Morphological operations, e.g., opening or skeletonization.
+novice
+    Simplified interface for teaching purposes.
+restoration
+    Restoration algorithms, e.g., deconvolution algorithms, denoising, etc.
 segmentation
-    Splitting an image into self-similar regions.
+    Partitioning an image into multiple regions.
 transform
-    Geometric and other transforms, e.g. rotation or the Radon transform.
+    Geometric and other transforms, e.g., rotation or the Radon transform.
 util
     Generic utilities.
+viewer
+    A simple graphical user interface for visualizing results and exploring
+    parameters.
 
 Utility Functions
 -----------------
@@ -52,6 +59,7 @@ img_as_ubyte
 import os.path as _osp
 import imp as _imp
 import functools as _functools
+import warnings as _warnings
 from skimage._shared.utils import deprecated as _deprecated
 
 pkg_dir = _osp.abspath(_osp.dirname(__file__))
@@ -68,24 +76,48 @@ try:
     _imp.find_module('nose')
 except ImportError:
     def _test(verbose=False):
-        """This would invoke the skimage test suite, but nose couldn't be
+        """This would run all unit tests, but nose couldn't be
         imported so the test suite can not run.
         """
         raise ImportError("Could not load nose. Unit tests not available.")
+
+    def _doctest(verbose=False):
+        """This would run all doc tests, but nose couldn't be
+        imported so the test suite can not run.
+        """
+        raise ImportError("Could not load nose. Doctests not available.")
 else:
-    def _test(verbose=False):
-        """Invoke the skimage test suite."""
+    def _test(doctest=False, verbose=False):
+        """Run all unit tests."""
         import nose
-        args = ['', pkg_dir, '--exe']
+        args = ['', pkg_dir, '--exe', '--ignore-files=^_test']
         if verbose:
             args.extend(['-v', '-s'])
-        nose.run('skimage', argv=args)
+        if doctest:
+            args.extend(['--with-doctest', '--ignore-files=^\.',
+                         '--ignore-files=^setup\.py$$', '--ignore-files=test'])
+            # Make sure warnings do not break the doc tests
+            with _warnings.catch_warnings():
+                _warnings.simplefilter("ignore")
+                success = nose.run('skimage', argv=args)
+        else:
+            success = nose.run('skimage', argv=args)
+        # Return sys.exit code
+        if success:
+            return 0
+        else:
+            return 1
+
 
 # do not use `test` as function name as this leads to a recursion problem with
 # the nose test suite
 test = _test
 test_verbose = _functools.partial(test, verbose=True)
 test_verbose.__doc__ = test.__doc__
+doctest = _functools.partial(test, doctest=True)
+doctest.__doc__ = doctest.__doc__
+doctest_verbose = _functools.partial(test, doctest=True, verbose=True)
+doctest_verbose.__doc__ = doctest.__doc__
 
 
 class _Log(Warning):
@@ -105,10 +137,9 @@ class _FakeLog(object):
         """
         self._name = name
 
-        import warnings
         warnings.simplefilter("always", _Log)
 
-        self._warnings = warnings
+        self._warnings = _warnings
 
     def _warn(self, msg, wtype):
         self._warnings.warn('%s: %s' % (wtype, msg), _Log)
@@ -135,32 +166,6 @@ class _FakeLog(object):
 
     def setLevel(*args):
         pass
-
-
-@_deprecated()
-def get_log(name=None):
-    """Return a console logger.
-
-    Output may be sent to the logger using the `debug`, `info`, `warning`,
-    `error` and `critical` methods.
-
-    Parameters
-    ----------
-    name : str
-        Name of the log.
-
-    References
-    ----------
-    .. [1] Logging facility for Python,
-           http://docs.python.org/library/logging.html
-
-    """
-    if name is None:
-        name = 'skimage'
-    else:
-        name = 'skimage.' + name
-
-    return _FakeLog(name)
 
 
 from .util.dtype import *

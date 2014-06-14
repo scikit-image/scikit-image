@@ -3,11 +3,14 @@ __all__ = ['imread', 'imread_collection']
 import skimage.io as io
 
 try:
-    import pyfits
+    from astropy.io import fits as pyfits
 except ImportError:
-    raise ImportError("PyFITS could not be found. Please refer to\n"
-        "http://www.stsci.edu/resources/software_hardware/pyfits\n"
-        "for further instructions.")
+    try:
+        import pyfits
+    except ImportError:
+        raise ImportError("PyFITS could not be found. Please refer to\n"
+            "http://www.stsci.edu/resources/software_hardware/pyfits\n"
+            "for further instructions.")
 
 
 def imread(fname, dtype=None):

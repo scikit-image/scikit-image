@@ -3,7 +3,7 @@ __all__ = ['convex_hull_image', 'convex_hull_object']
 import numpy as np
 from ._pnpoly import grid_points_inside_poly
 from ._convex_hull import possible_hull
-from skimage.morphology import label
+from ..measure._label import label
 from skimage.util import unique_rows
 
 
@@ -54,6 +54,10 @@ def convex_hull_image(image):
         raise ImportError('Could not import scipy.spatial, only available in '
                           'scipy >= 0.9.')
 
+    # Subtract offset
+    offset = coords.mean(axis=0)
+    coords -= offset
+
     # Find the convex hull
     chull = Delaunay(coords).convex_hull
     v = coords[np.unique(chull)]
@@ -62,6 +66,9 @@ def convex_hull_image(image):
     v_centred = v - v.mean(axis=0)
     angles = np.arctan2(v_centred[:, 0], v_centred[:, 1])
     v = v[np.argsort(angles)]
+
+    # Add back offset
+    v += offset
 
     # For each pixel coordinate, check whether that pixel
     # lies inside the convex hull
@@ -88,8 +95,8 @@ def convex_hull_object(image, neighbors=8):
     hull : ndarray of bool
         Binary image with pixels in convex hull set to True.
 
-    Note
-    ----
+    Notes
+    -----
     This function uses skimage.morphology.label to define unique objects,
     finds the convex hull of each using convex_hull_image, and combines
     these regions with logical OR. Be aware the convex hulls of unconnected

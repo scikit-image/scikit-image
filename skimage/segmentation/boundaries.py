@@ -38,8 +38,3 @@ def mark_boundaries(image, label_img, color=(1, 1, 0), outline_color=(0, 0, 0)):
         image[outer_boundaries != 0, :] = np.array(outline_color)
     image[boundaries, :] = np.array(color)
     return image
-
-
-@deprecated('mark_boundaries')
-def visualize_boundaries(*args, **kwargs):
-    return mark_boundaries(*args, **kwargs)

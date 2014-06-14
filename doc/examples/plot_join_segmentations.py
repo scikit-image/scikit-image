@@ -58,5 +58,5 @@ axes[3].set_title('Join')
 
 for ax in axes:
     ax.axis('off')
-plt.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
+fig.subplots_adjust(hspace=0.01, wspace=0.01, top=1, bottom=0, left=0, right=1)
 plt.show()

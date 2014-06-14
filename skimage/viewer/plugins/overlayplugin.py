@@ -3,7 +3,8 @@ from warnings import warn
 from skimage.util.dtype import dtype_range
 from .base import Plugin
 from ..utils import ClearColormap, update_axes_image
-from skimage._shared import six
+
+import six
 
 
 __all__ = ['OverlayPlugin']
@@ -44,7 +45,7 @@ class OverlayPlugin(Plugin):
         self._overlay_plot = None
         self._overlay = None
         self.cmap = None
-        self.color_names = self.colors.keys()
+        self.color_names = list(self.colors.keys())
 
     def attach(self, image_viewer):
         super(OverlayPlugin, self).attach(image_viewer)
@@ -107,3 +108,15 @@ class OverlayPlugin(Plugin):
         # clear overlay from ImageViewer on close
         self.overlay = None
         super(OverlayPlugin, self).closeEvent(event)
+
+    def output(self):
+        """Return the overlaid image.
+
+        Returns
+        -------
+        overlay : array, same shape as image
+            The overlay currently displayed.
+        data : None
+        """
+        return (self.overlay, None)
+

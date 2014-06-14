@@ -131,11 +131,11 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
     if selem is None:
         selem = np.ones([3] * seed.ndim, dtype=bool)
     else:
-        selem = selem.copy()
+        selem = selem.astype(bool, copy=True)
 
     if offset is None:
         if not all([d % 2 == 1 for d in selem.shape]):
-            ValueError("Footprint dimensions must all be odd")
+            raise ValueError("Footprint dimensions must all be odd")
         offset = np.array([d // 2 for d in selem.shape])
     # Cross out the center of the selem
     selem[[slice(d, d + 1) for d in offset]] = False
@@ -158,7 +158,7 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
 
     # Create a list of strides across the array to get the neighbors within
     # a flattened array
-    value_stride = np.array(images.strides[1:]) / images.dtype.itemsize
+    value_stride = np.array(images.strides[1:]) // images.dtype.itemsize
     image_stride = images.strides[0] // images.dtype.itemsize
     selem_mgrid = np.mgrid[[slice(-o, d - o)
                             for d, o in zip(selem.shape, offset)]]
@@ -187,7 +187,8 @@ def reconstruction(seed, mask, method='dilation', selem=None, offset=None):
         value_map = -value_map
 
     start = index_sorted[0]
-    reconstruction_loop(value_rank, prev, next, nb_strides, start, image_stride)
+    reconstruction_loop(value_rank, prev, next, nb_strides, start,
+                        image_stride)
 
     # Reshape reconstructed image to original image shape and remove padding.
     rec_img = value_map[value_rank[:image_stride]]

@@ -126,8 +126,8 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
     x_res = image.shape[1] - image.shape[1] % ntiles_x
     image = image[: y_res, : x_res]
 
-    x_size = image.shape[1] / ntiles_x  # Actual size of contextual regions
-    y_size = image.shape[0] / ntiles_y
+    x_size = image.shape[1] // ntiles_x  # Actual size of contextual regions
+    y_size = image.shape[0] // ntiles_y
     n_pixels = x_size * y_size
 
     if clip_limit > 0.0:  # Calculate actual cliplimit
@@ -139,7 +139,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
 
     bin_size = 1 + NR_OF_GREY / nbins
     aLUT = np.arange(NR_OF_GREY)
-    aLUT /= bin_size
+    aLUT //= bin_size
     img_blocks = view_as_blocks(image, (y_size, x_size))
 
     # Calculate greylevel mappings for each contextual region
@@ -315,7 +315,8 @@ def interpolate(image, xslice, yslice,
                                  np.arange(yslice.size))
     x_inv_coef, y_inv_coef = x_coef[:, ::-1] + 1, y_coef[::-1] + 1
 
-    view = image[yslice[0]: yslice[-1] + 1, xslice[0]: xslice[-1] + 1]
+    view = image[int(yslice[0]):int(yslice[-1] + 1),
+                 int(xslice[0]):int(xslice[-1] + 1)]
     im_slice = aLUT[view]
     new = ((y_inv_coef * (x_inv_coef * mapLU[im_slice]
                           + x_coef * mapRU[im_slice])

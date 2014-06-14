@@ -43,14 +43,14 @@ image_label_overlay = label2rgb(label_image, image=image)
 fig, ax = plt.subplots(ncols=1, nrows=1, figsize=(6, 6))
 ax.imshow(image_label_overlay)
 
-for region in regionprops(label_image, ['Area', 'BoundingBox']):
+for region in regionprops(label_image):
 
     # skip small images
-    if region['Area'] < 100:
+    if region.area < 100:
         continue
 
     # draw rectangle around segmented coins
-    minr, minc, maxr, maxc = region['BoundingBox']
+    minr, minc, maxr, maxc = region.bbox
     rect = mpatches.Rectangle((minc, minr), maxc - minc, maxr - minr,
                               fill=False, edgecolor='red', linewidth=2)
     ax.add_patch(rect)

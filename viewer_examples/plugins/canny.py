@@ -6,4 +6,4 @@ from skimage.viewer.plugins.canny import CannyPlugin
 image = data.camera()
 viewer = ImageViewer(image)
 viewer += CannyPlugin()
-viewer.show()
+canny_edges = viewer.show()[0][0]

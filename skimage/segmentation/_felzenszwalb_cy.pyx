@@ -7,7 +7,7 @@ import scipy
 
 cimport cython
 cimport numpy as cnp
-from skimage.morphology.ccomp cimport find_root, join_trees
+from skimage.measure._ccomp cimport find_root, join_trees
 
 from ..util import img_as_float
 
@@ -104,6 +104,8 @@ def _felzenszwalb_grey(image, double scale=1, sigma=0.8,
         seg0 = find_root(segments_p, edges_p[0])
         seg1 = find_root(segments_p, edges_p[1])
         edges_p += 2
+        if seg0 == seg1:
+            continue
         if segment_size[seg0] < min_size or segment_size[seg1] < min_size:
             join_trees(segments_p, seg0, seg1)
 

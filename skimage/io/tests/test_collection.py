@@ -1,87 +1,72 @@
-import sys
 import os.path
 
 import numpy as np
-from numpy.testing import (assert_raises,
-                           assert_equal,
-                           assert_array_almost_equal,
-                           )
-from numpy.testing.decorators import skipif
+from numpy.testing import assert_raises, assert_equal, assert_allclose
 
 from skimage import data_dir
-from skimage.io import ImageCollection, MultiImage
-from skimage.io.collection import alphanumeric_key
-from skimage.io import Image as ioImage
-from skimage._shared import six
+from skimage.io.collection import ImageCollection, alphanumeric_key
 
 
-try:
-    from PIL import Image
-except ImportError:
-    PIL_available = False
-else:
-    PIL_available = True
+def test_string_split():
+    test_string = 'z23a'
+    test_str_result = ['z', 23, 'a']
+    assert_equal(alphanumeric_key(test_string), test_str_result)
 
 
-class TestAlphanumericKey():
-    def setUp(self):
-        self.test_string = 'z23a'
-        self.test_str_result = ['z', 23, 'a']
-        self.filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png',
-            'e9.png', 'e10.png', 'em.png']
-        self.sorted_filenames = \
-            ['e9.png', 'e10.png', 'em.png', 'f9.9.png', 'f9.10.png',
-            'f10.9.png', 'f10.10.png']
-
-    def test_string_split(self):
-        assert_equal(alphanumeric_key(self.test_string), self.test_str_result)
-
-    def test_string_sort(self):
-        sorted_filenames = sorted(self.filenames, key=alphanumeric_key)
-        assert_equal(sorted_filenames, self.sorted_filenames)
+def test_string_sort():
+    filenames = ['f9.10.png', 'f9.9.png', 'f10.10.png', 'f10.9.png',
+                 'e9.png', 'e10.png', 'em.png']
+    sorted_filenames = ['e9.png', 'e10.png', 'em.png', 'f9.9.png',
+                        'f9.10.png', 'f10.9.png', 'f10.10.png']
+    sorted_filenames = sorted(filenames, key=alphanumeric_key)
+    assert_equal(sorted_filenames, sorted_filenames)
 
 
 class TestImageCollection():
-    pattern = [os.path.join(data_dir, pic) for pic in ['camera.png',
-                                                       'color.png']]
-    pattern_matched = [os.path.join(data_dir, pic) for pic in 
-                                                    ['camera.png', 'moon.png']]
+
+    pattern = [os.path.join(data_dir, pic)
+               for pic in ['camera.png', 'color.png']]
+
+    pattern_matched = [os.path.join(data_dir, pic)
+                       for pic in ['camera.png', 'moon.png']]
 
     def setUp(self):
-        self.collection = ImageCollection(self.pattern)
-        self.collection_matched = ImageCollection(self.pattern_matched)
+        # Generic image collection with images of different shapes.
+        self.images = ImageCollection(self.pattern)
+        # Image collection with images having shapes that match.
+        self.images_matched = ImageCollection(self.pattern_matched)
 
     def test_len(self):
-        assert len(self.collection) == 2
+        assert len(self.images) == 2
 
     def test_getitem(self):
-        num = len(self.collection)
+        num = len(self.images)
         for i in range(-num, num):
-            assert type(self.collection[i]) is np.ndarray
-        assert_array_almost_equal(self.collection[0],
-                                  self.collection[-num])
+            assert type(self.images[i]) is np.ndarray
+        assert_allclose(self.images[0],
+                                  self.images[-num])
 
-        #assert_raises expects a callable, hence this do-very-little func
+        # assert_raises expects a callable, hence this thin wrapper function.
         def return_img(n):
-            return self.collection[n]
+            return self.images[n]
         assert_raises(IndexError, return_img, num)
         assert_raises(IndexError, return_img, -num - 1)
 
     def test_slicing(self):
-        assert type(self.collection[:]) is ImageCollection
-        assert len(self.collection[:]) == 2
-        assert len(self.collection[:1]) == 1
-        assert len(self.collection[1:]) == 1
-        assert_array_almost_equal(self.collection[0], self.collection[:1][0])
-        assert_array_almost_equal(self.collection[1], self.collection[1:][0])
-        assert_array_almost_equal(self.collection[1], self.collection[::-1][0])
-        assert_array_almost_equal(self.collection[0], self.collection[::-1][1])
+        assert type(self.images[:]) is ImageCollection
+        assert len(self.images[:]) == 2
+        assert len(self.images[:1]) == 1
+        assert len(self.images[1:]) == 1
+        assert_allclose(self.images[0], self.images[:1][0])
+        assert_allclose(self.images[1], self.images[1:][0])
+        assert_allclose(self.images[1], self.images[::-1][0])
+        assert_allclose(self.images[0], self.images[::-1][1])
 
     def test_files_property(self):
-        assert isinstance(self.collection.files, list)
+        assert isinstance(self.images.files, list)
 
         def set_files(f):
-            self.collection.files = f
+            self.images.files = f
         assert_raises(AttributeError, set_files, 'newfiles')
 
     def test_custom_load(self):
@@ -94,59 +79,12 @@ class TestImageCollection():
         assert_equal(ic[1], (2, 'two'))
 
     def test_concatenate(self):
-        ar = self.collection_matched.concatenate()
-        assert_equal(ar.shape, (len(self.collection_matched),) + 
-                                self.collection[0].shape)
-        assert_raises(ValueError, self.collection.concatenate)
+        array = self.images_matched.concatenate()
+        expected_shape = (len(self.images_matched),) + self.images[0].shape
+        assert_equal(array.shape, expected_shape)
 
-
-class TestMultiImage():
-
-    def setUp(self):
-        # This multipage TIF file was created with imagemagick:
-        # convert im1.tif im2.tif -adjoin multipage.tif
-        if PIL_available:
-            self.img = MultiImage(os.path.join(data_dir, 'multipage.tif'))
-
-    @skipif(not PIL_available)
-    def test_len(self):
-        assert len(self.img) == 2
-
-    @skipif(not PIL_available)
-    def test_getitem(self):
-        num = len(self.img)
-        for i in range(-num, num):
-            assert type(self.img[i]) is np.ndarray
-        assert_array_almost_equal(self.img[0],
-                                  self.img[-num])
-
-        #assert_raises expects a callable, hence this do-very-little func
-        def return_img(n):
-            return self.img[n]
-        assert_raises(IndexError, return_img, num)
-        assert_raises(IndexError, return_img, -num - 1)
-
-    @skipif(not PIL_available)
-    def test_files_property(self):
-        assert isinstance(self.img.filename, six.string_types)
-
-        def set_filename(f):
-            self.img.filename = f
-        assert_raises(AttributeError, set_filename, 'newfile')
-
-    @skipif(not PIL_available)
-    def test_conserve_memory_property(self):
-        assert isinstance(self.img.conserve_memory, bool)
-
-        def set_mem(val):
-            self.img.conserve_memory = val
-        assert_raises(AttributeError, set_mem, True)
-
-    @skipif(not PIL_available)
-    def test_concatenate(self):
-        ar = self.img.concatenate()
-        assert_equal(ar.shape, (len(self.img),) + 
-                                self.img[0].shape)
+    def test_concatentate_mismatched_image_shapes(self):
+        assert_raises(ValueError, self.images.concatenate)
 
 
 if __name__ == "__main__":

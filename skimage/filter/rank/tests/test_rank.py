@@ -437,7 +437,7 @@ def test_16bit():
         image[10, 10] = value
         assert rank.minimum(image, selem)[10, 10] == 0
         assert rank.maximum(image, selem)[10, 10] == value
-        assert rank.mean(image, selem)[10, 10] == value / selem.size
+        assert rank.mean(image, selem)[10, 10] == int(value / selem.size)
 
 
 def test_bilateral():
@@ -497,6 +497,48 @@ def test_percentile_median():
     img_p0 = rank.percentile(img16, selem=selem, p0=.5)
     img_max = rank.median(img16, selem=selem)
     assert_array_equal(img_p0, img_max)
+
+def test_sum():
+    # check the number of valid pixels in the neighborhood
+
+    image8 = np.array([[0, 0, 0, 0, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 0, 0, 0, 0]], dtype=np.uint8)
+    image16 = 400*np.array([[0, 0, 0, 0, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 1, 1, 1, 0],
+                       [0, 0, 0, 0, 0]], dtype=np.uint16)
+    elem = np.ones((3, 3), dtype=np.uint8)
+    out8 = np.empty_like(image8)
+    out16 = np.empty_like(image16)
+    mask = np.ones(image8.shape, dtype=np.uint8)
+
+    r =  np.array([[1, 2, 3, 2, 1],
+           [2, 4, 6, 4, 2],
+           [3, 6, 9, 6, 3],
+           [2, 4, 6, 4, 2],
+           [1, 2, 3, 2, 1]], dtype=np.uint8)
+    rank.sum(image=image8, selem=elem, out=out8, mask=mask)
+    assert_array_equal(r, out8)
+    rank.sum_percentile(image=image8, selem=elem, out=out8, mask=mask,p0=.0,p1=1.)
+    assert_array_equal(r, out8)
+    rank.sum_bilateral(image=image8, selem=elem, out=out8, mask=mask,s0=255,s1=255)
+    assert_array_equal(r, out8)
+
+    r = 400* np.array([[1, 2, 3, 2, 1],
+           [2, 4, 6, 4, 2],
+           [3, 6, 9, 6, 3],
+           [2, 4, 6, 4, 2],
+           [1, 2, 3, 2, 1]], dtype=np.uint16)
+    rank.sum(image=image16, selem=elem, out=out16, mask=mask)
+    assert_array_equal(r, out16)
+    rank.sum_percentile(image=image16, selem=elem, out=out16, mask=mask,p0=.0,p1=1.)
+    assert_array_equal(r, out16)
+    rank.sum_bilateral(image=image16, selem=elem, out=out16, mask=mask,s0=1000,s1=1000)
+    assert_array_equal(r, out16)
 
 
 if __name__ == "__main__":

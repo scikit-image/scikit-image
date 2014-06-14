@@ -155,5 +155,15 @@ class TestDTypes():
         self._test_image(image)
 
 
+def test_inplace():
+    selem = np.ones((3, 3))
+    image = np.zeros((5, 5))
+    out = image
+
+    for f in (grey.erosion, grey.dilation,
+              grey.white_tophat, grey.black_tophat):
+        testing.assert_raises(NotImplementedError, f, image, selem, out=out)
+
+
 if __name__ == '__main__':
     testing.run_module_suite()

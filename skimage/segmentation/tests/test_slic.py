@@ -1,7 +1,7 @@
 import itertools as it
 import warnings
 import numpy as np
-from numpy.testing import assert_equal, assert_array_equal
+from numpy.testing import assert_equal, assert_raises
 from skimage.segmentation import slic
 
 
@@ -21,10 +21,10 @@ def test_color_2d():
     # we expect 4 segments
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape[:-1])
-    assert_array_equal(seg[:10, :10], 0)
-    assert_array_equal(seg[10:, :10], 2)
-    assert_array_equal(seg[:10, 10:], 1)
-    assert_array_equal(seg[10:, 10:], 3)
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
 
 
 def test_gray_2d():
@@ -41,10 +41,10 @@ def test_gray_2d():
 
     assert_equal(len(np.unique(seg)), 4)
     assert_equal(seg.shape, img.shape)
-    assert_array_equal(seg[:10, :10], 0)
-    assert_array_equal(seg[10:, :10], 2)
-    assert_array_equal(seg[:10, 10:], 1)
-    assert_array_equal(seg[10:, 10:], 3)
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
 
 
 def test_color_3d():
@@ -65,7 +65,7 @@ def test_color_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_array_equal(seg[s], c)
+        assert_equal(seg[s], c)
 
 
 def test_gray_3d():
@@ -76,7 +76,7 @@ def test_gray_3d():
         midpoint = dim_size // 2
         slices.append((slice(None, midpoint), slice(midpoint, None)))
     slices = list(it.product(*slices))
-    shades = np.arange(0, 1.000001, 1.0/7)
+    shades = np.arange(0, 1.000001, 1.0 / 7)
     for s, sh in zip(slices, shades):
         img[s] = sh
     img += 0.001 * rnd.normal(size=img.shape)
@@ -87,7 +87,7 @@ def test_gray_3d():
 
     assert_equal(len(np.unique(seg)), 8)
     for s, c in zip(slices, range(8)):
-        assert_array_equal(seg[s], c)
+        assert_equal(seg[s], c)
 
 
 def test_list_sigma():
@@ -118,7 +118,60 @@ def test_spacing():
     assert_equal(seg_spaced, result_spaced)
 
 
+def test_invalid_lab_conversion():
+    img = np.array([[1, 1, 1, 0, 0],
+                    [1, 1, 0, 0, 0]], np.float) + 1
+    assert_raises(ValueError, slic, img, multichannel=True, convert2lab=True)
+
+
+def test_enforce_connectivity():
+    img = np.array([[0, 0, 0, 1, 1, 1],
+                    [1, 0, 0, 1, 1, 0],
+                    [0, 0, 0, 1, 1, 0]], np.float)
+
+    segments_connected = slic(img, 2, compactness=0.0001,
+                              enforce_connectivity=True,
+                              convert2lab=False)
+    segments_disconnected = slic(img, 2, compactness=0.0001,
+                                 enforce_connectivity=False,
+                                 convert2lab=False)
+
+    result_connected = np.array([[0, 0, 0, 1, 1, 1],
+                                 [0, 0, 0, 1, 1, 1],
+                                 [0, 0, 0, 1, 1, 1]], np.float)
+
+    result_disconnected = np.array([[0, 0, 0, 1, 1, 1],
+                                    [1, 0, 0, 1, 1, 0],
+                                    [0, 0, 0, 1, 1, 0]], np.float)
+
+    assert_equal(segments_connected, result_connected)
+    assert_equal(segments_disconnected, result_disconnected)
+
+
+def test_slic_zero():
+    # Same as test_color_2d but with slic_zero=True
+    rnd = np.random.RandomState(0)
+    img = np.zeros((20, 21, 3))
+    img[:10, :10, 0] = 1
+    img[10:, :10, 1] = 1
+    img[10:, 10:, 2] = 1
+    img += 0.01 * rnd.normal(size=img.shape)
+    img[img > 1] = 1
+    img[img < 0] = 0
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        seg = slic(img, n_segments=4, sigma=0, slic_zero=True)
+
+    # we expect 4 segments
+    assert_equal(len(np.unique(seg)), 4)
+    assert_equal(seg.shape, img.shape[:-1])
+    assert_equal(seg[:10, :10], 0)
+    assert_equal(seg[10:, :10], 2)
+    assert_equal(seg[:10, 10:], 1)
+    assert_equal(seg[10:, 10:], 3)
+
 
 if __name__ == '__main__':
     from numpy import testing
+
     testing.run_module_suite()

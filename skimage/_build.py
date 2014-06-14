@@ -3,7 +3,6 @@ import os
 import hashlib
 import subprocess
 
-
 # WindowsError is not defined on unix systems
 try:
     WindowsError
@@ -26,7 +25,7 @@ def cython(pyx_files, working_path=''):
         return
 
     try:
-        import Cython
+        from Cython.Build import cythonize
     except ImportError:
         # If cython is not found, we do nothing -- the build will make use of
         # the distributed .c files
@@ -39,24 +38,7 @@ def cython(pyx_files, working_path=''):
             if not _changed(pyxfile):
                 continue
 
-            c_file = pyxfile[:-4] + '.c'
-
-            # run cython compiler
-            cmd = 'cython -o %s %s' % (c_file, pyxfile)
-            print(cmd)
-
-            try:
-                subprocess.call(['cython', '-o', c_file, pyxfile])
-            except WindowsError:
-                # On Windows cython.exe may be missing if Cython was installed
-                # via distutils. Run the cython.py script instead.
-                subprocess.call(
-                    [sys.executable,
-                     os.path.join(os.path.dirname(sys.executable),
-                                  'Scripts', 'cython.py'),
-                     '-o', c_file, pyxfile],
-                    shell=True)
-
+            cythonize(pyxfile)
 
 def _md5sum(f):
     m = hashlib.new('md5')
@@ -86,4 +68,4 @@ def _changed(filename):
         with open(filename_cache, 'wb') as cf:
             cf.write(md5_new.encode('utf-8'))
 
-    return md5_cached != md5_new
+    return md5_cached != md5_new.encode('utf-8')

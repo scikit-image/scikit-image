@@ -30,7 +30,7 @@ from subprocess import Popen, PIPE, CalledProcessError, check_call
 pages_dir = 'gh-pages'
 html_dir = 'build/html'
 pdf_dir = 'build/latex'
-pages_repo = 'git@github.com:scikit-image/docs.git'
+pages_repo = 'https://github.com/scikit-image/docs.git'
 
 #-----------------------------------------------------------------------------
 # Functions
@@ -86,13 +86,14 @@ if __name__ == '__main__':
         if l.startswith('VERSION'):
             tag = l.split("'")[1]
 
-            # Rename to, e.g., 0.9.x
-            tag = '.'.join(tag.split('.')[:-1] + ['x'])
+            if "dev" in tag:
+                tag = "dev"
+            else:
+                # Rename e.g. 0.9.0 to 0.9.x
+                tag = '.'.join(tag.split('.')[:-1] + ['x'])
 
             break
 
-    if "dev" in tag:
-        tag = "dev"
 
     startdir = os.getcwd()
     if not os.path.exists(pages_dir):
@@ -124,7 +125,7 @@ if __name__ == '__main__':
         sh("touch .nojekyll")
         sh('git add .nojekyll')
         sh('git add index.html')
-        sh('git add %s' % tag)
+        sh('git add --all %s' % tag)
         sh2('git commit -m"Updated doc release: %s"' % tag)
 
         print('Most recent commit:')

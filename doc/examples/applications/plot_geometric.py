@@ -33,14 +33,14 @@ First we create a transformation using explicit parameters:
 
 tform = tf.SimilarityTransform(scale=1, rotation=math.pi / 2,
                                translation=(0, 1))
-print(tform._matrix)
+print(tform.params)
 
 """
 Alternatively you can define a transformation by the transformation matrix
 itself:
 """
 
-matrix = tform._matrix.copy()
+matrix = tform.params.copy()
 matrix[1, 2] = 2
 tform2 = tf.SimilarityTransform(matrix)
 

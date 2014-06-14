@@ -154,7 +154,7 @@ class TestWatershed(unittest.TestCase):
                       [-1, -1,  1,  1,  1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]], out)
-        self.failUnless(error < eps)
+        self.assertTrue(error < eps)
 
     def test_watershed03(self):
         "watershed 3"
@@ -189,7 +189,7 @@ class TestWatershed(unittest.TestCase):
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]], out)
-        self.failUnless(error < eps)
+        self.assertTrue(error < eps)
 
     def test_watershed04(self):
         "watershed 4"
@@ -224,7 +224,7 @@ class TestWatershed(unittest.TestCase):
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]], out)
-        self.failUnless(error < eps)
+        self.assertTrue(error < eps)
 
     def test_watershed05(self):
         "watershed 5"
@@ -259,7 +259,7 @@ class TestWatershed(unittest.TestCase):
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]], out)
-        self.failUnless(error < eps)
+        self.assertTrue(error < eps)
 
     def test_watershed06(self):
         "watershed 6"
@@ -291,7 +291,7 @@ class TestWatershed(unittest.TestCase):
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1],
                       [-1, -1, -1, -1, -1, -1, -1]], out)
-        self.failUnless(error < eps)
+        self.assertTrue(error < eps)
 
     def test_watershed07(self):
         "A regression test of a competitive case that failed"

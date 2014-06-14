@@ -5,9 +5,9 @@ Pre-built installation
 <http://www.lfd.uci.edu/~gohlke/pythonlibs/#scikits.image>`__
 are kindly provided by Christoph Gohlke.
 
-The latest stable release is also included as part of the `Enthought Python
-Distribution (EPD) <http://enthought.com/products/epd.php>`__, `Python(x,y)
-<http://code.google.com/p/pythonxy/wiki/Welcome>`__ and
+The latest stable release is also included as part of
+`Enthought Canopy <https://www.enthought.com/products/canopy/>`__,
+`Python(x,y) <http://code.google.com/p/pythonxy/wiki/Welcome>`__ and
 `Anaconda <https://store.continuum.io/cshop/anaconda/>`__.
 
 On Debian and Ubuntu, a Debian package ``python-skimage`` can be found in

@@ -5,7 +5,8 @@ import skimage
 from skimage import data
 from skimage.filter.thresholding import (threshold_adaptive,
                                          threshold_otsu,
-                                         threshold_yen)
+                                         threshold_yen,
+                                         threshold_isodata)
 
 
 class TestSimpleImage():
@@ -43,9 +44,28 @@ class TestSimpleImage():
         assert threshold_yen(image) == 127
 
     def test_yen_binary(self):
-        image = np.zeros([2,256], dtype='uint8')
+        image = np.zeros([2,256], dtype=np.uint8)
         image[0] = 255
         assert threshold_yen(image) < 1
+
+    def test_yen_blank_zero(self):
+        image = np.zeros((5, 5), dtype=np.uint8)
+        assert threshold_yen(image) == 0
+
+    def test_yen_blank_max(self):
+        image = np.empty((5, 5), dtype=np.uint8)
+        image.fill(255)
+        assert threshold_yen(image) == 255
+
+    def test_isodata(self):
+        assert threshold_isodata(self.image) == 2
+
+    def test_isodata_blank_zero(self):
+        image = np.zeros((5, 5), dtype=np.uint8)
+        assert threshold_isodata(image) == 0
+
+    def test_isodata_linspace(self):
+        assert -63.8 < threshold_isodata(np.linspace(-127, 0, 256)) < -63.6
 
     def test_threshold_adaptive_generic(self):
         def func(arr):
@@ -114,6 +134,11 @@ def test_otsu_lena_image():
     assert 140 < threshold_otsu(lena) < 142
 
 
+def test_yen_camera_image():
+    camera = skimage.img_as_ubyte(data.camera())
+    assert 197 < threshold_yen(camera) < 199
+
+
 def test_yen_coins_image():
     coins = skimage.img_as_ubyte(data.coins())
     assert 109 < threshold_yen(coins) < 111
@@ -122,6 +147,33 @@ def test_yen_coins_image():
 def test_yen_coins_image_as_float():
     coins = skimage.img_as_float(data.coins())
     assert 0.43 < threshold_yen(coins) < 0.44
+
+
+def test_isodata_camera_image():
+    camera = skimage.img_as_ubyte(data.camera())
+    assert threshold_isodata(camera) == 88
+
+
+def test_isodata_coins_image():
+    coins = skimage.img_as_ubyte(data.coins())
+    assert threshold_isodata(coins) == 107
+
+
+def test_isodata_moon_image():
+    moon = skimage.img_as_ubyte(data.moon())
+    assert threshold_isodata(moon) == 87
+
+
+def test_isodata_moon_image_negative_int():
+    moon = skimage.img_as_ubyte(data.moon()).astype(np.int32)
+    moon -= 100
+    assert threshold_isodata(moon) == -13
+
+
+def test_isodata_moon_image_negative_float():
+    moon = skimage.img_as_ubyte(data.moon()).astype(np.float64)
+    moon -= 100
+    assert -13 < threshold_isodata(moon) < -12
 
 
 if __name__ == '__main__':
