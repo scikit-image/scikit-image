@@ -1,6 +1,6 @@
 These files were obtained from
 
-http://groups.google.com/group/sphinx-dev/browse_thread/thread/595ef2eff60084c5/
+https://www.mail-archive.com/sphinx-dev@googlegroups.com/msg02472.html
 
 and were released under a BSD/MIT license by Fernando Perez, Matthew Brett and
 the PyMVPA guys.

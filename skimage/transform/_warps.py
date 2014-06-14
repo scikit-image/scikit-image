@@ -252,16 +252,16 @@ def downscale_local_mean(image, factors, cval=0):
     image : ndarray
         Down-sampled image with same number of dimensions as input image.
 
-    Example
-    -------
+    Examples
+    --------
     >>> a = np.arange(15).reshape(3, 5)
     >>> a
     array([[ 0,  1,  2,  3,  4],
            [ 5,  6,  7,  8,  9],
            [10, 11, 12, 13, 14]])
     >>> downscale_local_mean(a, (2, 3))
-    array([[3.5, 4.],
-           [5.5, 4.5]])
+    array([[ 3.5,  4. ],
+           [ 5.5,  4.5]])
 
     """
     return block_reduce(image, factors, np.mean, cval)

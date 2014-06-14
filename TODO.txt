@@ -1,15 +1,17 @@
-Version 0.10
-------------
-* Remove deprecated functions in `skimage.filter.rank.*`
-* Remove deprecated parameter `epsilon` of `skimage.viewer.LineProfile`
-* Remove backwards-compatability of `skimage.measure.regionprops`
-* Remove {`ratio`, `sigma`} deprecation warnings of `skimage.segmentation.slic`
-* Change default mode of random_walker segmentation to 'cg_mg' > 'cg' > 'bf',
-  depending on which optional dependencies are available.
-* Remove deprecated `out` parameter of `skimage.morphology.binary_*`
-* Remove deprecated parameter `depth` in `skimage.segmentation.random_walker`
-* Remove deprecated logger function in `skimage/__init__.py`
-* Remove deprecated function `filter.median_filter`
-* Remove deprecated `skimage.color.is_gray` and `skimage.color.is_rgb`
-  functions
+Remember to list any API changes below in `doc/source/api_changes.txt`.
 
+Version 0.12
+------------
+* Change `label` to mark background as 0, not -1, which is consistent with
+  SciPy's labelling.
+* Remove `skimage.morphology.label` from `skimage.morphology.__init__`--it now
+  lives in `skimage.measure.label`.
+* Remove deprecated `reverse_map` parameter of `skimage.transform.warp`
+* Change depecrated `enforce_connectivity=False` on skimage.segmentation.slic
+  and set it to True as default
+* Remove deprecated `skimage.measure.fit.BaseModel._params` attribute
+* Remove deprecated `skimage.measure.fit.BaseModel._params`,
+  `skimage.transform.ProjectiveTransform._matrix`,
+  `skimage.transform.PolynomialTransform._params`,
+  `skimage.transform.PiecewiseAffineTransform.affines_*` attributes
+* Remove deprecated functions `skimage.filter.denoise_*`

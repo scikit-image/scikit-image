@@ -94,15 +94,15 @@ def daisy(img, step=4, radius=15, rings=3, histograms=8, orientations=8,
     '''
 
     # Validate image format.
-    if img.ndim > 2:
+    if img.ndim != 2:
         raise ValueError('Only grey-level images are supported.')
-    if img.dtype.kind != 'f':
-        img = img_as_float(img)
+
+    img = img_as_float(img)
 
     # Validate parameters.
     if sigmas is not None and ring_radii is not None \
             and len(sigmas) - 1 != len(ring_radii):
-        raise ValueError('len(sigmas)-1 != len(ring_radii)')
+        raise ValueError('`len(sigmas)-1 != len(ring_radii)`')
     if ring_radii is not None:
         rings = len(ring_radii)
         radius = ring_radii[-1]

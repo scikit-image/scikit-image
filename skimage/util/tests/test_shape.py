@@ -1,46 +1,42 @@
 import numpy as np
 from nose.tools import raises
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_warns
+
 from skimage.util.shape import view_as_blocks, view_as_windows
+from skimage._shared.utils import all_warnings
 
 
 @raises(TypeError)
 def test_view_as_blocks_block_not_a_tuple():
-
     A = np.arange(10)
     view_as_blocks(A, [5])
 
 
 @raises(ValueError)
 def test_view_as_blocks_negative_shape():
-
     A = np.arange(10)
     view_as_blocks(A, (-2,))
 
 
 @raises(ValueError)
 def test_view_as_blocks_block_too_large():
-
     A = np.arange(10)
     view_as_blocks(A, (11,))
 
 
 @raises(ValueError)
 def test_view_as_blocks_wrong_block_dimension():
-
     A = np.arange(10)
     view_as_blocks(A, (2, 2))
 
 
 @raises(ValueError)
 def test_view_as_blocks_1D_array_wrong_block_shape():
-
     A = np.arange(10)
     view_as_blocks(A, (3,))
 
 
 def test_view_as_blocks_1D_array():
-
     A = np.arange(10)
     B = view_as_blocks(A, (5,))
     assert_equal(B, np.array([[0, 1, 2, 3, 4],
@@ -48,7 +44,6 @@ def test_view_as_blocks_1D_array():
 
 
 def test_view_as_blocks_2D_array():
-
     A = np.arange(4 * 4).reshape(4, 4)
     B = view_as_blocks(A, (2, 2))
     assert_equal(B[0, 1], np.array([[2, 3],
@@ -57,7 +52,6 @@ def test_view_as_blocks_2D_array():
 
 
 def test_view_as_blocks_3D_array():
-
     A = np.arange(4 * 4 * 6).reshape(4, 4, 6)
     B = view_as_blocks(A, (1, 2, 2))
     assert_equal(B.shape, (4, 2, 3, 1, 2, 2))
@@ -69,41 +63,40 @@ def test_view_as_blocks_3D_array():
 
 @raises(TypeError)
 def test_view_as_windows_input_not_array():
-
     A = [1, 2, 3, 4, 5]
     view_as_windows(A, (2,))
 
 
 @raises(TypeError)
 def test_view_as_windows_window_not_tuple():
-
     A = np.arange(10)
     view_as_windows(A, [2])
 
 
 @raises(ValueError)
 def test_view_as_windows_wrong_window_dimension():
-
     A = np.arange(10)
     view_as_windows(A, (2, 2))
 
 
 @raises(ValueError)
 def test_view_as_windows_negative_window_length():
-
     A = np.arange(10)
     view_as_windows(A, (-1,))
 
 
 @raises(ValueError)
 def test_view_as_windows_window_too_large():
-
     A = np.arange(10)
     view_as_windows(A, (11,))
 
 
-def test_view_as_windows_1D():
+@raises(ValueError)
+def test_view_as_windows_step_below_one():
+    A = np.arange(10)
+    view_as_windows(A, (11,), step=0.9)
 
+def test_view_as_windows_1D():
     A = np.arange(10)
     window_shape = (3,)
     B = view_as_windows(A, window_shape)
@@ -118,7 +111,6 @@ def test_view_as_windows_1D():
 
 
 def test_view_as_windows_2D():
-
     A = np.arange(5 * 4).reshape(5, 4)
     window_shape = (4, 3)
     B = view_as_windows(A, window_shape)
@@ -141,7 +133,7 @@ def test_view_as_windows_2D():
                                 [17, 18, 19]]]]))
 
 
-def test_view_as_windows_With_skip():
+def test_view_as_windows_with_skip():
     A = np.arange(20).reshape((5, 4))
     B = view_as_windows(A, (2, 2), step=2)
     assert_equal(B, [[[[0, 1],
@@ -155,6 +147,15 @@ def test_view_as_windows_With_skip():
 
     C = view_as_windows(A, (2, 2), step=4)
     assert_equal(C.shape, (1, 1, 2, 2))
+
+
+def test_views_non_contiguous():
+    A = np.arange(16).reshape((4, 4))
+    A = A[::2, :]
+
+    with all_warnings():
+        assert_warns(RuntimeWarning, view_as_blocks, A, (2, 2))
+        assert_warns(RuntimeWarning, view_as_windows, A, (2, 2))
 
 
 if __name__ == '__main__':

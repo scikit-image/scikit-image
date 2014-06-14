@@ -2,7 +2,7 @@ import warnings
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_raises
 import skimage
 from skimage import data
 from skimage import exposure
@@ -44,6 +44,13 @@ def check_cdf_slope(cdf):
 # Test rescale intensity
 # ======================
 
+
+uint10_max = 2**10 - 1
+uint12_max = 2**12 - 1
+uint14_max = 2**14 - 1
+uint16_max = 2**16 - 1
+
+
 def test_rescale_stretch():
     image = np.array([51, 102, 153], dtype=np.uint8)
     out = exposure.rescale_intensity(image)
@@ -74,6 +81,30 @@ def test_rescale_out_range():
     out = exposure.rescale_intensity(image, out_range=(0, 127))
     assert out.dtype == np.int8
     assert_close(out, [0, 63, 127])
+
+
+def test_rescale_named_in_range():
+    image = np.array([0, uint10_max, uint10_max + 100], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, in_range='uint10')
+    assert_close(out, [0, uint16_max, uint16_max])
+
+
+def test_rescale_named_out_range():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint10')
+    assert_close(out, [0, uint10_max])
+
+
+def test_rescale_uint12_limits():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint12')
+    assert_close(out, [0, uint12_max])
+
+
+def test_rescale_uint14_limits():
+    image = np.array([0, uint16_max], dtype=np.uint16)
+    out = exposure.rescale_intensity(image, out_range='uint14')
+    assert_close(out, [0, uint14_max])
 
 
 # Test adaptive histogram equalization
@@ -230,6 +261,11 @@ def test_adjust_gamma_greater_one():
     assert_array_equal(result, expected)
 
 
+def test_adjust_gamma_neggative():
+    image = np.arange(0, 255, 4, np.uint8).reshape(8,8)
+    assert_raises(ValueError, exposure.adjust_gamma, image, -1)
+
+
 # Test Logarithmic Correction
 # ===========================
 
@@ -336,3 +372,8 @@ def test_adjust_inv_sigmoid_cutoff_half():
 
     result = exposure.adjust_sigmoid(image, 0.5, 10, True)
     assert_array_equal(result, expected)
+
+
+def test_neggative():
+    image = np.arange(-10, 245, 4).reshape(8, 8).astype(np.double)
+    assert_raises(ValueError, exposure.adjust_gamma, image)

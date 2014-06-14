@@ -13,8 +13,8 @@ How to make a new release of ``skimage``
 - Update the docs:
 
   - Edit ``doc/source/_static/docversions.js`` and commit
-  - Build a clean version of the docs.  Run ``make`` in the root dir, then
-    ``rm -rf build; make html`` in the docs.
+  - Build a clean version of the docs.  Run ``python setup.py install`` in the
+    root dir, then ``rm -rf build; make html`` in the docs.
   - Run ``make html`` again to copy the newly generated ``random.js`` into
     place.  Double check ``random.js``, otherwise the skimage.org front
     page gets broken!
@@ -51,7 +51,7 @@ How to make a new release of ``skimage``
   - Add previous stable version documentation path to disallowed paths
     in `robots.txt`
   - Build using ``make gh-pages``.
-  - Push upstream: ``git push`` in ``gh-pages``.
+  - Push upstream: ``git push origin master`` in ``gh-pages``.
 
 - Update the development docs for the new version ``0.Xdev`` just like above
 

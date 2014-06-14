@@ -44,13 +44,11 @@ from skimage import data
 noisy_image = img_as_ubyte(data.camera())
 hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 
-plt.figure(figsize=(8, 3))
-plt.subplot(1, 2, 1)
-plt.imshow(noisy_image, interpolation='nearest')
-plt.axis('off')
-plt.subplot(1, 2, 2)
-plt.plot(hist[1][:-1], hist[0], lw=2)
-plt.title('Histogram of grey values')
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 3))
+ax1.imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
+ax1.axis('off')
+ax2.plot(hist[1][:-1], hist[0], lw=2)
+ax2.set_title('Histogram of grey values')
 
 """
 
@@ -62,11 +60,6 @@ Noise removal
 Some noise is added to the image, 1% of pixels are randomly set to 255, 1% are
 randomly set to 0. The **median** filter is applied to remove the noise.
 
-.. note::
-
-    There are different implementations of median filter:
-    `skimage.filter.median_filter` and `skimage.filter.rank.median`
-
 """
 
 from skimage.filter.rank import median
@@ -77,27 +70,24 @@ noisy_image = img_as_ubyte(data.camera())
 noisy_image[noise > 0.99] = 255
 noisy_image[noise < 0.01] = 0
 
-fig = plt.figure(figsize=(10, 7))
+fig, ax = plt.subplots(2, 2, figsize=(10, 7))
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 1)
-plt.imshow(noisy_image, vmin=0, vmax=255)
-plt.title('Noisy image')
-plt.axis('off')
+ax1.imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
+ax1.set_title('Noisy image')
+ax1.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(median(noisy_image, disk(1)), vmin=0, vmax=255)
-plt.title('Median $r=1$')
-plt.axis('off')
+ax2.imshow(median(noisy_image, disk(1)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax2.set_title('Median $r=1$')
+ax2.axis('off')
 
-plt.subplot(2, 2, 3)
-plt.imshow(median(noisy_image, disk(5)), vmin=0, vmax=255)
-plt.title('Median $r=5$')
-plt.axis('off')
+ax3.imshow(median(noisy_image, disk(5)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax3.set_title('Median $r=5$')
+ax3.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(median(noisy_image, disk(20)), vmin=0, vmax=255)
-plt.title('Median $r=20$')
-plt.axis('off')
+ax4.imshow(median(noisy_image, disk(20)), vmin=0, vmax=255, cmap=plt.cm.gray)
+ax4.set_title('Median $r=20$')
+ax4.axis('off')
 
 """
 
@@ -119,19 +109,17 @@ image.
 
 from skimage.filter.rank import mean
 
-fig = plt.figure(figsize=[10, 7])
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7])
 
 loc_mean = mean(noisy_image, disk(10))
 
-plt.subplot(1, 2, 1)
-plt.imshow(noisy_image, vmin=0, vmax=255)
-plt.title('Original')
-plt.axis('off')
+ax1.imshow(noisy_image, vmin=0, vmax=255, cmap=plt.cm.gray)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(1, 2, 2)
-plt.imshow(loc_mean, vmin=0, vmax=255)
-plt.title('Local mean $r=10$')
-plt.axis('off')
+ax2.imshow(loc_mean, vmin=0, vmax=255, cmap=plt.cm.gray)
+ax2.set_title('Local mean $r=10$')
+ax2.axis('off')
 
 """
 
@@ -149,31 +137,28 @@ the central one.
 
 """
 
-from skimage.filter.rank import bilateral_mean
+from skimage.filter.rank import mean_bilateral
 
 noisy_image = img_as_ubyte(data.camera())
 
-bilat = bilateral_mean(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
+bilat = mean_bilateral(noisy_image.astype(np.uint16), disk(20), s0=10, s1=10)
 
-fig = plt.figure(figsize=[10, 7])
+fig, ax = plt.subplots(2, 2, figsize=(10, 7))
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 1)
-plt.imshow(noisy_image, cmap=plt.cm.gray)
-plt.title('Original')
-plt.axis('off')
+ax1.imshow(noisy_image, cmap=plt.cm.gray)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(2, 2, 3)
-plt.imshow(bilat, cmap=plt.cm.gray)
-plt.title('Bilateral mean')
-plt.axis('off')
+ax2.imshow(bilat, cmap=plt.cm.gray)
+ax2.set_title('Bilateral mean')
+ax2.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
-plt.axis('off')
+ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax3.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
-plt.axis('off')
+ax4.imshow(bilat[200:350, 350:450], cmap=plt.cm.gray)
+ax4.axis('off')
 
 """
 
@@ -203,7 +188,7 @@ from skimage.filter import rank
 noisy_image = img_as_ubyte(data.camera())
 
 # equalize globally and locally
-glob = exposure.equalize(noisy_image) * 255
+glob = exposure.equalize_hist(noisy_image) * 255
 loc = rank.equalize(noisy_image, disk(20))
 
 # extract histogram for each image
@@ -211,31 +196,26 @@ hist = np.histogram(noisy_image, bins=np.arange(0, 256))
 glob_hist = np.histogram(glob, bins=np.arange(0, 256))
 loc_hist = np.histogram(loc, bins=np.arange(0, 256))
 
-plt.figure(figsize=(10, 10))
+fig, ax = plt.subplots(3, 2, figsize=(10, 10))
+ax1, ax2, ax3, ax4, ax5, ax6 = ax.ravel()
 
-plt.subplot(321)
-plt.imshow(noisy_image, interpolation='nearest')
-plt.axis('off')
+ax1.imshow(noisy_image, interpolation='nearest', cmap=plt.cm.gray)
+ax1.axis('off')
 
-plt.subplot(322)
-plt.plot(hist[1][:-1], hist[0], lw=2)
-plt.title('Histogram of gray values')
+ax2.plot(hist[1][:-1], hist[0], lw=2)
+ax2.set_title('Histogram of gray values')
 
-plt.subplot(323)
-plt.imshow(glob, interpolation='nearest')
-plt.axis('off')
+ax3.imshow(glob, interpolation='nearest', cmap=plt.cm.gray)
+ax3.axis('off')
 
-plt.subplot(324)
-plt.plot(glob_hist[1][:-1], glob_hist[0], lw=2)
-plt.title('Histogram of gray values')
+ax4.plot(glob_hist[1][:-1], glob_hist[0], lw=2)
+ax4.set_title('Histogram of gray values')
 
-plt.subplot(325)
-plt.imshow(loc, interpolation='nearest')
-plt.axis('off')
+ax5.imshow(loc, interpolation='nearest', cmap=plt.cm.gray)
+ax5.axis('off')
 
-plt.subplot(326)
-plt.plot(loc_hist[1][:-1], loc_hist[0], lw=2)
-plt.title('Histogram of gray values')
+ax6.plot(loc_hist[1][:-1], loc_hist[0], lw=2)
+ax6.set_title('Histogram of gray values')
 
 """
 
@@ -256,17 +236,15 @@ noisy_image = img_as_ubyte(data.camera())
 
 auto = autolevel(noisy_image.astype(np.uint16), disk(20))
 
-fig = plt.figure(figsize=[10, 7])
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=[10, 7])
 
-plt.subplot(1, 2, 1)
-plt.imshow(noisy_image, cmap=plt.cm.gray)
-plt.title('Original')
-plt.axis('off')
+ax1.imshow(noisy_image, cmap=plt.cm.gray)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(1, 2, 2)
-plt.imshow(auto, cmap=plt.cm.gray)
-plt.title('Local autolevel')
-plt.axis('off')
+ax2.imshow(auto, cmap=plt.cm.gray)
+ax2.set_title('Local autolevel')
+ax2.axis('off')
 
 """
 
@@ -297,7 +275,7 @@ fig, axes = plt.subplots(nrows=3, figsize=(7, 8))
 ax0, ax1, ax2 = axes
 plt.gray()
 
-ax0.imshow(np.hstack((image, loc_autolevel)))
+ax0.imshow(np.hstack((image, loc_autolevel)), cmap=plt.cm.gray)
 ax0.set_title('Original / auto-level')
 
 ax1.imshow(
@@ -326,24 +304,22 @@ noisy_image = img_as_ubyte(data.camera())
 
 enh = enhance_contrast(noisy_image, disk(5))
 
-fig = plt.figure(figsize=[10, 7])
-plt.subplot(2, 2, 1)
-plt.imshow(noisy_image, cmap=plt.cm.gray)
-plt.title('Original')
-plt.axis('off')
+fig, ax = plt.subplots(2, 2, figsize=[10, 7])
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 3)
-plt.imshow(enh, cmap=plt.cm.gray)
-plt.title('Local morphological contrast enhancement')
-plt.axis('off')
+ax1.imshow(noisy_image, cmap=plt.cm.gray)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
-plt.axis('off')
+ax2.imshow(enh, cmap=plt.cm.gray)
+ax2.set_title('Local morphological contrast enhancement')
+ax2.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
-plt.axis('off')
+ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax3.axis('off')
+
+ax4.imshow(enh[200:350, 350:450], cmap=plt.cm.gray)
+ax4.axis('off')
 
 """
 
@@ -360,24 +336,22 @@ noisy_image = img_as_ubyte(data.camera())
 
 penh = enhance_contrast_percentile(noisy_image, disk(5), p0=.1, p1=.9)
 
-fig = plt.figure(figsize=[10, 7])
-plt.subplot(2, 2, 1)
-plt.imshow(noisy_image, cmap=plt.cm.gray)
-plt.title('Original')
-plt.axis('off')
+fig, ax = plt.subplots(2, 2, figsize=[10, 7])
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 3)
-plt.imshow(penh, cmap=plt.cm.gray)
-plt.title('Local percentile morphological\n contrast enhancement')
-plt.axis('off')
+ax1.imshow(noisy_image, cmap=plt.cm.gray)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
-plt.axis('off')
+ax2.imshow(penh, cmap=plt.cm.gray)
+ax2.set_title('Local percentile morphological\n contrast enhancement')
+ax2.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
-plt.axis('off')
+ax3.imshow(noisy_image[200:350, 350:450], cmap=plt.cm.gray)
+ax3.axis('off')
+
+ax4.imshow(penh[200:350, 350:450], cmap=plt.cm.gray)
+ax4.axis('off')
 
 """
 
@@ -419,29 +393,24 @@ loc_otsu = p8 >= t_loc_otsu
 t_glob_otsu = threshold_otsu(p8)
 glob_otsu = p8 >= t_glob_otsu
 
-plt.figure()
+fig, ax = plt.subplots(2, 2)
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 1)
-plt.imshow(p8, cmap=plt.cm.gray)
-plt.title('Original')
-plt.colorbar()
-plt.axis('off')
+fig.colorbar(ax1.imshow(p8, cmap=plt.cm.gray), ax=ax1)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(t_loc_otsu, cmap=plt.cm.gray)
-plt.title('Local Otsu ($r=%d$)' % radius)
-plt.colorbar()
-plt.axis('off')
+fig.colorbar(ax2.imshow(t_loc_otsu, cmap=plt.cm.gray), ax=ax2)
+ax2.set_title('Local Otsu ($r=%d$)' % radius)
+ax2.axis('off')
 
-plt.subplot(2, 2, 3)
-plt.imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
-plt.title('Original >= local Otsu' % t_glob_otsu)
-plt.axis('off')
+ax3.imshow(p8 >= t_loc_otsu, cmap=plt.cm.gray)
+ax3.set_title('Original >= local Otsu' % t_glob_otsu)
+ax3.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(glob_otsu, cmap=plt.cm.gray)
-plt.title('Global Otsu ($t=%d$)' % t_glob_otsu)
-plt.axis('off')
+ax4.imshow(glob_otsu, cmap=plt.cm.gray)
+ax4.set_title('Global Otsu ($t=%d$)' % t_glob_otsu)
+ax4.axis('off')
 
 """
 
@@ -460,17 +429,15 @@ m = (np.tile(x, (n, 1)) * np.linspace(0.1, 1, n) * 128 + 128).astype(np.uint8)
 radius = 10
 t = rank.otsu(m, disk(radius))
 
-plt.figure()
+fig, (ax1, ax2) = plt.subplots(1, 2)
 
-plt.subplot(1, 2, 1)
-plt.imshow(m)
-plt.title('Original')
-plt.axis('off')
+ax1.imshow(m)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(1, 2, 2)
-plt.imshow(m >= t, interpolation='nearest')
-plt.title('Local Otsu ($r=%d$)' % radius)
-plt.axis('off')
+ax2.imshow(m >= t, interpolation='nearest')
+ax2.set_title('Local Otsu ($r=%d$)' % radius)
+ax2.axis('off')
 
 """
 
@@ -501,27 +468,24 @@ opening = minimum(maximum(noisy_image, disk(5)), disk(5))
 grad = gradient(noisy_image, disk(5))
 
 # display results
-fig = plt.figure(figsize=[10, 7])
+fig, ax = plt.subplots(2, 2, figsize=[10, 7])
+ax1, ax2, ax3, ax4 = ax.ravel()
 
-plt.subplot(2, 2, 1)
-plt.imshow(noisy_image, cmap=plt.cm.gray)
-plt.title('Original')
-plt.axis('off')
+ax1.imshow(noisy_image, cmap=plt.cm.gray)
+ax1.set_title('Original')
+ax1.axis('off')
 
-plt.subplot(2, 2, 2)
-plt.imshow(closing, cmap=plt.cm.gray)
-plt.title('Gray-level closing')
-plt.axis('off')
+ax2.imshow(closing, cmap=plt.cm.gray)
+ax2.set_title('Gray-level closing')
+ax2.axis('off')
 
-plt.subplot(2, 2, 3)
-plt.imshow(opening, cmap=plt.cm.gray)
-plt.title('Gray-level opening')
-plt.axis('off')
+ax3.imshow(opening, cmap=plt.cm.gray)
+ax3.set_title('Gray-level opening')
+ax3.axis('off')
 
-plt.subplot(2, 2, 4)
-plt.imshow(grad, cmap=plt.cm.gray)
-plt.title('Morphological gradient')
-plt.axis('off')
+ax4.imshow(grad, cmap=plt.cm.gray)
+ax4.set_title('Morphological gradient')
+ax4.axis('off')
 
 """
 
@@ -554,19 +518,15 @@ import matplotlib.pyplot as plt
 
 image = data.camera()
 
-plt.figure(figsize=(10, 4))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
-plt.subplot(1, 2, 1)
-plt.imshow(image, cmap=plt.cm.gray)
-plt.title('Image')
-plt.colorbar()
-plt.axis('off')
+fig.colorbar(ax1.imshow(image, cmap=plt.cm.gray), ax=ax1)
+ax1.set_title('Image')
+ax1.axis('off')
 
-plt.subplot(1, 2, 2)
-plt.imshow(entropy(image, disk(5)), cmap=plt.cm.jet)
-plt.title('Entropy')
-plt.colorbar()
-plt.axis('off')
+fig.colorbar(ax2.imshow(entropy(image, disk(5)), cmap=plt.cm.jet), ax=ax2)
+ax2.set_title('Entropy')
+ax2.axis('off')
 
 """
 
@@ -589,7 +549,6 @@ from time import time
 
 from scipy.ndimage.filters import percentile_filter
 from skimage.morphology import dilation
-from skimage.filter import median_filter
 from skimage.filter.rank import median, maximum
 
 
@@ -620,11 +579,6 @@ def cm_dil(image, selem):
 
 
 @exec_and_timeit
-def ctmf_med(image, radius):
-    return median_filter(image=image, radius=radius)
-
-
-@exec_and_timeit
 def ndi_med(image, n):
     return percentile_filter(image, 50, size=n * 2 - 1)
 
@@ -651,12 +605,12 @@ for r in e_range:
 
 rec = np.asarray(rec)
 
-plt.figure()
-plt.title('Performance with respect to element size')
-plt.ylabel('Time (ms)')
-plt.title('Element radius')
-plt.plot(e_range, rec)
-plt.legend(['filter.rank.maximum', 'morphology.dilate'])
+fig, ax = plt.subplots()
+ax.set_title('Performance with respect to element size')
+ax.set_ylabel('Time (ms)')
+ax.set_xlabel('Element radius')
+ax.plot(e_range, rec)
+ax.legend(['filter.rank.maximum', 'morphology.dilate'])
 
 """
 
@@ -679,12 +633,12 @@ for s in s_range:
 
 rec = np.asarray(rec)
 
-plt.figure()
-plt.title('Performance with respect to image size')
-plt.ylabel('Time (ms)')
-plt.title('Image size')
-plt.plot(s_range, rec)
-plt.legend(['filter.rank.maximum', 'morphology.dilate'])
+fig, ax = plt.subplots()
+ax.set_title('Performance with respect to image size')
+ax.set_ylabel('Time (ms)')
+ax.set_xlabel('Image size')
+ax.plot(s_range, rec)
+ax.legend(['filter.rank.maximum', 'morphology.dilate'])
 
 
 """
@@ -694,7 +648,6 @@ plt.legend(['filter.rank.maximum', 'morphology.dilate'])
 Comparison between:
 
 * `filter.rank.median`
-* `filter.median_filter`
 * `scipy.ndimage.percentile`
 
 on increasing structuring element size:
@@ -708,19 +661,17 @@ e_range = range(2, 30, 4)
 for r in e_range:
     elem = disk(r + 1)
     rc, ms_rc = cr_med(a, elem)
-    rctmf, ms_rctmf = ctmf_med(a, r)
     rndi, ms_ndi = ndi_med(a, r)
-    rec.append((ms_rc, ms_rctmf, ms_ndi))
+    rec.append((ms_rc, ms_ndi))
 
 rec = np.asarray(rec)
 
-plt.figure()
-plt.title('Performance with respect to element size')
-plt.plot(e_range, rec)
-plt.legend(['filter.rank.median', 'filter.median_filter',
-            'scipy.ndimage.percentile'])
-plt.ylabel('Time (ms)')
-plt.title('Element radius')
+fig, ax = plt.subplots()
+ax.set_title('Performance with respect to element size')
+ax.plot(e_range, rec)
+ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
+ax.set_ylabel('Time (ms)')
+ax.set_xlabel('Element radius')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -729,10 +680,10 @@ Comparison of outcome of the three methods:
 
 """
 
-plt.figure()
-plt.imshow(np.hstack((rc, rctmf, rndi)))
-plt.title('filter.rank.median vs filtermedian_filter vs scipy.ndimage.percentile')
-plt.axis('off')
+fig, ax = plt.subplots()
+ax.imshow(np.hstack((rc, rndi)))
+ax.set_title('filter.rank.median vs. scipy.ndimage.percentile')
+ax.axis('off')
 
 """
 .. image:: PLOT2RST.current_figure
@@ -749,19 +700,17 @@ s_range = [100, 200, 500, 1000]
 for s in s_range:
     a = (np.random.random((s, s)) * 256).astype(np.uint8)
     (rc, ms_rc) = cr_med(a, elem)
-    rctmf, ms_rctmf = ctmf_med(a, r)
     rndi, ms_ndi = ndi_med(a, r)
-    rec.append((ms_rc, ms_rctmf, ms_ndi))
+    rec.append((ms_rc, ms_ndi))
 
 rec = np.asarray(rec)
 
-plt.figure()
-plt.title('Performance with respect to image size')
-plt.plot(s_range, rec)
-plt.legend(['filter.rank.median', 'filter.median_filter',
-            'scipy.ndimage.percentile'])
-plt.ylabel('Time (ms)')
-plt.title('Image size')
+fig, ax = plt.subplots()
+ax.set_title('Performance with respect to image size')
+ax.plot(s_range, rec)
+ax.legend(['filter.rank.median', 'scipy.ndimage.percentile'])
+ax.set_ylabel('Time (ms)')
+ax.set_xlabel('Image size')
 
 """
 .. image:: PLOT2RST.current_figure

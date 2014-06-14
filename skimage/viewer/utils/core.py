@@ -14,6 +14,9 @@ try:
     else:
         from matplotlib.backends.backend_qt4 import FigureManagerQT
         from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+    if 'agg' not in mpl.get_backend().lower():
+        print("Recommended matplotlib backend is `Agg` for full "
+              "skimage.viewer functionality.")
 except ImportError:
     FigureCanvasQTAgg = object  # hack to prevent nosetest and autodoc errors
     LinearSegmentedColormap = object

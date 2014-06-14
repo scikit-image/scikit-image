@@ -134,7 +134,11 @@ dtype range::
 
 Here, the ``in_range`` argument is set to the maximum range for a 10-bit image.
 By default, ``rescale_intensity`` stretches the values of ``in_range`` to match
-the range of the dtype.
+the range of the dtype. ``rescale_intensity`` also accepts strings as inputs
+to ``in_range`` and ``out_range``, so the example above could also be written
+as::
+
+   >>> image = exposure.rescale_intensity(img10bit, in_range='uint10')
 
 
 Note about negative values

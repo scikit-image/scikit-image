@@ -1,33 +1,14 @@
-__all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show',
-           'push', 'pop']
-
-try:
-    from urllib.request import urlopen
-except ImportError:
-    from urllib2 import urlopen
-
-import os
-import re
-import tempfile
 from io import BytesIO
 
 import numpy as np
+import six
 
-from skimage.io._plugins import call as call_plugin
+from skimage.io.manage_plugins import call_plugin
 from skimage.color import rgb2grey
-from skimage._shared import six
+from .util import file_or_url_context
 
 
-# Shared image queue
-_image_stack = []
-
-URL_REGEX = re.compile(r'http://|https://|ftp://|file://|file:\\')
-
-
-def is_url(filename):
-    """Return True if string is an http or ftp path."""
-    return (isinstance(filename, six.string_types) and
-            URL_REGEX.match(filename) is not None)
+__all__ = ['Image', 'imread', 'imread_collection', 'imsave', 'imshow', 'show']
 
 
 class Image(np.ndarray):
@@ -76,33 +57,6 @@ class Image(np.ndarray):
         return return_str
 
 
-def push(img):
-    """Push an image onto the shared image stack.
-
-    Parameters
-    ----------
-    img : ndarray
-        Image to push.
-
-    """
-    if not isinstance(img, np.ndarray):
-        raise ValueError("Can only push ndarrays to the image stack.")
-
-    _image_stack.append(img)
-
-
-def pop():
-    """Pop an image from the shared image stack.
-
-    Returns
-    -------
-    img : ndarray
-        Image popped from the stack.
-
-    """
-    return _image_stack.pop()
-
-
 def imread(fname, as_grey=False, plugin=None, flatten=None,
            **plugin_args):
     """Load an image from file.
@@ -139,14 +93,7 @@ def imread(fname, as_grey=False, plugin=None, flatten=None,
     if flatten is not None:
         as_grey = flatten
 
-    if is_url(fname):
-        _, ext = os.path.splitext(fname)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as f:
-            u = urlopen(fname)
-            f.write(u.read())
-        img = call_plugin('imread', f.name, plugin=plugin, **plugin_args)
-        os.remove(f.name)
-    else:
+    with file_or_url_context(fname) as fname:
         img = call_plugin('imread', fname, plugin=plugin, **plugin_args)
 
     if as_grey and getattr(img, 'ndim', 0) >= 3:
@@ -247,7 +194,7 @@ def show():
 
     >>> for i in range(4):
     ...     io.imshow(np.random.random((50, 50)))
-    >>> io.show()
+    >>> io.show() # doctest: +SKIP
 
     '''
     return call_plugin('_app_show')

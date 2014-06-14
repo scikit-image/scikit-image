@@ -49,9 +49,9 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
     Returns
     -------
-    output : (N, 2) array or ndarray of bools
+    output : ndarray or ndarray of bools
 
-        * If `indices = True`  : (row, column) coordinates of peaks.
+        * If `indices = True`  : (row, column, ...) coordinates of peaks.
         * If `indices = False` : Boolean array shaped like `image`, with peaks
           represented by True values.
 
@@ -65,10 +65,10 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
 
     Examples
     --------
-    >>> im = np.zeros((7, 7))
-    >>> im[3, 4] = 1
-    >>> im[3, 2] = 1.5
-    >>> im
+    >>> img1 = np.zeros((7, 7))
+    >>> img1[3, 4] = 1
+    >>> img1[3, 2] = 1.5
+    >>> img1
     array([[ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
@@ -77,12 +77,17 @@ def peak_local_max(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ],
            [ 0. ,  0. ,  0. ,  0. ,  0. ,  0. ,  0. ]])
 
-    >>> peak_local_max(im, min_distance=1)
+    >>> peak_local_max(img1, min_distance=1)
     array([[3, 2],
            [3, 4]])
 
-    >>> peak_local_max(im, min_distance=2)
+    >>> peak_local_max(img1, min_distance=2)
     array([[3, 2]])
+
+    >>> img2 = np.zeros((20, 20, 20))
+    >>> img2[10, 10, 10] = 1
+    >>> peak_local_max(img2, exclude_border=False)
+    array([[10, 10, 10]])
 
     """
     out = np.zeros_like(image, dtype=np.bool)

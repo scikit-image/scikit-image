@@ -5,17 +5,14 @@ from numpy.testing import assert_raises
 import itertools
 import os.path
 
-from skimage.transform import radon, iradon
+from skimage.transform import radon, iradon, iradon_sart, rescale
 from skimage.io import imread
 from skimage import data_dir
 
 
-__PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
+PHANTOM = imread(os.path.join(data_dir, "phantom.png"),
                    as_grey=True)[::2, ::2]
-
-
-def _get_phantom():
-    return __PHANTOM
+PHANTOM = rescale(PHANTOM, 0.5, order=1)
 
 
 def _debug_plot(original, result, sinogram=None):
@@ -39,7 +36,7 @@ def _debug_plot(original, result, sinogram=None):
     plt.show()
 
 
-def rescale(x):
+def _rescale_intensity(x):
     x = x.astype(float)
     x -= x.min()
     x /= x.max()
@@ -117,7 +114,7 @@ def test_iradon_center():
 
 def check_radon_iradon(interpolation_type, filter_type):
     debug = False
-    image = _get_phantom()
+    image = PHANTOM
     reconstructed = iradon(radon(image), filter=filter_type,
                            interpolation=interpolation_type)
     delta = np.mean(np.abs(image - reconstructed))
@@ -128,7 +125,7 @@ def check_radon_iradon(interpolation_type, filter_type):
         if interpolation_type == 'nearest':
             allowed_delta = 0.03
         else:
-            allowed_delta = 0.02
+            allowed_delta = 0.025
     else:
         allowed_delta = 0.05
     assert delta < allowed_delta
@@ -156,7 +153,7 @@ def test_iradon_angles():
     radon_image_200 = radon(image, theta=np.linspace(0, 180, nb_angles,
                                                      endpoint=False))
     reconstructed = iradon(radon_image_200)
-    delta_200 = np.mean(abs(rescale(image) - rescale(reconstructed)))
+    delta_200 = np.mean(abs(_rescale_intensity(image) - _rescale_intensity(reconstructed)))
     assert delta_200 < 0.03
     # Lower number of projections
     nb_angles = 80
@@ -225,7 +222,7 @@ def test_radon_circle():
     r = np.sqrt((c0 - shape[0] // 2)**2 + (c1 - shape[1] // 2)**2)
     radius = min(shape) // 2
     image = np.clip(radius - r, 0, np.inf)
-    image = rescale(image)
+    image = _rescale_intensity(image)
     angles = np.linspace(0, 180, min(shape), endpoint=False)
     sinogram = radon(image, theta=angles, circle=True)
     assert np.all(sinogram.std(axis=1) < 1e-2)
@@ -314,14 +311,9 @@ def test_order_angles_golden_ratio():
 
 
 def test_iradon_sart():
-    from skimage.io import imread
-    from skimage import data_dir
-    from skimage.transform import rescale, radon, iradon_sart
-
     debug = False
 
-    shepp_logan = imread(os.path.join(data_dir, "phantom.png"), as_grey=True)
-    image = rescale(shepp_logan, scale=0.4)
+    image = rescale(PHANTOM, 0.8)
     theta_ordered = np.linspace(0., 180., image.shape[0], endpoint=False)
     theta_missing_wedge = np.linspace(0., 150., image.shape[0], endpoint=True)
     for theta, error_factor in ((theta_ordered, 1.),
@@ -344,15 +336,15 @@ def test_iradon_sart():
 
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration) =', delta)
-        assert delta < 0.016 * error_factor
+        assert delta < 0.02 * error_factor
         reconstructed = iradon_sart(sinogram, theta, reconstructed)
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (2 iterations) =', delta)
-        assert delta < 0.013 * error_factor
+        assert delta < 0.014 * error_factor
         reconstructed = iradon_sart(sinogram, theta, clip=(0, 1))
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, clip) =', delta)
-        assert delta < 0.015 * error_factor
+        assert delta < 0.018 * error_factor
 
         np.random.seed(1239867)
         shifts = np.random.uniform(-3, 3, sinogram.shape[1])
@@ -377,7 +369,8 @@ def test_iradon_sart():
 
         delta = np.mean(np.abs(reconstructed - image))
         print('delta (1 iteration, shifted sinogram) =', delta)
-        assert delta < 0.018 * error_factor
+        assert delta < 0.022 * error_factor
+
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite

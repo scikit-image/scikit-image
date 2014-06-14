@@ -23,9 +23,9 @@ INTENSITY_SAMPLE[1, 9:11] = 2
 
 
 def test_all_props():
-    regions = regionprops(SAMPLE, 'all', INTENSITY_SAMPLE)[0]
+    region = regionprops(SAMPLE, INTENSITY_SAMPLE)[0]
     for prop in PROPS:
-        regions[prop]
+        assert_equal(region[prop], getattr(region, PROPS[prop]))
 
 
 def test_dtype():
@@ -336,15 +336,41 @@ def test_weighted_moments_normalized():
     assert_array_almost_equal(wnu, ref)
 
 
-def test_old_dict_interface():
-    feats = regionprops(SAMPLE,
-                        ['Area', 'Eccentricity', 'EulerNumber',
-                         'Extent', 'MinIntensity', 'MeanIntensity',
-                         'MaxIntensity', 'Solidity'],
-                        intensity_image=INTENSITY_SAMPLE)
+def test_label_sequence():
+    a = np.empty((2, 2), dtype=np.int)
+    a[:, :] = 2
+    ps = regionprops(a)
+    assert len(ps) == 1
+    assert ps[0].label == 2
 
-    np.array([list(props.values()) for props in feats], np.float)
-    assert_equal(len(feats[0]), 8)
+
+def test_pure_background():
+    a = np.zeros((2, 2), dtype=np.int)
+    ps = regionprops(a)
+    assert len(ps) == 0
+
+
+def test_invalid():
+    ps = regionprops(SAMPLE)
+    def get_intensity_image():
+        ps[0].intensity_image
+    assert_raises(AttributeError, get_intensity_image)
+
+
+def test_equals():
+    arr = np.zeros((100, 100), dtype=np.int)
+    arr[0:25, 0:25] = 1
+    arr[50:99, 50:99] = 2
+
+    regions = regionprops(arr)
+    r1 = regions[0]
+
+    regions = regionprops(arr)
+    r2 = regions[0]
+    r3 = regions[1]
+
+    assert_equal(r1 == r2, True, "Same regionprops are not equal")
+    assert_equal(r1 != r3, True, "Different regionprops are equal")
 
 
 if __name__ == "__main__":

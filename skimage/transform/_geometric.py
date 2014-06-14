@@ -1,11 +1,12 @@
+import six
 import math
+import warnings
 import numpy as np
 from scipy import ndimage, spatial
+
+from skimage._shared.utils import get_bound_method_class, safe_as_int
 from skimage.util import img_as_float
 from ._warps_cy import _warp_fast
-
-from skimage._shared.utils import get_bound_method_class
-from skimage._shared import six
 
 
 class GeometricTransform(object):
@@ -103,6 +104,11 @@ class ProjectiveTransform(GeometricTransform):
     matrix : (3, 3) array, optional
         Homogeneous transformation matrix.
 
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
+
     """
 
     _coeffs = range(8)
@@ -113,11 +119,17 @@ class ProjectiveTransform(GeometricTransform):
             matrix = np.eye(3)
         if matrix.shape != (3, 3):
             raise ValueError("invalid shape of transformation matrix")
-        self._matrix = matrix
+        self.params = matrix
+
+    @property
+    def _matrix(self):
+        warnings.warn('`_matrix` attribute is deprecated, '
+                      'use `params` instead.')
+        return self.params
 
     @property
     def _inv_matrix(self):
-        return np.linalg.inv(self._matrix)
+        return np.linalg.inv(self.params)
 
     def _apply_mat(self, coords, matrix):
         coords = np.array(coords, copy=False, ndmin=2)
@@ -133,7 +145,7 @@ class ProjectiveTransform(GeometricTransform):
         return dst[:, :2]
 
     def __call__(self, coords):
-        return self._apply_mat(coords, self._matrix)
+        return self._apply_mat(coords, self.params)
 
     def inverse(self, coords):
         """Apply inverse transformation.
@@ -235,7 +247,7 @@ class ProjectiveTransform(GeometricTransform):
         H.flat[list(self._coeffs) + [8]] = - V[-1, :-1] / V[-1, -1]
         H[2, 2] = 1
 
-        self._matrix = H
+        self.params = H
 
     def __add__(self, other):
         """Combine this transformation with another.
@@ -248,7 +260,7 @@ class ProjectiveTransform(GeometricTransform):
                 tform = self.__class__
             else:
                 tform = ProjectiveTransform
-            return tform(other._matrix.dot(self._matrix))
+            return tform(other.params.dot(self.params))
         else:
             raise TypeError("Cannot combine transformations of differing "
                             "types.")
@@ -284,6 +296,11 @@ class AffineTransform(ProjectiveTransform):
     translation : (tx, ty) as array, list or tuple, optional
         Translation parameters.
 
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
+
     """
 
     _coeffs = range(6)
@@ -299,7 +316,7 @@ class AffineTransform(ProjectiveTransform):
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
-            self._matrix = matrix
+            self.params = matrix
         elif params:
             if scale is None:
                 scale = (1, 1)
@@ -311,34 +328,34 @@ class AffineTransform(ProjectiveTransform):
                 translation = (0, 0)
 
             sx, sy = scale
-            self._matrix = np.array([
+            self.params = np.array([
                 [sx * math.cos(rotation), -sy * math.sin(rotation + shear), 0],
                 [sx * math.sin(rotation),  sy * math.cos(rotation + shear), 0],
                 [                      0,                                0, 1]
             ])
-            self._matrix[0:2, 2] = translation
+            self.params[0:2, 2] = translation
         else:
             # default to an identity transform
-            self._matrix = np.eye(3)
+            self.params = np.eye(3)
 
     @property
     def scale(self):
-        sx = math.sqrt(self._matrix[0, 0] ** 2 + self._matrix[1, 0] ** 2)
-        sy = math.sqrt(self._matrix[0, 1] ** 2 + self._matrix[1, 1] ** 2)
+        sx = math.sqrt(self.params[0, 0] ** 2 + self.params[1, 0] ** 2)
+        sy = math.sqrt(self.params[0, 1] ** 2 + self.params[1, 1] ** 2)
         return sx, sy
 
     @property
     def rotation(self):
-        return math.atan2(self._matrix[1, 0], self._matrix[0, 0])
+        return math.atan2(self.params[1, 0], self.params[0, 0])
 
     @property
     def shear(self):
-        beta = math.atan2(- self._matrix[0, 1], self._matrix[1, 1])
+        beta = math.atan2(- self.params[0, 1], self.params[1, 1])
         return beta - self.rotation
 
     @property
     def translation(self):
-        return self._matrix[0:2, 2]
+        return self.params[0:2, 2]
 
 
 class PiecewiseAffineTransform(GeometricTransform):
@@ -349,13 +366,20 @@ class PiecewiseAffineTransform(GeometricTransform):
     a Delaunay triangulation of the points to form a mesh. Each triangle is
     used to find a local affine transform.
 
+    Attributes
+    ----------
+    affines : list of AffineTransform objects
+        Affine transformations for each triangle in the mesh.
+    inverse_affines : list of AffineTransform objects
+        Inverse affine transformations for each triangle in the mesh.
+
     """
 
     def __init__(self):
         self._tesselation = None
         self._inverse_tesselation = None
-        self.affines = []
-        self.inverse_affines = []
+        self.affines = None
+        self.inverse_affines = None
 
     def estimate(self, src, dst):
         """Set the control points with which to perform the piecewise mapping.
@@ -465,11 +489,11 @@ class PiecewiseAffineTransform(GeometricTransform):
 class SimilarityTransform(ProjectiveTransform):
     """2D similarity transformation of the form::
 
-        X = a0*x - b0*y + a1 =
-          = m*x*cos(rotation) + m*y*sin(rotation) + a1
+        X = a0 * x - b0 * y + a1 =
+          = m * x * cos(rotation) - m * y * sin(rotation) + a1
 
-        Y = b0*x + a0*y + b1 =
-          = m*x*sin(rotation) + m*y*cos(rotation) + b1
+        Y = b0 * x + a0 * y + b1 =
+          = m * x * sin(rotation) + m * y * cos(rotation) + b1
 
     where ``m`` is a zoom factor and the homogeneous transformation matrix is::
 
@@ -488,6 +512,11 @@ class SimilarityTransform(ProjectiveTransform):
     translation : (tx, ty) as array, list or tuple, optional
         x, y translation parameters.
 
+    Attributes
+    ----------
+    params : (3, 3) array
+        Homogeneous transformation matrix.
+
     """
 
     def __init__(self, matrix=None, scale=None, rotation=None,
@@ -501,7 +530,7 @@ class SimilarityTransform(ProjectiveTransform):
         elif matrix is not None:
             if matrix.shape != (3, 3):
                 raise ValueError("Invalid shape of transformation matrix.")
-            self._matrix = matrix
+            self.params = matrix
         elif params:
             if scale is None:
                 scale = 1
@@ -510,16 +539,16 @@ class SimilarityTransform(ProjectiveTransform):
             if translation is None:
                 translation = (0, 0)
 
-            self._matrix = np.array([
+            self.params = np.array([
                 [math.cos(rotation), - math.sin(rotation), 0],
                 [math.sin(rotation),   math.cos(rotation), 0],
                 [                 0,                    0, 1]
             ])
-            self._matrix[0:2, 0:2] *= scale
-            self._matrix[0:2, 2] = translation
+            self.params[0:2, 0:2] *= scale
+            self.params[0:2, 2] = translation
         else:
             # default to an identity transform
-            self._matrix = np.eye(3)
+            self.params = np.eye(3)
 
     def estimate(self, src, dst):
         """Set the transformation matrix with the explicit parameters.
@@ -531,13 +560,13 @@ class SimilarityTransform(ProjectiveTransform):
 
         The transformation is defined as::
 
-            X = a0*x - b0*y + a1
-            Y = b0*x + a0*y + b1
+            X = a0 * x - b0 * y + a1
+            Y = b0 * x + a0 * y + b1
 
         These equations can be transformed to the following form::
 
-            0 = a0*x - b0*y + a1 - X
-            0 = b0*x + a0*y + b1 - Y
+            0 = a0 * x - b0 * y + a1 - X
+            0 = b0 * x + a0 * y + b1 - Y
 
         which exist for each set of corresponding points, so we have a set of
         N * 2 equations. The coefficients appear linearly so we can write
@@ -585,26 +614,26 @@ class SimilarityTransform(ProjectiveTransform):
         # singular value
         a0, a1, b0, b1 = - V[-1, :-1] / V[-1, -1]
 
-        self._matrix = np.array([[a0, -b0, a1],
-                                 [b0,  a0, b1],
-                                 [ 0,   0,  1]])
+        self.params = np.array([[a0, -b0, a1],
+                                [b0,  a0, b1],
+                                [ 0,   0,  1]])
 
     @property
     def scale(self):
-        if math.cos(self.rotation) == 0:
+        if abs(math.cos(self.rotation)) < np.spacing(1):
             # sin(self.rotation) == 1
-            scale = self._matrix[0, 1]
+            scale = self.params[1, 0]
         else:
-            scale = self._matrix[0, 0] / math.cos(self.rotation)
+            scale = self.params[0, 0] / math.cos(self.rotation)
         return scale
 
     @property
     def rotation(self):
-        return math.atan2(self._matrix[1, 0], self._matrix[1, 1])
+        return math.atan2(self.params[1, 0], self.params[1, 1])
 
     @property
     def translation(self):
-        return self._matrix[0:2, 2]
+        return self.params[0:2, 2]
 
 
 class PolynomialTransform(GeometricTransform):
@@ -619,6 +648,12 @@ class PolynomialTransform(GeometricTransform):
         Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
         a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
 
+    Attributes
+    ----------
+    params : (2, N) array
+        Polynomial coefficients where `N * 2 = (order + 1) * (order + 2)`. So,
+        a_ji is defined in `params[0, :]` and b_ji in `params[1, :]`.
+
     """
 
     def __init__(self, params=None):
@@ -627,7 +662,13 @@ class PolynomialTransform(GeometricTransform):
             params = np.array([[0, 1, 0], [0, 0, 1]])
         if params.shape[0] != 2:
             raise ValueError("invalid shape of transformation parameters")
-        self._params = params
+        self.params = params
+
+    @property
+    def _params(self):
+        warnings.warn('`_params` attribute is deprecated, '
+                      'use `params` instead.')
+        return self.params
 
     def estimate(self, src, dst, order=2):
         """Set the transformation matrix with the explicit transformation
@@ -681,6 +722,7 @@ class PolynomialTransform(GeometricTransform):
         rows = src.shape[0]
 
         # number of unknown polynomial coefficients
+        order = safe_as_int(order)
         u = (order + 1) * (order + 2)
 
         A = np.zeros((rows * 2, u + 1))
@@ -688,7 +730,7 @@ class PolynomialTransform(GeometricTransform):
         for j in range(order + 1):
             for i in range(j + 1):
                 A[:rows, pidx] = xs ** (j - i) * ys ** i
-                A[rows:, pidx + u / 2] = xs ** (j - i) * ys ** i
+                A[rows:, pidx + u // 2] = xs ** (j - i) * ys ** i
                 pidx += 1
 
         A[:rows, -1] = xd
@@ -700,7 +742,7 @@ class PolynomialTransform(GeometricTransform):
         # singular value
         params = - V[-1, :-1] / V[-1, -1]
 
-        self._params = params.reshape((2, u / 2))
+        self.params = params.reshape((2, u // 2))
 
     def __call__(self, coords):
         """Apply forward transformation.
@@ -718,7 +760,7 @@ class PolynomialTransform(GeometricTransform):
         """
         x = coords[:, 0]
         y = coords[:, 1]
-        u = len(self._params.ravel())
+        u = len(self.params.ravel())
         # number of coefficients -> u = (order + 1) * (order + 2)
         order = int((- 3 + math.sqrt(9 - 4 * (2 - u))) / 2)
         dst = np.zeros(coords.shape)
@@ -726,8 +768,8 @@ class PolynomialTransform(GeometricTransform):
         pidx = 0
         for j in range(order + 1):
             for i in range(j + 1):
-                dst[:, 0] += self._params[0, pidx] * x ** (j - i) * y ** i
-                dst[:, 1] += self._params[1, pidx] * x ** (j - i) * y ** i
+                dst[:, 0] += self.params[0, pidx] * x ** (j - i) * y ** i
+                dst[:, 1] += self.params[1, pidx] * x ** (j - i) * y ** i
                 pidx += 1
 
         return dst
@@ -797,13 +839,14 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     >>> tform = tf.estimate_transform('similarity', src, dst)
 
-    >>> tform.inverse(tform(src)) # == src
+    >>> np.allclose(tform.inverse(tform(src)), src)
+    True
 
     >>> # warp image using the estimated transformation
     >>> from skimage import data
     >>> image = data.camera()
 
-    >>> warp(image, inverse_map=tform.inverse)
+    >>> warp(image, inverse_map=tform.inverse) # doctest: +SKIP
 
     >>> # create transformation with explicit parameters
     >>> tform2 = tf.SimilarityTransform(scale=1.1, rotation=1,
@@ -811,7 +854,8 @@ def estimate_transform(ttype, src, dst, **kwargs):
 
     >>> # unite transformations, applied in order from left to right
     >>> tform3 = tform + tform2
-    >>> tform3(src) # == tform2(tform(src))
+    >>> np.allclose(tform3(src), tform2(tform(src)))
+    True
 
     """
     ttype = ttype.lower()
@@ -915,6 +959,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     >>> warped_image = map_coordinates(image, coords)
 
     """
+    shape = safe_as_int(shape)
     rows, cols = shape[0], shape[1]
     coords_shape = [len(shape), rows, cols]
     if len(shape) == 3:
@@ -960,7 +1005,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
         Keyword arguments passed to `inverse_map`.
     output_shape : tuple (rows, cols), optional
         Shape of the output image generated. By default the shape of the input
-        image is preserved.
+        image is preserved.  Note that, even for multi-band images, only rows
+        and columns need to be specified.
     order : int, optional
         The order of interpolation. The order has to be in the range 0-5:
         * 0: Nearest-neighbor
@@ -990,44 +1036,52 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
     >>> image = data.camera()
 
     The following image warps are all equal but differ substantially in
-    execution time.
+    execution time. The image is shifted to the bottom.
 
     Use a geometric transform to warp an image (fast):
 
     >>> from skimage.transform import SimilarityTransform
     >>> tform = SimilarityTransform(translation=(0, -10))
-    >>> warp(image, tform)
+    >>> warped = warp(image, tform)
 
-    Shift an image to the right with a callable (slow):
+    Use a callable (slow):
 
-    >>> def shift(xy):
+    >>> def shift_down(xy):
     ...     xy[:, 1] -= 10
     ...     return xy
-    >>> warp(image, shift_right)
+    >>> warped = warp(image, shift_down)
 
     Use a transformation matrix to warp an image (fast):
 
     >>> matrix = np.array([[1, 0, 0], [0, 1, -10], [0, 0, 1]])
-    >>> warp(image, matrix)
+    >>> warped = warp(image, matrix)
     >>> from skimage.transform import ProjectiveTransform
-    >>> warp(image, ProjectiveTransform(matrix=matrix))
+    >>> warped = warp(image, ProjectiveTransform(matrix=matrix))
 
     You can also use the inverse of a geometric transformation (fast):
 
-    >>> warp(image, tform.inverse)
+    >>> warped = warp(image, tform.inverse)
 
     """
     # Backward API compatibility
     if reverse_map is not None:
+        warnings.warn('`reverse_map` parameter is deprecated and replaced by '
+                      'the `inverse_map` parameter.')
         inverse_map = reverse_map
 
-    if image.ndim < 2:
-        raise ValueError("Input must have more than 1 dimension.")
+    if image.ndim < 2 or image.ndim > 3:
+        raise ValueError("Input must have 2 or 3 dimensions.")
 
     orig_ndim = image.ndim
     image = np.atleast_3d(img_as_float(image))
     ishape = np.array(image.shape)
     bands = ishape[2]
+
+    if output_shape is None:
+        output_shape = ishape
+    else:
+        output_shape = safe_as_int(output_shape)
+
 
     out = None
 
@@ -1042,14 +1096,14 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         # inverse_map is a homography
         elif isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
-            matrix = inverse_map._matrix
+            matrix = inverse_map.params
 
         # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
               and inverse_map.__name__ == 'inverse'
-              and isinstance(get_bound_method_class(inverse_map),
-                             HOMOGRAPHY_TRANSFORMS)):
-            matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
+              and get_bound_method_class(inverse_map) \
+                  in HOMOGRAPHY_TRANSFORMS):
+            matrix = np.linalg.inv(six.get_method_self(inverse_map).params)
 
         if matrix is not None:
             matrix = matrix.astype(np.double)
@@ -1057,17 +1111,13 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
             dims = []
             for dim in range(image.shape[2]):
                 dims.append(_warp_fast(image[..., dim], matrix,
-                            output_shape=output_shape,
-                            order=order, mode=mode, cval=cval))
+                                       output_shape=output_shape,
+                                       order=order, mode=mode, cval=cval))
             out = np.dstack(dims)
             if orig_ndim == 2:
                 out = out[..., 0]
 
     if out is None:  # use ndimage.map_coordinates
-
-        if output_shape is None:
-            output_shape = ishape
-
         rows, cols = output_shape[:2]
 
         # inverse_map is a transformation matrix as numpy array

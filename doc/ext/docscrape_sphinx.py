@@ -2,7 +2,6 @@ import re, inspect, textwrap, pydoc
 import sphinx
 from docscrape import NumpyDocString, FunctionDoc, ClassDoc
 
-
 class SphinxDocString(NumpyDocString):
     def __init__(self, docstring, config={}):
         self.use_plots = config.get('use_plots', False)
@@ -128,7 +127,7 @@ class SphinxDocString(NumpyDocString):
             return out
 
         out += ['.. index:: %s' % idx.get('default','')]
-        for section, references in idx.items():
+        for section, references in idx.iteritems():
             if section == 'default':
                 continue
             elif section == 'refguide':
@@ -179,7 +178,8 @@ class SphinxDocString(NumpyDocString):
         out += self._str_index() + ['']
         out += self._str_summary()
         out += self._str_extended_summary()
-        for param_list in ('Parameters', 'Returns', 'Raises'):
+        for param_list in ('Parameters', 'Returns', 'Other Parameters',
+                           'Raises', 'Warns'):
             out += self._str_param_list(param_list)
         out += self._str_warnings()
         out += self._str_see_also(func_role)

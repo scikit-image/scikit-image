@@ -9,10 +9,14 @@ from skimage import data_dir
 pyfits_available = True
 
 try:
-    import pyfits
+    from astropy.io import fits as pyfits
 except ImportError:
-    pyfits_available = False
-else:
+    try:
+        import pyfits
+    except ImportError:
+        pyfits_available = False
+
+if pyfits_available:
     import skimage.io._plugins.fits_plugin as fplug
 
 

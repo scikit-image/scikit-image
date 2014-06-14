@@ -1,42 +1,94 @@
 # vim ft=yaml
-# travis-ci.org definition for skimage build
-#
-# We pretend to be erlang because we can't use the python support in
-# travis-ci; it uses virtualenvs, they do not have numpy, scipy, matplotlib,
-# and it is impractical to build them
 
-language: erlang
-env:
-    - PYTHON=python PYSUF='' PYVER=2.7
-    - PYTHON=python3 PYSUF='3' PYVER=3.2
-install:
-    - sudo apt-get update  # needed for python3-numpy
-    - sudo apt-get install $PYTHON-dev
+# After changing this file, check it on:
+#   http://lint.travis-ci.org/
+
+
+language: python
+
+python:
+    - 2.6
+
+matrix:
+    include:
+        - python: 2.7
+          env:
+            - PYTHON=python
+            - PYTHONWARNINGS=all
+            - PYTHONX=python
+            - PYVER=2.x
+        - python: 3.2
+          env:
+            - PYTHON=python3
+            - PYTHONWARNINGS=all
+            - PYTHONX=python3
+            - PYVER=3.x
+    exclude:
+        - python: 2.6
+
+virtualenv:
+    system_site_packages: true
+
+before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+
+    - sudo apt-get update
+
     - sudo apt-get install $PYTHON-numpy
+    - wget https://raw.githubusercontent.com/numpy/numpy/master/numpy/_import_tools.py -O /home/travis/virtualenv/python3.2_with_system_site_packages/lib/python3.2/site-packages/numpy/_import_tools.py
+
     - sudo apt-get install $PYTHON-scipy
-    - sudo apt-get install $PYTHON-setuptools
-    - sudo apt-get install $PYTHON-nose
-    - sudo easy_install$PYSUF pip
-    - sudo pip-$PYVER install cython
     - sudo apt-get install libfreeimage3
-    - if [[ $PYVER == '2.7' ]]; then sudo apt-get install $PYTHON-matplotlib; fi
-    - if [[ $PYVER == '3.2' ]]; then sudo pip-$PYVER install git+git://github.com/matplotlib/matplotlib.git@v1.2.x; fi
-    - sudo pip-$PYVER install flake8
-    - $PYTHON setup.py build
-    - sudo $PYTHON setup.py install
+
+    - if [[ $PYVER == '2.x' ]]; then
+    -   sudo apt-get install $PYTHON-qt4;
+    -   sudo apt-get install $PYTHON-matplotlib;
+    - fi
+    - if [[ $PYVER == '3.x' ]]; then
+    -   sudo apt-get install $PYTHON-pyqt4;
+    -   pip install --use-mirrors matplotlib;
+    - fi
+
+    - pip install pillow
+    - pip install cython
+    - pip install flake8
+    - pip install six
+
+    - pip install nose-cov
+    - pip install coveralls
+
+    - python check_bento_build.py
+
+install:
+    - tools/header.py "Dependency versions"
+    - tools/build_versions.py
+
+    - python setup.py build_ext --inplace
+
 script:
-    # Check if setup.py's match bento.info
-    - $PYTHON check_bento_build.py
-    # Change into an innocuous directory and find tests from installation
-    - mkdir $HOME/.matplotlib
+    # Matplotlib settings
+    - mkdir -p $HOME/.matplotlib
+    - touch $HOME/.matplotlib/matplotlibrc
     - "echo 'backend : Agg' > $HOME/.matplotlib/matplotlibrc"
     - "echo 'backend.qt4 : PyQt4' >> $HOME/.matplotlib/matplotlibrc"
-    - mkdir for_test
-    - cd for_test
-    - nosetests-$PYVER --exe -v --cover-package=skimage skimage
-    # Change back to repository root directory and run all doc examples
-    - cd ..
-    - for f in doc/examples/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
-    - for f in doc/examples/applications/*.py; do $PYTHON "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+
+    # Run all tests
+    - if [[ $PYVER == '3.x' ]]; then
+    -   nosetests --exe -v --with-doctest --with-cov --cov skimage --cov-config=.coveragerc skimage
+    - fi
+    - if [[ $PYVER == '2.x' ]]; then
+    -   nosetests --exe -v --with-doctest skimage
+    - fi
+    # Run all doc examples
+    - export PYTHONPATH=$(pwd):$PYTHONPATH
+    - for f in doc/examples/*.py; do $PYTHONX "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+    - for f in doc/examples/applications/*.py; do $PYTHONX "$f"; if [ $? -ne 0 ]; then exit 1; fi done
+
     # Run pep8 and flake tests
     - flake8 --exit-zero --exclude=test_*,six.py skimage doc/examples viewer_examples
+
+after_success:
+    - if [[ $PYVER == '3.x' ]]; then
+    -   coveralls
+    - fi

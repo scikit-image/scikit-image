@@ -222,6 +222,22 @@ cdef inline double _kernel_pop(Py_ssize_t* histo, double pop, dtype_t g,
     return pop
 
 
+cdef inline double _kernel_sum(Py_ssize_t* histo, double pop,dtype_t g,
+                               Py_ssize_t max_bin, Py_ssize_t mid_bin,
+                               double p0, double p1,
+                               Py_ssize_t s0, Py_ssize_t s1):
+
+    cdef Py_ssize_t i
+    cdef Py_ssize_t sum = 0
+
+    if pop:
+        for i in range(max_bin):
+            sum += histo[i] * i
+        return sum
+    else:
+        return 0
+
+
 cdef inline double _kernel_threshold(Py_ssize_t* histo, double pop, dtype_t g,
                                      Py_ssize_t max_bin, Py_ssize_t mid_bin,
                                      double p0, double p1,
@@ -454,6 +470,15 @@ def _pop(dtype_t[:, ::1] image,
 
     _core(_kernel_pop[dtype_t], image, selem, mask, out,
           shift_x, shift_y, 0, 0, 0, 0, max_bin)
+
+def _sum(dtype_t[:, ::1] image,
+         char[:, ::1] selem,
+         char[:, ::1] mask,
+         dtype_t_out[:, ::1] out,
+         char shift_x, char shift_y, Py_ssize_t max_bin):
+
+    _core(_kernel_sum[dtype_t], image, selem, mask,
+          out, shift_x, shift_y, 0, 0, 0, 0, max_bin)
 
 
 def _threshold(dtype_t[:, ::1] image,

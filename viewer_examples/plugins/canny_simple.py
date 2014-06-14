@@ -21,4 +21,4 @@ plugin += SaveButtons(name='Save overlay to:')
 # Finally, attach the plugin to an image viewer.
 viewer = ImageViewer(image)
 viewer += plugin
-viewer.show()
+canny_edges = viewer.show()[0][0]

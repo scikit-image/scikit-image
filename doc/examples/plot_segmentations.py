@@ -51,7 +51,7 @@ and image location and is therefore closely related to quickshift. As the
 clustering method is simpler, it is very efficient. It is essential for this
 algorithm to work in Lab color space to obtain good results.  The algorithm
 quickly gained momentum and is now widely used. See [3] for details.  The
-``ratio`` parameter trades off color-similarity and proximity, as in the case
+``compactness`` parameter trades off color-similarity and proximity, as in the case
 of Quickshift, while ``n_segments`` chooses the number of centers for kmeans.
 
 .. [3] Radhakrishna Achanta, Appu Shaji, Kevin Smith, Aurelien Lucchi,
@@ -70,7 +70,7 @@ from skimage.util import img_as_float
 
 img = img_as_float(lena()[::2, ::2])
 segments_fz = felzenszwalb(img, scale=100, sigma=0.5, min_size=50)
-segments_slic = slic(img, ratio=10, n_segments=250, sigma=1)
+segments_slic = slic(img, n_segments=250, compactness=10, sigma=1)
 segments_quick = quickshift(img, kernel_size=3, max_dist=6, ratio=0.5)
 
 print("Felzenszwalb's number of segments: %d" % len(np.unique(segments_fz)))
@@ -79,7 +79,7 @@ print("Quickshift number of segments: %d" % len(np.unique(segments_quick)))
 
 fig, ax = plt.subplots(1, 3)
 fig.set_size_inches(8, 3, forward=True)
-plt.subplots_adjust(0.05, 0.05, 0.95, 0.95, 0.05, 0.05)
+fig.subplots_adjust(0.05, 0.05, 0.95, 0.95, 0.05, 0.05)
 
 ax[0].imshow(mark_boundaries(img, segments_fz))
 ax[0].set_title("Felzenszwalbs's method")
