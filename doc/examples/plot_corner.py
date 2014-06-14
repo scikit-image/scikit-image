@@ -10,13 +10,13 @@ position of corners.
 .. [2] http://en.wikipedia.org/wiki/Interest_point_detection
 
 """
-
 from matplotlib import pyplot as plt
 
 from skimage import data
 from skimage.feature import corner_harris, corner_subpix, corner_peaks
 from skimage.transform import warp, AffineTransform
 from skimage.draw import ellipse
+
 
 tform = AffineTransform(scale=(1.3, 1.1), rotation=1, shear=0.7,
                         translation=(210, 50))

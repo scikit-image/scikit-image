@@ -91,8 +91,13 @@ def corner_kitchen_rosenfeld(image):
     imxx, imxy = _compute_derivatives(imx)
     imyx, imyy = _compute_derivatives(imy)
 
-    response = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy) \
-               / (imx**2 + imy**2)
+    numerator = (imxx * imy**2 + imyy * imx**2 - 2 * imxy * imx * imy)
+    denominator = (imx**2 + imy**2)
+
+    response = np.zeros_like(image, dtype=np.double)
+
+    mask = denominator != 0
+    response[mask] = numerator[mask] / denominator[mask]
 
     return response
 
@@ -136,8 +141,8 @@ def corner_harris(image, method='k', k=0.05, eps=1e-6, sigma=1):
 
     References
     ----------
-    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -206,8 +211,8 @@ def corner_shi_tomasi(image, sigma=1):
 
     References
     ----------
-    ..[1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://kiwi.cs.dal.ca/~dparks/CornerDetection/harris.htm
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -272,9 +277,8 @@ def corner_foerstner(image, sigma=1):
 
     References
     ----------
-    ..[1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-          foerstner87.fast.pdf
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/foerstner87.fast.pdf
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     Examples
     --------
@@ -311,8 +315,13 @@ def corner_foerstner(image, sigma=1):
     # trace
     traceA = Axx + Ayy
 
-    w = detA / traceA
-    q = 4 * detA / traceA**2
+    w = np.zeros_like(image, dtype=np.double)
+    q = np.zeros_like(image, dtype=np.double)
+
+    mask = traceA != 0
+
+    w[mask] = detA[mask] / traceA[mask]
+    q[mask] = 4 * detA[mask] / traceA[mask]**2
 
     return w, q
 
@@ -338,9 +347,9 @@ def corner_subpix(image, corners, window_size=11, alpha=0.99):
 
     References
     ----------
-    ..[1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
-          foerstner87.fast.pdf
-    ..[2] http://en.wikipedia.org/wiki/Corner_detection
+    .. [1] http://www.ipb.uni-bonn.de/uploads/tx_ikgpublication/\
+           foerstner87.fast.pdf
+    .. [2] http://en.wikipedia.org/wiki/Corner_detection
 
     """
 
@@ -489,7 +498,7 @@ def corner_peaks(image, min_distance=10, threshold_abs=0, threshold_rel=0.1,
                            threshold_abs=threshold_abs,
                            threshold_rel=threshold_rel,
                            exclude_border=exclude_border,
-                           indices=False, num_peaks=np.inf,
+                           indices=False, num_peaks=num_peaks,
                            footprint=footprint, labels=labels)
     if min_distance > 0:
         coords = np.transpose(peaks.nonzero())

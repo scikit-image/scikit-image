@@ -13,7 +13,7 @@ from distutils.version import LooseVersion as V
 #*****************************************************************************
 
 def abort(error):
-    print '*WARNING* API documentation not generated: %s'%error
+    print('*WARNING* API documentation not generated: %s' % error)
     exit()
 
 if __name__ == '__main__':
@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # are not (re)generated. This avoids automatic generation of documentation
     # for older or newer versions if such versions are installed on the system.
 
-    installed_version = V(module.version.version)
+    installed_version = V(module.__version__)
 
     setup_lines = open('../setup.py').readlines()
     version = 'vUndefined'
@@ -54,4 +54,4 @@ if __name__ == '__main__':
                                         ]
     docwriter.write_api_docs(outdir)
     docwriter.write_index(outdir, 'api', relative_to='source/api')
-    print '%d files written' % len(docwriter.written_modules)
+    print('%d files written' % len(docwriter.written_modules))

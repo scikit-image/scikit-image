@@ -1,6 +1,5 @@
 import os.path
 import numpy as np
-from numpy.testing import *
 from numpy.testing.decorators import skipif
 
 from tempfile import NamedTemporaryFile
@@ -49,7 +48,7 @@ def test_bilevel():
     expected[::2] = 255
 
     img = imread(os.path.join(data_dir, 'checker_bilevel.png'))
-    assert_array_equal(img, expected)
+    np.testing.assert_array_equal(img, expected)
 
 
 @skipif(not sitk_available)
@@ -57,14 +56,14 @@ def test_imread_uint16():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16.tif'))
     assert np.issubdtype(img.dtype, np.uint16)
-    assert_array_almost_equal(img, expected)
+    np.testing.assert_array_almost_equal(img, expected)
 
 
 @skipif(not sitk_available)
 def test_imread_uint16_big_endian():
     expected = np.load(os.path.join(data_dir, 'chessboard_GRAY_U8.npy'))
     img = imread(os.path.join(data_dir, 'chessboard_GRAY_U16B.tif'))
-    assert_array_almost_equal(img, expected)
+    np.testing.assert_array_almost_equal(img, expected)
 
 
 class TestSave:
@@ -75,7 +74,7 @@ class TestSave:
         imsave(fname, x)
         y = imread(fname)
 
-        assert_array_almost_equal(x, y)
+        np.testing.assert_array_almost_equal(x, y)
 
     @skipif(not sitk_available)
     def test_imsave_roundtrip(self):
@@ -90,4 +89,5 @@ class TestSave:
                     yield self.roundtrip, dtype, x
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

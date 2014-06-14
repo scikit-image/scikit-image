@@ -1,4 +1,4 @@
-'''
+"""
 ===========================
 Structural similarity index
 ===========================
@@ -20,12 +20,13 @@ but with very different mean structural similarity indices.
        Transactions on Image Processing, vol. 13, no. 4, pp. 600-612,
        Apr. 2004.
 
-'''
+"""
+import numpy as np
+import matplotlib.pyplot as plt
 
-from skimage import data, color, io, exposure, img_as_float
+from skimage import data, img_as_float
 from skimage.measure import structural_similarity as ssim
 
-import numpy as np
 
 img = img_as_float(data.camera())
 rows, cols = img.shape
@@ -33,13 +34,13 @@ rows, cols = img.shape
 noise = np.ones_like(img) * 0.2 * (img.max() - img.min())
 noise[np.random.random(size=noise.shape) > 0.5] *= -1
 
+
 def mse(x, y):
     return np.linalg.norm(x - y)
 
 img_noise = img + noise
 img_const = img + abs(noise)
 
-import matplotlib.pyplot as plt
 f, (ax0, ax1, ax2) = plt.subplots(1, 3)
 
 mse_none = mse(img, img)

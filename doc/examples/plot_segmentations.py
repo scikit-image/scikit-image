@@ -58,6 +58,7 @@ of Quickshift, while ``n_segments`` chooses the number of centers for kmeans.
     Pascal Fua, and Sabine Suesstrunk, SLIC Superpixels Compared to
     State-of-the-art Superpixel Methods, TPAMI, May 2012.
 """
+from __future__ import print_function
 
 import matplotlib.pyplot as plt
 import numpy as np

@@ -17,11 +17,11 @@ MAINTAINER_EMAIL    = 'stefan@sun.ac.za'
 URL                 = 'http://scikit-image.org'
 LICENSE             = 'Modified BSD'
 DOWNLOAD_URL        = 'http://github.com/scikit-image/scikit-image'
-VERSION             = '0.8.1'
+VERSION             = '0.9.0'
 PYTHON_VERSION      = (2, 5)
 DEPENDENCIES        = {
                         'numpy': (1, 6),
-                        'Cython': (0, 15),
+                        'Cython': (0, 17),
                       }
 
 
@@ -30,10 +30,7 @@ import sys
 import re
 import setuptools
 from numpy.distutils.core import setup
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    from distutils.command.build_py import build_py
+from distutils.command.build_py import build_py
 
 
 def configuration(parent_package='', top_path=None):

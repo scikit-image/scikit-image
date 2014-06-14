@@ -84,17 +84,21 @@ def skeletonize(image):
     # look up table - there is one entry for each of the 2^8=256 possible
     # combinations of 8 binary neighbours. 1's, 2's and 3's are candidates
     # for removal at each iteration of the algorithm.
-    lut = [ 0,0,0,1,0,0,1,3,0,0,3,1,1,0,1,3,0,0,0,0,0,0,0,0,2,0,2,0,3,0,3,3,
-            0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,3,0,2,2,
-            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-            2,0,0,0,0,0,0,0,2,0,0,0,2,0,0,0,3,0,0,0,0,0,0,0,3,0,0,0,3,0,2,0,
-            0,0,3,1,0,0,1,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-            3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-            2,3,1,3,0,0,1,3,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-            2,3,0,1,0,0,0,1,0,0,0,0,0,0,0,0,3,3,0,1,0,0,0,0,2,2,0,0,2,0,0,0]
+    lut = [0, 0, 0, 1, 0, 0, 1, 3, 0, 0, 3, 1, 1, 0, 1, 3, 0, 0, 0, 0, 0, 0,
+           0, 0, 2, 0, 2, 0, 3, 0, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 2, 2, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2, 0,
+           0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 3, 0, 2, 0, 0, 0, 3, 1,
+           0, 0, 1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 1, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 1, 3, 0, 0,
+           1, 3, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 2, 3, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3,
+           0, 1, 0, 0, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0]
 
     # convert to unsigned int (this should work for boolean values)
-    skeleton = np.array(image).astype(np.uint8)
+    skeleton = image.astype(np.uint8)
 
     # check some properties of the input image:
     #  - 2D
@@ -106,13 +110,13 @@ def skeletonize(image):
 
     # create the mask that will assign a unique value based on the
     #  arrangement of neighbouring pixels
-    mask = np.array([[1,  2,  4],
+    mask = np.array([[  1,  2,  4],
                      [128,  0,  8],
-                     [64, 32, 16]], np.uint8)
+                     [ 64, 32, 16]], np.uint8)
 
-    pixelRemoved = True
-    while pixelRemoved:
-        pixelRemoved = False
+    pixel_removed = True
+    while pixel_removed:
+        pixel_removed = False
 
         # assign each pixel a unique value based on its foreground neighbours
         neighbours = ndimage.correlate(skeleton, mask, mode='constant')
@@ -126,11 +130,11 @@ def skeletonize(image):
         # pass 1 - remove the 1's and 3's
         code_mask = (codes == 1)
         if np.any(code_mask):
-            pixelRemoved = True
+            pixel_removed = True
             skeleton[code_mask] = 0
         code_mask = (codes == 3)
         if np.any(code_mask):
-            pixelRemoved = True
+            pixel_removed = True
             skeleton[code_mask] = 0
 
         # pass 2 - remove the 2's and 3's
@@ -139,14 +143,14 @@ def skeletonize(image):
         codes = np.take(lut, neighbours)
         code_mask = (codes == 2)
         if np.any(code_mask):
-            pixelRemoved = True
+            pixel_removed = True
             skeleton[code_mask] = 0
         code_mask = (codes == 3)
         if np.any(code_mask):
-            pixelRemoved = True
+            pixel_removed = True
             skeleton[code_mask] = 0
 
-    return skeleton
+    return skeleton.astype(bool)
 
 # --------- Skeletonization by medial axis transform --------
 
@@ -208,6 +212,7 @@ def medial_axis(image, mask=None, return_distance=False):
 
     Examples
     --------
+    >>> from skimage import morphology
     >>> square = np.zeros((7, 7), dtype=np.uint8)
     >>> square[1:-1, 2:-2] = 1
     >>> square
@@ -277,8 +282,8 @@ def medial_axis(image, mask=None, return_distance=False):
     i, j = np.mgrid[0:image.shape[0], 0:image.shape[1]]
     result = masked_image.copy()
     distance = distance[result]
-    i = np.ascontiguousarray(i[result], np.intp)
-    j = np.ascontiguousarray(j[result], np.intp)
+    i = np.ascontiguousarray(i[result], dtype=np.intp)
+    j = np.ascontiguousarray(j[result], dtype=np.intp)
     result = np.ascontiguousarray(result, np.uint8)
 
     # Determine the order in which pixels are processed.
@@ -291,9 +296,9 @@ def medial_axis(image, mask=None, return_distance=False):
     order = np.lexsort((tiebreaker,
                         corner_score[masked_image],
                         distance))
-    order = np.ascontiguousarray(order, np.int32)
+    order = np.ascontiguousarray(order, dtype=np.int32)
 
-    table = np.ascontiguousarray(table, np.uint8)
+    table = np.ascontiguousarray(table, dtype=np.uint8)
     # Remove pixels not belonging to the medial axis
     _skeletonize_loop(result, i, j, order, table)
 

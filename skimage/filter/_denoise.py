@@ -1,6 +1,5 @@
 import numpy as np
 from skimage import img_as_float
-from skimage._shared.utils import deprecated
 
 
 def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
@@ -37,7 +36,7 @@ def _denoise_tv_chambolle_3d(im, weight=100, eps=2.e-4, n_iter_max=200):
     >>> mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
     >>> mask = mask.astype(np.float)
     >>> mask += 0.2 * np.random.randn(*mask.shape)
-    >>> res = denoise_tv(mask, weight=100)
+    >>> res = denoise_tv_chambolle(mask, weight=100)
 
     """
 
@@ -127,7 +126,7 @@ def _denoise_tv_chambolle_2d(im, weight=50, eps=2.e-4, n_iter_max=200):
     >>> from skimage import color, data
     >>> lena = color.rgb2gray(data.lena())
     >>> lena += 0.5 * lena.std() * np.random.randn(*lena.shape)
-    >>> denoised_lena = denoise_tv(lena, weight=60)
+    >>> denoised_lena = denoise_tv_chambolle(lena, weight=60)
 
     """
 
@@ -227,7 +226,7 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
     >>> from skimage import color, data
     >>> lena = color.rgb2gray(data.lena())
     >>> lena += 0.5 * lena.std() * np.random.randn(*lena.shape)
-    >>> denoised_lena = denoise_tv(lena, weight=60)
+    >>> denoised_lena = denoise_tv_chambolle(lena, weight=60)
 
     3D example on synthetic data:
 
@@ -235,7 +234,7 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
     >>> mask = (x - 22)**2 + (y - 20)**2 + (z - 17)**2 < 8**2
     >>> mask = mask.astype(np.float)
     >>> mask += 0.2*np.random.randn(*mask.shape)
-    >>> res = denoise_tv(mask, weight=100)
+    >>> res = denoise_tv_chambolle(mask, weight=100)
 
     """
 
@@ -250,14 +249,10 @@ def denoise_tv_chambolle(im, weight=50, eps=2.e-4, n_iter_max=200,
             out = np.zeros_like(im)
             for c in range(im.shape[2]):
                 out[..., c] = _denoise_tv_chambolle_2d(im[..., c], weight, eps,
-                                             n_iter_max)
+                                                       n_iter_max)
         else:
             out = _denoise_tv_chambolle_3d(im, weight, eps, n_iter_max)
     else:
         raise ValueError('only 2-d and 3-d images may be denoised with this '
                          'function')
     return out
-
-
-tv_denoise = deprecated('skimage.filter.denoise_tv_chambolle')\
-                       (denoise_tv_chambolle)

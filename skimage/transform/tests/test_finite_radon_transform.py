@@ -1,7 +1,6 @@
 import numpy as np
-from numpy.testing import *
 
-from skimage.transform import *
+from skimage.transform import frt2, ifrt2
 
 
 def test_frt():
@@ -17,3 +16,8 @@ def test_frt():
     f = frt2(L)
     fi = ifrt2(f)
     assert len(np.nonzero(L - fi)[0]) == 0
+
+if __name__ == '__main__':
+    from numpy.testing import run_module_suite
+    run_module_suite()
+

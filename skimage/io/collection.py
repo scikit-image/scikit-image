@@ -10,6 +10,7 @@ from copy import copy
 
 import numpy as np
 from ._io import imread
+from .._shared import six
 
 
 def concatenate_images(ic):
@@ -98,13 +99,14 @@ class MultiImage(object):
     >>> len(img)
     2
     >>> for frame in img:
-    ...     print frame.shape
+    ...     print(frame.shape)
     (15, 10)
     (15, 10)
 
     The two frames in this image can be shown with matplotlib:
 
     .. plot:: show_collection.py
+
     """
     def __init__(self, filename, conserve_memory=True, dtype=None):
         """Load a multi-img."""
@@ -295,7 +297,7 @@ class ImageCollection(object):
     """
     def __init__(self, load_pattern, conserve_memory=True, load_func=None):
         """Load and manage a collection of images."""
-        if isinstance(load_pattern, basestring):
+        if isinstance(load_pattern, six.string_types):
             load_pattern = load_pattern.split(':')
             self._files = []
             for pattern in load_pattern:

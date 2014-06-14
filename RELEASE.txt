@@ -1,23 +1,25 @@
 How to make a new release of ``skimage``
 ========================================
 
+- Check ``TODO.txt`` for any outstanding tasks.
+
 - Update release notes.
 
-  - To show a list contributors, run ``doc/release/contributors.sh <commit>``,
-    where ``<commit>`` is the first commit since the previous release.
+  - To show a list of contributors and changes, run
+    ``doc/release/contribs.py <tag of prev release>``.
 
 - Update the version number in ``setup.py`` and ``bento.info`` and commit
 
 - Update the docs:
 
-  - Edit ``doc/source/themes/agogo/static/docversions.js`` and commit
+  - Edit ``doc/source/_static/docversions.js`` and commit
   - Build a clean version of the docs.  Run ``make`` in the root dir, then
     ``rm -rf build; make html`` in the docs.
   - Run ``make html`` again to copy the newly generated ``random.js`` into
     place.  Double check ``random.js``, otherwise the skimage.org front
     page gets broken!
   - Build using ``make gh-pages``.
-  - Push upstream: ``git push`` in ``doc/gh-pages``.
+  - Push upstream: ``git push origin gh-pages`` in ``doc/gh-pages``.
 
 - Add the version number as a tag in git::
 
@@ -46,6 +48,8 @@ How to make a new release of ``skimage``
   - Update stable and development version numbers in
     ``_templates/sidebar_versions.html``.
   - Add release date to ``index.rst`` under "Announcements".
+  - Add previous stable version documentation path to disallowed paths
+    in `robots.txt`
   - Build using ``make gh-pages``.
   - Push upstream: ``git push`` in ``gh-pages``.
 

@@ -26,10 +26,17 @@ Supported color spaces
         Derived from the RGB CIE color space. Chosen such that
         ``x == y == z == 1/3`` at the whitepoint, and all color matching
         functions are greater than zero everywhere.
+* LAB CIE : Lightness, a, b
+        Colorspace derived from XYZ CIE that is intended to be more
+        perceptually uniform
+* LCH CIE : Lightness, Chroma, Hue
+        Defined in terms of LAB CIE.  C and H are the polar representation of
+        a and b.  The polar angle C is defined to be on (0, 2*pi)
 
 :author: Nicolas Pinto (rgb2hsv)
 :author: Ralf Gommers (hsv2rgb)
 :author: Travis Oliphant (XYZ and RGB CIE functions)
+:author: Matt Terry (lab2lch)
 
 :license: modified BSD
 
@@ -43,18 +50,44 @@ References
 
 from __future__ import division
 
-__all__ = ['convert_colorspace', 'rgb2hsv', 'hsv2rgb', 'rgb2xyz', 'xyz2rgb',
-           'rgb2rgbcie', 'rgbcie2rgb', 'rgb2grey', 'rgb2gray', 'gray2rgb',
-           'xyz2lab', 'lab2xyz', 'lab2rgb', 'rgb2lab', 'is_rgb', 'is_gray'
-           ]
-
-__docformat__ = "restructuredtext en"
-
 import numpy as np
 from scipy import linalg
 from ..util import dtype
+from skimage._shared.utils import deprecated
 
 
+def guess_spatial_dimensions(image):
+    """Make an educated guess about whether an image has a channels dimension.
+
+    Parameters
+    ----------
+    image : ndarray
+        The input image.
+
+    Returns
+    -------
+    spatial_dims : int or None
+        The number of spatial dimensions of `image`. If ambiguous, the value
+        is `None`.
+
+    Raises
+    ------
+    ValueError
+        If the image array has less than two or more than four dimensions.
+    """
+    if image.ndim == 2:
+        return 2
+    if image.ndim == 3 and image.shape[-1] != 3:
+        return 3
+    if image.ndim == 3 and image.shape[-1] == 3:
+        return None
+    if image.ndim == 4 and image.shape[-1] == 3:
+        return 3
+    else:
+        raise ValueError("Expected 2D, 3D, or 4D array, got %iD." % image.ndim)
+
+
+@deprecated()
 def is_rgb(image):
     """Test whether the image is RGB or RGBA.
 
@@ -67,6 +100,7 @@ def is_rgb(image):
     return (image.ndim == 3 and image.shape[2] in (3, 4))
 
 
+@deprecated()
 def is_gray(image):
     """Test whether the image is gray (i.e. has only one color band).
 
@@ -76,7 +110,7 @@ def is_gray(image):
         Input image.
 
     """
-    return image.ndim == 2
+    return image.ndim in (2, 3) and not is_rgb(image)
 
 
 def convert_colorspace(arr, fromspace, tospace):
@@ -133,8 +167,9 @@ def _prepare_colorarray(arr):
     """
     arr = np.asanyarray(arr)
 
-    if arr.ndim != 3 or arr.shape[2] != 3:
-        msg = "the input array must be have a shape == (.,.,3))"
+    if arr.ndim not in [3, 4] or arr.shape[-1] != 3:
+        msg = ("the input array must be have a shape == (.., ..,[ ..,] 3)), " +
+               "got (" + (", ".join(map(str, arr.shape))) + ")")
         raise ValueError(msg)
 
     return dtype.img_as_float(arr)
@@ -312,6 +347,90 @@ gray_from_rgb = np.array([[0.2125, 0.7154, 0.0721],
 # CIE LAB constants for Observer= 2A, Illuminant= D65
 lab_ref_white = np.array([0.95047, 1., 1.08883])
 
+
+# Haematoxylin-Eosin-DAB colorspace
+# From original Ruifrok's paper: A. C. Ruifrok and D. A. Johnston,
+# "Quantification of histochemical staining by color deconvolution.,"
+# Analytical and quantitative cytology and histology / the International
+# Academy of Cytology [and] American Society of Cytology, vol. 23, no. 4,
+# pp. 291-9, Aug. 2001.
+rgb_from_hed = np.array([[0.65, 0.70, 0.29],
+                         [0.07, 0.99, 0.11],
+                         [0.27, 0.57, 0.78]])
+hed_from_rgb = linalg.inv(rgb_from_hed)
+
+# Following matrices are adapted form the Java code written by G.Landini.
+# The original code is available at:
+# http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+
+# Hematoxylin + DAB
+rgb_from_hdx = np.array([[0.650, 0.704, 0.286],
+                         [0.268, 0.570, 0.776],
+                         [0.0, 0.0, 0.0]])
+rgb_from_hdx[2, :] = np.cross(rgb_from_hdx[0, :], rgb_from_hdx[1, :])
+hdx_from_rgb = linalg.inv(rgb_from_hdx)
+
+# Feulgen + Light Green
+rgb_from_fgx = np.array([[0.46420921, 0.83008335, 0.30827187],
+                         [0.94705542, 0.25373821, 0.19650764],
+                         [0.0, 0.0, 0.0]])
+rgb_from_fgx[2, :] = np.cross(rgb_from_fgx[0, :], rgb_from_fgx[1, :])
+fgx_from_rgb = linalg.inv(rgb_from_fgx)
+
+# Giemsa: Methyl Blue + Eosin
+rgb_from_bex = np.array([[0.834750233, 0.513556283, 0.196330403],
+                         [0.092789, 0.954111, 0.283111],
+                         [0.0, 0.0, 0.0]])
+rgb_from_bex[2, :] = np.cross(rgb_from_bex[0, :], rgb_from_bex[1, :])
+bex_from_rgb = linalg.inv(rgb_from_bex)
+
+# FastRed + FastBlue +  DAB
+rgb_from_rbd = np.array([[0.21393921, 0.85112669, 0.47794022],
+                         [0.74890292, 0.60624161, 0.26731082],
+                         [0.268, 0.570, 0.776]])
+rbd_from_rgb = linalg.inv(rgb_from_rbd)
+
+# Methyl Green + DAB
+rgb_from_gdx = np.array([[0.98003, 0.144316, 0.133146],
+                         [0.268, 0.570, 0.776],
+                         [0.0, 0.0, 0.0]])
+rgb_from_gdx[2, :] = np.cross(rgb_from_gdx[0, :], rgb_from_gdx[1, :])
+gdx_from_rgb = linalg.inv(rgb_from_gdx)
+
+# Hematoxylin + AEC
+rgb_from_hax = np.array([[0.650, 0.704, 0.286],
+                         [0.2743, 0.6796, 0.6803],
+                         [0.0, 0.0, 0.0]])
+rgb_from_hax[2, :] = np.cross(rgb_from_hax[0, :], rgb_from_hax[1, :])
+hax_from_rgb = linalg.inv(rgb_from_hax)
+
+# Blue matrix Anilline Blue + Red matrix Azocarmine + Orange matrix Orange-G
+rgb_from_bro = np.array([[0.853033, 0.508733, 0.112656],
+                         [0.09289875, 0.8662008, 0.49098468],
+                         [0.10732849, 0.36765403, 0.9237484]])
+bro_from_rgb = linalg.inv(rgb_from_bro)
+
+# Methyl Blue + Ponceau Fuchsin
+rgb_from_bpx = np.array([[0.7995107, 0.5913521, 0.10528667],
+                         [0.09997159, 0.73738605, 0.6680326],
+                         [0.0, 0.0, 0.0]])
+rgb_from_bpx[2, :] = np.cross(rgb_from_bpx[0, :], rgb_from_bpx[1, :])
+bpx_from_rgb = linalg.inv(rgb_from_bpx)
+
+# Alcian Blue + Hematoxylin
+rgb_from_ahx = np.array([[0.874622, 0.457711, 0.158256],
+                         [0.552556, 0.7544, 0.353744],
+                         [0.0, 0.0, 0.0]])
+rgb_from_ahx[2, :] = np.cross(rgb_from_ahx[0, :], rgb_from_ahx[1, :])
+ahx_from_rgb = linalg.inv(rgb_from_ahx)
+
+# Hematoxylin + PAS
+rgb_from_hpx = np.array([[0.644211, 0.716556, 0.266844],
+                         [0.175411, 0.972178, 0.154589],
+                         [0.0, 0.0, 0.0]])
+rgb_from_hpx[2, :] = np.cross(rgb_from_hpx[0, :], rgb_from_hpx[1, :])
+hpx_from_rgb = linalg.inv(rgb_from_hpx)
+
 #-------------------------------------------------------------
 # The conversion functions that make use of the matrices above
 #-------------------------------------------------------------
@@ -333,12 +452,12 @@ def _convert(matrix, arr):
         The converted array.
     """
     arr = _prepare_colorarray(arr)
-    arr = np.swapaxes(arr, 0, 2)
+    arr = np.swapaxes(arr, 0, -1)
     oldshape = arr.shape
     arr = np.reshape(arr, (3, -1))
     out = np.dot(matrix, arr)
     out.shape = oldshape
-    out = np.swapaxes(out, 2, 0)
+    out = np.swapaxes(out, -1, 0)
 
     return np.ascontiguousarray(out)
 
@@ -393,17 +512,19 @@ def rgb2xyz(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -548,23 +669,24 @@ def gray2rgb(image):
     Parameters
     ----------
     image : array_like
-        Input image of shape ``(M, N)``.
+        Input image of shape ``(M, N [, P])``.
 
     Returns
     -------
     rgb : ndarray
-        RGB image of shape ``(M, N, 3)``.
+        RGB image of shape ``(M, N, [, P], 3)``.
 
     Raises
     ------
     ValueError
-        If the input is not 2-dimensional.
+        If the input is not a 2- or 3-dimensional image.
 
     """
-    if is_rgb(image):
+    if np.squeeze(image).ndim == 3 and image.shape[2] in (3, 4):
         return image
-    elif is_gray(image):
-        return np.dstack((image, image, image))
+    elif image.ndim != 1 and np.squeeze(image).ndim in (1, 2, 3):
+        image = image[..., np.newaxis]
+        return np.concatenate(3 * (image,), axis=-1)
     else:
         raise ValueError("Input image expected to be RGB, RGBA or gray.")
 
@@ -575,17 +697,19 @@ def xyz2lab(xyz):
     Parameters
     ----------
     xyz : array_like
-        The image in XYZ format, in a 3-D array of shape (.., .., 3).
+        The image in XYZ format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in CIE-LAB format, in a 3-D array of shape (.., .., 3).
+        The image in CIE-LAB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `xyz` is not a 3-D array of shape (.., .., 3).
+        If `xyz` is not a 3-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -615,14 +739,14 @@ def xyz2lab(xyz):
     arr[mask] = np.power(arr[mask], 1. / 3.)
     arr[~mask] = 7.787 * arr[~mask] + 16. / 116.
 
-    x, y, z = arr[:, :, 0], arr[:, :, 1], arr[:, :, 2]
+    x, y, z = arr[..., 0], arr[..., 1], arr[..., 2]
 
     # Vector scaling
     L = (116. * y) - 16.
     a = 500.0 * (x - y)
     b = 200.0 * (y - z)
 
-    return np.dstack([L, a, b])
+    return np.concatenate([x[..., np.newaxis] for x in [L, a, b]], axis=-1)
 
 
 def lab2xyz(lab):
@@ -679,17 +803,19 @@ def rgb2lab(rgb):
     Parameters
     ----------
     rgb : array_like
-        The image in RGB format, in a 3-D array of shape (.., .., 3).
+        The image in RGB format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Returns
     -------
     out : ndarray
-        The image in Lab format, in a 3-D array of shape (.., .., 3).
+        The image in Lab format, in a 3- or 4-D array of shape
+        (.., ..,[ ..,] 3).
 
     Raises
     ------
     ValueError
-        If `rgb` is not a 3-D array of shape (.., .., 3).
+        If `rgb` is not a 3- or 4-D array of shape (.., ..,[ ..,] 3).
 
     Notes
     -----
@@ -721,3 +847,291 @@ def lab2rgb(lab):
     This function uses lab2xyz and xyz2rgb.
     """
     return xyz2rgb(lab2xyz(lab))
+
+
+def rgb2hed(rgb):
+    """RGB to Haematoxylin-Eosin-DAB (HED) color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in HED format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2hed
+    >>> ihc = data.immunohistochemistry()
+    >>> ihc_hed = rgb2hed(ihc)
+    """
+    return separate_stains(rgb, hed_from_rgb)
+
+
+def hed2rgb(hed):
+    """Haematoxylin-Eosin-DAB (HED) to RGB color space conversion.
+
+    Parameters
+    ----------
+    hed : array_like
+        The image in the HED color space, in a 3-D array of shape (.., .., 3).
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `hed` is not a 3-D array of shape (.., .., 3).
+
+    References
+    ----------
+    .. [1] A. C. Ruifrok and D. A. Johnston, "Quantification of histochemical
+           staining by color deconvolution.," Analytical and quantitative
+           cytology and histology / the International Academy of Cytology [and]
+           American Society of Cytology, vol. 23, no. 4, pp. 291-9, Aug. 2001.
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2hed, hed2rgb
+    >>> ihc = data.immunohistochemistry()
+    >>> ihc_hed = rgb2hed(ihc)
+    >>> ihc_rgb = hed2rgb(ihc_hed)
+    """
+    return combine_stains(hed, rgb_from_hed)
+
+
+def separate_stains(rgb, conv_matrix):
+    """RGB to stain color space conversion.
+
+    Parameters
+    ----------
+    rgb : array_like
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+    conv_matrix: ndarray
+        The stain separation matrix as described by G. Landini [1]_.
+
+    Returns
+    -------
+    out : ndarray
+        The image in stain color space, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `rgb` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Stain separation matrices available in the ``color`` module and their
+    respective colorspace:
+
+    * ``hed_from_rgb``: Hematoxylin + Eosin + DAB
+    * ``hdx_from_rgb``: Hematoxylin + DAB
+    * ``fgx_from_rgb``: Feulgen + Light Green
+    * ``bex_from_rgb``: Giemsa stain : Methyl Blue + Eosin
+    * ``rbd_from_rgb``: FastRed + FastBlue +  DAB
+    * ``gdx_from_rgb``: Methyl Green + DAB
+    * ``hax_from_rgb``: Hematoxylin + AEC
+    * ``bro_from_rgb``: Blue matrix Anilline Blue + Red matrix Azocarmine\
+                        + Orange matrix Orange-G
+    * ``bpx_from_rgb``: Methyl Blue + Ponceau Fuchsin
+    * ``ahx_from_rgb``: Alcian Blue + Hematoxylin
+    * ``hpx_from_rgb``: Hematoxylin + PAS
+
+    References
+    ----------
+    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import separate_stains, hdx_from_rgb
+    >>> ihc = data.immunohistochemistry()
+    >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
+    """
+    rgb = dtype.img_as_float(rgb) + 2
+    stains = np.dot(np.reshape(-np.log(rgb), (-1, 3)), conv_matrix)
+    return np.reshape(stains, rgb.shape)
+
+
+def combine_stains(stains, conv_matrix):
+    """Stain to RGB color space conversion.
+
+    Parameters
+    ----------
+    stains : array_like
+        The image in stain color space, in a 3-D array of shape (.., .., 3).
+    conv_matrix: ndarray
+        The stain separation matrix as described by G. Landini [1]_.
+
+    Returns
+    -------
+    out : ndarray
+        The image in RGB format, in a 3-D array of shape (.., .., 3).
+
+    Raises
+    ------
+    ValueError
+        If `stains` is not a 3-D array of shape (.., .., 3).
+
+    Notes
+    -----
+    Stain combination matrices available in the ``color`` module and their
+    respective colorspace:
+
+    * ``rgb_from_hed``: Hematoxylin + Eosin + DAB
+    * ``rgb_from_hdx``: Hematoxylin + DAB
+    * ``rgb_from_fgx``: Feulgen + Light Green
+    * ``rgb_from_bex``: Giemsa stain : Methyl Blue + Eosin
+    * ``rgb_from_rbd``: FastRed + FastBlue +  DAB
+    * ``rgb_from_gdx``: Methyl Green + DAB
+    * ``rgb_from_hax``: Hematoxylin + AEC
+    * ``rgb_from_bro``: Blue matrix Anilline Blue + Red matrix Azocarmine\
+                        + Orange matrix Orange-G
+    * ``rgb_from_bpx``: Methyl Blue + Ponceau Fuchsin
+    * ``rgb_from_ahx``: Alcian Blue + Hematoxylin
+    * ``rgb_from_hpx``: Hematoxylin + PAS
+
+    References
+    ----------
+    .. [1] http://www.dentistry.bham.ac.uk/landinig/software/cdeconv/cdeconv.html
+
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import (separate_stains, combine_stains,
+    ...                            hdx_from_rgb, rgb_from_hdx)
+    >>> ihc = data.immunohistochemistry()
+    >>> ihc_hdx = separate_stains(ihc, hdx_from_rgb)
+    >>> ihc_rgb = combine_stains(ihc_hdx, rgb_from_hdx)
+    """
+    from ..exposure import rescale_intensity
+
+    stains = dtype.img_as_float(stains)
+    logrgb2 = np.dot(-np.reshape(stains, (-1, 3)), conv_matrix)
+    rgb2 = np.exp(logrgb2)
+    return rescale_intensity(np.reshape(rgb2 - 2, stains.shape), in_range=(-1, 1))
+
+
+def lab2lch(lab):
+    """CIE-LAB to CIE-LCH color space conversion.
+
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+
+    Parameters
+    ----------
+    lab : array_like
+        The N-D image in CIE-LAB format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
+        channels.  Subsequent elements are copied.
+
+    Returns
+    -------
+    out : ndarray
+        The image in LCH format, in a N-D array with same shape as input `lab`.
+
+    Raises
+    ------
+    ValueError
+        If `lch` does not have at least 3 color channels (i.e. l, a, b).
+
+    Notes
+    -----
+    The Hue is expressed as an angle between (0, 2*pi)
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lab2lch
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    """
+    lch = _prepare_lab_array(lab)
+
+    a, b = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = _cart2polar_2pi(a, b)
+    return lch
+
+
+def _cart2polar_2pi(x, y):
+    """convert cartesian coordiantes to polar (uses non-standard theta range!)
+
+    NON-STANDARD RANGE! Maps to (0, 2*pi) rather than usual (-pi, +pi)
+    """
+    r, t = np.hypot(x, y), np.arctan2(y, x)
+    t += np.where(t < 0., 2 * np.pi, 0)
+    return r, t
+
+
+def lch2lab(lch):
+    """CIE-LCH to CIE-LAB color space conversion.
+
+    LCH is the cylindrical representation of the LAB (Cartesian) colorspace
+
+    Parameters
+    ----------
+    lch : array_like
+        The N-D image in CIE-LCH format. The last (`N+1`th) dimension must have
+        at least 3 elements, corresponding to the ``L``, ``a``, and ``b`` color
+        channels.  Subsequent elements are copied.
+
+    Returns
+    -------
+    out : ndarray
+        The image in LAB format, with same shape as input `lch`.
+
+    Raises
+    ------
+    ValueError
+        If `lch` does not have at least 3 color channels (i.e. l, c, h).
+
+    Examples
+    --------
+    >>> from skimage import data
+    >>> from skimage.color import rgb2lab, lch2lab
+    >>> lena = data.lena()
+    >>> lena_lab = rgb2lab(lena)
+    >>> lena_lch = lab2lch(lena_lab)
+    >>> lena_lab2 = lch2lab(lena_lch)
+    """
+    lch = _prepare_lab_array(lch)
+
+    c, h = lch[..., 1], lch[..., 2]
+    lch[..., 1], lch[..., 2] = c * np.cos(h), c * np.sin(h)
+    return lch
+
+
+def _prepare_lab_array(arr):
+    """Ensure input for lab2lch, lch2lab are well-posed.
+
+    Arrays must be in floating point and have at least 3 elements in
+    last dimension.  Return a new array.
+    """
+    arr = np.asarray(arr)
+    shape = arr.shape
+    if shape[-1] < 3:
+        raise ValueError('Input array has less than 3 color channels')
+    return dtype.img_as_float(arr, force_copy=True)

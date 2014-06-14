@@ -95,6 +95,17 @@ def find_contours(array, level,
            Resolution 3D Surface Construction Algorithm. Computer Graphics
            (SIGGRAPH 87 Proceedings) 21(4) July 1987, p. 163-170).
 
+    Examples
+    --------
+    >>> a = np.zeros((3, 3))
+    >>> a[0, 0] = 1
+    >>> a
+    array([[ 1.,  0.,  0.],
+           [ 0.,  0.,  0.],
+           [ 0.,  0.,  0.]])
+    >>> find_contours(a, 0.5)
+    [array([[ 0. ,  0.5],
+           [ 0.5,  0. ]])]
     """
     array = np.asarray(array, dtype=np.double)
     if array.ndim != 2:
@@ -105,7 +116,7 @@ def find_contours(array, level,
         raise ValueError('Parameters "fully_connected" and'
         ' "positive_orientation" must be either "high" or "low".')
     point_list = _find_contours.iterate_and_store(array, level,
-        fully_connected == 'high')
+                                                  fully_connected == 'high')
     contours = _assemble_contours(_take_2(point_list))
     if positive_orientation == 'high':
         contours = [c[::-1] for c in contours]
@@ -115,8 +126,8 @@ def find_contours(array, level,
 def _take_2(seq):
     iterator = iter(seq)
     while(True):
-        n1 = iterator.next()
-        n2 = iterator.next()
+        n1 = next(iterator)
+        n2 = next(iterator)
         yield (n1, n2)
 
 

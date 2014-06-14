@@ -2,23 +2,29 @@ import warnings
 
 import numpy as np
 
+from ..qt import qt_api
+
 try:
-    import matplotlib.pyplot as plt
+    import matplotlib as mpl
+    from matplotlib.figure import Figure
+    from matplotlib import _pylab_helpers
     from matplotlib.colors import LinearSegmentedColormap
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
+    if qt_api is None:
+        raise ImportError
+    else:
+        from matplotlib.backends.backend_qt4 import FigureManagerQT
+        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg
 except ImportError:
     FigureCanvasQTAgg = object  # hack to prevent nosetest and autodoc errors
     LinearSegmentedColormap = object
     print("Could not import matplotlib -- skimage.viewer not available.")
 
-try:
-    from PyQt4 import QtGui
-except ImportError:
-    print("Could not import PyQt4 -- skimage.viewer not available.")
+from ..qt import QtGui
 
 
 __all__ = ['init_qtapp', 'start_qtapp', 'RequiredAttr', 'figimage',
-           'LinearColormap', 'ClearColormap', 'MatplotlibCanvas']
+           'LinearColormap', 'ClearColormap', 'FigureCanvas', 'new_plot',
+           'update_axes_image']
 
 
 QApp = None
@@ -30,61 +36,53 @@ def init_qtapp():
     The QApplication needs to be initialized before creating any QWidgets
     """
     global QApp
+    QApp = QtGui.QApplication.instance()
     if QApp is None:
         QApp = QtGui.QApplication([])
+    return QApp
 
 
-def start_qtapp():
+def is_event_loop_running(app=None):
+    """Return True if event loop is running."""
+    if app is None:
+        app = init_qtapp()
+    if hasattr(app, '_in_event_loop'):
+        return app._in_event_loop
+    else:
+        return False
+
+
+def start_qtapp(app=None):
     """Start Qt mainloop"""
-    QApp.exec_()
+    if app is None:
+        app = init_qtapp()
+    if not is_event_loop_running(app):
+        app._in_event_loop = True
+        app.exec_()
+        app._in_event_loop = False
+    else:
+        app._in_event_loop = True
 
 
 class RequiredAttr(object):
     """A class attribute that must be set before use."""
 
-    def __init__(self, msg):
+    instances = dict()
+
+    def __init__(self, msg='Required attribute not set', init_val=None):
+        self.instances[self, None] = init_val
         self.msg = msg
-        self.val = None
 
     def __get__(self, obj, objtype):
-        if self.val is None:
+        value = self.instances[self, obj]
+        if value is None:
+            # Should raise an error but that causes issues with the buildbot.
             warnings.warn(self.msg)
-        return self.val
+            self.__set__(obj, self.init_val)
+        return value
 
-    def __set__(self, obj, val):
-        self.val = val
-
-
-def figimage(image, scale=1, dpi=None, **kwargs):
-    """Return figure and axes with figure tightly surrounding image.
-
-    Unlike pyplot.figimage, this actually plots onto an axes object, which
-    fills the figure. Plotting the image onto an axes allows for subsequent
-    overlays of axes artists.
-
-    Parameters
-    ----------
-    image : array
-        image to plot
-    scale : float
-        If scale is 1, the figure and axes have the same dimension as the
-        image.  Smaller values of `scale` will shrink the figure.
-    dpi : int
-        Dots per inch for figure. If None, use the default rcParam.
-    """
-    dpi = dpi if dpi is not None else plt.rcParams['figure.dpi']
-    kwargs.setdefault('interpolation', 'nearest')
-    kwargs.setdefault('cmap', 'gray')
-
-    h, w, d = np.atleast_3d(image).shape
-    figsize = np.array((w, h), dtype=float) / dpi * scale
-
-    fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
-    fig.subplots_adjust(left=0, bottom=0, right=1, top=1)
-
-    ax.set_axis_off()
-    ax.imshow(image, **kwargs)
-    return fig, ax
+    def __set__(self, obj, value):
+        self.instances[self, obj] = value
 
 
 class LinearColormap(LinearSegmentedColormap):
@@ -108,7 +106,7 @@ class LinearColormap(LinearSegmentedColormap):
     """
     def __init__(self, name, segmented_data, **kwargs):
         segmented_data = dict((key, [(x, y, y) for x, y in value])
-                              for key, value in segmented_data.iteritems())
+                              for key, value in segmented_data.items())
         LinearSegmentedColormap.__init__(self, name, segmented_data, **kwargs)
 
 
@@ -124,14 +122,104 @@ class ClearColormap(LinearColormap):
         LinearColormap.__init__(self, name, cg_speq)
 
 
-class MatplotlibCanvas(FigureCanvasQTAgg):
+class FigureCanvas(FigureCanvasQTAgg):
     """Canvas for displaying images."""
-    def __init__(self, parent, figure, **kwargs):
+    def __init__(self, figure, **kwargs):
         self.fig = figure
         FigureCanvasQTAgg.__init__(self, self.fig)
         FigureCanvasQTAgg.setSizePolicy(self,
                                         QtGui.QSizePolicy.Expanding,
                                         QtGui.QSizePolicy.Expanding)
         FigureCanvasQTAgg.updateGeometry(self)
-        # Note: `setParent` must be called after `FigureCanvasQTAgg.__init__`.
-        self.setParent(parent)
+
+    def resizeEvent(self, event):
+        FigureCanvasQTAgg.resizeEvent(self, event)
+        # Call to `resize_event` missing in FigureManagerQT.
+        # See https://github.com/matplotlib/matplotlib/pull/1585
+        self.resize_event()
+
+
+def new_canvas(*args, **kwargs):
+    """Return a new figure canvas."""
+    allnums = _pylab_helpers.Gcf.figs.keys()
+    num = max(allnums) + 1 if allnums else 1
+
+    FigureClass = kwargs.pop('FigureClass', Figure)
+    figure = FigureClass(*args, **kwargs)
+    canvas = FigureCanvas(figure)
+    fig_manager = FigureManagerQT(canvas, num)
+    return fig_manager.canvas
+
+
+def new_plot(parent=None, subplot_kw=None, **fig_kw):
+    """Return new figure and axes.
+
+    Parameters
+    ----------
+    parent : QtWidget
+        Qt widget that displays the plot objects. If None, you must manually
+        call ``canvas.setParent`` and pass the parent widget.
+    subplot_kw : dict
+        Keyword arguments passed ``matplotlib.figure.Figure.add_subplot``.
+    fig_kw : dict
+        Keyword arguments passed ``matplotlib.figure.Figure``.
+    """
+    if subplot_kw is None:
+        subplot_kw = {}
+    canvas = new_canvas(**fig_kw)
+    canvas.setParent(parent)
+
+    fig = canvas.figure
+    ax = fig.add_subplot(1, 1, 1, **subplot_kw)
+    return fig, ax
+
+
+def figimage(image, scale=1, dpi=None, **kwargs):
+    """Return figure and axes with figure tightly surrounding image.
+
+    Unlike pyplot.figimage, this actually plots onto an axes object, which
+    fills the figure. Plotting the image onto an axes allows for subsequent
+    overlays of axes artists.
+
+    Parameters
+    ----------
+    image : array
+        image to plot
+    scale : float
+        If scale is 1, the figure and axes have the same dimension as the
+        image.  Smaller values of `scale` will shrink the figure.
+    dpi : int
+        Dots per inch for figure. If None, use the default rcParam.
+    """
+    dpi = dpi if dpi is not None else mpl.rcParams['figure.dpi']
+    kwargs.setdefault('interpolation', 'nearest')
+    kwargs.setdefault('cmap', 'gray')
+
+    h, w, d = np.atleast_3d(image).shape
+    figsize = np.array((w, h), dtype=float) / dpi * scale
+
+    fig, ax = new_plot(figsize=figsize, dpi=dpi)
+    fig.subplots_adjust(left=0, bottom=0, right=1, top=1)
+
+    ax.set_axis_off()
+    ax.imshow(image, **kwargs)
+    return fig, ax
+
+
+def update_axes_image(image_axes, image):
+    """Update the image displayed by an image plot.
+
+    This sets the image plot's array and updates its shape appropriately
+
+    Parameters
+    ----------
+    image_axes : `matplotlib.image.AxesImage`
+        Image axes to update.
+    image : array
+        Image array.
+    """
+    image_axes.set_array(image)
+
+    # Adjust size if new image shape doesn't match the original
+    h, w = image.shape[:2]
+    image_axes.set_extent((0, w, h, 0))

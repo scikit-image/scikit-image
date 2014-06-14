@@ -1,9 +1,23 @@
+Version 0.9
+-----------
+- No longer wrap ``imread`` output in an ``Image`` class
+- Change default value of `sigma` parameter in ``skimage.segmentation.slic``
+  to 0
+- ``hough_circle`` now returns a stack of arrays that are the same size as the
+  input image. Set the ``full_output`` flag to True for the old behavior.
+- The following functions were deprecated over two releases:
+  `skimage.filter.denoise_tv_chambolle`,
+  `skimage.morphology.is_local_maximum`, `skimage.transform.hough`,
+  `skimage.transform.probabilistic_hough`,`skimage.transform.hough_peaks`.
+  Their functionality still exists, but under different names.
+
+Version 0.4
+-----------
+- Switch mask and radius arguments for ``median_filter``
+
 Version 0.3
 -----------
 - Remove ``as_grey``, ``dtype`` keyword from ImageCollection
 - Remove ``dtype`` from imread
 - Generalise ImageCollection to accept a load_func
 
-Version 0.4
------------
-- Switch mask and radius arguments for median_filter

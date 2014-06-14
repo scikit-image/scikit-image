@@ -248,6 +248,8 @@ def local_binary_pattern(image, P, R, method='default'):
         * 'uniform': improved rotation invariance with uniform patterns and
             finer quantization of the angular space which is gray scale and
             rotation invariant.
+        * 'nri_uniform': non rotation-invariant uniform patterns variant
+            which is only gray scale invariant [2].
         * 'var': rotation invariant variance measures of the contrast of local
             image texture which is rotation but not gray scale invariant.
 
@@ -263,14 +265,19 @@ def local_binary_pattern(image, P, R, method='default'):
            Timo Ojala, Matti Pietikainen, Topi Maenpaa.
            http://www.rafbis.it/biplab15/images/stories/docenti/Danielriccio/\
            Articoliriferimento/LBP.pdf, 2002.
+    .. [2] Face recognition with local binary patterns.
+           Timo Ahonen, Abdenour Hadid, Matti Pietikainen,
+           http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.214.6851,
+           2004.
     """
 
     methods = {
         'default': ord('D'),
         'ror': ord('R'),
         'uniform': ord('U'),
+        'nri_uniform': ord('N'),
         'var': ord('V')
     }
-    image = np.array(image, dtype='double', copy=True)
+    image = np.ascontiguousarray(image, dtype=np.double)
     output = _local_binary_pattern(image, P, R, methods[method.lower()])
     return output

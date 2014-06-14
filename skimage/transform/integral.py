@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def integral_image(x):
     """Integral image / summed area table.
 
@@ -34,28 +37,34 @@ def integrate(ii, r0, c0, r1, c1):
     ----------
     ii : ndarray
         Integral image.
-    r0, c0 : int
-        Top-left corner of block to be summed.
-    r1, c1 : int
-        Bottom-right corner of block to be summed.
+    r0, c0 : int or ndarray
+        Top-left corner(s) of block to be summed.
+    r1, c1 : int or ndarray
+        Bottom-right corner(s) of block to be summed.
 
     Returns
     -------
-    S : int
-        Integral (sum) over the given window.
+    S : scalar or ndarray
+        Integral (sum) over the given window(s).
 
     """
-    S = 0
+    if np.isscalar(r0):
+        r0, c0, r1, c1 = [np.asarray([x]) for x in (r0, c0, r1, c1)]
+
+    S = np.zeros(r0.shape, ii.dtype)
 
     S += ii[r1, c1]
 
-    if (r0 - 1 >= 0) and (c0 - 1 >= 0):
-        S += ii[r0 - 1, c0 - 1]
+    good = (r0 >= 1) & (c0 >= 1)
+    S[good] += ii[r0[good] - 1, c0[good] - 1]
 
-    if (r0 - 1 >= 0):
-        S -= ii[r0 - 1, c1]
+    good = r0 >= 1
+    S[good] -= ii[r0[good] - 1, c1[good]]
 
-    if (c0 - 1 >= 0):
-        S -= ii[r1, c0 - 1]
+    good = c0 >= 1
+    S[good] -= ii[r1[good], c0[good] - 1]
+
+    if S.size == 1:
+        return np.asscalar(S)
 
     return S

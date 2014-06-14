@@ -1,11 +1,9 @@
 from __future__ import division
 import numpy as np
+from warnings import warn
 
 __all__ = ['img_as_float', 'img_as_int', 'img_as_uint', 'img_as_ubyte',
-           'img_as_bool']
-
-from .. import get_log
-log = get_log('dtype_converter')
+           'img_as_bool', 'dtype_limits']
 
 dtype_range = {np.bool_: (False, True),
                np.bool8: (False, True),
@@ -26,6 +24,23 @@ _supported_types = (np.bool_, np.bool8,
 if np.__version__ >= "1.6.0":
     dtype_range[np.float16] = (-1, 1)
     _supported_types += (np.float16, )
+
+
+def dtype_limits(image, clip_negative=True):
+    """Return intensity limits, i.e. (min, max) tuple, of the image's dtype.
+
+    Parameters
+    ----------
+    image : ndarray
+        Input image.
+    clip_negative : bool
+        If True, clip the negative range (i.e. return 0 for min intensity)
+        even if the image dtype allows negative values.
+    """
+    imin, imax = dtype_range[image.dtype.type]
+    if clip_negative:
+        imin = 0
+    return imin, imax
 
 
 def convert(image, dtype, force_copy=False, uniform=False):
@@ -84,12 +99,12 @@ def convert(image, dtype, force_copy=False, uniform=False):
         raise ValueError("can not convert %s to %s." % (dtypeobj_in, dtypeobj))
 
     def sign_loss():
-        log.warn("Possible sign loss when converting negative image of type "
-                 "%s to positive image of type %s." % (dtypeobj_in, dtypeobj))
+        warn("Possible sign loss when converting negative image of type "
+             "%s to positive image of type %s." % (dtypeobj_in, dtypeobj))
 
     def prec_loss():
-        log.warn("Possible precision loss when converting from "
-                 "%s to %s" % (dtypeobj_in, dtypeobj))
+        warn("Possible precision loss when converting from "
+             "%s to %s" % (dtypeobj_in, dtypeobj))
 
     def _dtype(itemsize, *dtypes):
         # Return first of `dtypes` with itemsize greater than `itemsize`
@@ -159,7 +174,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
 
     if kind_in == 'b':
         # from binary image, to float and to integer
-        result = dtype(image)
+        result = image.astype(dtype)
         if kind != 'f':
             result *= dtype(dtype_range[dtype][1])
         return result
@@ -178,7 +193,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             # floating point -> floating point
             if itemsize_in > itemsize:
                 prec_loss()
-            return dtype(image)
+            return image.astype(dtype)
 
         # floating point -> integer
         prec_loss()
@@ -201,7 +216,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             image *= (imax - imin + 1.0) / 2.0
             np.floor(image, out=image)
             np.clip(image, imin, imax, out=image)
-        return dtype(image)
+        return image.astype(dtype)
 
     if kind == 'f':
         # integer -> floating point
@@ -219,7 +234,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
             image *= 2.0
             image += 1.0
             image /= imax_in - imin_in
-        return dtype(image)
+        return image.astype(dtype)
 
     if kind_in == 'u':
         if kind == 'i':
@@ -245,7 +260,7 @@ def convert(image, dtype, force_copy=False, uniform=False):
     image -= imin_in
     image = _scale(image, 8 * itemsize_in, 8 * itemsize, copy=False)
     image += imin
-    return dtype(image)
+    return image.astype(dtype)
 
 
 def img_as_float(image, force_copy=False):

@@ -1,0 +1,15 @@
+Version 0.10
+------------
+* Remove deprecated functions in `skimage.filter.rank.*`
+* Remove deprecated parameter `epsilon` of `skimage.viewer.LineProfile`
+* Remove backwards-compatability of `skimage.measure.regionprops`
+* Remove {`ratio`, `sigma`} deprecation warnings of `skimage.segmentation.slic`
+* Change default mode of random_walker segmentation to 'cg_mg' > 'cg' > 'bf',
+  depending on which optional dependencies are available.
+* Remove deprecated `out` parameter of `skimage.morphology.binary_*`
+* Remove deprecated parameter `depth` in `skimage.segmentation.random_walker`
+* Remove deprecated logger function in `skimage/__init__.py`
+* Remove deprecated function `filter.median_filter`
+* Remove deprecated `skimage.color.is_gray` and `skimage.color.is_rgb`
+  functions
+

@@ -48,7 +48,7 @@ def sh2(cmd):
     out = p.communicate()[0]
     retcode = p.returncode
     if retcode:
-        print out.rstrip()
+        print(out.rstrip())
         raise CalledProcessError(retcode, cmd)
     else:
         return out.rstrip()
@@ -85,6 +85,10 @@ if __name__ == '__main__':
     for l in setup_lines:
         if l.startswith('VERSION'):
             tag = l.split("'")[1]
+
+            # Rename to, e.g., 0.9.x
+            tag = '.'.join(tag.split('.')[:-1] + ['x'])
+
             break
 
     if "dev" in tag:
@@ -123,12 +127,12 @@ if __name__ == '__main__':
         sh('git add %s' % tag)
         sh2('git commit -m"Updated doc release: %s"' % tag)
 
-        print 'Most recent commit:'
+        print('Most recent commit:')
         sys.stdout.flush()
         sh('git --no-pager log --oneline HEAD~1..')
     finally:
         cd(startdir)
 
-    print
-    print 'Now verify the build in: %r' % dest
-    print "If everything looks good, run 'git push' inside doc/gh-pages."
+    print('')
+    print('Now verify the build in: %r' % dest)
+    print("If everything looks good, run 'git push' inside doc/gh-pages.")

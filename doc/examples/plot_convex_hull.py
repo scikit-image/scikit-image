@@ -13,11 +13,11 @@ A good overview of the algorithm is given on `Steve Eddin's blog
 <http://blogs.mathworks.com/steve/2011/10/04/binary-image-convex-hull-algorithm-notes/>`__.
 
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 from skimage.morphology import convex_hull_image
+
 
 image = np.array(
     [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -27,9 +27,24 @@ image = np.array(
      [0, 1, 0, 0, 0, 0, 0, 1, 0],
      [0, 0, 0, 0, 0, 0, 0, 0, 0]], dtype=float)
 
-chull = convex_hull_image(image)
-image[chull] += 1.7
-image -= -1.7
+original_image = np.copy(image)
 
+chull = convex_hull_image(image)
+image[chull] += 1
+# image is now:
+#[[ 0.  0.  0.  0.  0.  0.  0.  0.  0.]
+# [ 0.  0.  0.  0.  2.  0.  0.  0.  0.]
+# [ 0.  0.  0.  2.  1.  2.  0.  0.  0.]
+# [ 0.  0.  2.  1.  1.  1.  2.  0.  0.]
+# [ 0.  2.  1.  1.  1.  1.  1.  2.  0.]
+# [ 0.  0.  0.  0.  0.  0.  0.  0.  0.]]
+
+
+fig = plt.subplots(figsize=(10, 6))
+plt.subplot(1, 2, 1)
+plt.title('Original picture')
+plt.imshow(original_image, cmap=plt.cm.gray, interpolation='nearest')
+plt.subplot(1, 2, 2)
+plt.title('Transformed picture')
 plt.imshow(image, cmap=plt.cm.gray, interpolation='nearest')
 plt.show()

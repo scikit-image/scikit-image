@@ -1,5 +1,3 @@
-from numpy.testing import *
-
 import time
 import random
 import skimage.graph.heap as heap
@@ -49,4 +47,5 @@ def _test_heap(n, fast_update):
     return t1 - t0
 
 if __name__ == "__main__":
+    from numpy.testing import run_module_suite
     run_module_suite()

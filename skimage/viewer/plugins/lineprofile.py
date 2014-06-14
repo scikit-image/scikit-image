@@ -1,13 +1,14 @@
+import warnings
+
 import numpy as np
 import scipy.ndimage as ndi
 from skimage.util.dtype import dtype_range
 
 from .plotplugin import PlotPlugin
+from ..canvastools import ThickLineTool
 
 
 __all__ = ['LineProfile']
-
-#TODO: Extract line tool and add it to a new `canvastools` subpackage.
 
 
 class LineProfile(PlotPlugin):
@@ -17,10 +18,10 @@ class LineProfile(PlotPlugin):
 
     Parameters
     ----------
-    linewidth : float
-        Line width for interpolation. Wider lines average over more pixels.
-    epsilon : float
+    maxdist : float
         Maximum pixel distance allowed when selecting end point of scan line.
+    epsilon : float
+        Deprecated. Use `maxdist` instead.
     limits : tuple or {None, 'image', 'dtype'}
         (minimum, maximum) intensity limits for plotted profile. The following
         special values are defined:
@@ -30,17 +31,17 @@ class LineProfile(PlotPlugin):
             'dtype' : fixed scale based on min/max intensity of image dtype.
     """
     name = 'Line Profile'
-    draws_on_image = True
 
-    def __init__(self, linewidth=1, epsilon=5, limits='image', **kwargs):
+    def __init__(self, maxdist=10, epsilon='deprecated',
+                 limits='image', **kwargs):
         super(LineProfile, self).__init__(**kwargs)
-        self.linewidth = linewidth
-        self.epsilon = epsilon
-        self._active_pt = None
+
+        if not epsilon == 'deprecated':
+            warnings.warn("Parameter `epsilon` deprecated; use `maxdist`.")
+            maxdist = epsilon
+        self.maxdist = maxdist
         self._limit_type = limits
-        self.line_kwargs = dict(color='y', lw=linewidth, alpha=0.5, marker='s',
-                                markersize=5, solid_capstyle='butt')
-        print self.help()
+        print(self.help())
 
     def attach(self, image_viewer):
         super(LineProfile, self).attach(image_viewer)
@@ -50,7 +51,7 @@ class LineProfile(PlotPlugin):
         if self._limit_type == 'image':
             self.limits = (np.min(image), np.max(image))
         elif self._limit_type == 'dtype':
-            self.self._limit_type = dtype_range[image.dtype.type]
+            self._limit_type = dtype_range[image.dtype.type]
         elif self._limit_type is None or len(self._limit_type) == 2:
             self.limits = self._limit_type
         else:
@@ -59,25 +60,21 @@ class LineProfile(PlotPlugin):
         if not self._limit_type is None:
             self.ax.set_ylim(self.limits)
 
-        h, w = image.shape
-        self._init_end_pts = np.array([[w / 3, h / 2], [2 * w / 3, h / 2]])
-        self.end_pts = self._init_end_pts.copy()
+        h, w = image.shape[0:2]
+        x = [w / 3, 2 * w / 3]
+        y = [h / 2] * 2
 
-        x, y = np.transpose(self.end_pts)
-        self.scan_line = image_viewer.ax.plot(x, y, **self.line_kwargs)[0]
-        self.artists.append(self.scan_line)
+        self.line_tool = ThickLineTool(self.image_viewer.ax,
+                                       maxdist=self.maxdist,
+                                       on_move=self.line_changed,
+                                       on_change=self.line_changed)
+        self.line_tool.end_points = np.transpose([x, y])
 
-        scan_data = profile_line(image, self.end_pts)
-        self.profile = self.ax.plot(scan_data, 'k-')[0]
+        scan_data = profile_line(image, self.line_tool.end_points)
+
+        self.reset_axes(scan_data)
+
         self._autoscale_view()
-
-        self.connect_image_event('key_press_event', self.on_key_press)
-        self.connect_image_event('button_press_event', self.on_mouse_press)
-        self.connect_image_event('button_release_event', self.on_mouse_release)
-        self.connect_image_event('motion_notify_event', self.on_move)
-        self.connect_image_event('scroll_event', self.on_scroll)
-
-        self.image_viewer.redraw()
 
     def help(self):
         helpstr = ("Line profile tool",
@@ -85,46 +82,18 @@ class LineProfile(PlotPlugin):
                    "Select and drag ends of the scan line to adjust it.")
         return '\n'.join(helpstr)
 
-    def get_profile(self):
+    def get_profiles(self):
         """Return intensity profile of the selected line.
 
         Returns
         -------
-        end_pts: (2, 2) array
+        end_points: (2, 2) array
             The positions ((x1, y1), (x2, y2)) of the line ends.
-        profile: 1d array
-            Profile of intensity values.
+        profile: list of 1d arrays
+            Profile of intensity values. Length 1 (grayscale) or 3 (rgb).
         """
-        end_pts = self.scan_line.get_xydata()
-        profile = self.profile.get_ydata()
-        return end_pts, profile
-
-    def on_scroll(self, event):
-        if not event.inaxes:
-            return
-        if event.button == 'up':
-            self._thicken_scan_line()
-        elif event.button == 'down':
-            self._shrink_scan_line()
-
-    def on_key_press(self, event):
-        if not event.inaxes:
-            return
-        elif event.key == '+':
-            self._thicken_scan_line()
-        elif event.key == '-':
-            self._shrink_scan_line()
-        elif event.key == 'r':
-            self.reset()
-
-    def _thicken_scan_line(self):
-        self.linewidth += 1
-        self.line_changed(None, None)
-
-    def _shrink_scan_line(self):
-        if self.linewidth > 1:
-            self.linewidth -= 1
-            self.line_changed(None, None)
+        profiles = [data.get_ydata() for data in self.profile]
+        return self.line_tool.end_points, profiles
 
     def _autoscale_view(self):
         if self.limits is None:
@@ -132,78 +101,57 @@ class LineProfile(PlotPlugin):
         else:
             self.ax.autoscale_view(scaley=False, tight=True)
 
-    def get_pt_under_cursor(self, event):
-        """Return index of the end point under cursor, if sufficiently close"""
-        xy = np.asarray(self.scan_line.get_xydata())
-        xyt = self.scan_line.get_transform().transform(xy)
-        xt, yt = xyt[:, 0], xyt[:, 1]
-        d = np.sqrt((xt - event.x)**2 + (yt - event.y)**2)
-        indseq = np.nonzero(np.equal(d, np.amin(d)))[0]
-        ind = indseq[0]
-        if d[ind] >= self.epsilon:
-            ind = None
-        return ind
+    def line_changed(self, end_points):
+        x, y = np.transpose(end_points)
+        self.line_tool.end_points = end_points
+        scan = profile_line(self.image_viewer.original_image, end_points,
+                            linewidth=self.line_tool.linewidth)
 
-    def on_mouse_press(self, event):
-        if event.button != 1:
-            return
-        if event.inaxes == None:
-            return
-        self._active_pt = self.get_pt_under_cursor(event)
+        if scan.shape[1] != len(self.profile):
+            self.reset_axes(scan)
 
-    def on_mouse_release(self, event):
-        if event.button != 1:
-            return
-        self._active_pt = None
-
-    def on_move(self, event):
-        if event.button != 1:
-            return
-        if self._active_pt is None:
-            return
-        if not self.image_viewer.ax.in_axes(event):
-            return
-        x, y = event.xdata, event.ydata
-        self.line_changed(x, y)
-
-    def reset(self):
-        self.end_pts = self._init_end_pts.copy()
-        self.scan_line.set_data(np.transpose(self.end_pts))
-        self.line_changed(None, None)
-
-    def line_changed(self, x, y):
-        if x is not None:
-            self.end_pts[self._active_pt, :] = x, y
-        self.scan_line.set_data(np.transpose(self.end_pts))
-        self.scan_line.set_linewidth(self.linewidth)
-
-        scan = profile_line(self.image_viewer.original_image, self.end_pts,
-                            linewidth=self.linewidth)
-        self.profile.set_xdata(np.arange(scan.shape[0]))
-        self.profile.set_ydata(scan)
+        for i in range(len(scan[0])):
+            self.profile[i].set_xdata(np.arange(scan.shape[0]))
+            self.profile[i].set_ydata(scan[:, i])
 
         self.ax.relim()
 
-        if self.useblit:
-            self.image_viewer.canvas.restore_region(self.img_background)
-            self.ax.draw_artist(self.scan_line)
-            self.ax.draw_artist(self.profile)
-            self.image_viewer.canvas.blit(self.image_viewer.ax.bbox)
-
         self._autoscale_view()
-
-        self.image_viewer.redraw()
         self.redraw()
 
+    def reset_axes(self, scan_data):
+        # Clear lines out
+        for line in self.ax.lines:
+            self.ax.lines = []
 
-def profile_line(img, end_pts, linewidth=1):
+        if scan_data.shape[1] == 1:
+            self.profile = self.ax.plot(scan_data, 'k-')
+        else:
+            self.profile = self.ax.plot(scan_data[:, 0], 'r-',
+                                        scan_data[:, 1], 'g-',
+                                        scan_data[:, 2], 'b-')
+
+
+def _calc_vert(img, x1, x2, y1, y2, linewidth):
+    # Quick calculation if perfectly horizontal
+    pixels = img[min(y1, y2): max(y1, y2) + 1,
+                 x1 - linewidth / 2: x1 + linewidth / 2 + 1]
+
+    # Reverse index if necessary
+    if y2 > y1:
+        pixels = pixels[::-1, :]
+
+    return pixels.mean(axis=1)[:, np.newaxis]
+
+
+def profile_line(img, end_points, linewidth=1):
     """Return the intensity profile of an image measured along a scan line.
 
     Parameters
     ----------
-    img : 2d array
-        The image.
-    end_pts: (2, 2) list
+    img : 2d or 3d array
+        The image, in grayscale (2d) or RGB (3d) format.
+    end_points: (2, 2) list
         End points ((x1, y1), (x2, y2)) of scan line.
     linewidth: int
         Width of the scan, perpendicular to the line
@@ -214,21 +162,22 @@ def profile_line(img, end_pts, linewidth=1):
         The intensity profile along the scan line. The length of the profile
         is the ceil of the computed length of the scan line.
     """
-    point1, point2 = end_pts
+    point1, point2 = end_points
     x1, y1 = point1 = np.asarray(point1, dtype=float)
     x2, y2 = point2 = np.asarray(point2, dtype=float)
     dx, dy = point2 - point1
+    channels = 1
+    if img.ndim == 3:
+        channels = 3
 
-    # Quick calculation if perfectly horizontal or vertical (remove?)
+    # Quick calculation if perfectly vertical; shortcuts div0 error
     if x1 == x2:
-        pixels = img[min(y1, y2): max(y1, y2) + 1,
-                     x1 - linewidth / 2:  x1 + linewidth / 2 + 1]
-        intensities = pixels.mean(axis=1)
-        return intensities
-    elif y1 == y2:
-        pixels = img[y1 - linewidth / 2:  y1 + linewidth / 2 + 1,
-                     min(x1, x2): max(x1, x2) + 1]
-        intensities = pixels.mean(axis=0)
+        if channels == 1:
+            img = img[:, :, np.newaxis]
+
+        img = np.rollaxis(img, -1)
+        intensities = np.hstack([_calc_vert(im, x1, x2, y1, y2, linewidth)
+                                 for im in img])
         return intensities
 
     theta = np.arctan2(dy, dx)
@@ -236,7 +185,7 @@ def profile_line(img, end_pts, linewidth=1):
     b = y1 - a * x1
     length = np.hypot(dx, dy)
 
-    line_x = np.linspace(min(x1, x2), max(x1, x2), np.ceil(length))
+    line_x = np.linspace(x2, x1, np.ceil(length))
     line_y = line_x * a + b
     y_width = abs(linewidth * np.cos(theta) / 2)
     perp_ys = np.array([np.linspace(yi - y_width,
@@ -244,7 +193,17 @@ def profile_line(img, end_pts, linewidth=1):
     perp_xs = - a * perp_ys + (line_x + a * line_y)[:, np.newaxis]
 
     perp_lines = np.array([perp_ys, perp_xs])
-    pixels = ndi.map_coordinates(img, perp_lines)
+    if img.ndim == 3:
+        pixels = [ndi.map_coordinates(img[..., i], perp_lines)
+                  for i in range(3)]
+        pixels = np.transpose(np.asarray(pixels), (1, 2, 0))
+    else:
+        pixels = ndi.map_coordinates(img, perp_lines)
+        pixels = pixels[..., np.newaxis]
+
     intensities = pixels.mean(axis=1)
 
-    return intensities
+    if intensities.ndim == 1:
+        return intensities[..., np.newaxis]
+    else:
+        return intensities

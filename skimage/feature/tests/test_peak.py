@@ -117,6 +117,155 @@ def test_indices_with_labels():
     assert (result == np.transpose(expected.nonzero())).all()
 
 
+def test_ndarray_indices_false():
+    nd_image = np.zeros((5,5,5))
+    nd_image[2,2,2] = 1
+    peaks = peak.peak_local_max(nd_image, min_distance=1, indices=False)
+    assert (peaks == nd_image.astype(np.bool)).all()
+
+
+def test_ndarray_exclude_border():
+    nd_image = np.zeros((5,5,5))
+    nd_image[[1,0,0],[0,1,0],[0,0,1]] = 1
+    nd_image[3,0,0] = 1
+    nd_image[2,2,2] = 1
+    expected = np.zeros_like(nd_image, dtype=np.bool)
+    expected[2,2,2] = True
+    result = peak.peak_local_max(nd_image, min_distance=2, indices=False)
+    assert (result == expected).all()
+
+
+def test_empty():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(~ result)
+
+
+def test_one_point():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    image[5, 5] = 1
+    labels[5, 5] = 1
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == (labels == 1))
+
+
+def test_adjacent_and_same():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    image[5, 5:6] = 1
+    labels[5, 5:6] = 1
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == (labels == 1))
+
+
+def test_adjacent_and_different():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    image[5, 5] = 1
+    image[5, 6] = .5
+    labels[5, 5:6] = 1
+    expected = (image == 1)
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == expected)
+    result = peak.peak_local_max(image, labels=labels,
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == expected)
+
+
+def test_not_adjacent_and_different():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    image[5, 5] = 1
+    image[5, 8] = .5
+    labels[image > 0] = 1
+    expected = (labels == 1)
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == expected)
+
+
+def test_two_objects():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    image[5, 5] = 1
+    image[5, 15] = .5
+    labels[5, 5] = 1
+    labels[5, 15] = 2
+    expected = (labels > 0)
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == expected)
+
+
+def test_adjacent_different_objects():
+    image = np.zeros((10, 20))
+    labels = np.zeros((10, 20), int)
+    image[5, 5] = 1
+    image[5, 6] = .5
+    labels[5, 5] = 1
+    labels[5, 6] = 2
+    expected = (labels > 0)
+    result = peak.peak_local_max(image, labels=labels,
+                                 footprint=np.ones((3, 3), bool),
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == expected)
+
+
+def test_four_quadrants():
+    np.random.seed(21)
+    image = np.random.uniform(size=(40, 60))
+    i, j = np.mgrid[0:40, 0:60]
+    labels = 1 + (i >= 20) + (j >= 30) * 2
+    i, j = np.mgrid[-3:4, -3:4]
+    footprint = (i * i + j * j <= 9)
+    expected = np.zeros(image.shape, float)
+    for imin, imax in ((0, 20), (20, 40)):
+        for jmin, jmax in ((0, 30), (30, 60)):
+            expected[imin:imax, jmin:jmax] = scipy.ndimage.maximum_filter(
+                image[imin:imax, jmin:jmax], footprint=footprint)
+    expected = (expected == image)
+    result = peak.peak_local_max(image, labels=labels, footprint=footprint,
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result == expected)
+
+
+def test_disk():
+    '''regression test of img-1194, footprint = [1]
+    Test peak.peak_local_max when every point is a local maximum
+    '''
+    np.random.seed(31)
+    image = np.random.uniform(size=(10, 20))
+    footprint = np.array([[1]])
+    result = peak.peak_local_max(image, labels=np.ones((10, 20)),
+                                 footprint=footprint,
+                                 min_distance=1, threshold_rel=0,
+                                 indices=False, exclude_border=False)
+    assert np.all(result)
+    result = peak.peak_local_max(image, footprint=footprint)
+    assert np.all(result)
+
+
 if __name__ == '__main__':
     from numpy import testing
     testing.run_module_suite()
