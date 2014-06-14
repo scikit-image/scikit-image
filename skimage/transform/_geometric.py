@@ -341,7 +341,7 @@ class AffineTransform(ProjectiveTransform):
         return self._matrix[0:2, 2]
 
 
-class PiecewiseAffineTransform(ProjectiveTransform):
+class PiecewiseAffineTransform(GeometricTransform):
 
     """2D piecewise affine transformation.
 
@@ -1031,21 +1031,24 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     out = None
 
-    # use fast Cython version for specific interpolation orders
+    # use fast Cython version for specific interpolation orders and input
     if order in range(4) and not map_args:
+
         matrix = None
 
+        # inverse_map is a transformation matrix as numpy array
         if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
             matrix = inverse_map
 
-        elif inverse_map in HOMOGRAPHY_TRANSFORMS:
+        # inverse_map is a homography
+        elif isinstance(inverse_map, HOMOGRAPHY_TRANSFORMS):
             matrix = inverse_map._matrix
 
+        # inverse_map is the inverse of a homography
         elif (hasattr(inverse_map, '__name__')
               and inverse_map.__name__ == 'inverse'
-              and get_bound_method_class(inverse_map)
-                  in HOMOGRAPHY_TRANSFORMS):
-
+              and isinstance(get_bound_method_class(inverse_map),
+                             HOMOGRAPHY_TRANSFORMS)):
             matrix = np.linalg.inv(six.get_method_self(inverse_map)._matrix)
 
         if matrix is not None:
@@ -1067,6 +1070,7 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         rows, cols = output_shape[:2]
 
+        # inverse_map is a transformation matrix as numpy array
         if isinstance(inverse_map, np.ndarray) and inverse_map.shape == (3, 3):
             inverse_map = ProjectiveTransform(matrix=inverse_map)
 
@@ -1075,19 +1079,19 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
         coords = warp_coords(coord_map, (rows, cols, bands))
 
-        # Prefilter not necessary for order 0, 1 interpolation
+        # Pre-filtering not necessary for order 0, 1 interpolation
         prefilter = order > 1
         out = ndimage.map_coordinates(image, coords, prefilter=prefilter,
                                       mode=mode, order=order, cval=cval)
 
-        # The spline filters sometimes return results outside [0, 1],
-        # so clip to ensure valid data
-        clipped = np.clip(out, 0, 1)
+    # The spline filters sometimes return results outside [0, 1],
+    # so clip to ensure valid data
+    clipped = np.clip(out, 0, 1)
 
-        if mode == 'constant' and not (0 <= cval <= 1):
-            clipped[out == cval] = cval
+    if mode == 'constant' and not (0 <= cval <= 1):
+        clipped[out == cval] = cval
 
-        out = clipped
+    out = clipped
 
     if out.ndim == 3 and orig_ndim == 2:
         # remove singleton dimension introduced by atleast_3d
