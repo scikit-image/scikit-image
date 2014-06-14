@@ -1,6 +1,6 @@
 skimage (0.10.0-1) unstable; urgency=medium
 
-  * Fresh upstream release
+  * Fresh upstream release (Closes: #751296)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 14 Jun 2014 07:43:58 -0400
 
