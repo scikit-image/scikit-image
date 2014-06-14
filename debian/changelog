@@ -1,3 +1,9 @@
+skimage (0.10.0-1) unstable; urgency=medium
+
+  * Fresh upstream release
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 14 Jun 2014 07:43:58 -0400
+
 skimage (0.9.3-4) unstable; urgency=low
 
   * debian/rules
