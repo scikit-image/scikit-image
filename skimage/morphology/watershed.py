@@ -211,7 +211,7 @@ def watershed(image, markers, connectivity=None, offset=None, mask=None):
         # If nothing is labeled, the output is empty and we don't have to
         # do anything
         c_output = c_output.flatten()
-        if c_mask == None:
+        if c_mask is None:
             c_mask = np.ones(c_image.shape, np.int8).flatten()
         else:
             c_mask = c_mask.astype(np.int8).flatten()
