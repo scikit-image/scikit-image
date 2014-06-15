@@ -47,7 +47,7 @@ class Plugin(QtGui.QDialog):
         Window containing image used in measurement.
     name : str
         Name of plugin. This is displayed as the window title.
-    artist : list
+    artists : list
         List of Matplotlib artists and canvastools. Any artists created by the
         plugin should be added to this list so that it gets cleaned up on
         close.

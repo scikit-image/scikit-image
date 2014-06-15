@@ -29,6 +29,9 @@ class LineTool(CanvasToolBase):
         Maximum pixel distance allowed when selecting control handle.
     line_props : dict
         Properties for :class:`matplotlib.lines.Line2D`.
+    nograb_draw : bool
+        If a mouse click is detected, but it does not grab a handle,
+        redraw the line from scratch.  True by default.
 
     Attributes
     ----------
@@ -36,15 +39,17 @@ class LineTool(CanvasToolBase):
         End points of line ((x1, y1), (x2, y2)).
     """
     def __init__(self, ax, on_move=None, on_release=None, on_enter=None,
-                 maxdist=10, line_props=None):
+                 maxdist=10, line_props=None, nograb_draw=True,
+                 **kwargs):
         super(LineTool, self).__init__(ax, on_move=on_move, on_enter=on_enter,
-                                       on_release=on_release)
+                                       on_release=on_release, **kwargs)
 
         props = dict(color='r', linewidth=1, alpha=0.4, solid_capstyle='butt')
         props.update(line_props if line_props is not None else {})
         self.linewidth = props['linewidth']
         self.maxdist = maxdist
         self._active_pt = None
+        self._nograb_draw = nograb_draw
 
         x = (0, 0)
         y = (0, 0)
@@ -77,7 +82,6 @@ class LineTool(CanvasToolBase):
 
         self._line.set_data(np.transpose(pts))
         self._handles.set_data(np.transpose(pts))
-        self._line.set_linewidth(self.linewidth)
 
         self.set_visible(True)
         self.redraw()
@@ -85,11 +89,12 @@ class LineTool(CanvasToolBase):
     def on_mouse_press(self, event):
         if event.button != 1 or not self.ax.in_axes(event):
             return
+
         self.set_visible(True)
         idx, px_dist = self._handles.closest(event.x, event.y)
         if px_dist < self.maxdist:
             self._active_pt = idx
-        else:
+        elif self._nograb_draw:
             self._active_pt = 0
             x, y = event.xdata, event.ydata
             self._end_pts = np.array([[x, y], [x, y]])
@@ -99,6 +104,7 @@ class LineTool(CanvasToolBase):
             return
         self._active_pt = None
         self.callback_on_release(self.geometry)
+        self.redraw()
 
     def on_move(self, event):
         if event.button != 1 or self._active_pt is None:
