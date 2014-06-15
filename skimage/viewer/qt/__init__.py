@@ -5,12 +5,12 @@ qt_api = os.environ.get('QT_API')
 
 if qt_api is None:
     try:
-        import PySide
-        qt_api = 'pyside'
+        import PyQt4
+        qt_api = 'pyqt'
     except ImportError:
         try:
-            import PyQt4
-            qt_api = 'pyqt'
+            import PySide
+            qt_api = 'pyside'
         except ImportError:
             qt_api = None
             # Note that we don't want to raise an error because that would
