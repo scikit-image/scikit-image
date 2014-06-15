@@ -23,13 +23,3 @@ Deprecations
 ------------
 
 
-
-
-Contributors to this release
-----------------------------
-
-This release was made possible by the collaborative efforts of many
-contributors, both new and old. They are listed in alphabetical order by
-surname:
-
-
