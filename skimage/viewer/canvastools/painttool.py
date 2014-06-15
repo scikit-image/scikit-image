@@ -102,7 +102,7 @@ class PaintTool(CanvasToolBase):
             self._overlay_plot = None
         elif self._overlay_plot is None:
             props = dict(cmap=self.cmap, alpha=self.alpha,
-                         norm=mcolors.no_norm(), animated=True)
+                         norm=mcolors.NoNorm(), animated=True)
             self._overlay_plot = self.ax.imshow(image, **props)
         else:
             self._overlay_plot.set_data(image)
