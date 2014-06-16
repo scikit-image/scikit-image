@@ -34,7 +34,6 @@ def threshold_cut(label, rag, thresh):
     """
     to_remove = [(x, y) for x, y, d in rag.edges_iter(data=True)
                  if d['weight'] >= thresh]
-
     rag.remove_edges_from(to_remove)
 
     comps = nx.connected_components(rag)

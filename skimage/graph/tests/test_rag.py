@@ -16,10 +16,7 @@ def test_threshold_cut():
     labels[50:, :50] = 2
     labels[50:, 50:] = 3
 
-    # print labels
     rag = graph.rag_meancolor(img, labels)
-    # print "no of edges",rag.number_of_edges()
     new_labels = graph.threshold_cut(labels, rag, 10)
 
     assert new_labels.max() == 2
-    # assert False
