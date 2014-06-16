@@ -23,6 +23,15 @@ def threshold_cut(label, rag, thresh):
     -------
     out : (width, height, 3) or (width, height, depth, 3) ndarray
         The new labelled array.
+
+    Examples
+    --------
+    >>> from skimage import data,graph,segmentation
+    >>> img = data.lena()
+    >>> labels = segmentation.slic(img)
+    >>> rag = graph.rag_meancolor(img, labels)
+    >>> new_labels = graph.threshold_cut(labels, rag, 10)
+
     """
     to_remove = [(x, y)
                  for x, y, d in rag.edges_iter(data=True) if d['weight'] >= thresh]

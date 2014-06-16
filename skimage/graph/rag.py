@@ -14,20 +14,20 @@ class RAG(nx.Graph):
     """
 
     def merge_nodes(self, i, j):
-    """Merges nodes `i` and `j`.
+        """Merges nodes `i` and `j`.
 
-    The new combined node is adjacent to all the neighbors of `i`
-    and `j`. In case of conflicting edges, edge with higher weight
-    is chosen.
+        The new combined node is adjacent to all the neighbors of `i`
+        and `j`. In case of conflicting edges, edge with higher weight
+        is chosen.
 
-    Parameters
-    ----------
-    i : int
-        Node to be merged.
-    j : int
-        Node to be merged.
+        Parameters
+        ----------
+        i : int
+            Node to be merged.
+        j : int
+            Node to be merged.
 
-    """
+        """
 
         if not self.has_edge(i, j):
             raise ValueError('Cant merge non adjacent nodes')
@@ -69,6 +69,14 @@ def rag_meancolor(img, labels):
     -------
     out : RAG
         The region adjacency graph.
+
+    Examples
+    --------
+    >>> from skimage import data,graph,segmentation
+    >>> img = data.lena()
+    >>> labels = segmentation.slic(img)
+    >>> rag = graph.rag_meancolor(img, labels)
+
     """
 
     img = util.img_as_ubyte(img)
