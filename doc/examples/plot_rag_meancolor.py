@@ -1,3 +1,14 @@
+"""
+================
+RAG Thresholding
+================
+
+This examples constructs a Region Adjacency Graph and merges region which are
+similar in color. We construct a RAG and define edges as the difference in
+mean color. We the join regions with similar mean color.
+
+"""
+
 from skimage import graph
 from skimage import segmentation
 from skimage import data, io
