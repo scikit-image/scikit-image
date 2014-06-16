@@ -32,7 +32,6 @@ class RAG(nx.Graph):
         if not self.has_edge(i, j):
             raise ValueError('Cant merge non adjacent nodes')
 
-        # print "before ",self.order()
         for x in self.neighbors(i):
             if x == j:
                 continue

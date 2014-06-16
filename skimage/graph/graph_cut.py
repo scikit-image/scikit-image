@@ -40,7 +40,6 @@ def threshold_cut(label, rag, thresh):
     out = np.copy(label)
 
     for i, nodes in enumerate(comps):
-
         for node in nodes:
             for l in rag.node[node]['labels']:
                 out[label == l] = i
